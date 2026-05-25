@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\chris\\.claude\\projects\\c--Users-chris-OneDrive---CG-Production-House-Desktop-CG-Dynamics\\memory"
+    ]
+  }
+}
