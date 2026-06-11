@@ -107,3 +107,15 @@ export async function deleteManualMetric(id: string) {
   const { error } = await supabase.from('manual_platform_metrics').delete().eq('id', id)
   return { error }
 }
+
+export type ManualMetricUpsert = Omit<ManualMetricInput, 'id'>
+
+// Insert-or-update by (client_id, month, platform) — used by the manual
+// summary CSV import so re-importing a month updates rather than duplicates.
+export async function upsertManualMetrics(rows: ManualMetricUpsert[]) {
+  const { data, error } = await supabase
+    .from('manual_platform_metrics')
+    .upsert(rows.map(payload), { onConflict: 'client_id,month,platform' })
+    .select('*')
+  return { data: (data ?? []) as ManualPlatformMetric[], error }
+}

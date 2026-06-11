@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import { importMetaPosts, type ImportedMetaPostInput } from '../../lib/db/importedMetaPosts'
+import {
+  MANUAL_SOURCE_LABELS,
+  upsertManualMetrics,
+  type ManualSourceType,
+} from '../../lib/db/manualMetrics'
 import { detectReportPeriod, formatReportPeriod } from '../../lib/reportPeriod'
-import { formatNumber, shortCaption } from '../../lib/reportStats'
+import { PLATFORM_LABELS, formatNumber, shortCaption, type Platform } from '../../lib/reportStats'
 
-type Platform = 'facebook' | 'instagram' | 'tiktok'
+type ImportType = 'meta' | 'manual'
 
 interface ParsedMetaRow {
   rowNumber: number
@@ -28,7 +34,29 @@ interface ParsedMetaRow {
   raw: Record<string, string>
 }
 
+interface ParsedManualRow {
+  rowNumber: number
+  clientCsv: string | null
+  month: string
+  platform: Platform
+  sourceType: ManualSourceType
+  views: number
+  reach: number
+  engagements: number
+  accountsEngaged: number
+  profileVisits: number
+  externalLinkTaps: number
+  followers: number
+  topContentNotes: string | null
+  contentTypeSplitNotes: string | null
+  generalNotes: string | null
+  error: string | null
+}
+
 type MetaExportType = 'facebook' | 'instagram'
+
+const MANUAL_TEMPLATE = `client,month,platform,source_type,views,reach,engagements,accounts_engaged,profile_visits,external_link_taps,followers,top_content_notes,content_type_split_notes,general_notes
+Red Oak,2026-05,instagram,manual_summary,12000,8000,950,420,210,35,5400,"Top reel: behind the scenes","60% reels, 30% carousels, 10% stories","Strong month, reels drove reach"`
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -76,7 +104,7 @@ function parseCsv(text: string) {
   return body.map(values => {
     const record: Record<string, string> = {}
     headers.forEach((header, index) => {
-      record[header.trim().replace(/^\uFEFF/, '')] = values[index]?.trim() ?? ''
+      record[header.trim().replace(/^﻿/, '')] = values[index]?.trim() ?? ''
     })
     return record
   })
@@ -189,12 +217,67 @@ function normalizeRows(rows: Record<string, string>[], exportType = detectMetaEx
   return [...byPostId.values()]
 }
 
+function normalizePlatform(value: string): Platform | null {
+  const v = value.toLowerCase().replace(/[^a-z]/g, '')
+  if (!v) return null
+  if (v.includes('face') || v === 'fb') return 'facebook'
+  if (v.includes('insta') || v === 'ig') return 'instagram'
+  if (v.includes('tiktok') || v === 'tt') return 'tiktok'
+  return null
+}
+
+function normalizeSourceType(value: string): ManualSourceType {
+  const v = value.toLowerCase().replace(/[^a-z]/g, '')
+  if (!v) return 'manual_summary'
+  if (v === 'metacsv' || v.includes('metabusiness') || v === 'meta') return 'meta_csv'
+  if (v === 'tiktokcsv' || v === 'tiktok') return 'tiktok_csv'
+  if (v === 'other') return 'other'
+  return 'manual_summary'
+}
+
+function normalizeManualRows(rows: Record<string, string>[], selectedPlatform: Platform): ParsedManualRow[] {
+  return rows.map((row, index) => {
+    const month = getValue(row, ['month']).trim()
+    const csvPlatform = getValue(row, ['platform']).trim()
+    const resolvedPlatform = csvPlatform ? normalizePlatform(csvPlatform) : selectedPlatform
+
+    let error: string | null = null
+    if (!/^\d{4}-\d{2}$/.test(month)) {
+      error = `Row ${index + 1}: month must be in YYYY-MM format`
+    } else if (csvPlatform && !resolvedPlatform) {
+      error = `Row ${index + 1}: unknown platform "${csvPlatform}"`
+    }
+
+    return {
+      rowNumber: index + 1,
+      clientCsv: getValue(row, ['client', 'client name']) || null,
+      month,
+      platform: resolvedPlatform ?? selectedPlatform,
+      sourceType: normalizeSourceType(getValue(row, ['source_type', 'source'])),
+      views: numberValue(row, ['views']),
+      reach: numberValue(row, ['reach']),
+      engagements: numberValue(row, ['engagements', 'interactions']),
+      accountsEngaged: numberValue(row, ['accounts_engaged']),
+      profileVisits: numberValue(row, ['profile_visits']),
+      externalLinkTaps: numberValue(row, ['external_link_taps', 'link taps']),
+      followers: numberValue(row, ['followers']),
+      topContentNotes: getValue(row, ['top_content_notes']) || null,
+      contentTypeSplitNotes: getValue(row, ['content_type_split_notes']) || null,
+      generalNotes: getValue(row, ['general_notes']) || null,
+      error,
+    }
+  })
+}
+
 export default function ImportMetaCsv() {
+  const { profile } = useAuth()
+  const [importType, setImportType] = useState<ImportType>('meta')
   const [clients, setClients] = useState<Client[]>([])
   const [clientId, setClientId] = useState('')
   const [platform, setPlatform] = useState<Platform>('facebook')
   const [fileName, setFileName] = useState<string | null>(null)
   const [rows, setRows] = useState<ParsedMetaRow[]>([])
+  const [manualRows, setManualRows] = useState<ParsedManualRow[]>([])
   const [periodStart, setPeriodStart] = useState('')
   const [periodEnd, setPeriodEnd] = useState('')
   const [periodSource, setPeriodSource] = useState<'publish_time' | 'filename' | null>(null)
@@ -225,11 +308,28 @@ export default function ImportMetaCsv() {
     void loadClients()
   }, [])
 
+  function resetPreview() {
+    setRows([])
+    setManualRows([])
+    setFileName(null)
+    setPeriodStart('')
+    setPeriodEnd('')
+    setPeriodSource(null)
+    setError(null)
+    setSuccess(null)
+  }
+
+  function handleImportTypeChange(nextType: ImportType) {
+    setImportType(nextType)
+    resetPreview()
+  }
+
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     setError(null)
     setSuccess(null)
     setRows([])
+    setManualRows([])
     setFileName(file?.name ?? null)
     setPeriodStart('')
     setPeriodEnd('')
@@ -240,6 +340,17 @@ export default function ImportMetaCsv() {
     try {
       const text = await file.text()
       const csvRows = parseCsv(text)
+      if (csvRows.length === 0) {
+        setError('No rows were found in this CSV.')
+        return
+      }
+
+      if (importType === 'manual') {
+        const parsed = normalizeManualRows(csvRows, platform)
+        setManualRows(parsed)
+        return
+      }
+
       const exportType = detectMetaExportType(csvRows)
       const parsed = normalizeRows(csvRows, exportType)
       if (parsed.length === 0) {
@@ -262,17 +373,7 @@ export default function ImportMetaCsv() {
     }
   }
 
-  async function handleSave() {
-    if (saving) return
-    if (!clientId) {
-      setError('Select a client before saving.')
-      return
-    }
-    if (rows.length === 0) {
-      setError('Upload and preview a CSV before saving.')
-      return
-    }
-
+  async function handleSaveMeta() {
     setSaving(true)
     setError(null)
     setSuccess(null)
@@ -315,7 +416,92 @@ export default function ImportMetaCsv() {
     }
   }
 
-  const totals = rows.reduce(
+  async function handleSaveManual() {
+    const firstError = manualRows.find(row => row.error)
+    if (firstError?.error) {
+      setError(firstError.error)
+      return
+    }
+
+    setSaving(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      // Selected client is the source of truth. De-duplicate within the file
+      // by month + platform so a single upsert never hits the same key twice.
+      const byKey = new Map<string, ParsedManualRow>()
+      manualRows.forEach(row => byKey.set(`${row.month}:${row.platform}`, row))
+
+      const payload = [...byKey.values()].map(row => ({
+        client_id: clientId,
+        month: row.month,
+        platform: row.platform,
+        source_type: row.sourceType,
+        views: row.views,
+        reach: row.reach,
+        engagements: row.engagements,
+        accounts_engaged: row.accountsEngaged,
+        profile_visits: row.profileVisits,
+        external_link_taps: row.externalLinkTaps,
+        followers: row.followers,
+        top_content_notes: row.topContentNotes,
+        content_type_split_notes: row.contentTypeSplitNotes,
+        general_notes: row.generalNotes,
+        created_by: profile?.id ?? null,
+      }))
+
+      const { error } = await upsertManualMetrics(payload)
+      if (error) {
+        setError(error.message)
+        return
+      }
+
+      setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'}. These now feed into the master report.`)
+    } catch (error) {
+      setError(errorMessage(error, 'Could not save manual summary metrics.'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleSave() {
+    if (saving) return
+    if (!clientId) {
+      setError('Select a client before saving.')
+      return
+    }
+    if (importType === 'manual') {
+      if (manualRows.length === 0) {
+        setError('Upload and preview a manual summary CSV before saving.')
+        return
+      }
+      await handleSaveManual()
+      return
+    }
+    if (rows.length === 0) {
+      setError('Upload and preview a CSV before saving.')
+      return
+    }
+    await handleSaveMeta()
+  }
+
+  function handleDownloadTemplate() {
+    const blob = new Blob([MANUAL_TEMPLATE], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'manual-summary-template.csv'
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const selectedClientName = clients.find(client => client.id === clientId)?.name ?? null
+  const clientMismatch =
+    importType === 'manual' &&
+    selectedClientName !== null &&
+    manualRows.some(row => row.clientCsv && row.clientCsv.toLowerCase() !== selectedClientName.toLowerCase())
+
+  const metaTotals = rows.reduce(
     (sum, row) => ({
       reach: sum.reach + row.reach,
       views: sum.views + row.views,
@@ -323,6 +509,17 @@ export default function ImportMetaCsv() {
     }),
     { reach: 0, views: 0, engagements: 0 }
   )
+  const manualTotals = manualRows.reduce(
+    (sum, row) => ({
+      reach: sum.reach + row.reach,
+      views: sum.views + row.views,
+      engagements: sum.engagements + row.engagements,
+    }),
+    { reach: 0, views: 0, engagements: 0 }
+  )
+  const totals = importType === 'manual' ? manualTotals : metaTotals
+  const activeCount = importType === 'manual' ? manualRows.length : rows.length
+
   const hasPeriod = Boolean(periodStart && periodEnd)
   const detectedPeriodText = hasPeriod
     ? formatReportPeriod({ start: periodStart, end: periodEnd })
@@ -331,16 +528,29 @@ export default function ImportMetaCsv() {
   return (
     <div className="w-full max-w-6xl p-4 sm:p-6 lg:p-8">
       <div className="mb-6 sm:mb-8">
-        <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Meta import</p>
+        <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Import</p>
         <h1 className="text-2xl font-semibold text-white sm:text-3xl">Import performance CSV</h1>
         <p className="text-sm text-brand-primary mt-2 max-w-2xl">
-          Upload Meta Business Suite exports, preview the normalized metrics, then save them for report building.
+          Upload Meta Business Suite post exports, or a manual summary CSV (e.g. Instagram
+          screenshots turned into a clean CSV), then save them for report building.
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
         <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-brand-accent mb-1.5">Import type</label>
+              <select
+                value={importType}
+                onChange={event => handleImportTypeChange(event.target.value as ImportType)}
+                className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
+              >
+                <option value="meta">Meta Business Suite CSV</option>
+                <option value="manual">Manual summary CSV</option>
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-brand-accent mb-1.5">Client</label>
               <select
@@ -356,7 +566,9 @@ export default function ImportMetaCsv() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-accent mb-1.5">Platform</label>
+              <label className="block text-sm font-medium text-brand-accent mb-1.5">
+                Platform{importType === 'manual' ? ' (default if CSV has no platform column)' : ''}
+              </label>
               <select
                 value={platform}
                 onChange={event => setPlatform(event.target.value as Platform)}
@@ -368,8 +580,28 @@ export default function ImportMetaCsv() {
               </select>
             </div>
 
+            {importType === 'manual' && (
+              <div className="rounded-lg border border-brand-muted bg-brand-bg/60 p-3">
+                <p className="text-sm font-medium text-white">Manual summary CSV format</p>
+                <p className="mt-1 text-xs text-brand-primary">
+                  Columns: client, month (YYYY-MM), platform, source_type, views, reach, engagements,
+                  accounts_engaged, profile_visits, external_link_taps, followers, top_content_notes,
+                  content_type_split_notes, general_notes. One or many rows.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  className="mt-3 rounded-lg border border-brand-muted px-3 py-2 text-xs text-brand-primary hover:text-white hover:border-white/30"
+                >
+                  Download manual summary CSV template
+                </button>
+              </div>
+            )}
+
             <div>
-              <label className="block text-sm font-medium text-brand-accent mb-1.5">Meta CSV file</label>
+              <label className="block text-sm font-medium text-brand-accent mb-1.5">
+                {importType === 'manual' ? 'Manual summary CSV file' : 'Meta CSV file'}
+              </label>
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -378,7 +610,7 @@ export default function ImportMetaCsv() {
               />
             </div>
 
-            {rows.length > 0 && (
+            {importType === 'meta' && rows.length > 0 && (
               <div className="rounded-lg border border-brand-muted bg-brand-bg/60 p-3">
                 <p className="text-sm font-medium text-white">
                   Detected period: {detectedPeriodText ?? 'No valid period found'}
@@ -411,6 +643,13 @@ export default function ImportMetaCsv() {
               </div>
             )}
 
+            {clientMismatch && (
+              <p className="text-xs text-amber-300 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
+                Some rows have a different client column than the selected client. The selected
+                client ({selectedClientName}) will be used.
+              </p>
+            )}
+
             {error && (
               <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
                 {error}
@@ -426,16 +665,20 @@ export default function ImportMetaCsv() {
             <button
               type="button"
               onClick={handleSave}
-              disabled={saving || rows.length === 0 || !clientId}
+              disabled={saving || activeCount === 0 || !clientId}
               className="w-full bg-brand-accent text-brand-bg font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving import...' : 'Save imported posts'}
+              {saving
+                ? 'Saving...'
+                : importType === 'manual'
+                  ? 'Save manual summary metrics'
+                  : 'Save imported posts'}
             </button>
           </div>
         </section>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <MetricCard label="Rows" value={formatNumber(rows.length)} />
+          <MetricCard label="Rows" value={formatNumber(activeCount)} />
           <MetricCard label="Reach" value={formatNumber(totals.reach)} />
           <MetricCard label="Views" value={formatNumber(totals.views)} />
           <MetricCard label="Engagements" value={formatNumber(totals.engagements)} />
@@ -447,48 +690,106 @@ export default function ImportMetaCsv() {
           <div className="min-w-0">
             <h2 className="text-sm font-semibold text-white">CSV preview</h2>
             <p className="mt-1 break-words text-xs text-brand-primary">
-              {fileName ? fileName : 'Upload a CSV to preview normalized post data.'}
+              {fileName
+                ? fileName
+                : importType === 'manual'
+                  ? 'Upload a manual summary CSV to preview the rows.'
+                  : 'Upload a CSV to preview normalized post data.'}
             </p>
           </div>
           <span className="text-xs text-brand-primary">{formatNumber(totals.views)} views</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead>
-              <tr className="text-left border-b border-brand-muted">
-                <th className="px-4 py-3 text-brand-primary font-medium">Post</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Reach</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Views</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Engagements</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-brand-primary">
-                    No CSV rows loaded yet.
-                  </td>
-                </tr>
-              ) : (
-                rows.slice(0, 25).map(row => (
-                  <tr key={row.rowNumber} className="border-b border-brand-muted/70 last:border-0">
-                    <td className="px-4 py-3 text-white min-w-80">
-                      <p className="font-medium">{shortCaption(row.caption, `Row ${row.rowNumber}`)}</p>
-                      <p className="text-xs text-brand-primary mt-1">{row.publishTime ?? 'No date found'}</p>
-                    </td>
-                    <td className="px-4 py-3 text-brand-primary">{formatNumber(row.reach)}</td>
-                    <td className="px-4 py-3 text-brand-primary">{formatNumber(row.views)}</td>
-                    <td className="px-4 py-3 text-brand-accent">{formatNumber(row.engagements)}</td>
-                    <td className="px-4 py-3 text-brand-primary">{row.postType ?? 'Post'}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {importType === 'manual' ? (
+          <ManualPreview rows={manualRows} />
+        ) : (
+          <MetaPreview rows={rows} />
+        )}
       </section>
+    </div>
+  )
+}
+
+function MetaPreview({ rows }: { rows: ParsedMetaRow[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[720px] text-sm">
+        <thead>
+          <tr className="text-left border-b border-brand-muted">
+            <th className="px-4 py-3 text-brand-primary font-medium">Post</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Reach</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Views</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Engagements</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="px-4 py-10 text-center text-brand-primary">
+                No CSV rows loaded yet.
+              </td>
+            </tr>
+          ) : (
+            rows.slice(0, 25).map(row => (
+              <tr key={row.rowNumber} className="border-b border-brand-muted/70 last:border-0">
+                <td className="px-4 py-3 text-white min-w-80">
+                  <p className="font-medium">{shortCaption(row.caption, `Row ${row.rowNumber}`)}</p>
+                  <p className="text-xs text-brand-primary mt-1">{row.publishTime ?? 'No date found'}</p>
+                </td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.reach)}</td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.views)}</td>
+                <td className="px-4 py-3 text-brand-accent">{formatNumber(row.engagements)}</td>
+                <td className="px-4 py-3 text-brand-primary">{row.postType ?? 'Post'}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function ManualPreview({ rows }: { rows: ParsedManualRow[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[720px] text-sm">
+        <thead>
+          <tr className="text-left border-b border-brand-muted">
+            <th className="px-4 py-3 text-brand-primary font-medium">Month</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Platform</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Source</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Reach</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Views</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Engagements</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Followers</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="px-4 py-10 text-center text-brand-primary">
+                No CSV rows loaded yet.
+              </td>
+            </tr>
+          ) : (
+            rows.map(row => (
+              <tr key={row.rowNumber} className="border-b border-brand-muted/70 last:border-0">
+                <td className="px-4 py-3 text-white">
+                  {row.month || '—'}
+                  {row.error && <p className="text-xs text-red-400 mt-1">{row.error}</p>}
+                </td>
+                <td className="px-4 py-3 text-brand-primary">{PLATFORM_LABELS[row.platform]}</td>
+                <td className="px-4 py-3 text-brand-primary">{MANUAL_SOURCE_LABELS[row.sourceType]}</td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.reach)}</td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.views)}</td>
+                <td className="px-4 py-3 text-brand-accent">{formatNumber(row.engagements)}</td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.followers)}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }
