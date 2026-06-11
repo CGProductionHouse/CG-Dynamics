@@ -88,7 +88,7 @@ export default function UsersAdmin() {
   }
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="w-full max-w-4xl p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-white">Users</h1>
       </div>
@@ -102,54 +102,88 @@ export default function UsersAdmin() {
       ) : error ? (
         <p className="text-red-400 text-sm">{error}</p>
       ) : (
-        <div className="bg-brand-surface border border-brand-muted rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-brand-muted text-left">
-                <th className="px-4 py-3 text-brand-primary font-medium">Name</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Role</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Client</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {profiles.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-brand-primary">
-                    No users yet.
-                  </td>
+        <>
+          <div className="space-y-3 md:hidden">
+            {profiles.length === 0 ? (
+              <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-8 text-center text-sm text-brand-primary">
+                No users yet.
+              </div>
+            ) : (
+              profiles.map(p => (
+                <article key={p.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h2 className="text-base font-semibold text-white break-words">
+                        {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
+                      </h2>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${roleBadge[p.role]}`}>
+                          {roleLabel[p.role]}
+                        </span>
+                        <span className="text-sm text-brand-primary break-all">{clientName(p.client_id)}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setEditing(p)}
+                      className="shrink-0 rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-brand-accent"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+
+          <div className="hidden bg-brand-surface border border-brand-muted rounded-xl overflow-hidden md:block">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-brand-muted text-left">
+                  <th className="px-4 py-3 text-brand-primary font-medium">Name</th>
+                  <th className="px-4 py-3 text-brand-primary font-medium">Role</th>
+                  <th className="px-4 py-3 text-brand-primary font-medium">Client</th>
+                  <th className="px-4 py-3" />
                 </tr>
-              ) : (
-                profiles.map(p => (
-                  <tr
-                    key={p.id}
-                    className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-white">
-                      {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${roleBadge[p.role]}`}
-                      >
-                        {roleLabel[p.role]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-brand-primary">{clientName(p.client_id)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => setEditing(p)}
-                        className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
-                      >
-                        Edit
-                      </button>
+              </thead>
+              <tbody>
+                {profiles.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-8 text-center text-brand-primary">
+                      No users yet.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : (
+                  profiles.map(p => (
+                    <tr
+                      key={p.id}
+                      className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-white">
+                        {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${roleBadge[p.role]}`}
+                        >
+                          {roleLabel[p.role]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-brand-primary">{clientName(p.client_id)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => setEditing(p)}
+                          className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {editing && (
@@ -224,10 +258,10 @@ function UserEditModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:items-center"
       onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-brand-surface border border-brand-muted rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+      <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-sm overflow-y-auto rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] sm:p-6">
         <h2 className="text-base font-semibold text-white mb-5">Edit user</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -283,7 +317,7 @@ function UserEditModal({
             </p>
           )}
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex flex-col gap-3 pt-1 sm:flex-row">
             <button
               type="button"
               onClick={onClose}

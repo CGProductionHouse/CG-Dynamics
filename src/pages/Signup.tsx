@@ -34,8 +34,8 @@ export default function Signup() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4">
-        <div className="w-full max-w-sm bg-brand-surface border border-brand-muted rounded-2xl p-8 shadow-[0_0_40px_rgba(45,212,191,0.08)] text-center">
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm bg-brand-surface border border-brand-muted rounded-xl p-6 shadow-[0_0_40px_rgba(45,212,191,0.08)] text-center sm:p-8">
           <div className="w-12 h-12 rounded-full bg-brand-accent/10 border border-brand-accent/30 flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -58,9 +58,9 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-brand-surface border border-brand-muted rounded-2xl p-8 shadow-[0_0_40px_rgba(45,212,191,0.08)]">
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm bg-brand-surface border border-brand-muted rounded-xl p-6 shadow-[0_0_40px_rgba(45,212,191,0.08)] sm:p-8">
+        <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl font-bold text-brand-accent">Create account</h1>
           <p className="mt-1 text-sm text-brand-primary">Get started with CG Dynamics</p>
         </div>

@@ -96,13 +96,13 @@ export default function ClientsList() {
   }
 
   return (
-    <div className="p-8 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
+    <div className="w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 className="text-xl font-semibold text-white">Clients</h1>
         {isAdmin && (
           <button
             onClick={() => setModal({ open: true })}
-            className="bg-brand-accent text-brand-bg text-sm font-semibold px-4 py-2 rounded-lg hover:brightness-110 transition"
+            className="w-full bg-brand-accent text-brand-bg text-sm font-semibold px-4 py-2.5 rounded-lg hover:brightness-110 transition sm:w-auto"
           >
             Add client
           </button>
@@ -114,62 +114,104 @@ export default function ClientsList() {
       ) : error ? (
         <p className="text-red-400 text-sm">{error}</p>
       ) : (
-        <div className="bg-brand-surface border border-brand-muted rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-brand-muted text-left">
-                <th className="px-4 py-3 text-brand-primary font-medium">Name</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Tier</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Status</th>
-                {isAdmin && <th className="px-4 py-3" />}
-              </tr>
-            </thead>
-            <tbody>
-              {clients.length === 0 ? (
-                <tr>
-                  <td colSpan={isAdmin ? 4 : 3} className="px-4 py-8 text-center text-brand-primary">
-                    No clients yet.
-                  </td>
-                </tr>
-              ) : (
-                clients.map(c => (
-                  <tr
-                    key={c.id}
-                    className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-white font-medium">{c.name}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${
-                          c.tier === 'premium'
-                            ? 'bg-brand-accent/20 text-brand-accent'
-                            : 'bg-brand-muted text-brand-primary'
-                        }`}
-                      >
-                        {c.tier}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs ${c.active ? 'text-green-400' : 'text-red-400'}`}>
-                        {c.active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    {isAdmin && (
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => setModal({ open: true, client: c })}
-                          className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
+        <>
+          <div className="space-y-3 md:hidden">
+            {clients.length === 0 ? (
+              <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-8 text-center text-sm text-brand-primary">
+                No clients yet.
+              </div>
+            ) : (
+              clients.map(c => (
+                <article key={c.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h2 className="text-base font-semibold text-white break-words">{c.name}</h2>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span
+                          className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
+                            c.tier === 'premium'
+                              ? 'bg-brand-accent/20 text-brand-accent'
+                              : 'bg-brand-muted text-brand-primary'
+                          }`}
                         >
-                          Edit
-                        </button>
-                      </td>
+                          {c.tier}
+                        </span>
+                        <span className={`text-xs font-medium ${c.active ? 'text-green-400' : 'text-red-400'}`}>
+                          {c.active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <button
+                        onClick={() => setModal({ open: true, client: c })}
+                        className="shrink-0 rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-brand-accent"
+                      >
+                        Edit
+                      </button>
                     )}
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+
+          <div className="hidden bg-brand-surface border border-brand-muted rounded-xl overflow-hidden md:block">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-brand-muted text-left">
+                  <th className="px-4 py-3 text-brand-primary font-medium">Name</th>
+                  <th className="px-4 py-3 text-brand-primary font-medium">Tier</th>
+                  <th className="px-4 py-3 text-brand-primary font-medium">Status</th>
+                  {isAdmin && <th className="px-4 py-3" />}
+                </tr>
+              </thead>
+              <tbody>
+                {clients.length === 0 ? (
+                  <tr>
+                    <td colSpan={isAdmin ? 4 : 3} className="px-4 py-8 text-center text-brand-primary">
+                      No clients yet.
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : (
+                  clients.map(c => (
+                    <tr
+                      key={c.id}
+                      className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-white font-medium">{c.name}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${
+                            c.tier === 'premium'
+                              ? 'bg-brand-accent/20 text-brand-accent'
+                              : 'bg-brand-muted text-brand-primary'
+                          }`}
+                        >
+                          {c.tier}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs ${c.active ? 'text-green-400' : 'text-red-400'}`}>
+                          {c.active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      {isAdmin && (
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => setModal({ open: true, client: c })}
+                            className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {modal.open && (
@@ -229,10 +271,10 @@ function ClientModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:items-center"
       onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-brand-surface border border-brand-muted rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+      <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-sm overflow-y-auto rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] sm:p-6">
         <h2 className="text-base font-semibold text-white mb-5">
           {client ? 'Edit client' : 'Add client'}
         </h2>
@@ -284,7 +326,7 @@ function ClientModal({
             </p>
           )}
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex flex-col gap-3 pt-1 sm:flex-row">
             <button
               type="button"
               onClick={onClose}

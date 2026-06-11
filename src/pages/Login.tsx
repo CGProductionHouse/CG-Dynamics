@@ -27,9 +27,9 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-brand-surface border border-brand-muted rounded-2xl p-8 shadow-[0_0_40px_rgba(45,212,191,0.08)]">
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm bg-brand-surface border border-brand-muted rounded-xl p-6 shadow-[0_0_40px_rgba(45,212,191,0.08)] sm:p-8">
+        <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl font-bold text-brand-accent">Sign in</h1>
           <p className="mt-1 text-sm text-brand-primary">Welcome back to CG Dynamics</p>
         </div>

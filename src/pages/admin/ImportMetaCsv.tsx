@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { listClients, type Client } from '../../lib/db/clients'
 import { importMetaPosts, type ImportedMetaPostInput } from '../../lib/db/importedMetaPosts'
+import { detectReportPeriod, formatReportPeriod } from '../../lib/reportPeriod'
 import { formatNumber, shortCaption } from '../../lib/reportStats'
 
 type Platform = 'facebook' | 'instagram' | 'tiktok'
@@ -11,10 +12,11 @@ interface ParsedMetaRow {
   metaPostId: string | null
   publishTime: string | null
   caption: string | null
+  description: string | null
   permalink: string | null
   postType: string | null
   reach: number
-  impressions: number
+  views: number
   engagements: number
   reactions: number
   comments: number
@@ -70,7 +72,7 @@ function parseCsv(text: string) {
   return body.map(values => {
     const record: Record<string, string> = {}
     headers.forEach((header, index) => {
-      record[header.trim()] = values[index]?.trim() ?? ''
+      record[header.trim().replace(/^\uFEFF/, '')] = values[index]?.trim() ?? ''
     })
     return record
   })
@@ -102,10 +104,7 @@ function dateValue(row: Record<string, string>) {
   const value = getValue(row, [
     'Publish time',
     'Published time',
-    'Created time',
-    'Date',
     'Post publish date',
-    'Post creation date',
   ])
   if (!value) return null
 
@@ -114,36 +113,46 @@ function dateValue(row: Record<string, string>) {
 }
 
 function normalizeRows(rows: Record<string, string>[]): ParsedMetaRow[] {
-  return rows.map((row, index) => {
+  const normalizedRows = rows.map((row, index) => {
     const reactions = numberValue(row, ['Reactions', 'Likes', 'Lifetime post total reactions'])
     const comments = numberValue(row, ['Comments', 'Lifetime post comments'])
     const shares = numberValue(row, ['Shares', 'Lifetime post shares'])
+    const title = getValue(row, ['Title', 'Post title'])
+    const description = getValue(row, ['Description'])
     const clicks = numberValue(row, ['Post clicks', 'Clicks', 'Total clicks', 'Lifetime post clicks'])
-    const importedEngagements = numberValue(row, [
-      'Engagements',
-      'Post engagements',
-      'Lifetime engaged users',
-      'Lifetime post engaged users',
-    ])
 
     return {
       rowNumber: index + 1,
       metaPostId: getValue(row, ['Post ID', 'Meta post ID', 'Facebook post ID', 'Permalink ID']) || null,
       publishTime: dateValue(row),
-      caption: getValue(row, ['Caption', 'Post message', 'Description', 'Post text', 'Message']) || null,
+      caption: title || description || null,
+      description: description || null,
       permalink: getValue(row, ['Permalink', 'Post permalink', 'URL', 'Link']) || null,
       postType: getValue(row, ['Post type', 'Type', 'Media type']) || null,
       reach: numberValue(row, ['Reach', 'Lifetime post reach', 'Post reach']),
-      impressions: numberValue(row, ['Impressions', 'Lifetime post impressions', 'Views', 'Post views']),
-      engagements: importedEngagements || reactions + comments + shares + clicks,
+      views: numberValue(row, ['Views', 'Post views', 'Lifetime post views']),
+      engagements: reactions + comments + shares,
       reactions,
       comments,
       shares,
       clicks,
-      videoViews: numberValue(row, ['Video views', '3-second video views', 'Views']),
+      videoViews: numberValue(row, ['Video views', '3-second video views']),
       raw: row,
     }
   })
+
+  const byPostId = new Map<string, ParsedMetaRow>()
+  const withoutPostId: ParsedMetaRow[] = []
+
+  normalizedRows.forEach(row => {
+    if (!row.metaPostId) {
+      withoutPostId.push(row)
+      return
+    }
+    if (!byPostId.has(row.metaPostId)) byPostId.set(row.metaPostId, row)
+  })
+
+  return [...byPostId.values(), ...withoutPostId]
 }
 
 export default function ImportMetaCsv() {
@@ -152,6 +161,9 @@ export default function ImportMetaCsv() {
   const [platform, setPlatform] = useState<Platform>('facebook')
   const [fileName, setFileName] = useState<string | null>(null)
   const [rows, setRows] = useState<ParsedMetaRow[]>([])
+  const [periodStart, setPeriodStart] = useState('')
+  const [periodEnd, setPeriodEnd] = useState('')
+  const [periodSource, setPeriodSource] = useState<'publish_time' | 'filename' | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -185,6 +197,9 @@ export default function ImportMetaCsv() {
     setSuccess(null)
     setRows([])
     setFileName(file?.name ?? null)
+    setPeriodStart('')
+    setPeriodEnd('')
+    setPeriodSource(null)
 
     if (!file) return
 
@@ -195,7 +210,16 @@ export default function ImportMetaCsv() {
         setError('No rows were found in this CSV.')
         return
       }
+      const detectedPeriod = detectReportPeriod(
+        parsed.map(row => row.publishTime),
+        file.name
+      )
       setRows(parsed)
+      if (detectedPeriod) {
+        setPeriodStart(detectedPeriod.start)
+        setPeriodEnd(detectedPeriod.end)
+        setPeriodSource(detectedPeriod.source)
+      }
     } catch (error) {
       setError(errorMessage(error, 'Could not parse this CSV file.'))
     }
@@ -230,7 +254,7 @@ export default function ImportMetaCsv() {
         permalink: row.permalink,
         post_type: row.postType,
         reach: row.reach,
-        impressions: row.impressions,
+        impressions: row.views,
         engagements: row.engagements,
         reactions: row.reactions,
         comments: row.comments,
@@ -257,24 +281,28 @@ export default function ImportMetaCsv() {
   const totals = rows.reduce(
     (sum, row) => ({
       reach: sum.reach + row.reach,
-      impressions: sum.impressions + row.impressions,
+      views: sum.views + row.views,
       engagements: sum.engagements + row.engagements,
     }),
-    { reach: 0, impressions: 0, engagements: 0 }
+    { reach: 0, views: 0, engagements: 0 }
   )
+  const hasPeriod = Boolean(periodStart && periodEnd)
+  const detectedPeriodText = hasPeriod
+    ? formatReportPeriod({ start: periodStart, end: periodEnd })
+    : null
 
   return (
-    <div className="p-8 max-w-6xl">
-      <div className="mb-8">
+    <div className="w-full max-w-6xl p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8">
         <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Meta import</p>
-        <h1 className="text-2xl font-semibold text-white">Import performance CSV</h1>
+        <h1 className="text-2xl font-semibold text-white sm:text-3xl">Import performance CSV</h1>
         <p className="text-sm text-brand-primary mt-2 max-w-2xl">
           Upload Meta Business Suite exports, preview the normalized metrics, then save them for report building.
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-        <section className="bg-brand-surface border border-brand-muted rounded-xl p-5">
+        <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-brand-accent mb-1.5">Client</label>
@@ -309,9 +337,42 @@ export default function ImportMetaCsv() {
                 type="file"
                 accept=".csv,text/csv"
                 onChange={handleFileChange}
-                className="block w-full text-sm text-brand-primary file:mr-4 file:rounded-lg file:border-0 file:bg-brand-accent file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-bg hover:file:brightness-110"
+                className="block w-full text-sm text-brand-primary file:mb-2 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-accent file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-bg hover:file:brightness-110 sm:file:mb-0"
               />
             </div>
+
+            {rows.length > 0 && (
+              <div className="rounded-lg border border-brand-muted bg-brand-bg/60 p-3">
+                <p className="text-sm font-medium text-white">
+                  Detected period: {detectedPeriodText ?? 'No valid period found'}
+                </p>
+                {periodSource && (
+                  <p className="mt-1 text-xs text-brand-primary">
+                    Source: {periodSource === 'publish_time' ? 'Publish time' : 'CSV filename'}
+                  </p>
+                )}
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="block text-xs text-brand-primary mb-1">Start</span>
+                    <input
+                      type="date"
+                      value={periodStart}
+                      onChange={event => setPeriodStart(event.target.value)}
+                      className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="block text-xs text-brand-primary mb-1">End</span>
+                    <input
+                      type="date"
+                      value={periodEnd}
+                      onChange={event => setPeriodEnd(event.target.value)}
+                      className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
 
             {error && (
               <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
@@ -336,31 +397,32 @@ export default function ImportMetaCsv() {
           </div>
         </section>
 
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <MetricCard label="Rows" value={formatNumber(rows.length)} />
           <MetricCard label="Reach" value={formatNumber(totals.reach)} />
+          <MetricCard label="Views" value={formatNumber(totals.views)} />
           <MetricCard label="Engagements" value={formatNumber(totals.engagements)} />
         </section>
       </div>
 
       <section className="mt-6 bg-brand-surface border border-brand-muted rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-brand-muted flex items-center justify-between">
-          <div>
+        <div className="flex flex-col gap-2 border-b border-brand-muted px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="min-w-0">
             <h2 className="text-sm font-semibold text-white">CSV preview</h2>
-            <p className="text-xs text-brand-primary mt-1">
+            <p className="mt-1 break-words text-xs text-brand-primary">
               {fileName ? fileName : 'Upload a CSV to preview normalized post data.'}
             </p>
           </div>
-          <span className="text-xs text-brand-primary">{formatNumber(totals.impressions)} impressions</span>
+          <span className="text-xs text-brand-primary">{formatNumber(totals.views)} views</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="text-left border-b border-brand-muted">
                 <th className="px-4 py-3 text-brand-primary font-medium">Post</th>
                 <th className="px-4 py-3 text-brand-primary font-medium">Reach</th>
-                <th className="px-4 py-3 text-brand-primary font-medium">Impressions</th>
+                <th className="px-4 py-3 text-brand-primary font-medium">Views</th>
                 <th className="px-4 py-3 text-brand-primary font-medium">Engagements</th>
                 <th className="px-4 py-3 text-brand-primary font-medium">Type</th>
               </tr>
@@ -380,7 +442,7 @@ export default function ImportMetaCsv() {
                       <p className="text-xs text-brand-primary mt-1">{row.publishTime ?? 'No date found'}</p>
                     </td>
                     <td className="px-4 py-3 text-brand-primary">{formatNumber(row.reach)}</td>
-                    <td className="px-4 py-3 text-brand-primary">{formatNumber(row.impressions)}</td>
+                    <td className="px-4 py-3 text-brand-primary">{formatNumber(row.views)}</td>
                     <td className="px-4 py-3 text-brand-accent">{formatNumber(row.engagements)}</td>
                     <td className="px-4 py-3 text-brand-primary">{row.postType ?? 'Post'}</td>
                   </tr>
@@ -396,9 +458,9 @@ export default function ImportMetaCsv() {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-brand-surface border border-brand-muted rounded-xl p-5">
-      <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">{label}</p>
-      <p className="text-2xl font-semibold text-white mt-3">{value}</p>
+    <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
+      <p className="text-xs uppercase tracking-[0.14em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
+      <p className="text-2xl font-semibold text-white mt-3 break-words">{value}</p>
     </div>
   )
 }

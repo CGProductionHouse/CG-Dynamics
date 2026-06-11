@@ -11,7 +11,10 @@ import AdminLayout from './pages/admin/AdminLayout'
 import ClientsList from './pages/admin/ClientsList'
 import UsersAdmin from './pages/admin/UsersAdmin'
 import ImportMetaCsv from './pages/admin/ImportMetaCsv'
+import ImportsManagement from './pages/admin/ImportsManagement'
 import NewReport from './pages/admin/NewReport'
+import ReportsManagement from './pages/admin/ReportsManagement'
+import PublishedPreview from './pages/admin/PublishedPreview'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -47,7 +50,11 @@ export default function App() {
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<ClientsList />} />
               <Route path="/admin/import" element={<ImportMetaCsv />} />
+              <Route path="/admin/imports" element={<ImportsManagement />} />
+              <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/reports/new" element={<NewReport />} />
+              <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
+              <Route path="/admin/published" element={<PublishedPreview />} />
 
               {/* Admin-only routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>

@@ -38,6 +38,7 @@ export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
 export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
   const raw = post.raw as {
     impressions?: number
+    views?: number
     engagements?: number
     video_views?: number
   }
@@ -48,7 +49,7 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
     permalink: post.permalink,
     publish_time: post.publish_time,
     reach: post.reach,
-    impressions: raw.impressions ?? post.views,
+    impressions: raw.views ?? raw.impressions ?? post.views,
     engagements: raw.engagements ?? post.reactions + post.comments + post.shares + post.total_clicks,
     post_type: post.meta_post_type,
   }

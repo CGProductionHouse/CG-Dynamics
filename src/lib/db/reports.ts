@@ -21,6 +21,7 @@ export interface Report {
   published_at: string | null
   created_by: string | null
   created_at: string
+  updated_at?: string | null
 }
 
 export interface ReportPost {
@@ -61,7 +62,7 @@ export interface ReportInput {
   boost_recommendation: string
   general_notes: string
   created_by: string | null
-  importedPosts: ImportedMetaPost[]
+  importedPosts?: ImportedMetaPost[]
 }
 
 function reportPayload(input: ReportInput) {
@@ -95,10 +96,13 @@ export async function saveReport(input: ReportInput) {
   }
 
   const report = reportResult.data as Report
-  const deleteResult = await supabase.from('posts').delete().eq('report_id', report.id)
-  if (deleteResult.error) return { data: null, error: deleteResult.error }
 
-  if (input.importedPosts.length > 0) {
+  if (input.importedPosts) {
+    const deleteResult = await supabase.from('posts').delete().eq('report_id', report.id)
+    if (deleteResult.error) return { data: null, error: deleteResult.error }
+  }
+
+  if (input.importedPosts && input.importedPosts.length > 0) {
     const posts = input.importedPosts.map(post => ({
       report_id: report.id,
       meta_post_id: post.meta_post_id,
@@ -115,6 +119,7 @@ export async function saveReport(input: ReportInput) {
       raw: {
         ...post.raw,
         imported_meta_post_id: post.id,
+        views: post.impressions,
         impressions: post.impressions,
         engagements: post.engagements,
         video_views: post.video_views,
@@ -125,6 +130,49 @@ export async function saveReport(input: ReportInput) {
   }
 
   return { data: report, error: null }
+}
+
+export async function listReports() {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .order('period_start', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  return { data: (data ?? []) as Report[], error }
+}
+
+export async function getReportWithPosts(reportId: string) {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*, posts(*)')
+    .eq('id', reportId)
+    .single()
+
+  return { data: data as ReportWithPosts | null, error }
+}
+
+export async function updateReportStatus(reportId: string, status: ReportStatus) {
+  const { data, error } = await supabase
+    .from('reports')
+    .update({
+      status,
+      published_at: status === 'published' ? new Date().toISOString() : null,
+    })
+    .eq('id', reportId)
+    .select('*')
+    .single()
+
+  return { data: data as Report | null, error }
+}
+
+export async function deleteReport(reportId: string) {
+  const { error } = await supabase
+    .from('reports')
+    .delete()
+    .eq('id', reportId)
+
+  return { error }
 }
 
 export async function getLatestPublishedReportForClient(clientId: string) {

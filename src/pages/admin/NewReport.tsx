@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/importedMetaPosts'
-import { saveReport, type ReportStatus } from '../../lib/db/reports'
+import { getReportWithPosts, saveReport, type ReportStatus } from '../../lib/db/reports'
+import { detectReportPeriod, formatReportPeriod } from '../../lib/reportPeriod'
 import {
   calculateReportStats,
   formatDate,
@@ -72,12 +74,15 @@ function buildPrompt(
 }
 
 export default function NewReport() {
+  const { reportId } = useParams()
   const { profile } = useAuth()
   const [clients, setClients] = useState<Client[]>([])
   const [clientId, setClientId] = useState('')
   const [platform, setPlatform] = useState<Platform>('facebook')
   const [periodStart, setPeriodStart] = useState(monthStartInputValue())
   const [periodEnd, setPeriodEnd] = useState(todayInputValue())
+  const [periodSource, setPeriodSource] = useState<'publish_time' | 'filename' | null>(null)
+  const [periodBatchId, setPeriodBatchId] = useState<string | null>(null)
   const [importedPosts, setImportedPosts] = useState<ImportedMetaPost[]>([])
   const [fields, setFields] = useState<ReportFields>({
     reportTitle: '',
@@ -90,6 +95,7 @@ export default function NewReport() {
     generalNotes: '',
   })
   const [savedReportId, setSavedReportId] = useState<string | null>(null)
+  const [reportStatus, setReportStatus] = useState<ReportStatus>('draft')
   const [aiPrompt, setAiPrompt] = useState('')
   const [loading, setLoading] = useState(true)
   const [postsLoading, setPostsLoading] = useState(false)
@@ -120,6 +126,48 @@ export default function NewReport() {
   }, [])
 
   useEffect(() => {
+    if (!reportId) return
+    const reportIdToLoad = reportId
+
+    async function loadReportForEdit() {
+      setLoading(true)
+      setError(null)
+      try {
+        const { data, error } = await getReportWithPosts(reportIdToLoad)
+        if (error || !data) {
+          setError(error?.message ?? 'Could not load this report.')
+          return
+        }
+
+        setSavedReportId(data.id)
+        setClientId(data.client_id)
+        setPlatform(data.platform)
+        setPeriodStart(data.period_start)
+        setPeriodEnd(data.period_end)
+        setPeriodSource(null)
+        setPeriodBatchId(null)
+        setReportStatus(data.status)
+        setFields({
+          reportTitle: data.report_title ?? '',
+          previousMonthStrategy: data.previous_month_strategy ?? '',
+          previousMonthReflection: data.previous_month_reflection ?? '',
+          performanceComments: data.performance_comments ?? '',
+          strategyNextMonth: data.strategy_next_month ?? '',
+          contentDirectionNextMonth: data.content_direction_next_month ?? '',
+          boostRecommendation: data.boost_recommendation ?? '',
+          generalNotes: data.general_notes ?? '',
+        })
+      } catch (error) {
+        setError(errorMessage(error, 'Could not load this report.'))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void loadReportForEdit()
+  }, [reportId])
+
+  useEffect(() => {
     if (!clientId) return
 
     async function loadImportedPosts() {
@@ -127,11 +175,32 @@ export default function NewReport() {
       setError(null)
       setSuccess(null)
       try {
-        const { data, error } = await listImportedMetaPosts(clientId, periodStart, periodEnd)
+        const { data, error } = await listImportedMetaPosts(clientId)
         if (error) {
           setError(error.message)
         } else {
-          setImportedPosts(data.filter(post => post.platform === platform))
+          const platformPosts = data
+            .filter(post => post.platform === platform)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          const latestBatchId = platformPosts[0]?.import_batch_id ?? null
+          const latestBatchPosts = latestBatchId
+            ? platformPosts.filter(post => post.import_batch_id === latestBatchId)
+            : platformPosts
+          const detectedPeriod = detectReportPeriod(
+            latestBatchPosts.map(post => post.publish_time),
+            latestBatchPosts[0]?.source_file_name
+          )
+
+          setImportedPosts(platformPosts)
+          if (detectedPeriod) {
+            setPeriodStart(detectedPeriod.start)
+            setPeriodEnd(detectedPeriod.end)
+            setPeriodSource(detectedPeriod.source)
+            setPeriodBatchId(latestBatchId)
+          } else {
+            setPeriodSource(null)
+            setPeriodBatchId(null)
+          }
         }
       } catch (error) {
         setError(errorMessage(error, 'Could not load imported posts.'))
@@ -141,14 +210,31 @@ export default function NewReport() {
     }
 
     void loadImportedPosts()
-  }, [clientId, periodStart, periodEnd, platform])
+  }, [clientId, platform])
 
   const selectedClient = clients.find(client => client.id === clientId)
-  const statsPosts = useMemo(() => importedPosts.map(importedToStatsPost), [importedPosts])
+  const periodImportedPosts = useMemo(() => {
+    const start = periodStart ? new Date(`${periodStart}T00:00:00`).getTime() : null
+    const end = periodEnd ? new Date(`${periodEnd}T23:59:59`).getTime() : null
+
+    return importedPosts.filter(post => {
+      if (!post.publish_time) {
+        return periodSource === 'filename' && periodBatchId !== null && post.import_batch_id === periodBatchId
+      }
+      const time = new Date(post.publish_time).getTime()
+      if (Number.isNaN(time)) {
+        return periodSource === 'filename' && periodBatchId !== null && post.import_batch_id === periodBatchId
+      }
+      if (start !== null && time < start) return false
+      if (end !== null && time > end) return false
+      return true
+    })
+  }, [importedPosts, periodBatchId, periodEnd, periodSource, periodStart])
+  const statsPosts = useMemo(() => periodImportedPosts.map(importedToStatsPost), [periodImportedPosts])
   const stats = useMemo(() => calculateReportStats(statsPosts), [statsPosts])
   const statsText = [
     `Total reach: ${formatNumber(stats.totalReach)}`,
-    `Impressions: ${formatNumber(stats.totalImpressions)}`,
+    `Views: ${formatNumber(stats.totalImpressions)}`,
     `Engagements: ${formatNumber(stats.totalEngagements)}`,
     `Post count: ${formatNumber(stats.postCount)}`,
     `Best performing post: ${stats.bestPost ? shortCaption(stats.bestPost.caption) : 'None'}`,
@@ -188,7 +274,7 @@ export default function NewReport() {
       setError('Select a client before saving.')
       return
     }
-    if (importedPosts.length === 0) {
+    if (!savedReportId && periodImportedPosts.length === 0) {
       setError('No imported posts were found for this client and date range.')
       return
     }
@@ -217,7 +303,7 @@ export default function NewReport() {
         boost_recommendation: fields.boostRecommendation,
         general_notes: fields.generalNotes,
         created_by: profile?.id ?? null,
-        importedPosts,
+        importedPosts: periodImportedPosts.length > 0 ? periodImportedPosts : undefined,
       })
 
       if (error || !data) {
@@ -226,6 +312,7 @@ export default function NewReport() {
       }
 
       setSavedReportId(data.id)
+      setReportStatus(data.status)
       setSuccess(status === 'published' ? 'Report published. The client can now view it.' : 'Draft saved.')
     } catch (error) {
       setError(errorMessage(error, 'Could not save this report.'))
@@ -235,43 +322,56 @@ export default function NewReport() {
   }
 
   return (
-    <div className="p-8 max-w-7xl">
-      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Report builder</p>
-          <h1 className="text-2xl font-semibold text-white">Create Meta performance report</h1>
+          <h1 className="text-2xl font-semibold text-white sm:text-3xl">
+            {savedReportId ? 'Edit Meta performance report' : 'Create Meta performance report'}
+          </h1>
           <p className="text-sm text-brand-primary mt-2 max-w-2xl">
             Build a client-ready report from imported Meta data, then add the strategy commentary manually.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
             onClick={() => handleSave('draft')}
             disabled={!!saving}
-            className="border border-brand-muted text-brand-primary px-4 py-2 rounded-lg text-sm hover:text-white hover:border-white/30 transition disabled:opacity-60"
+            className="w-full border border-brand-muted text-brand-primary px-4 py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition disabled:opacity-60 sm:w-auto"
           >
-            {saving === 'draft' ? 'Saving...' : 'Save draft'}
+            {saving === 'draft' ? 'Saving...' : reportStatus === 'published' ? 'Save as draft' : 'Save draft'}
           </button>
           <button
             type="button"
             onClick={() => handleSave('published')}
             disabled={!!saving}
-            className="bg-brand-accent text-brand-bg font-semibold px-4 py-2 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60"
+            className="w-full bg-brand-accent text-brand-bg font-semibold px-4 py-2.5 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60 sm:w-auto"
           >
-            {saving === 'published' ? 'Publishing...' : 'Publish'}
+            {saving === 'published' ? 'Saving...' : reportStatus === 'published' ? 'Save published' : 'Publish'}
           </button>
         </div>
       </div>
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6">
-        <div className="grid gap-4 md:grid-cols-4">
+      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
+        {periodStart && periodEnd && (
+          <p className="mb-4 text-sm text-brand-primary">
+            Detected period:{' '}
+            <span className="text-white">{formatReportPeriod({ start: periodStart, end: periodEnd })}</span>
+            {periodSource && (
+              <span> from {periodSource === 'publish_time' ? 'Publish time' : 'CSV filename'}</span>
+            )}
+          </p>
+        )}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Client">
             <select
               value={clientId}
               onChange={event => {
                 setClientId(event.target.value)
                 setSavedReportId(null)
+                setPeriodSource(null)
+                setPeriodBatchId(null)
               }}
               disabled={loading}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
@@ -287,6 +387,8 @@ export default function NewReport() {
               onChange={event => {
                 setPlatform(event.target.value as Platform)
                 setSavedReportId(null)
+                setPeriodSource(null)
+                setPeriodBatchId(null)
               }}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
             >
@@ -302,6 +404,8 @@ export default function NewReport() {
               onChange={event => {
                 setPeriodStart(event.target.value)
                 setSavedReportId(null)
+                setPeriodSource(null)
+                setPeriodBatchId(null)
               }}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
             />
@@ -313,6 +417,8 @@ export default function NewReport() {
               onChange={event => {
                 setPeriodEnd(event.target.value)
                 setSavedReportId(null)
+                setPeriodSource(null)
+                setPeriodBatchId(null)
               }}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
             />
@@ -332,16 +438,16 @@ export default function NewReport() {
         </p>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Reach" value={formatNumber(stats.totalReach)} />
-        <StatCard label="Impressions" value={formatNumber(stats.totalImpressions)} />
+        <StatCard label="Views" value={formatNumber(stats.totalImpressions)} />
         <StatCard label="Engagements" value={formatNumber(stats.totalEngagements)} />
         <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="space-y-5">
-          <div className="bg-brand-surface border border-brand-muted rounded-xl p-5">
+          <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-white mb-4">Report text</h2>
             <div className="space-y-4">
               <TextInput
@@ -360,14 +466,14 @@ export default function NewReport() {
             </div>
           </div>
 
-          <div className="bg-brand-surface border border-brand-muted rounded-xl p-5">
-            <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
+            <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-sm font-semibold text-white">Generate AI prompt</h2>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={handleGeneratePrompt}
-                  className="bg-brand-accent text-brand-bg font-semibold px-3 py-2 rounded-lg text-xs hover:brightness-110 transition"
+                  className="bg-brand-accent text-brand-bg font-semibold px-3 py-2.5 rounded-lg text-sm hover:brightness-110 transition sm:text-xs"
                 >
                   Generate AI prompt
                 </button>
@@ -375,7 +481,7 @@ export default function NewReport() {
                   type="button"
                   onClick={handleCopyPrompt}
                   disabled={!aiPrompt}
-                  className="border border-brand-muted text-brand-primary px-3 py-2 rounded-lg text-xs hover:text-white hover:border-white/30 transition disabled:opacity-50"
+                  className="border border-brand-muted text-brand-primary px-3 py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition disabled:opacity-50 sm:text-xs"
                 >
                   Copy
                 </button>
@@ -395,7 +501,7 @@ export default function NewReport() {
           <PerformancePanel title="Best performing post" post={stats.bestPost} />
           <PerformancePanel title="Worst performing post" post={stats.worstPost} />
 
-          <section className="bg-brand-surface border border-brand-muted rounded-xl p-5">
+          <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-white mb-4">Top 5 posts</h2>
             <div className="space-y-3">
               {stats.topPosts.length === 0 ? (
@@ -433,9 +539,9 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-brand-surface border border-brand-muted rounded-xl p-5">
-      <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">{label}</p>
-      <p className="text-3xl font-semibold text-white mt-3">{value}</p>
+    <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
+      <p className="text-xs uppercase tracking-[0.12em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
+      <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{value}</p>
     </div>
   )
 }
@@ -499,9 +605,9 @@ function PerformancePanel({
       {post ? (
         <div>
           <p className="text-sm text-white leading-relaxed">{shortCaption(post.caption)}</p>
-          <div className="grid grid-cols-3 gap-2 mt-4">
+          <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
             <MiniMetric label="Reach" value={formatNumber(post.reach)} />
-            <MiniMetric label="Impr." value={formatNumber(post.impressions)} />
+            <MiniMetric label="Views" value={formatNumber(post.impressions)} />
             <MiniMetric label="Eng." value={formatNumber(post.engagements)} />
           </div>
         </div>
@@ -516,7 +622,7 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-brand-bg/70 border border-brand-muted rounded-lg p-3">
       <p className="text-[10px] uppercase tracking-[0.14em] text-brand-primary">{label}</p>
-      <p className="text-sm font-semibold text-white mt-1">{value}</p>
+      <p className="text-base font-semibold text-white mt-1 sm:text-sm">{value}</p>
     </div>
   )
 }
