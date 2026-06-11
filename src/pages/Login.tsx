@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import PasswordField from '../components/PasswordField'
 
 export default function Login() {
   const { signIn } = useAuth()
@@ -51,21 +52,13 @@ export default function Login() {
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-brand-accent mb-1.5">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition"
-              placeholder="••••••••"
-            />
-          </div>
+          <PasswordField
+            id="password"
+            label="Password"
+            autoComplete="current-password"
+            value={password}
+            onChange={setPassword}
+          />
 
           {error && (
             <p role="alert" className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">

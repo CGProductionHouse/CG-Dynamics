@@ -29,6 +29,22 @@ function formatDateTime(value: string | null) {
   }).format(new Date(value))
 }
 
+const APP_LINK = 'https://cg-dynamics.vercel.app'
+
+function inviteMessage(email: string) {
+  return [
+    "Hi, you've been invited to access your CG Dynamics dashboard.",
+    '',
+    'Please sign up using this email address:',
+    email,
+    '',
+    'App link:',
+    APP_LINK,
+    '',
+    'Once your account is created, your dashboard access will be linked automatically.',
+  ].join('\n')
+}
+
 export default function InvitesAdmin() {
   const { profile } = useAuth()
   const [invites, setInvites] = useState<ClientInvite[]>([])
@@ -42,6 +58,7 @@ export default function InvitesAdmin() {
   const [role, setRole] = useState<InviteRole>('client')
   const [saving, setSaving] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const clientNameById = useMemo(
     () => new Map(clients.map(client => [client.id, client.name])),
@@ -137,6 +154,19 @@ export default function InvitesAdmin() {
     }
   }
 
+  async function handleCopyMessage(invite: ClientInvite) {
+    setError(null)
+    try {
+      await navigator.clipboard.writeText(inviteMessage(invite.email))
+      setCopiedId(invite.id)
+      window.setTimeout(() => {
+        setCopiedId(current => (current === invite.id ? null : current))
+      }, 2000)
+    } catch (error) {
+      setError(errorMessage(error, 'Could not copy the invite message.'))
+    }
+  }
+
   const activeClients = clients.filter(client => client.active)
 
   return (
@@ -146,6 +176,10 @@ export default function InvitesAdmin() {
         <p className="mt-2 text-sm text-brand-primary max-w-2xl">
           Pre-approve a client email. When that person signs up or next logs in, their account is
           automatically linked to the chosen client and they see their dashboard right away.
+        </p>
+        <p className="mt-3 max-w-2xl rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          Creating an invite does not send an email yet. This pre-approves the email. Send the
+          client the app link manually — use <span className="font-medium">Copy invite message</span> below.
         </p>
       </div>
 
@@ -242,15 +276,26 @@ export default function InvitesAdmin() {
                   </td>
                   <td className="px-4 py-3 text-brand-primary">{formatDateTime(invite.created_at)}</td>
                   <td className="px-4 py-3 text-brand-primary">{formatDateTime(invite.accepted_at)}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => void handleDelete(invite)}
-                      disabled={busyId === invite.id}
-                      className="text-xs text-red-300 hover:text-red-200 disabled:opacity-60"
-                    >
-                      Delete
-                    </button>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-3 whitespace-nowrap">
+                      {invite.status === 'pending' && (
+                        <button
+                          type="button"
+                          onClick={() => void handleCopyMessage(invite)}
+                          className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
+                        >
+                          {copiedId === invite.id ? 'Copied!' : 'Copy invite message'}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete(invite)}
+                        disabled={busyId === invite.id}
+                        className="text-xs text-red-300 hover:text-red-200 disabled:opacity-60"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
