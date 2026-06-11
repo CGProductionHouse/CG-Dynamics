@@ -5,9 +5,13 @@ import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/importedMetaPosts'
 import { getReportWithPosts, saveReport, type ReportStatus } from '../../lib/db/reports'
-import { detectReportPeriod, formatReportPeriod } from '../../lib/reportPeriod'
 import {
-  calculatePlatformBreakdowns,
+  listManualMetricsForClientMonth,
+  type ManualPlatformMetric,
+} from '../../lib/db/manualMetrics'
+import { detectReportPeriod, formatReportPeriod, reportMonth } from '../../lib/reportPeriod'
+import {
+  buildMasterReport,
   calculateReportStats,
   formatDate,
   formatNumber,
@@ -82,6 +86,7 @@ export default function NewReport() {
   const [periodSource, setPeriodSource] = useState<'publish_time' | 'filename' | null>(null)
   const [periodBatchId, setPeriodBatchId] = useState<string | null>(null)
   const [importedPosts, setImportedPosts] = useState<ImportedMetaPost[]>([])
+  const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [fields, setFields] = useState<ReportFields>({
     reportTitle: '',
     previousMonthStrategy: '',
@@ -210,6 +215,25 @@ export default function NewReport() {
     void loadImportedPosts()
   }, [clientId])
 
+  // Manual summary metrics for the selected client and report month. Matched
+  // to the month of the report END date so a period like 30 Apr - 31 May
+  // picks up May (2026-05) manual metrics.
+  useEffect(() => {
+    if (!clientId || !periodEnd) {
+      setManualMetrics([])
+      return
+    }
+    let active = true
+    async function loadManual() {
+      const { data } = await listManualMetricsForClientMonth(clientId, reportMonth(periodEnd))
+      if (active) setManualMetrics(data)
+    }
+    void loadManual()
+    return () => {
+      active = false
+    }
+  }, [clientId, periodEnd])
+
   const selectedClient = clients.find(client => client.id === clientId)
   const periodImportedPosts = useMemo(() => {
     const start = periodStart ? new Date(`${periodStart}T00:00:00`).getTime() : null
@@ -230,11 +254,12 @@ export default function NewReport() {
   }, [importedPosts, periodBatchId, periodEnd, periodSource, periodStart])
   const statsPosts = useMemo(() => periodImportedPosts.map(importedToStatsPost), [periodImportedPosts])
   const stats = useMemo(() => calculateReportStats(statsPosts), [statsPosts])
-  const breakdowns = useMemo(() => calculatePlatformBreakdowns(statsPosts), [statsPosts])
+  // Combined view: CSV posts + manual summary metrics (same logic the client sees).
+  const master = useMemo(() => buildMasterReport(statsPosts, manualMetrics), [statsPosts, manualMetrics])
   const statsText = [
-    `Total reach: ${formatNumber(stats.totalReach)}`,
-    `Views: ${formatNumber(stats.totalImpressions)}`,
-    `Engagements: ${formatNumber(stats.totalEngagements)}`,
+    `Total reach: ${formatNumber(master.totalReach)}`,
+    `Views: ${formatNumber(master.totalViews)}`,
+    `Engagements: ${formatNumber(master.totalEngagements)}`,
     `Post count: ${formatNumber(stats.postCount)}`,
     `Best performing post: ${stats.bestPost ? shortCaption(stats.bestPost.caption) : 'None'}`,
     `Worst performing post: ${stats.worstPost ? shortCaption(stats.worstPost.caption) : 'None'}`,
@@ -421,27 +446,31 @@ export default function NewReport() {
       )}
 
       <div className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Reach" value={formatNumber(stats.totalReach)} />
-        <StatCard label="Views" value={formatNumber(stats.totalImpressions)} />
-        <StatCard label="Engagements" value={formatNumber(stats.totalEngagements)} />
+        <StatCard label="Reach" value={formatNumber(master.totalReach)} />
+        <StatCard label="Views" value={formatNumber(master.totalViews)} />
+        <StatCard label="Engagements" value={formatNumber(master.totalEngagements)} />
         <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
       </div>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
-        <h2 className="text-sm font-semibold text-white mb-4">Platform breakdown</h2>
+        <h2 className="text-sm font-semibold text-white mb-1">Platform breakdown</h2>
+        <p className="mb-4 text-xs text-brand-primary">CSV imports and manual summary metrics combined.</p>
         <div className="grid gap-3 sm:grid-cols-3">
-          {breakdowns.map(breakdown => (
-            <div key={breakdown.platform} className="border border-brand-muted rounded-lg p-3 bg-brand-bg/50">
-              <p className="text-sm font-semibold text-white">{breakdown.label}</p>
-              {breakdown.hasData ? (
-                <dl className="mt-2 space-y-1 text-xs text-brand-primary">
-                  <div className="flex justify-between"><dt>Reach</dt><dd className="text-white">{formatNumber(breakdown.stats.totalReach)}</dd></div>
-                  <div className="flex justify-between"><dt>Views</dt><dd className="text-white">{formatNumber(breakdown.stats.totalImpressions)}</dd></div>
-                  <div className="flex justify-between"><dt>Engagements</dt><dd className="text-white">{formatNumber(breakdown.stats.totalEngagements)}</dd></div>
-                  <div className="flex justify-between"><dt>Posts</dt><dd className="text-white">{formatNumber(breakdown.stats.postCount)}</dd></div>
-                </dl>
-              ) : (
+          {master.platforms.map(view => (
+            <div key={view.platform} className="border border-brand-muted rounded-lg p-3 bg-brand-bg/50">
+              <p className="text-sm font-semibold text-white">{view.label}</p>
+              {view.source === 'none' ? (
                 <p className="mt-2 text-xs text-brand-primary">No data uploaded yet.</p>
+              ) : (
+                <dl className="mt-2 space-y-1 text-xs text-brand-primary">
+                  <div className="flex justify-between"><dt>Reach</dt><dd className="text-white">{formatNumber(view.reach)}</dd></div>
+                  <div className="flex justify-between"><dt>Views</dt><dd className="text-white">{formatNumber(view.views)}</dd></div>
+                  <div className="flex justify-between"><dt>Engagements</dt><dd className="text-white">{formatNumber(view.engagements)}</dd></div>
+                  <div className="flex justify-between">
+                    <dt>Source</dt>
+                    <dd className="text-white">{view.source === 'manual' ? 'Manual summary' : `${formatNumber(view.postCount)} posts`}</dd>
+                  </div>
+                </dl>
               )}
             </div>
           ))}

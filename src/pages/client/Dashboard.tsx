@@ -10,6 +10,7 @@ import {
   listManualMetricsForClientMonth,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
+import { reportMonth } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from './ClientReportView'
 
 function errorMessage(error: unknown, fallback: string) {
@@ -97,8 +98,7 @@ export default function Dashboard() {
         }
         setReport(data)
         if (data) {
-          const month = data.period_start.slice(0, 7)
-          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, month)
+          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, reportMonth(data.period_end))
           setManualMetrics(metrics)
         } else {
           setManualMetrics([])

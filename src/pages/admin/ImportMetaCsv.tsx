@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import { importMetaPosts, type ImportedMetaPostInput } from '../../lib/db/importedMetaPosts'
@@ -285,6 +286,7 @@ export default function ImportMetaCsv() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [manualSaved, setManualSaved] = useState(false)
 
   useEffect(() => {
     async function loadClients() {
@@ -317,6 +319,7 @@ export default function ImportMetaCsv() {
     setPeriodSource(null)
     setError(null)
     setSuccess(null)
+    setManualSaved(false)
   }
 
   function handleImportTypeChange(nextType: ImportType) {
@@ -328,6 +331,7 @@ export default function ImportMetaCsv() {
     const file = event.target.files?.[0]
     setError(null)
     setSuccess(null)
+    setManualSaved(false)
     setRows([])
     setManualRows([])
     setFileName(file?.name ?? null)
@@ -456,7 +460,8 @@ export default function ImportMetaCsv() {
         return
       }
 
-      setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'}. These now feed into the master report.`)
+      setManualSaved(true)
+      setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'} to Manual metrics. These now feed into the master monthly report.`)
     } catch (error) {
       setError(errorMessage(error, 'Could not save manual summary metrics.'))
     } finally {
@@ -588,6 +593,11 @@ export default function ImportMetaCsv() {
                   accounts_engaged, profile_visits, external_link_taps, followers, top_content_notes,
                   content_type_split_notes, general_notes. One or many rows.
                 </p>
+                <p className="mt-2 text-xs text-amber-300">
+                  month must match the report month you want this to appear in. For a May 2026 report
+                  use <span className="font-semibold">2026-05</span>. If an Instagram screenshot says
+                  "Last 30 days", still choose the reporting month, not today's date.
+                </p>
                 <button
                   type="button"
                   onClick={handleDownloadTemplate}
@@ -657,9 +667,17 @@ export default function ImportMetaCsv() {
             )}
 
             {success && (
-              <p className="text-sm text-brand-accent bg-brand-accent/10 border border-brand-accent/20 rounded-lg px-3 py-2">
-                {success}
-              </p>
+              <div className="rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2">
+                <p className="text-sm text-brand-accent">{success}</p>
+                {manualSaved && (
+                  <Link
+                    to="/admin/manual-metrics"
+                    className="mt-2 inline-block text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                  >
+                    View in Manual metrics
+                  </Link>
+                )}
+              </div>
             )}
 
             <button

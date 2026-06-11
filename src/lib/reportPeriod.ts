@@ -97,6 +97,13 @@ export function detectReportPeriod(
   }
 }
 
+// Manual platform metrics are keyed by calendar month (YYYY-MM). A monthly
+// report whose period starts on, say, 30 April still belongs to May, so we
+// match manual metrics to the month of the report END date.
+export function reportMonth(periodEnd: string) {
+  return periodEnd.slice(0, 7)
+}
+
 export function formatReportPeriod(period: Pick<DetectedReportPeriod, 'start' | 'end'>) {
   const formatter = new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',

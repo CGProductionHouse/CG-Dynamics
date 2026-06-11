@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
@@ -107,6 +108,14 @@ export default function ImportsManagement() {
         <h1 className="text-2xl font-semibold text-white sm:text-3xl">Import management</h1>
         <p className="text-sm text-brand-primary mt-2 max-w-2xl">
           Review uploaded CSV imports and remove incorrect imported post data without deleting clients or reports.
+        </p>
+        <p className="mt-3 max-w-2xl rounded-lg border border-brand-muted bg-brand-bg/60 px-3 py-2 text-xs text-brand-primary">
+          This page only shows Meta Business Suite post-level imports. Manual summary CSV imports are
+          aggregate numbers and live on the{' '}
+          <Link to="/admin/manual-metrics" className="font-semibold text-brand-accent underline hover:brightness-110">
+            Manual metrics
+          </Link>{' '}
+          page.
         </p>
       </div>
 
