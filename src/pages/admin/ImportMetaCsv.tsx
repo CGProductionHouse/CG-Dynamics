@@ -10,6 +10,7 @@ type Platform = 'facebook' | 'instagram' | 'tiktok'
 interface ParsedMetaRow {
   rowNumber: number
   metaPostId: string | null
+  pageName: string | null
   publishTime: string | null
   caption: string | null
   description: string | null
@@ -117,42 +118,51 @@ function normalizeRows(rows: Record<string, string>[]): ParsedMetaRow[] {
     const reactions = numberValue(row, ['Reactions', 'Likes', 'Lifetime post total reactions'])
     const comments = numberValue(row, ['Comments', 'Lifetime post comments'])
     const shares = numberValue(row, ['Shares', 'Lifetime post shares'])
+    const explicitEngagements = numberValue(row, [
+      'Reactions, Comments and Shares',
+      'Engagements',
+      'Post engagements',
+    ])
     const title = getValue(row, ['Title', 'Post title'])
     const description = getValue(row, ['Description'])
     const clicks = numberValue(row, ['Post clicks', 'Clicks', 'Total clicks', 'Lifetime post clicks'])
+    const metaPostId = getValue(row, ['Post ID']) || null
+    const pageName = getValue(row, ['Page name']) || null
 
     return {
       rowNumber: index + 1,
-      metaPostId: getValue(row, ['Post ID', 'Meta post ID', 'Facebook post ID', 'Permalink ID']) || null,
+      metaPostId,
+      pageName,
       publishTime: dateValue(row),
-      caption: title || description || null,
+      caption: title || null,
       description: description || null,
       permalink: getValue(row, ['Permalink', 'Post permalink', 'URL', 'Link']) || null,
-      postType: getValue(row, ['Post type', 'Type', 'Media type']) || null,
+      postType: getValue(row, ['Post type']) || null,
       reach: numberValue(row, ['Reach', 'Lifetime post reach', 'Post reach']),
       views: numberValue(row, ['Views', 'Post views', 'Lifetime post views']),
-      engagements: reactions + comments + shares,
+      engagements: explicitEngagements || reactions + comments + shares,
       reactions,
       comments,
       shares,
       clicks,
       videoViews: numberValue(row, ['Video views', '3-second video views']),
-      raw: row,
+      raw: {
+        ...row,
+        external_post_id: metaPostId ?? '',
+        page_name: pageName ?? '',
+        description,
+      },
     }
   })
 
   const byPostId = new Map<string, ParsedMetaRow>()
-  const withoutPostId: ParsedMetaRow[] = []
 
   normalizedRows.forEach(row => {
-    if (!row.metaPostId) {
-      withoutPostId.push(row)
-      return
-    }
+    if (!row.metaPostId) return
     if (!byPostId.has(row.metaPostId)) byPostId.set(row.metaPostId, row)
   })
 
-  return [...byPostId.values(), ...withoutPostId]
+  return [...byPostId.values()]
 }
 
 export default function ImportMetaCsv() {

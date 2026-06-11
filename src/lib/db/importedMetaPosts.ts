@@ -46,17 +46,13 @@ export interface ImportedMetaPostGroup {
 
 function uniqueRowsByPostId(rows: ImportedMetaPostInput[]) {
   const keyedRows = new Map<string, ImportedMetaPostInput>()
-  const rowsWithoutPostId: ImportedMetaPostInput[] = []
 
   rows.forEach(row => {
-    if (!row.meta_post_id) {
-      rowsWithoutPostId.push(row)
-      return
-    }
+    if (!row.meta_post_id) return
     if (!keyedRows.has(row.meta_post_id)) keyedRows.set(row.meta_post_id, row)
   })
 
-  return [...keyedRows.values(), ...rowsWithoutPostId]
+  return [...keyedRows.values()]
 }
 
 export async function importMetaPosts(rows: ImportedMetaPostInput[]) {
