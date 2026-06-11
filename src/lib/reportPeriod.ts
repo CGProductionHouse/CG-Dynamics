@@ -99,9 +99,12 @@ export function detectReportPeriod(
 
 // Manual platform metrics are keyed by calendar month (YYYY-MM). A monthly
 // report whose period starts on, say, 30 April still belongs to May, so we
-// match manual metrics to the month of the report END date.
+// match manual metrics to the month of the report END date. We read the
+// YYYY-MM prefix directly so an invalid day (e.g. 2026-06-31) still resolves
+// to a reliable month (2026-06) rather than rolling over.
 export function reportMonth(periodEnd: string) {
-  return periodEnd.slice(0, 7)
+  const match = /^(\d{4})-(\d{2})/.exec(periodEnd)
+  return match ? `${match[1]}-${match[2]}` : periodEnd.slice(0, 7)
 }
 
 export function formatReportPeriod(period: Pick<DetectedReportPeriod, 'start' | 'end'>) {

@@ -94,6 +94,19 @@ export async function listManualMetricsForClientMonth(clientId: string, month: s
   return { data: (data ?? []) as ManualPlatformMetric[], error }
 }
 
+// All manual metrics for a client across every month — used by the report
+// builder so the admin can see what is available and pick the right month.
+export async function listManualMetricsForClient(clientId: string) {
+  const { data, error } = await supabase
+    .from('manual_platform_metrics')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('month', { ascending: false })
+    .order('platform', { ascending: true })
+
+  return { data: (data ?? []) as ManualPlatformMetric[], error }
+}
+
 export async function saveManualMetric(input: ManualMetricInput) {
   const body = payload(input)
   const result = input.id

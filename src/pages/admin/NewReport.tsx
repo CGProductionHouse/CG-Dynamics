@@ -6,11 +6,13 @@ import { listClients, type Client } from '../../lib/db/clients'
 import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/importedMetaPosts'
 import { getReportWithPosts, saveReport, type ReportStatus } from '../../lib/db/reports'
 import {
-  listManualMetricsForClientMonth,
+  MANUAL_SOURCE_LABELS,
+  listManualMetricsForClient,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
 import { detectReportPeriod, formatReportPeriod, reportMonth } from '../../lib/reportPeriod'
 import {
+  PLATFORM_LABELS,
   buildMasterReport,
   calculateReportStats,
   formatDate,
@@ -215,26 +217,51 @@ export default function NewReport() {
     void loadImportedPosts()
   }, [clientId])
 
-  // Manual summary metrics for the selected client and report month. Matched
-  // to the month of the report END date so a period like 30 Apr - 31 May
-  // picks up May (2026-05) manual metrics.
+  // Load every manual summary for this client (all months) so we can both
+  // match the report month and show what else is available.
   useEffect(() => {
-    if (!clientId || !periodEnd) {
+    if (!clientId) {
       setManualMetrics([])
       return
     }
     let active = true
     async function loadManual() {
-      const { data } = await listManualMetricsForClientMonth(clientId, reportMonth(periodEnd))
+      const { data } = await listManualMetricsForClient(clientId)
       if (active) setManualMetrics(data)
     }
     void loadManual()
     return () => {
       active = false
     }
-  }, [clientId, periodEnd])
+  }, [clientId])
 
   const selectedClient = clients.find(client => client.id === clientId)
+  // The report month is the calendar month of the period end date.
+  const currentMonth = reportMonth(periodEnd)
+  const monthManualMetrics = useMemo(
+    () => manualMetrics.filter(metric => metric.month === currentMonth),
+    [manualMetrics, currentMonth]
+  )
+  // Manual summaries that exist for this client but a different month.
+  const otherMonthManualMetrics = useMemo(
+    () => manualMetrics.filter(metric => metric.month !== currentMonth),
+    [manualMetrics, currentMonth]
+  )
+  // Warn about platforms whose only manual data is in a different month than
+  // the one this report is currently set to.
+  const manualMonthMismatch = useMemo(() => {
+    const currentPlatforms = new Set(monthManualMetrics.map(metric => metric.platform))
+    const seen = new Set<string>()
+    const labels: string[] = []
+    otherMonthManualMetrics.forEach(metric => {
+      if (currentPlatforms.has(metric.platform)) return
+      const key = `${metric.platform}:${metric.month}`
+      if (seen.has(key)) return
+      seen.add(key)
+      labels.push(`${PLATFORM_LABELS[metric.platform]} ${metric.month}`)
+    })
+    return labels
+  }, [monthManualMetrics, otherMonthManualMetrics])
   const periodImportedPosts = useMemo(() => {
     const start = periodStart ? new Date(`${periodStart}T00:00:00`).getTime() : null
     const end = periodEnd ? new Date(`${periodEnd}T23:59:59`).getTime() : null
@@ -254,8 +281,9 @@ export default function NewReport() {
   }, [importedPosts, periodBatchId, periodEnd, periodSource, periodStart])
   const statsPosts = useMemo(() => periodImportedPosts.map(importedToStatsPost), [periodImportedPosts])
   const stats = useMemo(() => calculateReportStats(statsPosts), [statsPosts])
-  // Combined view: CSV posts + manual summary metrics (same logic the client sees).
-  const master = useMemo(() => buildMasterReport(statsPosts, manualMetrics), [statsPosts, manualMetrics])
+  // Combined view: CSV posts + manual summary metrics for the report month
+  // (same logic the client sees).
+  const master = useMemo(() => buildMasterReport(statsPosts, monthManualMetrics), [statsPosts, monthManualMetrics])
   const statsText = [
     `Total reach: ${formatNumber(master.totalReach)}`,
     `Views: ${formatNumber(master.totalViews)}`,
@@ -298,8 +326,8 @@ export default function NewReport() {
       setError('Select a client before saving.')
       return
     }
-    if (!savedReportId && periodImportedPosts.length === 0) {
-      setError('No imported posts were found for this client and date range.')
+    if (!savedReportId && periodImportedPosts.length === 0 && monthManualMetrics.length === 0) {
+      setError('No imported posts or manual summary metrics were found for this client and report month.')
       return
     }
     if (!periodStart || !periodEnd) {
@@ -475,6 +503,59 @@ export default function NewReport() {
             </div>
           ))}
         </div>
+      </section>
+
+      {manualMonthMismatch.length > 0 && (
+        <p className="mb-6 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          Manual data exists for another month: {manualMonthMismatch.join(', ')}. This report is
+          currently set to {currentMonth}. Set the report end date to that month to include it.
+        </p>
+      )}
+
+      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
+        <h2 className="text-sm font-semibold text-white mb-1">Available manual summaries for this client</h2>
+        <p className="mb-4 text-xs text-brand-primary">
+          Report month is <span className="text-white">{currentMonth}</span>. Rows matching this month feed into the report above.
+        </p>
+        {manualMetrics.length === 0 ? (
+          <p className="text-xs text-brand-primary">No manual summaries uploaded for this client yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="border-b border-brand-muted text-left">
+                  <th className="px-3 py-2 font-medium text-brand-primary">Month</th>
+                  <th className="px-3 py-2 font-medium text-brand-primary">Platform</th>
+                  <th className="px-3 py-2 font-medium text-brand-primary">Reach</th>
+                  <th className="px-3 py-2 font-medium text-brand-primary">Views</th>
+                  <th className="px-3 py-2 font-medium text-brand-primary">Engagements</th>
+                  <th className="px-3 py-2 font-medium text-brand-primary">Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                {manualMetrics.map(metric => {
+                  const matches = metric.month === currentMonth
+                  return (
+                    <tr
+                      key={metric.id}
+                      className={`border-b border-brand-muted/70 last:border-0 ${matches ? 'bg-brand-accent/[0.06]' : ''}`}
+                    >
+                      <td className="px-3 py-2 text-white">
+                        {metric.month}
+                        {matches && <span className="ml-2 text-[11px] text-brand-accent">this month</span>}
+                      </td>
+                      <td className="px-3 py-2 text-brand-primary">{PLATFORM_LABELS[metric.platform]}</td>
+                      <td className="px-3 py-2 text-brand-primary">{formatNumber(metric.reach)}</td>
+                      <td className="px-3 py-2 text-brand-primary">{formatNumber(metric.views)}</td>
+                      <td className="px-3 py-2 text-brand-primary">{formatNumber(metric.engagements)}</td>
+                      <td className="px-3 py-2 text-brand-primary">{MANUAL_SOURCE_LABELS[metric.source_type]}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
