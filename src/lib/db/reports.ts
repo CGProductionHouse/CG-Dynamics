@@ -143,13 +143,33 @@ export async function listReports() {
 }
 
 export async function getReportWithPosts(reportId: string) {
-  const { data, error } = await supabase
+  const reportResult = await supabase
     .from('reports')
-    .select('*, posts(*)')
+    .select('*')
     .eq('id', reportId)
     .single()
 
-  return { data: data as ReportWithPosts | null, error }
+  if (reportResult.error || !reportResult.data) {
+    return { data: null, error: reportResult.error }
+  }
+
+  const postsResult = await supabase
+    .from('posts')
+    .select('*')
+    .eq('report_id', reportId)
+    .order('publish_time', { ascending: true, nullsFirst: false })
+
+  if (postsResult.error) {
+    return { data: null, error: postsResult.error }
+  }
+
+  return {
+    data: {
+      ...(reportResult.data as Report),
+      posts: (postsResult.data ?? []) as ReportPost[],
+    },
+    error: null,
+  }
 }
 
 export async function updateReportStatus(reportId: string, status: ReportStatus) {
@@ -176,9 +196,9 @@ export async function deleteReport(reportId: string) {
 }
 
 export async function getLatestPublishedReportForClient(clientId: string) {
-  const { data, error } = await supabase
+  const reportResult = await supabase
     .from('reports')
-    .select('*, posts(*)')
+    .select('*')
     .eq('client_id', clientId)
     .eq('status', 'published')
     .order('period_end', { ascending: false })
@@ -186,5 +206,26 @@ export async function getLatestPublishedReportForClient(clientId: string) {
     .limit(1)
     .maybeSingle()
 
-  return { data: data as ReportWithPosts | null, error }
+  if (reportResult.error || !reportResult.data) {
+    return { data: null, error: reportResult.error }
+  }
+
+  const report = reportResult.data as Report
+  const postsResult = await supabase
+    .from('posts')
+    .select('*')
+    .eq('report_id', report.id)
+    .order('publish_time', { ascending: true, nullsFirst: false })
+
+  if (postsResult.error) {
+    return { data: null, error: postsResult.error }
+  }
+
+  return {
+    data: {
+      ...report,
+      posts: (postsResult.data ?? []) as ReportPost[],
+    },
+    error: null,
+  }
 }
