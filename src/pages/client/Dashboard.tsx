@@ -6,6 +6,10 @@ import {
   type Report,
   type ReportWithPosts,
 } from '../../lib/db/reports'
+import {
+  listManualMetricsForClientMonth,
+  type ManualPlatformMetric,
+} from '../../lib/db/manualMetrics'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from './ClientReportView'
 
 function errorMessage(error: unknown, fallback: string) {
@@ -42,6 +46,7 @@ export default function Dashboard() {
   const [reports, setReports] = useState<Report[]>([])
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const [report, setReport] = useState<ReportWithPosts | null>(null)
+  const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -88,8 +93,15 @@ export default function Dashboard() {
         const { data, error } = await getReportWithPosts(selectedReportId!)
         if (error) {
           setError(error.message)
+          return
+        }
+        setReport(data)
+        if (data) {
+          const month = data.period_start.slice(0, 7)
+          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, month)
+          setManualMetrics(metrics)
         } else {
-          setReport(data)
+          setManualMetrics([])
         }
       } catch (error) {
         setError(errorMessage(error, 'Could not load this report.'))
@@ -175,7 +187,7 @@ export default function Dashboard() {
       {reportLoading ? (
         <p className="text-brand-primary text-sm">Loading report...</p>
       ) : report ? (
-        <ClientReportView report={report} />
+        <ClientReportView report={report} manualMetrics={manualMetrics} />
       ) : (
         <EmptyReportState
           title="Select a month"

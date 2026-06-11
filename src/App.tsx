@@ -15,6 +15,7 @@ import ImportMetaCsv from './pages/admin/ImportMetaCsv'
 import ImportsManagement from './pages/admin/ImportsManagement'
 import NewReport from './pages/admin/NewReport'
 import ReportsManagement from './pages/admin/ReportsManagement'
+import ManualMetricsAdmin from './pages/admin/ManualMetricsAdmin'
 import PublishedPreview from './pages/admin/PublishedPreview'
 import Dashboard from './pages/client/Dashboard'
 
@@ -53,6 +54,7 @@ export default function App() {
               <Route path="/admin" element={<ClientsList />} />
               <Route path="/admin/imports" element={<ImportsManagement />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
+              <Route path="/admin/manual-metrics" element={<ManualMetricsAdmin />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
 
               {/* Admin-only write routes nested inside AdminLayout */}

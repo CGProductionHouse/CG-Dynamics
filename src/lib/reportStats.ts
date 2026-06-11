@@ -1,5 +1,6 @@
 import type { ImportedMetaPost } from './db/importedMetaPosts'
 import type { ReportPost } from './db/reports'
+import type { ManualPlatformMetric } from './db/manualMetrics'
 
 export type Platform = 'facebook' | 'instagram' | 'tiktok'
 
@@ -113,6 +114,108 @@ export function bestPlatform(breakdowns: PlatformBreakdown[]): PlatformBreakdown
     }
     return b.stats.totalEngagements - a.stats.totalEngagements
   })[0]
+}
+
+// ─── Master report: CSV posts + manual metrics combined ─────────────────────
+
+export type PlatformSource = 'posts' | 'manual' | 'none'
+
+export interface PlatformView {
+  platform: Platform
+  label: string
+  source: PlatformSource
+  reach: number
+  views: number
+  engagements: number
+  // Populated when source === 'posts'
+  postCount: number
+  bestPost: ReportStatsPost | null
+  topPosts: ReportStatsPost[]
+  // Populated when source === 'manual'
+  manual: ManualPlatformMetric | null
+}
+
+export interface MasterReportData {
+  platforms: PlatformView[]
+  totalReach: number
+  totalViews: number
+  totalEngagements: number
+  bestPlatform: PlatformView | null
+  bestPostOverall: ReportStatsPost | null
+}
+
+// Combines snapshotted CSV posts with manual platform metrics into one
+// master view. For each platform we prefer post-level CSV data when it
+// exists, otherwise fall back to the manual aggregate, so totals are never
+// double counted.
+export function buildMasterReport(
+  posts: ReportStatsPost[],
+  manualMetrics: ManualPlatformMetric[]
+): MasterReportData {
+  const platforms: PlatformView[] = PLATFORMS.map(platform => {
+    const platformPosts = posts.filter(post => post.platform === platform)
+    const manual = manualMetrics.find(metric => metric.platform === platform) ?? null
+
+    if (platformPosts.length > 0) {
+      const stats = calculateReportStats(platformPosts)
+      return {
+        platform,
+        label: PLATFORM_LABELS[platform],
+        source: 'posts',
+        reach: stats.totalReach,
+        views: stats.totalImpressions,
+        engagements: stats.totalEngagements,
+        postCount: stats.postCount,
+        bestPost: stats.bestPost,
+        topPosts: stats.topPosts,
+        manual,
+      }
+    }
+
+    if (manual) {
+      return {
+        platform,
+        label: PLATFORM_LABELS[platform],
+        source: 'manual',
+        reach: manual.reach,
+        views: manual.views,
+        engagements: manual.engagements,
+        postCount: 0,
+        bestPost: null,
+        topPosts: [],
+        manual,
+      }
+    }
+
+    return {
+      platform,
+      label: PLATFORM_LABELS[platform],
+      source: 'none',
+      reach: 0,
+      views: 0,
+      engagements: 0,
+      postCount: 0,
+      bestPost: null,
+      topPosts: [],
+      manual: null,
+    }
+  })
+
+  const withData = platforms.filter(view => view.source !== 'none')
+
+  const bestPlatform = [...withData].sort((a, b) => {
+    if (b.reach !== a.reach) return b.reach - a.reach
+    return b.engagements - a.engagements
+  })[0] ?? null
+
+  return {
+    platforms,
+    totalReach: withData.reduce((sum, view) => sum + view.reach, 0),
+    totalViews: withData.reduce((sum, view) => sum + view.views, 0),
+    totalEngagements: withData.reduce((sum, view) => sum + view.engagements, 0),
+    bestPlatform,
+    bestPostOverall: posts.length > 0 ? calculateReportStats(posts).bestPost : null,
+  }
 }
 
 export function formatNumber(value: number) {

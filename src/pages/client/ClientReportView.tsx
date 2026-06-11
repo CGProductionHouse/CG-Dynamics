@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { ReportWithPosts } from '../../lib/db/reports'
-import type { PlatformBreakdown, Platform, ReportStats, ReportStatsPost } from '../../lib/reportStats'
+import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
+import { MANUAL_SOURCE_LABELS } from '../../lib/db/manualMetrics'
+import type { MasterReportData, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORMS,
   PLATFORM_LABELS,
-  bestPlatform,
-  calculatePlatformBreakdowns,
-  calculateReportStats,
+  buildMasterReport,
   formatDate,
   formatNumber,
   reportPostToStatsPost,
@@ -16,16 +16,23 @@ import {
 
 type TabKey = 'overview' | Platform
 
-export function ClientReportView({ report }: { report: ReportWithPosts }) {
+export function ClientReportView({
+  report,
+  manualMetrics = [],
+}: {
+  report: ReportWithPosts
+  manualMetrics?: ManualPlatformMetric[]
+}) {
   const [tab, setTab] = useState<TabKey>('overview')
 
   const statsPosts = useMemo<ReportStatsPost[]>(
     () => report.posts.map(reportPostToStatsPost),
     [report]
   )
-  const overall = useMemo(() => calculateReportStats(statsPosts), [statsPosts])
-  const breakdowns = useMemo(() => calculatePlatformBreakdowns(statsPosts), [statsPosts])
-  const topPlatform = useMemo(() => bestPlatform(breakdowns), [breakdowns])
+  const master = useMemo(
+    () => buildMasterReport(statsPosts, manualMetrics),
+    [statsPosts, manualMetrics]
+  )
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'overview', label: 'Overview' },
@@ -67,47 +74,39 @@ export function ClientReportView({ report }: { report: ReportWithPosts }) {
       </div>
 
       {tab === 'overview' ? (
-        <OverviewTab report={report} overall={overall} topPlatform={topPlatform} />
+        <OverviewTab report={report} master={master} />
       ) : (
-        <PlatformTab breakdown={breakdowns.find(item => item.platform === tab)!} />
+        <PlatformTab view={master.platforms.find(item => item.platform === tab)!} />
       )}
     </>
   )
 }
 
-function OverviewTab({
-  report,
-  overall,
-  topPlatform,
-}: {
-  report: ReportWithPosts
-  overall: ReportStats
-  topPlatform: PlatformBreakdown | null
-}) {
+function OverviewTab({ report, master }: { report: ReportWithPosts; master: MasterReportData }) {
   return (
     <>
       <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Overall reach" value={formatNumber(overall.totalReach)} />
-        <StatCard label="Overall views" value={formatNumber(overall.totalImpressions)} />
-        <StatCard label="Overall engagements" value={formatNumber(overall.totalEngagements)} />
-        <StatCard label="Best platform" value={topPlatform ? topPlatform.label : 'No data yet'} />
+        <StatCard label="Overall reach" value={formatNumber(master.totalReach)} />
+        <StatCard label="Overall views" value={formatNumber(master.totalViews)} />
+        <StatCard label="Overall engagements" value={formatNumber(master.totalEngagements)} />
+        <StatCard label="Best platform" value={master.bestPlatform ? master.bestPlatform.label : 'No data yet'} />
       </section>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
         <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">Best post overall</p>
-        {overall.bestPost ? (
+        {master.bestPostOverall ? (
           <div>
             <h2 className="text-lg font-semibold text-white leading-snug sm:text-xl">
-              {shortCaption(overall.bestPost.caption)}
+              {shortCaption(master.bestPostOverall.caption)}
             </h2>
             <p className="text-sm text-brand-primary mt-2">
-              {overall.bestPost.platform ? `${PLATFORM_LABELS[overall.bestPost.platform]} · ` : ''}
-              {formatDate(overall.bestPost.publish_time)}
+              {master.bestPostOverall.platform ? `${PLATFORM_LABELS[master.bestPostOverall.platform]} · ` : ''}
+              {formatDate(master.bestPostOverall.publish_time)}
             </p>
             <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-3">
-              <MiniMetric label="Reach" value={formatNumber(overall.bestPost.reach)} />
-              <MiniMetric label="Views" value={formatNumber(overall.bestPost.impressions)} />
-              <MiniMetric label="Engagements" value={formatNumber(overall.bestPost.engagements)} />
+              <MiniMetric label="Reach" value={formatNumber(master.bestPostOverall.reach)} />
+              <MiniMetric label="Views" value={formatNumber(master.bestPostOverall.impressions)} />
+              <MiniMetric label="Engagements" value={formatNumber(master.bestPostOverall.engagements)} />
             </div>
           </div>
         ) : (
@@ -127,41 +126,45 @@ function OverviewTab({
   )
 }
 
-function PlatformTab({ breakdown }: { breakdown: PlatformBreakdown }) {
-  if (!breakdown.hasData) {
+function PlatformTab({ view }: { view: PlatformView }) {
+  if (view.source === 'none') {
     return (
       <div className="bg-brand-surface border border-brand-muted rounded-xl p-6 sm:p-10">
-        <h2 className="text-lg font-semibold text-white mb-2">{breakdown.label}</h2>
+        <h2 className="text-lg font-semibold text-white mb-2">{view.label}</h2>
         <p className="text-sm text-brand-primary">No data uploaded yet.</p>
       </div>
     )
   }
 
-  const { stats } = breakdown
+  if (view.source === 'manual') {
+    return <ManualPlatformTab view={view} />
+  }
 
+  return <PostsPlatformTab view={view} />
+}
+
+function PostsPlatformTab({ view }: { view: PlatformView }) {
   return (
     <>
       <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Reach" value={formatNumber(stats.totalReach)} />
-        <StatCard label="Views" value={formatNumber(stats.totalImpressions)} />
-        <StatCard label="Engagements" value={formatNumber(stats.totalEngagements)} />
-        <StatCard label="Posts" value={formatNumber(stats.postCount)} />
+        <StatCard label="Reach" value={formatNumber(view.reach)} />
+        <StatCard label="Views" value={formatNumber(view.views)} />
+        <StatCard label="Engagements" value={formatNumber(view.engagements)} />
+        <StatCard label="Posts" value={formatNumber(view.postCount)} />
       </section>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
-        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">
-          Best {breakdown.label} post
-        </p>
-        {stats.bestPost ? (
+        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">Best {view.label} post</p>
+        {view.bestPost ? (
           <div>
             <h2 className="text-lg font-semibold text-white leading-snug sm:text-xl">
-              {shortCaption(stats.bestPost.caption)}
+              {shortCaption(view.bestPost.caption)}
             </h2>
-            <p className="text-sm text-brand-primary mt-2">{formatDate(stats.bestPost.publish_time)}</p>
+            <p className="text-sm text-brand-primary mt-2">{formatDate(view.bestPost.publish_time)}</p>
             <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-3">
-              <MiniMetric label="Reach" value={formatNumber(stats.bestPost.reach)} />
-              <MiniMetric label="Views" value={formatNumber(stats.bestPost.impressions)} />
-              <MiniMetric label="Engagements" value={formatNumber(stats.bestPost.engagements)} />
+              <MiniMetric label="Reach" value={formatNumber(view.bestPost.reach)} />
+              <MiniMetric label="Views" value={formatNumber(view.bestPost.impressions)} />
+              <MiniMetric label="Engagements" value={formatNumber(view.bestPost.engagements)} />
             </div>
           </div>
         ) : (
@@ -171,11 +174,11 @@ function PlatformTab({ breakdown }: { breakdown: PlatformBreakdown }) {
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 sm:p-6">
         <div className="flex flex-col gap-1 mb-5 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-base font-semibold text-white">Top {breakdown.label} posts</h2>
+          <h2 className="text-base font-semibold text-white">Top {view.label} posts</h2>
           <span className="text-sm text-brand-primary sm:text-xs">Ranked by engagement</span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {stats.topPosts.map((post, index) => (
+          {view.topPosts.map((post, index) => (
             <article key={post.id} className="bg-brand-bg/60 border border-brand-muted rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-brand-accent text-sm font-semibold">#{index + 1}</span>
@@ -188,6 +191,38 @@ function PlatformTab({ breakdown }: { breakdown: PlatformBreakdown }) {
             </article>
           ))}
         </div>
+      </section>
+    </>
+  )
+}
+
+function ManualPlatformTab({ view }: { view: PlatformView }) {
+  const manual = view.manual!
+  return (
+    <>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-brand-muted px-2.5 py-1 text-xs font-medium text-brand-primary">
+          {MANUAL_SOURCE_LABELS[manual.source_type]}
+        </span>
+      </div>
+
+      <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
+        <StatCard label="Reach" value={formatNumber(view.reach)} />
+        <StatCard label="Views" value={formatNumber(view.views)} />
+        <StatCard label="Engagements" value={formatNumber(view.engagements)} />
+        <StatCard label="Followers" value={formatNumber(manual.followers)} />
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-3">
+        <StatCard label="Accounts engaged" value={formatNumber(manual.accounts_engaged)} />
+        <StatCard label="Profile visits" value={formatNumber(manual.profile_visits)} />
+        <StatCard label="External link taps" value={formatNumber(manual.external_link_taps)} />
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <StrategyCard title="Top content" text={manual.top_content_notes} />
+        <StrategyCard title="Content type split" text={manual.content_type_split_notes} />
+        <StrategyCard title="General notes" text={manual.general_notes} />
       </section>
     </>
   )

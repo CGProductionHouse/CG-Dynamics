@@ -41,6 +41,9 @@ export default function AdminLayout() {
       <NavLink to="/admin/reports" className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Reports
       </NavLink>
+      <NavLink to="/admin/manual-metrics" className={navClass} onClick={() => setMobileMenuOpen(false)}>
+        Manual metrics
+      </NavLink>
       <NavLink to="/admin/published" className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Published / Client preview
       </NavLink>

@@ -9,6 +9,10 @@ import {
   type Report,
   type ReportWithPosts,
 } from '../../lib/db/reports'
+import {
+  listManualMetricsForClientMonth,
+  type ManualPlatformMetric,
+} from '../../lib/db/manualMetrics'
 import { formatReportPeriod } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from '../client/ClientReportView'
 
@@ -39,6 +43,7 @@ export default function PublishedPreview() {
   const [selectedClientId, setSelectedClientId] = useState('')
   const [selectedReportId, setSelectedReportId] = useState(initialReportId)
   const [report, setReport] = useState<ReportWithPosts | null>(null)
+  const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -92,9 +97,16 @@ export default function PublishedPreview() {
         const { data, error } = await getReportWithPosts(selectedReportId)
         if (error) {
           setError(error.message)
+          return
+        }
+        setReport(data)
+        setSearchParams({ reportId: selectedReportId }, { replace: true })
+        if (data) {
+          const month = data.period_start.slice(0, 7)
+          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, month)
+          setManualMetrics(metrics)
         } else {
-          setReport(data)
-          setSearchParams({ reportId: selectedReportId }, { replace: true })
+          setManualMetrics([])
         }
       } catch (error) {
         setError(errorMessage(error, 'Could not load this report preview.'))
@@ -228,7 +240,7 @@ export default function PublishedPreview() {
       ) : report ? (
         <div className="overflow-hidden rounded-xl border border-brand-muted">
           <ClientDashboardShell action={<span className="text-xs font-semibold text-brand-accent">Preview mode</span>}>
-            <ClientReportView report={report} />
+            <ClientReportView report={report} manualMetrics={manualMetrics} />
           </ClientDashboardShell>
         </div>
       ) : (
