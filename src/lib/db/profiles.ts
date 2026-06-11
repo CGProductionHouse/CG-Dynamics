@@ -4,6 +4,7 @@ import { withRequestTimeout } from './requestTimeout'
 export interface Profile {
   id: string
   full_name: string | null
+  email: string | null
   role: 'admin' | 'team' | 'client'
   client_id: string | null
   created_at: string

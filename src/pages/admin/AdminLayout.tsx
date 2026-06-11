@@ -25,6 +25,11 @@ export default function AdminLayout() {
           Users
         </NavLink>
       )}
+      {profile?.role === 'admin' && (
+        <NavLink to="/admin/invites" className={navClass} onClick={() => setMobileMenuOpen(false)}>
+          Invites
+        </NavLink>
+      )}
       <NavLink to="/admin/import" className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Import CSV
       </NavLink>

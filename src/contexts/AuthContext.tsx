@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { User, AuthError, PostgrestError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { getProfile, type Profile } from '../lib/db/profiles'
+import { claimInvite } from '../lib/db/invites'
 
 type AuthContextError = AuthError | PostgrestError | Error
 
@@ -26,6 +27,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const authRequestRef = useRef(0)
 
   async function fetchProfile(userId: string) {
+    // Auto-link any pending client invite for this account before we read
+    // the profile, so an invited user lands on their dashboard immediately.
+    // Safe no-op if there is no invite (or the phase-3f migration is unrun).
+    await claimInvite().catch(() => {})
     const { data, error } = await getProfile(userId)
     if (error) {
       return { profile: null, error }

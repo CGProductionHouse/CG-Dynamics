@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
 import { listProfiles, updateProfile, type Profile } from '../../lib/db/profiles'
 import { listClients, type Client } from '../../lib/db/clients'
@@ -11,6 +11,12 @@ function errorMessage(error: unknown, fallback: string) {
   return fallback
 }
 
+// A user is "pending setup" when they are a client with no linked client
+// record yet — exactly what an admin needs to act on.
+function isPending(profile: Profile) {
+  return profile.role === 'client' && !profile.client_id
+}
+
 export default function UsersAdmin() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [clients, setClients] = useState<Client[]>([])
@@ -21,6 +27,17 @@ export default function UsersAdmin() {
   useEffect(() => {
     void loadAll()
   }, [])
+
+  // Pending/unlinked users float to the top; otherwise newest first.
+  const sortedProfiles = useMemo(() => {
+    return [...profiles].sort((a, b) => {
+      const pendingDiff = Number(isPending(b)) - Number(isPending(a))
+      if (pendingDiff !== 0) return pendingDiff
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+  }, [profiles])
+
+  const pendingCount = useMemo(() => profiles.filter(isPending).length, [profiles])
 
   async function loadAll(options: { silent?: boolean } = {}): Promise<string | null> {
     if (!options.silent) {
@@ -88,13 +105,19 @@ export default function UsersAdmin() {
   }
 
   return (
-    <div className="w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+    <div className="w-full max-w-5xl p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-white">Users</h1>
+        {pendingCount > 0 && (
+          <span className="rounded-full bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
+            {pendingCount} pending setup
+          </span>
+        )}
       </div>
 
       <p className="text-xs text-brand-primary mb-5">
-        Users appear here after signing up. Assign roles and client links as needed.
+        Users appear here after signing up. Assign roles and link clients as needed. Pending users
+        with no linked client are highlighted and sorted to the top.
       </p>
 
       {loading ? (
@@ -104,34 +127,48 @@ export default function UsersAdmin() {
       ) : (
         <>
           <div className="space-y-3 md:hidden">
-            {profiles.length === 0 ? (
+            {sortedProfiles.length === 0 ? (
               <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-8 text-center text-sm text-brand-primary">
                 No users yet.
               </div>
             ) : (
-              profiles.map(p => (
-                <article key={p.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h2 className="text-base font-semibold text-white break-words">
-                        {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
-                      </h2>
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${roleBadge[p.role]}`}>
-                          {roleLabel[p.role]}
-                        </span>
-                        <span className="text-sm text-brand-primary break-all">{clientName(p.client_id)}</span>
+              sortedProfiles.map(p => {
+                const pending = isPending(p)
+                return (
+                  <article
+                    key={p.id}
+                    className={`rounded-xl border bg-brand-surface p-4 ${
+                      pending ? 'border-amber-400/40' : 'border-brand-muted'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h2 className="text-base font-semibold text-white break-words">
+                          {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
+                        </h2>
+                        <p className="mt-0.5 text-sm text-brand-primary break-all">{p.email ?? 'No email'}</p>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${roleBadge[p.role]}`}>
+                            {roleLabel[p.role]}
+                          </span>
+                          <StatusBadge pending={pending} />
+                          <span className="text-sm text-brand-primary break-all">{clientName(p.client_id)}</span>
+                        </div>
                       </div>
+                      <button
+                        onClick={() => setEditing(p)}
+                        className={`shrink-0 rounded-lg border px-3 py-2 text-sm ${
+                          pending
+                            ? 'border-amber-400/40 text-amber-300 hover:text-amber-200'
+                            : 'border-brand-muted text-brand-primary hover:text-brand-accent'
+                        }`}
+                      >
+                        {pending ? 'Link to client' : 'Edit'}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setEditing(p)}
-                      className="shrink-0 rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-brand-accent"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </article>
-              ))
+                  </article>
+                )
+              })
             )}
           </div>
 
@@ -140,45 +177,60 @@ export default function UsersAdmin() {
               <thead>
                 <tr className="border-b border-brand-muted text-left">
                   <th className="px-4 py-3 text-brand-primary font-medium">Name</th>
+                  <th className="px-4 py-3 text-brand-primary font-medium">Email</th>
                   <th className="px-4 py-3 text-brand-primary font-medium">Role</th>
                   <th className="px-4 py-3 text-brand-primary font-medium">Client</th>
+                  <th className="px-4 py-3 text-brand-primary font-medium">Status</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
-                {profiles.length === 0 ? (
+                {sortedProfiles.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-brand-primary">
+                    <td colSpan={6} className="px-4 py-8 text-center text-brand-primary">
                       No users yet.
                     </td>
                   </tr>
                 ) : (
-                  profiles.map(p => (
-                    <tr
-                      key={p.id}
-                      className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
-                    >
-                      <td className="px-4 py-3 text-white">
-                        {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${roleBadge[p.role]}`}
-                        >
-                          {roleLabel[p.role]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-brand-primary">{clientName(p.client_id)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => setEditing(p)}
-                          className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  sortedProfiles.map(p => {
+                    const pending = isPending(p)
+                    return (
+                      <tr
+                        key={p.id}
+                        className={`border-b border-brand-muted last:border-0 transition-colors ${
+                          pending ? 'bg-amber-400/[0.06] hover:bg-amber-400/10' : 'hover:bg-brand-muted/20'
+                        }`}
+                      >
+                        <td className="px-4 py-3 text-white">
+                          {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
+                        </td>
+                        <td className="px-4 py-3 text-brand-primary break-all">{p.email ?? '-'}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${roleBadge[p.role]}`}
+                          >
+                            {roleLabel[p.role]}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-brand-primary">{clientName(p.client_id)}</td>
+                        <td className="px-4 py-3">
+                          <StatusBadge pending={pending} />
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => setEditing(p)}
+                            className={`text-xs transition-colors ${
+                              pending
+                                ? 'text-amber-300 hover:text-amber-200 font-medium'
+                                : 'text-brand-primary hover:text-brand-accent'
+                            }`}
+                          >
+                            {pending ? 'Link to client' : 'Edit'}
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
@@ -195,6 +247,21 @@ export default function UsersAdmin() {
         />
       )}
     </div>
+  )
+}
+
+function StatusBadge({ pending }: { pending: boolean }) {
+  if (pending) {
+    return (
+      <span className="inline-block rounded-full bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-300">
+        Pending setup
+      </span>
+    )
+  }
+  return (
+    <span className="inline-block rounded-full bg-brand-muted px-2 py-0.5 text-xs font-medium text-brand-primary">
+      Active
+    </span>
   )
 }
 
@@ -262,7 +329,8 @@ function UserEditModal({
       onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}
     >
       <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-sm overflow-y-auto rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] sm:p-6">
-        <h2 className="text-base font-semibold text-white mb-5">Edit user</h2>
+        <h2 className="text-base font-semibold text-white mb-1">Edit user</h2>
+        <p className="mb-5 text-xs text-brand-primary break-all">{profile.email ?? 'No email on file'}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

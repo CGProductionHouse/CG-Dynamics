@@ -10,6 +10,7 @@ import Signup from './pages/Signup'
 import AdminLayout from './pages/admin/AdminLayout'
 import ClientsList from './pages/admin/ClientsList'
 import UsersAdmin from './pages/admin/UsersAdmin'
+import InvitesAdmin from './pages/admin/InvitesAdmin'
 import ImportMetaCsv from './pages/admin/ImportMetaCsv'
 import ImportsManagement from './pages/admin/ImportsManagement'
 import NewReport from './pages/admin/NewReport'
@@ -59,6 +60,7 @@ export default function App() {
               {/* Admin-only routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>
                 <Route path="/admin/users" element={<UsersAdmin />} />
+                <Route path="/admin/invites" element={<InvitesAdmin />} />
               </Route>
             </Route>
           </Route>
