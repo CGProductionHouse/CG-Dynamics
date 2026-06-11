@@ -11,6 +11,7 @@ interface ParsedMetaRow {
   rowNumber: number
   metaPostId: string | null
   pageName: string | null
+  accountUsername: string | null
   publishTime: string | null
   caption: string | null
   description: string | null
@@ -26,6 +27,8 @@ interface ParsedMetaRow {
   videoViews: number
   raw: Record<string, string>
 }
+
+type MetaExportType = 'facebook' | 'instagram'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -113,11 +116,32 @@ function dateValue(row: Record<string, string>) {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString()
 }
 
-function normalizeRows(rows: Record<string, string>[]): ParsedMetaRow[] {
+function detectMetaExportType(rows: Record<string, string>[]): MetaExportType {
+  const firstRow = rows[0] ?? {}
+  const normalizedHeaders = new Set(
+    Object.keys(firstRow).map(header => header.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  )
+  const hasInstagramHeaders =
+    normalizedHeaders.has('accountusername') &&
+    normalizedHeaders.has('likes') &&
+    normalizedHeaders.has('saves')
+  const hasInstagramPostType = rows.some(row => {
+    const postType = getValue(row, ['Post type']).toLowerCase()
+    return ['ig image', 'ig carousel', 'ig reel'].includes(postType)
+  })
+
+  return hasInstagramHeaders && hasInstagramPostType ? 'instagram' : 'facebook'
+}
+
+function normalizeRows(rows: Record<string, string>[], exportType = detectMetaExportType(rows)): ParsedMetaRow[] {
   const normalizedRows = rows.map((row, index) => {
-    const reactions = numberValue(row, ['Reactions', 'Likes', 'Lifetime post total reactions'])
+    const likes = numberValue(row, ['Likes'])
+    const reactions = exportType === 'instagram'
+      ? likes
+      : numberValue(row, ['Reactions', 'Likes', 'Lifetime post total reactions'])
     const comments = numberValue(row, ['Comments', 'Lifetime post comments'])
     const shares = numberValue(row, ['Shares', 'Lifetime post shares'])
+    const saves = numberValue(row, ['Saves'])
     const explicitEngagements = numberValue(row, [
       'Reactions, Comments and Shares',
       'Engagements',
@@ -127,31 +151,31 @@ function normalizeRows(rows: Record<string, string>[]): ParsedMetaRow[] {
     const description = getValue(row, ['Description'])
     const clicks = numberValue(row, ['Post clicks', 'Clicks', 'Total clicks', 'Lifetime post clicks'])
     const metaPostId = getValue(row, ['Post ID']) || null
-    const pageName = getValue(row, ['Page name']) || null
+    const pageName = getValue(row, exportType === 'instagram' ? ['Account name'] : ['Page name']) || null
+    const accountUsername = getValue(row, ['Account username']) || null
+    const caption = exportType === 'instagram' ? description : title
 
     return {
       rowNumber: index + 1,
       metaPostId,
       pageName,
+      accountUsername,
       publishTime: dateValue(row),
-      caption: title || null,
+      caption: caption || null,
       description: description || null,
       permalink: getValue(row, ['Permalink', 'Post permalink', 'URL', 'Link']) || null,
       postType: getValue(row, ['Post type']) || null,
       reach: numberValue(row, ['Reach', 'Lifetime post reach', 'Post reach']),
       views: numberValue(row, ['Views', 'Post views', 'Lifetime post views']),
-      engagements: explicitEngagements || reactions + comments + shares,
+      engagements: exportType === 'instagram'
+        ? likes + comments + shares + saves
+        : explicitEngagements || reactions + comments + shares,
       reactions,
       comments,
       shares,
       clicks,
       videoViews: numberValue(row, ['Video views', '3-second video views']),
-      raw: {
-        ...row,
-        external_post_id: metaPostId ?? '',
-        page_name: pageName ?? '',
-        description,
-      },
+      raw: row,
     }
   })
 
@@ -215,11 +239,14 @@ export default function ImportMetaCsv() {
 
     try {
       const text = await file.text()
-      const parsed = normalizeRows(parseCsv(text))
+      const csvRows = parseCsv(text)
+      const exportType = detectMetaExportType(csvRows)
+      const parsed = normalizeRows(csvRows, exportType)
       if (parsed.length === 0) {
         setError('No rows were found in this CSV.')
         return
       }
+      setPlatform(exportType)
       const detectedPeriod = detectReportPeriod(
         parsed.map(row => row.publishTime),
         file.name
