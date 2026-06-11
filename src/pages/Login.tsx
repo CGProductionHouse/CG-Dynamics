@@ -14,12 +14,12 @@ export default function Login() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const { error } = await signIn(email, password)
+    const { error, role } = await signIn(email, password)
     setLoading(false)
     if (error) {
       setError(error.message)
     } else {
-      navigate('/')
+      navigate(role === 'client' ? '/dashboard' : '/admin')
     }
   }
 
