@@ -1,4 +1,5 @@
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect } from 'react'
+import type { FormEvent } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   listClients,
@@ -6,6 +7,26 @@ import {
   updateClient,
   type Client,
 } from '../../lib/db/clients'
+
+function errorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) return error.message
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message)
+  }
+  return fallback
+}
+
+function sortClients(clients: Client[]) {
+  return [...clients].sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function upsertClient(clients: Client[], client: Client) {
+  const exists = clients.some(c => c.id === client.id)
+  const nextClients = exists
+    ? clients.map(c => c.id === client.id ? client : c)
+    : [...clients, client]
+  return sortClients(nextClients)
+}
 
 export default function ClientsList() {
   const { profile } = useAuth()
@@ -17,31 +38,61 @@ export default function ClientsList() {
   const [modal, setModal] = useState<{ open: boolean; client?: Client }>({ open: false })
 
   useEffect(() => {
-    load()
+    void load()
   }, [])
 
-  async function load() {
-    setLoading(true)
-    const { data, error } = await listClients()
-    if (error) setError(error.message)
-    else setClients(data)
-    setLoading(false)
+  async function load(options: { silent?: boolean } = {}): Promise<string | null> {
+    if (!options.silent) {
+      setLoading(true)
+      setError(null)
+    }
+    try {
+      const { data, error } = await listClients()
+      if (error) {
+        const message = error.message
+        setError(message)
+        return message
+      }
+      setClients(data)
+      setError(null)
+      return null
+    } catch (error) {
+      const message = errorMessage(error, 'Could not load clients.')
+      setError(message)
+      return message
+    } finally {
+      if (!options.silent) setLoading(false)
+    }
   }
 
   async function handleSave(
     input: { name: string; tier: 'standard' | 'premium'; active: boolean }
   ): Promise<string | null> {
-    const existing = modal.client
-    if (existing) {
-      const { error } = await updateClient(existing.id, input)
-      if (error) return error.message
-    } else {
-      const { error } = await createClient({ name: input.name, tier: input.tier })
-      if (error) return error.message
+    try {
+      const existing = modal.client
+      if (existing) {
+        const { data, error } = await updateClient(existing.id, input)
+        if (error) return error.message
+        if (data) setClients(current => upsertClient(current, data))
+      } else {
+        const { data, error } = await createClient({
+          name: input.name,
+          tier: input.tier,
+          active: input.active,
+        })
+        if (error) return error.message
+        if (data) setClients(current => upsertClient(current, data))
+      }
+
+      void load({ silent: true }).then(refreshError => {
+        if (refreshError) {
+          setError(`Saved, but could not refresh the clients list: ${refreshError}`)
+        }
+      })
+      return null
+    } catch (error) {
+      return errorMessage(error, 'Could not save client.')
     }
-    setModal({ open: false })
-    load()
-    return null
   }
 
   return (
@@ -59,7 +110,7 @@ export default function ClientsList() {
       </div>
 
       {loading ? (
-        <p className="text-brand-primary text-sm">Loading…</p>
+        <p className="text-brand-primary text-sm">Loading...</p>
       ) : error ? (
         <p className="text-red-400 text-sm">{error}</p>
       ) : (
@@ -151,17 +202,35 @@ function ClientModal({
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!name.trim()) return
+    if (saving) return
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setError('Client name is required.')
+      return
+    }
+
     setSaving(true)
-    const err = await onSave({ name: name.trim(), tier, active })
-    setSaving(false)
-    if (err) setError(err)
+    setError(null)
+    let saved = false
+    try {
+      const err = await onSave({ name: trimmedName, tier, active })
+      if (err) {
+        setError(err)
+        return
+      }
+      saved = true
+      onClose()
+    } catch (error) {
+      setError(errorMessage(error, 'Could not save client.'))
+    } finally {
+      if (!saved) setSaving(false)
+    }
   }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}
     >
       <div className="bg-brand-surface border border-brand-muted rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(0,0,0,0.5)]">
         <h2 className="text-base font-semibold text-white mb-5">
@@ -219,6 +288,7 @@ function ClientModal({
             <button
               type="button"
               onClick={onClose}
+              disabled={saving}
               className="flex-1 border border-brand-muted text-brand-primary py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition"
             >
               Cancel
@@ -228,7 +298,7 @@ function ClientModal({
               disabled={saving}
               className="flex-1 bg-brand-accent text-brand-bg font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

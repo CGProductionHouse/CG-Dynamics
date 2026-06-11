@@ -10,12 +10,23 @@ import Signup from './pages/Signup'
 import AdminLayout from './pages/admin/AdminLayout'
 import ClientsList from './pages/admin/ClientsList'
 import UsersAdmin from './pages/admin/UsersAdmin'
+import ImportMetaCsv from './pages/admin/ImportMetaCsv'
+import NewReport from './pages/admin/NewReport'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, profileError, loading } = useAuth()
   if (loading) return <div className="min-h-screen bg-brand-bg" />
   if (!user) return <Navigate to="/login" replace />
+  if (profileError) {
+    return (
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6">
+        <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
+          Could not load your profile: {profileError}
+        </p>
+      </div>
+    )
+  }
   if (!profile) return <div className="min-h-screen bg-brand-bg" />
   if (profile.role === 'client') return <Navigate to="/dashboard" replace />
   return <Navigate to="/admin" replace />
@@ -35,6 +46,8 @@ export default function App() {
           <Route element={<RequireStaff />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<ClientsList />} />
+              <Route path="/admin/import" element={<ImportMetaCsv />} />
+              <Route path="/admin/reports/new" element={<NewReport />} />
 
               {/* Admin-only routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>

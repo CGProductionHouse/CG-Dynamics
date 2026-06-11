@@ -24,6 +24,12 @@ export default function AdminLayout() {
           <NavLink to="/admin" end className={navClass}>
             Clients
           </NavLink>
+          <NavLink to="/admin/import" className={navClass}>
+            Import CSV
+          </NavLink>
+          <NavLink to="/admin/reports/new" className={navClass}>
+            New report
+          </NavLink>
           {profile?.role === 'admin' && (
             <NavLink to="/admin/users" className={navClass}>
               Users

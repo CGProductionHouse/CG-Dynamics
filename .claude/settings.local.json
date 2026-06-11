@@ -4,10 +4,14 @@
       "PowerShell(node --version)",
       "PowerShell(npm --version)",
       "Bash(npm run *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ],
     "additionalDirectories": [
-      "c:\\Users\\chris\\.claude\\projects\\c--Users-chris-OneDrive---CG-Production-House-Desktop-CG-Dynamics\\memory"
+      "c:\\Users\\chris\\.claude\\projects\\c--Users-chris-OneDrive---CG-Production-House-Desktop-CG-Dynamics\\memory",
+      "c:\\Projects\\CG-Dynamics"
     ]
   }
 }

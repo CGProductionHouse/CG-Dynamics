@@ -1,6 +1,15 @@
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect } from 'react'
+import type { FormEvent } from 'react'
 import { listProfiles, updateProfile, type Profile } from '../../lib/db/profiles'
 import { listClients, type Client } from '../../lib/db/clients'
+
+function errorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) return error.message
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message)
+  }
+  return fallback
+}
 
 export default function UsersAdmin() {
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -10,32 +19,59 @@ export default function UsersAdmin() {
   const [editing, setEditing] = useState<Profile | null>(null)
 
   useEffect(() => {
-    loadAll()
+    void loadAll()
   }, [])
 
-  async function loadAll() {
-    setLoading(true)
-    const [profilesRes, clientsRes] = await Promise.all([listProfiles(), listClients()])
-    if (profilesRes.error) setError(profilesRes.error.message)
-    else setProfiles(profilesRes.data)
-    if (clientsRes.error) setError(clientsRes.error.message)
-    else setClients(clientsRes.data)
-    setLoading(false)
+  async function loadAll(options: { silent?: boolean } = {}): Promise<string | null> {
+    if (!options.silent) {
+      setLoading(true)
+      setError(null)
+    }
+    try {
+      const [profilesRes, clientsRes] = await Promise.all([listProfiles(), listClients()])
+      const loadError = profilesRes.error ?? clientsRes.error
+      if (loadError) {
+        const message = loadError.message
+        setError(message)
+        return message
+      }
+      setProfiles(profilesRes.data)
+      setClients(clientsRes.data)
+      setError(null)
+      return null
+    } catch (error) {
+      const message = errorMessage(error, 'Could not load users.')
+      setError(message)
+      return message
+    } finally {
+      if (!options.silent) setLoading(false)
+    }
   }
 
   async function handleSave(
     userId: string,
-    updates: { role: Profile['role']; client_id: string | null; full_name: string }
+    updates: { role: Profile['role']; client_id: string | null; full_name: string | null }
   ): Promise<string | null> {
-    const { error } = await updateProfile(userId, updates)
-    if (error) return error.message
-    setEditing(null)
-    loadAll()
-    return null
+    try {
+      const { data, error } = await updateProfile(userId, updates)
+      if (error) return error.message
+      if (data) {
+        setProfiles(current => current.map(profile => profile.id === data.id ? data : profile))
+      }
+
+      void loadAll({ silent: true }).then(refreshError => {
+        if (refreshError) {
+          setError(`Saved, but could not refresh the users list: ${refreshError}`)
+        }
+      })
+      return null
+    } catch (error) {
+      return errorMessage(error, 'Could not save user.')
+    }
   }
 
   function clientName(clientId: string | null) {
-    if (!clientId) return '—'
+    if (!clientId) return '-'
     return clients.find(c => c.id === clientId)?.name ?? clientId.slice(0, 8)
   }
 
@@ -62,7 +98,7 @@ export default function UsersAdmin() {
       </p>
 
       {loading ? (
-        <p className="text-brand-primary text-sm">Loading…</p>
+        <p className="text-brand-primary text-sm">Loading...</p>
       ) : error ? (
         <p className="text-red-400 text-sm">{error}</p>
       ) : (
@@ -140,7 +176,7 @@ function UserEditModal({
   clients: Client[]
   onSave: (
     userId: string,
-    updates: { role: Profile['role']; client_id: string | null; full_name: string }
+    updates: { role: Profile['role']; client_id: string | null; full_name: string | null }
   ) => Promise<string | null>
   onClose: () => void
 }) {
@@ -149,23 +185,47 @@ function UserEditModal({
   const [clientId, setClientId] = useState<string>(profile.client_id ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const clientOptions = clients.filter(c => c.active || c.id === clientId)
+
+  function handleRoleChange(nextRole: Profile['role']) {
+    setRole(nextRole)
+    if (nextRole !== 'client') setClientId('')
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (saving) return
+    if (role === 'client' && !clientId) {
+      setError('Select a client for client-role users.')
+      return
+    }
+
     setSaving(true)
-    const err = await onSave(profile.id, {
-      full_name: fullName.trim() || profile.full_name ?? '',
-      role,
-      client_id: clientId || null,
-    })
-    setSaving(false)
-    if (err) setError(err)
+    setError(null)
+    let saved = false
+    try {
+      const err = await onSave(profile.id, {
+        full_name: fullName.trim() || null,
+        role,
+        client_id: role === 'client' ? clientId : null,
+      })
+      if (err) {
+        setError(err)
+        return
+      }
+      saved = true
+      onClose()
+    } catch (error) {
+      setError(errorMessage(error, 'Could not save user.'))
+    } finally {
+      if (!saved) setSaving(false)
+    }
   }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}
     >
       <div className="bg-brand-surface border border-brand-muted rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(0,0,0,0.5)]">
         <h2 className="text-base font-semibold text-white mb-5">Edit user</h2>
@@ -188,7 +248,7 @@ function UserEditModal({
             <label className="block text-sm font-medium text-brand-accent mb-1.5">Role</label>
             <select
               value={role}
-              onChange={e => setRole(e.target.value as Profile['role'])}
+              onChange={e => handleRoleChange(e.target.value as Profile['role'])}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition"
             >
               <option value="client">Client</option>
@@ -204,11 +264,14 @@ function UserEditModal({
             <select
               value={clientId}
               onChange={e => setClientId(e.target.value)}
+              disabled={role !== 'client'}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition"
             >
-              <option value="">— None —</option>
-              {clients.filter(c => c.active).map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+              <option value="">None</option>
+              {clientOptions.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.active ? c.name : `${c.name} (inactive)`}
+                </option>
               ))}
             </select>
             <p className="mt-1 text-xs text-brand-primary">Only set for client-role users.</p>
@@ -224,6 +287,7 @@ function UserEditModal({
             <button
               type="button"
               onClick={onClose}
+              disabled={saving}
               className="flex-1 border border-brand-muted text-brand-primary py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition"
             >
               Cancel
@@ -233,7 +297,7 @@ function UserEditModal({
               disabled={saving}
               className="flex-1 bg-brand-accent text-brand-bg font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

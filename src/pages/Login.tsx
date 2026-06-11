@@ -1,4 +1,5 @@
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -18,6 +19,8 @@ export default function Login() {
     setLoading(false)
     if (error) {
       setError(error.message)
+    } else if (!role) {
+      setError('Could not load your profile after sign in.')
     } else {
       navigate(role === 'client' ? '/dashboard' : '/admin')
     }
