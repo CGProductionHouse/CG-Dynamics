@@ -9,7 +9,6 @@ import {
   type ReportWithPosts,
 } from '../../lib/db/reports'
 import { formatReportPeriod } from '../../lib/reportPeriod'
-import { calculateReportStats, reportPostToStatsPost } from '../../lib/reportStats'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from '../client/ClientReportView'
 
 function errorMessage(error: unknown, fallback: string) {
@@ -46,9 +45,6 @@ export default function PublishedPreview() {
   const clientReports = useMemo(() => {
     return reports.filter(report => report.client_id === selectedClientId)
   }, [reports, selectedClientId])
-  const statsPosts = useMemo(() => report?.posts.map(reportPostToStatsPost) ?? [], [report])
-  const stats = useMemo(() => calculateReportStats(statsPosts), [statsPosts])
-
   useEffect(() => {
     async function loadOptions() {
       setLoading(true)
@@ -225,7 +221,7 @@ export default function PublishedPreview() {
       ) : report ? (
         <div className="overflow-hidden rounded-xl border border-brand-muted">
           <ClientDashboardShell action={<span className="text-xs font-semibold text-brand-accent">Preview mode</span>}>
-            <ClientReportView report={report} stats={stats} />
+            <ClientReportView report={report} />
           </ClientDashboardShell>
         </div>
       ) : (

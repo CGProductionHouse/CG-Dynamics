@@ -171,7 +171,7 @@ export default function ReportsManagement() {
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-brand-primary">{monthLabel(report)} | {periodLabel(report)}</p>
-                    <p className="mt-1 text-xs text-brand-primary">{report.platform}</p>
+                    <p className="mt-1 text-xs text-brand-primary">Monthly master report</p>
                   </div>
 
                   <dl className="grid gap-3 sm:grid-cols-2">

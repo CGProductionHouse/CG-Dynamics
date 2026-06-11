@@ -3,10 +3,14 @@ import type { ImportedMetaPost } from './importedMetaPosts'
 
 export type ReportStatus = 'draft' | 'published'
 
+export type Platform = 'facebook' | 'instagram' | 'tiktok'
+
 export interface Report {
   id: string
   client_id: string
-  platform: 'facebook' | 'instagram' | 'tiktok'
+  // Master monthly reports are not tied to a single platform (null).
+  // Legacy per-platform reports may still carry a platform value.
+  platform: Platform | null
   period_start: string
   period_end: string
   status: ReportStatus
@@ -28,6 +32,7 @@ export interface ReportPost {
   id: string
   report_id: string
   meta_post_id: string | null
+  platform: Platform | null
   publish_time: string | null
   meta_post_type: string | null
   caption: string | null
@@ -49,7 +54,6 @@ export interface ReportWithPosts extends Report {
 export interface ReportInput {
   id?: string
   client_id: string
-  platform: 'facebook' | 'instagram' | 'tiktok'
   period_start: string
   period_end: string
   status: ReportStatus
@@ -68,7 +72,8 @@ export interface ReportInput {
 function reportPayload(input: ReportInput) {
   return {
     client_id: input.client_id,
-    platform: input.platform,
+    // Master monthly report: not tied to a single platform.
+    platform: null,
     period_start: input.period_start,
     period_end: input.period_end,
     status: input.status,
@@ -106,6 +111,7 @@ export async function saveReport(input: ReportInput) {
     const posts = input.importedPosts.map(post => ({
       report_id: report.id,
       meta_post_id: post.meta_post_id,
+      platform: post.platform,
       publish_time: post.publish_time,
       meta_post_type: post.post_type,
       caption: post.caption,
@@ -193,6 +199,18 @@ export async function deleteReport(reportId: string) {
     .eq('id', reportId)
 
   return { error }
+}
+
+export async function listPublishedReportsForClient(clientId: string) {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('client_id', clientId)
+    .eq('status', 'published')
+    .order('period_start', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  return { data: (data ?? []) as Report[], error }
 }
 
 export async function getLatestPublishedReportForClient(clientId: string) {

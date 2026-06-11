@@ -7,14 +7,13 @@ import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/impor
 import { getReportWithPosts, saveReport, type ReportStatus } from '../../lib/db/reports'
 import { detectReportPeriod, formatReportPeriod } from '../../lib/reportPeriod'
 import {
+  calculatePlatformBreakdowns,
   calculateReportStats,
   formatDate,
   formatNumber,
   importedToStatsPost,
   shortCaption,
 } from '../../lib/reportStats'
-
-type Platform = 'facebook' | 'instagram' | 'tiktok'
 
 interface ReportFields {
   reportTitle: string
@@ -78,7 +77,6 @@ export default function NewReport() {
   const { profile } = useAuth()
   const [clients, setClients] = useState<Client[]>([])
   const [clientId, setClientId] = useState('')
-  const [platform, setPlatform] = useState<Platform>('facebook')
   const [periodStart, setPeriodStart] = useState(monthStartInputValue())
   const [periodEnd, setPeriodEnd] = useState(todayInputValue())
   const [periodSource, setPeriodSource] = useState<'publish_time' | 'filename' | null>(null)
@@ -141,7 +139,6 @@ export default function NewReport() {
 
         setSavedReportId(data.id)
         setClientId(data.client_id)
-        setPlatform(data.platform)
         setPeriodStart(data.period_start)
         setPeriodEnd(data.period_end)
         setPeriodSource(null)
@@ -179,19 +176,20 @@ export default function NewReport() {
         if (error) {
           setError(error.message)
         } else {
-          const platformPosts = data
-            .filter(post => post.platform === platform)
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          const latestBatchId = platformPosts[0]?.import_batch_id ?? null
+          // Master report: combine every platform imported for this client.
+          const clientPosts = [...data].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )
+          const latestBatchId = clientPosts[0]?.import_batch_id ?? null
           const latestBatchPosts = latestBatchId
-            ? platformPosts.filter(post => post.import_batch_id === latestBatchId)
-            : platformPosts
+            ? clientPosts.filter(post => post.import_batch_id === latestBatchId)
+            : clientPosts
           const detectedPeriod = detectReportPeriod(
             latestBatchPosts.map(post => post.publish_time),
             latestBatchPosts[0]?.source_file_name
           )
 
-          setImportedPosts(platformPosts)
+          setImportedPosts(clientPosts)
           if (detectedPeriod) {
             setPeriodStart(detectedPeriod.start)
             setPeriodEnd(detectedPeriod.end)
@@ -210,7 +208,7 @@ export default function NewReport() {
     }
 
     void loadImportedPosts()
-  }, [clientId, platform])
+  }, [clientId])
 
   const selectedClient = clients.find(client => client.id === clientId)
   const periodImportedPosts = useMemo(() => {
@@ -232,6 +230,7 @@ export default function NewReport() {
   }, [importedPosts, periodBatchId, periodEnd, periodSource, periodStart])
   const statsPosts = useMemo(() => periodImportedPosts.map(importedToStatsPost), [periodImportedPosts])
   const stats = useMemo(() => calculateReportStats(statsPosts), [statsPosts])
+  const breakdowns = useMemo(() => calculatePlatformBreakdowns(statsPosts), [statsPosts])
   const statsText = [
     `Total reach: ${formatNumber(stats.totalReach)}`,
     `Views: ${formatNumber(stats.totalImpressions)}`,
@@ -290,11 +289,10 @@ export default function NewReport() {
       const { data, error } = await saveReport({
         id: savedReportId ?? undefined,
         client_id: clientId,
-        platform,
         period_start: periodStart,
         period_end: periodEnd,
         status,
-        report_title: fields.reportTitle || `${selectedClient?.name ?? 'Client'} Meta Performance Report`,
+        report_title: fields.reportTitle || `${selectedClient?.name ?? 'Client'} Monthly Report`,
         previous_month_strategy: fields.previousMonthStrategy,
         previous_month_reflection: fields.previousMonthReflection,
         performance_comments: fields.performanceComments,
@@ -327,10 +325,10 @@ export default function NewReport() {
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Report builder</p>
           <h1 className="text-2xl font-semibold text-white sm:text-3xl">
-            {savedReportId ? 'Edit Meta performance report' : 'Create Meta performance report'}
+            {savedReportId ? 'Edit monthly master report' : 'Create monthly master report'}
           </h1>
           <p className="text-sm text-brand-primary mt-2 max-w-2xl">
-            Build a client-ready report from imported Meta data, then add the strategy commentary manually.
+            Combine every platform imported for this client and month into one master dashboard, then add the strategy commentary manually.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -363,7 +361,7 @@ export default function NewReport() {
             )}
           </p>
         )}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Client">
             <select
               value={clientId}
@@ -379,22 +377,6 @@ export default function NewReport() {
               {clients.map(client => (
                 <option key={client.id} value={client.id}>{client.name}</option>
               ))}
-            </select>
-          </Field>
-          <Field label="Platform">
-            <select
-              value={platform}
-              onChange={event => {
-                setPlatform(event.target.value as Platform)
-                setSavedReportId(null)
-                setPeriodSource(null)
-                setPeriodBatchId(null)
-              }}
-              className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
-            >
-              <option value="facebook">Facebook</option>
-              <option value="instagram">Instagram</option>
-              <option value="tiktok">TikTok</option>
             </select>
           </Field>
           <Field label="Start date">
@@ -445,6 +427,27 @@ export default function NewReport() {
         <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
       </div>
 
+      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
+        <h2 className="text-sm font-semibold text-white mb-4">Platform breakdown</h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {breakdowns.map(breakdown => (
+            <div key={breakdown.platform} className="border border-brand-muted rounded-lg p-3 bg-brand-bg/50">
+              <p className="text-sm font-semibold text-white">{breakdown.label}</p>
+              {breakdown.hasData ? (
+                <dl className="mt-2 space-y-1 text-xs text-brand-primary">
+                  <div className="flex justify-between"><dt>Reach</dt><dd className="text-white">{formatNumber(breakdown.stats.totalReach)}</dd></div>
+                  <div className="flex justify-between"><dt>Views</dt><dd className="text-white">{formatNumber(breakdown.stats.totalImpressions)}</dd></div>
+                  <div className="flex justify-between"><dt>Engagements</dt><dd className="text-white">{formatNumber(breakdown.stats.totalEngagements)}</dd></div>
+                  <div className="flex justify-between"><dt>Posts</dt><dd className="text-white">{formatNumber(breakdown.stats.postCount)}</dd></div>
+                </dl>
+              ) : (
+                <p className="mt-2 text-xs text-brand-primary">No data uploaded yet.</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="space-y-5">
           <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
@@ -454,7 +457,7 @@ export default function NewReport() {
                 label="Report title"
                 value={fields.reportTitle}
                 onChange={value => updateField('reportTitle', value)}
-                placeholder={`${selectedClient?.name ?? 'Client'} Meta Performance Report`}
+                placeholder={`${selectedClient?.name ?? 'Client'} Monthly Report`}
               />
               <TextArea label="Previous month strategy" value={fields.previousMonthStrategy} onChange={value => updateField('previousMonthStrategy', value)} />
               <TextArea label="Previous month reflection" value={fields.previousMonthReflection} onChange={value => updateField('previousMonthReflection', value)} />

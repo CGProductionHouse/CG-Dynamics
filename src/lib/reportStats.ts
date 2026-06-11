@@ -1,6 +1,16 @@
 import type { ImportedMetaPost } from './db/importedMetaPosts'
 import type { ReportPost } from './db/reports'
 
+export type Platform = 'facebook' | 'instagram' | 'tiktok'
+
+export const PLATFORMS: Platform[] = ['facebook', 'instagram', 'tiktok']
+
+export const PLATFORM_LABELS: Record<Platform, string> = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+}
+
 export interface ReportStatsPost {
   id: string
   caption: string | null
@@ -10,6 +20,7 @@ export interface ReportStatsPost {
   impressions: number
   engagements: number
   post_type: string | null
+  platform: Platform | null
 }
 
 export interface ReportStats {
@@ -32,6 +43,7 @@ export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
     impressions: post.impressions,
     engagements: post.engagements,
     post_type: post.post_type,
+    platform: post.platform,
   }
 }
 
@@ -52,6 +64,7 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
     impressions: raw.views ?? raw.impressions ?? post.views,
     engagements: raw.engagements ?? post.reactions + post.comments + post.shares + post.total_clicks,
     post_type: post.meta_post_type,
+    platform: post.platform,
   }
 }
 
@@ -68,6 +81,38 @@ export function calculateReportStats(posts: ReportStatsPost[]): ReportStats {
     worstPost: worstSorted[0] ?? null,
     topPosts: sorted.slice(0, 5),
   }
+}
+
+export interface PlatformBreakdown {
+  platform: Platform
+  label: string
+  stats: ReportStats
+  hasData: boolean
+}
+
+export function calculatePlatformBreakdowns(posts: ReportStatsPost[]): PlatformBreakdown[] {
+  return PLATFORMS.map(platform => {
+    const platformPosts = posts.filter(post => post.platform === platform)
+    return {
+      platform,
+      label: PLATFORM_LABELS[platform],
+      stats: calculateReportStats(platformPosts),
+      hasData: platformPosts.length > 0,
+    }
+  })
+}
+
+// Best platform is ranked by reach first, then engagements as a tie-breaker.
+export function bestPlatform(breakdowns: PlatformBreakdown[]): PlatformBreakdown | null {
+  const withData = breakdowns.filter(breakdown => breakdown.hasData)
+  if (withData.length === 0) return null
+
+  return [...withData].sort((a, b) => {
+    if (b.stats.totalReach !== a.stats.totalReach) {
+      return b.stats.totalReach - a.stats.totalReach
+    }
+    return b.stats.totalEngagements - a.stats.totalEngagements
+  })[0]
 }
 
 export function formatNumber(value: number) {
