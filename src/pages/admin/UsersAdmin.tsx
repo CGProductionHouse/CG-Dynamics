@@ -152,7 +152,9 @@ export default function UsersAdmin() {
                             {roleLabel[p.role]}
                           </span>
                           <StatusBadge pending={pending} />
-                          <span className="text-sm text-brand-primary break-all">{clientName(p.client_id)}</span>
+                          <span className="text-sm text-brand-primary break-all">
+                            {p.role === 'team' ? 'All clients' : clientName(p.client_id)}
+                          </span>
                         </div>
                       </div>
                       <button
@@ -212,7 +214,9 @@ export default function UsersAdmin() {
                             {roleLabel[p.role]}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-brand-primary">{clientName(p.client_id)}</td>
+                        <td className="px-4 py-3 text-brand-primary">
+                          {p.role === 'team' ? 'All clients' : clientName(p.client_id)}
+                        </td>
                         <td className="px-4 py-3">
                           <StatusBadge pending={pending} />
                         </td>

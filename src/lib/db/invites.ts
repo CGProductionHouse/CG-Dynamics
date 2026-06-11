@@ -7,7 +7,7 @@ export type InviteRole = 'admin' | 'team' | 'client'
 export interface ClientInvite {
   id: string
   email: string
-  client_id: string
+  client_id: string | null
   role: InviteRole
   status: InviteStatus
   created_by: string | null
@@ -29,7 +29,7 @@ export async function listInvites() {
 
 export async function createInvite(input: {
   email: string
-  client_id: string
+  client_id: string | null
   role: InviteRole
   created_by: string | null
 }) {
@@ -38,7 +38,8 @@ export async function createInvite(input: {
       .from('client_invites')
       .insert({
         email: input.email.trim().toLowerCase(),
-        client_id: input.client_id,
+        // Team/admin invites are global and not tied to a client.
+        client_id: input.role === 'client' ? input.client_id : null,
         role: input.role,
         created_by: input.created_by,
       })

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
   getReportWithPosts,
@@ -29,6 +30,8 @@ function reportLabel(report: Report) {
 
 export default function PublishedPreview() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  const isAdmin = profile?.role === 'admin'
   const [searchParams, setSearchParams] = useSearchParams()
   const [initialReportId] = useState(searchParams.get('reportId') ?? '')
   const [clients, setClients] = useState<Client[]>([])
@@ -191,21 +194,25 @@ export default function PublishedPreview() {
 
       {report && (
         <div className="mb-4 flex flex-col gap-2 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
-            className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110"
-          >
-            Edit report
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleUnpublish()}
-            disabled={busy || report.status !== 'published'}
-            className="rounded-lg border border-brand-muted px-4 py-2.5 text-sm text-brand-primary hover:text-white disabled:opacity-60"
-          >
-            Unpublish
-          </button>
+          {isAdmin && (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
+                className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110"
+              >
+                Edit report
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleUnpublish()}
+                disabled={busy || report.status !== 'published'}
+                className="rounded-lg border border-brand-muted px-4 py-2.5 text-sm text-brand-primary hover:text-white disabled:opacity-60"
+              >
+                Unpublish
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => navigate('/admin/reports')}

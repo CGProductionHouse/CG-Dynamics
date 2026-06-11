@@ -98,7 +98,7 @@ export default function InvitesAdmin() {
       setError('Enter an email address to invite.')
       return
     }
-    if (!clientId) {
+    if (role === 'client' && !clientId) {
       setError('Select a client for this invite.')
       return
     }
@@ -109,7 +109,7 @@ export default function InvitesAdmin() {
     try {
       const { error } = await createInvite({
         email: trimmed,
-        client_id: clientId,
+        client_id: role === 'client' ? clientId : null,
         role,
         created_by: profile?.id ?? null,
       })
@@ -202,17 +202,23 @@ export default function InvitesAdmin() {
             />
           </Field>
           <Field label="Client">
-            <select
-              value={clientId}
-              onChange={event => setClientId(event.target.value)}
-              disabled={loading}
-              className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
-            >
-              {activeClients.length === 0 && <option value="">No clients</option>}
-              {activeClients.map(client => (
-                <option key={client.id} value={client.id}>{client.name}</option>
-              ))}
-            </select>
+            {role === 'client' ? (
+              <select
+                value={clientId}
+                onChange={event => setClientId(event.target.value)}
+                disabled={loading}
+                className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
+              >
+                {activeClients.length === 0 && <option value="">No clients</option>}
+                {activeClients.map(client => (
+                  <option key={client.id} value={client.id}>{client.name}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="w-full rounded-lg border border-brand-muted bg-brand-bg/60 px-3.5 py-2.5 text-sm text-brand-primary">
+                All clients (global access)
+              </div>
+            )}
           </Field>
           <Field label="Role">
             <select
@@ -260,7 +266,9 @@ export default function InvitesAdmin() {
                 <tr key={invite.id} className="border-b border-brand-muted last:border-0">
                   <td className="px-4 py-3 text-white break-all">{invite.email}</td>
                   <td className="px-4 py-3 text-brand-primary">
-                    {clientNameById.get(invite.client_id) ?? invite.client_id.slice(0, 8)}
+                    {invite.client_id
+                      ? clientNameById.get(invite.client_id) ?? invite.client_id.slice(0, 8)
+                      : 'All clients'}
                   </td>
                   <td className="px-4 py-3 capitalize text-brand-primary">{invite.role}</td>
                   <td className="px-4 py-3">

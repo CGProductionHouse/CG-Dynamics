@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
   deleteImportGroup,
@@ -33,6 +34,8 @@ function periodLabel(group: ImportedMetaPostGroup) {
 }
 
 export default function ImportsManagement() {
+  const { profile } = useAuth()
+  const isAdmin = profile?.role === 'admin'
   const [clients, setClients] = useState<Client[]>([])
   const [groups, setGroups] = useState<ImportedMetaPostGroup[]>([])
   const [selectedGroup, setSelectedGroup] = useState<ImportedMetaPostGroup | null>(null)
@@ -144,14 +147,16 @@ export default function ImportsManagement() {
                     >
                       View details
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleDelete(group)}
-                      disabled={deletingKey === group.key}
-                      className="rounded-lg border border-red-400/30 px-3 py-2 text-sm text-red-300 hover:bg-red-400/10 disabled:opacity-60"
-                    >
-                      {deletingKey === group.key ? 'Deleting...' : 'Delete import'}
-                    </button>
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete(group)}
+                        disabled={deletingKey === group.key}
+                        className="rounded-lg border border-red-400/30 px-3 py-2 text-sm text-red-300 hover:bg-red-400/10 disabled:opacity-60"
+                      >
+                        {deletingKey === group.key ? 'Deleting...' : 'Delete import'}
+                      </button>
+                    )}
                   </div>
                 </div>
                 <p className="mt-4 text-xs text-brand-primary">Imported {formatDateTime(group.created_at)}</p>

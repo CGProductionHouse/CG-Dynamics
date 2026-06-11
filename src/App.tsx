@@ -49,16 +49,17 @@ export default function App() {
           {/* Staff routes */}
           <Route element={<RequireStaff />}>
             <Route element={<AdminLayout />}>
+              {/* Read access for all staff (admin + team) */}
               <Route path="/admin" element={<ClientsList />} />
-              <Route path="/admin/import" element={<ImportMetaCsv />} />
               <Route path="/admin/imports" element={<ImportsManagement />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
-              <Route path="/admin/reports/new" element={<NewReport />} />
-              <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
 
-              {/* Admin-only routes nested inside AdminLayout */}
+              {/* Admin-only write routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>
+                <Route path="/admin/import" element={<ImportMetaCsv />} />
+                <Route path="/admin/reports/new" element={<NewReport />} />
+                <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
                 <Route path="/admin/users" element={<UsersAdmin />} />
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
               </Route>

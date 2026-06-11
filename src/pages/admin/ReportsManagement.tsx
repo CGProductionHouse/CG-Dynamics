@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
   deleteReport,
@@ -41,6 +42,8 @@ function periodLabel(report: Report) {
 
 export default function ReportsManagement() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  const isAdmin = profile?.role === 'admin'
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
@@ -131,16 +134,20 @@ export default function ReportsManagement() {
           <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Reports</p>
           <h1 className="text-2xl font-semibold text-white sm:text-3xl">Report management</h1>
           <p className="text-sm text-brand-primary mt-2 max-w-2xl">
-            View, edit, publish, unpublish, and delete monthly client reports.
+            {isAdmin
+              ? 'View, edit, publish, unpublish, and delete monthly client reports.'
+              : 'View monthly client reports (read-only).'}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => navigate('/admin/reports/new')}
-          className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110"
-        >
-          New report
-        </button>
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={() => navigate('/admin/reports/new')}
+            className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110"
+          >
+            New report
+          </button>
+        )}
       </div>
 
       {error && <Message tone="error" text={error} />}
@@ -187,29 +194,33 @@ export default function ReportsManagement() {
                     >
                       View
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
-                      className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleStatus(report)}
-                      disabled={busyReportId === report.id}
-                      className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:opacity-60"
-                    >
-                      {report.status === 'published' ? 'Unpublish' : 'Publish'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleDelete(report)}
-                      disabled={busyReportId === report.id}
-                      className="rounded-lg border border-red-400/30 px-3 py-2 text-sm text-red-300 hover:bg-red-400/10 disabled:opacity-60"
-                    >
-                      Delete
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
+                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleStatus(report)}
+                          disabled={busyReportId === report.id}
+                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:opacity-60"
+                        >
+                          {report.status === 'published' ? 'Unpublish' : 'Publish'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleDelete(report)}
+                          disabled={busyReportId === report.id}
+                          className="rounded-lg border border-red-400/30 px-3 py-2 text-sm text-red-300 hover:bg-red-400/10 disabled:opacity-60"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </article>
