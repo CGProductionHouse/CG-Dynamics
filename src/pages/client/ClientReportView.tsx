@@ -462,7 +462,7 @@ export function ClientDashboardShell({
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3 sm:px-6">
           {client ? (
             <div className="flex items-center gap-3">
-              <ClientLogo client={client} boxClassName="h-11 w-11 rounded-xl" />
+              <ClientLogo client={client} boxClassName="h-14 w-14 rounded-xl" padding="p-2" />
               <div className="min-w-0">
                 <p className="truncate text-base font-semibold leading-tight text-white">{client.name}</p>
                 <p className="mt-0.5 truncate text-xs text-brand-primary">Client dashboard</p>
@@ -494,9 +494,9 @@ function ClientReportLogo({ client }: { client?: Client | null }) {
   return (
     <ClientLogo
       client={client}
-      boxClassName="h-20 w-20 rounded-2xl sm:h-24 sm:w-24"
-      imgClassName="p-3"
-      textClassName="text-xl font-semibold text-brand-primary"
+      boxClassName="h-24 w-24 rounded-2xl sm:h-28 sm:w-28"
+      padding="p-3"
+      textClassName="text-2xl font-semibold text-brand-primary"
     />
   )
 }
