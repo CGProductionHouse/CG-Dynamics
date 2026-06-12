@@ -351,7 +351,7 @@ export function ClientDashboardShell({
     <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.08),transparent_28rem)]">
       <header className="border-b border-brand-muted bg-brand-surface/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3 sm:px-6">
-          <BrandMark subtitle="Client dashboard" />
+          <BrandMark subtitle="Client dashboard" size="report" />
           {action}
         </div>
       </header>
