@@ -12,7 +12,7 @@ export interface ClientLogoClient {
 export function ClientLogo({
   client,
   boxClassName = 'h-12 w-12 rounded-lg',
-  padding = 'p-2',
+  padding = 'p-1.5',
   textClassName = 'text-sm font-semibold text-brand-primary',
 }: {
   client: ClientLogoClient

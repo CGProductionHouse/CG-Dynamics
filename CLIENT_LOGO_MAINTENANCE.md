@@ -15,9 +15,29 @@ A simple, repeatable workflow for adding client logos to CG Dynamics.
    node scripts/sync-client-logos.mjs
    ```
 
-   Each image is given a clean slug filename and **copied** into
-   `public/client-logos/`. The script prints three lists: **Copied**,
-   **Skipped**, and **Needs review**.
+   Each image is given a clean slug filename, has its excess empty canvas
+   trimmed, and is written into `public/client-logos/`. The script prints a
+   per-file before/after report (original → output dimensions, whether
+   trimming was applied) plus **Skipped**, **Trimming skipped**, and
+   **Needs review** lists.
+
+   ### Canvas trimming
+
+   Many exported logos sit inside a much larger transparent (or solid-colour)
+   canvas, which makes the real logo look tiny once `object-contain` fits the
+   whole canvas. The script trims that empty space:
+
+   - transparent padding is trimmed to the artwork's bounding box
+   - a uniform solid-colour border is trimmed when the image has no
+     transparency
+   - a small safe margin is added back so logos never touch the edge
+   - logos that already fill ~90%+ of their canvas are left untouched
+   - transparency is preserved; PNGs stay PNG
+
+   Trimming uses only Node's built-in `zlib` and supports 8-bit, non-interlaced
+   PNGs (the usual export format). Any other format — JPEG, interlaced or
+   palette PNG — is copied through **untouched** and listed under "Trimming
+   skipped", so nothing is ever faked or risked.
 
 3. **Logos are served from `public/client-logos/`.**
    The app auto-matches a logo to a client by slugifying the client's name.
