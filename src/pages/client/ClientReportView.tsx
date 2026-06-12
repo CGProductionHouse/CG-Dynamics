@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { ReportWithPosts } from '../../lib/db/reports'
 import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
 import { MANUAL_SOURCE_LABELS } from '../../lib/db/manualMetrics'
-import type { MasterReportData, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
+import type { MasterReportData, Platform, PlatformSource, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORMS,
   PLATFORM_LABELS,
@@ -17,10 +17,10 @@ import {
 type TabKey = 'overview' | Platform
 
 const MANUAL_SOURCE_NOTE =
-  'Data source note: This platform data was added from an exported or manually captured account summary because full direct reporting access was not available. These figures are used as a best-effort reporting reference and may not contain the same level of detail as a direct platform export.'
+  'Source note: This platform uses a monthly account summary where post-level export detail was not available.'
 
 const REPORT_DISCLAIMER =
-  'Reporting disclaimer: This dashboard is compiled from exported platform data, manual summaries, and internal reporting tools. While every effort is made to keep the information accurate, small differences may occur between this report and the original source platforms due to export timing, platform processing delays, manual capture, or formatting differences. The original platform dashboards and exports remain the official source of record. Source exports can be provided on request.'
+  'Reporting note: This dashboard is compiled from exported platform data, manual summaries, and internal reporting tools. Small differences may appear because platforms process and export data at different times. Original platform dashboards and exports remain the source of record.'
 
 export function ClientReportView({
   report,
@@ -48,7 +48,7 @@ export function ClientReportView({
   return (
     <>
       <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+        <div className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Monthly master report</p>
           <h1 className="text-2xl font-semibold text-white sm:text-3xl">
             {report.report_title || 'Monthly Performance Report'}
@@ -57,8 +57,9 @@ export function ClientReportView({
             {formatDate(report.period_start)} to {formatDate(report.period_end)}
           </p>
         </div>
-        <div className="border border-brand-accent/30 bg-brand-accent/10 text-brand-accent rounded-lg px-3 py-2 text-xs font-semibold">
-          Published report
+        <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-3">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Status</p>
+          <p className="mt-1 text-sm font-semibold text-brand-accent">Published report</p>
         </div>
       </div>
 
@@ -110,7 +111,7 @@ function OverviewTab({ report, master }: { report: ReportWithPosts; master: Mast
               {shortCaption(master.bestPostOverall.caption)}
             </h2>
             <p className="text-sm text-brand-primary mt-2">
-              {master.bestPostOverall.platform ? `${PLATFORM_LABELS[master.bestPostOverall.platform]} · ` : ''}
+              {master.bestPostOverall.platform ? `${PLATFORM_LABELS[master.bestPostOverall.platform]} - ` : ''}
               {formatDate(master.bestPostOverall.publish_time)}
             </p>
             <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-3">
@@ -122,6 +123,30 @@ function OverviewTab({ report, master }: { report: ReportWithPosts; master: Mast
         ) : (
           <p className="text-sm text-brand-primary">No data uploaded yet.</p>
         )}
+      </section>
+
+      <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
+        <div className="mb-4">
+          <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Platform coverage</p>
+          <h2 className="mt-2 text-base font-semibold text-white">Data included in this report</h2>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {master.platforms.map(view => (
+            <div key={view.platform} className="rounded-lg border border-brand-muted bg-brand-bg/50 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm font-semibold text-white">{view.label}</p>
+                <SourceTag source={view.source} />
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-brand-primary">
+                {view.source === 'posts'
+                  ? `${formatNumber(view.postCount)} post-level records`
+                  : view.source === 'manual'
+                    ? MANUAL_SOURCE_LABELS[view.manual!.source_type]
+                    : 'No data for this month'}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
@@ -280,6 +305,21 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="text-xs uppercase tracking-[0.12em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
       <p className="text-2xl font-semibold text-white mt-4 break-words sm:text-3xl">{value}</p>
     </div>
+  )
+}
+
+function SourceTag({ source }: { source: PlatformSource }) {
+  const label = source === 'posts' ? 'Meta CSV' : source === 'manual' ? 'Summary' : 'No data'
+  const classes = {
+    posts: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent',
+    manual: 'border-sky-300/30 bg-sky-300/10 text-sky-200',
+    none: 'border-brand-muted bg-brand-muted/50 text-brand-primary',
+  }[source]
+
+  return (
+    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${classes}`}>
+      {label}
+    </span>
   )
 }
 

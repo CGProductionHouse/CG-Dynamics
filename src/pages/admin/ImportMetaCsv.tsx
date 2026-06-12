@@ -6,7 +6,9 @@ import { listClients, type Client } from '../../lib/db/clients'
 import { importMetaPosts, type ImportedMetaPostInput } from '../../lib/db/importedMetaPosts'
 import {
   MANUAL_SOURCE_LABELS,
+  listManualMetricsForClient,
   upsertManualMetrics,
+  type ManualPlatformMetric,
   type ManualSourceType,
 } from '../../lib/db/manualMetrics'
 import { detectReportPeriod, formatReportPeriod } from '../../lib/reportPeriod'
@@ -279,6 +281,7 @@ export default function ImportMetaCsv() {
   const [fileName, setFileName] = useState<string | null>(null)
   const [rows, setRows] = useState<ParsedMetaRow[]>([])
   const [manualRows, setManualRows] = useState<ParsedManualRow[]>([])
+  const [existingManualMetrics, setExistingManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [periodStart, setPeriodStart] = useState('')
   const [periodEnd, setPeriodEnd] = useState('')
   const [periodSource, setPeriodSource] = useState<'publish_time' | 'filename' | null>(null)
@@ -309,6 +312,24 @@ export default function ImportMetaCsv() {
 
     void loadClients()
   }, [])
+
+  useEffect(() => {
+    if (!clientId) {
+      setExistingManualMetrics([])
+      return
+    }
+
+    let active = true
+    async function loadExistingManualMetrics() {
+      const { data } = await listManualMetricsForClient(clientId)
+      if (active) setExistingManualMetrics(data)
+    }
+
+    void loadExistingManualMetrics()
+    return () => {
+      active = false
+    }
+  }, [clientId])
 
   function resetPreview() {
     setRows([])
@@ -524,6 +545,21 @@ export default function ImportMetaCsv() {
   )
   const totals = importType === 'manual' ? manualTotals : metaTotals
   const activeCount = importType === 'manual' ? manualRows.length : rows.length
+  const manualPreviewTotals = manualRows.reduce(
+    (sum, row) => ({
+      accountsEngaged: sum.accountsEngaged + row.accountsEngaged,
+      profileVisits: sum.profileVisits + row.profileVisits,
+      externalLinkTaps: sum.externalLinkTaps + row.externalLinkTaps,
+      followers: sum.followers + row.followers,
+    }),
+    { accountsEngaged: 0, profileVisits: 0, externalLinkTaps: 0, followers: 0 }
+  )
+  const existingManualKeys = new Set(
+    existingManualMetrics.map(metric => `${metric.month}:${metric.platform}`)
+  )
+  const manualRowsUpdatingExisting = importType === 'manual'
+    ? manualRows.filter(row => existingManualKeys.has(`${row.month}:${row.platform}`))
+    : []
 
   const manualWarnings: string[] = []
   if (importType === 'manual' && manualRows.length > 0) {
@@ -540,6 +576,9 @@ export default function ImportMetaCsv() {
     }
     if (totalProfileVisits === 0 && totalExternalLinkTaps === 0) {
       manualWarnings.push('Profile activity data is missing or not visible.')
+    }
+    if (manualRows.some(row => row.platform === 'tiktok' && row.reach === 0)) {
+      manualWarnings.push('TikTok reach is 0. Confirm this is the exported value before saving.')
     }
   }
 
@@ -572,6 +611,11 @@ export default function ImportMetaCsv() {
                 <option value="meta">Meta Business Suite CSV</option>
                 <option value="manual">Manual summary CSV</option>
               </select>
+              <p className="mt-2 text-xs leading-relaxed text-brand-primary">
+                {importType === 'meta'
+                  ? 'Meta Business Suite CSV = post-level Facebook or Instagram export with one row per post.'
+                  : 'Manual summary CSV = monthly platform totals captured from an exported dashboard or prepared summary sheet.'}
+              </p>
             </div>
 
             <div>
@@ -674,7 +718,16 @@ export default function ImportMetaCsv() {
             {clientMismatch && (
               <p className="text-xs text-amber-300 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
                 Some rows have a different client column than the selected client. The selected
-                client ({selectedClientName}) will be used.
+                client, {selectedClientName}, is the one that will receive this import.
+              </p>
+            )}
+
+            {manualRowsUpdatingExisting.length > 0 && (
+              <p className="text-xs text-brand-accent bg-brand-accent/10 border border-brand-accent/20 rounded-lg px-3 py-2">
+                Existing summary will be updated for{' '}
+                {manualRowsUpdatingExisting
+                  .map(row => `${PLATFORM_LABELS[row.platform]} ${row.month}`)
+                  .join(', ')}.
               </p>
             )}
 
@@ -700,14 +753,22 @@ export default function ImportMetaCsv() {
             {success && (
               <div className="rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2">
                 <p className="text-sm text-brand-accent">{success}</p>
-                {manualSaved && (
+                <div className="mt-2 flex flex-wrap gap-3">
+                  {manualSaved && (
+                    <Link
+                      to="/admin/manual-metrics"
+                      className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                    >
+                      View in Manual metrics
+                    </Link>
+                  )}
                   <Link
-                    to="/admin/manual-metrics"
-                    className="mt-2 inline-block text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                    to="/admin/reports/new"
+                    className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
                   >
-                    View in Manual metrics
+                    Create report
                   </Link>
-                )}
+                </div>
               </div>
             )}
 
@@ -733,6 +794,15 @@ export default function ImportMetaCsv() {
           <MetricCard label="Engagements" value={formatNumber(totals.engagements)} />
         </section>
       </div>
+
+      {importType === 'manual' && manualRows.length > 0 && (
+        <section className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <MetricCard label="Accounts engaged" value={formatNumber(manualPreviewTotals.accountsEngaged)} />
+          <MetricCard label="Profile visits" value={formatNumber(manualPreviewTotals.profileVisits)} />
+          <MetricCard label="External link taps" value={formatNumber(manualPreviewTotals.externalLinkTaps)} />
+          <MetricCard label="Followers" value={formatNumber(manualPreviewTotals.followers)} />
+        </section>
+      )}
 
       <section className="mt-6 bg-brand-surface border border-brand-muted rounded-xl overflow-hidden">
         <div className="flex flex-col gap-2 border-b border-brand-muted px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -800,7 +870,7 @@ function MetaPreview({ rows }: { rows: ParsedMetaRow[] }) {
 }
 
 function notePreview(text: string | null) {
-  if (!text) return '—'
+  if (!text) return '-'
   return text.length > 40 ? `${text.slice(0, 40)}...` : text
 }
 
@@ -836,7 +906,7 @@ function ManualPreview({ rows }: { rows: ParsedManualRow[] }) {
             rows.map(row => (
               <tr key={row.rowNumber} className="border-b border-brand-muted/70 last:border-0">
                 <td className="px-4 py-3 text-white">
-                  {row.month || '—'}
+                  {row.month || '-'}
                   {row.error && <p className="text-xs text-red-400 mt-1">{row.error}</p>}
                 </td>
                 <td className="px-4 py-3 text-brand-primary">{PLATFORM_LABELS[row.platform]}</td>

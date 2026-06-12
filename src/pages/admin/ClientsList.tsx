@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   listClients,
@@ -7,6 +8,17 @@ import {
   updateClient,
   type Client,
 } from '../../lib/db/clients'
+import { listImportGroups } from '../../lib/db/importedMetaPosts'
+import { listManualMetrics } from '../../lib/db/manualMetrics'
+import { listReports } from '../../lib/db/reports'
+
+interface OverviewStats {
+  totalClients: number
+  publishedReports: number
+  draftReports: number
+  imports: number
+  manualSummaries: number
+}
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -33,6 +45,13 @@ export default function ClientsList() {
   const isAdmin = profile?.role === 'admin'
 
   const [clients, setClients] = useState<Client[]>([])
+  const [overview, setOverview] = useState<OverviewStats>({
+    totalClients: 0,
+    publishedReports: 0,
+    draftReports: 0,
+    imports: 0,
+    manualSummaries: 0,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modal, setModal] = useState<{ open: boolean; client?: Client }>({ open: false })
@@ -47,13 +66,25 @@ export default function ClientsList() {
       setError(null)
     }
     try {
-      const { data, error } = await listClients()
-      if (error) {
-        const message = error.message
+      const [clientsRes, reportsRes, importsRes, manualRes] = await Promise.all([
+        listClients(),
+        listReports(),
+        listImportGroups(),
+        listManualMetrics(),
+      ])
+      if (clientsRes.error) {
+        const message = clientsRes.error.message
         setError(message)
         return message
       }
-      setClients(data)
+      setClients(clientsRes.data)
+      setOverview({
+        totalClients: clientsRes.data.length,
+        publishedReports: reportsRes.data.filter(report => report.status === 'published').length,
+        draftReports: reportsRes.data.filter(report => report.status === 'draft').length,
+        imports: importsRes.data.length,
+        manualSummaries: manualRes.data.length,
+      })
       setError(null)
       return null
     } catch (error) {
@@ -96,9 +127,12 @@ export default function ClientsList() {
   }
 
   return (
-    <div className="w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+    <div className="w-full max-w-6xl p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-xl font-semibold text-white">Clients</h1>
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Admin dashboard</p>
+          <h1 className="text-xl font-semibold text-white">Clients</h1>
+        </div>
         {isAdmin && (
           <button
             onClick={() => setModal({ open: true })}
@@ -108,6 +142,37 @@ export default function ClientsList() {
           </button>
         )}
       </div>
+
+      <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <OverviewCard label="Total clients" value={overview.totalClients} />
+        <OverviewCard label="Published reports" value={overview.publishedReports} />
+        <OverviewCard label="Draft reports" value={overview.draftReports} />
+        <OverviewCard label="Imports" value={overview.imports} />
+        <OverviewCard label="Manual summaries" value={overview.manualSummaries} />
+      </section>
+
+      <section className="mb-6 rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Quick actions</h2>
+            <p className="mt-1 text-xs text-brand-primary">
+              Jump straight to the reporting workflow.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap">
+            {isAdmin && (
+              <>
+                <QuickLink to="/admin/import" label="Import CSV" primary />
+                <QuickLink to="/admin/reports/new" label="Create report" />
+                <QuickLink to="/admin/invites" label="Invites" />
+              </>
+            )}
+            <QuickLink to="/admin/manual-metrics" label="Manual metrics" />
+            <QuickLink to="/admin/reports" label="Reports" />
+            <QuickLink to="/admin/published" label="Client preview" />
+          </div>
+        </div>
+      </section>
 
       {loading ? (
         <p className="text-brand-primary text-sm">Loading...</p>
@@ -225,7 +290,31 @@ export default function ClientsList() {
   )
 }
 
-// ─── Client modal ────────────────────────────────────────────────────────────
+function OverviewCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-brand-muted bg-brand-surface p-4">
+      <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{label}</p>
+      <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+    </div>
+  )
+}
+
+function QuickLink({ to, label, primary = false }: { to: string; label: string; primary?: boolean }) {
+  const classes = primary
+    ? 'border-brand-accent bg-brand-accent text-brand-bg'
+    : 'border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
+
+  return (
+    <Link
+      to={to}
+      className={`rounded-lg border px-3 py-2.5 text-center text-sm font-semibold transition ${classes}`}
+    >
+      {label}
+    </Link>
+  )
+}
+
+// Client modal
 
 function ClientModal({
   client,

@@ -49,6 +49,22 @@ function monthStartInputValue() {
   return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
 }
 
+function monthName(month: string) {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return month || 'No month selected'
+  return new Intl.DateTimeFormat('en-GB', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(`${month}-01T00:00:00`))
+}
+
+function postMonth(post: ImportedMetaPost) {
+  if (!post.publish_time) return null
+  const time = new Date(post.publish_time)
+  if (Number.isNaN(time.getTime())) return null
+  return time.toISOString().slice(0, 7)
+}
+
 function buildPrompt(
   clientName: string,
   periodStart: string,
@@ -238,6 +254,7 @@ export default function NewReport() {
   const selectedClient = clients.find(client => client.id === clientId)
   // The report month is the calendar month of the period end date.
   const currentMonth = reportMonth(periodEnd)
+  const currentMonthLabel = monthName(currentMonth)
   const monthManualMetrics = useMemo(
     () => manualMetrics.filter(metric => metric.month === currentMonth),
     [manualMetrics, currentMonth]
@@ -262,6 +279,14 @@ export default function NewReport() {
     })
     return labels
   }, [monthManualMetrics, otherMonthManualMetrics])
+  const importedMonthMismatch = useMemo(() => {
+    const months = new Set<string>()
+    importedPosts.forEach(post => {
+      const month = postMonth(post)
+      if (month && month !== currentMonth) months.add(month)
+    })
+    return [...months].sort().map(monthName)
+  }, [currentMonth, importedPosts])
   const periodImportedPosts = useMemo(() => {
     const start = periodStart ? new Date(`${periodStart}T00:00:00`).getTime() : null
     const end = periodEnd ? new Date(`${periodEnd}T23:59:59`).getTime() : null
@@ -406,13 +431,21 @@ export default function NewReport() {
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
         {periodStart && periodEnd && (
-          <p className="mb-4 text-sm text-brand-primary">
-            Detected period:{' '}
-            <span className="text-white">{formatReportPeriod({ start: periodStart, end: periodEnd })}</span>
-            {periodSource && (
-              <span> from {periodSource === 'publish_time' ? 'Publish time' : 'CSV filename'}</span>
-            )}
-          </p>
+          <div className="mb-4 grid gap-3 rounded-lg border border-brand-muted bg-brand-bg/50 p-3 sm:grid-cols-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Report month</p>
+              <p className="mt-1 text-base font-semibold text-white">{currentMonthLabel}</p>
+            </div>
+            <div className="sm:col-span-2">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Date range</p>
+              <p className="mt-1 text-sm text-white">
+                {formatReportPeriod({ start: periodStart, end: periodEnd })}
+                {periodSource && (
+                  <span className="text-brand-primary"> from {periodSource === 'publish_time' ? 'Publish time' : 'CSV filename'}</span>
+                )}
+              </p>
+            </div>
+          </div>
         )}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Client">
@@ -481,14 +514,33 @@ export default function NewReport() {
       </div>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
-        <h2 className="text-sm font-semibold text-white mb-1">Platform breakdown</h2>
-        <p className="mb-4 text-xs text-brand-primary">CSV imports and manual summary metrics combined.</p>
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white mb-1">Platform breakdown</h2>
+            <p className="text-xs text-brand-primary">
+              Matching {selectedClient?.name ?? 'client'} data for {currentMonthLabel}.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <SourcePill label="Meta CSV" tone="posts" />
+            <SourcePill label="Manual summary" tone="manual" />
+            <SourcePill label="No data" tone="none" />
+          </div>
+        </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {master.platforms.map(view => (
             <div key={view.platform} className="border border-brand-muted rounded-lg p-3 bg-brand-bg/50">
-              <p className="text-sm font-semibold text-white">{view.label}</p>
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm font-semibold text-white">{view.label}</p>
+                <SourcePill
+                  label={view.source === 'posts' ? 'Meta CSV' : view.source === 'manual' ? 'Manual summary' : 'No data'}
+                  tone={view.source}
+                />
+              </div>
               {view.source === 'none' ? (
-                <p className="mt-2 text-xs text-brand-primary">No data uploaded yet.</p>
+                <p className="mt-3 text-xs leading-relaxed text-brand-primary">
+                  No matching data for {currentMonthLabel}. Import a Meta CSV or add a manual summary for this month.
+                </p>
               ) : (
                 <dl className="mt-2 space-y-1 text-xs text-brand-primary">
                   <div className="flex justify-between"><dt>Reach</dt><dd className="text-white">{formatNumber(view.reach)}</dd></div>
@@ -496,8 +548,14 @@ export default function NewReport() {
                   <div className="flex justify-between"><dt>Engagements</dt><dd className="text-white">{formatNumber(view.engagements)}</dd></div>
                   <div className="flex justify-between">
                     <dt>Source</dt>
-                    <dd className="text-white">{view.source === 'manual' ? 'Manual summary' : `${formatNumber(view.postCount)} posts`}</dd>
+                    <dd className="text-white">{view.source === 'manual' ? MANUAL_SOURCE_LABELS[view.manual!.source_type] : `${formatNumber(view.postCount)} posts`}</dd>
                   </div>
+                  {view.source === 'manual' && view.manual && (
+                    <>
+                      <div className="flex justify-between"><dt>Profile visits</dt><dd className="text-white">{formatNumber(view.manual.profile_visits)}</dd></div>
+                      <div className="flex justify-between"><dt>External link taps</dt><dd className="text-white">{formatNumber(view.manual.external_link_taps)}</dd></div>
+                    </>
+                  )}
                 </dl>
               )}
             </div>
@@ -508,14 +566,21 @@ export default function NewReport() {
       {manualMonthMismatch.length > 0 && (
         <p className="mb-6 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
           Manual data exists for another month: {manualMonthMismatch.join(', ')}. This report is
-          currently set to {currentMonth}. Set the report end date to that month to include it.
+          currently set to {currentMonthLabel}. Set the report end date to the matching month to include it.
+        </p>
+      )}
+
+      {importedMonthMismatch.length > 0 && periodImportedPosts.length === 0 && (
+        <p className="mb-6 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          CSV data exists for {importedMonthMismatch.join(', ')}, but not for {currentMonthLabel}. Adjust the
+          date range or import data for the selected month.
         </p>
       )}
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
         <h2 className="text-sm font-semibold text-white mb-1">Available manual summaries for this client</h2>
         <p className="mb-4 text-xs text-brand-primary">
-          Report month is <span className="text-white">{currentMonth}</span>. Rows matching this month feed into the report above.
+          Report month is <span className="text-white">{currentMonthLabel}</span>. Rows matching this month feed into the report above.
         </p>
         {manualMetrics.length === 0 ? (
           <p className="text-xs text-brand-primary">No manual summaries uploaded for this client yet.</p>
@@ -656,6 +721,20 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="text-xs uppercase tracking-[0.12em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
       <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{value}</p>
     </div>
+  )
+}
+
+function SourcePill({ label, tone }: { label: string; tone: 'posts' | 'manual' | 'none' }) {
+  const classes = {
+    posts: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent',
+    manual: 'border-sky-300/30 bg-sky-300/10 text-sky-200',
+    none: 'border-brand-muted bg-brand-muted/50 text-brand-primary',
+  }[tone]
+
+  return (
+    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${classes}`}>
+      {label}
+    </span>
   )
 }
 
