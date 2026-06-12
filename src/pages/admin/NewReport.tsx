@@ -682,7 +682,13 @@ export default function NewReport() {
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="space-y-5">
           <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
-            <h2 className="text-sm font-semibold text-white mb-4">Report text</h2>
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Strategy board</p>
+              <h2 className="mt-2 text-base font-semibold text-white">Client-facing strategy narrative</h2>
+              <p className="mt-1 text-xs text-brand-primary">
+                Use these prompts to turn the report data into clear client direction.
+              </p>
+            </div>
             <div className="space-y-4">
               <TextInput
                 label="Report title"
@@ -690,13 +696,57 @@ export default function NewReport() {
                 onChange={value => updateField('reportTitle', value)}
                 placeholder={`${selectedClient?.name ?? 'Client'} Monthly Report`}
               />
-              <TextArea label="Previous month strategy" value={fields.previousMonthStrategy} onChange={value => updateField('previousMonthStrategy', value)} />
-              <TextArea label="Previous month reflection" value={fields.previousMonthReflection} onChange={value => updateField('previousMonthReflection', value)} />
-              <TextArea label="Performance comments" value={fields.performanceComments} onChange={value => updateField('performanceComments', value)} />
-              <TextArea label="Strategy for next month" value={fields.strategyNextMonth} onChange={value => updateField('strategyNextMonth', value)} />
-              <TextArea label="Content direction for next month" value={fields.contentDirectionNextMonth} onChange={value => updateField('contentDirectionNextMonth', value)} />
-              <TextArea label="Boosting recommendation" value={fields.boostRecommendation} onChange={value => updateField('boostRecommendation', value)} />
-              <TextArea label="General notes" value={fields.generalNotes} onChange={value => updateField('generalNotes', value)} />
+              <div className="grid gap-4 lg:grid-cols-2">
+                <StrategyTextarea
+                  title="What worked this month"
+                  helper="What performed best, and why?"
+                  value={fields.performanceComments}
+                  onChange={value => updateField('performanceComments', value)}
+                  placeholder="Summarise the strongest content, platform, audience response, or campaign signal."
+                />
+                <StrategyTextarea
+                  title="What needs attention"
+                  helper="What should we improve or watch next month?"
+                  value={fields.previousMonthReflection}
+                  onChange={value => updateField('previousMonthReflection', value)}
+                  placeholder="Note weaker content types, gaps in consistency, audience drop-offs, or conversion opportunities."
+                />
+                <StrategyTextarea
+                  title="Next month focus"
+                  helper="What should the team prioritise next?"
+                  value={fields.strategyNextMonth}
+                  onChange={value => updateField('strategyNextMonth', value)}
+                  placeholder="Set the main strategic focus for the coming reporting period."
+                />
+                <StrategyTextarea
+                  title="Content direction"
+                  helper="What content direction should the client expect next?"
+                  value={fields.contentDirectionNextMonth}
+                  onChange={value => updateField('contentDirectionNextMonth', value)}
+                  placeholder="Outline themes, formats, messaging angles, or campaign ideas."
+                />
+                <StrategyTextarea
+                  title="Boosting recommendation"
+                  helper="What should be boosted, paused, or tested?"
+                  value={fields.boostRecommendation}
+                  onChange={value => updateField('boostRecommendation', value)}
+                  placeholder="Recommend paid support, testing priorities, or budget caution."
+                />
+                <StrategyTextarea
+                  title="Notes / context"
+                  helper="What background context should be remembered?"
+                  value={fields.generalNotes}
+                  onChange={value => updateField('generalNotes', value)}
+                  placeholder="Add context around timing, campaigns, seasonal factors, or client-specific notes."
+                />
+                <StrategyTextarea
+                  title="Previous strategy context"
+                  helper="What was the previous plan or strategic baseline?"
+                  value={fields.previousMonthStrategy}
+                  onChange={value => updateField('previousMonthStrategy', value)}
+                  placeholder="Capture what the prior strategy aimed to do, so progress can be read in context."
+                />
+              </div>
             </div>
           </div>
 
@@ -844,23 +894,29 @@ function TextInput({
   )
 }
 
-function TextArea({
-  label,
+function StrategyTextarea({
+  title,
+  helper,
   value,
   onChange,
+  placeholder,
 }: {
-  label: string
+  title: string
+  helper: string
   value: string
   onChange: (value: string) => void
+  placeholder: string
 }) {
   return (
-    <label className="block">
-      <span className="block text-sm font-medium text-brand-accent mb-1.5">{label}</span>
+    <label className="block rounded-xl border border-brand-muted bg-brand-bg/45 p-4">
+      <span className="block text-sm font-semibold text-white">{title}</span>
+      <span className="mt-1 block text-xs leading-relaxed text-brand-primary">{helper}</span>
       <textarea
         value={value}
         onChange={event => onChange(event.target.value)}
-        rows={4}
-        className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
+        rows={5}
+        placeholder={placeholder}
+        className="mt-3 w-full bg-brand-surface border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
       />
     </label>
   )

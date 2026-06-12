@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { ReportWithPosts } from '../../lib/db/reports'
+import type { Client } from '../../lib/db/clients'
 import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
 import { MANUAL_SOURCE_LABELS } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
@@ -28,14 +29,18 @@ const REPORT_DISCLAIMER =
 
 export function ClientReportView({
   report,
+  client = null,
   manualMetrics = [],
   previousReport = null,
   previousManualMetrics = [],
+  showEmptyStrategy = false,
 }: {
   report: ReportWithPosts
+  client?: Client | null
   manualMetrics?: ManualPlatformMetric[]
   previousReport?: ReportWithPosts | null
   previousManualMetrics?: ManualPlatformMetric[]
+  showEmptyStrategy?: boolean
 }) {
   const [tab, setTab] = useState<TabKey>('overview')
 
@@ -71,19 +76,22 @@ export function ClientReportView({
     <>
       <div className="mb-6 rounded-2xl border border-brand-muted bg-brand-surface/80 p-5 shadow-[0_0_60px_rgba(45,212,191,0.06)] lg:mb-8 lg:p-7">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.22em] text-brand-accent mb-2">Monthly master report</p>
-          <h1 className="text-3xl font-semibold text-white sm:text-4xl">
-            {report.report_title || 'Monthly Performance Report'}
-          </h1>
-          <p className="text-sm text-brand-primary mt-3">
-            {formatDate(report.period_start)} to {formatDate(report.period_end)}
-          </p>
-        </div>
-        <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-3">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Status</p>
-          <p className="mt-1 text-sm font-semibold text-brand-accent">Published report</p>
-        </div>
+          <div className="flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-center">
+            <ClientReportLogo client={client} />
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-[0.22em] text-brand-accent mb-2">Monthly master report</p>
+              <h1 className="text-3xl font-semibold text-white sm:text-4xl">
+                {report.report_title || 'Monthly Performance Report'}
+              </h1>
+              <p className="text-sm text-brand-primary mt-3">
+                {formatDate(report.period_start)} to {formatDate(report.period_end)}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Status</p>
+            <p className="mt-1 text-sm font-semibold text-brand-accent">Published report</p>
+          </div>
         </div>
       </div>
 
@@ -105,7 +113,13 @@ export function ClientReportView({
       </div>
 
       {tab === 'overview' ? (
-        <OverviewTab report={report} master={master} movement={movement} />
+        <OverviewTab
+          report={report}
+          master={master}
+          movement={movement}
+          showEmptyStrategy={showEmptyStrategy}
+          usesManualData={manualMetrics.length > 0}
+        />
       ) : (
         <PlatformTab
           view={master.platforms.find(item => item.platform === tab)!}
@@ -125,10 +139,14 @@ function OverviewTab({
   report,
   master,
   movement,
+  showEmptyStrategy,
+  usesManualData,
 }: {
   report: ReportWithPosts
   master: MasterReportData
   movement: PerformanceMovement
+  showEmptyStrategy: boolean
+  usesManualData: boolean
 }) {
   return (
     <>
@@ -138,6 +156,8 @@ function OverviewTab({
         <StatCard label="Overall engagements" value={formatNumber(master.totalEngagements)} />
         <StatCard label="Best platform" value={master.bestPlatform ? master.bestPlatform.label : 'No data yet'} />
       </section>
+
+      <ExecutiveSummary report={report} master={master} usesManualData={usesManualData} />
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
         <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">Best post overall</p>
@@ -187,15 +207,101 @@ function OverviewTab({
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <StrategyCard title="Previous month strategy" text={report.previous_month_strategy} />
-        <StrategyCard title="Previous month reflection" text={report.previous_month_reflection} />
-        <StrategyCard title="Strategy for next month" text={report.strategy_next_month} />
-        <StrategyCard title="Content direction" text={report.content_direction_next_month} />
-        <StrategyCard title="Boosting recommendation" text={report.boost_recommendation} />
-        <StrategyCard title="General notes" text={report.general_notes} />
-      </section>
+      <StrategySection report={report} showEmptyStrategy={showEmptyStrategy} />
     </>
+  )
+}
+
+function ExecutiveSummary({
+  report,
+  master,
+  usesManualData,
+}: {
+  report: ReportWithPosts
+  master: MasterReportData
+  usesManualData: boolean
+}) {
+  const takeaway =
+    report.performance_comments ||
+    report.strategy_next_month ||
+    report.content_direction_next_month ||
+    report.general_notes
+
+  return (
+    <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 shadow-[0_0_50px_rgba(45,212,191,0.05)] sm:p-6">
+      <div className="mb-5">
+        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Executive summary</p>
+        <h2 className="mt-2 text-lg font-semibold text-white">Month at a glance</h2>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-3 text-sm leading-relaxed text-brand-primary">
+          <p>
+            The strongest platform this month was{' '}
+            <span className="font-semibold text-white">{master.bestPlatform?.label ?? 'not available yet'}</span>,
+            with {formatNumber(master.totalViews)} views, {formatNumber(master.totalReach)} reach and{' '}
+            {formatNumber(master.totalEngagements)} engagements across the report.
+          </p>
+          {master.bestPostOverall && (
+            <p>
+              Best post: <span className="text-white">{shortCaption(master.bestPostOverall.caption)}</span>
+            </p>
+          )}
+          {takeaway && <p className="text-white">{takeaway}</p>}
+          {usesManualData && (
+            <p className="text-xs text-brand-primary/80">
+              Some platform totals include monthly summary data where post-level export detail was not available.
+            </p>
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <MiniMetric label="Views" value={formatNumber(master.totalViews)} />
+          <MiniMetric label="Reach" value={formatNumber(master.totalReach)} />
+          <MiniMetric label="Eng." value={formatNumber(master.totalEngagements)} />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function StrategySection({
+  report,
+  showEmptyStrategy,
+}: {
+  report: ReportWithPosts
+  showEmptyStrategy: boolean
+}) {
+  const cards = [
+    {
+      title: 'Key takeaways',
+      text: report.general_notes,
+    },
+    {
+      title: 'What worked',
+      text: report.performance_comments,
+    },
+    {
+      title: 'Opportunities',
+      text: report.previous_month_reflection,
+    },
+    {
+      title: 'Next month focus',
+      text: report.strategy_next_month,
+    },
+    {
+      title: 'Recommended actions',
+      text: [report.content_direction_next_month, report.boost_recommendation].filter(Boolean).join('\n\n') || null,
+    },
+  ]
+  const visibleCards = showEmptyStrategy ? cards : cards.filter(card => card.text)
+
+  if (visibleCards.length === 0) return null
+
+  return (
+    <section className="grid gap-4 lg:grid-cols-2">
+      {visibleCards.map(card => (
+        <StrategyCard key={card.title} title={card.title} text={card.text} showEmpty={showEmptyStrategy} />
+      ))}
+    </section>
   )
 }
 
@@ -343,15 +449,29 @@ function ManualPlatformTab({
 export function ClientDashboardShell({
   children,
   action,
+  client = null,
 }: {
   children: ReactNode
   action: ReactNode
+  client?: Client | null
 }) {
   return (
     <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.08),transparent_28rem)]">
       <header className="border-b border-brand-muted bg-brand-surface/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3 sm:px-6">
-          <BrandMark subtitle="Client dashboard" size="report" />
+          {client?.logo_url ? (
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brand-muted bg-brand-bg p-1.5">
+                <img src={client.logo_url} alt={`${client.name} logo`} className="h-full w-full object-contain" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-base font-semibold leading-tight text-white">{client.name}</p>
+                <p className="mt-0.5 truncate text-xs text-brand-primary">Client dashboard</p>
+              </div>
+            </div>
+          ) : (
+            <BrandMark subtitle="Client dashboard" size="report" />
+          )}
           {action}
         </div>
       </header>
@@ -365,6 +485,16 @@ export function EmptyReportState({ title, message }: { title: string; message: s
     <div className="bg-brand-surface border border-brand-muted rounded-xl p-6 max-w-xl shadow-[0_0_50px_rgba(45,212,191,0.06)] sm:p-10">
       <h1 className="text-2xl font-semibold text-white mb-3">{title}</h1>
       <p className="text-base text-brand-primary leading-relaxed sm:text-sm">{message}</p>
+    </div>
+  )
+}
+
+function ClientReportLogo({ client }: { client?: Client | null }) {
+  if (!client?.logo_url) return <BrandMark subtitle="CG Production House" size="report" />
+
+  return (
+    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-brand-muted bg-brand-bg/70 p-3 sm:h-24 sm:w-24">
+      <img src={client.logo_url} alt={`${client.name} logo`} className="h-full w-full object-contain" />
     </div>
   )
 }
@@ -460,11 +590,21 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
   )
 }
 
-function StrategyCard({ title, text }: { title: string; text: string | null }) {
+function StrategyCard({
+  title,
+  text,
+  showEmpty = true,
+}: {
+  title: string
+  text: string | null
+  showEmpty?: boolean
+}) {
+  if (!text && !showEmpty) return null
+
   return (
     <article className="bg-brand-surface border border-brand-muted rounded-xl p-5 sm:p-6">
       <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">{title}</p>
-      <p className="text-base text-white leading-relaxed whitespace-pre-line sm:text-sm">
+      <p className={`text-base leading-relaxed whitespace-pre-line sm:text-sm ${text ? 'text-white' : 'text-brand-primary'}`}>
         {text || 'No notes added yet.'}
       </p>
     </article>

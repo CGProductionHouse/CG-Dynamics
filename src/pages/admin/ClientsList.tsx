@@ -97,7 +97,7 @@ export default function ClientsList() {
   }
 
   async function handleSave(
-    input: { name: string; tier: 'standard' | 'premium'; active: boolean }
+    input: { name: string; tier: 'standard' | 'premium'; active: boolean; logo_url: string | null }
   ): Promise<string | null> {
     try {
       const existing = modal.client
@@ -189,21 +189,24 @@ export default function ClientsList() {
               clients.map(c => (
                 <article key={c.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h2 className="text-base font-semibold text-white break-words">{c.name}</h2>
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
-                            c.tier === 'premium'
-                              ? 'bg-brand-accent/20 text-brand-accent'
-                              : 'bg-brand-muted text-brand-primary'
-                          }`}
-                        >
-                          {c.tier}
-                        </span>
-                        <span className={`text-xs font-medium ${c.active ? 'text-green-400' : 'text-red-400'}`}>
-                          {c.active ? 'Active' : 'Inactive'}
-                        </span>
+                    <div className="flex min-w-0 gap-3">
+                      <ClientLogo client={c} />
+                      <div className="min-w-0">
+                        <h2 className="text-base font-semibold text-white break-words">{c.name}</h2>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <span
+                            className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
+                              c.tier === 'premium'
+                                ? 'bg-brand-accent/20 text-brand-accent'
+                                : 'bg-brand-muted text-brand-primary'
+                            }`}
+                          >
+                            {c.tier}
+                          </span>
+                          <span className={`text-xs font-medium ${c.active ? 'text-green-400' : 'text-red-400'}`}>
+                            {c.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     {isAdmin && (
@@ -224,7 +227,7 @@ export default function ClientsList() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-brand-muted text-left">
-                  <th className="px-4 py-3 text-brand-primary font-medium">Name</th>
+                  <th className="px-4 py-3 text-brand-primary font-medium">Client</th>
                   <th className="px-4 py-3 text-brand-primary font-medium">Tier</th>
                   <th className="px-4 py-3 text-brand-primary font-medium">Status</th>
                   {isAdmin && <th className="px-4 py-3" />}
@@ -243,7 +246,12 @@ export default function ClientsList() {
                       key={c.id}
                       className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
                     >
-                      <td className="px-4 py-3 text-white font-medium">{c.name}</td>
+                      <td className="px-4 py-3 text-white font-medium">
+                        <div className="flex items-center gap-3">
+                          <ClientLogo client={c} />
+                          <span>{c.name}</span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -314,6 +322,22 @@ function QuickLink({ to, label, primary = false }: { to: string; label: string; 
   )
 }
 
+function ClientLogo({ client }: { client: Client }) {
+  if (!client.logo_url) {
+    return (
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-brand-muted bg-brand-bg text-xs font-semibold text-brand-primary">
+        {client.name.slice(0, 2).toUpperCase()}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-brand-muted bg-brand-bg p-1.5">
+      <img src={client.logo_url} alt={`${client.name} logo`} className="h-full w-full object-contain" />
+    </div>
+  )
+}
+
 // Client modal
 
 function ClientModal({
@@ -322,11 +346,12 @@ function ClientModal({
   onClose,
 }: {
   client?: Client
-  onSave: (input: { name: string; tier: 'standard' | 'premium'; active: boolean }) => Promise<string | null>
+  onSave: (input: { name: string; tier: 'standard' | 'premium'; active: boolean; logo_url: string | null }) => Promise<string | null>
   onClose: () => void
 }) {
   const [name, setName] = useState(client?.name ?? '')
   const [tier, setTier] = useState<'standard' | 'premium'>(client?.tier ?? 'standard')
+  const [logoUrl, setLogoUrl] = useState(client?.logo_url ?? '')
   const [active, setActive] = useState(client?.active ?? true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -344,7 +369,7 @@ function ClientModal({
     setError(null)
     let saved = false
     try {
-      const err = await onSave({ name: trimmedName, tier, active })
+      const err = await onSave({ name: trimmedName, tier, active, logo_url: logoUrl.trim() || null })
       if (err) {
         setError(err)
         return
@@ -395,6 +420,22 @@ function ClientModal({
               <option value="standard">Standard (quarterly)</option>
               <option value="premium">Premium (monthly)</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-brand-accent mb-1.5">
+              Client logo URL
+            </label>
+            <input
+              type="url"
+              value={logoUrl}
+              onChange={e => setLogoUrl(e.target.value)}
+              className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent transition"
+              placeholder="https://example.com/logo.png"
+            />
+            <p className="mt-1.5 text-xs text-brand-primary">
+              Paste a logo image URL. Recommended: transparent PNG or square logo.
+            </p>
           </div>
 
           {client && (

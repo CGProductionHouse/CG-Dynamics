@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { getClient, type Client } from '../../lib/db/clients'
 import {
   getReportWithPosts,
   listPublishedReportsForClient,
@@ -45,6 +46,7 @@ function oneReportPerMonth(reports: Report[]) {
 export default function Dashboard() {
   const { profile, signOut } = useAuth()
   const [reports, setReports] = useState<Report[]>([])
+  const [client, setClient] = useState<Client | null>(null)
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const [report, setReport] = useState<ReportWithPosts | null>(null)
   const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
@@ -66,12 +68,17 @@ export default function Dashboard() {
       setLoading(true)
       setError(null)
       try {
-        const { data, error } = await listPublishedReportsForClient(profile.client_id)
+        const [reportsRes, clientRes] = await Promise.all([
+          listPublishedReportsForClient(profile.client_id),
+          getClient(profile.client_id),
+        ])
+        const { data, error } = reportsRes
         if (error) {
           setError(error.message)
         } else {
           setReports(data)
           setSelectedReportId(oneReportPerMonth(data)[0]?.id ?? null)
+          setClient(clientRes.data)
         }
       } catch (error) {
         setError(errorMessage(error, 'Could not load your reports.'))
@@ -144,7 +151,7 @@ export default function Dashboard() {
 
   if (!profile?.client_id) {
     return (
-      <ClientDashboardShell action={action}>
+      <ClientDashboardShell action={action} client={client}>
         <EmptyReportState
           title="Your account is pending setup"
           message="Your client access has not been linked yet. Contact your account manager to get access."
@@ -155,7 +162,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <ClientDashboardShell action={action}>
+      <ClientDashboardShell action={action} client={client}>
         <p className="text-brand-primary text-sm">Loading your reports...</p>
       </ClientDashboardShell>
     )
@@ -163,7 +170,7 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <ClientDashboardShell action={action}>
+      <ClientDashboardShell action={action} client={client}>
         <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
           {error}
         </p>
@@ -173,7 +180,7 @@ export default function Dashboard() {
 
   if (months.length === 0) {
     return (
-      <ClientDashboardShell action={action}>
+      <ClientDashboardShell action={action} client={client}>
         <EmptyReportState
           title="No published report yet"
           message="Your monthly reports will appear here as soon as they are published by CG Production House."
@@ -183,7 +190,7 @@ export default function Dashboard() {
   }
 
   return (
-    <ClientDashboardShell action={action}>
+    <ClientDashboardShell action={action} client={client}>
       <div className="mb-6">
         <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-3">Your reports</p>
         <div className="flex flex-wrap gap-2">
@@ -209,6 +216,7 @@ export default function Dashboard() {
       ) : report ? (
         <ClientReportView
           report={report}
+          client={client}
           manualMetrics={manualMetrics}
           previousReport={previousReport}
           previousManualMetrics={previousManualMetrics}

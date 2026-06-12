@@ -55,6 +55,10 @@ export default function PublishedPreview() {
   const clientReports = useMemo(() => {
     return reports.filter(report => report.client_id === selectedClientId)
   }, [reports, selectedClientId])
+  const selectedClient = useMemo(
+    () => clients.find(client => client.id === selectedClientId) ?? null,
+    [clients, selectedClientId]
+  )
   useEffect(() => {
     async function loadOptions() {
       setLoading(true)
@@ -261,12 +265,14 @@ export default function PublishedPreview() {
         <p className="text-sm text-brand-primary">Loading preview...</p>
       ) : report ? (
         <div className="overflow-hidden rounded-xl border border-brand-muted">
-          <ClientDashboardShell action={<span className="text-xs font-semibold text-brand-accent">Preview mode</span>}>
+          <ClientDashboardShell action={<span className="text-xs font-semibold text-brand-accent">Preview mode</span>} client={selectedClient}>
             <ClientReportView
               report={report}
+              client={selectedClient}
               manualMetrics={manualMetrics}
               previousReport={previousReport}
               previousManualMetrics={previousManualMetrics}
+              showEmptyStrategy
             />
           </ClientDashboardShell>
         </div>
