@@ -16,6 +16,12 @@ import {
 
 type TabKey = 'overview' | Platform
 
+const MANUAL_SOURCE_NOTE =
+  'Data source note: This platform data was added from an exported or manually captured account summary because full direct reporting access was not available. These figures are used as a best-effort reporting reference and may not contain the same level of detail as a direct platform export.'
+
+const REPORT_DISCLAIMER =
+  'Reporting disclaimer: This dashboard is compiled from exported platform data, manual summaries, and internal reporting tools. While every effort is made to keep the information accurate, small differences may occur between this report and the original source platforms due to export timing, platform processing delays, manual capture, or formatting differences. The original platform dashboards and exports remain the official source of record. Source exports can be provided on request.'
+
 export function ClientReportView({
   report,
   manualMetrics = [],
@@ -78,6 +84,10 @@ export function ClientReportView({
       ) : (
         <PlatformTab view={master.platforms.find(item => item.platform === tab)!} />
       )}
+
+      <p className="mt-8 border-t border-brand-muted pt-5 text-xs leading-relaxed text-brand-primary/80">
+        {REPORT_DISCLAIMER}
+      </p>
     </>
   )
 }
@@ -224,6 +234,10 @@ function ManualPlatformTab({ view }: { view: PlatformView }) {
         <StrategyCard title="Content type split" text={manual.content_type_split_notes} />
         <StrategyCard title="General notes" text={manual.general_notes} />
       </section>
+
+      <p className="mt-6 rounded-lg border border-brand-muted bg-brand-bg/40 px-4 py-3 text-xs leading-relaxed text-brand-primary/80">
+        {MANUAL_SOURCE_NOTE}
+      </p>
     </>
   )
 }

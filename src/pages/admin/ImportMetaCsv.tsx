@@ -525,6 +525,24 @@ export default function ImportMetaCsv() {
   const totals = importType === 'manual' ? manualTotals : metaTotals
   const activeCount = importType === 'manual' ? manualRows.length : rows.length
 
+  const manualWarnings: string[] = []
+  if (importType === 'manual' && manualRows.length > 0) {
+    const sum = (pick: (row: ParsedManualRow) => number) => manualRows.reduce((acc, row) => acc + pick(row), 0)
+    const totalEngagements = sum(row => row.engagements)
+    const totalAccountsEngaged = sum(row => row.accountsEngaged)
+    const totalProfileVisits = sum(row => row.profileVisits)
+    const totalExternalLinkTaps = sum(row => row.externalLinkTaps)
+    if (totalEngagements === 0) {
+      manualWarnings.push('Engagements are 0. If this is not intentional, make sure the Instagram Interactions screenshot was included before creating the CSV.')
+    }
+    if (totalAccountsEngaged === 0) {
+      manualWarnings.push('Accounts engaged is 0. This usually means the Instagram Interactions screen was not included.')
+    }
+    if (totalProfileVisits === 0 && totalExternalLinkTaps === 0) {
+      manualWarnings.push('Profile activity data is missing or not visible.')
+    }
+  }
+
   const hasPeriod = Boolean(periodStart && periodEnd)
   const detectedPeriodText = hasPeriod
     ? formatReportPeriod({ start: periodStart, end: periodEnd })
@@ -660,6 +678,19 @@ export default function ImportMetaCsv() {
               </p>
             )}
 
+            {manualWarnings.length > 0 && (
+              <ul className="space-y-2">
+                {manualWarnings.map(warning => (
+                  <li
+                    key={warning}
+                    className="text-xs text-amber-300 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2"
+                  >
+                    {warning}
+                  </li>
+                ))}
+              </ul>
+            )}
+
             {error && (
               <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
                 {error}
@@ -768,10 +799,15 @@ function MetaPreview({ rows }: { rows: ParsedMetaRow[] }) {
   )
 }
 
+function notePreview(text: string | null) {
+  if (!text) return '—'
+  return text.length > 40 ? `${text.slice(0, 40)}...` : text
+}
+
 function ManualPreview({ rows }: { rows: ParsedManualRow[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-sm">
+      <table className="w-full min-w-[1180px] text-sm">
         <thead>
           <tr className="text-left border-b border-brand-muted">
             <th className="px-4 py-3 text-brand-primary font-medium">Month</th>
@@ -780,13 +816,19 @@ function ManualPreview({ rows }: { rows: ParsedManualRow[] }) {
             <th className="px-4 py-3 text-brand-primary font-medium">Reach</th>
             <th className="px-4 py-3 text-brand-primary font-medium">Views</th>
             <th className="px-4 py-3 text-brand-primary font-medium">Engagements</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Accounts engaged</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Profile visits</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">External link taps</th>
             <th className="px-4 py-3 text-brand-primary font-medium">Followers</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Top content</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">Content split</th>
+            <th className="px-4 py-3 text-brand-primary font-medium">General notes</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={7} className="px-4 py-10 text-center text-brand-primary">
+              <td colSpan={13} className="px-4 py-10 text-center text-brand-primary">
                 No CSV rows loaded yet.
               </td>
             </tr>
@@ -802,7 +844,13 @@ function ManualPreview({ rows }: { rows: ParsedManualRow[] }) {
                 <td className="px-4 py-3 text-brand-primary">{formatNumber(row.reach)}</td>
                 <td className="px-4 py-3 text-brand-primary">{formatNumber(row.views)}</td>
                 <td className="px-4 py-3 text-brand-accent">{formatNumber(row.engagements)}</td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.accountsEngaged)}</td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.profileVisits)}</td>
+                <td className="px-4 py-3 text-brand-primary">{formatNumber(row.externalLinkTaps)}</td>
                 <td className="px-4 py-3 text-brand-primary">{formatNumber(row.followers)}</td>
+                <td className="px-4 py-3 text-brand-primary">{notePreview(row.topContentNotes)}</td>
+                <td className="px-4 py-3 text-brand-primary">{notePreview(row.contentTypeSplitNotes)}</td>
+                <td className="px-4 py-3 text-brand-primary">{notePreview(row.generalNotes)}</td>
               </tr>
             ))
           )}
