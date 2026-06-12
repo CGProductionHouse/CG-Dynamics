@@ -5,6 +5,7 @@ import type { Client } from '../../lib/db/clients'
 import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
 import { MANUAL_SOURCE_LABELS } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
+import { ClientLogo } from '../../components/ClientLogo'
 import type { MasterReportData, MetricMovement, PerformanceMovement, Platform, PlatformSource, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORMS,
@@ -459,11 +460,9 @@ export function ClientDashboardShell({
     <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.08),transparent_28rem)]">
       <header className="border-b border-brand-muted bg-brand-surface/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3 sm:px-6">
-          {client?.logo_url ? (
+          {client ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brand-muted bg-brand-bg p-1.5">
-                <img src={client.logo_url} alt={`${client.name} logo`} className="h-full w-full object-contain" />
-              </div>
+              <ClientLogo client={client} boxClassName="h-11 w-11 rounded-xl" />
               <div className="min-w-0">
                 <p className="truncate text-base font-semibold leading-tight text-white">{client.name}</p>
                 <p className="mt-0.5 truncate text-xs text-brand-primary">Client dashboard</p>
@@ -490,12 +489,15 @@ export function EmptyReportState({ title, message }: { title: string; message: s
 }
 
 function ClientReportLogo({ client }: { client?: Client | null }) {
-  if (!client?.logo_url) return <BrandMark subtitle="CG Production House" size="report" />
+  if (!client) return <BrandMark subtitle="CG Production House" size="report" />
 
   return (
-    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-brand-muted bg-brand-bg/70 p-3 sm:h-24 sm:w-24">
-      <img src={client.logo_url} alt={`${client.name} logo`} className="h-full w-full object-contain" />
-    </div>
+    <ClientLogo
+      client={client}
+      boxClassName="h-20 w-20 rounded-2xl sm:h-24 sm:w-24"
+      imgClassName="p-3"
+      textClassName="text-xl font-semibold text-brand-primary"
+    />
   )
 }
 

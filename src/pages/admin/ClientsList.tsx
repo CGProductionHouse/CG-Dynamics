@@ -10,6 +10,7 @@ import {
 } from '../../lib/db/clients'
 import { listImportGroups } from '../../lib/db/importedMetaPosts'
 import { listManualMetrics } from '../../lib/db/manualMetrics'
+import { ClientLogo } from '../../components/ClientLogo'
 import { listReports } from '../../lib/db/reports'
 
 interface OverviewStats {
@@ -319,22 +320,6 @@ function QuickLink({ to, label, primary = false }: { to: string; label: string; 
     >
       {label}
     </Link>
-  )
-}
-
-function ClientLogo({ client }: { client: Client }) {
-  if (!client.logo_url) {
-    return (
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-brand-muted bg-brand-bg text-xs font-semibold text-brand-primary">
-        {client.name.slice(0, 2).toUpperCase()}
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-brand-muted bg-brand-bg p-1.5">
-      <img src={client.logo_url} alt={`${client.name} logo`} className="h-full w-full object-contain" />
-    </div>
   )
 }
 
