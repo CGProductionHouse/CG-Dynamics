@@ -4,28 +4,62 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
+import { AuthMessage } from '../components/AuthShell'
+
+function isNotConfirmed(error: { message?: string; code?: string } | null) {
+  if (!error) return false
+  if (error.code === 'email_not_confirmed') return true
+  return /not confirmed/i.test(error.message ?? '')
+}
 
 export default function Login() {
-  const { signIn } = useAuth()
+  const { signIn, resendConfirmation } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [unconfirmed, setUnconfirmed] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [resendMessage, setResendMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    setUnconfirmed(false)
+    setResendMessage(null)
     setLoading(true)
     const { error, role } = await signIn(email, password)
     setLoading(false)
     if (error) {
-      setError(error.message)
+      if (isNotConfirmed(error as { message?: string; code?: string })) {
+        setUnconfirmed(true)
+        setError('This email is registered but not confirmed yet.')
+      } else {
+        setError(error.message)
+      }
     } else if (!role) {
       setError('Could not load your profile after sign in.')
     } else {
       navigate(role === 'client' ? '/dashboard' : '/admin')
     }
+  }
+
+  async function handleResend() {
+    if (resending) return
+    if (!email.trim()) {
+      setResendMessage({ tone: 'error', text: 'Enter your email above first.' })
+      return
+    }
+    setResending(true)
+    setResendMessage(null)
+    const { error } = await resendConfirmation(email.trim())
+    setResending(false)
+    setResendMessage(
+      error
+        ? { tone: 'error', text: error.message }
+        : { tone: 'success', text: 'Confirmation email sent. Check your inbox (and spam folder).' }
+    )
   }
 
   return (
@@ -56,18 +90,38 @@ export default function Login() {
             />
           </div>
 
-          <PasswordField
-            id="password"
-            label="Password"
-            autoComplete="current-password"
-            value={password}
-            onChange={setPassword}
-          />
+          <div>
+            <PasswordField
+              id="password"
+              label="Password"
+              autoComplete="current-password"
+              value={password}
+              onChange={setPassword}
+            />
+            <div className="mt-1.5 text-right">
+              <Link to="/forgot-password" className="text-xs text-brand-primary hover:text-brand-accent transition">
+                Forgot password?
+              </Link>
+            </div>
+          </div>
 
-          {error && (
-            <p role="alert" className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
-              {error}
-            </p>
+          {error && <AuthMessage tone={unconfirmed ? 'info' : 'error'}>{error}</AuthMessage>}
+
+          {unconfirmed && (
+            <div className="space-y-3 rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-3">
+              <p className="text-xs text-brand-primary">
+                Didn't get the confirmation email? We can send it again.
+              </p>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending}
+                className="w-full rounded-lg border border-brand-accent/40 bg-brand-accent/10 py-2 text-sm font-medium text-brand-accent hover:bg-brand-accent/20 transition disabled:opacity-60"
+              >
+                {resending ? 'Sending...' : 'Resend confirmation email'}
+              </button>
+              {resendMessage && <AuthMessage tone={resendMessage.tone}>{resendMessage.text}</AuthMessage>}
+            </div>
           )}
 
           <button

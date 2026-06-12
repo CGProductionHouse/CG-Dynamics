@@ -13,8 +13,15 @@ interface AuthContextType {
   profileError: string | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: AuthContextError | null; role: string | null }>
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: AuthError | null }>
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: AuthError | null; alreadyRegistered: boolean }>
+  resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>
+  updatePassword: (password: string) => Promise<{ error: AuthError | null }>
+  resendConfirmation: (email: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
+}
+
+function appOrigin() {
+  return typeof window !== 'undefined' ? window.location.origin : ''
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -122,10 +129,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signUp(email: string, password: string, fullName?: string) {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${appOrigin()}/login`,
+      },
+    })
+    // With email confirmations enabled, signing up an existing address returns
+    // an obfuscated user with no identities (and no error) so we don't leak
+    // which emails exist. Treat that as "already registered".
+    const alreadyRegistered = !error && !!data.user && (data.user.identities?.length ?? 0) === 0
+    return { error, alreadyRegistered }
+  }
+
+  async function resetPasswordForEmail(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${appOrigin()}/reset-password`,
+    })
+    return { error }
+  }
+
+  async function updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password })
+    return { error }
+  }
+
+  async function resendConfirmation(email: string) {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${appOrigin()}/login` },
     })
     return { error }
   }
@@ -142,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, profileError, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, profile, profileError, loading, signIn, signUp, resetPasswordForEmail, updatePassword, resendConfirmation, signOut }}>
       {children}
     </AuthContext.Provider>
   )

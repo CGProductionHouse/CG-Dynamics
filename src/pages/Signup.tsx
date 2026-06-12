@@ -4,19 +4,29 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
+import { AuthMessage } from '../components/AuthShell'
+
+const CARD =
+  'w-full max-w-sm bg-brand-surface/95 border border-brand-muted rounded-xl p-6 shadow-[0_0_50px_rgba(45,212,191,0.1)] sm:p-8'
+const PAGE =
+  'min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.1),transparent_28rem)] flex items-center justify-center px-4 py-8'
 
 export default function Signup() {
-  const { signUp } = useAuth()
+  const { signUp, resendConfirmation } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [pendingAccount, setPendingAccount] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [resendMessage, setResendMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    setResendMessage(null)
 
     if (password !== confirmPassword) {
       setError('Passwords do not match.')
@@ -24,20 +34,43 @@ export default function Signup() {
     }
 
     setLoading(true)
-    const { error } = await signUp(email, password)
+    const { error, alreadyRegistered } = await signUp(email, password)
     setLoading(false)
 
     if (error) {
-      setError(error.message)
+      if (/already|registered|exists/i.test(error.message)) {
+        setPendingAccount(true)
+      } else {
+        setError(error.message)
+      }
+    } else if (alreadyRegistered) {
+      setPendingAccount(true)
     } else {
       setSuccess(true)
     }
   }
 
+  async function handleResend() {
+    if (resending) return
+    if (!email.trim()) {
+      setResendMessage({ tone: 'error', text: 'Enter your email above first.' })
+      return
+    }
+    setResending(true)
+    setResendMessage(null)
+    const { error } = await resendConfirmation(email.trim())
+    setResending(false)
+    setResendMessage(
+      error
+        ? { tone: 'error', text: error.message }
+        : { tone: 'success', text: 'Confirmation email sent. Check your inbox (and spam folder).' }
+    )
+  }
+
   if (success) {
     return (
-      <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.1),transparent_28rem)] flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-sm bg-brand-surface/95 border border-brand-muted rounded-xl p-6 shadow-[0_0_50px_rgba(45,212,191,0.1)] text-center sm:p-8">
+      <div className={PAGE}>
+        <div className={`${CARD} text-center`}>
           <div className="w-12 h-12 rounded-full bg-brand-accent/10 border border-brand-accent/30 flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -45,8 +78,8 @@ export default function Signup() {
           </div>
           <h2 className="text-xl font-bold text-brand-accent mb-2">Check your email</h2>
           <p className="text-sm text-brand-primary">
-            We sent a confirmation link to{' '}
-            <span className="text-white">{email}</span>. Click it to activate your account.
+            We sent a confirmation link to <span className="text-white">{email}</span>. Click it to
+            activate your account.
           </p>
           <Link
             to="/login"
@@ -59,9 +92,59 @@ export default function Signup() {
     )
   }
 
+  if (pendingAccount) {
+    return (
+      <div className={PAGE}>
+        <div className={CARD}>
+          <div className="mb-6 flex justify-center">
+            <BrandMark subtitle="Client reporting portal" />
+          </div>
+          <h2 className="text-xl font-bold text-white text-center mb-2">This email may already be registered</h2>
+          <p className="text-sm text-brand-primary text-center mb-5">
+            Try signing in, reset your password, or resend the confirmation email for{' '}
+            <span className="text-white">{email}</span>.
+          </p>
+          <div className="space-y-3">
+            <Link
+              to="/login"
+              className="block w-full bg-brand-accent text-brand-bg text-center font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 transition"
+            >
+              Go to sign in
+            </Link>
+            <Link
+              to="/forgot-password"
+              className="block w-full border border-brand-muted text-brand-primary text-center py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition"
+            >
+              Reset password
+            </Link>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="block w-full border border-brand-accent/40 bg-brand-accent/10 text-brand-accent text-center py-2.5 rounded-lg text-sm font-medium hover:bg-brand-accent/20 transition disabled:opacity-60"
+            >
+              {resending ? 'Sending...' : 'Resend confirmation email'}
+            </button>
+            {resendMessage && <AuthMessage tone={resendMessage.tone}>{resendMessage.text}</AuthMessage>}
+          </div>
+          <p className="mt-6 text-center text-sm text-brand-primary">
+            Wrong email?{' '}
+            <button
+              type="button"
+              onClick={() => { setPendingAccount(false); setResendMessage(null) }}
+              className="text-brand-accent hover:brightness-110 font-medium transition"
+            >
+              Edit details
+            </button>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.1),transparent_28rem)] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm bg-brand-surface/95 border border-brand-muted rounded-xl p-6 shadow-[0_0_50px_rgba(45,212,191,0.1)] sm:p-8">
+    <div className={PAGE}>
+      <div className={CARD}>
         <div className="mb-7 flex justify-center">
           <BrandMark subtitle="Client reporting portal" />
         </div>
@@ -103,11 +186,7 @@ export default function Signup() {
             onChange={setConfirmPassword}
           />
 
-          {error && (
-            <p role="alert" className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
-              {error}
-            </p>
-          )}
+          {error && <AuthMessage tone="error">{error}</AuthMessage>}
 
           <button
             type="submit"
