@@ -107,6 +107,13 @@ export function reportMonth(periodEnd: string) {
   return match ? `${match[1]}-${match[2]}` : periodEnd.slice(0, 7)
 }
 
+export function previousReportMonth(month: string) {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return null
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 2, 1))
+  return date.toISOString().slice(0, 7)
+}
+
 export function formatReportPeriod(period: Pick<DetectedReportPeriod, 'start' | 'end'>) {
   const formatter = new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',

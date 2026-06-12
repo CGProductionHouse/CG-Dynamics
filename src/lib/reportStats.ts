@@ -144,6 +144,22 @@ export interface MasterReportData {
   bestPostOverall: ReportStatsPost | null
 }
 
+export interface MetricMovement {
+  current: number
+  previous: number | null
+  difference: number | null
+  percent: number | null
+  direction: 'up' | 'down' | 'flat' | 'missing'
+}
+
+export interface PerformanceMovement {
+  views: MetricMovement
+  reach: MetricMovement
+  engagements: MetricMovement
+  profileVisits: MetricMovement
+  followers: MetricMovement
+}
+
 // Combines snapshotted CSV posts with manual platform metrics into one
 // master view. For each platform we prefer post-level CSV data when it
 // exists, otherwise fall back to the manual aggregate, so totals are never
@@ -218,8 +234,67 @@ export function buildMasterReport(
   }
 }
 
+export function totalManualProfileVisits(manualMetrics: ManualPlatformMetric[]) {
+  return manualMetrics.reduce((sum, metric) => sum + metric.profile_visits, 0)
+}
+
+export function totalManualFollowers(manualMetrics: ManualPlatformMetric[]) {
+  const withFollowers = manualMetrics.filter(metric => metric.followers > 0)
+  if (withFollowers.length === 0) return null
+  return withFollowers.reduce((sum, metric) => sum + metric.followers, 0)
+}
+
+export function compareMetric(current: number, previous: number | null | undefined): MetricMovement {
+  if (previous === null || previous === undefined) {
+    return {
+      current,
+      previous: null,
+      difference: null,
+      percent: null,
+      direction: 'missing',
+    }
+  }
+
+  const difference = current - previous
+  return {
+    current,
+    previous,
+    difference,
+    percent: previous === 0 ? null : (difference / previous) * 100,
+    direction: difference > 0 ? 'up' : difference < 0 ? 'down' : 'flat',
+  }
+}
+
+export function buildPerformanceMovement(
+  current: MasterReportData,
+  previous: MasterReportData | null,
+  currentManualMetrics: ManualPlatformMetric[],
+  previousManualMetrics: ManualPlatformMetric[]
+): PerformanceMovement {
+  const currentFollowers = totalManualFollowers(currentManualMetrics)
+  const previousFollowers = totalManualFollowers(previousManualMetrics)
+  const previousProfileVisits = previousManualMetrics.length > 0
+    ? totalManualProfileVisits(previousManualMetrics)
+    : null
+
+  return {
+    views: compareMetric(current.totalViews, previous?.totalViews),
+    reach: compareMetric(current.totalReach, previous?.totalReach),
+    engagements: compareMetric(current.totalEngagements, previous?.totalEngagements),
+    profileVisits: compareMetric(
+      totalManualProfileVisits(currentManualMetrics),
+      previousProfileVisits
+    ),
+    followers: compareMetric(currentFollowers ?? 0, previousFollowers),
+  }
+}
+
 export function formatNumber(value: number) {
   return new Intl.NumberFormat('en-US').format(value)
+}
+
+export function formatPercent(value: number) {
+  return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
 }
 
 export function formatDate(value: string | null) {

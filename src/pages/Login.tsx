@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordField from '../components/PasswordField'
+import BrandMark from '../components/BrandMark'
 
 export default function Login() {
   const { signIn } = useAuth()
@@ -28,11 +29,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm bg-brand-surface border border-brand-muted rounded-xl p-6 shadow-[0_0_40px_rgba(45,212,191,0.08)] sm:p-8">
+    <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.1),transparent_28rem)] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm bg-brand-surface/95 border border-brand-muted rounded-xl p-6 shadow-[0_0_50px_rgba(45,212,191,0.1)] sm:p-8">
+        <div className="mb-7 flex justify-center">
+          <BrandMark subtitle="Client reporting portal" />
+        </div>
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl font-bold text-brand-accent">Sign in</h1>
-          <p className="mt-1 text-sm text-brand-primary">Welcome back to CG Dynamics</p>
+          <h1 className="text-2xl font-bold text-white">Sign in</h1>
+          <p className="mt-1 text-sm text-brand-primary">Access your CG Production House reporting workspace.</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
@@ -71,7 +75,7 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-brand-accent text-brand-bg font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-surface transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 

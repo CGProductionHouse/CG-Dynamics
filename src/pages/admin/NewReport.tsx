@@ -10,15 +10,18 @@ import {
   listManualMetricsForClient,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
-import { detectReportPeriod, formatReportPeriod, reportMonth } from '../../lib/reportPeriod'
+import { detectReportPeriod, formatReportPeriod, previousReportMonth, reportMonth } from '../../lib/reportPeriod'
 import {
   PLATFORM_LABELS,
+  buildPerformanceMovement,
   buildMasterReport,
   calculateReportStats,
   formatDate,
   formatNumber,
+  formatPercent,
   importedToStatsPost,
   shortCaption,
+  type MetricMovement,
 } from '../../lib/reportStats'
 
 interface ReportFields {
@@ -255,9 +258,15 @@ export default function NewReport() {
   // The report month is the calendar month of the period end date.
   const currentMonth = reportMonth(periodEnd)
   const currentMonthLabel = monthName(currentMonth)
+  const previousMonth = previousReportMonth(currentMonth)
+  const previousMonthLabel = previousMonth ? monthName(previousMonth) : 'Previous month'
   const monthManualMetrics = useMemo(
     () => manualMetrics.filter(metric => metric.month === currentMonth),
     [manualMetrics, currentMonth]
+  )
+  const previousMonthManualMetrics = useMemo(
+    () => previousMonth ? manualMetrics.filter(metric => metric.month === previousMonth) : [],
+    [manualMetrics, previousMonth]
   )
   // Manual summaries that exist for this client but a different month.
   const otherMonthManualMetrics = useMemo(
@@ -305,10 +314,26 @@ export default function NewReport() {
     })
   }, [importedPosts, periodBatchId, periodEnd, periodSource, periodStart])
   const statsPosts = useMemo(() => periodImportedPosts.map(importedToStatsPost), [periodImportedPosts])
+  const previousMonthImportedPosts = useMemo(
+    () => previousMonth
+      ? importedPosts.filter(post => postMonth(post) === previousMonth).map(importedToStatsPost)
+      : [],
+    [importedPosts, previousMonth]
+  )
   const stats = useMemo(() => calculateReportStats(statsPosts), [statsPosts])
   // Combined view: CSV posts + manual summary metrics for the report month
   // (same logic the client sees).
   const master = useMemo(() => buildMasterReport(statsPosts, monthManualMetrics), [statsPosts, monthManualMetrics])
+  const previousMaster = useMemo(
+    () => previousMonthImportedPosts.length > 0 || previousMonthManualMetrics.length > 0
+      ? buildMasterReport(previousMonthImportedPosts, previousMonthManualMetrics)
+      : null,
+    [previousMonthImportedPosts, previousMonthManualMetrics]
+  )
+  const movement = useMemo(
+    () => buildPerformanceMovement(master, previousMaster, monthManualMetrics, previousMonthManualMetrics),
+    [master, monthManualMetrics, previousMaster, previousMonthManualMetrics]
+  )
   const statsText = [
     `Total reach: ${formatNumber(master.totalReach)}`,
     `Views: ${formatNumber(master.totalViews)}`,
@@ -516,6 +541,33 @@ export default function NewReport() {
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
+            <h2 className="text-sm font-semibold text-white mb-1">Growth comparison</h2>
+            <p className="text-xs text-brand-primary">
+              Comparing {currentMonthLabel} with {previousMonthLabel}.
+            </p>
+          </div>
+          <SourcePill
+            label={previousMaster ? 'Comparison available' : 'Previous month data not available'}
+            tone={previousMaster ? 'posts' : 'none'}
+          />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <MovementCard label="Views" movement={movement.views} />
+          <MovementCard label="Reach" movement={movement.reach} />
+          <MovementCard label="Engagements" movement={movement.engagements} />
+          <MovementCard label="Profile visits" movement={movement.profileVisits} />
+          <MovementCard label="Followers" movement={movement.followers} />
+        </div>
+        {!previousMaster && (
+          <p className="mt-4 rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-2 text-xs text-brand-primary">
+            Growth cannot be calculated yet because no imported posts or manual summary metrics were found for {previousMonthLabel}.
+          </p>
+        )}
+      </section>
+
+      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
             <h2 className="text-sm font-semibold text-white mb-1">Platform breakdown</h2>
             <p className="text-xs text-brand-primary">
               Matching {selectedClient?.name ?? 'client'} data for {currentMonthLabel}.
@@ -583,7 +635,9 @@ export default function NewReport() {
           Report month is <span className="text-white">{currentMonthLabel}</span>. Rows matching this month feed into the report above.
         </p>
         {manualMetrics.length === 0 ? (
-          <p className="text-xs text-brand-primary">No manual summaries uploaded for this client yet.</p>
+          <p className="rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-3 text-xs text-brand-primary">
+            No manual summaries uploaded for this client yet. Add one when a platform only has monthly summary data.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
@@ -600,14 +654,16 @@ export default function NewReport() {
               <tbody>
                 {manualMetrics.map(metric => {
                   const matches = metric.month === currentMonth
+                  const previousMatches = metric.month === previousMonth
                   return (
                     <tr
                       key={metric.id}
-                      className={`border-b border-brand-muted/70 last:border-0 ${matches ? 'bg-brand-accent/[0.06]' : ''}`}
+                      className={`border-b border-brand-muted/70 last:border-0 ${matches ? 'bg-brand-accent/[0.06]' : previousMatches ? 'bg-sky-300/[0.05]' : ''}`}
                     >
                       <td className="px-3 py-2 text-white">
                         {metric.month}
                         {matches && <span className="ml-2 text-[11px] text-brand-accent">this month</span>}
+                        {previousMatches && <span className="ml-2 text-[11px] text-sky-200">previous month</span>}
                       </td>
                       <td className="px-3 py-2 text-brand-primary">{PLATFORM_LABELS[metric.platform]}</td>
                       <td className="px-3 py-2 text-brand-primary">{formatNumber(metric.reach)}</td>
@@ -735,6 +791,32 @@ function SourcePill({ label, tone }: { label: string; tone: 'posts' | 'manual' |
     <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${classes}`}>
       {label}
     </span>
+  )
+}
+
+function movementText(movement: MetricMovement) {
+  if (movement.direction === 'missing' || movement.difference === null) {
+    return 'Previous month data not available'
+  }
+  const diff = `${movement.difference > 0 ? '+' : ''}${formatNumber(movement.difference)}`
+  if (movement.percent === null) return `${diff} difference`
+  return `${diff} (${formatPercent(movement.percent)})`
+}
+
+function MovementCard({ label, movement }: { label: string; movement: MetricMovement }) {
+  const tone = {
+    up: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent',
+    down: 'border-red-300/25 bg-red-400/10 text-red-200',
+    flat: 'border-brand-muted bg-brand-bg/50 text-brand-primary',
+    missing: 'border-brand-muted bg-brand-bg/40 text-brand-primary',
+  }[movement.direction]
+
+  return (
+    <article className={`rounded-lg border p-3 ${tone}`}>
+      <p className="text-[11px] uppercase tracking-[0.12em] opacity-80">{label}</p>
+      <p className="mt-2 text-xl font-semibold text-white">{formatNumber(movement.current)}</p>
+      <p className="mt-1 text-xs">{movementText(movement)}</p>
+    </article>
   )
 }
 

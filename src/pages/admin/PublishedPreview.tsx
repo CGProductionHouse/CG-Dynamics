@@ -13,7 +13,7 @@ import {
   listManualMetricsForClientMonth,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
-import { formatReportPeriod, reportMonth } from '../../lib/reportPeriod'
+import { formatReportPeriod, previousReportMonth, reportMonth } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from '../client/ClientReportView'
 
 function errorMessage(error: unknown, fallback: string) {
@@ -44,6 +44,8 @@ export default function PublishedPreview() {
   const [selectedReportId, setSelectedReportId] = useState(initialReportId)
   const [report, setReport] = useState<ReportWithPosts | null>(null)
   const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
+  const [previousReport, setPreviousReport] = useState<ReportWithPosts | null>(null)
+  const [previousManualMetrics, setPreviousManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -87,6 +89,8 @@ export default function PublishedPreview() {
   useEffect(() => {
     if (!selectedReportId) {
       setReport(null)
+      setPreviousReport(null)
+      setPreviousManualMetrics([])
       return
     }
 
@@ -102,10 +106,29 @@ export default function PublishedPreview() {
         setReport(data)
         setSearchParams({ reportId: selectedReportId }, { replace: true })
         if (data) {
-          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, reportMonth(data.period_end))
+          const currentMonth = reportMonth(data.period_end)
+          const previousMonth = previousReportMonth(currentMonth)
+          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, currentMonth)
           setManualMetrics(metrics)
+          if (previousMonth) {
+            const previous = reports.find(report =>
+              report.client_id === data.client_id &&
+              reportMonth(report.period_end) === previousMonth
+            )
+            const [previousReportResult, previousMetricsResult] = await Promise.all([
+              previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
+              listManualMetricsForClientMonth(data.client_id, previousMonth),
+            ])
+            setPreviousReport(previousReportResult.data)
+            setPreviousManualMetrics(previousMetricsResult.data)
+          } else {
+            setPreviousReport(null)
+            setPreviousManualMetrics([])
+          }
         } else {
           setManualMetrics([])
+          setPreviousReport(null)
+          setPreviousManualMetrics([])
         }
       } catch (error) {
         setError(errorMessage(error, 'Could not load this report preview.'))
@@ -115,7 +138,7 @@ export default function PublishedPreview() {
     }
 
     void loadReport()
-  }, [selectedReportId, setSearchParams])
+  }, [reports, selectedReportId, setSearchParams])
 
   function handleClientChange(clientId: string) {
     setSelectedClientId(clientId)
@@ -239,7 +262,12 @@ export default function PublishedPreview() {
       ) : report ? (
         <div className="overflow-hidden rounded-xl border border-brand-muted">
           <ClientDashboardShell action={<span className="text-xs font-semibold text-brand-accent">Preview mode</span>}>
-            <ClientReportView report={report} manualMetrics={manualMetrics} />
+            <ClientReportView
+              report={report}
+              manualMetrics={manualMetrics}
+              previousReport={previousReport}
+              previousManualMetrics={previousManualMetrics}
+            />
           </ClientDashboardShell>
         </div>
       ) : (

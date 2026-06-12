@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import BrandMark from '../../components/BrandMark'
 
 function navClass({ isActive }: { isActive: boolean }) {
   return `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -56,8 +57,7 @@ export default function AdminLayout() {
       <header className="sticky top-0 z-40 border-b border-brand-muted bg-brand-surface md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
-            <p className="text-brand-accent font-bold text-base leading-tight">CG Dynamics</p>
-            <p className="text-xs text-brand-primary mt-0.5 capitalize">{profile?.role ?? 'staff'}</p>
+            <BrandMark subtitle={profile?.role ?? 'staff'} compact />
           </div>
           <button
             type="button"
@@ -79,10 +79,7 @@ export default function AdminLayout() {
           />
           <aside className="absolute right-0 top-0 flex h-full w-[min(20rem,86vw)] flex-col bg-brand-surface border-l border-brand-muted shadow-[0_0_40px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-brand-muted">
-              <div>
-                <p className="text-brand-accent font-bold text-base leading-tight">CG Dynamics</p>
-                <p className="text-xs text-brand-primary mt-0.5 capitalize">{profile?.role ?? 'staff'}</p>
-              </div>
+              <BrandMark subtitle={profile?.role ?? 'staff'} compact />
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
@@ -109,8 +106,7 @@ export default function AdminLayout() {
 
       <aside className="hidden w-56 shrink-0 bg-brand-surface border-r border-brand-muted md:flex md:flex-col">
         <div className="px-5 py-4 border-b border-brand-muted">
-          <p className="text-brand-accent font-bold text-base leading-tight">CG Dynamics</p>
-          <p className="text-xs text-brand-primary mt-0.5 capitalize">{profile?.role ?? 'staff'}</p>
+          <BrandMark subtitle={profile?.role ?? 'staff'} compact />
         </div>
 
         <nav className="flex-1 p-3 space-y-0.5">

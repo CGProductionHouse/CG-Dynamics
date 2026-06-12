@@ -3,13 +3,17 @@ import type { ReactNode } from 'react'
 import type { ReportWithPosts } from '../../lib/db/reports'
 import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
 import { MANUAL_SOURCE_LABELS } from '../../lib/db/manualMetrics'
-import type { MasterReportData, Platform, PlatformSource, PlatformView, ReportStatsPost } from '../../lib/reportStats'
+import BrandMark from '../../components/BrandMark'
+import type { MasterReportData, MetricMovement, PerformanceMovement, Platform, PlatformSource, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORMS,
   PLATFORM_LABELS,
   buildMasterReport,
+  buildPerformanceMovement,
+  compareMetric,
   formatDate,
   formatNumber,
+  formatPercent,
   reportPostToStatsPost,
   shortCaption,
 } from '../../lib/reportStats'
@@ -25,9 +29,13 @@ const REPORT_DISCLAIMER =
 export function ClientReportView({
   report,
   manualMetrics = [],
+  previousReport = null,
+  previousManualMetrics = [],
 }: {
   report: ReportWithPosts
   manualMetrics?: ManualPlatformMetric[]
+  previousReport?: ReportWithPosts | null
+  previousManualMetrics?: ManualPlatformMetric[]
 }) {
   const [tab, setTab] = useState<TabKey>('overview')
 
@@ -39,6 +47,20 @@ export function ClientReportView({
     () => buildMasterReport(statsPosts, manualMetrics),
     [statsPosts, manualMetrics]
   )
+  const previousStatsPosts = useMemo<ReportStatsPost[]>(
+    () => previousReport?.posts.map(reportPostToStatsPost) ?? [],
+    [previousReport]
+  )
+  const previousMaster = useMemo(
+    () => previousReport || previousManualMetrics.length > 0
+      ? buildMasterReport(previousStatsPosts, previousManualMetrics)
+      : null,
+    [previousManualMetrics, previousReport, previousStatsPosts]
+  )
+  const movement = useMemo(
+    () => buildPerformanceMovement(master, previousMaster, manualMetrics, previousManualMetrics),
+    [manualMetrics, master, previousManualMetrics, previousMaster]
+  )
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'overview', label: 'Overview' },
@@ -47,13 +69,14 @@ export function ClientReportView({
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-6 rounded-2xl border border-brand-muted bg-brand-surface/80 p-5 shadow-[0_0_60px_rgba(45,212,191,0.06)] lg:mb-8 lg:p-7">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Monthly master report</p>
-          <h1 className="text-2xl font-semibold text-white sm:text-3xl">
+          <p className="text-xs uppercase tracking-[0.22em] text-brand-accent mb-2">Monthly master report</p>
+          <h1 className="text-3xl font-semibold text-white sm:text-4xl">
             {report.report_title || 'Monthly Performance Report'}
           </h1>
-          <p className="text-sm text-brand-primary mt-2">
+          <p className="text-sm text-brand-primary mt-3">
             {formatDate(report.period_start)} to {formatDate(report.period_end)}
           </p>
         </div>
@@ -61,17 +84,18 @@ export function ClientReportView({
           <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Status</p>
           <p className="mt-1 text-sm font-semibold text-brand-accent">Published report</p>
         </div>
+        </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2 border-b border-brand-muted pb-3">
+      <div className="mb-6 flex gap-2 overflow-x-auto border-b border-brand-muted pb-3">
         {tabs.map(item => (
           <button
             key={item.key}
             type="button"
             onClick={() => setTab(item.key)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            className={`shrink-0 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
               tab === item.key
-                ? 'bg-brand-accent text-brand-bg'
+                ? 'bg-brand-accent text-brand-bg shadow-[0_0_24px_rgba(45,212,191,0.12)]'
                 : 'border border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
             }`}
           >
@@ -81,9 +105,13 @@ export function ClientReportView({
       </div>
 
       {tab === 'overview' ? (
-        <OverviewTab report={report} master={master} />
+        <OverviewTab report={report} master={master} movement={movement} />
       ) : (
-        <PlatformTab view={master.platforms.find(item => item.platform === tab)!} />
+        <PlatformTab
+          view={master.platforms.find(item => item.platform === tab)!}
+          previousView={previousMaster?.platforms.find(item => item.platform === tab) ?? null}
+          previousManual={previousManualMetrics.find(metric => metric.platform === tab) ?? null}
+        />
       )}
 
       <p className="mt-8 border-t border-brand-muted pt-5 text-xs leading-relaxed text-brand-primary/80">
@@ -93,7 +121,15 @@ export function ClientReportView({
   )
 }
 
-function OverviewTab({ report, master }: { report: ReportWithPosts; master: MasterReportData }) {
+function OverviewTab({
+  report,
+  master,
+  movement,
+}: {
+  report: ReportWithPosts
+  master: MasterReportData
+  movement: PerformanceMovement
+}) {
   return (
     <>
       <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
@@ -124,6 +160,8 @@ function OverviewTab({ report, master }: { report: ReportWithPosts; master: Mast
           <p className="text-sm text-brand-primary">No data uploaded yet.</p>
         )}
       </section>
+
+      <PerformanceMovementSection movement={movement} />
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
         <div className="mb-4">
@@ -161,24 +199,32 @@ function OverviewTab({ report, master }: { report: ReportWithPosts; master: Mast
   )
 }
 
-function PlatformTab({ view }: { view: PlatformView }) {
+function PlatformTab({
+  view,
+  previousView,
+  previousManual,
+}: {
+  view: PlatformView
+  previousView: PlatformView | null
+  previousManual: ManualPlatformMetric | null
+}) {
   if (view.source === 'none') {
     return (
       <div className="bg-brand-surface border border-brand-muted rounded-xl p-6 sm:p-10">
         <h2 className="text-lg font-semibold text-white mb-2">{view.label}</h2>
-        <p className="text-sm text-brand-primary">No data uploaded yet.</p>
+        <p className="text-sm text-brand-primary">No platform data is available for this month yet.</p>
       </div>
     )
   }
 
   if (view.source === 'manual') {
-    return <ManualPlatformTab view={view} />
+    return <ManualPlatformTab view={view} previousManual={previousManual} />
   }
 
-  return <PostsPlatformTab view={view} />
+  return <PostsPlatformTab view={view} previousView={previousView} />
 }
 
-function PostsPlatformTab({ view }: { view: PlatformView }) {
+function PostsPlatformTab({ view, previousView }: { view: PlatformView; previousView: PlatformView | null }) {
   return (
     <>
       <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
@@ -186,6 +232,12 @@ function PostsPlatformTab({ view }: { view: PlatformView }) {
         <StatCard label="Views" value={formatNumber(view.views)} />
         <StatCard label="Engagements" value={formatNumber(view.engagements)} />
         <StatCard label="Posts" value={formatNumber(view.postCount)} />
+      </section>
+
+      <section className="grid gap-3 mb-6 sm:grid-cols-3">
+        <MovementCard label="Views growth" movement={compareMetric(view.views, previousView?.views)} />
+        <MovementCard label="Reach growth" movement={compareMetric(view.reach, previousView?.reach)} />
+        <MovementCard label="Engagement growth" movement={compareMetric(view.engagements, previousView?.engagements)} />
       </section>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
@@ -231,8 +283,15 @@ function PostsPlatformTab({ view }: { view: PlatformView }) {
   )
 }
 
-function ManualPlatformTab({ view }: { view: PlatformView }) {
+function ManualPlatformTab({
+  view,
+  previousManual,
+}: {
+  view: PlatformView
+  previousManual: ManualPlatformMetric | null
+}) {
   const manual = view.manual!
+  const followerGrowth = compareMetric(manual.followers, previousManual?.followers)
   return (
     <>
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -252,6 +311,20 @@ function ManualPlatformTab({ view }: { view: PlatformView }) {
         <StatCard label="Accounts engaged" value={formatNumber(manual.accounts_engaged)} />
         <StatCard label="Profile visits" value={formatNumber(manual.profile_visits)} />
         <StatCard label="External link taps" value={formatNumber(manual.external_link_taps)} />
+      </section>
+
+      <section className="grid gap-3 mb-6 sm:grid-cols-2 lg:grid-cols-5">
+        <MovementCard label="Views growth" movement={compareMetric(view.views, previousManual?.views)} />
+        <MovementCard label="Reach growth" movement={compareMetric(view.reach, previousManual?.reach)} />
+        <MovementCard label="Engagement growth" movement={compareMetric(view.engagements, previousManual?.engagements)} />
+        <MovementCard label="Profile visit growth" movement={compareMetric(manual.profile_visits, previousManual?.profile_visits)} />
+        <MovementCard label="Follower growth" movement={followerGrowth} />
+      </section>
+
+      <section className="grid gap-4 mb-6 lg:grid-cols-3">
+        <InsightCard title="Traffic" text={`${formatNumber(manual.profile_visits)} profile visits and ${formatNumber(manual.external_link_taps)} external link taps.`} />
+        <InsightCard title="Followers" text={followerGrowth.direction === 'missing' ? 'Previous follower count not available.' : movementText(followerGrowth)} />
+        <InsightCard title="Source" text={MANUAL_SOURCE_LABELS[manual.source_type]} />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
@@ -275,13 +348,10 @@ export function ClientDashboardShell({
   action: ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-brand-bg">
-      <header className="border-b border-brand-muted bg-brand-surface/80">
+    <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.08),transparent_28rem)]">
+      <header className="border-b border-brand-muted bg-brand-surface/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3 sm:px-6">
-          <div>
-            <p className="text-brand-accent font-bold text-base leading-tight">CG Dynamics</p>
-            <p className="text-xs text-brand-primary mt-0.5">Client dashboard</p>
-          </div>
+          <BrandMark subtitle="Client dashboard" />
           {action}
         </div>
       </header>
@@ -292,16 +362,74 @@ export function ClientDashboardShell({
 
 export function EmptyReportState({ title, message }: { title: string; message: string }) {
   return (
-    <div className="bg-brand-surface border border-brand-muted rounded-xl p-6 max-w-xl sm:p-10">
+    <div className="bg-brand-surface border border-brand-muted rounded-xl p-6 max-w-xl shadow-[0_0_50px_rgba(45,212,191,0.06)] sm:p-10">
       <h1 className="text-2xl font-semibold text-white mb-3">{title}</h1>
       <p className="text-base text-brand-primary leading-relaxed sm:text-sm">{message}</p>
     </div>
   )
 }
 
+function PerformanceMovementSection({ movement }: { movement: PerformanceMovement }) {
+  return (
+    <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 shadow-[0_0_50px_rgba(45,212,191,0.04)] sm:p-6">
+      <div className="mb-4">
+        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Growth vs previous month</p>
+        <h2 className="mt-2 text-lg font-semibold text-white">Performance movement</h2>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <MovementCard label="Views growth" movement={movement.views} />
+        <MovementCard label="Reach growth" movement={movement.reach} />
+        <MovementCard label="Engagement growth" movement={movement.engagements} />
+        <MovementCard label="Profile visit growth" movement={movement.profileVisits} />
+        <MovementCard label="Follower growth" movement={movement.followers} />
+      </div>
+    </section>
+  )
+}
+
+function movementText(movement: MetricMovement) {
+  if (movement.direction === 'missing' || movement.difference === null) {
+    return 'Previous month data not available.'
+  }
+  const diff = `${movement.difference > 0 ? '+' : ''}${formatNumber(movement.difference)}`
+  if (movement.percent === null) return `${diff} vs previous month`
+  return `${diff} (${formatPercent(movement.percent)}) vs previous month`
+}
+
+function MovementCard({ label, movement }: { label: string; movement: MetricMovement }) {
+  const tone = {
+    up: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent',
+    down: 'border-red-300/25 bg-red-400/10 text-red-200',
+    flat: 'border-brand-muted bg-brand-bg/50 text-brand-primary',
+    missing: 'border-brand-muted bg-brand-bg/40 text-brand-primary',
+  }[movement.direction]
+
+  const currentText = formatNumber(movement.current)
+  const detail = movement.direction === 'missing'
+    ? (label.toLowerCase().includes('follower') ? 'Previous follower count not available' : 'Previous month data not available')
+    : movementText(movement)
+
+  return (
+    <article className={`rounded-xl border p-4 ${tone}`}>
+      <p className="text-[11px] uppercase tracking-[0.12em] opacity-80">{label}</p>
+      <p className="mt-3 text-2xl font-semibold text-white">{currentText}</p>
+      <p className="mt-2 text-xs leading-relaxed">{detail}</p>
+    </article>
+  )
+}
+
+function InsightCard({ title, text }: { title: string; text: string | null }) {
+  return (
+    <article className="rounded-xl border border-brand-muted bg-brand-surface p-5">
+      <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">{title}</p>
+      <p className="text-sm leading-relaxed text-white">{text || 'No notes added yet.'}</p>
+    </article>
+  )
+}
+
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-brand-surface border border-brand-muted rounded-xl p-5 shadow-[0_0_40px_rgba(45,212,191,0.05)] sm:p-6">
+    <div className="bg-brand-surface border border-brand-muted rounded-xl p-5 shadow-[0_0_40px_rgba(45,212,191,0.07)] sm:p-6">
       <p className="text-xs uppercase tracking-[0.12em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
       <p className="text-2xl font-semibold text-white mt-4 break-words sm:text-3xl">{value}</p>
     </div>
