@@ -22,8 +22,9 @@ import PublishedPreview from './pages/admin/PublishedPreview'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
-  const { user, profile, profileError, loading } = useAuth()
+  const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
   if (loading) return <div className="min-h-screen bg-brand-bg" />
+  if (isPasswordRecovery) return <Navigate to="/reset-password" replace />
   if (!user) return <Navigate to="/login" replace />
   if (profileError) {
     return (

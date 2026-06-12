@@ -1,36 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase } from '../lib/supabase'
 import AuthShell, { AuthMessage } from '../components/AuthShell'
 import PasswordField from '../components/PasswordField'
 
 export default function ResetPassword() {
-  const { updatePassword } = useAuth()
+  const { updatePassword, signOut, isPasswordRecovery, loading } = useAuth()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
-  // Whether we arrived here from a valid recovery link.
-  const [recoveryReady, setRecoveryReady] = useState(false)
-
-  useEffect(() => {
-    // Supabase parses the recovery token from the URL and emits a
-    // PASSWORD_RECOVERY event; a session also means the link was valid.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || session) setRecoveryReady(true)
-    })
-    void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setRecoveryReady(true)
-    })
-    return () => subscription.unsubscribe()
-  }, [])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (loading) return
+    if (submitting) return
     if (password.length < 6) {
       setError('Choose a password with at least 6 characters.')
       return
@@ -39,23 +24,26 @@ export default function ResetPassword() {
       setError('Passwords do not match.')
       return
     }
-    setLoading(true)
+    setSubmitting(true)
     setError(null)
     const { error } = await updatePassword(password)
-    setLoading(false)
     if (error) {
+      setSubmitting(false)
       setError(error.message)
       return
     }
+    // End the recovery session so the user signs in fresh with the new password.
     setDone(true)
+    void signOut()
   }
 
+  // Success — shown regardless of the sign-out that follows.
   if (done) {
     return (
       <AuthShell title="Password updated" subtitle="You're all set">
         <div className="space-y-5">
           <AuthMessage tone="success">
-            Your password has been updated. You can now sign in with your new password.
+            Your password has been updated. Sign in with your new password to continue.
           </AuthMessage>
           <Link
             to="/login"
@@ -63,6 +51,38 @@ export default function ResetPassword() {
           >
             Continue to sign in
           </Link>
+        </div>
+      </AuthShell>
+    )
+  }
+
+  if (loading) {
+    return (
+      <AuthShell title="Set a new password">
+        <p className="text-center text-sm text-brand-primary">Checking your reset link...</p>
+      </AuthShell>
+    )
+  }
+
+  // No active recovery link/session — direct visit or expired link.
+  if (!isPasswordRecovery) {
+    return (
+      <AuthShell title="Reset link needed">
+        <div className="space-y-5">
+          <AuthMessage tone="info">
+            This reset link is missing or has expired. Request a new password reset.
+          </AuthMessage>
+          <Link
+            to="/forgot-password"
+            className="block w-full bg-brand-accent text-brand-bg text-center font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 transition"
+          >
+            Request a new reset link
+          </Link>
+          <p className="text-center text-sm text-brand-primary">
+            <Link to="/login" className="text-brand-accent hover:brightness-110 font-medium transition">
+              Back to sign in
+            </Link>
+          </p>
         </div>
       </AuthShell>
     )
@@ -92,21 +112,14 @@ export default function ResetPassword() {
           onChange={setConfirmPassword}
         />
 
-        {!recoveryReady && (
-          <AuthMessage tone="info">
-            Open this page from the reset link in your email. If you typed the address directly or the
-            link expired, request a new one from “Forgot password”.
-          </AuthMessage>
-        )}
-
         {error && <AuthMessage tone="error">{error}</AuthMessage>}
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={submitting}
           className="w-full bg-brand-accent text-brand-bg font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-surface transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {loading ? 'Updating...' : 'Update password'}
+          {submitting ? 'Updating...' : 'Update password'}
         </button>
       </form>
     </AuthShell>

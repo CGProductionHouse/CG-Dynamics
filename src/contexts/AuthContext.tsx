@@ -12,6 +12,11 @@ interface AuthContextType {
   profile: Profile | null
   profileError: string | null
   loading: boolean
+  // True from the moment a Supabase password-recovery link is opened until the
+  // password is updated (or the user signs out). While true, routing forces
+  // the user to /reset-password instead of /admin or /dashboard.
+  isPasswordRecovery: boolean
+  endPasswordRecovery: () => void
   signIn: (email: string, password: string) => Promise<{ error: AuthContextError | null; role: string | null }>
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: AuthError | null; alreadyRegistered: boolean }>
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>
@@ -24,6 +29,33 @@ function appOrigin() {
   return typeof window !== 'undefined' ? window.location.origin : ''
 }
 
+const RECOVERY_KEY = 'cg_password_recovery'
+
+// A recovery link (implicit flow) lands with #type=recovery in the URL hash.
+function urlHasRecovery() {
+  if (typeof window === 'undefined') return false
+  const hash = window.location.hash ?? ''
+  const search = window.location.search ?? ''
+  return hash.includes('type=recovery') || new URLSearchParams(search).get('type') === 'recovery'
+}
+
+function readRecoveryFlag() {
+  try {
+    return sessionStorage.getItem(RECOVERY_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function persistRecoveryFlag(value: boolean) {
+  try {
+    if (value) sessionStorage.setItem(RECOVERY_KEY, '1')
+    else sessionStorage.removeItem(RECOVERY_KEY)
+  } catch {
+    // ignore storage failures
+  }
+}
+
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -31,7 +63,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [profileError, setProfileError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(() => readRecoveryFlag() || urlHasRecovery())
   const authRequestRef = useRef(0)
+
+  function markRecovery(value: boolean) {
+    persistRecoveryFlag(value)
+    setIsPasswordRecovery(value)
+  }
+
+  function endPasswordRecovery() {
+    markRecovery(false)
+  }
 
   async function fetchProfile(userId: string) {
     // Auto-link any pending client invite for this account before we read
@@ -51,6 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
+
+    // Catch a recovery link even if the PASSWORD_RECOVERY event fires before
+    // our listener is attached.
+    if (urlHasRecovery()) markRecovery(true)
 
     async function applyUser(nextUser: User | null) {
       if (!mounted) return
@@ -86,7 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false)
       })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') markRecovery(true)
       setTimeout(() => {
         void applyUser(session?.user ?? null)
       }, 0)
@@ -101,6 +148,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error || !data.user) return { error, role: null }
+
+    // A normal password sign-in ends any lingering recovery mode so the user
+    // is not bounced back to /reset-password.
+    markRecovery(false)
 
     // Load profile immediately so the caller can navigate by role without
     // waiting for the onAuthStateChange callback to fire.
@@ -168,6 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     const requestId = ++authRequestRef.current
     setLoading(true)
+    markRecovery(false)
     await supabase.auth.signOut()
     if (requestId !== authRequestRef.current) return
     setUser(null)
@@ -177,7 +229,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, profileError, loading, signIn, signUp, resetPasswordForEmail, updatePassword, resendConfirmation, signOut }}>
+    <AuthContext.Provider value={{ user, profile, profileError, loading, isPasswordRecovery, endPasswordRecovery, signIn, signUp, resetPasswordForEmail, updatePassword, resendConfirmation, signOut }}>
       {children}
     </AuthContext.Provider>
   )

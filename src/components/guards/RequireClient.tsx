@@ -2,9 +2,10 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function RequireClient() {
-  const { user, profile, profileError, loading } = useAuth()
+  const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
 
   if (loading) return <div className="min-h-screen bg-brand-bg" />
+  if (isPasswordRecovery) return <Navigate to="/reset-password" replace />
   if (!user) return <Navigate to="/login" replace />
   if (profileError) return <ProfileError message={profileError} />
   if (!profile) return <div className="min-h-screen bg-brand-bg" />
