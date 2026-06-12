@@ -46,7 +46,7 @@ A simple, repeatable workflow for adding client logos to CG Dynamics.
 - `CamelCase` joins are split (`RedOak` → `red-oak`)
 - duplicate hyphens are collapsed
 - common filler words are removed: `logo`, `final`, `copy`, `white`, `black`,
-  `transparent`, `icon`, `01`, `02`, `new`, `old`
+  `transparent`, `icon`, `01`, `02`, `new`, `old`, `promotion`, `promotions`
 - a trailing single-character token (e.g. `0`, `o`) is treated as an export
   artifact and removed
 
@@ -59,10 +59,12 @@ A simple, repeatable workflow for adding client logos to CG Dynamics.
 | `CG Production House.png`       | `cg-production-house.png`|
 | `WISEMAN GROUP LOGO.png`        | `wiseman-group.png`      |
 | `NOVUS STEEL 0.png`             | `novus-steel.png`        |
-| `BRAIZE_PROMOTIONS_01_WHITE.png`| `braize-promotions.png`* |
+| `BRAIZE_PROMOTIONS_01_WHITE.png`| `braize.png`             |
+| `Braize Promotions.png`         | `braize.png`             |
 
-\* Flagged for review — the brand may be just `Braize`. Rename the copied file
-in `public/client-logos/` if needed; the original in `logo-dump/` is untouched.
+Messy filenames (several filler words removed or a trailing artifact stripped)
+are still listed under **Needs review** so you can confirm the client name —
+even when the slug is correct. The original in `logo-dump/` is always untouched.
 
 ## Making a logo match a client
 

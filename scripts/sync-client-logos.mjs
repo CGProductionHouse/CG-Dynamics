@@ -20,7 +20,7 @@ const SUPPORTED = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg'])
 // Common filler words stripped from logo filenames (not from client names).
 const STOP_WORDS = new Set([
   'logo', 'final', 'copy', 'white', 'black', 'transparent',
-  'icon', '01', '02', 'new', 'old',
+  'icon', '01', '02', 'new', 'old', 'promotion', 'promotions',
 ])
 
 function slugifyBase(base) {
