@@ -3,9 +3,13 @@ import type { ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLocalDraft } from '../../hooks/useLocalDraft'
-import { listClients, type Client } from '../../lib/db/clients'
+import { listClients, readPackageSettings, type Client } from '../../lib/db/clients'
 import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/importedMetaPosts'
-import { getReportWithPosts, saveReport, type ReportStatus } from '../../lib/db/reports'
+import { getReportWithPosts, saveReport, updateReportStrategyData, type ReportStatus } from '../../lib/db/reports'
+import { listStrategyOptions, DEFAULT_OPTIONS, type StrategyCategory, type StrategyOption } from '../../lib/db/strategyOptions'
+import { getMonthEvents } from '../../lib/contentCalendar'
+import { emptyStrategyData, readStrategyData, hasStrategyContent, type StrategyData } from '../../lib/strategyEngine'
+import { GuidedStrategyEditor, type StrategyContext } from '../../components/strategy/GuidedStrategy'
 import {
   MANUAL_SOURCE_LABELS,
   listManualMetricsForClient,
@@ -69,38 +73,30 @@ function postMonth(post: ImportedMetaPost) {
   return time.toISOString().slice(0, 7)
 }
 
-function buildPrompt(
-  clientName: string,
-  periodStart: string,
-  periodEnd: string,
-  fields: ReportFields,
-  statsText: string
-) {
-  return [
-    `You are helping CG Production House write a premium monthly Meta performance report for ${clientName}.`,
-    '',
-    `Report title: ${fields.reportTitle || `${clientName} Meta Performance Report`}`,
-    `Period: ${periodStart} to ${periodEnd}`,
-    '',
-    'Performance stats:',
-    statsText,
-    '',
-    'Admin notes and strategy fields:',
-    `Previous month strategy: ${fields.previousMonthStrategy || 'Not provided yet.'}`,
-    `Previous month reflection: ${fields.previousMonthReflection || 'Not provided yet.'}`,
-    `Performance comments: ${fields.performanceComments || 'Not provided yet.'}`,
-    `Strategy for next month: ${fields.strategyNextMonth || 'Not provided yet.'}`,
-    `Content direction for next month: ${fields.contentDirectionNextMonth || 'Not provided yet.'}`,
-    `Boosting recommendation: ${fields.boostRecommendation || 'Not provided yet.'}`,
-    `General notes: ${fields.generalNotes || 'Not provided yet.'}`,
-    '',
-    'Please turn this into concise, client-ready strategic commentary. Keep the tone polished, clear, commercially useful, and aligned with a premium social media analytics report.',
-  ].join('\n')
-}
-
 interface ReportDraft {
   clientId: string
   fields: ReportFields
+  strategyData?: StrategyData
+}
+
+// Derive the legacy text columns from the structured strategy so older client
+// views (and reports opened before the strategy_data migration) still render
+// meaningful content. Falls back to any existing legacy field value.
+function deriveLegacyFields(strategy: StrategyData, fields: ReportFields): ReportFields {
+  const join = (items: string[]) => items.filter(Boolean).join(', ')
+  const campaign = strategy.actionPlan.campaign_recommendation
+  const campaignText = campaign.enabled ? [join(campaign.items), campaign.notes].filter(Boolean).join('\n') : ''
+  const directionText = [join(strategy.clientDirection), strategy.clientRequestNotes].filter(Boolean).join('\n')
+  return {
+    reportTitle: fields.reportTitle,
+    previousMonthStrategy: fields.previousMonthStrategy,
+    previousMonthReflection: fields.previousMonthReflection,
+    performanceComments: strategy.topContent.whatThisTellsUs || join(strategy.topContent.whyItWorked) || fields.performanceComments,
+    strategyNextMonth: strategy.strategyGoingForward || fields.strategyNextMonth,
+    contentDirectionNextMonth: directionText || fields.contentDirectionNextMonth,
+    boostRecommendation: campaignText || fields.boostRecommendation,
+    generalNotes: join(strategy.clientActionsRequired) || fields.generalNotes,
+  }
 }
 
 export default function NewReport() {
@@ -129,7 +125,10 @@ export default function NewReport() {
   })
   const [savedReportId, setSavedReportId] = useState<string | null>(null)
   const [reportStatus, setReportStatus] = useState<ReportStatus>('draft')
-  const [aiPrompt, setAiPrompt] = useState('')
+  const [strategyData, setStrategyData] = useState<StrategyData>(() => emptyStrategyData())
+  const [optionsByCategory, setOptionsByCategory] = useState<Record<StrategyCategory, StrategyOption[]>>(DEFAULT_OPTIONS)
+  const [usingDefaults, setUsingDefaults] = useState(true)
+  const [strategyNotice, setStrategyNotice] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [postsLoading, setPostsLoading] = useState(false)
   const [saving, setSaving] = useState<ReportStatus | null>(null)
@@ -154,6 +153,7 @@ export default function NewReport() {
                 : data[0]?.id ?? ''
             setClientId(validClientId)
             if (draft?.fields) setFields(draft.fields)
+            if (draft?.strategyData) setStrategyData(readStrategyData(draft.strategyData))
           } else {
             setClientId(data[0]?.id ?? '')
           }
@@ -199,6 +199,9 @@ export default function NewReport() {
           boostRecommendation: data.boost_recommendation ?? '',
           generalNotes: data.general_notes ?? '',
         })
+        // Restore structured strategy (backward compatible: older reports have
+        // no strategy_data and resolve to an empty, valid structure).
+        setStrategyData(readStrategyData(data.strategy_data))
       } catch (error) {
         setError(errorMessage(error, 'Could not load this report.'))
       } finally {
@@ -273,15 +276,38 @@ export default function NewReport() {
     }
   }, [clientId])
 
+  // Load the editable strategy option library (falls back to built-in defaults
+  // if the strategy_options table is empty or not yet created).
+  useEffect(() => {
+    let active = true
+    async function loadOptions() {
+      const { byCategory, usingDefaults: defaults } = await listStrategyOptions()
+      if (!active) return
+      setOptionsByCategory(byCategory)
+      setUsingDefaults(defaults)
+    }
+    void loadOptions()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  async function reloadOptions() {
+    const { byCategory, usingDefaults: defaults } = await listStrategyOptions()
+    setOptionsByCategory(byCategory)
+    setUsingDefaults(defaults)
+  }
+
   // Auto-save strategy fields and client selection for new reports.
   // Only active when not editing an existing report (reportId is set).
   // Only saves when at least one field has content so we don't immediately
   // show "draft saved" on an untouched blank form.
   useEffect(() => {
     if (reportId || !clientId) return
-    if (!Object.values(fields).some(v => v.trim())) return
-    saveReportDraft({ clientId, fields })
-  }, [clientId, fields, reportId, saveReportDraft])
+    const hasFieldContent = Object.values(fields).some(v => v.trim())
+    if (!hasFieldContent && !hasStrategyContent(strategyData)) return
+    saveReportDraft({ clientId, fields, strategyData })
+  }, [clientId, fields, strategyData, reportId, saveReportDraft])
 
   const selectedClient = clients.find(client => client.id === clientId)
   // The report month is the calendar month of the period end date.
@@ -363,40 +389,26 @@ export default function NewReport() {
     () => buildPerformanceMovement(master, previousMaster, monthManualMetrics, previousMonthManualMetrics),
     [master, monthManualMetrics, previousMaster, previousMonthManualMetrics]
   )
-  const statsText = [
-    `Total reach: ${formatNumber(master.totalReach)}`,
-    `Views: ${formatNumber(master.totalViews)}`,
-    `Engagements: ${formatNumber(master.totalEngagements)}`,
-    `Post count: ${formatNumber(stats.postCount)}`,
-    `Best performing post: ${stats.bestPost ? shortCaption(stats.bestPost.caption) : 'None'}`,
-    `Worst performing post: ${stats.worstPost ? shortCaption(stats.worstPost.caption) : 'None'}`,
-    `Top posts: ${stats.topPosts.map((post, index) => `${index + 1}. ${shortCaption(post.caption)} (${formatNumber(post.engagements)} engagements)`).join('; ') || 'None'}`,
-  ].join('\n')
+  const calendarEvents = useMemo(() => getMonthEvents(currentMonth), [currentMonth])
+  const topPostContext = useMemo(() => {
+    const post = master.bestPostOverall
+    if (!post) return null
+    return {
+      caption: shortCaption(post.caption),
+      platform: post.platform,
+      metricLabel: 'engagements',
+      metricValue: post.engagements,
+    }
+  }, [master])
+  const strategyContext: StrategyContext = {
+    clientName: selectedClient?.name ?? 'Client',
+    packageSettings: readPackageSettings(selectedClient?.package_settings),
+    calendarEvents,
+    topPost: topPostContext,
+  }
 
   function updateField(key: keyof ReportFields, value: string) {
     setFields(current => ({ ...current, [key]: value }))
-  }
-
-  function handleGeneratePrompt() {
-    const prompt = buildPrompt(
-      selectedClient?.name ?? 'the selected client',
-      periodStart,
-      periodEnd,
-      fields,
-      statsText
-    )
-    setAiPrompt(prompt)
-    setSuccess('AI prompt generated. Copy it into ChatGPT or Claude, then paste the improved strategy text back into the fields.')
-  }
-
-  async function handleCopyPrompt() {
-    if (!aiPrompt) return
-    try {
-      await navigator.clipboard.writeText(aiPrompt)
-      setSuccess('AI prompt copied to your clipboard.')
-    } catch (error) {
-      setError(errorMessage(error, 'Could not copy the prompt. You can still select and copy it manually.'))
-    }
   }
 
   async function handleSave(status: ReportStatus) {
@@ -417,7 +429,22 @@ export default function NewReport() {
     setSaving(status)
     setError(null)
     setSuccess(null)
+    setStrategyNotice(null)
     try {
+      // Snapshot the auto-derived top content into the strategy data so the
+      // saved/published report stays stable even if underlying data changes.
+      const strategyToSave: StrategyData = {
+        ...strategyData,
+        topContent: {
+          ...strategyData.topContent,
+          autoCaption: topPostContext?.caption ?? strategyData.topContent.autoCaption,
+          autoPlatform: topPostContext?.platform ?? strategyData.topContent.autoPlatform,
+          autoMetricLabel: topPostContext?.metricLabel ?? strategyData.topContent.autoMetricLabel,
+          autoMetricValue: topPostContext?.metricValue ?? strategyData.topContent.autoMetricValue,
+        },
+      }
+      const legacy = deriveLegacyFields(strategyToSave, fields)
+
       const { data, error } = await saveReport({
         id: savedReportId ?? undefined,
         client_id: clientId,
@@ -425,13 +452,13 @@ export default function NewReport() {
         period_end: periodEnd,
         status,
         report_title: fields.reportTitle || `${selectedClient?.name ?? 'Client'} Monthly Report`,
-        previous_month_strategy: fields.previousMonthStrategy,
-        previous_month_reflection: fields.previousMonthReflection,
-        performance_comments: fields.performanceComments,
-        strategy_next_month: fields.strategyNextMonth,
-        content_direction_next_month: fields.contentDirectionNextMonth,
-        boost_recommendation: fields.boostRecommendation,
-        general_notes: fields.generalNotes,
+        previous_month_strategy: legacy.previousMonthStrategy,
+        previous_month_reflection: legacy.previousMonthReflection,
+        performance_comments: legacy.performanceComments,
+        strategy_next_month: legacy.strategyNextMonth,
+        content_direction_next_month: legacy.contentDirectionNextMonth,
+        boost_recommendation: legacy.boostRecommendation,
+        general_notes: legacy.generalNotes,
         created_by: profile?.id ?? null,
         importedPosts: periodImportedPosts.length > 0 ? periodImportedPosts : undefined,
       })
@@ -440,6 +467,13 @@ export default function NewReport() {
         setError(error?.message ?? 'Could not save this report.')
         return
       }
+
+      // Persist the structured strategy (best-effort: never blocks the save).
+      const strategyResult = await updateReportStrategyData(data.id, strategyToSave)
+      if (strategyResult.migrationNeeded) {
+        setStrategyNotice('Saved. The guided strategy is shown via the report text fields, but the structured version needs the phase-3j migration (reports.strategy_data) to be stored fully.')
+      }
+      setStrategyData(strategyToSave)
 
       setSavedReportId(data.id)
       setReportStatus(data.status)
@@ -740,88 +774,21 @@ export default function NewReport() {
                 onChange={value => updateField('reportTitle', value)}
                 placeholder={`${selectedClient?.name ?? 'Client'} Monthly Report`}
               />
-              <div className="grid gap-4 lg:grid-cols-2">
-                <StrategyTextarea
-                  title="What worked this month"
-                  helper="What performed best, and why?"
-                  value={fields.performanceComments}
-                  onChange={value => updateField('performanceComments', value)}
-                  placeholder="Summarise the strongest content, platform, audience response, or campaign signal."
-                />
-                <StrategyTextarea
-                  title="What needs attention"
-                  helper="What should we improve or watch next month?"
-                  value={fields.previousMonthReflection}
-                  onChange={value => updateField('previousMonthReflection', value)}
-                  placeholder="Note weaker content types, gaps in consistency, audience drop-offs, or conversion opportunities."
-                />
-                <StrategyTextarea
-                  title="Next month focus"
-                  helper="What should the team prioritise next?"
-                  value={fields.strategyNextMonth}
-                  onChange={value => updateField('strategyNextMonth', value)}
-                  placeholder="Set the main strategic focus for the coming reporting period."
-                />
-                <StrategyTextarea
-                  title="Content direction"
-                  helper="What content direction should the client expect next?"
-                  value={fields.contentDirectionNextMonth}
-                  onChange={value => updateField('contentDirectionNextMonth', value)}
-                  placeholder="Outline themes, formats, messaging angles, or campaign ideas."
-                />
-                <StrategyTextarea
-                  title="Boosting recommendation"
-                  helper="What should be boosted, paused, or tested?"
-                  value={fields.boostRecommendation}
-                  onChange={value => updateField('boostRecommendation', value)}
-                  placeholder="Recommend paid support, testing priorities, or budget caution."
-                />
-                <StrategyTextarea
-                  title="Notes / context"
-                  helper="What background context should be remembered?"
-                  value={fields.generalNotes}
-                  onChange={value => updateField('generalNotes', value)}
-                  placeholder="Add context around timing, campaigns, seasonal factors, or client-specific notes."
-                />
-                <StrategyTextarea
-                  title="Previous strategy context"
-                  helper="What was the previous plan or strategic baseline?"
-                  value={fields.previousMonthStrategy}
-                  onChange={value => updateField('previousMonthStrategy', value)}
-                  placeholder="Capture what the prior strategy aimed to do, so progress can be read in context."
-                />
-              </div>
+              {strategyNotice && (
+                <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+                  {strategyNotice}
+                </p>
+              )}
+              <GuidedStrategyEditor
+                data={strategyData}
+                onChange={setStrategyData}
+                context={strategyContext}
+                optionsByCategory={optionsByCategory}
+                usingDefaults={usingDefaults}
+                isAdmin={profile?.role === 'admin'}
+                onReloadOptions={() => void reloadOptions()}
+              />
             </div>
-          </div>
-
-          <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
-            <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="text-sm font-semibold text-white">Generate AI prompt</h2>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleGeneratePrompt}
-                  className="bg-brand-accent text-brand-bg font-semibold px-3 py-2.5 rounded-lg text-sm hover:brightness-110 transition sm:text-xs"
-                >
-                  Generate AI prompt
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyPrompt}
-                  disabled={!aiPrompt}
-                  className="border border-brand-muted text-brand-primary px-3 py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition disabled:opacity-50 sm:text-xs"
-                >
-                  Copy
-                </button>
-              </div>
-            </div>
-            <textarea
-              value={aiPrompt}
-              onChange={event => setAiPrompt(event.target.value)}
-              placeholder="Generated prompt will appear here."
-              rows={10}
-              className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
-            />
           </div>
         </section>
 
@@ -933,34 +900,6 @@ function TextInput({
         onChange={event => onChange(event.target.value)}
         placeholder={placeholder}
         className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
-      />
-    </label>
-  )
-}
-
-function StrategyTextarea({
-  title,
-  helper,
-  value,
-  onChange,
-  placeholder,
-}: {
-  title: string
-  helper: string
-  value: string
-  onChange: (value: string) => void
-  placeholder: string
-}) {
-  return (
-    <label className="block rounded-xl border border-brand-muted bg-brand-bg/45 p-4">
-      <span className="block text-sm font-semibold text-white">{title}</span>
-      <span className="mt-1 block text-xs leading-relaxed text-brand-primary">{helper}</span>
-      <textarea
-        value={value}
-        onChange={event => onChange(event.target.value)}
-        rows={5}
-        placeholder={placeholder}
-        className="mt-3 w-full bg-brand-surface border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
       />
     </label>
   )

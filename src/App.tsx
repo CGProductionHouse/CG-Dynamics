@@ -11,10 +11,11 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
 import ClientsList from './pages/admin/ClientsList'
-import UsersAdmin from './pages/admin/UsersAdmin'
 import InvitesAdmin from './pages/admin/InvitesAdmin'
 import ImportMetaCsv from './pages/admin/ImportMetaCsv'
 import ImportsManagement from './pages/admin/ImportsManagement'
+import ImportHub from './pages/admin/ImportHub'
+import UsersHub from './pages/admin/UsersHub'
 import NewReport from './pages/admin/NewReport'
 import ReportsManagement from './pages/admin/ReportsManagement'
 import ManualMetricsAdmin from './pages/admin/ManualMetricsAdmin'
@@ -57,17 +58,23 @@ export default function App() {
             <Route element={<AdminLayout />}>
               {/* Read access for all staff (admin + team) */}
               <Route path="/admin" element={<ClientsList />} />
-              <Route path="/admin/imports" element={<ImportsManagement />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
-              <Route path="/admin/manual-metrics" element={<ManualMetricsAdmin />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
+
+              {/* Consolidated Import workspace (CSV import is admin-gated inside
+                  the hub; manual summaries + history are staff read-only). */}
+              <Route path="/admin/import" element={<ImportHub />} />
+              {/* Legacy deep links kept working. */}
+              <Route path="/admin/imports" element={<ImportsManagement />} />
+              <Route path="/admin/manual-metrics" element={<ManualMetricsAdmin />} />
 
               {/* Admin-only write routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>
-                <Route path="/admin/import" element={<ImportMetaCsv />} />
+                <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
-                <Route path="/admin/users" element={<UsersAdmin />} />
+                <Route path="/admin/users" element={<UsersHub />} />
+                {/* Legacy deep link kept working. */}
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
               </Route>
             </Route>

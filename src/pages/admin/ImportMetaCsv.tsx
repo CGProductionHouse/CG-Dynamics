@@ -12,8 +12,34 @@ import {
   type ManualPlatformMetric,
   type ManualSourceType,
 } from '../../lib/db/manualMetrics'
-import { detectReportPeriod, formatReportPeriod } from '../../lib/reportPeriod'
+import { upsertDraftReportForMonth } from '../../lib/db/reports'
+import { detectReportPeriod, formatReportPeriod, reportMonth } from '../../lib/reportPeriod'
 import { PLATFORM_LABELS, formatNumber, shortCaption, type Platform } from '../../lib/reportStats'
+
+interface AutoReportLink {
+  month: string
+  reportId: string
+  clientName: string
+  created: boolean
+}
+
+function monthLongName(month: string) {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return month
+  return new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
+    .format(new Date(`${month}-01T00:00:00`))
+}
+
+// First and last calendar day of a YYYY-MM month, for reports created from a
+// manual summary (which carries no per-post dates).
+function monthBounds(month: string) {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return { start: `${month}-01`, end: `${month}-01` }
+  const year = Number(match[1])
+  const monthIndex = Number(match[2])
+  const end = new Date(Date.UTC(year, monthIndex, 0)).toISOString().slice(0, 10)
+  return { start: `${month}-01`, end }
+}
 
 type ImportType = 'meta' | 'manual'
 
@@ -301,6 +327,7 @@ export default function ImportMetaCsv() {
   const [success, setSuccess] = useState<string | null>(null)
   const [manualSaved, setManualSaved] = useState(false)
   const [settingsRestored, setSettingsRestored] = useState(false)
+  const [autoReports, setAutoReports] = useState<AutoReportLink[]>([])
 
   useEffect(() => {
     async function loadClients() {
@@ -360,6 +387,7 @@ export default function ImportMetaCsv() {
     setError(null)
     setSuccess(null)
     setManualSaved(false)
+    setAutoReports([])
   }
 
   function handleImportTypeChange(nextType: ImportType) {
@@ -373,6 +401,7 @@ export default function ImportMetaCsv() {
     setError(null)
     setSuccess(null)
     setManualSaved(false)
+    setAutoReports([])
     setRows([])
     setManualRows([])
     setFileName(file?.name ?? null)
@@ -454,7 +483,32 @@ export default function ImportMetaCsv() {
       }
 
       clearImportDraft()
-      setSuccess(`Saved ${rows.length} imported posts. You can now build a report from this data.`)
+
+      // Auto-create or update the draft report for this client/month so the
+      // imported data flows straight into the reporting workspace.
+      const clientName = clients.find(c => c.id === clientId)?.name ?? 'Client'
+      const links: AutoReportLink[] = []
+      if (periodStart && periodEnd) {
+        const month = reportMonth(periodEnd)
+        const result = await upsertDraftReportForMonth({
+          clientId,
+          clientName,
+          periodStart,
+          periodEnd,
+          month,
+          createdBy: profile?.id ?? null,
+        })
+        if (result.data) {
+          links.push({ month, reportId: result.data.id, clientName, created: result.created })
+        }
+      }
+      setAutoReports(links)
+
+      if (links.length > 0) {
+        setSuccess(`${clientName} · ${monthLongName(links[0].month)} report ${links[0].created ? 'created' : 'updated'} successfully.`)
+      } else {
+        setSuccess(`Saved ${rows.length} imported posts. You can now build a report from this data.`)
+      }
     } catch (error) {
       setError(errorMessage(error, 'Could not save imported posts.'))
     } finally {
@@ -504,7 +558,35 @@ export default function ImportMetaCsv() {
 
       setManualSaved(true)
       clearImportDraft()
-      setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'} to Manual metrics. These now feed into the master monthly report.`)
+
+      // Auto-create or update a draft report for each month present in the
+      // manual summary (no duplicates — existing reports are reused).
+      const clientName = clients.find(c => c.id === clientId)?.name ?? 'Client'
+      const months = [...new Set(payload.map(row => row.month))].sort()
+      const links: AutoReportLink[] = []
+      for (const month of months) {
+        const { start, end } = monthBounds(month)
+        const result = await upsertDraftReportForMonth({
+          clientId,
+          clientName,
+          periodStart: start,
+          periodEnd: end,
+          month,
+          createdBy: profile?.id ?? null,
+        })
+        if (result.data) {
+          links.push({ month, reportId: result.data.id, clientName, created: result.created })
+        }
+      }
+      setAutoReports(links)
+
+      if (links.length === 1) {
+        setSuccess(`${clientName} · ${monthLongName(links[0].month)} report ${links[0].created ? 'created' : 'updated'} successfully.`)
+      } else if (links.length > 1) {
+        setSuccess(`${clientName} · ${links.length} monthly reports updated successfully.`)
+      } else {
+        setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'} to Manual metrics.`)
+      }
     } catch (error) {
       setError(errorMessage(error, 'Could not save manual summary metrics.'))
     } finally {
@@ -811,7 +893,41 @@ export default function ImportMetaCsv() {
             {success && (
               <div className="rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2">
                 <p className="text-sm text-brand-accent">{success}</p>
+                {autoReports.length > 1 && (
+                  <p className="mt-1 text-xs text-brand-primary">
+                    {autoReports.length} monthly reports were created or updated.
+                  </p>
+                )}
                 <div className="mt-2 flex flex-wrap gap-3">
+                  {autoReports.length > 0 ? (
+                    <>
+                      <Link
+                        to={`/admin/reports/${autoReports[0].reportId}/edit`}
+                        className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                      >
+                        View report
+                      </Link>
+                      <Link
+                        to={`/admin/reports/${autoReports[0].reportId}/edit`}
+                        className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                      >
+                        Edit strategy
+                      </Link>
+                      <Link
+                        to={`/admin/published?reportId=${autoReports[0].reportId}`}
+                        className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                      >
+                        View as client
+                      </Link>
+                    </>
+                  ) : (
+                    <Link
+                      to="/admin/reports/new"
+                      className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                    >
+                      Create report
+                    </Link>
+                  )}
                   {manualSaved && (
                     <Link
                       to="/admin/manual-metrics"
@@ -820,12 +936,6 @@ export default function ImportMetaCsv() {
                       View in Manual metrics
                     </Link>
                   )}
-                  <Link
-                    to="/admin/reports/new"
-                    className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
-                  >
-                    Create report
-                  </Link>
                 </div>
               </div>
             )}

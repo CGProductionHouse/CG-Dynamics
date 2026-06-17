@@ -7,11 +7,15 @@ import {
   listClients,
   createClient,
   updateClient,
+  updateClientPackage,
   archiveClient,
   restoreClient,
   deleteClient,
   clientHasData,
+  readPackageSettings,
+  EMPTY_PACKAGE_SETTINGS,
   type Client,
+  type PackageSettings,
 } from '../../lib/db/clients'
 import { listImportGroups } from '../../lib/db/importedMetaPosts'
 import { listManualMetrics } from '../../lib/db/manualMetrics'
@@ -78,6 +82,7 @@ export default function ClientsList() {
   const [bulkOpen, setBulkOpen] = useState<boolean>(() => getBulkOpen() ?? false)
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active')
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
+  const [packageNotice, setPackageNotice] = useState<string | null>(null)
 
   const displayClients = useMemo(() => {
     if (viewFilter === 'active') return clients.filter(c => c.active)
@@ -164,14 +169,29 @@ export default function ClientsList() {
   }
 
   async function handleSave(
-    input: { name: string; tier: 'standard' | 'premium'; active: boolean; logo_url: string | null }
+    input: {
+      name: string
+      tier: 'standard' | 'premium'
+      active: boolean
+      logo_url: string | null
+      package: PackageSettings
+    }
   ): Promise<string | null> {
     try {
       const existing = modal.client
+      let savedId: string | null = null
       if (existing) {
-        const { data, error } = await updateClient(existing.id, input)
+        const { data, error } = await updateClient(existing.id, {
+          name: input.name,
+          tier: input.tier,
+          active: input.active,
+          logo_url: input.logo_url,
+        })
         if (error) return error.message
-        if (data) setClients(current => upsertClient(current, data))
+        if (data) {
+          savedId = data.id
+          setClients(current => upsertClient(current, data))
+        }
       } else {
         const { data, error } = await createClient({
           name: input.name,
@@ -179,7 +199,24 @@ export default function ClientsList() {
           active: input.active,
         })
         if (error) return error.message
-        if (data) setClients(current => upsertClient(current, data))
+        if (data) {
+          savedId = data.id
+          setClients(current => upsertClient(current, data))
+        }
+      }
+
+      // Best-effort package save: never blocks the core client save. If the
+      // phase-3j column is not present yet, show a soft migration notice.
+      if (savedId) {
+        const pkgResult = await updateClientPackage(savedId, input.package)
+        if (pkgResult.migrationNeeded) {
+          setPackageNotice('Client saved. Monthly package settings need the phase-3j migration (clients.package_settings) before they can be stored.')
+        } else if (pkgResult.error) {
+          setPackageNotice(`Client saved, but the package could not be stored: ${pkgResult.error.message}`)
+        } else {
+          setPackageNotice(null)
+          if (pkgResult.data) setClients(current => upsertClient(current, pkgResult.data!))
+        }
       }
 
       void load({ silent: true }).then(refreshError => {
@@ -248,6 +285,19 @@ export default function ClientsList() {
           </div>
         </div>
       </section>
+
+      {packageNotice && (
+        <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2">
+          <p className="text-sm text-amber-200">{packageNotice}</p>
+          <button
+            type="button"
+            onClick={() => setPackageNotice(null)}
+            className="shrink-0 text-xs text-amber-200/60 hover:text-amber-200"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-brand-primary text-sm">Loading...</p>
@@ -481,6 +531,29 @@ function QuickLink({ to, label, primary = false }: { to: string; label: string; 
   )
 }
 
+function PackageNumber({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: number
+  onChange: (value: string) => void
+}) {
+  return (
+    <label className="block">
+      <span className="block text-xs font-medium text-brand-primary mb-1">{label}</span>
+      <input
+        type="number"
+        min={0}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
+      />
+    </label>
+  )
+}
+
 // Client modal
 
 function ClientModal({
@@ -489,15 +562,23 @@ function ClientModal({
   onClose,
 }: {
   client?: Client
-  onSave: (input: { name: string; tier: 'standard' | 'premium'; active: boolean; logo_url: string | null }) => Promise<string | null>
+  onSave: (input: { name: string; tier: 'standard' | 'premium'; active: boolean; logo_url: string | null; package: PackageSettings }) => Promise<string | null>
   onClose: () => void
 }) {
   const [name, setName] = useState(client?.name ?? '')
   const [tier, setTier] = useState<'standard' | 'premium'>(client?.tier ?? 'standard')
   const [logoUrl, setLogoUrl] = useState(client?.logo_url ?? '')
   const [active, setActive] = useState(client?.active ?? true)
+  const [pkg, setPkg] = useState<PackageSettings>(() =>
+    client?.package_settings ? readPackageSettings(client.package_settings) : { ...EMPTY_PACKAGE_SETTINGS }
+  )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function setPkgNum(key: keyof PackageSettings, value: string) {
+    const n = Math.max(0, Math.round(Number(value)))
+    setPkg(current => ({ ...current, [key]: Number.isFinite(n) ? n : 0 }))
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -512,7 +593,7 @@ function ClientModal({
     setError(null)
     let saved = false
     try {
-      const err = await onSave({ name: trimmedName, tier, active, logo_url: logoUrl.trim() || null })
+      const err = await onSave({ name: trimmedName, tier, active, logo_url: logoUrl.trim() || null, package: pkg })
       if (err) {
         setError(err)
         return
@@ -531,7 +612,7 @@ function ClientModal({
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:items-center"
       onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}
     >
-      <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-sm overflow-y-auto rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] sm:p-6">
+      <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] sm:p-6">
         <h2 className="text-base font-semibold text-white mb-5">
           {client ? 'Edit client' : 'Add client'}
         </h2>
@@ -592,6 +673,52 @@ function ClientModal({
               <span className="text-sm text-brand-accent">Active</span>
             </label>
           )}
+
+          <fieldset className="rounded-lg border border-brand-muted bg-brand-bg/40 p-3.5">
+            <legend className="px-1.5 text-sm font-semibold text-brand-accent">Monthly package</legend>
+            <p className="mb-3 px-0.5 text-xs text-brand-primary">
+              Deliverables included each month. These drive the report action plan.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <PackageNumber label="Professional videos" value={pkg.professional_videos_per_month} onChange={v => setPkgNum('professional_videos_per_month', v)} />
+              <PackageNumber label="Reels" value={pkg.reels_per_month} onChange={v => setPkgNum('reels_per_month', v)} />
+              <PackageNumber label="Photo posts" value={pkg.photo_posts_per_month} onChange={v => setPkgNum('photo_posts_per_month', v)} />
+              <PackageNumber label="Design posters" value={pkg.design_posters_per_month} onChange={v => setPkgNum('design_posters_per_month', v)} />
+              <PackageNumber label="Animated posters" value={pkg.animated_posters_per_month} onChange={v => setPkgNum('animated_posters_per_month', v)} />
+              <PackageNumber label="Shoot days" value={pkg.shoot_days_per_month} onChange={v => setPkgNum('shoot_days_per_month', v)} />
+            </div>
+            <label className="mt-3 flex items-center gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={pkg.campaign_management_included}
+                onChange={e => setPkg(current => ({ ...current, campaign_management_included: e.target.checked }))}
+                className="h-4 w-4 rounded accent-brand-accent"
+              />
+              <span className="text-sm text-white">Campaign management included</span>
+            </label>
+            {pkg.campaign_management_included && (
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-brand-primary mb-1">Monthly campaign budget (R)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={pkg.monthly_campaign_budget}
+                  onChange={e => setPkgNum('monthly_campaign_budget', e.target.value)}
+                  className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                />
+              </div>
+            )}
+            <div className="mt-3">
+              <label className="block text-xs font-medium text-brand-primary mb-1">Package notes</label>
+              <textarea
+                value={pkg.package_notes}
+                onChange={e => setPkg(current => ({ ...current, package_notes: e.target.value }))}
+                rows={2}
+                placeholder="Anything specific about this client's package."
+                className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
+              />
+            </div>
+          </fieldset>
 
           {error && (
             <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">

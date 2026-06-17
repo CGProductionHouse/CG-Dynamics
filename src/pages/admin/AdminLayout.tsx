@@ -21,32 +21,31 @@ export default function AdminLayout() {
       <NavLink to="/admin" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Clients
       </NavLink>
+      <NavLink to="/admin/import" className={navClass} onClick={() => setMobileMenuOpen(false)}>
+        Import
+      </NavLink>
+      <NavLink to="/admin/reports" className={navClass} onClick={() => setMobileMenuOpen(false)}>
+        Reports
+      </NavLink>
       {profile?.role === 'admin' && (
         <NavLink to="/admin/users" className={navClass} onClick={() => setMobileMenuOpen(false)}>
           Users
         </NavLink>
       )}
-      {profile?.role === 'admin' && (
-        <NavLink to="/admin/invites" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-          Invites
-        </NavLink>
-      )}
-      {profile?.role === 'admin' && (
-        <NavLink to="/admin/import" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-          Import CSV
-        </NavLink>
-      )}
-      <NavLink to="/admin/imports" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Imports
-      </NavLink>
-      <NavLink to="/admin/reports" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Reports
-      </NavLink>
-      <NavLink to="/admin/manual-metrics" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Manual metrics
-      </NavLink>
-      <NavLink to="/admin/published" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Published / Client preview
+
+      {/* Kept prominent and easy to reach: see exactly what the client sees. */}
+      <NavLink
+        to="/admin/published"
+        className={({ isActive }) =>
+          `mt-1 flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
+            isActive
+              ? 'border-brand-accent bg-brand-accent/10 text-brand-accent'
+              : 'border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
+          }`
+        }
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        View as client
       </NavLink>
       </>
     )

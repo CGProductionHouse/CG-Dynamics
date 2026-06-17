@@ -6,6 +6,8 @@ import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
 import { MANUAL_SOURCE_LABELS } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
+import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
+import { readStrategyData, hasStrategyContent } from '../../lib/strategyEngine'
 import type { MasterReportData, MetricMovement, PerformanceMovement, Platform, PlatformSource, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORMS,
@@ -271,6 +273,13 @@ function StrategySection({
   report: ReportWithPosts
   showEmptyStrategy: boolean
 }) {
+  // Prefer the structured guided strategy when present. Older reports (no
+  // strategy_data) fall back to the legacy strategy cards below.
+  const strategy = readStrategyData(report.strategy_data)
+  if (hasStrategyContent(strategy)) {
+    return <GuidedStrategyView data={strategy} />
+  }
+
   const cards = [
     {
       title: 'Key takeaways',

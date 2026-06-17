@@ -1,5 +1,6 @@
 import { supabase } from '../supabase'
 import type { ImportedMetaPost } from './importedMetaPosts'
+import type { StrategyData } from '../strategyEngine'
 
 export type ReportStatus = 'draft' | 'published'
 
@@ -22,6 +23,9 @@ export interface Report {
   content_direction_next_month: string | null
   boost_recommendation: string | null
   general_notes: string | null
+  // Guided strategy engine structured data (added by phase-3j). Optional so the
+  // app keeps working before the migration is applied.
+  strategy_data?: StrategyData | null
   published_at: string | null
   created_by: string | null
   created_at: string
@@ -176,6 +180,94 @@ export async function getReportWithPosts(reportId: string) {
     },
     error: null,
   }
+}
+
+function strategyColumnMissing(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false
+  if (error.code === '42703') return true
+  const msg = (error.message ?? '').toLowerCase()
+  return msg.includes('strategy_data') && (msg.includes('does not exist') || msg.includes('schema cache') || msg.includes('could not find'))
+}
+
+// Best-effort save of the guided strategy structured data. Kept separate from
+// saveReport so the core report save never fails before the phase-3j migration
+// is applied — it simply reports `migrationNeeded` and the UI shows a note.
+export async function updateReportStrategyData(reportId: string, data: StrategyData) {
+  const { error } = await supabase
+    .from('reports')
+    .update({ strategy_data: data })
+    .eq('id', reportId)
+
+  if (error && strategyColumnMissing(error)) {
+    return { error: null, migrationNeeded: true }
+  }
+  return { error, migrationNeeded: false }
+}
+
+// Find an existing report for a client whose period END falls in the given
+// month (YYYY-MM). Used so imports update the right monthly report instead of
+// creating duplicates.
+function nextMonthStart(month: string): string {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return `${month}-01`
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]), 1)) // month is 0-indexed, so this is the 1st of the NEXT month
+  return date.toISOString().slice(0, 10)
+}
+
+export async function findReportForClientMonth(clientId: string, month: string) {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('client_id', clientId)
+    .gte('period_end', `${month}-01`)
+    .lt('period_end', nextMonthStart(month))
+    .order('platform', { nullsFirst: true })
+    .order('created_at', { ascending: false })
+
+  if (error) return { data: null, error }
+  const reports = (data ?? []) as Report[]
+  // Prefer the master report (platform === null) for the month.
+  const master = reports.find(r => r.platform === null) ?? reports[0] ?? null
+  return { data: master, error: null }
+}
+
+// Create or update (never duplicate) a DRAFT report for a client/month. Used by
+// the import flow so imported data automatically lands on a draft report. Never
+// publishes and never overwrites an existing report's status or strategy.
+export async function upsertDraftReportForMonth(input: {
+  clientId: string
+  clientName: string
+  periodStart: string
+  periodEnd: string
+  month: string
+  createdBy: string | null
+}): Promise<{ data: Report | null; error: { message: string } | null; created: boolean }> {
+  const existing = await findReportForClientMonth(input.clientId, input.month)
+  if (existing.error) return { data: null, error: existing.error, created: false }
+
+  if (existing.data) {
+    return { data: existing.data, error: null, created: false }
+  }
+
+  const monthLabel = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
+    .format(new Date(`${input.month}-01T00:00:00`))
+
+  const { data, error } = await supabase
+    .from('reports')
+    .insert({
+      client_id: input.clientId,
+      platform: null,
+      period_start: input.periodStart,
+      period_end: input.periodEnd,
+      status: 'draft',
+      report_title: `${input.clientName} ${monthLabel} Report`,
+      created_by: input.createdBy,
+    })
+    .select('*')
+    .single()
+
+  if (error) return { data: null, error, created: false }
+  return { data: data as Report, error: null, created: true }
 }
 
 export async function updateReportStatus(reportId: string, status: ReportStatus) {
