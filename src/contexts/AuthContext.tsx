@@ -65,6 +65,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(() => readRecoveryFlag() || urlHasRecovery())
   const authRequestRef = useRef(0)
+  // Tracks the currently-resolved user id and whether the first session lookup
+  // has completed. Used to keep background auth events (token refresh on tab
+  // focus, etc.) from re-gating the whole app behind the loading screen, which
+  // would unmount the routed tree and wipe in-progress work.
+  const userIdRef = useRef<string | null>(null)
+  const initialResolvedRef = useRef(false)
 
   function markRecovery(value: boolean) {
     persistRecoveryFlag(value)
@@ -98,11 +104,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // our listener is attached.
     if (urlHasRecovery()) markRecovery(true)
 
-    async function applyUser(nextUser: User | null) {
+    // `silent` updates user/profile without flipping the global loading flag,
+    // so the routed tree (and any in-progress admin work) is never unmounted.
+    async function applyUser(nextUser: User | null, options: { silent?: boolean } = {}) {
       if (!mounted) return
       const requestId = ++authRequestRef.current
-      setLoading(true)
+      if (!options.silent) setLoading(true)
       setUser(nextUser)
+      userIdRef.current = nextUser?.id ?? null
       try {
         if (nextUser) {
           const { profile: profileData, error } = await fetchProfile(nextUser.id)
@@ -119,7 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null)
         setProfileError(error instanceof Error ? error.message : 'Could not load your profile.')
       } finally {
-        if (mounted && requestId === authRequestRef.current) setLoading(false)
+        if (mounted && requestId === authRequestRef.current) {
+          setLoading(false)
+          initialResolvedRef.current = true
+        }
       }
     }
 
@@ -130,12 +142,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null)
         setProfileError(error instanceof Error ? error.message : 'Could not load your session.')
         setLoading(false)
+        initialResolvedRef.current = true
       })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') markRecovery(true)
+      const nextUser = session?.user ?? null
+
+      // Background event for the SAME signed-in user (token refresh, tab focus,
+      // USER_UPDATED). The Supabase client already manages the refreshed token
+      // internally, so we just keep our user object fresh WITHOUT re-fetching
+      // the profile or toggling loading — this is the key to not losing work.
+      if (initialResolvedRef.current && nextUser?.id && nextUser.id === userIdRef.current) {
+        setUser(nextUser)
+        return
+      }
+
+      // A genuine change (sign in, sign out, different user). After the first
+      // load, apply it silently so the app does not flash the loading screen
+      // and unmount the current page.
       setTimeout(() => {
-        void applyUser(session?.user ?? null)
+        void applyUser(nextUser, { silent: initialResolvedRef.current })
       }, 0)
     })
 
@@ -158,12 +185,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const requestId = ++authRequestRef.current
     setLoading(true)
     setUser(data.user)
+    userIdRef.current = data.user.id
     try {
       const { profile: profileData, error: profileLoadError } = await fetchProfile(data.user.id)
       if (requestId === authRequestRef.current) {
         setProfile(profileData)
         setProfileError(profileLoadError?.message ?? null)
         setLoading(false)
+        initialResolvedRef.current = true
       }
       return { error: profileLoadError, role: profileData?.role ?? null }
     } catch (error) {
@@ -226,6 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null)
     setProfileError(null)
     setLoading(false)
+    userIdRef.current = null
   }
 
   return (

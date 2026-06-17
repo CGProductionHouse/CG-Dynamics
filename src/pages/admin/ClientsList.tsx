@@ -46,6 +46,14 @@ export default function ClientsList() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
 
+  // Persist whether the bulk-import modal is open so a page reload reopens it
+  // automatically with the pasted list restored.
+  const {
+    getInitialDraft: getBulkOpen,
+    saveDraft: saveBulkOpen,
+    clearDraft: clearBulkOpen,
+  } = useLocalDraft<boolean>(`cg_bulk_open_${profile?.id ?? 'anon'}`)
+
   const [clients, setClients] = useState<Client[]>([])
   const [overview, setOverview] = useState<OverviewStats>({
     totalClients: 0,
@@ -57,7 +65,17 @@ export default function ClientsList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modal, setModal] = useState<{ open: boolean; client?: Client }>({ open: false })
-  const [bulkOpen, setBulkOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState<boolean>(() => getBulkOpen() ?? false)
+
+  function openBulk() {
+    setBulkOpen(true)
+    saveBulkOpen(true)
+  }
+
+  function closeBulk() {
+    setBulkOpen(false)
+    clearBulkOpen()
+  }
 
   useEffect(() => {
     void load()
@@ -139,7 +157,7 @@ export default function ClientsList() {
         {isAdmin && (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             <button
-              onClick={() => setBulkOpen(true)}
+              onClick={openBulk}
               className="w-full rounded-lg border border-brand-muted px-4 py-2.5 text-sm font-semibold text-brand-primary transition hover:border-white/30 hover:text-white sm:w-auto"
             >
               Bulk add clients
@@ -310,7 +328,7 @@ export default function ClientsList() {
         <BulkImportModal
           clients={clients}
           onImported={() => void load({ silent: true })}
-          onClose={() => setBulkOpen(false)}
+          onClose={closeBulk}
         />
       )}
     </div>
