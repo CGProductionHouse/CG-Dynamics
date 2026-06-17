@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -56,6 +56,7 @@ export default function ClientsList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modal, setModal] = useState<{ open: boolean; client?: Client }>({ open: false })
+  const [bulkOpen, setBulkOpen] = useState(false)
 
   useEffect(() => {
     void load()
@@ -135,12 +136,20 @@ export default function ClientsList() {
           <h1 className="text-xl font-semibold text-white">Clients</h1>
         </div>
         {isAdmin && (
-          <button
-            onClick={() => setModal({ open: true })}
-            className="w-full bg-brand-accent text-brand-bg text-sm font-semibold px-4 py-2.5 rounded-lg hover:brightness-110 transition sm:w-auto"
-          >
-            Add client
-          </button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <button
+              onClick={() => setBulkOpen(true)}
+              className="w-full rounded-lg border border-brand-muted px-4 py-2.5 text-sm font-semibold text-brand-primary transition hover:border-white/30 hover:text-white sm:w-auto"
+            >
+              Bulk add clients
+            </button>
+            <button
+              onClick={() => setModal({ open: true })}
+              className="w-full rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg transition hover:brightness-110 sm:w-auto"
+            >
+              Add client
+            </button>
+          </div>
         )}
       </div>
 
@@ -293,6 +302,14 @@ export default function ClientsList() {
           client={modal.client}
           onSave={handleSave}
           onClose={() => setModal({ open: false })}
+        />
+      )}
+
+      {bulkOpen && (
+        <BulkImportModal
+          clients={clients}
+          onImported={() => void load({ silent: true })}
+          onClose={() => setBulkOpen(false)}
         />
       )}
     </div>
@@ -459,6 +476,237 @@ function ClientModal({
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  )
+}
+
+// Bulk import modal
+
+function parseBulkText(text: string, existingClients: Client[]) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
+  const seen = new Set<string>()
+  const unique: string[] = []
+  const inListDupes: string[] = []
+  for (const line of lines) {
+    const key = line.toLowerCase()
+    if (seen.has(key)) {
+      inListDupes.push(line)
+    } else {
+      seen.add(key)
+      unique.push(line)
+    }
+  }
+  const existingLower = new Set(existingClients.map(c => c.name.toLowerCase()))
+  const toAdd = unique.filter(n => !existingLower.has(n.toLowerCase()))
+  const toSkip = unique.filter(n => existingLower.has(n.toLowerCase()))
+  return { toAdd, toSkip, inListDupes }
+}
+
+function BulkImportModal({
+  clients,
+  onImported,
+  onClose,
+}: {
+  clients: Client[]
+  onImported: () => void
+  onClose: () => void
+}) {
+  const [text, setText] = useState('')
+  const [tier, setTier] = useState<'standard' | 'premium'>('standard')
+  const [importing, setImporting] = useState(false)
+  const [result, setResult] = useState<{ added: string[]; failed: string[] } | null>(null)
+
+  const { toAdd, toSkip, inListDupes } = useMemo(
+    () => parseBulkText(text, clients),
+    [text, clients]
+  )
+
+  async function handleImport() {
+    if (importing || toAdd.length === 0) return
+    setImporting(true)
+    const settlements = await Promise.allSettled(
+      toAdd.map(name => createClient({ name, tier, active: true, logo_url: null }))
+    )
+    const added: string[] = []
+    const failed: string[] = []
+    settlements.forEach((s, i) => {
+      if (s.status === 'fulfilled' && !s.value.error) {
+        added.push(toAdd[i])
+      } else {
+        failed.push(toAdd[i])
+      }
+    })
+    setImporting(false)
+    setResult({ added, failed })
+    onImported()
+  }
+
+  const OVERLAY = 'fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:items-center'
+  const PANEL = 'my-auto w-full max-w-lg overflow-y-auto rounded-xl border border-brand-muted bg-brand-surface shadow-[0_0_40px_rgba(0,0,0,0.5)]'
+
+  if (result) {
+    return (
+      <div className={OVERLAY} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+        <div className={`${PANEL} p-5 sm:p-6`}>
+          <h2 className="mb-4 text-base font-semibold text-white">Import complete</h2>
+
+          {result.added.length > 0 && (
+            <div className="mb-3 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-3">
+              <p className="mb-2 text-sm font-medium text-green-400">
+                {result.added.length} client{result.added.length !== 1 ? 's' : ''} added
+              </p>
+              <ul className="space-y-0.5">
+                {result.added.map(name => (
+                  <li key={name} className="text-xs text-green-300">{name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {result.failed.length > 0 && (
+            <div className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3">
+              <p className="mb-2 text-sm font-medium text-red-400">
+                {result.failed.length} client{result.failed.length !== 1 ? 's' : ''} could not be added
+              </p>
+              <ul className="space-y-0.5">
+                {result.failed.map(name => (
+                  <li key={name} className="text-xs text-red-300">{name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {result.added.length === 0 && result.failed.length === 0 && (
+            <p className="mb-3 text-sm text-brand-primary">Nothing was imported.</p>
+          )}
+
+          <p className="mb-5 text-xs text-brand-primary">
+            Logos auto-resolve from <code className="rounded bg-brand-muted/60 px-1 py-0.5 text-brand-accent">/client-logos/client-name-slug.png</code> once a matching file is placed there.
+          </p>
+
+          <button
+            onClick={onClose}
+            className="w-full rounded-lg bg-brand-accent py-2.5 text-sm font-semibold text-brand-bg transition hover:brightness-110"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const hasInput = toAdd.length > 0 || toSkip.length > 0
+
+  return (
+    <div className={OVERLAY} onClick={e => { if (!importing && e.target === e.currentTarget) onClose() }}>
+      <div className={`${PANEL} p-5 sm:p-6`}>
+        <h2 className="mb-1 text-base font-semibold text-white">Bulk add clients</h2>
+        <p className="mb-4 text-xs text-brand-primary">
+          Paste one client name per line. Existing clients are skipped automatically.
+        </p>
+
+        <div className="mb-4">
+          <label className="mb-1.5 block text-sm font-medium text-brand-accent">
+            Client names
+          </label>
+          <textarea
+            rows={10}
+            value={text}
+            onChange={e => setText(e.target.value)}
+            disabled={importing}
+            placeholder={"Action Sport\nBohemia\nCape Lumber\nDelta Gas\n..."}
+            className="w-full resize-y rounded-lg border border-brand-muted bg-brand-bg px-3.5 py-2.5 font-mono text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent transition disabled:opacity-60"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-1.5 block text-sm font-medium text-brand-accent">
+            Default tier
+          </label>
+          <select
+            value={tier}
+            onChange={e => setTier(e.target.value as 'standard' | 'premium')}
+            disabled={importing}
+            className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition disabled:opacity-60"
+          >
+            <option value="standard">Standard (quarterly)</option>
+            <option value="premium">Premium (monthly)</option>
+          </select>
+        </div>
+
+        {hasInput && (
+          <div className="mb-4 space-y-2 rounded-lg border border-brand-muted bg-brand-bg/50 p-3">
+            <p className="text-xs font-medium text-brand-primary uppercase tracking-wider">Preview</p>
+
+            {toAdd.length > 0 && (
+              <div>
+                <p className="mb-1 text-xs font-medium text-green-400">
+                  {toAdd.length} new client{toAdd.length !== 1 ? 's' : ''} to add
+                </p>
+                <ul className="max-h-40 overflow-y-auto space-y-0.5">
+                  {toAdd.map(name => (
+                    <li key={name} className="flex items-center gap-1.5 text-xs text-green-300">
+                      <span className="text-green-500">+</span>
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {toSkip.length > 0 && (
+              <div>
+                <p className="mb-1 text-xs font-medium text-brand-primary">
+                  {toSkip.length} already exist{toSkip.length === 1 ? 's' : ''} — will be skipped
+                </p>
+                <ul className="max-h-28 overflow-y-auto space-y-0.5">
+                  {toSkip.map(name => (
+                    <li key={name} className="flex items-center gap-1.5 text-xs text-brand-primary/60">
+                      <span>–</span>
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {inListDupes.length > 0 && (
+              <p className="text-xs text-brand-primary/50">
+                {inListDupes.length} duplicate line{inListDupes.length !== 1 ? 's' : ''} in your list ignored
+              </p>
+            )}
+          </div>
+        )}
+
+        <p className="mb-4 text-xs text-brand-primary">
+          Logo URLs left blank — logos auto-resolve from{' '}
+          <code className="rounded bg-brand-muted/60 px-1 py-0.5 text-brand-accent">/client-logos/client-name-slug.png</code>{' '}
+          if a matching file exists.
+        </p>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={importing}
+            className="flex-1 rounded-lg border border-brand-muted py-2.5 text-sm text-brand-primary transition hover:border-white/30 hover:text-white disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleImport}
+            disabled={importing || toAdd.length === 0}
+            className="flex-1 rounded-lg bg-brand-accent py-2.5 text-sm font-semibold text-brand-bg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {importing
+              ? 'Importing...'
+              : toAdd.length > 0
+                ? `Import ${toAdd.length} client${toAdd.length !== 1 ? 's' : ''}`
+                : 'Import clients'}
+          </button>
+        </div>
       </div>
     </div>
   )
