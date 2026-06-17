@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { listClients, type Client } from '../../lib/db/clients'
 import { PLATFORMS, PLATFORM_LABELS, formatNumber, type Platform } from '../../lib/reportStats'
 import {
@@ -95,6 +96,8 @@ function toInt(value: string) {
 export default function ManualMetricsAdmin() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
+  const { getInitialDraft: getMetricsDraft, saveDraft: saveMetricsDraft, clearDraft: clearMetricsDraft, hasDraft: hasMetricsDraft } =
+    useLocalDraft<FormState>(`cg_manual_${profile?.id ?? 'anon'}`)
 
   const [clients, setClients] = useState<Client[]>([])
   const [metrics, setMetrics] = useState<ManualPlatformMetric[]>([])
@@ -124,7 +127,12 @@ export default function ManualMetricsAdmin() {
       }
       setClients(clientsRes.data)
       setMetrics(metricsRes.data)
-      setForm(current => (current.clientId ? current : emptyForm(clientsRes.data[0]?.id ?? '')))
+      setForm(current => {
+        if (current.clientId) return current
+        const draft = getMetricsDraft()
+        if (draft?.clientId && clientsRes.data.some(c => c.id === draft.clientId)) return draft
+        return emptyForm(clientsRes.data[0]?.id ?? '')
+      })
     } catch (error) {
       setError(errorMessage(error, 'Could not load manual metrics.'))
     } finally {
@@ -138,7 +146,9 @@ export default function ManualMetricsAdmin() {
   }, [])
 
   function updateForm(key: keyof FormState, value: string) {
-    setForm(current => ({ ...current, [key]: value }))
+    const next = { ...form, [key]: value }
+    setForm(next)
+    if (!editingId) saveMetricsDraft(next)
   }
 
   function startCreate() {
@@ -199,6 +209,7 @@ export default function ManualMetricsAdmin() {
         return
       }
       setSuccess(editingId ? 'Manual metrics updated.' : 'Manual metrics saved.')
+      if (!editingId) clearMetricsDraft()
       setEditingId(null)
       setForm(emptyForm(form.clientId))
       await load({ silent: true })
@@ -327,7 +338,7 @@ export default function ManualMetricsAdmin() {
             <TextAreaField label="General notes" value={form.generalNotes} onChange={value => updateForm('generalNotes', value)} />
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
               type="submit"
               disabled={saving}
@@ -344,6 +355,22 @@ export default function ManualMetricsAdmin() {
               >
                 Cancel edit
               </button>
+            )}
+            {!editingId && hasMetricsDraft && (
+              <div className="flex items-center gap-3 sm:ml-auto">
+                <p className="text-xs text-brand-primary">Draft saved on this device.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearMetricsDraft()
+                    setForm(emptyForm(clients[0]?.id ?? ''))
+                  }}
+                  disabled={saving}
+                  className="text-xs text-brand-accent hover:brightness-110 transition disabled:opacity-60"
+                >
+                  Clear draft
+                </button>
+              </div>
             )}
           </div>
         </form>

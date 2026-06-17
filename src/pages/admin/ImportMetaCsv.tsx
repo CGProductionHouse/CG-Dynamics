@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { listClients, type Client } from '../../lib/db/clients'
 import { importMetaPosts, type ImportedMetaPostInput } from '../../lib/db/importedMetaPosts'
 import {
@@ -272,8 +273,17 @@ function normalizeManualRows(rows: Record<string, string>[], selectedPlatform: P
   })
 }
 
+interface ImportSettingsDraft {
+  importType: ImportType
+  clientId: string
+  platform: Platform
+}
+
 export default function ImportMetaCsv() {
   const { profile } = useAuth()
+  const { getInitialDraft: getImportDraft, saveDraft: saveImportDraft, clearDraft: clearImportDraft, hasDraft: hasImportDraft } =
+    useLocalDraft<ImportSettingsDraft>(`cg_import_${profile?.id ?? 'anon'}`)
+
   const [importType, setImportType] = useState<ImportType>('meta')
   const [clients, setClients] = useState<Client[]>([])
   const [clientId, setClientId] = useState('')
@@ -290,6 +300,7 @@ export default function ImportMetaCsv() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [manualSaved, setManualSaved] = useState(false)
+  const [settingsRestored, setSettingsRestored] = useState(false)
 
   useEffect(() => {
     async function loadClients() {
@@ -301,7 +312,15 @@ export default function ImportMetaCsv() {
           setError(error.message)
         } else {
           setClients(data)
-          setClientId(data[0]?.id ?? '')
+          const draft = getImportDraft()
+          const validClientId =
+            draft?.clientId && data.some(c => c.id === draft.clientId)
+              ? draft.clientId
+              : data[0]?.id ?? ''
+          setClientId(validClientId)
+          if (draft?.importType) setImportType(draft.importType)
+          if (draft?.platform) setPlatform(draft.platform)
+          if (draft) setSettingsRestored(true)
         }
       } catch (error) {
         setError(errorMessage(error, 'Could not load clients.'))
@@ -345,6 +364,7 @@ export default function ImportMetaCsv() {
 
   function handleImportTypeChange(nextType: ImportType) {
     setImportType(nextType)
+    saveImportDraft({ importType: nextType, clientId, platform })
     resetPreview()
   }
 
@@ -433,6 +453,7 @@ export default function ImportMetaCsv() {
         return
       }
 
+      clearImportDraft()
       setSuccess(`Saved ${rows.length} imported posts. You can now build a report from this data.`)
     } catch (error) {
       setError(errorMessage(error, 'Could not save imported posts.'))
@@ -482,6 +503,7 @@ export default function ImportMetaCsv() {
       }
 
       setManualSaved(true)
+      clearImportDraft()
       setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'} to Manual metrics. These now feed into the master monthly report.`)
     } catch (error) {
       setError(errorMessage(error, 'Could not save manual summary metrics.'))
@@ -601,6 +623,34 @@ export default function ImportMetaCsv() {
       <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
         <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
           <div className="space-y-4">
+            {settingsRestored && !fileName && (
+              <div className="flex items-start gap-2 rounded-lg border border-sky-300/30 bg-sky-300/10 px-3 py-2.5">
+                <p className="text-xs leading-relaxed text-sky-200">
+                  Your import settings were restored. Please reselect the CSV file to continue.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSettingsRestored(false)}
+                  className="mt-0.5 shrink-0 text-xs text-sky-200/60 hover:text-sky-200 transition"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {hasImportDraft && !settingsRestored && (
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-brand-primary">Import settings saved on this device.</p>
+                <button
+                  type="button"
+                  onClick={clearImportDraft}
+                  className="text-xs text-brand-accent hover:brightness-110 transition"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-brand-accent mb-1.5">Import type</label>
               <select
@@ -622,7 +672,11 @@ export default function ImportMetaCsv() {
               <label className="block text-sm font-medium text-brand-accent mb-1.5">Client</label>
               <select
                 value={clientId}
-                onChange={event => setClientId(event.target.value)}
+                onChange={event => {
+                  const next = event.target.value
+                  setClientId(next)
+                  saveImportDraft({ importType, clientId: next, platform })
+                }}
                 disabled={loading}
                 className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
               >
@@ -638,7 +692,11 @@ export default function ImportMetaCsv() {
               </label>
               <select
                 value={platform}
-                onChange={event => setPlatform(event.target.value as Platform)}
+                onChange={event => {
+                  const next = event.target.value as Platform
+                  setPlatform(next)
+                  saveImportDraft({ importType, clientId, platform: next })
+                }}
                 className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
               >
                 <option value="facebook">Facebook</option>

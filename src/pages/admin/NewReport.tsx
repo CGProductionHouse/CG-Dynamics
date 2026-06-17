@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { listClients, type Client } from '../../lib/db/clients'
 import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/importedMetaPosts'
 import { getReportWithPosts, saveReport, type ReportStatus } from '../../lib/db/reports'
@@ -97,9 +98,17 @@ function buildPrompt(
   ].join('\n')
 }
 
+interface ReportDraft {
+  clientId: string
+  fields: ReportFields
+}
+
 export default function NewReport() {
   const { reportId } = useParams()
   const { profile } = useAuth()
+  const { getInitialDraft: getReportDraft, saveDraft: saveReportDraft, clearDraft: clearReportDraft, hasDraft: hasReportDraft } =
+    useLocalDraft<ReportDraft>(`cg_report_${profile?.id ?? 'anon'}`)
+
   const [clients, setClients] = useState<Client[]>([])
   const [clientId, setClientId] = useState('')
   const [periodStart, setPeriodStart] = useState(monthStartInputValue())
@@ -137,7 +146,17 @@ export default function NewReport() {
           setError(error.message)
         } else {
           setClients(data)
-          setClientId(data[0]?.id ?? '')
+          if (!reportId) {
+            const draft = getReportDraft()
+            const validClientId =
+              draft?.clientId && data.some(c => c.id === draft.clientId)
+                ? draft.clientId
+                : data[0]?.id ?? ''
+            setClientId(validClientId)
+            if (draft?.fields) setFields(draft.fields)
+          } else {
+            setClientId(data[0]?.id ?? '')
+          }
         }
       } catch (error) {
         setError(errorMessage(error, 'Could not load clients.'))
@@ -253,6 +272,16 @@ export default function NewReport() {
       active = false
     }
   }, [clientId])
+
+  // Auto-save strategy fields and client selection for new reports.
+  // Only active when not editing an existing report (reportId is set).
+  // Only saves when at least one field has content so we don't immediately
+  // show "draft saved" on an untouched blank form.
+  useEffect(() => {
+    if (reportId || !clientId) return
+    if (!Object.values(fields).some(v => v.trim())) return
+    saveReportDraft({ clientId, fields })
+  }, [clientId, fields, reportId, saveReportDraft])
 
   const selectedClient = clients.find(client => client.id === clientId)
   // The report month is the calendar month of the period end date.
@@ -414,6 +443,7 @@ export default function NewReport() {
 
       setSavedReportId(data.id)
       setReportStatus(data.status)
+      clearReportDraft()
       setSuccess(status === 'published' ? 'Report published. The client can now view it.' : 'Draft saved.')
     } catch (error) {
       setError(errorMessage(error, 'Could not save this report.'))
@@ -682,12 +712,26 @@ export default function NewReport() {
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="space-y-5">
           <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
-            <div className="mb-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Strategy board</p>
-              <h2 className="mt-2 text-base font-semibold text-white">Client-facing strategy narrative</h2>
-              <p className="mt-1 text-xs text-brand-primary">
-                Use these prompts to turn the report data into clear client direction.
-              </p>
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Strategy board</p>
+                <h2 className="mt-2 text-base font-semibold text-white">Client-facing strategy narrative</h2>
+                <p className="mt-1 text-xs text-brand-primary">
+                  Use these prompts to turn the report data into clear client direction.
+                </p>
+              </div>
+              {hasReportDraft && !reportId && (
+                <div className="shrink-0 text-right">
+                  <p className="text-xs text-brand-primary">Draft saved on this device.</p>
+                  <button
+                    type="button"
+                    onClick={clearReportDraft}
+                    className="mt-0.5 text-xs text-brand-accent hover:brightness-110 transition"
+                  >
+                    Clear draft
+                  </button>
+                </div>
+              )}
             </div>
             <div className="space-y-4">
               <TextInput

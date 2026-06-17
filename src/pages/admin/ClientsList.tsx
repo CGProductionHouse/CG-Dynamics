@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
+import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -503,6 +504,8 @@ function parseBulkText(text: string, existingClients: Client[]) {
   return { toAdd, toSkip, inListDupes }
 }
 
+type BulkDraft = { text: string; tier: 'standard' | 'premium' }
+
 function BulkImportModal({
   clients,
   onImported,
@@ -512,8 +515,12 @@ function BulkImportModal({
   onImported: () => void
   onClose: () => void
 }) {
-  const [text, setText] = useState('')
-  const [tier, setTier] = useState<'standard' | 'premium'>('standard')
+  const { profile } = useAuth()
+  const draftKey = `cg_bulk_${profile?.id ?? 'anon'}`
+  const { getInitialDraft, saveDraft, clearDraft, hasDraft } = useLocalDraft<BulkDraft>(draftKey)
+
+  const [text, setText] = useState<string>(() => getInitialDraft()?.text ?? '')
+  const [tier, setTier] = useState<'standard' | 'premium'>(() => getInitialDraft()?.tier ?? 'standard')
   const [importing, setImporting] = useState(false)
   const [result, setResult] = useState<{ added: string[]; failed: string[] } | null>(null)
 
@@ -539,7 +546,14 @@ function BulkImportModal({
     })
     setImporting(false)
     setResult({ added, failed })
+    clearDraft()
     onImported()
+  }
+
+  function handleClearDraft() {
+    clearDraft()
+    setText('')
+    setTier('standard')
   }
 
   const OVERLAY = 'fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:items-center'
@@ -613,7 +627,11 @@ function BulkImportModal({
           <textarea
             rows={10}
             value={text}
-            onChange={e => setText(e.target.value)}
+            onChange={e => {
+              const next = e.target.value
+              setText(next)
+              saveDraft({ text: next, tier })
+            }}
             disabled={importing}
             placeholder={"Action Sport\nBohemia\nCape Lumber\nDelta Gas\n..."}
             className="w-full resize-y rounded-lg border border-brand-muted bg-brand-bg px-3.5 py-2.5 font-mono text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent transition disabled:opacity-60"
@@ -626,7 +644,11 @@ function BulkImportModal({
           </label>
           <select
             value={tier}
-            onChange={e => setTier(e.target.value as 'standard' | 'premium')}
+            onChange={e => {
+              const next = e.target.value as 'standard' | 'premium'
+              setTier(next)
+              saveDraft({ text, tier: next })
+            }}
             disabled={importing}
             className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition disabled:opacity-60"
           >
@@ -684,6 +706,20 @@ function BulkImportModal({
           <code className="rounded bg-brand-muted/60 px-1 py-0.5 text-brand-accent">/client-logos/client-name-slug.png</code>{' '}
           if a matching file exists.
         </p>
+
+        {hasDraft && (
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs text-brand-primary">Draft saved on this device.</p>
+            <button
+              type="button"
+              onClick={handleClearDraft}
+              disabled={importing}
+              className="text-xs text-brand-accent hover:brightness-110 transition disabled:opacity-60"
+            >
+              Clear draft
+            </button>
+          </div>
+        )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
