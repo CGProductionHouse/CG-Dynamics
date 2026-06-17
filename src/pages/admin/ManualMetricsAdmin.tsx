@@ -119,7 +119,7 @@ export default function ManualMetricsAdmin() {
     if (!options.silent) setLoading(true)
     setError(null)
     try {
-      const [clientsRes, metricsRes] = await Promise.all([listClients(), listManualMetrics()])
+      const [clientsRes, metricsRes] = await Promise.all([listClients('active'), listManualMetrics()])
       const loadError = clientsRes.error ?? metricsRes.error
       if (loadError) {
         setError(loadError.message)

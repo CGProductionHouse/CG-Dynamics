@@ -7,6 +7,10 @@ import {
   listClients,
   createClient,
   updateClient,
+  archiveClient,
+  restoreClient,
+  deleteClient,
+  clientHasData,
   type Client,
 } from '../../lib/db/clients'
 import { listImportGroups } from '../../lib/db/importedMetaPosts'
@@ -42,6 +46,12 @@ function upsertClient(clients: Client[], client: Client) {
   return sortClients(nextClients)
 }
 
+type ViewFilter = 'active' | 'archived' | 'all'
+type ConfirmAction =
+  | { type: 'archive'; client: Client }
+  | { type: 'restore'; client: Client }
+  | { type: 'delete'; client: Client; checkingData: boolean; hasData: boolean | null }
+
 export default function ClientsList() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
@@ -66,6 +76,14 @@ export default function ClientsList() {
   const [error, setError] = useState<string | null>(null)
   const [modal, setModal] = useState<{ open: boolean; client?: Client }>({ open: false })
   const [bulkOpen, setBulkOpen] = useState<boolean>(() => getBulkOpen() ?? false)
+  const [viewFilter, setViewFilter] = useState<ViewFilter>('active')
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
+
+  const displayClients = useMemo(() => {
+    if (viewFilter === 'active') return clients.filter(c => c.active)
+    if (viewFilter === 'archived') return clients.filter(c => !c.active)
+    return clients
+  }, [clients, viewFilter])
 
   function openBulk() {
     setBulkOpen(true)
@@ -75,6 +93,34 @@ export default function ClientsList() {
   function closeBulk() {
     setBulkOpen(false)
     clearBulkOpen()
+  }
+
+  async function doArchive(client: Client) {
+    const { error } = await archiveClient(client.id)
+    if (error) throw error
+    setClients(prev => prev.map(c => c.id === client.id ? { ...c, active: false } : c))
+  }
+
+  async function doRestore(client: Client) {
+    const { error } = await restoreClient(client.id)
+    if (error) throw error
+    setClients(prev => prev.map(c => c.id === client.id ? { ...c, active: true } : c))
+  }
+
+  async function doDelete(client: Client) {
+    const { error } = await deleteClient(client.id)
+    if (error) throw error
+    setClients(prev => prev.filter(c => c.id !== client.id))
+  }
+
+  async function openDeleteConfirm(client: Client) {
+    setConfirmAction({ type: 'delete', client, checkingData: true, hasData: null })
+    const has = await clientHasData(client.id)
+    setConfirmAction(prev =>
+      prev?.type === 'delete' && prev.client.id === client.id
+        ? { ...prev, checkingData: false, hasData: has }
+        : prev
+    )
   }
 
   useEffect(() => {
@@ -209,13 +255,29 @@ export default function ClientsList() {
         <p className="text-red-400 text-sm">{error}</p>
       ) : (
         <>
+          <div className="mb-4 flex w-fit gap-1 rounded-lg border border-brand-muted bg-brand-surface p-1">
+            {(['active', 'archived', 'all'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setViewFilter(f)}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
+                  viewFilter === f
+                    ? 'bg-brand-accent text-brand-bg'
+                    : 'text-brand-primary hover:text-white'
+                }`}
+              >
+                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+          </div>
+
           <div className="space-y-3 md:hidden">
-            {clients.length === 0 ? (
+            {displayClients.length === 0 ? (
               <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-8 text-center text-sm text-brand-primary">
-                No clients yet.
+                {viewFilter === 'archived' ? 'No archived clients.' : viewFilter === 'active' ? 'No active clients.' : 'No clients yet.'}
               </div>
             ) : (
-              clients.map(c => (
+              displayClients.map(c => (
                 <article key={c.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 gap-3">
@@ -232,19 +294,44 @@ export default function ClientsList() {
                           >
                             {c.tier}
                           </span>
-                          <span className={`text-xs font-medium ${c.active ? 'text-green-400' : 'text-red-400'}`}>
-                            {c.active ? 'Active' : 'Inactive'}
+                          <span className={`text-xs font-medium ${c.active ? 'text-green-400' : 'text-amber-400'}`}>
+                            {c.active ? 'Active' : 'Archived'}
                           </span>
                         </div>
                       </div>
                     </div>
                     {isAdmin && (
-                      <button
-                        onClick={() => setModal({ open: true, client: c })}
-                        className="shrink-0 rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-brand-accent"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex shrink-0 flex-col gap-1.5">
+                        <button
+                          onClick={() => setModal({ open: true, client: c })}
+                          className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-brand-accent"
+                        >
+                          Edit
+                        </button>
+                        {c.active ? (
+                          <button
+                            onClick={() => setConfirmAction({ type: 'archive', client: c })}
+                            className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-amber-400"
+                          >
+                            Archive
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setConfirmAction({ type: 'restore', client: c })}
+                              className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-green-400"
+                            >
+                              Restore
+                            </button>
+                            <button
+                              onClick={() => void openDeleteConfirm(c)}
+                              className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-red-400"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
                 </article>
@@ -263,14 +350,14 @@ export default function ClientsList() {
                 </tr>
               </thead>
               <tbody>
-                {clients.length === 0 ? (
+                {displayClients.length === 0 ? (
                   <tr>
                     <td colSpan={isAdmin ? 4 : 3} className="px-4 py-8 text-center text-brand-primary">
-                      No clients yet.
+                      {viewFilter === 'archived' ? 'No archived clients.' : viewFilter === 'active' ? 'No active clients.' : 'No clients yet.'}
                     </td>
                   </tr>
                 ) : (
-                  clients.map(c => (
+                  displayClients.map(c => (
                     <tr
                       key={c.id}
                       className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
@@ -293,18 +380,43 @@ export default function ClientsList() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs ${c.active ? 'text-green-400' : 'text-red-400'}`}>
-                          {c.active ? 'Active' : 'Inactive'}
+                        <span className={`text-xs ${c.active ? 'text-green-400' : 'text-amber-400'}`}>
+                          {c.active ? 'Active' : 'Archived'}
                         </span>
                       </td>
                       {isAdmin && (
                         <td className="px-4 py-3 text-right">
-                          <button
-                            onClick={() => setModal({ open: true, client: c })}
-                            className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
-                          >
-                            Edit
-                          </button>
+                          <div className="flex items-center justify-end gap-3">
+                            <button
+                              onClick={() => setModal({ open: true, client: c })}
+                              className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
+                            >
+                              Edit
+                            </button>
+                            {c.active ? (
+                              <button
+                                onClick={() => setConfirmAction({ type: 'archive', client: c })}
+                                className="text-xs text-brand-primary hover:text-amber-400 transition-colors"
+                              >
+                                Archive
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => setConfirmAction({ type: 'restore', client: c })}
+                                  className="text-xs text-brand-primary hover:text-green-400 transition-colors"
+                                >
+                                  Restore
+                                </button>
+                                <button
+                                  onClick={() => void openDeleteConfirm(c)}
+                                  className="text-xs text-brand-primary hover:text-red-400 transition-colors"
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -321,6 +433,16 @@ export default function ClientsList() {
           client={modal.client}
           onSave={handleSave}
           onClose={() => setModal({ open: false })}
+        />
+      )}
+
+      {confirmAction && (
+        <ConfirmModal
+          action={confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onArchive={doArchive}
+          onRestore={doRestore}
+          onDelete={doDelete}
         />
       )}
 
@@ -500,6 +622,142 @@ function ClientModal({
   )
 }
 
+// Confirm modal (archive / restore / delete)
+
+function ConfirmModal({
+  action,
+  onClose,
+  onArchive,
+  onRestore,
+  onDelete,
+}: {
+  action: ConfirmAction
+  onClose: () => void
+  onArchive: (c: Client) => Promise<void>
+  onRestore: (c: Client) => Promise<void>
+  onDelete: (c: Client) => Promise<void>
+}) {
+  const [confirmName, setConfirmName] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [modalError, setModalError] = useState<string | null>(null)
+
+  async function execute(fn: () => Promise<void>) {
+    setSaving(true)
+    setModalError(null)
+    try {
+      await fn()
+      onClose()
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Something went wrong.')
+      setSaving(false)
+    }
+  }
+
+  const OVERLAY = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'
+  const PANEL = 'w-full max-w-sm rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] sm:p-6'
+  const btnBase = 'flex-1 rounded-lg py-2.5 text-sm font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed'
+  const btnCancel = `${btnBase} border border-brand-muted text-brand-primary hover:text-white hover:border-white/30`
+
+  if (action.type === 'restore') {
+    return (
+      <div className={OVERLAY} onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}>
+        <div className={PANEL}>
+          <h2 className="mb-1 text-base font-semibold text-white">Restore client?</h2>
+          <p className="mb-5 text-sm text-brand-primary">
+            <strong className="text-white">{action.client.name}</strong> will reappear in all workflows.
+          </p>
+          {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
+          <div className="flex gap-3">
+            <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+            <button onClick={() => execute(() => onRestore(action.client))} disabled={saving} className={`${btnBase} bg-green-600 text-white hover:brightness-110`}>
+              {saving ? 'Restoring...' : 'Restore'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (action.type === 'archive') {
+    return (
+      <div className={OVERLAY} onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}>
+        <div className={PANEL}>
+          <h2 className="mb-1 text-base font-semibold text-white">Archive client?</h2>
+          <p className="mb-5 text-sm text-brand-primary">
+            <strong className="text-white">{action.client.name}</strong> will be hidden from all workflows. You can restore them at any time.
+          </p>
+          {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
+          <div className="flex gap-3">
+            <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+            <button onClick={() => execute(() => onArchive(action.client))} disabled={saving} className={`${btnBase} bg-amber-600 text-white hover:brightness-110`}>
+              {saving ? 'Archiving...' : 'Archive'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Delete flow
+  if (action.checkingData) {
+    return (
+      <div className={OVERLAY}>
+        <div className={PANEL}>
+          <p className="text-sm text-brand-primary">Checking for existing data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (action.hasData) {
+    return (
+      <div className={OVERLAY} onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}>
+        <div className={PANEL}>
+          <h2 className="mb-1 text-base font-semibold text-white">Cannot delete</h2>
+          <p className="mb-5 text-sm text-brand-primary">
+            <strong className="text-white">{action.client.name}</strong> has existing reports, imports, or metrics. Archive them to hide from workflows — their data is preserved.
+          </p>
+          {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
+          <div className="flex gap-3">
+            <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+            <button onClick={() => execute(() => onArchive(action.client))} disabled={saving} className={`${btnBase} bg-amber-600 text-white hover:brightness-110`}>
+              {saving ? 'Archiving...' : 'Archive instead'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // No data — require name match to confirm permanent deletion
+  const nameMatches = confirmName === action.client.name
+
+  return (
+    <div className={OVERLAY} onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}>
+      <div className={PANEL}>
+        <h2 className="mb-1 text-base font-semibold text-white">Delete permanently?</h2>
+        <p className="mb-4 text-sm text-brand-primary">
+          This cannot be undone. Type <strong className="text-white">{action.client.name}</strong> to confirm.
+        </p>
+        <input
+          value={confirmName}
+          onChange={e => setConfirmName(e.target.value)}
+          disabled={saving}
+          placeholder={action.client.name}
+          className="mb-4 w-full rounded-lg border border-brand-muted bg-brand-bg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary/40 focus:outline-none focus:ring-2 focus:ring-red-500 transition disabled:opacity-60"
+        />
+        {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
+        <div className="flex gap-3">
+          <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+          <button onClick={() => execute(() => onDelete(action.client))} disabled={saving || !nameMatches} className={`${btnBase} bg-red-600 text-white hover:brightness-110`}>
+            {saving ? 'Deleting...' : 'Delete permanently'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Bulk import modal
 
 function parseBulkText(text: string, existingClients: Client[]) {
@@ -516,10 +774,12 @@ function parseBulkText(text: string, existingClients: Client[]) {
       unique.push(line)
     }
   }
-  const existingLower = new Set(existingClients.map(c => c.name.toLowerCase()))
-  const toAdd = unique.filter(n => !existingLower.has(n.toLowerCase()))
-  const toSkip = unique.filter(n => existingLower.has(n.toLowerCase()))
-  return { toAdd, toSkip, inListDupes }
+  const activeLower = new Set(existingClients.filter(c => c.active).map(c => c.name.toLowerCase()))
+  const archivedLower = new Set(existingClients.filter(c => !c.active).map(c => c.name.toLowerCase()))
+  const toAdd = unique.filter(n => !activeLower.has(n.toLowerCase()) && !archivedLower.has(n.toLowerCase()))
+  const toSkip = unique.filter(n => activeLower.has(n.toLowerCase()))
+  const toRestoreInstead = unique.filter(n => archivedLower.has(n.toLowerCase()))
+  return { toAdd, toSkip, inListDupes, toRestoreInstead }
 }
 
 type BulkDraft = { text: string; tier: 'standard' | 'premium' }
@@ -542,7 +802,7 @@ function BulkImportModal({
   const [importing, setImporting] = useState(false)
   const [result, setResult] = useState<{ added: string[]; failed: string[] } | null>(null)
 
-  const { toAdd, toSkip, inListDupes } = useMemo(
+  const { toAdd, toSkip, inListDupes, toRestoreInstead } = useMemo(
     () => parseBulkText(text, clients),
     [text, clients]
   )
@@ -628,7 +888,7 @@ function BulkImportModal({
     )
   }
 
-  const hasInput = toAdd.length > 0 || toSkip.length > 0
+  const hasInput = toAdd.length > 0 || toSkip.length > 0 || toRestoreInstead.length > 0
 
   return (
     <div className={OVERLAY} onClick={e => { if (!importing && e.target === e.currentTarget) onClose() }}>
@@ -704,6 +964,22 @@ function BulkImportModal({
                   {toSkip.map(name => (
                     <li key={name} className="flex items-center gap-1.5 text-xs text-brand-primary/60">
                       <span>–</span>
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {toRestoreInstead.length > 0 && (
+              <div>
+                <p className="mb-1 text-xs font-medium text-amber-400">
+                  {toRestoreInstead.length} archived — restore instead of re-adding
+                </p>
+                <ul className="max-h-28 overflow-y-auto space-y-0.5">
+                  {toRestoreInstead.map(name => (
+                    <li key={name} className="flex items-center gap-1.5 text-xs text-amber-400/70">
+                      <span>↺</span>
                       {name}
                     </li>
                   ))}

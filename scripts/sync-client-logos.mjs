@@ -29,6 +29,29 @@ const STOP_WORDS = new Set([
   'icon', '01', '02', 'new', 'old', 'promotion', 'promotions',
 ])
 
+// ─── slug aliases ───────────────────────────────────────────────────────────
+// Some client names produce a runtime slug (clientSlug()) that differs from
+// the sync-script slug because STOP_WORDS strip a word present in the client
+// name (e.g. "Promotions", "Attorneys", "Bloemfontein", "White").  After the
+// main sync loop, each source file is copied to the alias destination so the
+// app can resolve the logo at runtime.
+//
+// Format: { src: '<canonical output name>', dest: '<alias name>' }
+// If the source file does not yet exist in DEST_DIR the alias is skipped with
+// a warning (will be applied automatically the next time the source is synced).
+const ALIASES = [
+  { src: 'bloem-action-sport.png',       dest: 'action-sport.png' },
+  { src: 'bohemia-04.png',               dest: 'bohemia.png' },
+  { src: 'braize.png',                   dest: 'braize-promotions.png' },
+  { src: 'dulux-paint-bloemfontein.png', dest: 'dulux-bloemfontein.png' },
+  { src: 'hmh.png',                      dest: 'hmh-attorneys.png' },
+  { src: 'local-meat-deli.png',          dest: 'local-deli.png' },
+  { src: 'madisons.png',                 dest: 'madison-wear.png' },
+  { src: 'psg-wit.png',                  dest: 'psg.png' },
+  { src: 'tbs-brokers.png',              dest: 'tbs.png' },
+  { src: 'bloem-marble-marketing.png',   dest: 'bloem-marble-granite.png' },
+]
+
 // ─── filename slug ──────────────────────────────────────────────────────────
 
 function slugifyBase(base) {
@@ -414,6 +437,27 @@ function run() {
   console.log(`\nNeeds review (${needsReview.length}):`)
   if (needsReview.length === 0) console.log('  (none)')
   needsReview.forEach(s => console.log(`  ${s.name}  ->  ${s.target}  —  ${s.note}`))
+
+  // Apply slug aliases so the runtime clientSlug() can always find the file.
+  const aliasApplied = []
+  const aliasSkipped = []
+  for (const { src, dest } of ALIASES) {
+    const srcPath = join(DEST_DIR, src)
+    const destPath = join(DEST_DIR, dest)
+    if (!existsSync(srcPath)) {
+      aliasSkipped.push({ src, dest })
+      continue
+    }
+    copyFileSync(srcPath, destPath)
+    aliasApplied.push({ src, dest })
+  }
+  console.log(`\nAlias copies (${aliasApplied.length}):`)
+  if (aliasApplied.length === 0) console.log('  (none)')
+  aliasApplied.forEach(a => console.log(`  ${a.dest}  <-  ${a.src}`))
+  if (aliasSkipped.length > 0) {
+    console.log(`\nAlias copies skipped — source not yet synced (${aliasSkipped.length}):`)
+    aliasSkipped.forEach(a => console.log(`  ${a.dest}  <-  ${a.src}  (source missing)`))
+  }
   console.log('')
 }
 

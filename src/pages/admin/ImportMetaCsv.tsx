@@ -307,7 +307,7 @@ export default function ImportMetaCsv() {
       setLoading(true)
       setError(null)
       try {
-        const { data, error } = await listClients()
+        const { data, error } = await listClients('active')
         if (error) {
           setError(error.message)
         } else {
