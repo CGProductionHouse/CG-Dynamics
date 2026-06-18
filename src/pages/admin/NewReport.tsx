@@ -794,10 +794,9 @@ export default function NewReport() {
 
         <aside className="space-y-5">
           <PerformancePanel title="Best performing post" post={stats.bestPost} />
-          <PerformancePanel title="Worst performing post" post={stats.worstPost} />
 
           <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
-            <h2 className="text-sm font-semibold text-white mb-4">Top 5 posts</h2>
+            <h2 className="text-sm font-semibold text-white mb-4">Top 3 posts</h2>
             <div className="space-y-3">
               {stats.topPosts.length === 0 ? (
                 <p className="text-sm text-brand-primary">No imported posts found for this range.</p>

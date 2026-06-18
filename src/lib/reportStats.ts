@@ -30,7 +30,6 @@ export interface ReportStats {
   totalEngagements: number
   postCount: number
   bestPost: ReportStatsPost | null
-  worstPost: ReportStatsPost | null
   topPosts: ReportStatsPost[]
 }
 
@@ -71,7 +70,6 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
 
 export function calculateReportStats(posts: ReportStatsPost[]): ReportStats {
   const sorted = [...posts].sort((a, b) => b.engagements - a.engagements)
-  const worstSorted = [...posts].sort((a, b) => a.engagements - b.engagements)
 
   return {
     totalReach: posts.reduce((sum, post) => sum + post.reach, 0),
@@ -79,8 +77,7 @@ export function calculateReportStats(posts: ReportStatsPost[]): ReportStats {
     totalEngagements: posts.reduce((sum, post) => sum + post.engagements, 0),
     postCount: posts.length,
     bestPost: sorted[0] ?? null,
-    worstPost: worstSorted[0] ?? null,
-    topPosts: sorted.slice(0, 5),
+    topPosts: sorted.slice(0, 3),
   }
 }
 

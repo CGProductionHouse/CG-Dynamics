@@ -842,7 +842,7 @@ function ConfirmModal({
         <div className={PANEL}>
           <h2 className="mb-1 text-base font-semibold text-white">Cannot delete</h2>
           <p className="mb-5 text-sm text-brand-primary">
-            <strong className="text-white">{action.client.name}</strong> has existing reports, imports, or metrics. Archive them to hide from workflows — their data is preserved.
+            <strong className="text-white">{action.client.name}</strong> has report data. Archive instead to keep history safe.
           </p>
           {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
           <div className="flex gap-3">
