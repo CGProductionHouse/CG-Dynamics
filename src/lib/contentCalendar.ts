@@ -11,6 +11,7 @@ export type CalendarCategory =
   | 'commercial'
   | 'seasonal'
   | 'awareness_month'
+  | 'awareness'
 
 export type DeliverableType =
   | 'professional_video'
@@ -306,7 +307,7 @@ function buildYearEvents(year: number): CalendarEvent[] {
     {
       title: 'Nelson Mandela Day',
       date: new Date(Date.UTC(year, 6, 18)),
-      category: 'commercial',
+      category: 'awareness',
       relevanceHint: 'Mandela Day — 67 minutes of community action. Strong for community, social-good and local-pride content.',
       suggestedAngle: "Share a community initiative, highlight a team giving-back story, or acknowledge Madiba's legacy.",
       deliverables: ['photo_post', 'reel', 'professional_video'],
