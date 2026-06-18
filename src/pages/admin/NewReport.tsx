@@ -15,12 +15,13 @@ import {
   listManualMetricsForClient,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
-import { detectReportPeriod, formatReportPeriod, previousReportMonth, reportMonth } from '../../lib/reportPeriod'
+import { detectReportPeriod, formatReportPeriod, previousReportMonth, reportMonth, calendarMonthBounds, isMonthComplete } from '../../lib/reportPeriod'
 import {
   PLATFORM_LABELS,
   buildPerformanceMovement,
   buildMasterReport,
   calculateReportStats,
+  displayContentType,
   formatDate,
   formatNumber,
   formatPercent,
@@ -398,6 +399,7 @@ export default function NewReport() {
       platform: post.platform,
       metricLabel: 'engagements',
       metricValue: post.engagements,
+      postType: post.post_type,
     }
   }, [master])
   const strategyContext: StrategyContext = {
@@ -425,12 +427,20 @@ export default function NewReport() {
       setError('Select a report date range before saving.')
       return
     }
+    if (status === 'published' && !isMonthComplete(currentMonth)) {
+      setError('This report period is incomplete. Client reports are only available for completed calendar months.')
+      return
+    }
 
     setSaving(status)
     setError(null)
     setSuccess(null)
     setStrategyNotice(null)
     try {
+      // Always store the full calendar month as the report period so all
+      // reports have clean, comparable month boundaries.
+      const { start: monthStart, end: monthEnd } = calendarMonthBounds(currentMonth)
+
       // Snapshot the auto-derived top content into the strategy data so the
       // saved/published report stays stable even if underlying data changes.
       const strategyToSave: StrategyData = {
@@ -448,8 +458,8 @@ export default function NewReport() {
       const { data, error } = await saveReport({
         id: savedReportId ?? undefined,
         client_id: clientId,
-        period_start: periodStart,
-        period_end: periodEnd,
+        period_start: monthStart,
+        period_end: monthEnd,
         status,
         report_title: fields.reportTitle || `${selectedClient?.name ?? 'Client'} Monthly Report`,
         previous_month_strategy: legacy.previousMonthStrategy,
@@ -526,13 +536,15 @@ export default function NewReport() {
               <p className="mt-1 text-base font-semibold text-white">{currentMonthLabel}</p>
             </div>
             <div className="sm:col-span-2">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Date range</p>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Report period</p>
               <p className="mt-1 text-sm text-white">
-                {formatReportPeriod({ start: periodStart, end: periodEnd })}
-                {periodSource && (
-                  <span className="text-brand-primary"> from {periodSource === 'publish_time' ? 'Publish time' : 'CSV filename'}</span>
-                )}
+                {formatReportPeriod(calendarMonthBounds(currentMonth))}
               </p>
+              {!isMonthComplete(currentMonth) && (
+                <p className="mt-1 text-xs text-amber-300">
+                  Incomplete month — not available for client view yet.
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -808,6 +820,9 @@ export default function NewReport() {
                       <span className="text-xs text-brand-primary">{formatDate(post.publish_time)}</span>
                     </div>
                     <p className="text-sm text-white">{shortCaption(post.caption)}</p>
+                    <p className="text-xs text-brand-primary mt-1">
+                      {post.post_type ? displayContentType(post.post_type) ?? post.post_type : 'Content type not set'}
+                    </p>
                     <p className="text-xs text-brand-primary mt-2">
                       {formatNumber(post.engagements)} engagements | {formatNumber(post.reach)} reach
                     </p>
@@ -855,6 +870,7 @@ function SourcePill({ label, tone }: { label: string; tone: 'posts' | 'manual' |
 }
 
 function movementText(movement: MetricMovement) {
+  if (movement.notAvailable) return 'Data not available'
   if (movement.direction === 'missing' || movement.difference === null) {
     return 'Previous month data not available'
   }
@@ -874,7 +890,11 @@ function MovementCard({ label, movement }: { label: string; movement: MetricMove
   return (
     <article className={`rounded-lg border p-3 ${tone}`}>
       <p className="text-[11px] uppercase tracking-[0.12em] opacity-80">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-white">{formatNumber(movement.current)}</p>
+      {movement.notAvailable ? (
+        <p className="mt-2 text-sm text-brand-primary">Data not available</p>
+      ) : (
+        <p className="mt-2 text-xl font-semibold text-white">{formatNumber(movement.current)}</p>
+      )}
       <p className="mt-1 text-xs">{movementText(movement)}</p>
     </article>
   )
@@ -917,6 +937,11 @@ function PerformancePanel({
       {post ? (
         <div>
           <p className="text-sm text-white leading-relaxed">{shortCaption(post.caption)}</p>
+          <p className="mt-1 text-xs text-brand-primary">
+            {post.post_type
+              ? `Content type: ${displayContentType(post.post_type) ?? post.post_type}`
+              : 'Content type not set'}
+          </p>
           <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
             <MiniMetric label="Reach" value={formatNumber(post.reach)} />
             <MiniMetric label="Views" value={formatNumber(post.impressions)} />

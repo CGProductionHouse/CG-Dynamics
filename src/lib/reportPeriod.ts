@@ -123,3 +123,35 @@ export function formatReportPeriod(period: Pick<DetectedReportPeriod, 'start' | 
 
   return `${formatter.format(new Date(`${period.start}T00:00:00`))} - ${formatter.format(new Date(`${period.end}T00:00:00`))}`
 }
+
+// Returns the first and last calendar day of a YYYY-MM month string.
+export function calendarMonthBounds(month: string): { start: string; end: string } {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return { start: `${month}-01`, end: `${month}-01` }
+  const year = Number(match[1])
+  const monthIndex = Number(match[2])
+  const end = new Date(Date.UTC(year, monthIndex, 0)).toISOString().slice(0, 10)
+  return { start: `${month}-01`, end }
+}
+
+// True only when the last day of the month is strictly before today (UTC).
+export function isMonthComplete(month: string): boolean {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return false
+  const year = Number(match[1])
+  const monthIndex = Number(match[2])
+  const lastDay = new Date(Date.UTC(year, monthIndex, 0))
+  const today = new Date()
+  const todayUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
+  return lastDay < todayUtc
+}
+
+// "May 2026" — long month name + year for display headings.
+export function monthDisplayLabel(month: string): string {
+  const match = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!match) return month || 'Unknown month'
+  return new Intl.DateTimeFormat('en-GB', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(`${month}-01T00:00:00`))
+}

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Platform } from '../../lib/reportStats'
-import { PLATFORM_LABELS, formatNumber } from '../../lib/reportStats'
+import { PLATFORM_LABELS, displayContentType, formatNumber } from '../../lib/reportStats'
 import type { PackageSettings } from '../../lib/db/clients'
 import type { CalendarEvent } from '../../lib/contentCalendar'
 import { DELIVERABLE_LABELS } from '../../lib/contentCalendar'
@@ -27,7 +27,7 @@ export interface StrategyContext {
   clientName: string
   packageSettings: PackageSettings
   calendarEvents: CalendarEvent[]
-  topPost: { caption: string | null; platform: Platform | null; metricLabel: string; metricValue: number } | null
+  topPost: { caption: string | null; platform: Platform | null; metricLabel: string; metricValue: number; postType: string | null } | null
 }
 
 const ACTION_OPTION_CATEGORY: Record<ActionPlanKey, StrategyCategory> = {
@@ -147,6 +147,9 @@ export function GuidedStrategyEditor({
               <p className="mt-1 text-xs text-brand-primary">
                 {context.topPost.platform ? `${PLATFORM_LABELS[context.topPost.platform]} · ` : ''}
                 {context.topPost.metricLabel}: {formatNumber(context.topPost.metricValue)}
+                {context.topPost.postType
+                  ? ` · ${displayContentType(context.topPost.postType) ?? context.topPost.postType}`
+                  : ''}
               </p>
             </>
           ) : (

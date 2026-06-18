@@ -15,6 +15,7 @@ import {
   buildMasterReport,
   buildPerformanceMovement,
   compareMetric,
+  displayContentType,
   formatDate,
   formatNumber,
   formatPercent,
@@ -87,7 +88,8 @@ export function ClientReportView({
                 {report.report_title || 'Monthly Performance Report'}
               </h1>
               <p className="text-sm text-brand-primary mt-3">
-                {formatDate(report.period_start)} to {formatDate(report.period_end)}
+                {new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
+                  .format(new Date(`${report.period_end.slice(0, 7)}-01T00:00:00`))}
               </p>
             </div>
           </div>
@@ -173,6 +175,11 @@ function OverviewTab({
               {master.bestPostOverall.platform ? `${PLATFORM_LABELS[master.bestPostOverall.platform]} - ` : ''}
               {formatDate(master.bestPostOverall.publish_time)}
             </p>
+            {master.bestPostOverall.post_type && (
+              <p className="text-xs text-brand-primary mt-1">
+                Content type: {displayContentType(master.bestPostOverall.post_type) ?? master.bestPostOverall.post_type}
+              </p>
+            )}
             <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-3">
               <MiniMetric label="Reach" value={formatNumber(master.bestPostOverall.reach)} />
               <MiniMetric label="Views" value={formatNumber(master.bestPostOverall.impressions)} />
@@ -364,6 +371,11 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
               {shortCaption(view.bestPost.caption)}
             </h2>
             <p className="text-sm text-brand-primary mt-2">{formatDate(view.bestPost.publish_time)}</p>
+            {view.bestPost.post_type && (
+              <p className="text-xs text-brand-primary mt-1">
+                Content type: {displayContentType(view.bestPost.post_type) ?? view.bestPost.post_type}
+              </p>
+            )}
             <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-3">
               <MiniMetric label="Reach" value={formatNumber(view.bestPost.reach)} />
               <MiniMetric label="Views" value={formatNumber(view.bestPost.impressions)} />
@@ -380,7 +392,7 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
           <h2 className="text-base font-semibold text-white">Top {view.label} posts</h2>
           <span className="text-sm text-brand-primary sm:text-xs">Ranked by engagement</span>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {view.topPosts.map((post, index) => (
             <article key={post.id} className="bg-brand-bg/60 border border-brand-muted rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
@@ -388,6 +400,11 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
                 <span className="text-[11px] text-brand-primary">{formatDate(post.publish_time)}</span>
               </div>
               <p className="text-sm text-white leading-snug">{shortCaption(post.caption, 'Post')}</p>
+              {post.post_type && (
+                <p className="text-xs text-brand-primary mt-1">
+                  {displayContentType(post.post_type) ?? post.post_type}
+                </p>
+              )}
               <p className="text-sm text-brand-primary mt-3">
                 {formatNumber(post.engagements)} engagements
               </p>
@@ -529,6 +546,7 @@ function PerformanceMovementSection({ movement }: { movement: PerformanceMovemen
 }
 
 function movementText(movement: MetricMovement) {
+  if (movement.notAvailable) return 'Not available from this import source.'
   if (movement.direction === 'missing' || movement.difference === null) {
     return 'Previous month data not available.'
   }
@@ -545,15 +563,20 @@ function MovementCard({ label, movement }: { label: string; movement: MetricMove
     missing: 'border-brand-muted bg-brand-bg/40 text-brand-primary',
   }[movement.direction]
 
-  const currentText = formatNumber(movement.current)
-  const detail = movement.direction === 'missing'
-    ? (label.toLowerCase().includes('follower') ? 'Previous follower count not available' : 'Previous month data not available')
-    : movementText(movement)
+  const detail = movement.notAvailable
+    ? 'Not available from this import source.'
+    : movement.direction === 'missing'
+      ? (label.toLowerCase().includes('follower') ? 'Previous follower count not available' : 'Previous month data not available')
+      : movementText(movement)
 
   return (
     <article className={`rounded-xl border p-4 ${tone}`}>
       <p className="text-[11px] uppercase tracking-[0.12em] opacity-80">{label}</p>
-      <p className="mt-3 text-2xl font-semibold text-white">{currentText}</p>
+      {movement.notAvailable ? (
+        <p className="mt-3 text-sm font-medium text-brand-primary">Data not available</p>
+      ) : (
+        <p className="mt-3 text-2xl font-semibold text-white">{formatNumber(movement.current)}</p>
+      )}
       <p className="mt-2 text-xs leading-relaxed">{detail}</p>
     </article>
   )

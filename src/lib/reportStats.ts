@@ -147,6 +147,15 @@ export interface MetricMovement {
   difference: number | null
   percent: number | null
   direction: 'up' | 'down' | 'flat' | 'missing'
+  // True when the underlying metric is not available from the data source (e.g.
+  // profile visits from a CSV-only report). Distinguishes "genuinely 0" from
+  // "data not available".
+  notAvailable?: boolean
+}
+
+// Sentinel for metrics whose source does not provide the data at all.
+export function unavailableMetric(): MetricMovement {
+  return { current: 0, previous: null, difference: null, percent: null, direction: 'missing', notAvailable: true }
 }
 
 export interface PerformanceMovement {
@@ -231,7 +240,10 @@ export function buildMasterReport(
   }
 }
 
-export function totalManualProfileVisits(manualMetrics: ManualPlatformMetric[]) {
+// Returns null when no manual metrics exist — callers must treat null as
+// "data not available" rather than 0.
+export function totalManualProfileVisits(manualMetrics: ManualPlatformMetric[]): number | null {
+  if (manualMetrics.length === 0) return null
   return manualMetrics.reduce((sum, metric) => sum + metric.profile_visits, 0)
 }
 
@@ -270,19 +282,17 @@ export function buildPerformanceMovement(
 ): PerformanceMovement {
   const currentFollowers = totalManualFollowers(currentManualMetrics)
   const previousFollowers = totalManualFollowers(previousManualMetrics)
-  const previousProfileVisits = previousManualMetrics.length > 0
-    ? totalManualProfileVisits(previousManualMetrics)
-    : null
+  const currentProfileVisits = totalManualProfileVisits(currentManualMetrics)
+  const previousProfileVisits = totalManualProfileVisits(previousManualMetrics)
 
   return {
     views: compareMetric(current.totalViews, previous?.totalViews),
     reach: compareMetric(current.totalReach, previous?.totalReach),
     engagements: compareMetric(current.totalEngagements, previous?.totalEngagements),
-    profileVisits: compareMetric(
-      totalManualProfileVisits(currentManualMetrics),
-      previousProfileVisits
-    ),
-    followers: compareMetric(currentFollowers ?? 0, previousFollowers),
+    // Profile visits and followers are only available from manual summaries.
+    // Show "not available" rather than 0 when no manual data exists.
+    profileVisits: currentProfileVisits === null ? unavailableMetric() : compareMetric(currentProfileVisits, previousProfileVisits),
+    followers: currentFollowers === null ? unavailableMetric() : compareMetric(currentFollowers, previousFollowers),
   }
 }
 
@@ -306,4 +316,19 @@ export function formatDate(value: string | null) {
 export function shortCaption(caption: string | null, fallback = 'Untitled post') {
   if (!caption) return fallback
   return caption.length > 120 ? `${caption.slice(0, 120)}...` : caption
+}
+
+// Maps raw Meta CSV post_type values to friendly display labels.
+// Returns null when postType is absent so callers can choose to hide it.
+export function displayContentType(postType: string | null | undefined): string | null {
+  if (!postType) return null
+  const t = postType.toLowerCase().replace(/\s+/g, ' ').trim()
+  if (t === 'ig reel' || t === 'reel') return 'Reel'
+  if (t === 'ig carousel' || t === 'ig album' || t === 'carousel') return 'Carousel'
+  if (t === 'ig image' || t === 'image') return 'Photo post'
+  if (t === 'photo') return 'Photo post'
+  if (t.includes('video')) return 'Video'
+  if (t === 'link') return 'Link post'
+  if (t === 'status') return 'Status'
+  return postType
 }

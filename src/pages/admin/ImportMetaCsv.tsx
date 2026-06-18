@@ -13,7 +13,7 @@ import {
   type ManualSourceType,
 } from '../../lib/db/manualMetrics'
 import { upsertDraftReportForMonth } from '../../lib/db/reports'
-import { detectReportPeriod, formatReportPeriod, reportMonth } from '../../lib/reportPeriod'
+import { detectReportPeriod, formatReportPeriod, isMonthComplete, reportMonth } from '../../lib/reportPeriod'
 import { PLATFORM_LABELS, formatNumber, shortCaption, type Platform } from '../../lib/reportStats'
 
 interface AutoReportLink {
@@ -21,6 +21,7 @@ interface AutoReportLink {
   reportId: string
   clientName: string
   created: boolean
+  complete: boolean
 }
 
 function monthLongName(month: string) {
@@ -328,6 +329,7 @@ export default function ImportMetaCsv() {
   const [manualSaved, setManualSaved] = useState(false)
   const [settingsRestored, setSettingsRestored] = useState(false)
   const [autoReports, setAutoReports] = useState<AutoReportLink[]>([])
+  const [incompleteMonths, setIncompleteMonths] = useState<string[]>([])
 
   useEffect(() => {
     async function loadClients() {
@@ -388,6 +390,7 @@ export default function ImportMetaCsv() {
     setSuccess(null)
     setManualSaved(false)
     setAutoReports([])
+    setIncompleteMonths([])
   }
 
   function handleImportTypeChange(nextType: ImportType) {
@@ -484,30 +487,49 @@ export default function ImportMetaCsv() {
 
       clearImportDraft()
 
-      // Auto-create or update the draft report for this client/month so the
-      // imported data flows straight into the reporting workspace.
+      // Group imported posts by calendar month and separate complete from
+      // incomplete months. Only complete past months get draft reports.
       const clientName = clients.find(c => c.id === clientId)?.name ?? 'Client'
+      const monthSet = new Set<string>()
+      rows.forEach(row => {
+        if (row.publishTime) monthSet.add(reportMonth(row.publishTime))
+      })
+      if (monthSet.size === 0 && periodEnd) monthSet.add(reportMonth(periodEnd))
+
+      const allMonths = [...monthSet].sort()
+      const completeMths = allMonths.filter(isMonthComplete)
+      const incompleteMths = allMonths.filter(m => !isMonthComplete(m))
+
       const links: AutoReportLink[] = []
-      if (periodStart && periodEnd) {
-        const month = reportMonth(periodEnd)
+      for (const month of completeMths) {
+        const { start, end } = monthBounds(month)
         const result = await upsertDraftReportForMonth({
           clientId,
           clientName,
-          periodStart,
-          periodEnd,
+          periodStart: start,
+          periodEnd: end,
           month,
           createdBy: profile?.id ?? null,
         })
         if (result.data) {
-          links.push({ month, reportId: result.data.id, clientName, created: result.created })
+          links.push({ month, reportId: result.data.id, clientName, created: result.created, complete: true })
         }
       }
-      setAutoReports(links)
 
-      if (links.length > 0) {
-        setSuccess(`${clientName} · ${monthLongName(links[0].month)} report ${links[0].created ? 'created' : 'updated'} successfully.`)
+      setAutoReports(links)
+      setIncompleteMonths(incompleteMths)
+
+      if (completeMths.length > 0 && incompleteMths.length === 0) {
+        if (links.length === 1) {
+          setSuccess(`${clientName} · ${monthLongName(links[0].month)} report ${links[0].created ? 'created' : 'updated'} successfully.`)
+        } else {
+          setSuccess(`${clientName} · ${links.length} monthly reports updated successfully.`)
+        }
+      } else if (completeMths.length > 0 && incompleteMths.length > 0) {
+        setSuccess(`${completeMths.map(monthLongName).join(', ')} report${completeMths.length > 1 ? 's' : ''} updated. ${incompleteMths.map(monthLongName).join(', ')} data imported.`)
       } else {
-        setSuccess(`Saved ${rows.length} imported posts. You can now build a report from this data.`)
+        // All months incomplete (e.g. current month data)
+        setSuccess(`${rows.length} posts imported. ${incompleteMths.map(monthLongName).join(', ')} data saved but not available for client view yet.`)
       }
     } catch (error) {
       setError(errorMessage(error, 'Could not save imported posts.'))
@@ -559,12 +581,16 @@ export default function ImportMetaCsv() {
       setManualSaved(true)
       clearImportDraft()
 
-      // Auto-create or update a draft report for each month present in the
-      // manual summary (no duplicates — existing reports are reused).
+      // Auto-create draft reports for complete past months only. Incomplete
+      // months (current or future) still save their manual metrics but are
+      // flagged so the admin knows they are not yet client-viewable.
       const clientName = clients.find(c => c.id === clientId)?.name ?? 'Client'
-      const months = [...new Set(payload.map(row => row.month))].sort()
+      const allMonths = [...new Set(payload.map(row => row.month))].sort()
+      const completeMths = allMonths.filter(isMonthComplete)
+      const incompleteMths = allMonths.filter(m => !isMonthComplete(m))
+
       const links: AutoReportLink[] = []
-      for (const month of months) {
+      for (const month of completeMths) {
         const { start, end } = monthBounds(month)
         const result = await upsertDraftReportForMonth({
           clientId,
@@ -575,15 +601,19 @@ export default function ImportMetaCsv() {
           createdBy: profile?.id ?? null,
         })
         if (result.data) {
-          links.push({ month, reportId: result.data.id, clientName, created: result.created })
+          links.push({ month, reportId: result.data.id, clientName, created: result.created, complete: true })
         }
       }
-      setAutoReports(links)
 
-      if (links.length === 1) {
+      setAutoReports(links)
+      setIncompleteMonths(incompleteMths)
+
+      if (completeMths.length === 1 && incompleteMths.length === 0) {
         setSuccess(`${clientName} · ${monthLongName(links[0].month)} report ${links[0].created ? 'created' : 'updated'} successfully.`)
-      } else if (links.length > 1) {
+      } else if (completeMths.length > 1 && incompleteMths.length === 0) {
         setSuccess(`${clientName} · ${links.length} monthly reports updated successfully.`)
+      } else if (completeMths.length > 0 && incompleteMths.length > 0) {
+        setSuccess(`${completeMths.map(monthLongName).join(', ')} report${completeMths.length > 1 ? 's' : ''} updated. ${incompleteMths.map(monthLongName).join(', ')} data saved.`)
       } else {
         setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'} to Manual metrics.`)
       }
@@ -898,6 +928,11 @@ export default function ImportMetaCsv() {
                     {autoReports.length} monthly reports were created or updated.
                   </p>
                 )}
+                {incompleteMonths.length > 0 && (
+                  <p className="mt-1 text-xs text-amber-300">
+                    {incompleteMonths.map(monthLongName).join(', ')} {incompleteMonths.length === 1 ? 'is' : 'are'} incomplete — not available for client view yet.
+                  </p>
+                )}
                 <div className="mt-2 flex flex-wrap gap-3">
                   {autoReports.length > 0 ? (
                     <>
@@ -913,12 +948,14 @@ export default function ImportMetaCsv() {
                       >
                         Edit strategy
                       </Link>
-                      <Link
-                        to={`/admin/published?reportId=${autoReports[0].reportId}`}
-                        className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
-                      >
-                        View as client
-                      </Link>
+                      {autoReports[0].complete && (
+                        <Link
+                          to={`/admin/published?reportId=${autoReports[0].reportId}`}
+                          className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                        >
+                          View as client
+                        </Link>
+                      )}
                     </>
                   ) : (
                     <Link
