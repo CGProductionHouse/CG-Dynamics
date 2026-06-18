@@ -13,7 +13,7 @@ import {
   listManualMetricsForClientMonth,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
-import { formatReportPeriod, previousReportMonth, reportMonth } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from '../client/ClientReportView'
 
 function errorMessage(error: unknown, fallback: string) {
@@ -25,11 +25,7 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 function reportLabel(report: Report) {
-  const month = new Intl.DateTimeFormat('en-GB', {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(`${report.period_start}T00:00:00`))
-  return `${month} (${formatReportPeriod({ start: report.period_start, end: report.period_end })})`
+  return monthDisplayLabel(getReportMonthFromPeriod(report))
 }
 
 export default function PublishedPreview() {
@@ -52,8 +48,11 @@ export default function PublishedPreview() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
+  // The "View as client" dropdown mirrors what a client can actually see: one
+  // report per completed calendar month, deduped. Partial/current-month and
+  // duplicate reports are filtered out here.
   const clientReports = useMemo(() => {
-    return reports.filter(report => report.client_id === selectedClientId)
+    return selectMonthlyReports(reports.filter(report => report.client_id === selectedClientId))
   }, [reports, selectedClientId])
   const selectedClient = useMemo(
     () => clients.find(client => client.id === selectedClientId) ?? null,
@@ -110,14 +109,14 @@ export default function PublishedPreview() {
         setReport(data)
         setSearchParams({ reportId: selectedReportId }, { replace: true })
         if (data) {
-          const currentMonth = reportMonth(data.period_end)
+          const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
           const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, currentMonth)
           setManualMetrics(metrics)
           if (previousMonth) {
             const previous = reports.find(report =>
               report.client_id === data.client_id &&
-              reportMonth(report.period_end) === previousMonth
+              getReportMonthFromPeriod(report) === previousMonth
             )
             const [previousReportResult, previousMetricsResult] = await Promise.all([
               previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
@@ -146,8 +145,8 @@ export default function PublishedPreview() {
 
   function handleClientChange(clientId: string) {
     setSelectedClientId(clientId)
-    const nextReport = reports.find(report => report.client_id === clientId && report.status === 'published')
-      ?? reports.find(report => report.client_id === clientId)
+    const eligible = selectMonthlyReports(reports.filter(report => report.client_id === clientId))
+    const nextReport = eligible.find(report => report.status === 'published') ?? eligible[0]
     setSelectedReportId(nextReport?.id ?? '')
   }
 

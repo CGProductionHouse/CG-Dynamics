@@ -155,3 +155,110 @@ export function monthDisplayLabel(month: string): string {
     year: 'numeric',
   }).format(new Date(`${month}-01T00:00:00`))
 }
+
+// ─── Calendar-month integrity helpers ────────────────────────────────────────
+//
+// Reports must represent a single full calendar month. Old reports created
+// before this rule may carry partial ranges (e.g. 21 May - 10 June). These
+// helpers resolve, validate and normalize a report to its intended month.
+
+// Accepts either a "YYYY-MM" month or a full "YYYY-MM-DD" date.
+export function getCalendarMonthBounds(value: string): { start: string; end: string } {
+  return calendarMonthBounds(value.length > 7 ? value.slice(0, 7) : value)
+}
+
+// True when a stored period is exactly the first→last day of one calendar month.
+export function isFullCalendarMonth(periodStart: string, periodEnd: string): boolean {
+  if (!periodStart || !periodEnd) return false
+  const bounds = calendarMonthBounds(periodStart.slice(0, 7))
+  return periodStart === bounds.start && periodEnd === bounds.end
+}
+
+// True only when the calendar month has fully elapsed (alias of isMonthComplete,
+// named for the task's vocabulary).
+export function isCompletedMonth(month: string): boolean {
+  return isMonthComplete(month)
+}
+
+// The calendar month a report belongs to. Derived from period_start so that a
+// partial range like 21 May - 10 June resolves to May (the intended month).
+export function getReportMonthFromPeriod(report: { period_start: string }): string {
+  return report.period_start.slice(0, 7)
+}
+
+// Full calendar-month bounds for a report, derived from its intended month.
+export function normalizeReportToCalendarMonth(report: { period_start: string }): { month: string; start: string; end: string } {
+  const month = getReportMonthFromPeriod(report)
+  return { month, ...calendarMonthBounds(month) }
+}
+
+// Best-effort export coverage from the CSV filename, e.g.
+// "May-01-2026_May-31-2026.csv" or "report_2026-05-01_2026-05-31.csv". Handles
+// both textual (Month-Day-Year) and ISO (YYYY-MM-DD) date formats. Returns the
+// earliest and latest dates found.
+export function detectFilenameDateRange(fileName?: string | null): { start: string; end: string } | null {
+  if (!fileName) return null
+
+  const dates: Date[] = []
+
+  // ISO dates anywhere in the name.
+  const isoMatches = fileName.match(/\d{4}-\d{2}-\d{2}/g) ?? []
+  isoMatches.forEach(iso => {
+    const parsed = new Date(`${iso}T00:00:00Z`)
+    if (!Number.isNaN(parsed.getTime())) dates.push(parsed)
+  })
+
+  // Textual Month-Day-Year segments.
+  fileName.split(/[_\s]+/).forEach(segment => {
+    const parsed = parseFilenameDate(segment)
+    if (parsed) dates.push(parsed)
+  })
+
+  if (dates.length === 0) return null
+  dates.sort((a, b) => a.getTime() - b.getTime())
+  return { start: inputDateValue(dates[0]), end: inputDateValue(dates[dates.length - 1]) }
+}
+
+// True when a known export range spans the whole calendar month.
+export function monthFullyCoveredByRange(month: string, range: { start: string; end: string } | null): boolean {
+  if (!range) return false
+  const { start, end } = calendarMonthBounds(month)
+  return range.start <= start && range.end >= end
+}
+
+// Reduce a raw report list to the client-facing set: only reports whose intended
+// month is a completed calendar month, deduped to one report per month. When a
+// month has duplicates, the latest updated (then master, then newest) wins.
+export function selectMonthlyReports<
+  T extends { period_start: string; period_end: string; platform?: unknown; updated_at?: string | null; created_at: string }
+>(reports: T[]): T[] {
+  const byMonth = new Map<string, T>()
+  for (const report of reports) {
+    const month = getReportMonthFromPeriod(report)
+    if (!isCompletedMonth(month)) continue
+    const existing = byMonth.get(month)
+    if (!existing) {
+      byMonth.set(month, report)
+      continue
+    }
+    if (preferReport(report, existing)) byMonth.set(month, report)
+  }
+  return [...byMonth.values()].sort((a, b) =>
+    getReportMonthFromPeriod(b).localeCompare(getReportMonthFromPeriod(a))
+  )
+}
+
+// Pick the better of two same-month reports: latest updated wins; ties break to
+// the master report (platform === null), then to the most recently created.
+function preferReport(
+  candidate: { platform?: unknown; updated_at?: string | null; created_at: string },
+  current: { platform?: unknown; updated_at?: string | null; created_at: string }
+): boolean {
+  const candidateUpdated = candidate.updated_at ?? candidate.created_at
+  const currentUpdated = current.updated_at ?? current.created_at
+  if (candidateUpdated !== currentUpdated) return candidateUpdated > currentUpdated
+  const candidateMaster = candidate.platform === null || candidate.platform === undefined
+  const currentMaster = current.platform === null || current.platform === undefined
+  if (candidateMaster !== currentMaster) return candidateMaster
+  return candidate.created_at > current.created_at
+}

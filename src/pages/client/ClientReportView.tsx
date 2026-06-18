@@ -8,6 +8,7 @@ import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
 import { readStrategyData, hasStrategyContent } from '../../lib/strategyEngine'
+import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth } from '../../lib/reportPeriod'
 import type { MasterReportData, MetricMovement, PerformanceMovement, Platform, PlatformSource, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORMS,
@@ -31,6 +32,35 @@ const MANUAL_SOURCE_NOTE =
 const REPORT_DISCLAIMER =
   'Reporting note: This dashboard is compiled from exported platform data, manual summaries, and internal reporting tools. Small differences may appear because platforms process and export data at different times. Original platform dashboards and exports remain the source of record.'
 
+// Restrict a report's posts to its intended calendar month. Posts with no
+// publish time (or an unparseable one) are kept — they belong to the report.
+function postsForReportMonth(report: ReportWithPosts): ReportStatsPost[] {
+  const { start, end } = normalizeReportToCalendarMonth(report)
+  const startTime = new Date(`${start}T00:00:00Z`).getTime()
+  const endTime = new Date(`${end}T23:59:59Z`).getTime()
+  return report.posts
+    .filter(post => {
+      if (!post.publish_time) return true
+      const time = new Date(post.publish_time).getTime()
+      if (Number.isNaN(time)) return true
+      return time >= startTime && time <= endTime
+    })
+    .map(reportPostToStatsPost)
+}
+
+// Client-facing title must match the selected client. A stored custom title is
+// only trusted when it actually names this client; otherwise we derive it from
+// the client name so a stale "CG Production House Monthly Report" never shows on
+// another client's report.
+function resolveReportTitle(report: ReportWithPosts, client: Client | null): string {
+  const stored = report.report_title?.trim()
+  if (client?.name) {
+    if (stored && stored.toLowerCase().includes(client.name.toLowerCase())) return stored
+    return `${client.name} Monthly Report`
+  }
+  return stored || 'Monthly Performance Report'
+}
+
 export function ClientReportView({
   report,
   client = null,
@@ -48,8 +78,11 @@ export function ClientReportView({
 }) {
   const [tab, setTab] = useState<TabKey>('overview')
 
+  // Stats are always restricted to the report's intended calendar month, so a
+  // legacy partial range (e.g. 21 May - 10 June) never bleeds the next month's
+  // posts into this month's numbers.
   const statsPosts = useMemo<ReportStatsPost[]>(
-    () => report.posts.map(reportPostToStatsPost),
+    () => postsForReportMonth(report),
     [report]
   )
   const master = useMemo(
@@ -57,7 +90,7 @@ export function ClientReportView({
     [statsPosts, manualMetrics]
   )
   const previousStatsPosts = useMemo<ReportStatsPost[]>(
-    () => previousReport?.posts.map(reportPostToStatsPost) ?? [],
+    () => previousReport ? postsForReportMonth(previousReport) : [],
     [previousReport]
   )
   const previousMaster = useMemo(
@@ -85,11 +118,10 @@ export function ClientReportView({
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-[0.22em] text-brand-accent mb-2">Monthly master report</p>
               <h1 className="text-3xl font-semibold text-white sm:text-4xl">
-                {report.report_title || 'Monthly Performance Report'}
+                {resolveReportTitle(report, client)}
               </h1>
               <p className="text-sm text-brand-primary mt-3">
-                {new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
-                  .format(new Date(`${report.period_end.slice(0, 7)}-01T00:00:00`))}
+                {monthDisplayLabel(getReportMonthFromPeriod(report))}
               </p>
             </div>
           </div>

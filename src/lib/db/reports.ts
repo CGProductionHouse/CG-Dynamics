@@ -270,6 +270,20 @@ export async function upsertDraftReportForMonth(input: {
   return { data: data as Report, error: null, created: true }
 }
 
+// Repair a report's period to a full calendar month without touching status,
+// posts, strategy or any other field. Used by the admin "Repair to calendar
+// month" action for legacy partial-range reports.
+export async function updateReportPeriod(reportId: string, periodStart: string, periodEnd: string) {
+  const { data, error } = await supabase
+    .from('reports')
+    .update({ period_start: periodStart, period_end: periodEnd })
+    .eq('id', reportId)
+    .select('*')
+    .single()
+
+  return { data: data as Report | null, error }
+}
+
 export async function updateReportStatus(reportId: string, status: ReportStatus) {
   const { data, error } = await supabase
     .from('reports')

@@ -311,8 +311,10 @@ export default function NewReport() {
   }, [clientId, fields, strategyData, reportId, saveReportDraft])
 
   const selectedClient = clients.find(client => client.id === clientId)
-  // The report month is the calendar month of the period end date.
-  const currentMonth = reportMonth(periodEnd)
+  // The report month is the calendar month of the period START date. Using the
+  // start keeps legacy partial ranges (e.g. 21 May - 10 June) resolving to their
+  // intended month (May), matching the client-facing resolution.
+  const currentMonth = reportMonth(periodStart)
   const currentMonthLabel = monthName(currentMonth)
   const previousMonth = previousReportMonth(currentMonth)
   const previousMonthLabel = previousMonth ? monthName(previousMonth) : 'Previous month'
@@ -352,9 +354,13 @@ export default function NewReport() {
     })
     return [...months].sort().map(monthName)
   }, [currentMonth, importedPosts])
+  // Posts feeding the report are always clamped to the intended calendar month
+  // so the admin preview matches the published client view exactly (and a
+  // partial range never bleeds the next month's posts into the stats).
   const periodImportedPosts = useMemo(() => {
-    const start = periodStart ? new Date(`${periodStart}T00:00:00`).getTime() : null
-    const end = periodEnd ? new Date(`${periodEnd}T23:59:59`).getTime() : null
+    const bounds = calendarMonthBounds(currentMonth)
+    const start = new Date(`${bounds.start}T00:00:00`).getTime()
+    const end = new Date(`${bounds.end}T23:59:59`).getTime()
 
     return importedPosts.filter(post => {
       if (!post.publish_time) {
@@ -364,11 +370,11 @@ export default function NewReport() {
       if (Number.isNaN(time)) {
         return periodSource === 'filename' && periodBatchId !== null && post.import_batch_id === periodBatchId
       }
-      if (start !== null && time < start) return false
-      if (end !== null && time > end) return false
+      if (time < start) return false
+      if (time > end) return false
       return true
     })
-  }, [importedPosts, periodBatchId, periodEnd, periodSource, periodStart])
+  }, [importedPosts, periodBatchId, periodSource, currentMonth])
   const statsPosts = useMemo(() => periodImportedPosts.map(importedToStatsPost), [periodImportedPosts])
   const previousMonthImportedPosts = useMemo(
     () => previousMonth

@@ -11,7 +11,7 @@ import {
   listManualMetricsForClientMonth,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
-import { previousReportMonth, reportMonth } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from './ClientReportView'
 
 function errorMessage(error: unknown, fallback: string) {
@@ -23,24 +23,7 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 function monthLabel(report: Report) {
-  return new Intl.DateTimeFormat('en-GB', {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(`${report.period_start}T00:00:00`))
-}
-
-// One entry per month. Prefer the master report (platform === null) when a
-// legacy per-platform report also exists for the same month.
-function oneReportPerMonth(reports: Report[]) {
-  const byMonth = new Map<string, Report>()
-  reports.forEach(report => {
-    const key = report.period_start.slice(0, 7)
-    const existing = byMonth.get(key)
-    if (!existing || (existing.platform !== null && report.platform === null)) {
-      byMonth.set(key, report)
-    }
-  })
-  return [...byMonth.values()].sort((a, b) => b.period_start.localeCompare(a.period_start))
+  return monthDisplayLabel(getReportMonthFromPeriod(report))
 }
 
 export default function Dashboard() {
@@ -56,7 +39,7 @@ export default function Dashboard() {
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const months = useMemo(() => oneReportPerMonth(reports), [reports])
+  const months = useMemo(() => selectMonthlyReports(reports), [reports])
 
   useEffect(() => {
     async function loadReports() {
@@ -77,7 +60,7 @@ export default function Dashboard() {
           setError(error.message)
         } else {
           setReports(data)
-          setSelectedReportId(oneReportPerMonth(data)[0]?.id ?? null)
+          setSelectedReportId(selectMonthlyReports(data)[0]?.id ?? null)
           setClient(clientRes.data)
         }
       } catch (error) {
@@ -109,12 +92,12 @@ export default function Dashboard() {
         }
         setReport(data)
         if (data) {
-          const currentMonth = reportMonth(data.period_end)
+          const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
           const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, currentMonth)
           setManualMetrics(metrics)
           if (previousMonth) {
-            const previous = reports.find(item => reportMonth(item.period_end) === previousMonth)
+            const previous = reports.find(item => getReportMonthFromPeriod(item) === previousMonth)
             const [previousReportResult, previousMetricsResult] = await Promise.all([
               previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
               listManualMetricsForClientMonth(data.client_id, previousMonth),

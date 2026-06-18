@@ -13,7 +13,7 @@ import {
   type ManualSourceType,
 } from '../../lib/db/manualMetrics'
 import { upsertDraftReportForMonth } from '../../lib/db/reports'
-import { detectReportPeriod, formatReportPeriod, isMonthComplete, reportMonth } from '../../lib/reportPeriod'
+import { detectFilenameDateRange, detectReportPeriod, formatReportPeriod, isMonthComplete, monthFullyCoveredByRange, reportMonth } from '../../lib/reportPeriod'
 import { PLATFORM_LABELS, formatNumber, shortCaption, type Platform } from '../../lib/reportStats'
 
 interface AutoReportLink {
@@ -330,6 +330,7 @@ export default function ImportMetaCsv() {
   const [settingsRestored, setSettingsRestored] = useState(false)
   const [autoReports, setAutoReports] = useState<AutoReportLink[]>([])
   const [incompleteMonths, setIncompleteMonths] = useState<string[]>([])
+  const [partialExportMonths, setPartialExportMonths] = useState<string[]>([])
 
   useEffect(() => {
     async function loadClients() {
@@ -391,6 +392,7 @@ export default function ImportMetaCsv() {
     setManualSaved(false)
     setAutoReports([])
     setIncompleteMonths([])
+    setPartialExportMonths([])
   }
 
   function handleImportTypeChange(nextType: ImportType) {
@@ -405,6 +407,8 @@ export default function ImportMetaCsv() {
     setSuccess(null)
     setManualSaved(false)
     setAutoReports([])
+    setIncompleteMonths([])
+    setPartialExportMonths([])
     setRows([])
     setManualRows([])
     setFileName(file?.name ?? null)
@@ -487,9 +491,16 @@ export default function ImportMetaCsv() {
 
       clearImportDraft()
 
-      // Group imported posts by calendar month and separate complete from
-      // incomplete months. Only complete past months get draft reports.
+      // Group imported posts by calendar month, then decide each month's
+      // eligibility for a client-facing report. Completeness is based on the
+      // export's coverage (filename date range when present), NOT on whether a
+      // post happens to exist on the 1st/last — a client may simply not post
+      // every day. Buckets:
+      //   ready    → completed month with full export coverage → create report
+      //   partial  → completed month but the export only covers part of it
+      //   incomplete → current/future month (not yet a finished calendar month)
       const clientName = clients.find(c => c.id === clientId)?.name ?? 'Client'
+      const filenameRange = detectFilenameDateRange(fileName)
       const monthSet = new Set<string>()
       rows.forEach(row => {
         if (row.publishTime) monthSet.add(reportMonth(row.publishTime))
@@ -497,11 +508,24 @@ export default function ImportMetaCsv() {
       if (monthSet.size === 0 && periodEnd) monthSet.add(reportMonth(periodEnd))
 
       const allMonths = [...monthSet].sort()
-      const completeMths = allMonths.filter(isMonthComplete)
-      const incompleteMths = allMonths.filter(m => !isMonthComplete(m))
+      const readyMths: string[] = []
+      const partialMths: string[] = []
+      const incompleteMths: string[] = []
+      for (const month of allMonths) {
+        if (!isMonthComplete(month)) {
+          incompleteMths.push(month)
+          continue
+        }
+        // Completed month: require full export coverage when we can verify it
+        // from the filename. With no filename range we fall back to accepting
+        // the completed month (coverage is uncertain but not contradicted).
+        const covered = filenameRange ? monthFullyCoveredByRange(month, filenameRange) : true
+        if (covered) readyMths.push(month)
+        else partialMths.push(month)
+      }
 
       const links: AutoReportLink[] = []
-      for (const month of completeMths) {
+      for (const month of readyMths) {
         const { start, end } = monthBounds(month)
         const result = await upsertDraftReportForMonth({
           clientId,
@@ -518,19 +542,22 @@ export default function ImportMetaCsv() {
 
       setAutoReports(links)
       setIncompleteMonths(incompleteMths)
+      setPartialExportMonths(partialMths)
 
-      if (completeMths.length > 0 && incompleteMths.length === 0) {
-        if (links.length === 1) {
-          setSuccess(`${clientName} · ${monthLongName(links[0].month)} report ${links[0].created ? 'created' : 'updated'} successfully.`)
-        } else {
-          setSuccess(`${clientName} · ${links.length} monthly reports updated successfully.`)
-        }
-      } else if (completeMths.length > 0 && incompleteMths.length > 0) {
-        setSuccess(`${completeMths.map(monthLongName).join(', ')} report${completeMths.length > 1 ? 's' : ''} updated. ${incompleteMths.map(monthLongName).join(', ')} data imported.`)
-      } else {
-        // All months incomplete (e.g. current month data)
-        setSuccess(`${rows.length} posts imported. ${incompleteMths.map(monthLongName).join(', ')} data saved but not available for client view yet.`)
+      const parts: string[] = []
+      if (readyMths.length === 1) {
+        parts.push(`${clientName} · ${monthLongName(links[0]?.month ?? readyMths[0])} report ${links[0]?.created ? 'created' : 'updated'} successfully.`)
+      } else if (readyMths.length > 1) {
+        parts.push(`${clientName} · ${readyMths.length} monthly reports updated successfully.`)
       }
+      if (partialMths.length > 0) {
+        parts.push(`Partial export detected for ${partialMths.map(monthLongName).join(', ')} — not available for client view.`)
+      }
+      if (incompleteMths.length > 0) {
+        parts.push(`${incompleteMths.map(monthLongName).join(', ')} data imported, but not available for client view yet.`)
+      }
+      if (parts.length === 0) parts.push(`Saved ${rows.length} imported posts.`)
+      setSuccess(parts.join(' '))
     } catch (error) {
       setError(errorMessage(error, 'Could not save imported posts.'))
     } finally {
@@ -926,6 +953,11 @@ export default function ImportMetaCsv() {
                 {autoReports.length > 1 && (
                   <p className="mt-1 text-xs text-brand-primary">
                     {autoReports.length} monthly reports were created or updated.
+                  </p>
+                )}
+                {partialExportMonths.length > 0 && (
+                  <p className="mt-1 text-xs text-amber-300">
+                    Partial export detected for {partialExportMonths.map(monthLongName).join(', ')}. This month is not available for client view.
                   </p>
                 )}
                 {incompleteMonths.length > 0 && (

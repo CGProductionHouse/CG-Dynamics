@@ -5,10 +5,17 @@ import { listClients, type Client } from '../../lib/db/clients'
 import {
   deleteReport,
   listReports,
+  updateReportPeriod,
   updateReportStatus,
   type Report,
 } from '../../lib/db/reports'
-import { formatReportPeriod } from '../../lib/reportPeriod'
+import {
+  formatReportPeriod,
+  isFullCalendarMonth,
+  monthDisplayLabel,
+  getReportMonthFromPeriod,
+  normalizeReportToCalendarMonth,
+} from '../../lib/reportPeriod'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -30,10 +37,7 @@ function formatDateTime(value: string | null | undefined) {
 }
 
 function monthLabel(report: Report) {
-  return new Intl.DateTimeFormat('en-GB', {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(`${report.period_start}T00:00:00`))
+  return monthDisplayLabel(getReportMonthFromPeriod(report))
 }
 
 function periodLabel(report: Report) {
@@ -127,6 +131,33 @@ export default function ReportsManagement() {
     }
   }
 
+  async function handleRepair(report: Report) {
+    const { month, start, end } = normalizeReportToCalendarMonth(report)
+    const confirmed = window.confirm(
+      `Repair ${clientNameById.get(report.client_id) ?? report.client_id} to ${monthDisplayLabel(month)}?\n\n` +
+      `Period will be set to ${start} → ${end} (full calendar month).\n` +
+      `This does not publish, delete or change any report content.`
+    )
+    if (!confirmed) return
+
+    setBusyReportId(report.id)
+    setError(null)
+    setSuccess(null)
+    try {
+      const { error } = await updateReportPeriod(report.id, start, end)
+      if (error) {
+        setError(error.message)
+        return
+      }
+      setSuccess(`Report repaired to ${monthDisplayLabel(month)}.`)
+      await load()
+    } catch (error) {
+      setError(errorMessage(error, 'Could not repair report.'))
+    } finally {
+      setBusyReportId(null)
+    }
+  }
+
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -163,6 +194,7 @@ export default function ReportsManagement() {
         <div className="space-y-3">
           {reports.map(report => {
             const clientName = clientNameById.get(report.client_id) ?? report.client_id
+            const isPartial = !isFullCalendarMonth(report.period_start, report.period_end)
             return (
               <article key={report.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
                 <div className="grid gap-4 xl:grid-cols-[1fr_1.1fr_auto] xl:items-center">
@@ -176,9 +208,19 @@ export default function ReportsManagement() {
                       }`}>
                         {report.status}
                       </span>
+                      {isPartial && (
+                        <span className="rounded-full bg-amber-400/15 px-2 py-1 text-xs font-medium text-amber-300">
+                          Invalid partial period
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-sm text-brand-primary">{monthLabel(report)} | {periodLabel(report)}</p>
                     <p className="mt-1 text-xs text-brand-primary">Monthly master report</p>
+                    {isPartial && (
+                      <p className="mt-1 text-xs text-amber-300/90">
+                        Client-facing reports use completed calendar months only. Repair to {monthLabel(report)} to fix the period.
+                      </p>
+                    )}
                   </div>
 
                   <dl className="grid gap-3 sm:grid-cols-2">
@@ -211,6 +253,16 @@ export default function ReportsManagement() {
                         >
                           {report.status === 'published' ? 'Unpublish' : 'Publish'}
                         </button>
+                        {isPartial && (
+                          <button
+                            type="button"
+                            onClick={() => void handleRepair(report)}
+                            disabled={busyReportId === report.id}
+                            className="rounded-lg border border-amber-400/40 px-3 py-2 text-sm text-amber-300 hover:bg-amber-400/10 disabled:opacity-60"
+                          >
+                            Repair to calendar month
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => void handleDelete(report)}
