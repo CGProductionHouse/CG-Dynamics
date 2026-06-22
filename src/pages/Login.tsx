@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext'
 import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
 import { AuthMessage } from '../components/AuthShell'
+import { friendlyAuthError } from '../lib/authErrors'
+import { useCooldown } from '../hooks/useCooldown'
 
 function isNotConfirmed(error: { message?: string; code?: string } | null) {
   if (!error) return false
@@ -22,6 +24,7 @@ export default function Login() {
   const [unconfirmed, setUnconfirmed] = useState(false)
   const [resending, setResending] = useState(false)
   const [resendMessage, setResendMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
+  const resendCooldown = useCooldown(60)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -36,7 +39,7 @@ export default function Login() {
         setUnconfirmed(true)
         setError('This email is registered but not confirmed yet.')
       } else {
-        setError(error.message)
+        setError(friendlyAuthError(error, 'Could not sign in. Check your details and try again.'))
       }
     } else if (!role) {
       setError('Could not load your profile after sign in.')
@@ -46,7 +49,7 @@ export default function Login() {
   }
 
   async function handleResend() {
-    if (resending) return
+    if (resending || resendCooldown.active) return
     if (!email.trim()) {
       setResendMessage({ tone: 'error', text: 'Enter your email above first.' })
       return
@@ -55,11 +58,13 @@ export default function Login() {
     setResendMessage(null)
     const { error } = await resendConfirmation(email.trim())
     setResending(false)
-    setResendMessage(
-      error
-        ? { tone: 'error', text: error.message }
-        : { tone: 'success', text: 'Confirmation email sent. Check your inbox (and spam folder).' }
-    )
+    if (error) {
+      setResendMessage({ tone: 'error', text: friendlyAuthError(error, 'Could not resend the confirmation email.') })
+    } else {
+      setResendMessage({ tone: 'success', text: 'Confirmation email sent. Check your inbox (and spam folder).' })
+    }
+    // Throttle repeat requests regardless of outcome.
+    resendCooldown.start()
   }
 
   return (
@@ -115,10 +120,14 @@ export default function Login() {
               <button
                 type="button"
                 onClick={handleResend}
-                disabled={resending}
+                disabled={resending || resendCooldown.active}
                 className="w-full rounded-lg border border-brand-accent/40 bg-brand-accent/10 py-2 text-sm font-medium text-brand-accent hover:bg-brand-accent/20 transition disabled:opacity-60"
               >
-                {resending ? 'Sending...' : 'Resend confirmation email'}
+                {resending
+                  ? 'Sending...'
+                  : resendCooldown.active
+                    ? `Please wait ${resendCooldown.remaining}s before requesting another email`
+                    : 'Resend confirmation email'}
               </button>
               {resendMessage && <AuthMessage tone={resendMessage.tone}>{resendMessage.text}</AuthMessage>}
             </div>

@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext'
 import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
 import { AuthMessage } from '../components/AuthShell'
+import { friendlyAuthError, isAlreadyRegistered, isEmailRateLimit, SIGNUP_RATE_LIMITED_MESSAGE } from '../lib/authErrors'
+import { useCooldown } from '../hooks/useCooldown'
 
 const CARD =
   'w-full max-w-sm bg-brand-surface/95 border border-brand-muted rounded-xl p-6 shadow-[0_0_50px_rgba(45,212,191,0.1)] sm:p-8'
@@ -17,15 +19,18 @@ export default function Signup() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [pendingAccount, setPendingAccount] = useState(false)
   const [resending, setResending] = useState(false)
   const [resendMessage, setResendMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
+  const resendCooldown = useCooldown(60)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    setInfo(null)
     setResendMessage(null)
 
     if (password !== confirmPassword) {
@@ -38,10 +43,15 @@ export default function Signup() {
     setLoading(false)
 
     if (error) {
-      if (/already|registered|exists/i.test(error.message)) {
+      // The account may already exist on the server even though the
+      // confirmation email was throttled — guide the user instead of letting
+      // them hammer the sign-up button.
+      if (isEmailRateLimit(error)) {
+        setInfo(SIGNUP_RATE_LIMITED_MESSAGE)
+      } else if (isAlreadyRegistered(error)) {
         setPendingAccount(true)
       } else {
-        setError(error.message)
+        setError(friendlyAuthError(error, 'Could not create your account. Please try again.'))
       }
     } else if (alreadyRegistered) {
       setPendingAccount(true)
@@ -51,7 +61,7 @@ export default function Signup() {
   }
 
   async function handleResend() {
-    if (resending) return
+    if (resending || resendCooldown.active) return
     if (!email.trim()) {
       setResendMessage({ tone: 'error', text: 'Enter your email above first.' })
       return
@@ -60,11 +70,13 @@ export default function Signup() {
     setResendMessage(null)
     const { error } = await resendConfirmation(email.trim())
     setResending(false)
-    setResendMessage(
-      error
-        ? { tone: 'error', text: error.message }
-        : { tone: 'success', text: 'Confirmation email sent. Check your inbox (and spam folder).' }
-    )
+    if (error) {
+      setResendMessage({ tone: 'error', text: friendlyAuthError(error, 'Could not resend the confirmation email.') })
+    } else {
+      setResendMessage({ tone: 'success', text: 'Confirmation email sent. Check your inbox (and spam folder).' })
+    }
+    // Throttle repeat requests regardless of outcome.
+    resendCooldown.start()
   }
 
   if (success) {
@@ -120,10 +132,14 @@ export default function Signup() {
             <button
               type="button"
               onClick={handleResend}
-              disabled={resending}
+              disabled={resending || resendCooldown.active}
               className="block w-full border border-brand-accent/40 bg-brand-accent/10 text-brand-accent text-center py-2.5 rounded-lg text-sm font-medium hover:bg-brand-accent/20 transition disabled:opacity-60"
             >
-              {resending ? 'Sending...' : 'Resend confirmation email'}
+              {resending
+                ? 'Sending...'
+                : resendCooldown.active
+                  ? `Please wait ${resendCooldown.remaining}s before requesting another email`
+                  : 'Resend confirmation email'}
             </button>
             {resendMessage && <AuthMessage tone={resendMessage.tone}>{resendMessage.text}</AuthMessage>}
           </div>
@@ -187,6 +203,7 @@ export default function Signup() {
           />
 
           {error && <AuthMessage tone="error">{error}</AuthMessage>}
+          {info && <AuthMessage tone="info">{info}</AuthMessage>}
 
           <button
             type="submit"

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import AuthShell, { AuthMessage } from '../components/AuthShell'
 import PasswordField from '../components/PasswordField'
+import { friendlyAuthError } from '../lib/authErrors'
 
 export default function ResetPassword() {
   const { updatePassword, signOut, isPasswordRecovery, loading } = useAuth()
@@ -29,7 +30,7 @@ export default function ResetPassword() {
     const { error } = await updatePassword(password)
     if (error) {
       setSubmitting(false)
-      setError(error.message)
+      setError(friendlyAuthError(error, 'Could not update your password. Please try again.'))
       return
     }
     // End the recovery session so the user signs in fresh with the new password.
