@@ -10,7 +10,6 @@ import {
   type Report,
 } from '../../lib/db/reports'
 import {
-  formatReportPeriod,
   isFullCalendarMonth,
   isMonthComplete,
   monthDisplayLabel,
@@ -18,7 +17,19 @@ import {
   normalizeReportToCalendarMonth,
 } from '../../lib/reportPeriod'
 import { readStrategyData, strategyRequiredComplete } from '../../lib/strategyEngine'
+import { ClientLogo } from '../../components/ClientLogo'
 import WorkflowGuide from '../../components/WorkflowGuide'
+
+type StatusFilter = 'all' | 'internal-draft' | 'ready-to-publish' | 'published' | 'incomplete-month' | 'needs-repair'
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'internal-draft', label: 'Internal drafts' },
+  { value: 'ready-to-publish', label: 'Ready to publish' },
+  { value: 'published', label: 'Published' },
+  { value: 'incomplete-month', label: 'Incomplete month' },
+  { value: 'needs-repair', label: 'Needs repair' },
+]
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -43,44 +54,41 @@ function monthLabel(report: Report) {
   return monthDisplayLabel(getReportMonthFromPeriod(report))
 }
 
-function periodLabel(report: Report) {
-  return formatReportPeriod({ start: report.period_start, end: report.period_end })
+function getDerivedStatus(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): StatusFilter {
+  if (isPartial) return 'needs-repair'
+  if (report.status === 'published') return 'published'
+  if (!monthComplete) return 'incomplete-month'
+  if (ready) return 'ready-to-publish'
+  return 'internal-draft'
 }
 
-interface WorkflowStatus {
+interface BadgeInfo {
   label: string
   className: string
-  next: string
 }
 
-// Friendly, single-glance status + next action for the workflow board.
-function workflowStatus(report: Report, monthComplete: boolean, ready: boolean): WorkflowStatus {
-  if (report.status === 'published') {
-    return {
-      label: 'Published',
-      className: 'bg-brand-accent/20 text-brand-accent',
-      next: 'Live for the client. Update any time the data changes.',
-    }
+function statusBadge(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): BadgeInfo {
+  if (report.status === 'published' && !isPartial) {
+    return { label: 'Published', className: 'bg-brand-accent/20 text-brand-accent' }
+  }
+  if (isPartial) {
+    return { label: 'Needs repair', className: 'bg-amber-400/15 text-amber-300' }
   }
   if (!monthComplete) {
-    return {
-      label: 'Internal draft',
-      className: 'bg-brand-muted text-brand-primary',
-      next: 'Saved as internal draft. Client view unlocks after month-end — you can edit strategy now.',
-    }
+    return { label: 'Internal draft', className: 'bg-brand-muted text-brand-primary' }
   }
   if (ready) {
-    return {
-      label: 'Ready to publish',
-      className: 'bg-sky-300/15 text-sky-200',
-      next: 'Looks complete. Review, then publish for the client.',
-    }
+    return { label: 'Ready to publish', className: 'bg-sky-300/15 text-sky-200' }
   }
-  return {
-    label: 'Needs strategy',
-    className: 'bg-amber-400/15 text-amber-300',
-    next: 'Add the strategy and action plan, then publish.',
-  }
+  return { label: 'Needs strategy', className: 'bg-amber-400/15 text-amber-300' }
+}
+
+function nextActionText(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): string {
+  if (isPartial) return 'Report period needs fixing. Use repair to match the calendar month.'
+  if (report.status === 'published') return 'Live for the client. Update any time the data changes.'
+  if (!monthComplete) return 'Client view unlocks after month-end. You can add strategy now.'
+  if (ready) return 'Looks complete. Review, then publish for the client.'
+  return 'Add the strategy and action plan, then publish.'
 }
 
 export default function ReportsManagement() {
@@ -94,9 +102,26 @@ export default function ReportsManagement() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
+  const [clientFilter, setClientFilter] = useState<string>('all')
+  const [monthFilter, setMonthFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const clientById = useMemo(() => {
+    return new Map(clients.map(client => [client.id, client]))
+  }, [clients])
+
   const clientNameById = useMemo(() => {
     return new Map(clients.map(client => [client.id, client.name]))
   }, [clients])
+
+  const uniqueMonths = useMemo(() => {
+    const months = new Set<string>()
+    for (const report of reports) {
+      months.add(getReportMonthFromPeriod(report))
+    }
+    return [...months].sort((a, b) => b.localeCompare(a))
+  }, [reports])
 
   async function load() {
     setLoading(true)
@@ -121,9 +146,60 @@ export default function ReportsManagement() {
     void load()
   }, [])
 
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      'internal-draft': 0,
+      'ready-to-publish': 0,
+      'published': 0,
+      'incomplete-month': 0,
+      'needs-repair': 0,
+    }
+    for (const report of reports) {
+      const monthComplete = isMonthComplete(getReportMonthFromPeriod(report))
+      const ready = monthComplete && report.status !== 'published' && strategyRequiredComplete(readStrategyData(report.strategy_data))
+      const isPartial = !isFullCalendarMonth(report.period_start, report.period_end)
+      const derived = getDerivedStatus(report, monthComplete, ready, isPartial)
+      counts[derived] = (counts[derived] ?? 0) + 1
+    }
+    return counts
+  }, [reports])
+
+  const filteredReports = useMemo(() => {
+    let result = [...reports]
+
+    if (clientFilter !== 'all') {
+      result = result.filter(r => r.client_id === clientFilter)
+    }
+    if (monthFilter !== 'all') {
+      result = result.filter(r => getReportMonthFromPeriod(r) === monthFilter)
+    }
+    if (statusFilter !== 'all') {
+      result = result.filter(r => {
+        const monthComplete = isMonthComplete(getReportMonthFromPeriod(r))
+        const ready = monthComplete && r.status !== 'published' && strategyRequiredComplete(readStrategyData(r.strategy_data))
+        const isPartial = !isFullCalendarMonth(r.period_start, r.period_end)
+        return getDerivedStatus(r, monthComplete, ready, isPartial) === statusFilter
+      })
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(r => {
+        const name = clientNameById.get(r.client_id) ?? ''
+        return name.toLowerCase().includes(q) || (r.report_title ?? '').toLowerCase().includes(q)
+      })
+    }
+
+    result.sort((a, b) => {
+      const aDate = a.updated_at ?? a.created_at
+      const bDate = b.updated_at ?? b.created_at
+      return bDate.localeCompare(aDate)
+    })
+
+    return result
+  }, [reports, clientFilter, monthFilter, statusFilter, searchQuery, clientNameById])
+
   async function handleStatus(report: Report) {
     const nextStatus = report.status === 'published' ? 'draft' : 'published'
-    // Client-facing reports are only valid for completed calendar months.
     if (nextStatus === 'published' && !isMonthComplete(getReportMonthFromPeriod(report))) {
       setSuccess(null)
       setError('Client view is only available for completed months. This month is still in progress, so it stays an internal draft until the calendar month is complete.')
@@ -154,7 +230,7 @@ export default function ReportsManagement() {
 
   async function handleDelete(report: Report) {
     const confirmed = window.confirm(
-      `Delete report for ${clientNameById.get(report.client_id) ?? report.client_id} (${periodLabel(report)})?\n\nThis deletes only the report and its report posts. Imported CSV data will remain available.`
+      `Delete report for ${clientNameById.get(report.client_id) ?? report.client_id} (${monthLabel(report)})?\n\nThis deletes only the report and its report posts. Imported CSV data will remain available.`
     )
     if (!confirmed) return
 
@@ -203,13 +279,22 @@ export default function ReportsManagement() {
     }
   }
 
+  function clearFilters() {
+    setClientFilter('all')
+    setMonthFilter('all')
+    setStatusFilter('all')
+    setSearchQuery('')
+  }
+
+  const hasActiveFilters = clientFilter !== 'all' || monthFilter !== 'all' || statusFilter !== 'all' || searchQuery !== ''
+
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Reports</p>
+          <p className="mb-2 text-xs uppercase tracking-[0.22em] text-brand-primary">Reports</p>
           <h1 className="text-2xl font-semibold text-white sm:text-3xl">Report management</h1>
-          <p className="text-sm text-brand-primary mt-2 max-w-2xl">
+          <p className="mt-2 max-w-2xl text-sm text-brand-primary">
             {isAdmin
               ? 'View, edit, publish, unpublish, and delete monthly client reports.'
               : 'View monthly client reports (read-only).'}
@@ -231,47 +316,149 @@ export default function ReportsManagement() {
       {error && <Message tone="error" text={error} />}
       {success && <Message tone="success" text={success} />}
 
+      {/* ── Filter panel ── */}
+      <div className="mb-6 rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-0 flex-1 sm:flex sm:flex-wrap sm:items-end sm:gap-3">
+            <FilterGroup label="Client">
+              <select
+                value={clientFilter}
+                onChange={e => setClientFilter(e.target.value)}
+                className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              >
+                <option value="all">All clients</option>
+                {clients.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </FilterGroup>
+
+            <FilterGroup label="Month">
+              <select
+                value={monthFilter}
+                onChange={e => setMonthFilter(e.target.value)}
+                className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              >
+                <option value="all">All months</option>
+                {uniqueMonths.map(m => (
+                  <option key={m} value={m}>{monthDisplayLabel(m)}</option>
+                ))}
+              </select>
+            </FilterGroup>
+
+            <FilterGroup label="Status">
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value as StatusFilter)}
+                className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              >
+                {STATUS_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </FilterGroup>
+
+            <div className="min-w-0 sm:w-44">
+              <label className="mb-1 block text-xs text-brand-primary">Search</label>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Client name or title…"
+                className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              />
+            </div>
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="shrink-0 rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+
+        {!loading && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-brand-primary">
+            <span>
+              Showing {filteredReports.length} of {reports.length} reports
+            </span>
+            {statusCounts['internal-draft'] > 0 && (
+              <span>Internal drafts: <span className="text-white">{statusCounts['internal-draft']}</span></span>
+            )}
+            {statusCounts['ready-to-publish'] > 0 && (
+              <span>Ready to publish: <span className="text-white">{statusCounts['ready-to-publish']}</span></span>
+            )}
+            {statusCounts['published'] > 0 && (
+              <span>Published: <span className="text-white">{statusCounts['published']}</span></span>
+            )}
+            {statusCounts['needs-repair'] > 0 && (
+              <span>Needs repair: <span className="text-white">{statusCounts['needs-repair']}</span></span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Report cards ── */}
       {loading ? (
         <p className="text-sm text-brand-primary">Loading reports...</p>
-      ) : reports.length === 0 ? (
+      ) : filteredReports.length === 0 ? (
         <div className="rounded-xl border border-brand-muted bg-brand-surface p-8 text-center text-sm text-brand-primary">
-          No reports found.
+          {hasActiveFilters ? 'No reports match the current filters.' : 'No reports found.'}
         </div>
       ) : (
         <div className="space-y-3">
-          {reports.map(report => {
+          {filteredReports.map(report => {
+            const client = clientById.get(report.client_id)
             const clientName = clientNameById.get(report.client_id) ?? report.client_id
             const isPartial = !isFullCalendarMonth(report.period_start, report.period_end)
             const monthComplete = isMonthComplete(getReportMonthFromPeriod(report))
             const ready = monthComplete && report.status !== 'published' && strategyRequiredComplete(readStrategyData(report.strategy_data))
-            const workflow = workflowStatus(report, monthComplete, ready)
+            const badge = statusBadge(report, monthComplete, ready, isPartial)
+            const nextAction = nextActionText(report, monthComplete, ready, isPartial)
             return (
-              <article key={report.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
-                <div className="grid gap-4 xl:grid-cols-[1fr_1.1fr_auto] xl:items-center">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-base font-semibold text-white">{clientName}</h2>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${workflow.className}`}>
-                        {workflow.label}
-                      </span>
-                    </div>
-                    <p className="mt-1.5 text-sm font-medium text-white">{monthLabel(report)}</p>
-                    <p className="mt-1.5 text-xs text-brand-primary">
-                      <span className="font-medium text-brand-accent">Next:</span> {workflow.next}
-                    </p>
-                    {isPartial && isAdmin && (
-                      <p className="mt-2 text-[11px] text-amber-300/70">
-                        Admin note: stored period is not a full calendar month. Use “Repair to calendar month” to tidy it.
-                      </p>
+              <article key={report.id} className="rounded-xl border border-brand-muted bg-brand-surface">
+                <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    {client && (
+                      <div className="hidden shrink-0 sm:block">
+                        <ClientLogo
+                          client={client}
+                          boxClassName="h-10 w-10 rounded-lg"
+                          padding="p-1"
+                          textClassName="text-xs font-semibold text-brand-primary"
+                        />
+                      </div>
                     )}
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="truncate text-base font-semibold text-white">{clientName}</h2>
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${badge.className}`}>
+                          {badge.label}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-sm font-medium text-white/80">{monthLabel(report)}</p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-brand-primary">{nextAction}</p>
+                      <p className="mt-0.5 text-xs text-brand-primary/60">
+                        Last updated: {formatDateTime(report.updated_at ?? report.created_at)}
+                      </p>
+                      {isPartial && isAdmin && (
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-[11px] text-amber-300/60 hover:text-amber-300">
+                            Admin detail
+                          </summary>
+                          <p className="mt-1 text-[11px] text-amber-300/50">
+                            Stored period is not a full calendar month. Use "Repair to calendar month" to fix.
+                          </p>
+                        </details>
+                      )}
+                    </div>
                   </div>
 
-                  <dl className="grid gap-3 sm:grid-cols-2">
-                    <Detail label="Last updated" value={formatDateTime(report.updated_at ?? report.created_at)} />
-                    <Detail label="Month" value={periodLabel(report)} />
-                  </dl>
-
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
+                  <div className="flex shrink-0 flex-wrap gap-2">
                     {monthComplete ? (
                       <button
                         type="button"
@@ -298,15 +485,12 @@ export default function ReportsManagement() {
                         >
                           Edit strategy
                         </button>
-                        {/* Publish is only valid for completed months. For an in-progress
-                            month the button is disabled and the badge/explanation above
-                            tells staff why. Unpublish stays available either way. */}
                         <button
                           type="button"
                           onClick={() => void handleStatus(report)}
                           disabled={busyReportId === report.id || (report.status !== 'published' && !monthComplete)}
                           title={report.status !== 'published' && !monthComplete ? 'Client view is only available for completed months.' : undefined}
-                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {report.status === 'published' ? 'Unpublish' : 'Publish'}
                         </button>
@@ -341,11 +525,11 @@ export default function ReportsManagement() {
   )
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-brand-muted bg-brand-bg/60 p-3">
-      <dt className="text-xs text-brand-primary">{label}</dt>
-      <dd className="mt-1 text-sm text-white">{value}</dd>
+    <div className="min-w-0 sm:w-44">
+      <label className="mb-1 block text-xs text-brand-primary">{label}</label>
+      {children}
     </div>
   )
 }
