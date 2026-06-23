@@ -155,12 +155,17 @@ export default function MetaIntegrationPage() {
   const [syncResult, setSyncResult] = useState<{
     status: string
     message: string
+    clientsAttempted?: number
+    clientsSucceeded?: number
     clientsSynced?: number
     clientsFailed?: number
     reportsCreated?: number
+    reportsReused?: number
     reportsUpdated?: number
     postsSynced?: number
     warnings?: string[]
+    failedClients?: { name: string; error: string }[]
+    succeededClients?: { name: string; postsSynced: number }[]
     reportId?: string
   } | null>(null)
 
@@ -387,12 +392,17 @@ export default function MetaIntegrationPage() {
       setSyncResult({
         status: data.status,
         message: data.message,
+        clientsAttempted: data.clientsAttempted,
+        clientsSucceeded: data.clientsSucceeded ?? data.clientsSynced,
         clientsSynced: data.clientsSynced,
         clientsFailed: data.clientsFailed,
         reportsCreated: data.reportsCreated,
+        reportsReused: data.reportsReused,
         reportsUpdated: data.reportsUpdated,
         postsSynced: data.postsSynced,
         warnings: data.warnings,
+        failedClients: data.failedClients,
+        succeededClients: data.succeededClients,
       })
     } catch {
       setSyncResult({ status: 'failed', message: 'Sync request failed.' })
@@ -599,19 +609,31 @@ export default function MetaIntegrationPage() {
                 <p className={`text-sm font-medium ${syncResult.status === 'failed' ? 'text-red-400' : 'text-brand-accent'}`}>
                   {syncResult.message}
                 </p>
-                {syncResult.status !== 'failed' && (
+                {syncResult.status !== 'skipped' && (
                   <ul className="mt-2 space-y-1 text-sm text-brand-primary">
-                    <li>Clients synced: {syncResult.clientsSynced}</li>
+                    <li>Clients succeeded: {syncResult.clientsSucceeded ?? syncResult.clientsSynced ?? 0}{syncResult.clientsAttempted !== undefined ? ` of ${syncResult.clientsAttempted}` : ''}</li>
                     {syncResult.clientsFailed !== undefined && syncResult.clientsFailed > 0 && (
                       <li className="text-amber-400">Clients failed: {syncResult.clientsFailed}</li>
                     )}
-                    <li>Reports created: {syncResult.reportsCreated}</li>
-                    <li>Reports updated: {syncResult.reportsUpdated}</li>
-                    <li>Posts synced: {syncResult.postsSynced}</li>
+                    <li>Reports created: {syncResult.reportsCreated ?? 0}</li>
+                    <li>Reports reused: {syncResult.reportsReused ?? syncResult.reportsUpdated ?? 0}</li>
+                    <li>Posts synced: {syncResult.postsSynced ?? 0}</li>
                     {syncResult.warnings && syncResult.warnings.length > 0 && (
                       <li className="text-amber-400">Warnings: {syncResult.warnings.length}</li>
                     )}
                   </ul>
+                )}
+                {syncResult.failedClients && syncResult.failedClients.length > 0 && (
+                  <div className="mt-3 rounded-lg border border-red-400/20 bg-red-400/5 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-red-300">Failed clients</p>
+                    <ul className="mt-2 space-y-1.5 text-xs text-brand-primary">
+                      {syncResult.failedClients.map(fc => (
+                        <li key={fc.name}>
+                          <span className="font-medium text-white">{fc.name}:</span> <span className="text-red-300">{fc.error}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {syncResult.status !== 'failed' && (

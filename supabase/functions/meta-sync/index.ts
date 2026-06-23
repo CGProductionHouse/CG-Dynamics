@@ -17,12 +17,42 @@ interface SyncClient {
 interface SyncClientResult {
   clientId: string
   clientName: string
+  assetId: string
   status: 'success' | 'failed'
   error?: string
+  reportId?: string
   reportCreated: boolean
-  reportUpdated: boolean
+  reportReused: boolean
   postsSynced: number
   warnings: string[]
+}
+
+interface DbErrorLike {
+  message?: string
+  code?: string
+  details?: string
+  hint?: string
+}
+
+// Builds a safe, useful error string from a Supabase/PostgREST error. Never
+// includes tokens — only error metadata. e.g.
+// "duplicate key value violates unique constraint \"reports_master_unique\" — code 23505"
+function describeDbError(err: DbErrorLike | null | undefined): string {
+  if (!err) return 'unknown database error'
+  const parts: string[] = []
+  if (err.message) parts.push(err.message)
+  if (err.code) parts.push(`code ${err.code}`)
+  if (err.details) parts.push(err.details)
+  if (err.hint) parts.push(err.hint)
+  return parts.length > 0 ? parts.join(' — ') : 'unknown database error'
+}
+
+// First day of the month AFTER the given YYYY-MM (used for an exclusive upper
+// bound when matching reports by period_end within a calendar month).
+function nextMonthStart(month: string): string {
+  const year = Number(month.slice(0, 4))
+  const monthIndex = Number(month.slice(5, 7)) // 1-12
+  return new Date(Date.UTC(year, monthIndex, 1)).toISOString().slice(0, 10)
 }
 
 interface SyncRunRecord {
@@ -177,12 +207,17 @@ Deno.serve(async (req) => {
       status: 'skipped',
       message: 'No linked clients found to sync.',
       period: { periodStart, periodEnd, month },
+      clientsAttempted: 0,
+      clientsSucceeded: 0,
       clientsSynced: 0,
       clientsFailed: 0,
       reportsCreated: 0,
+      reportsReused: 0,
       reportsUpdated: 0,
       postsSynced: 0,
       warnings: [],
+      failedClients: [],
+      succeededClients: [],
     })
   }
 
@@ -197,7 +232,7 @@ Deno.serve(async (req) => {
     for (const c of clientRows) clientNameMap.set(c.id, c.name)
   }
 
-  const clients: SyncClient[] = linkedAssets.map(a => ({
+  const allMappedClients: SyncClient[] = linkedAssets.map(a => ({
     assetId: a.id,
     clientId: a.client_id,
     clientName: clientNameMap.get(a.client_id) ?? 'Unknown',
@@ -206,51 +241,85 @@ Deno.serve(async (req) => {
     instagramAccountId: a.instagram_account_id,
     instagramUsername: a.instagram_username,
     adAccountId: a.ad_account_id,
-  })).filter(c => c.facebookPageId || c.instagramAccountId)
+  }))
+  // A client can only be synced if it has at least one linked page/IG id.
+  const clients: SyncClient[] = allMappedClients.filter(c => c.facebookPageId || c.instagramAccountId)
+  const skippedAssets = allMappedClients.filter(c => !c.facebookPageId && !c.instagramAccountId)
 
   // ── Sync each client ─────────────────────────────────────
+  const clientsAttempted = clients.length
   const results: SyncClientResult[] = []
-  const syncRunId = crypto.randomUUID()
   let totalPostsSynced = 0
   let clientsSynced = 0
   let clientsFailed = 0
   let reportsCreated = 0
-  let reportsUpdated = 0
+  let reportsReused = 0
   const allWarnings: string[] = []
+
+  // Linked assets with no Facebook page or Instagram account can't be synced —
+  // surface them as a warning instead of silently dropping them.
+  for (const skipped of skippedAssets) {
+    allWarnings.push(`${skipped.clientName} has no linked Facebook page or Instagram account to sync.`)
+  }
 
   for (const client of clients) {
     const result: SyncClientResult = {
       clientId: client.clientId,
       clientName: client.clientName,
+      assetId: client.assetId,
       status: 'success',
       reportCreated: false,
-      reportUpdated: false,
+      reportReused: false,
       postsSynced: 0,
       warnings: [],
     }
 
     try {
-      // ── Create or find report ──────────────────────────
-      // Use the meta-content-mapping for the connection_id for the sync run.
-      const { data: existingReports } = await sb
+      // ── Find or create the monthly master report ───────
+      // Find any existing report for this client whose period END falls inside
+      // the target calendar month, then prefer the master report (platform IS
+      // NULL). This mirrors the frontend findReportForClientMonth helper so the
+      // sync reuses exactly the same report the CSV/manual import would, and
+      // never tries to insert a duplicate.
+      //
+      // NOTE: PostgREST `.eq('platform', null)` does NOT match NULL — it must be
+      // `.is('platform', null)`. The previous `.eq` always missed the existing
+      // master report and then hit the reports_master_unique constraint on
+      // insert, surfacing as the generic "Failed to create report".
+      const monthEndExclusive = nextMonthStart(month)
+      const { data: monthReports, error: findError } = await sb
         .from('reports')
-        .select('id')
+        .select('id, platform, status, period_start, period_end, created_at')
         .eq('client_id', client.clientId)
-        .eq('period_start', periodStart)
-        .eq('period_end', periodEnd)
-        .eq('platform', null)
-        .limit(1)
+        .gte('period_end', periodStart)
+        .lt('period_end', monthEndExclusive)
+        .order('platform', { ascending: true, nullsFirst: true })
+        .order('created_at', { ascending: false })
+
+      if (findError) {
+        throw new Error(
+          `Failed to look up existing report for ${client.clientName} (${client.clientId}) ` +
+          `${periodStart}..${periodEnd}: ${describeDbError(findError)}`,
+        )
+      }
+
+      const monthRows = monthReports ?? []
+      // Prefer the master (platform === null); fall back to the most recent
+      // legacy per-platform report so we still reuse rather than duplicate.
+      const existing = monthRows.find(r => r.platform === null) ?? monthRows[0] ?? null
 
       let reportId: string
-      let isNewReport = false
 
-      if (existingReports && existingReports.length > 0) {
-        reportId = existingReports[0].id
-        result.reportUpdated = true
-        reportsUpdated++
+      if (existing) {
+        // Reuse — never overwrite strategy_data and never change status, so a
+        // published report stays published and a draft stays an internal draft.
+        reportId = existing.id
+        result.reportReused = true
+        reportsReused++
       } else {
         const reportTitle = `${client.clientName} ${monthLabel(month)} Report`
-        const { data: newReport } = await sb
+        // Always full calendar-month bounds (e.g. 2026-05-01 .. 2026-05-31).
+        const { data: newReport, error: insertError } = await sb
           .from('reports')
           .insert({
             client_id: client.clientId,
@@ -259,18 +328,23 @@ Deno.serve(async (req) => {
             period_end: periodEnd,
             status: 'draft',
             report_title: reportTitle,
+            created_by: user.id,
           })
           .select('id')
           .single()
 
-        if (!newReport) {
-          throw new Error('Failed to create report')
+        if (insertError || !newReport) {
+          throw new Error(
+            `Failed to create report for ${client.clientName} (${client.clientId}) ` +
+            `${periodStart}..${periodEnd}: ${describeDbError(insertError)}`,
+          )
         }
         reportId = newReport.id
-        isNewReport = true
         result.reportCreated = true
         reportsCreated++
       }
+
+      result.reportId = reportId
 
       // ── Fetch Facebook posts ───────────────────────────
       const fbPosts: Array<{
@@ -503,9 +577,11 @@ Deno.serve(async (req) => {
         if (existingMapping && existingMapping.length > 0 && existingMapping[0].post_id) {
           // Update existing post.
           const postId = existingMapping[0].post_id
-          await sb
+          const { error: updateError } = await sb
             .from('posts')
             .update({
+              report_id: reportId,
+              platform: post.platform,
               publish_time: post.publishTime,
               meta_post_type: post.postType,
               caption: post.caption,
@@ -526,17 +602,23 @@ Deno.serve(async (req) => {
             })
             .eq('id', postId)
 
+          if (updateError) {
+            result.warnings.push(`Could not update ${post.platform} post ${post.metaPostId}: ${describeDbError(updateError)}`)
+            continue
+          }
+
           // Update mapping last_synced_at.
           await sb
             .from('meta_content_mappings')
-            .update({ last_synced_at: new Date().toISOString() })
+            .update({ last_synced_at: new Date().toISOString(), report_id: reportId })
             .eq('id', existingMapping[0].id)
         } else if (existingMapping && existingMapping.length > 0 && !existingMapping[0].post_id) {
           // Mapping exists but no post — create post and link.
-          const { data: newPost } = await sb
+          const { data: newPost, error: insertError } = await sb
             .from('posts')
             .insert({
               report_id: reportId,
+              platform: post.platform,
               meta_post_id: post.metaPostId,
               publish_time: post.publishTime,
               meta_post_type: post.postType,
@@ -559,22 +641,26 @@ Deno.serve(async (req) => {
             .select('id')
             .single()
 
-          if (newPost) {
-            await sb
-              .from('meta_content_mappings')
-              .update({
-                post_id: newPost.id,
-                report_id: reportId,
-                last_synced_at: new Date().toISOString(),
-              })
-              .eq('id', existingMapping[0].id)
+          if (insertError || !newPost) {
+            result.warnings.push(`Could not save ${post.platform} post ${post.metaPostId}: ${describeDbError(insertError)}`)
+            continue
           }
+
+          await sb
+            .from('meta_content_mappings')
+            .update({
+              post_id: newPost.id,
+              report_id: reportId,
+              last_synced_at: new Date().toISOString(),
+            })
+            .eq('id', existingMapping[0].id)
         } else {
           // No mapping — create post and mapping.
-          const { data: newPost } = await sb
+          const { data: newPost, error: insertError } = await sb
             .from('posts')
             .insert({
               report_id: reportId,
+              platform: post.platform,
               meta_post_id: post.metaPostId,
               publish_time: post.publishTime,
               meta_post_type: post.postType,
@@ -597,19 +683,25 @@ Deno.serve(async (req) => {
             .select('id')
             .single()
 
-          if (newPost) {
-            await sb
-              .from('meta_content_mappings')
-              .insert({
-                client_id: client.clientId,
-                report_id: reportId,
-                post_id: newPost.id,
-                platform: post.platform,
-                meta_object_id: post.metaPostId,
-                meta_object_type: post.postType,
-                permalink: post.permalink,
-                last_synced_at: new Date().toISOString(),
-              })
+          if (insertError || !newPost) {
+            result.warnings.push(`Could not save ${post.platform} post ${post.metaPostId}: ${describeDbError(insertError)}`)
+            continue
+          }
+
+          const { error: mappingError } = await sb
+            .from('meta_content_mappings')
+            .insert({
+              client_id: client.clientId,
+              report_id: reportId,
+              post_id: newPost.id,
+              platform: post.platform,
+              meta_object_id: post.metaPostId,
+              meta_object_type: post.postType,
+              permalink: post.permalink,
+              last_synced_at: new Date().toISOString(),
+            })
+          if (mappingError) {
+            result.warnings.push(`Saved ${post.platform} post ${post.metaPostId} but could not record its mapping: ${describeDbError(mappingError)}`)
           }
         }
 
@@ -783,7 +875,8 @@ Deno.serve(async (req) => {
       clientsSynced++
     } catch (err) {
       result.status = 'failed'
-      result.error = String(err)
+      // Our thrown errors already carry the detailed, token-free message.
+      result.error = err instanceof Error ? err.message : String(err)
       clientsFailed++
     }
 
@@ -792,31 +885,38 @@ Deno.serve(async (req) => {
 
     // ── Record per-client sync run ─────────────────────────
     try {
-      await sb.from('meta_sync_runs').insert({
-        id: crypto.randomUUID(),
+      const { error: runError } = await sb.from('meta_sync_runs').insert({
         client_id: client.clientId,
+        asset_id: client.assetId,
         connection_id: connections[0].id,
         sync_type: 'previous_completed_month',
         period_start: periodStart,
         period_end: periodEnd,
         status: result.status,
         summary: {
+          reportId: result.reportId ?? null,
           postsSynced: result.postsSynced,
           warnings: result.warnings,
           reportCreated: result.reportCreated,
-          reportUpdated: result.reportUpdated,
+          reportReused: result.reportReused,
         },
         error_message: result.error ?? null,
         started_at: new Date().toISOString(),
         finished_at: new Date().toISOString(),
       })
-    } catch {
+      if (runError) {
+        console.error('Failed to record meta_sync_runs row for client', client.clientId, describeDbError(runError))
+      }
+    } catch (logErr) {
       // Log but don't fail the sync.
-      console.error('Failed to record meta_sync_runs row for client', client.clientId)
+      console.error('Failed to record meta_sync_runs row for client', client.clientId, String(logErr))
     }
   }
 
   // ── Determine overall sync status ──────────────────────
+  // success = every attempted client succeeded
+  // partial = at least one succeeded AND at least one failed
+  // failed  = no client succeeded
   let overallStatus: string
   if (clientsSynced > 0 && clientsFailed === 0) {
     overallStatus = 'success'
@@ -826,6 +926,13 @@ Deno.serve(async (req) => {
     overallStatus = 'failed'
   }
 
+  const failedClients = results
+    .filter(r => r.status === 'failed')
+    .map(r => ({ clientId: r.clientId, name: r.clientName, error: r.error ?? 'Unknown error' }))
+  const succeededClients = results
+    .filter(r => r.status === 'success')
+    .map(r => ({ clientId: r.clientId, name: r.clientName, postsSynced: r.postsSynced, reportId: r.reportId ?? null }))
+
   return jsonResponse({
     ok: true,
     status: overallStatus,
@@ -833,14 +940,21 @@ Deno.serve(async (req) => {
       ? `Synced ${monthLabel(month)} for ${clientsSynced} client(s).`
       : overallStatus === 'partial'
         ? `Synced ${monthLabel(month)} — ${clientsSynced} succeeded, ${clientsFailed} failed.`
-        : `Sync failed for all ${clientsFailed} client(s).`,
+        : `Sync failed for all ${clientsAttempted} client(s).`,
     period: { periodStart, periodEnd, month },
-    clientsSynced,
+    // Accurate per-run counters.
+    clientsAttempted,
+    clientsSucceeded: clientsSynced,
     clientsFailed,
     reportsCreated,
-    reportsUpdated,
+    reportsReused,
+    reportsUpdated: reportsReused, // backward-compat alias (reused = updated with fresh posts)
     postsSynced: totalPostsSynced,
     warnings: allWarnings,
+    failedClients,
+    succeededClients,
+    // Backward-compatible field used by the existing UI.
+    clientsSynced,
     details: results,
   })
 })
