@@ -12,6 +12,7 @@ import {
 import {
   formatReportPeriod,
   isFullCalendarMonth,
+  isMonthComplete,
   monthDisplayLabel,
   getReportMonthFromPeriod,
   normalizeReportToCalendarMonth,
@@ -84,6 +85,12 @@ export default function ReportsManagement() {
 
   async function handleStatus(report: Report) {
     const nextStatus = report.status === 'published' ? 'draft' : 'published'
+    // Client-facing reports are only valid for completed calendar months.
+    if (nextStatus === 'published' && !isMonthComplete(getReportMonthFromPeriod(report))) {
+      setSuccess(null)
+      setError('Client view is only available for completed months. This month is still in progress, so it stays an internal draft until the calendar month is complete.')
+      return
+    }
     const confirmed = window.confirm(
       `${nextStatus === 'published' ? 'Publish' : 'Unpublish'} ${clientNameById.get(report.client_id) ?? 'this client'} ${monthLabel(report)}?`
     )
@@ -195,6 +202,7 @@ export default function ReportsManagement() {
           {reports.map(report => {
             const clientName = clientNameById.get(report.client_id) ?? report.client_id
             const isPartial = !isFullCalendarMonth(report.period_start, report.period_end)
+            const monthComplete = isMonthComplete(getReportMonthFromPeriod(report))
             return (
               <article key={report.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
                 <div className="grid gap-4 xl:grid-cols-[1fr_1.1fr_auto] xl:items-center">
@@ -208,6 +216,11 @@ export default function ReportsManagement() {
                       }`}>
                         {report.status}
                       </span>
+                      {!monthComplete && (
+                        <span className="rounded-full bg-amber-400/15 px-2 py-1 text-xs font-medium text-amber-300">
+                          Internal draft · Incomplete month
+                        </span>
+                      )}
                       {isPartial && (
                         <span className="rounded-full bg-amber-400/15 px-2 py-1 text-xs font-medium text-amber-300">
                           Invalid partial period
@@ -216,6 +229,11 @@ export default function ReportsManagement() {
                     </div>
                     <p className="mt-1 text-sm text-brand-primary">{monthLabel(report)} | {periodLabel(report)}</p>
                     <p className="mt-1 text-xs text-brand-primary">Monthly master report</p>
+                    {!monthComplete && (
+                      <p className="mt-1 text-xs text-amber-300/90">
+                        Client view unlocks once the month is complete. You can still edit strategy and prepare the report.
+                      </p>
+                    )}
                     {isPartial && (
                       <p className="mt-1 text-xs text-amber-300/90">
                         Client-facing reports use completed calendar months only. Repair to {monthLabel(report)} to fix the period.
@@ -229,13 +247,23 @@ export default function ReportsManagement() {
                   </dl>
 
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/admin/published?reportId=${report.id}`)}
-                      className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
-                    >
-                      View
-                    </button>
+                    {monthComplete ? (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/published?reportId=${report.id}`)}
+                        className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
+                      >
+                        View
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
+                        className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
+                      >
+                        View internal draft
+                      </button>
+                    )}
                     {isAdmin && (
                       <>
                         <button
@@ -243,13 +271,17 @@ export default function ReportsManagement() {
                           onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
                           className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
                         >
-                          Edit
+                          Edit strategy
                         </button>
+                        {/* Publish is only valid for completed months. For an in-progress
+                            month the button is disabled and the badge/explanation above
+                            tells staff why. Unpublish stays available either way. */}
                         <button
                           type="button"
                           onClick={() => void handleStatus(report)}
-                          disabled={busyReportId === report.id}
-                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:opacity-60"
+                          disabled={busyReportId === report.id || (report.status !== 'published' && !monthComplete)}
+                          title={report.status !== 'published' && !monthComplete ? 'Client view is only available for completed months.' : undefined}
+                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                           {report.status === 'published' ? 'Unpublish' : 'Publish'}
                         </button>

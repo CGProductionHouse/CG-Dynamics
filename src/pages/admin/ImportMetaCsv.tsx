@@ -525,6 +525,7 @@ export default function ImportMetaCsv() {
       }
 
       const links: AutoReportLink[] = []
+      // Completed, fully-covered months → client-ready reports.
       for (const month of readyMths) {
         const { start, end } = monthBounds(month)
         const result = await upsertDraftReportForMonth({
@@ -539,22 +540,42 @@ export default function ImportMetaCsv() {
           links.push({ month, reportId: result.data.id, clientName, created: result.created, complete: true })
         }
       }
+      // Current/incomplete months → internal drafts. Staff can review the data,
+      // add strategy and prepare the report now; the draft is never shown to
+      // clients and cannot be published until the month is complete.
+      for (const month of incompleteMths) {
+        const { start, end } = monthBounds(month)
+        const result = await upsertDraftReportForMonth({
+          clientId,
+          clientName,
+          periodStart: start,
+          periodEnd: end,
+          month,
+          createdBy: profile?.id ?? null,
+        })
+        if (result.data) {
+          links.push({ month, reportId: result.data.id, clientName, created: result.created, complete: false })
+        }
+      }
 
       setAutoReports(links)
       setIncompleteMonths(incompleteMths)
       setPartialExportMonths(partialMths)
 
+      const readyLink = links.find(link => link.complete)
       const parts: string[] = []
       if (readyMths.length === 1) {
-        parts.push(`${clientName} · ${monthLongName(links[0]?.month ?? readyMths[0])} report ${links[0]?.created ? 'created' : 'updated'} successfully.`)
+        parts.push(`${clientName} · ${monthLongName(readyMths[0])} report ${readyLink?.created ? 'created' : 'updated'} successfully.`)
       } else if (readyMths.length > 1) {
         parts.push(`${clientName} · ${readyMths.length} monthly reports updated successfully.`)
       }
-      if (partialMths.length > 0) {
-        parts.push(`Partial export detected for ${partialMths.map(monthLongName).join(', ')} — not available for client view.`)
-      }
       if (incompleteMths.length > 0) {
-        parts.push(`${incompleteMths.map(monthLongName).join(', ')} data imported, but not available for client view yet.`)
+        const names = incompleteMths.map(monthLongName).join(', ')
+        const isAre = incompleteMths.length === 1 ? 'the month is' : 'these months are'
+        parts.push(`${names} data imported successfully as an internal draft. Client view will unlock when ${isAre} complete. You can still review the data, add strategy, and prepare the report.`)
+      }
+      if (partialMths.length > 0) {
+        parts.push(`Partial export detected for ${partialMths.map(monthLongName).join(', ')}. Saved for internal review — import a full-month export to unlock client view.`)
       }
       if (parts.length === 0) parts.push(`Saved ${rows.length} imported posts.`)
       setSuccess(parts.join(' '))
@@ -617,6 +638,7 @@ export default function ImportMetaCsv() {
       const incompleteMths = allMonths.filter(m => !isMonthComplete(m))
 
       const links: AutoReportLink[] = []
+      // Completed months → client-ready reports.
       for (const month of completeMths) {
         const { start, end } = monthBounds(month)
         const result = await upsertDraftReportForMonth({
@@ -631,19 +653,39 @@ export default function ImportMetaCsv() {
           links.push({ month, reportId: result.data.id, clientName, created: result.created, complete: true })
         }
       }
+      // Current/incomplete months → internal drafts (never client-visible).
+      for (const month of incompleteMths) {
+        const { start, end } = monthBounds(month)
+        const result = await upsertDraftReportForMonth({
+          clientId,
+          clientName,
+          periodStart: start,
+          periodEnd: end,
+          month,
+          createdBy: profile?.id ?? null,
+        })
+        if (result.data) {
+          links.push({ month, reportId: result.data.id, clientName, created: result.created, complete: false })
+        }
+      }
 
       setAutoReports(links)
       setIncompleteMonths(incompleteMths)
 
-      if (completeMths.length === 1 && incompleteMths.length === 0) {
-        setSuccess(`${clientName} · ${monthLongName(links[0].month)} report ${links[0].created ? 'created' : 'updated'} successfully.`)
-      } else if (completeMths.length > 1 && incompleteMths.length === 0) {
-        setSuccess(`${clientName} · ${links.length} monthly reports updated successfully.`)
-      } else if (completeMths.length > 0 && incompleteMths.length > 0) {
-        setSuccess(`${completeMths.map(monthLongName).join(', ')} report${completeMths.length > 1 ? 's' : ''} updated. ${incompleteMths.map(monthLongName).join(', ')} data saved.`)
-      } else {
-        setSuccess(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'} to Manual metrics.`)
+      const readyLink = links.find(link => link.complete)
+      const parts: string[] = []
+      if (completeMths.length === 1) {
+        parts.push(`${clientName} · ${monthLongName(completeMths[0])} report ${readyLink?.created ? 'created' : 'updated'} successfully.`)
+      } else if (completeMths.length > 1) {
+        parts.push(`${clientName} · ${completeMths.length} monthly reports updated successfully.`)
       }
+      if (incompleteMths.length > 0) {
+        const names = incompleteMths.map(monthLongName).join(', ')
+        const isAre = incompleteMths.length === 1 ? 'the month is' : 'these months are'
+        parts.push(`${names} data imported successfully as an internal draft. Client view will unlock when ${isAre} complete. You can still review the data, add strategy, and prepare the report.`)
+      }
+      if (parts.length === 0) parts.push(`Saved ${payload.length} manual summary ${payload.length === 1 ? 'entry' : 'entries'} to Manual metrics.`)
+      setSuccess(parts.join(' '))
     } catch (error) {
       setError(errorMessage(error, 'Could not save manual summary metrics.'))
     } finally {
@@ -756,6 +798,11 @@ export default function ImportMetaCsv() {
         <p className="text-sm text-brand-primary mt-2 max-w-2xl">
           Upload Meta Business Suite post exports, or a manual summary CSV (e.g. Instagram
           screenshots turned into a clean CSV), then save them for report building.
+        </p>
+        <p className="text-xs text-brand-primary mt-2 max-w-2xl">
+          Current or incomplete months are saved as internal drafts you can keep working on — client
+          view unlocks once the month is complete. Use the <span className="font-semibold text-white">Import history</span> tab
+          above to review past imports (client, period, platform and import date).
         </p>
       </div>
 
@@ -950,62 +997,71 @@ export default function ImportMetaCsv() {
             {success && (
               <div className="rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2">
                 <p className="text-sm text-brand-accent">{success}</p>
-                {autoReports.length > 1 && (
-                  <p className="mt-1 text-xs text-brand-primary">
-                    {autoReports.length} monthly reports were created or updated.
-                  </p>
-                )}
                 {partialExportMonths.length > 0 && (
                   <p className="mt-1 text-xs text-amber-300">
-                    Partial export detected for {partialExportMonths.map(monthLongName).join(', ')}. This month is not available for client view.
+                    Partial export for {partialExportMonths.map(monthLongName).join(', ')}: saved for internal review only. Import a full-month export to unlock client view.
                   </p>
                 )}
-                {incompleteMonths.length > 0 && (
-                  <p className="mt-1 text-xs text-amber-300">
-                    {incompleteMonths.map(monthLongName).join(', ')} {incompleteMonths.length === 1 ? 'is' : 'are'} incomplete — not available for client view yet.
-                  </p>
-                )}
-                <div className="mt-2 flex flex-wrap gap-3">
-                  {autoReports.length > 0 ? (
-                    <>
-                      <Link
-                        to={`/admin/reports/${autoReports[0].reportId}/edit`}
-                        className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
-                      >
-                        View report
-                      </Link>
-                      <Link
-                        to={`/admin/reports/${autoReports[0].reportId}/edit`}
-                        className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
-                      >
-                        Edit strategy
-                      </Link>
-                      {autoReports[0].complete && (
+                {autoReports.length > 0 ? (
+                  <div className="mt-3 space-y-2">
+                    {autoReports.map(link => (
+                      <div key={link.reportId} className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="text-xs font-semibold text-white">{monthLongName(link.month)}</span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                            link.complete ? 'bg-brand-accent/20 text-brand-accent' : 'bg-amber-400/15 text-amber-300'
+                          }`}
+                        >
+                          {link.complete ? 'Completed report' : 'Internal draft'}
+                        </span>
                         <Link
-                          to={`/admin/published?reportId=${autoReports[0].reportId}`}
+                          to={`/admin/reports/${link.reportId}/edit`}
                           className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
                         >
-                          View as client
+                          {link.complete ? 'View report' : 'View internal draft'}
                         </Link>
-                      )}
-                    </>
-                  ) : (
+                        <Link
+                          to={`/admin/reports/${link.reportId}/edit`}
+                          className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                        >
+                          Edit strategy
+                        </Link>
+                        {link.complete && (
+                          <Link
+                            to={`/admin/published?reportId=${link.reportId}`}
+                            className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
+                          >
+                            View as client
+                          </Link>
+                        )}
+                      </div>
+                    ))}
+                    {incompleteMonths.length > 0 && (
+                      <p className="text-xs text-brand-primary">
+                        Client view is only available for completed months.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-2 flex flex-wrap gap-3">
                     <Link
                       to="/admin/reports/new"
                       className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
                     >
                       Create report
                     </Link>
-                  )}
-                  {manualSaved && (
+                  </div>
+                )}
+                {manualSaved && (
+                  <div className="mt-2">
                     <Link
                       to="/admin/manual-metrics"
                       className="text-sm font-semibold text-brand-accent underline hover:brightness-110"
                     >
                       View in Manual metrics
                     </Link>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
