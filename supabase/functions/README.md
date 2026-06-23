@@ -43,6 +43,7 @@ succeeds or fails.
 ```bash
 supabase functions deploy meta-oauth-start --no-verify-jwt
 supabase functions deploy meta-oauth-callback --no-verify-jwt
+supabase functions deploy meta-connection-status --no-verify-jwt
 supabase functions deploy meta-sync --no-verify-jwt
 ```
 
@@ -56,6 +57,17 @@ This function must be deployed after the code is merged:
 
 ```bash
 npx supabase functions deploy meta-list-assets --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
+```
+
+It verifies the caller's JWT internally and enforces staff-level access, so
+`--no-verify-jwt` is used (the function handles auth itself).
+
+## Deploy note (meta-connection-status)
+
+This function must be deployed after the code is merged:
+
+```bash
+npx supabase functions deploy meta-connection-status --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
 ```
 
 It verifies the caller's JWT internally and enforces staff-level access, so

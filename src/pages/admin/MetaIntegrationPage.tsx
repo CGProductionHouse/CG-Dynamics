@@ -126,6 +126,7 @@ export default function MetaIntegrationPage() {
   const [searchParams] = useSearchParams()
   const [connectState, setConnectState] = useState<ConnectState>('idle')
   const [connectMsg, setConnectMsg] = useState<string | null>(null)
+  const [connectionLoading, setConnectionLoading] = useState(true)
 
   // Assets
   const [loadingAssets, setLoadingAssets] = useState(false)
@@ -149,29 +150,49 @@ export default function MetaIntegrationPage() {
   const [linkedAssets, setLinkedAssets] = useState<LinkedAsset[]>([])
   const [loadingLinked, setLoadingLinked] = useState(false)
 
-  // Read OAuth result from URL query params after callback redirect.
+  // Load connection status from the server on mount (reliable source of truth).
+  const checkConnection = useCallback(async () => {
+    setConnectionLoading(true)
+    try {
+      const { data } = await supabase.functions.invoke('meta-connection-status', {
+        method: 'POST',
+      })
+      if (data?.ok && data?.connected) {
+        setConnectState('connected')
+        setConnectMsg(null)
+      } else {
+        setConnectState('idle')
+      }
+    } catch {
+      setConnectState('idle')
+    } finally {
+      setConnectionLoading(false)
+    }
+  }, [])
+
+  // On mount: load connection status, clients, and linked assets.
+  useEffect(() => {
+    checkConnection()
+    listClients('active').then(res => {
+      if (res.data) setClients(res.data)
+    })
+    loadLinkedAssets()
+  }, [checkConnection])
+
+  // OAuth result from URL query params – shows a success/error banner
+  // but does not override the server-driven connection state.
   useEffect(() => {
     const meta = searchParams.get('meta')
     if (meta === 'connected') {
-      setConnectState('connected')
       setConnectMsg('Meta connected. Next step: link assets to clients.')
+      // Re-check server state to pick up the newly saved connection.
+      checkConnection()
       window.history.replaceState(null, '', window.location.pathname)
     } else if (meta === 'error') {
-      setConnectState('error')
       setConnectMsg('Meta connection failed. Please try again.')
       window.history.replaceState(null, '', window.location.pathname)
     }
-  }, [searchParams])
-
-  // Load clients when connected.
-  useEffect(() => {
-    if (connectState === 'connected') {
-      listClients('active').then(res => {
-        if (res.data) setClients(res.data)
-      })
-      loadLinkedAssets()
-    }
-  }, [connectState])
+  }, [searchParams, checkConnection])
 
   const loadLinkedAssets = useCallback(async () => {
     setLoadingLinked(true)
@@ -371,8 +392,8 @@ export default function MetaIntegrationPage() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">1</span>
                 <h2 className="text-sm font-semibold text-white">Connect Meta</h2>
               </div>
-              <span className={`shrink-0 text-xs font-medium ${connectState === 'connected' ? 'text-brand-accent' : 'text-amber-400'}`}>
-                {connectState === 'connected' ? 'Connected' : 'Not connected'}
+              <span className={`shrink-0 text-xs font-medium ${connectionLoading ? 'text-brand-primary/60' : connectState === 'connected' ? 'text-brand-accent' : 'text-amber-400'}`}>
+                {connectionLoading ? 'Checking…' : connectState === 'connected' ? 'Connected' : 'Not connected'}
               </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-brand-primary">
@@ -403,7 +424,7 @@ export default function MetaIntegrationPage() {
                 <h2 className="text-sm font-semibold text-white">Link assets to clients</h2>
               </div>
               <span className="shrink-0 text-xs font-medium text-brand-primary">
-                {connectState === 'connected' ? (assetsLoaded ? 'Assets loaded' : 'Ready') : 'Waiting for Meta connection'}
+                {connectionLoading ? 'Checking connection…' : connectState === 'connected' ? (assetsLoaded ? 'Assets loaded' : 'Ready') : 'Waiting for Meta connection'}
               </span>
             </div>
 
@@ -554,10 +575,9 @@ export default function MetaIntegrationPage() {
         </div>
       </div>
 
-      {/* Linked clients section */}
-      {connectState === 'connected' && (
-        <div className="mt-8 max-w-2xl">
-          <h3 className="text-sm font-semibold text-white">Linked clients</h3>
+      {/* Linked clients section — always visible, independent of connection status */}
+      <div className="mt-8 max-w-2xl">
+        <h3 className="text-sm font-semibold text-white">Linked clients</h3>
           {loadingLinked ? (
             <p className="mt-2 text-sm text-brand-primary">Loading linked clients…</p>
           ) : linkedAssets.length === 0 ? (
@@ -587,7 +607,6 @@ export default function MetaIntegrationPage() {
             </div>
           )}
         </div>
-      )}
 
       {/* Architecture note */}
       <div className="mt-10 max-w-2xl rounded-xl border border-brand-muted bg-brand-surface/30 p-5">
