@@ -8,7 +8,7 @@ import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/impor
 import { getReportWithPosts, saveReport, updateReportStrategyData, type ReportStatus } from '../../lib/db/reports'
 import { listStrategyOptions, DEFAULT_OPTIONS, type StrategyCategory, type StrategyOption } from '../../lib/db/strategyOptions'
 import { getMonthEvents } from '../../lib/contentCalendar'
-import { emptyStrategyData, readStrategyData, hasStrategyContent, type StrategyData } from '../../lib/strategyEngine'
+import { emptyStrategyData, readStrategyData, hasStrategyContent, strategyChecklist, type StrategyData } from '../../lib/strategyEngine'
 import { GuidedStrategyEditor, type StrategyContext } from '../../components/strategy/GuidedStrategy'
 import {
   MANUAL_SOURCE_LABELS,
@@ -797,6 +797,7 @@ export default function NewReport() {
                   {strategyNotice}
                 </p>
               )}
+              <StrategyChecklist data={strategyData} />
               <GuidedStrategyEditor
                 data={strategyData}
                 onChange={setStrategyData}
@@ -849,6 +850,44 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="block text-sm font-medium text-brand-accent mb-1.5">{label}</span>
       {children}
     </label>
+  )
+}
+
+// Non-blocking completion guide. Shows staff what is done and what is still
+// missing before publishing — saving a draft is always allowed.
+function StrategyChecklist({ data }: { data: StrategyData }) {
+  const items = strategyChecklist(data)
+  const required = items.filter(item => !item.optional)
+  const doneCount = required.filter(item => item.done).length
+  const allDone = doneCount === required.length
+
+  return (
+    <div className="rounded-lg border border-brand-muted bg-brand-bg/50 p-3.5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">Before you publish</p>
+        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${allDone ? 'bg-brand-accent/20 text-brand-accent' : 'bg-brand-muted text-brand-primary'}`}>
+          {doneCount}/{required.length} ready
+        </span>
+      </div>
+      <ul className="mt-3 space-y-1.5">
+        {items.map(item => (
+          <li key={item.key} className="flex items-start gap-2 text-sm">
+            <span
+              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold ${
+                item.done ? 'border-brand-accent bg-brand-accent/15 text-brand-accent' : 'border-brand-muted text-transparent'
+              }`}
+            >
+              ✓
+            </span>
+            <span className={item.done ? 'text-white' : 'text-brand-primary'}>
+              {item.label}
+              {item.optional && !item.done ? ' (optional)' : ''}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-[11px] text-brand-primary">This is a guide — you can save a draft at any time.</p>
+    </div>
   )
 }
 

@@ -184,6 +184,67 @@ export function hasStrategyContent(data: StrategyData): boolean {
   )
 }
 
+// ─── completion checklist ────────────────────────────────────────────────────
+//
+// Guides staff through finishing a report before publishing. Never blocks
+// saving — it only shows what is done and what is still missing.
+
+export interface StrategyChecklistItem {
+  key: string
+  label: string
+  done: boolean
+  // Optional items are helpful but not required to consider a report ready.
+  optional?: boolean
+}
+
+function actionPlanHasContent(data: StrategyData): boolean {
+  return (Object.values(data.actionPlan) as ActionPlanSection[]).some(
+    s => s.enabled && (s.items.length > 0 || s.notes.trim() !== '')
+  )
+}
+
+export function strategyChecklist(data: StrategyData): StrategyChecklistItem[] {
+  return [
+    {
+      key: 'direction',
+      label: 'Client direction added',
+      done: data.clientDirection.length > 0 || data.clientRequestNotes.trim() !== '',
+    },
+    {
+      key: 'topContent',
+      label: 'Top content insight reviewed',
+      done:
+        data.topContent.whyItWorked.length > 0 ||
+        data.topContent.whatThisTellsUs.trim() !== '' ||
+        data.topContent.contentType.trim() !== '',
+    },
+    {
+      key: 'strategy',
+      label: 'Strategy going forward written',
+      done: data.strategyGoingForward.trim() !== '',
+    },
+    {
+      key: 'actionPlan',
+      label: 'Action plan added',
+      done: actionPlanHasContent(data),
+    },
+    {
+      key: 'clientActions',
+      label: 'Client actions required completed or marked not needed',
+      done: data.clientActionsRequired.length > 0,
+      optional: true,
+    },
+  ]
+}
+
+// True once all required (non-optional) checklist items are done. Used to mark a
+// completed-month draft as "Ready to publish" in the reports workflow board.
+export function strategyRequiredComplete(data: StrategyData): boolean {
+  return strategyChecklist(data)
+    .filter(item => !item.optional)
+    .every(item => item.done)
+}
+
 // ─── draft generators ────────────────────────────────────────────────────────
 
 function lowerFirst(text: string) {

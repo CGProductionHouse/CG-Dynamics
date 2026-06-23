@@ -686,7 +686,7 @@ function LabeledTextarea({
 
 // ─── client-facing view ──────────────────────────────────────────────────────
 
-export function GuidedStrategyView({ data }: { data: StrategyData }) {
+export function GuidedStrategyView({ data, hideTopContent = false }: { data: StrategyData; hideTopContent?: boolean }) {
   const usedCalendar = data.calendarSelections.filter(s => s.use)
   const activePlans = (Object.keys(ACTION_PLAN_LABELS) as ActionPlanKey[])
     .map(key => ({ key, section: data.actionPlan[key] }))
@@ -703,7 +703,7 @@ export function GuidedStrategyView({ data }: { data: StrategyData }) {
         </ViewCard>
       )}
 
-      {(data.topContent.whyItWorked.length > 0 || data.topContent.whatThisTellsUs.trim() || data.topContent.coverImageUrl) && (
+      {!hideTopContent && (data.topContent.whyItWorked.length > 0 || data.topContent.whatThisTellsUs.trim() || data.topContent.coverImageUrl) && (
         <ViewCard title="Top content insight">
           {data.topContent.coverImageUrl && (
             <img

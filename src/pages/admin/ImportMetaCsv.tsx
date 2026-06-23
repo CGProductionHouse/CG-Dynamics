@@ -838,7 +838,7 @@ export default function ImportMetaCsv() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-brand-accent mb-1.5">Import type</label>
+              <label className="block text-sm font-medium text-brand-accent mb-1.5">Step 1 · Choose import type</label>
               <select
                 value={importType}
                 onChange={event => handleImportTypeChange(event.target.value as ImportType)}
@@ -855,7 +855,7 @@ export default function ImportMetaCsv() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-brand-accent mb-1.5">Client</label>
+              <label className="block text-sm font-medium text-brand-accent mb-1.5">Step 2 · Choose client</label>
               <select
                 value={clientId}
                 onChange={event => {
@@ -916,7 +916,7 @@ export default function ImportMetaCsv() {
 
             <div>
               <label className="block text-sm font-medium text-brand-accent mb-1.5">
-                {importType === 'manual' ? 'Manual summary CSV file' : 'Meta CSV file'}
+                Step 3 · Upload {importType === 'manual' ? 'manual summary CSV' : 'Meta CSV'}
               </label>
               <input
                 type="file"
@@ -1071,11 +1071,7 @@ export default function ImportMetaCsv() {
               disabled={saving || activeCount === 0 || !clientId}
               className="w-full bg-brand-accent text-brand-bg font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {saving
-                ? 'Saving...'
-                : importType === 'manual'
-                  ? 'Save manual summary metrics'
-                  : 'Save imported posts'}
+              {saving ? 'Importing...' : 'Step 4 · Import data'}
             </button>
           </div>
         </section>

@@ -9,9 +9,8 @@ import { ClientLogo } from '../../components/ClientLogo'
 import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
 import { readStrategyData, hasStrategyContent } from '../../lib/strategyEngine'
 import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth } from '../../lib/reportPeriod'
-import type { MasterReportData, MetricMovement, PerformanceMovement, Platform, PlatformSource, PlatformView, ReportStatsPost } from '../../lib/reportStats'
+import type { MasterReportData, MetricMovement, PerformanceMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
-  PLATFORMS,
   PLATFORM_LABELS,
   buildMasterReport,
   buildPerformanceMovement,
@@ -104,9 +103,11 @@ export function ClientReportView({
     [manualMetrics, master, previousManualMetrics, previousMaster]
   )
 
+  // Only offer platform tabs for platforms that actually have data this month.
+  const availablePlatforms = master.platforms.filter(view => view.source !== 'none')
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'overview', label: 'Overview' },
-    ...PLATFORMS.map(platform => ({ key: platform as TabKey, label: PLATFORM_LABELS[platform] })),
+    ...availablePlatforms.map(view => ({ key: view.platform as TabKey, label: view.label })),
   ]
 
   return (
@@ -116,11 +117,11 @@ export function ClientReportView({
           <div className="flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-center">
             <ClientReportLogo client={client} />
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.22em] text-brand-accent mb-2">Monthly master report</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-brand-accent mb-2">Monthly report</p>
               <h1 className="text-3xl font-semibold text-white sm:text-4xl">
                 {resolveReportTitle(report, client)}
               </h1>
-              <p className="text-sm text-brand-primary mt-3">
+              <p className="text-sm font-medium text-white/90 mt-3">
                 {monthDisplayLabel(getReportMonthFromPeriod(report))}
               </p>
             </div>
@@ -155,7 +156,6 @@ export function ClientReportView({
           master={master}
           movement={movement}
           showEmptyStrategy={showEmptyStrategy}
-          usesManualData={manualMetrics.length > 0}
         />
       ) : (
         <PlatformTab
@@ -177,131 +177,198 @@ function OverviewTab({
   master,
   movement,
   showEmptyStrategy,
-  usesManualData,
 }: {
   report: ReportWithPosts
   master: MasterReportData
   movement: PerformanceMovement
   showEmptyStrategy: boolean
-  usesManualData: boolean
 }) {
+  const strategy = readStrategyData(report.strategy_data)
+  const hasStrategy = hasStrategyContent(strategy)
+  const platformsWithData = master.platforms.filter(view => view.source !== 'none')
+  const hasAnyData = platformsWithData.length > 0
+  // Only show growth when there is at least one full previous-month comparison.
+  const showGrowth =
+    movement.views.direction !== 'missing' ||
+    movement.reach.direction !== 'missing' ||
+    movement.engagements.direction !== 'missing'
+
   return (
     <>
-      <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Overall reach" value={formatNumber(master.totalReach)} />
-        <StatCard label="Overall views" value={formatNumber(master.totalViews)} />
-        <StatCard label="Overall engagements" value={formatNumber(master.totalEngagements)} />
-        <StatCard label="Best platform" value={master.bestPlatform ? master.bestPlatform.label : 'No data yet'} />
+      <SectionHeading eyebrow="Monthly snapshot" title="The month at a glance" />
+      <section className="grid grid-cols-2 gap-3 mb-8 sm:gap-4 lg:grid-cols-4">
+        <StatCard label="Views" value={snapshotValue(master.totalViews)} />
+        <StatCard label="Reach" value={snapshotValue(master.totalReach)} />
+        <StatCard label="Engagements" value={snapshotValue(master.totalEngagements)} />
+        <StatCard label="Best platform" value={master.bestPlatform ? master.bestPlatform.label : 'Data not available'} />
       </section>
 
-      <ExecutiveSummary report={report} master={master} usesManualData={usesManualData} />
-
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
-        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">Best post overall</p>
-        {master.bestPostOverall ? (
-          <div>
-            <h2 className="text-lg font-semibold text-white leading-snug sm:text-xl">
-              {shortCaption(master.bestPostOverall.caption)}
-            </h2>
-            <p className="text-sm text-brand-primary mt-2">
-              {master.bestPostOverall.platform ? `${PLATFORM_LABELS[master.bestPostOverall.platform]} - ` : ''}
-              {formatDate(master.bestPostOverall.publish_time)}
-            </p>
-            {master.bestPostOverall.post_type && (
-              <p className="text-xs text-brand-primary mt-1">
-                Content type: {displayContentType(master.bestPostOverall.post_type) ?? master.bestPostOverall.post_type}
-              </p>
-            )}
-            <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-3">
-              <MiniMetric label="Reach" value={formatNumber(master.bestPostOverall.reach)} />
-              <MiniMetric label="Views" value={formatNumber(master.bestPostOverall.impressions)} />
-              <MiniMetric label="Engagements" value={formatNumber(master.bestPostOverall.engagements)} />
-            </div>
+      {showGrowth && (
+        <section className="mb-8">
+          <SectionHeading eyebrow="Growth vs previous month" title="How we moved" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <MovementCard label="Views" movement={movement.views} />
+            <MovementCard label="Reach" movement={movement.reach} />
+            <MovementCard label="Engagements" movement={movement.engagements} />
           </div>
-        ) : (
-          <p className="text-sm text-brand-primary">No data uploaded yet.</p>
-        )}
-      </section>
+        </section>
+      )}
 
-      <PerformanceMovementSection movement={movement} />
+      <TopContentSection master={master} strategy={strategy} />
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
-        <div className="mb-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Platform coverage</p>
-          <h2 className="mt-2 text-base font-semibold text-white">Data included in this report</h2>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {master.platforms.map(view => (
-            <div key={view.platform} className="rounded-lg border border-brand-muted bg-brand-bg/50 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-semibold text-white">{view.label}</p>
-                <SourceTag source={view.source} />
-              </div>
-              <p className="mt-3 text-xs leading-relaxed text-brand-primary">
-                {view.source === 'posts'
-                  ? `${formatNumber(view.postCount)} post-level records`
-                  : view.source === 'manual'
-                    ? MANUAL_SOURCE_LABELS[view.manual!.source_type]
-                    : 'No data for this month'}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {hasAnyData && (
+        <section className="mb-8">
+          <SectionHeading eyebrow="Platform performance" title="How each channel did" />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {platformsWithData.map(view => (
+              <PlatformSummaryCard key={view.platform} view={view} />
+            ))}
+          </div>
+        </section>
+      )}
 
-      <StrategySection report={report} showEmptyStrategy={showEmptyStrategy} />
+      {hasStrategy ? (
+        <GuidedStrategyView data={strategy} hideTopContent />
+      ) : (
+        <StrategySection report={report} showEmptyStrategy={showEmptyStrategy} />
+      )}
     </>
   )
 }
 
-function ExecutiveSummary({
-  report,
-  master,
-  usesManualData,
-}: {
-  report: ReportWithPosts
-  master: MasterReportData
-  usesManualData: boolean
-}) {
-  const takeaway =
-    report.performance_comments ||
-    report.strategy_next_month ||
-    report.content_direction_next_month ||
-    report.general_notes
+function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="mb-4">
+      <p className="text-xs uppercase tracking-[0.18em] text-brand-accent">{eyebrow}</p>
+      <h2 className="mt-1.5 text-lg font-semibold text-white sm:text-xl">{title}</h2>
+    </div>
+  )
+}
+
+// Core reach/views/engagements come straight from the data. A genuine 0 reads
+// as "no meaningful number to show" for a client, so we present it softly rather
+// than a large ugly zero.
+function snapshotValue(value: number) {
+  return value > 0 ? formatNumber(value) : 'Data not available'
+}
+
+function TopContentSection({ master, strategy }: { master: MasterReportData; strategy: ReturnType<typeof readStrategyData> }) {
+  const tc = strategy.topContent
+  const best = master.bestPostOverall
+
+  const caption = (tc.autoCaption && tc.autoCaption.trim()) || (best ? shortCaption(best.caption) : null)
+  const coverImage = tc.coverImageUrl.trim()
+  const hasAnything = Boolean(caption || coverImage || tc.whyItWorked.length > 0 || tc.whatThisTellsUs.trim())
+  if (!hasAnything) return null
+
+  const contentType =
+    tc.contentType.trim() ||
+    (best?.post_type ? displayContentType(best.post_type) : null)
+  const platformLabel =
+    (best?.platform && PLATFORM_LABELS[best.platform]) ||
+    (tc.autoPlatform && PLATFORM_LABELS[tc.autoPlatform]) ||
+    null
+  const metricValue = best
+    ? best.engagements
+    : typeof tc.autoMetricValue === 'number'
+      ? tc.autoMetricValue
+      : null
 
   return (
-    <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 shadow-[0_0_50px_rgba(45,212,191,0.05)] sm:p-6">
-      <div className="mb-5">
-        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Executive summary</p>
-        <h2 className="mt-2 text-lg font-semibold text-white">Month at a glance</h2>
-      </div>
-      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-3 text-sm leading-relaxed text-brand-primary">
-          <p>
-            The strongest platform this month was{' '}
-            <span className="font-semibold text-white">{master.bestPlatform?.label ?? 'not available yet'}</span>,
-            with {formatNumber(master.totalViews)} views, {formatNumber(master.totalReach)} reach and{' '}
-            {formatNumber(master.totalEngagements)} engagements across the report.
-          </p>
-          {master.bestPostOverall && (
-            <p>
-              Best post: <span className="text-white">{shortCaption(master.bestPostOverall.caption)}</span>
-            </p>
-          )}
-          {takeaway && <p className="text-white">{takeaway}</p>}
-          {usesManualData && (
-            <p className="text-xs text-brand-primary/80">
-              Some platform totals include monthly summary data where post-level export detail was not available.
-            </p>
-          )}
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <MiniMetric label="Views" value={formatNumber(master.totalViews)} />
-          <MiniMetric label="Reach" value={formatNumber(master.totalReach)} />
-          <MiniMetric label="Eng." value={formatNumber(master.totalEngagements)} />
+    <section className="mb-8">
+      <SectionHeading eyebrow="Top content" title="What performed best" />
+      <div className="overflow-hidden rounded-2xl border border-brand-muted bg-brand-surface">
+        <div className="grid gap-0 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="relative min-h-[12rem] bg-gradient-to-br from-brand-accent/20 via-brand-surface to-brand-bg">
+            {coverImage ? (
+              <img
+                src={coverImage}
+                alt="Top content cover"
+                className="h-full max-h-72 w-full object-cover"
+                onError={e => {
+                  const el = e.currentTarget as HTMLImageElement
+                  el.style.display = 'none'
+                }}
+              />
+            ) : (
+              <div className="flex h-full min-h-[12rem] flex-col items-center justify-center gap-2 p-6 text-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-brand-accent/40 bg-brand-accent/10 text-brand-accent">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16l5-5 4 4 3-3 6 6M4 6h16v12H4z" />
+                  </svg>
+                </span>
+                <p className="text-xs font-medium text-brand-primary">{contentType ?? 'Top performing content'}</p>
+              </div>
+            )}
+          </div>
+          <div className="p-5 sm:p-6">
+            {caption && (
+              <h3 className="text-lg font-semibold leading-snug text-white sm:text-xl">{caption}</h3>
+            )}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {contentType && (
+                <span className="rounded-full border border-brand-accent/30 bg-brand-accent/10 px-3 py-1 text-xs font-medium text-brand-accent">
+                  {contentType}
+                </span>
+              )}
+              {platformLabel && (
+                <span className="rounded-full border border-brand-muted px-3 py-1 text-xs font-medium text-brand-primary">
+                  {platformLabel}
+                </span>
+              )}
+            </div>
+            {metricValue != null && metricValue > 0 && (
+              <p className="mt-4 text-sm text-brand-primary">
+                <span className="text-2xl font-semibold text-white">{formatNumber(metricValue)}</span> engagements
+              </p>
+            )}
+            {tc.whyItWorked.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-1.5 text-xs uppercase tracking-[0.14em] text-brand-primary">Why it worked</p>
+                <div className="flex flex-wrap gap-2">
+                  {tc.whyItWorked.map((item, index) => (
+                    <span key={index} className="rounded-full border border-brand-muted bg-brand-bg/60 px-3 py-1 text-xs text-white">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {tc.whatThisTellsUs.trim() && (
+              <p className="mt-4 text-sm leading-relaxed text-white whitespace-pre-line">{tc.whatThisTellsUs}</p>
+            )}
+          </div>
         </div>
       </div>
     </section>
+  )
+}
+
+function PlatformSummaryCard({ view }: { view: PlatformView }) {
+  return (
+    <article className="rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
+      <p className="text-sm font-semibold text-white">{view.label}</p>
+      <dl className="mt-3 space-y-1.5 text-sm">
+        <PlatformRow label="Reach" value={formatNumber(view.reach)} />
+        <PlatformRow label="Views" value={formatNumber(view.views)} />
+        <PlatformRow label="Engagements" value={formatNumber(view.engagements)} />
+        {view.source === 'posts' && <PlatformRow label="Posts" value={formatNumber(view.postCount)} />}
+      </dl>
+      {view.bestPost?.caption && (
+        <p className="mt-3 truncate text-xs text-brand-primary">
+          Top: <span className="text-white">{shortCaption(view.bestPost.caption, 'Post')}</span>
+        </p>
+      )}
+    </article>
+  )
+}
+
+function PlatformRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="text-brand-primary">{label}</dt>
+      <dd className="font-medium text-white">{value}</dd>
+    </div>
   )
 }
 
@@ -559,24 +626,6 @@ function ClientReportLogo({ client }: { client?: Client | null }) {
   )
 }
 
-function PerformanceMovementSection({ movement }: { movement: PerformanceMovement }) {
-  return (
-    <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 shadow-[0_0_50px_rgba(45,212,191,0.04)] sm:p-6">
-      <div className="mb-4">
-        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Growth vs previous month</p>
-        <h2 className="mt-2 text-lg font-semibold text-white">Performance movement</h2>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <MovementCard label="Views growth" movement={movement.views} />
-        <MovementCard label="Reach growth" movement={movement.reach} />
-        <MovementCard label="Engagement growth" movement={movement.engagements} />
-        <MovementCard label="Profile visit growth" movement={movement.profileVisits} />
-        <MovementCard label="Follower growth" movement={movement.followers} />
-      </div>
-    </section>
-  )
-}
-
 function movementText(movement: MetricMovement) {
   if (movement.notAvailable) return 'Not available from this import source.'
   if (movement.direction === 'missing' || movement.difference === null) {
@@ -629,21 +678,6 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="text-xs uppercase tracking-[0.12em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
       <p className="text-2xl font-semibold text-white mt-4 break-words sm:text-3xl">{value}</p>
     </div>
-  )
-}
-
-function SourceTag({ source }: { source: PlatformSource }) {
-  const label = source === 'posts' ? 'Meta CSV' : source === 'manual' ? 'Summary' : 'No data'
-  const classes = {
-    posts: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent',
-    manual: 'border-sky-300/30 bg-sky-300/10 text-sky-200',
-    none: 'border-brand-muted bg-brand-muted/50 text-brand-primary',
-  }[source]
-
-  return (
-    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${classes}`}>
-      {label}
-    </span>
   )
 }
 

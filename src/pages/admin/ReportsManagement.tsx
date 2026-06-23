@@ -17,6 +17,8 @@ import {
   getReportMonthFromPeriod,
   normalizeReportToCalendarMonth,
 } from '../../lib/reportPeriod'
+import { readStrategyData, strategyRequiredComplete } from '../../lib/strategyEngine'
+import WorkflowGuide from '../../components/WorkflowGuide'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -43,6 +45,42 @@ function monthLabel(report: Report) {
 
 function periodLabel(report: Report) {
   return formatReportPeriod({ start: report.period_start, end: report.period_end })
+}
+
+interface WorkflowStatus {
+  label: string
+  className: string
+  next: string
+}
+
+// Friendly, single-glance status + next action for the workflow board.
+function workflowStatus(report: Report, monthComplete: boolean, ready: boolean): WorkflowStatus {
+  if (report.status === 'published') {
+    return {
+      label: 'Published',
+      className: 'bg-brand-accent/20 text-brand-accent',
+      next: 'Live for the client. Update if the data changes.',
+    }
+  }
+  if (!monthComplete) {
+    return {
+      label: 'Incomplete month',
+      className: 'bg-amber-400/15 text-amber-300',
+      next: 'Client view unlocks after month-end. You can edit strategy now.',
+    }
+  }
+  if (ready) {
+    return {
+      label: 'Ready to publish',
+      className: 'bg-sky-300/15 text-sky-200',
+      next: 'Review, then publish for the client.',
+    }
+  }
+  return {
+    label: 'Internal draft',
+    className: 'bg-brand-muted text-brand-primary',
+    next: 'Add the strategy and action plan to finish.',
+  }
 }
 
 export default function ReportsManagement() {
@@ -188,6 +226,8 @@ export default function ReportsManagement() {
         )}
       </div>
 
+      <WorkflowGuide />
+
       {error && <Message tone="error" text={error} />}
       {success && <Message tone="success" text={success} />}
 
@@ -203,47 +243,32 @@ export default function ReportsManagement() {
             const clientName = clientNameById.get(report.client_id) ?? report.client_id
             const isPartial = !isFullCalendarMonth(report.period_start, report.period_end)
             const monthComplete = isMonthComplete(getReportMonthFromPeriod(report))
+            const ready = monthComplete && report.status !== 'published' && strategyRequiredComplete(readStrategyData(report.strategy_data))
+            const workflow = workflowStatus(report, monthComplete, ready)
             return (
               <article key={report.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
                 <div className="grid gap-4 xl:grid-cols-[1fr_1.1fr_auto] xl:items-center">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-base font-semibold text-white">{clientName}</h2>
-                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${
-                        report.status === 'published'
-                          ? 'bg-brand-accent/20 text-brand-accent'
-                          : 'bg-brand-muted text-brand-primary'
-                      }`}>
-                        {report.status}
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${workflow.className}`}>
+                        {workflow.label}
                       </span>
-                      {!monthComplete && (
-                        <span className="rounded-full bg-amber-400/15 px-2 py-1 text-xs font-medium text-amber-300">
-                          Internal draft · Incomplete month
-                        </span>
-                      )}
-                      {isPartial && (
-                        <span className="rounded-full bg-amber-400/15 px-2 py-1 text-xs font-medium text-amber-300">
-                          Invalid partial period
-                        </span>
-                      )}
                     </div>
-                    <p className="mt-1 text-sm text-brand-primary">{monthLabel(report)} | {periodLabel(report)}</p>
-                    <p className="mt-1 text-xs text-brand-primary">Monthly master report</p>
-                    {!monthComplete && (
-                      <p className="mt-1 text-xs text-amber-300/90">
-                        Client view unlocks once the month is complete. You can still edit strategy and prepare the report.
-                      </p>
-                    )}
-                    {isPartial && (
-                      <p className="mt-1 text-xs text-amber-300/90">
-                        Client-facing reports use completed calendar months only. Repair to {monthLabel(report)} to fix the period.
+                    <p className="mt-1.5 text-sm font-medium text-white">{monthLabel(report)}</p>
+                    <p className="mt-1.5 text-xs text-brand-primary">
+                      <span className="font-medium text-brand-accent">Next:</span> {workflow.next}
+                    </p>
+                    {isPartial && isAdmin && (
+                      <p className="mt-2 text-[11px] text-amber-300/70">
+                        Admin note: stored period is not a full calendar month. Use “Repair to calendar month” to tidy it.
                       </p>
                     )}
                   </div>
 
                   <dl className="grid gap-3 sm:grid-cols-2">
-                    <Detail label="Created" value={formatDateTime(report.created_at)} />
                     <Detail label="Last updated" value={formatDateTime(report.updated_at ?? report.created_at)} />
+                    <Detail label="Month" value={periodLabel(report)} />
                   </dl>
 
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
