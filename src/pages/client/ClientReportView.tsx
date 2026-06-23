@@ -172,7 +172,7 @@ function ReportHero({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-          <HeroMiniCard label="Status" value="Published" accent="teal" />
+          <HeroMiniCard label="Status" value={report.status.charAt(0).toUpperCase() + report.status.slice(1)} accent="teal" />
           <HeroMiniCard label="Report month" value={month} accent="amber" />
           <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? 'Data unavailable'} accent="teal" />
         </div>
@@ -355,7 +355,7 @@ function FeaturedContent({
   const best = master.bestPostOverall
 
   const caption = (tc.autoCaption && tc.autoCaption.trim()) || (best ? shortCaption(best.caption) : null)
-  const coverImage = tc.coverImageUrl.trim()
+  const coverImage = (tc.coverImageUrl?.trim() || tc.autoImageUrl?.trim() || best?.imageUrl || '').trim()
   const contentType = tc.contentType.trim() || (best?.post_type ? displayContentType(best.post_type) : null)
   const platformLabel =
     (best?.platform && PLATFORM_LABELS[best.platform]) ||

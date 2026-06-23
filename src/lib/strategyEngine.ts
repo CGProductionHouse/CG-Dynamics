@@ -27,6 +27,7 @@ export interface TopContentInsight {
   autoPlatform: Platform | null
   autoMetricLabel: string | null
   autoMetricValue: number | null
+  autoImageUrl: string | null
   // Staff-provided enrichment.
   coverImageUrl: string
   contentType: string
@@ -91,6 +92,7 @@ export function emptyStrategyData(): StrategyData {
       autoPlatform: null,
       autoMetricLabel: null,
       autoMetricValue: null,
+      autoImageUrl: null,
       coverImageUrl: '',
       contentType: '',
       whyItWorked: [],
@@ -148,6 +150,7 @@ export function readStrategyData(raw: unknown): StrategyData {
       autoPlatform: (topContent.autoPlatform ?? null) as Platform | null,
       autoMetricLabel: typeof topContent.autoMetricLabel === 'string' ? topContent.autoMetricLabel : null,
       autoMetricValue: typeof topContent.autoMetricValue === 'number' ? topContent.autoMetricValue : null,
+      autoImageUrl: typeof topContent.autoImageUrl === 'string' ? topContent.autoImageUrl : null,
       coverImageUrl: typeof topContent.coverImageUrl === 'string' ? topContent.coverImageUrl : '',
       contentType: typeof topContent.contentType === 'string' ? topContent.contentType : '',
       whyItWorked: strArray(topContent.whyItWorked),

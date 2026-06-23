@@ -22,6 +22,7 @@ export interface ReportStatsPost {
   engagements: number
   post_type: string | null
   platform: Platform | null
+  imageUrl: string | null
 }
 
 export interface ReportStats {
@@ -44,6 +45,7 @@ export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
     engagements: post.engagements,
     post_type: post.post_type,
     platform: post.platform,
+    imageUrl: null,
   }
 }
 
@@ -53,6 +55,9 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
     views?: number
     engagements?: number
     video_views?: number
+    full_picture?: string
+    thumbnail_url?: string
+    media_url?: string
   }
 
   return {
@@ -65,6 +70,7 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
     engagements: raw.engagements ?? post.reactions + post.comments + post.shares + post.total_clicks,
     post_type: post.meta_post_type,
     platform: post.platform,
+    imageUrl: raw.full_picture ?? raw.thumbnail_url ?? raw.media_url ?? null,
   }
 }
 

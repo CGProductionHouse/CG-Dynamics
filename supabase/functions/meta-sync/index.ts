@@ -286,6 +286,7 @@ Deno.serve(async (req) => {
         engagedUsers: number | null
         clicks: number | null
         impressionsUnique: number | null
+        fullPicture: string | null
       }> = []
 
       if (client.facebookPageId) {
@@ -324,6 +325,7 @@ Deno.serve(async (req) => {
                 engagedUsers: null,
                 clicks: null,
                 impressionsUnique: null,
+                fullPicture: (raw.full_picture as string | null) ?? null,
               })
             }
 
@@ -383,6 +385,8 @@ Deno.serve(async (req) => {
         saves: number | null
         shares: number | null
         videoViews: number | null
+        thumbnailUrl: string | null
+        mediaUrl: string | null
       }> = []
 
       if (client.instagramAccountId) {
@@ -427,6 +431,8 @@ Deno.serve(async (req) => {
                 saves: null,
                 shares: null,
                 videoViews: null,
+                thumbnailUrl: (raw.thumbnail_url as string | null) ?? null,
+                mediaUrl: (raw.media_url as string | null) ?? null,
               })
             }
 
@@ -510,7 +516,13 @@ Deno.serve(async (req) => {
               comments: post.comments,
               shares: post.shares ?? 0,
               total_clicks: post.clicks ?? 0,
-              raw: { platform: post.platform, synced_at: new Date().toISOString() },
+              raw: {
+                platform: post.platform,
+                synced_at: new Date().toISOString(),
+                ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
+                ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
+                ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
+              },
             })
             .eq('id', postId)
 
@@ -536,7 +548,13 @@ Deno.serve(async (req) => {
               comments: post.comments,
               shares: post.shares ?? 0,
               total_clicks: post.clicks ?? 0,
-              raw: { platform: post.platform, synced_at: new Date().toISOString() },
+              raw: {
+                platform: post.platform,
+                synced_at: new Date().toISOString(),
+                ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
+                ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
+                ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
+              },
             })
             .select('id')
             .single()
@@ -568,7 +586,13 @@ Deno.serve(async (req) => {
               comments: post.comments,
               shares: post.shares ?? 0,
               total_clicks: post.clicks ?? 0,
-              raw: { platform: post.platform, synced_at: new Date().toISOString() },
+              raw: {
+                platform: post.platform,
+                synced_at: new Date().toISOString(),
+                ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
+                ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
+                ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
+              },
             })
             .select('id')
             .single()

@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { listClients, readPackageSettings, type Client } from '../../lib/db/clients'
 import { listImportedMetaPosts, type ImportedMetaPost } from '../../lib/db/importedMetaPosts'
-import { getReportWithPosts, saveReport, updateReportStrategyData, type ReportStatus } from '../../lib/db/reports'
+import { getReportWithPosts, saveReport, updateReportStrategyData, type ReportPost, type ReportStatus } from '../../lib/db/reports'
 import { listStrategyOptions, DEFAULT_OPTIONS, type StrategyCategory, type StrategyOption } from '../../lib/db/strategyOptions'
 import { getMonthEvents } from '../../lib/contentCalendar'
 import { emptyStrategyData, readStrategyData, hasStrategyContent, strategyChecklist, type StrategyData } from '../../lib/strategyEngine'
@@ -26,6 +26,7 @@ import {
   formatNumber,
   formatPercent,
   importedToStatsPost,
+  reportPostToStatsPost,
   shortCaption,
   type MetricMovement,
 } from '../../lib/reportStats'
@@ -113,6 +114,7 @@ export default function NewReport() {
   const [periodSource, setPeriodSource] = useState<'publish_time' | 'filename' | null>(null)
   const [periodBatchId, setPeriodBatchId] = useState<string | null>(null)
   const [importedPosts, setImportedPosts] = useState<ImportedMetaPost[]>([])
+  const [reportPosts, setReportPosts] = useState<ReportPost[]>([])
   const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [fields, setFields] = useState<ReportFields>({
     reportTitle: '',
@@ -190,6 +192,7 @@ export default function NewReport() {
         setPeriodSource(null)
         setPeriodBatchId(null)
         setReportStatus(data.status)
+        setReportPosts(data.posts ?? [])
         setFields({
           reportTitle: data.report_title ?? '',
           previousMonthStrategy: data.previous_month_strategy ?? '',
@@ -375,7 +378,23 @@ export default function NewReport() {
       return true
     })
   }, [importedPosts, periodBatchId, periodSource, currentMonth])
-  const statsPosts = useMemo(() => periodImportedPosts.map(importedToStatsPost), [periodImportedPosts])
+  const statsPosts = useMemo(() => {
+    const fromImported = periodImportedPosts.map(importedToStatsPost)
+    const fromReport = savedReportId
+      ? reportPosts
+          .filter(post => {
+            if (!post.publish_time) return true
+            const time = new Date(post.publish_time).getTime()
+            if (Number.isNaN(time)) return true
+            const { start, end } = calendarMonthBounds(currentMonth)
+            const startTime = new Date(`${start}T00:00:00`).getTime()
+            const endTime = new Date(`${end}T23:59:59`).getTime()
+            return time >= startTime && time <= endTime
+          })
+          .map(reportPostToStatsPost)
+      : []
+    return [...fromImported, ...fromReport]
+  }, [periodImportedPosts, reportPosts, savedReportId, currentMonth])
   const previousMonthImportedPosts = useMemo(
     () => previousMonth
       ? importedPosts.filter(post => postMonth(post) === previousMonth).map(importedToStatsPost)
@@ -406,6 +425,7 @@ export default function NewReport() {
       metricLabel: 'engagements',
       metricValue: post.engagements,
       postType: post.post_type,
+      imageUrl: post.imageUrl,
     }
   }, [master])
   const strategyContext: StrategyContext = {
@@ -457,6 +477,7 @@ export default function NewReport() {
           autoPlatform: topPostContext?.platform ?? strategyData.topContent.autoPlatform,
           autoMetricLabel: topPostContext?.metricLabel ?? strategyData.topContent.autoMetricLabel,
           autoMetricValue: topPostContext?.metricValue ?? strategyData.topContent.autoMetricValue,
+          autoImageUrl: topPostContext?.imageUrl ?? strategyData.topContent.autoImageUrl,
         },
       }
       const legacy = deriveLegacyFields(strategyToSave, fields)

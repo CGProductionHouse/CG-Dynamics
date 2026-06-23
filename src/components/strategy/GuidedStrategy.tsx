@@ -27,7 +27,7 @@ export interface StrategyContext {
   clientName: string
   packageSettings: PackageSettings
   calendarEvents: CalendarEvent[]
-  topPost: { caption: string | null; platform: Platform | null; metricLabel: string; metricValue: number; postType: string | null } | null
+  topPost: { caption: string | null; platform: Platform | null; metricLabel: string; metricValue: number; postType: string | null; imageUrl: string | null } | null
 }
 
 const ACTION_OPTION_CATEGORY: Record<ActionPlanKey, StrategyCategory> = {
