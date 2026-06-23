@@ -14,12 +14,15 @@ export function ClientLogo({
   boxClassName = 'h-12 w-12 rounded-lg',
   padding = 'p-1.5',
   textClassName = 'text-sm font-semibold text-brand-primary',
+  frameClassName = 'border border-brand-muted bg-brand-bg',
 }: {
   client: ClientLogoClient
   boxClassName?: string
   /** Inner padding so the logo never touches the edges of the box. */
   padding?: string
   textClassName?: string
+  /** Border + background of the logo frame. Override for warm/light surfaces. */
+  frameClassName?: string
 }) {
   const candidates = useMemo(() => clientLogoCandidates(client), [client.name, client.logo_url])
   const [index, setIndex] = useState(0)
@@ -36,7 +39,7 @@ export function ClientLogo({
   // is scaled with object-contain so landscape, square and portrait logos all
   // fit fully (never cropped) and stay centred.
   return (
-    <div className={`flex shrink-0 items-center justify-center overflow-hidden border border-brand-muted bg-brand-bg ${boxClassName} ${padding}`}>
+    <div className={`flex shrink-0 items-center justify-center overflow-hidden ${frameClassName} ${boxClassName} ${padding}`}>
       {src ? (
         <img
           key={src}

@@ -686,38 +686,59 @@ function LabeledTextarea({
 
 // ─── client-facing view ──────────────────────────────────────────────────────
 
-export function GuidedStrategyView({ data, hideTopContent = false }: { data: StrategyData; hideTopContent?: boolean }) {
+type ViewVariant = 'default' | 'report'
+
+export function GuidedStrategyView({
+  data,
+  hideTopContent = false,
+  variant = 'default',
+}: {
+  data: StrategyData
+  hideTopContent?: boolean
+  variant?: ViewVariant
+}) {
   const usedCalendar = data.calendarSelections.filter(s => s.use)
   const activePlans = (Object.keys(ACTION_PLAN_LABELS) as ActionPlanKey[])
     .map(key => ({ key, section: data.actionPlan[key] }))
     .filter(({ section }) => section.enabled && (section.items.length > 0 || section.notes.trim() !== ''))
 
+  const report = variant === 'report'
+  const body = report ? 'text-report-text' : 'text-white'
+  const sub = report ? 'text-report-muted' : 'text-brand-primary'
+  const accent = report ? 'text-report-accent' : 'text-brand-accent'
+
   return (
-    <div className="space-y-4">
+    <div className="grid gap-4 lg:grid-cols-2">
+      {data.strategyGoingForward.trim() && (
+        <ViewCard title="Strategy going forward" variant={variant} wide>
+          <p className={`text-[0.95rem] leading-relaxed whitespace-pre-line ${body}`}>{data.strategyGoingForward}</p>
+        </ViewCard>
+      )}
+
       {(data.clientDirection.length > 0 || data.clientRequestNotes.trim()) && (
-        <ViewCard title="Client direction">
-          {data.clientDirection.length > 0 && <ChipRow items={data.clientDirection} />}
+        <ViewCard title="What the client wanted" variant={variant}>
+          {data.clientDirection.length > 0 && <ChipRow items={data.clientDirection} variant={variant} />}
           {data.clientRequestNotes.trim() && (
-            <p className="mt-3 text-sm leading-relaxed text-white whitespace-pre-line">{data.clientRequestNotes}</p>
+            <p className={`mt-3 text-[0.95rem] leading-relaxed whitespace-pre-line ${body}`}>{data.clientRequestNotes}</p>
           )}
         </ViewCard>
       )}
 
       {!hideTopContent && (data.topContent.whyItWorked.length > 0 || data.topContent.whatThisTellsUs.trim() || data.topContent.coverImageUrl) && (
-        <ViewCard title="Top content insight">
+        <ViewCard title="Top content insight" variant={variant}>
           {data.topContent.coverImageUrl && (
             <img
               src={data.topContent.coverImageUrl}
               alt="Top content cover"
-              className="mb-3 max-h-64 w-full rounded-lg border border-brand-muted object-cover"
+              className={`mb-3 max-h-64 w-full rounded-lg object-cover ${report ? '' : 'border border-brand-muted'}`}
               onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
             />
           )}
           {data.topContent.autoCaption && (
-            <p className="text-sm font-medium text-white">{data.topContent.autoCaption}</p>
+            <p className={`text-sm font-medium ${body}`}>{data.topContent.autoCaption}</p>
           )}
           {(data.topContent.contentType || data.topContent.autoPlatform) && (
-            <p className="mt-1 text-xs text-brand-primary">
+            <p className={`mt-1 text-xs ${sub}`}>
               {[data.topContent.contentType, data.topContent.autoPlatform ? PLATFORM_LABELS[data.topContent.autoPlatform] : '']
                 .filter(Boolean)
                 .join(' · ')}
@@ -725,40 +746,34 @@ export function GuidedStrategyView({ data, hideTopContent = false }: { data: Str
           )}
           {data.topContent.whyItWorked.length > 0 && (
             <div className="mt-3">
-              <p className="mb-1.5 text-xs uppercase tracking-[0.14em] text-brand-primary">Why it worked</p>
-              <ChipRow items={data.topContent.whyItWorked} />
+              <p className={`mb-1.5 text-xs uppercase tracking-[0.14em] ${sub}`}>Why it worked</p>
+              <ChipRow items={data.topContent.whyItWorked} variant={variant} />
             </div>
           )}
           {data.topContent.whatThisTellsUs.trim() && (
-            <p className="mt-3 text-sm leading-relaxed text-white whitespace-pre-line">{data.topContent.whatThisTellsUs}</p>
+            <p className={`mt-3 text-[0.95rem] leading-relaxed whitespace-pre-line ${body}`}>{data.topContent.whatThisTellsUs}</p>
           )}
-        </ViewCard>
-      )}
-
-      {data.strategyGoingForward.trim() && (
-        <ViewCard title="Strategy going forward">
-          <p className="text-sm leading-relaxed text-white whitespace-pre-line">{data.strategyGoingForward}</p>
         </ViewCard>
       )}
 
       {activePlans.length > 0 && (
-        <ViewCard title="Action plan">
-          <div className="space-y-4">
+        <ViewCard title="Action plan" variant={variant} wide>
+          <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
             {activePlans.map(({ key, section }) => (
               <div key={key}>
-                <p className="text-sm font-semibold text-brand-accent">{ACTION_PLAN_LABELS[key]}</p>
+                <p className={`text-sm font-semibold ${accent}`}>{ACTION_PLAN_LABELS[key]}</p>
                 {section.items.length > 0 && (
-                  <ul className="mt-1.5 space-y-1">
+                  <ul className="mt-2 space-y-1.5">
                     {section.items.map((item, index) => (
-                      <li key={index} className="flex gap-2 text-sm text-white">
-                        <span className="text-brand-accent">•</span>
+                      <li key={index} className={`flex gap-2 text-sm ${body}`}>
+                        <span className={accent}>•</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 )}
                 {section.notes.trim() && (
-                  <p className="mt-1.5 text-sm leading-relaxed text-brand-primary whitespace-pre-line">{section.notes}</p>
+                  <p className={`mt-2 text-sm leading-relaxed whitespace-pre-line ${sub}`}>{section.notes}</p>
                 )}
               </div>
             ))}
@@ -767,11 +782,11 @@ export function GuidedStrategyView({ data, hideTopContent = false }: { data: Str
       )}
 
       {data.clientActionsRequired.length > 0 && (
-        <ViewCard title="Client actions required">
-          <ul className="space-y-1">
+        <ViewCard title="What we need from you" variant={variant}>
+          <ul className="space-y-1.5">
             {data.clientActionsRequired.map((item, index) => (
-              <li key={index} className="flex gap-2 text-sm text-white">
-                <span className="text-brand-accent">•</span>
+              <li key={index} className={`flex gap-2 text-sm ${body}`}>
+                <span className={accent}>•</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -780,13 +795,13 @@ export function GuidedStrategyView({ data, hideTopContent = false }: { data: Str
       )}
 
       {usedCalendar.length > 0 && (
-        <ViewCard title="Key dates ahead">
+        <ViewCard title="Key dates ahead" variant={variant}>
           <ul className="space-y-1.5">
             {usedCalendar.map(s => (
-              <li key={s.eventId} className="text-sm text-white">
+              <li key={s.eventId} className={`text-sm ${body}`}>
                 <span className="font-medium">{s.title}</span>
-                {s.date && <span className="ml-2 text-xs text-brand-primary">{s.date}</span>}
-                {s.note.trim() && <span className="block text-xs text-brand-primary">{s.note}</span>}
+                {s.date && <span className={`ml-2 text-xs ${sub}`}>{s.date}</span>}
+                {s.note.trim() && <span className={`block text-xs ${sub}`}>{s.note}</span>}
               </li>
             ))}
           </ul>
@@ -796,20 +811,41 @@ export function GuidedStrategyView({ data, hideTopContent = false }: { data: Str
   )
 }
 
-function ViewCard({ title, children }: { title: string; children: ReactNode }) {
+function ViewCard({
+  title,
+  children,
+  variant = 'default',
+  wide = false,
+}: {
+  title: string
+  children: ReactNode
+  variant?: ViewVariant
+  wide?: boolean
+}) {
+  const report = variant === 'report'
+  const shell = report
+    ? 'rounded-2xl bg-report-surface p-6 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)] sm:p-7'
+    : 'rounded-xl border border-brand-muted bg-brand-surface p-5 sm:p-6'
+  const heading = report
+    ? 'mb-4 font-display text-lg font-semibold text-report-text'
+    : 'mb-3 text-xs uppercase tracking-[0.18em] text-brand-primary'
   return (
-    <article className="rounded-xl border border-brand-muted bg-brand-surface p-5 sm:p-6">
-      <p className="mb-3 text-xs uppercase tracking-[0.18em] text-brand-primary">{title}</p>
+    <article className={`${shell} ${wide ? 'lg:col-span-2' : ''}`}>
+      <p className={heading}>{title}</p>
       {children}
     </article>
   )
 }
 
-function ChipRow({ items }: { items: string[] }) {
+function ChipRow({ items, variant = 'default' }: { items: string[]; variant?: ViewVariant }) {
+  const report = variant === 'report'
+  const chip = report
+    ? 'bg-report-accent/15 text-report-accent'
+    : 'border border-brand-accent/30 bg-brand-accent/10 text-brand-accent'
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((item, index) => (
-        <span key={index} className="rounded-full border border-brand-accent/30 bg-brand-accent/10 px-3 py-1 text-xs font-medium text-brand-accent">
+        <span key={index} className={`rounded-full px-3 py-1 text-xs font-medium ${chip}`}>
           {item}
         </span>
       ))}

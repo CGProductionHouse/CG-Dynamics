@@ -264,7 +264,7 @@ export default function PublishedPreview() {
         <p className="text-sm text-brand-primary">Loading preview...</p>
       ) : report ? (
         <div className="overflow-hidden rounded-xl border border-brand-muted">
-          <ClientDashboardShell action={<span className="text-xs font-semibold text-brand-accent">Preview mode</span>} client={selectedClient}>
+          <ClientDashboardShell action={<span className="rounded-full bg-report-elevated px-3 py-1 text-xs font-medium text-report-accent">Preview mode</span>} client={selectedClient}>
             <ClientReportView
               report={report}
               client={selectedClient}

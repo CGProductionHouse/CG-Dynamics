@@ -126,7 +126,7 @@ export default function Dashboard() {
   const action = (
     <button
       onClick={signOut}
-      className="text-sm text-brand-primary hover:text-brand-accent transition-colors"
+      className="rounded-full px-3.5 py-1.5 text-sm text-report-muted transition-colors hover:bg-report-elevated hover:text-report-text"
     >
       Sign out
     </button>
@@ -146,7 +146,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <ClientDashboardShell action={action} client={client}>
-        <p className="text-brand-primary text-sm">Loading your reports...</p>
+        <p className="text-sm text-report-muted">Loading your reports…</p>
       </ClientDashboardShell>
     )
   }
@@ -154,9 +154,7 @@ export default function Dashboard() {
   if (error) {
     return (
       <ClientDashboardShell action={action} client={client}>
-        <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
-          {error}
-        </p>
+        <p className="rounded-2xl bg-report-surface px-4 py-3 text-sm text-[#d8a07a]">{error}</p>
       </ClientDashboardShell>
     )
   }
@@ -174,28 +172,30 @@ export default function Dashboard() {
 
   return (
     <ClientDashboardShell action={action} client={client}>
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-3">Your reports</p>
-        <div className="flex flex-wrap gap-2">
-          {months.map(item => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setSelectedReportId(item.id)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                selectedReportId === item.id
-                  ? 'bg-brand-accent text-brand-bg'
-                  : 'border border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
-              }`}
-            >
-              {monthLabel(item)}
-            </button>
-          ))}
+      {months.length > 1 && (
+        <div className="mb-8">
+          <p className="mb-3 text-[0.7rem] uppercase tracking-[0.22em] text-report-faint">Choose a month</p>
+          <div className="flex flex-wrap gap-1.5">
+            {months.map(item => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setSelectedReportId(item.id)}
+                className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
+                  selectedReportId === item.id
+                    ? 'bg-report-accent/20 font-medium text-report-accent'
+                    : 'text-report-faint hover:text-report-muted'
+                }`}
+              >
+                {monthLabel(item)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {reportLoading ? (
-        <p className="text-brand-primary text-sm">Loading report...</p>
+        <p className="text-sm text-report-muted">Loading report…</p>
       ) : report ? (
         <ClientReportView
           report={report}

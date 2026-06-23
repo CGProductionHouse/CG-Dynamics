@@ -575,7 +575,7 @@ export default function ImportMetaCsv() {
         parts.push(`${names} data imported successfully as an internal draft. Client view will unlock when ${isAre} complete. You can still review the data, add strategy, and prepare the report.`)
       }
       if (partialMths.length > 0) {
-        parts.push(`Partial export detected for ${partialMths.map(monthLongName).join(', ')}. Saved for internal review — import a full-month export to unlock client view.`)
+        parts.push(`${partialMths.map(monthLongName).join(', ')} needs a full month of data before it can go to the client — saved as an internal draft for now.`)
       }
       if (parts.length === 0) parts.push(`Saved ${rows.length} imported posts.`)
       setSuccess(parts.join(' '))
@@ -999,7 +999,7 @@ export default function ImportMetaCsv() {
                 <p className="text-sm text-brand-accent">{success}</p>
                 {partialExportMonths.length > 0 && (
                   <p className="mt-1 text-xs text-amber-300">
-                    Partial export for {partialExportMonths.map(monthLongName).join(', ')}: saved for internal review only. Import a full-month export to unlock client view.
+                    {partialExportMonths.map(monthLongName).join(', ')} needs a full month of data before it can go to the client. Saved as an internal draft for now.
                   </p>
                 )}
                 {autoReports.length > 0 ? (

@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import type { ReportWithPosts } from '../../lib/db/reports'
 import type { Client } from '../../lib/db/clients'
 import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
-import { MANUAL_SOURCE_LABELS } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
@@ -25,11 +24,14 @@ import {
 
 type TabKey = 'overview' | Platform
 
-const MANUAL_SOURCE_NOTE =
-  'Source note: This platform uses a monthly account summary where post-level export detail was not available.'
-
 const REPORT_DISCLAIMER =
-  'Reporting note: This dashboard is compiled from exported platform data, manual summaries, and internal reporting tools. Small differences may appear because platforms process and export data at different times. Original platform dashboards and exports remain the source of record.'
+  'This report is compiled from each platform’s exported data and our internal reporting. Small differences can appear as platforms finalise their numbers; the original platform dashboards remain the source of record.'
+
+// Warm logo frame so the client logo sits on a soft surface rather than the
+// dark teal admin frame.
+const LOGO_FRAME = 'border border-report-line/70 bg-report-elevated'
+
+// ─── data helpers (unchanged behaviour) ──────────────────────────────────────
 
 // Restrict a report's posts to its intended calendar month. Posts with no
 // publish time (or an unparseable one) are kept — they belong to the report.
@@ -47,18 +49,15 @@ function postsForReportMonth(report: ReportWithPosts): ReportStatsPost[] {
     .map(reportPostToStatsPost)
 }
 
-// Client-facing title must match the selected client. A stored custom title is
-// only trusted when it actually names this client; otherwise we derive it from
-// the client name so a stale "CG Production House Monthly Report" never shows on
-// another client's report.
-function resolveReportTitle(report: ReportWithPosts, client: Client | null): string {
+// Client-facing title: only trust a stored title when it names this client,
+// otherwise show the client name so no other client's title ever leaks through.
+function reportClientName(report: ReportWithPosts, client: Client | null): string {
+  if (client?.name) return client.name
   const stored = report.report_title?.trim()
-  if (client?.name) {
-    if (stored && stored.toLowerCase().includes(client.name.toLowerCase())) return stored
-    return `${client.name} Monthly Report`
-  }
   return stored || 'Monthly Performance Report'
 }
+
+// ─── main report ──────────────────────────────────────────────────────────────
 
 export function ClientReportView({
   report,
@@ -77,25 +76,17 @@ export function ClientReportView({
 }) {
   const [tab, setTab] = useState<TabKey>('overview')
 
-  // Stats are always restricted to the report's intended calendar month, so a
-  // legacy partial range (e.g. 21 May - 10 June) never bleeds the next month's
-  // posts into this month's numbers.
-  const statsPosts = useMemo<ReportStatsPost[]>(
-    () => postsForReportMonth(report),
-    [report]
-  )
-  const master = useMemo(
-    () => buildMasterReport(statsPosts, manualMetrics),
-    [statsPosts, manualMetrics]
-  )
+  const statsPosts = useMemo<ReportStatsPost[]>(() => postsForReportMonth(report), [report])
+  const master = useMemo(() => buildMasterReport(statsPosts, manualMetrics), [statsPosts, manualMetrics])
   const previousStatsPosts = useMemo<ReportStatsPost[]>(
-    () => previousReport ? postsForReportMonth(previousReport) : [],
+    () => (previousReport ? postsForReportMonth(previousReport) : []),
     [previousReport]
   )
   const previousMaster = useMemo(
-    () => previousReport || previousManualMetrics.length > 0
-      ? buildMasterReport(previousStatsPosts, previousManualMetrics)
-      : null,
+    () =>
+      previousReport || previousManualMetrics.length > 0
+        ? buildMasterReport(previousStatsPosts, previousManualMetrics)
+        : null,
     [previousManualMetrics, previousReport, previousStatsPosts]
   )
   const movement = useMemo(
@@ -103,60 +94,42 @@ export function ClientReportView({
     [manualMetrics, master, previousManualMetrics, previousMaster]
   )
 
-  // Only offer platform tabs for platforms that actually have data this month.
   const availablePlatforms = master.platforms.filter(view => view.source !== 'none')
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'overview', label: 'Overview' },
     ...availablePlatforms.map(view => ({ key: view.platform as TabKey, label: view.label })),
   ]
+  const month = monthDisplayLabel(getReportMonthFromPeriod(report))
 
   return (
-    <>
-      <div className="mb-6 rounded-2xl border border-brand-muted bg-brand-surface/80 p-5 shadow-[0_0_60px_rgba(45,212,191,0.06)] lg:mb-8 lg:p-7">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-center">
-            <ClientReportLogo client={client} />
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.22em] text-brand-accent mb-2">Monthly report</p>
-              <h1 className="text-3xl font-semibold text-white sm:text-4xl">
-                {resolveReportTitle(report, client)}
-              </h1>
-              <p className="text-sm font-medium text-white/90 mt-3">
-                {monthDisplayLabel(getReportMonthFromPeriod(report))}
-              </p>
-            </div>
-          </div>
-          <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-3">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary">Status</p>
-            <p className="mt-1 text-sm font-semibold text-brand-accent">Published report</p>
-          </div>
-        </div>
-      </div>
+    <div className="font-sans text-report-text">
+      <Hero report={report} client={client} month={month} />
 
-      <div className="mb-6 flex gap-2 overflow-x-auto border-b border-brand-muted pb-3">
-        {tabs.map(item => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setTab(item.key)}
-            className={`shrink-0 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-              tab === item.key
-                ? 'bg-brand-accent text-brand-bg shadow-[0_0_24px_rgba(45,212,191,0.12)]'
-                : 'border border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {/* Tabs only appear when there is at least one platform to drill into. */}
+      {availablePlatforms.length > 0 && (
+        <div className="mb-8 flex flex-wrap gap-1.5">
+          {tabs.map(item => {
+            const active = tab === item.key
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setTab(item.key)}
+                className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
+                  active
+                    ? 'bg-report-elevated font-medium text-report-text'
+                    : 'text-report-faint hover:text-report-muted'
+                }`}
+              >
+                {item.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {tab === 'overview' ? (
-        <OverviewTab
-          report={report}
-          master={master}
-          movement={movement}
-          showEmptyStrategy={showEmptyStrategy}
-        />
+        <OverviewTab report={report} master={master} movement={movement} showEmptyStrategy={showEmptyStrategy} />
       ) : (
         <PlatformTab
           view={master.platforms.find(item => item.platform === tab)!}
@@ -165,10 +138,45 @@ export function ClientReportView({
         />
       )}
 
-      <p className="mt-8 border-t border-brand-muted pt-5 text-xs leading-relaxed text-brand-primary/80">
+      <p className="mx-auto mt-14 max-w-3xl border-t border-report-line/60 pt-6 text-center text-xs leading-relaxed text-report-faint">
         {REPORT_DISCLAIMER}
       </p>
-    </>
+    </div>
+  )
+}
+
+function Hero({ report, client, month }: { report: ReportWithPosts; client: Client | null; month: string }) {
+  return (
+    <section className="relative mb-10 overflow-hidden rounded-[1.75rem] bg-report-elevated px-6 py-10 shadow-[0_30px_70px_-40px_rgba(0,0,0,0.85)] sm:px-10 sm:py-14">
+      {/* soft warm depth — no hard borders */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,179,165,0.16),transparent_55%),radial-gradient(130%_130%_at_100%_120%,rgba(216,180,138,0.12),transparent_55%)]" />
+      <div className="relative flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          {client ? (
+            <ClientLogo
+              client={client}
+              boxClassName="h-20 w-20 rounded-2xl sm:h-24 sm:w-24"
+              padding="p-3"
+              frameClassName={LOGO_FRAME}
+              textClassName="text-2xl font-semibold text-report-accent"
+            />
+          ) : (
+            <BrandMark subtitle="CG Production House" size="report" />
+          )}
+          <div className="min-w-0">
+            <p className="text-[0.7rem] uppercase tracking-[0.28em] text-report-accent">Monthly Performance Report</p>
+            <h1 className="mt-2 font-display text-4xl font-semibold leading-[1.05] text-report-text sm:text-5xl">
+              {reportClientName(report, client)}
+            </h1>
+            <p className="mt-3 font-display text-lg text-report-muted">{month}</p>
+          </div>
+        </div>
+        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-report-surface/70 px-3.5 py-1.5 text-xs font-medium text-report-accent backdrop-blur">
+          <span className="h-1.5 w-1.5 rounded-full bg-report-accent" />
+          Published
+        </span>
+      </div>
+    </section>
   )
 }
 
@@ -186,40 +194,40 @@ function OverviewTab({
   const strategy = readStrategyData(report.strategy_data)
   const hasStrategy = hasStrategyContent(strategy)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
-  const hasAnyData = platformsWithData.length > 0
-  // Only show growth when there is at least one full previous-month comparison.
-  const showGrowth =
-    movement.views.direction !== 'missing' ||
-    movement.reach.direction !== 'missing' ||
-    movement.engagements.direction !== 'missing'
+
+  const growthItems = [
+    { label: 'Views', m: movement.views },
+    { label: 'Reach', m: movement.reach },
+    { label: 'Engagements', m: movement.engagements },
+  ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null && !g.m.notAvailable)
 
   return (
     <>
-      <SectionHeading eyebrow="Monthly snapshot" title="The month at a glance" />
-      <section className="grid grid-cols-2 gap-3 mb-8 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Views" value={snapshotValue(master.totalViews)} />
-        <StatCard label="Reach" value={snapshotValue(master.totalReach)} />
-        <StatCard label="Engagements" value={snapshotValue(master.totalEngagements)} />
-        <StatCard label="Best platform" value={master.bestPlatform ? master.bestPlatform.label : 'Data not available'} />
+      <SectionHeading eyebrow="Executive summary" title="The month at a glance" />
+      <section className="mb-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <MetricStat label="Views" value={master.totalViews} />
+        <MetricStat label="Reach" value={master.totalReach} />
+        <MetricStat label="Engagements" value={master.totalEngagements} />
+        <MetricStat label="Best platform" text={master.bestPlatform?.label ?? null} />
       </section>
 
-      {showGrowth && (
-        <section className="mb-8">
-          <SectionHeading eyebrow="Growth vs previous month" title="How we moved" />
+      {growthItems.length > 0 && (
+        <section className="mb-12">
+          <SectionHeading eyebrow="Momentum" title="How we moved versus last month" />
           <div className="grid gap-3 sm:grid-cols-3">
-            <MovementCard label="Views" movement={movement.views} />
-            <MovementCard label="Reach" movement={movement.reach} />
-            <MovementCard label="Engagements" movement={movement.engagements} />
+            {growthItems.map(item => (
+              <MovementChip key={item.label} label={item.label} movement={item.m} />
+            ))}
           </div>
         </section>
       )}
 
       <TopContentSection master={master} strategy={strategy} />
 
-      {hasAnyData && (
-        <section className="mb-8">
-          <SectionHeading eyebrow="Platform performance" title="How each channel did" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {platformsWithData.length > 0 && (
+        <section className="mb-12">
+          <SectionHeading eyebrow="Channels" title="How each platform performed" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {platformsWithData.map(view => (
               <PlatformSummaryCard key={view.platform} view={view} />
             ))}
@@ -228,31 +236,73 @@ function OverviewTab({
       )}
 
       {hasStrategy ? (
-        <GuidedStrategyView data={strategy} hideTopContent />
+        <section className="mb-4">
+          <SectionHeading eyebrow="Looking ahead" title="Strategy & action plan" />
+          <GuidedStrategyView data={strategy} hideTopContent variant="report" />
+        </section>
       ) : (
-        <StrategySection report={report} showEmptyStrategy={showEmptyStrategy} />
+        <LegacyStrategySection report={report} showEmptyStrategy={showEmptyStrategy} />
       )}
     </>
   )
 }
 
+// ─── shared presentation pieces ───────────────────────────────────────────────
+
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
-    <div className="mb-4">
-      <p className="text-xs uppercase tracking-[0.18em] text-brand-accent">{eyebrow}</p>
-      <h2 className="mt-1.5 text-lg font-semibold text-white sm:text-xl">{title}</h2>
+    <div className="mb-5">
+      <p className="text-[0.7rem] uppercase tracking-[0.22em] text-report-accent">{eyebrow}</p>
+      <h2 className="mt-2 font-display text-2xl font-semibold text-report-text sm:text-[1.7rem]">{title}</h2>
     </div>
   )
 }
 
-// Core reach/views/engagements come straight from the data. A genuine 0 reads
-// as "no meaningful number to show" for a client, so we present it softly rather
-// than a large ugly zero.
-function snapshotValue(value: number) {
-  return value > 0 ? formatNumber(value) : 'Data not available'
+// One premium metric. `value` is a raw number (a genuine 0 reads as no useful
+// figure, so it shows softly); `text` is for label-style values like a platform.
+function MetricStat({ label, value, text }: { label: string; value?: number; text?: string | null }) {
+  const hasNumber = typeof value === 'number' && value > 0
+  const display = text != null ? text : hasNumber ? formatNumber(value as number) : null
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-report-surface px-5 py-6 shadow-[0_24px_50px_-36px_rgba(0,0,0,0.9)] sm:px-6 sm:py-7">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-report-accent/40 to-transparent" />
+      <p className="text-[0.7rem] uppercase tracking-[0.16em] text-report-faint">{label}</p>
+      {display ? (
+        <p className="mt-3 font-display text-3xl font-semibold leading-none text-report-text sm:text-4xl">{display}</p>
+      ) : (
+        <p className="mt-3 text-sm font-medium text-report-faint">Data unavailable</p>
+      )}
+    </div>
+  )
 }
 
-function TopContentSection({ master, strategy }: { master: MasterReportData; strategy: ReturnType<typeof readStrategyData> }) {
+function MovementChip({ label, movement }: { label: string; movement: MetricMovement }) {
+  const up = (movement.difference ?? 0) > 0
+  const down = (movement.difference ?? 0) < 0
+  const arrow = up ? '↑' : down ? '↓' : '→'
+  const tone = up ? 'text-report-accent' : down ? 'text-[#d8a07a]' : 'text-report-faint'
+  const detail =
+    movement.percent !== null
+      ? `${arrow} ${formatPercent(movement.percent)} vs last month`
+      : `${arrow} ${movement.difference! > 0 ? '+' : ''}${formatNumber(movement.difference!)} vs last month`
+
+  return (
+    <div className="rounded-2xl bg-report-surface px-5 py-5 shadow-[0_24px_50px_-36px_rgba(0,0,0,0.9)]">
+      <p className="text-[0.7rem] uppercase tracking-[0.16em] text-report-faint">{label}</p>
+      <p className="mt-2.5 font-display text-2xl font-semibold leading-none text-report-text">{formatNumber(movement.current)}</p>
+      <p className={`mt-2 text-xs font-medium ${tone}`}>{detail}</p>
+    </div>
+  )
+}
+
+function TopContentSection({
+  master,
+  strategy,
+}: {
+  master: MasterReportData
+  strategy: ReturnType<typeof readStrategyData>
+}) {
   const tc = strategy.topContent
   const best = master.bestPostOverall
 
@@ -261,81 +311,65 @@ function TopContentSection({ master, strategy }: { master: MasterReportData; str
   const hasAnything = Boolean(caption || coverImage || tc.whyItWorked.length > 0 || tc.whatThisTellsUs.trim())
   if (!hasAnything) return null
 
-  const contentType =
-    tc.contentType.trim() ||
-    (best?.post_type ? displayContentType(best.post_type) : null)
+  const contentType = tc.contentType.trim() || (best?.post_type ? displayContentType(best.post_type) : null)
   const platformLabel =
     (best?.platform && PLATFORM_LABELS[best.platform]) ||
     (tc.autoPlatform && PLATFORM_LABELS[tc.autoPlatform]) ||
     null
-  const metricValue = best
-    ? best.engagements
-    : typeof tc.autoMetricValue === 'number'
-      ? tc.autoMetricValue
-      : null
+  const metricValue = best ? best.engagements : typeof tc.autoMetricValue === 'number' ? tc.autoMetricValue : null
 
   return (
-    <section className="mb-8">
-      <SectionHeading eyebrow="Top content" title="What performed best" />
-      <div className="overflow-hidden rounded-2xl border border-brand-muted bg-brand-surface">
-        <div className="grid gap-0 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="relative min-h-[12rem] bg-gradient-to-br from-brand-accent/20 via-brand-surface to-brand-bg">
+    <section className="mb-12">
+      <SectionHeading eyebrow="Top content" title="The standout this month" />
+      <div className="overflow-hidden rounded-3xl bg-report-surface shadow-[0_30px_60px_-44px_rgba(0,0,0,0.9)]">
+        <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="relative min-h-[14rem] bg-[radial-gradient(120%_120%_at_20%_10%,rgba(111,179,165,0.28),transparent_60%),radial-gradient(120%_120%_at_100%_100%,rgba(216,180,138,0.2),transparent_55%)]">
             {coverImage ? (
               <img
                 src={coverImage}
-                alt="Top content cover"
-                className="h-full max-h-72 w-full object-cover"
+                alt="Top content"
+                className="h-full max-h-80 w-full object-cover"
                 onError={e => {
-                  const el = e.currentTarget as HTMLImageElement
-                  el.style.display = 'none'
+                  ;(e.currentTarget as HTMLImageElement).style.display = 'none'
                 }}
               />
             ) : (
-              <div className="flex h-full min-h-[12rem] flex-col items-center justify-center gap-2 p-6 text-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-brand-accent/40 bg-brand-accent/10 text-brand-accent">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+              <div className="flex h-full min-h-[14rem] flex-col items-center justify-center gap-3 p-8 text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-report-elevated/80 text-report-accent">
+                  <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16l5-5 4 4 3-3 6 6M4 6h16v12H4z" />
                   </svg>
                 </span>
-                <p className="text-xs font-medium text-brand-primary">{contentType ?? 'Top performing content'}</p>
+                <p className="text-sm font-medium text-report-muted">{contentType ?? 'Featured content'}</p>
               </div>
             )}
           </div>
-          <div className="p-5 sm:p-6">
-            {caption && (
-              <h3 className="text-lg font-semibold leading-snug text-white sm:text-xl">{caption}</h3>
-            )}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {contentType && (
-                <span className="rounded-full border border-brand-accent/30 bg-brand-accent/10 px-3 py-1 text-xs font-medium text-brand-accent">
-                  {contentType}
-                </span>
-              )}
-              {platformLabel && (
-                <span className="rounded-full border border-brand-muted px-3 py-1 text-xs font-medium text-brand-primary">
-                  {platformLabel}
-                </span>
-              )}
+          <div className="p-7 sm:p-9">
+            <div className="flex flex-wrap gap-2">
+              {contentType && <SoftPill tone="accent">{contentType}</SoftPill>}
+              {platformLabel && <SoftPill>{platformLabel}</SoftPill>}
             </div>
+            {caption && (
+              <h3 className="mt-4 font-display text-xl font-semibold leading-snug text-report-text sm:text-2xl">{caption}</h3>
+            )}
             {metricValue != null && metricValue > 0 && (
-              <p className="mt-4 text-sm text-brand-primary">
-                <span className="text-2xl font-semibold text-white">{formatNumber(metricValue)}</span> engagements
+              <p className="mt-5 flex items-baseline gap-2">
+                <span className="font-display text-3xl font-semibold text-report-text">{formatNumber(metricValue)}</span>
+                <span className="text-sm text-report-muted">engagements</span>
               </p>
             )}
             {tc.whyItWorked.length > 0 && (
-              <div className="mt-4">
-                <p className="mb-1.5 text-xs uppercase tracking-[0.14em] text-brand-primary">Why it worked</p>
-                <div className="flex flex-wrap gap-2">
+              <div className="mt-6">
+                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-report-faint">Why it worked</p>
+                <div className="mt-2 flex flex-wrap gap-2">
                   {tc.whyItWorked.map((item, index) => (
-                    <span key={index} className="rounded-full border border-brand-muted bg-brand-bg/60 px-3 py-1 text-xs text-white">
-                      {item}
-                    </span>
+                    <SoftPill key={index}>{item}</SoftPill>
                   ))}
                 </div>
               </div>
             )}
             {tc.whatThisTellsUs.trim() && (
-              <p className="mt-4 text-sm leading-relaxed text-white whitespace-pre-line">{tc.whatThisTellsUs}</p>
+              <p className="mt-6 text-[0.95rem] leading-relaxed text-report-muted whitespace-pre-line">{tc.whatThisTellsUs}</p>
             )}
           </div>
         </div>
@@ -344,19 +378,28 @@ function TopContentSection({ master, strategy }: { master: MasterReportData; str
   )
 }
 
+function SoftPill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'accent' }) {
+  const classes =
+    tone === 'accent'
+      ? 'bg-report-accent/15 text-report-accent'
+      : 'bg-report-elevated text-report-muted'
+  return <span className={`rounded-full px-3 py-1 text-xs font-medium ${classes}`}>{children}</span>
+}
+
 function PlatformSummaryCard({ view }: { view: PlatformView }) {
   return (
-    <article className="rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
-      <p className="text-sm font-semibold text-white">{view.label}</p>
-      <dl className="mt-3 space-y-1.5 text-sm">
+    <article className="rounded-2xl bg-report-surface p-5 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)] sm:p-6">
+      <p className="font-display text-lg font-semibold text-report-text">{view.label}</p>
+      <dl className="mt-4 space-y-0">
         <PlatformRow label="Reach" value={formatNumber(view.reach)} />
         <PlatformRow label="Views" value={formatNumber(view.views)} />
         <PlatformRow label="Engagements" value={formatNumber(view.engagements)} />
         {view.source === 'posts' && <PlatformRow label="Posts" value={formatNumber(view.postCount)} />}
       </dl>
       {view.bestPost?.caption && (
-        <p className="mt-3 truncate text-xs text-brand-primary">
-          Top: <span className="text-white">{shortCaption(view.bestPost.caption, 'Post')}</span>
+        <p className="mt-4 line-clamp-2 text-xs leading-relaxed text-report-faint">
+          <span className="text-report-muted">Top post · </span>
+          {shortCaption(view.bestPost.caption, 'Post')}
         </p>
       )}
     </article>
@@ -365,61 +408,14 @@ function PlatformSummaryCard({ view }: { view: PlatformView }) {
 
 function PlatformRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <dt className="text-brand-primary">{label}</dt>
-      <dd className="font-medium text-white">{value}</dd>
+    <div className="flex items-center justify-between border-b border-report-line/50 py-2 last:border-0">
+      <dt className="text-sm text-report-muted">{label}</dt>
+      <dd className="text-sm font-semibold text-report-text">{value}</dd>
     </div>
   )
 }
 
-function StrategySection({
-  report,
-  showEmptyStrategy,
-}: {
-  report: ReportWithPosts
-  showEmptyStrategy: boolean
-}) {
-  // Prefer the structured guided strategy when present. Older reports (no
-  // strategy_data) fall back to the legacy strategy cards below.
-  const strategy = readStrategyData(report.strategy_data)
-  if (hasStrategyContent(strategy)) {
-    return <GuidedStrategyView data={strategy} />
-  }
-
-  const cards = [
-    {
-      title: 'Key takeaways',
-      text: report.general_notes,
-    },
-    {
-      title: 'What worked',
-      text: report.performance_comments,
-    },
-    {
-      title: 'Opportunities',
-      text: report.previous_month_reflection,
-    },
-    {
-      title: 'Next month focus',
-      text: report.strategy_next_month,
-    },
-    {
-      title: 'Recommended actions',
-      text: [report.content_direction_next_month, report.boost_recommendation].filter(Boolean).join('\n\n') || null,
-    },
-  ]
-  const visibleCards = showEmptyStrategy ? cards : cards.filter(card => card.text)
-
-  if (visibleCards.length === 0) return null
-
-  return (
-    <section className="grid gap-4 lg:grid-cols-2">
-      {visibleCards.map(card => (
-        <StrategyCard key={card.title} title={card.title} text={card.text} showEmpty={showEmptyStrategy} />
-      ))}
-    </section>
-  )
-}
+// ─── platform drill-down tabs ─────────────────────────────────────────────────
 
 function PlatformTab({
   view,
@@ -432,85 +428,86 @@ function PlatformTab({
 }) {
   if (view.source === 'none') {
     return (
-      <div className="bg-brand-surface border border-brand-muted rounded-xl p-6 sm:p-10">
-        <h2 className="text-lg font-semibold text-white mb-2">{view.label}</h2>
-        <p className="text-sm text-brand-primary">No platform data is available for this month yet.</p>
+      <div className="rounded-2xl bg-report-surface p-8 sm:p-10">
+        <h2 className="font-display text-xl font-semibold text-report-text">{view.label}</h2>
+        <p className="mt-2 text-sm text-report-muted">No data for this platform this month.</p>
       </div>
     )
   }
-
-  if (view.source === 'manual') {
-    return <ManualPlatformTab view={view} previousManual={previousManual} />
-  }
-
+  if (view.source === 'manual') return <ManualPlatformTab view={view} previousManual={previousManual} />
   return <PostsPlatformTab view={view} previousView={previousView} />
 }
 
 function PostsPlatformTab({ view, previousView }: { view: PlatformView; previousView: PlatformView | null }) {
+  const growth = [
+    { label: 'Views', m: compareMetric(view.views, previousView?.views) },
+    { label: 'Reach', m: compareMetric(view.reach, previousView?.reach) },
+    { label: 'Engagements', m: compareMetric(view.engagements, previousView?.engagements) },
+  ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
+
   return (
     <>
-      <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Reach" value={formatNumber(view.reach)} />
-        <StatCard label="Views" value={formatNumber(view.views)} />
-        <StatCard label="Engagements" value={formatNumber(view.engagements)} />
-        <StatCard label="Posts" value={formatNumber(view.postCount)} />
+      <SectionHeading eyebrow={view.label} title={`${view.label} at a glance`} />
+      <section className="mb-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <MetricStat label="Reach" value={view.reach} />
+        <MetricStat label="Views" value={view.views} />
+        <MetricStat label="Engagements" value={view.engagements} />
+        <MetricStat label="Posts" value={view.postCount} />
       </section>
 
-      <section className="grid gap-3 mb-6 sm:grid-cols-3">
-        <MovementCard label="Views growth" movement={compareMetric(view.views, previousView?.views)} />
-        <MovementCard label="Reach growth" movement={compareMetric(view.reach, previousView?.reach)} />
-        <MovementCard label="Engagement growth" movement={compareMetric(view.engagements, previousView?.engagements)} />
-      </section>
+      {growth.length > 0 && (
+        <section className="mb-12">
+          <SectionHeading eyebrow="Momentum" title="Versus last month" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {growth.map(g => (
+              <MovementChip key={g.label} label={g.label} movement={g.m} />
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 mb-6 sm:p-6">
-        <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">Best {view.label} post</p>
-        {view.bestPost ? (
-          <div>
-            <h2 className="text-lg font-semibold text-white leading-snug sm:text-xl">
+      {view.bestPost && (
+        <section className="mb-12">
+          <SectionHeading eyebrow="Top content" title={`Best ${view.label} post`} />
+          <div className="rounded-3xl bg-report-surface p-7 shadow-[0_30px_60px_-44px_rgba(0,0,0,0.9)] sm:p-9">
+            <div className="flex flex-wrap gap-2">
+              {view.bestPost.post_type && (
+                <SoftPill tone="accent">{displayContentType(view.bestPost.post_type) ?? view.bestPost.post_type}</SoftPill>
+              )}
+              <SoftPill>{formatDate(view.bestPost.publish_time)}</SoftPill>
+            </div>
+            <h3 className="mt-4 font-display text-xl font-semibold leading-snug text-report-text sm:text-2xl">
               {shortCaption(view.bestPost.caption)}
-            </h2>
-            <p className="text-sm text-brand-primary mt-2">{formatDate(view.bestPost.publish_time)}</p>
-            {view.bestPost.post_type && (
-              <p className="text-xs text-brand-primary mt-1">
-                Content type: {displayContentType(view.bestPost.post_type) ?? view.bestPost.post_type}
-              </p>
-            )}
-            <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-3">
+            </h3>
+            <div className="mt-6 grid grid-cols-3 gap-3">
               <MiniMetric label="Reach" value={formatNumber(view.bestPost.reach)} />
               <MiniMetric label="Views" value={formatNumber(view.bestPost.impressions)} />
               <MiniMetric label="Engagements" value={formatNumber(view.bestPost.engagements)} />
             </div>
           </div>
-        ) : (
-          <p className="text-sm text-brand-primary">No data uploaded yet.</p>
-        )}
-      </section>
+        </section>
+      )}
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-5 sm:p-6">
-        <div className="flex flex-col gap-1 mb-5 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-base font-semibold text-white">Top {view.label} posts</h2>
-          <span className="text-sm text-brand-primary sm:text-xs">Ranked by engagement</span>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {view.topPosts.map((post, index) => (
-            <article key={post.id} className="bg-brand-bg/60 border border-brand-muted rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-brand-accent text-sm font-semibold">#{index + 1}</span>
-                <span className="text-[11px] text-brand-primary">{formatDate(post.publish_time)}</span>
-              </div>
-              <p className="text-sm text-white leading-snug">{shortCaption(post.caption, 'Post')}</p>
-              {post.post_type && (
-                <p className="text-xs text-brand-primary mt-1">
-                  {displayContentType(post.post_type) ?? post.post_type}
-                </p>
-              )}
-              <p className="text-sm text-brand-primary mt-3">
-                {formatNumber(post.engagements)} engagements
-              </p>
-            </article>
-          ))}
-        </div>
-      </section>
+      {view.topPosts.length > 0 && (
+        <section className="mb-4">
+          <SectionHeading eyebrow="Highlights" title={`Top ${view.label} posts`} />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {view.topPosts.map((post, index) => (
+              <article key={post.id} className="rounded-2xl bg-report-surface p-5 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)]">
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-lg font-semibold text-report-accent">#{index + 1}</span>
+                  <span className="text-[11px] text-report-faint">{formatDate(post.publish_time)}</span>
+                </div>
+                <p className="mt-3 text-sm leading-snug text-report-text">{shortCaption(post.caption, 'Post')}</p>
+                {post.post_type && (
+                  <p className="mt-2 text-xs text-report-faint">{displayContentType(post.post_type) ?? post.post_type}</p>
+                )}
+                <p className="mt-3 text-sm text-report-muted">{formatNumber(post.engagements)} engagements</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   )
 }
@@ -523,54 +520,109 @@ function ManualPlatformTab({
   previousManual: ManualPlatformMetric | null
 }) {
   const manual = view.manual!
-  const followerGrowth = compareMetric(manual.followers, previousManual?.followers)
+  const notes = [
+    { title: 'Top content', text: manual.top_content_notes },
+    { title: 'Content mix', text: manual.content_type_split_notes },
+    { title: 'Notes', text: manual.general_notes },
+  ].filter(note => note.text && note.text.trim())
+
+  const growth = [
+    { label: 'Views', m: compareMetric(view.views, previousManual?.views) },
+    { label: 'Reach', m: compareMetric(view.reach, previousManual?.reach) },
+    { label: 'Engagements', m: compareMetric(view.engagements, previousManual?.engagements) },
+    { label: 'Followers', m: compareMetric(manual.followers, previousManual?.followers) },
+  ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
+
   return (
     <>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-brand-muted px-2.5 py-1 text-xs font-medium text-brand-primary">
-          {MANUAL_SOURCE_LABELS[manual.source_type]}
-        </span>
-      </div>
-
-      <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Reach" value={formatNumber(view.reach)} />
-        <StatCard label="Views" value={formatNumber(view.views)} />
-        <StatCard label="Engagements" value={formatNumber(view.engagements)} />
-        <StatCard label="Followers" value={formatNumber(manual.followers)} />
+      <SectionHeading eyebrow={view.label} title={`${view.label} at a glance`} />
+      <section className="mb-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <MetricStat label="Reach" value={view.reach} />
+        <MetricStat label="Views" value={view.views} />
+        <MetricStat label="Engagements" value={view.engagements} />
+        <MetricStat label="Followers" value={manual.followers} />
       </section>
 
-      <section className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-3">
-        <StatCard label="Accounts engaged" value={formatNumber(manual.accounts_engaged)} />
-        <StatCard label="Profile visits" value={formatNumber(manual.profile_visits)} />
-        <StatCard label="External link taps" value={formatNumber(manual.external_link_taps)} />
-      </section>
+      {growth.length > 0 && (
+        <section className="mb-12">
+          <SectionHeading eyebrow="Momentum" title="Versus last month" />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {growth.map(g => (
+              <MovementChip key={g.label} label={g.label} movement={g.m} />
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section className="grid gap-3 mb-6 sm:grid-cols-2 lg:grid-cols-5">
-        <MovementCard label="Views growth" movement={compareMetric(view.views, previousManual?.views)} />
-        <MovementCard label="Reach growth" movement={compareMetric(view.reach, previousManual?.reach)} />
-        <MovementCard label="Engagement growth" movement={compareMetric(view.engagements, previousManual?.engagements)} />
-        <MovementCard label="Profile visit growth" movement={compareMetric(manual.profile_visits, previousManual?.profile_visits)} />
-        <MovementCard label="Follower growth" movement={followerGrowth} />
-      </section>
-
-      <section className="grid gap-4 mb-6 lg:grid-cols-3">
-        <InsightCard title="Traffic" text={`${formatNumber(manual.profile_visits)} profile visits and ${formatNumber(manual.external_link_taps)} external link taps.`} />
-        <InsightCard title="Followers" text={followerGrowth.direction === 'missing' ? 'Previous follower count not available.' : movementText(followerGrowth)} />
-        <InsightCard title="Source" text={MANUAL_SOURCE_LABELS[manual.source_type]} />
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        <StrategyCard title="Top content" text={manual.top_content_notes} />
-        <StrategyCard title="Content type split" text={manual.content_type_split_notes} />
-        <StrategyCard title="General notes" text={manual.general_notes} />
-      </section>
-
-      <p className="mt-6 rounded-lg border border-brand-muted bg-brand-bg/40 px-4 py-3 text-xs leading-relaxed text-brand-primary/80">
-        {MANUAL_SOURCE_NOTE}
-      </p>
+      {notes.length > 0 && (
+        <section className="mb-4 grid gap-4 lg:grid-cols-2">
+          {notes.map(note => (
+            <article key={note.title} className="rounded-2xl bg-report-surface p-6 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)]">
+              <p className="text-[0.7rem] uppercase tracking-[0.18em] text-report-faint">{note.title}</p>
+              <p className="mt-3 text-[0.95rem] leading-relaxed text-report-text whitespace-pre-line">{note.text}</p>
+            </article>
+          ))}
+        </section>
+      )}
     </>
   )
 }
+
+function MiniMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-report-elevated/70 p-4">
+      <p className="text-[0.65rem] uppercase tracking-[0.14em] text-report-faint">{label}</p>
+      <p className="mt-1.5 font-display text-lg font-semibold text-report-text">{value}</p>
+    </div>
+  )
+}
+
+// Legacy reports (pre guided-strategy) — render only the cards that have text.
+// Never shows an empty "no notes" block on the client view.
+function LegacyStrategySection({
+  report,
+  showEmptyStrategy,
+}: {
+  report: ReportWithPosts
+  showEmptyStrategy: boolean
+}) {
+  const cards = [
+    { title: 'Key takeaways', text: report.general_notes },
+    { title: 'What worked', text: report.performance_comments },
+    { title: 'Opportunities', text: report.previous_month_reflection },
+    { title: 'Next month focus', text: report.strategy_next_month },
+    {
+      title: 'Recommended actions',
+      text: [report.content_direction_next_month, report.boost_recommendation].filter(Boolean).join('\n\n') || null,
+    },
+  ].filter(card => card.text && card.text.trim())
+
+  if (cards.length === 0) {
+    // Admin preview gets a gentle hint; the real client view shows nothing.
+    if (!showEmptyStrategy) return null
+    return (
+      <p className="rounded-2xl bg-report-surface p-6 text-sm text-report-faint">
+        Strategy for this month will appear here once it is added in the editor.
+      </p>
+    )
+  }
+
+  return (
+    <section className="mb-4">
+      <SectionHeading eyebrow="Looking ahead" title="Strategy & next steps" />
+      <div className="grid gap-4 lg:grid-cols-2">
+        {cards.map(card => (
+          <article key={card.title} className="rounded-2xl bg-report-surface p-6 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)]">
+            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-report-faint">{card.title}</p>
+            <p className="mt-3 text-[0.95rem] leading-relaxed text-report-text whitespace-pre-line">{card.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ─── client shell + states ────────────────────────────────────────────────────
 
 export function ClientDashboardShell({
   children,
@@ -582,131 +634,39 @@ export function ClientDashboardShell({
   client?: Client | null
 }) {
   return (
-    <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.08),transparent_28rem)]">
-      <header className="border-b border-brand-muted bg-brand-surface/90 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3 sm:px-6">
+    <div className="min-h-screen bg-report-bg font-sans text-report-text bg-[radial-gradient(110%_90%_at_50%_-10%,rgba(111,179,165,0.08),transparent_60%)]">
+      <header className="sticky top-0 z-30 border-b border-report-line/50 bg-report-bg/85 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
           {client ? (
             <div className="flex items-center gap-3">
-              <ClientLogo client={client} boxClassName="h-14 w-14 rounded-xl" padding="p-1.5" />
+              <ClientLogo
+                client={client}
+                boxClassName="h-11 w-11 rounded-xl"
+                padding="p-1.5"
+                frameClassName={LOGO_FRAME}
+                textClassName="text-sm font-semibold text-report-accent"
+              />
               <div className="min-w-0">
-                <p className="truncate text-base font-semibold leading-tight text-white">{client.name}</p>
-                <p className="mt-0.5 truncate text-xs text-brand-primary">Client dashboard</p>
+                <p className="truncate text-sm font-semibold leading-tight text-report-text">{client.name}</p>
+                <p className="mt-0.5 truncate text-xs text-report-faint">Client portal</p>
               </div>
             </div>
           ) : (
-            <BrandMark subtitle="Client dashboard" size="report" />
+            <BrandMark subtitle="Client portal" size="report" />
           )}
           {action}
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
     </div>
   )
 }
 
 export function EmptyReportState({ title, message }: { title: string; message: string }) {
   return (
-    <div className="bg-brand-surface border border-brand-muted rounded-xl p-6 max-w-xl shadow-[0_0_50px_rgba(45,212,191,0.06)] sm:p-10">
-      <h1 className="text-2xl font-semibold text-white mb-3">{title}</h1>
-      <p className="text-base text-brand-primary leading-relaxed sm:text-sm">{message}</p>
+    <div className="max-w-xl rounded-3xl bg-report-surface p-8 shadow-[0_30px_60px_-44px_rgba(0,0,0,0.9)] sm:p-10">
+      <h1 className="font-display text-2xl font-semibold text-report-text">{title}</h1>
+      <p className="mt-3 text-[0.95rem] leading-relaxed text-report-muted">{message}</p>
     </div>
-  )
-}
-
-function ClientReportLogo({ client }: { client?: Client | null }) {
-  if (!client) return <BrandMark subtitle="CG Production House" size="report" />
-
-  return (
-    <ClientLogo
-      client={client}
-      boxClassName="h-24 w-24 rounded-2xl sm:h-28 sm:w-28"
-      padding="p-2.5"
-      textClassName="text-2xl font-semibold text-brand-primary"
-    />
-  )
-}
-
-function movementText(movement: MetricMovement) {
-  if (movement.notAvailable) return 'Not available from this import source.'
-  if (movement.direction === 'missing' || movement.difference === null) {
-    return 'Previous month data not available.'
-  }
-  const diff = `${movement.difference > 0 ? '+' : ''}${formatNumber(movement.difference)}`
-  if (movement.percent === null) return `${diff} vs previous month`
-  return `${diff} (${formatPercent(movement.percent)}) vs previous month`
-}
-
-function MovementCard({ label, movement }: { label: string; movement: MetricMovement }) {
-  const tone = {
-    up: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent',
-    down: 'border-red-300/25 bg-red-400/10 text-red-200',
-    flat: 'border-brand-muted bg-brand-bg/50 text-brand-primary',
-    missing: 'border-brand-muted bg-brand-bg/40 text-brand-primary',
-  }[movement.direction]
-
-  const detail = movement.notAvailable
-    ? 'Not available from this import source.'
-    : movement.direction === 'missing'
-      ? (label.toLowerCase().includes('follower') ? 'Previous follower count not available' : 'Previous month data not available')
-      : movementText(movement)
-
-  return (
-    <article className={`rounded-xl border p-4 ${tone}`}>
-      <p className="text-[11px] uppercase tracking-[0.12em] opacity-80">{label}</p>
-      {movement.notAvailable ? (
-        <p className="mt-3 text-sm font-medium text-brand-primary">Data not available</p>
-      ) : (
-        <p className="mt-3 text-2xl font-semibold text-white">{formatNumber(movement.current)}</p>
-      )}
-      <p className="mt-2 text-xs leading-relaxed">{detail}</p>
-    </article>
-  )
-}
-
-function InsightCard({ title, text }: { title: string; text: string | null }) {
-  return (
-    <article className="rounded-xl border border-brand-muted bg-brand-surface p-5">
-      <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">{title}</p>
-      <p className="text-sm leading-relaxed text-white">{text || 'No notes added yet.'}</p>
-    </article>
-  )
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-brand-surface border border-brand-muted rounded-xl p-5 shadow-[0_0_40px_rgba(45,212,191,0.07)] sm:p-6">
-      <p className="text-xs uppercase tracking-[0.12em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
-      <p className="text-2xl font-semibold text-white mt-4 break-words sm:text-3xl">{value}</p>
-    </div>
-  )
-}
-
-function MiniMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-brand-bg/70 border border-brand-muted rounded-lg p-4">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-brand-primary">{label}</p>
-      <p className="text-lg font-semibold text-white mt-2 sm:text-base">{value}</p>
-    </div>
-  )
-}
-
-function StrategyCard({
-  title,
-  text,
-  showEmpty = true,
-}: {
-  title: string
-  text: string | null
-  showEmpty?: boolean
-}) {
-  if (!text && !showEmpty) return null
-
-  return (
-    <article className="bg-brand-surface border border-brand-muted rounded-xl p-5 sm:p-6">
-      <p className="text-xs uppercase tracking-[0.18em] text-brand-primary mb-3">{title}</p>
-      <p className={`text-base leading-relaxed whitespace-pre-line sm:text-sm ${text ? 'text-white' : 'text-brand-primary'}`}>
-        {text || 'No notes added yet.'}
-      </p>
-    </article>
   )
 }

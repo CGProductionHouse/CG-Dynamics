@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom'
 // step. Rendered at the top of the Reports board (and reusable elsewhere).
 const STEPS: { step: number; title: string; hint: string; to: string }[] = [
   { step: 1, title: 'Import data', hint: 'Upload a CSV or summary', to: '/admin/import' },
-  { step: 2, title: 'Review reports', hint: 'Check the monthly draft', to: '/admin/reports' },
-  { step: 3, title: 'Edit strategy', hint: 'Add the plan & insight', to: '/admin/reports' },
-  { step: 4, title: 'View as client', hint: 'See the final look', to: '/admin/published' },
+  { step: 2, title: 'Review draft', hint: 'Open the monthly draft', to: '/admin/reports' },
+  { step: 3, title: 'Add strategy', hint: 'Insight & action plan', to: '/admin/reports' },
+  { step: 4, title: 'View as client', hint: 'See the final report', to: '/admin/published' },
   { step: 5, title: 'Publish', hint: 'Share with the client', to: '/admin/reports' },
 ]
 

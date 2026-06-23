@@ -59,27 +59,27 @@ function workflowStatus(report: Report, monthComplete: boolean, ready: boolean):
     return {
       label: 'Published',
       className: 'bg-brand-accent/20 text-brand-accent',
-      next: 'Live for the client. Update if the data changes.',
+      next: 'Live for the client. Update any time the data changes.',
     }
   }
   if (!monthComplete) {
     return {
-      label: 'Incomplete month',
-      className: 'bg-amber-400/15 text-amber-300',
-      next: 'Client view unlocks after month-end. You can edit strategy now.',
+      label: 'Internal draft',
+      className: 'bg-brand-muted text-brand-primary',
+      next: 'Saved as internal draft. Client view unlocks after month-end — you can edit strategy now.',
     }
   }
   if (ready) {
     return {
       label: 'Ready to publish',
       className: 'bg-sky-300/15 text-sky-200',
-      next: 'Review, then publish for the client.',
+      next: 'Looks complete. Review, then publish for the client.',
     }
   }
   return {
-    label: 'Internal draft',
-    className: 'bg-brand-muted text-brand-primary',
-    next: 'Add the strategy and action plan to finish.',
+    label: 'Needs strategy',
+    className: 'bg-amber-400/15 text-amber-300',
+    next: 'Add the strategy and action plan, then publish.',
   }
 }
 
@@ -278,7 +278,7 @@ export default function ReportsManagement() {
                         onClick={() => navigate(`/admin/published?reportId=${report.id}`)}
                         className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
                       >
-                        View
+                        View as client
                       </button>
                     ) : (
                       <button
