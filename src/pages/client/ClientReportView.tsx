@@ -5,10 +5,9 @@ import type { Client } from '../../lib/db/clients'
 import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
-import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
-import { readStrategyData, hasStrategyContent } from '../../lib/strategyEngine'
+import { readStrategyData } from '../../lib/strategyEngine'
 import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth } from '../../lib/reportPeriod'
-import type { MasterReportData, MetricMovement, PerformanceMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
+import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORM_LABELS,
   buildMasterReport,
@@ -25,20 +24,15 @@ import {
 type TabKey = 'overview' | Platform
 
 const REPORT_DISCLAIMER =
-  'This report is compiled from each platform’s exported data and our internal reporting. Small differences can appear as platforms finalise their numbers; the original platform dashboards remain the source of record.'
+  'This report is compiled from exported platform data and CG Production House reporting tools. Small differences can occur because platforms continue processing data after export. Source platform dashboards remain the official record.'
 
-// Warm logo frame so the client logo sits on a soft surface rather than the
-// dark teal admin frame.
-const LOGO_FRAME = 'border border-report-line/70 bg-report-elevated'
+const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]'
 
-// ─── data helpers (unchanged behaviour) ──────────────────────────────────────
-
-// Restrict a report's posts to its intended calendar month. Posts with no
-// publish time (or an unparseable one) are kept — they belong to the report.
 function postsForReportMonth(report: ReportWithPosts): ReportStatsPost[] {
   const { start, end } = normalizeReportToCalendarMonth(report)
   const startTime = new Date(`${start}T00:00:00Z`).getTime()
   const endTime = new Date(`${end}T23:59:59Z`).getTime()
+
   return report.posts
     .filter(post => {
       if (!post.publish_time) return true
@@ -49,15 +43,11 @@ function postsForReportMonth(report: ReportWithPosts): ReportStatsPost[] {
     .map(reportPostToStatsPost)
 }
 
-// Client-facing title: only trust a stored title when it names this client,
-// otherwise show the client name so no other client's title ever leaks through.
 function reportClientName(report: ReportWithPosts, client: Client | null): string {
   if (client?.name) return client.name
   const stored = report.report_title?.trim()
   return stored || 'Monthly Performance Report'
 }
-
-// ─── main report ──────────────────────────────────────────────────────────────
 
 export function ClientReportView({
   report,
@@ -78,10 +68,12 @@ export function ClientReportView({
 
   const statsPosts = useMemo<ReportStatsPost[]>(() => postsForReportMonth(report), [report])
   const master = useMemo(() => buildMasterReport(statsPosts, manualMetrics), [statsPosts, manualMetrics])
+
   const previousStatsPosts = useMemo<ReportStatsPost[]>(
     () => (previousReport ? postsForReportMonth(previousReport) : []),
     [previousReport]
   )
+
   const previousMaster = useMemo(
     () =>
       previousReport || previousManualMetrics.length > 0
@@ -89,6 +81,7 @@ export function ClientReportView({
         : null,
     [previousManualMetrics, previousReport, previousStatsPosts]
   )
+
   const movement = useMemo(
     () => buildPerformanceMovement(master, previousMaster, manualMetrics, previousManualMetrics),
     [manualMetrics, master, previousManualMetrics, previousMaster]
@@ -99,33 +92,19 @@ export function ClientReportView({
     { key: 'overview', label: 'Overview' },
     ...availablePlatforms.map(view => ({ key: view.platform as TabKey, label: view.label })),
   ]
+
   const month = monthDisplayLabel(getReportMonthFromPeriod(report))
 
   return (
-    <div className="font-sans text-report-text">
-      <Hero report={report} client={client} month={month} />
+    <div className="relative overflow-hidden font-sans text-slate-50">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[#030706]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_0%,rgba(45,212,191,0.20),transparent_32%),radial-gradient(circle_at_90%_16%,rgba(249,115,22,0.16),transparent_26%),linear-gradient(180deg,#06110f_0%,#030706_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18] bg-[linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
-      {/* Tabs only appear when there is at least one platform to drill into. */}
+      <ReportHero report={report} client={client} month={month} master={master} />
+
       {availablePlatforms.length > 0 && (
-        <div className="mb-8 flex flex-wrap gap-1.5">
-          {tabs.map(item => {
-            const active = tab === item.key
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setTab(item.key)}
-                className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
-                  active
-                    ? 'bg-report-elevated font-medium text-report-text'
-                    : 'text-report-faint hover:text-report-muted'
-                }`}
-              >
-                {item.label}
-              </button>
-            )
-          })}
-        </div>
+        <ReportTabs tabs={tabs} active={tab} onChange={setTab} />
       )}
 
       {tab === 'overview' ? (
@@ -138,45 +117,113 @@ export function ClientReportView({
         />
       )}
 
-      <p className="mx-auto mt-14 max-w-3xl border-t border-report-line/60 pt-6 text-center text-xs leading-relaxed text-report-faint">
+      <p className="mx-auto mt-16 max-w-3xl border-t border-white/10 pt-6 text-center text-xs leading-relaxed text-slate-500">
         {REPORT_DISCLAIMER}
       </p>
     </div>
   )
 }
 
-function Hero({ report, client, month }: { report: ReportWithPosts; client: Client | null; month: string }) {
+function ReportHero({
+  report,
+  client,
+  month,
+  master,
+}: {
+  report: ReportWithPosts
+  client: Client | null
+  month: string
+  master: MasterReportData
+}) {
   return (
-    <section className="relative mb-10 overflow-hidden rounded-[1.75rem] bg-report-elevated px-6 py-10 shadow-[0_30px_70px_-40px_rgba(0,0,0,0.85)] sm:px-10 sm:py-14">
-      {/* soft warm depth — no hard borders */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,179,165,0.16),transparent_55%),radial-gradient(130%_130%_at_100%_120%,rgba(216,180,138,0.12),transparent_55%)]" />
-      <div className="relative flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+    <section className="relative mb-8 overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(45,212,191,0.28),transparent_34%),radial-gradient(circle_at_95%_15%,rgba(249,115,22,0.18),transparent_26%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_45%)]" />
+      <div className="absolute right-6 top-4 hidden text-[8rem] font-black leading-none tracking-[-0.1em] text-white/[0.035] lg:block">
+        CG
+      </div>
+      <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-[#2dd4bf] via-[#14b8a6] to-[#f97316]" />
+
+      <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:p-10">
+        <div className="flex min-w-0 items-center gap-5 sm:gap-6">
           {client ? (
             <ClientLogo
               client={client}
               boxClassName="h-20 w-20 rounded-2xl sm:h-24 sm:w-24"
               padding="p-3"
               frameClassName={LOGO_FRAME}
-              textClassName="text-2xl font-semibold text-report-accent"
+              textClassName="text-2xl font-black text-[#2dd4bf]"
             />
           ) : (
             <BrandMark subtitle="CG Production House" size="report" />
           )}
+
           <div className="min-w-0">
-            <p className="text-[0.7rem] uppercase tracking-[0.28em] text-report-accent">Monthly Performance Report</p>
-            <h1 className="mt-2 font-display text-4xl font-semibold leading-[1.05] text-report-text sm:text-5xl">
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2dd4bf]">
+              Monthly Performance Report
+            </p>
+            <h1 className="mt-3 text-4xl font-black leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl">
               {reportClientName(report, client)}
             </h1>
-            <p className="mt-3 font-display text-lg text-report-muted">{month}</p>
+            <p className="mt-3 text-lg font-semibold text-slate-300">{month}</p>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-400">
+              A clear view of what performed, what mattered, and what comes next.
+            </p>
           </div>
         </div>
-        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-report-surface/70 px-3.5 py-1.5 text-xs font-medium text-report-accent backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-report-accent" />
-          Published
-        </span>
+
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <HeroMiniCard label="Status" value="Published" accent="teal" />
+          <HeroMiniCard label="Report month" value={month} accent="amber" />
+          <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? 'Data unavailable'} accent="teal" />
+        </div>
       </div>
     </section>
+  )
+}
+
+function HeroMiniCard({ label, value, accent }: { label: string; value: string; accent: 'teal' | 'amber' }) {
+  const dot = accent === 'amber' ? 'bg-[#f97316]' : 'bg-[#2dd4bf]'
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 backdrop-blur">
+      <div className="flex items-center gap-2">
+        <span className={`h-2 w-2 rounded-full ${dot}`} />
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-slate-500">{label}</p>
+      </div>
+      <p className="mt-2 text-base font-black text-white">{value}</p>
+    </div>
+  )
+}
+
+function ReportTabs({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: { key: TabKey; label: string }[]
+  active: TabKey
+  onChange: (tab: TabKey) => void
+}) {
+  return (
+    <div className="mb-10 flex w-fit flex-wrap gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+      {tabs.map(item => {
+        const isActive = active === item.key
+        return (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => onChange(item.key)}
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${
+              isActive
+                ? 'bg-white text-[#06110f] shadow-lg'
+                : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+            }`}
+          >
+            {item.label}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -188,11 +235,10 @@ function OverviewTab({
 }: {
   report: ReportWithPosts
   master: MasterReportData
-  movement: PerformanceMovement
+  movement: ReturnType<typeof buildPerformanceMovement>
   showEmptyStrategy: boolean
 }) {
   const strategy = readStrategyData(report.strategy_data)
-  const hasStrategy = hasStrategyContent(strategy)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
 
   const growthItems = [
@@ -204,30 +250,30 @@ function OverviewTab({
   return (
     <>
       <SectionHeading eyebrow="Executive summary" title="The month at a glance" />
-      <section className="mb-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <MetricStat label="Views" value={master.totalViews} />
-        <MetricStat label="Reach" value={master.totalReach} />
-        <MetricStat label="Engagements" value={master.totalEngagements} />
-        <MetricStat label="Best platform" text={master.bestPlatform?.label ?? null} />
+      <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricTile label="Views" value={master.totalViews} accent="teal" />
+        <MetricTile label="Reach" value={master.totalReach} accent="teal" />
+        <MetricTile label="Engagements" value={master.totalEngagements} accent="teal" />
+        <MetricTile label="Best platform" value={master.bestPlatform?.label ?? null} accent="amber" />
       </section>
 
       {growthItems.length > 0 && (
         <section className="mb-12">
-          <SectionHeading eyebrow="Momentum" title="How we moved versus last month" />
-          <div className="grid gap-3 sm:grid-cols-3">
+          <SectionHeading eyebrow="Momentum" title="How the numbers moved" />
+          <div className="grid gap-4 sm:grid-cols-3">
             {growthItems.map(item => (
-              <MovementChip key={item.label} label={item.label} movement={item.m} />
+              <MovementCard key={item.label} label={item.label} movement={item.m} />
             ))}
           </div>
         </section>
       )}
 
-      <TopContentSection master={master} strategy={strategy} />
+      <FeaturedContent master={master} strategy={strategy} />
 
       {platformsWithData.length > 0 && (
         <section className="mb-12">
-          <SectionHeading eyebrow="Channels" title="How each platform performed" />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <SectionHeading eyebrow="Platform performance" title="How each channel performed" />
+          <div className="grid gap-4 lg:grid-cols-3">
             {platformsWithData.map(view => (
               <PlatformSummaryCard key={view.platform} view={view} />
             ))}
@@ -235,68 +281,70 @@ function OverviewTab({
         </section>
       )}
 
-      {hasStrategy ? (
-        <section className="mb-4">
-          <SectionHeading eyebrow="Looking ahead" title="Strategy & action plan" />
-          <GuidedStrategyView data={strategy} hideTopContent variant="report" />
-        </section>
-      ) : (
-        <LegacyStrategySection report={report} showEmptyStrategy={showEmptyStrategy} />
-      )}
+      <StrategyBlocks report={report} strategy={strategy} showEmptyStrategy={showEmptyStrategy} />
     </>
   )
 }
 
-// ─── shared presentation pieces ───────────────────────────────────────────────
-
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="mb-5">
-      <p className="text-[0.7rem] uppercase tracking-[0.22em] text-report-accent">{eyebrow}</p>
-      <h2 className="mt-2 font-display text-2xl font-semibold text-report-text sm:text-[1.7rem]">{title}</h2>
+      <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">{eyebrow}</p>
+      <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white sm:text-4xl">{title}</h2>
     </div>
   )
 }
 
-// One premium metric. `value` is a raw number (a genuine 0 reads as no useful
-// figure, so it shows softly); `text` is for label-style values like a platform.
-function MetricStat({ label, value, text }: { label: string; value?: number; text?: string | null }) {
-  const hasNumber = typeof value === 'number' && value > 0
-  const display = text != null ? text : hasNumber ? formatNumber(value as number) : null
+function MetricTile({
+  label,
+  value,
+  accent,
+}: {
+  label: string
+  value: number | string | null | undefined
+  accent: 'teal' | 'amber'
+}) {
+  const accentClass = accent === 'amber' ? 'from-[#f97316] to-[#f59e0b]' : 'from-[#2dd4bf] to-[#14b8a6]'
+  const display =
+    typeof value === 'number'
+      ? formatNumber(value)
+      : typeof value === 'string' && value.trim()
+        ? value
+        : 'Data unavailable'
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-report-surface px-5 py-6 shadow-[0_24px_50px_-36px_rgba(0,0,0,0.9)] sm:px-6 sm:py-7">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-report-accent/40 to-transparent" />
-      <p className="text-[0.7rem] uppercase tracking-[0.16em] text-report-faint">{label}</p>
-      {display ? (
-        <p className="mt-3 font-display text-3xl font-semibold leading-none text-report-text sm:text-4xl">{display}</p>
-      ) : (
-        <p className="mt-3 text-sm font-medium text-report-faint">Data unavailable</p>
-      )}
+    <div className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.95)] backdrop-blur sm:p-6">
+      <div className={`mb-5 h-1 w-12 rounded-full bg-gradient-to-r ${accentClass}`} />
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">{label}</p>
+      <p className="mt-3 text-3xl font-black leading-none tracking-[-0.04em] text-white sm:text-4xl">
+        {display}
+      </p>
+      <div className="pointer-events-none absolute -bottom-14 -right-14 h-32 w-32 rounded-full bg-[#2dd4bf]/0 blur-3xl transition group-hover:bg-[#2dd4bf]/10" />
     </div>
   )
 }
 
-function MovementChip({ label, movement }: { label: string; movement: MetricMovement }) {
-  const up = (movement.difference ?? 0) > 0
-  const down = (movement.difference ?? 0) < 0
-  const arrow = up ? '↑' : down ? '↓' : '→'
-  const tone = up ? 'text-report-accent' : down ? 'text-[#d8a07a]' : 'text-report-faint'
+function MovementCard({ label, movement }: { label: string; movement: MetricMovement }) {
+  const difference = movement.difference ?? 0
+  const up = difference > 0
+  const down = difference < 0
+  const tone = up ? 'text-[#2dd4bf]' : down ? 'text-[#f97316]' : 'text-slate-400'
+  const prefix = up ? '+' : ''
   const detail =
     movement.percent !== null
-      ? `${arrow} ${formatPercent(movement.percent)} vs last month`
-      : `${arrow} ${movement.difference! > 0 ? '+' : ''}${formatNumber(movement.difference!)} vs last month`
+      ? `${up ? '+' : ''}${formatPercent(movement.percent)} vs last month`
+      : `${prefix}${formatNumber(difference)} vs last month`
 
   return (
-    <div className="rounded-2xl bg-report-surface px-5 py-5 shadow-[0_24px_50px_-36px_rgba(0,0,0,0.9)]">
-      <p className="text-[0.7rem] uppercase tracking-[0.16em] text-report-faint">{label}</p>
-      <p className="mt-2.5 font-display text-2xl font-semibold leading-none text-report-text">{formatNumber(movement.current)}</p>
-      <p className={`mt-2 text-xs font-medium ${tone}`}>{detail}</p>
+    <div className="rounded-3xl border border-white/[0.08] bg-[#0b1715]/90 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">{label}</p>
+      <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">{formatNumber(movement.current)}</p>
+      <p className={`mt-2 text-sm font-bold ${tone}`}>{detail}</p>
     </div>
   )
 }
 
-function TopContentSection({
+function FeaturedContent({
   master,
   strategy,
 }: {
@@ -308,9 +356,6 @@ function TopContentSection({
 
   const caption = (tc.autoCaption && tc.autoCaption.trim()) || (best ? shortCaption(best.caption) : null)
   const coverImage = tc.coverImageUrl.trim()
-  const hasAnything = Boolean(caption || coverImage || tc.whyItWorked.length > 0 || tc.whatThisTellsUs.trim())
-  if (!hasAnything) return null
-
   const contentType = tc.contentType.trim() || (best?.post_type ? displayContentType(best.post_type) : null)
   const platformLabel =
     (best?.platform && PLATFORM_LABELS[best.platform]) ||
@@ -318,59 +363,72 @@ function TopContentSection({
     null
   const metricValue = best ? best.engagements : typeof tc.autoMetricValue === 'number' ? tc.autoMetricValue : null
 
+  const hasAnything = Boolean(caption || coverImage || tc.whyItWorked.length > 0 || tc.whatThisTellsUs.trim())
+  if (!hasAnything) return null
+
   return (
     <section className="mb-12">
-      <SectionHeading eyebrow="Top content" title="The standout this month" />
-      <div className="overflow-hidden rounded-3xl bg-report-surface shadow-[0_30px_60px_-44px_rgba(0,0,0,0.9)]">
-        <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="relative min-h-[14rem] bg-[radial-gradient(120%_120%_at_20%_10%,rgba(111,179,165,0.28),transparent_60%),radial-gradient(120%_120%_at_100%_100%,rgba(216,180,138,0.2),transparent_55%)]">
+      <SectionHeading eyebrow="Featured content" title="What performed best" />
+
+      <div className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#071311] shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)]">
+        <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="relative min-h-[18rem] overflow-hidden bg-[#030706]">
             {coverImage ? (
               <img
                 src={coverImage}
                 alt="Top content"
-                className="h-full max-h-80 w-full object-cover"
+                className="h-full max-h-[28rem] w-full object-cover"
                 onError={e => {
                   ;(e.currentTarget as HTMLImageElement).style.display = 'none'
                 }}
               />
             ) : (
-              <div className="flex h-full min-h-[14rem] flex-col items-center justify-center gap-3 p-8 text-center">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-report-elevated/80 text-report-accent">
-                  <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16l5-5 4 4 3-3 6 6M4 6h16v12H4z" />
-                  </svg>
-                </span>
-                <p className="text-sm font-medium text-report-muted">{contentType ?? 'Featured content'}</p>
-              </div>
+              <DesignedPlaceholder contentType={contentType ?? 'Top content'} />
             )}
           </div>
-          <div className="p-7 sm:p-9">
-            <div className="flex flex-wrap gap-2">
-              {contentType && <SoftPill tone="accent">{contentType}</SoftPill>}
-              {platformLabel && <SoftPill>{platformLabel}</SoftPill>}
-            </div>
-            {caption && (
-              <h3 className="mt-4 font-display text-xl font-semibold leading-snug text-report-text sm:text-2xl">{caption}</h3>
-            )}
-            {metricValue != null && metricValue > 0 && (
-              <p className="mt-5 flex items-baseline gap-2">
-                <span className="font-display text-3xl font-semibold text-report-text">{formatNumber(metricValue)}</span>
-                <span className="text-sm text-report-muted">engagements</span>
-              </p>
-            )}
-            {tc.whyItWorked.length > 0 && (
-              <div className="mt-6">
-                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-report-faint">Why it worked</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {tc.whyItWorked.map((item, index) => (
-                    <SoftPill key={index}>{item}</SoftPill>
-                  ))}
-                </div>
+
+          <div className="relative overflow-hidden p-7 sm:p-9">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.10),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(45,212,191,0.12),transparent_36%)]" />
+            <div className="relative">
+              <div className="flex flex-wrap gap-2">
+                {contentType && <Pill tone="teal">{contentType}</Pill>}
+                {platformLabel && <Pill>{platformLabel}</Pill>}
               </div>
-            )}
-            {tc.whatThisTellsUs.trim() && (
-              <p className="mt-6 text-[0.95rem] leading-relaxed text-report-muted whitespace-pre-line">{tc.whatThisTellsUs}</p>
-            )}
+
+              {caption && (
+                <h3 className="mt-5 text-2xl font-black leading-tight tracking-[-0.035em] text-white sm:text-3xl">
+                  {caption}
+                </h3>
+              )}
+
+              {metricValue != null && metricValue > 0 && (
+                <div className="mt-7 inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
+                  <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
+                    {formatNumber(metricValue)}
+                  </span>
+                  <span className="pb-1 text-sm font-bold text-slate-400">engagements</span>
+                </div>
+              )}
+
+              {tc.whyItWorked.length > 0 && (
+                <div className="mt-7">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Why it worked</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {tc.whyItWorked.map((item, index) => (
+                      <Pill key={index} tone="amber">
+                        {item}
+                      </Pill>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tc.whatThisTellsUs.trim() && (
+                <p className="mt-7 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">
+                  {tc.whatThisTellsUs}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -378,27 +436,55 @@ function TopContentSection({
   )
 }
 
-function SoftPill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'accent' }) {
+function DesignedPlaceholder({ contentType }: { contentType: string }) {
+  return (
+    <div className="relative flex h-full min-h-[18rem] items-center justify-center overflow-hidden p-8">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(45,212,191,0.38),transparent_36%),radial-gradient(circle_at_80%_90%,rgba(249,115,22,0.32),transparent_34%),linear-gradient(135deg,#06110f,#030706)]" />
+      <div className="absolute -left-8 top-8 h-40 w-40 rounded-full border border-white/10" />
+      <div className="absolute bottom-6 right-6 text-7xl font-black tracking-[-0.08em] text-white/[0.05]">
+        TOP
+      </div>
+      <div className="relative text-center">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.06] text-[#2dd4bf] shadow-2xl">
+          <svg className="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 17h16M7 4v16M17 4v16" />
+          </svg>
+        </div>
+        <p className="mt-4 text-xs font-black uppercase tracking-[0.26em] text-slate-400">{contentType}</p>
+      </div>
+    </div>
+  )
+}
+
+function Pill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'teal' | 'amber' }) {
   const classes =
-    tone === 'accent'
-      ? 'bg-report-accent/15 text-report-accent'
-      : 'bg-report-elevated text-report-muted'
-  return <span className={`rounded-full px-3 py-1 text-xs font-medium ${classes}`}>{children}</span>
+    tone === 'teal'
+      ? 'border-[#2dd4bf]/20 bg-[#2dd4bf]/10 text-[#2dd4bf]'
+      : tone === 'amber'
+        ? 'border-[#f97316]/20 bg-[#f97316]/10 text-[#fbbf24]'
+        : 'border-white/10 bg-white/[0.06] text-slate-300'
+
+  return <span className={`rounded-full border px-3 py-1 text-xs font-bold ${classes}`}>{children}</span>
 }
 
 function PlatformSummaryCard({ view }: { view: PlatformView }) {
   return (
-    <article className="rounded-2xl bg-report-surface p-5 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)] sm:p-6">
-      <p className="font-display text-lg font-semibold text-report-text">{view.label}</p>
-      <dl className="mt-4 space-y-0">
+    <article className="group rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] transition hover:border-[#2dd4bf]/25 hover:bg-white/[0.06]">
+      <div className="mb-5 flex items-center justify-between">
+        <h3 className="text-xl font-black tracking-[-0.03em] text-white">{view.label}</h3>
+        <span className="h-2.5 w-2.5 rounded-full bg-[#2dd4bf] shadow-[0_0_20px_rgba(45,212,191,0.7)]" />
+      </div>
+
+      <dl className="space-y-0">
         <PlatformRow label="Reach" value={formatNumber(view.reach)} />
         <PlatformRow label="Views" value={formatNumber(view.views)} />
         <PlatformRow label="Engagements" value={formatNumber(view.engagements)} />
         {view.source === 'posts' && <PlatformRow label="Posts" value={formatNumber(view.postCount)} />}
       </dl>
+
       {view.bestPost?.caption && (
-        <p className="mt-4 line-clamp-2 text-xs leading-relaxed text-report-faint">
-          <span className="text-report-muted">Top post · </span>
+        <p className="mt-5 line-clamp-2 text-sm leading-relaxed text-slate-400">
+          <span className="font-bold text-slate-200">Top: </span>
           {shortCaption(view.bestPost.caption, 'Post')}
         </p>
       )}
@@ -408,14 +494,150 @@ function PlatformSummaryCard({ view }: { view: PlatformView }) {
 
 function PlatformRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-report-line/50 py-2 last:border-0">
-      <dt className="text-sm text-report-muted">{label}</dt>
-      <dd className="text-sm font-semibold text-report-text">{value}</dd>
+    <div className="flex items-center justify-between border-b border-white/[0.07] py-2.5 last:border-0">
+      <dt className="text-sm text-slate-400">{label}</dt>
+      <dd className="text-sm font-black text-white">{value}</dd>
     </div>
   )
 }
 
-// ─── platform drill-down tabs ─────────────────────────────────────────────────
+function StrategyBlocks({
+  report,
+  strategy,
+  showEmptyStrategy,
+}: {
+  report: ReportWithPosts
+  strategy: ReturnType<typeof readStrategyData>
+  showEmptyStrategy: boolean
+}) {
+  const cards = buildStrategyCards(report, strategy)
+
+  if (cards.length === 0) {
+    if (!showEmptyStrategy) return null
+
+    return (
+      <section className="mb-4">
+        <SectionHeading eyebrow="Strategy" title="Strategy will appear here" />
+        <p className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 text-sm text-slate-400">
+          Add strategy in the report editor to complete the client-facing story.
+        </p>
+      </section>
+    )
+  }
+
+  return (
+    <section className="mb-4">
+      <SectionHeading eyebrow="Strategy" title="What we do next" />
+      <div className="grid gap-4 lg:grid-cols-2">
+        {cards.map(card => (
+          <article
+            key={card.title}
+            className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.035))] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-7"
+          >
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">{card.label}</p>
+            <h3 className="mt-3 text-xl font-black tracking-[-0.03em] text-white">{card.title}</h3>
+            <p className="mt-4 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">{card.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function buildStrategyCards(report: ReportWithPosts, strategy: ReturnType<typeof readStrategyData>) {
+  const record = strategy as unknown as Record<string, unknown>
+
+  const guidedCards = [
+    {
+      label: 'Direction',
+      title: 'Client direction',
+      text: textFromKeys(record, ['clientDirection', 'direction', 'monthlyDirection']),
+    },
+    {
+      label: 'Focus',
+      title: 'Strategy going forward',
+      text: textFromKeys(record, ['strategyGoingForward', 'strategyNextMonth', 'strategy', 'nextMonthFocus']),
+    },
+    {
+      label: 'Execution',
+      title: 'Action plan',
+      text: textFromKeys(record, ['actionPlan', 'recommendedActions', 'actions', 'contentPlan']),
+    },
+    {
+      label: 'Client input',
+      title: 'Client actions required',
+      text: textFromKeys(record, ['clientActionsRequired', 'clientActions', 'clientNeeds', 'requirements']),
+    },
+    {
+      label: 'Campaigns',
+      title: 'Campaign recommendation',
+      text: textFromKeys(record, ['campaignRecommendation', 'boostRecommendation', 'paidMediaRecommendation', 'campaign']),
+    },
+  ]
+
+  const legacyCards = [
+    { label: 'Insight', title: 'Key takeaways', text: report.general_notes },
+    { label: 'Performance', title: 'What worked', text: report.performance_comments },
+    { label: 'Opportunity', title: 'Opportunities', text: report.previous_month_reflection },
+    { label: 'Focus', title: 'Next month focus', text: report.strategy_next_month },
+    {
+      label: 'Action',
+      title: 'Recommended actions',
+      text: [report.content_direction_next_month, report.boost_recommendation].filter(Boolean).join('\n\n') || null,
+    },
+  ]
+
+  return [...guidedCards, ...legacyCards]
+    .map(card => ({ ...card, text: cleanText(card.text) }))
+    .filter(card => card.text)
+}
+
+function textFromKeys(record: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = record[key]
+    const formatted = formatStrategyValue(value)
+    if (formatted) return formatted
+  }
+  return null
+}
+
+function formatStrategyValue(value: unknown): string | null {
+  if (typeof value === 'string') return value.trim() || null
+
+  if (Array.isArray(value)) {
+    const parts = value.map(item => formatStrategyValue(item)).filter(Boolean)
+    return parts.length > 0 ? parts.join('\n') : null
+  }
+
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([key, item]) => {
+        const formatted = formatStrategyValue(item)
+        if (!formatted) return null
+        return `${humanLabel(key)}: ${formatted}`
+      })
+      .filter(Boolean)
+
+    return entries.length > 0 ? entries.join('\n') : null
+  }
+
+  return null
+}
+
+function cleanText(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
+function humanLabel(key: string) {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^./, char => char.toUpperCase())
+}
 
 function PlatformTab({
   view,
@@ -426,14 +648,7 @@ function PlatformTab({
   previousView: PlatformView | null
   previousManual: ManualPlatformMetric | null
 }) {
-  if (view.source === 'none') {
-    return (
-      <div className="rounded-2xl bg-report-surface p-8 sm:p-10">
-        <h2 className="font-display text-xl font-semibold text-report-text">{view.label}</h2>
-        <p className="mt-2 text-sm text-report-muted">No data for this platform this month.</p>
-      </div>
-    )
-  }
+  if (view.source === 'none') return null
   if (view.source === 'manual') return <ManualPlatformTab view={view} previousManual={previousManual} />
   return <PostsPlatformTab view={view} previousView={previousView} />
 }
@@ -447,20 +662,20 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
 
   return (
     <>
-      <SectionHeading eyebrow={view.label} title={`${view.label} at a glance`} />
-      <section className="mb-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <MetricStat label="Reach" value={view.reach} />
-        <MetricStat label="Views" value={view.views} />
-        <MetricStat label="Engagements" value={view.engagements} />
-        <MetricStat label="Posts" value={view.postCount} />
+      <SectionHeading eyebrow={view.label} title={`${view.label} performance`} />
+      <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricTile label="Reach" value={view.reach} accent="teal" />
+        <MetricTile label="Views" value={view.views} accent="teal" />
+        <MetricTile label="Engagements" value={view.engagements} accent="teal" />
+        <MetricTile label="Posts" value={view.postCount} accent="amber" />
       </section>
 
       {growth.length > 0 && (
         <section className="mb-12">
           <SectionHeading eyebrow="Momentum" title="Versus last month" />
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3">
             {growth.map(g => (
-              <MovementChip key={g.label} label={g.label} movement={g.m} />
+              <MovementCard key={g.label} label={g.label} movement={g.m} />
             ))}
           </div>
         </section>
@@ -468,18 +683,20 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
 
       {view.bestPost && (
         <section className="mb-12">
-          <SectionHeading eyebrow="Top content" title={`Best ${view.label} post`} />
-          <div className="rounded-3xl bg-report-surface p-7 shadow-[0_30px_60px_-44px_rgba(0,0,0,0.9)] sm:p-9">
+          <SectionHeading eyebrow="Top post" title={`Best ${view.label} content`} />
+          <div className="rounded-[2rem] border border-white/[0.08] bg-[#071311] p-7 shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)] sm:p-9">
             <div className="flex flex-wrap gap-2">
               {view.bestPost.post_type && (
-                <SoftPill tone="accent">{displayContentType(view.bestPost.post_type) ?? view.bestPost.post_type}</SoftPill>
+                <Pill tone="teal">{displayContentType(view.bestPost.post_type) ?? view.bestPost.post_type}</Pill>
               )}
-              <SoftPill>{formatDate(view.bestPost.publish_time)}</SoftPill>
+              <Pill>{formatDate(view.bestPost.publish_time)}</Pill>
             </div>
-            <h3 className="mt-4 font-display text-xl font-semibold leading-snug text-report-text sm:text-2xl">
+
+            <h3 className="mt-5 text-2xl font-black leading-tight tracking-[-0.035em] text-white sm:text-3xl">
               {shortCaption(view.bestPost.caption)}
             </h3>
-            <div className="mt-6 grid grid-cols-3 gap-3">
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
               <MiniMetric label="Reach" value={formatNumber(view.bestPost.reach)} />
               <MiniMetric label="Views" value={formatNumber(view.bestPost.impressions)} />
               <MiniMetric label="Engagements" value={formatNumber(view.bestPost.engagements)} />
@@ -490,19 +707,26 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
 
       {view.topPosts.length > 0 && (
         <section className="mb-4">
-          <SectionHeading eyebrow="Highlights" title={`Top ${view.label} posts`} />
+          <SectionHeading eyebrow="Top 3" title={`Top ${view.label} posts`} />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {view.topPosts.map((post, index) => (
-              <article key={post.id} className="rounded-2xl bg-report-surface p-5 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)]">
+              <article
+                key={post.id}
+                className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]"
+              >
                 <div className="flex items-center justify-between">
-                  <span className="font-display text-lg font-semibold text-report-accent">#{index + 1}</span>
-                  <span className="text-[11px] text-report-faint">{formatDate(post.publish_time)}</span>
+                  <span className="text-2xl font-black text-[#2dd4bf]">#{index + 1}</span>
+                  <span className="text-xs text-slate-500">{formatDate(post.publish_time)}</span>
                 </div>
-                <p className="mt-3 text-sm leading-snug text-report-text">{shortCaption(post.caption, 'Post')}</p>
+                <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white">
+                  {shortCaption(post.caption, 'Post')}
+                </p>
                 {post.post_type && (
-                  <p className="mt-2 text-xs text-report-faint">{displayContentType(post.post_type) ?? post.post_type}</p>
+                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                    {displayContentType(post.post_type) ?? post.post_type}
+                  </p>
                 )}
-                <p className="mt-3 text-sm text-report-muted">{formatNumber(post.engagements)} engagements</p>
+                <p className="mt-4 text-sm font-bold text-slate-300">{formatNumber(post.engagements)} engagements</p>
               </article>
             ))}
           </div>
@@ -535,20 +759,20 @@ function ManualPlatformTab({
 
   return (
     <>
-      <SectionHeading eyebrow={view.label} title={`${view.label} at a glance`} />
-      <section className="mb-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <MetricStat label="Reach" value={view.reach} />
-        <MetricStat label="Views" value={view.views} />
-        <MetricStat label="Engagements" value={view.engagements} />
-        <MetricStat label="Followers" value={manual.followers} />
+      <SectionHeading eyebrow={view.label} title={`${view.label} performance`} />
+      <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricTile label="Reach" value={view.reach} accent="teal" />
+        <MetricTile label="Views" value={view.views} accent="teal" />
+        <MetricTile label="Engagements" value={view.engagements} accent="teal" />
+        <MetricTile label="Followers" value={manual.followers} accent="amber" />
       </section>
 
       {growth.length > 0 && (
         <section className="mb-12">
           <SectionHeading eyebrow="Momentum" title="Versus last month" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {growth.map(g => (
-              <MovementChip key={g.label} label={g.label} movement={g.m} />
+              <MovementCard key={g.label} label={g.label} movement={g.m} />
             ))}
           </div>
         </section>
@@ -557,9 +781,12 @@ function ManualPlatformTab({
       {notes.length > 0 && (
         <section className="mb-4 grid gap-4 lg:grid-cols-2">
           {notes.map(note => (
-            <article key={note.title} className="rounded-2xl bg-report-surface p-6 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)]">
-              <p className="text-[0.7rem] uppercase tracking-[0.18em] text-report-faint">{note.title}</p>
-              <p className="mt-3 text-[0.95rem] leading-relaxed text-report-text whitespace-pre-line">{note.text}</p>
+            <article
+              key={note.title}
+              className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]"
+            >
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">{note.title}</p>
+              <p className="mt-4 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">{note.text}</p>
             </article>
           ))}
         </section>
@@ -570,59 +797,12 @@ function ManualPlatformTab({
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-report-elevated/70 p-4">
-      <p className="text-[0.65rem] uppercase tracking-[0.14em] text-report-faint">{label}</p>
-      <p className="mt-1.5 font-display text-lg font-semibold text-report-text">{value}</p>
+    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.05] p-4">
+      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">{label}</p>
+      <p className="mt-2 text-xl font-black text-white">{value}</p>
     </div>
   )
 }
-
-// Legacy reports (pre guided-strategy) — render only the cards that have text.
-// Never shows an empty "no notes" block on the client view.
-function LegacyStrategySection({
-  report,
-  showEmptyStrategy,
-}: {
-  report: ReportWithPosts
-  showEmptyStrategy: boolean
-}) {
-  const cards = [
-    { title: 'Key takeaways', text: report.general_notes },
-    { title: 'What worked', text: report.performance_comments },
-    { title: 'Opportunities', text: report.previous_month_reflection },
-    { title: 'Next month focus', text: report.strategy_next_month },
-    {
-      title: 'Recommended actions',
-      text: [report.content_direction_next_month, report.boost_recommendation].filter(Boolean).join('\n\n') || null,
-    },
-  ].filter(card => card.text && card.text.trim())
-
-  if (cards.length === 0) {
-    // Admin preview gets a gentle hint; the real client view shows nothing.
-    if (!showEmptyStrategy) return null
-    return (
-      <p className="rounded-2xl bg-report-surface p-6 text-sm text-report-faint">
-        Strategy for this month will appear here once it is added in the editor.
-      </p>
-    )
-  }
-
-  return (
-    <section className="mb-4">
-      <SectionHeading eyebrow="Looking ahead" title="Strategy & next steps" />
-      <div className="grid gap-4 lg:grid-cols-2">
-        {cards.map(card => (
-          <article key={card.title} className="rounded-2xl bg-report-surface p-6 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)]">
-            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-report-faint">{card.title}</p>
-            <p className="mt-3 text-[0.95rem] leading-relaxed text-report-text whitespace-pre-line">{card.text}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-// ─── client shell + states ────────────────────────────────────────────────────
 
 export function ClientDashboardShell({
   children,
@@ -634,9 +814,11 @@ export function ClientDashboardShell({
   client?: Client | null
 }) {
   return (
-    <div className="min-h-screen bg-report-bg font-sans text-report-text bg-[radial-gradient(110%_90%_at_50%_-10%,rgba(111,179,165,0.08),transparent_60%)]">
-      <header className="sticky top-0 z-30 border-b border-report-line/50 bg-report-bg/85 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+    <div className="min-h-screen bg-[#030706] font-sans text-slate-50">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(249,115,22,0.12),transparent_30%)]" />
+
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#030706]/88 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
           {client ? (
             <div className="flex items-center gap-3">
               <ClientLogo
@@ -644,29 +826,33 @@ export function ClientDashboardShell({
                 boxClassName="h-11 w-11 rounded-xl"
                 padding="p-1.5"
                 frameClassName={LOGO_FRAME}
-                textClassName="text-sm font-semibold text-report-accent"
+                textClassName="text-sm font-black text-[#2dd4bf]"
               />
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold leading-tight text-report-text">{client.name}</p>
-                <p className="mt-0.5 truncate text-xs text-report-faint">Client portal</p>
+                <p className="truncate text-sm font-black leading-tight text-white">{client.name}</p>
+                <p className="mt-0.5 truncate text-xs text-slate-500">Client portal</p>
               </div>
             </div>
           ) : (
             <BrandMark subtitle="Client portal" size="report" />
           )}
+
           {action}
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+
+      <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        {children}
+      </main>
     </div>
   )
 }
 
 export function EmptyReportState({ title, message }: { title: string; message: string }) {
   return (
-    <div className="max-w-xl rounded-3xl bg-report-surface p-8 shadow-[0_30px_60px_-44px_rgba(0,0,0,0.9)] sm:p-10">
-      <h1 className="font-display text-2xl font-semibold text-report-text">{title}</h1>
-      <p className="mt-3 text-[0.95rem] leading-relaxed text-report-muted">{message}</p>
+    <div className="max-w-xl rounded-[2rem] border border-white/[0.08] bg-white/[0.045] p-8 shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)] sm:p-10">
+      <h1 className="text-3xl font-black tracking-[-0.04em] text-white">{title}</h1>
+      <p className="mt-4 text-[0.95rem] leading-relaxed text-slate-400">{message}</p>
     </div>
   )
 }
