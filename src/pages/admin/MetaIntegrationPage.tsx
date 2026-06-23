@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { listClients, type Client } from '../../lib/db/clients'
@@ -44,6 +44,82 @@ interface LinkedAsset {
   ad_account_id: string | null
   ad_account_name: string | null
   is_active: boolean
+}
+
+/* ---------- SearchablePicker ---------- */
+interface SearchablePickerProps {
+  value: string
+  onChange: (value: string) => void
+  options: { value: string; label: string }[]
+  placeholder: string
+  emptyLabel?: string
+  disabled?: boolean
+}
+
+function SearchablePicker({ value, onChange, options, placeholder, emptyLabel, disabled }: SearchablePickerProps) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  const selectedLabel = options.find(o => o.value === value)?.label ?? ''
+
+  const filtered = useMemo(() => {
+    if (!query) return options
+    const q = query.toLowerCase()
+    return options.filter(o => o.label.toLowerCase().includes(q))
+  }, [options, query])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <input
+        type="text"
+        value={open ? query : selectedLabel}
+        onChange={e => { setQuery(e.target.value); setOpen(true) }}
+        onFocus={() => { setOpen(true); setQuery('') }}
+        onKeyDown={e => { if (e.key === 'Escape') { setOpen(false); setQuery('') } }}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder:text-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => { onChange(''); setQuery('') }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-brand-primary/50 hover:text-white"
+        >
+          ✕
+        </button>
+      )}
+      {open && (
+        <ul className="absolute left-0 right-0 top-full z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-brand-muted bg-brand-bg py-1 shadow-xl">
+          {filtered.length === 0
+            ? <li className="px-3 py-2 text-sm text-brand-primary/60">{emptyLabel || 'No options'}</li>
+            : filtered.map(o => (
+                <li
+                  key={o.value}
+                  onClick={() => { onChange(o.value); setOpen(false); setQuery('') }}
+                  className={`cursor-pointer px-3 py-2 text-sm transition-colors hover:bg-brand-accent/15 ${
+                    o.value === value ? 'text-brand-accent' : 'text-white'
+                  }`}
+                >
+                  {o.label}
+                </li>
+              ))}
+        </ul>
+      )}
+    </div>
+  )
 }
 
 export default function MetaIntegrationPage() {
@@ -160,10 +236,36 @@ export default function MetaIntegrationPage() {
     }
   }
 
-  // Derive filtered Instagram options from selected page.
-  const filteredIgOptions = selectedPageId
+  // Sorted and derived options.
+  const sortedClientOptions = useMemo(
+    () => clients.map(c => ({ value: c.id, label: c.name })).sort((a, b) => a.label.localeCompare(b.label)),
+    [clients],
+  )
+  const sortedPageOptions = useMemo(
+    () => pages.map(p => ({ value: p.id, label: p.category ? `${p.name} (${p.category})` : p.name })).sort((a, b) => a.label.localeCompare(b.label)),
+    [pages],
+  )
+  const filteredIgAccounts = selectedPageId
     ? igAccounts.filter(a => a.facebookPageId === selectedPageId)
     : igAccounts
+  const sortedIgOptions = useMemo(
+    () =>
+      filteredIgAccounts
+        .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [filteredIgAccounts],
+  )
+  const sortedAdOptions = useMemo(
+    () => adAccounts.map(a => ({ value: a.id, label: a.name })).sort((a, b) => a.label.localeCompare(b.label)),
+    [adAccounts],
+  )
+
+  // Auto-select Instagram when a Facebook Page is chosen and only one IG option.
+  useEffect(() => {
+    if (sortedIgOptions.length === 1 && (selectedIgId === '' || !selectedPageId)) {
+      setSelectedIgId(sortedIgOptions[0].value)
+    }
+  }, [sortedIgOptions, selectedIgId, selectedPageId])
 
   // Map selected IDs to display names for saving.
   const selectedPage = pages.find(p => p.id === selectedPageId)
@@ -337,75 +439,51 @@ export default function MetaIntegrationPage() {
 
             {assetsLoaded && (
               <div className="mt-4 space-y-4">
-                {/* Client dropdown */}
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-                  <span className="w-32 text-sm text-brand-primary">CG Client</span>
-                  <select
+                {/* Client picker */}
+                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                  <span className="text-sm text-brand-primary">CG Client</span>
+                  <SearchablePicker
                     value={selectedClientId}
-                    onChange={e => setSelectedClientId(e.target.value)}
-                    className="flex-1 rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-                  >
-                    <option value="">Select a client…</option>
-                    {clients.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                    onChange={setSelectedClientId}
+                    options={sortedClientOptions}
+                    placeholder="Select a client…"
+                  />
                 </div>
 
-                {/* Facebook Page dropdown */}
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-                  <span className="w-32 text-sm text-brand-primary">Facebook Page</span>
-                  <select
+                {/* Facebook Page picker */}
+                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                  <span className="text-sm text-brand-primary">Facebook Page</span>
+                  <SearchablePicker
                     value={selectedPageId}
-                    onChange={e => { setSelectedPageId(e.target.value); setSelectedIgId('') }}
-                    className="flex-1 rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-                  >
-                    <option value="">Select a page…</option>
-                    {pages.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}{p.category ? ` (${p.category})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={v => { setSelectedPageId(v); setSelectedIgId('') }}
+                    options={sortedPageOptions}
+                    placeholder="Select a page…"
+                    emptyLabel="No pages found"
+                  />
                 </div>
 
-                {/* Instagram Account dropdown */}
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-                  <span className="w-32 text-sm text-brand-primary">Instagram Account</span>
-                  <select
+                {/* Instagram Account picker */}
+                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                  <span className="text-sm text-brand-primary">Instagram Account</span>
+                  <SearchablePicker
                     value={selectedIgId}
-                    onChange={e => setSelectedIgId(e.target.value)}
-                    className="flex-1 rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-                  >
-                    <option value="">
-                      {filteredIgOptions.length === 0 && selectedPageId
-                        ? 'No Instagram account linked to this page'
-                        : igAccounts.length === 0
-                          ? 'No Instagram accounts found'
-                          : 'Select an account…'}
-                    </option>
-                    {filteredIgOptions.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name || a.username || a.id}{a.facebookPageName ? ` — ${a.facebookPageName}` : ''}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSelectedIgId}
+                    options={sortedIgOptions}
+                    placeholder={igAccounts.length === 0 ? 'No Instagram accounts found' : 'Select an account…'}
+                    emptyLabel={selectedPageId ? 'No Instagram linked to this page' : 'Select a Facebook Page first'}
+                  />
                 </div>
 
-                {/* Ad Account dropdown */}
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-                  <span className="w-32 text-sm text-brand-primary">Ad Account</span>
+                {/* Ad Account picker */}
+                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                  <span className="text-sm text-brand-primary">Ad Account</span>
                   {adAccounts.length > 0 ? (
-                    <select
+                    <SearchablePicker
                       value={selectedAdId}
-                      onChange={e => setSelectedAdId(e.target.value)}
-                      className="flex-1 rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-                    >
-                      <option value="">Select an ad account (optional)…</option>
-                      {adAccounts.map(a => (
-                        <option key={a.id} value={a.id}>{a.name}</option>
-                      ))}
-                    </select>
+                      onChange={setSelectedAdId}
+                      options={sortedAdOptions}
+                      placeholder="Select an ad account (optional)…"
+                    />
                   ) : (
                     <p className="text-sm text-brand-primary/60">
                       {adAccountsError || 'No ad accounts available.'}
