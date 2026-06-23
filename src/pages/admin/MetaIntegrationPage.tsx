@@ -1,51 +1,99 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 const STEP_LABELS = ['Connect Meta', 'Link assets', 'Sync data', 'Review draft']
 
+type ConnectState = 'idle' | 'loading' | 'connected' | 'error'
+
 export default function MetaIntegrationPage() {
+  const [searchParams] = useSearchParams()
+  const [connectState, setConnectState] = useState<ConnectState>('idle')
+  const [connectMsg, setConnectMsg] = useState<string | null>(null)
   const [testState, setTestState] = useState<{
     action: string | null
     loading: boolean
-    success: string | null
-    error: string | null
+    msg: string | null
+    isError: boolean
     detail: string | null
-  }>({ action: null, loading: false, success: null, error: null, detail: null })
+  }>({ action: null, loading: false, msg: null, isError: false, detail: null })
+
+  // Read OAuth result from URL query params after callback redirect.
+  useEffect(() => {
+    const meta = searchParams.get('meta')
+    if (meta === 'connected') {
+      setConnectState('connected')
+      setConnectMsg('Meta connected. Next step: link assets to clients.')
+      // Clean the URL without a full page reload.
+      window.history.replaceState(null, '', window.location.pathname)
+    } else if (meta === 'error') {
+      setConnectState('error')
+      setConnectMsg('Meta connection failed. Please try again.')
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [searchParams])
+
+  async function handleConnect() {
+    setConnectState('idle')
+    setConnectMsg(null)
+    setTestState({ action: null, loading: false, msg: null, isError: false, detail: null })
+    try {
+      const { data, error } = await supabase.functions.invoke('meta-oauth-start', {
+        method: 'POST',
+      })
+      if (error) {
+        setConnectState('error')
+        setConnectMsg('Could not reach the connection service. Check Supabase Edge Function deployment.')
+        return
+      }
+      if (!data?.ok || !data?.url) {
+        setConnectState('error')
+        setConnectMsg(data?.error || 'Failed to start Meta connection.')
+        return
+      }
+      // Redirect browser to Meta OAuth dialog.
+      window.location.href = data.url
+    } catch {
+      setConnectState('error')
+      setConnectMsg('Could not reach the connection service.')
+    }
+  }
 
   async function testService(endpoint: string, body?: Record<string, unknown>) {
-    setTestState({ action: endpoint, loading: true, success: null, error: null, detail: null })
+    setTestState({ action: endpoint, loading: true, msg: null, isError: false, detail: null })
     try {
       const { data, error } = await supabase.functions.invoke(endpoint, {
-        method: body ? 'POST' : 'POST',
+        method: 'POST',
         body: body ?? {},
       })
       if (error) {
-        setTestState(prev => ({
-          ...prev,
+        setTestState({
+          action: endpoint,
           loading: false,
-          error: 'Could not reach the Meta service. Check Supabase Edge Function deployment.',
+          msg: 'Could not reach the Meta service. Check Supabase Edge Function deployment.',
+          isError: true,
           detail: error.message,
-        }))
+        })
         return
       }
       const ok = data?.ok !== false
-      setTestState(prev => ({
-        ...prev,
+      setTestState({
+        action: endpoint,
         loading: false,
-        success: ok
-          ? endpoint === 'meta-oauth-start'
-            ? 'Meta connection service is reachable. Real OAuth will be added next.'
-            : 'Meta sync service is reachable. Real sync logic will be added next.'
+        msg: ok
+          ? 'Service is reachable and responding correctly.'
           : `Unexpected response from ${endpoint}.`,
-        detail: ok ? JSON.stringify(data, null, 2) : JSON.stringify(data, null, 2),
-      }))
+        isError: !ok,
+        detail: JSON.stringify(data, null, 2),
+      })
     } catch (err) {
-      setTestState(prev => ({
-        ...prev,
+      setTestState({
+        action: endpoint,
         loading: false,
-        error: 'Could not reach the Meta service. Check Supabase Edge Function deployment.',
+        msg: 'Could not reach the Meta service. Check Supabase Edge Function deployment.',
+        isError: true,
         detail: err instanceof Error ? err.message : String(err),
-      }))
+      })
     }
   }
 
@@ -63,6 +111,25 @@ export default function MetaIntegrationPage() {
           CSV exports.
         </p>
       </div>
+
+      {/* Connection status banner */}
+      {connectMsg && (
+        <div
+          className={`mt-6 max-w-2xl rounded-xl border p-5 ${
+            connectState === 'connected'
+              ? 'border-brand-accent/20 bg-brand-accent/10'
+              : 'border-red-400/20 bg-red-400/10'
+          }`}
+        >
+          <p
+            className={`text-sm font-medium ${
+              connectState === 'connected' ? 'text-brand-accent' : 'text-red-400'
+            }`}
+          >
+            {connectMsg}
+          </p>
+        </div>
+      )}
 
       {/* Horizontal step indicator */}
       <div className="mt-6 inline-flex items-center overflow-hidden rounded-xl border border-brand-muted bg-brand-surface">
@@ -93,8 +160,14 @@ export default function MetaIntegrationPage() {
                 </span>
                 <h2 className="text-sm font-semibold text-white">Connect Meta</h2>
               </div>
-              <span className="shrink-0 text-xs font-medium text-amber-400">
-                Not connected
+              <span
+                className={`shrink-0 text-xs font-medium ${
+                  connectState === 'connected'
+                    ? 'text-brand-accent'
+                    : 'text-amber-400'
+                }`}
+              >
+                {connectState === 'connected' ? 'Connected' : 'Not connected'}
               </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-brand-primary">
@@ -103,24 +176,33 @@ export default function MetaIntegrationPage() {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                disabled
-                className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
+                onClick={handleConnect}
+                disabled={connectState === 'connected' || testState.loading}
+                className={`rounded-lg border px-5 py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                  connectState === 'connected'
+                    ? 'border-brand-accent/50 bg-brand-accent/10 text-brand-accent'
+                    : 'border-brand-accent bg-brand-accent/10 text-brand-accent hover:bg-brand-accent/20'
+                }`}
               >
-                Connect Meta
+                {connectState === 'connected'
+                  ? 'Reconnect Meta'
+                  : 'Connect Meta'}
               </button>
-              <button
-                type="button"
-                onClick={() => testService('meta-oauth-start')}
-                disabled={testState.loading}
-                className="rounded-lg border border-brand-muted px-5 py-2.5 text-sm font-semibold text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {testState.action === 'meta-oauth-start' && testState.loading
-                  ? 'Testing…'
-                  : 'Test Meta connection service'}
-              </button>
+              {connectState !== 'connected' && (
+                <button
+                  type="button"
+                  onClick={() => testService('meta-oauth-start')}
+                  disabled={testState.loading}
+                  className="rounded-lg border border-brand-muted px-3 py-2 text-xs font-medium text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {testState.action === 'meta-oauth-start' && testState.loading
+                    ? 'Testing…'
+                    : 'Test service'}
+                </button>
+              )}
             </div>
             <p className="mt-3 text-xs text-brand-primary/50">
-              OAuth connection will be added in the next phase.
+              OAuth connection redirects to Meta for authorisation.
             </p>
           </div>
         </div>
@@ -138,7 +220,9 @@ export default function MetaIntegrationPage() {
                 </h2>
               </div>
               <span className="shrink-0 text-xs font-medium text-brand-primary">
-                Waiting for Meta connection
+                {connectState === 'connected'
+                  ? 'Coming next'
+                  : 'Waiting for Meta connection'}
               </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-brand-primary">
@@ -211,11 +295,11 @@ export default function MetaIntegrationPage() {
                   })
                 }
                 disabled={testState.loading}
-                className="rounded-lg border border-brand-muted px-5 py-2.5 text-sm font-semibold text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg border border-brand-muted px-3 py-2 text-xs font-medium text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {testState.action === 'meta-sync' && testState.loading
                   ? 'Testing…'
-                  : 'Test sync service'}
+                  : 'Test service'}
               </button>
             </div>
           </div>
@@ -241,31 +325,27 @@ export default function MetaIntegrationPage() {
       </div>
 
       {/* Test result display */}
-      {testState.success && (
-        <div className="mt-6 max-w-2xl rounded-xl border border-brand-accent/20 bg-brand-accent/10 p-5">
-          <p className="text-sm font-medium text-brand-accent">{testState.success}</p>
+      {testState.msg && (
+        <div
+          className={`mt-6 max-w-2xl rounded-xl border p-5 ${
+            testState.isError
+              ? 'border-red-400/20 bg-red-400/10'
+              : 'border-brand-accent/20 bg-brand-accent/10'
+          }`}
+        >
+          <p
+            className={`text-sm font-medium ${
+              testState.isError ? 'text-red-400' : 'text-brand-accent'
+            }`}
+          >
+            {testState.msg}
+          </p>
           {testState.detail && (
             <details className="mt-2">
-              <summary className="cursor-pointer text-xs text-brand-accent/60 hover:text-brand-accent">
+              <summary className="cursor-pointer text-xs text-brand-primary/60 hover:text-brand-primary">
                 Response detail
               </summary>
               <pre className="mt-2 overflow-x-auto rounded-lg bg-brand-bg/50 p-3 text-xs text-brand-primary">
-                {testState.detail}
-              </pre>
-            </details>
-          )}
-        </div>
-      )}
-
-      {testState.error && (
-        <div className="mt-6 max-w-2xl rounded-xl border border-red-400/20 bg-red-400/10 p-5">
-          <p className="text-sm font-medium text-red-400">{testState.error}</p>
-          {testState.detail && (
-            <details className="mt-2">
-              <summary className="cursor-pointer text-xs text-red-400/60 hover:text-red-400">
-                Error detail
-              </summary>
-              <pre className="mt-2 overflow-x-auto rounded-lg bg-brand-bg/50 p-3 text-xs text-red-300/70">
                 {testState.detail}
               </pre>
             </details>
