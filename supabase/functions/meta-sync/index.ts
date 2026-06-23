@@ -276,11 +276,13 @@ Deno.serve(async (req) => {
 
     try {
       // ── Find or create the monthly master report ───────
-      // Find any existing report for this client whose period END falls inside
-      // the target calendar month, then prefer the master report (platform IS
-      // NULL). This mirrors the frontend findReportForClientMonth helper so the
-      // sync reuses exactly the same report the CSV/manual import would, and
-      // never tries to insert a duplicate.
+      // Find an existing MASTER report (platform IS NULL) for this client whose
+      // period END falls inside the target calendar month, and reuse it.
+      //
+      // Meta-integrated reports must stay separate from old CSV/import reports,
+      // so we deliberately only reuse the platform-null master. Legacy
+      // per-platform reports (e.g. Facebook/Instagram CSV imports) are never
+      // reused — if no master exists we create a fresh platform-null master.
       //
       // NOTE: PostgREST `.eq('platform', null)` does NOT match NULL — it must be
       // `.is('platform', null)`. The previous `.eq` always missed the existing
@@ -291,9 +293,9 @@ Deno.serve(async (req) => {
         .from('reports')
         .select('id, platform, status, period_start, period_end, created_at')
         .eq('client_id', client.clientId)
+        .is('platform', null)
         .gte('period_end', periodStart)
         .lt('period_end', monthEndExclusive)
-        .order('platform', { ascending: true, nullsFirst: true })
         .order('created_at', { ascending: false })
 
       if (findError) {
@@ -303,10 +305,9 @@ Deno.serve(async (req) => {
         )
       }
 
-      const monthRows = monthReports ?? []
-      // Prefer the master (platform === null); fall back to the most recent
-      // legacy per-platform report so we still reuse rather than duplicate.
-      const existing = monthRows.find(r => r.platform === null) ?? monthRows[0] ?? null
+      // Reuse only a platform-null master report; ignore any legacy
+      // per-platform reports for the same month.
+      const existing = (monthReports ?? []).find(r => r.platform === null) ?? null
 
       let reportId: string
 
