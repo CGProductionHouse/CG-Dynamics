@@ -47,6 +47,10 @@ export default function AdminLayout() {
       >
         View as client
       </NavLink>
+
+      <NavLink to="/admin/integrations" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
+        Integrations
+      </NavLink>
       </>
     )
   }

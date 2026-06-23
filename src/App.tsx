@@ -20,6 +20,8 @@ import NewReport from './pages/admin/NewReport'
 import ReportsManagement from './pages/admin/ReportsManagement'
 import ManualMetricsAdmin from './pages/admin/ManualMetricsAdmin'
 import PublishedPreview from './pages/admin/PublishedPreview'
+import IntegrationsPage from './pages/admin/IntegrationsPage'
+import MetaIntegrationPage from './pages/admin/MetaIntegrationPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -60,6 +62,8 @@ export default function App() {
               <Route path="/admin" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
+              <Route path="/admin/integrations" element={<IntegrationsPage />} />
+              <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
 
               {/* Consolidated Import workspace (CSV import is admin-gated inside
                   the hub; manual summaries + history are staff read-only). */}
