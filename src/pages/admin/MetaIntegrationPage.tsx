@@ -150,6 +150,20 @@ export default function MetaIntegrationPage() {
   const [linkedAssets, setLinkedAssets] = useState<LinkedAsset[]>([])
   const [loadingLinked, setLoadingLinked] = useState(false)
 
+  // Sync state
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<{
+    status: string
+    message: string
+    clientsSynced?: number
+    clientsFailed?: number
+    reportsCreated?: number
+    reportsUpdated?: number
+    postsSynced?: number
+    warnings?: string[]
+    reportId?: string
+  } | null>(null)
+
   // Load connection status from the server on mount (reliable source of truth).
   const checkConnection = useCallback(async () => {
     setConnectionLoading(true)
@@ -353,6 +367,40 @@ export default function MetaIntegrationPage() {
     await loadLinkedAssets()
   }
 
+  async function handleSync() {
+    setSyncing(true)
+    setSyncResult(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('meta-sync', {
+        method: 'POST',
+        body: { mode: 'previous_completed_month' },
+      })
+      if (error) {
+        setSyncResult({ status: 'failed', message: 'Could not reach the sync service. Check Supabase Edge Function deployment.' })
+        return
+      }
+      if (!data?.ok) {
+        setSyncResult({ status: 'failed', message: data?.error || 'Sync failed.' })
+        return
+      }
+      await loadLinkedAssets()
+      setSyncResult({
+        status: data.status,
+        message: data.message,
+        clientsSynced: data.clientsSynced,
+        clientsFailed: data.clientsFailed,
+        reportsCreated: data.reportsCreated,
+        reportsUpdated: data.reportsUpdated,
+        postsSynced: data.postsSynced,
+        warnings: data.warnings,
+      })
+    } catch {
+      setSyncResult({ status: 'failed', message: 'Sync request failed.' })
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl">
@@ -536,28 +584,74 @@ export default function MetaIntegrationPage() {
                 <h2 className="text-sm font-semibold text-white">Sync report data</h2>
               </div>
               <span className="shrink-0 text-xs font-medium text-brand-primary">
-                {linkedAssets.length > 0 ? 'Ready for sync setup' : 'Waiting for linked assets'}
+                {linkedAssets.length > 0 ? 'Ready' : 'Waiting for linked assets'}
               </span>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-brand-primary">
-              Sync will be enabled after we add the reporting sync engine.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                disabled
-                className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
-              >
-                Sync previous completed month
-              </button>
-              <button
-                type="button"
-                disabled
-                className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
-              >
-                Sync current month as internal draft
-              </button>
-            </div>
+
+            {!syncResult && (
+              <p className="mt-3 text-sm leading-relaxed text-brand-primary">
+                Sync the previous completed month from linked Meta assets. Reports will be saved as internal drafts.
+              </p>
+            )}
+
+            {syncResult && (
+              <div className={`mt-3 rounded-xl border p-4 ${syncResult.status === 'failed' ? 'border-red-400/20 bg-red-400/10' : 'border-brand-accent/20 bg-brand-accent/10'}`}>
+                <p className={`text-sm font-medium ${syncResult.status === 'failed' ? 'text-red-400' : 'text-brand-accent'}`}>
+                  {syncResult.message}
+                </p>
+                {syncResult.status !== 'failed' && (
+                  <ul className="mt-2 space-y-1 text-sm text-brand-primary">
+                    <li>Clients synced: {syncResult.clientsSynced}</li>
+                    {syncResult.clientsFailed !== undefined && syncResult.clientsFailed > 0 && (
+                      <li className="text-amber-400">Clients failed: {syncResult.clientsFailed}</li>
+                    )}
+                    <li>Reports created: {syncResult.reportsCreated}</li>
+                    <li>Reports updated: {syncResult.reportsUpdated}</li>
+                    <li>Posts synced: {syncResult.postsSynced}</li>
+                    {syncResult.warnings && syncResult.warnings.length > 0 && (
+                      <li className="text-amber-400">Warnings: {syncResult.warnings.length}</li>
+                    )}
+                  </ul>
+                )}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {syncResult.status !== 'failed' && (
+                    <a
+                      href="/admin/reports"
+                      className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-semibold text-brand-bg hover:brightness-110"
+                    >
+                      Go to reports
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSyncResult(null)}
+                    className="rounded-lg border border-brand-muted px-4 py-2 text-xs text-brand-primary hover:text-white"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!syncResult && (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSync}
+                  disabled={syncing || linkedAssets.length === 0}
+                  className="rounded-lg border border-brand-accent bg-brand-accent/10 px-5 py-2.5 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {syncing ? 'Syncing…' : 'Sync previous completed month'}
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
+                >
+                  Sync current month as internal draft
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
