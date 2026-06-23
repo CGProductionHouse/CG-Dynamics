@@ -55,14 +55,6 @@ function nextMonthStart(month: string): string {
   return new Date(Date.UTC(year, monthIndex, 1)).toISOString().slice(0, 10)
 }
 
-interface SyncRunRecord {
-  syncType: string
-  periodStart: string
-  periodEnd: string
-  status: string
-  summary: Record<string, unknown>
-}
-
 function getPreviousMonthBounds(): { periodStart: string; periodEnd: string; month: string } {
   const now = new Date()
   const year = now.getUTCFullYear()
@@ -107,6 +99,172 @@ function safeTimestamp(ts: string | null | undefined): string | null {
   if (!ts) return null
   const d = new Date(ts)
   return Number.isNaN(d.getTime()) ? null : d.toISOString()
+}
+
+// ── Token-safe Meta helpers ──────────────────────────────────
+// Removes any access token from a string so tokens never appear in warnings,
+// summaries, logs or responses.
+function redact(text: string, tokens: Array<string | null | undefined>): string {
+  let out = text
+  for (const t of tokens) {
+    if (t && t.length >= 8) out = out.split(t).join('[redacted]')
+  }
+  return out.replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
+}
+
+// Reads a Meta Graph API error response into a safe, detailed, token-free string
+// (message, type, code, subcode, fbtrace_id).
+async function readMetaError(res: Response, tokens: Array<string | null | undefined>): Promise<string> {
+  let detail = `HTTP ${res.status}`
+  try {
+    const body = await res.json()
+    const e = body?.error
+    if (e && typeof e === 'object') {
+      const parts: string[] = []
+      if (e.message) parts.push(String(e.message))
+      if (e.type) parts.push(`type ${e.type}`)
+      if (e.code !== undefined) parts.push(`code ${e.code}`)
+      if (e.error_subcode !== undefined && e.error_subcode !== null) parts.push(`subcode ${e.error_subcode}`)
+      if (e.fbtrace_id) parts.push(`trace ${e.fbtrace_id}`)
+      if (parts.length > 0) detail = parts.join(', ')
+    }
+  } catch {
+    // keep HTTP status
+  }
+  return redact(detail, tokens)
+}
+
+function sumInsightValue(v: { values?: Array<{ value?: number }> }): number | null {
+  if (!v.values || v.values.length === 0) return null
+  let sum = 0
+  let any = false
+  for (const entry of v.values) {
+    if (typeof entry.value === 'number') {
+      sum += entry.value
+      any = true
+    }
+  }
+  return any ? sum : null
+}
+
+interface InsightFetchResult {
+  values: Record<string, number>
+  error: string | null
+}
+
+// Resilient insight fetch: tries the whole metric batch, and if Meta rejects it
+// (often because ONE metric is unsupported for the object/type), retries each
+// metric individually so the supported metrics still come through. A failed
+// metric is simply absent from the result — never a fake 0.
+async function fetchInsights(
+  baseUrl: string,
+  objectId: string,
+  metrics: string[],
+  token: string,
+  extra: Record<string, string>,
+  tokens: Array<string | null | undefined>,
+): Promise<InsightFetchResult> {
+  const values: Record<string, number> = {}
+
+  const runBatch = async (ms: string[]): Promise<{ ok: boolean; error: string | null }> => {
+    const params = new URLSearchParams({ access_token: token, metric: ms.join(','), ...extra })
+    const res = await fetch(`${baseUrl}/${objectId}/insights?${params.toString()}`)
+    if (!res.ok) return { ok: false, error: await readMetaError(res, tokens) }
+    const data = await res.json()
+    for (const v of (data.data as Array<{ name: string; values?: Array<{ value?: number }> }> ?? [])) {
+      const val = sumInsightValue(v)
+      if (val !== null) values[v.name] = val
+    }
+    return { ok: true, error: null }
+  }
+
+  const batch = await runBatch(metrics)
+  if (batch.ok) return { values, error: null }
+
+  // Split: try each metric on its own so one bad metric doesn't lose the rest.
+  const errors: string[] = []
+  for (const m of metrics) {
+    const single = await runBatch([m])
+    if (!single.ok && single.error) errors.push(`${m} (${single.error})`)
+  }
+  return { values, error: errors.length > 0 ? errors.join('; ') : batch.error }
+}
+
+// Fetches Facebook Page access tokens for the connected user. Page endpoints
+// (Page posts/insights) and the IG Business endpoints behind a page generally
+// require the PAGE access token, not the user token. Tokens are used in-memory
+// only and never stored or logged.
+async function fetchPageTokens(baseUrl: string, userToken: string): Promise<Map<string, string>> {
+  const map = new Map<string, string>()
+  let url: string | null =
+    `${baseUrl}/me/accounts?fields=id,access_token&limit=100&access_token=${encodeURIComponent(userToken)}`
+  let guard = 0
+  while (url && guard < 10) {
+    guard++
+    const res = await fetch(url)
+    if (!res.ok) break
+    const data = await res.json()
+    for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
+      if (p.id && p.access_token) map.set(p.id, p.access_token)
+    }
+    url = (data.paging?.next as string | undefined) ?? null
+  }
+  return map
+}
+
+interface SyncedMetric {
+  clientId: string
+  month: string
+  platform: string
+  views: number
+  reach: number
+  engagements: number
+  profileVisits: number
+  externalLinkTaps: number
+  followers: number
+  createdBy: string | null
+}
+
+// Upserts Meta-synced account totals into manual_platform_metrics using a VALID
+// source_type ('other' — the table CHECK constraint does not allow a custom
+// 'meta_business_sync'). Caller only invokes this when real data exists, so we
+// never write a fake all-zero row. Errors surface as warnings, never silently.
+async function upsertSyncedPlatformMetric(
+  sb: ReturnType<typeof createClient>,
+  m: SyncedMetric,
+  warnings: string[],
+  tokens: Array<string | null | undefined>,
+) {
+  const payload = {
+    client_id: m.clientId,
+    month: m.month,
+    platform: m.platform,
+    source_type: 'other',
+    views: m.views,
+    reach: m.reach,
+    engagements: m.engagements,
+    accounts_engaged: 0,
+    profile_visits: m.profileVisits,
+    external_link_taps: m.externalLinkTaps,
+    followers: m.followers,
+    top_content_notes: null,
+    content_type_split_notes: null,
+    general_notes: `Meta sync account totals (${new Date().toISOString().slice(0, 10)})`,
+    created_by: m.createdBy,
+  }
+  const { data: existing } = await sb
+    .from('manual_platform_metrics')
+    .select('id')
+    .eq('client_id', m.clientId)
+    .eq('month', m.month)
+    .eq('platform', m.platform)
+    .limit(1)
+  const res = existing && existing.length > 0
+    ? await sb.from('manual_platform_metrics').update(payload).eq('id', existing[0].id)
+    : await sb.from('manual_platform_metrics').insert(payload)
+  if (res.error) {
+    warnings.push(redact(`Could not store ${m.platform} account totals: ${describeDbError(res.error)}`, tokens))
+  }
 }
 
 Deno.serve(async (req) => {
@@ -188,6 +346,17 @@ Deno.serve(async (req) => {
 
   const accessToken = tokenRows[0].encrypted_access_token
   const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
+
+  // Page access tokens (in-memory only, never stored) for Page + IG endpoints.
+  // Falls back to the user token per endpoint if a page token is unavailable.
+  let pageTokenMap = new Map<string, string>()
+  try {
+    pageTokenMap = await fetchPageTokens(baseUrl, accessToken)
+  } catch (_err) {
+    // Non-fatal — endpoints will fall back to the user token.
+  }
+  // Used to scrub any token from warnings/errors before they are stored/returned.
+  const knownTokens: string[] = [accessToken, ...pageTokenMap.values()]
 
   // ── Load linked clients ──────────────────────────────────
   let linkedAssetsQuery = sb
@@ -273,6 +442,13 @@ Deno.serve(async (req) => {
       postsSynced: 0,
       warnings: [],
     }
+
+    // Page + IG Business endpoints generally need the Page access token. Fall
+    // back to the user token when a page token isn't available.
+    const pageToken = client.facebookPageId
+      ? (pageTokenMap.get(client.facebookPageId) ?? accessToken)
+      : accessToken
+    const igToken = pageToken
 
     try {
       // ── Find or create the monthly master report ───────
@@ -367,7 +543,7 @@ Deno.serve(async (req) => {
       if (client.facebookPageId) {
         try {
           const fbParams = new URLSearchParams({
-            access_token: accessToken,
+            access_token: pageToken,
             fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true),attachments',
             since: periodStart,
             until: `${periodEnd}T23:59:59Z`,
@@ -404,45 +580,32 @@ Deno.serve(async (req) => {
               })
             }
 
-            // Attempt per-post insights (best-effort).
+            // Per-post insights (best-effort, resilient). Missing metrics stay
+            // null — never coerced to 0.
+            let fbInsightErr: string | null = null
             for (const post of fbPosts) {
-              try {
-                const insightParams = new URLSearchParams({
-                  access_token: accessToken,
-                  metric: 'post_impressions,post_impressions_unique,post_engaged_users,post_clicks',
-                })
-                const insRes = await fetch(`${baseUrl}/${post.metaPostId}/insights?${insightParams.toString()}`)
-                if (insRes.ok) {
-                  const insData = await insRes.json()
-                  const values = insData.data as Array<{ name: string; values?: Array<{ value: number }> }> ?? []
-                  for (const v of values) {
-                    const val = v.values?.[0]?.value
-                    if (val === undefined || val === null) continue
-                    switch (v.name) {
-                      case 'post_impressions':
-                        post.impressions = val
-                        break
-                      case 'post_impressions_unique':
-                        post.impressionsUnique = val
-                        break
-                      case 'post_engaged_users':
-                        post.engagedUsers = val
-                        break
-                      case 'post_clicks':
-                        post.clicks = val
-                        break
-                    }
-                  }
-                }
-              } catch {
-                result.warnings.push(`Failed to fetch insights for FB post ${post.metaPostId}`)
-              }
+              const { values, error } = await fetchInsights(
+                baseUrl,
+                post.metaPostId,
+                ['post_impressions', 'post_impressions_unique', 'post_engaged_users', 'post_clicks'],
+                pageToken,
+                {},
+                knownTokens,
+              )
+              if (typeof values.post_impressions === 'number') post.impressions = values.post_impressions
+              if (typeof values.post_impressions_unique === 'number') post.impressionsUnique = values.post_impressions_unique
+              if (typeof values.post_engaged_users === 'number') post.engagedUsers = values.post_engaged_users
+              if (typeof values.post_clicks === 'number') post.clicks = values.post_clicks
+              if (error && !fbInsightErr) fbInsightErr = error
+            }
+            if (fbInsightErr) {
+              result.warnings.push(`Some Facebook post insights were unavailable (views/reach may be missing): ${fbInsightErr}`)
             }
           } else {
-            result.warnings.push(`Failed to fetch Facebook posts: ${fbRes.status}`)
+            result.warnings.push(`Could not fetch Facebook posts: ${await readMetaError(fbRes, knownTokens)}`)
           }
         } catch (err) {
-          result.warnings.push(`Error fetching Facebook posts: ${String(err)}`)
+          result.warnings.push(redact(`Error fetching Facebook posts: ${String(err)}`, knownTokens))
         }
       }
 
@@ -467,7 +630,7 @@ Deno.serve(async (req) => {
       if (client.instagramAccountId) {
         try {
           const igParams = new URLSearchParams({
-            access_token: accessToken,
+            access_token: igToken,
             fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
             limit: '100',
           })
@@ -511,58 +674,56 @@ Deno.serve(async (req) => {
               })
             }
 
-            // Attempt per-media insights (best-effort).
+            // Per-media insights (best-effort, resilient). Valid metrics depend
+            // on media type, so we request a small set and let the resilient
+            // fetcher drop any unsupported metric instead of failing the batch.
+            // likes/comments come from the media fields above, not insights.
+            let igInsightErr: string | null = null
             for (const post of igPosts) {
-              try {
-                const igMetricParams = new URLSearchParams({
-                  access_token: accessToken,
-                  metric: 'views,reach,likes,comments,saves,shares',
-                })
-                const insRes = await fetch(`${baseUrl}/${post.metaPostId}/insights?${igMetricParams.toString()}`)
-                if (insRes.ok) {
-                  const insData = await insRes.json()
-                  const values = insData.data as Array<{ name: string; values?: Array<{ value: number }> }> ?? []
-                  for (const v of values) {
-                    const val = v.values?.[0]?.value
-                    if (val === undefined || val === null) continue
-                    switch (v.name) {
-                      case 'views':
-                        post.impressions = val
-                        break
-                      case 'reach':
-                        post.reach = val
-                        break
-                      case 'likes':
-                        post.reactions = val
-                        break
-                      case 'comments':
-                        post.comments = val
-                        break
-                      case 'saves':
-                        post.saves = val
-                        break
-                      case 'shares':
-                        post.shares = val
-                        break
-                    }
-                  }
-                }
-              } catch {
-                result.warnings.push(`Failed to fetch insights for IG media ${post.metaPostId}`)
-              }
+              const { values, error } = await fetchInsights(
+                baseUrl,
+                post.metaPostId,
+                ['reach', 'views', 'saved', 'shares', 'total_interactions'],
+                igToken,
+                {},
+                knownTokens,
+              )
+              if (typeof values.reach === 'number') post.reach = values.reach
+              if (typeof values.views === 'number') post.impressions = values.views
+              if (typeof values.saved === 'number') post.saves = values.saved
+              if (typeof values.shares === 'number') post.shares = values.shares
+              if (error && !igInsightErr) igInsightErr = error
+            }
+            if (igInsightErr) {
+              result.warnings.push(`Some Instagram media insights were unavailable (views/reach may be missing): ${igInsightErr}`)
             }
           } else {
-            result.warnings.push(`Failed to fetch Instagram media: ${igRes.status}`)
+            result.warnings.push(`Could not fetch Instagram media: ${await readMetaError(igRes, knownTokens)}`)
           }
         } catch (err) {
-          result.warnings.push(`Error fetching Instagram media: ${String(err)}`)
+          result.warnings.push(redact(`Error fetching Instagram media: ${String(err)}`, knownTokens))
         }
       }
 
       // ── Upsert posts and mappings ──────────────────────
+      // Normalize each post to availability-aware metrics:
+      //   viewsValue / reachValue are number | null (null = Meta did not return)
+      //   engagementsValue is always a number (from likes/comments/etc.)
       const allPosts = [
-        ...fbPosts.map(p => ({ ...p, platform: 'facebook' as const })),
-        ...igPosts.map(p => ({ ...p, platform: 'instagram' as const })),
+        ...fbPosts.map(p => ({
+          ...p,
+          platform: 'facebook' as const,
+          viewsValue: typeof p.impressions === 'number' ? p.impressions : null,
+          reachValue: typeof p.impressionsUnique === 'number' ? p.impressionsUnique : null,
+          engagementsValue: p.reactions + p.comments + p.shares + (p.clicks ?? 0),
+        })),
+        ...igPosts.map(p => ({
+          ...p,
+          platform: 'instagram' as const,
+          viewsValue: typeof p.impressions === 'number' ? p.impressions : null,
+          reachValue: typeof p.reach === 'number' ? p.reach : null,
+          engagementsValue: p.reactions + p.comments + (p.saves ?? 0) + (p.shares ?? 0),
+        })),
       ]
 
       for (const post of allPosts) {
@@ -587,15 +748,20 @@ Deno.serve(async (req) => {
               meta_post_type: post.postType,
               caption: post.caption,
               permalink: post.permalink,
-              views: post.impressions ?? post.impressionsUnique ?? 0,
-              reach: post.reach ?? 0,
+              views: post.viewsValue ?? 0,
+              reach: post.reachValue ?? 0,
               reactions: post.reactions,
               comments: post.comments,
               shares: post.shares ?? 0,
-              total_clicks: post.clicks ?? 0,
+              total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
               raw: {
+                source: 'meta_sync',
                 platform: post.platform,
                 synced_at: new Date().toISOString(),
+                // True availability: number when Meta returned it, null otherwise.
+                views: post.viewsValue,
+                reach: post.reachValue,
+                engagements: post.engagementsValue,
                 ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
                 ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
                 ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
@@ -625,15 +791,20 @@ Deno.serve(async (req) => {
               meta_post_type: post.postType,
               caption: post.caption,
               permalink: post.permalink,
-              views: post.impressions ?? post.impressionsUnique ?? 0,
-              reach: post.reach ?? 0,
+              views: post.viewsValue ?? 0,
+              reach: post.reachValue ?? 0,
               reactions: post.reactions,
               comments: post.comments,
               shares: post.shares ?? 0,
-              total_clicks: post.clicks ?? 0,
+              total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
               raw: {
+                source: 'meta_sync',
                 platform: post.platform,
                 synced_at: new Date().toISOString(),
+                // True availability: number when Meta returned it, null otherwise.
+                views: post.viewsValue,
+                reach: post.reachValue,
+                engagements: post.engagementsValue,
                 ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
                 ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
                 ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
@@ -667,15 +838,20 @@ Deno.serve(async (req) => {
               meta_post_type: post.postType,
               caption: post.caption,
               permalink: post.permalink,
-              views: post.impressions ?? post.impressionsUnique ?? 0,
-              reach: post.reach ?? 0,
+              views: post.viewsValue ?? 0,
+              reach: post.reachValue ?? 0,
               reactions: post.reactions,
               comments: post.comments,
               shares: post.shares ?? 0,
-              total_clicks: post.clicks ?? 0,
+              total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
               raw: {
+                source: 'meta_sync',
                 platform: post.platform,
                 synced_at: new Date().toISOString(),
+                // True availability: number when Meta returned it, null otherwise.
+                views: post.viewsValue,
+                reach: post.reachValue,
+                engagements: post.engagementsValue,
                 ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
                 ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
                 ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
@@ -710,165 +886,91 @@ Deno.serve(async (req) => {
         totalPostsSynced++
       }
 
-      // ── Fetch Facebook Page monthly totals ─────────────
+      // ── Fetch Facebook Page monthly totals (best-effort) ──
+      // These enrich follower / profile-visit movement. Post-level totals above
+      // remain the primary source for reach/views/engagements. Resilient + only
+      // stored when Meta actually returns real values (never a fake-0 row).
       if (client.facebookPageId) {
         try {
-          const pageInsightParams = new URLSearchParams({
-            access_token: accessToken,
-            metric: 'page_impressions,page_impressions_unique,page_engaged_users,page_views_total,page_fans',
-            period: 'month',
-            since: periodStart,
-            until: periodEnd,
-          })
-
-          const pageInsRes = await fetch(`${baseUrl}/${client.facebookPageId}/insights?${pageInsightParams.toString()}`)
-          if (pageInsRes.ok) {
-            const pageInsData = await pageInsRes.json()
-            const pageValues = pageInsData.data as Array<{ name: string; values?: Array<{ value: number }> }> ?? []
-
-            let fbImpressions = 0
-            let fbReach = 0
-            let fbEngagements = 0
-            let fbProfileVisits = 0
-            let fbFollowers = 0
-
-            for (const v of pageValues) {
-              const val = v.values?.reduce((sum, entry) => sum + (entry.value ?? 0), 0) ?? 0
-              switch (v.name) {
-                case 'page_impressions':
-                  fbImpressions = val
-                  break
-                case 'page_impressions_unique':
-                  fbReach = val
-                  break
-                case 'page_engaged_users':
-                  fbEngagements = val
-                  break
-                case 'page_views_total':
-                  fbProfileVisits = val
-                  break
-                case 'page_fans':
-                  fbFollowers = val
-                  break
-              }
-            }
-
-            // Upsert into manual_platform_metrics for Facebook.
-            const { data: existingFbMetrics } = await sb
-              .from('manual_platform_metrics')
-              .select('id')
-              .eq('client_id', client.clientId)
-              .eq('month', month)
-              .eq('platform', 'facebook')
-              .limit(1)
-
-            const fbMetricPayload = {
-              client_id: client.clientId,
+          const { values, error } = await fetchInsights(
+            baseUrl,
+            client.facebookPageId,
+            ['page_impressions', 'page_impressions_unique', 'page_post_engagements', 'page_views_total', 'page_fans'],
+            pageToken,
+            { period: 'month', since: periodStart, until: periodEnd },
+            knownTokens,
+          )
+          if (error && Object.keys(values).length === 0) {
+            result.warnings.push(`Facebook page insights unavailable (follower/profile totals may be missing): ${error}`)
+          }
+          const anyPositive = ['page_impressions', 'page_impressions_unique', 'page_post_engagements', 'page_views_total', 'page_fans']
+            .some(k => typeof values[k] === 'number' && values[k] > 0)
+          if (anyPositive) {
+            await upsertSyncedPlatformMetric(sb, {
+              clientId: client.clientId,
               month,
               platform: 'facebook',
-              source_type: 'meta_business_sync',
-              views: fbImpressions,
-              reach: fbReach,
-              engagements: fbEngagements,
-              accounts_engaged: 0,
-              profile_visits: fbProfileVisits,
-              external_link_taps: 0,
-              followers: fbFollowers,
-              top_content_notes: null,
-              content_type_split_notes: null,
-              general_notes: `Synced from Meta API on ${new Date().toISOString().slice(0, 10)}`,
-              created_by: user.id,
-            }
-
-            if (existingFbMetrics && existingFbMetrics.length > 0) {
-              await sb.from('manual_platform_metrics').update(fbMetricPayload).eq('id', existingFbMetrics[0].id)
-            } else {
-              await sb.from('manual_platform_metrics').insert(fbMetricPayload)
-            }
-          } else {
-            result.warnings.push(`Failed to fetch Facebook page insights: ${pageInsRes.status}`)
+              views: values.page_impressions ?? 0,
+              reach: values.page_impressions_unique ?? 0,
+              engagements: values.page_post_engagements ?? 0,
+              profileVisits: values.page_views_total ?? 0,
+              externalLinkTaps: 0,
+              followers: values.page_fans ?? 0,
+              createdBy: user.id,
+            }, result.warnings, knownTokens)
           }
         } catch (err) {
-          result.warnings.push(`Error fetching Facebook page insights: ${String(err)}`)
+          result.warnings.push(redact(`Error fetching Facebook page insights: ${String(err)}`, knownTokens))
         }
       }
 
-      // ── Fetch Instagram account monthly totals ─────────
+      // ── Fetch Instagram account monthly totals (best-effort) ──
       if (client.instagramAccountId) {
         try {
-          const igAccParams = new URLSearchParams({
-            access_token: accessToken,
-            metric: 'views,reach,profile_views,website_clicks',
-            period: 'day',
-            since: periodStart,
-            until: periodEnd,
-          })
-
-          const igAccRes = await fetch(`${baseUrl}/${client.instagramAccountId}/insights?${igAccParams.toString()}`)
-          if (igAccRes.ok) {
-            const igAccData = await igAccRes.json()
-            const igValues = igAccData.data as Array<{ name: string; values?: Array<{ value: number }> }> ?? []
-
-            let igViews = 0
-            let igReach = 0
-            let igProfileVisits = 0
-            let igWebsiteClicks = 0
-
-            for (const v of igValues) {
-              const val = v.values?.reduce((sum, entry) => sum + (entry.value ?? 0), 0) ?? 0
-              switch (v.name) {
-                case 'views':
-                  igViews = val
-                  break
-                case 'reach':
-                  igReach = val
-                  break
-                case 'profile_views':
-                  igProfileVisits = val
-                  break
-                case 'website_clicks':
-                  igWebsiteClicks = val
-                  break
-              }
+          const { values, error } = await fetchInsights(
+            baseUrl,
+            client.instagramAccountId,
+            ['reach', 'profile_views', 'website_clicks'],
+            igToken,
+            { period: 'day', since: periodStart, until: periodEnd },
+            knownTokens,
+          )
+          // followers_count is a lifetime metric fetched separately (best-effort).
+          let igFollowers = 0
+          try {
+            const fParams = new URLSearchParams({ access_token: igToken, fields: 'followers_count' })
+            const fRes = await fetch(`${baseUrl}/${client.instagramAccountId}?${fParams.toString()}`)
+            if (fRes.ok) {
+              const fData = await fRes.json()
+              if (typeof fData.followers_count === 'number') igFollowers = fData.followers_count
             }
+          } catch {
+            // non-fatal
+          }
 
-            // Upsert into manual_platform_metrics for Instagram.
-            const { data: existingIgMetrics } = await sb
-              .from('manual_platform_metrics')
-              .select('id')
-              .eq('client_id', client.clientId)
-              .eq('month', month)
-              .eq('platform', 'instagram')
-              .limit(1)
+          if (error && Object.keys(values).length === 0 && igFollowers === 0) {
+            result.warnings.push(`Instagram account insights unavailable (follower/profile totals may be missing): ${error}`)
+          }
 
-            const igMetricPayload = {
-              client_id: client.clientId,
+          const anyPositive =
+            (['reach', 'profile_views', 'website_clicks'].some(k => typeof values[k] === 'number' && values[k] > 0)) ||
+            igFollowers > 0
+          if (anyPositive) {
+            await upsertSyncedPlatformMetric(sb, {
+              clientId: client.clientId,
               month,
               platform: 'instagram',
-              source_type: 'meta_business_sync',
-              views: igViews,
-              reach: igReach,
+              views: 0,
+              reach: values.reach ?? 0,
               engagements: 0,
-              accounts_engaged: 0,
-              profile_visits: igProfileVisits,
-              external_link_taps: igWebsiteClicks,
-              followers: 0,
-              top_content_notes: null,
-              content_type_split_notes: null,
-              general_notes: `Synced from Meta API on ${new Date().toISOString().slice(0, 10)}`,
-              created_by: user.id,
-            }
-
-            if (existingIgMetrics && existingIgMetrics.length > 0) {
-              await sb.from('manual_platform_metrics').update(igMetricPayload).eq('id', existingIgMetrics[0].id)
-            } else {
-              await sb.from('manual_platform_metrics').insert(igMetricPayload)
-            }
-          } else {
-            result.warnings.push(`Failed to fetch Instagram account insights: ${igAccRes.status}`)
+              profileVisits: values.profile_views ?? 0,
+              externalLinkTaps: values.website_clicks ?? 0,
+              followers: igFollowers,
+              createdBy: user.id,
+            }, result.warnings, knownTokens)
           }
         } catch (err) {
-          result.warnings.push(`Error fetching Instagram account insights: ${String(err)}`)
+          result.warnings.push(redact(`Error fetching Instagram account insights: ${String(err)}`, knownTokens))
         }
       }
 
@@ -876,8 +978,8 @@ Deno.serve(async (req) => {
       clientsSynced++
     } catch (err) {
       result.status = 'failed'
-      // Our thrown errors already carry the detailed, token-free message.
-      result.error = err instanceof Error ? err.message : String(err)
+      // Our thrown errors already carry the detailed message; redact defensively.
+      result.error = redact(err instanceof Error ? err.message : String(err), knownTokens)
       clientsFailed++
     }
 

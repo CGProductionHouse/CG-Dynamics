@@ -12,9 +12,10 @@ import {
   PLATFORM_LABELS,
   buildMasterReport,
   buildPerformanceMovement,
-  compareMetric,
+  compareNullable,
   displayContentType,
   formatDate,
+  formatMetric,
   formatNumber,
   formatPercent,
   reportPostToStatsPost,
@@ -310,7 +311,7 @@ function MetricTile({
       ? formatNumber(value)
       : typeof value === 'string' && value.trim()
         ? value
-        : 'Data unavailable'
+        : 'Data not available'
 
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.95)] backdrop-blur sm:p-6">
@@ -476,8 +477,8 @@ function PlatformSummaryCard({ view }: { view: PlatformView }) {
       </div>
 
       <dl className="space-y-0">
-        <PlatformRow label="Reach" value={formatNumber(view.reach)} />
-        <PlatformRow label="Views" value={formatNumber(view.views)} />
+        <PlatformRow label="Reach" value={formatMetric(view.reach)} />
+        <PlatformRow label="Views" value={formatMetric(view.views)} />
         <PlatformRow label="Engagements" value={formatNumber(view.engagements)} />
         {view.source === 'posts' && <PlatformRow label="Posts" value={formatNumber(view.postCount)} />}
       </dl>
@@ -655,9 +656,9 @@ function PlatformTab({
 
 function PostsPlatformTab({ view, previousView }: { view: PlatformView; previousView: PlatformView | null }) {
   const growth = [
-    { label: 'Views', m: compareMetric(view.views, previousView?.views) },
-    { label: 'Reach', m: compareMetric(view.reach, previousView?.reach) },
-    { label: 'Engagements', m: compareMetric(view.engagements, previousView?.engagements) },
+    { label: 'Views', m: compareNullable(view.views, previousView?.views) },
+    { label: 'Reach', m: compareNullable(view.reach, previousView?.reach) },
+    { label: 'Engagements', m: compareNullable(view.engagements, previousView?.engagements) },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
 
   return (
@@ -697,8 +698,8 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
             </h3>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Reach" value={formatNumber(view.bestPost.reach)} />
-              <MiniMetric label="Views" value={formatNumber(view.bestPost.impressions)} />
+              <MiniMetric label="Reach" value={formatMetric(view.bestPost.reach)} />
+              <MiniMetric label="Views" value={formatMetric(view.bestPost.impressions)} />
               <MiniMetric label="Engagements" value={formatNumber(view.bestPost.engagements)} />
             </div>
           </div>
@@ -751,10 +752,10 @@ function ManualPlatformTab({
   ].filter(note => note.text && note.text.trim())
 
   const growth = [
-    { label: 'Views', m: compareMetric(view.views, previousManual?.views) },
-    { label: 'Reach', m: compareMetric(view.reach, previousManual?.reach) },
-    { label: 'Engagements', m: compareMetric(view.engagements, previousManual?.engagements) },
-    { label: 'Followers', m: compareMetric(manual.followers, previousManual?.followers) },
+    { label: 'Views', m: compareNullable(view.views, previousManual?.views) },
+    { label: 'Reach', m: compareNullable(view.reach, previousManual?.reach) },
+    { label: 'Engagements', m: compareNullable(view.engagements, previousManual?.engagements) },
+    { label: 'Followers', m: compareNullable(manual.followers, previousManual?.followers) },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
 
   return (

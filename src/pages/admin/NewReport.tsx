@@ -23,6 +23,7 @@ import {
   calculateReportStats,
   displayContentType,
   formatDate,
+  formatMetric,
   formatNumber,
   formatPercent,
   importedToStatsPost,
@@ -635,8 +636,8 @@ export default function NewReport() {
       )}
 
       <div className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Reach" value={formatNumber(master.totalReach)} />
-        <StatCard label="Views" value={formatNumber(master.totalViews)} />
+        <StatCard label="Reach" value={formatMetric(master.totalReach)} />
+        <StatCard label="Views" value={formatMetric(master.totalViews)} />
         <StatCard label="Engagements" value={formatNumber(master.totalEngagements)} />
         <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
       </div>
@@ -698,8 +699,8 @@ export default function NewReport() {
                 </p>
               ) : (
                 <dl className="mt-2 space-y-1 text-xs text-brand-primary">
-                  <div className="flex justify-between"><dt>Reach</dt><dd className="text-white">{formatNumber(view.reach)}</dd></div>
-                  <div className="flex justify-between"><dt>Views</dt><dd className="text-white">{formatNumber(view.views)}</dd></div>
+                  <div className="flex justify-between"><dt>Reach</dt><dd className="text-white">{formatMetric(view.reach)}</dd></div>
+                  <div className="flex justify-between"><dt>Views</dt><dd className="text-white">{formatMetric(view.views)}</dd></div>
                   <div className="flex justify-between"><dt>Engagements</dt><dd className="text-white">{formatNumber(view.engagements)}</dd></div>
                   <div className="flex justify-between">
                     <dt>Source</dt>
@@ -852,7 +853,7 @@ export default function NewReport() {
                       {post.post_type ? displayContentType(post.post_type) ?? post.post_type : 'Content type not set'}
                     </p>
                     <p className="text-xs text-brand-primary mt-2">
-                      {formatNumber(post.engagements)} engagements | {formatNumber(post.reach)} reach
+                      {formatNumber(post.engagements)} engagements | {formatMetric(post.reach)} reach
                     </p>
                   </div>
                 ))
@@ -1009,8 +1010,8 @@ function PerformancePanel({
               : 'Content type not set'}
           </p>
           <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
-            <MiniMetric label="Reach" value={formatNumber(post.reach)} />
-            <MiniMetric label="Views" value={formatNumber(post.impressions)} />
+            <MiniMetric label="Reach" value={formatMetric(post.reach)} />
+            <MiniMetric label="Views" value={formatMetric(post.impressions)} />
             <MiniMetric label="Eng." value={formatNumber(post.engagements)} />
           </div>
         </div>

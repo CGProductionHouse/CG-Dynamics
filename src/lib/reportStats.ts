@@ -17,8 +17,12 @@ export interface ReportStatsPost {
   caption: string | null
   permalink: string | null
   publish_time: string | null
-  reach: number
-  impressions: number
+  // reach / impressions are null when the source genuinely did not return the
+  // metric (e.g. Meta did not provide insights). They are only 0 when a source
+  // explicitly reported 0. Engagements come from likes/comments/etc. which are
+  // generally available, so they stay numeric.
+  reach: number | null
+  impressions: number | null
   engagements: number
   post_type: string | null
   platform: Platform | null
@@ -26,12 +30,21 @@ export interface ReportStatsPost {
 }
 
 export interface ReportStats {
-  totalReach: number
-  totalImpressions: number
+  totalReach: number | null
+  totalImpressions: number | null
   totalEngagements: number
   postCount: number
   bestPost: ReportStatsPost | null
   topPosts: ReportStatsPost[]
+}
+
+// Sums a set of possibly-missing metric values. Returns null when EVERY value
+// is missing (so the UI can show "Data not available"); otherwise sums only the
+// values that are real numbers. A real 0 counts as data.
+export function sumOrNull(values: Array<number | null | undefined>): number | null {
+  const nums = values.filter((v): v is number => typeof v === 'number')
+  if (nums.length === 0) return null
+  return nums.reduce((sum, v) => sum + v, 0)
 }
 
 export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
@@ -50,24 +63,52 @@ export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
 }
 
 export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
-  const raw = post.raw as {
-    impressions?: number
-    views?: number
-    engagements?: number
-    video_views?: number
+  const raw = (post.raw ?? {}) as {
+    impressions?: number | null
+    views?: number | null
+    reach?: number | null
+    engagements?: number | null
+    video_views?: number | null
     full_picture?: string
     thumbnail_url?: string
     media_url?: string
+    source?: string
+    synced_at?: string
   }
+
+  // Meta-synced posts record the TRUE availability of each metric in `raw`
+  // (a number, or null when Meta did not return it). Legacy CSV/import posts
+  // carry real numbers in raw.views/impressions and the integer columns.
+  const isSynced = raw.source === 'meta_sync' || typeof raw.synced_at === 'string'
+
+  let impressions: number | null
+  let reach: number | null
+  if (isSynced) {
+    impressions = typeof raw.views === 'number' ? raw.views : null
+    reach = typeof raw.reach === 'number' ? raw.reach : null
+  } else {
+    impressions =
+      typeof raw.views === 'number'
+        ? raw.views
+        : typeof raw.impressions === 'number'
+          ? raw.impressions
+          : post.views
+    reach = post.reach
+  }
+
+  const engagements =
+    typeof raw.engagements === 'number'
+      ? raw.engagements
+      : post.reactions + post.comments + post.shares + post.total_clicks
 
   return {
     id: post.id,
     caption: post.caption,
     permalink: post.permalink,
     publish_time: post.publish_time,
-    reach: post.reach,
-    impressions: raw.views ?? raw.impressions ?? post.views,
-    engagements: raw.engagements ?? post.reactions + post.comments + post.shares + post.total_clicks,
+    reach,
+    impressions,
+    engagements,
     post_type: post.meta_post_type,
     platform: post.platform,
     imageUrl: raw.full_picture ?? raw.thumbnail_url ?? raw.media_url ?? null,
@@ -78,8 +119,8 @@ export function calculateReportStats(posts: ReportStatsPost[]): ReportStats {
   const sorted = [...posts].sort((a, b) => b.engagements - a.engagements)
 
   return {
-    totalReach: posts.reduce((sum, post) => sum + post.reach, 0),
-    totalImpressions: posts.reduce((sum, post) => sum + post.impressions, 0),
+    totalReach: sumOrNull(posts.map(post => post.reach)),
+    totalImpressions: sumOrNull(posts.map(post => post.impressions)),
     totalEngagements: posts.reduce((sum, post) => sum + post.engagements, 0),
     postCount: posts.length,
     bestPost: sorted[0] ?? null,
@@ -106,15 +147,16 @@ export function calculatePlatformBreakdowns(posts: ReportStatsPost[]): PlatformB
   })
 }
 
-// Best platform is ranked by reach first, then engagements as a tie-breaker.
+// Best platform is ranked by reach first (missing reach sorts low), then
+// engagements as a tie-breaker.
 export function bestPlatform(breakdowns: PlatformBreakdown[]): PlatformBreakdown | null {
   const withData = breakdowns.filter(breakdown => breakdown.hasData)
   if (withData.length === 0) return null
 
   return [...withData].sort((a, b) => {
-    if (b.stats.totalReach !== a.stats.totalReach) {
-      return b.stats.totalReach - a.stats.totalReach
-    }
+    const ar = a.stats.totalReach ?? -1
+    const br = b.stats.totalReach ?? -1
+    if (br !== ar) return br - ar
     return b.stats.totalEngagements - a.stats.totalEngagements
   })[0]
 }
@@ -127,8 +169,9 @@ export interface PlatformView {
   platform: Platform
   label: string
   source: PlatformSource
-  reach: number
-  views: number
+  // null when the metric was not available from this platform's source.
+  reach: number | null
+  views: number | null
   engagements: number
   // Populated when source === 'posts'
   postCount: number
@@ -140,8 +183,8 @@ export interface PlatformView {
 
 export interface MasterReportData {
   platforms: PlatformView[]
-  totalReach: number
-  totalViews: number
+  totalReach: number | null
+  totalViews: number | null
   totalEngagements: number
   bestPlatform: PlatformView | null
   bestPostOverall: ReportStatsPost | null
@@ -232,14 +275,18 @@ export function buildMasterReport(
   const withData = platforms.filter(view => view.source !== 'none')
 
   const bestPlatform = [...withData].sort((a, b) => {
-    if (b.reach !== a.reach) return b.reach - a.reach
+    const ar = a.reach ?? -1
+    const br = b.reach ?? -1
+    if (br !== ar) return br - ar
     return b.engagements - a.engagements
   })[0] ?? null
 
   return {
     platforms,
-    totalReach: withData.reduce((sum, view) => sum + view.reach, 0),
-    totalViews: withData.reduce((sum, view) => sum + view.views, 0),
+    // Totals stay null when no platform reported the metric; otherwise sum only
+    // the platforms that did. Never invent a 0.
+    totalReach: sumOrNull(withData.map(view => view.reach)),
+    totalViews: sumOrNull(withData.map(view => view.views)),
     totalEngagements: withData.reduce((sum, view) => sum + view.engagements, 0),
     bestPlatform,
     bestPostOverall: posts.length > 0 ? calculateReportStats(posts).bestPost : null,
@@ -280,6 +327,22 @@ export function compareMetric(current: number, previous: number | null | undefin
   }
 }
 
+// Like compareMetric, but treats a null current value as "not available" so the
+// UI never shows a fake 0 for a missing metric.
+export function compareNullable(
+  current: number | null | undefined,
+  previous: number | null | undefined
+): MetricMovement {
+  if (typeof current !== 'number') return unavailableMetric()
+  return compareMetric(current, typeof previous === 'number' ? previous : null)
+}
+
+// Formats a possibly-missing metric for display. Returns "Data not available"
+// for null/undefined, and the formatted number (including a real 0) otherwise.
+export function formatMetric(value: number | null | undefined): string {
+  return typeof value === 'number' ? formatNumber(value) : 'Data not available'
+}
+
 export function buildPerformanceMovement(
   current: MasterReportData,
   previous: MasterReportData | null,
@@ -292,8 +355,9 @@ export function buildPerformanceMovement(
   const previousProfileVisits = totalManualProfileVisits(previousManualMetrics)
 
   return {
-    views: compareMetric(current.totalViews, previous?.totalViews),
-    reach: compareMetric(current.totalReach, previous?.totalReach),
+    // Views/reach are null when neither source reported them → "not available".
+    views: compareNullable(current.totalViews, previous?.totalViews),
+    reach: compareNullable(current.totalReach, previous?.totalReach),
     engagements: compareMetric(current.totalEngagements, previous?.totalEngagements),
     // Profile visits and followers are only available from manual summaries.
     // Show "not available" rather than 0 when no manual data exists.

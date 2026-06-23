@@ -19,8 +19,25 @@ import {
 import { readStrategyData, strategyRequiredComplete } from '../../lib/strategyEngine'
 import { ClientLogo } from '../../components/ClientLogo'
 import WorkflowGuide from '../../components/WorkflowGuide'
+import { supabase } from '../../lib/supabase'
 
 type StatusFilter = 'all' | 'internal-draft' | 'ready-to-publish' | 'published' | 'incomplete-month' | 'needs-repair'
+
+type ReportSource = 'meta' | 'manual' | 'mixed'
+type SourceFilter = 'all' | ReportSource
+
+const SOURCE_OPTIONS: { value: SourceFilter; label: string }[] = [
+  { value: 'all', label: 'All sources' },
+  { value: 'meta', label: 'Meta synced' },
+  { value: 'manual', label: 'Manual / CSV' },
+  { value: 'mixed', label: 'Mixed' },
+]
+
+const SOURCE_BADGE: Record<ReportSource, { label: string; className: string }> = {
+  meta: { label: 'Meta synced', className: 'bg-sky-400/15 text-sky-300' },
+  manual: { label: 'Manual / CSV', className: 'bg-brand-muted text-brand-primary' },
+  mixed: { label: 'Mixed', className: 'bg-amber-400/15 text-amber-300' },
+}
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -105,7 +122,10 @@ export default function ReportsManagement() {
   const [clientFilter, setClientFilter] = useState<string>('all')
   const [monthFilter, setMonthFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  // report id → data source (derived from meta_content_mappings + posts).
+  const [sourceById, setSourceById] = useState<Map<string, ReportSource>>(new Map())
 
   const clientById = useMemo(() => {
     return new Map(clients.map(client => [client.id, client]))
@@ -135,10 +155,51 @@ export default function ReportsManagement() {
       }
       setClients(clientsRes.data)
       setReports(reportsRes.data)
+      await classifySources(reportsRes.data)
     } catch (error) {
       setError(errorMessage(error, 'Could not load reports.'))
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Classify each report's data source. A report is "Meta synced" when its posts
+  // are linked in meta_content_mappings; "Mixed" when it also has non-Meta
+  // (e.g. CSV import) posts; otherwise "Manual / CSV". Lightweight id-only reads.
+  async function classifySources(reportRows: Report[]) {
+    try {
+      const [mapRes, postsRes] = await Promise.all([
+        supabase.from('meta_content_mappings').select('report_id, post_id'),
+        supabase.from('posts').select('id, report_id'),
+      ])
+
+      const metaPostsByReport = new Map<string, Set<string>>()
+      for (const m of (mapRes.data ?? []) as { report_id: string | null; post_id: string | null }[]) {
+        if (!m.report_id) continue
+        const set = metaPostsByReport.get(m.report_id) ?? new Set<string>()
+        if (m.post_id) set.add(m.post_id)
+        metaPostsByReport.set(m.report_id, set)
+      }
+
+      const totalPostsByReport = new Map<string, number>()
+      for (const p of (postsRes.data ?? []) as { id: string; report_id: string }[]) {
+        totalPostsByReport.set(p.report_id, (totalPostsByReport.get(p.report_id) ?? 0) + 1)
+      }
+
+      const next = new Map<string, ReportSource>()
+      for (const r of reportRows) {
+        const metaCount = metaPostsByReport.get(r.id)?.size ?? 0
+        const total = totalPostsByReport.get(r.id) ?? 0
+        if (metaCount > 0) {
+          next.set(r.id, total > metaCount ? 'mixed' : 'meta')
+        } else {
+          next.set(r.id, 'manual')
+        }
+      }
+      setSourceById(next)
+    } catch {
+      // Source classification is best-effort; never block the reports list.
+      setSourceById(new Map())
     }
   }
 
@@ -181,6 +242,9 @@ export default function ReportsManagement() {
         return getDerivedStatus(r, monthComplete, ready, isPartial) === statusFilter
       })
     }
+    if (sourceFilter !== 'all') {
+      result = result.filter(r => (sourceById.get(r.id) ?? 'manual') === sourceFilter)
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       result = result.filter(r => {
@@ -196,7 +260,7 @@ export default function ReportsManagement() {
     })
 
     return result
-  }, [reports, clientFilter, monthFilter, statusFilter, searchQuery, clientNameById])
+  }, [reports, clientFilter, monthFilter, statusFilter, sourceFilter, sourceById, searchQuery, clientNameById])
 
   async function handleStatus(report: Report) {
     const nextStatus = report.status === 'published' ? 'draft' : 'published'
@@ -283,10 +347,11 @@ export default function ReportsManagement() {
     setClientFilter('all')
     setMonthFilter('all')
     setStatusFilter('all')
+    setSourceFilter('all')
     setSearchQuery('')
   }
 
-  const hasActiveFilters = clientFilter !== 'all' || monthFilter !== 'all' || statusFilter !== 'all' || searchQuery !== ''
+  const hasActiveFilters = clientFilter !== 'all' || monthFilter !== 'all' || statusFilter !== 'all' || sourceFilter !== 'all' || searchQuery !== ''
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -353,6 +418,18 @@ export default function ReportsManagement() {
                 className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 {STATUS_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </FilterGroup>
+
+            <FilterGroup label="Source">
+              <select
+                value={sourceFilter}
+                onChange={e => setSourceFilter(e.target.value as SourceFilter)}
+                className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              >
+                {SOURCE_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
@@ -439,6 +516,14 @@ export default function ReportsManagement() {
                         <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${badge.className}`}>
                           {badge.label}
                         </span>
+                        {(() => {
+                          const src = SOURCE_BADGE[sourceById.get(report.id) ?? 'manual']
+                          return (
+                            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${src.className}`}>
+                              {src.label}
+                            </span>
+                          )
+                        })()}
                       </div>
                       <p className="mt-0.5 text-sm font-medium text-white/80">{monthLabel(report)}</p>
                       <p className="mt-1.5 text-xs leading-relaxed text-brand-primary">{nextAction}</p>
