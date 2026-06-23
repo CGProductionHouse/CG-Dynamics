@@ -73,15 +73,6 @@ export default function MetaIntegrationPage() {
   const [linkedAssets, setLinkedAssets] = useState<LinkedAsset[]>([])
   const [loadingLinked, setLoadingLinked] = useState(false)
 
-  // Test state
-  const [testState, setTestState] = useState<{
-    action: string | null
-    loading: boolean
-    msg: string | null
-    isError: boolean
-    detail: string | null
-  }>({ action: null, loading: false, msg: null, isError: false, detail: null })
-
   // Read OAuth result from URL query params after callback redirect.
   useEffect(() => {
     const meta = searchParams.get('meta')
@@ -184,6 +175,8 @@ export default function MetaIntegrationPage() {
     setSaving(true)
     setLinkMsg(null)
 
+    const clientName = clients.find(c => c.id === selectedClientId)?.name ?? 'Client'
+
     // Check for existing active mapping for this client.
     const { data: existing } = await supabase
       .from('meta_client_assets')
@@ -219,7 +212,12 @@ export default function MetaIntegrationPage() {
     if (result.error) {
       setLinkMsg({ ok: false, text: 'Failed to save link. Please try again.' })
     } else {
-      setLinkMsg({ ok: true, text: 'Asset link saved.' })
+      setLinkMsg({ ok: true, text: `${clientName} linked successfully. You can now link another client.` })
+      // Clear form for next link.
+      setSelectedClientId('')
+      setSelectedPageId('')
+      setSelectedIgId('')
+      setSelectedAdId('')
       await loadLinkedAssets()
     }
   }
@@ -230,24 +228,6 @@ export default function MetaIntegrationPage() {
       .update({ is_active: false })
       .eq('id', asset.id)
     await loadLinkedAssets()
-  }
-
-  async function testService(endpoint: string, body?: Record<string, unknown>) {
-    setTestState({ action: endpoint, loading: true, msg: null, isError: false, detail: null })
-    try {
-      const { data, error } = await supabase.functions.invoke(endpoint, {
-        method: 'POST',
-        body: body ?? {},
-      })
-      if (error) {
-        setTestState({ action: endpoint, loading: false, msg: 'Could not reach the Meta service. Check Supabase Edge Function deployment.', isError: true, detail: error.message })
-        return
-      }
-      const ok = data?.ok !== false
-      setTestState({ action: endpoint, loading: false, msg: ok ? 'Service is reachable and responding correctly.' : `Unexpected response from ${endpoint}.`, isError: !ok, detail: JSON.stringify(data, null, 2) })
-    } catch (err) {
-      setTestState({ action: endpoint, loading: false, msg: 'Could not reach the Meta service. Check Supabase Edge Function deployment.', isError: true, detail: err instanceof Error ? err.message : String(err) })
-    }
   }
 
   return (
@@ -308,16 +288,6 @@ export default function MetaIntegrationPage() {
               >
                 {connectState === 'connected' ? 'Reconnect Meta' : 'Connect Meta'}
               </button>
-              {connectState !== 'connected' && (
-                <button
-                  type="button"
-                  onClick={() => testService('meta-oauth-start')}
-                  disabled={testState.loading}
-                  className="rounded-lg border border-brand-muted px-3 py-2 text-xs font-medium text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Test service
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -355,6 +325,14 @@ export default function MetaIntegrationPage() {
 
             {assetError && (
               <p className="mt-3 text-sm text-red-400">{assetError}</p>
+            )}
+
+            {linkMsg && (
+              <div className={`mt-4 rounded-xl border p-4 ${linkMsg.ok ? 'border-brand-accent/20 bg-brand-accent/10' : 'border-red-400/20 bg-red-400/10'}`}>
+                <p className={`text-sm font-medium ${linkMsg.ok ? 'text-brand-accent' : 'text-red-400'}`}>
+                  {linkMsg.text}
+                </p>
+              </div>
             )}
 
             {assetsLoaded && (
@@ -444,11 +422,6 @@ export default function MetaIntegrationPage() {
                   >
                     {saving ? 'Saving…' : 'Save link'}
                   </button>
-                  {linkMsg && (
-                    <span className={`text-sm ${linkMsg.ok ? 'text-brand-accent' : 'text-red-400'}`}>
-                      {linkMsg.text}
-                    </span>
-                  )}
                 </div>
               </div>
             )}
@@ -468,7 +441,7 @@ export default function MetaIntegrationPage() {
               </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-brand-primary">
-              Sync will be enabled after assets are linked.
+              Sync will be enabled after we add the reporting sync engine.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button
@@ -484,14 +457,6 @@ export default function MetaIntegrationPage() {
                 className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
               >
                 Sync current month as internal draft
-              </button>
-              <button
-                type="button"
-                onClick={() => testService('meta-sync', { clientId: null, syncType: 'previous_completed_month', periodStart: null, periodEnd: null })}
-                disabled={testState.loading}
-                className="rounded-lg border border-brand-muted px-3 py-2 text-xs font-medium text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Test service
               </button>
             </div>
           </div>
@@ -527,9 +492,9 @@ export default function MetaIntegrationPage() {
                   <div key={asset.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-muted bg-brand-surface p-4">
                     <div className="min-w-0 text-sm">
                       <p className="font-medium text-white">{client?.name ?? asset.client_id}</p>
-                      {asset.facebook_page_name && <p className="text-brand-primary">{asset.facebook_page_name}</p>}
-                      {asset.instagram_username && <p className="text-brand-primary">@{asset.instagram_username}</p>}
-                      {asset.ad_account_name && <p className="text-brand-primary">{asset.ad_account_name}</p>}
+                      <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
+                      <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : 'No Instagram account linked'}</p>
+                      <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
                     </div>
                     <button
                       type="button"
@@ -542,21 +507,6 @@ export default function MetaIntegrationPage() {
                 )
               })}
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Test result */}
-      {testState.msg && (
-        <div className={`mt-6 max-w-2xl rounded-xl border p-5 ${testState.isError ? 'border-red-400/20 bg-red-400/10' : 'border-brand-accent/20 bg-brand-accent/10'}`}>
-          <p className={`text-sm font-medium ${testState.isError ? 'text-red-400' : 'text-brand-accent'}`}>
-            {testState.msg}
-          </p>
-          {testState.detail && (
-            <details className="mt-2">
-              <summary className="cursor-pointer text-xs text-brand-primary/60 hover:text-brand-primary">Response detail</summary>
-              <pre className="mt-2 overflow-x-auto rounded-lg bg-brand-bg/50 p-3 text-xs text-brand-primary">{testState.detail}</pre>
-            </details>
           )}
         </div>
       )}
