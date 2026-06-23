@@ -50,11 +50,22 @@ supabase functions deploy meta-sync --no-verify-jwt
 > auth validation (OAuth callback receives a Meta redirect, not a Supabase
 > JWT). Auth verification for sync will be added in a later phase.
 
+## Deploy note (meta-list-assets)
+
+This function must be deployed after the code is merged:
+
+```bash
+npx supabase functions deploy meta-list-assets --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
+```
+
+It verifies the caller's JWT internally and enforces staff-level access, so
+`--no-verify-jwt` is used (the function handles auth itself).
+
 ## Future phases
 
 1. ✅ OAuth start — generate Meta login URL
 2. ✅ OAuth callback — exchange code, store token server-side
-3. ⬜ Asset discovery — fetch and display connected pages/accounts
-4. ⬜ Asset linking — map Meta assets to CG Dynamics clients
+3. ✅ Asset discovery — fetch connected pages/accounts from Meta
+4. ✅ Asset linking — map Meta assets to CG Dynamics clients
 5. ⬜ Manual sync — pull monthly data and create/update report drafts
 6. ⬜ Scheduled sync — automate monthly pull
