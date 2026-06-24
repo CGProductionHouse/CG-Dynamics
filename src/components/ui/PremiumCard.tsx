@@ -39,7 +39,7 @@ export function PremiumCard({
 }
 
 interface PremiumCardHeaderProps {
-  title: string
+  title: ReactNode
   subtitle?: string
   eyebrow?: string
   action?: ReactNode

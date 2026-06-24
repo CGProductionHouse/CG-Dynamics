@@ -32,6 +32,9 @@ import {
 } from '../../lib/reportStats'
 import { buildMetaContentMetrics, buildMetaPlatformMetrics, metaEngagementLabel, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
 import { buildPlatformPerformance, buildReportPerformance, type PerformanceLevel } from '../../lib/reportPerformance'
+import { PremiumCard, PremiumCardHeader, CardGrid } from '../../components/ui/PremiumCard'
+import { StatusBadge, SourceBadge, ReadinessBadge } from '../../components/ui/Badges'
+import { ActionButton, ButtonGroup } from '../../components/ui/Buttons'
 
 interface ReportFields {
   reportTitle: string
@@ -554,42 +557,36 @@ export default function NewReport() {
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Report builder</p>
-          <h1 className="text-2xl font-semibold text-white sm:text-3xl">
-            {savedReportId ? 'Edit monthly master report' : 'Create monthly master report'}
-          </h1>
-          <p className="text-sm text-brand-primary mt-2 max-w-2xl">
-            Combine every platform imported for this client and month into one master dashboard, then add the strategy commentary manually.
-          </p>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => handleSave('draft')}
-            disabled={!!saving}
-            className="w-full border border-brand-muted text-brand-primary px-4 py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition disabled:opacity-60 sm:w-auto"
-          >
-            {saving === 'draft' ? 'Saving...' : reportStatus === 'published' ? 'Save as draft' : 'Save draft'}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSave('published')}
-            disabled={!!saving}
-            className="w-full bg-brand-accent text-brand-bg font-semibold px-4 py-2.5 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60 sm:w-auto"
-          >
-            {saving === 'published' ? 'Saving...' : reportStatus === 'published' ? 'Save published' : 'Publish'}
-          </button>
-        </div>
+      <PremiumCard className="mb-6 lg:mb-8">
+        <PremiumCardHeader
+          eyebrow="Report builder"
+          title={savedReportId ? 'Edit monthly master report' : 'Create monthly master report'}
+          subtitle="Combine every platform imported for this client and month into one master dashboard, then add the strategy commentary manually."
+          action={
+            <ButtonGroup>
+              <ActionButton
+                variant="secondary"
+                onClick={() => handleSave('draft')}
+                disabled={!!saving}
+              >
+                {saving === 'draft' ? 'Saving...' : reportStatus === 'published' ? 'Save as draft' : 'Save draft'}
+              </ActionButton>
+              <ActionButton
+                variant="primary"
+                onClick={() => handleSave('published')}
+                disabled={!!saving}
+              >
+                {saving === 'published' ? 'Saving...' : reportStatus === 'published' ? 'Save published' : 'Publish'}
+              </ActionButton>
+            </ButtonGroup>
+          }
+        />
         {savedReportId && reportStatus !== 'published' && !hasStrategyContent(strategyData) && (
-          <p className="mt-2 text-xs text-amber-300 text-right">
-            Add CG action plan before publishing.
-          </p>
+          <ReadinessBadge ready={false} />
         )}
-      </div>
+      </PremiumCard>
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
+      <PremiumCard padding="md" className="mb-6">
         {periodStart && periodEnd && (
           <div className="mb-4 grid gap-3 rounded-lg border border-brand-muted bg-brand-bg/50 p-3 sm:grid-cols-3">
             <div>
@@ -603,7 +600,7 @@ export default function NewReport() {
               </p>
               {!isMonthComplete(currentMonth) && (
                 <p className="mt-1 text-xs text-amber-300">
-                  Incomplete month — not available for client view yet.
+                  Incomplete month - not available for client view yet.
                 </p>
               )}
             </div>
@@ -654,7 +651,7 @@ export default function NewReport() {
             />
           </Field>
         </div>
-      </section>
+      </PremiumCard>
 
       {error && (
         <p className="mb-4 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
@@ -668,32 +665,41 @@ export default function NewReport() {
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
+      <CardGrid columns={4} gap={3} className="mb-6">
         {master.totalViews !== null && (
-          <StatCard label="Views" value={formatNumber(master.totalViews)} />
+          <PremiumCard padding="sm">
+            <p className="text-xs uppercase tracking-[0.12em] text-brand-primary">Views</p>
+            <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{formatNumber(master.totalViews)}</p>
+          </PremiumCard>
         )}
         {master.totalReach !== null && (
-          <StatCard label="Reach" value={formatNumber(master.totalReach)} />
+          <PremiumCard padding="sm">
+            <p className="text-xs uppercase tracking-[0.12em] text-brand-primary">Reach</p>
+            <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{formatNumber(master.totalReach)}</p>
+          </PremiumCard>
         )}
         {master.totalEngagements > 0 && (
-          <StatCard label="Content interactions" value={formatNumber(master.totalEngagements)} />
+          <PremiumCard padding="sm">
+            <p className="text-xs uppercase tracking-[0.12em] text-brand-primary">Content interactions</p>
+            <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{formatNumber(master.totalEngagements)}</p>
+          </PremiumCard>
         )}
-        <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
-      </div>
+        <PremiumCard padding="sm">
+          <p className="text-xs uppercase tracking-[0.12em] text-brand-primary">Posts</p>
+          <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{postsLoading ? '...' : formatNumber(stats.postCount)}</p>
+        </PremiumCard>
+      </CardGrid>
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-white mb-1">Growth comparison</h2>
-            <p className="text-xs text-brand-primary">
-              Comparing {currentMonthLabel} with {previousMonthLabel}.
-            </p>
-          </div>
-          <SourcePill
-            label={previousMaster ? 'Comparison available' : 'Baseline not synced yet'}
-            tone={previousMaster ? 'posts' : 'none'}
-          />
-        </div>
+      <PremiumCard className="mb-6">
+        <PremiumCardHeader
+          title="Growth comparison"
+          subtitle={`Comparing ${currentMonthLabel} with ${previousMonthLabel}.`}
+          action={
+            previousMaster
+              ? <SourceBadge source="meta" customLabel="Comparison available" />
+              : <SourceBadge source="none" customLabel="Baseline not synced yet" />
+          }
+        />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {!movement.views.notAvailable && <MovementCard label="Views" movement={movement.views} />}
           {!movement.reach.notAvailable && <MovementCard label="Reach" movement={movement.reach} />}
@@ -706,24 +712,33 @@ export default function NewReport() {
             Growth cannot be calculated yet because no imported posts or manual summary metrics were found for {previousMonthLabel}.
           </p>
         )}
-      </section>
+      </PremiumCard>
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-white mb-1">Performance story preview</h2>
-            <p className="text-xs text-brand-primary">
-              Exactly what {selectedClient?.name ?? 'the client'} sees in the published report — no technical labels.
-            </p>
-          </div>
-          <PerfBadge level={performance.performanceLevel} />
-        </div>
+      <PremiumCard className="mb-6">
+        <PremiumCardHeader
+          title="Performance story preview"
+          subtitle={`Exactly what ${selectedClient?.name ?? 'the client'} sees in the published report - no technical labels.`}
+          action={
+            <StatusBadge
+              label={PERF_LEVEL_META[performance.performanceLevel].label}
+              variant={
+                performance.performanceLevel === 'strong' || performance.performanceLevel === 'improving'
+                  ? 'published'
+                  : performance.performanceLevel === 'steady'
+                    ? 'ready-to-publish'
+                    : performance.performanceLevel === 'needs_attention'
+                      ? 'needs-strategy'
+                      : 'internal-draft'
+              }
+            />
+          }
+        />
 
         <p className="text-sm leading-relaxed text-white">{performance.performanceHeadline}</p>
 
         {!performance.hasComparison && (
           <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-            Previous month baseline not synced yet — month-over-month growth will appear once {previousMonthLabel} is synced.
+            Previous month baseline not synced yet - month-over-month growth will appear once {previousMonthLabel} is synced.
             The client report hides growth sections until then (it never shows "data not available").
           </p>
         )}
@@ -786,19 +801,16 @@ export default function NewReport() {
         )}
 
         <p className="mt-3 text-[11px] text-brand-primary/70">
-          Metric sources — Meta synced totals: account monthly total &amp; current snapshot; imported posts: post aggregation &amp; media insight; CSV rows: manual fallback. The client report shows none of these labels.
+          Metric sources - Meta synced totals: account monthly total &amp; current snapshot; imported posts: post aggregation &amp; media insight; CSV rows: manual fallback. The client report shows none of these labels.
         </p>
-      </section>
+      </PremiumCard>
 
       {platformDiagnostics.length > 0 && (
-        <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
-          <div className="mb-4">
-            <h2 className="text-sm font-semibold text-white mb-1">Platform story diagnostics</h2>
-            <p className="text-xs text-brand-primary">
-              Admin-only: how each platform tab is built — which metric feeds each card, what ranked the top content,
-              why content was labelled, and whether follower growth was skipped. The client never sees this.
-            </p>
-          </div>
+        <PremiumCard className="mb-6">
+          <PremiumCardHeader
+            title="Platform story diagnostics"
+            subtitle="Admin-only: how each platform tab is built - which metric feeds each card, what ranked the top content, why content was labelled, and whether follower growth was skipped. The client never sees this."
+          />
           <div className="grid gap-3 lg:grid-cols-2">
             {platformDiagnostics.map(p => (
               <div key={p.platform} className="rounded-lg border border-brand-muted bg-brand-bg/50 p-3">
@@ -846,31 +858,29 @@ export default function NewReport() {
               </div>
             ))}
           </div>
-        </section>
+        </PremiumCard>
       )}
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-white mb-1">Platform breakdown</h2>
-            <p className="text-xs text-brand-primary">
-              Meta-style platform metrics for {selectedClient?.name ?? 'client'} in {currentMonthLabel}.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <SourcePill label="Meta synced" tone="posts" />
-            <SourcePill label="Manual fallback" tone="manual" />
-            <SourcePill label="No data" tone="none" />
-          </div>
-        </div>
+      <PremiumCard className="mb-6">
+        <PremiumCardHeader
+          title="Platform breakdown"
+          subtitle={`Meta-style platform metrics for ${selectedClient?.name ?? 'client'} in ${currentMonthLabel}.`}
+          action={
+            <div className="flex flex-wrap gap-2">
+              <SourceBadge source="meta" />
+              <SourceBadge source="manual" />
+              <SourceBadge source="none" />
+            </div>
+          }
+        />
         <div className="grid gap-3 sm:grid-cols-3">
           {master.platforms.map(view => (
-            <div key={view.platform} className="border border-brand-muted rounded-lg p-3 bg-brand-bg/50">
+              <div key={view.platform} className="border border-brand-muted rounded-lg p-3 bg-brand-bg/50">
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm font-semibold text-white">{view.label}</p>
-                <SourcePill
-                  label={view.source === 'posts' ? 'Meta synced' : view.source === 'manual' ? 'Manual fallback' : 'No data'}
-                  tone={view.source}
+                <SourceBadge
+                  source={view.source === 'posts' ? 'meta' : view.source === 'manual' ? 'manual' : 'none'}
+                  customLabel={view.source === 'posts' ? 'Meta synced' : view.source === 'manual' ? 'Manual fallback' : 'No data'}
                 />
               </div>
               {view.source === 'none' ? (
@@ -897,7 +907,7 @@ export default function NewReport() {
             </div>
           ))}
         </div>
-      </section>
+      </PremiumCard>
 
       {manualMonthMismatch.length > 0 && (
         <p className="mb-6 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
@@ -913,11 +923,11 @@ export default function NewReport() {
         </p>
       )}
 
-      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
-        <h2 className="text-sm font-semibold text-white mb-1">Available manual summaries for this client</h2>
-        <p className="mb-4 text-xs text-brand-primary">
-          Report month is <span className="text-white">{currentMonthLabel}</span>. Rows matching this month feed into the report above.
-        </p>
+      <PremiumCard className="mb-6">
+        <PremiumCardHeader
+          title="Available manual summaries for this client"
+          subtitle={`Report month is ${currentMonthLabel}. Rows matching this month feed into the report above.`}
+        />
         {manualMetrics.length === 0 ? (
           <p className="rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-3 text-xs text-brand-primary">
             No manual summaries uploaded for this client yet. Add one when a platform only has monthly summary data.
@@ -961,32 +971,30 @@ export default function NewReport() {
             </table>
           </div>
         )}
-      </section>
+      </PremiumCard>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="space-y-5">
-          <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-brand-primary">Strategy board</p>
-                <h2 className="mt-2 text-base font-semibold text-white">Client-facing strategy narrative</h2>
-                <p className="mt-1 text-xs text-brand-primary">
-                  Use these prompts to turn the report data into clear client direction.
-                </p>
-              </div>
-              {hasReportDraft && !reportId && (
-                <div className="shrink-0 text-right">
-                  <p className="text-xs text-brand-primary">Draft saved on this device.</p>
-                  <button
-                    type="button"
-                    onClick={clearReportDraft}
-                    className="mt-0.5 text-xs text-brand-accent hover:brightness-110 transition"
-                  >
-                    Clear draft
-                  </button>
-                </div>
-              )}
-            </div>
+          <PremiumCard padding="md">
+            <PremiumCardHeader
+              eyebrow="Strategy board"
+              title="Client-facing strategy narrative"
+              subtitle="Use these prompts to turn the report data into clear client direction."
+              action={
+                hasReportDraft && !reportId ? (
+                  <div className="shrink-0 text-right">
+                    <p className="text-xs text-brand-primary">Draft saved on this device.</p>
+                    <button
+                      type="button"
+                      onClick={clearReportDraft}
+                      className="mt-0.5 text-xs text-brand-accent hover:brightness-110 transition"
+                    >
+                      Clear draft
+                    </button>
+                  </div>
+                ) : undefined
+              }
+            />
             <div className="space-y-4">
               <TextInput
                 label="Report title"
@@ -1010,14 +1018,36 @@ export default function NewReport() {
                 onReloadOptions={() => void reloadOptions()}
               />
             </div>
-          </div>
+          </PremiumCard>
         </section>
 
         <aside className="space-y-5">
-          <PerformancePanel title="Best performing post" post={stats.bestPost} />
+          <PremiumCard padding="md">
+            <PremiumCardHeader title="Best performing post" />
+            {stats.bestPost ? (
+              <div>
+                <p className="text-sm text-white leading-relaxed">{shortCaption(stats.bestPost.caption)}</p>
+                <p className="mt-1 text-xs text-brand-primary">
+                  {stats.bestPost.post_type
+                    ? `Content type: ${displayContentType(stats.bestPost.post_type) ?? stats.bestPost.post_type}`
+                    : 'Content type not set'}
+                </p>
+                <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
+                  {buildMetaContentMetrics(stats.bestPost).map(item => (
+                    <div key={item.key} className="bg-brand-bg/70 border border-brand-muted rounded-lg p-3">
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-brand-primary">{item.label}</p>
+                      <p className="text-base font-semibold text-white mt-1 sm:text-sm">{formatNumber(item.value)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-brand-primary">No post data loaded yet.</p>
+            )}
+          </PremiumCard>
 
-          <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
-            <h2 className="text-sm font-semibold text-white mb-4">Top 3 posts</h2>
+          <PremiumCard padding="md">
+            <PremiumCardHeader title="Top 3 posts" />
             <div className="space-y-3">
               {stats.topPosts.length === 0 ? (
                 <p className="text-sm text-brand-primary">No imported posts found for this range.</p>
@@ -1039,7 +1069,7 @@ export default function NewReport() {
                 ))
               )}
             </div>
-          </section>
+          </PremiumCard>
         </aside>
       </div>
     </div>
@@ -1055,8 +1085,6 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-// Non-blocking completion guide. Shows staff what is done and what is still
-// missing before publishing — saving a draft is always allowed.
 function StrategyChecklist({ data }: { data: StrategyData }) {
   const items = strategyChecklist(data)
   const required = items.filter(item => !item.optional)
@@ -1067,9 +1095,7 @@ function StrategyChecklist({ data }: { data: StrategyData }) {
     <div className="rounded-lg border border-brand-muted bg-brand-bg/50 p-3.5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">Before you publish</p>
-        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${allDone ? 'bg-brand-accent/20 text-brand-accent' : 'bg-brand-muted text-brand-primary'}`}>
-          {doneCount}/{required.length} ready
-        </span>
+        <ReadinessBadge ready={allDone} />
       </div>
       <ul className="mt-3 space-y-1.5">
         {items.map(item => (
@@ -1088,49 +1114,17 @@ function StrategyChecklist({ data }: { data: StrategyData }) {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[11px] text-brand-primary">This is a guide — you can save a draft at any time.</p>
+      <p className="mt-3 text-[11px] text-brand-primary">This is a guide - you can save a draft at any time.</p>
     </div>
   )
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-brand-surface border border-brand-muted rounded-xl p-4 sm:p-5">
-      <p className="text-xs uppercase tracking-[0.12em] text-brand-primary sm:tracking-[0.18em]">{label}</p>
-      <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{value}</p>
-    </div>
-  )
-}
-
-function SourcePill({ label, tone }: { label: string; tone: 'posts' | 'manual' | 'none' }) {
-  const classes = {
-    posts: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent',
-    manual: 'border-sky-300/30 bg-sky-300/10 text-sky-200',
-    none: 'border-brand-muted bg-brand-muted/50 text-brand-primary',
-  }[tone]
-
-  return (
-    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${classes}`}>
-      {label}
-    </span>
-  )
-}
-
-const PERF_LEVEL_META: Record<PerformanceLevel, { label: string; classes: string }> = {
-  strong: { label: 'Strong month', classes: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent' },
-  improving: { label: 'Improving', classes: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent' },
-  steady: { label: 'Steady', classes: 'border-sky-300/30 bg-sky-300/10 text-sky-200' },
-  needs_attention: { label: 'Needs attention', classes: 'border-amber-400/30 bg-amber-400/10 text-amber-200' },
-  baseline_only: { label: 'Baseline month', classes: 'border-brand-muted bg-brand-muted/50 text-brand-primary' },
-}
-
-function PerfBadge({ level }: { level: PerformanceLevel }) {
-  const meta = PERF_LEVEL_META[level]
-  return (
-    <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${meta.classes}`}>
-      {meta.label}
-    </span>
-  )
+const PERF_LEVEL_META: Record<PerformanceLevel, { label: string }> = {
+  strong: { label: 'Strong month' },
+  improving: { label: 'Improving' },
+  steady: { label: 'Steady' },
+  needs_attention: { label: 'Needs attention' },
+  baseline_only: { label: 'Baseline month' },
 }
 
 function movementText(movement: MetricMovement) {
@@ -1183,46 +1177,4 @@ function TextInput({
   )
 }
 
-function PerformancePanel({
-  title,
-  post,
-}: {
-  title: string
-  post: ReturnType<typeof calculateReportStats>['bestPost']
-}) {
-  return (
-    <section className="bg-brand-surface border border-brand-muted rounded-xl p-5">
-      <h2 className="text-sm font-semibold text-white mb-4">{title}</h2>
-      {post ? (
-        <div>
-          <p className="text-sm text-white leading-relaxed">{shortCaption(post.caption)}</p>
-          <p className="mt-1 text-xs text-brand-primary">
-            {post.post_type
-              ? `Content type: ${displayContentType(post.post_type) ?? post.post_type}`
-              : 'Content type not set'}
-          </p>
-          <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
-            {buildMetaContentMetrics(post).map(item => (
-              <MiniMetric
-                key={item.key}
-                label={item.label}
-                value={formatNumber(item.value)}
-              />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p className="text-sm text-brand-primary">No post data loaded yet.</p>
-      )}
-    </section>
-  )
-}
 
-function MiniMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-brand-bg/70 border border-brand-muted rounded-lg p-3">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-brand-primary">{label}</p>
-      <p className="text-base font-semibold text-white mt-1 sm:text-sm">{value}</p>
-    </div>
-  )
-}

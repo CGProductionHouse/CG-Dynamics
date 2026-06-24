@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { listClients, type Client } from '../../lib/db/clients'
+import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
+import { StatusBadge } from '../../components/ui/Badges'
+import { ActionButton } from '../../components/ui/Buttons'
 
 const STEP_LABELS = ['Connect Meta', 'Link assets', 'Sync data', 'Review draft']
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -688,446 +691,387 @@ export default function MetaIntegrationPage() {
       {/* Step cards */}
       <div className="mt-6 space-y-4 max-w-2xl">
         {/* Step 1 — Connect Meta */}
-        <div className="rounded-xl border border-brand-muted bg-brand-surface">
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">1</span>
-                <h2 className="text-sm font-semibold text-white">Connect Meta</h2>
-              </div>
-              <span className={`shrink-0 text-xs font-medium ${connectionLoading ? 'text-brand-primary/60' : connectState === 'connected' ? 'text-brand-accent' : 'text-amber-400'}`}>
-                {connectionLoading ? 'Checking…' : connectState === 'connected' ? 'Connected' : 'Not connected'}
-              </span>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-brand-primary">
-              Authorise CG Dynamics to access your Facebook Business assets.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={handleConnect}
-                className={`rounded-lg border px-5 py-2.5 text-sm font-semibold transition-all ${
-                  connectState === 'connected'
-                    ? 'border-brand-accent/50 bg-brand-accent/10 text-brand-accent'
-                    : 'border-brand-accent bg-brand-accent/10 text-brand-accent hover:bg-brand-accent/20'
-                }`}
-              >
-                {connectState === 'connected' ? 'Reconnect Meta' : 'Connect Meta'}
-              </button>
-            </div>
+        <PremiumCard>
+          <PremiumCardHeader
+            title={<span className="flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">1</span> Connect Meta</span>}
+            action={
+              <StatusBadge
+                label={connectionLoading ? 'Checking...' : connectState === 'connected' ? 'Connected' : 'Not connected'}
+                variant={connectState === 'connected' ? 'published' : 'needs-strategy'}
+              />
+            }
+          />
+          <p className="text-sm leading-relaxed text-brand-primary">
+            Authorise CG Dynamics to access your Facebook Business assets.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <ActionButton variant="outline" onClick={handleConnect}>
+              {connectState === 'connected' ? 'Reconnect Meta' : 'Connect Meta'}
+            </ActionButton>
           </div>
-        </div>
+        </PremiumCard>
 
         {/* Step 2 — Link assets to clients */}
-        <div className="rounded-xl border border-brand-muted bg-brand-surface">
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">2</span>
-                <h2 className="text-sm font-semibold text-white">Link assets to clients</h2>
+        <PremiumCard>
+          <PremiumCardHeader
+            title={<span className="flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">2</span> Link assets to clients</span>}
+            action={
+              <StatusBadge
+                label={connectionLoading ? 'Checking connection...' : connectState === 'connected' ? (assetsLoaded ? 'Assets loaded' : 'Ready') : 'Waiting for Meta connection'}
+                variant={connectState === 'connected' ? (assetsLoaded ? 'published' : 'ready-to-publish') : 'internal-draft'}
+              />
+            }
+          />
+
+          {connectState === 'connected' && !assetsLoaded && (
+            <>
+              <p className="text-sm leading-relaxed text-brand-primary">
+                Load your Meta assets, then choose which Facebook Page, Instagram account and ad account belong to each CG client.
+              </p>
+              <div className="mt-4">
+                <ActionButton variant="outline" onClick={loadAssets} loading={loadingAssets}>
+                  {loadingAssets ? 'Loading...' : 'Load Meta assets'}
+                </ActionButton>
               </div>
-              <span className="shrink-0 text-xs font-medium text-brand-primary">
-                {connectionLoading ? 'Checking connection…' : connectState === 'connected' ? (assetsLoaded ? 'Assets loaded' : 'Ready') : 'Waiting for Meta connection'}
-              </span>
+            </>
+          )}
+
+          {assetError && (
+            <p className="mt-3 text-sm text-red-400">{assetError}</p>
+          )}
+
+          {linkMsg && (
+            <div className={`mt-4 rounded-xl border p-4 ${linkMsg.ok ? 'border-brand-accent/20 bg-brand-accent/10' : 'border-red-400/20 bg-red-400/10'}`}>
+              <p className={`text-sm font-medium ${linkMsg.ok ? 'text-brand-accent' : 'text-red-400'}`}>
+                {linkMsg.text}
+              </p>
             </div>
+          )}
 
-            {connectState === 'connected' && !assetsLoaded && (
-              <>
-                <p className="mt-3 text-sm leading-relaxed text-brand-primary">
-                  Load your Meta assets, then choose which Facebook Page, Instagram account and ad account belong to each CG client.
-                </p>
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={loadAssets}
-                    disabled={loadingAssets}
-                    className="rounded-lg border border-brand-accent bg-brand-accent/10 px-5 py-2.5 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {loadingAssets ? 'Loading…' : 'Load Meta assets'}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {assetError && (
-              <p className="mt-3 text-sm text-red-400">{assetError}</p>
-            )}
-
-            {linkMsg && (
-              <div className={`mt-4 rounded-xl border p-4 ${linkMsg.ok ? 'border-brand-accent/20 bg-brand-accent/10' : 'border-red-400/20 bg-red-400/10'}`}>
-                <p className={`text-sm font-medium ${linkMsg.ok ? 'text-brand-accent' : 'text-red-400'}`}>
-                  {linkMsg.text}
-                </p>
+          {assetsLoaded && (
+            <div className="mt-4 space-y-4">
+              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                <span className="text-sm text-brand-primary">CG Client</span>
+                <SearchablePicker
+                  value={selectedClientId}
+                  onChange={setSelectedClientId}
+                  options={sortedClientOptions}
+                  placeholder="Select a client..."
+                />
               </div>
-            )}
 
-            {assetsLoaded && (
-              <div className="mt-4 space-y-4">
-                {/* Client picker */}
-                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                  <span className="text-sm text-brand-primary">CG Client</span>
-                  <SearchablePicker
-                    value={selectedClientId}
-                    onChange={setSelectedClientId}
-                    options={sortedClientOptions}
-                    placeholder="Select a client…"
-                  />
-                </div>
-
-                {/* Facebook Page picker */}
-                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                  <span className="text-sm text-brand-primary">Facebook Page</span>
-                  <SearchablePicker
-                    value={selectedPageId}
-                    onChange={v => { setSelectedPageId(v); setSelectedIgId('') }}
-                    options={sortedPageOptions}
-                    placeholder="Select a page…"
-                    emptyLabel="No pages found"
-                  />
-                </div>
-
-                {/* Instagram Account picker */}
-                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                  <span className="text-sm text-brand-primary">Instagram Account</span>
-                  <SearchablePicker
-                    value={selectedIgId}
-                    onChange={setSelectedIgId}
-                    options={sortedIgOptions}
-                    placeholder={igAccounts.length === 0 ? 'No Instagram accounts found' : 'Select an account…'}
-                    emptyLabel={selectedPageId ? 'No Instagram linked to this page' : 'Select a Facebook Page first'}
-                  />
-                </div>
-
-                {/* Ad Account picker */}
-                <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                  <span className="text-sm text-brand-primary">Ad Account</span>
-                  {adAccounts.length > 0 ? (
-                    <SearchablePicker
-                      value={selectedAdId}
-                      onChange={setSelectedAdId}
-                      options={sortedAdOptions}
-                      placeholder="Select an ad account (optional)…"
-                    />
-                  ) : (
-                    <p className="text-sm text-brand-primary/60">
-                      {adAccountsError || 'No ad accounts available.'}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleSaveLink}
-                    disabled={saving || !selectedClientId}
-                    className="rounded-lg bg-brand-accent px-5 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {saving ? 'Saving…' : 'Save link'}
-                  </button>
-                </div>
+              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                <span className="text-sm text-brand-primary">Facebook Page</span>
+                <SearchablePicker
+                  value={selectedPageId}
+                  onChange={v => { setSelectedPageId(v); setSelectedIgId('') }}
+                  options={sortedPageOptions}
+                  placeholder="Select a page..."
+                  emptyLabel="No pages found"
+                />
               </div>
-            )}
-          </div>
-        </div>
+
+              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                <span className="text-sm text-brand-primary">Instagram Account</span>
+                <SearchablePicker
+                  value={selectedIgId}
+                  onChange={setSelectedIgId}
+                  options={sortedIgOptions}
+                  placeholder={igAccounts.length === 0 ? 'No Instagram accounts found' : 'Select an account...'}
+                  emptyLabel={selectedPageId ? 'No Instagram linked to this page' : 'Select a Facebook Page first'}
+                />
+              </div>
+
+              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                <span className="text-sm text-brand-primary">Ad Account</span>
+                {adAccounts.length > 0 ? (
+                  <SearchablePicker
+                    value={selectedAdId}
+                    onChange={setSelectedAdId}
+                    options={sortedAdOptions}
+                    placeholder="Select an ad account (optional)..."
+                  />
+                ) : (
+                  <p className="text-sm text-brand-primary/60">
+                    {adAccountsError || 'No ad accounts available.'}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <ActionButton variant="primary" onClick={handleSaveLink} disabled={saving || !selectedClientId} loading={saving}>
+                  {saving ? 'Saving...' : 'Save link'}
+                </ActionButton>
+              </div>
+            </div>
+          )}
+        </PremiumCard>
 
         {/* Step 3 — Sync report data */}
-        <div className="rounded-xl border border-brand-muted bg-brand-surface">
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">3</span>
-                <h2 className="text-sm font-semibold text-white">Sync report data</h2>
-              </div>
-              <span className="shrink-0 text-xs font-medium text-brand-primary">
-                {linkedAssets.length > 0 ? 'Ready' : 'Waiting for linked assets'}
-              </span>
-            </div>
+        <PremiumCard>
+          <PremiumCardHeader
+            title={<span className="flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">3</span> Sync report data</span>}
+            action={
+              <StatusBadge
+                label={linkedAssets.length > 0 ? 'Ready' : 'Waiting for linked assets'}
+                variant={linkedAssets.length > 0 ? 'ready-to-publish' : 'internal-draft'}
+              />
+            }
+          />
 
-            {!syncResult && (
-              <div className="mt-3 space-y-2 text-sm leading-relaxed text-brand-primary">
-                <p>Sync the previous completed month from linked Meta assets. Reports are saved as internal drafts.</p>
-                <div className="rounded-lg border border-brand-muted bg-brand-bg/60 px-3 py-2.5">
-                  <p className="text-xs text-brand-primary">
-                    <span className="font-semibold text-white">Selected client</span> for quick updates between campaigns.
-                  </p>
-                  <p className="mt-1 text-xs text-brand-primary">
-                    <span className="font-semibold text-white">All linked clients</span> for month-end reporting across every client.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {syncProgress && (
-              <p className="mt-3 rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2 text-sm font-medium text-brand-accent">
-                {syncProgress}
-              </p>
-            )}
-
-            {syncResult && (
-              <div className={`mt-3 rounded-xl border p-4 ${syncResult.status === 'failed' ? 'border-red-400/20 bg-red-400/10' : 'border-brand-accent/20 bg-brand-accent/10'}`}>
-                <p className={`text-sm font-medium ${syncResult.status === 'failed' ? 'text-red-400' : 'text-brand-accent'}`}>
-                  {syncResult.message}
+          {!syncResult && (
+            <div className="space-y-2 text-sm leading-relaxed text-brand-primary">
+              <p>Sync the previous completed month from linked Meta assets. Reports are saved as internal drafts.</p>
+              <div className="rounded-lg border border-brand-muted bg-brand-bg/60 px-3 py-2.5">
+                <p className="text-xs text-brand-primary">
+                  <span className="font-semibold text-white">Selected client</span> for quick updates between campaigns.
                 </p>
-                {syncResult.status !== 'skipped' && (
-                  <ul className="mt-2 space-y-1 text-sm text-brand-primary">
-                    {syncResult.phase && <li>Failed phase: {syncResult.phase}</li>}
-                    {syncResult.syncEngineVersion && <li>Sync engine: {syncResult.syncEngineVersion}</li>}
-                    <li>Clients succeeded: {syncResult.clientsSucceeded ?? syncResult.clientsSynced ?? 0}{syncResult.clientsAttempted !== undefined ? ` of ${syncResult.clientsAttempted}` : ''}</li>
-                    {syncResult.clientsFailed !== undefined && syncResult.clientsFailed > 0 && (
-                      <li className="text-amber-400">Clients failed: {syncResult.clientsFailed}</li>
-                    )}
-                    <li>Reports created: {syncResult.reportsCreated ?? 0}</li>
-                    <li>Reports reused: {syncResult.reportsReused ?? syncResult.reportsUpdated ?? 0}</li>
-                    <li>Posts synced: {syncResult.postsSynced ?? 0}</li>
-                    {syncResult.warnings && syncResult.warnings.length > 0 && (
-                      <li className="text-amber-400">Warnings: {syncResult.warnings.length}</li>
-                    )}
-                  </ul>
-                )}
-                {syncResult.failedClients && syncResult.failedClients.length > 0 && (
-                  <div className="mt-3 rounded-lg border border-red-400/20 bg-red-400/5 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-red-300">Failed clients</p>
-                    <ul className="mt-2 space-y-1.5 text-xs text-brand-primary">
-                      {syncResult.failedClients.map(fc => (
-                        <li key={fc.name}>
-                          <span className="font-medium text-white">{fc.name}:</span> <span className="text-red-300">{fc.error}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Staff-only diagnostics (this page is admin/team only by route). */}
-                {(syncResult.debug || (syncResult.steps && syncResult.steps.length > 0)) && (
-                  <details className="mt-3 rounded-lg border border-brand-muted bg-brand-bg/50 p-3">
-                    <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
-                      Diagnostics (staff only)
-                    </summary>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <CopyButton
-                        getPayload={() => ({
-                          syncEngineVersion: syncResult.syncEngineVersion,
-                          status: syncResult.status,
-                          message: syncResult.message,
-                          period: syncResult.period,
-                          clientsAttempted: syncResult.clientsAttempted,
-                          clientsSucceeded: syncResult.clientsSucceeded,
-                          clientsFailed: syncResult.clientsFailed,
-                          reportsCreated: syncResult.reportsCreated,
-                          reportsReused: syncResult.reportsReused,
-                          reportsUpdated: syncResult.reportsUpdated,
-                          postsSynced: syncResult.postsSynced,
-                          warnings: syncResult.warnings,
-                          failedClients: syncResult.failedClients,
-                          succeededClients: syncResult.succeededClients,
-                          steps: syncResult.steps,
-                          diagnostics: syncResult.diagnostics,
-                          details: syncResult.details,
-                        })}
-                      />
-                    </div>
-                {syncResult.period && (
-                  <div className="mt-2">
-                    <p className="text-[11px] text-brand-primary/70">
-                      Current sync: <strong className="text-white">{syncResult.period.month}</strong> (<strong className="text-brand-primary/90">{syncResult.period.periodStart}</strong> to <strong className="text-brand-primary/90">{syncResult.period.periodEnd}</strong>)
-                    </p>
-                    <p className="text-[11px] text-brand-primary/70 mt-0.5">
-                      Compare these numbers against the same date range in Meta Business Suite.
-                    </p>
-                  </div>
-                )}
-                    {syncResult.steps && syncResult.steps.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary/70">Steps</p>
-                        <ol className="mt-1 space-y-0.5 text-xs text-brand-primary">
-                          {syncResult.steps.map((s, i) => (
-                            <li key={i}>{i + 1}. {s}</li>
-                          ))}
-                        </ol>
-                      </div>
-                    )}
-                    {syncResult.debug && (
-                      <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded bg-black/40 p-2 text-[11px] leading-relaxed text-brand-primary">
-                        {syncResult.debug}
-                      </pre>
-                    )}
-                  </details>
-                )}
-
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {syncResult.status !== 'failed' && (
-                    <a
-                      href="/admin/reports"
-                      className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-semibold text-brand-bg hover:brightness-110"
-                    >
-                      Go to reports
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setSyncResult(null)}
-                    className="rounded-lg border border-brand-muted px-4 py-2 text-xs text-brand-primary hover:text-white"
-                  >
-                    Dismiss
-                  </button>
-                </div>
+                <p className="mt-1 text-xs text-brand-primary">
+                  <span className="font-semibold text-white">All linked clients</span> for month-end reporting across every client.
+                </p>
               </div>
-            )}
+            </div>
+          )}
 
-            {!syncResult && (
-              <div className="mt-4 space-y-4">
-                {/* Sync mode selector */}
-                <div className="flex gap-1 rounded-lg border border-brand-muted bg-brand-bg p-0.5 w-fit">
-                  <button
-                    type="button"
-                    onClick={() => setSyncMode('all')}
-                    className={`rounded-md px-3.5 py-1.5 text-xs font-semibold transition ${
-                      syncMode === 'all'
-                        ? 'bg-brand-accent text-brand-bg'
-                        : 'text-brand-primary hover:text-white'
-                    }`}
-                  >
-                    All linked clients
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSyncMode('selected')}
-                    className={`rounded-md px-3.5 py-1.5 text-xs font-semibold transition ${
-                      syncMode === 'selected'
-                        ? 'bg-brand-accent text-brand-bg'
-                        : 'text-brand-primary hover:text-white'
-                    }`}
-                  >
-                    Selected client
-                  </button>
+          {syncProgress && (
+            <p className="mt-3 rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2 text-sm font-medium text-brand-accent">
+              {syncProgress}
+            </p>
+          )}
+
+          {syncResult && (
+            <div className={`mt-3 rounded-xl border p-4 ${syncResult.status === 'failed' ? 'border-red-400/20 bg-red-400/10' : 'border-brand-accent/20 bg-brand-accent/10'}`}>
+              <p className={`text-sm font-medium ${syncResult.status === 'failed' ? 'text-red-400' : 'text-brand-accent'}`}>
+                {syncResult.message}
+              </p>
+              {syncResult.status !== 'skipped' && (
+                <ul className="mt-2 space-y-1 text-sm text-brand-primary">
+                  {syncResult.phase && <li>Failed phase: {syncResult.phase}</li>}
+                  {syncResult.syncEngineVersion && <li>Sync engine: {syncResult.syncEngineVersion}</li>}
+                  <li>Clients succeeded: {syncResult.clientsSucceeded ?? syncResult.clientsSynced ?? 0}{syncResult.clientsAttempted !== undefined ? ` of ${syncResult.clientsAttempted}` : ''}</li>
+                  {syncResult.clientsFailed !== undefined && syncResult.clientsFailed > 0 && (
+                    <li className="text-amber-400">Clients failed: {syncResult.clientsFailed}</li>
+                  )}
+                  <li>Reports created: {syncResult.reportsCreated ?? 0}</li>
+                  <li>Reports reused: {syncResult.reportsReused ?? syncResult.reportsUpdated ?? 0}</li>
+                  <li>Posts synced: {syncResult.postsSynced ?? 0}</li>
+                  {syncResult.warnings && syncResult.warnings.length > 0 && (
+                    <li className="text-amber-400">Warnings: {syncResult.warnings.length}</li>
+                  )}
+                </ul>
+              )}
+              {syncResult.failedClients && syncResult.failedClients.length > 0 && (
+                <div className="mt-3 rounded-lg border border-red-400/20 bg-red-400/5 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-red-300">Failed clients</p>
+                  <ul className="mt-2 space-y-1.5 text-xs text-brand-primary">
+                    {syncResult.failedClients.map(fc => (
+                      <li key={fc.name}>
+                        <span className="font-medium text-white">{fc.name}:</span> <span className="text-red-300">{fc.error}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+              )}
 
-                {/* Client picker (selected mode only) */}
-                {syncMode === 'selected' && (
-                  <div className="max-w-xs">
-                    <SearchablePicker
-                      value={selectedSyncClientId}
-                      onChange={setSelectedSyncClientId}
-                      options={linkedAssets
-                        .filter(a => a.facebook_page_id || a.instagram_account_id)
-                        .map(a => ({ value: a.client_id, label: clientNameForAsset(a) }))
-                        .sort((a, b) => a.label.localeCompare(b.label))}
-                      placeholder="Search and select a client…"
-                      emptyLabel="No linked clients with sync-ready assets"
+              {/* Staff-only diagnostics */}
+              {(syncResult.debug || (syncResult.steps && syncResult.steps.length > 0)) && (
+                <details className="mt-3 rounded-lg border border-brand-muted bg-brand-bg/50 p-3">
+                  <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
+                    Diagnostics (staff only)
+                  </summary>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <CopyButton
+                      getPayload={() => ({
+                        syncEngineVersion: syncResult.syncEngineVersion,
+                        status: syncResult.status,
+                        message: syncResult.message,
+                        period: syncResult.period,
+                        clientsAttempted: syncResult.clientsAttempted,
+                        clientsSucceeded: syncResult.clientsSucceeded,
+                        clientsFailed: syncResult.clientsFailed,
+                        reportsCreated: syncResult.reportsCreated,
+                        reportsReused: syncResult.reportsReused,
+                        reportsUpdated: syncResult.reportsUpdated,
+                        postsSynced: syncResult.postsSynced,
+                        warnings: syncResult.warnings,
+                        failedClients: syncResult.failedClients,
+                        succeededClients: syncResult.succeededClients,
+                        steps: syncResult.steps,
+                        diagnostics: syncResult.diagnostics,
+                        details: syncResult.details,
+                      })}
                     />
                   </div>
+                  {syncResult.period && (
+                    <div className="mt-2">
+                      <p className="text-[11px] text-brand-primary/70">
+                        Current sync: <strong className="text-white">{syncResult.period.month}</strong> (<strong className="text-brand-primary/90">{syncResult.period.periodStart}</strong> to <strong className="text-brand-primary/90">{syncResult.period.periodEnd}</strong>)
+                      </p>
+                      <p className="text-[11px] text-brand-primary/70 mt-0.5">
+                        Compare these numbers against the same date range in Meta Business Suite.
+                      </p>
+                    </div>
+                  )}
+                  {syncResult.steps && syncResult.steps.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary/70">Steps</p>
+                      <ol className="mt-1 space-y-0.5 text-xs text-brand-primary">
+                        {syncResult.steps.map((s, i) => (
+                          <li key={i}>{i + 1}. {s}</li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                  {syncResult.debug && (
+                    <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded bg-black/40 p-2 text-[11px] leading-relaxed text-brand-primary">
+                      {syncResult.debug}
+                    </pre>
+                  )}
+                </details>
+              )}
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {syncResult.status !== 'failed' && (
+                  <ActionButton variant="primary" onClick={() => window.location.href = '/admin/reports'}>
+                    Go to reports
+                  </ActionButton>
                 )}
-
-                {/* Baseline option — works for both all-client and selected modes */}
-                <label className="flex max-w-md cursor-pointer items-start gap-2.5 rounded-lg border border-brand-muted bg-brand-bg/60 px-3.5 py-2.5">
-                  <input
-                    type="checkbox"
-                    checked={syncBaseline}
-                    onChange={e => setSyncBaseline(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 accent-brand-accent"
-                  />
-                  <span className="text-xs leading-relaxed text-brand-primary">
-                    <span className="font-semibold text-white">Also sync the previous month</span> as a baseline so the
-                    report can show month-over-month growth. Existing reports are reused, not duplicated.
-                  </span>
-                </label>
-
-                {syncBaseline && (
-                  <div className="max-w-md rounded-lg border border-brand-muted bg-brand-bg/40 px-3.5 py-2 text-xs text-brand-primary">
-                    Current sync: <span className="text-white">last completed month</span>
-                    <br />
-                    Baseline: <span className="text-white">previous month for growth comparison</span>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleSync}
-                    disabled={
-                      syncing ||
-                      linkedAssets.length === 0 ||
-                      (syncMode === 'selected' && !selectedSyncClientId)
-                    }
-                    className="rounded-lg border border-brand-accent bg-brand-accent/10 px-5 py-2.5 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {syncing
-                      ? 'Syncing…'
-                      : syncMode === 'selected'
-                        ? syncBaseline ? 'Sync selected client + baseline' : 'Sync selected client'
-                        : syncBaseline ? 'Sync all linked clients + baseline' : 'Sync all linked clients'}
-                  </button>
-                  <button
-                    type="button"
-                    disabled
-                    className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
-                  >
-                    Sync current month as internal draft
-                  </button>
-                </div>
+                <ActionButton variant="secondary" onClick={() => setSyncResult(null)}>
+                  Dismiss
+                </ActionButton>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+
+          {!syncResult && (
+            <div className="mt-4 space-y-4">
+              <div className="flex gap-1 rounded-lg border border-brand-muted bg-brand-bg p-0.5 w-fit">
+                <ActionButton
+                  variant={syncMode === 'all' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSyncMode('all')}
+                >
+                  All linked clients
+                </ActionButton>
+                <ActionButton
+                  variant={syncMode === 'selected' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSyncMode('selected')}
+                >
+                  Selected client
+                </ActionButton>
+              </div>
+
+              {syncMode === 'selected' && (
+                <div className="max-w-xs">
+                  <SearchablePicker
+                    value={selectedSyncClientId}
+                    onChange={setSelectedSyncClientId}
+                    options={linkedAssets
+                      .filter(a => a.facebook_page_id || a.instagram_account_id)
+                      .map(a => ({ value: a.client_id, label: clientNameForAsset(a) }))
+                      .sort((a, b) => a.label.localeCompare(b.label))}
+                    placeholder="Search and select a client..."
+                    emptyLabel="No linked clients with sync-ready assets"
+                  />
+                </div>
+              )}
+
+              <label className="flex max-w-md cursor-pointer items-start gap-2.5 rounded-lg border border-brand-muted bg-brand-bg/60 px-3.5 py-2.5">
+                <input
+                  type="checkbox"
+                  checked={syncBaseline}
+                  onChange={e => setSyncBaseline(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-brand-accent"
+                />
+                <span className="text-xs leading-relaxed text-brand-primary">
+                  <span className="font-semibold text-white">Also sync the previous month</span> as a baseline so the
+                  report can show month-over-month growth. Existing reports are reused, not duplicated.
+                </span>
+              </label>
+
+              {syncBaseline && (
+                <div className="max-w-md rounded-lg border border-brand-muted bg-brand-bg/40 px-3.5 py-2 text-xs text-brand-primary">
+                  Current sync: <span className="text-white">last completed month</span>
+                  <br />
+                  Baseline: <span className="text-white">previous month for growth comparison</span>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-3">
+                <ActionButton
+                  variant="outline"
+                  onClick={handleSync}
+                  disabled={
+                    syncing ||
+                    linkedAssets.length === 0 ||
+                    (syncMode === 'selected' && !selectedSyncClientId)
+                  }
+                  loading={syncing}
+                >
+                  {syncing
+                    ? 'Syncing...'
+                    : syncMode === 'selected'
+                      ? syncBaseline ? 'Sync selected client + baseline' : 'Sync selected client'
+                      : syncBaseline ? 'Sync all linked clients + baseline' : 'Sync all linked clients'}
+                </ActionButton>
+                <ActionButton variant="secondary" disabled>
+                  Sync current month as internal draft
+                </ActionButton>
+              </div>
+            </div>
+          )}
+        </PremiumCard>
 
         {/* Step 4 — Review draft */}
-        <div className="rounded-xl border border-brand-muted bg-brand-surface">
-          <div className="p-5">
-            <div className="flex items-center gap-3">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">4</span>
-              <h2 className="text-sm font-semibold text-white">Review monthly draft</h2>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-brand-primary">
-              After sync, CG Dynamics will create or update a monthly report draft. Staff can add strategy, preview as client, and publish.
-            </p>
-          </div>
-        </div>
+        <PremiumCard>
+          <PremiumCardHeader title={<span className="flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">4</span> Review monthly draft</span>} />
+          <p className="text-sm leading-relaxed text-brand-primary">
+            After sync, CG Dynamics will create or update a monthly report draft. Staff can add strategy, preview as client, and publish.
+          </p>
+        </PremiumCard>
       </div>
 
       {/* Linked clients section — always visible, independent of connection status */}
-      <div className="mt-8 max-w-2xl">
-        <h3 className="text-sm font-semibold text-white">Linked clients</h3>
-          {loadingLinked ? (
-            <p className="mt-2 text-sm text-brand-primary">Loading linked clients…</p>
-          ) : linkedAssets.length === 0 ? (
-            <p className="mt-2 text-sm text-brand-primary">No clients linked yet. Load Meta assets above and save a link.</p>
-          ) : (
-            <div className="mt-3 space-y-2">
-              {linkedAssets.map(asset => {
-                const client = clients.find(c => c.id === asset.client_id)
-                return (
-                  <div key={asset.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-muted bg-brand-surface p-4">
-                    <div className="min-w-0 text-sm">
-                      <p className="font-medium text-white">{client?.name ?? asset.client_id}</p>
-                      <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
-                      <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : 'No Instagram account linked'}</p>
-                      <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDeactivate(asset)}
-                      className="rounded-lg border border-red-400/30 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/10"
-                    >
-                      Deactivate
-                    </button>
+      <PremiumCard className="mt-8" padding="md">
+        <PremiumCardHeader title="Linked clients" />
+        {loadingLinked ? (
+          <p className="text-sm text-brand-primary">Loading linked clients...</p>
+        ) : linkedAssets.length === 0 ? (
+          <p className="text-sm text-brand-primary">No clients linked yet. Load Meta assets above and save a link.</p>
+        ) : (
+          <div className="space-y-2">
+            {linkedAssets.map(asset => {
+              const client = clients.find(c => c.id === asset.client_id)
+              return (
+                <div key={asset.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-muted bg-brand-bg/50 p-4">
+                  <div className="min-w-0 flex-1 text-sm">
+                    <p className="font-medium text-white">{client?.name ?? asset.client_id}</p>
+                    <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
+                    <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : 'No Instagram account linked'}</p>
+                    <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
                   </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+                  <ActionButton variant="danger" size="sm" onClick={() => handleDeactivate(asset)}>
+                    Deactivate
+                  </ActionButton>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </PremiumCard>
 
       {/* Architecture note */}
-      <div className="mt-10 max-w-2xl rounded-xl border border-brand-muted bg-brand-surface/30 p-5">
-        <h3 className="text-xs uppercase tracking-[0.15em] text-brand-primary/60">Planned safe setup</h3>
-        <ul className="mt-3 space-y-1.5 text-sm leading-relaxed text-brand-primary/70">
+      <PremiumCard className="mt-6" padding="md" border>
+        <PremiumCardHeader eyebrow="Planned safe setup" title="" />
+        <ul className="space-y-1.5 text-sm leading-relaxed text-brand-primary/70">
           <li className="flex items-start gap-2 before:mt-[5px] before:block before:h-1 before:w-1 before:shrink-0 before:rounded-full before:bg-brand-primary/50">Meta tokens will never be stored in the frontend.</li>
           <li className="flex items-start gap-2 before:mt-[5px] before:block before:h-1 before:w-1 before:shrink-0 before:rounded-full before:bg-brand-primary/50">OAuth and API calls will run through Supabase Edge Functions.</li>
           <li className="flex items-start gap-2 before:mt-[5px] before:block before:h-1 before:w-1 before:shrink-0 before:rounded-full before:bg-brand-primary/50">Synced data will create or update draft reports only.</li>
           <li className="flex items-start gap-2 before:mt-[5px] before:block before:h-1 before:w-1 before:shrink-0 before:rounded-full before:bg-brand-primary/50">Reports will never auto-publish.</li>
           <li className="flex items-start gap-2 before:mt-[5px] before:block before:h-1 before:w-1 before:shrink-0 before:rounded-full before:bg-brand-primary/50">Current month data stays as internal draft until month-end.</li>
         </ul>
-      </div>
+      </PremiumCard>
     </div>
   )
 }
