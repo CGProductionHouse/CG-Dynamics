@@ -31,6 +31,7 @@ import {
   shortCaption,
   type MetricMovement,
 } from '../../lib/reportStats'
+import { META_SOURCE_NOTE, buildMetaContentMetrics, buildMetaPlatformMetrics, metaEngagementLabel, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
 
 interface ReportFields {
   reportTitle: string
@@ -636,11 +637,15 @@ export default function NewReport() {
       )}
 
       <div className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Reach" value={formatMetric(master.totalReach)} />
         <StatCard label="Views" value={formatMetric(master.totalViews)} />
-        <StatCard label="Engagements" value={formatNumber(master.totalEngagements)} />
+        <StatCard label="Reach / viewers" value={formatMetric(master.totalReach)} />
+        <StatCard label="Content interactions" value={formatNumber(master.totalEngagements)} />
         <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
       </div>
+
+      <p className="mb-6 rounded-lg border border-brand-muted bg-brand-surface/60 px-3 py-2 text-xs text-brand-primary">
+        {META_SOURCE_NOTE}
+      </p>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -657,8 +662,8 @@ export default function NewReport() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <MovementCard label="Views" movement={movement.views} />
-          <MovementCard label="Reach" movement={movement.reach} />
-          <MovementCard label="Engagements" movement={movement.engagements} />
+          <MovementCard label="Reach / viewers" movement={movement.reach} />
+          <MovementCard label="Content interactions" movement={movement.engagements} />
           <MovementCard label="Profile visits" movement={movement.profileVisits} />
           <MovementCard label="Followers" movement={movement.followers} />
         </div>
@@ -674,11 +679,11 @@ export default function NewReport() {
           <div>
             <h2 className="text-sm font-semibold text-white mb-1">Platform breakdown</h2>
             <p className="text-xs text-brand-primary">
-              Matching {selectedClient?.name ?? 'client'} data for {currentMonthLabel}.
+              Meta-style platform metrics for {selectedClient?.name ?? 'client'} in {currentMonthLabel}.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <SourcePill label="Meta CSV" tone="posts" />
+            <SourcePill label="Meta synced" tone="posts" />
             <SourcePill label="Manual summary" tone="manual" />
             <SourcePill label="No data" tone="none" />
           </div>
@@ -689,19 +694,24 @@ export default function NewReport() {
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm font-semibold text-white">{view.label}</p>
                 <SourcePill
-                  label={view.source === 'posts' ? 'Meta CSV' : view.source === 'manual' ? 'Manual summary' : 'No data'}
+                  label={view.source === 'posts' ? 'Meta synced' : view.source === 'manual' ? 'Manual summary' : 'No data'}
                   tone={view.source}
                 />
               </div>
               {view.source === 'none' ? (
                 <p className="mt-3 text-xs leading-relaxed text-brand-primary">
-                  No matching data for {currentMonthLabel}. Import a Meta CSV or add a manual summary for this month.
+                  No matching Meta sync or manual fallback data for {currentMonthLabel}.
                 </p>
               ) : (
                 <dl className="mt-2 space-y-1 text-xs text-brand-primary">
-                  <div className="flex justify-between"><dt>Reach</dt><dd className="text-white">{formatMetric(view.reach)}</dd></div>
-                  <div className="flex justify-between"><dt>Views</dt><dd className="text-white">{formatMetric(view.views)}</dd></div>
-                  <div className="flex justify-between"><dt>Engagements</dt><dd className="text-white">{formatNumber(view.engagements)}</dd></div>
+                  {buildMetaPlatformMetrics(view).map(item => (
+                    <div key={item.key} className="flex justify-between gap-3">
+                      <dt>{item.label}</dt>
+                      <dd className="text-right text-white">
+                        {typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
+                      </dd>
+                    </div>
+                  ))}
                   <div className="flex justify-between">
                     <dt>Source</dt>
                     <dd className="text-white">{view.source === 'manual' ? MANUAL_SOURCE_LABELS[view.manual!.source_type] : `${formatNumber(view.postCount)} posts`}</dd>
@@ -853,7 +863,7 @@ export default function NewReport() {
                       {post.post_type ? displayContentType(post.post_type) ?? post.post_type : 'Content type not set'}
                     </p>
                     <p className="text-xs text-brand-primary mt-2">
-                      {formatNumber(post.engagements)} engagements | {formatMetric(post.reach)} reach
+                      {formatNumber(post.engagements)} {metaEngagementLabel().toLowerCase()} | {formatMetric(post.reach)} {metaPrimaryMetricLabel(post.platform).toLowerCase()}
                     </p>
                   </div>
                 ))
@@ -1010,9 +1020,13 @@ function PerformancePanel({
               : 'Content type not set'}
           </p>
           <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
-            <MiniMetric label="Reach" value={formatMetric(post.reach)} />
-            <MiniMetric label="Views" value={formatMetric(post.impressions)} />
-            <MiniMetric label="Eng." value={formatNumber(post.engagements)} />
+            {buildMetaContentMetrics(post).map(item => (
+              <MiniMetric
+                key={item.key}
+                label={item.label}
+                value={typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
+              />
+            ))}
           </div>
         </div>
       ) : (

@@ -89,6 +89,24 @@ function mapFbPostType(attachments?: { data?: { media_type?: string }[] }): stri
   return 'Post'
 }
 
+function normalizeContentType(value: string | null | undefined): string {
+  const t = (value ?? '').toLowerCase()
+  if (t.includes('reel')) return 'reel'
+  if (t.includes('story')) return 'story'
+  if (t.includes('live')) return 'live'
+  if (t.includes('carousel') || t.includes('album')) return 'carousel'
+  if (t.includes('video')) return 'video'
+  if (t.includes('photo') || t.includes('image')) return 'photo'
+  if (t.includes('post')) return 'post'
+  return 'unknown'
+}
+
+function facebookImageUrl(raw: Record<string, unknown>): string | null {
+  if (typeof raw.full_picture === 'string' && raw.full_picture) return raw.full_picture
+  const attachment = (raw.attachments as { data?: Array<{ media?: { image?: { src?: string } } }> } | undefined)?.data?.[0]
+  return attachment?.media?.image?.src ?? null
+}
+
 function mapIgMediaType(mediaType: string, mediaProductType?: string): string {
   if (mediaProductType === 'REELS') return 'Reel'
   if (mediaType === 'CAROUSEL_ALBUM') return 'Carousel'
@@ -201,6 +219,14 @@ function sumInsightValue(v: { values?: Array<{ value?: number }> }): number | nu
 interface InsightFetchResult {
   values: Record<string, number>
   error: string | null
+}
+
+function igInsightMetricsForType(postType: string): string[] {
+  const normalized = normalizeContentType(postType)
+  if (normalized === 'reel' || normalized === 'video') {
+    return ['reach', 'plays', 'saved', 'shares', 'total_interactions']
+  }
+  return ['reach', 'saved', 'shares', 'total_interactions']
 }
 
 // Resilient insight fetch: tries the whole metric batch. When `split` is true
@@ -647,6 +673,7 @@ async function handleRequest(req: Request): Promise<Response> {
         clicks: number | null
         impressionsUnique: number | null
         fullPicture: string | null
+        rawPayload: Record<string, unknown>
       }> = []
 
       if (client.facebookPageId) {
@@ -685,41 +712,12 @@ async function handleRequest(req: Request): Promise<Response> {
                 engagedUsers: null,
                 clicks: null,
                 impressionsUnique: null,
-                fullPicture: (raw.full_picture as string | null) ?? null,
+                fullPicture: facebookImageUrl(raw),
+                rawPayload: raw,
               })
             }
 
-            // Per-post insights (best-effort). One batch request per post and a
-            // circuit breaker: if a post's insights fail, the rest will fail the
-            // same way (permission/deprecation), so we stop and record a single
-            // warning. This prevents a request storm that times the function out.
-            // Missing metrics stay null — never coerced to 0.
-            let fbInsightErr: string | null = null
-            for (const post of fbPosts) {
-              if (Date.now() > insightDeadline) {
-                fbInsightErr = fbInsightErr ?? 'time budget reached — remaining post insights skipped'
-                break
-              }
-              const { values, error } = await fetchInsights(
-                baseUrl,
-                post.metaPostId,
-                ['post_impressions', 'post_impressions_unique', 'post_engaged_users', 'post_clicks'],
-                pageToken,
-                {},
-                knownTokens,
-              )
-              if (error) {
-                fbInsightErr = error
-                break
-              }
-              if (typeof values.post_impressions === 'number') post.impressions = values.post_impressions
-              if (typeof values.post_impressions_unique === 'number') post.impressionsUnique = values.post_impressions_unique
-              if (typeof values.post_engaged_users === 'number') post.engagedUsers = values.post_engaged_users
-              if (typeof values.post_clicks === 'number') post.clicks = values.post_clicks
-            }
-            if (fbInsightErr) {
-              result.warnings.push(`Facebook post insights unavailable (views/reach shown as not available): ${fbInsightErr}`)
-            }
+            result.warnings.push('Facebook post views/viewers are not synced because the available Page post fields do not expose stable Meta Business Suite view metrics through this API path.')
           } else {
             result.warnings.push(`Could not fetch Facebook posts: ${await readMetaError(fbRes, knownTokens)}`)
           }
@@ -742,8 +740,10 @@ async function handleRequest(req: Request): Promise<Response> {
         saves: number | null
         shares: number | null
         videoViews: number | null
+        totalInteractions: number | null
         thumbnailUrl: string | null
         mediaUrl: string | null
+        rawPayload: Record<string, unknown>
       }> = []
 
       if (client.instagramAccountId) {
@@ -788,8 +788,10 @@ async function handleRequest(req: Request): Promise<Response> {
                 saves: null,
                 shares: null,
                 videoViews: null,
+                totalInteractions: null,
                 thumbnailUrl: (raw.thumbnail_url as string | null) ?? null,
                 mediaUrl: (raw.media_url as string | null) ?? null,
+                rawPayload: raw,
               })
             }
 
@@ -806,7 +808,7 @@ async function handleRequest(req: Request): Promise<Response> {
               const { values, error } = await fetchInsights(
                 baseUrl,
                 post.metaPostId,
-                ['reach', 'views', 'saved', 'shares', 'total_interactions'],
+                igInsightMetricsForType(post.postType),
                 igToken,
                 {},
                 knownTokens,
@@ -817,8 +819,10 @@ async function handleRequest(req: Request): Promise<Response> {
               }
               if (typeof values.reach === 'number') post.reach = values.reach
               if (typeof values.views === 'number') post.impressions = values.views
+              if (typeof values.plays === 'number') post.impressions = values.plays
               if (typeof values.saved === 'number') post.saves = values.saved
               if (typeof values.shares === 'number') post.shares = values.shares
+              if (typeof values.total_interactions === 'number') post.totalInteractions = values.total_interactions
             }
             if (igInsightErr) {
               result.warnings.push(`Instagram media insights unavailable (views/reach shown as not available): ${igInsightErr}`)
@@ -848,7 +852,9 @@ async function handleRequest(req: Request): Promise<Response> {
           platform: 'instagram' as const,
           viewsValue: typeof p.impressions === 'number' ? p.impressions : null,
           reachValue: typeof p.reach === 'number' ? p.reach : null,
-          engagementsValue: p.reactions + p.comments + (p.saves ?? 0) + (p.shares ?? 0),
+          engagementsValue: typeof p.totalInteractions === 'number'
+            ? p.totalInteractions
+            : p.reactions + p.comments + (p.saves ?? 0) + (p.shares ?? 0),
         })),
       ]
 
@@ -883,11 +889,19 @@ async function handleRequest(req: Request): Promise<Response> {
               raw: {
                 source: 'meta_sync',
                 platform: post.platform,
+                content_type: normalizeContentType(post.postType),
                 synced_at: new Date().toISOString(),
                 // True availability: number when Meta returned it, null otherwise.
                 views: post.viewsValue,
                 reach: post.reachValue,
                 engagements: post.engagementsValue,
+                metric_availability: {
+                  views: typeof post.viewsValue === 'number',
+                  reach: typeof post.reachValue === 'number',
+                  content_interactions: true,
+                  source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
+                },
+                meta_payload: post.rawPayload,
                 ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
                 ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
                 ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
@@ -926,11 +940,19 @@ async function handleRequest(req: Request): Promise<Response> {
               raw: {
                 source: 'meta_sync',
                 platform: post.platform,
+                content_type: normalizeContentType(post.postType),
                 synced_at: new Date().toISOString(),
                 // True availability: number when Meta returned it, null otherwise.
                 views: post.viewsValue,
                 reach: post.reachValue,
                 engagements: post.engagementsValue,
+                metric_availability: {
+                  views: typeof post.viewsValue === 'number',
+                  reach: typeof post.reachValue === 'number',
+                  content_interactions: true,
+                  source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
+                },
+                meta_payload: post.rawPayload,
                 ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
                 ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
                 ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
@@ -973,11 +995,19 @@ async function handleRequest(req: Request): Promise<Response> {
               raw: {
                 source: 'meta_sync',
                 platform: post.platform,
+                content_type: normalizeContentType(post.postType),
                 synced_at: new Date().toISOString(),
                 // True availability: number when Meta returned it, null otherwise.
                 views: post.viewsValue,
                 reach: post.reachValue,
                 engagements: post.engagementsValue,
+                metric_availability: {
+                  views: typeof post.viewsValue === 'number',
+                  reach: typeof post.reachValue === 'number',
+                  content_interactions: true,
+                  source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
+                },
+                meta_payload: post.rawPayload,
                 ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
                 ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
                 ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
@@ -1012,42 +1042,42 @@ async function handleRequest(req: Request): Promise<Response> {
         totalPostsSynced++
       }
 
-      // ── Fetch Facebook Page monthly totals (best-effort) ──
-      // These enrich follower / profile-visit movement. Post-level totals above
-      // remain the primary source for reach/views/engagements. Resilient + only
-      // stored when Meta actually returns real values (never a fake-0 row).
+      // ── Fetch Facebook Page stable account fields (best-effort) ──
+      // Avoid deprecated/invalid Page insight metrics that Meta rejects with
+      // "The value must be a valid insights metric". Business Suite views/visits
+      // stay unavailable unless Meta exposes a stable API value.
       if (client.facebookPageId && Date.now() < insightDeadline) {
         try {
-          const { values, error } = await fetchInsights(
-            baseUrl,
-            client.facebookPageId,
-            ['page_impressions', 'page_impressions_unique', 'page_post_engagements', 'page_views_total', 'page_fans'],
-            pageToken,
-            { period: 'month', since: periodStart, until: periodEnd },
-            knownTokens,
-            { split: true },
-          )
-          if (error && Object.keys(values).length === 0) {
-            result.warnings.push(`Facebook page insights unavailable (follower/profile totals may be missing): ${error}`)
+          const pageParams = new URLSearchParams({ access_token: pageToken, fields: 'fan_count,followers_count' })
+          const pageRes = await metaFetch(`${baseUrl}/${client.facebookPageId}?${pageParams.toString()}`)
+          if (pageRes.ok) {
+            const pageData = await pageRes.json()
+            const follows =
+              typeof pageData.followers_count === 'number'
+                ? pageData.followers_count
+                : typeof pageData.fan_count === 'number'
+                  ? pageData.fan_count
+                  : 0
+            if (follows > 0) {
+              await upsertSyncedPlatformMetric(sb, {
+                clientId: client.clientId,
+                month,
+                platform: 'facebook',
+                views: 0,
+                reach: 0,
+                engagements: 0,
+                profileVisits: 0,
+                externalLinkTaps: 0,
+                followers: follows,
+                createdBy: user.id,
+              }, result.warnings, knownTokens)
+            }
+          } else {
+            result.warnings.push(`Facebook follows unavailable: ${await readMetaError(pageRes, knownTokens)}`)
           }
-          const anyPositive = ['page_impressions', 'page_impressions_unique', 'page_post_engagements', 'page_views_total', 'page_fans']
-            .some(k => typeof values[k] === 'number' && values[k] > 0)
-          if (anyPositive) {
-            await upsertSyncedPlatformMetric(sb, {
-              clientId: client.clientId,
-              month,
-              platform: 'facebook',
-              views: values.page_impressions ?? 0,
-              reach: values.page_impressions_unique ?? 0,
-              engagements: values.page_post_engagements ?? 0,
-              profileVisits: values.page_views_total ?? 0,
-              externalLinkTaps: 0,
-              followers: values.page_fans ?? 0,
-              createdBy: user.id,
-            }, result.warnings, knownTokens)
-          }
+          result.warnings.push('Facebook Page views, viewers and visits are marked unavailable when Meta does not expose stable Business Suite-equivalent values through the Page API.')
         } catch (err) {
-          result.warnings.push(redact(`Error fetching Facebook page insights: ${String(err)}`, knownTokens))
+          result.warnings.push(redact(`Error fetching Facebook account fields: ${String(err)}`, knownTokens))
         }
       }
 

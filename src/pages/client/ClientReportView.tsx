@@ -15,12 +15,18 @@ import {
   compareNullable,
   displayContentType,
   formatDate,
-  formatMetric,
   formatNumber,
   formatPercent,
   reportPostToStatsPost,
   shortCaption,
 } from '../../lib/reportStats'
+import {
+  META_SOURCE_NOTE,
+  buildMetaContentMetrics,
+  buildMetaPlatformMetrics,
+  metaEngagementLabel,
+  metaPrimaryMetricLabel,
+} from '../../lib/metaMetrics'
 
 type TabKey = 'overview' | Platform
 
@@ -119,6 +125,9 @@ export function ClientReportView({
       )}
 
       <p className="mx-auto mt-16 max-w-3xl border-t border-white/10 pt-6 text-center text-xs leading-relaxed text-slate-500">
+        {META_SOURCE_NOTE}
+      </p>
+      <p className="mx-auto mt-3 max-w-3xl text-center text-xs leading-relaxed text-slate-600">
         {REPORT_DISCLAIMER}
       </p>
     </div>
@@ -244,8 +253,8 @@ function OverviewTab({
 
   const growthItems = [
     { label: 'Views', m: movement.views },
-    { label: 'Reach', m: movement.reach },
-    { label: 'Engagements', m: movement.engagements },
+    { label: 'Reach / viewers', m: movement.reach },
+    { label: 'Content interactions', m: movement.engagements },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null && !g.m.notAvailable)
 
   return (
@@ -253,8 +262,8 @@ function OverviewTab({
       <SectionHeading eyebrow="Executive summary" title="The month at a glance" />
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricTile label="Views" value={master.totalViews} accent="teal" />
-        <MetricTile label="Reach" value={master.totalReach} accent="teal" />
-        <MetricTile label="Engagements" value={master.totalEngagements} accent="teal" />
+        <MetricTile label="Reach / viewers" value={master.totalReach} accent="teal" />
+        <MetricTile label="Content interactions" value={master.totalEngagements} accent="teal" />
         <MetricTile label="Best platform" value={master.bestPlatform?.label ?? null} accent="amber" />
       </section>
 
@@ -477,10 +486,13 @@ function PlatformSummaryCard({ view }: { view: PlatformView }) {
       </div>
 
       <dl className="space-y-0">
-        <PlatformRow label="Reach" value={formatMetric(view.reach)} />
-        <PlatformRow label="Views" value={formatMetric(view.views)} />
-        <PlatformRow label="Engagements" value={formatNumber(view.engagements)} />
-        {view.source === 'posts' && <PlatformRow label="Posts" value={formatNumber(view.postCount)} />}
+        {buildMetaPlatformMetrics(view).map(item => (
+          <PlatformRow
+            key={item.key}
+            label={item.label}
+            value={typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
+          />
+        ))}
       </dl>
 
       {view.bestPost?.caption && (
@@ -657,18 +669,17 @@ function PlatformTab({
 function PostsPlatformTab({ view, previousView }: { view: PlatformView; previousView: PlatformView | null }) {
   const growth = [
     { label: 'Views', m: compareNullable(view.views, previousView?.views) },
-    { label: 'Reach', m: compareNullable(view.reach, previousView?.reach) },
-    { label: 'Engagements', m: compareNullable(view.engagements, previousView?.engagements) },
+    { label: metaPrimaryMetricLabel(view.platform), m: compareNullable(view.reach, previousView?.reach) },
+    { label: metaEngagementLabel(), m: compareNullable(view.engagements, previousView?.engagements) },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
 
   return (
     <>
       <SectionHeading eyebrow={view.label} title={`${view.label} performance`} />
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricTile label="Reach" value={view.reach} accent="teal" />
-        <MetricTile label="Views" value={view.views} accent="teal" />
-        <MetricTile label="Engagements" value={view.engagements} accent="teal" />
-        <MetricTile label="Posts" value={view.postCount} accent="amber" />
+        {buildMetaPlatformMetrics(view).slice(0, 4).map(item => (
+          <MetricTile key={item.key} label={item.label} value={item.value} accent={item.key === 'posts' ? 'amber' : 'teal'} />
+        ))}
       </section>
 
       {growth.length > 0 && (
@@ -698,9 +709,13 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
             </h3>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Reach" value={formatMetric(view.bestPost.reach)} />
-              <MiniMetric label="Views" value={formatMetric(view.bestPost.impressions)} />
-              <MiniMetric label="Engagements" value={formatNumber(view.bestPost.engagements)} />
+              {buildMetaContentMetrics(view.bestPost).map(item => (
+                <MiniMetric
+                  key={item.key}
+                  label={item.label}
+                  value={typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -727,7 +742,7 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
                     {displayContentType(post.post_type) ?? post.post_type}
                   </p>
                 )}
-                <p className="mt-4 text-sm font-bold text-slate-300">{formatNumber(post.engagements)} engagements</p>
+                <p className="mt-4 text-sm font-bold text-slate-300">{formatNumber(post.engagements)} content interactions</p>
               </article>
             ))}
           </div>
@@ -754,7 +769,7 @@ function ManualPlatformTab({
   const growth = [
     { label: 'Views', m: compareNullable(view.views, previousManual?.views) },
     { label: 'Reach', m: compareNullable(view.reach, previousManual?.reach) },
-    { label: 'Engagements', m: compareNullable(view.engagements, previousManual?.engagements) },
+    { label: 'Content interactions', m: compareNullable(view.engagements, previousManual?.engagements) },
     { label: 'Followers', m: compareNullable(manual.followers, previousManual?.followers) },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
 
@@ -764,7 +779,7 @@ function ManualPlatformTab({
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricTile label="Reach" value={view.reach} accent="teal" />
         <MetricTile label="Views" value={view.views} accent="teal" />
-        <MetricTile label="Engagements" value={view.engagements} accent="teal" />
+        <MetricTile label="Content interactions" value={view.engagements} accent="teal" />
         <MetricTile label="Followers" value={manual.followers} accent="amber" />
       </section>
 

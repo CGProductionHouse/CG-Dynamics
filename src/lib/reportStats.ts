@@ -72,6 +72,7 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
     full_picture?: string
     thumbnail_url?: string
     media_url?: string
+    content_type?: string
     source?: string
     synced_at?: string
   }
@@ -109,7 +110,7 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
     reach,
     impressions,
     engagements,
-    post_type: post.meta_post_type,
+    post_type: raw.content_type ?? post.meta_post_type,
     platform: post.platform,
     imageUrl: raw.full_picture ?? raw.thumbnail_url ?? raw.media_url ?? null,
   }
@@ -190,6 +191,10 @@ export interface MasterReportData {
   bestPostOverall: ReportStatsPost | null
 }
 
+function isMetaSyncedManualMetric(metric: ManualPlatformMetric | null): boolean {
+  return metric?.source_type === 'other' && metric.general_notes?.startsWith('Meta sync account totals') === true
+}
+
 export interface MetricMovement {
   current: number
   previous: number | null
@@ -244,13 +249,14 @@ export function buildMasterReport(
     }
 
     if (manual) {
+      const metaSyncedManual = isMetaSyncedManualMetric(manual)
       return {
         platform,
         label: PLATFORM_LABELS[platform],
         source: 'manual',
-        reach: manual.reach,
-        views: manual.views,
-        engagements: manual.engagements,
+        reach: metaSyncedManual && manual.reach === 0 ? null : manual.reach,
+        views: metaSyncedManual && manual.views === 0 ? null : manual.views,
+        engagements: metaSyncedManual && manual.engagements === 0 ? 0 : manual.engagements,
         postCount: 0,
         bestPost: null,
         topPosts: [],
@@ -262,8 +268,8 @@ export function buildMasterReport(
       platform,
       label: PLATFORM_LABELS[platform],
       source: 'none',
-      reach: 0,
-      views: 0,
+      reach: null,
+      views: null,
       engagements: 0,
       postCount: 0,
       bestPost: null,
@@ -297,7 +303,9 @@ export function buildMasterReport(
 // "data not available" rather than 0.
 export function totalManualProfileVisits(manualMetrics: ManualPlatformMetric[]): number | null {
   if (manualMetrics.length === 0) return null
-  return manualMetrics.reduce((sum, metric) => sum + metric.profile_visits, 0)
+  const available = manualMetrics.filter(metric => !isMetaSyncedManualMetric(metric) || metric.profile_visits > 0)
+  if (available.length === 0) return null
+  return available.reduce((sum, metric) => sum + metric.profile_visits, 0)
 }
 
 export function totalManualFollowers(manualMetrics: ManualPlatformMetric[]) {
