@@ -358,10 +358,11 @@ export function compareNullable(
   return compareMetric(current, typeof previous === 'number' ? previous : null)
 }
 
-// Formats a possibly-missing metric for display. Returns "Data not available"
-// for null/undefined, and the formatted number (including a real 0) otherwise.
-export function formatMetric(value: number | null | undefined): string {
-  return typeof value === 'number' ? formatNumber(value) : 'Data not available'
+// Formats a possibly-missing metric for display. Returns null for
+// null/undefined (callers should omit the metric entirely), and the
+// formatted number (including a real 0) otherwise.
+export function formatMetric(value: number | null | undefined): string | null {
+  return typeof value === 'number' ? formatNumber(value) : null
 }
 
 export function buildPerformanceMovement(

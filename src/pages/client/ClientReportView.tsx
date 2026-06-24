@@ -246,7 +246,7 @@ function OverviewTab({
 
   const growthItems = [
     { label: 'Views', m: movement.views },
-    { label: 'Reach / viewers', m: movement.reach },
+    { label: 'Reach', m: movement.reach },
     { label: 'Content interactions', m: movement.engagements },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null && !g.m.notAvailable)
 
@@ -255,7 +255,7 @@ function OverviewTab({
       <SectionHeading eyebrow="Executive summary" title="The month at a glance" />
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {master.totalViews !== null && <MetricTile label="Views" value={formatNumber(master.totalViews)} accent="teal" />}
-        {master.totalReach !== null && <MetricTile label="Reach / viewers" value={formatNumber(master.totalReach)} accent="teal" />}
+        {master.totalReach !== null && <MetricTile label="Reach" value={formatNumber(master.totalReach)} accent="teal" />}
         {master.totalEngagements > 0 && <MetricTile label="Content interactions" value={formatNumber(master.totalEngagements)} accent="teal" />}
         {master.bestPlatform && <MetricTile label="Best platform" value={master.bestPlatform.label} accent="amber" />}
       </section>
@@ -644,7 +644,7 @@ function PlatformTab({
 function PostsPlatformTab({ view, previousView }: { view: PlatformView; previousView: PlatformView | null }) {
   const growth = [
     { label: 'Views', m: compareNullable(view.views, previousView?.views) },
-    { label: metaPrimaryMetricLabel(view.platform), m: compareNullable(view.reach, previousView?.reach) },
+    { label: metaPrimaryMetricLabel(), m: compareNullable(view.reach, previousView?.reach) },
     { label: metaEngagementLabel(), m: compareNullable(view.engagements, previousView?.engagements) },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
 
@@ -741,7 +741,7 @@ function ManualPlatformTab({
     { label: 'Views', m: compareNullable(view.views, previousManual?.views) },
     { label: 'Reach', m: compareNullable(view.reach, previousManual?.reach) },
     { label: 'Content interactions', m: compareNullable(view.engagements, previousManual?.engagements) },
-    { label: 'Followers', m: compareNullable(manual.followers, previousManual?.followers) },
+    { label: 'Current followers', m: compareNullable(manual.followers, previousManual?.followers) },
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
 
   return (
@@ -751,7 +751,7 @@ function ManualPlatformTab({
         {view.views !== null && <MetricTile label="Views" value={formatNumber(view.views)} accent="teal" />}
         {view.reach !== null && <MetricTile label="Reach" value={formatNumber(view.reach)} accent="teal" />}
         {view.engagements > 0 && <MetricTile label="Content interactions" value={formatNumber(view.engagements)} accent="teal" />}
-        {manual.followers > 0 && <MetricTile label="Followers" value={formatNumber(manual.followers)} accent="amber" />}
+        {manual.followers > 0 && <MetricTile label="Current followers" value={formatNumber(manual.followers)} accent="amber" />}
       </section>
 
       {growth.length > 0 && (

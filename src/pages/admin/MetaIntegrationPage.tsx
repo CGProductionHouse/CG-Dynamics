@@ -201,6 +201,8 @@ export default function MetaIntegrationPage() {
   // Sync state
   const [syncing, setSyncing] = useState(false)
   const [syncProgress, setSyncProgress] = useState<string | null>(null)
+  const [syncMode, setSyncMode] = useState<'all' | 'selected'>('all')
+  const [selectedSyncClientId, setSelectedSyncClientId] = useState('')
   const [syncResult, setSyncResult] = useState<{
     status: string
     message: string
@@ -476,7 +478,9 @@ export default function MetaIntegrationPage() {
         return
       }
 
-      const syncableAssets = linkedAssets.filter(asset => asset.facebook_page_id || asset.instagram_account_id)
+      const syncableAssets = linkedAssets
+        .filter(asset => asset.facebook_page_id || asset.instagram_account_id)
+        .filter(asset => syncMode !== 'selected' || asset.client_id === selectedSyncClientId)
       if (syncableAssets.length === 0) {
         setSyncResult({
           status: 'skipped',
@@ -872,6 +876,11 @@ export default function MetaIntegrationPage() {
                         })}
                       />
                     </div>
+                    {syncResult.period && (
+                      <p className="mt-2 text-[11px] text-brand-primary/70">
+                        Compare these numbers against the same date range (<strong className="text-brand-primary/90">{syncResult.period.periodStart}</strong> to <strong className="text-brand-primary/90">{syncResult.period.periodEnd}</strong>) in Meta Business Suite.
+                      </p>
+                    )}
                     {syncResult.steps && syncResult.steps.length > 0 && (
                       <div className="mt-2">
                         <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary/70">Steps</p>
@@ -911,22 +920,74 @@ export default function MetaIntegrationPage() {
             )}
 
             {!syncResult && (
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleSync}
-                  disabled={syncing || linkedAssets.length === 0}
-                  className="rounded-lg border border-brand-accent bg-brand-accent/10 px-5 py-2.5 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {syncing ? 'Syncing…' : 'Sync previous completed month'}
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
-                >
-                  Sync current month as internal draft
-                </button>
+              <div className="mt-4 space-y-4">
+                {/* Sync mode selector */}
+                <div className="flex gap-1 rounded-lg border border-brand-muted bg-brand-bg p-0.5 w-fit">
+                  <button
+                    type="button"
+                    onClick={() => setSyncMode('all')}
+                    className={`rounded-md px-3.5 py-1.5 text-xs font-semibold transition ${
+                      syncMode === 'all'
+                        ? 'bg-brand-accent text-brand-bg'
+                        : 'text-brand-primary hover:text-white'
+                    }`}
+                  >
+                    All linked clients
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSyncMode('selected')}
+                    className={`rounded-md px-3.5 py-1.5 text-xs font-semibold transition ${
+                      syncMode === 'selected'
+                        ? 'bg-brand-accent text-brand-bg'
+                        : 'text-brand-primary hover:text-white'
+                    }`}
+                  >
+                    Selected client
+                  </button>
+                </div>
+
+                {/* Client picker (selected mode only) */}
+                {syncMode === 'selected' && (
+                  <div className="max-w-xs">
+                    <SearchablePicker
+                      value={selectedSyncClientId}
+                      onChange={setSelectedSyncClientId}
+                      options={linkedAssets
+                        .filter(a => a.facebook_page_id || a.instagram_account_id)
+                        .map(a => ({ value: a.client_id, label: clientNameForAsset(a) }))
+                        .sort((a, b) => a.label.localeCompare(b.label))}
+                      placeholder="Search and select a client…"
+                      emptyLabel="No linked clients with sync-ready assets"
+                    />
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSync}
+                    disabled={
+                      syncing ||
+                      linkedAssets.length === 0 ||
+                      (syncMode === 'selected' && !selectedSyncClientId)
+                    }
+                    className="rounded-lg border border-brand-accent bg-brand-accent/10 px-5 py-2.5 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {syncing
+                      ? 'Syncing…'
+                      : syncMode === 'selected'
+                        ? 'Sync selected client'
+                        : 'Sync all linked clients'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled
+                    className="cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-5 py-2.5 text-sm font-semibold text-brand-primary"
+                  >
+                    Sync current month as internal draft
+                  </button>
+                </div>
               </div>
             )}
           </div>

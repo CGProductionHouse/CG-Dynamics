@@ -640,7 +640,7 @@ export default function NewReport() {
           <StatCard label="Views" value={formatNumber(master.totalViews)} />
         )}
         {master.totalReach !== null && (
-          <StatCard label="Reach / viewers" value={formatNumber(master.totalReach)} />
+          <StatCard label="Reach" value={formatNumber(master.totalReach)} />
         )}
         {master.totalEngagements > 0 && (
           <StatCard label="Content interactions" value={formatNumber(master.totalEngagements)} />
@@ -663,10 +663,10 @@ export default function NewReport() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {!movement.views.notAvailable && <MovementCard label="Views" movement={movement.views} />}
-          {!movement.reach.notAvailable && <MovementCard label="Reach / viewers" movement={movement.reach} />}
+          {!movement.reach.notAvailable && <MovementCard label="Reach" movement={movement.reach} />}
           {movement.engagements.current > 0 && <MovementCard label="Content interactions" movement={movement.engagements} />}
           {!movement.profileVisits.notAvailable && <MovementCard label="Profile visits" movement={movement.profileVisits} />}
-          {!movement.followers.notAvailable && <MovementCard label="Followers" movement={movement.followers} />}
+          {!movement.followers.notAvailable && <MovementCard label="Current followers" movement={movement.followers} />}
         </div>
         {!previousMaster && (
           <p className="mt-4 rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-2 text-xs text-brand-primary">
@@ -859,7 +859,7 @@ export default function NewReport() {
                       {post.post_type ? displayContentType(post.post_type) ?? post.post_type : 'Content type not set'}
                     </p>
                     <p className="text-xs text-brand-primary mt-2">
-                      {formatNumber(post.engagements)} {metaEngagementLabel().toLowerCase()}{post.reach !== null ? ` | ${formatNumber(post.reach)} ${metaPrimaryMetricLabel(post.platform).toLowerCase()}` : ''}
+                      {formatNumber(post.engagements)} {metaEngagementLabel().toLowerCase()}{post.reach !== null ? ` | ${formatNumber(post.reach)} ${metaPrimaryMetricLabel().toLowerCase()}` : ''}
                     </p>
                   </div>
                 ))

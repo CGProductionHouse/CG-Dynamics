@@ -721,7 +721,7 @@ async function handleRequest(req: Request): Promise<Response> {
               })
             }
 
-            result.warnings.push('Facebook post views/viewers are not synced because the available Page post fields do not expose stable Meta Business Suite view metrics through this API path.')
+            result.warnings.push('Facebook views and reach are not synced. Page Insights (page_impressions, page_impressions_unique) consistently return errors through the current API. Post-level content interactions and current follower count are synced instead.')
           } else {
             result.warnings.push(`Could not fetch Facebook posts: ${await readMetaError(fbRes, knownTokens)}`)
           }
@@ -1046,44 +1046,31 @@ async function handleRequest(req: Request): Promise<Response> {
         totalPostsSynced++
       }
 
-      // ── Fetch Facebook Page account totals (best-effort) ──
-      // Use Page-level insights for impressions/reach/engaged users, plus direct
-      // Page fields for follower count. Post-level content interaction sum is kept
-      // as a fallback when page_engaged_users is not available.
+      // ── Fetch Facebook Page data (reliable fields only) ──
+      // Facebook Page-level insights (page_impressions, page_impressions_unique,
+      // page_engaged_users) are NOT requested because they consistently return
+      // "invalid" errors through the current API version and token permissions.
+      // Instead we rely on post-level data (reactions, comments, shares) for
+      // content interactions, and Page fields for current follower count. Views
+      // and reach are not available for Facebook through this API path.
       if (client.facebookPageId && Date.now() < insightDeadline) {
         try {
           const fbValues: Record<string, number> = {}
-          const fbErrors: string[] = []
 
-          // Page insights: impressions, reach, engaged users (daily, summed over month)
-          const fbInsightResult = await fetchInsights(
-            baseUrl,
-            client.facebookPageId,
-            ['page_impressions', 'page_impressions_unique', 'page_engaged_users'],
-            pageToken,
-            { period: 'day', since: periodStart, until: periodEnd },
-            knownTokens,
-            { split: true },
-          )
-          if (fbInsightResult.error) {
-            fbErrors.push(fbInsightResult.error)
-          }
-          Object.assign(fbValues, fbInsightResult.values)
-
-          // Post-level content interaction sum (fallback for page_engaged_users)
+          // Post-level content interaction sum
           const fbContentInteractions = fbPosts.reduce(
             (sum, post) => sum + post.reactions + post.comments + post.shares + (post.clicks ?? 0),
             0,
           )
 
-          // Follower count from Page fields (lifetime)
-          let follows = 0
+          // Current follower count from Page fields
+          let currentFollowers = 0
           try {
             const pageParams = new URLSearchParams({ access_token: pageToken, fields: 'fan_count,followers_count' })
             const pageRes = await metaFetch(`${baseUrl}/${client.facebookPageId}?${pageParams.toString()}`)
             if (pageRes.ok) {
               const pageData = await pageRes.json()
-              follows =
+              currentFollowers =
                 typeof pageData.followers_count === 'number'
                   ? pageData.followers_count
                   : typeof pageData.fan_count === 'number'
@@ -1094,50 +1081,38 @@ async function handleRequest(req: Request): Promise<Response> {
             // non-fatal
           }
 
-          const engagements = typeof fbValues.page_engaged_users === 'number'
-            ? fbValues.page_engaged_users
-            : fbContentInteractions
-
-          const anyPositive =
-            (typeof fbValues.page_impressions === 'number' && fbValues.page_impressions > 0) ||
-            (typeof fbValues.page_impressions_unique === 'number' && fbValues.page_impressions_unique > 0) ||
-            engagements > 0 ||
-            follows > 0
+          const anyPositive = fbContentInteractions > 0 || currentFollowers > 0
 
           if (anyPositive) {
             await upsertSyncedPlatformMetric(sb, {
               clientId: client.clientId,
               month,
               platform: 'facebook',
-              views: fbValues.page_impressions ?? 0,
-              reach: fbValues.page_impressions_unique ?? 0,
-              engagements,
+              views: 0,
+              reach: 0,
+              engagements: fbContentInteractions,
               profileVisits: 0,
               externalLinkTaps: 0,
-              followers: follows,
+              followers: currentFollowers,
               createdBy: user.id,
             }, result.warnings, knownTokens)
           }
 
           result.accountTotals.facebook = {
-            views: typeof fbValues.page_impressions === 'number' ? fbValues.page_impressions : null,
-            viewers: typeof fbValues.page_impressions_unique === 'number' ? fbValues.page_impressions_unique : null,
-            content_interactions: engagements,
+            views: null,
+            viewers: null,
+            content_interactions: fbContentInteractions,
             visits: null,
-            follows: follows > 0 ? follows : null,
+            current_followers: currentFollowers > 0 ? currentFollowers : null,
           }
 
-          const missingFb = ['page_impressions', 'page_impressions_unique']
-            .filter(metric => typeof fbValues[metric] !== 'number')
-          if (missingFb.length > 0) {
-            result.unavailableMetrics.push({
-              platform: 'facebook',
-              metrics: missingFb.map(m => m === 'page_impressions' ? 'views' : 'viewers'),
-              reason: fbErrors.length > 0 ? fbErrors.join('; ') : 'Meta Page insights not available for this period.',
-            })
-          }
+          result.unavailableMetrics.push({
+            platform: 'facebook',
+            metrics: ['views', 'viewers'],
+            reason: 'Facebook Page Insights did not return page_impressions or page_impressions_unique through the current API version and token permissions. Post-level interactions and follower count are synced instead.',
+          })
         } catch (err) {
-          result.warnings.push(redact(`Error fetching Facebook account totals: ${String(err)}`, knownTokens))
+          result.warnings.push(redact(`Error fetching Facebook account data: ${String(err)}`, knownTokens))
         }
       }
 
@@ -1224,7 +1199,7 @@ async function handleRequest(req: Request): Promise<Response> {
             content_interactions: igValues.total_interactions ?? null,
             visits: igValues.profile_views ?? null,
             website_clicks: igValues.website_clicks ?? null,
-            follows: igFollowers > 0 ? igFollowers : null,
+            current_followers: igFollowers > 0 ? igFollowers : null,
           }
           const missingIg = ['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks']
             .filter(metric => typeof igValues[metric] !== 'number')
