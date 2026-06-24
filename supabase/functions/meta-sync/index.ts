@@ -134,6 +134,18 @@ async function readMetaError(res: Response, tokens: Array<string | null | undefi
   return redact(detail, tokens)
 }
 
+// fetch with a hard timeout so a slow/hung Meta request can never stall the
+// whole function (which would blow the Edge runtime wall-clock limit).
+async function metaFetch(url: string, timeoutMs = 8000): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(url, { signal: controller.signal })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 function sumInsightValue(v: { values?: Array<{ value?: number }> }): number | null {
   if (!v.values || v.values.length === 0) return null
   let sum = 0
@@ -152,10 +164,13 @@ interface InsightFetchResult {
   error: string | null
 }
 
-// Resilient insight fetch: tries the whole metric batch, and if Meta rejects it
-// (often because ONE metric is unsupported for the object/type), retries each
-// metric individually so the supported metrics still come through. A failed
-// metric is simply absent from the result — never a fake 0.
+// Resilient insight fetch: tries the whole metric batch. When `split` is true
+// and the batch fails (often because ONE metric is unsupported), it retries each
+// metric individually so the supported metrics still come through.
+//
+// IMPORTANT: `split` defaults to FALSE. Per-post insight calls must NOT split,
+// or 85 posts × ~5 metrics becomes a request storm that times out the function.
+// Per-metric splitting is only used for the handful of account/page-level calls.
 async function fetchInsights(
   baseUrl: string,
   objectId: string,
@@ -163,23 +178,30 @@ async function fetchInsights(
   token: string,
   extra: Record<string, string>,
   tokens: Array<string | null | undefined>,
+  opts: { split?: boolean } = {},
 ): Promise<InsightFetchResult> {
+  const split = opts.split === true
   const values: Record<string, number> = {}
 
   const runBatch = async (ms: string[]): Promise<{ ok: boolean; error: string | null }> => {
     const params = new URLSearchParams({ access_token: token, metric: ms.join(','), ...extra })
-    const res = await fetch(`${baseUrl}/${objectId}/insights?${params.toString()}`)
-    if (!res.ok) return { ok: false, error: await readMetaError(res, tokens) }
-    const data = await res.json()
-    for (const v of (data.data as Array<{ name: string; values?: Array<{ value?: number }> }> ?? [])) {
-      const val = sumInsightValue(v)
-      if (val !== null) values[v.name] = val
+    try {
+      const res = await metaFetch(`${baseUrl}/${objectId}/insights?${params.toString()}`)
+      if (!res.ok) return { ok: false, error: await readMetaError(res, tokens) }
+      const data = await res.json()
+      for (const v of (data.data as Array<{ name: string; values?: Array<{ value?: number }> }> ?? [])) {
+        const val = sumInsightValue(v)
+        if (val !== null) values[v.name] = val
+      }
+      return { ok: true, error: null }
+    } catch (e) {
+      return { ok: false, error: redact(`request failed: ${String(e)}`, tokens) }
     }
-    return { ok: true, error: null }
   }
 
   const batch = await runBatch(metrics)
   if (batch.ok) return { values, error: null }
+  if (!split) return { values, error: batch.error }
 
   // Split: try each metric on its own so one bad metric doesn't lose the rest.
   const errors: string[] = []
@@ -201,7 +223,7 @@ async function fetchPageTokens(baseUrl: string, userToken: string): Promise<Map<
   let guard = 0
   while (url && guard < 10) {
     guard++
-    const res = await fetch(url)
+    const res = await metaFetch(url)
     if (!res.ok) break
     const data = await res.json()
     for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
@@ -273,11 +295,30 @@ Deno.serve(async (req) => {
   }
 
   if (req.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405)
+    return jsonResponse({
+      ok: false,
+      status: 'failed',
+      error: 'Method not allowed',
+      clientsSucceeded: 0,
+      clientsFailed: 0,
+      reportsCreated: 0,
+      reportsReused: 0,
+      postsSynced: 0,
+    }, 405)
   }
 
-  // ── Auth ─────────────────────────────────────────────────
-  const authHeader = req.headers.get('Authorization') ?? ''
+  // Safe operational trail returned in the response for admin debugging. Never
+  // contains tokens. `tokensForRedaction` is filled once tokens are known so the
+  // top-level catch can scrub them from any unexpected error message.
+  const steps: string[] = []
+  const tokensForRedaction: string[] = []
+
+  // Top-level boundary: the function must ALWAYS return valid JSON with CORS,
+  // even on an unexpected crash, so the frontend can show the real reason
+  // instead of a generic "could not reach service".
+  try {
+    // ── Auth ─────────────────────────────────────────────────
+    const authHeader = req.headers.get('Authorization') ?? ''
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
@@ -303,6 +344,7 @@ Deno.serve(async (req) => {
   if (!profile || !['admin', 'team'].includes(profile.role)) {
     return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
   }
+  steps.push('auth ok')
 
   // ── Parse body ───────────────────────────────────────────
   let body: { mode?: string; clientId?: string } = {}
@@ -333,6 +375,7 @@ Deno.serve(async (req) => {
   if (!connections || connections.length === 0) {
     return jsonResponse({ ok: false, error: 'Meta is not connected.' }, 400)
   }
+  steps.push('connection loaded')
 
   const { data: tokenRows } = await sb
     .from('meta_connection_tokens')
@@ -347,6 +390,8 @@ Deno.serve(async (req) => {
   const accessToken = tokenRows[0].encrypted_access_token
   const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
 
+  steps.push('meta token loaded')
+
   // Page access tokens (in-memory only, never stored) for Page + IG endpoints.
   // Falls back to the user token per endpoint if a page token is unavailable.
   let pageTokenMap = new Map<string, string>()
@@ -355,8 +400,10 @@ Deno.serve(async (req) => {
   } catch (_err) {
     // Non-fatal — endpoints will fall back to the user token.
   }
+  steps.push(`page tokens loaded (${pageTokenMap.size})`)
   // Used to scrub any token from warnings/errors before they are stored/returned.
   const knownTokens: string[] = [accessToken, ...pageTokenMap.values()]
+  tokensForRedaction.push(...knownTokens)
 
   // ── Load linked clients ──────────────────────────────────
   let linkedAssetsQuery = sb
@@ -371,6 +418,7 @@ Deno.serve(async (req) => {
   const { data: linkedAssets } = await linkedAssetsQuery
 
   if (!linkedAssets || linkedAssets.length === 0) {
+    steps.push('linked assets loaded (0)')
     return jsonResponse({
       ok: true,
       status: 'skipped',
@@ -387,8 +435,10 @@ Deno.serve(async (req) => {
       warnings: [],
       failedClients: [],
       succeededClients: [],
+      steps,
     })
   }
+  steps.push(`linked assets loaded (${linkedAssets.length})`)
 
   // Load client names for the linked asset rows.
   const clientIds = [...new Set(linkedAssets.map(a => a.client_id))]
@@ -430,6 +480,12 @@ Deno.serve(async (req) => {
   for (const skipped of skippedAssets) {
     allWarnings.push(`${skipped.clientName} has no linked Facebook page or Instagram account to sync.`)
   }
+
+  // Hard time budget for all best-effort insight fetching. Posts (and their
+  // engagements/images) are always saved; once this deadline passes we stop
+  // fetching optional insights so the function returns well under the Edge
+  // runtime wall-clock limit instead of being killed.
+  const insightDeadline = Date.now() + 70_000
 
   for (const client of clients) {
     const result: SyncClientResult = {
@@ -522,6 +578,7 @@ Deno.serve(async (req) => {
       }
 
       result.reportId = reportId
+      steps.push(`${client.clientName}: report ${result.reportCreated ? 'created' : 'reused'}`)
 
       // ── Fetch Facebook posts ───────────────────────────
       const fbPosts: Array<{
@@ -550,7 +607,7 @@ Deno.serve(async (req) => {
             limit: '100',
           })
 
-          const fbRes = await fetch(`${baseUrl}/${client.facebookPageId}/posts?${fbParams.toString()}`)
+          const fbRes = await metaFetch(`${baseUrl}/${client.facebookPageId}/posts?${fbParams.toString()}`)
           if (fbRes.ok) {
             const fbData = await fbRes.json()
             const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
@@ -580,10 +637,17 @@ Deno.serve(async (req) => {
               })
             }
 
-            // Per-post insights (best-effort, resilient). Missing metrics stay
-            // null — never coerced to 0.
+            // Per-post insights (best-effort). One batch request per post and a
+            // circuit breaker: if a post's insights fail, the rest will fail the
+            // same way (permission/deprecation), so we stop and record a single
+            // warning. This prevents a request storm that times the function out.
+            // Missing metrics stay null — never coerced to 0.
             let fbInsightErr: string | null = null
             for (const post of fbPosts) {
+              if (Date.now() > insightDeadline) {
+                fbInsightErr = fbInsightErr ?? 'time budget reached — remaining post insights skipped'
+                break
+              }
               const { values, error } = await fetchInsights(
                 baseUrl,
                 post.metaPostId,
@@ -592,14 +656,17 @@ Deno.serve(async (req) => {
                 {},
                 knownTokens,
               )
+              if (error) {
+                fbInsightErr = error
+                break
+              }
               if (typeof values.post_impressions === 'number') post.impressions = values.post_impressions
               if (typeof values.post_impressions_unique === 'number') post.impressionsUnique = values.post_impressions_unique
               if (typeof values.post_engaged_users === 'number') post.engagedUsers = values.post_engaged_users
               if (typeof values.post_clicks === 'number') post.clicks = values.post_clicks
-              if (error && !fbInsightErr) fbInsightErr = error
             }
             if (fbInsightErr) {
-              result.warnings.push(`Some Facebook post insights were unavailable (views/reach may be missing): ${fbInsightErr}`)
+              result.warnings.push(`Facebook post insights unavailable (views/reach shown as not available): ${fbInsightErr}`)
             }
           } else {
             result.warnings.push(`Could not fetch Facebook posts: ${await readMetaError(fbRes, knownTokens)}`)
@@ -635,7 +702,7 @@ Deno.serve(async (req) => {
             limit: '100',
           })
 
-          const igRes = await fetch(`${baseUrl}/${client.instagramAccountId}/media?${igParams.toString()}`)
+          const igRes = await metaFetch(`${baseUrl}/${client.instagramAccountId}/media?${igParams.toString()}`)
           if (igRes.ok) {
             const igData = await igRes.json()
             const rawMedia: Array<Record<string, unknown>> = igData.data ?? []
@@ -674,12 +741,16 @@ Deno.serve(async (req) => {
               })
             }
 
-            // Per-media insights (best-effort, resilient). Valid metrics depend
-            // on media type, so we request a small set and let the resilient
-            // fetcher drop any unsupported metric instead of failing the batch.
+            // Per-media insights (best-effort). One batch request per media with
+            // the same circuit breaker + time budget as Facebook, so a broken
+            // insights permission can't storm the function into a timeout.
             // likes/comments come from the media fields above, not insights.
             let igInsightErr: string | null = null
             for (const post of igPosts) {
+              if (Date.now() > insightDeadline) {
+                igInsightErr = igInsightErr ?? 'time budget reached — remaining media insights skipped'
+                break
+              }
               const { values, error } = await fetchInsights(
                 baseUrl,
                 post.metaPostId,
@@ -688,14 +759,17 @@ Deno.serve(async (req) => {
                 {},
                 knownTokens,
               )
+              if (error) {
+                igInsightErr = error
+                break
+              }
               if (typeof values.reach === 'number') post.reach = values.reach
               if (typeof values.views === 'number') post.impressions = values.views
               if (typeof values.saved === 'number') post.saves = values.saved
               if (typeof values.shares === 'number') post.shares = values.shares
-              if (error && !igInsightErr) igInsightErr = error
             }
             if (igInsightErr) {
-              result.warnings.push(`Some Instagram media insights were unavailable (views/reach may be missing): ${igInsightErr}`)
+              result.warnings.push(`Instagram media insights unavailable (views/reach shown as not available): ${igInsightErr}`)
             }
           } else {
             result.warnings.push(`Could not fetch Instagram media: ${await readMetaError(igRes, knownTokens)}`)
@@ -890,7 +964,7 @@ Deno.serve(async (req) => {
       // These enrich follower / profile-visit movement. Post-level totals above
       // remain the primary source for reach/views/engagements. Resilient + only
       // stored when Meta actually returns real values (never a fake-0 row).
-      if (client.facebookPageId) {
+      if (client.facebookPageId && Date.now() < insightDeadline) {
         try {
           const { values, error } = await fetchInsights(
             baseUrl,
@@ -899,6 +973,7 @@ Deno.serve(async (req) => {
             pageToken,
             { period: 'month', since: periodStart, until: periodEnd },
             knownTokens,
+            { split: true },
           )
           if (error && Object.keys(values).length === 0) {
             result.warnings.push(`Facebook page insights unavailable (follower/profile totals may be missing): ${error}`)
@@ -925,7 +1000,7 @@ Deno.serve(async (req) => {
       }
 
       // ── Fetch Instagram account monthly totals (best-effort) ──
-      if (client.instagramAccountId) {
+      if (client.instagramAccountId && Date.now() < insightDeadline) {
         try {
           const { values, error } = await fetchInsights(
             baseUrl,
@@ -934,12 +1009,13 @@ Deno.serve(async (req) => {
             igToken,
             { period: 'day', since: periodStart, until: periodEnd },
             knownTokens,
+            { split: true },
           )
           // followers_count is a lifetime metric fetched separately (best-effort).
           let igFollowers = 0
           try {
             const fParams = new URLSearchParams({ access_token: igToken, fields: 'followers_count' })
-            const fRes = await fetch(`${baseUrl}/${client.instagramAccountId}?${fParams.toString()}`)
+            const fRes = await metaFetch(`${baseUrl}/${client.instagramAccountId}?${fParams.toString()}`)
             if (fRes.ok) {
               const fData = await fRes.json()
               if (typeof fData.followers_count === 'number') igFollowers = fData.followers_count
@@ -975,11 +1051,13 @@ Deno.serve(async (req) => {
       }
 
       result.status = 'success'
+      steps.push(`${client.clientName}: ${result.postsSynced} posts synced`)
       clientsSynced++
     } catch (err) {
       result.status = 'failed'
       // Our thrown errors already carry the detailed message; redact defensively.
       result.error = redact(err instanceof Error ? err.message : String(err), knownTokens)
+      steps.push(`${client.clientName}: failed`)
       clientsFailed++
     }
 
@@ -1056,8 +1134,34 @@ Deno.serve(async (req) => {
     warnings: allWarnings,
     failedClients,
     succeededClients,
+    steps,
     // Backward-compatible field used by the existing UI.
     clientsSynced,
     details: results,
   })
+  } catch (err) {
+    // Any unhandled error still returns valid JSON (with CORS via jsonResponse)
+    // so the UI shows the real reason rather than a transport failure. Status is
+    // 200 so the Supabase client surfaces it through `data`, not a thrown error.
+    const rawMsg = err instanceof Error ? err.message : String(err)
+    const safeMsg = redact(`Sync failed unexpectedly: ${rawMsg}`, tokensForRedaction).slice(0, 600)
+    return jsonResponse({
+      ok: false,
+      status: 'failed',
+      error: safeMsg,
+      message: 'Sync failed unexpectedly.',
+      clientsAttempted: 0,
+      clientsSucceeded: 0,
+      clientsSynced: 0,
+      clientsFailed: 0,
+      reportsCreated: 0,
+      reportsReused: 0,
+      reportsUpdated: 0,
+      postsSynced: 0,
+      warnings: [],
+      failedClients: [],
+      succeededClients: [],
+      steps,
+    }, 200)
+  }
 })

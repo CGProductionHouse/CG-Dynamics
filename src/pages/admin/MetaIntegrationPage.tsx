@@ -122,6 +122,54 @@ function SearchablePicker({ value, onChange, options, placeholder, emptyLabel, d
   )
 }
 
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value, null, 2)
+  } catch {
+    return String(value)
+  }
+}
+
+// Pulls the real, safe error out of a Supabase Functions invoke error. A
+// FunctionsHttpError carries the Edge Function's Response in `error.context`,
+// whose JSON body holds the function's own (token-free) error message + status.
+async function extractFunctionError(error: unknown): Promise<{ message: string; debug: string }> {
+  const anyErr = error as { name?: string; message?: string; context?: unknown }
+  let status: number | undefined
+  let bodyText = ''
+
+  const ctx = anyErr?.context
+  if (ctx && typeof ctx === 'object' && 'status' in (ctx as Record<string, unknown>)) {
+    const res = ctx as Response
+    status = res.status
+    try {
+      bodyText = await res.clone().text()
+    } catch {
+      /* body may already be consumed — fall back to the error message */
+    }
+  }
+
+  let parsed: { error?: string; message?: string } | null = null
+  try {
+    parsed = bodyText ? JSON.parse(bodyText) : null
+  } catch {
+    /* response was not JSON */
+  }
+
+  const fnMessage = (parsed?.error || parsed?.message || '').toString().trim()
+  const base =
+    fnMessage ||
+    anyErr?.message ||
+    'The sync service returned an error. Check the Supabase Edge Function deployment and logs.'
+  const message = status ? `${base} (HTTP ${status})` : base
+  const debug = safeStringify({
+    name: anyErr?.name,
+    status,
+    body: parsed ?? (bodyText ? bodyText.slice(0, 800) : undefined),
+  })
+  return { message, debug }
+}
+
 export default function MetaIntegrationPage() {
   const [searchParams] = useSearchParams()
   const [connectState, setConnectState] = useState<ConnectState>('idle')
@@ -166,6 +214,8 @@ export default function MetaIntegrationPage() {
     warnings?: string[]
     failedClients?: { name: string; error: string }[]
     succeededClients?: { name: string; postsSynced: number }[]
+    steps?: string[]
+    debug?: string
     reportId?: string
   } | null>(null)
 
@@ -381,11 +431,24 @@ export default function MetaIntegrationPage() {
         body: { mode: 'previous_completed_month' },
       })
       if (error) {
-        setSyncResult({ status: 'failed', message: 'Could not reach the sync service. Check Supabase Edge Function deployment.' })
+        // Read the real error out of the function's HTTP response instead of a
+        // generic "could not reach" message.
+        const detail = await extractFunctionError(error)
+        setSyncResult({
+          status: 'failed',
+          message: detail.message,
+          debug: detail.debug,
+        })
         return
       }
       if (!data?.ok) {
-        setSyncResult({ status: 'failed', message: data?.error || 'Sync failed.' })
+        setSyncResult({
+          status: 'failed',
+          message: data?.error || data?.message || 'Sync failed.',
+          warnings: data?.warnings,
+          steps: data?.steps,
+          debug: safeStringify({ error: data?.error, steps: data?.steps, warnings: data?.warnings }),
+        })
         return
       }
       await loadLinkedAssets()
@@ -403,9 +466,20 @@ export default function MetaIntegrationPage() {
         warnings: data.warnings,
         failedClients: data.failedClients,
         succeededClients: data.succeededClients,
+        steps: data.steps,
+        debug: safeStringify({
+          status: data.status,
+          steps: data.steps,
+          warnings: data.warnings,
+          failedClients: data.failedClients,
+        }),
       })
-    } catch {
-      setSyncResult({ status: 'failed', message: 'Sync request failed.' })
+    } catch (e) {
+      setSyncResult({
+        status: 'failed',
+        message: 'Sync request failed before reaching the service.',
+        debug: safeStringify({ error: e instanceof Error ? e.message : String(e) }),
+      })
     } finally {
       setSyncing(false)
     }
@@ -635,6 +709,31 @@ export default function MetaIntegrationPage() {
                     </ul>
                   </div>
                 )}
+
+                {/* Staff-only diagnostics (this page is admin/team only by route). */}
+                {(syncResult.debug || (syncResult.steps && syncResult.steps.length > 0)) && (
+                  <details className="mt-3 rounded-lg border border-brand-muted bg-brand-bg/50 p-3">
+                    <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
+                      Diagnostics (staff only)
+                    </summary>
+                    {syncResult.steps && syncResult.steps.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary/70">Steps</p>
+                        <ol className="mt-1 space-y-0.5 text-xs text-brand-primary">
+                          {syncResult.steps.map((s, i) => (
+                            <li key={i}>{i + 1}. {s}</li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+                    {syncResult.debug && (
+                      <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded bg-black/40 p-2 text-[11px] leading-relaxed text-brand-primary">
+                        {syncResult.debug}
+                      </pre>
+                    )}
+                  </details>
+                )}
+
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {syncResult.status !== 'failed' && (
                     <a
