@@ -1104,17 +1104,44 @@ async function handleRequest(req: Request): Promise<Response> {
       }
 
       // ── Fetch Instagram account monthly totals (best-effort) ──
+      // Instagram insight metrics have different param requirements:
+      //   - reach works with period=day
+      //   - views, total_interactions, profile_views, website_clicks need metric_type=total_value
+      // We split into safe groups to avoid "should be specified with parameter" errors.
       if (client.instagramAccountId && Date.now() < insightDeadline) {
         try {
-          const { values, error } = await fetchInsights(
+          const igValues: Record<string, number> = {}
+          const igErrors: string[] = []
+
+          // Group 1: reach (no special params needed)
+          const reachResult = await fetchInsights(
             baseUrl,
             client.instagramAccountId,
-            ['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks'],
+            ['reach'],
             igToken,
             { period: 'day', since: periodStart, until: periodEnd },
             knownTokens,
+          )
+          if (reachResult.error) {
+            igErrors.push(`reach (${reachResult.error})`)
+          }
+          Object.assign(igValues, reachResult.values)
+
+          // Group 2: metrics requiring metric_type=total_value
+          const totalValueResult = await fetchInsights(
+            baseUrl,
+            client.instagramAccountId,
+            ['views', 'total_interactions', 'profile_views', 'website_clicks'],
+            igToken,
+            { period: 'day', since: periodStart, until: periodEnd, metric_type: 'total_value' },
+            knownTokens,
             { split: true },
           )
+          if (totalValueResult.error) {
+            igErrors.push(totalValueResult.error)
+          }
+          Object.assign(igValues, totalValueResult.values)
+
           // followers_count is a lifetime metric fetched separately (best-effort).
           let igFollowers = 0
           try {
@@ -1128,41 +1155,46 @@ async function handleRequest(req: Request): Promise<Response> {
             // non-fatal
           }
 
-          if (error && Object.keys(values).length === 0 && igFollowers === 0) {
-            result.warnings.push(`Instagram account insights unavailable (follower/profile totals may be missing): ${error}`)
+          const combinedError = igErrors.length > 0 ? igErrors.join('; ') : null
+
+          if (combinedError && Object.keys(igValues).length === 0 && igFollowers === 0) {
+            result.warnings.push(`Instagram account insights unavailable (follower/profile totals may be missing): ${combinedError}`)
+          } else if (combinedError && (Object.keys(igValues).length > 0 || igFollowers > 0)) {
+            result.warnings.push(`Some Instagram account insights had errors: ${combinedError}`)
           }
 
           const anyPositive =
-            (['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks'].some(k => typeof values[k] === 'number' && values[k] > 0)) ||
+            (['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks'].some(k => typeof igValues[k] === 'number' && igValues[k] > 0)) ||
             igFollowers > 0
           if (anyPositive) {
             await upsertSyncedPlatformMetric(sb, {
               clientId: client.clientId,
               month,
               platform: 'instagram',
-              views: values.views ?? 0,
-              reach: values.reach ?? 0,
-              engagements: values.total_interactions ?? 0,
-              profileVisits: values.profile_views ?? 0,
-              externalLinkTaps: values.website_clicks ?? 0,
+              views: igValues.views ?? 0,
+              reach: igValues.reach ?? 0,
+              engagements: igValues.total_interactions ?? 0,
+              profileVisits: igValues.profile_views ?? 0,
+              externalLinkTaps: igValues.website_clicks ?? 0,
               followers: igFollowers,
               createdBy: user.id,
             }, result.warnings, knownTokens)
           }
           result.accountTotals.instagram = {
-            views: values.views ?? null,
-            reach: values.reach ?? null,
-            content_interactions: values.total_interactions ?? null,
-            visits: values.profile_views ?? null,
+            views: igValues.views ?? null,
+            reach: igValues.reach ?? null,
+            content_interactions: igValues.total_interactions ?? null,
+            visits: igValues.profile_views ?? null,
+            website_clicks: igValues.website_clicks ?? null,
             follows: igFollowers > 0 ? igFollowers : null,
           }
-          const missingIg = ['views', 'reach', 'total_interactions', 'profile_views']
-            .filter(metric => typeof values[metric] !== 'number')
+          const missingIg = ['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks']
+            .filter(metric => typeof igValues[metric] !== 'number')
           if (missingIg.length > 0) {
             result.unavailableMetrics.push({
               platform: 'instagram',
               metrics: missingIg,
-              reason: error ?? 'Meta did not return this metric for the requested month.',
+              reason: combinedError ?? 'Meta did not return this metric for the requested month.',
             })
           }
         } catch (err) {

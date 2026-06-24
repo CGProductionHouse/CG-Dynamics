@@ -254,6 +254,13 @@ export default function ReportsManagement() {
     }
 
     result.sort((a, b) => {
+      // Prefer Meta synced reports, then mixed, then manual/CSV.
+      const aSource = sourceById.get(a.id) ?? 'manual'
+      const bSource = sourceById.get(b.id) ?? 'manual'
+      const sourceOrder: Record<ReportSource, number> = { meta: 0, mixed: 1, manual: 2 }
+      const sourceDiff = sourceOrder[aSource] - sourceOrder[bSource]
+      if (sourceDiff !== 0) return sourceDiff
+      // Within the same source, newest first.
       const aDate = a.updated_at ?? a.created_at
       const bDate = b.updated_at ?? b.created_at
       return bDate.localeCompare(aDate)

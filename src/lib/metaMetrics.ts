@@ -16,8 +16,8 @@ export const META_UNAVAILABLE_LABEL = 'Data not available from Meta API'
 export const META_SOURCE_NOTE =
   'Data source: Meta Business Sync. Some metrics may be unavailable where Meta does not expose them through the API.'
 
-function isMetaSyncedManual(view: PlatformView): boolean {
-  return view.source === 'manual' && view.manual?.source_type === 'other' && view.manual.general_notes?.startsWith('Meta sync account totals') === true
+function hasMetaSyncedMetric(manual: PlatformView['manual']): boolean {
+  return manual?.source_type === 'other' && manual.general_notes?.startsWith('Meta sync account totals') === true
 }
 
 function metric(key: string, label: string, value: number | null | undefined): MetaMetricValue {
@@ -45,10 +45,12 @@ export function formatMetaMetric(value: number | null | undefined): string {
 }
 
 export function buildMetaPlatformMetrics(view: PlatformView): MetaMetricValue[] {
-  const metaManual = isMetaSyncedManual(view)
-  const interactions = metaManual && view.engagements === 0 ? null : view.engagements
-  const visits = metaManual && view.manual?.profile_visits === 0 ? null : view.manual?.profile_visits
-  const follows = metaManual && view.manual?.followers === 0 ? null : view.manual?.followers
+  // Check if the attached manual metric is Meta synced regardless of view source
+  // so 0 values from Meta (meaning "unavailable") are shown as "Data not available".
+  const metaSyncedMetric = hasMetaSyncedMetric(view.manual)
+  const interactions = metaSyncedMetric && view.engagements === 0 ? null : view.engagements
+  const visits = metaSyncedMetric && view.manual?.profile_visits === 0 ? null : view.manual?.profile_visits
+  const follows = metaSyncedMetric && view.manual?.followers === 0 ? null : view.manual?.followers
 
   if (view.platform === 'facebook') {
     return [
@@ -66,6 +68,8 @@ export function buildMetaPlatformMetrics(view: PlatformView): MetaMetricValue[] 
       metric('views', 'Views', view.views),
       metric('reach', 'Reach', view.reach),
       metric('content_interactions', 'Content interactions', interactions),
+      metric('profile_visits', 'Profile visits', visits),
+      metric('follows', 'Follows', follows),
       metric('posts', 'Posts', view.postCount),
     ]
   }

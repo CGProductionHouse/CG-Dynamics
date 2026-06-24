@@ -261,11 +261,18 @@ function OverviewTab({
     <>
       <SectionHeading eyebrow="Executive summary" title="The month at a glance" />
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricTile label="Views" value={master.totalViews} accent="teal" />
+        {master.totalViews !== null && (
+          <MetricTile label="Views" value={master.totalViews} accent="teal" />
+        )}
         <MetricTile label="Reach / viewers" value={master.totalReach} accent="teal" />
         <MetricTile label="Content interactions" value={master.totalEngagements} accent="teal" />
         <MetricTile label="Best platform" value={master.bestPlatform?.label ?? null} accent="amber" />
       </section>
+      {master.totalViews === null && master.platforms.some(p => p.source === 'posts') && (
+        <p className="mb-12 rounded-2xl border border-white/10 bg-white/[0.045] px-5 py-3 text-sm text-slate-400 backdrop-blur">
+          Partial Meta data available — views are not exposed through the available Meta API path for all platforms.
+        </p>
+      )}
 
       {growthItems.length > 0 && (
         <section className="mb-12">

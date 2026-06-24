@@ -139,6 +139,37 @@ function redactForDisplay(text: string): string {
     .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
 }
 
+function CopyButton({ getPayload }: { getPayload: () => Record<string, unknown> }) {
+  const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
+
+  async function handleCopy() {
+    setCopyError(null)
+    try {
+      const payload = getPayload()
+      const text = JSON.stringify(payload, null, 2)
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopyError('Could not copy to clipboard.')
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="rounded-lg border border-brand-accent bg-brand-accent/10 px-3 py-1.5 text-xs font-semibold text-brand-accent hover:bg-brand-accent/20"
+      >
+        {copied ? 'Copied' : 'Copy diagnostics'}
+      </button>
+      {copyError && <span className="text-xs text-red-300">{copyError}</span>}
+    </div>
+  )
+}
+
 export default function MetaIntegrationPage() {
   const [searchParams] = useSearchParams()
   const [connectState, setConnectState] = useState<ConnectState>('idle')
@@ -173,6 +204,7 @@ export default function MetaIntegrationPage() {
   const [syncResult, setSyncResult] = useState<{
     status: string
     message: string
+    period?: { periodStart: string; periodEnd: string; month: string }
     phase?: string
     syncEngineVersion?: string
     clientsAttempted?: number
@@ -187,6 +219,8 @@ export default function MetaIntegrationPage() {
     failedClients?: { name: string; error: string }[]
     succeededClients?: { name: string; postsSynced: number }[]
     steps?: string[]
+    diagnostics?: unknown[]
+    details?: unknown[]
     debug?: string
     reportId?: string
   } | null>(null)
@@ -474,7 +508,9 @@ export default function MetaIntegrationPage() {
       const succeededClients: { name: string; postsSynced: number }[] = []
       const steps: string[] = []
       const diagnostics: unknown[] = []
+      const details: unknown[] = []
       let syncEngineVersion: string | undefined
+      let syncResultPeriod: { periodStart: string; periodEnd: string; month: string } | null = null
 
       for (let index = 0; index < syncableAssets.length; index++) {
         const asset = syncableAssets[index]
@@ -488,6 +524,7 @@ export default function MetaIntegrationPage() {
 
         syncEngineVersion = typeof data?.syncEngineVersion === 'string' ? data.syncEngineVersion : syncEngineVersion
         diagnostics.push({ clientName, httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) })
+        if (data?.period && !syncResultPeriod) syncResultPeriod = data.period as { periodStart: string; periodEnd: string; month: string }
 
         if (!response.ok || !data?.ok) {
           const safeText = data ? null : redactForDisplay(text || 'No response body from sync service.').slice(0, 500)
@@ -501,6 +538,7 @@ export default function MetaIntegrationPage() {
           failedClients.push({ name: clientName, error })
           if (Array.isArray(data?.warnings)) warnings.push(...data.warnings.map(String))
           if (Array.isArray(data?.steps)) steps.push(...data.steps.map(String))
+          if (Array.isArray(data?.details)) details.push(...data.details)
           continue
         }
 
@@ -512,6 +550,7 @@ export default function MetaIntegrationPage() {
         totals.postsSynced += Number(data.postsSynced ?? 0)
         if (Array.isArray(data.warnings)) warnings.push(...data.warnings.map(String))
         if (Array.isArray(data.steps)) steps.push(...data.steps.map(String))
+        if (Array.isArray(data.details)) details.push(...data.details)
         if (Array.isArray(data.failedClients)) {
           failedClients.push(...data.failedClients.map(item => {
             const row = item as { name?: unknown; error?: unknown }
@@ -540,6 +579,7 @@ export default function MetaIntegrationPage() {
           : status === 'partial'
             ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed.`
             : `Sync failed for all ${totals.clientsAttempted} client(s).`,
+        period: syncResultPeriod ?? undefined,
         syncEngineVersion,
         clientsAttempted: totals.clientsAttempted,
         clientsSucceeded: totals.clientsSucceeded,
@@ -553,6 +593,8 @@ export default function MetaIntegrationPage() {
         failedClients,
         succeededClients,
         steps,
+        diagnostics,
+        details,
         debug: safeStringify({ syncEngineVersion, diagnostics, warnings, failedClients }),
       })
     } catch (e) {
@@ -807,6 +849,29 @@ export default function MetaIntegrationPage() {
                     <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
                       Diagnostics (staff only)
                     </summary>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <CopyButton
+                        getPayload={() => ({
+                          syncEngineVersion: syncResult.syncEngineVersion,
+                          status: syncResult.status,
+                          message: syncResult.message,
+                          period: syncResult.period,
+                          clientsAttempted: syncResult.clientsAttempted,
+                          clientsSucceeded: syncResult.clientsSucceeded,
+                          clientsFailed: syncResult.clientsFailed,
+                          reportsCreated: syncResult.reportsCreated,
+                          reportsReused: syncResult.reportsReused,
+                          reportsUpdated: syncResult.reportsUpdated,
+                          postsSynced: syncResult.postsSynced,
+                          warnings: syncResult.warnings,
+                          failedClients: syncResult.failedClients,
+                          succeededClients: syncResult.succeededClients,
+                          steps: syncResult.steps,
+                          diagnostics: syncResult.diagnostics,
+                          details: syncResult.details,
+                        })}
+                      />
+                    </div>
                     {syncResult.steps && syncResult.steps.length > 0 && (
                       <div className="mt-2">
                         <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary/70">Steps</p>

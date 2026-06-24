@@ -637,7 +637,9 @@ export default function NewReport() {
       )}
 
       <div className="grid grid-cols-2 gap-3 mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Views" value={formatMetric(master.totalViews)} />
+        {master.totalViews !== null && (
+          <StatCard label="Views" value={formatNumber(master.totalViews)} />
+        )}
         <StatCard label="Reach / viewers" value={formatMetric(master.totalReach)} />
         <StatCard label="Content interactions" value={formatNumber(master.totalEngagements)} />
         <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
@@ -646,6 +648,11 @@ export default function NewReport() {
       <p className="mb-6 rounded-lg border border-brand-muted bg-brand-surface/60 px-3 py-2 text-xs text-brand-primary">
         {META_SOURCE_NOTE}
       </p>
+      {master.totalViews === null && master.platforms.some(p => p.source === 'posts') && (
+        <p className="mb-6 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
+          Partial Meta data available — views/viewers are not exposed through the available Meta API path for all platforms.
+        </p>
+      )}
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
