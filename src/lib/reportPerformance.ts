@@ -136,6 +136,7 @@ export interface ReportPerformance {
   performanceLevel: PerformanceLevel
   performanceHeadline: string
   recommendations: string[]
+  nextSteps: NextStep[]
 
   topContent: TopContent | null
 
@@ -285,6 +286,7 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
     performanceLevel,
     performanceHeadline: overallHeadline(metrics, performanceLevel, monthLabel, hasComparison),
     recommendations: buildRecommendations({ master, metrics, best, curPosts, performanceLevel }),
+    nextSteps: buildNextSteps({ master, metrics, best, curPosts, performanceLevel }),
     topContent,
     adminMissingMetrics: buildAdminMissing(master),
   }
@@ -368,6 +370,127 @@ function overallHeadline(
   return headlineFor(level, monthLabel)
 }
 
+export interface NextStep {
+  priority: number
+  title: string
+  why: string
+  action: string
+}
+
+function buildNextSteps(input: {
+  master: MasterReportData
+  metrics: PerformanceMetric[]
+  best: ReportStatsPost | null
+  curPosts: number
+  performanceLevel: PerformanceLevel
+}): NextStep[] {
+  const { master, metrics, best, curPosts } = input
+  const steps: NextStep[] = []
+
+  const reach = master.totalReach
+  const interactions = master.totalEngagements
+  const bestEng = best?.engagements ?? 0
+  const dir = (key: string) => metrics.find(m => m.key === key)?.direction
+
+  const reachUp = dir('reach') === 'up' || dir('views') === 'up'
+  const interDown = dir('content_interactions') === 'down'
+  const profileDown = dir('profile_visits') === 'down'
+
+  // 1. Convert reach into engagement when visibility is up but response is thin.
+  if (typeof reach === 'number' && reach >= 500 && interactions > 0 && interactions / reach < 0.02) {
+    steps.push({
+      priority: 1,
+      title: 'Convert reach into engagement',
+      why: 'Reach improved, but interactions softened, which means more people saw the content without taking meaningful action.',
+      action: 'Use stronger opening hooks, question-led captions and product comparison posts.',
+    })
+  } else if (bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
+    steps.push({
+      priority: 1,
+      title: 'Sharpen content hooks',
+      why: 'Individual post interactions are still building, making it harder to build momentum from the content.',
+      action: 'Test opening hooks that stop the scroll and make the product value clearer in the first line.',
+    })
+  } else if (reachUp && interDown) {
+    steps.push({
+      priority: 1,
+      title: 'Convert reach into engagement',
+      why: 'Visibility improved while response quality declined — more people saw the content without taking action.',
+      action: 'Strengthen calls to action, lead with questions, and test carousel formats.',
+    })
+  }
+
+  // 2. Posting consistency.
+  if (curPosts > 0 && curPosts < 8) {
+    steps.push({
+      priority: 2,
+      title: 'Increase posting consistency',
+      why: `Fewer posts were published (${curPosts} total) than the recommended weekly rhythm, making it harder to build momentum.`,
+      action: 'Keep a steady weekly rhythm before judging campaign direction.',
+    })
+  }
+
+  // 3. Profile action.
+  if (profileDown) {
+    steps.push({
+      priority: 3,
+      title: 'Improve profile action',
+      why: 'Profile visits declined while visibility improved, meaning the content did not drive enough curiosity to the profile.',
+      action: 'Add clearer product intent, stronger CTA copy and direct enquiry prompts.',
+    })
+  }
+
+  // 4. Channel strategy.
+  if (master.bestPlatform?.platform === 'instagram') {
+    steps.push({
+      priority: 4,
+      title: 'Use Instagram as the visibility driver',
+      why: 'Instagram created the strongest reach this month, making it the primary channel for visibility.',
+      action: 'Lead with Instagram-first posts, then repurpose the strongest creatives to Facebook.',
+    })
+  } else if (master.bestPlatform?.platform === 'facebook') {
+    steps.push({
+      priority: 4,
+      title: 'Extend Facebook reach to Instagram',
+      why: 'Facebook is leading on reach this month, with formats that could perform well on Instagram too.',
+      action: 'Repurpose Facebooks strongest formats to Instagram for compounding visibility.',
+    })
+  }
+
+  // 5. Audience retention.
+  const followers = metrics.find(m => m.key === 'current_followers')
+  if (followers && followers.direction === 'down') {
+    steps.push({
+      priority: 5,
+      title: 'Prioritise audience retention',
+      why: 'Follower count declined, suggesting content is not yet creating repeat-visit value.',
+      action: 'Publish saveable, repeat-value content like how-to posts, carousel comparisons and educational reels.',
+    })
+  }
+
+  // 6. Product storytelling (watch/product posts with low response).
+  if (best && bestEng < WEAK_CONTENT_THRESHOLD && best.post_type?.toLowerCase().includes('video') === false) {
+    steps.push({
+      priority: 6,
+      title: 'Strengthen product storytelling',
+      why: 'Watch and product posts are being seen, but audience response is still building.',
+      action: 'Test close-up detail reels, comparison posts, price and feature education, and which-would-you-choose captions.',
+    })
+  }
+
+  // Always at least one step.
+  if (steps.length === 0) {
+    steps.push({
+      priority: 1,
+      title: 'Build on this months momentum',
+      why: 'The current trajectory is positive — the next step is to compound it with consistent execution.',
+      action: 'Double down on the formats that earned the most visibility and plan one campaign moment for next month.',
+    })
+  }
+
+  return steps.slice(0, 5)
+}
+
 function buildRecommendations(input: {
   master: MasterReportData
   metrics: PerformanceMetric[]
@@ -375,49 +498,7 @@ function buildRecommendations(input: {
   curPosts: number
   performanceLevel: PerformanceLevel
 }): string[] {
-  const { master, metrics, best, curPosts } = input
-  const recs: string[] = []
-
-  const reach = master.totalReach
-  const interactions = master.totalEngagements
-  const bestEng = best?.engagements ?? 0
-
-  // Reach is decent but interactions are thin → engagement quality.
-  if (typeof reach === 'number' && reach >= 500 && interactions > 0 && interactions / reach < 0.02) {
-    recs.push('Lift engagement quality with stronger calls to action and reasons to comment.')
-    recs.push('Test carousel and product-comparison posts that invite a response.')
-    recs.push('Lead more captions with a question to spark conversation.')
-  } else if (bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
-    recs.push('Sharpen opening hooks so the first line stops the scroll.')
-    recs.push('Make the product value clearer and add one obvious call to action per post.')
-  }
-
-  // Posting consistency.
-  if (curPosts > 0 && curPosts < 8) {
-    recs.push('Increase posting consistency to keep the audience warm between campaigns.')
-  }
-
-  // Audience direction.
-  const followers = metrics.find(m => m.key === 'current_followers')
-  if (followers && followers.direction === 'down') {
-    recs.push('Prioritise audience retention with saveable, repeat-value content.')
-  }
-
-  // Channel strategy.
-  if (master.bestPlatform?.platform === 'instagram') {
-    recs.push('Use Instagram as the primary visibility channel and repurpose the strongest posts to Facebook.')
-  } else if (master.bestPlatform?.platform === 'facebook') {
-    recs.push('Facebook is leading on reach — extend its best formats to Instagram for compounding visibility.')
-  }
-
-  // Always give at least a forward action.
-  if (recs.length === 0) {
-    recs.push('Double down on the formats that earned the most interactions this month.')
-    recs.push('Plan one campaign moment for next month to create a visible spike.')
-  }
-
-  // Keep it tight and client-safe.
-  return [...new Set(recs)].slice(0, 4)
+  return buildNextSteps(input).map(s => `${s.title}: ${s.action}`)
 }
 
 function buildAdminMissing(master: MasterReportData): string[] {

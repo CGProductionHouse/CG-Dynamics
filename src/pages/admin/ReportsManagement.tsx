@@ -102,10 +102,10 @@ function statusBadge(report: Report, monthComplete: boolean, ready: boolean, isP
 
 function nextActionText(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): string {
   if (isPartial) return 'Report period needs fixing. Use repair to match the calendar month.'
-  if (report.status === 'published') return 'Live for the client. Update any time the data changes.'
-  if (!monthComplete) return 'Client view unlocks after month-end. You can add strategy now.'
-  if (ready) return 'Looks complete. Review, then publish for the client.'
-  return 'Add the strategy and action plan, then publish.'
+  if (report.status === 'published') return 'Published and live for the client. Update any time.'
+  if (!monthComplete) return 'Client view unlocks after month-end. Add the CG action plan in the meantime.'
+  if (ready) return 'Data synced and strategy complete. Review, then publish for the client.'
+  return 'Add the CG action plan using the strategy board, then publish.'
 }
 
 export default function ReportsManagement() {

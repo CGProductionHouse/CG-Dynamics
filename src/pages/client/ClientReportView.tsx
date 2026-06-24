@@ -416,7 +416,7 @@ function GrowthChart({
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-8 lg:grid-cols-4 lg:gap-x-4">
         {series.map(item => {
           const pairMax = Math.max(item.previous, item.current, 1)
           const prevH = Math.max((item.previous / pairMax) * 100, item.previous > 0 ? 6 : 2)
@@ -435,7 +435,7 @@ function GrowthChart({
 
           return (
             <div key={item.key} className="flex flex-col items-center">
-              <div className="flex h-32 w-full items-end justify-center gap-2">
+              <div className="flex h-36 w-full items-end justify-center gap-3 sm:gap-4">
                 <Bar heightPct={prevH} value={item.previous} tone="muted" />
                 <Bar heightPct={curH} value={item.current} tone="teal" />
               </div>
@@ -443,6 +443,11 @@ function GrowthChart({
                 {item.label}
               </p>
               <p className={`mt-1 text-xs font-bold ${badgeTone}`}>{badge}</p>
+              <div className="mt-2 flex w-full max-w-[10rem] items-center justify-center gap-4 text-[0.65rem] text-slate-500">
+                <span>{formatCompact(item.previous)}</span>
+                <span className="text-slate-600">vs</span>
+                <span className="text-slate-300">{formatCompact(item.current)}</span>
+              </div>
             </div>
           )
         })}
@@ -451,13 +456,19 @@ function GrowthChart({
   )
 }
 
+function formatCompact(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`
+  return formatNumber(value)
+}
+
 function Bar({ heightPct, value, tone }: { heightPct: number; value: number; tone: 'muted' | 'teal' }) {
   const fill =
     tone === 'teal'
       ? 'bg-gradient-to-t from-[#14b8a6] to-[#2dd4bf] shadow-[0_0_24px_-4px_rgba(45,212,191,0.6)]'
       : 'bg-white/20'
   return (
-    <div className="flex h-full w-7 flex-col items-center justify-end sm:w-9">
+    <div className="flex h-full w-9 flex-col items-center justify-end sm:w-12">
       <span className="mb-1 text-[0.65rem] font-bold text-slate-400">{formatNumber(value)}</span>
       <div className={`w-full rounded-t-lg ${fill}`} style={{ height: `${heightPct}%` }} />
     </div>
@@ -536,6 +547,12 @@ function ContentSection({
           ? { value: topContent!.interactions, label: 'content interactions' }
           : null
 
+  const allMetrics: { label: string; value: string }[] = []
+  if (typeof bestPost?.impressions === 'number') allMetrics.push({ label: 'views', value: formatNumber(bestPost.impressions) })
+  if (typeof bestPost?.reach === 'number') allMetrics.push({ label: 'reach', value: formatNumber(bestPost.reach) })
+  if (bestPost && bestPost.engagements > 0) allMetrics.push({ label: 'content interactions', value: formatNumber(bestPost.engagements) })
+  const metricRow = allMetrics.map(m => `${m.value} ${m.label}`).join(' · ')
+
   const cgInsight = tc.whatThisTellsUs.trim()
   const hasCG = tc.whyItWorked.length > 0 || cgInsight.length > 0
 
@@ -590,17 +607,18 @@ function ContentSection({
                 </h3>
               )}
 
-              {tone === 'top' && heroMetric ? (
-                <div className="mt-7 inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
-                  <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
-                    {formatNumber(heroMetric.value)}
-                  </span>
-                  <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label}</span>
+              {heroMetric ? (
+                <div className="mt-7">
+                  <div className="inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
+                    <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
+                      {formatNumber(heroMetric.value)}
+                    </span>
+                    <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label}</span>
+                  </div>
+                  {metricRow && (
+                    <p className="mt-3 text-sm text-slate-400">{metricRow}</p>
+                  )}
                 </div>
-              ) : heroMetric ? (
-                <p className="mt-5 text-sm font-semibold text-slate-400">
-                  {formatNumber(heroMetric.value)} {heroMetric.label} — the most for the month.
-                </p>
               ) : null}
 
               {tc.whyItWorked.length > 0 && (
@@ -1005,6 +1023,7 @@ function PlatformContent({ performance, view }: { performance: PlatformPerforman
   const metrics = buildMetaContentMetrics(best)
   // Hero metric: first available from views → reach → interactions
   const heroMetric = metrics.length > 0 ? metrics[0] : null
+  const metricRowStr = metrics.map(m => `${formatNumber(m.value)} ${m.label.toLowerCase()}`).join(' · ')
   const copy = tone === 'learning' ? PLATFORM_LEARNING_COPY : tone === 'baseline' ? PLATFORM_BASELINE_COPY : null
 
   return (
@@ -1014,23 +1033,28 @@ function PlatformContent({ performance, view }: { performance: PlatformPerforman
         <div className="flex flex-wrap gap-2">
           {best.post_type && <Pill tone="teal">{displayContentType(best.post_type) ?? best.post_type}</Pill>}
           <Pill>{formatDate(best.publish_time)}</Pill>
-          {tone !== 'top' && <Pill tone="amber">Highest activity post this month</Pill>}
+          {tone !== 'top' && <Pill tone="amber">Highest activity post</Pill>}
         </div>
 
         <h3 className="mt-5 text-2xl font-black leading-tight tracking-[-0.035em] text-white sm:text-3xl">
           {shortCaption(best.caption)}
         </h3>
 
-          {tone === 'top' && heroMetric ? (
-          <div className="mt-7 inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
-            <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
-              {formatNumber(heroMetric.value)}
-            </span>
-            <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label.toLowerCase()}</span>
+        {heroMetric ? (
+          <div className="mt-7">
+            <div className="inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
+              <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
+                {formatNumber(heroMetric.value)}
+              </span>
+              <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label.toLowerCase()}</span>
+            </div>
+            {metricRowStr && (
+              <p className="mt-3 text-sm text-slate-400">{metricRowStr}</p>
+            )}
           </div>
         ) : null}
 
-        {metrics.length > 0 && (
+        {metrics.length > 0 && !heroMetric && (
           <div className="mt-7 grid gap-3 sm:grid-cols-3">
             {metrics.map(item => (
               <MiniMetric key={item.key} label={item.label} value={formatNumber(item.value)} />
@@ -1057,6 +1081,12 @@ function PlatformContent({ performance, view }: { performance: PlatformPerforman
   )
 }
 
+function rankingReason(post: ReportStatsPost, index: number): string {
+  if (typeof post.impressions === 'number' && post.impressions > 0) return `#${index + 1} by views`
+  if (typeof post.reach === 'number' && post.reach > 0) return `#${index + 1} by reach`
+  return `#${index + 1} by interactions`
+}
+
 function PlatformPostCard({ post, index }: { post: ReportStatsPost; index: number }) {
   const parts: string[] = []
   if (typeof post.impressions === 'number') parts.push(`${formatNumber(post.impressions)} views`)
@@ -1066,7 +1096,7 @@ function PlatformPostCard({ post, index }: { post: ReportStatsPost; index: numbe
   return (
     <article className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">
       <div className="flex items-center justify-between">
-        <span className="text-2xl font-black text-[#2dd4bf]">#{index + 1}</span>
+        <span className="text-2xl font-black text-[#2dd4bf]">{rankingReason(post, index)}</span>
         <span className="text-xs text-slate-500">{formatDate(post.publish_time)}</span>
       </div>
       <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white">{shortCaption(post.caption, 'Post')}</p>

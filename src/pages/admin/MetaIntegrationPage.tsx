@@ -844,9 +844,17 @@ export default function MetaIntegrationPage() {
             </div>
 
             {!syncResult && (
-              <p className="mt-3 text-sm leading-relaxed text-brand-primary">
-                Sync the previous completed month from linked Meta assets. Reports will be saved as internal drafts.
-              </p>
+              <div className="mt-3 space-y-2 text-sm leading-relaxed text-brand-primary">
+                <p>Sync the previous completed month from linked Meta assets. Reports are saved as internal drafts.</p>
+                <div className="rounded-lg border border-brand-muted bg-brand-bg/60 px-3 py-2.5">
+                  <p className="text-xs text-brand-primary">
+                    <span className="font-semibold text-white">Selected client</span> for quick updates between campaigns.
+                  </p>
+                  <p className="mt-1 text-xs text-brand-primary">
+                    <span className="font-semibold text-white">All linked clients</span> for month-end reporting across every client.
+                  </p>
+                </div>
+              </div>
             )}
 
             {syncProgress && (
@@ -918,11 +926,16 @@ export default function MetaIntegrationPage() {
                         })}
                       />
                     </div>
-                    {syncResult.period && (
-                      <p className="mt-2 text-[11px] text-brand-primary/70">
-                        Compare these numbers against the same date range (<strong className="text-brand-primary/90">{syncResult.period.periodStart}</strong> to <strong className="text-brand-primary/90">{syncResult.period.periodEnd}</strong>) in Meta Business Suite.
-                      </p>
-                    )}
+                {syncResult.period && (
+                  <div className="mt-2">
+                    <p className="text-[11px] text-brand-primary/70">
+                      Current sync: <strong className="text-white">{syncResult.period.month}</strong> (<strong className="text-brand-primary/90">{syncResult.period.periodStart}</strong> to <strong className="text-brand-primary/90">{syncResult.period.periodEnd}</strong>)
+                    </p>
+                    <p className="text-[11px] text-brand-primary/70 mt-0.5">
+                      Compare these numbers against the same date range in Meta Business Suite.
+                    </p>
+                  </div>
+                )}
                     {syncResult.steps && syncResult.steps.length > 0 && (
                       <div className="mt-2">
                         <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary/70">Steps</p>

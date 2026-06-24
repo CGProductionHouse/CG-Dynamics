@@ -690,7 +690,7 @@ export default function NewReport() {
             </p>
           </div>
           <SourcePill
-            label={previousMaster ? 'Comparison available' : 'Previous month data not available'}
+            label={previousMaster ? 'Comparison available' : 'Baseline not synced yet'}
             tone={previousMaster ? 'posts' : 'none'}
           />
         </div>
@@ -763,6 +763,14 @@ export default function NewReport() {
                 </li>
               ))}
             </ol>
+            {!hasStrategyContent(strategyData) && (
+              <div className="mt-3 rounded-lg border border-brand-accent/30 bg-brand-accent/5 px-3 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-accent">Use these as the CG action plan</p>
+                <p className="mt-1 text-xs text-brand-primary">
+                  Copy the recommendations above into the strategy board to give the client a clear action plan. A complete CG action plan makes the report feel finished.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -1127,7 +1135,7 @@ function PerfBadge({ level }: { level: PerformanceLevel }) {
 
 function movementText(movement: MetricMovement) {
   if (movement.direction === 'missing' || movement.difference === null) {
-    return 'Previous month data not available'
+    return 'Baseline not yet available'
   }
   const diff = `${movement.difference > 0 ? '+' : ''}${formatNumber(movement.difference)}`
   if (movement.percent === null) return `${diff} difference`
