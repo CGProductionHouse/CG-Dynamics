@@ -31,6 +31,7 @@ import {
   type MetricMovement,
 } from '../../lib/reportStats'
 import { buildMetaContentMetrics, buildMetaPlatformMetrics, metaEngagementLabel, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
+import { buildReportPerformance, type PerformanceLevel } from '../../lib/reportPerformance'
 
 interface ReportFields {
   reportTitle: string
@@ -416,6 +417,19 @@ export default function NewReport() {
     () => buildPerformanceMovement(master, previousMaster, monthManualMetrics, previousMonthManualMetrics),
     [master, monthManualMetrics, previousMaster, previousMonthManualMetrics]
   )
+  // Client-safe performance story (same model the published report renders).
+  // Shown here so staff can preview exactly what the client will see.
+  const performance = useMemo(
+    () => buildReportPerformance({
+      master,
+      previousMaster,
+      currentManual: monthManualMetrics,
+      previousManual: previousMonthManualMetrics,
+      monthLabel: monthName(currentMonth),
+      previousMonthLabel: previousMonth ? monthName(previousMonth) : null,
+    }),
+    [master, previousMaster, monthManualMetrics, previousMonthManualMetrics, currentMonth, previousMonth]
+  )
   const calendarEvents = useMemo(() => getMonthEvents(currentMonth), [currentMonth])
   const topPostContext = useMemo(() => {
     const post = master.bestPostOverall
@@ -673,6 +687,80 @@ export default function NewReport() {
             Growth cannot be calculated yet because no imported posts or manual summary metrics were found for {previousMonthLabel}.
           </p>
         )}
+      </section>
+
+      <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white mb-1">Performance story preview</h2>
+            <p className="text-xs text-brand-primary">
+              Exactly what {selectedClient?.name ?? 'the client'} sees in the published report — no technical labels.
+            </p>
+          </div>
+          <PerfBadge level={performance.performanceLevel} />
+        </div>
+
+        <p className="text-sm leading-relaxed text-white">{performance.performanceHeadline}</p>
+
+        {!performance.hasComparison && (
+          <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
+            Previous month baseline not synced yet — month-over-month growth will appear once {previousMonthLabel} is synced.
+            The client report hides growth sections until then (it never shows "data not available").
+          </p>
+        )}
+
+        {performance.metrics.length > 0 && (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {performance.metrics.map(metric => (
+              <div key={metric.key} className="rounded-lg border border-brand-muted bg-brand-bg/50 p-3">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{metric.label}</p>
+                <p className="mt-2 text-xl font-semibold text-white">{formatNumber(metric.current)}</p>
+                {metric.direction && metric.comparisonLabel ? (
+                  <p className={`mt-1 text-xs ${
+                    metric.trend === 'positive' ? 'text-brand-accent' : metric.trend === 'negative' ? 'text-amber-300' : 'text-brand-primary'
+                  }`}>
+                    {metric.direction === 'up' ? '↑' : metric.direction === 'down' ? '↓' : '→'}{' '}
+                    {metric.percent !== null
+                      ? formatPercent(metric.percent)
+                      : `${metric.change !== null && metric.change > 0 ? '+' : ''}${formatNumber(metric.change ?? 0)}`}{' '}
+                    <span className="text-brand-primary">{metric.comparisonLabel}</span>
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-brand-primary/70">No comparison yet</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {performance.recommendations.length > 0 && (
+          <div className="mt-4 rounded-lg border border-brand-muted bg-brand-bg/40 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-primary">Recommendations the client will see</p>
+            <ol className="mt-2 space-y-1.5">
+              {performance.recommendations.map((rec, index) => (
+                <li key={index} className="flex gap-2 text-sm text-white">
+                  <span className="text-brand-accent">{index + 1}.</span>
+                  <span>{rec}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {performance.adminMissingMetrics.length > 0 && (
+          <div className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-200">Admin-only: metrics not synced (hidden from client)</p>
+            <ul className="mt-1.5 space-y-0.5">
+              {performance.adminMissingMetrics.map(item => (
+                <li key={item} className="text-xs text-amber-200/90">• {item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <p className="mt-3 text-[11px] text-brand-primary/70">
+          Metric sources — Meta synced totals: account monthly total &amp; current snapshot; imported posts: post aggregation &amp; media insight; CSV rows: manual fallback. The client report shows none of these labels.
+        </p>
       </section>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
@@ -938,6 +1026,23 @@ function SourcePill({ label, tone }: { label: string; tone: 'posts' | 'manual' |
   return (
     <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${classes}`}>
       {label}
+    </span>
+  )
+}
+
+const PERF_LEVEL_META: Record<PerformanceLevel, { label: string; classes: string }> = {
+  strong: { label: 'Strong month', classes: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent' },
+  improving: { label: 'Improving', classes: 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent' },
+  steady: { label: 'Steady', classes: 'border-sky-300/30 bg-sky-300/10 text-sky-200' },
+  needs_attention: { label: 'Needs attention', classes: 'border-amber-400/30 bg-amber-400/10 text-amber-200' },
+  baseline_only: { label: 'Baseline month', classes: 'border-brand-muted bg-brand-muted/50 text-brand-primary' },
+}
+
+function PerfBadge({ level }: { level: PerformanceLevel }) {
+  const meta = PERF_LEVEL_META[level]
+  return (
+    <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${meta.classes}`}>
+      {meta.label}
     </span>
   )
 }

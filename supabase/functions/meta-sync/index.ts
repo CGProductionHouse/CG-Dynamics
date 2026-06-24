@@ -75,6 +75,27 @@ function getPreviousMonthBounds(): { periodStart: string; periodEnd: string; mon
   }
 }
 
+// Full calendar-month bounds for a specific YYYY-MM (used by the optional
+// `month` parameter so a baseline month — e.g. April when syncing May — can be
+// synced for comparison without changing the default behaviour).
+function monthBoundsFor(month: string): { periodStart: string; periodEnd: string; month: string } {
+  const year = Number(month.slice(0, 4))
+  const m = Number(month.slice(5, 7)) // 1-12
+  const lastDay = new Date(Date.UTC(year, m, 0)).getUTCDate()
+  return {
+    periodStart: `${month}-01`,
+    periodEnd: `${month}-${String(lastDay).padStart(2, '0')}`,
+    month,
+  }
+}
+
+// Current calendar month as YYYY-MM (UTC). Used to reject syncing an
+// incomplete (current/future) month.
+function currentMonthStr(): string {
+  const now = new Date()
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
+}
+
 function monthLabel(month: string): string {
   const m = Number(month.slice(5, 7))
   const y = Number(month.slice(0, 4))
@@ -422,7 +443,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
   // ── Parse body ───────────────────────────────────────────
   phase = 'request_parse'
-  let body: { mode?: string; clientId?: string } = {}
+  let body: { mode?: string; clientId?: string; month?: string } = {}
   try {
     body = await req.json()
   } catch {
@@ -439,7 +460,25 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   // ── Calculate period ─────────────────────────────────────
-  const { periodStart, periodEnd, month } = getPreviousMonthBounds()
+  // Default: previous completed calendar month. An optional `month` (YYYY-MM)
+  // lets the caller target a specific completed month (e.g. an April baseline
+  // when syncing May). Current/future months are rejected.
+  let periodStart: string
+  let periodEnd: string
+  let month: string
+  if (typeof body.month === 'string' && /^\d{4}-\d{2}$/.test(body.month)) {
+    if (body.month >= currentMonthStr()) {
+      return safeJsonResponse({
+        ok: false,
+        status: 'failed',
+        phase: 'request_parse',
+        error: `Month ${body.month} is not a completed calendar month yet.`,
+      }, 400)
+    }
+    ;({ periodStart, periodEnd, month } = monthBoundsFor(body.month))
+  } else {
+    ;({ periodStart, periodEnd, month } = getPreviousMonthBounds())
+  }
 
   // ── Get Meta token ───────────────────────────────────────
   phase = 'connection'

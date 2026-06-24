@@ -139,6 +139,14 @@ function redactForDisplay(text: string): string {
     .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
 }
 
+// Calendar month before the given YYYY-MM, as YYYY-MM (used for baseline sync).
+function priorMonth(month: string): string {
+  const year = Number(month.slice(0, 4))
+  const m = Number(month.slice(5, 7)) // 1-12
+  const d = new Date(Date.UTC(year, m - 2, 1))
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+}
+
 function CopyButton({ getPayload }: { getPayload: () => Record<string, unknown> }) {
   const [copied, setCopied] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
@@ -203,6 +211,9 @@ export default function MetaIntegrationPage() {
   const [syncProgress, setSyncProgress] = useState<string | null>(null)
   const [syncMode, setSyncMode] = useState<'all' | 'selected'>('all')
   const [selectedSyncClientId, setSelectedSyncClientId] = useState('')
+  // When on, the sync also pulls the previous calendar month so the report can
+  // show month-over-month growth.
+  const [syncBaseline, setSyncBaseline] = useState(false)
   const [syncResult, setSyncResult] = useState<{
     status: string
     message: string
@@ -515,20 +526,27 @@ export default function MetaIntegrationPage() {
       const details: unknown[] = []
       let syncEngineVersion: string | undefined
       let syncResultPeriod: { periodStart: string; periodEnd: string; month: string } | null = null
+      // The primary (target) month as YYYY-MM — used to derive the baseline.
+      let targetMonth = ''
 
-      for (let index = 0; index < syncableAssets.length; index++) {
-        const asset = syncableAssets[index]
+      const accessToken = sessionData.session.access_token
+
+      // Sync one asset for a given month. `isBaseline` keeps the previous-month
+      // pass from affecting the primary success/failure status — its data folds
+      // in (reports/posts) and any problem becomes a warning, not a failure.
+      async function processAsset(asset: LinkedAsset, monthParam: string | undefined, isBaseline: boolean) {
         const clientName = clientNameForAsset(asset)
-        setSyncProgress(`Syncing ${index + 1} of ${syncableAssets.length}: ${clientName}`)
-
-        const { response, data, text } = await invokeMetaSync(sessionData.session.access_token, {
-          mode: 'previous_completed_month',
-          clientId: asset.client_id,
-        })
+        const reqBody: Record<string, unknown> = { mode: 'previous_completed_month', clientId: asset.client_id }
+        if (monthParam) reqBody.month = monthParam
+        const { response, data, text } = await invokeMetaSync(accessToken, reqBody)
 
         syncEngineVersion = typeof data?.syncEngineVersion === 'string' ? data.syncEngineVersion : syncEngineVersion
-        diagnostics.push({ clientName, httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) })
-        if (data?.period && !syncResultPeriod) syncResultPeriod = data.period as { periodStart: string; periodEnd: string; month: string }
+        diagnostics.push({ clientName, month: monthParam ?? 'previous_completed', baseline: isBaseline, httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) })
+        const respPeriod = data?.period as { periodStart?: string; periodEnd?: string; month?: string } | undefined
+        if (respPeriod && !syncResultPeriod && typeof respPeriod.month === 'string') {
+          syncResultPeriod = { periodStart: respPeriod.periodStart ?? '', periodEnd: respPeriod.periodEnd ?? '', month: respPeriod.month }
+          if (!isBaseline) targetMonth = respPeriod.month
+        }
 
         if (!response.ok || !data?.ok) {
           const safeText = data ? null : redactForDisplay(text || 'No response body from sync service.').slice(0, 500)
@@ -538,16 +556,19 @@ export default function MetaIntegrationPage() {
             typeof data?.error === 'string' ? data.error : typeof data?.message === 'string' ? data.message : safeText || 'Sync failed.',
             !response.ok ? `(HTTP ${response.status})` : null,
           ].filter(Boolean).join(' ')
-          totals.clientsFailed++
-          failedClients.push({ name: clientName, error })
-          if (Array.isArray(data?.warnings)) warnings.push(...data.warnings.map(String))
-          if (Array.isArray(data?.steps)) steps.push(...data.steps.map(String))
-          if (Array.isArray(data?.details)) details.push(...data.details)
-          continue
+          if (isBaseline) {
+            warnings.push(`Baseline ${monthParam ?? ''} for ${clientName}: ${error}`)
+          } else {
+            totals.clientsFailed++
+            failedClients.push({ name: clientName, error })
+            if (Array.isArray(data?.warnings)) warnings.push(...data.warnings.map(String))
+            if (Array.isArray(data?.steps)) steps.push(...data.steps.map(String))
+            if (Array.isArray(data?.details)) details.push(...data.details)
+          }
+          return
         }
 
-        totals.clientsSucceeded += Number(data.clientsSucceeded ?? data.clientsSynced ?? 0)
-        totals.clientsFailed += Number(data.clientsFailed ?? 0)
+        // Report/post counts fold in for both passes.
         totals.reportsCreated += Number(data.reportsCreated ?? 0)
         totals.reportsReused += Number(data.reportsReused ?? data.reportsUpdated ?? 0)
         totals.reportsUpdated += Number(data.reportsUpdated ?? data.reportsReused ?? 0)
@@ -555,6 +576,11 @@ export default function MetaIntegrationPage() {
         if (Array.isArray(data.warnings)) warnings.push(...data.warnings.map(String))
         if (Array.isArray(data.steps)) steps.push(...data.steps.map(String))
         if (Array.isArray(data.details)) details.push(...data.details)
+
+        if (isBaseline) return
+
+        totals.clientsSucceeded += Number(data.clientsSucceeded ?? data.clientsSynced ?? 0)
+        totals.clientsFailed += Number(data.clientsFailed ?? 0)
         if (Array.isArray(data.failedClients)) {
           failedClients.push(...data.failedClients.map(item => {
             const row = item as { name?: unknown; error?: unknown }
@@ -569,6 +595,22 @@ export default function MetaIntegrationPage() {
         }
       }
 
+      // Pass 1 — the target (previous completed) month.
+      for (let index = 0; index < syncableAssets.length; index++) {
+        setSyncProgress(`Syncing ${index + 1} of ${syncableAssets.length}: ${clientNameForAsset(syncableAssets[index])}`)
+        await processAsset(syncableAssets[index], undefined, false)
+      }
+
+      // Pass 2 (optional) — the previous-month baseline for growth comparison.
+      let baselineMonth: string | null = null
+      if (syncBaseline && targetMonth) {
+        baselineMonth = priorMonth(targetMonth)
+        for (let index = 0; index < syncableAssets.length; index++) {
+          setSyncProgress(`Syncing baseline ${index + 1} of ${syncableAssets.length}: ${clientNameForAsset(syncableAssets[index])}`)
+          await processAsset(syncableAssets[index], baselineMonth, true)
+        }
+      }
+
       await loadLinkedAssets()
       const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0
         ? 'success'
@@ -579,9 +621,9 @@ export default function MetaIntegrationPage() {
       setSyncResult({
         status,
         message: status === 'success'
-          ? `Synced previous completed month for ${totals.clientsSucceeded} client(s).`
+          ? `Synced previous completed month for ${totals.clientsSucceeded} client(s)${baselineMonth ? ' (incl. previous-month baseline)' : ''}.`
           : status === 'partial'
-            ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed.`
+            ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed${baselineMonth ? ' (previous-month baseline also attempted)' : ''}.`
             : `Sync failed for all ${totals.clientsAttempted} client(s).`,
         period: syncResultPeriod ?? undefined,
         syncEngineVersion,
@@ -963,6 +1005,20 @@ export default function MetaIntegrationPage() {
                   </div>
                 )}
 
+                {/* Baseline option — works for both all-client and selected modes */}
+                <label className="flex max-w-md cursor-pointer items-start gap-2.5 rounded-lg border border-brand-muted bg-brand-bg/60 px-3.5 py-2.5">
+                  <input
+                    type="checkbox"
+                    checked={syncBaseline}
+                    onChange={e => setSyncBaseline(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-brand-accent"
+                  />
+                  <span className="text-xs leading-relaxed text-brand-primary">
+                    <span className="font-semibold text-white">Also sync the previous month</span> as a baseline so the
+                    report can show month-over-month growth. Existing reports are reused, not duplicated.
+                  </span>
+                </label>
+
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
@@ -977,8 +1033,8 @@ export default function MetaIntegrationPage() {
                     {syncing
                       ? 'Syncing…'
                       : syncMode === 'selected'
-                        ? 'Sync selected client'
-                        : 'Sync all linked clients'}
+                        ? syncBaseline ? 'Sync selected client + baseline' : 'Sync selected client'
+                        : syncBaseline ? 'Sync all linked clients + baseline' : 'Sync all linked clients'}
                   </button>
                   <button
                     type="button"
