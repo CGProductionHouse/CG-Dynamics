@@ -18,11 +18,14 @@ import {
 } from '../../lib/reportPeriod'
 import { readStrategyData, strategyRequiredComplete } from '../../lib/strategyEngine'
 import { ClientLogo } from '../../components/ClientLogo'
+import { ActionButton } from '../../components/ui/Buttons'
+import { StatusBadge, SourceBadge, type SourceVariant } from '../../components/ui/Badges'
+import { PremiumCard } from '../../components/ui/PremiumCard'
+import { EmptyState } from '../../components/ui/States'
 import WorkflowGuide from '../../components/WorkflowGuide'
 import { supabase } from '../../lib/supabase'
 
 type StatusFilter = 'all' | 'internal-draft' | 'ready-to-publish' | 'published' | 'incomplete-month' | 'needs-repair'
-
 type ReportSource = 'meta' | 'manual' | 'mixed'
 type SourceFilter = 'all' | ReportSource
 
@@ -32,12 +35,6 @@ const SOURCE_OPTIONS: { value: SourceFilter; label: string }[] = [
   { value: 'manual', label: 'Manual fallback' },
   { value: 'mixed', label: 'Mixed source' },
 ]
-
-const SOURCE_BADGE: Record<ReportSource, { label: string; className: string }> = {
-  meta: { label: 'Meta synced', className: 'bg-sky-400/15 text-sky-300' },
-  manual: { label: 'Manual fallback', className: 'bg-brand-muted text-brand-primary' },
-  mixed: { label: 'Mixed source', className: 'bg-amber-400/15 text-amber-300' },
-}
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -79,25 +76,25 @@ function getDerivedStatus(report: Report, monthComplete: boolean, ready: boolean
   return 'internal-draft'
 }
 
-interface BadgeInfo {
-  label: string
-  className: string
+function getStatusVariant(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): 'published' | 'ready-to-publish' | 'needs-strategy' | 'internal-draft' | 'incomplete-month' | 'needs-repair' {
+  if (report.status === 'published' && !isPartial) return 'published'
+  if (isPartial) return 'needs-repair'
+  if (!monthComplete) return 'incomplete-month'
+  if (ready) return 'ready-to-publish'
+  return 'needs-strategy'
 }
 
-function statusBadge(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): BadgeInfo {
-  if (report.status === 'published' && !isPartial) {
-    return { label: 'Published', className: 'bg-brand-accent/20 text-brand-accent' }
-  }
-  if (isPartial) {
-    return { label: 'Needs repair', className: 'bg-amber-400/15 text-amber-300' }
-  }
-  if (!monthComplete) {
-    return { label: 'Internal draft', className: 'bg-brand-muted text-brand-primary' }
-  }
-  if (ready) {
-    return { label: 'Ready to publish', className: 'bg-sky-300/15 text-sky-200' }
-  }
-  return { label: 'Needs strategy', className: 'bg-amber-400/15 text-amber-300' }
+function getStatusLabel(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): string {
+  if (report.status === 'published' && !isPartial) return 'Published'
+  if (isPartial) return 'Needs repair'
+  if (!monthComplete) return 'Internal draft'
+  if (ready) return 'Ready to publish'
+  return 'Needs strategy'
+}
+
+function getSourceVariant(report: Report, sourceById: Map<string, ReportSource>): SourceVariant {
+  const src = sourceById.get(report.id) ?? 'manual'
+  return src as SourceVariant
 }
 
 function nextActionText(report: Report, monthComplete: boolean, ready: boolean, isPartial: boolean): string {
@@ -124,7 +121,6 @@ export default function ReportsManagement() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
-  // report id → data source (derived from meta_content_mappings + posts).
   const [sourceById, setSourceById] = useState<Map<string, ReportSource>>(new Map())
 
   const clientById = useMemo(() => {
@@ -163,9 +159,6 @@ export default function ReportsManagement() {
     }
   }
 
-  // Classify each report's data source. A report is "Meta synced" when its posts
-  // are linked in meta_content_mappings; "Mixed" when it also has non-Meta
-  // (e.g. CSV import) posts; otherwise "Manual / CSV". Lightweight id-only reads.
   async function classifySources(reportRows: Report[]) {
     try {
       const [mapRes, postsRes] = await Promise.all([
@@ -198,7 +191,6 @@ export default function ReportsManagement() {
       }
       setSourceById(next)
     } catch {
-      // Source classification is best-effort; never block the reports list.
       setSourceById(new Map())
     }
   }
@@ -254,13 +246,11 @@ export default function ReportsManagement() {
     }
 
     result.sort((a, b) => {
-      // Prefer Meta synced reports, then mixed, then manual/CSV.
       const aSource = sourceById.get(a.id) ?? 'manual'
       const bSource = sourceById.get(b.id) ?? 'manual'
       const sourceOrder: Record<ReportSource, number> = { meta: 0, mixed: 1, manual: 2 }
       const sourceDiff = sourceOrder[aSource] - sourceOrder[bSource]
       if (sourceDiff !== 0) return sourceDiff
-      // Within the same source, newest first.
       const aDate = a.updated_at ?? a.created_at
       const bDate = b.updated_at ?? b.created_at
       return bDate.localeCompare(aDate)
@@ -327,7 +317,7 @@ export default function ReportsManagement() {
     const { month, start, end } = normalizeReportToCalendarMonth(report)
     const confirmed = window.confirm(
       `Repair ${clientNameById.get(report.client_id) ?? report.client_id} to ${monthDisplayLabel(month)}?\n\n` +
-      `Period will be set to ${start} → ${end} (full calendar month).\n` +
+      `Period will be set to ${start} to ${end} (full calendar month).\n` +
       `This does not publish, delete or change any report content.`
     )
     if (!confirmed) return
@@ -362,6 +352,7 @@ export default function ReportsManagement() {
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+      {/* Page header */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-2 text-xs uppercase tracking-[0.22em] text-brand-primary">Reports</p>
@@ -372,31 +363,37 @@ export default function ReportsManagement() {
         </div>
         {isAdmin && (
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+            <ActionButton
+              variant="outline"
               onClick={() => navigate('/admin/integrations/meta')}
-              className="rounded-lg border border-brand-accent bg-brand-accent/10 px-4 py-2.5 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20"
             >
               Sync Meta data
-            </button>
-            <button
-              type="button"
+            </ActionButton>
+            <ActionButton
+              variant="primary"
               onClick={() => navigate('/admin/reports/new')}
-              className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110"
             >
               New report
-            </button>
+            </ActionButton>
           </div>
         )}
       </div>
 
       <WorkflowGuide />
 
-      {error && <Message tone="error" text={error} />}
-      {success && <Message tone="success" text={success} />}
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-4 rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2 text-sm text-brand-accent">
+          {success}
+        </div>
+      )}
 
-      {/* ── Filter panel ── */}
-      <div className="mb-6 rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
+      {/* Filter panel */}
+      <PremiumCard padding="md" className="mb-6">
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-0 flex-1 sm:flex sm:flex-wrap sm:items-end sm:gap-3">
             <FilterGroup label="Client">
@@ -455,7 +452,7 @@ export default function ReportsManagement() {
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Client name or title…"
+                placeholder="Client name or title..."
                 className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
@@ -491,15 +488,26 @@ export default function ReportsManagement() {
             )}
           </div>
         )}
-      </div>
+      </PremiumCard>
 
-      {/* ── Report cards ── */}
+      {/* Report cards */}
       {loading ? (
-        <p className="text-sm text-brand-primary">Loading reports...</p>
-      ) : filteredReports.length === 0 ? (
-        <div className="rounded-xl border border-brand-muted bg-brand-surface p-8 text-center text-sm text-brand-primary">
-          {hasActiveFilters ? 'No reports match the current filters.' : 'No reports found.'}
+        <div className="flex flex-col items-center justify-center gap-3 py-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-muted border-t-brand-accent" />
+          <p className="text-sm text-brand-primary">Loading reports...</p>
         </div>
+      ) : filteredReports.length === 0 ? (
+        <EmptyState
+          title={hasActiveFilters ? 'No matching reports' : 'No reports found'}
+          message={hasActiveFilters ? 'No reports match the current filters.' : 'Sync Meta data to create your first monthly report.'}
+          action={
+            isAdmin ? (
+              <ActionButton variant="outline" onClick={() => navigate('/admin/integrations/meta')}>
+                Sync Meta data
+              </ActionButton>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="space-y-3">
           {filteredReports.map(report => {
@@ -508,11 +516,15 @@ export default function ReportsManagement() {
             const isPartial = !isFullCalendarMonth(report.period_start, report.period_end)
             const monthComplete = isMonthComplete(getReportMonthFromPeriod(report))
             const ready = monthComplete && report.status !== 'published' && strategyRequiredComplete(readStrategyData(report.strategy_data))
-            const badge = statusBadge(report, monthComplete, ready, isPartial)
-            const nextAction = nextActionText(report, monthComplete, ready, isPartial)
+            const actionText = nextActionText(report, monthComplete, ready, isPartial)
+            const statusVariant = getStatusVariant(report, monthComplete, ready, isPartial)
+            const statusLabel = getStatusLabel(report, monthComplete, ready, isPartial)
+            const sourceVariant = getSourceVariant(report, sourceById)
+
             return (
-              <article key={report.id} className="rounded-xl border border-brand-muted bg-brand-surface">
-                <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-start lg:justify-between">
+              <PremiumCard key={report.id} hover>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  {/* Left: client info + badges + action text */}
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     {client && (
                       <div className="hidden shrink-0 sm:block">
@@ -527,20 +539,11 @@ export default function ReportsManagement() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="truncate text-base font-semibold text-white">{clientName}</h2>
-                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${badge.className}`}>
-                          {badge.label}
-                        </span>
-                        {(() => {
-                          const src = SOURCE_BADGE[sourceById.get(report.id) ?? 'manual']
-                          return (
-                            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${src.className}`}>
-                              {src.label}
-                            </span>
-                          )
-                        })()}
+                        <StatusBadge label={statusLabel} variant={statusVariant} />
+                        <SourceBadge source={sourceVariant} />
                       </div>
                       <p className="mt-0.5 text-sm font-medium text-white/80">{monthLabel(report)}</p>
-                      <p className="mt-1.5 text-xs leading-relaxed text-brand-primary">{nextAction}</p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-brand-primary">{actionText}</p>
                       <p className="mt-0.5 text-xs text-brand-primary/60">
                         Last updated: {formatDateTime(report.updated_at ?? report.created_at)}
                       </p>
@@ -557,77 +560,78 @@ export default function ReportsManagement() {
                     </div>
                   </div>
 
+                  {/* Right: action buttons */}
                   <div className="flex shrink-0 flex-wrap gap-2">
-                    <button
-                      type="button"
+                    <ActionButton
+                      variant="secondary"
+                      size="sm"
                       onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
-                      className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
                     >
                       {ready || report.status === 'published' ? 'Review report' : 'Edit strategy'}
-                    </button>
+                    </ActionButton>
                     {!ready && report.status !== 'published' && (
-                      <button
-                        type="button"
+                      <ActionButton
+                        variant="outline"
+                        size="sm"
                         onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
-                        className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-semibold text-brand-bg hover:brightness-110"
                       >
                         Add CG action plan
-                      </button>
+                      </ActionButton>
                     )}
                     {monthComplete && (
-                      <button
-                        type="button"
+                      <ActionButton
+                        variant="secondary"
+                        size="sm"
                         onClick={() => navigate(`/admin/published?reportId=${report.id}`)}
-                        className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
                       >
                         Preview
-                      </button>
+                      </ActionButton>
                     )}
                     {isAdmin && (
                       <>
                         {ready && (
-                          <button
-                            type="button"
+                          <ActionButton
+                            variant="primary"
+                            size="sm"
                             onClick={() => void handleStatus(report)}
                             disabled={busyReportId === report.id}
-                            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-semibold text-brand-bg hover:brightness-110 disabled:opacity-60"
                           >
                             Publish
-                          </button>
+                          </ActionButton>
                         )}
                         {report.status === 'published' && (
-                          <button
-                            type="button"
+                          <ActionButton
+                            variant="secondary"
+                            size="sm"
                             onClick={() => void handleStatus(report)}
                             disabled={busyReportId === report.id}
-                            className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:opacity-60"
                           >
                             Unpublish
-                          </button>
+                          </ActionButton>
                         )}
                         {isPartial && (
-                          <button
-                            type="button"
+                          <ActionButton
+                            variant="secondary"
+                            size="sm"
                             onClick={() => void handleRepair(report)}
                             disabled={busyReportId === report.id}
-                            className="rounded-lg border border-amber-400/40 px-3 py-2 text-sm text-amber-300 hover:bg-amber-400/10 disabled:opacity-60"
                           >
                             Repair to calendar month
-                          </button>
+                          </ActionButton>
                         )}
-                        <button
-                          type="button"
+                        <ActionButton
+                          variant="danger"
+                          size="sm"
                           onClick={() => void handleDelete(report)}
                           disabled={busyReportId === report.id}
-                          className="rounded-lg border border-red-400/30 px-3 py-2 text-sm text-red-300 hover:bg-red-400/10 disabled:opacity-60"
                         >
                           Delete
-                        </button>
+                        </ActionButton>
                       </>
                     )}
                   </div>
                 </div>
-              </article>
+              </PremiumCard>
             )
           })}
         </div>
@@ -643,11 +647,4 @@ function FilterGroup({ label, children }: { label: string; children: React.React
       {children}
     </div>
   )
-}
-
-function Message({ tone, text }: { tone: 'success' | 'error'; text: string }) {
-  const styles = tone === 'success'
-    ? 'text-brand-accent bg-brand-accent/10 border-brand-accent/20'
-    : 'text-red-400 bg-red-400/10 border-red-400/20'
-  return <p className={`mb-4 rounded-lg border px-3 py-2 text-sm ${styles}`}>{text}</p>
 }
