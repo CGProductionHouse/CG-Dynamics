@@ -54,7 +54,7 @@ export default function AdminLayout() {
           Fallback
         </p>
         <NavLink to="/admin/import" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-          Manual import
+          Manual import fallback
         </NavLink>
       </div>
       </>

@@ -1,8 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
-import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { PremiumCard } from '../../components/ui/PremiumCard'
+import { ActionButton } from '../../components/ui/Buttons'
+import { Pill, StatusBadge } from '../../components/ui/Badges'
+import { EmptyState } from '../../components/ui/States'
+import { useLocalDraft } from '../../hooks/useLocalDraft'
 import {
   listClients,
   createClient,
@@ -239,28 +243,25 @@ export default function ClientsList() {
         </div>
         {isAdmin && (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-            <button
-              onClick={openBulk}
-              className="w-full rounded-lg border border-brand-muted px-4 py-2.5 text-sm font-semibold text-brand-primary transition hover:border-white/30 hover:text-white sm:w-auto"
-            >
-              Bulk add clients
-            </button>
-            <button
-              onClick={() => setModal({ open: true })}
-              className="w-full rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg transition hover:brightness-110 sm:w-auto"
-            >
-              Add client
-            </button>
+            <ActionButton variant="secondary" onClick={openBulk}>Bulk add clients</ActionButton>
+            <ActionButton variant="primary" onClick={() => setModal({ open: true })}>Add client</ActionButton>
           </div>
         )}
       </div>
 
       <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <OverviewCard label="Total clients" value={overview.totalClients} />
-        <OverviewCard label="Published reports" value={overview.publishedReports} />
-        <OverviewCard label="Draft reports" value={overview.draftReports} />
-        <OverviewCard label="Imports" value={overview.imports} />
-        <OverviewCard label="Manual summaries" value={overview.manualSummaries} />
+        {([
+          ['Total clients', overview.totalClients],
+          ['Published reports', overview.publishedReports],
+          ['Draft reports', overview.draftReports],
+          ['Imports', overview.imports],
+          ['Manual summaries', overview.manualSummaries],
+        ] as const).map(([label, value]) => (
+          <PremiumCard key={label} padding="sm">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{label}</p>
+            <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+          </PremiumCard>
+        ))}
       </section>
 
       <section className="mb-6 rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
@@ -323,68 +324,40 @@ export default function ClientsList() {
 
           <div className="space-y-3 md:hidden">
             {displayClients.length === 0 ? (
-              <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-8 text-center text-sm text-brand-primary">
-                {viewFilter === 'archived' ? 'No archived clients.' : viewFilter === 'active' ? 'No active clients.' : 'No clients yet.'}
-              </div>
+              <EmptyState
+                title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
+                message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client to get started.' : 'Clients you add will appear here.'}
+                centered={false}
+              />
             ) : (
               displayClients.map(c => (
-                <article key={c.id} className="rounded-xl border border-brand-muted bg-brand-surface p-4">
+                <PremiumCard key={c.id} padding="sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 gap-3">
                       <ClientLogo client={c} />
                       <div className="min-w-0">
                         <h2 className="text-base font-semibold text-white break-words">{c.name}</h2>
                         <div className="mt-3 flex flex-wrap items-center gap-2">
-                          <span
-                            className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
-                              c.tier === 'premium'
-                                ? 'bg-brand-accent/20 text-brand-accent'
-                                : 'bg-brand-muted text-brand-primary'
-                            }`}
-                          >
-                            {c.tier}
-                          </span>
-                          <span className={`text-xs font-medium ${c.active ? 'text-green-400' : 'text-amber-400'}`}>
-                            {c.active ? 'Active' : 'Archived'}
-                          </span>
+                          <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
+                          <StatusBadge label={c.active ? 'Active' : 'Archived'} variant="default" />
                         </div>
                       </div>
                     </div>
                     {isAdmin && (
                       <div className="flex shrink-0 flex-col gap-1.5">
-                        <button
-                          onClick={() => setModal({ open: true, client: c })}
-                          className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-brand-accent"
-                        >
-                          Edit
-                        </button>
+                        <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
                         {c.active ? (
-                          <button
-                            onClick={() => setConfirmAction({ type: 'archive', client: c })}
-                            className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-amber-400"
-                          >
-                            Archive
-                          </button>
+                          <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
                         ) : (
                           <>
-                            <button
-                              onClick={() => setConfirmAction({ type: 'restore', client: c })}
-                              className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-green-400"
-                            >
-                              Restore
-                            </button>
-                            <button
-                              onClick={() => void openDeleteConfirm(c)}
-                              className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs text-brand-primary hover:text-red-400"
-                            >
-                              Delete
-                            </button>
+                            <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
+                            <ActionButton variant="danger" size="sm" onClick={() => void openDeleteConfirm(c)}>Delete</ActionButton>
                           </>
                         )}
                       </div>
                     )}
                   </div>
-                </article>
+                </PremiumCard>
               ))
             )}
           </div>
@@ -402,8 +375,14 @@ export default function ClientsList() {
               <tbody>
                 {displayClients.length === 0 ? (
                   <tr>
-                    <td colSpan={isAdmin ? 4 : 3} className="px-4 py-8 text-center text-brand-primary">
-                      {viewFilter === 'archived' ? 'No archived clients.' : viewFilter === 'active' ? 'No active clients.' : 'No clients yet.'}
+                    <td colSpan={isAdmin ? 4 : 3} className="px-4 py-8">
+                      <div className="mx-auto max-w-sm">
+                        <EmptyState
+                          title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
+                          message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client to get started.' : 'Clients you add will appear here.'}
+                          centered={false}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -419,51 +398,21 @@ export default function ClientsList() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${
-                            c.tier === 'premium'
-                              ? 'bg-brand-accent/20 text-brand-accent'
-                              : 'bg-brand-muted text-brand-primary'
-                          }`}
-                        >
-                          {c.tier}
-                        </span>
+                        <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs ${c.active ? 'text-green-400' : 'text-amber-400'}`}>
-                          {c.active ? 'Active' : 'Archived'}
-                        </span>
+                        <StatusBadge label={c.active ? 'Active' : 'Archived'} variant="default" />
                       </td>
                       {isAdmin && (
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-3">
-                            <button
-                              onClick={() => setModal({ open: true, client: c })}
-                              className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
-                            >
-                              Edit
-                            </button>
+                            <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
                             {c.active ? (
-                              <button
-                                onClick={() => setConfirmAction({ type: 'archive', client: c })}
-                                className="text-xs text-brand-primary hover:text-amber-400 transition-colors"
-                              >
-                                Archive
-                              </button>
+                              <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
                             ) : (
                               <>
-                                <button
-                                  onClick={() => setConfirmAction({ type: 'restore', client: c })}
-                                  className="text-xs text-brand-primary hover:text-green-400 transition-colors"
-                                >
-                                  Restore
-                                </button>
-                                <button
-                                  onClick={() => void openDeleteConfirm(c)}
-                                  className="text-xs text-brand-primary hover:text-red-400 transition-colors"
-                                >
-                                  Delete
-                                </button>
+                                <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
+                                <ActionButton variant="danger" size="sm" onClick={() => void openDeleteConfirm(c)}>Delete</ActionButton>
                               </>
                             )}
                           </div>
@@ -503,15 +452,6 @@ export default function ClientsList() {
           onClose={closeBulk}
         />
       )}
-    </div>
-  )
-}
-
-function OverviewCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-brand-muted bg-brand-surface p-4">
-      <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{label}</p>
-      <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
     </div>
   )
 }
@@ -727,21 +667,10 @@ function ClientModal({
           )}
 
           <div className="flex flex-col gap-3 pt-1 sm:flex-row">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              className="flex-1 border border-brand-muted text-brand-primary py-2.5 rounded-lg text-sm hover:text-white hover:border-white/30 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 bg-brand-accent text-brand-bg font-semibold py-2.5 rounded-lg text-sm hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
+            <ActionButton variant="secondary" onClick={onClose} disabled={saving} fullWidth>Cancel</ActionButton>
+            <ActionButton variant="primary" type="submit" disabled={saving} loading={saving} fullWidth>
+              Save
+            </ActionButton>
           </div>
         </form>
       </div>
@@ -783,7 +712,6 @@ function ConfirmModal({
   const OVERLAY = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'
   const PANEL = 'w-full max-w-sm rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] sm:p-6'
   const btnBase = 'flex-1 rounded-lg py-2.5 text-sm font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed'
-  const btnCancel = `${btnBase} border border-brand-muted text-brand-primary hover:text-white hover:border-white/30`
 
   if (action.type === 'restore') {
     return (
@@ -795,7 +723,7 @@ function ConfirmModal({
           </p>
           {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
           <div className="flex gap-3">
-            <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+            <ActionButton onClick={onClose} disabled={saving} variant="secondary" size="sm">Cancel</ActionButton>
             <button onClick={() => execute(() => onRestore(action.client))} disabled={saving} className={`${btnBase} bg-green-600 text-white hover:brightness-110`}>
               {saving ? 'Restoring...' : 'Restore'}
             </button>
@@ -815,7 +743,7 @@ function ConfirmModal({
           </p>
           {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
           <div className="flex gap-3">
-            <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+            <ActionButton onClick={onClose} disabled={saving} variant="secondary" size="sm">Cancel</ActionButton>
             <button onClick={() => execute(() => onArchive(action.client))} disabled={saving} className={`${btnBase} bg-amber-600 text-white hover:brightness-110`}>
               {saving ? 'Archiving...' : 'Archive'}
             </button>
@@ -846,7 +774,7 @@ function ConfirmModal({
           </p>
           {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
           <div className="flex gap-3">
-            <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+            <ActionButton onClick={onClose} disabled={saving} variant="secondary" size="sm">Cancel</ActionButton>
             <button onClick={() => execute(() => onArchive(action.client))} disabled={saving} className={`${btnBase} bg-amber-600 text-white hover:brightness-110`}>
               {saving ? 'Archiving...' : 'Archive instead'}
             </button>
@@ -856,7 +784,7 @@ function ConfirmModal({
     )
   }
 
-  // No data — require name match to confirm permanent deletion
+  // No data - require name match to confirm permanent deletion
   const nameMatches = confirmName === action.client.name
 
   return (
@@ -875,7 +803,7 @@ function ConfirmModal({
         />
         {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
         <div className="flex gap-3">
-          <button onClick={onClose} disabled={saving} className={btnCancel}>Cancel</button>
+          <ActionButton onClick={onClose} disabled={saving} variant="secondary" size="sm">Cancel</ActionButton>
           <button onClick={() => execute(() => onDelete(action.client))} disabled={saving || !nameMatches} className={`${btnBase} bg-red-600 text-white hover:brightness-110`}>
             {saving ? 'Deleting...' : 'Delete permanently'}
           </button>
@@ -1004,12 +932,7 @@ function BulkImportModal({
             Logos auto-resolve from <code className="rounded bg-brand-muted/60 px-1 py-0.5 text-brand-accent">/client-logos/client-name-slug.png</code> once a matching file is placed there.
           </p>
 
-          <button
-            onClick={onClose}
-            className="w-full rounded-lg bg-brand-accent py-2.5 text-sm font-semibold text-brand-bg transition hover:brightness-110"
-          >
-            Done
-          </button>
+          <ActionButton variant="primary" onClick={onClose} fullWidth>Done</ActionButton>
         </div>
       </div>
     )
@@ -1085,7 +1008,7 @@ function BulkImportModal({
             {toSkip.length > 0 && (
               <div>
                 <p className="mb-1 text-xs font-medium text-brand-primary">
-                  {toSkip.length} already exist{toSkip.length === 1 ? 's' : ''} — will be skipped
+                  {toSkip.length} already exist{toSkip.length === 1 ? 's' : ''} - will be skipped
                 </p>
                 <ul className="max-h-28 overflow-y-auto space-y-0.5">
                   {toSkip.map(name => (
@@ -1101,7 +1024,7 @@ function BulkImportModal({
             {toRestoreInstead.length > 0 && (
               <div>
                 <p className="mb-1 text-xs font-medium text-amber-400">
-                  {toRestoreInstead.length} archived — restore instead of re-adding
+                  {toRestoreInstead.length} archived - restore instead of re-adding
                 </p>
                 <ul className="max-h-28 overflow-y-auto space-y-0.5">
                   {toRestoreInstead.map(name => (
@@ -1123,7 +1046,7 @@ function BulkImportModal({
         )}
 
         <p className="mb-4 text-xs text-brand-primary">
-          Logo URLs left blank — logos auto-resolve from{' '}
+          Logo URLs left blank - logos auto-resolve from{' '}
           <code className="rounded bg-brand-muted/60 px-1 py-0.5 text-brand-accent">/client-logos/client-name-slug.png</code>{' '}
           if a matching file exists.
         </p>
@@ -1131,38 +1054,17 @@ function BulkImportModal({
         {hasDraft && (
           <div className="mb-3 flex items-center justify-between">
             <p className="text-xs text-brand-primary">Draft saved on this device.</p>
-            <button
-              type="button"
-              onClick={handleClearDraft}
-              disabled={importing}
-              className="text-xs text-brand-accent hover:brightness-110 transition disabled:opacity-60"
-            >
-              Clear draft
-            </button>
+            <ActionButton variant="ghost" size="sm" onClick={handleClearDraft} disabled={importing}>Clear draft</ActionButton>
           </div>
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={importing}
-            className="flex-1 rounded-lg border border-brand-muted py-2.5 text-sm text-brand-primary transition hover:border-white/30 hover:text-white disabled:opacity-60"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleImport}
-            disabled={importing || toAdd.length === 0}
-            className="flex-1 rounded-lg bg-brand-accent py-2.5 text-sm font-semibold text-brand-bg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {importing
-              ? 'Importing...'
-              : toAdd.length > 0
-                ? `Import ${toAdd.length} client${toAdd.length !== 1 ? 's' : ''}`
-                : 'Import clients'}
-          </button>
+          <ActionButton variant="secondary" onClick={onClose} disabled={importing} fullWidth>Cancel</ActionButton>
+          <ActionButton variant="primary" onClick={handleImport} disabled={importing || toAdd.length === 0} loading={importing} fullWidth>
+            {toAdd.length > 0
+              ? `Import ${toAdd.length} client${toAdd.length !== 1 ? 's' : ''}`
+              : 'Import clients'}
+          </ActionButton>
         </div>
       </div>
     </div>

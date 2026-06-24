@@ -22,7 +22,7 @@ export default function WorkflowGuide() {
             {item.step}
           </span>
           <span className="font-medium text-white">{item.title}</span>
-          <span className="hidden text-brand-primary sm:inline">— {item.hint}</span>
+          <span className="hidden text-brand-primary sm:inline">- {item.hint}</span>
         </Link>
       ))}
       <span className="ml-1 hidden shrink-0 text-[11px] text-brand-primary/70 lg:inline">

@@ -575,7 +575,7 @@ export default function ImportMetaCsv() {
         parts.push(`${names} data imported successfully as an internal draft. Client view will unlock when ${isAre} complete. You can still review the data, add strategy, and prepare the report.`)
       }
       if (partialMths.length > 0) {
-        parts.push(`${partialMths.map(monthLongName).join(', ')} needs a full month of data before it can go to the client — saved as an internal draft for now.`)
+        parts.push(`${partialMths.map(monthLongName).join(', ')} needs a full month of data before it can go to the client - saved as an internal draft for now.`)
       }
       if (parts.length === 0) parts.push(`Saved ${rows.length} imported posts.`)
       setSuccess(parts.join(' '))
@@ -800,7 +800,7 @@ export default function ImportMetaCsv() {
           screenshots turned into a clean CSV), then save them for report building.
         </p>
         <p className="text-xs text-brand-primary mt-2 max-w-2xl">
-          Current or incomplete months are saved as internal drafts you can keep working on — client
+          Current or incomplete months are saved as internal drafts you can keep working on - client
           view unlocks once the month is complete. Use the <span className="font-semibold text-white">Import history</span> tab
           above to review past imports (client, period, platform and import date).
         </p>

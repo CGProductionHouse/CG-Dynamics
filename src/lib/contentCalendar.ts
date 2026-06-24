@@ -1,6 +1,6 @@
 // South African content calendar.
 //
-// Pure and deterministic — NO network calls at runtime. Computes South African
+// Pure and deterministic - NO network calls at runtime. Computes South African
 // public holidays (with the Sunday -> Monday observance rule and Easter-derived
 // Good Friday / Family Day), plus the commercial and seasonal marketing dates a
 // social team plans around. Used to surface "calendar suggestions" in the
@@ -114,16 +114,16 @@ const MONTH_THEMES: Record<number, MonthTheme[]> = {
   1: [
     {
       title: "Valentine's season",
-      relevanceHint: 'February is love season — high engagement for gifts, dining, couples experiences and self-care offers.',
+      relevanceHint: 'February is love season - high engagement for gifts, dining, couples experiences and self-care offers.',
       suggestedAngle: "Run a Valentine's special, gift guide, couples experience or a treat-yourself promotion.",
       deliverables: ['design_poster', 'reel', 'campaign'],
     },
   ],
-  // April — Easter month (Good Friday and Family Day fall here most years)
+  // April - Easter month (Good Friday and Family Day fall here most years)
   3: [
     {
       title: 'Easter period',
-      relevanceHint: 'Easter weekend is a high-traffic, family-focused long weekend — trading patterns shift and audiences are very active online.',
+      relevanceHint: 'Easter weekend is a high-traffic, family-focused long weekend - trading patterns shift and audiences are very active online.',
       suggestedAngle: 'Share trading hours and Easter specials at least a week before Good Friday.',
       deliverables: ['design_poster', 'photo_post', 'reel'],
     },
@@ -141,13 +141,13 @@ const MONTH_THEMES: Record<number, MonthTheme[]> = {
   6: [
     {
       title: 'Mandela Month',
-      relevanceHint: 'July is Nelson Mandela Month — Mandela Day (18 July) calls for 67 minutes of community action.',
+      relevanceHint: 'July is Nelson Mandela Month - Mandela Day (18 July) calls for 67 minutes of community action.',
       suggestedAngle: "Show the brand's community side. Share a Mandela Day initiative, a local cause, or a team giving-back story.",
       deliverables: ['professional_video', 'reel', 'photo_post'],
     },
     {
       title: 'Winter content opportunity',
-      relevanceHint: 'Midwinter in South Africa — audiences respond to warmth, comfort and seasonal offers.',
+      relevanceHint: 'Midwinter in South Africa - audiences respond to warmth, comfort and seasonal offers.',
       suggestedAngle: 'Promote winter specials, cosy experiences, hot products or seasonal deals.',
       deliverables: ['reel', 'photo_post', 'design_poster'],
     },
@@ -174,7 +174,7 @@ const MONTH_THEMES: Record<number, MonthTheme[]> = {
   9: [
     {
       title: 'October year-end build',
-      relevanceHint: 'October opens the final quarter — audiences start planning for year-end spending and Black Friday.',
+      relevanceHint: 'October opens the final quarter - audiences start planning for year-end spending and Black Friday.',
       suggestedAngle: 'Begin end-of-year promotions, countdown content and early Black Friday teasers.',
       deliverables: ['campaign', 'design_poster', 'animated_poster', 'reel'],
     },
@@ -283,7 +283,7 @@ function buildYearEvents(year: number): CalendarEvent[] {
       title: "Mother's Day",
       date: nthWeekday(year, 4, 0, 2),
       category: 'commercial',
-      relevanceHint: 'Second Sunday of May — major gifting and dining date.',
+      relevanceHint: 'Second Sunday of May - major gifting and dining date.',
       suggestedAngle: "Mother's Day gift ideas, specials or bookings.",
       deliverables: ['design_poster', 'reel', 'campaign'],
     },
@@ -300,7 +300,7 @@ function buildYearEvents(year: number): CalendarEvent[] {
       title: "Father's Day",
       date: nthWeekday(year, 5, 0, 3),
       category: 'commercial',
-      relevanceHint: 'Third Sunday of June — gifting and dining date.',
+      relevanceHint: 'Third Sunday of June - gifting and dining date.',
       suggestedAngle: "Father's Day gift ideas, specials or bookings.",
       deliverables: ['design_poster', 'reel', 'campaign'],
     },
@@ -308,7 +308,7 @@ function buildYearEvents(year: number): CalendarEvent[] {
       title: 'Nelson Mandela Day',
       date: new Date(Date.UTC(year, 6, 18)),
       category: 'awareness',
-      relevanceHint: 'Mandela Day — 67 minutes of community action. Strong for community, social-good and local-pride content.',
+      relevanceHint: 'Mandela Day - 67 minutes of community action. Strong for community, social-good and local-pride content.',
       suggestedAngle: "Share a community initiative, highlight a team giving-back story, or acknowledge Madiba's legacy.",
       deliverables: ['photo_post', 'reel', 'professional_video'],
     },
@@ -334,7 +334,7 @@ function buildYearEvents(year: number): CalendarEvent[] {
       title: 'Black Friday',
       date: addDays(nthWeekday(year, 10, 4, 4), 1),
       category: 'commercial',
-      relevanceHint: 'Day after the 4th Thursday of November — peak sales event.',
+      relevanceHint: 'Day after the 4th Thursday of November - peak sales event.',
       suggestedAngle: 'Headline specials with campaign support; prepare assets in advance.',
       deliverables: ['campaign', 'animated_poster', 'design_poster', 'reel'],
     },

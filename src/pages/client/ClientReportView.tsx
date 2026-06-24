@@ -210,7 +210,7 @@ function ReportHero({
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
           <HeroMiniCard label="Status" value={report.status.charAt(0).toUpperCase() + report.status.slice(1)} accent="teal" />
           <HeroMiniCard label="Report month" value={month} accent="amber" />
-          <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? '—'} accent="teal" />
+          <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? '-'} accent="teal" />
         </div>
       </div>
     </section>
@@ -295,7 +295,7 @@ function OverviewTab({
 
   return (
     <>
-      {/* B — Performance overview */}
+      {/* B - Performance overview */}
       <section className="mb-14">
         <SectionHeading eyebrow="Performance overview" title="The month at a glance" />
         <p className="-mt-2 mb-6 max-w-2xl text-base leading-relaxed text-slate-300">
@@ -308,7 +308,7 @@ function OverviewTab({
         </div>
       </section>
 
-      {/* C — Growth trend */}
+      {/* C - Growth trend */}
       {performance.growthSeries.length > 0 && performance.previousMonthLabel && (
         <section className="mb-14">
           <SectionHeading
@@ -323,7 +323,7 @@ function OverviewTab({
         </section>
       )}
 
-      {/* D — Channel performance */}
+      {/* D - Channel performance */}
       {platformsWithData.length > 0 && (
         <section className="mb-14">
           <SectionHeading eyebrow="Channel performance" title="How each channel performed" />
@@ -339,15 +339,15 @@ function OverviewTab({
         </section>
       )}
 
-      {/* E — Content */}
+      {/* E - Content */}
       <ContentSection topContent={performance.topContent} strategy={strategy} />
 
-      {/* F — Recommendations */}
+      {/* F - Recommendations */}
       {performance.recommendations.length > 0 && (
         <RecommendationsSection recommendations={performance.recommendations} />
       )}
 
-      {/* G — CG action plan */}
+      {/* G - CG action plan */}
       <StrategyBlocks report={report} strategy={strategy} showEmptyStrategy={showEmptyStrategy} nextSteps={nextSteps} recommendations={performance.recommendations} />
     </>
   )
@@ -523,7 +523,7 @@ const LEARNING_COPY =
 const BASELINE_COPY =
   'This sets a clear content baseline for the month. Next month we build on it with sharper formats and a consistent posting rhythm.'
 
-// E — Content section. Adapts wording to the real strength of the top content
+// E - Content section. Adapts wording to the real strength of the top content
 // so weak content is framed as learning, never celebrated as a win.
 function ContentSection({
   topContent,
@@ -978,13 +978,13 @@ function PlatformTab({
 function PlatformPerformanceView({ performance, view }: { performance: PlatformPerformance; view: PlatformView }) {
   return (
     <>
-      {/* A — Platform performance header */}
+      {/* A - Platform performance header */}
       <SectionHeading eyebrow={performance.label} title={`${performance.label} performance`} />
       <p className="-mt-2 mb-6 max-w-2xl text-base leading-relaxed text-slate-300">
         {performance.performanceHeadline}
       </p>
 
-      {/* B — Performance cards (period metrics only — never current followers) */}
+      {/* B - Performance cards (period metrics only - never current followers) */}
       {performance.cards.length > 0 && (
         <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {performance.cards.map(metric => (
@@ -993,14 +993,14 @@ function PlatformPerformanceView({ performance, view }: { performance: PlatformP
         </section>
       )}
 
-      {/* C — Audience base (follower snapshot, never shown as growth) */}
+      {/* C - Audience base (follower snapshot, never shown as growth) */}
       {performance.audienceBase !== null && (
         <section className="mb-12">
           <AudienceBaseCard followers={performance.audienceBase} />
         </section>
       )}
 
-      {/* D — Momentum (true period metrics vs last month) */}
+      {/* D - Momentum (true period metrics vs last month) */}
       {performance.momentum.length > 0 && (
         <section className="mb-12">
           <SectionHeading eyebrow="Momentum" title="Versus last month" />
@@ -1012,10 +1012,10 @@ function PlatformPerformanceView({ performance, view }: { performance: PlatformP
         </section>
       )}
 
-      {/* E — Content overview (adaptive wording) */}
+      {/* E - Content overview (adaptive wording) */}
       <PlatformContent performance={performance} view={view} />
 
-      {/* F — Platform recommendations */}
+      {/* F - Platform recommendations */}
       {performance.recommendations.length > 0 && (
         <section className="mb-12">
           <SectionHeading eyebrow="Recommendations" title={`Next steps for ${performance.label}`} />

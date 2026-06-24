@@ -179,7 +179,7 @@ export default function InvitesAdmin() {
         </p>
         <p className="mt-3 max-w-2xl rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
           Creating an invite does not send an email yet. This pre-approves the email. Send the
-          client the app link manually — use <span className="font-medium">Copy invite message</span> below.
+          client the app link manually - use <span className="font-medium">Copy invite message</span> below.
         </p>
         <p className="mt-2 max-w-2xl text-xs text-brand-primary">
           Note: Auth emails (sign-up confirmations and password resets) require Supabase SMTP

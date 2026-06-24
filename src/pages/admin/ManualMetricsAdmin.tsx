@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { ActionButton } from '../../components/ui/Buttons'
+import { EmptyState } from '../../components/ui/States'
 import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { listClients, type Client } from '../../lib/db/clients'
 import { PLATFORMS, PLATFORM_LABELS, formatNumber, type Platform } from '../../lib/reportStats'
@@ -257,13 +259,7 @@ export default function ManualMetricsAdmin() {
           </p>
         </div>
         {isAdmin && editingId && (
-          <button
-            type="button"
-            onClick={startCreate}
-            className="rounded-lg border border-brand-muted px-4 py-2.5 text-sm text-brand-primary hover:text-white"
-          >
-            New entry
-          </button>
+          <ActionButton variant="secondary" onClick={startCreate}>New entry</ActionButton>
         )}
       </div>
 
@@ -339,37 +335,19 @@ export default function ManualMetricsAdmin() {
           </div>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110 transition disabled:opacity-60 sm:w-auto"
-            >
-              {saving ? 'Saving...' : editingId ? 'Save changes' : 'Save manual metrics'}
-            </button>
+            <ActionButton variant="primary" type="submit" disabled={saving} loading={saving}>
+              {editingId ? 'Save changes' : 'Save manual metrics'}
+            </ActionButton>
             {editingId && (
-              <button
-                type="button"
-                onClick={startCreate}
-                disabled={saving}
-                className="rounded-lg border border-brand-muted px-4 py-2.5 text-sm text-brand-primary hover:text-white"
-              >
-                Cancel edit
-              </button>
+              <ActionButton variant="secondary" onClick={startCreate} disabled={saving}>Cancel edit</ActionButton>
             )}
             {!editingId && hasMetricsDraft && (
               <div className="flex items-center gap-3 sm:ml-auto">
                 <p className="text-xs text-brand-primary">Draft saved on this device.</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    clearMetricsDraft()
-                    setForm(emptyForm(clients[0]?.id ?? ''))
-                  }}
-                  disabled={saving}
-                  className="text-xs text-brand-accent hover:brightness-110 transition disabled:opacity-60"
-                >
-                  Clear draft
-                </button>
+                <ActionButton variant="ghost" size="sm" onClick={() => {
+                  clearMetricsDraft()
+                  setForm(emptyForm(clients[0]?.id ?? ''))
+                }} disabled={saving}>Clear draft</ActionButton>
               </div>
             )}
           </div>
@@ -379,9 +357,7 @@ export default function ManualMetricsAdmin() {
       {loading ? (
         <p className="text-sm text-brand-primary">Loading manual metrics...</p>
       ) : metrics.length === 0 ? (
-        <div className="rounded-xl border border-brand-muted bg-brand-surface p-8 text-center text-sm text-brand-primary">
-          No manual metrics yet.
-        </div>
+        <EmptyState title="No manual metrics yet" message="Manual metrics you add will appear here. Use this when a reliable CSV export is not available." centered={false} />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-brand-muted bg-brand-surface">
           <table className="w-full text-sm">
@@ -409,22 +385,9 @@ export default function ManualMetricsAdmin() {
                   <td className="px-4 py-3 text-brand-primary">{formatNumber(metric.engagements)}</td>
                   {isAdmin && (
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-3 whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => startEdit(metric)}
-                          className="text-xs text-brand-primary hover:text-brand-accent"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleDelete(metric)}
-                          disabled={busyId === metric.id}
-                          className="text-xs text-red-300 hover:text-red-200 disabled:opacity-60"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex items-center justify-end gap-3 whitespace-nowrap">
+                        <ActionButton variant="ghost" size="sm" onClick={() => startEdit(metric)}>Edit</ActionButton>
+                        <ActionButton variant="danger" size="sm" onClick={() => void handleDelete(metric)} disabled={busyId === metric.id}>Delete</ActionButton>
                       </div>
                     </td>
                   )}

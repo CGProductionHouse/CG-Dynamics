@@ -74,7 +74,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     key: 'current_followers',
     label: 'Current followers',
     sourceType: 'account_current_snapshot',
-    meaning: 'Total follower count at the time of sync. Not "new follows" — only total audience size.',
+    meaning: 'Total follower count at the time of sync. Not "new follows" - only total audience size.',
     safeForClient: true,
     adminOnly: false,
     sumAcrossPlatforms: true,
@@ -118,7 +118,7 @@ function metaMetricAvailable(metric: PlatformView['manual'] | null, key: 'views'
 }
 
 // Returns the correct client-facing label for the reach-type metric on a
-// given platform. Always "Reach" — never "Viewers" or "Reach / viewers".
+// given platform. Always "Reach" - never "Viewers" or "Reach / viewers".
 export function metaPrimaryMetricLabel(): string {
   return 'Reach'
 }

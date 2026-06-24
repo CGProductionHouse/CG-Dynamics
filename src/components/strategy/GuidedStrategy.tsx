@@ -153,7 +153,7 @@ export function GuidedStrategyEditor({
               </p>
             </>
           ) : (
-            <p className="text-xs text-brand-primary">No top post detected yet — import data for this month.</p>
+            <p className="text-xs text-brand-primary">No top post detected yet - import data for this month.</p>
           )}
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -538,7 +538,7 @@ function OptionsEditorModal({
       onClick={e => { if (!busy && e.target === e.currentTarget) onClose() }}
     >
       <div className="w-full max-w-md rounded-xl border border-brand-muted bg-brand-surface p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-        <h3 className="mb-1 text-base font-semibold text-white">Edit options — {STRATEGY_CATEGORY_LABELS[category]}</h3>
+        <h3 className="mb-1 text-base font-semibold text-white">Edit options - {STRATEGY_CATEGORY_LABELS[category]}</h3>
         <p className="mb-4 text-xs text-brand-primary">
           Changes apply to future reports only. Reports already saved keep the labels chosen at the time.
         </p>

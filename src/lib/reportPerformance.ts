@@ -12,7 +12,7 @@ import {
 // Turns synced Meta metrics (current + previous month) into a client-safe
 // performance story: metric cards with growth, a growth series for the chart,
 // auto recommendations, an honest content tone, and an overall performance
-// level. It never invents 0s — a metric with no real value is simply omitted.
+// level. It never invents 0s - a metric with no real value is simply omitted.
 
 export type TrendStatus = 'positive' | 'negative' | 'neutral'
 export type Direction = 'up' | 'down' | 'flat'
@@ -27,14 +27,14 @@ export type ContentTone = 'top' | 'learning' | 'baseline'
 // Engagement threshold below which a "best" post is NOT celebrated as a win.
 export const WEAK_CONTENT_THRESHOLD = 25
 // Views / reach a post needs before it can be celebrated as "top performing"
-// even when interactions are thin — mirrors Meta defaulting to top-by-views.
+// even when interactions are thin - mirrors Meta defaulting to top-by-views.
 export const STRONG_VIEWS_THRESHOLD = 100
 export const STRONG_REACH_THRESHOLD = 100
 
 // Decides how a single post should be framed. A post can be "top" on the
 // strength of views or reach even with low interactions (Meta's top-by-views
 // behaviour), but a low-interaction post with no strong views/reach is framed
-// as learning — never celebrated as a win.
+// as learning - never celebrated as a win.
 export function contentToneFor(post: ReportStatsPost): {
   tone: ContentTone
   rankingMetricLabel: string | null
@@ -53,7 +53,7 @@ export function contentToneFor(post: ReportStatsPost): {
     return {
       tone: 'top',
       rankingMetricLabel,
-      reason: `Strong ${rankingMetricLabel} — shown as top performing content.`,
+      reason: `Strong ${rankingMetricLabel} - shown as top performing content.`,
     }
   }
 
@@ -63,11 +63,11 @@ export function contentToneFor(post: ReportStatsPost): {
       tone: 'learning',
       rankingMetricLabel:
         typeof views === 'number' ? 'views' : typeof reach === 'number' ? 'reach' : 'content interactions',
-      reason: `Top content interactions (${interactions}) are below ${WEAK_CONTENT_THRESHOLD} with no stronger views/reach signal — framed as content learning, not a win.`,
+      reason: `Top content interactions (${interactions}) are below ${WEAK_CONTENT_THRESHOLD} with no stronger views/reach signal - framed as content learning, not a win.`,
     }
   }
 
-  return { tone: 'baseline', rankingMetricLabel: null, reason: 'No engagement signal yet — shown as a content baseline.' }
+  return { tone: 'baseline', rankingMetricLabel: null, reason: 'No engagement signal yet - shown as a content baseline.' }
 }
 
 function topContentFor(post: ReportStatsPost): TopContent {
@@ -92,7 +92,7 @@ export interface PerformanceMetric {
   // null when there is no previous month to compare against.
   direction: Direction | null
   trend: TrendStatus
-  // e.g. "vs April 2026" — null when there is no comparison.
+  // e.g. "vs April 2026" - null when there is no comparison.
   comparisonLabel: string | null
 }
 
@@ -170,7 +170,7 @@ function buildMetric(
   previous: number | null,
   previousMonthLabel: string | null,
 ): PerformanceMetric | null {
-  // Omit metrics with no real current value — never show a fake 0.
+  // Omit metrics with no real current value - never show a fake 0.
   if (typeof current !== 'number') return null
 
   const hasPrev = typeof previous === 'number'
@@ -236,7 +236,7 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
   ]
   const metrics = candidates.filter((m): m is PerformanceMetric => m !== null)
 
-  // Growth chart: prefer Reach, Content interactions, Posts, Current followers —
+  // Growth chart: prefer Reach, Content interactions, Posts, Current followers -
   // only where BOTH months have a real value so we can draw a true comparison.
   const growthKeys = ['reach', 'content_interactions', 'posts', 'current_followers', 'views']
   const growthSeries: GrowthSeriesItem[] = metrics
@@ -342,7 +342,7 @@ function directionOf(metrics: PerformanceMetric[], key: string): Direction | nul
   return metrics.find(m => m.key === key)?.direction ?? null
 }
 
-// Professional, honest, constructive headline — no panic wording, no fake
+// Professional, honest, constructive headline - no panic wording, no fake
 // positivity. Prefers a data-aware story (e.g. visibility up / engagement soft)
 // and otherwise falls back to the level-based copy.
 function overallHeadline(
@@ -401,14 +401,14 @@ function buildNextSteps(input: {
     steps.push({
       priority: 1,
       title: 'Convert visibility into response',
-      why: 'Visibility improved while response quality is the next focus — more people saw the content without taking action.',
+      why: 'Visibility improved while response quality is the next focus - more people saw the content without taking action.',
       action: 'Test stronger opening hooks, question-led captions and product comparison posts.',
     })
   } else if (typeof reach === 'number' && reach >= 500 && interactions > 0 && interactions / reach < 0.02) {
     steps.push({
       priority: 1,
       title: 'Convert reach into engagement',
-      why: 'Visibility is building while response quality is the next focus — the content is being seen but action is still building.',
+      why: 'Visibility is building while response quality is the next focus - the content is being seen but action is still building.',
       action: 'Use stronger opening hooks, question-led captions and product comparison posts.',
     })
   } else if (bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
@@ -425,7 +425,7 @@ function buildNextSteps(input: {
     steps.push({
       priority: 2,
       title: 'Build posting consistency',
-      why: `Fewer posts were published (${curPosts} total) than the recommended weekly rhythm — consistency is the next focus.`,
+      why: `Fewer posts were published (${curPosts} total) than the recommended weekly rhythm - consistency is the next focus.`,
       action: 'Keep a steady weekly rhythm before judging campaign direction.',
     })
   }
@@ -435,7 +435,7 @@ function buildNextSteps(input: {
     steps.push({
       priority: 3,
       title: 'Profile action needs focus',
-      why: 'Profile visits changed while visibility improved — the content can drive more curiosity to the profile.',
+      why: 'Profile visits changed while visibility improved - the content can drive more curiosity to the profile.',
       action: 'Add clearer product intent, stronger CTA copy and direct enquiry prompts.',
     })
   }
@@ -462,17 +462,17 @@ function buildNextSteps(input: {
     steps.push({
       priority: 5,
       title: 'Build on what worked',
-      why: 'The strongest post this month shows clear audience preference — use its format as a creative signal.',
+      why: 'The strongest post this month shows clear audience preference - use its format as a creative signal.',
       action: 'Create variations of the top posts format and posting time while testing one new angle.',
     })
   }
 
-  // 6. No previous baseline — content direction is becoming clearer.
+  // 6. No previous baseline - content direction is becoming clearer.
   if (!input.performanceLevel || input.performanceLevel === 'baseline_only') {
     steps.push({
       priority: 5,
       title: 'Content direction is becoming clearer',
-      why: 'This month sets the content baseline — next month we will have a clearer picture of what is gaining traction.',
+      why: 'This month sets the content baseline - next month we will have a clearer picture of what is gaining traction.',
       action: 'Keep the same posting rhythm and note which posts earn the most attention.',
     })
   }
@@ -483,7 +483,7 @@ function buildNextSteps(input: {
     steps.push({
       priority: 6,
       title: 'Prioritise audience retention',
-      why: 'Follower count moved differently this month — content can create more repeat-visit value.',
+      why: 'Follower count moved differently this month - content can create more repeat-visit value.',
       action: 'Publish saveable, repeat-value content like how-to posts, carousel comparisons and educational reels.',
     })
   }
@@ -493,7 +493,7 @@ function buildNextSteps(input: {
     steps.push({
       priority: 1,
       title: 'Build on this months momentum',
-      why: 'The current trajectory is positive — the next step is to compound it with consistent execution.',
+      why: 'The current trajectory is positive - the next step is to compound it with consistent execution.',
       action: 'Double down on the formats that earned the most visibility and plan one campaign moment for next month.',
     })
   }
@@ -533,7 +533,7 @@ export interface PlatformPerformance {
   hasComparison: boolean
   performanceHeadline: string
 
-  // Period metric cards (never current followers — that lives in audienceBase).
+  // Period metric cards (never current followers - that lives in audienceBase).
   cards: PerformanceMetric[]
   // Snapshot follower count, shown as a static "Audience base" card.
   audienceBase: number | null
@@ -583,9 +583,9 @@ function platformHeadline(label: string, cards: PerformanceMetric[], hasComparis
     return `${label} grew on both reach and audience response this month.`
   }
   if ((reach === 'down' || views === 'down') && inter === 'up') {
-    return `${label} earned stronger engagement — the next step is widening reach.`
+    return `${label} earned stronger engagement - the next step is widening reach.`
   }
-  return `${label} held steady this month — a stable base to build on.`
+  return `${label} held steady this month - a stable base to build on.`
 }
 
 function buildPlatformRecommendations(input: {
@@ -603,7 +603,7 @@ function buildPlatformRecommendations(input: {
 
   if (reachUp && interDown) {
     recs.push(
-      'Reach improved while response quality is the next focus — test stronger hooks and clearer calls to action.',
+      'Reach improved while response quality is the next focus - test stronger hooks and clearer calls to action.',
     )
   }
 

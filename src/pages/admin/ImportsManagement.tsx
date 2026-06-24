@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { ActionButton } from '../../components/ui/Buttons'
+import { EmptyState } from '../../components/ui/States'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
   deleteImportGroup,
@@ -125,9 +127,7 @@ export default function ImportsManagement() {
       {loading ? (
         <p className="text-sm text-brand-primary">Loading imports...</p>
       ) : groups.length === 0 ? (
-        <div className="rounded-xl border border-brand-muted bg-brand-surface p-8 text-center text-sm text-brand-primary">
-          No imports found.
-        </div>
+        <EmptyState title="No imports found" message="Imported CSV batches will appear here once uploaded." centered={false} />
       ) : (
         <div className="space-y-3">
           {groups.map(group => {
@@ -149,22 +149,11 @@ export default function ImportsManagement() {
                     <MiniStat label="Eng." value={formatNumber(group.total_engagements)} />
                   </div>
                   <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedGroup(group)}
-                      className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
-                    >
-                      View details
-                    </button>
+                    <ActionButton variant="secondary" size="sm" onClick={() => setSelectedGroup(group)}>View details</ActionButton>
                     {isAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => void handleDelete(group)}
-                        disabled={deletingKey === group.key}
-                        className="rounded-lg border border-red-400/30 px-3 py-2 text-sm text-red-300 hover:bg-red-400/10 disabled:opacity-60"
-                      >
+                      <ActionButton variant="danger" size="sm" onClick={() => void handleDelete(group)} disabled={deletingKey === group.key}>
                         {deletingKey === group.key ? 'Deleting...' : 'Delete import'}
-                      </button>
+                      </ActionButton>
                     )}
                   </div>
                 </div>
@@ -184,13 +173,7 @@ export default function ImportsManagement() {
                 {clientNameById.get(selectedGroup.client_id) ?? selectedGroup.client_id} | {periodLabel(selectedGroup)}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setSelectedGroup(null)}
-              className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
-            >
-              Close
-            </button>
+            <ActionButton variant="secondary" size="sm" onClick={() => setSelectedGroup(null)}>Close</ActionButton>
           </div>
           <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Detail label="Import date" value={formatDateTime(selectedGroup.created_at)} />

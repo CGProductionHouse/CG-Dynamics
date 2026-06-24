@@ -1,4 +1,4 @@
-// Guided strategy engine — types, defaults and draft generators.
+// Guided strategy engine - types, defaults and draft generators.
 //
 // Replaces the old open-ended report notes with a structured, guided strategy
 // and action plan. The structured result is stored on reports.strategy_data
@@ -190,7 +190,7 @@ export function hasStrategyContent(data: StrategyData): boolean {
 // ─── completion checklist ────────────────────────────────────────────────────
 //
 // Guides staff through finishing a report before publishing. Never blocks
-// saving — it only shows what is done and what is still missing.
+// saving - it only shows what is done and what is still missing.
 
 export interface StrategyChecklistItem {
   key: string
@@ -290,7 +290,7 @@ export function generateStrategyGoingForward(ctx: GenerateContext): string {
   if (drivers) {
     opening += ` to ${drivers}`
   } else if (why) {
-    opening += ` to build on what worked — ${why}`
+    opening += ` to build on what worked - ${why}`
   } else {
     opening += ' to build on the strongest performing content and keep momentum'
   }
