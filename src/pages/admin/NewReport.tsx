@@ -582,6 +582,11 @@ export default function NewReport() {
             {saving === 'published' ? 'Saving...' : reportStatus === 'published' ? 'Save published' : 'Publish'}
           </button>
         </div>
+        {savedReportId && reportStatus !== 'published' && !hasStrategyContent(strategyData) && (
+          <p className="mt-2 text-xs text-amber-300 text-right">
+            Add CG action plan before publishing.
+          </p>
+        )}
       </div>
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">

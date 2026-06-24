@@ -21,11 +21,11 @@ export default function AdminLayout() {
       <NavLink to="/admin" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Clients
       </NavLink>
-      <NavLink to="/admin/import" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Import
-      </NavLink>
       <NavLink to="/admin/reports" className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Reports
+      </NavLink>
+      <NavLink to="/admin/integrations" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
+        Integrations
       </NavLink>
       {profile?.role === 'admin' && (
         <NavLink to="/admin/users" className={navClass} onClick={() => setMobileMenuOpen(false)}>
@@ -48,9 +48,15 @@ export default function AdminLayout() {
         View as client
       </NavLink>
 
-      <NavLink to="/admin/integrations" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Integrations
-      </NavLink>
+      {/* Fallback import — kept but visually separate from the main workflow */}
+      <div className="mt-3 border-t border-brand-muted/40 pt-3">
+        <p className="px-3 pb-1 text-[10px] font-medium uppercase tracking-[0.14em] text-brand-primary/50">
+          Fallback
+        </p>
+        <NavLink to="/admin/import" className={navClass} onClick={() => setMobileMenuOpen(false)}>
+          Manual import
+        </NavLink>
+      </div>
       </>
     )
   }

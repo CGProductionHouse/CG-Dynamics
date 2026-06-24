@@ -125,6 +125,10 @@ export function ClientReportView({
 
       <ReportHero report={report} client={client} month={month} master={master} />
 
+      <p className="mb-6 text-center text-xs text-slate-500">
+        Reporting period: {report.period_start ? formatDate(report.period_start) : '—'} to {report.period_end ? formatDate(report.period_end) : '—'}
+      </p>
+
       {availablePlatforms.length > 0 && (
         <ReportTabs tabs={tabs} active={tab} onChange={setTab} />
       )}
@@ -519,7 +523,19 @@ function ContentSection({
   const platformLabel = topContent?.platformLabel || (tc.autoPlatform ? PLATFORM_LABELS[tc.autoPlatform] : null)
 
   const tone = topContent?.tone ?? 'baseline'
-  const interactions = topContent?.interactions ?? 0
+  const bestPost = topContent?.post ?? null
+  const rankingMetric = topContent?.rankingMetricLabel ?? null
+
+  // Pick the strongest metric to showcase (views > reach > interactions).
+  const heroMetric: { value: number; label: string } | null =
+    rankingMetric === 'views' && typeof bestPost?.impressions === 'number'
+      ? { value: bestPost.impressions, label: 'views' }
+      : rankingMetric === 'reach' && typeof bestPost?.reach === 'number'
+        ? { value: bestPost.reach, label: 'reach' }
+        : (topContent?.interactions ?? 0) > 0
+          ? { value: topContent!.interactions, label: 'content interactions' }
+          : null
+
   const cgInsight = tc.whatThisTellsUs.trim()
   const hasCG = tc.whyItWorked.length > 0 || cgInsight.length > 0
 
@@ -574,16 +590,16 @@ function ContentSection({
                 </h3>
               )}
 
-              {tone === 'top' && interactions > 0 ? (
+              {tone === 'top' && heroMetric ? (
                 <div className="mt-7 inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
                   <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
-                    {formatNumber(interactions)}
+                    {formatNumber(heroMetric.value)}
                   </span>
-                  <span className="pb-1 text-sm font-bold text-slate-400">content interactions</span>
+                  <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label}</span>
                 </div>
-              ) : interactions > 0 ? (
+              ) : heroMetric ? (
                 <p className="mt-5 text-sm font-semibold text-slate-400">
-                  {formatNumber(interactions)} content interactions — the most for the month.
+                  {formatNumber(heroMetric.value)} {heroMetric.label} — the most for the month.
                 </p>
               ) : null}
 
@@ -732,7 +748,7 @@ function StrategyBlocks({
       <section className="mb-4">
         <SectionHeading eyebrow="CG action plan" title="What we do next" />
         <p className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 text-sm text-slate-400">
-          Strategy will be added by the CG team before final publishing.
+          CG action plan will be added before final publishing.
         </p>
       </section>
     )
@@ -987,6 +1003,8 @@ function PlatformContent({ performance, view }: { performance: PlatformPerforman
         : { eyebrow: 'Content', title: 'Content baseline' }
 
   const metrics = buildMetaContentMetrics(best)
+  // Hero metric: first available from views → reach → interactions
+  const heroMetric = metrics.length > 0 ? metrics[0] : null
   const copy = tone === 'learning' ? PLATFORM_LEARNING_COPY : tone === 'baseline' ? PLATFORM_BASELINE_COPY : null
 
   return (
@@ -1002,6 +1020,15 @@ function PlatformContent({ performance, view }: { performance: PlatformPerforman
         <h3 className="mt-5 text-2xl font-black leading-tight tracking-[-0.035em] text-white sm:text-3xl">
           {shortCaption(best.caption)}
         </h3>
+
+          {tone === 'top' && heroMetric ? (
+          <div className="mt-7 inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
+            <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
+              {formatNumber(heroMetric.value)}
+            </span>
+            <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label.toLowerCase()}</span>
+          </div>
+        ) : null}
 
         {metrics.length > 0 && (
           <div className="mt-7 grid gap-3 sm:grid-cols-3">

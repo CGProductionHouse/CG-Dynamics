@@ -512,7 +512,7 @@ function buildPlatformRecommendations(input: {
 
   if (reachUp && interDown) {
     recs.push(
-      'The content reached more people, but response quality softened. Next month should focus on clearer hooks and stronger calls to action.',
+      'Reach improved while response quality is the next focus — test stronger hooks and clearer calls to action.',
     )
   }
 
