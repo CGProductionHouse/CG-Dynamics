@@ -234,13 +234,17 @@ export function buildMasterReport(
 
     if (platformPosts.length > 0) {
       const stats = calculateReportStats(platformPosts)
+      const metaSyncedManual = isMetaSyncedManualMetric(manual)
+      const manualViewsAvailable = Boolean(manual && (!metaSyncedManual || manual.views > 0))
+      const manualReachAvailable = Boolean(manual && (!metaSyncedManual || manual.reach > 0))
+      const manualEngagementsAvailable = Boolean(manual && (!metaSyncedManual || manual.engagements > 0))
       return {
         platform,
         label: PLATFORM_LABELS[platform],
         source: 'posts',
-        reach: stats.totalReach,
-        views: stats.totalImpressions,
-        engagements: stats.totalEngagements,
+        reach: manualReachAvailable ? manual!.reach : stats.totalReach,
+        views: manualViewsAvailable ? manual!.views : stats.totalImpressions,
+        engagements: manualEngagementsAvailable ? manual!.engagements : stats.totalEngagements,
         postCount: stats.postCount,
         bestPost: stats.bestPost,
         topPosts: stats.topPosts,

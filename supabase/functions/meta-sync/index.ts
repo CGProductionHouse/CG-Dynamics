@@ -28,6 +28,8 @@ interface SyncClientResult {
   reportReused: boolean
   postsSynced: number
   warnings: string[]
+  accountTotals: Record<string, Record<string, number | null>>
+  unavailableMetrics: Array<{ platform: string; metrics: string[]; reason: string }>
 }
 
 interface DbErrorLike {
@@ -575,6 +577,8 @@ async function handleRequest(req: Request): Promise<Response> {
       reportReused: false,
       postsSynced: 0,
       warnings: [],
+      accountTotals: {},
+      unavailableMetrics: [],
     }
 
     // Page + IG Business endpoints generally need the Page access token. Fall
@@ -1048,34 +1052,52 @@ async function handleRequest(req: Request): Promise<Response> {
       // stay unavailable unless Meta exposes a stable API value.
       if (client.facebookPageId && Date.now() < insightDeadline) {
         try {
+          const fbContentInteractions = fbPosts.reduce(
+            (sum, post) => sum + post.reactions + post.comments + post.shares + (post.clicks ?? 0),
+            0,
+          )
           const pageParams = new URLSearchParams({ access_token: pageToken, fields: 'fan_count,followers_count' })
           const pageRes = await metaFetch(`${baseUrl}/${client.facebookPageId}?${pageParams.toString()}`)
+          let follows = 0
           if (pageRes.ok) {
             const pageData = await pageRes.json()
-            const follows =
+            follows =
               typeof pageData.followers_count === 'number'
                 ? pageData.followers_count
                 : typeof pageData.fan_count === 'number'
                   ? pageData.fan_count
                   : 0
-            if (follows > 0) {
-              await upsertSyncedPlatformMetric(sb, {
-                clientId: client.clientId,
-                month,
-                platform: 'facebook',
-                views: 0,
-                reach: 0,
-                engagements: 0,
-                profileVisits: 0,
-                externalLinkTaps: 0,
-                followers: follows,
-                createdBy: user.id,
-              }, result.warnings, knownTokens)
-            }
           } else {
             result.warnings.push(`Facebook follows unavailable: ${await readMetaError(pageRes, knownTokens)}`)
           }
-          result.warnings.push('Facebook Page views, viewers and visits are marked unavailable when Meta does not expose stable Business Suite-equivalent values through the Page API.')
+
+          if (follows > 0 || fbContentInteractions > 0) {
+            await upsertSyncedPlatformMetric(sb, {
+              clientId: client.clientId,
+              month,
+              platform: 'facebook',
+              views: 0,
+              reach: 0,
+              engagements: fbContentInteractions,
+              profileVisits: 0,
+              externalLinkTaps: 0,
+              followers: follows,
+              createdBy: user.id,
+            }, result.warnings, knownTokens)
+          }
+          result.accountTotals.facebook = {
+            views: null,
+            viewers: null,
+            content_interactions: fbContentInteractions,
+            visits: null,
+            follows: follows > 0 ? follows : null,
+          }
+          result.unavailableMetrics.push({
+            platform: 'facebook',
+            metrics: ['views', 'viewers', 'visits'],
+            reason: 'Meta did not expose stable Business Suite-equivalent Page values through the available API path.',
+          })
+          result.warnings.push('Facebook unavailable metrics: views, viewers and visits are marked unavailable when Meta does not expose stable Business Suite-equivalent values through the Page API.')
         } catch (err) {
           result.warnings.push(redact(`Error fetching Facebook account fields: ${String(err)}`, knownTokens))
         }
@@ -1087,7 +1109,7 @@ async function handleRequest(req: Request): Promise<Response> {
           const { values, error } = await fetchInsights(
             baseUrl,
             client.instagramAccountId,
-            ['reach', 'profile_views', 'website_clicks'],
+            ['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks'],
             igToken,
             { period: 'day', since: periodStart, until: periodEnd },
             knownTokens,
@@ -1111,21 +1133,37 @@ async function handleRequest(req: Request): Promise<Response> {
           }
 
           const anyPositive =
-            (['reach', 'profile_views', 'website_clicks'].some(k => typeof values[k] === 'number' && values[k] > 0)) ||
+            (['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks'].some(k => typeof values[k] === 'number' && values[k] > 0)) ||
             igFollowers > 0
           if (anyPositive) {
             await upsertSyncedPlatformMetric(sb, {
               clientId: client.clientId,
               month,
               platform: 'instagram',
-              views: 0,
+              views: values.views ?? 0,
               reach: values.reach ?? 0,
-              engagements: 0,
+              engagements: values.total_interactions ?? 0,
               profileVisits: values.profile_views ?? 0,
               externalLinkTaps: values.website_clicks ?? 0,
               followers: igFollowers,
               createdBy: user.id,
             }, result.warnings, knownTokens)
+          }
+          result.accountTotals.instagram = {
+            views: values.views ?? null,
+            reach: values.reach ?? null,
+            content_interactions: values.total_interactions ?? null,
+            visits: values.profile_views ?? null,
+            follows: igFollowers > 0 ? igFollowers : null,
+          }
+          const missingIg = ['views', 'reach', 'total_interactions', 'profile_views']
+            .filter(metric => typeof values[metric] !== 'number')
+          if (missingIg.length > 0) {
+            result.unavailableMetrics.push({
+              platform: 'instagram',
+              metrics: missingIg,
+              reason: error ?? 'Meta did not return this metric for the requested month.',
+            })
           }
         } catch (err) {
           result.warnings.push(redact(`Error fetching Instagram account insights: ${String(err)}`, knownTokens))
@@ -1133,6 +1171,10 @@ async function handleRequest(req: Request): Promise<Response> {
       }
 
       result.status = 'success'
+      steps.push(`${client.clientName}: account totals ${JSON.stringify(result.accountTotals)}`)
+      if (result.unavailableMetrics.length > 0) {
+        steps.push(`${client.clientName}: unavailable metrics ${JSON.stringify(result.unavailableMetrics)}`)
+      }
       steps.push(`${client.clientName}: ${result.postsSynced} posts synced`)
       clientsSynced++
     } catch (err) {
@@ -1162,6 +1204,8 @@ async function handleRequest(req: Request): Promise<Response> {
           warnings: result.warnings,
           reportCreated: result.reportCreated,
           reportReused: result.reportReused,
+          accountTotals: result.accountTotals,
+          unavailableMetrics: result.unavailableMetrics,
         },
         error_message: result.error ?? null,
         started_at: new Date().toISOString(),
