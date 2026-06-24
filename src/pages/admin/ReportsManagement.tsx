@@ -29,14 +29,14 @@ type SourceFilter = 'all' | ReportSource
 const SOURCE_OPTIONS: { value: SourceFilter; label: string }[] = [
   { value: 'all', label: 'All sources' },
   { value: 'meta', label: 'Meta synced' },
-  { value: 'manual', label: 'Manual / CSV' },
-  { value: 'mixed', label: 'Mixed' },
+  { value: 'manual', label: 'Manual fallback' },
+  { value: 'mixed', label: 'Mixed source' },
 ]
 
 const SOURCE_BADGE: Record<ReportSource, { label: string; className: string }> = {
   meta: { label: 'Meta synced', className: 'bg-sky-400/15 text-sky-300' },
-  manual: { label: 'Manual / CSV', className: 'bg-brand-muted text-brand-primary' },
-  mixed: { label: 'Mixed', className: 'bg-amber-400/15 text-amber-300' },
+  manual: { label: 'Manual fallback', className: 'bg-brand-muted text-brand-primary' },
+  mixed: { label: 'Mixed source', className: 'bg-amber-400/15 text-amber-300' },
 }
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
@@ -367,19 +367,26 @@ export default function ReportsManagement() {
           <p className="mb-2 text-xs uppercase tracking-[0.22em] text-brand-primary">Reports</p>
           <h1 className="text-2xl font-semibold text-white sm:text-3xl">Report management</h1>
           <p className="mt-2 max-w-2xl text-sm text-brand-primary">
-            {isAdmin
-              ? 'View, edit, publish, unpublish, and delete monthly client reports.'
-              : 'View monthly client reports (read-only).'}
+            Sync data, review performance, add CG strategy, then publish.
           </p>
         </div>
         {isAdmin && (
-          <button
-            type="button"
-            onClick={() => navigate('/admin/reports/new')}
-            className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110"
-          >
-            New report
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => navigate('/admin/integrations/meta')}
+              className="rounded-lg border border-brand-accent bg-brand-accent/10 px-4 py-2.5 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20"
+            >
+              Sync Meta data
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/reports/new')}
+              className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110"
+            >
+              New report
+            </button>
+          </div>
         )}
       </div>
 
@@ -551,41 +558,53 @@ export default function ReportsManagement() {
                   </div>
 
                   <div className="flex shrink-0 flex-wrap gap-2">
-                    {monthComplete ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
+                      className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
+                    >
+                      {ready || report.status === 'published' ? 'Review report' : 'Edit strategy'}
+                    </button>
+                    {!ready && report.status !== 'published' && (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
+                        className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-semibold text-brand-bg hover:brightness-110"
+                      >
+                        Add CG action plan
+                      </button>
+                    )}
+                    {monthComplete && (
                       <button
                         type="button"
                         onClick={() => navigate(`/admin/published?reportId=${report.id}`)}
                         className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
                       >
-                        View as client
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
-                        className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
-                      >
-                        View internal draft
+                        Preview
                       </button>
                     )}
                     {isAdmin && (
                       <>
-                        <button
-                          type="button"
-                          onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
-                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
-                        >
-                          Edit strategy
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleStatus(report)}
-                          disabled={busyReportId === report.id || (report.status !== 'published' && !monthComplete)}
-                          title={report.status !== 'published' && !monthComplete ? 'Client view is only available for completed months.' : undefined}
-                          className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {report.status === 'published' ? 'Unpublish' : 'Publish'}
-                        </button>
+                        {ready && (
+                          <button
+                            type="button"
+                            onClick={() => void handleStatus(report)}
+                            disabled={busyReportId === report.id}
+                            className="rounded-lg bg-brand-accent px-3 py-2 text-sm font-semibold text-brand-bg hover:brightness-110 disabled:opacity-60"
+                          >
+                            Publish
+                          </button>
+                        )}
+                        {report.status === 'published' && (
+                          <button
+                            type="button"
+                            onClick={() => void handleStatus(report)}
+                            disabled={busyReportId === report.id}
+                            className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white disabled:opacity-60"
+                          >
+                            Unpublish
+                          </button>
+                        )}
                         {isPartial && (
                           <button
                             type="button"

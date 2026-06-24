@@ -280,9 +280,12 @@ function OverviewTab({
 
   if (!hasData) {
     return (
-      <p className="rounded-2xl border border-white/10 bg-white/[0.045] px-5 py-4 text-sm text-slate-400">
-        Your performance data will appear here once this month is synced.
-      </p>
+      <div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.045] p-8 text-center sm:p-10">
+        <p className="text-base font-semibold text-white">No report data yet</p>
+        <p className="mt-3 text-sm leading-relaxed text-slate-400">
+          Performance data will appear here once the month is synced and the report is published.
+        </p>
+      </div>
     )
   }
 

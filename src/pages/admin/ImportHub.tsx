@@ -27,8 +27,12 @@ export default function ImportHub() {
   return (
     <div>
       <div className="border-b border-brand-muted bg-brand-surface/60 px-4 pt-4 sm:px-6 lg:px-8">
-        <p className="text-xs uppercase tracking-[0.22em] text-brand-primary">Import</p>
-        <h1 className="mt-2 mb-4 text-xl font-semibold text-white">Import &amp; data</h1>
+        <p className="text-xs uppercase tracking-[0.22em] text-brand-primary">Fallback</p>
+        <h1 className="mt-2 text-xl font-semibold text-white">Manual import fallback</h1>
+        <p className="mb-4 mt-1 max-w-2xl text-sm text-brand-primary">
+          Use this only when Meta Sync is unavailable or when a platform cannot be connected. 
+          <a href="/admin/integrations/meta" className="ml-1 text-brand-accent hover:brightness-110 underline underline-offset-2">Go to Meta Sync</a> for the primary workflow.
+        </p>
         <div className="flex gap-2 overflow-x-auto">
           {tabs.map(item => (
             <button

@@ -274,14 +274,14 @@ export default function ClientsList() {
           <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap">
             {isAdmin && (
               <>
-                <QuickLink to="/admin/import" label="Import CSV" primary />
-                <QuickLink to="/admin/reports/new" label="Create report" />
+                <QuickLink to="/admin/integrations/meta" label="Sync Meta" primary />
+                <QuickLink to="/admin/reports" label="Reports" />
+                <QuickLink to="/admin/reports/new" label="New report" />
                 <QuickLink to="/admin/invites" label="Invites" />
               </>
             )}
-            <QuickLink to="/admin/manual-metrics" label="Manual metrics" />
-            <QuickLink to="/admin/reports" label="Reports" />
             <QuickLink to="/admin/published" label="Client preview" />
+            <QuickLink to="/admin/import" label="Manual import fallback" />
           </div>
         </div>
       </section>

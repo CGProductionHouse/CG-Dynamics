@@ -859,7 +859,7 @@ export default function NewReport() {
           </div>
           <div className="flex flex-wrap gap-2">
             <SourcePill label="Meta synced" tone="posts" />
-            <SourcePill label="Manual summary" tone="manual" />
+            <SourcePill label="Manual fallback" tone="manual" />
             <SourcePill label="No data" tone="none" />
           </div>
         </div>
@@ -869,7 +869,7 @@ export default function NewReport() {
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm font-semibold text-white">{view.label}</p>
                 <SourcePill
-                  label={view.source === 'posts' ? 'Meta synced' : view.source === 'manual' ? 'Manual summary' : 'No data'}
+                  label={view.source === 'posts' ? 'Meta synced' : view.source === 'manual' ? 'Manual fallback' : 'No data'}
                   tone={view.source}
                 />
               </div>

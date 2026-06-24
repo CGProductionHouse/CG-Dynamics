@@ -1032,6 +1032,14 @@ export default function MetaIntegrationPage() {
                   </span>
                 </label>
 
+                {syncBaseline && (
+                  <div className="max-w-md rounded-lg border border-brand-muted bg-brand-bg/40 px-3.5 py-2 text-xs text-brand-primary">
+                    Current sync: <span className="text-white">last completed month</span>
+                    <br />
+                    Baseline: <span className="text-white">previous month for growth comparison</span>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
