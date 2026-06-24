@@ -22,14 +22,14 @@ import {
 import {
   buildMetaContentMetrics,
   buildMetaPlatformMetrics,
-  metaEngagementLabel,
-  metaPrimaryMetricLabel,
 } from '../../lib/metaMetrics'
 import {
   WEAK_CONTENT_THRESHOLD,
+  buildPlatformPerformance,
   buildReportPerformance,
   type GrowthSeriesItem,
   type PerformanceMetric,
+  type PlatformPerformance,
   type ReportPerformance,
   type TopContent,
 } from '../../lib/reportPerformance'
@@ -142,6 +142,8 @@ export function ClientReportView({
           view={master.platforms.find(item => item.platform === tab)!}
           previousView={previousMaster?.platforms.find(item => item.platform === tab) ?? null}
           previousManual={previousManualMetrics.find(metric => metric.platform === tab) ?? null}
+          previousMonthLabel={previousMonthLabel}
+          monthLabel={month}
         />
       )}
 
@@ -331,7 +333,7 @@ function OverviewTab({
 
       {/* F — Recommendations */}
       {performance.recommendations.length > 0 && (
-        <RecommendationsSection performance={performance} />
+        <RecommendationsSection recommendations={performance.recommendations} />
       )}
 
       {/* G — CG action plan */}
@@ -459,23 +461,29 @@ function Bar({ heightPct, value, tone }: { heightPct: number; value: number; ton
 }
 
 // ── F: auto recommendations ──────────────────────────────────────────────────
-function RecommendationsSection({ performance }: { performance: ReportPerformance }) {
+function RecommendationsSection({ recommendations }: { recommendations: string[] }) {
   return (
     <section className="mb-14">
       <SectionHeading eyebrow="Recommendations" title="Where to focus next" />
-      <div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.04] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-8">
-        <ul className="space-y-4">
-          {performance.recommendations.map((rec, index) => (
-            <li key={index} className="flex items-start gap-4">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2dd4bf]/15 text-sm font-black text-[#2dd4bf]">
-                {index + 1}
-              </span>
-              <p className="text-[0.95rem] leading-relaxed text-slate-200">{rec}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <RecommendationList recommendations={recommendations} />
     </section>
+  )
+}
+
+function RecommendationList({ recommendations }: { recommendations: string[] }) {
+  return (
+    <div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.04] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-8">
+      <ul className="space-y-4">
+        {recommendations.map((rec, index) => (
+          <li key={index} className="flex items-start gap-4">
+            <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2dd4bf]/15 text-sm font-black text-[#2dd4bf]">
+              {index + 1}
+            </span>
+            <p className="text-[0.95rem] leading-relaxed text-slate-200">{rec}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
@@ -484,38 +492,6 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
     <div className="mb-5">
       <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">{eyebrow}</p>
       <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white sm:text-4xl">{title}</h2>
-    </div>
-  )
-}
-
-function MetricTile({ label, value, accent }: { label: string; value: string; accent: 'teal' | 'amber' }) {
-  const accentClass = accent === 'amber' ? 'from-[#f97316] to-[#f59e0b]' : 'from-[#2dd4bf] to-[#14b8a6]'
-  return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.95)] backdrop-blur sm:p-6">
-      <div className={`mb-5 h-1 w-12 rounded-full bg-gradient-to-r ${accentClass}`} />
-      <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">{label}</p>
-      <p className="mt-3 text-3xl font-black leading-none tracking-[-0.04em] text-white sm:text-4xl">{value}</p>
-      <div className="pointer-events-none absolute -bottom-14 -right-14 h-32 w-32 rounded-full bg-[#2dd4bf]/0 blur-3xl transition group-hover:bg-[#2dd4bf]/10" />
-    </div>
-  )
-}
-
-function MovementCard({ label, movement }: { label: string; movement: MetricMovement }) {
-  const difference = movement.difference ?? 0
-  const up = difference > 0
-  const down = difference < 0
-  const tone = up ? 'text-[#2dd4bf]' : down ? 'text-[#f97316]' : 'text-slate-400'
-  const prefix = up ? '+' : ''
-  const detail =
-    movement.percent !== null
-      ? `${up ? '+' : ''}${formatPercent(movement.percent)} vs last month`
-      : `${prefix}${formatNumber(difference)} vs last month`
-
-  return (
-    <div className="rounded-3xl border border-white/[0.08] bg-[#0b1715]/90 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">
-      <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">{label}</p>
-      <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">{formatNumber(movement.current)}</p>
-      <p className={`mt-2 text-sm font-bold ${tone}`}>{detail}</p>
     </div>
   )
 }
@@ -880,154 +856,230 @@ function PlatformTab({
   view,
   previousView,
   previousManual,
+  previousMonthLabel,
+  monthLabel,
 }: {
   view: PlatformView
   previousView: PlatformView | null
   previousManual: ManualPlatformMetric | null
+  previousMonthLabel: string | null
+  monthLabel: string
 }) {
   if (view.source === 'none') return null
-  if (view.source === 'manual') return <ManualPlatformTab view={view} previousManual={previousManual} />
-  return <PostsPlatformTab view={view} previousView={previousView} />
+
+  const performance = buildPlatformPerformance({
+    view,
+    previousView,
+    previousManual,
+    monthLabel,
+    previousMonthLabel,
+  })
+
+  return <PlatformPerformanceView performance={performance} view={view} />
 }
 
-function PostsPlatformTab({ view, previousView }: { view: PlatformView; previousView: PlatformView | null }) {
-  const growth = [
-    { label: 'Views', m: compareNullable(view.views, previousView?.views) },
-    { label: metaPrimaryMetricLabel(), m: compareNullable(view.reach, previousView?.reach) },
-    { label: metaEngagementLabel(), m: compareNullable(view.engagements, previousView?.engagements) },
-  ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
-
+// Unified Meta-style platform dashboard: header + headline, performance cards,
+// audience base, momentum (period metrics only), adaptive content, and
+// platform-specific recommendations.
+function PlatformPerformanceView({ performance, view }: { performance: PlatformPerformance; view: PlatformView }) {
   return (
     <>
-      <SectionHeading eyebrow={view.label} title={`${view.label} performance`} />
-      <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {buildMetaPlatformMetrics(view).slice(0, 4).map(item => (
-          <MetricTile key={item.key} label={item.label} value={formatNumber(item.value)} accent={item.key === 'posts' ? 'amber' : 'teal'} />
-        ))}
-      </section>
+      {/* A — Platform performance header */}
+      <SectionHeading eyebrow={performance.label} title={`${performance.label} performance`} />
+      <p className="-mt-2 mb-6 max-w-2xl text-base leading-relaxed text-slate-300">
+        {performance.performanceHeadline}
+      </p>
 
-      {growth.length > 0 && (
+      {/* B — Performance cards (period metrics only — never current followers) */}
+      {performance.cards.length > 0 && (
+        <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {performance.cards.map(metric => (
+            <PerformanceCard key={metric.key} metric={metric} />
+          ))}
+        </section>
+      )}
+
+      {/* C — Audience base (follower snapshot, never shown as growth) */}
+      {performance.audienceBase !== null && (
+        <section className="mb-12">
+          <AudienceBaseCard followers={performance.audienceBase} />
+        </section>
+      )}
+
+      {/* D — Momentum (true period metrics vs last month) */}
+      {performance.momentum.length > 0 && (
         <section className="mb-12">
           <SectionHeading eyebrow="Momentum" title="Versus last month" />
-          <div className="grid gap-4 sm:grid-cols-3">
-            {growth.map(g => (
-              <MovementCard key={g.label} label={g.label} movement={g.m} />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {performance.momentum.map(metric => (
+              <MomentumCard key={metric.key} metric={metric} />
             ))}
           </div>
         </section>
       )}
 
-      {view.bestPost && (
+      {/* E — Content overview (adaptive wording) */}
+      <PlatformContent performance={performance} view={view} />
+
+      {/* F — Platform recommendations */}
+      {performance.recommendations.length > 0 && (
         <section className="mb-12">
-          <SectionHeading eyebrow="Top post" title={`Best ${view.label} content`} />
-          <div className="rounded-[2rem] border border-white/[0.08] bg-[#071311] p-7 shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)] sm:p-9">
-            <div className="flex flex-wrap gap-2">
-              {view.bestPost.post_type && (
-                <Pill tone="teal">{displayContentType(view.bestPost.post_type) ?? view.bestPost.post_type}</Pill>
-              )}
-              <Pill>{formatDate(view.bestPost.publish_time)}</Pill>
-            </div>
-
-            <h3 className="mt-5 text-2xl font-black leading-tight tracking-[-0.035em] text-white sm:text-3xl">
-              {shortCaption(view.bestPost.caption)}
-            </h3>
-
-            <div className="mt-7 grid gap-3 sm:grid-cols-3">
-              {buildMetaContentMetrics(view.bestPost).map(item => (
-                <MiniMetric key={item.key} label={item.label} value={formatNumber(item.value)} />
-              ))}
-            </div>
-          </div>
+          <SectionHeading eyebrow="Recommendations" title={`Next steps for ${performance.label}`} />
+          <RecommendationList recommendations={performance.recommendations} />
         </section>
       )}
 
-      {view.topPosts.length > 0 && (
-        <section className="mb-4">
-          <SectionHeading eyebrow="Top 3" title={`Top ${view.label} posts`} />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {view.topPosts.map((post, index) => (
-              <article
-                key={post.id}
-                className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-black text-[#2dd4bf]">#{index + 1}</span>
-                  <span className="text-xs text-slate-500">{formatDate(post.publish_time)}</span>
-                </div>
-                <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white">
-                  {shortCaption(post.caption, 'Post')}
-                </p>
-                {post.post_type && (
-                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                    {displayContentType(post.post_type) ?? post.post_type}
-                  </p>
-                )}
-                <p className="mt-4 text-sm font-bold text-slate-300">{formatNumber(post.engagements)} content interactions</p>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Manual summary notes (when this platform is summary-only) */}
+      <PlatformNotes view={view} />
     </>
   )
 }
 
-function ManualPlatformTab({
-  view,
-  previousManual,
-}: {
-  view: PlatformView
-  previousManual: ManualPlatformMetric | null
-}) {
-  const manual = view.manual!
+function AudienceBaseCard({ followers }: { followers: number }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(249,115,22,0.10),rgba(255,255,255,0.03))] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-7">
+      <div>
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#f59e0b]">Audience base</p>
+        <p className="mt-2 text-sm text-slate-400">Total followers at the time of sync</p>
+      </div>
+      <p className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl">{formatNumber(followers)}</p>
+    </div>
+  )
+}
+
+function MomentumCard({ metric }: { metric: PerformanceMetric }) {
+  const up = metric.direction === 'up'
+  const down = metric.direction === 'down'
+  const tone = up ? 'text-[#2dd4bf]' : down ? 'text-[#f59e0b]' : 'text-slate-400'
+  const arrow = up ? '↑' : down ? '↓' : '→'
+  const value =
+    metric.percent !== null
+      ? formatPercent(metric.percent)
+      : `${(metric.change ?? 0) > 0 ? '+' : ''}${formatNumber(metric.change ?? 0)}`
+
+  return (
+    <div className="rounded-3xl border border-white/[0.08] bg-[#0b1715]/90 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">{metric.label}</p>
+      <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">{formatNumber(metric.current)}</p>
+      <p className={`mt-2 text-sm font-bold ${tone}`}>
+        {arrow} {value} <span className="font-medium text-slate-500">{metric.comparisonLabel}</span>
+      </p>
+    </div>
+  )
+}
+
+const PLATFORM_LEARNING_COPY =
+  'This post created the highest activity for the month, but engagement is still building. Next month’s focus is stronger hooks, clearer product value, and more interactive content.'
+const PLATFORM_BASELINE_COPY =
+  'This sets a clear content baseline for the month. Next month we build on it with sharper formats and a consistent posting rhythm.'
+
+function PlatformContent({ performance, view }: { performance: PlatformPerformance; view: PlatformView }) {
+  const tc = performance.topContent
+  if (!tc) return null
+
+  const best = tc.post
+  const tone = tc.tone
+  const heading =
+    tone === 'top'
+      ? { eyebrow: 'Top content', title: 'Top performing content' }
+      : tone === 'learning'
+        ? { eyebrow: 'Content', title: 'Content learning' }
+        : { eyebrow: 'Content', title: 'Content baseline' }
+
+  const metrics = buildMetaContentMetrics(best)
+  const copy = tone === 'learning' ? PLATFORM_LEARNING_COPY : tone === 'baseline' ? PLATFORM_BASELINE_COPY : null
+
+  return (
+    <section className="mb-12">
+      <SectionHeading eyebrow={heading.eyebrow} title={heading.title} />
+      <div className="rounded-[2rem] border border-white/[0.08] bg-[#071311] p-7 shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)] sm:p-9">
+        <div className="flex flex-wrap gap-2">
+          {best.post_type && <Pill tone="teal">{displayContentType(best.post_type) ?? best.post_type}</Pill>}
+          <Pill>{formatDate(best.publish_time)}</Pill>
+          {tone !== 'top' && <Pill tone="amber">Highest activity post this month</Pill>}
+        </div>
+
+        <h3 className="mt-5 text-2xl font-black leading-tight tracking-[-0.035em] text-white sm:text-3xl">
+          {shortCaption(best.caption)}
+        </h3>
+
+        {metrics.length > 0 && (
+          <div className="mt-7 grid gap-3 sm:grid-cols-3">
+            {metrics.map(item => (
+              <MiniMetric key={item.key} label={item.label} value={formatNumber(item.value)} />
+            ))}
+          </div>
+        )}
+
+        {copy && <p className="mt-7 text-[0.95rem] leading-relaxed text-slate-300">{copy}</p>}
+      </div>
+
+      {view.topPosts.length > 0 && (
+        <div className="mt-6">
+          <p className="mb-4 text-xs font-black uppercase tracking-[0.22em] text-slate-500">
+            {tone === 'top' ? `Top ${performance.label} posts` : `Recent ${performance.label} content`}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {view.topPosts.map((post, index) => (
+              <PlatformPostCard key={post.id} post={post} index={index} />
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function PlatformPostCard({ post, index }: { post: ReportStatsPost; index: number }) {
+  const parts: string[] = []
+  if (typeof post.impressions === 'number') parts.push(`${formatNumber(post.impressions)} views`)
+  if (typeof post.reach === 'number') parts.push(`${formatNumber(post.reach)} reach`)
+  parts.push(`${formatNumber(post.engagements)} content interactions`)
+
+  return (
+    <article className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">
+      <div className="flex items-center justify-between">
+        <span className="text-2xl font-black text-[#2dd4bf]">#{index + 1}</span>
+        <span className="text-xs text-slate-500">{formatDate(post.publish_time)}</span>
+      </div>
+      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white">{shortCaption(post.caption, 'Post')}</p>
+      {post.post_type && (
+        <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+          {displayContentType(post.post_type) ?? post.post_type}
+        </p>
+      )}
+      <p className="mt-4 text-sm font-bold text-slate-300">{parts.join(' · ')}</p>
+    </article>
+  )
+}
+
+function PlatformNotes({ view }: { view: PlatformView }) {
+  if (view.source !== 'manual' || !view.manual) return null
+  const manual = view.manual
   const notes = [
     { title: 'Top content', text: manual.top_content_notes },
     { title: 'Content mix', text: manual.content_type_split_notes },
     { title: 'Notes', text: manual.general_notes },
-  ].filter(note => note.text && note.text.trim())
+  ].filter(note => {
+    const text = note.text?.trim()
+    // Hide the internal Meta-sync marker that lives in general_notes.
+    return text && !text.startsWith('Meta sync account totals')
+  })
 
-  const growth = [
-    { label: 'Views', m: compareNullable(view.views, previousManual?.views) },
-    { label: 'Reach', m: compareNullable(view.reach, previousManual?.reach) },
-    { label: 'Content interactions', m: compareNullable(view.engagements, previousManual?.engagements) },
-    { label: 'Current followers', m: compareNullable(manual.followers, previousManual?.followers) },
-  ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null)
+  if (notes.length === 0) return null
 
   return (
-    <>
-      <SectionHeading eyebrow={view.label} title={`${view.label} performance`} />
-      <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {view.views !== null && <MetricTile label="Views" value={formatNumber(view.views)} accent="teal" />}
-        {view.reach !== null && <MetricTile label="Reach" value={formatNumber(view.reach)} accent="teal" />}
-        {view.engagements > 0 && <MetricTile label="Content interactions" value={formatNumber(view.engagements)} accent="teal" />}
-        {manual.followers > 0 && <MetricTile label="Current followers" value={formatNumber(manual.followers)} accent="amber" />}
-      </section>
-
-      {growth.length > 0 && (
-        <section className="mb-12">
-          <SectionHeading eyebrow="Momentum" title="Versus last month" />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {growth.map(g => (
-              <MovementCard key={g.label} label={g.label} movement={g.m} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {notes.length > 0 && (
-        <section className="mb-4 grid gap-4 lg:grid-cols-2">
-          {notes.map(note => (
-            <article
-              key={note.title}
-              className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]"
-            >
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">{note.title}</p>
-              <p className="mt-4 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">{note.text}</p>
-            </article>
-          ))}
-        </section>
-      )}
-    </>
+    <section className="mb-4 grid gap-4 lg:grid-cols-2">
+      {notes.map(note => (
+        <article
+          key={note.title}
+          className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]"
+        >
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">{note.title}</p>
+          <p className="mt-4 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">{note.text}</p>
+        </article>
+      ))}
+    </section>
   )
 }
 

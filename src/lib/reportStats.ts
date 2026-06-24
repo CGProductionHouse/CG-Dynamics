@@ -116,16 +116,49 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
   }
 }
 
+export type RankingMetric = 'views' | 'reach' | 'interactions'
+
+// Ranks posts by the strongest available metric, mirroring Meta's "Top content"
+// (which defaults to top content by views). Prefers views, then reach, then
+// content interactions — using whichever metric is actually present in the set.
+// Returns the ranked list and which metric decided the order.
+export function rankPostsByStrength(posts: ReportStatsPost[]): {
+  posts: ReportStatsPost[]
+  metric: RankingMetric | null
+} {
+  if (posts.length === 0) return { posts: [], metric: null }
+
+  const anyViews = posts.some(post => typeof post.impressions === 'number')
+  const anyReach = posts.some(post => typeof post.reach === 'number')
+  const metric: RankingMetric = anyViews ? 'views' : anyReach ? 'reach' : 'interactions'
+
+  const valueFor = (post: ReportStatsPost) =>
+    metric === 'views'
+      ? post.impressions ?? -1
+      : metric === 'reach'
+        ? post.reach ?? -1
+        : post.engagements
+
+  const ranked = [...posts].sort((a, b) => {
+    const diff = valueFor(b) - valueFor(a)
+    if (diff !== 0) return diff
+    // Tie-break on interactions so equally-ranked posts settle deterministically.
+    return b.engagements - a.engagements
+  })
+
+  return { posts: ranked, metric }
+}
+
 export function calculateReportStats(posts: ReportStatsPost[]): ReportStats {
-  const sorted = [...posts].sort((a, b) => b.engagements - a.engagements)
+  const { posts: ranked } = rankPostsByStrength(posts)
 
   return {
     totalReach: sumOrNull(posts.map(post => post.reach)),
     totalImpressions: sumOrNull(posts.map(post => post.impressions)),
     totalEngagements: posts.reduce((sum, post) => sum + post.engagements, 0),
     postCount: posts.length,
-    bestPost: sorted[0] ?? null,
-    topPosts: sorted.slice(0, 3),
+    bestPost: ranked[0] ?? null,
+    topPosts: ranked.slice(0, 3),
   }
 }
 

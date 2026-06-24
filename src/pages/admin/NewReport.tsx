@@ -31,7 +31,7 @@ import {
   type MetricMovement,
 } from '../../lib/reportStats'
 import { buildMetaContentMetrics, buildMetaPlatformMetrics, metaEngagementLabel, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
-import { buildReportPerformance, type PerformanceLevel } from '../../lib/reportPerformance'
+import { buildPlatformPerformance, buildReportPerformance, type PerformanceLevel } from '../../lib/reportPerformance'
 
 interface ReportFields {
   reportTitle: string
@@ -430,6 +430,20 @@ export default function NewReport() {
     }),
     [master, previousMaster, monthManualMetrics, previousMonthManualMetrics, currentMonth, previousMonth]
   )
+  // Admin-only: how each platform tab is built (card sources, ranking metric,
+  // content-tone reason, skipped follower growth). Never shown to the client.
+  const platformDiagnostics = useMemo(
+    () => master.platforms
+      .filter(view => view.source !== 'none')
+      .map(view => buildPlatformPerformance({
+        view,
+        previousView: previousMaster?.platforms.find(p => p.platform === view.platform) ?? null,
+        previousManual: previousMonthManualMetrics.find(m => m.platform === view.platform) ?? null,
+        monthLabel: monthName(currentMonth),
+        previousMonthLabel: previousMonth ? monthName(previousMonth) : null,
+      })),
+    [master, previousMaster, previousMonthManualMetrics, currentMonth, previousMonth]
+  )
   const calendarEvents = useMemo(() => getMonthEvents(currentMonth), [currentMonth])
   const topPostContext = useMemo(() => {
     const post = master.bestPostOverall
@@ -762,6 +776,65 @@ export default function NewReport() {
           Metric sources — Meta synced totals: account monthly total &amp; current snapshot; imported posts: post aggregation &amp; media insight; CSV rows: manual fallback. The client report shows none of these labels.
         </p>
       </section>
+
+      {platformDiagnostics.length > 0 && (
+        <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-white mb-1">Platform story diagnostics</h2>
+            <p className="text-xs text-brand-primary">
+              Admin-only: how each platform tab is built — which metric feeds each card, what ranked the top content,
+              why content was labelled, and whether follower growth was skipped. The client never sees this.
+            </p>
+          </div>
+          <div className="grid gap-3 lg:grid-cols-2">
+            {platformDiagnostics.map(p => (
+              <div key={p.platform} className="rounded-lg border border-brand-muted bg-brand-bg/50 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-white">{p.label}</p>
+                  {p.rankingMetricLabel && (
+                    <span className="rounded-full border border-brand-accent/30 bg-brand-accent/10 px-2 py-0.5 text-[11px] font-medium text-brand-accent">
+                      Top content by {p.rankingMetricLabel}
+                    </span>
+                  )}
+                </div>
+
+                <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-primary">Card metrics &amp; sources</p>
+                {p.cardSources.length > 0 ? (
+                  <ul className="mt-1 space-y-0.5">
+                    {p.cardSources.map(card => (
+                      <li key={card.label} className="flex justify-between gap-3 text-xs text-brand-primary">
+                        <span>{card.label}</span>
+                        <span className="text-white">{card.source}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-1 text-xs text-brand-primary/70">No usable metrics for this platform yet.</p>
+                )}
+
+                {p.audienceBase !== null && (
+                  <p className="mt-2 text-xs text-brand-primary">
+                    <span className="text-brand-primary/70">Audience base: </span>
+                    <span className="text-white">{formatNumber(p.audienceBase)} followers (snapshot)</span>
+                  </p>
+                )}
+
+                {p.contentToneReason && (
+                  <p className="mt-2 text-xs text-brand-primary">
+                    <span className="text-brand-primary/70">Content label: </span>{p.contentToneReason}
+                  </p>
+                )}
+
+                {p.followerGrowthSkippedReason && (
+                  <p className="mt-2 rounded border border-amber-400/20 bg-amber-400/5 px-2 py-1 text-[11px] text-amber-200/90">
+                    Follower growth skipped: {p.followerGrowthSkippedReason}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

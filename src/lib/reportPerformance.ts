@@ -1,7 +1,8 @@
 import type { ManualPlatformMetric } from './db/manualMetrics'
-import type { MasterReportData, PlatformView, ReportStatsPost } from './reportStats'
+import type { MasterReportData, Platform, PlatformView, ReportStatsPost } from './reportStats'
 import {
   PLATFORM_LABELS,
+  isMetaSyncedManualMetric,
   totalManualFollowers,
   totalManualProfileVisits,
 } from './reportStats'
@@ -25,6 +26,61 @@ export type ContentTone = 'top' | 'learning' | 'baseline'
 
 // Engagement threshold below which a "best" post is NOT celebrated as a win.
 export const WEAK_CONTENT_THRESHOLD = 25
+// Views / reach a post needs before it can be celebrated as "top performing"
+// even when interactions are thin — mirrors Meta defaulting to top-by-views.
+export const STRONG_VIEWS_THRESHOLD = 100
+export const STRONG_REACH_THRESHOLD = 100
+
+// Decides how a single post should be framed. A post can be "top" on the
+// strength of views or reach even with low interactions (Meta's top-by-views
+// behaviour), but a low-interaction post with no strong views/reach is framed
+// as learning — never celebrated as a win.
+export function contentToneFor(post: ReportStatsPost): {
+  tone: ContentTone
+  rankingMetricLabel: string | null
+  reason: string
+} {
+  const views = post.impressions
+  const reach = post.reach
+  const interactions = post.engagements
+
+  const strongViews = typeof views === 'number' && views >= STRONG_VIEWS_THRESHOLD
+  const strongReach = typeof reach === 'number' && reach >= STRONG_REACH_THRESHOLD
+  const strongInteractions = interactions >= WEAK_CONTENT_THRESHOLD
+
+  if (strongViews || strongReach || strongInteractions) {
+    const rankingMetricLabel = strongViews ? 'views' : strongReach ? 'reach' : 'content interactions'
+    return {
+      tone: 'top',
+      rankingMetricLabel,
+      reason: `Strong ${rankingMetricLabel} — shown as top performing content.`,
+    }
+  }
+
+  const hasSignal = interactions > 0 || typeof views === 'number' || typeof reach === 'number'
+  if (hasSignal) {
+    return {
+      tone: 'learning',
+      rankingMetricLabel:
+        typeof views === 'number' ? 'views' : typeof reach === 'number' ? 'reach' : 'content interactions',
+      reason: `Top content interactions (${interactions}) are below ${WEAK_CONTENT_THRESHOLD} with no stronger views/reach signal — framed as content learning, not a win.`,
+    }
+  }
+
+  return { tone: 'baseline', rankingMetricLabel: null, reason: 'No engagement signal yet — shown as a content baseline.' }
+}
+
+function topContentFor(post: ReportStatsPost): TopContent {
+  const { tone, rankingMetricLabel, reason } = contentToneFor(post)
+  return {
+    post,
+    tone,
+    platformLabel: post.platform ? PLATFORM_LABELS[post.platform] : null,
+    interactions: post.engagements,
+    rankingMetricLabel,
+    toneReason: reason,
+  }
+}
 
 export interface PerformanceMetric {
   key: string
@@ -55,6 +111,10 @@ export interface TopContent {
   platformLabel: string | null
   // The single headline number we are comfortable showing for this tone.
   interactions: number
+  // Which metric earned this post the top slot ("views" / "reach" / ...).
+  rankingMetricLabel: string | null
+  // Admin-only: why this tone was chosen.
+  toneReason: string
 }
 
 export interface ReportPerformance {
@@ -193,18 +253,7 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
 
   // Top content tone (Part 6: never celebrate weak content).
   const best = master.bestPostOverall
-  let topContent: TopContent | null = null
-  if (best) {
-    const interactions = best.engagements
-    const tone: ContentTone =
-      interactions >= WEAK_CONTENT_THRESHOLD ? 'top' : interactions > 0 ? 'learning' : 'baseline'
-    topContent = {
-      post: best,
-      tone,
-      platformLabel: best.platform ? PLATFORM_LABELS[best.platform] : null,
-      interactions,
-    }
-  }
+  const topContent: TopContent | null = best ? topContentFor(best) : null
 
   // Weakest area: the comparable metric that declined the most; otherwise an
   // engagement-quality flag when reach is healthy but interactions are thin.
@@ -234,7 +283,7 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
     contentVolume: curPosts,
     audienceSize: curFollowers,
     performanceLevel,
-    performanceHeadline: headlineFor(performanceLevel, monthLabel),
+    performanceHeadline: overallHeadline(metrics, performanceLevel, monthLabel, hasComparison),
     recommendations: buildRecommendations({ master, metrics, best, curPosts, performanceLevel }),
     topContent,
     adminMissingMetrics: buildAdminMissing(master),
@@ -281,10 +330,42 @@ function headlineFor(level: PerformanceLevel, monthLabel: string): string {
     case 'steady':
       return `${monthLabel} held steady — a stable base to build on.`
     case 'needs_attention':
-      return `${monthLabel} softened in places — here is where we focus next.`
+      return `${monthLabel} set a clearer baseline — the next step is converting reach into stronger audience response.`
     case 'baseline_only':
       return `${monthLabel} sets the baseline we will grow from next month.`
   }
+}
+
+function directionOf(metrics: PerformanceMetric[], key: string): Direction | null {
+  return metrics.find(m => m.key === key)?.direction ?? null
+}
+
+// Professional, honest, constructive headline — no panic wording, no fake
+// positivity. Prefers a data-aware story (e.g. visibility up / engagement soft)
+// and otherwise falls back to the level-based copy.
+function overallHeadline(
+  metrics: PerformanceMetric[],
+  level: PerformanceLevel,
+  monthLabel: string,
+  hasComparison: boolean,
+): string {
+  if (hasComparison) {
+    const reach = directionOf(metrics, 'reach')
+    const views = directionOf(metrics, 'views')
+    const inter = directionOf(metrics, 'content_interactions')
+    const visibilityUp = reach === 'up' || views === 'up'
+
+    if (visibilityUp && inter === 'down') {
+      return `${monthLabel} improved visibility, while engagement quality is the next focus.`
+    }
+    if (visibilityUp && (inter === 'up' || inter === 'flat')) {
+      return `${monthLabel} built on both visibility and audience response.`
+    }
+    if ((reach === 'down' || views === 'down') && inter === 'up') {
+      return `${monthLabel} earned stronger engagement — the next step is widening reach.`
+    }
+  }
+  return headlineFor(level, monthLabel)
 }
 
 function buildRecommendations(input: {
@@ -344,4 +425,191 @@ function buildAdminMissing(master: MasterReportData): string[] {
   if (master.totalViews === null) missing.push('Views (account total not synced)')
   if (master.totalReach === null) missing.push('Reach (account total not synced)')
   return missing
+}
+
+// ── Per-platform performance (Meta-style platform dashboard) ─────────────────
+
+type ManualMetricKey = 'views' | 'reach' | 'engagements' | 'profile_visits' | 'followers'
+
+export interface PlatformCardSource {
+  label: string
+  source: string
+}
+
+export interface PlatformPerformance {
+  platform: Platform
+  label: string
+  hasComparison: boolean
+  performanceHeadline: string
+
+  // Period metric cards (never current followers — that lives in audienceBase).
+  cards: PerformanceMetric[]
+  // Snapshot follower count, shown as a static "Audience base" card.
+  audienceBase: number | null
+  // True period metrics that have a real previous-month comparison.
+  momentum: PerformanceMetric[]
+
+  topContent: TopContent | null
+  recommendations: string[]
+
+  // Admin-only diagnostics.
+  cardSources: PlatformCardSource[]
+  rankingMetricLabel: string | null
+  contentToneReason: string | null
+  followerGrowthSkippedReason: string | null
+}
+
+function manualValueAvailable(manual: ManualPlatformMetric | null, key: ManualMetricKey): boolean {
+  if (!manual) return false
+  // For Meta-synced totals a 0 means "could not fetch" → unavailable.
+  if (!isMetaSyncedManualMetric(manual)) return true
+  return manual[key] > 0
+}
+
+function cardSourceLabel(view: PlatformView, key: string): string {
+  if (key === 'posts') return 'Post count'
+  const manualKey: ManualMetricKey =
+    key === 'content_interactions' ? 'engagements' : key === 'profile_visits' ? 'profile_visits' : (key as 'views' | 'reach')
+
+  if (view.manual && manualValueAvailable(view.manual, manualKey)) {
+    return isMetaSyncedManualMetric(view.manual) ? 'Meta account total' : 'Manual summary'
+  }
+  return view.source === 'posts' ? 'Post aggregation' : 'Not available'
+}
+
+function platformHeadline(label: string, cards: PerformanceMetric[], hasComparison: boolean): string {
+  if (!hasComparison) return `${label} sets this month's baseline to grow from.`
+
+  const reach = directionOf(cards, 'reach')
+  const views = directionOf(cards, 'views')
+  const inter = directionOf(cards, 'content_interactions')
+  const visibilityUp = reach === 'up' || views === 'up'
+
+  if (visibilityUp && inter === 'down') {
+    return `${label} reached more people this month, while engagement quality is the next focus.`
+  }
+  if (visibilityUp && (inter === 'up' || inter === 'flat')) {
+    return `${label} grew on both reach and audience response this month.`
+  }
+  if ((reach === 'down' || views === 'down') && inter === 'up') {
+    return `${label} earned stronger engagement — the next step is widening reach.`
+  }
+  return `${label} held steady this month — a stable base to build on.`
+}
+
+function buildPlatformRecommendations(input: {
+  view: PlatformView
+  cards: PerformanceMetric[]
+  topContent: TopContent | null
+}): string[] {
+  const { view, cards, topContent } = input
+  const recs: string[] = []
+  const dir = (key: string) => directionOf(cards, key)
+
+  const reachUp = dir('reach') === 'up' || dir('views') === 'up'
+  const interDown = dir('content_interactions') === 'down'
+  const postsDown = dir('posts') === 'down'
+
+  if (reachUp && interDown) {
+    recs.push(
+      'The content reached more people, but response quality softened. Next month should focus on clearer hooks and stronger calls to action.',
+    )
+  }
+
+  const weakContent = topContent ? topContent.tone !== 'top' : false
+  const reach = view.reach ?? 0
+  const thinEngagement = reach >= 500 && view.engagements > 0 && view.engagements / reach < 0.02
+  if (weakContent || thinEngagement) {
+    recs.push('Test question-led captions, product comparison posts, and carousel-style storytelling to lift engagement.')
+  }
+
+  if (postsDown || (view.postCount > 0 && view.postCount < 8)) {
+    recs.push('Increase posting consistency before judging performance direction.')
+  }
+
+  if (view.platform === 'instagram') {
+    recs.push('Use Instagram as the primary visibility channel and repurpose the strongest posts to Facebook.')
+  } else if (view.platform === 'facebook') {
+    recs.push('Extend Facebook’s strongest formats to Instagram for compounding visibility.')
+  }
+
+  if (recs.length === 0) {
+    recs.push('Double down on the formats that earned the most attention this month and keep the posting rhythm consistent.')
+  }
+
+  return [...new Set(recs)].slice(0, 4)
+}
+
+export function buildPlatformPerformance(input: {
+  view: PlatformView
+  previousView: PlatformView | null
+  previousManual: ManualPlatformMetric | null
+  monthLabel: string
+  previousMonthLabel: string | null
+}): PlatformPerformance {
+  const { view, previousView, previousManual, previousMonthLabel } = input
+  const prev = previousView
+  const prevManual = previousManual ?? prev?.manual ?? null
+
+  // Followers is a point-in-time snapshot → audience base card only, never growth.
+  const followersAvailable = manualValueAvailable(view.manual, 'followers')
+  const audienceBase = followersAvailable ? view.manual!.followers : null
+
+  const profileVisitsAvailable = manualValueAvailable(view.manual, 'profile_visits')
+  const prevProfileVisits =
+    prevManual && manualValueAvailable(prevManual, 'profile_visits') ? prevManual.profile_visits : null
+
+  const candidates: Array<PerformanceMetric | null> = [
+    buildMetric('views', 'Views', view.views, prev?.views ?? null, previousMonthLabel),
+    buildMetric('reach', 'Reach', view.reach, prev?.reach ?? null, previousMonthLabel),
+    buildMetric(
+      'content_interactions',
+      'Content interactions',
+      view.engagements > 0 ? view.engagements : null,
+      prev && prev.engagements > 0 ? prev.engagements : null,
+      previousMonthLabel,
+    ),
+    profileVisitsAvailable
+      ? buildMetric(
+          'profile_visits',
+          'Profile visits',
+          view.manual!.profile_visits,
+          prevProfileVisits,
+          previousMonthLabel,
+        )
+      : null,
+    buildMetric(
+      'posts',
+      'Posts published',
+      view.postCount > 0 ? view.postCount : null,
+      prev ? prev.postCount : null,
+      previousMonthLabel,
+    ),
+  ]
+  const cards = candidates.filter((m): m is PerformanceMetric => m !== null)
+
+  const hasComparison = cards.some(m => m.direction !== null)
+  const momentum = cards.filter(m => m.direction !== null)
+
+  const topContent = view.bestPost ? topContentFor(view.bestPost) : null
+  const recommendations = buildPlatformRecommendations({ view, cards, topContent })
+
+  return {
+    platform: view.platform,
+    label: view.label,
+    hasComparison,
+    performanceHeadline: platformHeadline(view.label, cards, hasComparison),
+    cards,
+    audienceBase,
+    momentum,
+    topContent,
+    recommendations,
+    cardSources: cards.map(card => ({ label: card.label, source: cardSourceLabel(view, card.key) })),
+    rankingMetricLabel: topContent?.rankingMetricLabel ?? null,
+    contentToneReason: topContent?.toneReason ?? null,
+    followerGrowthSkippedReason:
+      audienceBase !== null
+        ? 'Follower count is a point-in-time snapshot, not a period metric, so month-over-month follower growth is intentionally not shown.'
+        : null,
+  }
 }

@@ -226,7 +226,15 @@ async function metaFetch(url: string, timeoutMs = 8000): Promise<Response> {
   }
 }
 
-function sumInsightValue(v: { values?: Array<{ value?: number }> }): number | null {
+function sumInsightValue(v: {
+  values?: Array<{ value?: number }>
+  total_value?: { value?: number }
+}): number | null {
+  // metric_type=total_value responses carry a single aggregated figure in
+  // `total_value`, NOT a time series in `values`. Read it first — without this,
+  // every total_value metric (views, total_interactions, profile_views,
+  // website_clicks) parses as null and silently fails to import.
+  if (v.total_value && typeof v.total_value.value === 'number') return v.total_value.value
   if (!v.values || v.values.length === 0) return null
   let sum = 0
   let any = false
@@ -244,12 +252,12 @@ interface InsightFetchResult {
   error: string | null
 }
 
-function igInsightMetricsForType(postType: string): string[] {
-  const normalized = normalizeContentType(postType)
-  if (normalized === 'reel' || normalized === 'video') {
-    return ['reach', 'plays', 'saved', 'shares', 'total_interactions']
-  }
-  return ['reach', 'saved', 'shares', 'total_interactions']
+// Media-level insight metrics for CONTENT cards (per-post). `views` is the v22
+// replacement for the deprecated `plays`/`impressions` and is valid across reels,
+// videos, images and carousels — previously non-reel media requested no views
+// metric at all, so post views never imported.
+function igInsightMetricsForType(_postType: string): string[] {
+  return ['reach', 'views', 'saved', 'shares', 'total_interactions']
 }
 
 // Resilient insight fetch: tries the whole metric batch. When `split` is true
@@ -277,7 +285,7 @@ async function fetchInsights(
       const res = await metaFetch(`${baseUrl}/${objectId}/insights?${params.toString()}`)
       if (!res.ok) return { ok: false, error: await readMetaError(res, tokens) }
       const data = await res.json()
-      for (const v of (data.data as Array<{ name: string; values?: Array<{ value?: number }> }> ?? [])) {
+      for (const v of (data.data as Array<{ name: string; values?: Array<{ value?: number }>; total_value?: { value?: number } }> ?? [])) {
         const val = sumInsightValue(v)
         if (val !== null) values[v.name] = val
       }
@@ -843,12 +851,17 @@ async function handleRequest(req: Request): Promise<Response> {
             // insights permission can't storm the function into a timeout.
             // likes/comments come from the media fields above, not insights.
             let igInsightErr: string | null = null
+            // Tolerant per-media insights: one failing media must NOT drop the
+            // rest. We continue past failures and only break as a circuit breaker
+            // after several consecutive errors (a likely permission problem) so a
+            // broken insights scope can't storm the function into a timeout.
+            let consecutiveFailures = 0
             for (const post of igPosts) {
               if (Date.now() > insightDeadline) {
                 igInsightErr = igInsightErr ?? 'time budget reached — remaining media insights skipped'
                 break
               }
-              const { values, error } = await fetchInsights(
+              let { values, error } = await fetchInsights(
                 baseUrl,
                 post.metaPostId,
                 igInsightMetricsForType(post.postType),
@@ -856,10 +869,22 @@ async function handleRequest(req: Request): Promise<Response> {
                 {},
                 knownTokens,
               )
-              if (error) {
-                igInsightErr = error
-                break
+              // One unsupported metric can fail the whole batch — retry once with
+              // a minimal, broadly-supported set so views/reach still come through.
+              if (error && Object.keys(values).length === 0) {
+                const retry = await fetchInsights(baseUrl, post.metaPostId, ['reach', 'views'], igToken, {}, knownTokens)
+                if (Object.keys(retry.values).length > 0) {
+                  values = retry.values
+                  error = retry.error
+                }
               }
+              if (error && Object.keys(values).length === 0) {
+                igInsightErr = error
+                consecutiveFailures++
+                if (consecutiveFailures >= 3) break
+                continue
+              }
+              consecutiveFailures = 0
               if (typeof values.reach === 'number') post.reach = values.reach
               if (typeof values.views === 'number') post.impressions = values.views
               if (typeof values.plays === 'number') post.impressions = values.plays
@@ -868,7 +893,7 @@ async function handleRequest(req: Request): Promise<Response> {
               if (typeof values.total_interactions === 'number') post.totalInteractions = values.total_interactions
             }
             if (igInsightErr) {
-              result.warnings.push(`Instagram media insights unavailable (views/reach shown as not available): ${igInsightErr}`)
+              result.warnings.push(`Some Instagram media insights were unavailable: ${igInsightErr}`)
             }
           } else {
             result.warnings.push(`Could not fetch Instagram media: ${await readMetaError(igRes, knownTokens)}`)
@@ -1165,34 +1190,40 @@ async function handleRequest(req: Request): Promise<Response> {
           const igValues: Record<string, number> = {}
           const igErrors: string[] = []
 
-          // Group 1: reach (no special params needed)
-          const reachResult = await fetchInsights(
+          // Account-level insights for the PLATFORM cards. In v22 these are
+          // metric_type=total_value metrics returning a single aggregated figure
+          // over the period. Split per-metric so one unsupported metric can't drop
+          // the others (preserve every metric that succeeds).
+          const accountResult = await fetchInsights(
             baseUrl,
             client.instagramAccountId,
-            ['reach'],
-            igToken,
-            { period: 'day', since: periodStart, until: periodEnd },
-            knownTokens,
-          )
-          if (reachResult.error) {
-            igErrors.push(`reach (${reachResult.error})`)
-          }
-          Object.assign(igValues, reachResult.values)
-
-          // Group 2: metrics requiring metric_type=total_value
-          const totalValueResult = await fetchInsights(
-            baseUrl,
-            client.instagramAccountId,
-            ['views', 'total_interactions', 'profile_views', 'website_clicks'],
+            ['reach', 'views', 'total_interactions', 'profile_views', 'website_clicks'],
             igToken,
             { period: 'day', since: periodStart, until: periodEnd, metric_type: 'total_value' },
             knownTokens,
             { split: true },
           )
-          if (totalValueResult.error) {
-            igErrors.push(totalValueResult.error)
+          if (accountResult.error) {
+            igErrors.push(accountResult.error)
           }
-          Object.assign(igValues, totalValueResult.values)
+          Object.assign(igValues, accountResult.values)
+
+          // Reach fallback: when total_value reach is unavailable, fall back to the
+          // older period=day time series so reach still imports.
+          if (typeof igValues.reach !== 'number') {
+            const reachFallback = await fetchInsights(
+              baseUrl,
+              client.instagramAccountId,
+              ['reach'],
+              igToken,
+              { period: 'day', since: periodStart, until: periodEnd },
+              knownTokens,
+            )
+            Object.assign(igValues, reachFallback.values)
+            if (reachFallback.error && typeof igValues.reach !== 'number') {
+              igErrors.push(`reach (${reachFallback.error})`)
+            }
+          }
 
           // followers_count is a lifetime metric fetched separately (best-effort).
           let igFollowers = 0
