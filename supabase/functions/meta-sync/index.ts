@@ -2,6 +2,9 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const META_GRAPH_VERSION = 'v22.0'
+const SYNC_ENGINE_VERSION = 'live-runtime-failure-fix'
+
+type ErrorPhase = 'auth' | 'env' | 'request_parse' | 'connection' | 'assets' | 'sync' | 'unknown'
 
 interface SyncClient {
   assetId: string
@@ -109,7 +112,43 @@ function redact(text: string, tokens: Array<string | null | undefined>): string 
   for (const t of tokens) {
     if (t && t.length >= 8) out = out.split(t).join('[redacted]')
   }
-  return out.replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
+  return out
+    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
+    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
+}
+
+function safeJsonResponse(data: Record<string, unknown>, status = 200): Response {
+  return jsonResponse({ syncEngineVersion: SYNC_ENGINE_VERSION, ...data }, status)
+}
+
+function failureResponse(
+  phase: ErrorPhase,
+  error: unknown,
+  status = 500,
+  tokens: Array<string | null | undefined> = [],
+  extras: Record<string, unknown> = {},
+): Response {
+  const raw = error instanceof Error ? error.message : String(error || 'Unknown error')
+  const safeError = redact(raw, tokens).slice(0, 600)
+  return safeJsonResponse({
+    ok: false,
+    status: 'failed',
+    phase,
+    error: safeError || 'Sync failed.',
+    clientsAttempted: 0,
+    clientsSucceeded: 0,
+    clientsSynced: 0,
+    clientsFailed: 0,
+    reportsCreated: 0,
+    reportsReused: 0,
+    reportsUpdated: 0,
+    postsSynced: 0,
+    warnings: [],
+    failedClients: [],
+    succeededClients: [],
+    ...extras,
+  }, status)
 }
 
 // Reads a Meta Graph API error response into a safe, detailed, token-free string
@@ -291,20 +330,23 @@ async function upsertSyncedPlatformMetric(
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { status: 204, headers: corsHeaders })
+  }
+
+  try {
+    return await handleRequest(req)
+  } catch (err) {
+    return failureResponse('unknown', err, 500)
+  }
+})
+
+async function handleRequest(req: Request): Promise<Response> {
+  if (req.method === 'GET') {
+    return safeJsonResponse({ ok: true, service: 'meta-sync', status: 'deployed' })
   }
 
   if (req.method !== 'POST') {
-    return jsonResponse({
-      ok: false,
-      status: 'failed',
-      error: 'Method not allowed',
-      clientsSucceeded: 0,
-      clientsFailed: 0,
-      reportsCreated: 0,
-      reportsReused: 0,
-      postsSynced: 0,
-    }, 405)
+    return failureResponse('request_parse', 'Method not allowed', 405)
   }
 
   // Safe operational trail returned in the response for admin debugging. Never
@@ -312,27 +354,31 @@ Deno.serve(async (req) => {
   // top-level catch can scrub them from any unexpected error message.
   const steps: string[] = []
   const tokensForRedaction: string[] = []
+  let phase: ErrorPhase = 'auth'
 
   // Top-level boundary: the function must ALWAYS return valid JSON with CORS,
   // even on an unexpected crash, so the frontend can show the real reason
   // instead of a generic "could not reach service".
   try {
     // ── Auth ─────────────────────────────────────────────────
+    phase = 'auth'
     const authHeader = req.headers.get('Authorization') ?? ''
+    phase = 'env'
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return jsonResponse({ ok: false, error: 'Server configuration error.' }, 500)
+      return failureResponse('env', 'Server configuration error.', 500)
   }
 
   const sb = createClient(supabaseUrl, serviceRoleKey)
 
+  phase = 'auth'
   const token = authHeader.replace('Bearer ', '')
   const { data: { user }, error: authError } = await sb.auth.getUser(token)
 
   if (authError || !user) {
-    return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
+    return failureResponse('auth', 'Authentication required.', 401)
   }
 
   const { data: profile } = await sb
@@ -342,21 +388,24 @@ Deno.serve(async (req) => {
     .single()
 
   if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+    return failureResponse('auth', 'Staff access required.', 403)
   }
   steps.push('auth ok')
 
   // ── Parse body ───────────────────────────────────────────
+  phase = 'request_parse'
   let body: { mode?: string; clientId?: string } = {}
   try {
     body = await req.json()
   } catch {
-    return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400)
+    return failureResponse('request_parse', 'Invalid JSON body.', 400)
   }
 
   if (body.mode !== 'previous_completed_month') {
-    return jsonResponse({
+    return safeJsonResponse({
       ok: false,
+      status: 'failed',
+      phase: 'request_parse',
       error: `Unsupported mode "${body.mode ?? ''}". Only "previous_completed_month" is supported.`,
     }, 400)
   }
@@ -365,6 +414,7 @@ Deno.serve(async (req) => {
   const { periodStart, periodEnd, month } = getPreviousMonthBounds()
 
   // ── Get Meta token ───────────────────────────────────────
+  phase = 'connection'
   const { data: connections } = await sb
     .from('meta_connections')
     .select('id')
@@ -373,7 +423,7 @@ Deno.serve(async (req) => {
     .limit(1)
 
   if (!connections || connections.length === 0) {
-    return jsonResponse({ ok: false, error: 'Meta is not connected.' }, 400)
+    return failureResponse('connection', 'Meta is not connected.', 400, tokensForRedaction, { steps })
   }
   steps.push('connection loaded')
 
@@ -384,7 +434,7 @@ Deno.serve(async (req) => {
     .limit(1)
 
   if (!tokenRows || tokenRows.length === 0 || !tokenRows[0].encrypted_access_token) {
-    return jsonResponse({ ok: false, error: 'Meta connection token is missing. Reconnect Meta.' }, 400)
+    return failureResponse('connection', 'Meta connection token is missing. Reconnect Meta.', 400, tokensForRedaction, { steps })
   }
 
   const accessToken = tokenRows[0].encrypted_access_token
@@ -406,6 +456,7 @@ Deno.serve(async (req) => {
   tokensForRedaction.push(...knownTokens)
 
   // ── Load linked clients ──────────────────────────────────
+  phase = 'assets'
   let linkedAssetsQuery = sb
     .from('meta_client_assets')
     .select('id, client_id, facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, ad_account_id')
@@ -419,7 +470,7 @@ Deno.serve(async (req) => {
 
   if (!linkedAssets || linkedAssets.length === 0) {
     steps.push('linked assets loaded (0)')
-    return jsonResponse({
+    return safeJsonResponse({
       ok: true,
       status: 'skipped',
       message: 'No linked clients found to sync.',
@@ -466,6 +517,7 @@ Deno.serve(async (req) => {
   const skippedAssets = allMappedClients.filter(c => !c.facebookPageId && !c.instagramAccountId)
 
   // ── Sync each client ─────────────────────────────────────
+  phase = 'sync'
   const clientsAttempted = clients.length
   const results: SyncClientResult[] = []
   let totalPostsSynced = 0
@@ -1114,7 +1166,7 @@ Deno.serve(async (req) => {
     .filter(r => r.status === 'success')
     .map(r => ({ clientId: r.clientId, name: r.clientName, postsSynced: r.postsSynced, reportId: r.reportId ?? null }))
 
-  return jsonResponse({
+  return safeJsonResponse({
     ok: true,
     status: overallStatus,
     message: overallStatus === 'success'
@@ -1145,9 +1197,10 @@ Deno.serve(async (req) => {
     // 200 so the Supabase client surfaces it through `data`, not a thrown error.
     const rawMsg = err instanceof Error ? err.message : String(err)
     const safeMsg = redact(`Sync failed unexpectedly: ${rawMsg}`, tokensForRedaction).slice(0, 600)
-    return jsonResponse({
+    return safeJsonResponse({
       ok: false,
       status: 'failed',
+      phase,
       error: safeMsg,
       message: 'Sync failed unexpectedly.',
       clientsAttempted: 0,
@@ -1164,4 +1217,4 @@ Deno.serve(async (req) => {
       steps,
     }, 200)
   }
-})
+}

@@ -4,6 +4,8 @@ import { supabase } from '../../lib/supabase'
 import { listClients, type Client } from '../../lib/db/clients'
 
 const STEP_LABELS = ['Connect Meta', 'Link assets', 'Sync data', 'Review draft']
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined
 
 type ConnectState = 'idle' | 'loading' | 'connected' | 'error'
 
@@ -130,44 +132,11 @@ function safeStringify(value: unknown): string {
   }
 }
 
-// Pulls the real, safe error out of a Supabase Functions invoke error. A
-// FunctionsHttpError carries the Edge Function's Response in `error.context`,
-// whose JSON body holds the function's own (token-free) error message + status.
-async function extractFunctionError(error: unknown): Promise<{ message: string; debug: string }> {
-  const anyErr = error as { name?: string; message?: string; context?: unknown }
-  let status: number | undefined
-  let bodyText = ''
-
-  const ctx = anyErr?.context
-  if (ctx && typeof ctx === 'object' && 'status' in (ctx as Record<string, unknown>)) {
-    const res = ctx as Response
-    status = res.status
-    try {
-      bodyText = await res.clone().text()
-    } catch {
-      /* body may already be consumed — fall back to the error message */
-    }
-  }
-
-  let parsed: { error?: string; message?: string } | null = null
-  try {
-    parsed = bodyText ? JSON.parse(bodyText) : null
-  } catch {
-    /* response was not JSON */
-  }
-
-  const fnMessage = (parsed?.error || parsed?.message || '').toString().trim()
-  const base =
-    fnMessage ||
-    anyErr?.message ||
-    'The sync service returned an error. Check the Supabase Edge Function deployment and logs.'
-  const message = status ? `${base} (HTTP ${status})` : base
-  const debug = safeStringify({
-    name: anyErr?.name,
-    status,
-    body: parsed ?? (bodyText ? bodyText.slice(0, 800) : undefined),
-  })
-  return { message, debug }
+function redactForDisplay(text: string): string {
+  return text
+    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
+    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
 }
 
 export default function MetaIntegrationPage() {
@@ -203,6 +172,8 @@ export default function MetaIntegrationPage() {
   const [syncResult, setSyncResult] = useState<{
     status: string
     message: string
+    phase?: string
+    syncEngineVersion?: string
     clientsAttempted?: number
     clientsSucceeded?: number
     clientsSynced?: number
@@ -426,35 +397,82 @@ export default function MetaIntegrationPage() {
     setSyncing(true)
     setSyncResult(null)
     try {
-      const { data, error } = await supabase.functions.invoke('meta-sync', {
+      if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+        throw new Error('Missing Supabase frontend environment variables.')
+      }
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError || !sessionData.session?.access_token) {
+        setSyncResult({
+          status: 'failed',
+          message: 'Authentication required. Please sign in again before syncing.',
+          phase: 'auth',
+          debug: safeStringify({ error: sessionError?.message ?? 'No active session' }),
+        })
+        return
+      }
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/meta-sync`, {
         method: 'POST',
-        body: { mode: 'previous_completed_month' },
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mode: 'previous_completed_month' }),
       })
-      if (error) {
-        // Read the real error out of the function's HTTP response instead of a
-        // generic "could not reach" message.
-        const detail = await extractFunctionError(error)
-        setSyncResult({
-          status: 'failed',
-          message: detail.message,
-          debug: detail.debug,
-        })
-        return
+
+      const responseText = await response.text()
+      let data: Record<string, any> | null = null
+      try {
+        data = responseText ? JSON.parse(responseText) : null
+      } catch {
+        data = null
       }
-      if (!data?.ok) {
+
+      if (!response.ok || !data?.ok) {
+        const safeText = data
+          ? null
+          : redactForDisplay(responseText || 'No response body from sync service.').slice(0, 500)
+        const phase = typeof data?.phase === 'string' ? data.phase : undefined
+        const message = [
+          phase ? `Phase: ${phase}.` : null,
+          data?.error || data?.message || safeText || 'Sync failed.',
+          !response.ok ? `(HTTP ${response.status})` : null,
+        ].filter(Boolean).join(' ')
         setSyncResult({
           status: 'failed',
-          message: data?.error || data?.message || 'Sync failed.',
+          message,
+          phase,
+          syncEngineVersion: typeof data?.syncEngineVersion === 'string' ? data.syncEngineVersion : undefined,
+          clientsAttempted: data?.clientsAttempted,
+          clientsSucceeded: data?.clientsSucceeded ?? data?.clientsSynced,
+          clientsSynced: data?.clientsSynced,
+          clientsFailed: data?.clientsFailed,
+          reportsCreated: data?.reportsCreated,
+          reportsReused: data?.reportsReused,
+          reportsUpdated: data?.reportsUpdated,
+          postsSynced: data?.postsSynced,
           warnings: data?.warnings,
+          failedClients: data?.failedClients,
+          succeededClients: data?.succeededClients,
           steps: data?.steps,
-          debug: safeStringify({ error: data?.error, steps: data?.steps, warnings: data?.warnings }),
+          debug: safeStringify({
+            httpStatus: response.status,
+            phase,
+            syncEngineVersion: data?.syncEngineVersion,
+            body: data ?? safeText,
+          }),
         })
         return
       }
+
       await loadLinkedAssets()
       setSyncResult({
         status: data.status,
         message: data.message,
+        phase: typeof data.phase === 'string' ? data.phase : undefined,
+        syncEngineVersion: typeof data.syncEngineVersion === 'string' ? data.syncEngineVersion : undefined,
         clientsAttempted: data.clientsAttempted,
         clientsSucceeded: data.clientsSucceeded ?? data.clientsSynced,
         clientsSynced: data.clientsSynced,
@@ -469,6 +487,7 @@ export default function MetaIntegrationPage() {
         steps: data.steps,
         debug: safeStringify({
           status: data.status,
+          syncEngineVersion: data.syncEngineVersion,
           steps: data.steps,
           warnings: data.warnings,
           failedClients: data.failedClients,
@@ -477,8 +496,9 @@ export default function MetaIntegrationPage() {
     } catch (e) {
       setSyncResult({
         status: 'failed',
-        message: 'Sync request failed before reaching the service.',
-        debug: safeStringify({ error: e instanceof Error ? e.message : String(e) }),
+        message: redactForDisplay(e instanceof Error ? e.message : String(e)),
+        phase: 'unknown',
+        debug: safeStringify({ error: redactForDisplay(e instanceof Error ? e.message : String(e)) }),
       })
     } finally {
       setSyncing(false)
@@ -685,6 +705,8 @@ export default function MetaIntegrationPage() {
                 </p>
                 {syncResult.status !== 'skipped' && (
                   <ul className="mt-2 space-y-1 text-sm text-brand-primary">
+                    {syncResult.phase && <li>Failed phase: {syncResult.phase}</li>}
+                    {syncResult.syncEngineVersion && <li>Sync engine: {syncResult.syncEngineVersion}</li>}
                     <li>Clients succeeded: {syncResult.clientsSucceeded ?? syncResult.clientsSynced ?? 0}{syncResult.clientsAttempted !== undefined ? ` of ${syncResult.clientsAttempted}` : ''}</li>
                     {syncResult.clientsFailed !== undefined && syncResult.clientsFailed > 0 && (
                       <li className="text-amber-400">Clients failed: {syncResult.clientsFailed}</li>
