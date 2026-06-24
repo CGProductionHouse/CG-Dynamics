@@ -1046,60 +1046,98 @@ async function handleRequest(req: Request): Promise<Response> {
         totalPostsSynced++
       }
 
-      // ── Fetch Facebook Page stable account fields (best-effort) ──
-      // Avoid deprecated/invalid Page insight metrics that Meta rejects with
-      // "The value must be a valid insights metric". Business Suite views/visits
-      // stay unavailable unless Meta exposes a stable API value.
+      // ── Fetch Facebook Page account totals (best-effort) ──
+      // Use Page-level insights for impressions/reach/engaged users, plus direct
+      // Page fields for follower count. Post-level content interaction sum is kept
+      // as a fallback when page_engaged_users is not available.
       if (client.facebookPageId && Date.now() < insightDeadline) {
         try {
+          const fbValues: Record<string, number> = {}
+          const fbErrors: string[] = []
+
+          // Page insights: impressions, reach, engaged users (daily, summed over month)
+          const fbInsightResult = await fetchInsights(
+            baseUrl,
+            client.facebookPageId,
+            ['page_impressions', 'page_impressions_unique', 'page_engaged_users'],
+            pageToken,
+            { period: 'day', since: periodStart, until: periodEnd },
+            knownTokens,
+            { split: true },
+          )
+          if (fbInsightResult.error) {
+            fbErrors.push(fbInsightResult.error)
+          }
+          Object.assign(fbValues, fbInsightResult.values)
+
+          // Post-level content interaction sum (fallback for page_engaged_users)
           const fbContentInteractions = fbPosts.reduce(
             (sum, post) => sum + post.reactions + post.comments + post.shares + (post.clicks ?? 0),
             0,
           )
-          const pageParams = new URLSearchParams({ access_token: pageToken, fields: 'fan_count,followers_count' })
-          const pageRes = await metaFetch(`${baseUrl}/${client.facebookPageId}?${pageParams.toString()}`)
+
+          // Follower count from Page fields (lifetime)
           let follows = 0
-          if (pageRes.ok) {
-            const pageData = await pageRes.json()
-            follows =
-              typeof pageData.followers_count === 'number'
-                ? pageData.followers_count
-                : typeof pageData.fan_count === 'number'
-                  ? pageData.fan_count
-                  : 0
-          } else {
-            result.warnings.push(`Facebook follows unavailable: ${await readMetaError(pageRes, knownTokens)}`)
+          try {
+            const pageParams = new URLSearchParams({ access_token: pageToken, fields: 'fan_count,followers_count' })
+            const pageRes = await metaFetch(`${baseUrl}/${client.facebookPageId}?${pageParams.toString()}`)
+            if (pageRes.ok) {
+              const pageData = await pageRes.json()
+              follows =
+                typeof pageData.followers_count === 'number'
+                  ? pageData.followers_count
+                  : typeof pageData.fan_count === 'number'
+                    ? pageData.fan_count
+                    : 0
+            }
+          } catch {
+            // non-fatal
           }
 
-          if (follows > 0 || fbContentInteractions > 0) {
+          const engagements = typeof fbValues.page_engaged_users === 'number'
+            ? fbValues.page_engaged_users
+            : fbContentInteractions
+
+          const anyPositive =
+            (typeof fbValues.page_impressions === 'number' && fbValues.page_impressions > 0) ||
+            (typeof fbValues.page_impressions_unique === 'number' && fbValues.page_impressions_unique > 0) ||
+            engagements > 0 ||
+            follows > 0
+
+          if (anyPositive) {
             await upsertSyncedPlatformMetric(sb, {
               clientId: client.clientId,
               month,
               platform: 'facebook',
-              views: 0,
-              reach: 0,
-              engagements: fbContentInteractions,
+              views: fbValues.page_impressions ?? 0,
+              reach: fbValues.page_impressions_unique ?? 0,
+              engagements,
               profileVisits: 0,
               externalLinkTaps: 0,
               followers: follows,
               createdBy: user.id,
             }, result.warnings, knownTokens)
           }
+
           result.accountTotals.facebook = {
-            views: null,
-            viewers: null,
-            content_interactions: fbContentInteractions,
+            views: typeof fbValues.page_impressions === 'number' ? fbValues.page_impressions : null,
+            viewers: typeof fbValues.page_impressions_unique === 'number' ? fbValues.page_impressions_unique : null,
+            content_interactions: engagements,
             visits: null,
             follows: follows > 0 ? follows : null,
           }
-          result.unavailableMetrics.push({
-            platform: 'facebook',
-            metrics: ['views', 'viewers', 'visits'],
-            reason: 'Meta did not expose stable Business Suite-equivalent Page values through the available API path.',
-          })
-          result.warnings.push('Facebook unavailable metrics: views, viewers and visits are marked unavailable when Meta does not expose stable Business Suite-equivalent values through the Page API.')
+
+          const missingFb = ['page_impressions', 'page_impressions_unique']
+            .filter(metric => typeof fbValues[metric] !== 'number')
+          if (missingFb.length > 0) {
+            result.unavailableMetrics.push({
+              platform: 'facebook',
+              metrics: missingFb.map(m => m === 'page_impressions' ? 'views' : 'viewers'),
+              reason: fbErrors.length > 0 ? fbErrors.join('; ') : 'Meta Page insights not available for this period.',
+            })
+          }
         } catch (err) {
-          result.warnings.push(redact(`Error fetching Facebook account fields: ${String(err)}`, knownTokens))
+          result.warnings.push(redact(`Error fetching Facebook account totals: ${String(err)}`, knownTokens))
         }
       }
 

@@ -21,7 +21,6 @@ import {
   shortCaption,
 } from '../../lib/reportStats'
 import {
-  META_SOURCE_NOTE,
   buildMetaContentMetrics,
   buildMetaPlatformMetrics,
   metaEngagementLabel,
@@ -29,9 +28,6 @@ import {
 } from '../../lib/metaMetrics'
 
 type TabKey = 'overview' | Platform
-
-const REPORT_DISCLAIMER =
-  'This report is compiled from exported platform data and CG Production House reporting tools. Small differences can occur because platforms continue processing data after export. Source platform dashboards remain the official record.'
 
 const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]'
 
@@ -125,10 +121,7 @@ export function ClientReportView({
       )}
 
       <p className="mx-auto mt-16 max-w-3xl border-t border-white/10 pt-6 text-center text-xs leading-relaxed text-slate-500">
-        {META_SOURCE_NOTE}
-      </p>
-      <p className="mx-auto mt-3 max-w-3xl text-center text-xs leading-relaxed text-slate-600">
-        {REPORT_DISCLAIMER}
+        Source: Meta Business Sync. Platform dashboards remain the official record.
       </p>
     </div>
   )
@@ -184,7 +177,7 @@ function ReportHero({
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
           <HeroMiniCard label="Status" value={report.status.charAt(0).toUpperCase() + report.status.slice(1)} accent="teal" />
           <HeroMiniCard label="Report month" value={month} accent="amber" />
-          <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? 'Data unavailable'} accent="teal" />
+          <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? '—'} accent="teal" />
         </div>
       </div>
     </section>
@@ -261,17 +254,13 @@ function OverviewTab({
     <>
       <SectionHeading eyebrow="Executive summary" title="The month at a glance" />
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {master.totalViews !== null && (
-          <MetricTile label="Views" value={master.totalViews} accent="teal" />
-        )}
-        <MetricTile label="Reach / viewers" value={master.totalReach} accent="teal" />
-        <MetricTile label="Content interactions" value={master.totalEngagements} accent="teal" />
-        <MetricTile label="Best platform" value={master.bestPlatform?.label ?? null} accent="amber" />
+        {master.totalViews !== null && <MetricTile label="Views" value={formatNumber(master.totalViews)} accent="teal" />}
+        {master.totalReach !== null && <MetricTile label="Reach / viewers" value={formatNumber(master.totalReach)} accent="teal" />}
+        {master.totalEngagements > 0 && <MetricTile label="Content interactions" value={formatNumber(master.totalEngagements)} accent="teal" />}
+        {master.bestPlatform && <MetricTile label="Best platform" value={master.bestPlatform.label} accent="amber" />}
       </section>
-      {master.totalViews === null && master.platforms.some(p => p.source === 'posts') && (
-        <p className="mb-12 rounded-2xl border border-white/10 bg-white/[0.045] px-5 py-3 text-sm text-slate-400 backdrop-blur">
-          Partial Meta data available — views are not exposed through the available Meta API path for all platforms.
-        </p>
+      {master.platforms.filter(p => p.source !== 'none').length === 0 && master.totalEngagements === 0 && (
+        <p className="mb-12 rounded-2xl border border-white/10 bg-white/[0.045] px-5 py-3 text-sm text-slate-400">No synced data available yet.</p>
       )}
 
       {growthItems.length > 0 && (
@@ -312,30 +301,13 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
   )
 }
 
-function MetricTile({
-  label,
-  value,
-  accent,
-}: {
-  label: string
-  value: number | string | null | undefined
-  accent: 'teal' | 'amber'
-}) {
+function MetricTile({ label, value, accent }: { label: string; value: string; accent: 'teal' | 'amber' }) {
   const accentClass = accent === 'amber' ? 'from-[#f97316] to-[#f59e0b]' : 'from-[#2dd4bf] to-[#14b8a6]'
-  const display =
-    typeof value === 'number'
-      ? formatNumber(value)
-      : typeof value === 'string' && value.trim()
-        ? value
-        : 'Data not available'
-
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.95)] backdrop-blur sm:p-6">
       <div className={`mb-5 h-1 w-12 rounded-full bg-gradient-to-r ${accentClass}`} />
       <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">{label}</p>
-      <p className="mt-3 text-3xl font-black leading-none tracking-[-0.04em] text-white sm:text-4xl">
-        {display}
-      </p>
+      <p className="mt-3 text-3xl font-black leading-none tracking-[-0.04em] text-white sm:text-4xl">{value}</p>
       <div className="pointer-events-none absolute -bottom-14 -right-14 h-32 w-32 rounded-full bg-[#2dd4bf]/0 blur-3xl transition group-hover:bg-[#2dd4bf]/10" />
     </div>
   )
@@ -494,11 +466,7 @@ function PlatformSummaryCard({ view }: { view: PlatformView }) {
 
       <dl className="space-y-0">
         {buildMetaPlatformMetrics(view).map(item => (
-          <PlatformRow
-            key={item.key}
-            label={item.label}
-            value={typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
-          />
+          <PlatformRow key={item.key} label={item.label} value={formatNumber(item.value)} />
         ))}
       </dl>
 
@@ -685,7 +653,7 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
       <SectionHeading eyebrow={view.label} title={`${view.label} performance`} />
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {buildMetaPlatformMetrics(view).slice(0, 4).map(item => (
-          <MetricTile key={item.key} label={item.label} value={item.value} accent={item.key === 'posts' ? 'amber' : 'teal'} />
+          <MetricTile key={item.key} label={item.label} value={formatNumber(item.value)} accent={item.key === 'posts' ? 'amber' : 'teal'} />
         ))}
       </section>
 
@@ -717,11 +685,7 @@ function PostsPlatformTab({ view, previousView }: { view: PlatformView; previous
 
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
               {buildMetaContentMetrics(view.bestPost).map(item => (
-                <MiniMetric
-                  key={item.key}
-                  label={item.label}
-                  value={typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
-                />
+                <MiniMetric key={item.key} label={item.label} value={formatNumber(item.value)} />
               ))}
             </div>
           </div>
@@ -784,10 +748,10 @@ function ManualPlatformTab({
     <>
       <SectionHeading eyebrow={view.label} title={`${view.label} performance`} />
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricTile label="Reach" value={view.reach} accent="teal" />
-        <MetricTile label="Views" value={view.views} accent="teal" />
-        <MetricTile label="Content interactions" value={view.engagements} accent="teal" />
-        <MetricTile label="Followers" value={manual.followers} accent="amber" />
+        {view.views !== null && <MetricTile label="Views" value={formatNumber(view.views)} accent="teal" />}
+        {view.reach !== null && <MetricTile label="Reach" value={formatNumber(view.reach)} accent="teal" />}
+        {view.engagements > 0 && <MetricTile label="Content interactions" value={formatNumber(view.engagements)} accent="teal" />}
+        {manual.followers > 0 && <MetricTile label="Followers" value={formatNumber(manual.followers)} accent="amber" />}
       </section>
 
       {growth.length > 0 && (

@@ -23,7 +23,6 @@ import {
   calculateReportStats,
   displayContentType,
   formatDate,
-  formatMetric,
   formatNumber,
   formatPercent,
   importedToStatsPost,
@@ -31,7 +30,7 @@ import {
   shortCaption,
   type MetricMovement,
 } from '../../lib/reportStats'
-import { META_SOURCE_NOTE, buildMetaContentMetrics, buildMetaPlatformMetrics, metaEngagementLabel, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
+import { buildMetaContentMetrics, buildMetaPlatformMetrics, metaEngagementLabel, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
 
 interface ReportFields {
   reportTitle: string
@@ -640,19 +639,14 @@ export default function NewReport() {
         {master.totalViews !== null && (
           <StatCard label="Views" value={formatNumber(master.totalViews)} />
         )}
-        <StatCard label="Reach / viewers" value={formatMetric(master.totalReach)} />
-        <StatCard label="Content interactions" value={formatNumber(master.totalEngagements)} />
+        {master.totalReach !== null && (
+          <StatCard label="Reach / viewers" value={formatNumber(master.totalReach)} />
+        )}
+        {master.totalEngagements > 0 && (
+          <StatCard label="Content interactions" value={formatNumber(master.totalEngagements)} />
+        )}
         <StatCard label="Posts" value={postsLoading ? '...' : formatNumber(stats.postCount)} />
       </div>
-
-      <p className="mb-6 rounded-lg border border-brand-muted bg-brand-surface/60 px-3 py-2 text-xs text-brand-primary">
-        {META_SOURCE_NOTE}
-      </p>
-      {master.totalViews === null && master.platforms.some(p => p.source === 'posts') && (
-        <p className="mb-6 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-          Partial Meta data available — views/viewers are not exposed through the available Meta API path for all platforms.
-        </p>
-      )}
 
       <section className="bg-brand-surface border border-brand-muted rounded-xl p-4 mb-6 sm:p-5">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -668,11 +662,11 @@ export default function NewReport() {
           />
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <MovementCard label="Views" movement={movement.views} />
-          <MovementCard label="Reach / viewers" movement={movement.reach} />
-          <MovementCard label="Content interactions" movement={movement.engagements} />
-          <MovementCard label="Profile visits" movement={movement.profileVisits} />
-          <MovementCard label="Followers" movement={movement.followers} />
+          {!movement.views.notAvailable && <MovementCard label="Views" movement={movement.views} />}
+          {!movement.reach.notAvailable && <MovementCard label="Reach / viewers" movement={movement.reach} />}
+          {movement.engagements.current > 0 && <MovementCard label="Content interactions" movement={movement.engagements} />}
+          {!movement.profileVisits.notAvailable && <MovementCard label="Profile visits" movement={movement.profileVisits} />}
+          {!movement.followers.notAvailable && <MovementCard label="Followers" movement={movement.followers} />}
         </div>
         {!previousMaster && (
           <p className="mt-4 rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-2 text-xs text-brand-primary">
@@ -714,21 +708,16 @@ export default function NewReport() {
                   {buildMetaPlatformMetrics(view).map(item => (
                     <div key={item.key} className="flex justify-between gap-3">
                       <dt>{item.label}</dt>
-                      <dd className="text-right text-white">
-                        {typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
-                      </dd>
+                      <dd className="text-right text-white">{formatNumber(item.value)}</dd>
                     </div>
                   ))}
+                  {buildMetaPlatformMetrics(view).length === 0 && (
+                    <p className="text-xs text-brand-primary/60">No synced metrics for this period.</p>
+                  )}
                   <div className="flex justify-between">
                     <dt>Source</dt>
                     <dd className="text-white">{view.source === 'manual' ? MANUAL_SOURCE_LABELS[view.manual!.source_type] : `${formatNumber(view.postCount)} posts`}</dd>
                   </div>
-                  {view.source === 'manual' && view.manual && (
-                    <>
-                      <div className="flex justify-between"><dt>Profile visits</dt><dd className="text-white">{formatNumber(view.manual.profile_visits)}</dd></div>
-                      <div className="flex justify-between"><dt>External link taps</dt><dd className="text-white">{formatNumber(view.manual.external_link_taps)}</dd></div>
-                    </>
-                  )}
                 </dl>
               )}
             </div>
@@ -870,7 +859,7 @@ export default function NewReport() {
                       {post.post_type ? displayContentType(post.post_type) ?? post.post_type : 'Content type not set'}
                     </p>
                     <p className="text-xs text-brand-primary mt-2">
-                      {formatNumber(post.engagements)} {metaEngagementLabel().toLowerCase()} | {formatMetric(post.reach)} {metaPrimaryMetricLabel(post.platform).toLowerCase()}
+                      {formatNumber(post.engagements)} {metaEngagementLabel().toLowerCase()}{post.reach !== null ? ` | ${formatNumber(post.reach)} ${metaPrimaryMetricLabel(post.platform).toLowerCase()}` : ''}
                     </p>
                   </div>
                 ))
@@ -954,7 +943,6 @@ function SourcePill({ label, tone }: { label: string; tone: 'posts' | 'manual' |
 }
 
 function movementText(movement: MetricMovement) {
-  if (movement.notAvailable) return 'Data not available'
   if (movement.direction === 'missing' || movement.difference === null) {
     return 'Previous month data not available'
   }
@@ -974,11 +962,7 @@ function MovementCard({ label, movement }: { label: string; movement: MetricMove
   return (
     <article className={`rounded-lg border p-3 ${tone}`}>
       <p className="text-[11px] uppercase tracking-[0.12em] opacity-80">{label}</p>
-      {movement.notAvailable ? (
-        <p className="mt-2 text-sm text-brand-primary">Data not available</p>
-      ) : (
-        <p className="mt-2 text-xl font-semibold text-white">{formatNumber(movement.current)}</p>
-      )}
+      <p className="mt-2 text-xl font-semibold text-white">{formatNumber(movement.current)}</p>
       <p className="mt-1 text-xs">{movementText(movement)}</p>
     </article>
   )
@@ -1031,7 +1015,7 @@ function PerformancePanel({
               <MiniMetric
                 key={item.key}
                 label={item.label}
-                value={typeof item.value === 'number' ? formatNumber(item.value) : 'Data not available'}
+                value={formatNumber(item.value)}
               />
             ))}
           </div>

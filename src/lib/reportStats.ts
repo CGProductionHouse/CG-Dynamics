@@ -191,8 +191,15 @@ export interface MasterReportData {
   bestPostOverall: ReportStatsPost | null
 }
 
-function isMetaSyncedManualMetric(metric: ManualPlatformMetric | null): boolean {
+export function isMetaSyncedManualMetric(metric: ManualPlatformMetric | null): boolean {
   return metric?.source_type === 'other' && metric.general_notes?.startsWith('Meta sync account totals') === true
+}
+
+function metaMetricAvailable(metric: ManualPlatformMetric | null, key: 'views' | 'reach' | 'engagements' | 'profile_visits' | 'followers'): boolean {
+  if (!metric) return false
+  if (!isMetaSyncedManualMetric(metric)) return true
+  // For Meta synced metrics, 0 means "unavailable" (we couldn't fetch it).
+  return metric[key] > 0
 }
 
 export interface MetricMovement {
@@ -234,17 +241,18 @@ export function buildMasterReport(
 
     if (platformPosts.length > 0) {
       const stats = calculateReportStats(platformPosts)
-      const metaSyncedManual = isMetaSyncedManualMetric(manual)
-      const manualViewsAvailable = Boolean(manual && (!metaSyncedManual || manual.views > 0))
-      const manualReachAvailable = Boolean(manual && (!metaSyncedManual || manual.reach > 0))
-      const manualEngagementsAvailable = Boolean(manual && (!metaSyncedManual || manual.engagements > 0))
+      // Meta synced manual metric is the PRIMARY source for account-level totals.
+      // Post data provides post count, top content, captions, and engagement fallback.
+      const viewsAvailable = metaMetricAvailable(manual, 'views')
+      const reachAvailable = metaMetricAvailable(manual, 'reach')
+      const engagementsAvailable = metaMetricAvailable(manual, 'engagements')
       return {
         platform,
         label: PLATFORM_LABELS[platform],
         source: 'posts',
-        reach: manualReachAvailable ? manual!.reach : stats.totalReach,
-        views: manualViewsAvailable ? manual!.views : stats.totalImpressions,
-        engagements: manualEngagementsAvailable ? manual!.engagements : stats.totalEngagements,
+        reach: reachAvailable ? manual!.reach : stats.totalReach,
+        views: viewsAvailable ? manual!.views : stats.totalImpressions,
+        engagements: engagementsAvailable ? manual!.engagements : stats.totalEngagements,
         postCount: stats.postCount,
         bestPost: stats.bestPost,
         topPosts: stats.topPosts,
@@ -253,14 +261,16 @@ export function buildMasterReport(
     }
 
     if (manual) {
-      const metaSyncedManual = isMetaSyncedManualMetric(manual)
+      const viewsAvailable = metaMetricAvailable(manual, 'views')
+      const reachAvailable = metaMetricAvailable(manual, 'reach')
+      const engagementsAvailable = metaMetricAvailable(manual, 'engagements')
       return {
         platform,
         label: PLATFORM_LABELS[platform],
         source: 'manual',
-        reach: metaSyncedManual && manual.reach === 0 ? null : manual.reach,
-        views: metaSyncedManual && manual.views === 0 ? null : manual.views,
-        engagements: metaSyncedManual && manual.engagements === 0 ? 0 : manual.engagements,
+        reach: reachAvailable ? manual.reach : null,
+        views: viewsAvailable ? manual.views : null,
+        engagements: engagementsAvailable ? manual.engagements : 0,
         postCount: 0,
         bestPost: null,
         topPosts: [],
@@ -303,19 +313,18 @@ export function buildMasterReport(
   }
 }
 
-// Returns null when no manual metrics exist — callers must treat null as
-// "data not available" rather than 0.
 export function totalManualProfileVisits(manualMetrics: ManualPlatformMetric[]): number | null {
   if (manualMetrics.length === 0) return null
-  const available = manualMetrics.filter(metric => !isMetaSyncedManualMetric(metric) || metric.profile_visits > 0)
+  const available = manualMetrics.filter(metric => metaMetricAvailable(metric, 'profile_visits'))
   if (available.length === 0) return null
   return available.reduce((sum, metric) => sum + metric.profile_visits, 0)
 }
 
 export function totalManualFollowers(manualMetrics: ManualPlatformMetric[]) {
-  const withFollowers = manualMetrics.filter(metric => metric.followers > 0)
-  if (withFollowers.length === 0) return null
-  return withFollowers.reduce((sum, metric) => sum + metric.followers, 0)
+  if (manualMetrics.length === 0) return null
+  const available = manualMetrics.filter(metric => metaMetricAvailable(metric, 'followers'))
+  if (available.length === 0) return null
+  return available.reduce((sum, metric) => sum + metric.followers, 0)
 }
 
 export function compareMetric(current: number, previous: number | null | undefined): MetricMovement {
