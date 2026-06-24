@@ -326,13 +326,13 @@ function computeLevel(
 function headlineFor(level: PerformanceLevel, monthLabel: string): string {
   switch (level) {
     case 'strong':
-      return `${monthLabel} was a strong month — momentum is building.`
+      return `${monthLabel} was a strong month - momentum is building.`
     case 'improving':
       return `${monthLabel} moved in the right direction with clear gains.`
     case 'steady':
-      return `${monthLabel} held steady — a stable base to build on.`
+      return `${monthLabel} held steady - a stable base to build on.`
     case 'needs_attention':
-      return `${monthLabel} set a clearer baseline — the next step is converting reach into stronger audience response.`
+      return `${monthLabel} set a clearer baseline - the next step is converting reach into stronger audience response.`
     case 'baseline_only':
       return `${monthLabel} sets the baseline we will grow from next month.`
   }
@@ -364,7 +364,7 @@ function overallHeadline(
       return `${monthLabel} built on both visibility and audience response.`
     }
     if ((reach === 'down' || views === 'down') && inter === 'up') {
-      return `${monthLabel} earned stronger engagement — the next step is widening reach.`
+      return `${monthLabel} earned stronger engagement - the next step is widening reach.`
     }
   }
   return headlineFor(level, monthLabel)
@@ -396,27 +396,27 @@ function buildNextSteps(input: {
   const interDown = dir('content_interactions') === 'down'
   const profileDown = dir('profile_visits') === 'down'
 
-  // 1. Convert reach into engagement when visibility is up but response is thin.
-  if (typeof reach === 'number' && reach >= 500 && interactions > 0 && interactions / reach < 0.02) {
+  // 1. Visibility up, response quality is the next focus.
+  if (reachUp && interDown) {
+    steps.push({
+      priority: 1,
+      title: 'Convert visibility into response',
+      why: 'Visibility improved while response quality is the next focus — more people saw the content without taking action.',
+      action: 'Test stronger opening hooks, question-led captions and product comparison posts.',
+    })
+  } else if (typeof reach === 'number' && reach >= 500 && interactions > 0 && interactions / reach < 0.02) {
     steps.push({
       priority: 1,
       title: 'Convert reach into engagement',
-      why: 'Reach improved, but interactions softened, which means more people saw the content without taking meaningful action.',
+      why: 'Visibility is building while response quality is the next focus — the content is being seen but action is still building.',
       action: 'Use stronger opening hooks, question-led captions and product comparison posts.',
     })
   } else if (bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
     steps.push({
       priority: 1,
       title: 'Sharpen content hooks',
-      why: 'Individual post interactions are still building, making it harder to build momentum from the content.',
+      why: 'Individual post interactions are still building, making it harder to create momentum from the content itself.',
       action: 'Test opening hooks that stop the scroll and make the product value clearer in the first line.',
-    })
-  } else if (reachUp && interDown) {
-    steps.push({
-      priority: 1,
-      title: 'Convert reach into engagement',
-      why: 'Visibility improved while response quality declined — more people saw the content without taking action.',
-      action: 'Strengthen calls to action, lead with questions, and test carousel formats.',
     })
   }
 
@@ -424,18 +424,18 @@ function buildNextSteps(input: {
   if (curPosts > 0 && curPosts < 8) {
     steps.push({
       priority: 2,
-      title: 'Increase posting consistency',
-      why: `Fewer posts were published (${curPosts} total) than the recommended weekly rhythm, making it harder to build momentum.`,
+      title: 'Build posting consistency',
+      why: `Fewer posts were published (${curPosts} total) than the recommended weekly rhythm — consistency is the next focus.`,
       action: 'Keep a steady weekly rhythm before judging campaign direction.',
     })
   }
 
-  // 3. Profile action.
+  // 3. Profile action needs focus.
   if (profileDown) {
     steps.push({
       priority: 3,
-      title: 'Improve profile action',
-      why: 'Profile visits declined while visibility improved, meaning the content did not drive enough curiosity to the profile.',
+      title: 'Profile action needs focus',
+      why: 'Profile visits changed while visibility improved — the content can drive more curiosity to the profile.',
       action: 'Add clearer product intent, stronger CTA copy and direct enquiry prompts.',
     })
   }
@@ -457,24 +457,34 @@ function buildNextSteps(input: {
     })
   }
 
-  // 5. Audience retention.
-  const followers = metrics.find(m => m.key === 'current_followers')
-  if (followers && followers.direction === 'down') {
+  // 5. Strong top post exists - use it as a format signal.
+  if (best && bestEng >= WEAK_CONTENT_THRESHOLD) {
     steps.push({
       priority: 5,
-      title: 'Prioritise audience retention',
-      why: 'Follower count declined, suggesting content is not yet creating repeat-visit value.',
-      action: 'Publish saveable, repeat-value content like how-to posts, carousel comparisons and educational reels.',
+      title: 'Build on what worked',
+      why: 'The strongest post this month shows clear audience preference — use its format as a creative signal.',
+      action: 'Create variations of the top posts format and posting time while testing one new angle.',
     })
   }
 
-  // 6. Product storytelling (watch/product posts with low response).
-  if (best && bestEng < WEAK_CONTENT_THRESHOLD && best.post_type?.toLowerCase().includes('video') === false) {
+  // 6. No previous baseline — content direction is becoming clearer.
+  if (!input.performanceLevel || input.performanceLevel === 'baseline_only') {
+    steps.push({
+      priority: 5,
+      title: 'Content direction is becoming clearer',
+      why: 'This month sets the content baseline — next month we will have a clearer picture of what is gaining traction.',
+      action: 'Keep the same posting rhythm and note which posts earn the most attention.',
+    })
+  }
+
+  // 7. Audience retention.
+  const followers = metrics.find(m => m.key === 'current_followers')
+  if (followers && followers.direction === 'down') {
     steps.push({
       priority: 6,
-      title: 'Strengthen product storytelling',
-      why: 'Watch and product posts are being seen, but audience response is still building.',
-      action: 'Test close-up detail reels, comparison posts, price and feature education, and which-would-you-choose captions.',
+      title: 'Prioritise audience retention',
+      why: 'Follower count moved differently this month — content can create more repeat-visit value.',
+      action: 'Publish saveable, repeat-value content like how-to posts, carousel comparisons and educational reels.',
     })
   }
 
@@ -640,7 +650,7 @@ export function buildPlatformPerformance(input: {
   const prevProfileVisits =
     prevManual && manualValueAvailable(prevManual, 'profile_visits') ? prevManual.profile_visits : null
 
-  const candidates: Array<PerformanceMetric | null> = [
+  const candidateMap: Array<PerformanceMetric | null> = [
     buildMetric('views', 'Views', view.views, prev?.views ?? null, previousMonthLabel),
     buildMetric('reach', 'Reach', view.reach, prev?.reach ?? null, previousMonthLabel),
     buildMetric(
@@ -667,6 +677,19 @@ export function buildPlatformPerformance(input: {
       previousMonthLabel,
     ),
   ]
+  // Platform-aware reordering: Facebook leads with content interactions and posts
+  // (since views/reach may be absent), Instagram leads with views and reach.
+  const preferOrder = view.platform === 'facebook'
+    ? ['content_interactions', 'posts', 'views', 'reach', 'profile_visits']
+    : ['views', 'reach', 'content_interactions', 'profile_visits', 'posts']
+  const candidates = [...candidateMap].sort((a, b) => {
+    if (!a && !b) return 0
+    if (!a) return 1
+    if (!b) return -1
+    const ai = preferOrder.indexOf(a.key)
+    const bi = preferOrder.indexOf(b.key)
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+  })
   const cards = candidates.filter((m): m is PerformanceMetric => m !== null)
 
   const hasComparison = cards.some(m => m.direction !== null)

@@ -28,6 +28,7 @@ import {
   buildPlatformPerformance,
   buildReportPerformance,
   type GrowthSeriesItem,
+  type NextStep,
   type PerformanceMetric,
   type PlatformPerformance,
   type ReportPerformance,
@@ -126,7 +127,7 @@ export function ClientReportView({
       <ReportHero report={report} client={client} month={month} master={master} />
 
       <p className="mb-6 text-center text-xs text-slate-500">
-        Reporting period: {report.period_start ? formatDate(report.period_start) : '—'} to {report.period_end ? formatDate(report.period_end) : '—'}
+        Reporting period: {report.period_start ? formatDate(report.period_start) : '-'} to {report.period_end ? formatDate(report.period_end) : '-'}
       </p>
 
       {availablePlatforms.length > 0 && (
@@ -140,6 +141,7 @@ export function ClientReportView({
           previousMaster={previousMaster}
           performance={performance}
           showEmptyStrategy={showEmptyStrategy}
+          nextSteps={performance.nextSteps}
         />
       ) : (
         <PlatformTab
@@ -267,12 +269,14 @@ function OverviewTab({
   previousMaster,
   performance,
   showEmptyStrategy,
+  nextSteps,
 }: {
   report: ReportWithPosts
   master: MasterReportData
   previousMaster: MasterReportData | null
   performance: ReportPerformance
   showEmptyStrategy: boolean
+  nextSteps: NextStep[]
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
@@ -344,7 +348,7 @@ function OverviewTab({
       )}
 
       {/* G — CG action plan */}
-      <StrategyBlocks report={report} strategy={strategy} showEmptyStrategy={showEmptyStrategy} />
+      <StrategyBlocks report={report} strategy={strategy} showEmptyStrategy={showEmptyStrategy} nextSteps={nextSteps} recommendations={performance.recommendations} />
     </>
   )
 }
@@ -597,7 +601,9 @@ function ContentSection({
               <div className="flex flex-wrap gap-2">
                 {contentType && <Pill tone="teal">{contentType}</Pill>}
                 {platformLabel && <Pill>{platformLabel}</Pill>}
-                {tone !== 'top' && <Pill tone="amber">Highest activity post</Pill>}
+                {rankingMetric && tone === 'top' && <Pill tone="teal">Top content by {rankingMetric}</Pill>}
+                {tone === 'learning' && <Pill tone="amber">Highest activity post this month</Pill>}
+                {tone === 'baseline' && <Pill tone="neutral">Content baseline</Pill>}
               </div>
 
               {caption && (
@@ -755,12 +761,63 @@ function StrategyBlocks({
   report,
   strategy,
   showEmptyStrategy,
+  nextSteps,
+  recommendations,
 }: {
   report: ReportWithPosts
   strategy: ReturnType<typeof readStrategyData>
   showEmptyStrategy: boolean
+  nextSteps: NextStep[]
+  recommendations: string[]
 }) {
   const cards = buildStrategyCards(report, strategy)
+  const isPublished = report.status === 'published'
+
+  if (cards.length === 0 && isPublished && nextSteps.length > 0) {
+    // Published report without strategy - show next steps as a fallback action plan.
+    return (
+      <section className="mb-4">
+        <SectionHeading eyebrow="CG action plan" title="What we do next" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {nextSteps.slice(0, 4).map(step => (
+            <article
+              key={step.priority}
+              className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.035))] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-7"
+            >
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">Next step</p>
+              <h3 className="mt-3 text-xl font-black tracking-[-0.03em] text-white">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">{step.why}</p>
+              <p className="mt-3 text-[0.95rem] leading-relaxed text-slate-300">{step.action}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (cards.length === 0 && isPublished) {
+    // Published with no strategy and no generated next steps - safe placeholder.
+    return (
+      <section className="mb-4">
+        <SectionHeading eyebrow="CG action plan" title="What we do next" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {recommendations.slice(0, 4).map((rec, index) => (
+            <article
+              key={index}
+              className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.035))] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-7"
+            >
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">Recommended focus</p>
+              <p className="mt-4 text-[0.95rem] leading-relaxed text-slate-300">{rec}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (cards.length === 0 && isPublished) {
+    return null
+  }
 
   if (cards.length === 0) {
     if (!showEmptyStrategy) return null
