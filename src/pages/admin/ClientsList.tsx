@@ -326,37 +326,42 @@ export default function ClientsList() {
             {displayClients.length === 0 ? (
               <EmptyState
                 title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
-                message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client to get started.' : 'Clients you add will appear here.'}
+                message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client, then link Meta assets before syncing reports.' : 'Clients you add will appear here.'}
                 centered={false}
               />
             ) : (
               displayClients.map(c => (
                 <PremiumCard key={c.id} padding="sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 gap-3">
-                      <ClientLogo client={c} />
-                      <div className="min-w-0">
-                        <h2 className="text-base font-semibold text-white break-words">{c.name}</h2>
-                        <div className="mt-3 flex flex-wrap items-center gap-2">
-                          <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
-                          <StatusBadge label={c.active ? 'Active' : 'Archived'} variant="default" />
-                        </div>
+                  <div className="flex items-start gap-3">
+                    <ClientLogo client={c} />
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-base font-semibold text-white break-words">{c.name}</h2>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
+                        <StatusBadge
+                          label={c.active ? 'Active' : 'Archived'}
+                          variant={c.active ? 'published' : 'internal-draft'}
+                        />
                       </div>
                     </div>
-                    {isAdmin && (
-                      <div className="flex shrink-0 flex-col gap-1.5">
-                        <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
-                        {c.active ? (
-                          <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
-                        ) : (
-                          <>
-                            <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
-                            <ActionButton variant="danger" size="sm" onClick={() => void openDeleteConfirm(c)}>Delete</ActionButton>
-                          </>
-                        )}
-                      </div>
-                    )}
                   </div>
+
+                  {c.active ? (
+                    <ClientQuickActions client={c} isAdmin={isAdmin} onEdit={() => setModal({ open: true, client: c })} />
+                  ) : (
+                    isAdmin && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <ActionButton variant="secondary" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
+                        <ActionButton variant="danger" size="sm" onClick={() => void openDeleteConfirm(c)}>Delete</ActionButton>
+                      </div>
+                    )
+                  )}
+
+                  {c.active && isAdmin && (
+                    <div className="mt-2 border-t border-brand-muted/40 pt-2">
+                      <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive client</ActionButton>
+                    </div>
+                  )}
                 </PremiumCard>
               ))
             )}
@@ -379,7 +384,7 @@ export default function ClientsList() {
                       <div className="mx-auto max-w-sm">
                         <EmptyState
                           title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
-                          message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client to get started.' : 'Clients you add will appear here.'}
+                          message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client, then link Meta assets before syncing reports.' : 'Clients you add will appear here.'}
                           centered={false}
                         />
                       </div>
@@ -401,14 +406,22 @@ export default function ClientsList() {
                         <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
                       </td>
                       <td className="px-4 py-3">
-                        <StatusBadge label={c.active ? 'Active' : 'Archived'} variant="default" />
+                        <StatusBadge
+                          label={c.active ? 'Active' : 'Archived'}
+                          variant={c.active ? 'published' : 'internal-draft'}
+                        />
                       </td>
                       {isAdmin && (
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-3">
-                            <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap items-center justify-end gap-2">
                             {c.active ? (
-                              <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
+                              <>
+                                <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Sync Meta" primary />
+                                <ClientActionLink to={`/admin/reports?client=${c.id}`} label="Reports" />
+                                <ClientActionLink to={`/admin/reports/new?client=${c.id}`} label="New report" />
+                                <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
+                                <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
+                              </>
                             ) : (
                               <>
                                 <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
@@ -468,6 +481,57 @@ function QuickLink({ to, label, primary = false }: { to: string; label: string; 
     >
       {label}
     </Link>
+  )
+}
+
+// Compact per-client action chip. Meta sync is the primary action; the rest are
+// secondary links into the reporting workflow.
+function ClientActionLink({ to, label, primary = false }: { to: string; label: string; primary?: boolean }) {
+  const classes = primary
+    ? 'border-brand-accent bg-brand-accent text-brand-bg'
+    : 'border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
+
+  return (
+    <Link to={to} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${classes}`}>
+      {label}
+    </Link>
+  )
+}
+
+// Per-client workflow actions, in priority order: Sync Meta, Reports, New
+// report, Edit client. Manual import fallback is kept visually secondary.
+function ClientQuickActions({
+  client,
+  isAdmin,
+  onEdit,
+}: {
+  client: Client
+  isAdmin: boolean
+  onEdit: () => void
+}) {
+  return (
+    <div className="mt-4 flex flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
+        {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Sync Meta" primary />}
+        <ClientActionLink to={`/admin/reports?client=${client.id}`} label="Reports" />
+        {isAdmin && <ClientActionLink to={`/admin/reports/new?client=${client.id}`} label="New report" />}
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs font-semibold text-brand-primary transition hover:border-white/30 hover:text-white"
+          >
+            Edit client
+          </button>
+        )}
+      </div>
+      <Link
+        to={`/admin/import?client=${client.id}`}
+        className="w-fit text-[11px] font-medium text-brand-primary/60 underline-offset-2 transition hover:text-brand-primary hover:underline"
+      >
+        Manual import fallback
+      </Link>
+    </div>
   )
 }
 
@@ -1013,7 +1077,7 @@ function BulkImportModal({
                 <ul className="max-h-28 overflow-y-auto space-y-0.5">
                   {toSkip.map(name => (
                     <li key={name} className="flex items-center gap-1.5 text-xs text-brand-primary/60">
-                      <span>–</span>
+                      <span>-</span>
                       {name}
                     </li>
                   ))}

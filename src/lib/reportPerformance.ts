@@ -212,7 +212,6 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
   const prevLabel = hasComparison ? previousMonthLabel : null
 
   const curFollowers = totalManualFollowers(currentManual)
-  const prevFollowers = hasComparison ? totalManualFollowers(previousManual) : null
   const curVisits = totalManualProfileVisits(currentManual)
   const prevVisits = hasComparison ? totalManualProfileVisits(previousManual) : null
 
@@ -231,14 +230,17 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
       prevLabel,
     ),
     buildMetric('profile_visits', 'Profile visits', curVisits, prevVisits, prevLabel),
-    buildMetric('current_followers', 'Current followers', curFollowers, prevFollowers, prevLabel),
+    // Current followers is a point-in-time snapshot (audience base), NOT a period
+    // metric. Pass no previous value so it never shows month-over-month growth.
+    buildMetric('current_followers', 'Current followers', curFollowers, null, prevLabel),
     buildMetric('posts', 'Posts published', curPosts > 0 ? curPosts : null, hasComparison ? prevPosts : null, prevLabel),
   ]
   const metrics = candidates.filter((m): m is PerformanceMetric => m !== null)
 
-  // Growth chart: prefer Reach, Content interactions, Posts, Current followers -
-  // only where BOTH months have a real value so we can draw a true comparison.
-  const growthKeys = ['reach', 'content_interactions', 'posts', 'current_followers', 'views']
+  // Growth chart: true period metrics only (Reach, Content interactions, Posts,
+  // Views) where BOTH months have a real value. Followers are deliberately
+  // excluded — a snapshot cannot show growth.
+  const growthKeys = ['reach', 'content_interactions', 'posts', 'views']
   const growthSeries: GrowthSeriesItem[] = metrics
     .filter(m => growthKeys.includes(m.key) && m.previous !== null && m.direction !== null)
     .sort((a, b) => growthKeys.indexOf(a.key) - growthKeys.indexOf(b.key))

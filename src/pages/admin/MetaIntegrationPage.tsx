@@ -317,6 +317,21 @@ export default function MetaIntegrationPage() {
     }
   }, [searchParams, checkConnection])
 
+  // Deep link from the Clients page (?client=<id>): preselect that client for a
+  // selected-client sync once its linked assets are known. One-shot so it never
+  // fights a later manual change.
+  const appliedClientParam = useRef(false)
+  useEffect(() => {
+    if (appliedClientParam.current) return
+    const clientParam = searchParams.get('client')
+    if (!clientParam) return
+    if (linkedAssets.some(asset => asset.client_id === clientParam)) {
+      setSyncMode('selected')
+      setSelectedSyncClientId(clientParam)
+      appliedClientParam.current = true
+    }
+  }, [searchParams, linkedAssets])
+
   const loadLinkedAssets = useCallback(async () => {
     setLoadingLinked(true)
     const { data } = await supabase

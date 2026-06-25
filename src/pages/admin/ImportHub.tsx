@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import ImportMetaCsv from './ImportMetaCsv'
 import ManualMetricsAdmin from './ManualMetricsAdmin'
@@ -30,8 +31,8 @@ export default function ImportHub() {
         <p className="text-xs uppercase tracking-[0.22em] text-brand-primary">Fallback</p>
         <h1 className="mt-2 text-xl font-semibold text-white">Manual import fallback</h1>
         <p className="mb-4 mt-1 max-w-2xl text-sm text-brand-primary">
-          Use this only when Meta Sync is unavailable or when a platform cannot be connected. 
-          <a href="/admin/integrations/meta" className="ml-1 text-brand-accent hover:brightness-110 underline underline-offset-2">Go to Meta Sync</a> for the primary workflow.
+          Use this only when Meta Sync is unavailable or when a platform cannot be connected.
+          <Link to="/admin/integrations/meta" className="ml-1 text-brand-accent hover:brightness-110 underline underline-offset-2">Go to Meta Sync</Link> for the primary workflow.
         </p>
         <div className="flex gap-2 overflow-x-auto">
           {tabs.map(item => (

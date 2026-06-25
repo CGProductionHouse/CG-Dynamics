@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
@@ -107,6 +107,7 @@ function nextActionText(report: Report, monthComplete: boolean, ready: boolean, 
 
 export default function ReportsManagement() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
   const [clients, setClients] = useState<Client[]>([])
@@ -116,7 +117,8 @@ export default function ReportsManagement() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  const [clientFilter, setClientFilter] = useState<string>('all')
+  // Deep link from the Clients page: ?client=<id> pre-filters to that client.
+  const [clientFilter, setClientFilter] = useState<string>(() => searchParams.get('client') ?? 'all')
   const [monthFilter, setMonthFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')

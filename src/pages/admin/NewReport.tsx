@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLocalDraft } from '../../hooks/useLocalDraft'
 import { listClients, readPackageSettings, type Client } from '../../lib/db/clients'
@@ -108,6 +108,7 @@ function deriveLegacyFields(strategy: StrategyData, fields: ReportFields): Repor
 
 export default function NewReport() {
   const { reportId } = useParams()
+  const [searchParams] = useSearchParams()
   const { profile } = useAuth()
   const { getInitialDraft: getReportDraft, saveDraft: saveReportDraft, clearDraft: clearReportDraft, hasDraft: hasReportDraft } =
     useLocalDraft<ReportDraft>(`cg_report_${profile?.id ?? 'anon'}`)
@@ -155,10 +156,15 @@ export default function NewReport() {
           setClients(data)
           if (!reportId) {
             const draft = getReportDraft()
+            // Deep link from the Clients page (?client=<id>) takes precedence so
+            // "New report" opens straight onto that client.
+            const queryClientId = searchParams.get('client')
             const validClientId =
-              draft?.clientId && data.some(c => c.id === draft.clientId)
-                ? draft.clientId
-                : data[0]?.id ?? ''
+              queryClientId && data.some(c => c.id === queryClientId)
+                ? queryClientId
+                : draft?.clientId && data.some(c => c.id === draft.clientId)
+                  ? draft.clientId
+                  : data[0]?.id ?? ''
             setClientId(validClientId)
             if (draft?.fields) setFields(draft.fields)
             if (draft?.strategyData) setStrategyData(readStrategyData(draft.strategyData))
@@ -739,7 +745,7 @@ export default function NewReport() {
         {!performance.hasComparison && (
           <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
             Previous month baseline not synced yet - month-over-month growth will appear once {previousMonthLabel} is synced.
-            The client report hides growth sections until then (it never shows "data not available").
+            The client report simply hides growth sections until then, with no missing-data wording.
           </p>
         )}
 

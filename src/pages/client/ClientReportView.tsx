@@ -375,7 +375,9 @@ function PerformanceCard({ metric }: { metric: PerformanceMetric }) {
       {metric.direction && metric.comparisonLabel ? (
         <GrowthBadge metric={metric} />
       ) : (
-        <p className="mt-3 text-xs font-medium text-slate-500">This month</p>
+        <p className="mt-3 text-xs font-medium text-slate-500">
+          {metric.key === 'current_followers' ? 'Audience base' : 'This month'}
+        </p>
       )}
       <div className="pointer-events-none absolute -bottom-14 -right-14 h-32 w-32 rounded-full bg-[#2dd4bf]/0 blur-3xl transition group-hover:bg-[#2dd4bf]/10" />
     </div>
