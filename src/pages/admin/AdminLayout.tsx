@@ -24,6 +24,9 @@ export default function AdminLayout() {
       <NavLink to="/admin/reports" className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Reports
       </NavLink>
+      <NavLink to="/admin/assistant" className={navClass} onClick={() => setMobileMenuOpen(false)}>
+        CG Assistant
+      </NavLink>
       <NavLink to="/admin/integrations" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
         Integrations
       </NavLink>

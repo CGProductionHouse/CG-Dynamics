@@ -1,5 +1,31 @@
 # React + TypeScript + Vite
 
+## CG Assistant setup
+
+CG Assistant is a staff-facing assistant inside the existing CG Dynamics admin
+portal at `/admin/assistant`.
+
+Required environment:
+
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+OPENAI_API_KEY=
+```
+
+`OPENAI_API_KEY` is server-side only. Set it as a Supabase Edge Function secret,
+not as a `VITE_` variable. If it is missing, the assistant page still loads and
+shows a clear setup message.
+
+Before production use, run `supabase/phase-4b-cg-assistant-audit.sql` in the
+Supabase SQL editor, then deploy `cg-assistant-chat` with the same internal JWT
+verification pattern used by the other Edge Functions.
+
+The first assistant version does not connect live tasks, calendar, client task
+details, Meta, CG Hours, or approvals yet. It refuses confidential finance,
+payroll, bank, Xero/accounting, profit/loss, owner-note, and private HR/payroll
+requests before any AI call.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

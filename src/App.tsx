@@ -22,6 +22,7 @@ import ManualMetricsAdmin from './pages/admin/ManualMetricsAdmin'
 import PublishedPreview from './pages/admin/PublishedPreview'
 import IntegrationsPage from './pages/admin/IntegrationsPage'
 import MetaIntegrationPage from './pages/admin/MetaIntegrationPage'
+import AssistantPage from './pages/admin/AssistantPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -61,6 +62,7 @@ export default function App() {
               {/* Read access for all staff (admin + team) */}
               <Route path="/admin" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
+              <Route path="/admin/assistant" element={<AssistantPage />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
               <Route path="/admin/integrations" element={<IntegrationsPage />} />
               <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />

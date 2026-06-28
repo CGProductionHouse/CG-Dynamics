@@ -33,6 +33,7 @@ supabase secrets set META_APP_ID=<your-meta-app-id>
 supabase secrets set META_APP_SECRET=<your-meta-app-secret>
 supabase secrets set META_REDIRECT_URI=<full-edge-function-url>
 supabase secrets set APP_PUBLIC_URL=https://cg-dynamics.vercel.app
+supabase secrets set OPENAI_API_KEY=<your-openai-api-key>
 ```
 
 `META_REDIRECT_URI` must match exactly what is registered in the Meta App
@@ -42,6 +43,9 @@ settings, e.g.:
 `APP_PUBLIC_URL` is where the browser is redirected after the OAuth callback
 succeeds or fails.
 
+`OPENAI_API_KEY` is used only by the `cg-assistant-chat` Edge Function. It must
+not be added as a `VITE_` browser environment variable.
+
 ## Deploy
 
 ```bash
@@ -49,10 +53,26 @@ supabase functions deploy meta-oauth-start --no-verify-jwt
 supabase functions deploy meta-oauth-callback --no-verify-jwt
 supabase functions deploy meta-connection-status --no-verify-jwt
 supabase functions deploy meta-sync --no-verify-jwt
+supabase functions deploy cg-assistant-chat --no-verify-jwt
 ```
 
 > `--no-verify-jwt` is used because these functions handle their own auth
 > validation internally (JWT verification, role checks, or OAuth redirects).
+
+## Deploy note (cg-assistant-chat)
+
+Before deploying the CG Assistant function, run the repo migration
+`supabase/phase-4b-cg-assistant-audit.sql` in the Supabase SQL editor if audit
+logging should be stored.
+
+```bash
+npx supabase functions deploy cg-assistant-chat --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
+```
+
+The function verifies the caller's JWT internally and enforces staff-level
+access. It refuses confidential finance, payroll, bank, Xero/accounting,
+profit/loss, owner-note, and private HR/payroll requests before calling OpenAI.
+If `OPENAI_API_KEY` is not set, the UI still loads and shows a setup message.
 
 ## Deploy note (meta-list-assets)
 
