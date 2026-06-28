@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { sendAssistantMessage, type AssistantChatMessage, type AssistantToolStatus } from '../../lib/assistant'
@@ -6,12 +6,15 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
 import { Pill } from '../../components/ui/Badges'
 
+const SESSION_KEY = 'cg-assistant-chat-session-v1'
+
 const STARTER_PROMPTS = [
   'What should I focus on today?',
   'Summarise my tasks.',
   'What is urgent?',
   'Help me write a client update.',
   'What can you help with?',
+  'What is connected?',
 ]
 
 const DEFAULT_TOOLS: AssistantToolStatus[] = [
@@ -53,10 +56,57 @@ const DEFAULT_TOOLS: AssistantToolStatus[] = [
   },
 ]
 
-const INITIAL_MESSAGE: AssistantChatMessage = {
-  role: 'assistant',
-  content:
-    'Hi, I am CG Assistant. I can help with operational planning, client updates, prioritisation, and general CG workflow questions. Live task, calendar, approvals, Meta, and CG Hours tools are placeholders in this first version, so I will tell you clearly when something is not connected yet.',
+type LocalAssistantMessage = AssistantChatMessage & {
+  id: string
+  createdAt: string
+  restricted?: boolean
+  setupRequired?: boolean
+}
+
+function createId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function loadSessionMessages(): LocalAssistantMessage[] {
+  try {
+    const raw = window.sessionStorage.getItem(SESSION_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+
+    return parsed.filter((message): message is LocalAssistantMessage => {
+      return (
+        message &&
+        typeof message === 'object' &&
+        typeof message.id === 'string' &&
+        typeof message.content === 'string' &&
+        typeof message.createdAt === 'string' &&
+        (message.role === 'user' || message.role === 'assistant')
+      )
+    })
+  } catch {
+    return []
+  }
+}
+
+function formatTime(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function makeMessage(
+  role: AssistantChatMessage['role'],
+  content: string,
+  options: Pick<LocalAssistantMessage, 'restricted' | 'setupRequired'> = {}
+): LocalAssistantMessage {
+  return {
+    id: createId(),
+    role,
+    content,
+    createdAt: new Date().toISOString(),
+    ...options,
+  }
 }
 
 function toolTone(status: AssistantToolStatus['status']) {
@@ -74,7 +124,7 @@ function roleLabel(role: string | undefined) {
 
 export default function AssistantPage() {
   const { profile } = useAuth()
-  const [messages, setMessages] = useState<AssistantChatMessage[]>([INITIAL_MESSAGE])
+  const [messages, setMessages] = useState<LocalAssistantMessage[]>(loadSessionMessages)
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,37 +132,43 @@ export default function AssistantPage() {
   const [tools, setTools] = useState<AssistantToolStatus[]>(DEFAULT_TOOLS)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
 
-  const assistantHistory = useMemo(
-    () => messages.filter((message) => message.role === 'user' || message.role === 'assistant'),
+  const assistantHistory = useMemo<AssistantChatMessage[]>(
+    () => messages.map(({ role, content, createdAt }) => ({ role, content, createdAt })),
     [messages]
   )
+
+  useEffect(() => {
+    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(messages.slice(-30)))
+  }, [messages])
 
   async function sendMessage(messageText = input) {
     const cleanMessage = messageText.trim()
     if (!cleanMessage || isSending) return
 
-    const nextMessages = [...messages, { role: 'user' as const, content: cleanMessage }]
-    setMessages(nextMessages)
+    const historyBeforeSend = assistantHistory
+    const userMessage = makeMessage('user', cleanMessage)
+
+    setMessages((current) => [...current, userMessage])
     setInput('')
     setError(null)
     setIsSending(true)
 
-    const response = await sendAssistantMessage(cleanMessage, assistantHistory)
+    const response = await sendAssistantMessage(cleanMessage, historyBeforeSend)
 
     setIsSending(false)
     if (response.tools?.length) setTools(response.tools)
     if (response.setupRequired) setSetupRequired(true)
 
-    if (!response.ok && response.error) {
-      setError(response.error)
+    if (!response.ok) {
+      setError(response.error ?? 'CG Assistant could not complete that request. Please try again.')
     }
 
     setMessages((current) => [
       ...current,
-      {
-        role: 'assistant',
-        content: response.answer,
-      },
+      makeMessage('assistant', response.answer, {
+        restricted: response.restricted,
+        setupRequired: response.setupRequired,
+      }),
     ])
 
     window.setTimeout(() => inputRef.current?.focus(), 0)
@@ -123,11 +179,19 @@ export default function AssistantPage() {
     void sendMessage()
   }
 
+  function clearSession() {
+    setMessages([])
+    setError(null)
+    setSetupRequired(false)
+    window.sessionStorage.removeItem(SESSION_KEY)
+    window.setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
   return (
-    <div className="min-h-screen bg-brand-bg p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-brand-bg p-3 sm:p-6 lg:p-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-5">
         <header className="overflow-hidden rounded-2xl border border-brand-muted bg-brand-surface">
-          <div className="border-b border-white/10 bg-gradient-to-r from-brand-muted/70 via-brand-surface to-brand-accent/10 px-5 py-5 sm:px-7">
+          <div className="border-b border-white/10 bg-gradient-to-r from-brand-muted/70 via-brand-surface to-brand-accent/10 px-4 py-5 sm:px-7">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.26em] text-brand-accent">
@@ -137,8 +201,8 @@ export default function AssistantPage() {
                   CG Assistant
                 </h1>
                 <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-primary sm:text-base">
-                  Practical, role-aware help for CG operations. This first version is intentionally guarded and only
-                  uses approved server-side access.
+                  Practical, role-aware help for CG operations. It answers from approved context only and says clearly
+                  when a module is not connected yet.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -147,45 +211,92 @@ export default function AssistantPage() {
               </div>
             </div>
           </div>
-          <div className="px-5 py-4 sm:px-7">
+          <div className="px-4 py-4 sm:px-7">
             <p className="text-sm leading-relaxed text-brand-primary">
-              Confidential finance, payroll, bank details, accounting values, profit/loss, owner notes, and private HR
-              fields are protected. CG Assistant will refuse restricted requests instead of guessing or exposing data.
+              Salary, payroll, bank, Xero, profit/loss, revenue, invoice totals, tax, ID numbers, and personal HR
+              details are protected for staff and managers. CG Assistant will refuse restricted requests instead of
+              guessing or exposing data.
             </p>
           </div>
         </header>
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <PremiumCard padding="none" className="flex min-h-[640px] flex-col overflow-hidden">
+          <PremiumCard padding="none" className="flex min-h-[74vh] flex-col overflow-hidden">
             <div className="border-b border-brand-muted px-4 py-4 sm:px-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-white">Assistant chat</h2>
                   <p className="text-sm text-brand-primary">
-                    Ask for operational help, drafting support, priorities, and workflow guidance.
+                    Ask for priorities, drafts, checklists, operational summaries, or setup status.
                   </p>
                 </div>
-                {setupRequired && (
-                  <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200">
-                    OpenAI key needed
-                  </span>
-                )}
+                <div className="flex flex-wrap gap-2">
+                  {setupRequired && (
+                    <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200">
+                      OpenAI key needed
+                    </span>
+                  )}
+                  {messages.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearSession}
+                      className="rounded-full border border-brand-muted px-3 py-1 text-xs font-semibold text-brand-primary hover:border-white/30 hover:text-white"
+                    >
+                      Clear chat
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
-              {messages.map((message, index) => {
+              {messages.length === 0 && (
+                <div className="mx-auto flex min-h-[22rem] max-w-2xl flex-col items-center justify-center rounded-2xl border border-brand-muted bg-brand-bg/50 px-5 py-8 text-center">
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-accent">
+                    Ready when you are
+                  </p>
+                  <h3 className="mt-3 text-2xl font-black text-white">Start with an operational question</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-brand-primary">
+                    CG Assistant can help draft client updates, plan priorities, explain what is connected, and create
+                    practical checklists. It will not invent task or finance data.
+                  </p>
+                  <div className="mt-5 flex flex-wrap justify-center gap-2">
+                    {STARTER_PROMPTS.slice(0, 4).map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        onClick={() => void sendMessage(prompt)}
+                        disabled={isSending}
+                        className="rounded-full border border-brand-muted bg-brand-surface px-3 py-1.5 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-accent/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {messages.map((message) => {
                 const isUser = message.role === 'user'
                 return (
-                  <div key={`${message.role}-${index}`} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                      className={`max-w-[min(44rem,92%)] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
-                        isUser
-                          ? 'bg-brand-accent text-brand-bg'
-                          : 'border border-brand-muted bg-brand-bg/70 text-brand-primary'
-                      }`}
-                    >
-                      <p className="whitespace-pre-wrap">{message.content}</p>
+                  <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[min(44rem,92%)] ${isUser ? 'items-end' : 'items-start'}`}>
+                      <div
+                        className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                          isUser
+                            ? 'bg-brand-accent text-brand-bg'
+                            : message.restricted
+                              ? 'border border-amber-400/30 bg-amber-400/10 text-amber-100'
+                              : message.setupRequired
+                                ? 'border border-sky-300/30 bg-sky-300/10 text-sky-100'
+                                : 'border border-brand-muted bg-brand-bg/70 text-brand-primary'
+                        }`}
+                      >
+                        <p className="whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                      <p className={`mt-1 px-1 text-[11px] text-brand-primary/60 ${isUser ? 'text-right' : ''}`}>
+                        {isUser ? 'You' : 'CG Assistant'} {formatTime(message.createdAt)}
+                      </p>
                     </div>
                   </div>
                 )
@@ -194,7 +305,10 @@ export default function AssistantPage() {
               {isSending && (
                 <div className="flex justify-start">
                   <div className="rounded-2xl border border-brand-muted bg-brand-bg/70 px-4 py-3 text-sm text-brand-primary">
-                    CG Assistant is thinking...
+                    <div className="flex items-center gap-3">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
+                      <span>Checking access and preparing a short answer...</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -202,19 +316,19 @@ export default function AssistantPage() {
 
             {error && (
               <div className="border-t border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200 sm:px-5">
-                {error}
+                {error} If this keeps happening, confirm the Edge Function is deployed and the user is signed in.
               </div>
             )}
 
             <div className="border-t border-brand-muted bg-brand-surface/90 px-4 py-4 sm:px-5">
-              <div className="mb-3 flex flex-wrap gap-2">
+              <div className="mb-3 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
                 {STARTER_PROMPTS.map((prompt) => (
                   <button
                     key={prompt}
                     type="button"
                     onClick={() => void sendMessage(prompt)}
                     disabled={isSending}
-                    className="rounded-full border border-brand-muted bg-brand-bg/60 px-3 py-1.5 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-accent/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    className="shrink-0 rounded-full border border-brand-muted bg-brand-bg/60 px-3 py-1.5 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-accent/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {prompt}
                   </button>
@@ -231,13 +345,19 @@ export default function AssistantPage() {
                   placeholder="Ask CG Assistant for operational help..."
                   className="min-h-[4.5rem] flex-1 resize-none rounded-xl border border-brand-muted bg-brand-bg px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-brand-primary/60 focus:border-brand-accent"
                 />
-                <ActionButton type="submit" loading={isSending} disabled={!input.trim()} className="sm:self-end">
+                <ActionButton
+                  type="submit"
+                  loading={isSending}
+                  disabled={!input.trim()}
+                  fullWidth
+                  className="sm:w-auto sm:self-end"
+                >
                   Send
                 </ActionButton>
               </form>
               <p className="mt-2 text-xs text-brand-primary/70">
-                Keep requests operational. The assistant does not have access to private finance, payroll, or owner-only
-                notes.
+                Session history stays in this browser tab. Keep requests operational and avoid pasting confidential
+                payroll, finance, or private HR details.
               </p>
             </div>
           </PremiumCard>
@@ -245,9 +365,9 @@ export default function AssistantPage() {
           <aside className="space-y-5">
             <PremiumCard>
               <PremiumCardHeader
-                eyebrow="Guardrails"
+                eyebrow="Capabilities"
                 title="What is connected"
-                subtitle="This foundation keeps tools explicit so future integrations can be added safely."
+                subtitle="The assistant is ready for safe tool connections, but this version does not fake live data."
               />
               <div className="space-y-3">
                 {tools.map((tool) => (
@@ -268,12 +388,12 @@ export default function AssistantPage() {
               <PremiumCardHeader
                 eyebrow="Access"
                 title="Role-aware answers"
-                subtitle="Owner, admin, manager, and staff paths are separated before any AI response is generated."
+                subtitle="The server checks role and protected topics before any AI response."
               />
               <ul className="space-y-2 text-sm leading-relaxed text-brand-primary">
-                <li>Staff: own work, visible project task context, public schedule, and general operational help.</li>
-                <li>Managers: team workload, task status, approvals, and non-financial summaries when connected.</li>
-                <li>Owner/admin: future full assistant tools, while confidential finance remains protected here.</li>
+                <li>Staff: general operational help and future own-task/public-schedule context.</li>
+                <li>Managers: future team workload, status, and approvals without finance or payroll details.</li>
+                <li>Owner/admin: setup planning is allowed, but unavailable finance data is never invented.</li>
               </ul>
             </PremiumCard>
           </aside>

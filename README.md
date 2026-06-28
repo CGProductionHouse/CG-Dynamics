@@ -17,14 +17,42 @@ OPENAI_API_KEY=
 not as a `VITE_` variable. If it is missing, the assistant page still loads and
 shows a clear setup message.
 
-Before production use, run `supabase/phase-4b-cg-assistant-audit.sql` in the
-Supabase SQL editor, then deploy `cg-assistant-chat` with the same internal JWT
-verification pattern used by the other Edge Functions.
+Set the OpenAI key:
+
+```bash
+supabase secrets set OPENAI_API_KEY=<your-openai-api-key>
+```
+
+Run the audit migration in the Supabase SQL editor:
+
+```sql
+-- supabase/phase-4b-cg-assistant-audit.sql
+```
+
+Deploy the Edge Function:
+
+```bash
+npx supabase functions deploy cg-assistant-chat --project-ref <project-ref> --no-verify-jwt
+```
+
+The function verifies the caller's JWT internally, so `--no-verify-jwt` matches
+the existing internal-auth pattern used by the Meta functions.
 
 The first assistant version does not connect live tasks, calendar, client task
 details, Meta, CG Hours, or approvals yet. It refuses confidential finance,
-payroll, bank, Xero/accounting, profit/loss, owner-note, and private HR/payroll
-requests before any AI call.
+payroll, bank, Xero/accounting, profit/loss, revenue, invoice totals, tax, ID
+numbers, owner-note, and private HR/payroll requests before any AI call.
+
+Role restriction test prompts:
+
+- Staff/manager: ask for payroll, salary, Xero, revenue, invoice totals, tax,
+  bank details, ID numbers, or personal HR details. The assistant should refuse.
+- Owner/admin: ask how future finance access should be set up. The assistant
+  may give setup guidance, but must not invent unavailable finance values.
+- Any staff role: ask "What can you help with?" or "What is connected?" The
+  assistant should list connected guardrails and pending modules.
+- Any staff role: ask "Summarise my tasks." The assistant should say the task
+  module is not connected yet and offer a safe workflow.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

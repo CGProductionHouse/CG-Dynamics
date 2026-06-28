@@ -65,14 +65,34 @@ Before deploying the CG Assistant function, run the repo migration
 `supabase/phase-4b-cg-assistant-audit.sql` in the Supabase SQL editor if audit
 logging should be stored.
 
+Set the OpenAI secret server-side only:
+
+```bash
+supabase secrets set OPENAI_API_KEY=<your-openai-api-key>
+```
+
 ```bash
 npx supabase functions deploy cg-assistant-chat --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
 ```
 
 The function verifies the caller's JWT internally and enforces staff-level
-access. It refuses confidential finance, payroll, bank, Xero/accounting,
-profit/loss, owner-note, and private HR/payroll requests before calling OpenAI.
-If `OPENAI_API_KEY` is not set, the UI still loads and shows a setup message.
+access. It refuses confidential finance, payroll, salary, bank, Xero/accounting,
+profit/loss, revenue, invoice totals, tax, ID numbers, owner-note, and private
+HR/payroll requests before calling OpenAI for staff and manager roles. Owner and
+admin users may ask general future setup questions, but the function still will
+not invent unavailable finance values. If `OPENAI_API_KEY` is not set, the UI
+still loads and shows a setup message.
+
+Role restriction smoke tests:
+- Staff/manager asking for salary, payroll, Xero, bank, profit/loss, revenue,
+  invoice totals, tax, ID numbers, or personal HR details should receive a
+  refusal.
+- Owner/admin asking how to safely configure a future finance integration should
+  receive setup guidance without live values.
+- "What can you help with?", "What is connected?", and "What is not connected
+  yet?" should return the safe capabilities response.
+- "Summarise my tasks." should return "Task module not connected yet" and must
+  not fake task data.
 
 ## Deploy note (meta-list-assets)
 

@@ -5,6 +5,7 @@ export type AssistantRole = 'user' | 'assistant'
 export interface AssistantChatMessage {
   role: AssistantRole
   content: string
+  createdAt?: string
 }
 
 export interface AssistantToolStatus {
