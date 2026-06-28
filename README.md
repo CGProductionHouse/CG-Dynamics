@@ -96,6 +96,25 @@ Role restriction test prompts:
 - Provider limits: if a free provider rate-limits, the router should try the
   next configured provider before returning the clean unavailable message.
 
+Launch checklist:
+
+- Merge the assistant branch after review.
+- Set Supabase Edge Function secrets for the chosen providers.
+- Deploy `cg-assistant-chat`.
+- Run `supabase/phase-4b-cg-assistant-audit.sql` in the Supabase SQL editor.
+- Sign in as admin and open `/admin/assistant`.
+- Use the admin-only diagnostics panel to refresh setup status and test the AI
+  provider.
+- Confirm staff/team users cannot see diagnostics.
+- Test staff restriction prompts for payroll, salary, Xero, bank, profit/loss,
+  revenue, invoice totals, tax, ID numbers, and personal HR details.
+- Test provider fallback by making the first configured provider invalid while a
+  later provider is valid.
+- Test missing provider keys by temporarily removing provider secrets in a safe
+  non-production environment.
+- Test the assistant on mobile widths.
+- Confirm the Vercel build still passes.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

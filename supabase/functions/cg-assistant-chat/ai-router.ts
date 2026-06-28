@@ -11,6 +11,13 @@ export interface AiRouterResult {
   model: string
 }
 
+export interface AiProviderDiagnostic {
+  provider: AiProviderName
+  model: string
+  configured: boolean
+  keyStatus: 'configured' | 'missing'
+}
+
 interface ProviderConfig {
   name: AiProviderName
   apiKey: string | null
@@ -62,6 +69,23 @@ function providerOrder(): AiProviderName[] {
     })
 
   return requested.length > 0 ? requested : DEFAULT_PROVIDER_ORDER
+}
+
+export function getProviderOrder(): AiProviderName[] {
+  return providerOrder()
+}
+
+export function getProviderDiagnostics(): AiProviderDiagnostic[] {
+  return DEFAULT_PROVIDER_ORDER.map((name) => {
+    const config = providerConfig(name)
+    const configured = Boolean(config.apiKey)
+    return {
+      provider: name,
+      model: config.model,
+      configured,
+      keyStatus: configured ? 'configured' : 'missing',
+    }
+  })
 }
 
 function maxAttempts(): number {

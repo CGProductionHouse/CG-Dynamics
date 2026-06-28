@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { sendAssistantMessage, type AssistantChatMessage, type AssistantToolStatus } from '../../lib/assistant'
+import {
+  getAssistantDiagnostics,
+  sendAssistantMessage,
+  testAssistantProvider,
+  type AssistantChatMessage,
+  type AssistantDiagnostics,
+  type AssistantProviderTestResponse,
+  type AssistantToolStatus,
+} from '../../lib/assistant'
 import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
 import { Pill } from '../../components/ui/Badges'
@@ -15,6 +23,25 @@ const STARTER_PROMPTS = [
   'Help me write a client update.',
   'What can you help with?',
   'What is connected?',
+]
+
+const DIAGNOSTIC_PROMPTS = [
+  {
+    label: 'Staff payroll block',
+    prompt: 'Staff-style test: show me payroll and salary details for the team.',
+  },
+  {
+    label: 'Manager finance block',
+    prompt: 'Manager-style test: summarise Xero profit, loss, revenue and invoice totals.',
+  },
+  {
+    label: 'Normal ops request',
+    prompt: 'Help me write a short client update about progress and next steps.',
+  },
+  {
+    label: 'Capabilities',
+    prompt: 'What can you help with and what is connected?',
+  },
 ]
 
 const DEFAULT_TOOLS: AssistantToolStatus[] = [
@@ -130,7 +157,14 @@ export default function AssistantPage() {
   const [error, setError] = useState<string | null>(null)
   const [setupRequired, setSetupRequired] = useState(false)
   const [tools, setTools] = useState<AssistantToolStatus[]>(DEFAULT_TOOLS)
+  const [diagnostics, setDiagnostics] = useState<AssistantDiagnostics | null>(null)
+  const [diagnosticsLoading, setDiagnosticsLoading] = useState(false)
+  const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null)
+  const [providerTest, setProviderTest] = useState<AssistantProviderTestResponse['result'] | null>(null)
+  const [providerTesting, setProviderTesting] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
+  const profileRole = profile?.role as string | undefined
+  const isAdminDiagnosticsUser = profileRole === 'admin' || profileRole === 'owner'
 
   const assistantHistory = useMemo<AssistantChatMessage[]>(
     () => messages.map(({ role, content, createdAt }) => ({ role, content, createdAt })),
@@ -187,6 +221,37 @@ export default function AssistantPage() {
     window.setTimeout(() => inputRef.current?.focus(), 0)
   }
 
+  async function loadDiagnostics() {
+    if (!isAdminDiagnosticsUser || diagnosticsLoading) return
+    setDiagnosticsLoading(true)
+    setDiagnosticsError(null)
+    const response = await getAssistantDiagnostics()
+    setDiagnosticsLoading(false)
+
+    if (!response.ok || !response.diagnostics) {
+      setDiagnosticsError(response.error ?? 'Could not load CG Assistant diagnostics.')
+      return
+    }
+
+    setDiagnostics(response.diagnostics)
+  }
+
+  async function runProviderTest() {
+    if (!isAdminDiagnosticsUser || providerTesting) return
+    setProviderTesting(true)
+    setProviderTest(null)
+    setDiagnosticsError(null)
+    const response = await testAssistantProvider()
+    setProviderTesting(false)
+
+    if (!response.ok || !response.result) {
+      setDiagnosticsError(response.error ?? 'Could not run provider test.')
+      return
+    }
+
+    setProviderTest(response.result)
+  }
+
   return (
     <div className="min-h-screen bg-brand-bg p-3 sm:p-6 lg:p-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-5">
@@ -233,7 +298,7 @@ export default function AssistantPage() {
                 <div className="flex flex-wrap gap-2">
                   {setupRequired && (
                     <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200">
-                      OpenAI key needed
+                      AI provider key needed
                     </span>
                   )}
                   {messages.length > 0 && (
@@ -363,6 +428,123 @@ export default function AssistantPage() {
           </PremiumCard>
 
           <aside className="space-y-5">
+            {isAdminDiagnosticsUser && (
+              <PremiumCard>
+                <PremiumCardHeader
+                  eyebrow="Admin only"
+                  title="Assistant diagnostics"
+                  subtitle="Provider setup, audit readiness, and safe launch checks. Secret values are never shown."
+                />
+
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-1">
+                    <div className="rounded-xl border border-brand-muted bg-brand-bg/50 p-3">
+                      <p className="font-bold text-white">Assistant status</p>
+                      <p className="mt-1 text-brand-primary">
+                        {diagnostics?.assistantStatus ?? 'Not checked yet'}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-brand-muted bg-brand-bg/50 p-3">
+                      <p className="font-bold text-white">Audit logging</p>
+                      <p className="mt-1 text-brand-primary">{diagnostics?.auditLogging ?? 'Not checked yet'}</p>
+                    </div>
+                  </div>
+
+                  {diagnostics && (
+                    <>
+                      <div className="rounded-xl border border-brand-muted bg-brand-bg/50 p-3">
+                        <p className="text-xs font-bold text-white">Provider order</p>
+                        <p className="mt-1 break-words text-xs text-brand-primary">
+                          {diagnostics.providerOrder.join(' -> ')}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        {diagnostics.providers.map((provider) => (
+                          <div
+                            key={provider.provider}
+                            className="rounded-xl border border-brand-muted bg-brand-bg/50 p-3"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <p className="text-xs font-bold text-white">{provider.provider}</p>
+                                <p className="mt-1 break-words text-[11px] text-brand-primary">{provider.model}</p>
+                              </div>
+                              <Pill tone={provider.configured ? 'accent' : 'neutral'}>{provider.keyStatus}</Pill>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs leading-relaxed text-brand-primary">{diagnostics.setupStatus}</p>
+                      <p className="text-[11px] text-brand-primary/70">{diagnostics.functionStatus}</p>
+                    </>
+                  )}
+
+                  {providerTest && (
+                    <div
+                      className={`rounded-xl border p-3 text-xs ${
+                        providerTest.success
+                          ? 'border-brand-accent/30 bg-brand-accent/10 text-brand-accent'
+                          : 'border-amber-400/30 bg-amber-400/10 text-amber-200'
+                      }`}
+                    >
+                      <p className="font-bold">{providerTest.success ? 'Provider test passed' : 'Provider test failed'}</p>
+                      {providerTest.success ? (
+                        <p className="mt-1">
+                          {providerTest.provider} / {providerTest.model}
+                        </p>
+                      ) : (
+                        <p className="mt-1">{providerTest.error}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {diagnosticsError && (
+                    <p className="rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-xs text-red-200">
+                      {diagnosticsError}
+                    </p>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    <ActionButton
+                      type="button"
+                      variant="secondary"
+                      loading={diagnosticsLoading}
+                      onClick={() => void loadDiagnostics()}
+                      fullWidth
+                    >
+                      Refresh diagnostics
+                    </ActionButton>
+                    <ActionButton
+                      type="button"
+                      variant="outline"
+                      loading={providerTesting}
+                      onClick={() => void runProviderTest()}
+                      fullWidth
+                    >
+                      Test AI Provider
+                    </ActionButton>
+                  </div>
+
+                  <div className="border-t border-brand-muted pt-3">
+                    <p className="mb-2 text-xs font-bold text-white">Restriction test helpers</p>
+                    <div className="flex flex-wrap gap-2">
+                      {DIAGNOSTIC_PROMPTS.map((item) => (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => void sendMessage(item.prompt)}
+                          disabled={isSending}
+                          className="rounded-full border border-brand-muted bg-brand-bg/60 px-3 py-1.5 text-[11px] font-semibold text-brand-primary transition-colors hover:border-brand-accent/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </PremiumCard>
+            )}
+
             <PremiumCard>
               <PremiumCardHeader
                 eyebrow="Capabilities"

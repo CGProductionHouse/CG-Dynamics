@@ -136,6 +136,25 @@ Role restriction smoke tests:
   configured provider, then return the clean unavailable message only if all
   configured providers fail.
 
+Launch checklist:
+- Merge the assistant branch after review.
+- Set Supabase secrets for OpenRouter, Gemini, Groq, and OpenAI fallback as
+  needed.
+- Deploy `cg-assistant-chat`.
+- Run `supabase/phase-4b-cg-assistant-audit.sql` in the Supabase SQL editor.
+- Sign in as admin and confirm `/admin/assistant` shows the diagnostics panel.
+- Run "Refresh diagnostics" and "Test AI Provider".
+- Confirm staff/team users do not see diagnostics and cannot call diagnostics
+  actions.
+- Confirm staff restriction prompts refuse payroll, salary, Xero, bank,
+  profit/loss, revenue, invoice totals, tax, ID numbers, and personal HR
+  details.
+- Test provider fallback with an invalid first provider key and a valid later
+  provider key.
+- Test missing provider keys in a safe non-production environment.
+- Check the assistant mobile layout.
+- Confirm the Vercel build passes.
+
 ## Deploy note (meta-list-assets)
 
 This function must be deployed after the code is merged:

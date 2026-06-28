@@ -1,6 +1,11 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { routeAiChat, type AiChatMessage } from './ai-router.ts'
+import {
+  getProviderDiagnostics,
+  getProviderOrder,
+  routeAiChat,
+  type AiChatMessage,
+} from './ai-router.ts'
 
 const MAX_MESSAGE_CHARS = 2000
 const MAX_HISTORY_MESSAGES = 8
@@ -120,6 +125,20 @@ const SETUP_QUESTION_PATTERNS = [
   /\bpermissions?\b/i,
 ]
 
+type AssistantAction = 'chat' | 'diagnostics' | 'test_provider'
+
+interface AuditValues {
+  userId: string
+  role: string
+  message: string
+  responseStatus: string
+  restricted: boolean
+  promptCategory: string
+  model?: string | null
+  errorMessage?: string | null
+  redactPrompt?: boolean
+}
+
 function normalizeMessage(value: unknown): string {
   if (typeof value !== 'string') return ''
   return value.trim().slice(0, MAX_MESSAGE_CHARS)
@@ -163,6 +182,17 @@ function isSetupQuestion(message: string): boolean {
 
 function isPrivilegedRole(role: string): boolean {
   return role === 'owner' || role === 'admin'
+}
+
+function normalizeAction(value: unknown): AssistantAction {
+  if (value === 'diagnostics') return 'diagnostics'
+  if (value === 'test_provider') return 'test_provider'
+  return 'chat'
+}
+
+function auditMessage(message: string, redactPrompt: boolean): string {
+  if (redactPrompt) return '[restricted prompt redacted]'
+  return message.slice(0, MAX_MESSAGE_CHARS)
 }
 
 function getTaskLookupPlaceholder() {
@@ -255,21 +285,14 @@ function buildSystemPrompt(role: string): string {
 
 async function auditAssistantRequest(
   sb: ReturnType<typeof createClient>,
-  values: {
-    userId: string
-    role: string
-    message: string
-    responseStatus: string
-    restricted: boolean
-    model?: string | null
-    errorMessage?: string | null
-  }
+  values: AuditValues
 ) {
   try {
     await sb.from('cg_assistant_audit_logs').insert({
       user_id: values.userId,
       role: values.role,
-      message: values.message.slice(0, MAX_MESSAGE_CHARS),
+      message: auditMessage(values.message, Boolean(values.redactPrompt)),
+      prompt_category: values.promptCategory,
       response_status: values.responseStatus,
       restricted: values.restricted,
       model: values.model ?? 'ai-router',
@@ -278,6 +301,101 @@ async function auditAssistantRequest(
     })
   } catch {
     // Audit logging is best-effort until the migration has been applied.
+  }
+}
+
+async function auditStatus(sb: ReturnType<typeof createClient>): Promise<'available' | 'pending'> {
+  try {
+    const { error } = await sb
+      .from('cg_assistant_audit_logs')
+      .select('id, prompt_category', { head: true, count: 'exact' })
+      .limit(1)
+
+    return error ? 'pending' : 'available'
+  } catch {
+    return 'pending'
+  }
+}
+
+async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
+  const providers = getProviderDiagnostics()
+  const configuredProviders = providers.filter((provider) => provider.configured).length
+  const auditLogging = await auditStatus(sb)
+
+  return jsonResponse({
+    ok: true,
+    diagnostics: {
+      assistantStatus: configuredProviders > 0 ? 'ready' : 'setup_required',
+      setupStatus:
+        configuredProviders > 0
+          ? 'At least one AI provider key appears configured.'
+          : 'No AI provider key appears configured yet.',
+      providers: providers.map((provider) => ({
+        provider: provider.provider,
+        model: provider.model,
+        configured: provider.configured,
+        keyStatus: provider.configured ? 'configured (masked)' : 'missing',
+      })),
+      providerOrder: getProviderOrder(),
+      auditLogging,
+      functionStatus: 'cg-assistant-chat reachable',
+    },
+  })
+}
+
+async function handleProviderTest(sb: ReturnType<typeof createClient>, userId: string, role: string) {
+  const messages: AiChatMessage[] = [
+    {
+      role: 'system',
+      content:
+        'You are CG Assistant. This is an admin diagnostics check. Reply with exactly: CG Assistant online.',
+    },
+    { role: 'user', content: 'Reply with CG Assistant online.' },
+  ]
+
+  try {
+    const result = await routeAiChat(messages)
+    await auditAssistantRequest(sb, {
+      userId,
+      role,
+      message: '[admin provider diagnostics test]',
+      promptCategory: 'diagnostic_provider_test',
+      responseStatus: 'provider_test_success',
+      restricted: false,
+      model: `${result.provider}:${result.model}`,
+    })
+
+    return jsonResponse({
+      ok: true,
+      result: {
+        success: true,
+        provider: result.provider,
+        model: result.model,
+        message: result.content,
+      },
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown provider diagnostics error.'
+    await auditAssistantRequest(sb, {
+      userId,
+      role,
+      message: '[admin provider diagnostics test]',
+      promptCategory: 'diagnostic_provider_test',
+      responseStatus: 'provider_test_failed',
+      restricted: false,
+      model: 'ai-router',
+      errorMessage: errorMessage.slice(0, 500),
+    })
+
+    return jsonResponse({
+      ok: true,
+      result: {
+        success: false,
+        error: errorMessage === 'NO_AI_PROVIDER_KEYS'
+          ? 'No AI provider key is configured.'
+          : 'No AI provider is currently available. Check provider keys, limits, or logs.',
+      },
+    })
   }
 }
 
@@ -324,6 +442,22 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400)
   }
 
+  const action = normalizeAction(body.action)
+
+  if (action !== 'chat') {
+    if (!isPrivilegedRole(role)) {
+      return jsonResponse({ ok: false, error: 'Admin diagnostics access required.' }, 403)
+    }
+
+    if (action === 'diagnostics') {
+      return await handleDiagnostics(sb)
+    }
+
+    if (action === 'test_provider') {
+      return await handleProviderTest(sb, user.id, role)
+    }
+  }
+
   const message = normalizeMessage(body.message)
   const history = normalizeHistory(body.history)
 
@@ -341,7 +475,9 @@ Deno.serve(async (req) => {
       message,
       responseStatus: setupAllowed ? 'restricted_setup_guidance' : 'restricted',
       restricted: !setupAllowed,
+      promptCategory: setupAllowed ? 'restricted_setup' : 'restricted',
       model: 'local:restricted_guard',
+      redactPrompt: true,
     })
 
     return jsonResponse({
@@ -361,6 +497,7 @@ Deno.serve(async (req) => {
       message,
       responseStatus: 'capabilities',
       restricted: false,
+      promptCategory: 'capabilities',
       model: 'local:capabilities',
     })
 
@@ -380,6 +517,7 @@ Deno.serve(async (req) => {
       message,
       responseStatus: 'task_module_not_connected',
       restricted: false,
+      promptCategory: 'task_placeholder',
       model: 'local:task_placeholder',
     })
 
@@ -404,6 +542,7 @@ Deno.serve(async (req) => {
       message,
       responseStatus: 'success',
       restricted: false,
+      promptCategory: 'chat',
       model: `${result.provider}:${result.model}`,
     })
 
@@ -425,6 +564,7 @@ Deno.serve(async (req) => {
       message,
       responseStatus: noKeys ? 'setup_required' : 'provider_unavailable',
       restricted: false,
+      promptCategory: 'chat',
       model: 'ai-router',
       errorMessage: errorMessage.slice(0, 500),
     })

@@ -13,6 +13,7 @@ create table if not exists cg_assistant_audit_logs (
   user_id uuid references profiles(id) on delete set null,
   role text,
   message text not null,
+  prompt_category text,
   response_status text not null,
   restricted boolean not null default false,
   model text,
@@ -20,6 +21,9 @@ create table if not exists cg_assistant_audit_logs (
   error_message text,
   created_at timestamptz not null default now()
 );
+
+alter table cg_assistant_audit_logs
+  add column if not exists prompt_category text;
 
 alter table cg_assistant_audit_logs enable row level security;
 
