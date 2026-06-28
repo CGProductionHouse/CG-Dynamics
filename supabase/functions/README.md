@@ -33,7 +33,16 @@ supabase secrets set META_APP_ID=<your-meta-app-id>
 supabase secrets set META_APP_SECRET=<your-meta-app-secret>
 supabase secrets set META_REDIRECT_URI=<full-edge-function-url>
 supabase secrets set APP_PUBLIC_URL=https://cg-dynamics.vercel.app
+supabase secrets set OPENROUTER_API_KEY=<your-openrouter-api-key>
+supabase secrets set OPENROUTER_MODEL=openrouter/free
+supabase secrets set GEMINI_API_KEY=<your-gemini-api-key>
+supabase secrets set GEMINI_MODEL=gemini-2.5-flash-lite
+supabase secrets set GROQ_API_KEY=<your-groq-api-key>
+supabase secrets set GROQ_MODEL=llama-3.1-8b-instant
 supabase secrets set OPENAI_API_KEY=<your-openai-api-key>
+supabase secrets set OPENAI_MODEL=gpt-4o-mini
+supabase secrets set AI_PROVIDER_ORDER=openrouter,gemini,groq,openai
+supabase secrets set AI_MAX_FALLBACKS=3
 ```
 
 `META_REDIRECT_URI` must match exactly what is registered in the Meta App
@@ -43,8 +52,8 @@ settings, e.g.:
 `APP_PUBLIC_URL` is where the browser is redirected after the OAuth callback
 succeeds or fails.
 
-`OPENAI_API_KEY` is used only by the `cg-assistant-chat` Edge Function. It must
-not be added as a `VITE_` browser environment variable.
+AI provider keys are used only by the `cg-assistant-chat` Edge Function. They
+must not be added as `VITE_` browser environment variables.
 
 ## Deploy
 
@@ -65,11 +74,37 @@ Before deploying the CG Assistant function, run the repo migration
 `supabase/phase-4b-cg-assistant-audit.sql` in the Supabase SQL editor if audit
 logging should be stored.
 
-Set the OpenAI secret server-side only:
+Set provider secrets server-side only. Recommended order is OpenRouter first,
+then Gemini, then Groq, then OpenAI as paid fallback:
 
 ```bash
+supabase secrets set OPENROUTER_API_KEY=<your-openrouter-api-key>
+supabase secrets set OPENROUTER_MODEL=openrouter/free
+supabase secrets set GEMINI_API_KEY=<your-gemini-api-key>
+supabase secrets set GEMINI_MODEL=gemini-2.5-flash-lite
+supabase secrets set GROQ_API_KEY=<your-groq-api-key>
+supabase secrets set GROQ_MODEL=llama-3.1-8b-instant
 supabase secrets set OPENAI_API_KEY=<your-openai-api-key>
+supabase secrets set OPENAI_MODEL=gpt-4o-mini
+supabase secrets set AI_PROVIDER_ORDER=openrouter,gemini,groq,openai
+supabase secrets set AI_MAX_FALLBACKS=3
 ```
+
+Provider variables:
+- `OPENROUTER_API_KEY` / `OPENROUTER_MODEL` route OpenRouter free/low-cost
+  model calls through the OpenAI-compatible chat completions endpoint.
+- `GEMINI_API_KEY` / `GEMINI_MODEL` route Gemini API calls.
+- `GROQ_API_KEY` / `GROQ_MODEL` route Groq OpenAI-compatible calls.
+- `OPENAI_API_KEY` / `OPENAI_MODEL` are paid OpenAI fallback only when
+  configured and earlier providers fail.
+- `AI_PROVIDER_ORDER` controls provider priority.
+- `AI_MAX_FALLBACKS=3` allows the default four-provider chain to try the first
+  provider plus three fallbacks.
+
+ChatGPT Plus/Pro subscriptions do not power API usage. Each API provider needs
+its own key, billing/quota setup, and rate-limit handling. Free models may be
+useful for testing or low-cost staff help, but they are not guaranteed
+production capacity.
 
 ```bash
 npx supabase functions deploy cg-assistant-chat --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
@@ -78,10 +113,10 @@ npx supabase functions deploy cg-assistant-chat --project-ref ehtjfntukiwbgptqgb
 The function verifies the caller's JWT internally and enforces staff-level
 access. It refuses confidential finance, payroll, salary, bank, Xero/accounting,
 profit/loss, revenue, invoice totals, tax, ID numbers, owner-note, and private
-HR/payroll requests before calling OpenAI for staff and manager roles. Owner and
-admin users may ask general future setup questions, but the function still will
-not invent unavailable finance values. If `OPENAI_API_KEY` is not set, the UI
-still loads and shows a setup message.
+HR/payroll requests before routing to any AI provider for staff and manager
+roles. Owner and admin users may ask general future setup questions, but the
+function still will not invent unavailable finance values. If no provider key is
+set, the UI still loads and shows a setup message.
 
 Role restriction smoke tests:
 - Staff/manager asking for salary, payroll, Xero, bank, profit/loss, revenue,
@@ -93,6 +128,13 @@ Role restriction smoke tests:
   yet?" should return the safe capabilities response.
 - "Summarise my tasks." should return "Task module not connected yet" and must
   not fake task data.
+- Remove all provider keys and ask a normal operational question. The assistant
+  should say no AI provider key is configured.
+- Set the first provider key invalid while a later provider is valid. Server
+  logs should show the first provider failing and the later provider/model used.
+- Exhaust or rate-limit a free provider. The router should try the next
+  configured provider, then return the clean unavailable message only if all
+  configured providers fail.
 
 ## Deploy note (meta-list-assets)
 

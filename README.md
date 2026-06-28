@@ -10,18 +10,53 @@ Required environment:
 ```bash
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
+OPENROUTER_API_KEY=
+OPENROUTER_MODEL=openrouter/free
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash-lite
+GROQ_API_KEY=
+GROQ_MODEL=llama-3.1-8b-instant
 OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4o-mini
+AI_PROVIDER_ORDER=openrouter,gemini,groq,openai
+AI_MAX_FALLBACKS=3
 ```
 
-`OPENAI_API_KEY` is server-side only. Set it as a Supabase Edge Function secret,
-not as a `VITE_` variable. If it is missing, the assistant page still loads and
-shows a clear setup message.
+AI provider keys are server-side only. Set them as Supabase Edge Function
+secrets, not as `VITE_` browser variables. If no provider key is configured, the
+assistant page still loads and shows a clear setup message.
 
-Set the OpenAI key:
+Provider variables:
+
+- `OPENROUTER_API_KEY` / `OPENROUTER_MODEL`: OpenRouter chat completions, useful
+  for free or low-cost models first.
+- `GEMINI_API_KEY` / `GEMINI_MODEL`: Google Gemini fallback.
+- `GROQ_API_KEY` / `GROQ_MODEL`: Groq OpenAI-compatible fallback.
+- `OPENAI_API_KEY` / `OPENAI_MODEL`: paid OpenAI fallback only when configured
+  and earlier providers fail.
+- `AI_PROVIDER_ORDER`: comma-separated routing order.
+- `AI_MAX_FALLBACKS`: number of fallback hops after the first provider. `3`
+  allows trying all four default providers.
+
+Recommended setup order:
 
 ```bash
+supabase secrets set OPENROUTER_API_KEY=<your-openrouter-api-key>
+supabase secrets set OPENROUTER_MODEL=openrouter/free
+supabase secrets set GEMINI_API_KEY=<your-gemini-api-key>
+supabase secrets set GEMINI_MODEL=gemini-2.5-flash-lite
+supabase secrets set GROQ_API_KEY=<your-groq-api-key>
+supabase secrets set GROQ_MODEL=llama-3.1-8b-instant
 supabase secrets set OPENAI_API_KEY=<your-openai-api-key>
+supabase secrets set OPENAI_MODEL=gpt-4o-mini
+supabase secrets set AI_PROVIDER_ORDER=openrouter,gemini,groq,openai
+supabase secrets set AI_MAX_FALLBACKS=3
 ```
+
+ChatGPT Plus/Pro subscriptions do not power API usage. API providers require
+their own API keys, billing settings, quotas, and rate limits. Free models are
+useful for low-cost testing, but they may rate-limit, change availability, or be
+unsuitable as guaranteed production capacity.
 
 Run the audit migration in the Supabase SQL editor:
 
@@ -53,6 +88,13 @@ Role restriction test prompts:
   assistant should list connected guardrails and pending modules.
 - Any staff role: ask "Summarise my tasks." The assistant should say the task
   module is not connected yet and offer a safe workflow.
+- Missing keys: remove all provider keys and ask a normal question. The
+  assistant should say no AI provider key is configured.
+- Invalid/fallback keys: set the first provider key invalid while a later
+  provider is valid. The server logs should show the failed provider and then
+  the provider/model that was used.
+- Provider limits: if a free provider rate-limits, the router should try the
+  next configured provider before returning the clean unavailable message.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

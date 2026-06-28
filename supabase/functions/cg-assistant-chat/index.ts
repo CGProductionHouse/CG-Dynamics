@@ -1,8 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { routeAiChat, type AiChatMessage } from './ai-router.ts'
 
-const ASSISTANT_MODEL = 'gpt-4o-mini'
-const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions'
 const MAX_MESSAGE_CHARS = 2000
 const MAX_HISTORY_MESSAGES = 8
 
@@ -184,7 +183,7 @@ function buildCapabilitiesResponse(role: string): string {
     '',
     'Connected right now:',
     '- Role checks and protected-data filtering.',
-    '- Server-side OpenAI requests only.',
+    '- Server-side AI provider routing only.',
     '- Best-effort audit logging when the audit migration has been run.',
     '',
     'Not connected yet:',
@@ -273,7 +272,7 @@ async function auditAssistantRequest(
       message: values.message.slice(0, MAX_MESSAGE_CHARS),
       response_status: values.responseStatus,
       restricted: values.restricted,
-      model: values.model ?? ASSISTANT_MODEL,
+      model: values.model ?? 'ai-router',
       tool_names: TOOL_REGISTRY.map((tool) => tool.key),
       error_message: values.errorMessage ?? null,
     })
@@ -342,14 +341,13 @@ Deno.serve(async (req) => {
       message,
       responseStatus: setupAllowed ? 'restricted_setup_guidance' : 'restricted',
       restricted: !setupAllowed,
-      model: ASSISTANT_MODEL,
+      model: 'local:restricted_guard',
     })
 
     return jsonResponse({
       ok: true,
       answer,
       restricted: !setupAllowed,
-      model: ASSISTANT_MODEL,
       tools: TOOL_REGISTRY,
     })
   }
@@ -363,13 +361,12 @@ Deno.serve(async (req) => {
       message,
       responseStatus: 'capabilities',
       restricted: false,
-      model: ASSISTANT_MODEL,
+      model: 'local:capabilities',
     })
 
     return jsonResponse({
       ok: true,
       answer,
-      model: ASSISTANT_MODEL,
       tools: TOOL_REGISTRY,
     })
   }
@@ -383,101 +380,60 @@ Deno.serve(async (req) => {
       message,
       responseStatus: 'task_module_not_connected',
       restricted: false,
-      model: ASSISTANT_MODEL,
+      model: 'local:task_placeholder',
     })
 
     return jsonResponse({
       ok: true,
       answer,
-      model: ASSISTANT_MODEL,
       tools: TOOL_REGISTRY,
     })
   }
 
-  const openAiKey = Deno.env.get('OPENAI_API_KEY')
-
-  if (!openAiKey) {
-    const answer =
-      'CG Assistant is installed, but the server is missing OPENAI_API_KEY. Once the Supabase Edge Function secret is set, I will be able to answer operational questions. The protected-data guardrails are already active.'
-
-    await auditAssistantRequest(sb, {
-      userId: user.id,
-      role,
-      message,
-      responseStatus: 'setup_required',
-      restricted: false,
-      model: ASSISTANT_MODEL,
-    })
-
-    return jsonResponse({
-      ok: true,
-      answer,
-      setupRequired: true,
-      model: ASSISTANT_MODEL,
-      tools: TOOL_REGISTRY,
-    })
-  }
-
-  const messages = [
+  const messages: AiChatMessage[] = [
     { role: 'system', content: buildSystemPrompt(role) },
     ...history,
     { role: 'user', content: message },
   ]
 
-  const openAiResponse = await fetch(OPENAI_CHAT_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${openAiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: ASSISTANT_MODEL,
-      temperature: 0.2,
-      max_tokens: 500,
-      messages,
-    }),
-  })
-
-  if (!openAiResponse.ok) {
-    const errorText = await openAiResponse.text()
+  try {
+    const result = await routeAiChat(messages)
     await auditAssistantRequest(sb, {
       userId: user.id,
       role,
       message,
-      responseStatus: 'openai_error',
+      responseStatus: 'success',
       restricted: false,
-      model: ASSISTANT_MODEL,
-      errorMessage: errorText.slice(0, 500),
+      model: `${result.provider}:${result.model}`,
     })
 
     return jsonResponse({
-      ok: false,
-      answer: 'CG Assistant could not generate a response right now. Please try again shortly.',
-      error: 'OpenAI request failed.',
-      model: ASSISTANT_MODEL,
+      ok: true,
+      answer: result.content,
       tools: TOOL_REGISTRY,
-    }, 502)
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown AI provider error.'
+    const noKeys = errorMessage === 'NO_AI_PROVIDER_KEYS'
+    const answer = noKeys
+      ? 'CG Assistant is installed, but no AI provider key is configured yet. Add OpenRouter, Gemini, Groq, or OpenAI server-side keys to enable operational answers. The protected-data guardrails are already active.'
+      : 'CG Assistant is online, but no AI provider is currently available. Please ask admin to check provider keys or limits.'
+
+    await auditAssistantRequest(sb, {
+      userId: user.id,
+      role,
+      message,
+      responseStatus: noKeys ? 'setup_required' : 'provider_unavailable',
+      restricted: false,
+      model: 'ai-router',
+      errorMessage: errorMessage.slice(0, 500),
+    })
+
+    return jsonResponse({
+      ok: true,
+      answer,
+      setupRequired: noKeys,
+      tools: TOOL_REGISTRY,
+    })
   }
-
-  const result = await openAiResponse.json()
-  const answer =
-    typeof result?.choices?.[0]?.message?.content === 'string'
-      ? result.choices[0].message.content.trim()
-      : 'CG Assistant could not format a response. Please try again.'
-
-  await auditAssistantRequest(sb, {
-    userId: user.id,
-    role,
-    message,
-    responseStatus: 'success',
-    restricted: false,
-    model: ASSISTANT_MODEL,
-  })
-
-  return jsonResponse({
-    ok: true,
-    answer,
-    model: ASSISTANT_MODEL,
-    tools: TOOL_REGISTRY,
-  })
 })
