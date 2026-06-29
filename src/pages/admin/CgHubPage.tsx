@@ -40,6 +40,18 @@ const CARDS: HubCard[] = [
     buttonLabel: 'Open Package Master',
   },
   {
+    title: 'Monthly Planner',
+    description: 'Track monthly package deliverables, totals and progress.',
+    to: '/admin/monthly-planner',
+    status: 'Live',
+    icon: (
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M6.75 3v2.25M17.25 3v2.25M3.75 8.25h16.5m-15 12h13.5A1.5 1.5 0 0020.25 18.75V7.5A1.5 1.5 0 0018.75 6H5.25A1.5 1.5 0 003.75 7.5v11.25A1.5 1.5 0 005.25 20.25z" />
+      </svg>
+    ),
+    buttonLabel: 'Open Monthly Planner',
+  },
+  {
     title: 'CG Assistant',
     description: 'Ask for operational help, drafts, checklists and setup support.',
     to: '/admin/assistant',
@@ -132,6 +144,9 @@ export default function CgHubPage() {
         <div className="flex flex-wrap gap-2">
           <ActionButton variant="primary" size="sm" onClick={() => navigate('/admin/planner')}>
             Open Planner
+          </ActionButton>
+          <ActionButton variant="outline" size="sm" onClick={() => navigate('/admin/monthly-planner')}>
+            Monthly Planner
           </ActionButton>
           <ActionButton variant="outline" size="sm" onClick={() => navigate('/admin/assistant')}>
             CG Assistant

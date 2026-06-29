@@ -288,6 +288,7 @@ export interface DeliverableFilters {
   clientId?: string
   month?: string
   status?: ProductionStatus
+  deliverableType?: DeliverableType
   assignedToName?: string
   boardId?: string
   bucketId?: string
@@ -311,6 +312,9 @@ export async function listMonthlyDeliverables(filters?: DeliverableFilters) {
   if (filters?.status) {
     query = query.eq('production_status', filters.status)
   }
+  if (filters?.deliverableType) {
+    query = query.eq('deliverable_type', filters.deliverableType)
+  }
   if (filters?.assignedToName) {
     query = query.eq('assigned_to_name', filters.assignedToName)
   }
@@ -325,6 +329,10 @@ export async function listMonthlyDeliverables(filters?: DeliverableFilters) {
   }
 
   return query
+}
+
+export async function listMonthlyDeliverablesByMonth(month: string, filters?: Omit<DeliverableFilters, 'month'>) {
+  return listMonthlyDeliverables({ ...filters, month })
 }
 
 // ── Mutation helpers ──────────────────────────────────────────
@@ -530,6 +538,7 @@ export interface GeneratedDeliverableRow {
   title: string
   deliverable_type: DeliverableType
   due_date: string
+  assigned_to_name?: string | null
 }
 
 export function generateDeliverableRows(
@@ -559,6 +568,7 @@ export function generateDeliverableRows(
       title,
       deliverable_type: template.deliverable_type,
       due_date: dueDate,
+      assigned_to_name: template.default_assignee_name,
     })
   }
 
@@ -570,15 +580,46 @@ export interface ActivePackageRecord {
   client_id: string
 }
 
-export async function generateAllForMonth(monthStartDate: string) {
+export interface MonthlyPackageTotals {
+  total: number
+  remaining: number
+  byType: Record<DeliverableType, { total: number; complete: number }>
+}
+
+const COMPLETE_STATUSES: ProductionStatus[] = ['posted', 'approved', 'scheduled']
+
+export function getMonthlyPackageTotals(deliverables: MonthlyDeliverable[]): MonthlyPackageTotals {
+  const byType = DELIVERABLE_TYPES.reduce((acc, type) => {
+    acc[type] = { total: 0, complete: 0 }
+    return acc
+  }, {} as MonthlyPackageTotals['byType'])
+
+  let complete = 0
+
+  for (const deliverable of deliverables) {
+    byType[deliverable.deliverable_type].total += 1
+    if (COMPLETE_STATUSES.includes(deliverable.production_status)) {
+      byType[deliverable.deliverable_type].complete += 1
+      complete += 1
+    }
+  }
+
+  return {
+    total: deliverables.length,
+    remaining: deliverables.length - complete,
+    byType,
+  }
+}
+
+export async function generateMonthFromPackages(monthStartDate: string) {
   const { data: packages, error: pkgError } = await supabase
     .from(PACKAGES_TABLE)
     .select('id, client_id')
     .eq('status', 'active')
     .is('archived_at', null)
 
-  if (pkgError) return { data: null, error: pkgError }
-  if (!packages || packages.length === 0) return { data: [], error: null }
+  if (pkgError) return { data: null, error: pkgError, inserted: 0, skipped: 0 }
+  if (!packages || packages.length === 0) return { data: [], error: null, inserted: 0, skipped: 0 }
 
   const allRows: GeneratedDeliverableRow[] = []
 
@@ -589,22 +630,40 @@ export async function generateAllForMonth(monthStartDate: string) {
       .eq('package_id', pkg.id)
       .eq('active', true)
 
-    if (tmplError) return { data: null, error: tmplError }
+    if (tmplError) return { data: null, error: tmplError, inserted: 0, skipped: 0 }
     if (!templates) continue
 
     for (const template of templates) {
-      const rows = generateDeliverableRows(template, pkg, monthStartDate)
-      allRows.push(...rows)
+      allRows.push(...generateDeliverableRows(template, pkg, monthStartDate))
     }
   }
 
-  // Insert all generated rows
-  if (allRows.length === 0) return { data: [], error: null }
+  if (allRows.length === 0) return { data: [], error: null, inserted: 0, skipped: 0 }
+
+  const { data: existing, error: existingError } = await supabase
+    .from(DELIVERABLES_TABLE)
+    .select('package_id, template_id, instance_number')
+    .eq('month', monthStartDate)
+    .is('archived_at', null)
+
+  if (existingError) return { data: null, error: existingError, inserted: 0, skipped: 0 }
+
+  const existingKeys = new Set(
+    (existing ?? []).map(row => `${row.package_id}|${row.template_id}|${row.instance_number}`),
+  )
+  const newRows = allRows.filter(row => !existingKeys.has(`${row.package_id}|${row.template_id}|${row.instance_number}`))
+  const skipped = allRows.length - newRows.length
+
+  if (newRows.length === 0) return { data: [], error: null, inserted: 0, skipped }
 
   const { data, error } = await supabase
     .from(DELIVERABLES_TABLE)
-    .insert(allRows)
+    .insert(newRows)
     .select()
 
-  return { data, error }
+  return { data, error, inserted: data?.length ?? 0, skipped }
+}
+
+export async function generateAllForMonth(monthStartDate: string) {
+  return generateMonthFromPackages(monthStartDate)
 }

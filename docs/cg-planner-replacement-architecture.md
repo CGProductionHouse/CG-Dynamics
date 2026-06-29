@@ -695,13 +695,40 @@ Do not build the importer yet. The import mapping is documented here for when da
 - Deactivate templates (soft-delete via `active = false`)
 - Archive packages (sets `end_date`, `status = 'archived'`)
 
-### Deferred to Phase 6D
-- Monthly deliverable generation from templates (one month at a time)
-- Monthly Bucket View UI — the main working screen for staff
+### Phase 6D — Monthly Planner Package Board
+
+**Status:** ✅ Complete
+
+| Item | Detail |
+|---|---|
+| Page | `src/pages/admin/MonthlyPlannerPage.tsx` |
+| Route | `/admin/monthly-planner` (staff, under CG Hub nav) |
+| Purpose | First working monthly package tracker for generated client deliverables |
+| Source of truth | `client_packages` + `package_deliverable_templates` |
+| Generated instances | `monthly_deliverables` rows for a selected month |
+| Month isolation | July DP1 and August DP1 are separate rows; updating one month does not affect another |
+| Helpers added | `listMonthlyDeliverablesByMonth()`, `generateMonthFromPackages()`, `getMonthlyPackageTotals()` |
+| Permissions | Staff view if RLS allows; generation/status updates are admin-only in the UI |
+
+### What Monthly Planner Can Do Now
+- Select previous/current/next month or choose a month with a compact month input
+- Generate one month's deliverables from active Package Master templates
+- Prevent duplicate generation in code by checking existing `(package_id, template_id, instance_number, month)` rows before insert
+- Rely on the existing database unique constraint as a final guard: `unique (package_id, template_id, instance_number, month)`
+- View generated monthly deliverables grouped by client
+- Show client totals for DP, Photo, Video, Reel, Other and remaining work
+- Filter by client, client search text, production status and deliverable type
+- Update production status as admin only
+- Show compact deliverable cards with code, title, type, assignee, status, priority, due date, scheduled date and notes
+
+### Deferred to Phase 6E
 - Calendar View — scheduled dates on a month grid
 - Drag-and-drop status changes across buckets
-- Approval workflows (internal review, client approval, scheduled/posted)
-- Bulk operations across months
+- Approval workflows (internal review modal, client approval modal)
+- Staff-specific permission rules for scheduled/posted controls
+- Package change wizard for future-month package edits
+- Year planner and bulk month operations
+- WhatsApp API and AI assignment automation
 
 ### Next step
-**Phase 6D — Monthly deliverable generation and Monthly Bucket View UI.**
+**Phase 6E — Calendar View and approval workflow foundations.**

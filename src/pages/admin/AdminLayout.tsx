@@ -21,7 +21,8 @@ function getSection(pathname: string): Section {
     pathname.startsWith('/admin/planner') ||
     pathname.startsWith('/admin/assistant') ||
     pathname.startsWith('/admin/command-centre') ||
-    pathname.startsWith('/admin/package-master')
+    pathname.startsWith('/admin/package-master') ||
+    pathname.startsWith('/admin/monthly-planner')
   ) return 'cg-hub'
   return 'home'
 }
@@ -145,6 +146,9 @@ export default function AdminLayout() {
         </NavLink>
         <NavLink to="/admin/package-master" className={subNav} onClick={close}>
           Package Master
+        </NavLink>
+        <NavLink to="/admin/monthly-planner" className={subNav} onClick={close}>
+          Monthly Planner
         </NavLink>
         <NavLink to="/admin/command-centre" className={subNav} onClick={close}>
           Command Centre
