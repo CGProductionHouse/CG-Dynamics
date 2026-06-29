@@ -61,7 +61,7 @@ create table public.planner_buckets (
   bucket_type text not null default 'default'
               check (bucket_type in ('default', 'client_requests', 'graphic_design', 'video', 'websites',
                                      'admin', 'content_guides', 'once_off', 'daily', 'weekly', 'monthly',
-                                     'payroll', 'checking', 'client_package', 'cg_socials', 'other')),
+                                     'payroll', 'checking', 'client_schedule', 'client_package', 'cg_socials', 'other')),
   sort_order  int not null default 0,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
