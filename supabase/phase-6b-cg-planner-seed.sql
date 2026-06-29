@@ -132,9 +132,19 @@ from public.planner_boards where slug = 'admin-check-list'
 and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'ADDITIONAL ADMIN');
 
 -- Client Schedule (from 2025 CLIENTS SCHEDULE.xlsx export)
--- The real Planner export uses client names as buckets (43 clients).
--- These should be dynamically generated from active client_packages,
--- not statically seeded here.
+-- The real Planner export uses client names as buckets (43 clients):
+--   ACTION SPORT, AV EVENT LIFE, BOHEMIA, BRAIZE PROMOTIONS, C&L INNOVATIONS,
+--   CAPE LUMBER, CENTRAL CANVAS, DAISY & CO, DELTA GAS, DULUX BLOEMFONTEIN,
+--   ECONO, EHRLICH PARK BUTCHERY, EMMANUEL FUNERALS, FIRST TECH, GERMOPARTS,
+--   HINO TRUCKS, HMHI ATTORNEYS, HUMAN AUTO FORD, JENKOR, KUNDEDIENSTE,
+--   LOCAL DELI, LORACLOX, MADISON WEAR, NOVUS STEEL, PEYPER BONDS, PIEK GROUP,
+--   PSG, RC POLYPIPE, RED OAK, SECURIFORCE, SUPA QUICK BFN, SUPA QUICK CENTURION,
+--   TBS, TOBICH OPTICS, TOYOTA BLOEMFONTEIN, WATCH ADDICT, WE AR FUELS,
+--   WISEMAN GROUP, WISEMAN MIDAS, WISERIDE, BLOEM MARBLE & GRANITE,
+--   BOUWER & COETZEE ATTORNEYS, THE STAFFORDHIRE PUB
+--
+-- Seeding a representative subset here; the full set should be dynamically
+-- generated from active client_packages in the application layer.
 --
 -- Scheduled / Unscheduled / Waiting Approval / Client Requests
 -- are STATUSES and VIEWS, not primary buckets.
@@ -142,6 +152,46 @@ and not exists (select 1 from public.planner_buckets where board_id = planner_bo
 --
 -- See architecture doc section "Real Planner export findings"
 -- for the correct model: Package Master View → Monthly Bucket View → Calendar View.
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'WISEMAN GROUP', 'client_schedule', 1
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'WISEMAN GROUP');
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'CAPE LUMBER', 'client_schedule', 2
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'CAPE LUMBER');
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'RED OAK', 'client_schedule', 3
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'RED OAK');
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'BOHEMIA', 'client_schedule', 4
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'BOHEMIA');
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'FIRST TECH', 'client_schedule', 5
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'FIRST TECH');
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'CENTRAL CANVAS', 'client_schedule', 6
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'CENTRAL CANVAS');
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'TBS', 'client_schedule', 7
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'TBS');
+
+insert into public.planner_buckets (board_id, name, bucket_type, sort_order)
+select id, 'HINO TRUCKS', 'client_schedule', 8
+from public.planner_boards where slug = 'client-schedule'
+and not exists (select 1 from public.planner_buckets where board_id = planner_boards.id and name = 'HINO TRUCKS');
 
 -- CG Socials (kept from original — no export available yet)
 insert into public.planner_buckets (board_id, name, bucket_type, sort_order)

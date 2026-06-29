@@ -528,8 +528,17 @@ posted  ◄── Final state
 On 2026-06-29, four `.xlsx` exports were extracted from Microsoft Teams Planner and saved in `docs/planner-exports/`. Below are the findings that corrected the seed model.
 
 ### 2025 CLIENTS SCHEDULE (4306 tasks, 43 buckets)
-- **Buckets are clients**, not general columns. Each client (ACTION SPORT, BOHEMIA, CAPE LUMBER, WISEMAN GROUP, etc.) is a bucket.
-- **Task naming:** `{code} {instance} - {client}` — e.g. `F 1 - WISEMAN GROUP`, `DP 3 - CAPE LUMBER`, `VIDEO 1 - RED OAK`
+- **Buckets are clients**, not general columns. The 43 client buckets (exact names from export):
+  1. ACTION SPORT, 2. AV EVENT LIFE, 3. BOHEMIA, 4. BRAIZE PROMOTIONS, 5. C&L INNOVATIONS,
+  6. CAPE LUMBER, 7. CENTRAL CANVAS, 8. DAISY & CO, 9. DELTA GAS, 10. DULUX BLOEMFONTEIN,
+  11. ECONO, 12. EHRLICH PARK BUTCHERY, 13. EMMANUEL FUNERALS, 14. FIRST TECH, 15. GERMOPARTS,
+  16. HINO TRUCKS, 17. HMHI ATTORNEYS, 18. HUMAN AUTO FORD, 19. JENKOR, 20. KUNDEDIENSTE,
+  21. LOCAL DELI, 22. LORACLOX, 23. MADISON WEAR, 24. NOVUS STEEL, 25. PEYPER BONDS,
+  26. PIEK GROUP, 27. PSG, 28. RC POLYPIPE, 29. RED OAK, 30. SECURIFORCE,
+  31. SUPA QUICK BFN, 32. SUPA QUICK CENTURION, 33. TBS, 34. TOBICH OPTICS, 35. TOYOTA BLOEMFONTEIN,
+  36. WATCH ADDICT, 37. WE AR FUELS, 38. WISEMAN GROUP, 39. WISEMAN MIDAS, 40. WISERIDE,
+  41. BLOEM MARBLE & GRANITE, 42. BOUWER & COETZEE ATTORNEYS, 43. THE STAFFORDHIRE PUB
+- **Task naming:** `{code} {instance} - {client}` — e.g. `WEB - WISEMAN GROUP`, `F 1 - WISEMAN GROUP`, `WEB` (no client suffix when bucket is the client)
 - **Deliverable codes observed:** `WEB`, `F` (photo), `DP` (designed poster), `VIDEO`, `REEL`, `T` (TBS Brokers-specific), plus numbered variants (DP 1–12, VIDEO 1–8, F 1–8)
 - **Statuses:** 4012 Completed, 293 Not started, 1 In progress — indicating heavy historical data
 - **Assignments:** mostly unassigned; assigned to team in Planner via user picker
@@ -538,36 +547,42 @@ On 2026-06-29, four `.xlsx` exports were extracted from Microsoft Teams Planner 
 - **No labels used.** Notes contain specific instructions (e.g. "THURSDAYS\n4 EDITED FOTOS BRANDED WITH LOGO STRIP")
 
 ### To Do (507 tasks, 7 buckets)
-- **Buckets** (in order): CG ADMIN - RECURRING, CLIENT REQUESTS, GRAPHIC DESIGN, ADMIN / TO DO, WEBSITES, CONTENT GUIDES, ONCE-OFF
+- **Buckets (exact, in order):** CG ADMIN - RECURRING, CLIENT REQUESTS, GRAPHIC DESIGN, ADMIN / TO DO, WEBSITES, CONTENT GUIDES, ONCE-OFF
 - **Task patterns:** recurring tasks (WIX INQUIRIES — weekly, END OF DAY UPDATE — daily), project tasks (RED OAK TV, CG SOCIALS, CANVA, ONE DRIVE, CGPH WEBSITE UPDATES)
-- **Multi-assignment:** semicolon-separated user names (e.g. `Christie-Ann Groenewald;Sydney Oosthuizen;Amonique Fourie;Franco Lessing`)
-- **Users:** Christie-Ann, Amonique, Franco, CG Production House, Sydney, Ger-Marie, KG
+- **Multi-assignment:** semicolon-separated user GUIDs mapped to names: Christie-Ann Groenewald, Amonique Fourie, Franco Lessing
+- **Users (7):** Christie-Ann Groenewald, Amonique Fourie, Franco Lessing, CG Production House, Sydney Oosthuizen, Ger-Marie Pretorius, KG
 - **Statuses:** 488 Completed, 16 Not started, 3 In progress
 - **Recurring:** tasks repeat with new rows each cycle (same name, different due dates)
+- **Priority:** Medium only (no use of Urgent/High in this board)
 
 ### Client Websites (31 tasks, 5 buckets)
-- **Buckets:** NEW WEBSITES / REQUESTS, MONTHLY UPDATES, WEBSITES MAINTENANCE, GOOGLE BUSINESS PROFILES, BACKGROUND SITES (OLD CLIENTS)
-- **Main recurring task:** "WEBSITE MONTHLY STATUS CHECK" (11 instances)
-- **Other tasks:** individual client websites (LGM, RAADZAAL, RUSOORD, HYMN, SERENITY HEIGHTS, etc.) with build platform noted (WORDPRESS, GOOGLE SITES, WIX, CANVA)
+- **Buckets (exact, in order):** NEW WEBSITES / REQUESTS, MONTHLY UPDATES, WEBSITES MAINTENANCE, GOOGLE BUSINESS PROFILES, BACKGROUND SITES (OLD CLIENTS)
+- **Task naming:** `{SITE} - {PLATFORM}` — e.g. `LGM - WORDPRESS`, `RAADZAAL - GOOGLE SITES`
+- **Main recurring task:** "WEBSITE MONTHLY STATUS CHECK" (11 instances across MONTHLY UPDATES bucket)
 - **Statuses:** mostly Not started or Completed
+- **Users (5):** Christie-Ann, Sydney, Amonique, Franco, CG Production House
 
 ### ADMIN CHECK LIST (3605 tasks, 7 buckets)
-- **Buckets:** DAILY, WEEKLY, MONTHLY, INSTAGRAM NOT CONNECTED, TIKTOK PAGES, LINKDIN, ADDITIONAL ADMIN
-- **Daily tasks:** SOCIAL MEDIA POSTS CHECK, FACEBOOK GROUPS SHARE, CLIENT GROUPS CHECK, TASK ASSIGNMENT, SCHEDULING AND SORTING, EMAILS CHECK
-- **Weekly/Monthly:** XERO ADMIN, SYSTEM & SCHEDULING REVIEW, EMPLOYEE TASK REVIEW, TIKTOK POSTS, INSTAGRAM POSTS, LINKDIN POSTS, MYHOURS APPROVALS, WIX INQUIRIES, FINANCES, PAYRUN (full-time + part-time)
-- **Monthly:** CLIENT CHECK-IN, CLIENT STATEMENTS, CLIENT INVOICES, CONTENT RUN SCHEDULING, HUMAN RESOURCES, WISEMAN INVOICE
+- **Buckets (exact, in order):** DAILY, WEEKLY, MONTHLY, INSTAGRAM NOT CONNECTED, TIKTOK PAGES (trailing space in export — trimmed in seed), LINKDIN, ADDITIONAL ADMIN
+- **Daily tasks (6):** SOCIAL MEDIA POSTS CHECK, FACEBOOK GROUPS SHARE, CLIENT GROUPS CHECK, TASK ASSIGNMENT, SCHEDULING AND SORTING, EMAILS CHECK
+- **Weekly:** XERO ADMIN, SYSTEM & SCHEDULING REVIEW, EMPLOYEE TASK REVIEW, TIKTOK POSTS, INSTAGRAM POSTS, LINKDIN POSTS, MYHOURS APPROVALS
+- **Monthly:** CLIENT CHECK-IN, CLIENT STATEMENTS, CLIENT INVOICES, CONTENT RUN SCHEDULING, HUMAN RESOURCES, WISEMAN INVOICE, PAYRUN (full-time + part-time)
 - **Checklist:** semicolon-separated platform names (e.g. `LINKDIN;INSTAGRAM;TIKTOK;FACEBOOK`)
 - **Assigned to:** mostly Amonique
+- **Users (4):** Amonique, CG Production House, Christie-Ann, Franco
 
 ### Corrections Applied
 
 | Previous assumption | Real export finding | Change |
 |---|---|---|
-| Client Schedule buckets: Scheduled, Unscheduled, Waiting Approval | Client Schedule buckets are **client names** (43 clients) | Buckets removed from seed; replaced with comment that they come from active packages |
+| Client Schedule buckets: Scheduled, Unscheduled, Waiting Approval | Client Schedule buckets are **client names** (43 clients) | No generic buckets seeded; 8 representative client buckets instead |
 | Operations/To Do had "Video" bucket | No "Video" bucket in To Do export | Removed; videos belong in Client Schedule as deliverables |
-| Admin Check List had "Social Checks", "Client Check-ins" | Real buckets: INSTAGRAM NOT CONNECTED, TIKTOK PAGES, LINKDIN, ADDITIONAL ADMIN | Seed updated |
+| Admin Check List had "Social Checks", "Client Check-ins" | Real buckets: DAILY, WEEKLY, MONTHLY, INSTAGRAM NOT CONNECTED, TIKTOK PAGES, LINKDIN, ADDITIONAL ADMIN | Seed updated |
 | Client Websites had "Website Maintenance" (title case) | Exact name: "WEBSITES MAINTENANCE" (uppercase) | Seed updated |
 | Background Sites bucket name | Exact name: "BACKGROUND SITES (OLD CLIENTS)" | Seed updated |
+| Admin Check List "TIKTOK PAGES" | Trailing space in export: "TIKTOK PAGES " | Trimmed in seed — stored as "TIKTOK PAGES" |
+| To Do users | All 7 staff found | Stored in architecture doc for reference |
+| Client Schedule task naming | Pattern: `{CODE} {N} - {CLIENT}` | Drives monthly deliverable title format |
 
 ### Corrected Model: Three Views for Client Schedule
 
