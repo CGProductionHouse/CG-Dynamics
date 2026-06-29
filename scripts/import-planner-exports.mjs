@@ -47,6 +47,18 @@ function get(row, names) {
   return ''
 }
 
+function looksLikePlannerId(value) {
+  const text = String(value ?? '').trim()
+  return /^[A-Za-z0-9_-]{16,}$/.test(text) && !/\s/.test(text)
+}
+
+function splitPeople(value) {
+  return String(value ?? '')
+    .split(';')
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
 function parseDate(value) {
   if (value === undefined || value === null || String(value).trim() === '') return null
   if (typeof value === 'number') {
@@ -136,13 +148,100 @@ function isImportTaskSheet(sheetName) {
   return normalise(sheetName) === 'tasks'
 }
 
-function taskFromRow(row, source) {
+function buildLookupContext(sheets, source, preview) {
+  const bucketById = new Map()
+  const bucketByTaskId = new Map()
+  const userById = new Map()
+  const assignedByTaskId = new Map()
+
+  for (const { sheetName, rows } of sheets) {
+    for (const row of rows) {
+      const bucketId = String(get(row, ['Bucket ID', 'Bucket Id', 'BucketID'])).trim()
+      const bucketName = String(get(row, ['Bucket Name', 'Bucket name', 'BucketName'])).trim()
+      if (bucketId && bucketName) bucketById.set(bucketId, bucketName)
+
+      const userId = String(get(row, ['User ID', 'User Id', 'UserID'])).trim()
+      const userName = String(get(row, ['User Name', 'User name', 'Display Name', 'Name'])).trim()
+      if (userId && userName) userById.set(userId, userName)
+
+      const taskId = String(get(row, ['Task ID', 'Task Id', 'ID'])).trim()
+      const rowBucket = String(get(row, ['Bucket Name', 'Bucket'])).trim()
+      if (taskId && rowBucket && !looksLikePlannerId(rowBucket)) {
+        bucketByTaskId.set(taskId, rowBucket)
+      }
+
+      const assigned = String(get(row, ['Assigned To', 'Assigned to', 'Assignees'])).trim()
+      if (taskId && assigned && !splitPeople(assigned).some(looksLikePlannerId)) {
+        assignedByTaskId.set(taskId, assigned)
+      }
+    }
+
+    if (normalise(sheetName).includes('bucket')) {
+      preview.lookupSheetsRead.push({ file: source.file, sheet: sheetName, lookup: 'buckets', rows: rows.length })
+    }
+    if (normalise(sheetName).includes('user') || normalise(sheetName).includes('member')) {
+      preview.lookupSheetsRead.push({ file: source.file, sheet: sheetName, lookup: 'users', rows: rows.length })
+    }
+  }
+
+  return { bucketById, bucketByTaskId, userById, assignedByTaskId }
+}
+
+function resolveBucketName(rawBucket, row, source, lookup, preview) {
+  const raw = String(rawBucket ?? '').trim()
+  const taskId = String(get(row, ['Task ID', 'Task Id', 'ID'])).trim()
+  if (!raw) return 'Imported'
+  if (lookup.bucketById.has(raw)) return lookup.bucketById.get(raw)
+  if (!looksLikePlannerId(raw)) return raw
+  if (taskId && lookup.bucketByTaskId.has(taskId)) return lookup.bucketByTaskId.get(taskId)
+
+  preview.warnings.push({
+    type: 'unresolved_bucket_id',
+    file: source.file,
+    plan: source.plan,
+    taskId: taskId || null,
+    bucketId: raw,
+    title: String(get(row, ['Task Name', 'Title', 'Name'])).trim(),
+  })
+  return 'Unresolved Bucket'
+}
+
+function resolveAssignedTo(rawAssignedTo, row, source, lookup, preview) {
+  const raw = String(rawAssignedTo ?? '').trim()
+  const taskId = String(get(row, ['Task ID', 'Task Id', 'ID'])).trim()
+  if (!raw) return null
+
+  const people = splitPeople(raw)
+  if (people.length === 0) return null
+
+  const unresolvedIds = people.filter(person => looksLikePlannerId(person) && !lookup.userById.has(person))
+  const resolved = people.map(person => lookup.userById.get(person) ?? person)
+  const stillLooksLikeIds = resolved.filter(looksLikePlannerId)
+
+  if (stillLooksLikeIds.length === 0) return resolved.join(';')
+
+  const consolidatedAssigned = taskId ? lookup.assignedByTaskId.get(taskId) : null
+  if (consolidatedAssigned) return consolidatedAssigned
+
+  preview.warnings.push({
+    type: 'unresolved_assigned_to_id',
+    file: source.file,
+    plan: source.plan,
+    taskId: taskId || null,
+    assignedToIds: unresolvedIds.length > 0 ? unresolvedIds : stillLooksLikeIds,
+    title: String(get(row, ['Task Name', 'Title', 'Name'])).trim(),
+  })
+  return null
+}
+
+function taskFromRow(row, source, lookup, preview) {
   const title = String(get(row, ['Task Name', 'Title', 'Name'])).trim()
-  const bucket = String(get(row, ['Bucket Name', 'Bucket'])).trim() || 'Imported'
+  const rawBucket = String(get(row, ['Bucket Name', 'Bucket'])).trim()
+  const bucket = resolveBucketName(rawBucket, row, source, lookup, preview)
   const dueDate = parseDate(get(row, ['Due Date', 'Due date', 'Due']))
   const startDate = parseDate(get(row, ['Start Date', 'Start date', 'Start']))
   const originalTaskId = String(get(row, ['Task ID', 'Task Id', 'ID'])).trim() || null
-  const assignedTo = String(get(row, ['Assigned To', 'Assigned to', 'Assignees'])).trim() || null
+  const assignedTo = resolveAssignedTo(get(row, ['Assigned To', 'Assigned to', 'Assignees']), row, source, lookup, preview)
   const notes = String(get(row, ['Description', 'Notes', 'Task Description'])).trim() || null
   const progress = get(row, ['Progress', 'Status'])
 
@@ -173,6 +272,7 @@ function buildPreview() {
     filesFound: [],
     filesMissing: [],
     sheetsRead: [],
+    lookupSheetsRead: [],
     boardsDetected: new Set(),
     bucketsDetected: new Set(),
     tasksDetected: 0,
@@ -203,11 +303,12 @@ function buildPreview() {
     preview.filesFound.push(source.file)
     preview.boardsDetected.add(source.plan)
     const sheets = readRows(filePath)
+    const lookup = buildLookupContext(sheets, source, preview)
     for (const { sheetName, rows } of sheets) {
       preview.sheetsRead.push({ file: source.file, sheet: sheetName, rows: rows.length })
       if (!isImportTaskSheet(sheetName)) continue
       for (const row of rows) {
-        const task = taskFromRow(row, source)
+        const task = taskFromRow(row, source, lookup, preview)
         if (!task) continue
         preview.tasksDetected += 1
         preview.bucketsDetected.add(task.bucket)
