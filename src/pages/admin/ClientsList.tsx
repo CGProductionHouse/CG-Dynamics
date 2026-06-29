@@ -238,7 +238,7 @@ export default function ClientsList() {
     <div className="w-full max-w-6xl p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Admin dashboard</p>
+          <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Client management</p>
           <h1 className="text-xl font-semibold text-white">Clients</h1>
         </div>
         {isAdmin && (
@@ -264,7 +264,7 @@ export default function ClientsList() {
         ))}
       </section>
 
-      <section className="mb-6 rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
+      <PremiumCard padding="sm" className="mb-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">Quick actions</h2>
@@ -285,7 +285,7 @@ export default function ClientsList() {
             <QuickLink to="/admin/import" label="Manual import fallback" />
           </div>
         </div>
-      </section>
+      </PremiumCard>
 
       {packageNotice && (
         <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2">

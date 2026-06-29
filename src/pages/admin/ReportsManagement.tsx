@@ -461,13 +461,9 @@ export default function ReportsManagement() {
           </div>
 
           {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="shrink-0 rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
-            >
+            <ActionButton variant="ghost" size="sm" onClick={clearFilters}>
               Clear filters
-            </button>
+            </ActionButton>
           )}
         </div>
 

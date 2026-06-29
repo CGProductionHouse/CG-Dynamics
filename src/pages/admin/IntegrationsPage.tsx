@@ -1,48 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { PremiumCard } from '../../components/ui/PremiumCard'
+import { ActionButton } from '../../components/ui/Buttons'
+import { StatusBadge, Pill } from '../../components/ui/Badges'
 
 type MetaState = 'loading' | 'connected' | 'disconnected'
-
-interface StaticPlatform {
-  id: string
-  initial: string
-  accent: string
-  title: string
-  status: string
-  statusClass: string
-  description: string
-  buttonLabel: string
-  to: string | null
-  disabled: boolean
-}
-
-const comingSoon: StaticPlatform[] = [
-  {
-    id: 'tiktok',
-    initial: 'T',
-    accent: 'bg-brand-muted text-brand-primary',
-    title: 'TikTok',
-    status: 'Planned',
-    statusClass: 'text-brand-primary',
-    description: 'TikTok reporting sync will be added later.',
-    buttonLabel: 'Coming later',
-    to: null,
-    disabled: true,
-  },
-  {
-    id: 'google',
-    initial: 'G',
-    accent: 'bg-brand-muted text-brand-primary',
-    title: 'Google Ads',
-    status: 'Planned',
-    statusClass: 'text-brand-primary',
-    description: 'Google Ads and campaign reporting will be added later.',
-    buttonLabel: 'Coming later',
-    to: null,
-    disabled: true,
-  },
-]
 
 export default function IntegrationsPage() {
   const navigate = useNavigate()
@@ -81,8 +44,6 @@ export default function IntegrationsPage() {
   const metaConnected = metaState === 'connected'
   const metaStatus =
     metaState === 'loading' ? 'Checking…' : metaConnected ? 'Connected' : 'Not connected'
-  const metaStatusClass =
-    metaState === 'loading' ? 'text-brand-primary' : metaConnected ? 'text-brand-accent' : 'text-amber-400'
   const metaDescription = metaConnected
     ? linkedClients && linkedClients > 0
       ? `Facebook and Instagram are connected. ${linkedClients} client${linkedClients === 1 ? '' : 's'} linked for monthly sync.`
@@ -110,9 +71,9 @@ export default function IntegrationsPage() {
 
       <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {/* Meta — live status */}
-        <div className="group relative flex flex-col rounded-xl border border-brand-muted bg-brand-surface">
-          <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-xl bg-gradient-to-r from-brand-accent to-sky-400" />
-          <div className="flex flex-1 flex-col p-5">
+        <PremiumCard padding="md" className="relative">
+          <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-brand-accent to-sky-400" />
+          <div className="flex flex-col pt-1">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-500/20 text-sm font-bold text-sky-300">
                 M
@@ -120,54 +81,80 @@ export default function IntegrationsPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-base font-semibold text-white">Meta Business</h2>
-                  <span className={`shrink-0 text-xs font-medium ${metaStatusClass}`}>{metaStatus}</span>
+                  <StatusBadge
+                    label={metaStatus}
+                    variant={metaConnected ? 'published' : metaState === 'loading' ? 'default' : 'internal-draft'}
+                    size="sm"
+                  />
                 </div>
                 <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">{metaDescription}</p>
               </div>
             </div>
             <div className="mt-auto pt-5">
+              <ActionButton variant="outline" onClick={() => navigate('/admin/integrations/meta')} fullWidth>
+                {metaButtonLabel}
+              </ActionButton>
+            </div>
+          </div>
+        </PremiumCard>
+
+        {/* TikTok — planned */}
+        <PremiumCard padding="md">
+          <div className="flex flex-col">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-sm font-bold text-brand-primary">
+                T
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-base font-semibold text-white">TikTok</h2>
+                  <Pill tone="neutral">Planned</Pill>
+                </div>
+                <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
+                  TikTok reporting sync will be added later.
+                </p>
+              </div>
+            </div>
+            <div className="mt-auto pt-5">
               <button
                 type="button"
-                onClick={() => navigate('/admin/integrations/meta')}
-                className="w-full rounded-lg border border-brand-accent bg-brand-accent/10 px-4 py-2.5 text-sm font-semibold text-brand-accent transition-all hover:bg-brand-accent/20 hover:shadow-[0_0_12px_-4px] hover:shadow-brand-accent/30"
+                disabled
+                className="w-full cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-4 py-2.5 text-sm font-semibold text-brand-primary"
               >
-                {metaButtonLabel}
+                Coming later
               </button>
             </div>
           </div>
-        </div>
+        </PremiumCard>
 
-        {/* Planned platforms */}
-        {comingSoon.map(p => (
-          <div
-            key={p.id}
-            className="group relative flex flex-col rounded-xl border border-brand-muted bg-brand-surface"
-          >
-            <div className="flex flex-1 flex-col p-5">
-              <div className="flex items-start gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${p.accent}`}>
-                  {p.initial}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-base font-semibold text-white">{p.title}</h2>
-                    <span className={`shrink-0 text-xs font-medium ${p.statusClass}`}>{p.status}</span>
-                  </div>
-                  <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">{p.description}</p>
-                </div>
+        {/* Google Ads — planned */}
+        <PremiumCard padding="md">
+          <div className="flex flex-col">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-sm font-bold text-brand-primary">
+                G
               </div>
-              <div className="mt-auto pt-5">
-                <button
-                  type="button"
-                  disabled
-                  className="w-full cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-4 py-2.5 text-sm font-semibold text-brand-primary"
-                >
-                  {p.buttonLabel}
-                </button>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-base font-semibold text-white">Google Ads</h2>
+                  <Pill tone="neutral">Planned</Pill>
+                </div>
+                <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
+                  Google Ads and campaign reporting will be added later.
+                </p>
               </div>
             </div>
+            <div className="mt-auto pt-5">
+              <button
+                type="button"
+                disabled
+                className="w-full cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-4 py-2.5 text-sm font-semibold text-brand-primary"
+              >
+                Coming later
+              </button>
+            </div>
           </div>
-        ))}
+        </PremiumCard>
       </div>
     </div>
   )
