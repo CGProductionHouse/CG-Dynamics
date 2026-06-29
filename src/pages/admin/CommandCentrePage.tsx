@@ -297,7 +297,7 @@ export default function CommandCentrePage() {
         <CaptureRequestCard onTaskCreated={load} />
       </div>
 
-      <div className="mb-6">
+      <div id="morning-import" className="mb-6">
         <MorningImportCard onTasksCreated={load} />
       </div>
 
