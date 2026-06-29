@@ -299,32 +299,33 @@ export default function CommandCentrePage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Command Centre</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Command Centre</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-primary">
-          Daily tasks, client requests, staff progress and WhatsApp-ready summaries.
-        </p>
-      </div>
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">CG Command Centre</p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Command Centre</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-primary/70">
+            Daily tasks, client requests, staff progress and WhatsApp-ready summaries.
+          </p>
+        </div>
+        <div className="mb-8 h-px bg-gradient-to-r from-brand-accent/30 via-brand-accent/10 to-transparent" />
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Total active" value={stats.total} />
-        <StatCard label="Client requests" value={stats.clientRequests} accent />
-        <StatCard label="Done today" value={stats.doneToday} teal />
-        <StatCard label="Blocked" value={stats.blocked} amber />
-        <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
-        <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} />
-      </div>
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <StatCard label="Total active" value={stats.total} />
+          <StatCard label="Client requests" value={stats.clientRequests} accent />
+          <StatCard label="Done today" value={stats.doneToday} teal />
+          <StatCard label="Blocked" value={stats.blocked} amber />
+          <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
+          <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} />
+        </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-6 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setFilterStaff('')}
-          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             !filterStaff
-              ? 'bg-brand-accent text-brand-bg'
-              : 'border border-brand-muted text-brand-primary hover:text-white'
+              ? 'bg-brand-accent text-brand-bg shadow-sm'
+              : 'border border-brand-muted/60 text-brand-primary hover:text-white hover:border-brand-muted'
           }`}
         >
           All tasks
@@ -332,10 +333,10 @@ export default function CommandCentrePage() {
         <button
           type="button"
           onClick={() => setFilterStaff('__my__')}
-          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             filterStaff === '__my__'
-              ? 'bg-brand-accent text-brand-bg'
-              : 'border border-brand-muted text-brand-primary hover:text-white'
+              ? 'bg-brand-accent text-brand-bg shadow-sm'
+              : 'border border-brand-muted/60 text-brand-primary hover:text-white hover:border-brand-muted'
           }`}
         >
           My tasks
@@ -343,7 +344,7 @@ export default function CommandCentrePage() {
         <select
           value={filterStaff !== '__my__' && filterStaff !== '' ? filterStaff : ''}
           onChange={e => setFilterStaff(e.target.value || '')}
-          className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          className="rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
         >
           <option value="">All staff</option>
           {KNOWN_STAFF.map(name => (
@@ -366,7 +367,11 @@ export default function CommandCentrePage() {
       </p>
 
       <div className="mb-6">
-        <h2 className="mb-4 text-lg font-bold text-white">Today's tasks</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-6 w-1 rounded-full bg-brand-accent/50" />
+          <h2 className="text-lg font-bold text-white">Today's tasks</h2>
+          <span className="rounded-full bg-brand-accent/10 px-2 py-0.5 text-xs font-medium text-brand-accent">{filteredActiveTasks.length}</span>
+        </div>
         {staffGroups.length === 0 ? (
           <EmptyState
             title="No tasks for today yet"
@@ -426,7 +431,7 @@ function StatCard({ label, value, accent, teal, amber, danger }: {
     : 'text-white'
   return (
     <PremiumCard padding="sm">
-      <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{label}</p>
+      <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary/70">{label}</p>
       <p className={`mt-2 text-2xl font-semibold ${valClass}`}>{value}</p>
     </PremiumCard>
   )
@@ -437,58 +442,64 @@ function TaskRow({ task, busyId, onStatusChange }: {
   busyId: string | null
   onStatusChange: (id: string, status: TaskStatus) => void
 }) {
+  const accentColor = task.priority === 'urgent' ? 'bg-amber-400/40'
+    : task.priority === 'client_request' ? 'bg-brand-accent/40'
+    : 'bg-brand-muted/30'
   return (
-    <PremiumCard padding="sm">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-sm font-semibold text-white">{task.title}</span>
-            {task.priority !== 'normal' && (
-              <Pill tone={priorityColor(task.priority)}>
-                {task.priority === 'urgent' ? 'Urgent' : 'Client req'}
-              </Pill>
-            )}
+    <div className="relative">
+      <div className={`absolute left-0 top-2 bottom-2 w-0.5 rounded-full ${accentColor}`} />
+      <PremiumCard padding="sm">
+        <div className="flex flex-col gap-2 pl-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-sm font-semibold text-white">{task.title}</span>
+              {task.priority !== 'normal' && (
+                <Pill tone={priorityColor(task.priority)}>
+                  {task.priority === 'urgent' ? 'Urgent' : 'Client req'}
+                </Pill>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+              {task.client_name && <span className="text-brand-primary">{task.client_name}</span>}
+              <span className={dateClass(task.due_date)}>{formatDate(task.due_date)}</span>
+              <span className="text-brand-primary/50">·</span>
+              <span className="text-brand-primary/60">{task.bucket}</span>
+              {task.notes && (
+                <>
+                  <span className="text-brand-primary/50">·</span>
+                  <span className="text-brand-primary/60 truncate max-w-[200px]">{task.notes}</span>
+                </>
+              )}
+            </div>
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-            {task.client_name && <span className="text-brand-primary">{task.client_name}</span>}
-            <span className={dateClass(task.due_date)}>{formatDate(task.due_date)}</span>
-            <span className="text-brand-primary/50">·</span>
-            <span className="text-brand-primary/60">{task.bucket}</span>
-            {task.notes && (
-              <>
-                <span className="text-brand-primary/50">·</span>
-                <span className="text-brand-primary/60 truncate max-w-[200px]">{task.notes}</span>
-              </>
-            )}
-          </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Pill tone={statusTone(task.status)}>{statusLabel(task.status)}</Pill>
+          {task.status !== 'done' && (
+            <select
+              value={task.status}
+              onChange={e => onStatusChange(task.id, e.target.value as TaskStatus)}
+              disabled={busyId === task.id}
+              className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
+            >
+              {STATUSES.map(s => (
+                <option key={s} value={s}>{statusLabel(s)}</option>
+              ))}
+            </select>
+          )}
+          {task.status === 'done' && (
+            <button
+              type="button"
+              onClick={() => onStatusChange(task.id, 'to_do')}
+              disabled={busyId === task.id}
+              className="rounded-lg border border-brand-muted/60 px-2 py-1.5 text-xs text-brand-primary hover:text-white disabled:opacity-60"
+            >
+              Reopen
+            </button>
+          )}
         </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <Pill tone={statusTone(task.status)}>{statusLabel(task.status)}</Pill>
-        {task.status !== 'done' && (
-          <select
-            value={task.status}
-            onChange={e => onStatusChange(task.id, e.target.value as TaskStatus)}
-            disabled={busyId === task.id}
-            className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
-          >
-            {STATUSES.map(s => (
-              <option key={s} value={s}>{statusLabel(s)}</option>
-            ))}
-          </select>
-        )}
-        {task.status === 'done' && (
-          <button
-            type="button"
-            onClick={() => onStatusChange(task.id, 'to_do')}
-            disabled={busyId === task.id}
-            className="rounded-lg border border-brand-muted px-2 py-1.5 text-xs text-brand-primary hover:text-white disabled:opacity-60"
-          >
-            Reopen
-          </button>
-        )}
-      </div>
-      </div>
-    </PremiumCard>
+        </div>
+      </PremiumCard>
+    </div>
   )
 }
 

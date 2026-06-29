@@ -58,15 +58,16 @@ export default function ClientPerformancePage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">
           Client Performance
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
           Performance Dashboard
         </h1>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-brand-primary">
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-brand-primary/70">
           Manage clients, build reports, sync Meta data and review published insights.
         </p>
+        <div className="mt-6 h-px bg-gradient-to-r from-brand-accent/30 via-brand-accent/10 to-transparent" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

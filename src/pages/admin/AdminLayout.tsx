@@ -25,24 +25,25 @@ function getSection(pathname: string): Section {
 }
 
 function mainNav({ isActive }: { isActive: boolean }) {
-  return `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+  return `relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
     isActive
-      ? 'bg-brand-muted text-brand-accent'
-      : 'text-brand-primary hover:text-white hover:bg-brand-muted/50'
+      ? 'bg-brand-accent/10 text-brand-accent'
+      : 'text-brand-primary hover:text-white hover:bg-white/[0.04]'
   }`
 }
 
 function subNav({ isActive }: { isActive: boolean }) {
-  return `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+  return `relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors ${
     isActive
-      ? 'bg-brand-muted/50 text-brand-accent'
-      : 'text-brand-primary/60 hover:text-white hover:bg-white/[0.03]'
+      ? 'bg-brand-accent/8 text-brand-accent'
+      : 'text-brand-primary/70 hover:text-white hover:bg-white/[0.03]'
   }`
 }
 
 function sectionLabel(label: string) {
   return (
-    <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-primary/60">
+    <p className="flex items-center gap-2 px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-primary/50">
+      <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-accent/60" />
       {label}
     </p>
   )
@@ -53,7 +54,7 @@ function backLink(closeMobile: () => void) {
     <NavLink
       to="/admin"
       end
-      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-brand-primary/40 hover:text-white transition-colors"
+      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-brand-primary/50 hover:text-white transition-colors"
       onClick={closeMobile}
     >
       <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -91,10 +92,8 @@ export default function AdminLayout() {
         </NavLink>
         {isAdmin && (
           <>
-            <div className="mt-3 border-t border-brand-muted/40" />
-            <p className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand-primary/50">
-              Admin
-            </p>
+            <div className="mt-3 border-t border-brand-muted/30" />
+            {sectionLabel('Admin')}
             <NavLink to="/admin/users" className={mainNav} onClick={close}>Users</NavLink>
             <NavLink to="/admin/invites" className={mainNav} onClick={close}>Invites</NavLink>
           </>
@@ -114,15 +113,13 @@ export default function AdminLayout() {
         <NavLink to="/admin/clients" className={subNav} onClick={close}>Clients</NavLink>
         <NavLink to="/admin/reports" className={subNav} onClick={close}>Reports</NavLink>
         <NavLink to="/admin/integrations" end className={subNav} onClick={close}>Integrations</NavLink>
-        <div className="mt-3 border-t border-brand-muted/40" />
-        <p className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand-primary/50">
-          Data
-        </p>
+        <div className="mt-3 border-t border-brand-muted/30" />
+        {sectionLabel('Data')}
         <NavLink to="/admin/import" className={subNav} onClick={close}>Imports</NavLink>
         <NavLink to="/admin/manual-metrics" className={subNav} onClick={close}>
           Manual metrics
         </NavLink>
-        <div className="mt-3 border-t border-brand-muted/40" />
+        <div className="mt-3 border-t border-brand-muted/30" />
         <NavLink
           to="/admin/published"
           className={subNav}
@@ -147,7 +144,7 @@ export default function AdminLayout() {
         <NavLink to="/admin/command-centre" className={subNav} onClick={close}>
           Command Centre
         </NavLink>
-        <div className="mt-3 border-t border-brand-muted/40" />
+        <div className="mt-3 border-t border-brand-muted/30" />
         <a
           href="https://cg-hours.vercel.app"
           target="_blank"
@@ -175,7 +172,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-brand-bg md:flex">
-      <header className="sticky top-0 z-40 border-b border-brand-muted bg-brand-surface md:hidden">
+      <header className="sticky top-0 z-40 border-b border-brand-muted/50 bg-brand-surface/95 backdrop-blur-sm md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <BrandMark subtitle={profile?.role ?? 'staff'} compact />
@@ -183,7 +180,7 @@ export default function AdminLayout() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="rounded-lg border border-brand-muted px-3 py-2 text-sm font-semibold text-brand-primary hover:text-white"
+            className="rounded-lg border border-brand-muted/60 px-3.5 py-2 text-sm font-semibold text-brand-primary hover:text-white transition-colors"
           >
             Menu
           </button>
@@ -198,27 +195,32 @@ export default function AdminLayout() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="absolute right-0 top-0 flex h-full w-[min(20rem,86vw)] flex-col bg-brand-surface border-l border-brand-muted shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-brand-muted">
+          <aside className="absolute right-0 top-0 flex h-full w-[min(20rem,86vw)] flex-col bg-brand-surface border-l border-brand-muted/50 shadow-2xl">
+            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-brand-muted/50">
               <BrandMark subtitle={profile?.role ?? 'staff'} compact />
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="rounded-lg border border-brand-muted px-3 py-2 text-sm text-brand-primary hover:text-white"
+                className="rounded-lg border border-brand-muted/60 px-3 py-2 text-sm text-brand-primary hover:text-white transition-colors"
               >
                 Close
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
+            <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
               {renderNav()}
             </nav>
-            <div className="p-3 border-t border-brand-muted space-y-1">
-              <p className="px-3 py-2 text-xs font-medium text-white truncate">
-                {profile?.full_name ?? 'Staff user'}
-              </p>
+            <div className="px-3 py-3 border-t border-brand-muted/50 space-y-1.5">
+              <div className="px-3 py-1.5">
+                <p className="text-sm font-medium text-white truncate">
+                  {profile?.full_name ?? 'Staff user'}
+                </p>
+                <p className="text-xs text-brand-primary/50 mt-0.5">
+                  {profile?.role === 'admin' ? 'Admin' : 'Staff'}
+                </p>
+              </div>
               <button
                 onClick={signOut}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm text-brand-primary hover:text-white hover:bg-brand-muted/50 transition-colors"
+                className="w-full text-left px-3 py-2 rounded-lg text-sm text-brand-primary hover:text-white hover:bg-white/[0.04] transition-colors"
               >
                 Sign out
               </button>
@@ -227,24 +229,27 @@ export default function AdminLayout() {
         </div>
       )}
 
-      <aside className="hidden w-56 shrink-0 bg-brand-surface border-r border-brand-muted md:flex md:flex-col">
-        <div className="px-5 py-4 border-b border-brand-muted">
+      <aside className="hidden w-56 shrink-0 bg-brand-surface border-r border-brand-muted/50 md:flex md:flex-col">
+        <div className="px-5 py-4 border-b border-brand-muted/50">
           <BrandMark subtitle={profile?.role ?? 'staff'} compact />
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
+        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
           {renderNav()}
         </nav>
 
-        <div className="p-3 border-t border-brand-muted space-y-0.5">
-          <div className="px-3 py-2">
-            <p className="text-xs font-medium text-white truncate">
+        <div className="px-3 py-3 border-t border-brand-muted/50 space-y-1.5">
+          <div className="px-3 py-1.5">
+            <p className="text-sm font-medium text-white truncate">
               {profile?.full_name ?? 'Staff user'}
+            </p>
+            <p className="text-xs text-brand-primary/50 mt-0.5">
+              {profile?.role === 'admin' ? 'Admin' : 'Staff'}
             </p>
           </div>
           <button
             onClick={signOut}
-            className="w-full text-left px-3 py-2 rounded-lg text-sm text-brand-primary hover:text-white hover:bg-brand-muted/50 transition-colors"
+            className="w-full text-left px-3 py-2 rounded-lg text-sm text-brand-primary hover:text-white hover:bg-white/[0.04] transition-colors"
           >
             Sign out
           </button>
@@ -255,8 +260,8 @@ export default function AdminLayout() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-muted bg-brand-surface md:hidden">
-        <div className="flex items-center justify-around px-2 py-1.5">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-muted/50 bg-brand-surface/95 backdrop-blur-sm md:hidden">
+        <div className="flex items-center justify-around px-2 py-1">
           <MobileNavItem to="/admin" label="Today" exact>
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -294,10 +299,10 @@ function MobileNavItem({ to, label, exact, children }: {
       to={to}
       end={exact}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors ${
+        `flex flex-col items-center gap-0.5 rounded-lg px-4 py-2 text-[11px] font-medium transition-colors ${
           isActive
             ? 'text-brand-accent'
-            : 'text-brand-primary/60 hover:text-white'
+            : 'text-brand-primary/50 hover:text-white'
         }`
       }
     >

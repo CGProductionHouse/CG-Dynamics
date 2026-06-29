@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { PremiumCard } from '../../components/ui/PremiumCard'
@@ -295,28 +295,27 @@ export default function AdminHomePage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-10">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">
               CG Dynamics
             </p>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
               Today at CG
             </h1>
+            <p className="mt-2 text-sm text-brand-primary/70">
+              {formatDateNice()}
+            </p>
           </div>
           {profile && (
-            <span className="hidden text-sm text-brand-primary/60 sm:block">
-              {profile.full_name ?? 'Staff'}
-            </span>
+            <div className="hidden sm:flex flex-col items-end">
+              <span className="text-sm font-medium text-white">{profile.full_name ?? 'Staff'}</span>
+              <span className="text-xs text-brand-primary/50">{profile.role === 'admin' ? 'Admin' : 'Staff'}</span>
+            </div>
           )}
         </div>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-primary">
-          {formatDateNice()}
-        </p>
-        <p className="mt-1 text-sm leading-relaxed text-brand-primary/70">
-          Tasks, client requests, updates and shortcuts for the day.
-        </p>
+        <div className="mt-6 h-px bg-gradient-to-r from-brand-accent/30 via-brand-accent/10 to-transparent" />
       </div>
 
       {error && (
@@ -369,12 +368,24 @@ export default function AdminHomePage() {
 
           {/* Stats */}
           <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            <StatCard label="Tasks today" value={stats.total} />
-            <StatCard label="Client requests" value={stats.clientRequests} accent />
-            <StatCard label="Done today" value={stats.doneToday} teal />
-            <StatCard label="Blocked" value={stats.blocked} amber />
-            <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
-            <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} />
+            <StatCard label="Active tasks" value={stats.total} icon={
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192" /></svg>
+            } />
+            <StatCard label="Client requests" value={stats.clientRequests} accent icon={
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227" /></svg>
+            } />
+            <StatCard label="Done today" value={stats.doneToday} teal icon={
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            } />
+            <StatCard label="Blocked" value={stats.blocked} amber icon={
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+            } />
+            <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} icon={
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            } />
+            <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} icon={
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 6v12m6-6H6" /></svg>
+            } />
           </div>
 
           {/* Client request preview */}
@@ -391,33 +402,36 @@ export default function AdminHomePage() {
               </div>
               <div className="space-y-2">
                 {clientRequests.map(task => (
-                  <PremiumCard key={task.id} padding="sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-white truncate">{task.title}</span>
-                          <Pill tone="accent">Client req</Pill>
+                  <div key={task.id} className="relative">
+                    <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-brand-accent/40" />
+                    <PremiumCard padding="sm">
+                      <div className="flex items-center justify-between gap-3 pl-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-white truncate">{task.title}</span>
+                            <Pill tone="accent">Client req</Pill>
+                          </div>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-brand-primary/70">
+                            {task.client_name && <span>{task.client_name}</span>}
+                            {task.assigned_to_name && <span>· {task.assigned_to_name}</span>}
+                            <span>· {formatDate(task.due_date)}</span>
+                          </div>
                         </div>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-brand-primary/70">
-                          {task.client_name && <span>{task.client_name}</span>}
-                          {task.assigned_to_name && <span>· {task.assigned_to_name}</span>}
-                          <span>· {formatDate(task.due_date)}</span>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <select
+                            value={task.status}
+                            onChange={e => handleClientRequestStatusChange(task.id, e.target.value as TaskStatus)}
+                            disabled={busyId === task.id}
+                            className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
+                          >
+                            {STATUSES.map(s => (
+                              <option key={s} value={s}>{statusLabel(s)}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <select
-                          value={task.status}
-                          onChange={e => handleClientRequestStatusChange(task.id, e.target.value as TaskStatus)}
-                          disabled={busyId === task.id}
-                          className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
-                        >
-                          {STATUSES.map(s => (
-                            <option key={s} value={s}>{statusLabel(s)}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </PremiumCard>
+                    </PremiumCard>
+                  </div>
                 ))}
               </div>
             </div>
@@ -582,89 +596,118 @@ function QuickAddCard({ onTaskCreated }: {
 
   return (
     <PremiumCard padding="sm">
-      <h2 className="mb-2 text-sm font-semibold text-white">Quick add task</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-end sm:flex-wrap">
-        <div className="min-w-0 flex-1 sm:min-w-[200px]">
-          <input
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            required
-            placeholder="What needs to be done?"
-            className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-          />
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-accent/10 text-brand-accent">
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={clientId}
-            onChange={e => setClientId(e.target.value)}
-            className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-          >
-            <option value="">No client</option>
-            {clientsLoading ? (
-              <option disabled>Loading...</option>
-            ) : (
-              clients.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))
-            )}
-            <option value="__manual__">Manual / other</option>
-          </select>
-          {isManual && (
+        <div>
+          <h2 className="text-sm font-semibold text-white">Quick add task</h2>
+          <p className="text-xs text-brand-primary/60">Create a task with defaults.</p>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:flex-wrap">
+          <div className="min-w-0 flex-[2] sm:min-w-[200px]">
+            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Task title</label>
             <input
-              value={manualClientName}
-              onChange={e => setManualClientName(e.target.value)}
-              placeholder="Type client name"
-              className="w-36 rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              required
+              placeholder="What needs to be done?"
+              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
+          </div>
+          <div className="flex-1 sm:min-w-0">
+            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Client</label>
+            <select
+              value={clientId}
+              onChange={e => setClientId(e.target.value)}
+              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            >
+              <option value="">No client</option>
+              {clientsLoading ? (
+                <option disabled>Loading...</option>
+              ) : (
+                clients.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))
+              )}
+              <option value="__manual__">Manual / other</option>
+            </select>
+          </div>
+          {isManual && (
+            <div className="flex-1 sm:min-w-0">
+              <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Client name</label>
+              <input
+                value={manualClientName}
+                onChange={e => setManualClientName(e.target.value)}
+                placeholder="Type client name"
+                className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              />
+            </div>
           )}
-          <select
-            value={assignedName}
-            onChange={e => setAssignedName(e.target.value)}
-            className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-          >
-            <option value="">Staff</option>
-            {KNOWN_STAFF.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-          <select
-            value={priority}
-            onChange={e => setPriority(e.target.value as TaskPriority)}
-            className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-          >
-            {PRIORITIES.map(p => (
-              <option key={p} value={p}>{p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}</option>
-            ))}
-          </select>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={e => setDueDate(e.target.value)}
-            className="w-32 rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-          />
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="min-w-[130px] flex-1 sm:flex-none">
+            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Staff</label>
+            <select
+              value={assignedName}
+              onChange={e => setAssignedName(e.target.value)}
+              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            >
+              <option value="">Unassigned</option>
+              {KNOWN_STAFF.map(name => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="min-w-[120px] flex-1 sm:flex-none">
+            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Priority</label>
+            <select
+              value={priority}
+              onChange={e => setPriority(e.target.value as TaskPriority)}
+              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            >
+              {PRIORITIES.map(p => (
+                <option key={p} value={p}>{p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}</option>
+              ))}
+            </select>
+          </div>
+          <div className="min-w-[140px] flex-1 sm:flex-none">
+            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Due date</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            />
+          </div>
           <button
             type="submit"
             disabled={saving || !title.trim()}
-            className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-semibold text-brand-bg hover:brightness-110 disabled:opacity-60 transition-all"
+            className="mt-1 w-full rounded-lg bg-brand-accent px-5 py-2 text-sm font-semibold text-brand-bg hover:brightness-110 disabled:opacity-50 transition-all sm:w-auto"
           >
-            {saving ? 'Adding...' : 'Add'}
+            {saving ? 'Adding...' : 'Add task'}
           </button>
         </div>
         {error && (
-          <p className="w-full text-xs text-red-400">{error}</p>
+          <p className="text-xs text-red-400">{error}</p>
         )}
       </form>
     </PremiumCard>
   )
 }
 
-function StatCard({ label, value, accent, teal, amber, danger }: {
+function StatCard({ label, value, accent, teal, amber, danger, icon }: {
   label: string
   value: number
   accent?: boolean
   teal?: boolean
   amber?: boolean
   danger?: boolean
+  icon?: ReactNode
 }) {
   const valClass = danger
     ? 'text-red-400'
@@ -674,7 +717,10 @@ function StatCard({ label, value, accent, teal, amber, danger }: {
     : 'text-white'
   return (
     <PremiumCard padding="sm">
-      <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{label}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary/70">{label}</p>
+        {icon && <span className="text-brand-primary/40">{icon}</span>}
+      </div>
       <p className={`mt-2 text-2xl font-semibold ${valClass}`}>{value}</p>
     </PremiumCard>
   )

@@ -259,13 +259,13 @@ export default function AssistantPage() {
           <div className="border-b border-white/10 bg-gradient-to-r from-brand-muted/70 via-brand-surface to-brand-accent/10 px-4 py-5 sm:px-7">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.26em] text-brand-accent">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">
                   Staff portal
                 </p>
                 <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
                   CG Assistant
                 </h1>
-                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-primary sm:text-base">
+                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-primary/70">
                   Practical, role-aware help for CG operations. It answers from approved context only and says clearly
                   when a module is not connected yet.
                 </p>
@@ -287,13 +287,16 @@ export default function AssistantPage() {
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <PremiumCard padding="none" className="flex min-h-[74vh] flex-col overflow-hidden">
-            <div className="border-b border-brand-muted px-4 py-4 sm:px-5">
+            <div className="border-b border-brand-muted/50 px-4 py-4 sm:px-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">Assistant chat</h2>
-                  <p className="text-sm text-brand-primary">
-                    Ask for priorities, drafts, checklists, operational summaries, or setup status.
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 rounded-full bg-brand-accent/50" />
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Assistant chat</h2>
+                    <p className="text-sm text-brand-primary/70">
+                      Ask for priorities, drafts, checklists, operational summaries, or setup status.
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {setupRequired && (
