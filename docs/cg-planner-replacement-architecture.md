@@ -507,47 +507,34 @@ posted  ◄── Final state
 
 ---
 
-## 15. Next Prompt Recommendation
+## Phase 6A Implementation Note
 
-Here is the exact prompt to hand to the developer after commit:
+**Status:** ✅ Complete (committed alongside Phase 1 of arch doc)
 
-```
-Phase 6 — Planner Core Schema + Library
+| Item | Detail |
+|---|---|
+| Migration file | `supabase/phase-6-cg-planner-core.sql` |
+| Helper file | `src/lib/planner.ts` |
+| Migration applied to production? | ❌ Not yet |
+| UI wired? | ❌ Not yet |
+| Existing Command Centre modified? | ❌ No (only added `deliverable_id` FK column) |
 
-Create a migration file `supabase/phase-6-cg-planner-core.sql` with these tables:
+### Tables created in migration
+- `planner_boards` — board-level organisation
+- `planner_buckets` — columns/buckets inside boards
+- `client_packages` — versioned client package setup
+- `package_deliverable_templates` — repeatable deliverable types
+- `monthly_deliverables` — core table: one row per deliverable per month
+- `planner_activity_log` — safe audit log (no secrets/finance)
 
-1. `client_packages` — id, client_id, name, active (default true), start_date, end_date, created_at, updated_at
-2. `package_deliverable_types` — id, package_id FK cascade, code (e.g. "DP"), label (e.g. "Designed Poster"), count_per_month (int), sort_order (int). Unique on (package_id, code).
-3. `monthly_deliverables` — id, package_id FK cascade, client_id FK cascade, deliverable_type_id FK cascade, code (denormalised), instance_number (int 1..N), month (date, first of month), status (text with check constraint: 'to_do','in_progress','ready_for_internal_review','internal_changes','ready_for_client_approval','waiting_client','client_changes','approved','scheduled','posted','blocked','moved'), due_date, scheduled_date, posted_at, assigned_to_user_id FK to profiles, assigned_to_name, title, notes, parent_request_id FK to client_requests, created_at, updated_at. Unique on (package_id, deliverable_type_id, instance_number, month).
-4. `admin_board_tasks` — id, title, category ('daily','weekly','monthly','payroll','checking','other'), assigned_to_id FK, assigned_to_name, status ('to_do','in_progress','done','blocked'), due_date, recurring (nullable 'daily','weekly','monthly'), notes, created_by FK, created_at, updated_at.
-5. `cg_socials_tasks` — id, title, platform ('facebook','instagram','tiktok','linkedin','other'), content_type ('post','reel','story','video','photo','other'), status ('to_do','in_progress','ready_for_internal_review','approved','scheduled','posted','blocked','moved'), scheduled_date, posted_at, assigned_to_id FK, assigned_to_name, notes, created_at, updated_at.
-6. `deliverable_comments` — id, deliverable_id FK cascade, author_id FK cascade, body, created_at.
-7. Alter `command_centre_tasks` to add `deliverable_id uuid references monthly_deliverables(id) on delete set null`.
+### Existing table extension
+- `command_centre_tasks` gains `deliverable_id` FK (safe `do $$` block)
 
-Add proper RLS for all tables:
-- Admin board: only admin can select/insert/update/delete
-- Packages + deliverable types: admin only
-- Monthly deliverables: staff can select all, update only assigned rows, admin can do everything
-- CG socials: staff select + update own, admin full
-- Comments: staff select all + insert own + update own
+### RLS model
+- `planner_boards`: staff select public/staff boards; admin_only hidden from non-admin
+- `client_packages` / `package_deliverable_templates`: admin CRUD, staff select
+- `monthly_deliverables`: staff select, admin CRUD (conservative — field-level RLS TODO for Amonique-specific perms)
+- `planner_activity_log`: staff insert + select
 
-Add indexes on: monthly_deliverables(client_id, month), monthly_deliverables(status), monthly_deliverables(assigned_to_name), admin_board_tasks(category, status), cg_socials_tasks(scheduled_date).
-
-Write `src/lib/planner.ts` with:
-- TypeScript types matching all new tables
-- `listDeliverables(filters)` — client_id, month, status, assigned_to_name
-- `updateDeliverableStatus(id, status)` — with permission check
-- `updateDeliverable(id, partial)` — admin only for sensitive fields
-- `listAdminTasks(filters)` — category, status
-- `listCgSocials(filters)` — platform, status
-- Helper: `generateDeliverableRows(packageId, month)` — deterministic row generator
-- Helper: `generateAllForMonth(month)` — loops active packages
-
-Do NOT:
-- Create UI pages yet
-- Create calendar views
-- Create approval modals
-- Delete existing command_centre_tasks or any existing code
-
-The migration must be safe to run on an existing database without data loss.
-```
+### Next step
+**Phase 6B — Run migration on production, seed boards/buckets, build first Planner UI views.**
