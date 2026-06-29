@@ -9,6 +9,8 @@ import {
   createTask,
   updateTaskStatus,
   listActiveClients,
+  parseMorningList,
+  morningEditToInput,
   BUCKETS,
   PRIORITIES,
   STATUSES,
@@ -19,6 +21,8 @@ import {
   type TaskPriority,
   type TaskStatus,
   type ClientOption,
+  type ParsedMorningTask,
+  type MorningTaskEdit,
 } from '../../lib/commandCentre'
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
@@ -292,6 +296,14 @@ export default function CommandCentrePage() {
         <AddTaskCard onTaskCreated={load} />
         <CaptureRequestCard onTaskCreated={load} />
       </div>
+
+      <div className="mb-6">
+        <MorningImportCard onTasksCreated={load} />
+      </div>
+
+      <p className="mb-6 text-xs text-brand-primary/60">
+        WhatsApp messages are generated for copy/paste only. No WhatsApp API is connected yet.
+      </p>
 
       <div className="mb-6">
         <h2 className="mb-4 text-lg font-bold text-white">Today's tasks</h2>
@@ -800,6 +812,266 @@ function CaptureRequestCard({ onTaskCreated }: {
           Capture client request
         </ActionButton>
       </form>
+    </PremiumCard>
+  )
+}
+
+function MorningImportCard({ onTasksCreated }: {
+  onTasksCreated: () => void
+}) {
+  const [rawText, setRawText] = useState('')
+  const [parsed, setParsed] = useState<ParsedMorningTask[] | null>(null)
+  const [edits, setEdits] = useState<MorningTaskEdit[]>([])
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
+  const [clientsError, setClientsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    setClientsLoading(true)
+    setClientsError(null)
+    listActiveClients().then(({ data, error }) => {
+      if (!active) return
+      setClientsLoading(false)
+      if (error) {
+        setClientsError('Client list unavailable.')
+        return
+      }
+      setClients(data ?? [])
+    }).catch(() => {
+      if (active) {
+        setClientsLoading(false)
+        setClientsError('Client list unavailable.')
+      }
+    })
+    return () => { active = false }
+  }, [])
+
+  function handleParse() {
+    if (!rawText.trim()) return
+    setError(null)
+    setSuccess(null)
+    const parsedTasks = parseMorningList(rawText, clients)
+    if (parsedTasks.length === 0) {
+      setError('No tasks found. Make sure each task starts with a bullet like "- task name".')
+      return
+    }
+    setParsed(parsedTasks)
+    setEdits(parsedTasks.map(t => ({
+      id: t.id,
+      clientOption: t.clientId || '',
+      manualClientName: '',
+      title: t.title,
+      bucket: t.bucket,
+      priority: t.priority,
+      dueDate: t.dueDate,
+      notes: t.notes || '',
+    })))
+  }
+
+  function handleDeleteRow(id: string) {
+    setEdits(prev => prev.filter(e => e.id !== id))
+    setParsed(prev => prev ? prev.filter(p => p.id !== id) : null)
+    setError(null)
+    setSuccess(null)
+  }
+
+  function updateEdit(id: string, patch: Partial<MorningTaskEdit>) {
+    setEdits(prev => prev.map(e => e.id === id ? { ...e, ...patch } : e))
+  }
+
+  async function handleCreateAll() {
+    if (saving || edits.length === 0) return
+    setSaving(true)
+    setError(null)
+    setSuccess(null)
+    let created = 0
+    for (const edit of edits) {
+      const input = morningEditToInput(edit)
+      // Attach staff name from the original parsed task
+      const original = parsed?.find(p => p.id === edit.id)
+      input.assigned_to_name = original?.staffName === 'Unassigned' ? null : original?.staffName ?? null
+      const { error } = await createTask(input)
+      if (error) {
+        setError(`Error creating task "${edit.title}": ${error.message}`)
+        setSaving(false)
+        return
+      }
+      created++
+    }
+    setSaving(false)
+    setSuccess(`Created ${created} task${created === 1 ? '' : 's'}.`)
+    setParsed(null)
+    setEdits([])
+    setRawText('')
+    onTasksCreated()
+  }
+
+  return (
+    <PremiumCard padding="md">
+      <h2 className="mb-1 text-base font-semibold text-white">Morning List Import</h2>
+      <p className="mb-4 text-xs text-brand-primary">
+        Paste the daily WhatsApp to-do list here. Voice note import will come later — for now, paste the typed list.
+      </p>
+
+      {!parsed ? (
+        <>
+          <textarea
+            value={rawText}
+            onChange={e => setRawText(e.target.value)}
+            rows={6}
+            placeholder={`@Sydney\n- Cape Lumber poster design\n- First Tech content guide\n\n@Ger-Marie\n- Bloem Marble poster design\n- Central Canvas 4 designs 4 photos`}
+            className="w-full resize-none rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          />
+          {error && (
+            <p className="mt-2 text-xs text-red-400">{error}</p>
+          )}
+          <ActionButton
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={handleParse}
+            disabled={!rawText.trim()}
+          >
+            Parse list
+          </ActionButton>
+        </>
+      ) : (
+        <>
+          {success && (
+            <p className="mb-3 text-xs text-[#2dd4bf]">{success}</p>
+          )}
+          {error && (
+            <p className="mb-3 text-xs text-red-400">{error}</p>
+          )}
+          <div className="space-y-2">
+            {edits.map((edit, i) => {
+              const original = parsed?.find(p => p.id === edit.id)
+              const isManual = edit.clientOption === '__manual__'
+              return (
+                <div key={edit.id} className="rounded-lg border border-brand-muted bg-brand-bg p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-brand-accent">
+                      {original?.staffName ?? `Task ${i + 1}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRow(edit.id)}
+                      className="text-xs text-red-400 hover:text-red-300"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <label className="mb-1 block text-[11px] text-brand-primary">Client</label>
+                      {clientsLoading ? (
+                        <p className="text-xs text-brand-primary/60 py-1">Loading...</p>
+                      ) : (
+                        <>
+                          <select
+                            value={edit.clientOption}
+                            onChange={e => updateEdit(edit.id, { clientOption: e.target.value, manualClientName: '' })}
+                            className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                          >
+                            <option value="">No client</option>
+                            {clients.map(c => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                            <option value="__manual__">Manual / other client</option>
+                          </select>
+                          {clientsError && (
+                            <p className="mt-1 text-[11px] text-amber-400">{clientsError}</p>
+                          )}
+                        </>
+                      )}
+                      {isManual && (
+                        <input
+                          value={edit.manualClientName}
+                          onChange={e => updateEdit(edit.id, { manualClientName: e.target.value })}
+                          placeholder="Type client name"
+                          className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                        />
+                      )}
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="mb-1 block text-[11px] text-brand-primary">Title</label>
+                      <input
+                        value={edit.title}
+                        onChange={e => updateEdit(edit.id, { title: e.target.value })}
+                        className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] text-brand-primary">Bucket</label>
+                      <select
+                        value={edit.bucket}
+                        onChange={e => updateEdit(edit.id, { bucket: e.target.value as TaskBucket })}
+                        className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                      >
+                        {BUCKETS.map(b => (
+                          <option key={b} value={b}>{b}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] text-brand-primary">Priority</label>
+                      <select
+                        value={edit.priority}
+                        onChange={e => updateEdit(edit.id, { priority: e.target.value as TaskPriority })}
+                        className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                      >
+                        {PRIORITIES.map(p => (
+                          <option key={p} value={p}>{p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] text-brand-primary">Due date</label>
+                      <input
+                        type="date"
+                        value={edit.dueDate}
+                        onChange={e => updateEdit(edit.id, { dueDate: e.target.value })}
+                        className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="mb-1 block text-[11px] text-brand-primary">Notes</label>
+                      <input
+                        value={edit.notes}
+                        onChange={e => updateEdit(edit.id, { notes: e.target.value })}
+                        placeholder="Optional details"
+                        className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <ActionButton
+              variant="primary"
+              onClick={handleCreateAll}
+              disabled={saving || edits.length === 0}
+              loading={saving}
+            >
+              Create {edits.length} task{edits.length === 1 ? '' : 's'}
+            </ActionButton>
+            <button
+              type="button"
+              onClick={() => { setParsed(null); setEdits([]); setError(null); setSuccess(null) }}
+              className="text-xs text-brand-primary hover:text-white"
+            >
+              Back to paste
+            </button>
+          </div>
+        </>
+      )}
     </PremiumCard>
   )
 }

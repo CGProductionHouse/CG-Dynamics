@@ -151,4 +151,151 @@ export const STATUSES: TaskStatus[] = [
   'moved_to_tomorrow',
 ]
 
+export interface ParsedMorningTask {
+  id: string
+  staffName: string
+  clientId: string | null
+  clientName: string | null
+  title: string
+  bucket: TaskBucket
+  priority: TaskPriority
+  dueDate: string
+  notes: string | null
+}
+
+export interface MorningTaskEdit {
+  id: string
+  clientOption: '' | '__manual__' | string // client ID, '__manual__', or empty
+  manualClientName: string
+  title: string
+  bucket: TaskBucket
+  priority: TaskPriority
+  dueDate: string
+  notes: string
+}
+
+function inferBucket(text: string): TaskBucket {
+  const lower = text.toLowerCase()
+  if (/\b(website|shopify|wordpress)\b/.test(lower)) return 'Websites'
+  if (/\b(content guide|guideline)\b/.test(lower)) return 'Content Guides'
+  if (/\b(video|reel)\b/.test(lower)) return 'Video'
+  if (/\b(design|poster|menu|logo)\b/.test(lower)) return 'Graphic Design'
+  if (/\b(photo|photos)\b/.test(lower)) return 'Graphic Design'
+  if (/\b(schedule|calendar|post)\b/.test(lower)) return 'Client Schedules'
+  if (/\b(strategy|report|campaign ideas|next month)\b/.test(lower)) return 'Admin / To Do'
+  return 'Admin / To Do'
+}
+
+function inferPriority(text: string): TaskPriority {
+  const lower = text.toLowerCase()
+  if (/\burgent\b/.test(lower)) return 'urgent'
+  if (/\b(client request|client asked)\b/.test(lower)) return 'client_request'
+  return 'normal'
+}
+
+function tryMatchClient(text: string, clients: ClientOption[]): { clientId: string | null; clientName: string | null; remaining: string } {
+  const sorted = [...clients].sort((a, b) => b.name.length - a.name.length)
+  const lower = text.toLowerCase()
+  for (const c of sorted) {
+    const idx = lower.indexOf(c.name.toLowerCase())
+    if (idx === -1) continue
+    const before = text.slice(0, idx).trim()
+    const after = text.slice(idx + c.name.length).trim()
+    const remaining = (before + ' ' + after).trim().replace(/\s+/g, ' ')
+    return { clientId: c.id, clientName: c.name, remaining }
+  }
+  return { clientId: null, clientName: null, remaining: text }
+}
+
+let importIdCounter = 0
+function nextImportId() {
+  return `mi-${Date.now().toString(36)}-${++importIdCounter}`
+}
+
+export function parseMorningList(input: string, clients: ClientOption[]): ParsedMorningTask[] {
+  const lines = input.split('\n')
+  const result: ParsedMorningTask[] = []
+  let currentStaff = 'Unassigned'
+
+  for (const raw of lines) {
+    const line = raw.trim()
+    if (!line) continue
+
+    const staffMatch = line.match(/^@(.+)$/)
+    if (staffMatch) {
+      currentStaff = staffMatch[1].trim()
+      continue
+    }
+    if (KNOWN_STAFF.includes(line)) {
+      currentStaff = line
+      continue
+    }
+
+    const bulletMatch = line.match(/^[-*•]\s+(.*)$/)
+    if (!bulletMatch) continue
+
+    const content = bulletMatch[1].trim()
+    if (!content) continue
+
+    let titleText = content
+    let extraNotes = ''
+
+    const { clientId, clientName, remaining } = tryMatchClient(titleText, clients)
+    titleText = remaining || titleText
+
+    if (!titleText && clientName) {
+      titleText = clientName
+    }
+
+    const colonIdx = titleText.indexOf(':')
+    if (colonIdx > 0) {
+      extraNotes = titleText.slice(colonIdx + 1).trim()
+      titleText = titleText.slice(0, colonIdx).trim()
+    }
+
+    const countPattern = /\d+\s+\w+/g
+    const countMatches = titleText.match(countPattern)
+    if (countMatches && countMatches.length >= 2) {
+      const counts = countMatches.join(', ')
+      titleText = titleText.replace(/\d+\s+\w+/g, '').trim()
+      extraNotes = extraNotes ? counts + ' — ' + extraNotes : counts
+    }
+
+    titleText = titleText.replace(/\s+/g, ' ').trim()
+    const bucket = inferBucket(content)
+    const priority = inferPriority(content)
+
+    result.push({
+      id: nextImportId(),
+      staffName: currentStaff,
+      clientId,
+      clientName: clientName || null,
+      title: titleText || content,
+      bucket,
+      priority,
+      dueDate: new Date().toISOString().slice(0, 10),
+      notes: extraNotes || null,
+    })
+  }
+
+  return result
+}
+
+export function morningEditToInput(edit: MorningTaskEdit): TaskInput {
+  const isManual = edit.clientOption === '__manual__'
+  const selectedClientId = isManual || !edit.clientOption ? null : edit.clientOption
+  return {
+    title: edit.title,
+    client_id: selectedClientId,
+    client_name: isManual ? edit.manualClientName.trim() || null : null,
+    assigned_to_name: null,
+    bucket: edit.bucket,
+    priority: edit.priority,
+    status: 'to_do',
+    due_date: edit.dueDate,
+    notes: edit.notes?.trim() || null,
+    source: 'morning_list',
+  }
+}
+
 export const KNOWN_STAFF = ['Sydney', 'Ger-Marie', 'Franco', 'KG', 'Amonique', 'CA']
