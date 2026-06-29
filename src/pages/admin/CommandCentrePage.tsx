@@ -8,6 +8,7 @@ import {
   listTasks,
   createTask,
   updateTaskStatus,
+  listActiveClients,
   BUCKETS,
   PRIORITIES,
   STATUSES,
@@ -17,6 +18,7 @@ import {
   type TaskBucket,
   type TaskPriority,
   type TaskStatus,
+  type ClientOption,
 } from '../../lib/commandCentre'
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
@@ -422,7 +424,8 @@ function AddTaskCard({ onTaskCreated }: {
   onTaskCreated: () => void
 }) {
   const [title, setTitle] = useState('')
-  const [clientName, setClientName] = useState('')
+  const [clientId, setClientId] = useState('')
+  const [manualClientName, setManualClientName] = useState('')
   const [assignedName, setAssignedName] = useState('')
   const [bucket, setBucket] = useState<TaskBucket>('Admin / To Do')
   const [priority, setPriority] = useState<TaskPriority>('normal')
@@ -432,6 +435,46 @@ function AddTaskCard({ onTaskCreated }: {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
+  const [clientsError, setClientsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    setClientsLoading(true)
+    setClientsError(null)
+    listActiveClients().then(({ data, error }) => {
+      if (!active) return
+      setClientsLoading(false)
+      if (error) {
+        setClientsError('Client list unavailable.')
+        return
+      }
+      setClients(data ?? [])
+    }).catch(() => {
+      if (active) {
+        setClientsLoading(false)
+        setClientsError('Client list unavailable.')
+      }
+    })
+    return () => { active = false }
+  }, [])
+
+  const isManualClient = clientId === '__manual__'
+  const selectedClient = clients.find(c => c.id === clientId)
+
+  function resetForm() {
+    setTitle('')
+    setClientId('')
+    setManualClientName('')
+    setAssignedName('')
+    setBucket('Admin / To Do')
+    setPriority('normal')
+    setDueDate(todayStr)
+    setStatus('to_do')
+    setNotes('')
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (saving || !title.trim()) return
@@ -440,7 +483,8 @@ function AddTaskCard({ onTaskCreated }: {
     try {
       const input: TaskInput = {
         title: title.trim(),
-        client_name: clientName.trim() || null,
+        client_id: selectedClient?.id ?? null,
+        client_name: isManualClient ? manualClientName.trim() || null : selectedClient?.name ?? null,
         assigned_to_name: assignedName.trim() || null,
         bucket,
         priority,
@@ -454,14 +498,7 @@ function AddTaskCard({ onTaskCreated }: {
         setError(error.message)
         return
       }
-      setTitle('')
-      setClientName('')
-      setAssignedName('')
-      setBucket('Admin / To Do')
-      setPriority('normal')
-      setDueDate(todayStr)
-      setStatus('to_do')
-      setNotes('')
+      resetForm()
       onTaskCreated()
     } catch {
       setError('Could not save task.')
@@ -488,12 +525,34 @@ function AddTaskCard({ onTaskCreated }: {
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-primary">Client</label>
-            <input
-              value={clientName}
-              onChange={e => setClientName(e.target.value)}
-              placeholder="Client name (optional)"
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            />
+            {clientsLoading ? (
+              <p className="text-xs text-brand-primary/60 py-2">Loading clients...</p>
+            ) : (
+              <>
+                <select
+                  value={clientId}
+                  onChange={e => setClientId(e.target.value)}
+                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                >
+                  <option value="">No client</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                  <option value="__manual__">Manual / other client</option>
+                </select>
+                {clientsError && (
+                  <p className="mt-1 text-xs text-amber-400">{clientsError} You can still type a client name.</p>
+                )}
+              </>
+            )}
+            {isManualClient && (
+              <input
+                value={manualClientName}
+                onChange={e => setManualClientName(e.target.value)}
+                placeholder="Type client name"
+                className="mt-2 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              />
+            )}
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-primary">Assigned to</label>
@@ -569,12 +628,51 @@ function CaptureRequestCard({ onTaskCreated }: {
 }) {
   const [whatsappText, setWhatsappText] = useState('')
   const [title, setTitle] = useState('')
-  const [clientName, setClientName] = useState('')
+  const [clientId, setClientId] = useState('')
+  const [manualClientName, setManualClientName] = useState('')
   const [assignedName, setAssignedName] = useState('')
   const [dueDate, setDueDate] = useState(todayStr)
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
+  const [clientsError, setClientsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    setClientsLoading(true)
+    setClientsError(null)
+    listActiveClients().then(({ data, error }) => {
+      if (!active) return
+      setClientsLoading(false)
+      if (error) {
+        setClientsError('Client list unavailable.')
+        return
+      }
+      setClients(data ?? [])
+    }).catch(() => {
+      if (active) {
+        setClientsLoading(false)
+        setClientsError('Client list unavailable.')
+      }
+    })
+    return () => { active = false }
+  }, [])
+
+  const isManualClient = clientId === '__manual__'
+  const selectedClient = clients.find(c => c.id === clientId)
+
+  function resetForm() {
+    setWhatsappText('')
+    setTitle('')
+    setClientId('')
+    setManualClientName('')
+    setAssignedName('')
+    setDueDate(todayStr)
+    setNotes('')
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -584,7 +682,8 @@ function CaptureRequestCard({ onTaskCreated }: {
     try {
       const input: TaskInput = {
         title: title.trim() || `Client request`,
-        client_name: clientName.trim() || null,
+        client_id: selectedClient?.id ?? null,
+        client_name: isManualClient ? manualClientName.trim() || null : selectedClient?.name ?? null,
         assigned_to_name: assignedName.trim() || null,
         bucket: 'Client Requests',
         priority: 'client_request',
@@ -599,12 +698,7 @@ function CaptureRequestCard({ onTaskCreated }: {
         setError(error.message)
         return
       }
-      setWhatsappText('')
-      setTitle('')
-      setClientName('')
-      setAssignedName('')
-      setDueDate(todayStr)
-      setNotes('')
+      resetForm()
       onTaskCreated()
     } catch {
       setError('Could not save client request.')
@@ -647,12 +741,34 @@ function CaptureRequestCard({ onTaskCreated }: {
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-primary">Client</label>
-            <input
-              value={clientName}
-              onChange={e => setClientName(e.target.value)}
-              placeholder="Client name"
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            />
+            {clientsLoading ? (
+              <p className="text-xs text-brand-primary/60 py-2">Loading clients...</p>
+            ) : (
+              <>
+                <select
+                  value={clientId}
+                  onChange={e => setClientId(e.target.value)}
+                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                >
+                  <option value="">No client</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                  <option value="__manual__">Manual / other client</option>
+                </select>
+                {clientsError && (
+                  <p className="mt-1 text-xs text-amber-400">{clientsError} You can still type a client name.</p>
+                )}
+              </>
+            )}
+            {isManualClient && (
+              <input
+                value={manualClientName}
+                onChange={e => setManualClientName(e.target.value)}
+                placeholder="Type client name"
+                className="mt-2 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              />
+            )}
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-primary">Assigned to</label>

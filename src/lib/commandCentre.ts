@@ -114,6 +114,19 @@ export async function deleteTask(id: string) {
   return supabase.from(TABLE).delete().eq('id', id)
 }
 
+export interface ClientOption {
+  id: string
+  name: string
+}
+
+export async function listActiveClients() {
+  return supabase
+    .from('clients')
+    .select('id, name')
+    .eq('active', true)
+    .order('name')
+}
+
 export const BUCKETS: TaskBucket[] = [
   'Client Requests',
   'Graphic Design',
