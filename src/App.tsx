@@ -10,6 +10,9 @@ import Signup from './pages/Signup'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
+import AdminHomePage from './pages/admin/AdminHomePage'
+import ClientPerformancePage from './pages/admin/ClientPerformancePage'
+import CgHubPage from './pages/admin/CgHubPage'
 import ClientsList from './pages/admin/ClientsList'
 import InvitesAdmin from './pages/admin/InvitesAdmin'
 import ImportMetaCsv from './pages/admin/ImportMetaCsv'
@@ -60,7 +63,10 @@ export default function App() {
           <Route element={<RequireStaff />}>
             <Route element={<AdminLayout />}>
               {/* Read access for all staff (admin + team) */}
-              <Route path="/admin" element={<ClientsList />} />
+              <Route path="/admin" element={<AdminHomePage />} />
+              <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
+              <Route path="/admin/cg-hub" element={<CgHubPage />} />
+              <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/assistant" element={<AssistantPage />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
