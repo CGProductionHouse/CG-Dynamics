@@ -11,7 +11,7 @@ const BOARD_LABELS: Record<string, string> = {
   'operations-todo': 'Operations',
   'client-websites': 'Websites',
   'admin-check-list': 'Admin',
-  'client-schedule': 'Schedule',
+  'client-schedule': 'Client Schedule Board',
   'cg-socials': 'CG Socials',
 }
 

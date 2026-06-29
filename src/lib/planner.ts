@@ -209,6 +209,65 @@ export const PRODUCTION_STATUS_LABELS: Record<ProductionStatus, string> = {
   moved: 'Moved',
 }
 
+export const PACKAGE_DELIVERABLE_TYPES: DeliverableType[] = ['dp', 'photo', 'video', 'reel']
+
+export const PACKAGE_DELIVERABLE_LABELS: Record<DeliverableType, string> = {
+  dp: 'DP (Designed Poster)',
+  photo: 'F (Photo)',
+  video: 'Video',
+  reel: 'Reel',
+  content_run: 'Content Run',
+  website_update: 'Website Update',
+  monthly_report: 'Report',
+  strategy: 'Strategy',
+  admin: 'Admin',
+  other: 'Other',
+}
+
+export type SimplifiedProductionStatus =
+  | 'not_started'
+  | 'in_progress'
+  | 'ready_review'
+  | 'awaiting_client'
+  | 'meta_drafts'
+  | 'scheduled_posted'
+
+export const SIMPLIFIED_STATUS_LABELS: Record<SimplifiedProductionStatus, string> = {
+  not_started: 'Not started',
+  in_progress: 'In progress',
+  ready_review: 'Ready for review',
+  awaiting_client: 'Awaiting client approval',
+  meta_drafts: 'Meta Drafts',
+  scheduled_posted: 'Scheduled / Posted',
+}
+
+export const SIMPLIFIED_STATUS_OPTIONS: SimplifiedProductionStatus[] = [
+  'not_started',
+  'in_progress',
+  'ready_review',
+  'awaiting_client',
+  'meta_drafts',
+  'scheduled_posted',
+]
+
+export const SIMPLIFIED_TO_BACKEND_STATUS: Record<SimplifiedProductionStatus, ProductionStatus> = {
+  not_started: 'to_do',
+  in_progress: 'in_progress',
+  ready_review: 'ready_internal_review',
+  awaiting_client: 'ready_client_approval',
+  meta_drafts: 'approved',
+  scheduled_posted: 'scheduled',
+}
+
+export function simplifyProductionStatus(status: ProductionStatus): SimplifiedProductionStatus {
+  if (status === 'to_do' || status === 'moved') return 'not_started'
+  if (status === 'ready_internal_review') return 'ready_review'
+  if (status === 'ready_client_approval' || status === 'waiting_client') return 'awaiting_client'
+  if (status === 'approved') return 'meta_drafts'
+  if (status === 'scheduled' || status === 'posted') return 'scheduled_posted'
+  return 'in_progress'
+}
+
 // ── Helpers ───────────────────────────────────────────────────
 
 export function formatDeliverableCode(code: string, instance: number): string {

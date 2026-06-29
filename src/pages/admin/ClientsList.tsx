@@ -249,13 +249,11 @@ export default function ClientsList() {
         )}
       </div>
 
-      <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
         {([
           ['Total clients', overview.totalClients],
           ['Published reports', overview.publishedReports],
           ['Draft reports', overview.draftReports],
-          ['Imports', overview.imports],
-          ['Manual summaries', overview.manualSummaries],
         ] as const).map(([label, value]) => (
           <PremiumCard key={label} padding="sm">
             <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{label}</p>
@@ -269,7 +267,7 @@ export default function ClientsList() {
           <div>
             <h2 className="text-sm font-semibold text-white">Quick actions</h2>
             <p className="mt-1 text-xs text-brand-primary">
-              Jump straight to the reporting workflow.
+              Open the normal client workflow.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap">
@@ -277,12 +275,11 @@ export default function ClientsList() {
               <>
                 <QuickLink to="/admin/integrations/meta" label="Sync Meta" primary />
                 <QuickLink to="/admin/reports" label="Reports" />
-                <QuickLink to="/admin/reports/new" label="New report" />
-                <QuickLink to="/admin/invites" label="Invites" />
+                <QuickLink to="/admin/package-master" label="Package Master" />
+                <QuickLink to="/admin/monthly-planner" label="Monthly Planner" />
               </>
             )}
             <QuickLink to="/admin/published" label="Client preview" />
-            <QuickLink to="/admin/import" label="Manual import fallback" />
           </div>
         </div>
       </PremiumCard>
@@ -418,7 +415,8 @@ export default function ClientsList() {
                               <>
                                 <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Sync Meta" primary />
                                 <ClientActionLink to={`/admin/reports?client=${c.id}`} label="Reports" />
-                                <ClientActionLink to={`/admin/reports/new?client=${c.id}`} label="New report" />
+                                <ClientActionLink to={`/admin/package-master?client=${c.id}`} label="Package" />
+                                <ClientActionLink to={`/admin/monthly-planner?client=${c.id}`} label="Monthly Planner" />
                                 <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
                                 <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
                               </>
@@ -498,8 +496,8 @@ function ClientActionLink({ to, label, primary = false }: { to: string; label: s
   )
 }
 
-// Per-client workflow actions, in priority order: Sync Meta, Reports, New
-// report, Edit client. Manual import fallback is kept visually secondary.
+// Per-client workflow actions, in priority order: Sync Meta, Reports, Package,
+// Monthly Planner, Edit client.
 function ClientQuickActions({
   client,
   isAdmin,
@@ -514,7 +512,8 @@ function ClientQuickActions({
       <div className="flex flex-wrap gap-2">
         {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Sync Meta" primary />}
         <ClientActionLink to={`/admin/reports?client=${client.id}`} label="Reports" />
-        {isAdmin && <ClientActionLink to={`/admin/reports/new?client=${client.id}`} label="New report" />}
+        <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
+        <ClientActionLink to={`/admin/monthly-planner?client=${client.id}`} label="Monthly Planner" />
         {isAdmin && (
           <button
             type="button"
@@ -525,12 +524,6 @@ function ClientQuickActions({
           </button>
         )}
       </div>
-      <Link
-        to={`/admin/import?client=${client.id}`}
-        className="w-fit text-[11px] font-medium text-brand-primary/60 underline-offset-2 transition hover:text-brand-primary hover:underline"
-      >
-        Manual import fallback
-      </Link>
     </div>
   )
 }

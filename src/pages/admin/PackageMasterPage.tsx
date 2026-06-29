@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
@@ -9,9 +10,11 @@ import {
   createClientPackage,
   listPackageDeliverableTemplates,
   createPackageDeliverableTemplate,
+  updatePackageDeliverableTemplate,
   deactivatePackageDeliverableTemplate,
   archiveClientPackage,
-  DELIVERABLE_TYPES,
+  PACKAGE_DELIVERABLE_LABELS,
+  PACKAGE_DELIVERABLE_TYPES,
   type ClientPackage,
   type PackageDeliverableTemplate,
   type CreateClientPackageInput,
@@ -20,24 +23,39 @@ import {
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
-const TYPE_LABELS: Record<DeliverableType, string> = {
-  dp: 'DP',
-  photo: 'Photo',
-  video: 'Video',
-  reel: 'Reel',
-  content_run: 'Content Run',
-  website_update: 'Website Update',
-  monthly_report: 'Monthly Report',
-  strategy: 'Strategy',
-  admin: 'Admin',
-  other: 'Other',
+const TYPE_LABELS = PACKAGE_DELIVERABLE_LABELS
+
+const MAIN_TYPE_META: Record<DeliverableType, { short: string; codePrefix: string; titlePrefix: string }> = {
+  dp: { short: 'DP', codePrefix: 'DP', titlePrefix: 'DP' },
+  photo: { short: 'F', codePrefix: 'F', titlePrefix: 'F' },
+  video: { short: 'Video', codePrefix: 'Video', titlePrefix: 'Video' },
+  reel: { short: 'Reel', codePrefix: 'Reel', titlePrefix: 'Reel' },
+  content_run: { short: 'Content', codePrefix: 'Content', titlePrefix: 'Content' },
+  website_update: { short: 'Web', codePrefix: 'Web', titlePrefix: 'Web' },
+  monthly_report: { short: 'Report', codePrefix: 'Report', titlePrefix: 'Report' },
+  strategy: { short: 'Strategy', codePrefix: 'Strategy', titlePrefix: 'Strategy' },
+  admin: { short: 'Admin', codePrefix: 'Admin', titlePrefix: 'Admin' },
+  other: { short: 'Other', codePrefix: 'Other', titlePrefix: 'Other' },
 }
 
-const QUICK_BUTTONS: { label: string; type: DeliverableType; codePrefix: string }[] = [
-  { label: 'Add DP', type: 'dp', codePrefix: 'DP' },
-  { label: 'Add Photo', type: 'photo', codePrefix: 'F' },
-  { label: 'Add Video', type: 'video', codePrefix: 'Video' },
-  { label: 'Add Reel', type: 'reel', codePrefix: 'Reel' },
+const DEFAULT_QUANTITIES: Record<DeliverableType, number> = {
+  dp: 0,
+  photo: 0,
+  video: 0,
+  reel: 0,
+  content_run: 0,
+  website_update: 0,
+  monthly_report: 0,
+  strategy: 0,
+  admin: 0,
+  other: 0,
+}
+
+const QUANTITY_FIELDS: { type: DeliverableType; label: string }[] = [
+  { type: 'dp', label: 'DP quantity' },
+  { type: 'photo', label: 'F quantity' },
+  { type: 'video', label: 'Video quantity' },
+  { type: 'reel', label: 'Reel quantity' },
 ]
 
 function filterActive<T extends { active?: boolean }>(items: T[]): T[] {
@@ -46,6 +64,7 @@ function filterActive<T extends { active?: boolean }>(items: T[]): T[] {
 
 export default function PackageMasterPage() {
   const { profile } = useAuth()
+  const [searchParams] = useSearchParams()
   const isAdmin = profile?.role === 'admin'
 
   const [clients, setClients] = useState<ClientOption[]>([])
@@ -76,6 +95,9 @@ export default function PackageMasterPage() {
   const [tplDayOfMonth, setTplDayOfMonth] = useState('')
   const [tplSaving, setTplSaving] = useState(false)
   const [tplError, setTplError] = useState<string | null>(null)
+  const [quantities, setQuantities] = useState<Record<DeliverableType, number>>(DEFAULT_QUANTITIES)
+  const [quantitySaving, setQuantitySaving] = useState(false)
+  const [quantityMessage, setQuantityMessage] = useState<string | null>(null)
 
   const [tableMissing, setTableMissing] = useState(false)
 
@@ -93,9 +115,13 @@ export default function PackageMasterPage() {
         return
       }
       setClients(data ?? [])
+      const clientId = searchParams.get('client')
+      if (clientId && data?.some(client => client.id === clientId)) {
+        setSelectedClientId(clientId)
+      }
     })
     return () => { active = false }
-  }, [])
+  }, [searchParams])
 
   const filteredClients = useMemo(() => {
     if (!clientSearch) return clients
@@ -160,15 +186,24 @@ export default function PackageMasterPage() {
   )
 
   const templateStats = useMemo(() => {
-    const active = filterActive(templates)
+    const active = filterActive(templates).filter(t => PACKAGE_DELIVERABLE_TYPES.includes(t.deliverable_type))
     return {
       dp: active.filter(t => t.deliverable_type === 'dp').reduce((s, t) => s + t.count_per_month, 0),
       photo: active.filter(t => t.deliverable_type === 'photo').reduce((s, t) => s + t.count_per_month, 0),
       video: active.filter(t => t.deliverable_type === 'video').reduce((s, t) => s + t.count_per_month, 0),
       reel: active.filter(t => t.deliverable_type === 'reel').reduce((s, t) => s + t.count_per_month, 0),
-      other: active.filter(t => !['dp', 'photo', 'video', 'reel'].includes(t.deliverable_type)).reduce((s, t) => s + t.count_per_month, 0),
     }
   }, [templates])
+
+  useEffect(() => {
+    setQuantities(current => ({
+      ...current,
+      dp: templateStats.dp,
+      photo: templateStats.photo,
+      video: templateStats.video,
+      reel: templateStats.reel,
+    }))
+  }, [templateStats])
 
   async function handleCreatePackage(e: FormEvent) {
     e.preventDefault()
@@ -193,27 +228,52 @@ export default function PackageMasterPage() {
     setPkgSaving(false)
   }
 
-  function nextCode(type: DeliverableType, prefix: string): string {
-    const active = filterActive(templates)
-    const existing = active.filter(t => t.deliverable_type === type)
-    const nextNum = existing.length + 1
-    return `${prefix} ${nextNum}`
+  function templateCode(type: DeliverableType, index: number) {
+    const prefix = MAIN_TYPE_META[type].codePrefix
+    return type === 'video' || type === 'reel' ? `${prefix} ${index}` : `${prefix}${index}`
   }
 
-  async function handleQuickAdd(type: DeliverableType, prefix: string) {
-    if (!selectedPackageId) return
-    const code = nextCode(type, prefix)
-    const input: CreatePackageDeliverableTemplateInput = {
-      package_id: selectedPackageId,
-      code,
-      deliverable_type: type,
-      title_template: code,
-      count_per_month: 1,
+  async function savePackageQuantities() {
+    if (!selectedPackageId || quantitySaving) return
+    setQuantitySaving(true)
+    setQuantityMessage(null)
+
+    for (const type of PACKAGE_DELIVERABLE_TYPES) {
+      const target = Math.max(0, Math.round(quantities[type] || 0))
+      const existing = filterActive(templates)
+        .filter(template => template.deliverable_type === type)
+        .sort((a, b) => a.sort_order - b.sort_order || a.code.localeCompare(b.code))
+
+      for (let i = 0; i < target; i++) {
+        const code = templateCode(type, i + 1)
+        const current = existing[i]
+        if (current) {
+          await updatePackageDeliverableTemplate(current.id, {
+            code,
+            title_template: code,
+            count_per_month: 1,
+            sort_order: i + 1,
+            active: true,
+          })
+        } else {
+          await createPackageDeliverableTemplate({
+            package_id: selectedPackageId,
+            code,
+            deliverable_type: type,
+            title_template: code,
+            count_per_month: 1,
+          })
+        }
+      }
+
+      for (const extra of existing.slice(target)) {
+        await deactivatePackageDeliverableTemplate(extra.id)
+      }
     }
-    const { error } = await createPackageDeliverableTemplate(input)
-    if (!error) {
-      await loadTemplates(selectedPackageId)
-    }
+
+    await loadTemplates(selectedPackageId)
+    setQuantityMessage('Package quantities saved.')
+    setQuantitySaving(false)
   }
 
   async function handleCreateTemplate(e: FormEvent) {
@@ -275,7 +335,7 @@ export default function PackageMasterPage() {
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-5">
         <h1 className="text-3xl font-black tracking-tight text-white">Package Master</h1>
-        <p className="mt-1 text-sm text-white/45">Package setup.</p>
+        <p className="mt-1 text-sm text-white/45">Set the package.</p>
       </div>
 
       {/* Client selector */}
@@ -445,48 +505,61 @@ export default function PackageMasterPage() {
           {/* Selected package detail */}
           {currentPackage && (
             <div className="mb-6">
-              <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+              <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.dp}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">DP</p>
+                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">DP (Designed Poster)</p>
                 </div>
                 <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.photo}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Photos</p>
+                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">F (Photo)</p>
                 </div>
                 <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.video}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Videos</p>
+                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Video</p>
                 </div>
                 <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.reel}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Reels</p>
-                </div>
-                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
-                  <p className="text-xl font-semibold text-white">{templateStats.other}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Other</p>
+                  <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Reel</p>
                 </div>
               </div>
 
-              {/* Quick add + custom add */}
+              {isAdmin && (
+                <div className="mb-4 rounded-xl bg-white/[0.025] p-3">
+                  <div className="grid gap-2 sm:grid-cols-4">
+                    {QUANTITY_FIELDS.map(field => (
+                      <label key={field.type} className="block">
+                        <span className="mb-1 block text-[11px] font-medium text-white/45">{field.label}</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={quantities[field.type]}
+                          onChange={event => setQuantities(current => ({
+                            ...current,
+                            [field.type]: Math.max(0, Math.round(Number(event.target.value) || 0)),
+                          }))}
+                          className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <ActionButton size="sm" onClick={savePackageQuantities} loading={quantitySaving}>
+                      Save Quantities
+                    </ActionButton>
+                    {quantityMessage && <span className="text-xs text-brand-accent">{quantityMessage}</span>}
+                  </div>
+                </div>
+              )}
+
               <div className="mb-4 flex flex-wrap gap-1.5">
-                {isAdmin && QUICK_BUTTONS.map(btn => (
-                  <button
-                    key={btn.type}
-                    type="button"
-                    onClick={() => handleQuickAdd(btn.type, btn.codePrefix)}
-                    className="rounded-lg bg-white/[0.035] px-2.5 py-1.5 text-xs font-medium text-white/70 hover:text-white transition-colors"
-                  >
-                    + {btn.label}
-                  </button>
-                ))}
                 {isAdmin && (
                   <button
                     type="button"
                     onClick={() => setCreateTplOpen(!createTplOpen)}
                     className="rounded-lg bg-brand-accent/10 px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-accent/15 transition-colors"
                   >
-                    {createTplOpen ? 'Cancel' : '+ Custom'}
+                    {createTplOpen ? 'Hide advanced' : 'Advanced template'}
                   </button>
                 )}
               </div>
@@ -518,7 +591,7 @@ export default function PackageMasterPage() {
                           onChange={e => setTplType(e.target.value as DeliverableType)}
                           className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         >
-                          {DELIVERABLE_TYPES.map(t => (
+                          {PACKAGE_DELIVERABLE_TYPES.map(t => (
                             <option key={t} value={t}>{TYPE_LABELS[t]}</option>
                           ))}
                         </select>
@@ -586,7 +659,7 @@ export default function PackageMasterPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-brand-muted/10">
-                      {filterActive(templates).map(t => (
+                      {filterActive(templates).filter(t => PACKAGE_DELIVERABLE_TYPES.includes(t.deliverable_type)).map(t => (
                         <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
                           <td className="px-3 py-2.5">
                             <span className="font-medium text-white">{t.code}</span>

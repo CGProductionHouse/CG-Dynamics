@@ -28,7 +28,7 @@ const CARDS: HubCard[] = [
   },
   {
     title: 'Package Master',
-    description: 'Package setup.',
+    description: 'Set the package.',
     to: '/admin/package-master',
     status: 'Live',
     icon: (
@@ -40,7 +40,7 @@ const CARDS: HubCard[] = [
   },
   {
     title: 'Monthly Planner',
-    description: 'Monthly package tracker.',
+    description: 'Track this month.',
     to: '/admin/monthly-planner',
     status: 'Live',
     icon: (

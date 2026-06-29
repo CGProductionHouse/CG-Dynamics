@@ -1,37 +1,30 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import {
-  DELIVERABLE_TYPES,
-  PRODUCTION_STATUSES,
-  PRODUCTION_STATUS_LABELS,
+  PACKAGE_DELIVERABLE_LABELS,
+  PACKAGE_DELIVERABLE_TYPES,
+  SIMPLIFIED_STATUS_LABELS,
+  SIMPLIFIED_STATUS_OPTIONS,
+  SIMPLIFIED_TO_BACKEND_STATUS,
   generateMonthFromPackages,
   getMonthlyPackageTotals,
   listClientPackages,
   listMonthlyDeliverablesByMonth,
   monthKey,
+  simplifyProductionStatus,
   updateMonthlyDeliverableStatus,
   type DeliverableType,
   type MonthlyDeliverable,
-  type ProductionStatus,
+  type SimplifiedProductionStatus,
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
-const TYPE_LABELS: Record<DeliverableType, string> = {
-  dp: 'DP',
-  photo: 'Photo',
-  video: 'Video',
-  reel: 'Reel',
-  content_run: 'Content Run',
-  website_update: 'Website Update',
-  monthly_report: 'Report',
-  strategy: 'Strategy',
-  admin: 'Admin',
-  other: 'Other',
-}
+const TYPE_LABELS = PACKAGE_DELIVERABLE_LABELS
 
-const DISPLAY_TYPES: DeliverableType[] = ['dp', 'photo', 'video', 'reel', 'other']
+const DISPLAY_TYPES: DeliverableType[] = ['dp', 'photo', 'video', 'reel']
 
 function toMonthStart(key: string) {
   return `${key}-01`
@@ -51,15 +44,25 @@ function formatDate(value: string | null) {
   })
 }
 
-function statusTone(status: ProductionStatus) {
-  if (status === 'posted' || status === 'scheduled' || status === 'approved') return 'text-brand-accent border-brand-accent/25 bg-brand-accent/10'
-  if (status === 'blocked' || status === 'client_changes' || status === 'internal_changes') return 'text-amber-300 border-amber-400/25 bg-amber-400/10'
-  if (status === 'waiting_client' || status === 'ready_client_approval') return 'text-sky-200 border-sky-300/25 bg-sky-300/10'
+function statusTone(status: SimplifiedProductionStatus) {
+  if (status === 'scheduled_posted' || status === 'meta_drafts') return 'text-brand-accent border-brand-accent/25 bg-brand-accent/10'
+  if (status === 'awaiting_client') return 'text-sky-200 border-sky-300/25 bg-sky-300/10'
+  if (status === 'ready_review') return 'text-amber-300 border-amber-400/25 bg-amber-400/10'
   return 'text-white/60 border-white/10 bg-white/[0.03]'
+}
+
+function displayDeliverableCode(deliverable: MonthlyDeliverable) {
+  const instance = String(deliverable.instance_number)
+  if (deliverable.code.trim().endsWith(instance)) return deliverable.code
+  if (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel') {
+    return `${deliverable.code} ${instance}`
+  }
+  return `${deliverable.code}${instance}`
 }
 
 export default function MonthlyPlannerPage() {
   const { profile } = useAuth()
+  const [searchParams] = useSearchParams()
   const isAdmin = profile?.role === 'admin'
   const [selectedMonth, setSelectedMonth] = useState(monthKey(new Date()))
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
@@ -67,7 +70,7 @@ export default function MonthlyPlannerPage() {
   const [activePackageCount, setActivePackageCount] = useState(0)
   const [clientFilter, setClientFilter] = useState('')
   const [clientSearch, setClientSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | ProductionStatus>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | SimplifiedProductionStatus>('all')
   const [typeFilter, setTypeFilter] = useState<'all' | DeliverableType>('all')
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
@@ -83,12 +86,14 @@ export default function MonthlyPlannerPage() {
 
   const filteredDeliverables = useMemo(() => {
     const search = clientSearch.trim().toLowerCase()
-    if (!search) return deliverables
     return deliverables.filter(deliverable => {
+      if (!PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)) return false
+      if (statusFilter !== 'all' && simplifyProductionStatus(deliverable.production_status) !== statusFilter) return false
+      if (!search) return true
       const clientName = clientNameById.get(deliverable.client_id) ?? 'Unknown client'
       return clientName.toLowerCase().includes(search)
     })
-  }, [clientNameById, clientSearch, deliverables])
+  }, [clientNameById, clientSearch, deliverables, statusFilter])
 
   const groupedDeliverables = useMemo(() => {
     const groups = new Map<string, MonthlyDeliverable[]>()
@@ -119,7 +124,6 @@ export default function MonthlyPlannerPage() {
       listClientPackages({ status: 'active' }),
       listMonthlyDeliverablesByMonth(monthStart, {
         clientId: clientFilter || undefined,
-        status: statusFilter === 'all' ? undefined : statusFilter,
         deliverableType: typeFilter === 'all' ? undefined : typeFilter,
       }),
     ])
@@ -137,6 +141,10 @@ export default function MonthlyPlannerPage() {
     }
 
     setClients(clientResult.data ?? [])
+    const clientId = searchParams.get('client')
+    if (clientId && !clientFilter && clientResult.data?.some(client => client.id === clientId)) {
+      setClientFilter(clientId)
+    }
     setActivePackageCount(packageResult.data?.length ?? 0)
     setDeliverables(deliverableResult.data ?? [])
   }
@@ -144,7 +152,7 @@ export default function MonthlyPlannerPage() {
   useEffect(() => {
     loadData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monthStart, clientFilter, statusFilter, typeFilter])
+  }, [monthStart, clientFilter, typeFilter])
 
   async function handleGenerate() {
     if (!isAdmin) return
@@ -164,15 +172,16 @@ export default function MonthlyPlannerPage() {
     await loadData()
   }
 
-  async function handleStatusChange(id: string, status: ProductionStatus) {
+  async function handleStatusChange(id: string, status: SimplifiedProductionStatus) {
     if (!isAdmin) return
     setErrorMessage(null)
-    const { error } = await updateMonthlyDeliverableStatus(id, status)
+    const backendStatus = SIMPLIFIED_TO_BACKEND_STATUS[status]
+    const { error } = await updateMonthlyDeliverableStatus(id, backendStatus)
     if (error) {
       setErrorMessage(error.message ?? 'Could not update status.')
       return
     }
-    setDeliverables(current => current.map(item => item.id === id ? { ...item, production_status: status } : item))
+    setDeliverables(current => current.map(item => item.id === id ? { ...item, production_status: backendStatus } : item))
   }
 
   if (loading) {
@@ -257,11 +266,11 @@ export default function MonthlyPlannerPage() {
         />
         <select
           value={statusFilter}
-          onChange={event => setStatusFilter(event.target.value as 'all' | ProductionStatus)}
+          onChange={event => setStatusFilter(event.target.value as 'all' | SimplifiedProductionStatus)}
           className="rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white outline-none focus:border-brand-accent/50"
         >
           <option value="all">All statuses</option>
-          {PRODUCTION_STATUSES.map(status => <option key={status} value={status}>{PRODUCTION_STATUS_LABELS[status]}</option>)}
+          {SIMPLIFIED_STATUS_OPTIONS.map(status => <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>)}
         </select>
         <select
           value={typeFilter}
@@ -269,7 +278,7 @@ export default function MonthlyPlannerPage() {
           className="rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white outline-none focus:border-brand-accent/50"
         >
           <option value="all">All types</option>
-          {DELIVERABLE_TYPES.map(type => <option key={type} value={type}>{TYPE_LABELS[type]}</option>)}
+          {PACKAGE_DELIVERABLE_TYPES.map(type => <option key={type} value={type}>{TYPE_LABELS[type]}</option>)}
         </select>
       </div>
 
@@ -277,7 +286,7 @@ export default function MonthlyPlannerPage() {
         <StatBox label="Total" value={overallTotals.total} />
         <StatBox label="Remaining" value={overallTotals.remaining} warn={overallTotals.remaining > 0} />
         <StatBox label="DP" value={`${overallTotals.byType.dp.complete}/${overallTotals.byType.dp.total}`} />
-        <StatBox label="Photo" value={`${overallTotals.byType.photo.complete}/${overallTotals.byType.photo.total}`} />
+        <StatBox label="F" value={`${overallTotals.byType.photo.complete}/${overallTotals.byType.photo.total}`} />
         <StatBox label="Video" value={`${overallTotals.byType.video.complete}/${overallTotals.byType.video.total}`} />
         <StatBox label="Reel" value={`${overallTotals.byType.reel.complete}/${overallTotals.byType.reel.total}`} />
       </div>
@@ -315,7 +324,7 @@ export default function MonthlyPlannerPage() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] font-bold text-white">
-                            {deliverable.code}{deliverable.instance_number}
+                            {displayDeliverableCode(deliverable)}
                           </span>
                           <span className="text-[11px] text-white/40">{TYPE_LABELS[deliverable.deliverable_type]}</span>
                           {deliverable.priority !== 'normal' && (
@@ -326,8 +335,8 @@ export default function MonthlyPlannerPage() {
                         </div>
                         <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white">{deliverable.title}</h3>
                       </div>
-                      <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(deliverable.production_status)}`}>
-                        {PRODUCTION_STATUS_LABELS[deliverable.production_status]}
+                      <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(simplifyProductionStatus(deliverable.production_status))}`}>
+                        {SIMPLIFIED_STATUS_LABELS[simplifyProductionStatus(deliverable.production_status)]}
                       </span>
                     </div>
 
@@ -340,11 +349,11 @@ export default function MonthlyPlannerPage() {
 
                     {isAdmin && (
                       <select
-                        value={deliverable.production_status}
-                        onChange={event => handleStatusChange(deliverable.id, event.target.value as ProductionStatus)}
+                        value={simplifyProductionStatus(deliverable.production_status)}
+                        onChange={event => handleStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
                         className="mt-3 w-full rounded-md border border-white/10 bg-brand-bg px-2 py-1.5 text-xs text-white outline-none focus:border-brand-accent/50"
                       >
-                        {PRODUCTION_STATUSES.map(status => <option key={status} value={status}>{PRODUCTION_STATUS_LABELS[status]}</option>)}
+                        {SIMPLIFIED_STATUS_OPTIONS.map(status => <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>)}
                       </select>
                     )}
                   </article>
