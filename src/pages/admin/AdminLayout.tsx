@@ -7,17 +7,19 @@ const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 
 const navItems = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
+  { to: '/admin/client-performance', label: 'Performance' },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/planner', label: 'Planner' },
-  { to: '/admin/command-centre', label: 'Tasks' },
+  { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
+  { to: '/admin/published', label: 'Client Preview' },
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {
-  return `group flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+  return `group relative flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold transition-colors ${
     isActive
-      ? 'bg-brand-accent text-black shadow-[0_10px_30px_rgba(200,121,42,0.18)]'
-      : 'text-brand-primary hover:bg-white/[0.06] hover:text-white'
+      ? 'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]'
+      : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'
   }`
 }
 
@@ -28,10 +30,12 @@ function ExternalHoursLink({ onClick }: { onClick?: () => void }) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={onClick}
-      className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.06] hover:text-white"
+      className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white"
     >
       <span>CG Hours</span>
-      <span className="text-xs opacity-60">↗</span>
+      <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">
+        External
+      </span>
     </a>
   )
 }
@@ -56,7 +60,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-brand-bg md:flex">
-      <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-gradient-to-r from-transparent via-brand-accent to-transparent pointer-events-none" />
+      <div className="fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-brand-teal/70 to-transparent pointer-events-none" />
 
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -117,8 +121,8 @@ export default function AdminLayout() {
           <MobileNavItem to="/admin/cg-hub" label="Hub" />
           <MobileNavItem to="/admin/clients" label="Clients" />
           <MobileNavItem to="/admin/planner" label="Planner" />
-          <MobileNavItem to="/admin/command-centre" label="Tasks" />
-          <MobileNavItem to="/admin/assistant" label="Assistant" />
+          <MobileNavItem to="/admin/command-centre" label="Daily" />
+          <MobileNavItem to="/admin/published" label="Preview" />
         </div>
       </nav>
     </div>
@@ -148,7 +152,7 @@ function MobileNavItem({ to, label }: { to: string; label: string }) {
       to={to}
       className={({ isActive }) =>
         `rounded-md px-2 py-2 text-center text-[11px] font-bold transition-colors ${
-          isActive ? 'bg-brand-accent text-black' : 'text-brand-primary hover:text-white'
+          isActive ? 'bg-white/[0.08] text-white shadow-[inset_0_2px_0_rgba(45,212,191,0.85)]' : 'text-brand-primary hover:text-white'
         }`
       }
     >
