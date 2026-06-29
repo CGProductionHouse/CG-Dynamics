@@ -45,17 +45,33 @@ CG Dynamics Planner
 │   ├── Pending approvals count
 │   └── Quick add → task / client request
 │
-├── Planner (replaces Teams Planner entirely)
-│   ├── Active tasks        (flat view, all statuses)
-│   ├── Client schedules    (calendar / package view)
-│   ├── Monthly packages    (per-client deliverable grid)
-│   ├── Admin board         (hidden from non-admin)
-│   └── CG Socials          (CG's own content)
+├── Board Views (flat board navigation)
+│   ├── Operations / To Do
+│   ├── Client Websites
+│   ├── Admin Check List (admin_only)
+│   ├── Client Schedule (Package Master View)
+│   └── CG Socials
 │
-├── Calendar
+├── Package Master View
+│   ├── Per-client package template (DP, F, Video, Reel counts)
+│   ├── Editing affects future months only
+│   ├── Archive dates and recurrence rules
+│   └── Admin/CA/Amonique only
+│
+├── Monthly Bucket View
+│   ├── One month at a time
+│   ├── Each deliverable is an independent row
+│   ├── Individual assignment per item
+│   ├── Full approval/status lifecycle
+│   └── Main working view for staff + Amonique
+│
+├── Calendar View
+│   ├── Monthly deliverables by date
 │   ├── Public CG calendar
 │   ├── Staff-specific calendars
-│   └── Client package calendar
+│   ├── Client package calendar
+│   ├── CA/Amonique sets scheduled_date
+│   └── Staff view-only + production status updates
 │
 ├── Morning import (existing, enhanced)
 │   └── Import → assign to package + month
@@ -504,6 +520,108 @@ posted  ◄── Final state
 - No push notifications
 - No client-facing portal for approvals (approvals go via WhatsApp still)
 - No SSO or OAuth changes
+
+---
+
+## Real Planner Export Findings
+
+On 2026-06-29, four `.xlsx` exports were extracted from Microsoft Teams Planner and saved in `docs/planner-exports/`. Below are the findings that corrected the seed model.
+
+### 2025 CLIENTS SCHEDULE (4306 tasks, 43 buckets)
+- **Buckets are clients**, not general columns. Each client (ACTION SPORT, BOHEMIA, CAPE LUMBER, WISEMAN GROUP, etc.) is a bucket.
+- **Task naming:** `{code} {instance} - {client}` — e.g. `F 1 - WISEMAN GROUP`, `DP 3 - CAPE LUMBER`, `VIDEO 1 - RED OAK`
+- **Deliverable codes observed:** `WEB`, `F` (photo), `DP` (designed poster), `VIDEO`, `REEL`, `T` (TBS Brokers-specific), plus numbered variants (DP 1–12, VIDEO 1–8, F 1–8)
+- **Statuses:** 4012 Completed, 293 Not started, 1 In progress — indicating heavy historical data
+- **Assignments:** mostly unassigned; assigned to team in Planner via user picker
+- **Users:** CG Production House (info@), Amonique (amonique@), Christie-Ann (ca@)
+- **Due dates:** set per task with start/due date pairs (e.g. due 2026-07-02, start 2026-07-02)
+- **No labels used.** Notes contain specific instructions (e.g. "THURSDAYS\n4 EDITED FOTOS BRANDED WITH LOGO STRIP")
+
+### To Do (507 tasks, 7 buckets)
+- **Buckets** (in order): CG ADMIN - RECURRING, CLIENT REQUESTS, GRAPHIC DESIGN, ADMIN / TO DO, WEBSITES, CONTENT GUIDES, ONCE-OFF
+- **Task patterns:** recurring tasks (WIX INQUIRIES — weekly, END OF DAY UPDATE — daily), project tasks (RED OAK TV, CG SOCIALS, CANVA, ONE DRIVE, CGPH WEBSITE UPDATES)
+- **Multi-assignment:** semicolon-separated user names (e.g. `Christie-Ann Groenewald;Sydney Oosthuizen;Amonique Fourie;Franco Lessing`)
+- **Users:** Christie-Ann, Amonique, Franco, CG Production House, Sydney, Ger-Marie, KG
+- **Statuses:** 488 Completed, 16 Not started, 3 In progress
+- **Recurring:** tasks repeat with new rows each cycle (same name, different due dates)
+
+### Client Websites (31 tasks, 5 buckets)
+- **Buckets:** NEW WEBSITES / REQUESTS, MONTHLY UPDATES, WEBSITES MAINTENANCE, GOOGLE BUSINESS PROFILES, BACKGROUND SITES (OLD CLIENTS)
+- **Main recurring task:** "WEBSITE MONTHLY STATUS CHECK" (11 instances)
+- **Other tasks:** individual client websites (LGM, RAADZAAL, RUSOORD, HYMN, SERENITY HEIGHTS, etc.) with build platform noted (WORDPRESS, GOOGLE SITES, WIX, CANVA)
+- **Statuses:** mostly Not started or Completed
+
+### ADMIN CHECK LIST (3605 tasks, 7 buckets)
+- **Buckets:** DAILY, WEEKLY, MONTHLY, INSTAGRAM NOT CONNECTED, TIKTOK PAGES, LINKDIN, ADDITIONAL ADMIN
+- **Daily tasks:** SOCIAL MEDIA POSTS CHECK, FACEBOOK GROUPS SHARE, CLIENT GROUPS CHECK, TASK ASSIGNMENT, SCHEDULING AND SORTING, EMAILS CHECK
+- **Weekly/Monthly:** XERO ADMIN, SYSTEM & SCHEDULING REVIEW, EMPLOYEE TASK REVIEW, TIKTOK POSTS, INSTAGRAM POSTS, LINKDIN POSTS, MYHOURS APPROVALS, WIX INQUIRIES, FINANCES, PAYRUN (full-time + part-time)
+- **Monthly:** CLIENT CHECK-IN, CLIENT STATEMENTS, CLIENT INVOICES, CONTENT RUN SCHEDULING, HUMAN RESOURCES, WISEMAN INVOICE
+- **Checklist:** semicolon-separated platform names (e.g. `LINKDIN;INSTAGRAM;TIKTOK;FACEBOOK`)
+- **Assigned to:** mostly Amonique
+
+### Corrections Applied
+
+| Previous assumption | Real export finding | Change |
+|---|---|---|
+| Client Schedule buckets: Scheduled, Unscheduled, Waiting Approval | Client Schedule buckets are **client names** (43 clients) | Buckets removed from seed; replaced with comment that they come from active packages |
+| Operations/To Do had "Video" bucket | No "Video" bucket in To Do export | Removed; videos belong in Client Schedule as deliverables |
+| Admin Check List had "Social Checks", "Client Check-ins" | Real buckets: INSTAGRAM NOT CONNECTED, TIKTOK PAGES, LINKDIN, ADDITIONAL ADMIN | Seed updated |
+| Client Websites had "Website Maintenance" (title case) | Exact name: "WEBSITES MAINTENANCE" (uppercase) | Seed updated |
+| Background Sites bucket name | Exact name: "BACKGROUND SITES (OLD CLIENTS)" | Seed updated |
+
+### Corrected Model: Three Views for Client Schedule
+
+The 2025 CLIENTS SCHEDULE board reveals that the Planner replacement must support three distinct views, not just a flat bucket board:
+
+#### 1. Package Master View
+- Shows the client's package template for the year/future.
+- Editing this affects future generated months only.
+- This is where package changes, archive dates and recurrence rules live.
+- Only CA/Amonique/admin should edit this.
+
+#### 2. Monthly Bucket View
+- Shows only deliverables for one selected month.
+- Each monthly item is independent.
+- Example: July DP1 - WISEMAN is separate from August DP1 - WISEMAN.
+- Moving/editing/ticking off July DP1 must not affect future months.
+- This is the main working view for Amonique and staff.
+
+#### 3. Calendar View
+- Shows monthly deliverables by date.
+- Amonique/CA can schedule/reschedule `scheduled_date`.
+- Staff can view calendar and update production status only.
+- Staff cannot mark items as scheduled/posted.
+
+#### Individual Assignment
+Every deliverable item must be individually assignable:
+- WISEMAN DP1 → Ger-Marie
+- WISEMAN DP2 → KG
+- WISEMAN F1 → Franco / content run
+- WISEMAN Video 1 → Sydney
+- WISEMAN Reel 1 → Alana / Sydney
+
+### Import Plan (future)
+
+When building the data importer from Planner exports:
+
+| Planner field | CG Dynamics target |
+|---|---|
+| Plan name → slug | `planner_boards.slug` (lowercased, hyphenated) |
+| Bucket name | `planner_buckets.name` (on matching board) |
+| Task Name | `monthly_deliverables.title` or `command_centre_tasks.title` |
+| Bucket (client name in Client Schedule) | `monthly_deliverables.code + instance_number` + `client_id` lookup via name |
+| Status (Completed / Not started / In progress) | `monthly_deliverables.production_status` (posted / to_do / in_progress) |
+| Priority (Medium, etc.) | `monthly_deliverables.priority` |
+| Assigned To (semicolon-separated) | `monthly_deliverables.assigned_to_name` (first assignee) |
+| Created Date | `created_at` |
+| Due date | `monthly_deliverables.due_date` |
+| Start date | start date (optional) |
+| Completed Date | `monthly_deliverables.posted_at` |
+| Notes | `monthly_deliverables.notes` |
+| Checklist Items (semicolon-separated) | Future `deliverable_checklist` table or `metadata` JSONB |
+| User ID → User Name → Email | Map Teams user GUIDs to existing `profiles` rows via email |
+
+Do not build the importer yet. The import mapping is documented here for when data migration is ready.
 
 ---
 
