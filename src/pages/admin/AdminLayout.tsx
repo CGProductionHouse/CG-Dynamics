@@ -18,6 +18,7 @@ function getSection(pathname: string): Section {
   ) return 'client-performance'
   if (
     pathname.startsWith('/admin/cg-hub') ||
+    pathname.startsWith('/admin/planner') ||
     pathname.startsWith('/admin/assistant') ||
     pathname.startsWith('/admin/command-centre')
   ) return 'cg-hub'
@@ -138,11 +139,14 @@ export default function AdminLayout() {
         {backLink(close)}
         {sectionLabel('CG Hub')}
         <NavLink to="/admin/cg-hub" end className={subNav} onClick={close}>Overview</NavLink>
-        <NavLink to="/admin/assistant" className={subNav} onClick={close}>
-          CG Assistant
+        <NavLink to="/admin/planner" className={subNav} onClick={close}>
+          Planner
         </NavLink>
         <NavLink to="/admin/command-centre" className={subNav} onClick={close}>
           Command Centre
+        </NavLink>
+        <NavLink to="/admin/assistant" className={subNav} onClick={close}>
+          CG Assistant
         </NavLink>
         <div className="mt-3 border-t border-brand-muted/30" />
         <a
