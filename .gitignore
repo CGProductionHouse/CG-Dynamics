@@ -129,6 +129,11 @@ dist
 # TernJS port file
 .tern-port
 
+# Local reference files — Planner exports and brand examples
+# Only used locally to update docs/code/SQL; never committed
+docs/planner-exports/
+docs/cgbrand-examples/
+
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
