@@ -364,29 +364,30 @@ function TaskRow({ task, busyId, onStatusChange }: {
   onStatusChange: (id: string, status: TaskStatus) => void
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-brand-muted bg-brand-bg/40 p-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-sm font-semibold text-white">{task.title}</span>
-          {task.priority !== 'normal' && (
-            <Pill tone={priorityColor(task.priority)}>
-              {task.priority === 'urgent' ? 'Urgent' : 'Client req'}
-            </Pill>
-          )}
+    <PremiumCard padding="sm">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-sm font-semibold text-white">{task.title}</span>
+            {task.priority !== 'normal' && (
+              <Pill tone={priorityColor(task.priority)}>
+                {task.priority === 'urgent' ? 'Urgent' : 'Client req'}
+              </Pill>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+            {task.client_name && <span className="text-brand-primary">{task.client_name}</span>}
+            <span className={dateClass(task.due_date)}>{formatDate(task.due_date)}</span>
+            <span className="text-brand-primary/50">·</span>
+            <span className="text-brand-primary/60">{task.bucket}</span>
+            {task.notes && (
+              <>
+                <span className="text-brand-primary/50">·</span>
+                <span className="text-brand-primary/60 truncate max-w-[200px]">{task.notes}</span>
+              </>
+            )}
+          </div>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-          {task.client_name && <span className="text-brand-primary">{task.client_name}</span>}
-          <span className={dateClass(task.due_date)}>{formatDate(task.due_date)}</span>
-          <span className="text-brand-primary/50">·</span>
-          <span className="text-brand-primary/60">{task.bucket}</span>
-          {task.notes && (
-            <>
-              <span className="text-brand-primary/50">·</span>
-              <span className="text-brand-primary/60 truncate max-w-[200px]">{task.notes}</span>
-            </>
-          )}
-        </div>
-      </div>
       <div className="flex shrink-0 items-center gap-2">
         <Pill tone={statusTone(task.status)}>{statusLabel(task.status)}</Pill>
         {task.status !== 'done' && (
@@ -412,7 +413,8 @@ function TaskRow({ task, busyId, onStatusChange }: {
           </button>
         )}
       </div>
-    </div>
+      </div>
+    </PremiumCard>
   )
 }
 

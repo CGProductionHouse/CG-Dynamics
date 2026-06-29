@@ -35,14 +35,14 @@ function mainNav({ isActive }: { isActive: boolean }) {
 function subNav({ isActive }: { isActive: boolean }) {
   return `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors ${
     isActive
-      ? 'text-brand-accent'
-      : 'text-brand-primary/60 hover:text-white'
+      ? 'bg-brand-muted/50 text-brand-accent'
+      : 'text-brand-primary/60 hover:text-white hover:bg-white/[0.03]'
   }`
 }
 
 function sectionLabel(label: string) {
   return (
-    <p className="px-3 pt-4 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand-primary/50">
+    <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-primary/60">
       {label}
     </p>
   )
@@ -53,10 +53,10 @@ function backLink(closeMobile: () => void) {
     <NavLink
       to="/admin"
       end
-      className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-brand-primary/50 hover:text-white transition-colors"
+      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-brand-primary/40 hover:text-white transition-colors"
       onClick={closeMobile}
     >
-      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M15.75 19.5L8.25 12l7.5-7.5" />
       </svg>
       Back to Home
