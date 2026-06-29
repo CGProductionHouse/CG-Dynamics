@@ -28,6 +28,7 @@ import IntegrationsPage from './pages/admin/IntegrationsPage'
 import MetaIntegrationPage from './pages/admin/MetaIntegrationPage'
 import AssistantPage from './pages/admin/AssistantPage'
 import PlannerPage from './pages/admin/PlannerPage'
+import PackageMasterPage from './pages/admin/PackageMasterPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -70,6 +71,7 @@ export default function App() {
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
               <Route path="/admin/command-centre" element={<CommandCentrePage />} />
               <Route path="/admin/planner" element={<PlannerPage />} />
+              <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/assistant" element={<AssistantPage />} />

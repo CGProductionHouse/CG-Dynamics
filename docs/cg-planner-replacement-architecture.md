@@ -669,5 +669,39 @@ Do not build the importer yet. The import mapping is documented here for when da
 - `monthly_deliverables`: staff select, admin CRUD (conservative — field-level RLS TODO for Amonique-specific perms)
 - `planner_activity_log`: staff insert + select
 
+### Phase 6C — Package Master View
+
+**Status:** ✅ Complete
+
+| Item | Detail |
+|---|---|
+| Page | `src/pages/admin/PackageMasterPage.tsx` |
+| Route | `/admin/package-master` (staff, under CG Hub nav) |
+| Helpers added | `updatePackageDeliverableTemplate()`, `deactivatePackageDeliverableTemplate()` in `src/lib/planner.ts` |
+| Clients | Uses existing `clients` table via `listActiveClients()` — no duplicate client list |
+| Packages | `client_packages.client_id → clients.id` — shared client memory with reporting/Meta/tasks |
+| Templates | `package_deliverable_templates` — define monthly DP/F/Video/Reel structure per package |
+| Permissions | Admin CRUD on packages/templates; staff view-only via RLS |
+| Quick-add buttons | +DP, +Photo, +Video, +Reel — auto-generate next code number |
+| Custom add | Full form with code, type, title template, assignee, day-of-month |
+| Archive | Packages can be ended with end_date; templates can be deactivated |
+
+### What Package Master Can Do Now
+- Select an active client from the existing `clients` table
+- View current package(s) with template totals (DP/Photo/Video/Reel/Other counts)
+- Create new packages with name, start date, notes
+- Add deliverable templates via quick-add buttons or custom form
+- View templates in a compact table with code, type, title, count, assignee, day
+- Deactivate templates (soft-delete via `active = false`)
+- Archive packages (sets `end_date`, `status = 'archived'`)
+
+### Deferred to Phase 6D
+- Monthly deliverable generation from templates (one month at a time)
+- Monthly Bucket View UI — the main working screen for staff
+- Calendar View — scheduled dates on a month grid
+- Drag-and-drop status changes across buckets
+- Approval workflows (internal review, client approval, scheduled/posted)
+- Bulk operations across months
+
 ### Next step
-**Phase 6B — Run migration on production, seed boards/buckets, build first Planner UI views.**
+**Phase 6D — Monthly deliverable generation and Monthly Bucket View UI.**

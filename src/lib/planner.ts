@@ -446,6 +446,39 @@ export async function updateMonthlyDeliverableSchedule(id: string, scheduledDate
     .single()
 }
 
+export interface UpdatePackageDeliverableTemplateInput {
+  code?: string
+  deliverable_type?: DeliverableType
+  title_template?: string
+  count_per_month?: number
+  default_bucket?: string | null
+  default_assignee_name?: string | null
+  default_day_of_month?: number | null
+  sort_order?: number
+  active?: boolean
+}
+
+export async function updatePackageDeliverableTemplate(
+  id: string,
+  patch: UpdatePackageDeliverableTemplateInput,
+) {
+  return supabase
+    .from(TEMPLATES_TABLE)
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+}
+
+export async function deactivatePackageDeliverableTemplate(id: string) {
+  return supabase
+    .from(TEMPLATES_TABLE)
+    .update({ active: false })
+    .eq('id', id)
+    .select()
+    .single()
+}
+
 export async function archiveClientPackage(id: string, endDate: string) {
   return supabase
     .from(PACKAGES_TABLE)
