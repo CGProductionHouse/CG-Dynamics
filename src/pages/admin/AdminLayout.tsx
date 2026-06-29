@@ -1,9 +1,30 @@
-import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { useState, useMemo } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 
-function navClass({ isActive }: { isActive: boolean }) {
+type Section = 'home' | 'client-performance' | 'cg-hub'
+
+function getSection(pathname: string): Section {
+  if (pathname === '/admin') return 'home'
+  if (
+    pathname.startsWith('/admin/client-performance') ||
+    pathname.startsWith('/admin/clients') ||
+    pathname.startsWith('/admin/reports') ||
+    pathname.startsWith('/admin/integrations') ||
+    pathname.startsWith('/admin/import') ||
+    pathname.startsWith('/admin/manual-metrics') ||
+    pathname.startsWith('/admin/published')
+  ) return 'client-performance'
+  if (
+    pathname.startsWith('/admin/cg-hub') ||
+    pathname.startsWith('/admin/assistant') ||
+    pathname.startsWith('/admin/command-centre')
+  ) return 'cg-hub'
+  return 'home'
+}
+
+function mainNav({ isActive }: { isActive: boolean }) {
   return `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
     isActive
       ? 'bg-brand-muted text-brand-accent'
@@ -11,54 +32,145 @@ function navClass({ isActive }: { isActive: boolean }) {
   }`
 }
 
+function subNav({ isActive }: { isActive: boolean }) {
+  return `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+    isActive
+      ? 'text-brand-accent'
+      : 'text-brand-primary/60 hover:text-white'
+  }`
+}
+
+function sectionLabel(label: string) {
+  return (
+    <p className="px-3 pt-4 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand-primary/50">
+      {label}
+    </p>
+  )
+}
+
+function backLink(closeMobile: () => void) {
+  return (
+    <NavLink
+      to="/admin"
+      end
+      className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-brand-primary/50 hover:text-white transition-colors"
+      onClick={closeMobile}
+    >
+      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+      Back to Home
+    </NavLink>
+  )
+}
+
+const closeIcon = (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+)
+
 export default function AdminLayout() {
   const { profile, signOut } = useAuth()
+  const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const section = useMemo(() => getSection(location.pathname), [location.pathname])
+  const isAdmin = profile?.role === 'admin'
+  const close = () => setMobileMenuOpen(false)
 
-  function renderNavItems() {
+  function renderHomeNav() {
     return (
       <>
-      <NavLink to="/admin" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Home
-      </NavLink>
-      <NavLink to="/admin/client-performance" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Client Performance
-      </NavLink>
-      <NavLink to="/admin/cg-hub" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        CG Hub
-      </NavLink>
-      <NavLink to="/admin/assistant" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        CG Assistant
-      </NavLink>
-      <NavLink to="/admin/integrations" end className={navClass} onClick={() => setMobileMenuOpen(false)}>
-        Integrations
-      </NavLink>
-      {profile?.role === 'admin' && (
-        <NavLink to="/admin/users" className={navClass} onClick={() => setMobileMenuOpen(false)}>
-          Users
+        <NavLink to="/admin" end className={mainNav} onClick={close}>Home</NavLink>
+        <NavLink to="/admin/client-performance" className={mainNav} onClick={close}>
+          Client Performance
         </NavLink>
-      )}
-
-      {/* View as client — kept accessible but less prominent */}
-      <NavLink
-        to="/admin/published"
-        className={({ isActive }) =>
-          `mt-1 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            isActive
-              ? 'text-brand-accent'
-              : 'text-brand-primary/60 hover:text-brand-primary'
-          }`
-        }
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        View as client
-      </NavLink>
+        <NavLink to="/admin/cg-hub" className={mainNav} onClick={close}>
+          CG Hub
+        </NavLink>
+        {isAdmin && (
+          <>
+            <div className="mt-3 border-t border-brand-muted/40" />
+            <p className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand-primary/50">
+              Admin
+            </p>
+            <NavLink to="/admin/users" className={mainNav} onClick={close}>Users</NavLink>
+            <NavLink to="/admin/invites" className={mainNav} onClick={close}>Invites</NavLink>
+          </>
+        )}
       </>
     )
+  }
+
+  function renderClientPerformanceNav() {
+    return (
+      <>
+        {backLink(close)}
+        {sectionLabel('Client Performance')}
+        <NavLink to="/admin/client-performance" end className={subNav} onClick={close}>
+          Overview
+        </NavLink>
+        <NavLink to="/admin/clients" className={subNav} onClick={close}>Clients</NavLink>
+        <NavLink to="/admin/reports" className={subNav} onClick={close}>Reports</NavLink>
+        <NavLink to="/admin/integrations" end className={subNav} onClick={close}>Integrations</NavLink>
+        <div className="mt-3 border-t border-brand-muted/40" />
+        <p className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand-primary/50">
+          Data
+        </p>
+        <NavLink to="/admin/import" className={subNav} onClick={close}>Imports</NavLink>
+        <NavLink to="/admin/manual-metrics" className={subNav} onClick={close}>
+          Manual metrics
+        </NavLink>
+        <div className="mt-3 border-t border-brand-muted/40" />
+        <NavLink
+          to="/admin/published"
+          className={subNav}
+          onClick={close}
+        >
+          {closeIcon}
+          View as client
+        </NavLink>
+      </>
+    )
+  }
+
+  function renderCgHubNav() {
+    return (
+      <>
+        {backLink(close)}
+        {sectionLabel('CG Hub')}
+        <NavLink to="/admin/cg-hub" end className={subNav} onClick={close}>Overview</NavLink>
+        <NavLink to="/admin/assistant" className={subNav} onClick={close}>
+          CG Assistant
+        </NavLink>
+        <NavLink to="/admin/command-centre" className={subNav} onClick={close}>
+          Command Centre
+        </NavLink>
+        <div className="mt-3 border-t border-brand-muted/40" />
+        <a
+          href="https://cg-hours.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-brand-primary/60 hover:text-white transition-colors"
+          onClick={close}
+        >
+          <span>CG Hours</span>
+          <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+        </a>
+        <p className="px-3 pt-0.5 text-[10px] text-brand-primary/40">
+          External app. Opens separately.
+        </p>
+      </>
+    )
+  }
+
+  function renderNav() {
+    if (section === 'client-performance') return renderClientPerformanceNav()
+    if (section === 'cg-hub') return renderCgHubNav()
+    return renderHomeNav()
   }
 
   return (
@@ -97,7 +209,9 @@ export default function AdminLayout() {
                 Close
               </button>
             </div>
-            <nav className="flex-1 p-3 space-y-1">{renderNavItems()}</nav>
+            <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
+              {renderNav()}
+            </nav>
             <div className="p-3 border-t border-brand-muted space-y-1">
               <p className="px-3 py-2 text-xs font-medium text-white truncate">
                 {profile?.full_name ?? 'Staff user'}
@@ -118,8 +232,8 @@ export default function AdminLayout() {
           <BrandMark subtitle={profile?.role ?? 'staff'} compact />
         </div>
 
-        <nav className="flex-1 p-3 space-y-0.5">
-          {renderNavItems()}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
+          {renderNav()}
         </nav>
 
         <div className="p-3 border-t border-brand-muted space-y-0.5">
