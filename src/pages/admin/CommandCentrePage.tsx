@@ -299,18 +299,13 @@ export default function CommandCentrePage() {
   }
 
   return (
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">CG Command Centre</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Command Centre</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-primary/70">
-            Daily tasks, client requests, staff progress and WhatsApp-ready summaries.
-          </p>
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">CG Command Centre</h1>
         </div>
-        <div className="mb-8 h-px bg-gradient-to-r from-brand-accent/30 via-brand-accent/10 to-transparent" />
 
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <StatCard label="Total active" value={stats.total} />
+        <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          <StatCard label="Active" value={stats.total} />
           <StatCard label="Client requests" value={stats.clientRequests} accent />
           <StatCard label="Done today" value={stats.doneToday} teal />
           <StatCard label="Blocked" value={stats.blocked} amber />
@@ -430,10 +425,10 @@ function StatCard({ label, value, accent, teal, amber, danger }: {
     : amber ? 'text-amber-400'
     : 'text-white'
   return (
-    <PremiumCard padding="sm">
-      <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary/70">{label}</p>
-      <p className={`mt-2 text-2xl font-semibold ${valClass}`}>{value}</p>
-    </PremiumCard>
+    <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
+      <p className={`mt-1.5 text-xl font-semibold ${valClass}`}>{value}</p>
+    </div>
   )
 }
 

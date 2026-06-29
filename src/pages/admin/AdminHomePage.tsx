@@ -69,71 +69,44 @@ const PRIMARY_ACTIONS = [
   {
     id: 'morning-list',
     title: 'Paste Morning List',
-    description: 'Import Amonique\'s WhatsApp to-do list and create tasks.',
+    description: 'Import WhatsApp to-do list.',
     to: '/admin/command-centre#morning-import',
     icon: (
-      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
       </svg>
     ),
   },
   {
     id: 'command-centre',
-    title: 'Open Command Centre',
-    description: 'View today\'s team tasks, statuses and update progress.',
+    title: 'Command Centre',
+    description: 'Today\'s team tasks and statuses.',
     to: '/admin/command-centre',
     icon: (
-      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192" />
       </svg>
     ),
   },
   {
     id: 'assistant',
     title: 'CG Assistant',
-    description: 'Ask for help, drafts, checklists and operational support.',
+    description: 'Drafts, checklists, support.',
     to: '/admin/assistant',
     icon: (
-      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
       </svg>
     ),
   },
   {
-    id: 'client-performance',
-    title: 'Client Performance',
-    description: 'Reports, clients, Meta data and monthly performance insights.',
-    to: '/admin/client-performance',
+    id: 'planner',
+    title: 'CG Planner',
+    description: 'Board view, buckets, monthly deliverables.',
+    to: '/admin/planner',
     icon: (
-      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      </svg>
-    ),
-  },
-]
-
-const SECONDARY_SECTIONS = [
-  {
-    id: 'client-performance',
-    title: 'Client Performance Dashboard',
-    description: 'Monthly reports, client analytics, Meta integrations and performance insights.',
-    to: '/admin/client-performance',
-    accent: 'from-teal-500 to-sky-400',
-    icon: (
-      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'cg-hub',
-    title: 'CG Hub',
-    description: 'Internal tools — CG Assistant, Command Centre, staff workflows and hours.',
-    to: '/admin/cg-hub',
-    accent: 'from-brand-accent to-teal-300',
-    icon: (
-      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
       </svg>
     ),
   },
@@ -293,18 +266,15 @@ export default function AdminHomePage() {
   if (loading) return <DashboardSkeleton />
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-10">
+      <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">
-              CG Dynamics
-            </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
+            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
               Today at CG
             </h1>
-            <p className="mt-2 text-sm text-brand-primary/70">
+            <p className="mt-1 text-sm text-brand-primary/50">
               {formatDateNice()}
             </p>
           </div>
@@ -315,7 +285,6 @@ export default function AdminHomePage() {
             </div>
           )}
         </div>
-        <div className="mt-6 h-px bg-gradient-to-r from-brand-accent/30 via-brand-accent/10 to-transparent" />
       </div>
 
       {error && (
@@ -337,17 +306,8 @@ export default function AdminHomePage() {
 
           <EmptyState
             title="Command Centre data is not available yet"
-            message="Set up the Command Centre database to see today's tasks, stats and workload."
+            message="Set up the Command Centre database."
           />
-
-          <div className="mt-10">
-            <h2 className="mb-4 text-lg font-bold text-white">More sections</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              {SECONDARY_SECTIONS.map(section => (
-                <SecondarySectionCard key={section.id} section={section} />
-              ))}
-            </div>
-          </div>
         </>
       ) : (
         <>
@@ -400,37 +360,30 @@ export default function AdminHomePage() {
                   View all
                 </Link>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {clientRequests.map(task => (
-                  <div key={task.id} className="relative">
-                    <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-brand-accent/40" />
-                    <PremiumCard padding="sm">
-                      <div className="flex items-center justify-between gap-3 pl-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-white truncate">{task.title}</span>
-                            <Pill tone="accent">Client req</Pill>
-                          </div>
-                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-brand-primary/70">
-                            {task.client_name && <span>{task.client_name}</span>}
-                            {task.assigned_to_name && <span>· {task.assigned_to_name}</span>}
-                            <span>· {formatDate(task.due_date)}</span>
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          <select
-                            value={task.status}
-                            onChange={e => handleClientRequestStatusChange(task.id, e.target.value as TaskStatus)}
-                            disabled={busyId === task.id}
-                            className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
-                          >
-                            {STATUSES.map(s => (
-                              <option key={s} value={s}>{statusLabel(s)}</option>
-                            ))}
-                          </select>
-                        </div>
+                  <div key={task.id} className="flex items-center justify-between gap-3 rounded-lg border border-brand-muted/20 bg-brand-surface/40 px-3 py-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white truncate">{task.title}</span>
+                        <Pill tone="accent">Client req</Pill>
                       </div>
-                    </PremiumCard>
+                      <div className="flex flex-wrap items-center gap-x-2 text-xs text-brand-primary/50">
+                        {task.client_name && <span>{task.client_name}</span>}
+                        {task.assigned_to_name && <span>· {task.assigned_to_name}</span>}
+                        <span>· {formatDate(task.due_date)}</span>
+                      </div>
+                    </div>
+                    <select
+                      value={task.status}
+                      onChange={e => handleClientRequestStatusChange(task.id, e.target.value as TaskStatus)}
+                      disabled={busyId === task.id}
+                      className="shrink-0 rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
+                    >
+                      {STATUSES.map(s => (
+                        <option key={s} value={s}>{statusLabel(s)}</option>
+                      ))}
+                    </select>
                   </div>
                 ))}
               </div>
@@ -441,16 +394,16 @@ export default function AdminHomePage() {
           {workload.length > 0 && (
             <div className="mb-8">
               <h2 className="mb-3 text-base font-bold text-white">Staff workload</h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {workload.map(staff => (
-                  <PremiumCard key={staff.name} padding="sm">
+                  <div key={staff.name} className="rounded-xl border border-brand-muted/20 bg-brand-surface/40 p-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-brand-accent">
+                      <h3 className="text-xs font-semibold text-brand-accent">
                         {staff.name === 'Unassigned' ? 'Unassigned' : `@${staff.name}`}
                       </h3>
                       <div className="flex items-center gap-2 text-xs">
                         {staff.active > 0 && (
-                          <span className="text-white font-semibold">{staff.active} active</span>
+                          <span className="text-white font-semibold">{staff.active}</span>
                         )}
                         {staff.doneToday > 0 && (
                           <span className="text-[#2dd4bf]">{staff.doneToday} done</span>
@@ -459,50 +412,27 @@ export default function AdminHomePage() {
                           <span className="text-amber-400">{staff.blocked} blocked</span>
                         )}
                         {staff.active === 0 && staff.doneToday === 0 && (
-                          <span className="text-brand-primary/50">No tasks</span>
+                          <span className="text-brand-primary/50">—</span>
                         )}
                       </div>
                     </div>
                     {staff.previewTasks.length > 0 && (
-                      <ul className="mt-2 space-y-1">
+                      <div className="mt-1.5 space-y-0.5">
                         {staff.previewTasks.map((t, i) => (
-                          <li key={i} className="truncate text-xs text-brand-primary/80">
+                          <p key={i} className="truncate text-xs text-brand-primary/60">
                             <Link to="/admin/command-centre" className="hover:text-brand-accent transition-colors">
                               {t.client_name ? `${t.client_name} — ` : ''}{t.title}
                             </Link>
-                          </li>
+                          </p>
                         ))}
-                      </ul>
+                      </div>
                     )}
-                  </PremiumCard>
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Quick shortcuts */}
-          <div className="mb-8">
-            <h2 className="mb-3 text-sm font-semibold text-brand-primary">Quick shortcuts</h2>
-            <div className="flex flex-wrap gap-2">
-              <ShortcutLink to="/admin/cg-hub">CG Hub</ShortcutLink>
-              <ShortcutLink to="/admin/reports">Reports</ShortcutLink>
-              <ShortcutLink to="/admin/clients">Clients</ShortcutLink>
-              <ShortcutLink to="/admin/integrations">Integrations</ShortcutLink>
-              <ShortcutLink external to="https://cg-hours.vercel.app">
-                CG Hours
-              </ShortcutLink>
-            </div>
-          </div>
-
-          {/* Secondary section cards */}
-          <div className="mt-10">
-            <h2 className="mb-4 text-lg font-bold text-white">More sections</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              {SECONDARY_SECTIONS.map(section => (
-                <SecondarySectionCard key={section.id} section={section} />
-              ))}
-            </div>
-          </div>
         </>
       )}
     </div>
@@ -515,17 +445,19 @@ function PrimaryActionCard({ action }: {
   return (
     <Link
       to={action.to}
-      className="group relative flex flex-col rounded-2xl border border-brand-muted bg-brand-surface p-5 transition-all duration-200 hover:border-brand-accent/30 hover:bg-white/[0.03] hover:-translate-y-0.5"
+      className="group flex items-start gap-4 rounded-xl border border-brand-muted/60 bg-brand-surface/80 p-4 transition-all hover:border-brand-accent/30 hover:bg-white/[0.03]"
     >
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-accent/10 text-brand-accent group-hover:bg-brand-accent/20 transition-colors">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-accent/10 text-brand-accent group-hover:bg-brand-accent/20 transition-colors">
         {action.icon}
       </div>
-      <h2 className="mt-3 text-sm font-bold text-white group-hover:text-brand-accent transition-colors">
-        {action.title}
-      </h2>
-      <p className="mt-1 text-xs leading-relaxed text-brand-primary/80">
-        {action.description}
-      </p>
+      <div className="min-w-0">
+        <h2 className="text-sm font-semibold text-white group-hover:text-brand-accent transition-colors">
+          {action.title}
+        </h2>
+        <p className="mt-0.5 text-xs text-brand-primary/60">
+          {action.description}
+        </p>
+      </div>
     </Link>
   )
 }
@@ -603,8 +535,7 @@ function QuickAddCard({ onTaskCreated }: {
           </svg>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-white">Quick add task</h2>
-          <p className="text-xs text-brand-primary/60">Create a task with defaults.</p>
+          <h2 className="text-sm font-semibold text-white">Quick add</h2>
         </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -716,72 +647,14 @@ function StatCard({ label, value, accent, teal, amber, danger, icon }: {
     : amber ? 'text-amber-400'
     : 'text-white'
   return (
-    <PremiumCard padding="sm">
+    <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary/70">{label}</p>
-        {icon && <span className="text-brand-primary/40">{icon}</span>}
+        <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
+        {icon && <span className="text-brand-primary/30">{icon}</span>}
       </div>
-      <p className={`mt-2 text-2xl font-semibold ${valClass}`}>{value}</p>
-    </PremiumCard>
+      <p className={`mt-1.5 text-xl font-semibold ${valClass}`}>{value}</p>
+    </div>
   )
 }
 
-function ShortcutLink({ to, external, children }: {
-  to: string
-  external?: boolean
-  children: string
-}) {
-  if (external) {
-    return (
-      <a
-        href={to}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-brand-muted bg-brand-surface px-3 py-2 text-xs text-brand-primary hover:text-white hover:border-brand-accent/30 transition-colors"
-      >
-        {children}
-        <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-        </svg>
-      </a>
-    )
-  }
-  return (
-    <Link
-      to={to}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-brand-muted bg-brand-surface px-3 py-2 text-xs text-brand-primary hover:text-white hover:border-brand-accent/30 transition-colors"
-    >
-      {children}
-    </Link>
-  )
-}
 
-function SecondarySectionCard({ section }: {
-  section: typeof SECONDARY_SECTIONS[number]
-}) {
-  return (
-    <Link
-      to={section.to}
-      className="group relative flex flex-col rounded-2xl border border-brand-muted bg-brand-surface p-6 transition-all duration-200 hover:border-brand-accent/30 hover:bg-white/[0.03] hover:-translate-y-0.5"
-    >
-      <div className={`absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r ${section.accent}`} />
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-accent/10 text-brand-accent">
-        {section.icon}
-      </div>
-      <h2 className="mt-4 text-lg font-bold text-white group-hover:text-brand-accent transition-colors">
-        {section.title}
-      </h2>
-      <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
-        {section.description}
-      </p>
-      <div className="mt-5">
-        <span className="inline-flex items-center gap-1.5 rounded-lg bg-brand-accent/10 px-4 py-2 text-sm font-semibold text-brand-accent transition-all group-hover:bg-brand-accent/20">
-          Enter
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-          </svg>
-        </span>
-      </div>
-    </Link>
-  )
-}

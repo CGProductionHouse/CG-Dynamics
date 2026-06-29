@@ -28,8 +28,8 @@ function getSection(pathname: string): Section {
 function mainNav({ isActive }: { isActive: boolean }) {
   return `relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
     isActive
-      ? 'bg-brand-accent/10 text-brand-accent'
-      : 'text-brand-primary hover:text-white hover:bg-white/[0.04]'
+      ? 'bg-brand-accent/10 text-brand-accent shadow-sm'
+      : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
   }`
 }
 
@@ -37,13 +37,13 @@ function subNav({ isActive }: { isActive: boolean }) {
   return `relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors ${
     isActive
       ? 'bg-brand-accent/8 text-brand-accent'
-      : 'text-brand-primary/70 hover:text-white hover:bg-white/[0.03]'
+      : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
   }`
 }
 
 function sectionLabel(label: string) {
   return (
-    <p className="flex items-center gap-2 px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-primary/50">
+    <p className="flex items-center gap-2 px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/30">
       <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-accent/60" />
       {label}
     </p>
@@ -55,7 +55,7 @@ function backLink(closeMobile: () => void) {
     <NavLink
       to="/admin"
       end
-      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-brand-primary/50 hover:text-white transition-colors"
+      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-white/40 hover:text-white transition-colors"
       onClick={closeMobile}
     >
       <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -153,7 +153,7 @@ export default function AdminLayout() {
           href="https://cg-hours.vercel.app"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-brand-primary/60 hover:text-white transition-colors"
+          className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-white/50 hover:text-white transition-colors"
           onClick={close}
         >
           <span>CG Hours</span>
@@ -161,8 +161,8 @@ export default function AdminLayout() {
             <path d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
           </svg>
         </a>
-        <p className="px-3 pt-0.5 text-[10px] text-brand-primary/40">
-          External app. Opens separately.
+        <p className="px-3 pt-0.5 text-[10px] text-white/30">
+          External app
         </p>
       </>
     )
@@ -176,6 +176,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-brand-bg md:flex">
+      <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-gradient-to-r from-transparent via-brand-accent/60 to-transparent pointer-events-none" />
       <header className="sticky top-0 z-40 border-b border-brand-muted/50 bg-brand-surface/95 backdrop-blur-sm md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
@@ -184,7 +185,7 @@ export default function AdminLayout() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="rounded-lg border border-brand-muted/60 px-3.5 py-2 text-sm font-semibold text-brand-primary hover:text-white transition-colors"
+            className="rounded-lg border border-brand-muted/60 px-3.5 py-2 text-sm font-semibold text-white/70 hover:text-white transition-colors"
           >
             Menu
           </button>
@@ -247,13 +248,13 @@ export default function AdminLayout() {
             <p className="text-sm font-medium text-white truncate">
               {profile?.full_name ?? 'Staff user'}
             </p>
-            <p className="text-xs text-brand-primary/50 mt-0.5">
+            <p className="text-xs text-white/40 mt-0.5">
               {profile?.role === 'admin' ? 'Admin' : 'Staff'}
             </p>
           </div>
           <button
             onClick={signOut}
-            className="w-full text-left px-3 py-2 rounded-lg text-sm text-brand-primary hover:text-white hover:bg-white/[0.04] transition-colors"
+            className="w-full text-left px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors"
           >
             Sign out
           </button>
@@ -306,7 +307,7 @@ function MobileNavItem({ to, label, exact, children }: {
         `flex flex-col items-center gap-0.5 rounded-lg px-4 py-2 text-[11px] font-medium transition-colors ${
           isActive
             ? 'text-brand-accent'
-            : 'text-brand-primary/50 hover:text-white'
+            : 'text-white/50 hover:text-white'
         }`
       }
     >

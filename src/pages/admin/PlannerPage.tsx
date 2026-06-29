@@ -92,16 +92,16 @@ export default function PlannerPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 h-8 w-48 animate-pulse rounded-lg bg-white/10" />
-        <div className="flex gap-2 mb-6">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mb-4 h-6 w-40 animate-pulse rounded bg-white/10" />
+        <div className="flex gap-1.5 mb-4">
           {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-9 w-24 animate-pulse rounded-lg bg-white/10" />
+            <div key={i} className="h-7 w-20 animate-pulse rounded-md bg-white/10" />
           ))}
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-3 overflow-x-auto pb-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-64 w-72 shrink-0 animate-pulse rounded-xl bg-brand-surface border border-brand-muted" />
+            <div key={i} className="h-60 w-64 shrink-0 animate-pulse rounded-lg bg-white/[0.04]" />
           ))}
         </div>
       </div>
@@ -111,13 +111,10 @@ export default function PlannerPage() {
   if (tableMissing) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">CG Dynamics</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Planner</h1>
-        </div>
+        <h1 className="mb-6 text-xl font-black tracking-tight text-white">CG Planner</h1>
         <EmptyState
           title="Planner tables not set up yet"
-          message="Run phase-6 (core) and phase-6b (seed) migrations in Supabase to set up planner boards and buckets."
+          message="Run phase-6 and phase-6b migrations."
         />
       </div>
     )
@@ -126,32 +123,24 @@ export default function PlannerPage() {
   if (boards.length === 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">CG Dynamics</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Planner</h1>
-        </div>
+        <h1 className="mb-6 text-xl font-black tracking-tight text-white">CG Planner</h1>
         <EmptyState
           title="No boards found"
-          message="Seed data has not been inserted yet. Run the phase-6b seed migration to create boards."
+          message="Run the phase-6b seed migration to create boards."
         />
       </div>
     )
   }
 
-  const currentBoard = boards.find(b => b.slug === activeBoard)
-
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">CG Dynamics</p>
-          <h1 className="text-xl font-black tracking-tight text-white sm:text-2xl">CG Planner</h1>
-        </div>
+      <div className="mb-4">
+        <h1 className="text-xl font-black tracking-tight text-white">CG Planner</h1>
       </div>
 
-      {/* Board tabs */}
-      <div className="mb-5 flex flex-wrap gap-1.5 border-b border-brand-muted/30 pb-3">
+      {/* Board tabs — Teams Planner style */}
+      <div className="mb-4 flex flex-wrap gap-1">
         {boards.map(board => {
           const isActive = activeBoard === board.slug
           const isAdminOnly = board.visibility === 'admin_only'
@@ -160,16 +149,16 @@ export default function PlannerPage() {
               key={board.slug}
               type="button"
               onClick={() => setActiveBoard(board.slug)}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 isActive
-                  ? 'bg-brand-accent text-brand-bg shadow-sm'
-                  : 'text-brand-primary/70 hover:text-white hover:bg-white/[0.04]'
+                  ? 'bg-brand-accent/15 text-brand-accent shadow-sm'
+                  : 'text-brand-primary/60 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
-              {BOARD_ICONS[board.slug]}
+              <span className="shrink-0">{BOARD_ICONS[board.slug]}</span>
               <span>{BOARD_LABELS[board.slug] ?? board.name}</span>
               {isAdminOnly && (
-                <svg className="h-3 w-3 text-amber-400/70" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="h-2.5 w-2.5 text-amber-400/60" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
               )}
@@ -178,32 +167,25 @@ export default function PlannerPage() {
         })}
       </div>
 
-      {/* Board description */}
-      {currentBoard?.description && (
-        <p className="mb-5 text-xs leading-relaxed text-brand-primary/50 max-w-xl">
-          {currentBoard.description}
-        </p>
-      )}
-
       {/* Bucket columns */}
       {buckets.length === 0 ? (
         <EmptyState
           title="No buckets configured"
-          message="This board has no columns yet. Add buckets via the phase-6b seed migration."
+          message="This board has no columns yet."
           centered={false}
         />
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-3 overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
           {buckets.map(bucket => (
-            <div key={bucket.id} className="w-64 shrink-0 sm:w-72">
-              <div className="mb-2 flex items-center gap-2 px-1">
-                <h3 className="text-xs font-semibold text-brand-primary/80 uppercase tracking-wider truncate">
+            <div key={bucket.id} className="w-60 shrink-0 sm:w-64">
+              <div className="mb-2 flex items-center gap-2 px-2">
+                <h3 className="text-[11px] font-semibold text-brand-primary/60 uppercase tracking-wider truncate">
                   {bucket.name}
                 </h3>
-                <span className="text-[11px] text-brand-primary/30">0</span>
+                <span className="text-[11px] text-brand-primary/20">0</span>
               </div>
-              <div className="min-h-[20rem] rounded-xl border border-dashed border-brand-muted/30 bg-brand-surface/30 p-3">
-                <p className="text-center text-xs text-brand-primary/30 pt-8">
+              <div className="min-h-[15rem] rounded-lg border border-dashed border-white/5 bg-white/[0.02] p-2.5">
+                <p className="text-center text-xs text-brand-primary/20 pt-6">
                   No tasks yet
                 </p>
               </div>
