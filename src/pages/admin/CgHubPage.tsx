@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 
@@ -17,7 +16,7 @@ interface HubCard {
 const CARDS: HubCard[] = [
   {
     title: 'CG Planner',
-    description: 'Boards, package schedules, milestone tracking and approval workflows.',
+    description: 'Boards and buckets.',
     to: '/admin/planner',
     status: 'Live',
     icon: (
@@ -29,7 +28,7 @@ const CARDS: HubCard[] = [
   },
   {
     title: 'Package Master',
-    description: 'Set up client packages, deliverables and monthly templates.',
+    description: 'Package setup.',
     to: '/admin/package-master',
     status: 'Live',
     icon: (
@@ -41,7 +40,7 @@ const CARDS: HubCard[] = [
   },
   {
     title: 'Monthly Planner',
-    description: 'Track monthly package deliverables, totals and progress.',
+    description: 'Monthly package tracker.',
     to: '/admin/monthly-planner',
     status: 'Live',
     icon: (
@@ -52,8 +51,8 @@ const CARDS: HubCard[] = [
     buttonLabel: 'Open Monthly Planner',
   },
   {
-    title: 'CG Assistant',
-    description: 'Ask for operational help, drafts, checklists and setup support.',
+    title: 'Assistant',
+    description: 'Drafts and support.',
     to: '/admin/assistant',
     status: 'Live',
     icon: (
@@ -65,7 +64,7 @@ const CARDS: HubCard[] = [
   },
   {
     title: 'CG Hours',
-    description: 'Open the CG Hours system for staff time tracking and work-hour management.',
+    description: 'Time tracking.',
     to: 'https://cg-hours.vercel.app',
     external: true,
     status: 'Live external app',
@@ -78,7 +77,7 @@ const CARDS: HubCard[] = [
   },
   {
     title: 'Command Centre',
-    description: 'Daily tasks, client requests and team progress.',
+    description: 'Daily tasks.',
     to: '/admin/command-centre',
     status: 'Live',
     icon: (
@@ -123,22 +122,18 @@ export default function CgHubPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">
-          CG Hub
-        </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-6">
+        <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
           CG Hub
         </h1>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-brand-primary/70">
-          Internal tools for the team, workflows, hours, tasks and assistant support.
+        <p className="mt-1 text-sm text-white/45">
+          Tools, tasks and schedules.
         </p>
-        <div className="mt-6 h-px bg-gradient-to-r from-brand-accent/30 via-brand-accent/10 to-transparent" />
       </div>
 
-      <PremiumCard padding="sm" className="mb-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-brand-primary/70">
+      <div className="mb-6 rounded-xl bg-white/[0.025] p-3">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
           Quick Actions
         </p>
         <div className="flex flex-wrap gap-2">
@@ -158,18 +153,18 @@ export default function CgHubPage() {
             CG Hours
           </ActionButton>
         </div>
-      </PremiumCard>
+      </div>
 
-      <PremiumCard padding="sm" className="mb-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-brand-primary/70">
-          OneDrive Resources
+      <div className="mb-6 rounded-xl bg-white/[0.025] p-3">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
+          OneDrive
         </p>
-        <div className="flex flex-col gap-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           <a
             href="https://cgproductionhouse365-my.sharepoint.com/:f:/g/personal/info_cgproductionhouse_com/IgC0gAsW73aeQq8CjNUBdEfmAUK5IYEyo8z5crwYCYmKPh0?e=dJbeui"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 rounded-lg border border-brand-muted/40 px-3.5 py-2.5 text-sm text-brand-primary transition-colors hover:text-white hover:border-brand-accent/30"
+            className="flex items-center gap-2.5 rounded-lg bg-white/[0.025] px-3 py-2 text-sm text-white/60 transition-colors hover:text-white"
           >
             <svg className="h-4 w-4 shrink-0 text-brand-accent/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
@@ -180,7 +175,7 @@ export default function CgHubPage() {
             href="https://1drv.ms/f/c/a2ac9fe4b255f52f/IgAv9VWy5J-sIICibQAAAAAAAXsqhpnxBLjESAlwfFtYXMU?e=CrP1U9"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 rounded-lg border border-brand-muted/40 px-3.5 py-2.5 text-sm text-brand-primary transition-colors hover:text-white hover:border-brand-accent/30"
+            className="flex items-center gap-2.5 rounded-lg bg-white/[0.025] px-3 py-2 text-sm text-white/60 transition-colors hover:text-white"
           >
             <svg className="h-4 w-4 shrink-0 text-brand-accent/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
@@ -191,7 +186,7 @@ export default function CgHubPage() {
             href="https://1drv.ms/f/c/a2ac9fe4b255f52f/IgDJNIFpROWtQ48o2oS4u2TJAY7XcLW0gmxEomsaK2CWt_c?e=XqGVzu"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 rounded-lg border border-brand-muted/40 px-3.5 py-2.5 text-sm text-brand-primary transition-colors hover:text-white hover:border-brand-accent/30"
+            className="flex items-center gap-2.5 rounded-lg bg-white/[0.025] px-3 py-2 text-sm text-white/60 transition-colors hover:text-white"
           >
             <svg className="h-4 w-4 shrink-0 text-brand-accent/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -199,23 +194,23 @@ export default function CgHubPage() {
             <span>Once-Off OneDrive</span>
           </a>
         </div>
-      </PremiumCard>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {CARDS.map(card => (
-          <PremiumCard key={card.title} padding="md">
+          <div key={card.title} className="rounded-xl bg-white/[0.03] p-4">
             <div className="flex flex-col">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-accent/10 text-brand-accent">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-white/60">
                   {card.icon}
                 </div>
                 <Pill tone={pillTone(card.status)}>{card.status}</Pill>
               </div>
-              <h2 className="mt-4 text-base font-bold text-white">{card.title}</h2>
-              <p className="mt-1 text-sm leading-relaxed text-brand-primary">
+              <h2 className="mt-3 text-base font-bold text-white">{card.title}</h2>
+              <p className="mt-1 text-sm text-white/45">
                 {card.description}
               </p>
-              <div className="mt-auto pt-5">
+              <div className="mt-auto pt-4">
                 {card.to ? (
                   card.external ? (
                     <a
@@ -241,7 +236,7 @@ export default function CgHubPage() {
                 )}
               </div>
             </div>
-          </PremiumCard>
+          </div>
         ))}
       </div>
     </div>

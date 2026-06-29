@@ -68,8 +68,8 @@ interface StaffWorkload {
 const PRIMARY_ACTIONS = [
   {
     id: 'morning-list',
-    title: 'Paste Morning List',
-    description: 'Import WhatsApp to-do list.',
+    title: 'Client Requests',
+    description: 'Paste the morning list.',
     to: '/admin/command-centre#morning-import',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -79,8 +79,8 @@ const PRIMARY_ACTIONS = [
   },
   {
     id: 'command-centre',
-    title: 'Command Centre',
-    description: 'Today\'s team tasks and statuses.',
+    title: 'Tasks',
+    description: 'Open team tasks.',
     to: '/admin/command-centre',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -89,10 +89,10 @@ const PRIMARY_ACTIONS = [
     ),
   },
   {
-    id: 'assistant',
-    title: 'CG Assistant',
-    description: 'Drafts, checklists, support.',
-    to: '/admin/assistant',
+    id: 'monthly-planner',
+    title: 'Monthly Planner',
+    description: 'Package tracker.',
+    to: '/admin/monthly-planner',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -101,12 +101,23 @@ const PRIMARY_ACTIONS = [
   },
   {
     id: 'planner',
-    title: 'CG Planner',
-    description: 'Board view, buckets, monthly deliverables.',
+    title: 'Planner',
+    description: 'Boards and buckets.',
     to: '/admin/planner',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+    ),
+  },
+  {
+    id: 'assistant',
+    title: 'Assistant',
+    description: 'Drafts and support.',
+    to: '/admin/assistant',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
       </svg>
     ),
   },
@@ -271,17 +282,17 @@ export default function AdminHomePage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
-              Today at CG
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Today
             </h1>
-            <p className="mt-1 text-sm text-brand-primary/50">
+            <p className="mt-1 text-sm text-white/45">
               {formatDateNice()}
             </p>
           </div>
           {profile && (
             <div className="hidden sm:flex flex-col items-end">
               <span className="text-sm font-medium text-white">{profile.full_name ?? 'Staff'}</span>
-              <span className="text-xs text-brand-primary/50">{profile.role === 'admin' ? 'Admin' : 'Staff'}</span>
+              <span className="text-xs text-white/40">{profile.role === 'admin' ? 'Admin' : 'Staff'}</span>
             </div>
           )}
         </div>
@@ -312,22 +323,22 @@ export default function AdminHomePage() {
       ) : (
         <>
           {/* Quick add task */}
-          <div className="mb-6">
+          <div className="mb-5">
             <QuickAddCard onTaskCreated={() => { setQuickAddMsg('Task added successfully.'); void load() }} />
           </div>
           {quickAddMsg && (
-            <p className="mb-4 text-xs text-[#2dd4bf]">{quickAddMsg}</p>
+            <p className="mb-4 text-xs text-brand-accent">{quickAddMsg}</p>
           )}
 
           {/* Primary action cards */}
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             {PRIMARY_ACTIONS.map(action => (
               <PrimaryActionCard key={action.id} action={action} />
             ))}
           </div>
 
           {/* Stats */}
-          <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             <StatCard label="Active tasks" value={stats.total} icon={
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192" /></svg>
             } />
@@ -350,25 +361,25 @@ export default function AdminHomePage() {
 
           {/* Client request preview */}
           {clientRequests.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-base font-bold text-white">Open client requests</h2>
                 <Link
                   to="/admin/command-centre"
-                  className="text-xs text-brand-accent hover:text-brand-accent/80 transition-colors"
+                  className="text-xs text-white/45 hover:text-white transition-colors"
                 >
                   View all
                 </Link>
               </div>
               <div className="space-y-1.5">
                 {clientRequests.map(task => (
-                  <div key={task.id} className="flex items-center justify-between gap-3 rounded-lg border border-brand-muted/20 bg-brand-surface/40 px-3 py-2">
+                  <div key={task.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.035] px-3 py-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-white truncate">{task.title}</span>
                         <Pill tone="accent">Client req</Pill>
                       </div>
-                      <div className="flex flex-wrap items-center gap-x-2 text-xs text-brand-primary/50">
+                      <div className="flex flex-wrap items-center gap-x-2 text-xs text-white/45">
                         {task.client_name && <span>{task.client_name}</span>}
                         {task.assigned_to_name && <span>· {task.assigned_to_name}</span>}
                         <span>· {formatDate(task.due_date)}</span>
@@ -393,12 +404,12 @@ export default function AdminHomePage() {
           {/* Staff workload preview */}
           {workload.length > 0 && (
             <div className="mb-8">
-              <h2 className="mb-3 text-base font-bold text-white">Staff workload</h2>
+              <h2 className="mb-3 text-base font-bold text-white">Team</h2>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {workload.map(staff => (
-                  <div key={staff.name} className="rounded-xl border border-brand-muted/20 bg-brand-surface/40 p-3">
+                  <div key={staff.name} className="rounded-lg bg-white/[0.025] p-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-semibold text-brand-accent">
+                      <h3 className="text-xs font-semibold text-white/75">
                         {staff.name === 'Unassigned' ? 'Unassigned' : `@${staff.name}`}
                       </h3>
                       <div className="flex items-center gap-2 text-xs">
@@ -406,21 +417,21 @@ export default function AdminHomePage() {
                           <span className="text-white font-semibold">{staff.active}</span>
                         )}
                         {staff.doneToday > 0 && (
-                          <span className="text-[#2dd4bf]">{staff.doneToday} done</span>
+                            <span className="text-brand-accent">{staff.doneToday} done</span>
                         )}
                         {staff.blocked > 0 && (
                           <span className="text-amber-400">{staff.blocked} blocked</span>
                         )}
                         {staff.active === 0 && staff.doneToday === 0 && (
-                          <span className="text-brand-primary/50">—</span>
+                          <span className="text-white/30">—</span>
                         )}
                       </div>
                     </div>
                     {staff.previewTasks.length > 0 && (
                       <div className="mt-1.5 space-y-0.5">
                         {staff.previewTasks.map((t, i) => (
-                          <p key={i} className="truncate text-xs text-brand-primary/60">
-                            <Link to="/admin/command-centre" className="hover:text-brand-accent transition-colors">
+                          <p key={i} className="truncate text-xs text-white/45">
+                            <Link to="/admin/command-centre" className="hover:text-white transition-colors">
                               {t.client_name ? `${t.client_name} — ` : ''}{t.title}
                             </Link>
                           </p>
@@ -445,16 +456,16 @@ function PrimaryActionCard({ action }: {
   return (
     <Link
       to={action.to}
-      className="group flex items-start gap-4 rounded-xl border border-brand-muted/60 bg-brand-surface/80 p-4 transition-all hover:border-brand-accent/30 hover:bg-white/[0.03]"
+      className="group flex items-center gap-3 rounded-lg bg-white/[0.035] px-3 py-3 transition-all hover:bg-white/[0.06]"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-accent/10 text-brand-accent group-hover:bg-brand-accent/20 transition-colors">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/[0.04] text-white/60 group-hover:text-brand-accent transition-colors">
         {action.icon}
       </div>
       <div className="min-w-0">
-        <h2 className="text-sm font-semibold text-white group-hover:text-brand-accent transition-colors">
+        <h2 className="text-sm font-semibold text-white transition-colors">
           {action.title}
         </h2>
-        <p className="mt-0.5 text-xs text-brand-primary/60">
+        <p className="mt-0.5 truncate text-xs text-white/40">
           {action.description}
         </p>
       </div>
@@ -527,35 +538,26 @@ function QuickAddCard({ onTaskCreated }: {
   }
 
   return (
-    <PremiumCard padding="sm">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-accent/10 text-brand-accent">
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </div>
-        <div>
-          <h2 className="text-sm font-semibold text-white">Quick add</h2>
-        </div>
-      </div>
+    <div className="rounded-xl bg-white/[0.035] p-3">
+      <h2 className="mb-3 text-sm font-semibold text-white">Quick Add</h2>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:flex-wrap">
           <div className="min-w-0 flex-[2] sm:min-w-[200px]">
-            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Task title</label>
+            <label className="mb-1 block text-[11px] font-medium text-white/45">Task</label>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}
               required
               placeholder="What needs to be done?"
-              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <div className="flex-1 sm:min-w-0">
-            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Client</label>
+            <label className="mb-1 block text-[11px] font-medium text-white/45">Client</label>
             <select
               value={clientId}
               onChange={e => setClientId(e.target.value)}
-              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">No client</option>
               {clientsLoading ? (
@@ -570,23 +572,23 @@ function QuickAddCard({ onTaskCreated }: {
           </div>
           {isManual && (
             <div className="flex-1 sm:min-w-0">
-              <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Client name</label>
+              <label className="mb-1 block text-[11px] font-medium text-white/45">Client name</label>
               <input
                 value={manualClientName}
                 onChange={e => setManualClientName(e.target.value)}
                 placeholder="Type client name"
-                className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
           )}
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <div className="min-w-[130px] flex-1 sm:flex-none">
-            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Staff</label>
+            <label className="mb-1 block text-[11px] font-medium text-white/45">Staff</label>
             <select
               value={assignedName}
               onChange={e => setAssignedName(e.target.value)}
-              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               <option value="">Unassigned</option>
               {KNOWN_STAFF.map(name => (
@@ -595,11 +597,11 @@ function QuickAddCard({ onTaskCreated }: {
             </select>
           </div>
           <div className="min-w-[120px] flex-1 sm:flex-none">
-            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Priority</label>
+            <label className="mb-1 block text-[11px] font-medium text-white/45">Priority</label>
             <select
               value={priority}
               onChange={e => setPriority(e.target.value as TaskPriority)}
-              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
             >
               {PRIORITIES.map(p => (
                 <option key={p} value={p}>{p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}</option>
@@ -607,12 +609,12 @@ function QuickAddCard({ onTaskCreated }: {
             </select>
           </div>
           <div className="min-w-[140px] flex-1 sm:flex-none">
-            <label className="mb-1 block text-[11px] font-medium text-brand-primary/60">Due date</label>
+            <label className="mb-1 block text-[11px] font-medium text-white/45">Due</label>
             <input
               type="date"
               value={dueDate}
               onChange={e => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
           </div>
           <button
@@ -627,7 +629,7 @@ function QuickAddCard({ onTaskCreated }: {
           <p className="text-xs text-red-400">{error}</p>
         )}
       </form>
-    </PremiumCard>
+    </div>
   )
 }
 
@@ -647,14 +649,12 @@ function StatCard({ label, value, accent, teal, amber, danger, icon }: {
     : amber ? 'text-amber-400'
     : 'text-white'
   return (
-    <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3">
+    <div className="rounded-lg bg-white/[0.025] p-3">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
-        {icon && <span className="text-brand-primary/30">{icon}</span>}
+        <p className="text-[10px] uppercase tracking-[0.12em] text-white/35">{label}</p>
+        {icon && <span className="text-white/25">{icon}</span>}
       </div>
       <p className={`mt-1.5 text-xl font-semibold ${valClass}`}>{value}</p>
     </div>
   )
 }
-
-

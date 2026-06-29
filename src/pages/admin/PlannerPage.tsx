@@ -152,7 +152,7 @@ export default function PlannerPage() {
               className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 isActive
                   ? 'bg-brand-accent/15 text-brand-accent shadow-sm'
-                  : 'text-brand-primary/60 hover:text-white hover:bg-white/[0.04]'
+                  : 'text-white/55 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               <span className="shrink-0">{BOARD_ICONS[board.slug]}</span>
@@ -179,14 +179,14 @@ export default function PlannerPage() {
           {buckets.map(bucket => (
             <div key={bucket.id} className="w-60 shrink-0 sm:w-64">
               <div className="mb-2 flex items-center gap-2 px-2">
-                <h3 className="text-[11px] font-semibold text-brand-primary/60 uppercase tracking-wider truncate">
+                <h3 className="text-[11px] font-semibold text-white/50 uppercase tracking-wider truncate">
                   {bucket.name}
                 </h3>
-                <span className="text-[11px] text-brand-primary/20">0</span>
+                <span className="text-[11px] text-white/25">0</span>
               </div>
-              <div className="min-h-[15rem] rounded-lg border border-dashed border-white/5 bg-white/[0.02] p-2.5">
-                <p className="text-center text-xs text-brand-primary/20 pt-6">
-                  No tasks yet
+              <div className="min-h-[15rem] rounded-lg bg-white/[0.025] p-2.5">
+                <p className="pt-5 text-center text-xs text-white/25">
+                  Empty
                 </p>
               </div>
             </div>

@@ -39,14 +39,13 @@ function subNav({ isActive }: { isActive: boolean }) {
   return `relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors ${
     isActive
       ? 'bg-brand-accent/8 text-brand-accent'
-      : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
+      : 'text-white/55 hover:text-white hover:bg-white/[0.03]'
   }`
 }
 
 function sectionLabel(label: string) {
   return (
-    <p className="flex items-center gap-2 px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/30">
-      <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-accent/60" />
+    <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/28">
       {label}
     </p>
   )
@@ -214,7 +213,7 @@ export default function AdminLayout() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="rounded-lg border border-brand-muted/60 px-3 py-2 text-sm text-brand-primary hover:text-white transition-colors"
+                className="rounded-lg border border-white/10 px-3 py-2 text-sm text-white/60 hover:text-white transition-colors"
               >
                 Close
               </button>
@@ -227,13 +226,13 @@ export default function AdminLayout() {
                 <p className="text-sm font-medium text-white truncate">
                   {profile?.full_name ?? 'Staff user'}
                 </p>
-                <p className="text-xs text-brand-primary/50 mt-0.5">
+            <p className="text-xs text-white/40 mt-0.5">
                   {profile?.role === 'admin' ? 'Admin' : 'Staff'}
                 </p>
               </div>
               <button
                 onClick={signOut}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm text-brand-primary hover:text-white hover:bg-white/[0.04] transition-colors"
+              className="w-full text-left px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors"
               >
                 Sign out
               </button>

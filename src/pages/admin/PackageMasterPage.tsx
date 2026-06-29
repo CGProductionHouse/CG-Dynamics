@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 import { EmptyState } from '../../components/ui/States'
@@ -274,14 +273,14 @@ export default function PackageMasterPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight text-white">Package Master</h1>
-        <p className="mt-1 text-sm text-white/40">Client packages and monthly deliverable templates.</p>
+      <div className="mb-5">
+        <h1 className="text-3xl font-black tracking-tight text-white">Package Master</h1>
+        <p className="mt-1 text-sm text-white/45">Package setup.</p>
       </div>
 
       {/* Client selector */}
-      <div className="mb-6">
-        <label className="mb-1.5 block text-xs font-medium text-white/50">Select client</label>
+      <div className="mb-5">
+        <label className="mb-1.5 block text-xs font-medium text-white/50">Client</label>
         {clientsLoading ? (
           <div className="h-10 w-full animate-pulse rounded-lg bg-white/10" />
         ) : (
@@ -289,11 +288,11 @@ export default function PackageMasterPage() {
             <input
               value={clientSearch}
               onChange={e => setClientSearch(e.target.value)}
-              placeholder="Search clients..."
-              className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              placeholder="Search clients"
+              className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
             {clientSearch && filteredClients.length > 0 && (
-              <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-brand-muted/60 bg-brand-surface shadow-xl">
+              <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-white/10 bg-brand-surface shadow-xl">
                 {filteredClients.map(c => (
                   <button
                     key={c.id}
@@ -318,16 +317,16 @@ export default function PackageMasterPage() {
       {!selectedClient ? (
         <EmptyState
           title="Select a client"
-          message="Choose a client above to view or create packages."
+          message="Choose a client to view packages."
           centered={false}
         />
       ) : (
         <>
           {/* Client header */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-5 flex items-center justify-between rounded-xl bg-white/[0.03] px-4 py-3">
             <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35">Selected</p>
               <h2 className="text-lg font-bold text-white">{selectedClient.name}</h2>
-              <p className="text-xs text-white/40">client_id: {selectedClient.id.slice(0, 8)}…</p>
             </div>
             {isAdmin && (
               <ActionButton variant="outline" size="sm" onClick={() => setCreatePkgOpen(!createPkgOpen)}>
@@ -338,8 +337,8 @@ export default function PackageMasterPage() {
 
           {/* Create package form */}
           {createPkgOpen && isAdmin && (
-            <PremiumCard padding="md" className="mb-6">
-              <h3 className="mb-3 text-sm font-semibold text-white">Create package for {selectedClient.name}</h3>
+            <div className="mb-5 rounded-xl bg-white/[0.035] p-4">
+              <h3 className="mb-3 text-sm font-semibold text-white">New package</h3>
               <form onSubmit={handleCreatePackage} className="space-y-3">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
@@ -349,7 +348,7 @@ export default function PackageMasterPage() {
                       onChange={e => setPkgName(e.target.value)}
                       required
                       placeholder="e.g. Standard Monthly"
-                      className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                    className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                   </div>
                   <div>
@@ -359,7 +358,7 @@ export default function PackageMasterPage() {
                       value={pkgStartDate}
                       onChange={e => setPkgStartDate(e.target.value)}
                       required
-                      className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                      className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
                     />
                   </div>
                 </div>
@@ -369,8 +368,8 @@ export default function PackageMasterPage() {
                     value={pkgNotes}
                     onChange={e => setPkgNotes(e.target.value)}
                     rows={2}
-                    placeholder="Optional notes about this package"
-                    className="w-full resize-none rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                    placeholder="Optional"
+                    className="w-full resize-none rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
                   />
                 </div>
                 {pkgError && <p className="text-xs text-red-400">{pkgError}</p>}
@@ -378,12 +377,12 @@ export default function PackageMasterPage() {
                   Create package
                 </ActionButton>
               </form>
-            </PremiumCard>
+            </div>
           )}
 
           {/* Packages list */}
           {packagesLoading ? (
-            <div className="mb-6 space-y-2">
+            <div className="mb-5 space-y-2">
               {[1, 2].map(i => (
                 <div key={i} className="h-16 animate-pulse rounded-xl bg-white/[0.04]" />
               ))}
@@ -405,10 +404,10 @@ export default function PackageMasterPage() {
                     key={pkg.id}
                     type="button"
                     onClick={() => setSelectedPackageId(pkg.id)}
-                    className={`w-full rounded-xl border px-4 py-3 text-left transition-all ${
+                  className={`w-full rounded-lg px-4 py-3 text-left transition-all ${
                       isSelected
-                        ? 'border-brand-accent/40 bg-brand-accent/8'
-                        : 'border-brand-muted/30 bg-brand-surface/40 hover:border-brand-muted/60'
+                        ? 'bg-brand-accent/10'
+                        : 'bg-white/[0.025] hover:bg-white/[0.05]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -446,24 +445,24 @@ export default function PackageMasterPage() {
           {/* Selected package detail */}
           {currentPackage && (
             <div className="mb-6">
-              <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3 text-center">
+              <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.dp}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">DP</p>
                 </div>
-                <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3 text-center">
+                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.photo}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Photos</p>
                 </div>
-                <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3 text-center">
+                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.video}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Videos</p>
                 </div>
-                <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3 text-center">
+                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.reel}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Reels</p>
                 </div>
-                <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3 text-center">
+                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.other}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Other</p>
                 </div>
@@ -476,7 +475,7 @@ export default function PackageMasterPage() {
                     key={btn.type}
                     type="button"
                     onClick={() => handleQuickAdd(btn.type, btn.codePrefix)}
-                    className="rounded-lg border border-brand-muted/40 px-2.5 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:border-brand-accent/30 transition-colors"
+                    className="rounded-lg bg-white/[0.035] px-2.5 py-1.5 text-xs font-medium text-white/70 hover:text-white transition-colors"
                   >
                     + {btn.label}
                   </button>
@@ -485,7 +484,7 @@ export default function PackageMasterPage() {
                   <button
                     type="button"
                     onClick={() => setCreateTplOpen(!createTplOpen)}
-                    className="rounded-lg border border-brand-accent/30 px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-accent/10 transition-colors"
+                    className="rounded-lg bg-brand-accent/10 px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-accent/15 transition-colors"
                   >
                     {createTplOpen ? 'Cancel' : '+ Custom'}
                   </button>
@@ -498,7 +497,7 @@ export default function PackageMasterPage() {
 
               {/* Custom template form */}
               {createTplOpen && isAdmin && (
-                <PremiumCard padding="md" className="mb-4">
+                <div className="mb-4 rounded-xl bg-white/[0.035] p-4">
                   <h3 className="mb-3 text-sm font-semibold text-white">Add deliverable template</h3>
                   <form onSubmit={handleCreateTemplate} className="space-y-3">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -509,7 +508,7 @@ export default function PackageMasterPage() {
                           onChange={e => setTplCode(e.target.value)}
                           required
                           placeholder="e.g. DP5"
-                          className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                           className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         />
                       </div>
                       <div>
@@ -517,7 +516,7 @@ export default function PackageMasterPage() {
                         <select
                           value={tplType}
                           onChange={e => setTplType(e.target.value as DeliverableType)}
-                          className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                          className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         >
                           {DELIVERABLE_TYPES.map(t => (
                             <option key={t} value={t}>{TYPE_LABELS[t]}</option>
@@ -530,7 +529,7 @@ export default function PackageMasterPage() {
                           value={tplTitle}
                           onChange={e => setTplTitle(e.target.value)}
                           placeholder="e.g. Designed Poster {instance}"
-                          className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                          className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         />
                       </div>
                       <div>
@@ -539,7 +538,7 @@ export default function PackageMasterPage() {
                           value={tplAssignee}
                           onChange={e => setTplAssignee(e.target.value)}
                           placeholder="Staff name"
-                          className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                          className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         />
                       </div>
                       <div>
@@ -551,7 +550,7 @@ export default function PackageMasterPage() {
                           value={tplDayOfMonth}
                           onChange={e => setTplDayOfMonth(e.target.value)}
                           placeholder="e.g. 15"
-                          className="w-full rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                          className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         />
                       </div>
                     </div>
@@ -560,7 +559,7 @@ export default function PackageMasterPage() {
                       Add template
                     </ActionButton>
                   </form>
-                </PremiumCard>
+                </div>
               )}
 
               {/* Template list */}
@@ -571,9 +570,9 @@ export default function PackageMasterPage() {
                   ))}
                 </div>
               ) : templates.length === 0 ? (
-                <p className="text-sm text-white/30">No templates yet. Add deliverables using the buttons above.</p>
+                <p className="text-sm text-white/30">No templates yet.</p>
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-brand-muted/20">
+                <div className="overflow-x-auto rounded-xl bg-white/[0.02]">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-brand-muted/20 bg-white/[0.02]">

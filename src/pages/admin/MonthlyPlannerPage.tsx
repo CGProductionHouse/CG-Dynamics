@@ -191,24 +191,24 @@ export default function MonthlyPlannerPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <h1 className="mb-6 text-xl font-black tracking-tight text-white">Monthly Planner</h1>
-        <EmptyState title="Planner tables not set up yet" message="Run phase-6 and phase-6b migrations before using the monthly board." />
+        <EmptyState title="Planner tables not set up" message="Run the planner migrations." />
       </div>
     )
   }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-accent/70">Package Board</p>
-          <h1 className="mt-1 text-xl font-black tracking-tight text-white">Monthly Planner</h1>
+          <h1 className="text-2xl font-black tracking-tight text-white">Monthly Planner</h1>
+          <p className="mt-1 text-sm text-white/45">Monthly package tracker.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setSelectedMonth(shiftMonth(selectedMonth, -1))}
-            className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/60 hover:border-brand-accent/30 hover:text-white"
+            className="rounded-lg bg-white/[0.035] px-3 py-2 text-xs font-semibold text-white/60 hover:text-white"
           >
             Previous
           </button>
@@ -221,25 +221,25 @@ export default function MonthlyPlannerPage() {
           <button
             type="button"
             onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))}
-            className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/60 hover:border-brand-accent/30 hover:text-white"
+            className="rounded-lg bg-white/[0.035] px-3 py-2 text-xs font-semibold text-white/60 hover:text-white"
           >
             Next
           </button>
           {isAdmin && (
             <ActionButton size="sm" onClick={handleGenerate} loading={generating}>
-              Generate month from packages
+              Generate Month
             </ActionButton>
           )}
         </div>
       </div>
 
       {(message || errorMessage) && (
-        <div className={`mb-3 rounded-lg border px-3 py-2 text-sm ${errorMessage ? 'border-red-400/25 bg-red-400/10 text-red-200' : 'border-brand-accent/25 bg-brand-accent/10 text-brand-accent'}`}>
+        <div className={`mb-3 rounded-lg px-3 py-2 text-sm ${errorMessage ? 'bg-red-400/10 text-red-200' : 'bg-brand-accent/10 text-brand-accent'}`}>
           {errorMessage ?? message}
         </div>
       )}
 
-      <div className="mb-4 grid gap-2 rounded-xl border border-white/10 bg-white/[0.025] p-3 md:grid-cols-4">
+      <div className="mb-3 grid gap-2 rounded-xl bg-white/[0.025] p-3 md:grid-cols-4">
         <select
           value={clientFilter}
           onChange={event => setClientFilter(event.target.value)}
@@ -284,21 +284,21 @@ export default function MonthlyPlannerPage() {
 
       {groupedDeliverables.length === 0 ? (
         <EmptyState
-          title="No deliverables generated for this month yet."
-          message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : 'Generate this month from active Package Master templates.'}
+          title="No deliverables for this month."
+          message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : 'Generate this month from Package Master.'}
           action={isAdmin ? (
-            <ActionButton onClick={handleGenerate} loading={generating}>Generate month from packages</ActionButton>
+            <ActionButton onClick={handleGenerate} loading={generating}>Generate Month</ActionButton>
           ) : undefined}
           centered={false}
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {groupedDeliverables.map(group => (
-            <section key={group.clientId} className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+            <section key={group.clientId} className="rounded-xl bg-white/[0.025] p-3">
               <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h2 className="text-base font-bold text-white">{group.clientName}</h2>
-                  <p className="text-xs text-white/40">{group.totals.remaining} remaining of {group.totals.total}</p>
+                  <p className="text-xs text-white/40">{group.totals.remaining}/{group.totals.total} remaining</p>
                 </div>
                 <div className="grid grid-cols-3 gap-1.5 text-[11px] sm:grid-cols-6">
                   {DISPLAY_TYPES.map(type => (
@@ -310,11 +310,11 @@ export default function MonthlyPlannerPage() {
 
               <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                 {group.items.map(deliverable => (
-                  <article key={deliverable.id} className="rounded-lg border border-white/8 bg-brand-bg/70 p-3">
+                  <article key={deliverable.id} className="rounded-lg bg-brand-bg/70 p-3">
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="rounded-md bg-brand-accent/12 px-1.5 py-0.5 text-[11px] font-bold text-brand-accent">
+                          <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] font-bold text-white">
                             {deliverable.code}{deliverable.instance_number}
                           </span>
                           <span className="text-[11px] text-white/40">{TYPE_LABELS[deliverable.deliverable_type]}</span>
@@ -332,7 +332,7 @@ export default function MonthlyPlannerPage() {
                     </div>
 
                     <div className="space-y-1 text-xs text-white/45">
-                      {deliverable.assigned_to_name && <p>Assigned: <span className="text-white/70">{deliverable.assigned_to_name}</span></p>}
+                      {deliverable.assigned_to_name && <p>Staff: <span className="text-white/70">{deliverable.assigned_to_name}</span></p>}
                       {deliverable.scheduled_date && <p>Scheduled: <span className="text-white/70">{formatDate(deliverable.scheduled_date)}</span></p>}
                       {deliverable.due_date && <p>Due: <span className="text-white/70">{formatDate(deliverable.due_date)}</span></p>}
                       {deliverable.notes && <p className="line-clamp-2">Notes: <span className="text-white/60">{deliverable.notes}</span></p>}
@@ -360,7 +360,7 @@ export default function MonthlyPlannerPage() {
 
 function StatBox({ label, value, warn = false }: { label: string; value: string | number; warn?: boolean }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2">
+    <div className="rounded-lg bg-white/[0.025] px-3 py-2">
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
       <p className={`mt-1 text-lg font-black ${warn ? 'text-amber-300' : 'text-white'}`}>{value}</p>
     </div>
@@ -369,7 +369,7 @@ function StatBox({ label, value, warn = false }: { label: string; value: string 
 
 function MiniTotal({ label, total, complete, warn = false }: { label: string; total: number; complete: number; warn?: boolean }) {
   return (
-    <div className="rounded-md border border-white/8 bg-white/[0.025] px-2 py-1">
+    <div className="rounded-md bg-white/[0.025] px-2 py-1">
       <p className="text-white/35">{label}</p>
       <p className={`font-bold ${warn ? 'text-amber-300' : 'text-white/80'}`}>{complete}/{total}</p>
     </div>
