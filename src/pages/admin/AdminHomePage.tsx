@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { PremiumCard } from '../../components/ui/PremiumCard'
@@ -6,9 +7,17 @@ import { Pill } from '../../components/ui/Badges'
 import { EmptyState } from '../../components/ui/States'
 import {
   listTasks,
+  createTask,
+  updateTaskStatus,
+  listActiveClients,
+  PRIORITIES,
+  STATUSES,
   KNOWN_STAFF,
   type CommandCentreTask,
+  type TaskInput,
+  type TaskPriority,
   type TaskStatus,
+  type ClientOption,
 } from '../../lib/commandCentre'
 
 function todayStr() {
@@ -34,13 +43,6 @@ function formatDate(dateStr: string) {
   if (diff === 0) return 'Today'
   if (diff === 1) return 'Tomorrow'
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
-
-function statusTone(s: TaskStatus) {
-  if (s === 'done') return 'teal'
-  if (s === 'in_progress') return 'accent'
-  if (s === 'blocked' || s === 'waiting_client') return 'amber'
-  return 'neutral'
 }
 
 function statusLabel(s: TaskStatus) {
@@ -164,6 +166,8 @@ export default function AdminHomePage() {
   const [loading, setLoading] = useState(true)
   const [tableMissing, setTableMissing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [quickAddMsg, setQuickAddMsg] = useState<string | null>(null)
   const today = todayStr()
 
   async function load() {
@@ -192,6 +196,27 @@ export default function AdminHomePage() {
   }
 
   useEffect(() => { void load() }, [])
+
+  const handleClientRequestStatusChange = useCallback(async (id: string, status: TaskStatus) => {
+    setBusyId(id)
+    try {
+      const { error } = await updateTaskStatus(id, status)
+      if (!error) {
+        setTasks(prev => prev.map(t => {
+          if (t.id !== id) return t
+          const now = new Date().toISOString()
+          return {
+            ...t,
+            status,
+            updated_at: now,
+            completed_at: (status as string) === 'done' ? now : null,
+          }
+        }))
+      }
+    } finally {
+      setBusyId(null)
+    }
+  }, [])
 
   const activeTasks = useMemo(
     () => tasks.filter(t => t.status !== 'done' && t.status !== 'moved_to_tomorrow'),
@@ -327,6 +352,14 @@ export default function AdminHomePage() {
         </>
       ) : (
         <>
+          {/* Quick add task */}
+          <div className="mb-6">
+            <QuickAddCard onTaskCreated={() => { setQuickAddMsg('Task added successfully.'); void load() }} />
+          </div>
+          {quickAddMsg && (
+            <p className="mb-4 text-xs text-[#2dd4bf]">{quickAddMsg}</p>
+          )}
+
           {/* Primary action cards */}
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {PRIMARY_ACTIONS.map(action => (
@@ -371,7 +404,18 @@ export default function AdminHomePage() {
                           <span>· {formatDate(task.due_date)}</span>
                         </div>
                       </div>
-                      <Pill tone={statusTone(task.status)}>{statusLabel(task.status)}</Pill>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <select
+                          value={task.status}
+                          onChange={e => handleClientRequestStatusChange(task.id, e.target.value as TaskStatus)}
+                          disabled={busyId === task.id}
+                          className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
+                        >
+                          {STATUSES.map(s => (
+                            <option key={s} value={s}>{statusLabel(s)}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </PremiumCard>
                 ))}
@@ -409,7 +453,9 @@ export default function AdminHomePage() {
                       <ul className="mt-2 space-y-1">
                         {staff.previewTasks.map((t, i) => (
                           <li key={i} className="truncate text-xs text-brand-primary/80">
-                            {t.client_name ? `${t.client_name} — ` : ''}{t.title}
+                            <Link to="/admin/command-centre" className="hover:text-brand-accent transition-colors">
+                              {t.client_name ? `${t.client_name} — ` : ''}{t.title}
+                            </Link>
                           </li>
                         ))}
                       </ul>
@@ -467,6 +513,148 @@ function PrimaryActionCard({ action }: {
         {action.description}
       </p>
     </Link>
+  )
+}
+
+function QuickAddCard({ onTaskCreated }: {
+  onTaskCreated: () => void
+}) {
+  const [title, setTitle] = useState('')
+  const [clientId, setClientId] = useState('')
+  const [manualClientName, setManualClientName] = useState('')
+  const [assignedName, setAssignedName] = useState('')
+  const [priority, setPriority] = useState<TaskPriority>('normal')
+  const [dueDate, setDueDate] = useState(todayStr())
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    listActiveClients().then(({ data }) => {
+      if (!active) return
+      setClients(data ?? [])
+      setClientsLoading(false)
+    }).catch(() => { if (active) setClientsLoading(false) })
+    return () => { active = false }
+  }, [])
+
+  const isManual = clientId === '__manual__'
+  const selectedClient = clients.find(c => c.id === clientId)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (saving || !title.trim()) return
+    setSaving(true)
+    setError(null)
+    try {
+      const input: TaskInput = {
+        title: title.trim(),
+        client_id: selectedClient?.id ?? null,
+        client_name: isManual ? manualClientName.trim() || null : selectedClient?.name ?? null,
+        assigned_to_name: assignedName.trim() || null,
+        bucket: 'Admin / To Do',
+        priority,
+        status: 'to_do',
+        due_date: dueDate,
+        source: 'manual',
+      }
+      const { error } = await createTask(input)
+      if (error) {
+        setError(error.message)
+        return
+      }
+      setTitle('')
+      setClientId('')
+      setManualClientName('')
+      setAssignedName('')
+      setPriority('normal')
+      setDueDate(todayStr())
+      onTaskCreated()
+    } catch {
+      setError('Could not save task.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <PremiumCard padding="sm">
+      <h2 className="mb-2 text-sm font-semibold text-white">Quick add task</h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-end sm:flex-wrap">
+        <div className="min-w-0 flex-1 sm:min-w-[200px]">
+          <input
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            required
+            placeholder="What needs to be done?"
+            className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={clientId}
+            onChange={e => setClientId(e.target.value)}
+            className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          >
+            <option value="">No client</option>
+            {clientsLoading ? (
+              <option disabled>Loading...</option>
+            ) : (
+              clients.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))
+            )}
+            <option value="__manual__">Manual / other</option>
+          </select>
+          {isManual && (
+            <input
+              value={manualClientName}
+              onChange={e => setManualClientName(e.target.value)}
+              placeholder="Type client name"
+              className="w-36 rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            />
+          )}
+          <select
+            value={assignedName}
+            onChange={e => setAssignedName(e.target.value)}
+            className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          >
+            <option value="">Staff</option>
+            {KNOWN_STAFF.map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+          <select
+            value={priority}
+            onChange={e => setPriority(e.target.value as TaskPriority)}
+            className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          >
+            {PRIORITIES.map(p => (
+              <option key={p} value={p}>{p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}</option>
+            ))}
+          </select>
+          <input
+            type="date"
+            value={dueDate}
+            onChange={e => setDueDate(e.target.value)}
+            className="w-32 rounded-lg border border-brand-muted bg-brand-bg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          />
+          <button
+            type="submit"
+            disabled={saving || !title.trim()}
+            className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-semibold text-brand-bg hover:brightness-110 disabled:opacity-60 transition-all"
+          >
+            {saving ? 'Adding...' : 'Add'}
+          </button>
+        </div>
+        {error && (
+          <p className="w-full text-xs text-red-400">{error}</p>
+        )}
+      </form>
+    </PremiumCard>
   )
 }
 

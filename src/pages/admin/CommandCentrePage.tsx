@@ -4,6 +4,7 @@ import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 import { EmptyState } from '../../components/ui/States'
+import { useAuth } from '../../contexts/AuthContext'
 import {
   listTasks,
   createTask,
@@ -128,12 +129,14 @@ function buildEndOfDay(activeTasks: CommandCentreTask[]) {
 }
 
 export default function CommandCentrePage() {
+  const { profile } = useAuth()
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tableMissing, setTableMissing] = useState(false)
   const [copiedSection, setCopiedSection] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [filterStaff, setFilterStaff] = useState<string>('')
 
   async function load() {
     setLoading(true)
@@ -196,9 +199,19 @@ export default function CommandCentrePage() {
     movedToTomorrow: tasks.filter(t => t.status === 'moved_to_tomorrow').length,
   }), [tasks, activeTasks, today, now])
 
+  const filteredActiveTasks = useMemo(() => {
+    if (!filterStaff) return activeTasks
+    if (filterStaff === '__my__') {
+      const myName = profile?.full_name ?? ''
+      if (KNOWN_STAFF.includes(myName)) return activeTasks.filter(t => t.assigned_to_name === myName)
+      return activeTasks.filter(t => t.assigned_to_name === profile?.full_name)
+    }
+    return activeTasks.filter(t => t.assigned_to_name === filterStaff)
+  }, [activeTasks, filterStaff, profile])
+
   const staffGroups = useMemo(() => {
     const groups = new Map<string, CommandCentreTask[]>()
-    for (const t of activeTasks) {
+    for (const t of filteredActiveTasks) {
       const name = t.assigned_to_name ?? 'Unassigned'
       if (!groups.has(name)) groups.set(name, [])
       groups.get(name)!.push(t)
@@ -213,7 +226,7 @@ export default function CommandCentrePage() {
       if (b === 'Unassigned') return -1
       return a.localeCompare(b)
     })
-  }, [activeTasks])
+  }, [filteredActiveTasks])
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
     setBusyId(id)
@@ -245,7 +258,19 @@ export default function CommandCentrePage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <p className="text-sm text-brand-primary">Loading...</p>
+        <div className="mb-6">
+          <div className="h-4 w-32 animate-pulse rounded-lg bg-white/10" />
+          <div className="mt-3 h-8 w-64 animate-pulse rounded-lg bg-white/10" />
+        </div>
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="h-20 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
+          ))}
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="h-64 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
+          <div className="h-64 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
+        </div>
       </div>
     )
   }
@@ -290,6 +315,41 @@ export default function CommandCentrePage() {
         <StatCard label="Blocked" value={stats.blocked} amber />
         <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
         <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} />
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setFilterStaff('')}
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+            !filterStaff
+              ? 'bg-brand-accent text-brand-bg'
+              : 'border border-brand-muted text-brand-primary hover:text-white'
+          }`}
+        >
+          All tasks
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilterStaff('__my__')}
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+            filterStaff === '__my__'
+              ? 'bg-brand-accent text-brand-bg'
+              : 'border border-brand-muted text-brand-primary hover:text-white'
+          }`}
+        >
+          My tasks
+        </button>
+        <select
+          value={filterStaff !== '__my__' && filterStaff !== '' ? filterStaff : ''}
+          onChange={e => setFilterStaff(e.target.value || '')}
+          className="rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+        >
+          <option value="">All staff</option>
+          {KNOWN_STAFF.map(name => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
       </div>
 
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
