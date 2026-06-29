@@ -133,6 +133,8 @@ dist
 # Only used locally to update docs/code/SQL; never committed
 docs/planner-exports/
 docs/cgbrand-examples/
+docs/planner-screenshots/
+scripts/generated/
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test

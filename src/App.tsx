@@ -30,6 +30,7 @@ import AssistantPage from './pages/admin/AssistantPage'
 import PlannerPage from './pages/admin/PlannerPage'
 import PackageMasterPage from './pages/admin/PackageMasterPage'
 import MonthlyPlannerPage from './pages/admin/MonthlyPlannerPage'
+import PlannerImportPage from './pages/admin/PlannerImportPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -96,6 +97,7 @@ export default function App() {
                 <Route path="/admin/users" element={<UsersHub />} />
                 {/* Legacy deep link kept working. */}
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
+                <Route path="/admin/planner-import" element={<PlannerImportPage />} />
               </Route>
             </Route>
           </Route>

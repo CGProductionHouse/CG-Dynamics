@@ -730,5 +730,73 @@ Do not build the importer yet. The import mapping is documented here for when da
 - Year planner and bulk month operations
 - WhatsApp API and AI assignment automation
 
+### Phase 6E — Teams Planner Import Foundation
+
+**Status:** ✅ Foundation complete; dry-run only by default
+
+| Item | Detail |
+|---|---|
+| Script | `scripts/import-planner-exports.mjs` |
+| Dry-run | `node scripts/import-planner-exports.mjs --mode dry-run` |
+| SQL preview | `node scripts/import-planner-exports.mjs --mode generate-sql` |
+| JSON output | `scripts/generated/planner-import-preview.json` (gitignored) |
+| SQL output | `scripts/generated/planner-import-preview.sql` (gitignored) |
+| Migration | `supabase/phase-6e-teams-planner-import.sql` adds `planner_tasks` for non-package Planner tasks |
+| Admin route | `/admin/planner-import` shows local run instructions; no production import button |
+
+#### Source files
+- `docs/planner-exports/2025 CLIENTS SCHEDULE.xlsx`
+- `docs/planner-exports/To Do.xlsx`
+- `docs/planner-exports/Client Websites.xlsx`
+- `docs/planner-exports/ADMIN CHECK LIST.xlsx`
+
+These files are local-only references and must not be committed.
+
+#### Client Schedule mapping
+- Buckets are treated as client names.
+- Client matching uses existing `clients.name` only, with safe normalised matching.
+- No duplicate clients are created.
+- Unknown client buckets are flagged for manual review.
+- Known package content codes are imported only when detected:
+- `DP1`, `DP2`, etc. → `dp`
+- `F1`, `F2`, etc. → `photo`
+- `Video 1`, `Video 2`, etc. → `video`
+- `Reel 1`, `Reel 2`, etc. → `reel`
+- Unknown card types are warnings, not package templates.
+
+#### Package import rule
+- Create one active `Monthly Content Package` per matched client only if no active package exists.
+- Generate package templates from detected quantities.
+- Generate monthly deliverables by task due/start month.
+- Each month remains independent.
+- Inserts are idempotent using existing unique constraints and `on conflict do nothing`.
+
+#### Generic Planner task mapping
+- `To Do.xlsx` imports to `planner_tasks` under Operations.
+- `Client Websites.xlsx` imports to `planner_tasks` under Client Websites.
+- `ADMIN CHECK LIST.xlsx` imports to `planner_tasks` under the admin-only board.
+- Admin board tasks stay protected by board visibility and RLS.
+
+#### Simplified status mapping
+- Not started → `to_do`
+- In progress → `in_progress`
+- Ready for review → `ready_internal_review`
+- Awaiting client approval → `ready_client_approval`
+- Meta Drafts → `approved`
+- Scheduled / Posted → `scheduled`
+
+#### Dry-run first rule
+- Always run `--mode dry-run` first.
+- Review `planner-import-preview.json` for unmatched clients and warnings.
+- Then run `--mode generate-sql`.
+- Review generated SQL manually before running it in Supabase.
+- The script does not apply SQL automatically.
+
+#### Manual review still needed
+- Unmatched client bucket names.
+- Client Schedule cards that are not DP/F/Video/Reel.
+- Tasks with missing due/start dates where month cannot be inferred.
+- Completed operational tasks where Planner status does not clearly mean scheduled/posted.
+
 ### Next step
-**Phase 6E — Calendar View and approval workflow foundations.**
+**Phase 6F — Calendar View and approval workflow foundations.**
