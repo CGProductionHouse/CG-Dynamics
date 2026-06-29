@@ -22,7 +22,13 @@ import {
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
-const TYPE_LABELS = PACKAGE_DELIVERABLE_LABELS
+const TYPE_LABELS = {
+  ...PACKAGE_DELIVERABLE_LABELS,
+  dp: 'DP',
+  photo: 'F',
+  video: 'Video',
+  reel: 'Reel',
+}
 
 const DISPLAY_TYPES: DeliverableType[] = ['dp', 'photo', 'video', 'reel']
 
@@ -206,18 +212,19 @@ export default function MonthlyPlannerPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
       <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-white">Monthly Planner</h1>
-          <p className="mt-1 text-sm text-white/45">Monthly package tracker.</p>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Planner</p>
+          <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Monthly Planner</h1>
+          <p className="mt-1 text-sm text-brand-primary/75">Schedule monthly content work.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setSelectedMonth(shiftMonth(selectedMonth, -1))}
-            className="rounded-lg bg-white/[0.035] px-3 py-2 text-xs font-semibold text-white/60 hover:text-white"
+            className="rounded-md bg-white/[0.05] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
           >
             Previous
           </button>
@@ -225,12 +232,12 @@ export default function MonthlyPlannerPage() {
             type="month"
             value={selectedMonth}
             onChange={event => setSelectedMonth(event.target.value)}
-            className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-semibold text-white outline-none focus:border-brand-accent/50"
+            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-accent/50"
           />
           <button
             type="button"
             onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))}
-            className="rounded-lg bg-white/[0.035] px-3 py-2 text-xs font-semibold text-white/60 hover:text-white"
+            className="rounded-md bg-white/[0.05] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
           >
             Next
           </button>
@@ -248,7 +255,7 @@ export default function MonthlyPlannerPage() {
         </div>
       )}
 
-      <div className="mb-3 grid gap-2 rounded-xl bg-white/[0.025] p-3 md:grid-cols-4">
+      <div className="mb-3 grid gap-2 rounded-xl border border-white/8 bg-white/[0.035] p-3 md:grid-cols-4">
         <select
           value={clientFilter}
           onChange={event => setClientFilter(event.target.value)}
@@ -303,7 +310,7 @@ export default function MonthlyPlannerPage() {
       ) : (
         <div className="space-y-3">
           {groupedDeliverables.map(group => (
-            <section key={group.clientId} className="rounded-xl bg-white/[0.025] p-3">
+            <section key={group.clientId} className="rounded-xl border border-white/8 bg-white/[0.03] p-3">
               <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h2 className="text-base font-bold text-white">{group.clientName}</h2>
@@ -319,7 +326,7 @@ export default function MonthlyPlannerPage() {
 
               <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                 {group.items.map(deliverable => (
-                  <article key={deliverable.id} className="rounded-lg bg-brand-bg/70 p-3">
+                  <article key={deliverable.id} className="rounded-lg border border-white/8 bg-black/35 p-3">
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">

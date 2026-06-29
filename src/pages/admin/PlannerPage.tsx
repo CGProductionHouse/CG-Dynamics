@@ -1,5 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
+import { useAuth } from '../../contexts/AuthContext'
 import {
   listPlannerBoards,
   listPlannerBuckets,
@@ -45,6 +47,8 @@ const BOARD_ICONS: Record<string, ReactNode> = {
 }
 
 export default function PlannerPage() {
+  const { profile } = useAuth()
+  const isAdmin = profile?.role === 'admin'
   const [boards, setBoards] = useState<PlannerBoard[]>([])
   const [buckets, setBuckets] = useState<PlannerBucket[]>([])
   const [activeBoard, setActiveBoard] = useState<string | null>(null)
@@ -133,10 +137,29 @@ export default function PlannerPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="text-xl font-black tracking-tight text-white">CG Planner</h1>
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Schedule</p>
+          <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Planner</h1>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/admin/monthly-planner"
+            className="rounded-md border border-white/10 bg-white/[0.05] px-3 py-2 text-sm font-bold text-brand-primary transition hover:border-brand-accent/40 hover:text-white"
+          >
+            Monthly Planner
+          </Link>
+          {isAdmin && (
+            <Link
+              to="/admin/planner-import"
+              className="rounded-md bg-brand-accent px-3 py-2 text-sm font-bold text-black transition hover:brightness-110"
+            >
+              Import
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Board tabs — Teams Planner style */}
@@ -151,7 +174,7 @@ export default function PlannerPage() {
               onClick={() => setActiveBoard(board.slug)}
               className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 isActive
-                  ? 'bg-brand-accent/15 text-brand-accent shadow-sm'
+                  ? 'bg-brand-accent text-black shadow-sm'
                   : 'text-white/55 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
@@ -184,8 +207,8 @@ export default function PlannerPage() {
                 </h3>
                 <span className="text-[11px] text-white/25">0</span>
               </div>
-              <div className="min-h-[15rem] rounded-lg bg-white/[0.025] p-2.5">
-                <p className="pt-5 text-center text-xs text-white/25">
+              <div className="min-h-[15rem] rounded-lg border border-white/8 bg-white/[0.025] p-2.5">
+                <p className="pt-5 text-center text-xs text-white/35">
                   Empty
                 </p>
               </div>

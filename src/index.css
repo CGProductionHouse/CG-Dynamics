@@ -10,8 +10,22 @@
 
 body {
   margin: 0;
-  background-color: #0a1412;
+  background:
+    radial-gradient(circle at 18% -10%, rgba(200, 121, 42, 0.18), transparent 28rem),
+    linear-gradient(180deg, #0b0a09 0%, #070707 42%, #050505 100%);
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #f7f2ea;
+}
+
+::selection {
+  background: rgba(200, 121, 42, 0.35);
+  color: #fff;
+}
+
+input,
+select,
+textarea {
+  color-scheme: dark;
 }

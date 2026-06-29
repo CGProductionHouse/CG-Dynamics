@@ -23,7 +23,13 @@ import {
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
-const TYPE_LABELS = PACKAGE_DELIVERABLE_LABELS
+const TYPE_LABELS = {
+  ...PACKAGE_DELIVERABLE_LABELS,
+  dp: 'DP (Designed Poster)',
+  photo: 'F (Photo)',
+  video: 'Video',
+  reel: 'Reel',
+}
 
 const MAIN_TYPE_META: Record<DeliverableType, { short: string; codePrefix: string; titlePrefix: string }> = {
   dp: { short: 'DP', codePrefix: 'DP', titlePrefix: 'DP' },
@@ -52,10 +58,10 @@ const DEFAULT_QUANTITIES: Record<DeliverableType, number> = {
 }
 
 const QUANTITY_FIELDS: { type: DeliverableType; label: string }[] = [
-  { type: 'dp', label: 'DP quantity' },
-  { type: 'photo', label: 'F quantity' },
-  { type: 'video', label: 'Video quantity' },
-  { type: 'reel', label: 'Reel quantity' },
+  { type: 'dp', label: 'DP' },
+  { type: 'photo', label: 'F' },
+  { type: 'video', label: 'Video' },
+  { type: 'reel', label: 'Reel' },
 ]
 
 function filterActive<T extends { active?: boolean }>(items: T[]): T[] {
@@ -322,7 +328,7 @@ export default function PackageMasterPage() {
   if (tableMissing) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-6 text-xl font-black tracking-tight text-white">Package Master</h1>
+        <h1 className="mb-6 text-xl font-black tracking-tight text-white">Package</h1>
         <EmptyState
           title="Planner tables not set up"
           message="Run the Phase 6 migrations to enable package management."
@@ -332,10 +338,11 @@ export default function PackageMasterPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 lg:px-8">
       <div className="mb-5">
-        <h1 className="text-3xl font-black tracking-tight text-white">Package Master</h1>
-        <p className="mt-1 text-sm text-white/45">Set the package.</p>
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Client workflow</p>
+        <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Package</h1>
+        <p className="mt-1 text-sm text-brand-primary/75">Set monthly quantities.</p>
       </div>
 
       {/* Client selector */}
@@ -383,7 +390,7 @@ export default function PackageMasterPage() {
       ) : (
         <>
           {/* Client header */}
-          <div className="mb-5 flex items-center justify-between rounded-xl bg-white/[0.03] px-4 py-3">
+          <div className="mb-5 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.035] px-4 py-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35">Selected</p>
               <h2 className="text-lg font-bold text-white">{selectedClient.name}</h2>
@@ -506,26 +513,27 @@ export default function PackageMasterPage() {
           {currentPackage && (
             <div className="mb-6">
               <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
+                <div className="rounded-lg border border-white/8 bg-white/[0.035] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.dp}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">DP (Designed Poster)</p>
                 </div>
-                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
+                <div className="rounded-lg border border-white/8 bg-white/[0.035] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.photo}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">F (Photo)</p>
                 </div>
-                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
+                <div className="rounded-lg border border-white/8 bg-white/[0.035] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.video}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Video</p>
                 </div>
-                <div className="rounded-lg bg-white/[0.025] p-3 text-center">
+                <div className="rounded-lg border border-white/8 bg-white/[0.035] p-3 text-center">
                   <p className="text-xl font-semibold text-white">{templateStats.reel}</p>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">Reel</p>
                 </div>
               </div>
 
               {isAdmin && (
-                <div className="mb-4 rounded-xl bg-white/[0.025] p-3">
+                <div className="mb-4 rounded-xl border border-white/8 bg-white/[0.035] p-4">
+                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-white">Monthly quantities</h3>
                   <div className="grid gap-2 sm:grid-cols-4">
                     {QUANTITY_FIELDS.map(field => (
                       <label key={field.type} className="block">
@@ -545,7 +553,7 @@ export default function PackageMasterPage() {
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <ActionButton size="sm" onClick={savePackageQuantities} loading={quantitySaving}>
-                      Save Quantities
+                      Save
                     </ActionButton>
                     {quantityMessage && <span className="text-xs text-brand-accent">{quantityMessage}</span>}
                   </div>
@@ -559,7 +567,7 @@ export default function PackageMasterPage() {
                     onClick={() => setCreateTplOpen(!createTplOpen)}
                     className="rounded-lg bg-brand-accent/10 px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-accent/15 transition-colors"
                   >
-                    {createTplOpen ? 'Hide advanced' : 'Advanced template'}
+                    {createTplOpen ? 'Hide advanced' : 'Advanced'}
                   </button>
                 )}
               </div>

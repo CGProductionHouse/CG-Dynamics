@@ -3,14 +3,15 @@ import { ActionButton } from '../../components/ui/Buttons'
 
 export default function PlannerImportPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-black tracking-tight text-white">Planner Import</h1>
-        <p className="mt-1 text-sm text-white/45">Dry-run first. Review SQL before running.</p>
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Planner</p>
+        <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Import</h1>
+        <p className="mt-1 text-sm text-brand-primary/75">Dry-run first. Review SQL before running.</p>
       </div>
 
       <div className="space-y-4">
-        <section className="rounded-xl bg-white/[0.03] p-4">
+        <section className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
           <h2 className="text-base font-bold text-white">Excel files</h2>
           <p className="mt-1 text-sm text-white/50">Place exports in `docs/planner-exports/`.</p>
           <ul className="mt-3 space-y-1 text-sm text-white/60">
@@ -21,7 +22,7 @@ export default function PlannerImportPage() {
           </ul>
         </section>
 
-        <section className="rounded-xl bg-white/[0.03] p-4">
+        <section className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
           <h2 className="text-base font-bold text-white">Commands</h2>
           <div className="mt-3 space-y-2 text-sm">
             <code className="block rounded-lg bg-brand-bg px-3 py-2 text-white/80">node scripts/import-planner-exports.mjs --mode dry-run</code>
@@ -38,7 +39,7 @@ export default function PlannerImportPage() {
 
         <div className="flex flex-wrap gap-2">
           <Link to="/admin/planner"><ActionButton variant="outline" size="sm">Planner</ActionButton></Link>
-          <Link to="/admin/package-master"><ActionButton variant="outline" size="sm">Package Master</ActionButton></Link>
+          <Link to="/admin/package-master"><ActionButton variant="outline" size="sm">Package</ActionButton></Link>
           <Link to="/admin/monthly-planner"><ActionButton variant="outline" size="sm">Monthly Planner</ActionButton></Link>
         </div>
       </div>

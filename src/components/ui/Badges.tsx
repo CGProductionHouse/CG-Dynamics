@@ -10,11 +10,11 @@ type StatusVariant =
   | 'default'
 
 const STATUS_STYLES: Record<StatusVariant, string> = {
-  published: 'bg-brand-accent/20 text-brand-accent border-brand-accent/30',
+  published: 'bg-brand-teal/18 text-[#66d0c3] border-brand-teal/30',
   'ready-to-publish': 'bg-sky-300/15 text-sky-200 border-sky-300/30',
   'needs-strategy': 'bg-amber-400/15 text-amber-300 border-amber-400/30',
-  'internal-draft': 'bg-brand-muted text-brand-primary border-brand-muted/50',
-  'incomplete-month': 'bg-brand-muted text-brand-primary border-brand-muted/50',
+  'internal-draft': 'bg-white/[0.06] text-brand-primary border-white/10',
+  'incomplete-month': 'bg-white/[0.06] text-brand-primary border-white/10',
   'needs-repair': 'bg-amber-400/15 text-amber-300 border-amber-400/30',
   default: 'bg-brand-muted text-brand-primary border-brand-muted/50',
 }
@@ -40,8 +40,8 @@ export function StatusBadge({ label, variant = 'default', className = '', size =
 export type SourceVariant = 'meta' | 'manual' | 'mixed' | 'none'
 
 const SOURCE_STYLES: Record<SourceVariant, string> = {
-  meta: 'bg-sky-400/15 text-sky-300 border-sky-400/30',
-  manual: 'bg-brand-muted text-brand-primary border-brand-muted/50',
+  meta: 'bg-brand-teal/15 text-[#66d0c3] border-brand-teal/30',
+  manual: 'bg-white/[0.06] text-brand-primary border-white/10',
   mixed: 'bg-amber-400/15 text-amber-300 border-amber-400/30',
   none: 'bg-brand-muted/50 text-brand-primary/60 border-brand-muted/30',
 }
@@ -91,14 +91,14 @@ export function ReadinessBadge({ ready, className = '', size = 'sm' }: Readiness
   if (ready) {
     return (
       <span className={`${baseClasses} ${sizeClasses} bg-brand-accent/20 text-brand-accent border-brand-accent/30 ${className}`}>
-        Ready to publish
+        Ready for review
       </span>
     )
   }
 
     return (
       <span className={`${baseClasses} ${sizeClasses} bg-amber-400/15 text-amber-300 border-amber-400/30 ${className}`}>
-        Needs CG action plan
+        Needs action
       </span>
     )
 }
@@ -111,10 +111,10 @@ interface PillProps {
 
 export function Pill({ children, tone = 'neutral', className = '' }: PillProps) {
   const tones = {
-    neutral: 'border-white/10 bg-white/[0.06] text-slate-300',
-    teal: 'border-[#2dd4bf]/20 bg-[#2dd4bf]/10 text-[#2dd4bf]',
-    amber: 'border-[#f97316]/20 bg-[#f97316]/10 text-[#fbbf24]',
-    accent: 'border-brand-accent/20 bg-brand-accent/10 text-brand-accent',
+    neutral: 'border-white/10 bg-white/[0.06] text-brand-primary',
+    teal: 'border-brand-teal/25 bg-brand-teal/12 text-[#66d0c3]',
+    amber: 'border-brand-accent/25 bg-brand-accent/12 text-[#f2b66f]',
+    accent: 'border-brand-accent/25 bg-brand-accent/12 text-[#f2b66f]',
   }
 
   return (

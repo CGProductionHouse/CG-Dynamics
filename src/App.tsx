@@ -49,7 +49,7 @@ function HomeRedirect() {
   }
   if (!profile) return <div className="min-h-screen bg-brand-bg" />
   if (profile.role === 'client') return <Navigate to="/dashboard" replace />
-  return <Navigate to="/admin" replace />
+  return <Navigate to="/admin/cg-hub" replace />
 }
 
 export default function App() {

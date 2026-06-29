@@ -21,13 +21,13 @@ export function ActionButton({
   className = '',
   ...props
 }: ActionButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg disabled:opacity-60 disabled:cursor-not-allowed'
+  const baseClasses = 'inline-flex items-center justify-center font-bold rounded-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg disabled:opacity-60 disabled:cursor-not-allowed'
 
   const variantClasses = {
-    primary: 'bg-brand-accent text-brand-bg hover:brightness-110',
-    secondary: 'border border-brand-muted bg-brand-muted/50 text-brand-primary hover:text-white hover:border-white/30',
-    outline: 'border border-brand-accent bg-brand-accent/10 text-brand-accent hover:bg-brand-accent/20',
-    ghost: 'text-brand-primary hover:text-white hover:bg-white/[0.05]',
+    primary: 'bg-brand-accent text-black shadow-[0_8px_24px_rgba(200,121,42,0.18)] hover:brightness-110',
+    secondary: 'border border-white/10 bg-white/[0.06] text-white hover:border-brand-accent/45 hover:bg-white/[0.09]',
+    outline: 'border border-brand-accent/55 bg-brand-accent/10 text-[#f2b66f] hover:bg-brand-accent/18',
+    ghost: 'text-brand-primary hover:text-white hover:bg-white/[0.06]',
     danger: 'border border-red-400/30 bg-red-400/10 text-red-300 hover:bg-red-400/20',
   }
 
@@ -72,8 +72,8 @@ export function IconButton({ children, variant = 'ghost', size = 'md', ariaLabel
   const baseClasses = 'inline-flex items-center justify-center rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg'
 
   const variantClasses = {
-    primary: 'bg-brand-accent text-brand-bg hover:brightness-110',
-    secondary: 'border border-brand-muted bg-brand-muted/50 text-brand-primary hover:text-white hover:border-white/30',
+    primary: 'bg-brand-accent text-black hover:brightness-110',
+    secondary: 'border border-white/10 bg-white/[0.06] text-brand-primary hover:text-white hover:border-brand-accent/45',
     ghost: 'text-brand-primary hover:text-white hover:bg-white/[0.05]',
     danger: 'border border-red-400/30 bg-red-400/10 text-red-300 hover:bg-red-400/20',
   }

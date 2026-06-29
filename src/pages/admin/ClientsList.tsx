@@ -235,11 +235,11 @@ export default function ClientsList() {
   }
 
   return (
-    <div className="w-full max-w-6xl p-4 sm:p-6 lg:p-8">
+    <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Client management</p>
-          <h1 className="text-xl font-semibold text-white">Clients</h1>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f] mb-2">Client management</p>
+          <h1 className="font-display text-4xl font-black uppercase tracking-wide text-white">Clients</h1>
         </div>
         {isAdmin && (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
@@ -249,40 +249,18 @@ export default function ClientsList() {
         )}
       </div>
 
-      <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <section className="mb-5 grid grid-cols-3 gap-2 lg:max-w-2xl">
         {([
           ['Total clients', overview.totalClients],
           ['Published reports', overview.publishedReports],
           ['Draft reports', overview.draftReports],
         ] as const).map(([label, value]) => (
-          <PremiumCard key={label} padding="sm">
-            <p className="text-[11px] uppercase tracking-[0.12em] text-brand-primary">{label}</p>
-            <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+          <PremiumCard key={label} padding="sm" className="bg-white/[0.035]">
+            <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/70">{label}</p>
+            <p className="mt-2 text-2xl font-black text-white">{value}</p>
           </PremiumCard>
         ))}
       </section>
-
-      <PremiumCard padding="sm" className="mb-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-white">Quick actions</h2>
-            <p className="mt-1 text-xs text-brand-primary">
-              Open the normal client workflow.
-            </p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap">
-            {isAdmin && (
-              <>
-                <QuickLink to="/admin/integrations/meta" label="Sync Meta" primary />
-                <QuickLink to="/admin/reports" label="Reports" />
-                <QuickLink to="/admin/package-master" label="Package Master" />
-                <QuickLink to="/admin/monthly-planner" label="Monthly Planner" />
-              </>
-            )}
-            <QuickLink to="/admin/published" label="Client preview" />
-          </div>
-        </div>
-      </PremiumCard>
 
       {packageNotice && (
         <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2">
@@ -303,14 +281,14 @@ export default function ClientsList() {
         <p className="text-red-400 text-sm">{error}</p>
       ) : (
         <>
-          <div className="mb-4 flex w-fit gap-1 rounded-lg border border-brand-muted bg-brand-surface p-1">
+          <div className="mb-4 flex w-fit gap-1 rounded-md border border-white/10 bg-white/[0.04] p-1">
             {(['active', 'archived', 'all'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setViewFilter(f)}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
                   viewFilter === f
-                    ? 'bg-brand-accent text-brand-bg'
+                    ? 'bg-brand-accent text-black'
                     : 'text-brand-primary hover:text-white'
                 }`}
               >
@@ -364,13 +342,13 @@ export default function ClientsList() {
             )}
           </div>
 
-          <div className="hidden bg-brand-surface border border-brand-muted rounded-xl overflow-hidden md:block">
+          <div className="hidden overflow-hidden rounded-xl border border-white/10 bg-brand-surface/90 md:block">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-brand-muted text-left">
-                  <th className="px-4 py-3 text-brand-primary font-medium">Client</th>
-                  <th className="px-4 py-3 text-brand-primary font-medium">Tier</th>
-                  <th className="px-4 py-3 text-brand-primary font-medium">Status</th>
+                <tr className="border-b border-white/10 bg-white/[0.025] text-left">
+                  <th className="px-4 py-3 text-brand-primary/80 font-bold">Client</th>
+                  <th className="px-4 py-3 text-brand-primary/80 font-bold">Tier</th>
+                  <th className="px-4 py-3 text-brand-primary/80 font-bold">Status</th>
                   {isAdmin && <th className="px-4 py-3" />}
                 </tr>
               </thead>
@@ -391,7 +369,7 @@ export default function ClientsList() {
                   displayClients.map(c => (
                     <tr
                       key={c.id}
-                      className="border-b border-brand-muted last:border-0 hover:bg-brand-muted/20 transition-colors"
+                      className="border-b border-white/8 last:border-0 hover:bg-white/[0.035] transition-colors"
                     >
                       <td className="px-4 py-3 text-white font-medium">
                         <div className="flex items-center gap-3">
@@ -413,8 +391,8 @@ export default function ClientsList() {
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             {c.active ? (
                               <>
-                                <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Sync Meta" primary />
-                                <ClientActionLink to={`/admin/reports?client=${c.id}`} label="Reports" />
+                                <ClientActionLink to={`/admin/reports?client=${c.id}`} label="Reports" primary />
+                                <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Sync" />
                                 <ClientActionLink to={`/admin/package-master?client=${c.id}`} label="Package" />
                                 <ClientActionLink to={`/admin/monthly-planner?client=${c.id}`} label="Monthly Planner" />
                                 <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
@@ -467,37 +445,21 @@ export default function ClientsList() {
   )
 }
 
-function QuickLink({ to, label, primary = false }: { to: string; label: string; primary?: boolean }) {
-  const classes = primary
-    ? 'border-brand-accent bg-brand-accent text-brand-bg'
-    : 'border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
-
-  return (
-    <Link
-      to={to}
-      className={`rounded-lg border px-3 py-2.5 text-center text-sm font-semibold transition ${classes}`}
-    >
-      {label}
-    </Link>
-  )
-}
-
 // Compact per-client action chip. Meta sync is the primary action; the rest are
 // secondary links into the reporting workflow.
 function ClientActionLink({ to, label, primary = false }: { to: string; label: string; primary?: boolean }) {
   const classes = primary
-    ? 'border-brand-accent bg-brand-accent text-brand-bg'
-    : 'border-brand-muted text-brand-primary hover:text-white hover:border-white/30'
+    ? 'border-brand-accent bg-brand-accent text-black'
+    : 'border-white/10 bg-white/[0.04] text-brand-primary hover:text-white hover:border-brand-accent/40'
 
   return (
-    <Link to={to} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${classes}`}>
+    <Link to={to} className={`rounded-md border px-3 py-1.5 text-xs font-bold transition ${classes}`}>
       {label}
     </Link>
   )
 }
 
-// Per-client workflow actions, in priority order: Sync Meta, Reports, Package,
-// Monthly Planner, Edit client.
+// Per-client workflow actions: Reports, Sync, Package, Monthly Planner, Edit.
 function ClientQuickActions({
   client,
   isAdmin,
@@ -510,17 +472,17 @@ function ClientQuickActions({
   return (
     <div className="mt-4 flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
-        {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Sync Meta" primary />}
-        <ClientActionLink to={`/admin/reports?client=${client.id}`} label="Reports" />
+        <ClientActionLink to={`/admin/reports?client=${client.id}`} label="Reports" primary />
+        {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Sync" />}
         <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
         <ClientActionLink to={`/admin/monthly-planner?client=${client.id}`} label="Monthly Planner" />
         {isAdmin && (
           <button
             type="button"
             onClick={onEdit}
-            className="rounded-lg border border-brand-muted px-3 py-1.5 text-xs font-semibold text-brand-primary transition hover:border-white/30 hover:text-white"
+            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-brand-primary transition hover:border-brand-accent/40 hover:text-white"
           >
-            Edit client
+            Edit
           </button>
         )}
       </div>
@@ -677,10 +639,10 @@ function ClientModal({
               Deliverables included each month. These drive the report action plan.
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <PackageNumber label="Professional videos" value={pkg.professional_videos_per_month} onChange={v => setPkgNum('professional_videos_per_month', v)} />
-              <PackageNumber label="Reels" value={pkg.reels_per_month} onChange={v => setPkgNum('reels_per_month', v)} />
-              <PackageNumber label="Photo posts" value={pkg.photo_posts_per_month} onChange={v => setPkgNum('photo_posts_per_month', v)} />
-              <PackageNumber label="Design posters" value={pkg.design_posters_per_month} onChange={v => setPkgNum('design_posters_per_month', v)} />
+              <PackageNumber label="Video" value={pkg.professional_videos_per_month} onChange={v => setPkgNum('professional_videos_per_month', v)} />
+              <PackageNumber label="Reel" value={pkg.reels_per_month} onChange={v => setPkgNum('reels_per_month', v)} />
+              <PackageNumber label="F (Photo)" value={pkg.photo_posts_per_month} onChange={v => setPkgNum('photo_posts_per_month', v)} />
+              <PackageNumber label="DP (Designed Poster)" value={pkg.design_posters_per_month} onChange={v => setPkgNum('design_posters_per_month', v)} />
               <PackageNumber label="Animated posters" value={pkg.animated_posters_per_month} onChange={v => setPkgNum('animated_posters_per_month', v)} />
               <PackageNumber label="Shoot days" value={pkg.shoot_days_per_month} onChange={v => setPkgNum('shoot_days_per_month', v)} />
             </div>

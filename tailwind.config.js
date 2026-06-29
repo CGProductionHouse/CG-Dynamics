@@ -7,30 +7,29 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        display: ['Fraunces', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        sans: ['Inter', 'Arial Narrow', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        display: ['Inter', 'Arial Narrow', 'Impact', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         brand: {
-          primary: '#0f766e',   // teal-700 — flat logo color
-          accent:  '#2dd4bf',   // teal-400 — glowing highlight
-          bg:      '#0a1412',   // near-black with teal undertone
-          surface: '#0f1f1c',   // card / panel background
-          muted:   '#134e4a',   // subtle borders / dividers
+          primary: '#d7d2c8',
+          accent: '#c8792a',
+          bg: '#070707',
+          surface: '#11100e',
+          muted: '#2a2520',
+          teal: '#2a8f83',
         },
-        // Warm, premium, editorial palette used ONLY by the client-facing
-        // report. Kept separate from `brand` so admin/auth styling is untouched.
         report: {
-          bg:        '#1a1512',  // deep warm charcoal
-          surface:   '#241e19',  // warm neutral card
-          elevated:  '#2d2620',  // slightly raised surface
-          line:      '#3a322a',  // very subtle warm divider
-          text:      '#f3ede4',  // soft warm off-white
-          muted:     '#aaa093',  // warm grey secondary text
-          faint:     '#80776a',  // faint tertiary text
-          accent:    '#6fb3a5',  // muted teal accent (not neon)
+          bg: '#1a1512',
+          surface: '#241e19',
+          elevated: '#2d2620',
+          line: '#3a322a',
+          text: '#f3ede4',
+          muted: '#aaa093',
+          faint: '#80776a',
+          accent: '#6fb3a5',
           'accent-deep': '#2f4a44',
-          sand:      '#d8b48a',  // soft warm highlight for gradients
+          sand: '#d8b48a',
         },
       },
     },
