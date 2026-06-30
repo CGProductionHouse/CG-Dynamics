@@ -1338,6 +1338,16 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
               <p className="mt-2 text-[11px] text-brand-primary/40">After migration phase-7a</p>
             </div>
           )}
+
+          <div className="rounded-lg border border-white/[0.06] bg-brand-surface/40 px-3 py-2.5">
+            <p className="mb-2 text-xs font-medium text-brand-primary">Timer</p>
+            <div className="flex items-center gap-2">
+              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Start</button>
+              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Pause</button>
+              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Stop</button>
+            </div>
+            <p className="mt-1.5 text-[11px] text-brand-primary/40">After migration</p>
+          </div>
         </div>
 
         <div className="border-t border-white/[0.08] px-5 py-4">

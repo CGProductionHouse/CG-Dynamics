@@ -796,6 +796,16 @@ function DeliverableDetailDrawer({
               </div>
             </div>
           )}
+
+          <div className="border-t border-white/[0.06] pt-4">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Timer</p>
+            <div className="flex items-center gap-2">
+              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/[0.08] px-3 py-1.5 text-xs text-white/25">Start</button>
+              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/[0.08] px-3 py-1.5 text-xs text-white/25">Pause</button>
+              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/[0.08] px-3 py-1.5 text-xs text-white/25">Stop</button>
+            </div>
+            <p className="mt-1.5 text-[10px] text-white/20">After migration</p>
+          </div>
         </div>
 
         <div className="border-t border-white/[0.08] px-5 py-3">
