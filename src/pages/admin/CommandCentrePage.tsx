@@ -667,7 +667,7 @@ function TaskRow({ task, busyId, onStatusChange }: {
               <span className="text-sm font-semibold text-white">{task.title}</span>
               {task.priority !== 'normal' && (
                 <Pill tone={priorityColor(task.priority)}>
-                  {task.priority === 'urgent' ? 'Urgent' : 'Client req'}
+                  {task.priority === 'urgent' ? 'Urgent' : task.source === 'whatsapp_paste' ? 'Client req · WA' : 'Client req'}
                 </Pill>
               )}
             </div>

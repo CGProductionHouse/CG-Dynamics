@@ -520,6 +520,8 @@ export default function MonthlyPlannerPage() {
                           </select>
                         )
                       )}
+
+                      {isAdmin && <PackageActionMenu />}
                     </article>
                   )
                 })}
@@ -555,5 +557,46 @@ function SourceChip({ source }: { source: DeliverableSource }) {
     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SOURCE_CHIP_STYLE[source]}`}>
       {SOURCE_LABEL[source]}
     </span>
+  )
+}
+
+const PACKAGE_ACTIONS = [
+  { value: 'use_slot', label: 'Use package slot' },
+  { value: 'addon', label: 'Mark as add-on' },
+  { value: 'move_work', label: 'Move to another month' },
+] as const
+
+// Placeholder menu — reserves the workflow position.
+// Saving is not active until phase-7a migration is applied and
+// the full linking UI is built.
+function PackageActionMenu() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mt-2 border-t border-white/[0.06] pt-2">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center justify-between text-[11px] font-semibold text-white/35 hover:text-white/55 transition-colors"
+      >
+        <span>Package action</span>
+        <span className="text-[10px]">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div className="mt-2 space-y-0.5">
+          {PACKAGE_ACTIONS.map(action => (
+            <button
+              key={action.value}
+              type="button"
+              disabled
+              className="flex w-full cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-white/25"
+            >
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/15" />
+              {action.label}
+            </button>
+          ))}
+          <p className="pt-0.5 text-[10px] text-white/20">Coming soon</p>
+        </div>
+      )}
+    </div>
   )
 }

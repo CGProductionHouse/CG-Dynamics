@@ -24,6 +24,8 @@ export type TaskStatus =
 
 export type TaskSource = 'manual' | 'whatsapp_paste' | 'morning_list' | 'other'
 
+export type PackageAction = 'use_slot' | 'addon' | 'move_work'
+
 export interface CommandCentreTask {
   id: string
   title: string
@@ -42,6 +44,13 @@ export interface CommandCentreTask {
   created_at: string
   updated_at: string
   completed_at: string | null
+  // Package linking fields — added to DB in phase-6 (deliverable_id)
+  // and phase-7a (package_action, quote_needed, admin_package_note).
+  // Optional until migrations are applied.
+  deliverable_id?: string | null
+  package_action?: PackageAction | null
+  quote_needed?: boolean
+  admin_package_note?: string | null
 }
 
 export interface TaskInput {
