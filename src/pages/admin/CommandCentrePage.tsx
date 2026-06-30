@@ -1427,7 +1427,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
             >
               Close
             </button>
-            {isAdmin && !confirmDelete && (
+            {isAdmin && task.data_origin !== 'planner_tasks' && !confirmDelete && (
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
@@ -1436,7 +1436,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
                 Delete task
               </button>
             )}
-            {isAdmin && confirmDelete && (
+            {isAdmin && task.data_origin !== 'planner_tasks' && confirmDelete && (
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-brand-primary">Sure?</span>
                 <button

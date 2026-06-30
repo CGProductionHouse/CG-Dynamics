@@ -253,12 +253,20 @@ export default function PlannerPage() {
           <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Planner</h1>
         </div>
         {isAdmin && (
-          <Link
-            to="/admin/planner-import"
-            className="text-xs font-semibold text-brand-primary/60 hover:text-brand-primary transition-colors"
-          >
-            Import
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/admin/import-health"
+              className="text-xs font-semibold text-brand-primary/60 hover:text-brand-primary transition-colors"
+            >
+              Health
+            </Link>
+            <Link
+              to="/admin/planner-import"
+              className="text-xs font-semibold text-brand-primary/60 hover:text-brand-primary transition-colors"
+            >
+              Import
+            </Link>
+          </div>
         )}
       </div>
 

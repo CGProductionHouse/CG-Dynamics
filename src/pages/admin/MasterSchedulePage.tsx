@@ -107,6 +107,14 @@ function formatMonthShort(mk: string): string {
   return new Date(year, month - 1, 1).toLocaleDateString('en-ZA', { month: 'short' })
 }
 
+function monthKeyFromValue(value: string): string {
+  return value.slice(0, 7)
+}
+
+function displayDateForDeliverable(deliverable: MonthlyDeliverable) {
+  return deliverable.scheduled_date ?? deliverable.due_date
+}
+
 // ── Page ───────────────────────────────────────────────────────
 
 export default function MasterSchedulePage() {
@@ -171,14 +179,16 @@ export default function MasterSchedulePage() {
       map.set(`${selectedYear}-${String(m).padStart(2, '0')}`, [])
     }
     for (const d of filteredDeliverables) {
-      const list = map.get(d.month)
+      const list = map.get(monthKeyFromValue(d.month))
       if (list) list.push(d)
     }
     for (const [, items] of map) {
       items.sort((a, b) => {
-        if (a.scheduled_date && b.scheduled_date) return a.scheduled_date.localeCompare(b.scheduled_date)
-        if (a.scheduled_date) return -1
-        if (b.scheduled_date) return 1
+        const aDate = displayDateForDeliverable(a)
+        const bDate = displayDateForDeliverable(b)
+        if (aDate && bDate) return aDate.localeCompare(bDate)
+        if (aDate) return -1
+        if (bDate) return 1
         return a.code.localeCompare(b.code) || a.instance_number - b.instance_number
       })
     }
@@ -187,7 +197,7 @@ export default function MasterSchedulePage() {
 
   const yearStats = useMemo(() => {
     const total = filteredDeliverables.length
-    const scheduled = filteredDeliverables.filter(d => d.scheduled_date).length
+    const scheduled = filteredDeliverables.filter(d => displayDateForDeliverable(d)).length
     const posted = filteredDeliverables.filter(
       d => simplifyProductionStatus(d.production_status) === 'scheduled_posted'
     ).length
@@ -518,7 +528,7 @@ function MonthSection({
   onToggle: () => void
   onOpen: (d: MonthlyDeliverable, clientName: string) => void
 }) {
-  const scheduled = items.filter(d => d.scheduled_date).length
+  const scheduled = items.filter(d => displayDateForDeliverable(d)).length
   const unscheduled = items.length - scheduled
 
   return (
@@ -595,8 +605,9 @@ function DeliverableRow({
 }) {
   const simplified = simplifyProductionStatus(deliverable.production_status)
   const source = deliverableSource(deliverable)
-  const isToday = deliverable.scheduled_date === todayStr
-  const isUnscheduled = !deliverable.scheduled_date
+  const displayDate = displayDateForDeliverable(deliverable)
+  const isToday = displayDate === todayStr
+  const isUnscheduled = !displayDate
 
   return (
     <button
@@ -610,7 +621,7 @@ function DeliverableRow({
           isToday ? 'text-brand-teal' : isUnscheduled ? 'text-white/20' : 'text-white/45'
         }`}
       >
-        {deliverable.scheduled_date ? formatScheduledDate(deliverable.scheduled_date) : '—'}
+        {displayDate ? formatScheduledDate(displayDate) : '—'}
       </span>
 
       {/* Type badge */}

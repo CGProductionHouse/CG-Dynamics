@@ -384,6 +384,28 @@ export default function PackageMasterPage() {
             {clientSearch && filteredClients.length === 0 && (
               <p className="mt-1 text-xs text-white/30">No clients match "{clientSearch}"</p>
             )}
+            <div className="mt-3 max-h-48 overflow-y-auto rounded-xl border border-white/8 bg-white/[0.025] p-2">
+              <div className="grid gap-1 sm:grid-cols-2">
+                {filteredClients.map(c => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedClientId(c.id)
+                      setClientSearch('')
+                      setCreatePkgOpen(false)
+                    }}
+                    className={`rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                      selectedClientId === c.id
+                        ? 'bg-brand-accent/12 text-brand-accent'
+                        : 'text-white/60 hover:bg-white/[0.04] hover:text-white'
+                    }`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

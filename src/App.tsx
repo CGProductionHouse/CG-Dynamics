@@ -32,6 +32,7 @@ import PackageMasterPage from './pages/admin/PackageMasterPage'
 import MonthlyPlannerPage from './pages/admin/MonthlyPlannerPage'
 import MasterSchedulePage from './pages/admin/MasterSchedulePage'
 import PlannerImportPage from './pages/admin/PlannerImportPage'
+import ImportHealthPage from './pages/admin/ImportHealthPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -100,6 +101,7 @@ export default function App() {
                 {/* Legacy deep link kept working. */}
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
                 <Route path="/admin/planner-import" element={<PlannerImportPage />} />
+                <Route path="/admin/import-health" element={<ImportHealthPage />} />
               </Route>
             </Route>
           </Route>

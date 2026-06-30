@@ -8,6 +8,9 @@ export type TaskBucket =
   | 'Admin / To Do'
   | 'Content Guides'
   | 'Once-off'
+  | 'Daily'
+  | 'Weekly'
+  | 'Monthly'
   | 'Recurring'
   | 'CG Socials'
   | 'Client Schedules'
@@ -22,12 +25,14 @@ export type TaskStatus =
   | 'waiting_client'
   | 'moved_to_tomorrow'
 
-export type TaskSource = 'manual' | 'whatsapp_paste' | 'morning_list' | 'other'
+export type TaskSource = 'manual' | 'whatsapp_paste' | 'morning_list' | 'teams_import' | 'other'
 
 export type PackageAction = 'use_slot' | 'addon' | 'move_work'
 
 export interface CommandCentreTask {
   id: string
+  native_id?: string
+  data_origin?: 'command_centre' | 'planner_tasks'
   title: string
   client_id: string | null
   client_name: string | null
@@ -72,12 +77,158 @@ export interface TaskInput {
 }
 
 const TABLE = 'command_centre_tasks'
+const PLANNER_TASKS_TABLE = 'planner_tasks'
+const PLANNER_BUCKETS_TABLE = 'planner_buckets'
+
+type PlannerTaskRow = {
+  id: string
+  board_id: string | null
+  bucket_id: string | null
+  title: string
+  client_id: string | null
+  client_name: string | null
+  assigned_to_name: string | null
+  status: string
+  priority: TaskPriority
+  start_date: string | null
+  due_date: string | null
+  notes: string | null
+  source: string | null
+  original_plan_name: string | null
+  original_bucket_name: string | null
+  created_at: string
+  updated_at: string
+  helper_names?: string[]
+}
+
+type PlannerBucketRow = {
+  id: string
+  name: string
+}
+
+const PLANNER_TASK_PREFIX = 'planner:'
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function unique(values: Array<string | null | undefined>) {
+  return Array.from(new Set(values.filter(Boolean) as string[]))
+}
+
+function isPlannerTaskId(id: string) {
+  return id.startsWith(PLANNER_TASK_PREFIX)
+}
+
+function stripPlannerTaskId(id: string) {
+  return id.replace(PLANNER_TASK_PREFIX, '')
+}
+
+function cleanBucketName(value: string | null | undefined): string {
+  const raw = String(value ?? '').trim()
+  if (!raw) return 'Admin / To Do'
+  if (/^[A-Za-z0-9_-]{16,}$/.test(raw) && !/\s/.test(raw)) return 'Admin / To Do'
+
+  const normalised = raw.toLowerCase().replace(/[^a-z0-9]+/g, '')
+  if (normalised.includes('clientrequest')) return 'Client Requests'
+  if (normalised.includes('graphicdesign')) return 'Graphic Design'
+  if (normalised.includes('website')) return 'Websites'
+  if (normalised === 'daily') return 'Daily'
+  if (normalised === 'weekly') return 'Weekly'
+  if (normalised === 'monthly') return 'Monthly'
+  if (normalised.includes('admin') || normalised.includes('todo')) return 'Admin / To Do'
+  if (normalised.includes('onceoff')) return 'Once-off'
+  if (normalised.includes('video')) return 'Video'
+  if (normalised.includes('contentguide')) return 'Content Guides'
+  return raw
+}
+
+function taskStatusFromPlanner(status: string): TaskStatus {
+  if (status === 'in_progress') return 'in_progress'
+  if (status === 'scheduled' || status === 'approved') return 'done'
+  if (status === 'ready_internal_review') return 'in_progress'
+  return 'to_do'
+}
+
+function plannerStatusFromTask(status: TaskStatus): string {
+  if (status === 'in_progress') return 'in_progress'
+  if (status === 'done') return 'scheduled'
+  return 'to_do'
+}
+
+function plannerTaskToCommandTask(row: PlannerTaskRow, bucketName: string | undefined): CommandCentreTask {
+  const bucket = cleanBucketName(bucketName || row.original_bucket_name)
+  return {
+    id: `${PLANNER_TASK_PREFIX}${row.id}`,
+    native_id: row.id,
+    data_origin: 'planner_tasks',
+    title: row.title,
+    client_id: row.client_id,
+    client_name: row.client_name,
+    assigned_to_user_id: null,
+    assigned_to_name: row.assigned_to_name,
+    bucket: bucket as TaskBucket,
+    priority: row.priority ?? 'normal',
+    status: taskStatusFromPlanner(row.status),
+    due_date: row.due_date ?? row.start_date ?? todayStr(),
+    notes: row.notes,
+    source: row.source === 'teams_import' ? 'teams_import' : 'other',
+    whatsapp_source_text: null,
+    created_by: null,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    completed_at: row.status === 'scheduled' || row.status === 'approved' ? row.updated_at : null,
+    helper_names: row.helper_names,
+  }
+}
 
 export async function listTasks() {
-  return supabase
+  const [nativeResult, plannerResult] = await Promise.all([
+    supabase
     .from(TABLE)
     .select('*')
-    .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from(PLANNER_TASKS_TABLE)
+      .select('*')
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false }),
+  ])
+
+  if (nativeResult.error) return nativeResult
+  if (plannerResult.error) {
+    if (plannerResult.error.message?.includes('does not exist') || plannerResult.error.code === '42P01') {
+      return nativeResult
+    }
+    return { data: nativeResult.data ?? [], error: plannerResult.error }
+  }
+
+  const plannerRows = (plannerResult.data ?? []) as PlannerTaskRow[]
+  const bucketIds = unique(plannerRows.map(row => row.bucket_id))
+  const bucketNames = new Map<string, string>()
+
+  if (bucketIds.length > 0) {
+    const { data: buckets } = await supabase
+      .from(PLANNER_BUCKETS_TABLE)
+      .select('id, name')
+      .in('id', bucketIds)
+
+    for (const bucket of (buckets ?? []) as PlannerBucketRow[]) {
+      bucketNames.set(bucket.id, bucket.name)
+    }
+  }
+
+  const nativeTasks = ((nativeResult.data ?? []) as CommandCentreTask[]).map(task => ({
+    ...task,
+    native_id: task.id,
+    data_origin: 'command_centre' as const,
+  }))
+  const importedTasks = plannerRows.map(row => plannerTaskToCommandTask(
+    row,
+    row.bucket_id ? bucketNames.get(row.bucket_id) : undefined,
+  ))
+
+  return { data: [...importedTasks, ...nativeTasks], error: null }
 }
 
 export async function createTask(input: TaskInput) {
@@ -102,6 +253,15 @@ export async function createTask(input: TaskInput) {
 }
 
 export async function updateTaskStatus(id: string, status: TaskStatus) {
+  if (isPlannerTaskId(id)) {
+    return supabase
+      .from(PLANNER_TASKS_TABLE)
+      .update({ status: plannerStatusFromTask(status) })
+      .eq('id', stripPlannerTaskId(id))
+      .select()
+      .single()
+  }
+
   return supabase
     .from(TABLE)
     .update({ status })
@@ -114,6 +274,27 @@ export async function updateTask(
   id: string,
   updates: Partial<Omit<CommandCentreTask, 'id' | 'created_at' | 'created_by'>>
 ) {
+  if (isPlannerTaskId(id)) {
+    const patch: Record<string, unknown> = {}
+    if (updates.title !== undefined) patch.title = updates.title
+    if (updates.client_id !== undefined) patch.client_id = updates.client_id
+    if (updates.client_name !== undefined) patch.client_name = updates.client_name
+    if (updates.assigned_to_name !== undefined) patch.assigned_to_name = updates.assigned_to_name
+    if (updates.status !== undefined) patch.status = plannerStatusFromTask(updates.status)
+    if (updates.priority !== undefined) patch.priority = updates.priority
+    if (updates.due_date !== undefined) patch.due_date = updates.due_date
+    if (updates.notes !== undefined) patch.notes = updates.notes
+    if (updates.bucket !== undefined) patch.original_bucket_name = updates.bucket
+    if (updates.helper_names !== undefined) patch.helper_names = updates.helper_names
+
+    return supabase
+      .from(PLANNER_TASKS_TABLE)
+      .update(patch)
+      .eq('id', stripPlannerTaskId(id))
+      .select()
+      .single()
+  }
+
   return supabase
     .from(TABLE)
     .update(updates)
@@ -123,6 +304,9 @@ export async function updateTask(
 }
 
 export async function deleteTask(id: string) {
+  if (isPlannerTaskId(id)) {
+    return { data: null, error: { message: 'Imported Planner tasks cannot be deleted from Daily Tasks.' } }
+  }
   return supabase.from(TABLE).delete().eq('id', id)
 }
 
@@ -152,13 +336,16 @@ export async function listActiveClients() {
 }
 
 export const BUCKETS: TaskBucket[] = [
+  'Daily',
+  'Weekly',
+  'Monthly',
   'Client Requests',
   'Graphic Design',
-  'Video',
   'Websites',
   'Admin / To Do',
-  'Content Guides',
   'Once-off',
+  'Video',
+  'Content Guides',
   'Recurring',
   'CG Socials',
   'Client Schedules',

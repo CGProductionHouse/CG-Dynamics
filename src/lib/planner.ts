@@ -404,8 +404,8 @@ export async function listMonthlyDeliverablesByYear(
     .from(DELIVERABLES_TABLE)
     .select('*')
     .is('archived_at', null)
-    .gte('month', `${year}-01`)
-    .lte('month', `${year}-12`)
+    .gte('month', `${year}-01-01`)
+    .lt('month', `${year + 1}-01-01`)
     .order('month')
     .order('instance_number')
 

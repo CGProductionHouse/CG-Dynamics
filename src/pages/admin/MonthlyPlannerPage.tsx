@@ -100,6 +100,10 @@ function formatMonthHeading(key: string) {
   return new Date(year, month - 1, 1).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
 }
 
+function displayDateForDeliverable(deliverable: MonthlyDeliverable) {
+  return deliverable.scheduled_date ?? deliverable.due_date
+}
+
 const STAFF_STATUSES: SimplifiedProductionStatus[] = ['not_started', 'in_progress', 'ready_review', 'awaiting_client']
 const FINAL_STATUSES: SimplifiedProductionStatus[] = ['meta_drafts', 'scheduled_posted']
 
@@ -191,23 +195,24 @@ export default function MonthlyPlannerPage() {
   const byDate = useMemo(() => {
     const map = new Map<string, MonthlyDeliverable[]>()
     for (const d of filteredDeliverables) {
-      if (!d.scheduled_date) continue
-      const list = map.get(d.scheduled_date) ?? []
+      const date = displayDateForDeliverable(d)
+      if (!date) continue
+      const list = map.get(date) ?? []
       list.push(d)
-      map.set(d.scheduled_date, list)
+      map.set(date, list)
     }
     return map
   }, [filteredDeliverables])
 
   const unscheduled = useMemo(
-    () => filteredDeliverables.filter(d => !d.scheduled_date),
+    () => filteredDeliverables.filter(d => !displayDateForDeliverable(d)),
     [filteredDeliverables]
   )
 
   const calendarStats = useMemo(() => ({
     total: filteredDeliverables.length,
-    scheduled: filteredDeliverables.filter(d => d.scheduled_date).length,
-    unscheduled: filteredDeliverables.filter(d => !d.scheduled_date).length,
+    scheduled: filteredDeliverables.filter(d => displayDateForDeliverable(d)).length,
+    unscheduled: filteredDeliverables.filter(d => !displayDateForDeliverable(d)).length,
     clientRequests: filteredDeliverables.filter(d => deliverableSource(d) === 'client_request').length,
     packageItems: filteredDeliverables.filter(d => deliverableSource(d) === 'package').length,
   }), [filteredDeliverables])

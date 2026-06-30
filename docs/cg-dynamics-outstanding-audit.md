@@ -39,7 +39,7 @@ The biggest missing pieces are:
 
 | Request | Status | Notes |
 |---|---|---|
-| Replace Teams/Planner as the main internal operations system | PARTIAL | Navigation, Daily Tasks, Planner and Monthly Planner exist, but live data import and calendar/master schedule are still missing. |
+| Replace Teams/Planner as the main internal operations system | PARTIAL | Navigation, Daily Tasks, Planner and Monthly Planner exist. Teams Planner production data has now been imported, and app verification/polish for imported rows has started. |
 | Make the app easier than Teams, not more complicated | PARTIAL | Several pages were simplified, but the app still needs real workflow testing with imported data. |
 | Keep CG Hub and Performance separate | DONE | Navigation zones were split and pushed. |
 | Same Clients page available from both zones | DONE | Shared Clients route preserved. |
@@ -63,7 +63,7 @@ The biggest missing pieces are:
 | Full calendar view with real month/day layout | PARTIAL | Calendar grid added to Monthly Planner with real weekdays and day numbers. |
 | Calendar must use real dates for 2026, 2027, etc. | PARTIAL | Date math uses native JS Date (year, month, day) — works for any year. |
 | Full-screen calendar/schedule view like screenshots shared | PARTIAL | Month grid exists in Monthly Planner. Full master schedule (all clients, full year) still missing. |
-| Master schedule must show the whole year/content plan | PARTIAL | Master Schedule page built at /admin/master-schedule. Shows all 12 months, all clients, real dates, source/status/type/client filters. Drag/drop, bulk scheduling, and imported real data still outstanding. |
+| Master schedule must show the whole year/content plan | PARTIAL | Master Schedule page built at /admin/master-schedule. Imported monthly deliverables are now being surfaced by year/month using imported month and due-date data. Drag/drop and bulk scheduling are still outstanding. |
 | Monthly Planner must connect directly to master schedule/calendar | PARTIAL | Monthly Planner now has calendar view using scheduled_date. Full master schedule backbone still missing. |
 | Staff should see monthly summary, not full-year complexity | PARTIAL | Monthly Planner calendar view shows current month only. Needs real imported data. |
 | CA/Amonique control final schedule dates and Scheduled/Posted states | PREPARED | UI/role split exists in Monthly Planner; RLS migration still pending. |
@@ -74,11 +74,11 @@ The biggest missing pieces are:
 
 | Request | Status | Notes |
 |---|---|---|
-| Import Teams/Planner Excel exports so user can cancel Teams | PARTIAL | Import script fixed, but real import has not been run in Supabase. |
+| Import Teams/Planner Excel exports so user can cancel Teams | PARTIAL | Import script fixed and production import has run. Current production counts reported: planner_tasks 4,143; client_packages 38; package_deliverable_templates 243; monthly_deliverables 2,931. App data verification/polish has started. |
 | Import must not use raw Planner IDs as bucket/client names | DONE | Importer was fixed and dry run showed bucket names resolving. |
 | Review regenerated preview SQL/JSON before running | OUTSTANDING | Generated files are local/ignored and need review before Supabase run. |
-| Import operational boards/tasks | OUTSTANDING | No live import yet. |
-| Import client schedule/monthly package data | OUTSTANDING | No live import yet. |
+| Import operational boards/tasks | PARTIAL | Live planner_tasks import completed. Daily Tasks now needs ongoing verification with real staff roles and imported task updates. |
+| Import client schedule/monthly package data | PARTIAL | Live client packages/templates/monthly deliverables import completed. Monthly Planner, Master Schedule and Package views are being adjusted for imported data. |
 | Protect admin-sensitive checklist boards | PREPARED | Admin board logic exists, but must be verified with imported data. |
 
 Known source workbooks:
