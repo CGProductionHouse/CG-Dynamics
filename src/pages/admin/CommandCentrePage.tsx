@@ -8,7 +8,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import {
   listTasks,
   createTask,
+  updateTask,
   updateTaskStatus,
+  deleteTask,
   listActiveClients,
   parseMorningList,
   morningEditToInput,
@@ -255,6 +257,30 @@ export default function CommandCentrePage() {
     setTimeout(() => setCopiedSection(null), 2000)
   }, [])
 
+  const isAdmin = profile?.role === 'admin'
+  const [drawerTask, setDrawerTask] = useState<CommandCentreTask | null>(null)
+
+  useEffect(() => {
+    if (!drawerTask) return
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDrawerTask(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [drawerTask])
+
+  const handleOpenDetails = useCallback((task: CommandCentreTask) => {
+    setDrawerTask(task)
+  }, [])
+
+  const handleSaveTask = useCallback((updated: CommandCentreTask) => {
+    setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
+    setDrawerTask(updated)
+  }, [])
+
+  const handleDeleteTask = useCallback((id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id))
+    setDrawerTask(null)
+  }, [])
+
   if (loading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -383,6 +409,7 @@ export default function CommandCentrePage() {
                       task={task}
                       busyId={busyId}
                       onStatusChange={handleStatusChange}
+                      onOpenDetails={handleOpenDetails}
                     />
                   ))}
                 </div>
@@ -410,6 +437,16 @@ export default function CommandCentrePage() {
       <div id="morning-import" className="mb-6">
         <MorningImportCard onTasksCreated={load} />
       </div>
+
+      {drawerTask && (
+        <TaskDetailDrawer
+          task={drawerTask}
+          isAdmin={isAdmin}
+          onClose={() => setDrawerTask(null)}
+          onSaved={handleSaveTask}
+          onDeleted={handleDeleteTask}
+        />
+      )}
     </div>
   )
 }
@@ -649,10 +686,11 @@ function QuickAddCard({ onTaskCreated }: { onTaskCreated: () => void }) {
   )
 }
 
-function TaskRow({ task, busyId, onStatusChange }: {
+function TaskRow({ task, busyId, onStatusChange, onOpenDetails }: {
   task: CommandCentreTask
   busyId: string | null
   onStatusChange: (id: string, status: TaskStatus) => void
+  onOpenDetails: (task: CommandCentreTask) => void
 }) {
   const accentColor = task.priority === 'urgent' ? 'bg-amber-400/40'
     : task.priority === 'client_request' ? 'bg-brand-accent/40'
@@ -664,7 +702,13 @@ function TaskRow({ task, busyId, onStatusChange }: {
         <div className="flex flex-col gap-2 pl-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-sm font-semibold text-white">{task.title}</span>
+              <button
+                type="button"
+                onClick={() => onOpenDetails(task)}
+                className="text-sm font-semibold text-white hover:text-brand-accent transition-colors text-left"
+              >
+                {task.title}
+              </button>
               {task.priority !== 'normal' && (
                 <Pill tone={priorityColor(task.priority)}>
                   {task.priority === 'urgent' ? 'Urgent' : task.source === 'whatsapp_paste' ? 'Client req · WA' : 'Client req'}
@@ -708,6 +752,14 @@ function TaskRow({ task, busyId, onStatusChange }: {
                 Reopen
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => onOpenDetails(task)}
+              className="rounded-lg border border-brand-muted/60 px-2 py-1.5 text-xs text-brand-primary hover:text-white transition-colors"
+              title="Open details"
+            >
+              ···
+            </button>
           </div>
         </div>
       </PremiumCard>
@@ -1041,5 +1093,292 @@ function EndOfDayCard({ allRelevant, copiedSection, onCopy }: {
         </pre>
       )}
     </PremiumCard>
+  )
+}
+
+function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
+  task: CommandCentreTask
+  isAdmin: boolean
+  onClose: () => void
+  onSaved: (updated: CommandCentreTask) => void
+  onDeleted: (id: string) => void
+}) {
+  const [title, setTitle] = useState(task.title)
+  const [clientId, setClientId] = useState(task.client_id ?? (task.client_name ? '__manual__' : ''))
+  const [manualClientName, setManualClientName] = useState(
+    task.client_id ? '' : (task.client_name ?? '')
+  )
+  const [assignedName, setAssignedName] = useState(task.assigned_to_name ?? '')
+  const [bucket, setBucket] = useState<TaskBucket>(task.bucket)
+  const [priority, setPriority] = useState<TaskPriority>(task.priority)
+  const [status, setStatus] = useState<TaskStatus>(task.status)
+  const [dueDate, setDueDate] = useState(task.due_date)
+  const [notes, setNotes] = useState(task.notes ?? '')
+  const [saving, setSaving] = useState(false)
+  const [saveMsg, setSaveMsg] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    listActiveClients().then(({ data }) => {
+      if (!active) return
+      setClients(data ?? [])
+      setClientsLoading(false)
+    }).catch(() => {
+      if (active) setClientsLoading(false)
+    })
+    return () => { active = false }
+  }, [])
+
+  const isManualClient = clientId === '__manual__'
+  const selectedClient = clients.find(c => c.id === clientId)
+
+  async function handleSave() {
+    if (saving || !title.trim()) return
+    setSaving(true)
+    setSaveMsg(null)
+    setSaveError(null)
+    try {
+      const resolvedClientId = selectedClient?.id ?? null
+      const resolvedClientName = isManualClient
+        ? (manualClientName.trim() || null)
+        : (selectedClient?.name ?? null)
+      const updates = {
+        title: title.trim(),
+        client_id: resolvedClientId,
+        client_name: resolvedClientName,
+        assigned_to_name: assignedName.trim() || null,
+        bucket,
+        priority,
+        status,
+        due_date: dueDate,
+        notes: notes.trim() || null,
+      }
+      const { error } = await updateTask(task.id, updates)
+      if (error) { setSaveError(error.message); return }
+      const updated: CommandCentreTask = {
+        ...task,
+        ...updates,
+        updated_at: new Date().toISOString(),
+        completed_at: (status as string) === 'done'
+          ? (task.completed_at ?? new Date().toISOString())
+          : null,
+      }
+      onSaved(updated)
+      setSaveMsg('Saved')
+      setTimeout(() => setSaveMsg(null), 2000)
+    } catch {
+      setSaveError('Could not save.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (deleting) return
+    setDeleting(true)
+    try {
+      await deleteTask(task.id)
+      onDeleted(task.id)
+      onClose()
+    } catch {
+      setDeleting(false)
+    }
+  }
+
+  const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-[#111111] sm:w-[480px] border-l border-white/[0.08] overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+          <h2 className="text-base font-semibold text-white">Task details</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-brand-primary hover:text-white transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-4 px-5 py-5">
+          {task.priority === 'client_request' && (
+            <div className="flex items-center gap-2">
+              <Pill tone="accent">
+                {task.source === 'whatsapp_paste' ? 'Client req · WA' : 'Client request'}
+              </Pill>
+              {task.source === 'whatsapp_paste' && (
+                <span className="text-xs text-brand-primary/60">From WhatsApp</span>
+              )}
+            </div>
+          )}
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Title</label>
+            <input value={title} onChange={e => setTitle(e.target.value)} className={inputCls} />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
+            {clientsLoading ? (
+              <p className="py-2 text-xs text-brand-primary/60">Loading clients...</p>
+            ) : (
+              <select value={clientId} onChange={e => setClientId(e.target.value)} className={inputCls}>
+                <option value="">No client</option>
+                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <option value="__manual__">Manual / other client</option>
+              </select>
+            )}
+            {isManualClient && (
+              <input
+                value={manualClientName}
+                onChange={e => setManualClientName(e.target.value)}
+                placeholder="Type client name"
+                className={`mt-2 ${inputCls}`}
+              />
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label>
+            <select value={assignedName} onChange={e => setAssignedName(e.target.value)} className={inputCls}>
+              <option value="">Unassigned</option>
+              {KNOWN_STAFF.map(name => <option key={name} value={name}>{name}</option>)}
+              <option value="__other__">Other...</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Bucket</label>
+              <select value={bucket} onChange={e => setBucket(e.target.value as TaskBucket)} className={inputCls}>
+                {BUCKETS.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Priority</label>
+              <select value={priority} onChange={e => setPriority(e.target.value as TaskPriority)} className={inputCls}>
+                {PRIORITIES.map(p => (
+                  <option key={p} value={p}>
+                    {p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
+              <select value={status} onChange={e => setStatus(e.target.value as TaskStatus)} className={inputCls}>
+                {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Due date</label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">
+              {priority === 'client_request' ? 'Notes — paste WhatsApp message here' : 'Notes'}
+            </label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              rows={4}
+              className={`resize-none ${inputCls}`}
+            />
+          </div>
+
+          <div className="rounded-lg border border-white/[0.06] bg-brand-surface/40 px-3 py-2.5">
+            <p className="text-xs text-brand-primary/60">
+              <span className="font-medium text-brand-primary">Helpers / collaborators</span>
+              {' '}— coming soon
+            </p>
+          </div>
+
+          {isAdmin && task.priority === 'client_request' && (
+            <div className="rounded-lg border border-white/[0.06] bg-brand-surface/40 px-3 py-3">
+              <p className="mb-2.5 text-xs font-medium text-brand-primary">Package action</p>
+              <div className="flex flex-wrap gap-2">
+                {(['use_slot', 'addon', 'move_work'] as const).map(action => (
+                  <button
+                    key={action}
+                    type="button"
+                    disabled
+                    className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-brand-primary/40 cursor-not-allowed"
+                  >
+                    {action === 'use_slot' ? 'Use package slot' : action === 'addon' ? 'Mark as add-on' : 'Move to another month'}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-brand-primary/40">After migration phase-7a</p>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-white/[0.08] px-5 py-4">
+          {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
+          {saveMsg && <p className="mb-2 text-xs text-[#2dd4bf]">{saveMsg}</p>}
+          <div className="flex items-center gap-3">
+            <ActionButton
+              variant="primary"
+              onClick={handleSave}
+              disabled={saving || !title.trim()}
+              loading={saving}
+            >
+              Save
+            </ActionButton>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-brand-primary hover:text-white transition-colors"
+            >
+              Close
+            </button>
+            {isAdmin && !confirmDelete && (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="ml-auto text-xs text-red-400/70 hover:text-red-400 transition-colors"
+              >
+                Delete task
+              </button>
+            )}
+            {isAdmin && confirmDelete && (
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs text-brand-primary">Sure?</span>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="text-xs text-red-400 hover:text-red-300 disabled:opacity-60"
+                >
+                  {deleting ? 'Deleting...' : 'Yes, delete'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  className="text-xs text-brand-primary hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
