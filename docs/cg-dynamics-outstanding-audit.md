@@ -43,7 +43,7 @@ The biggest missing pieces are:
 | Make the app easier than Teams, not more complicated | PARTIAL | Several pages were simplified, but the app still needs real workflow testing with imported data. |
 | Keep CG Hub and Performance separate | DONE | Navigation zones were split and pushed. |
 | Same Clients page available from both zones | DONE | Shared Clients route preserved. |
-| Staff should open the app and instantly know what to do | PARTIAL | Daily Tasks focus list exists, but needs testing with real staff data. |
+| Staff should open the app and instantly know what to do | PARTIAL | CG Hub now shows Today Focus: priority queue, scheduled today, my active work. Needs testing with real staff data. |
 
 ## 2. Visual and brand direction
 
@@ -105,7 +105,7 @@ Known source workbooks:
 | Request | Status | Notes |
 |---|---|---|
 | Rename Command Centre to Daily Tasks | DONE | UI language changed. |
-| Daily Tasks should be staff start page | PARTIAL | Focus page exists, but needs real staff task data. |
+| Daily Tasks should be staff start page | PARTIAL | CG Hub Today Focus is now the real start screen (priority queue, scheduled today, quick add). Daily Tasks remains the full task list. |
 | Default to active staff member/my tasks | PARTIAL | Logic added where profile can match assigned_to_name. Needs real user testing. |
 | Staff can still view team/all tasks where allowed | PARTIAL | Filters exist. Needs role testing. |
 | Priority stack: client requests, urgent, overdue, today, in progress | DONE/PARTIAL | Sort logic added, must be tested with real tasks. |
@@ -294,11 +294,12 @@ Next order should be:
 4. Import real Teams/Planner data.
 5. ~~Build the real calendar/master schedule month view.~~ DONE — Monthly Planner calendar + Master Schedule page built.
 6. ~~Link Monthly Planner to the master schedule/calendar.~~ DONE — "Year view" link in Monthly Planner, "Monthly view" link in Master Schedule.
-7. Activate package request workflow: package slot, add-on, moved work, quote needed.
-8. Add client brand update workflow.
-9. Activate helpers/collaborators.
-10. Activate timer only after calendar/package/staff workflows are stable.
-11. Then consider CG Hours recommendation bridge.
+7. ~~Add Hub Today Focus so staff know what to do instantly.~~ DONE — CG Hub shows priority queue, scheduled today, my active work, quick add task.
+8. Activate package request workflow: package slot, add-on, moved work, quote needed.
+9. Add client brand update workflow.
+10. Activate helpers/collaborators.
+11. Activate timer only after calendar/package/staff workflows are stable.
+12. Then consider CG Hours recommendation bridge.
 
 ## Main correction from latest feedback
 
