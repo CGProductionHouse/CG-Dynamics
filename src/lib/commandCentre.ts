@@ -51,6 +51,9 @@ export interface CommandCentreTask {
   package_action?: PackageAction | null
   quote_needed?: boolean
   admin_package_note?: string | null
+  // Collaborative assignments — added in phase-7b.
+  // Optional until migration is applied.
+  helper_names?: string[]
 }
 
 export interface TaskInput {
@@ -121,6 +124,18 @@ export async function updateTask(
 
 export async function deleteTask(id: string) {
   return supabase.from(TABLE).delete().eq('id', id)
+}
+
+// Ready for use after phase-7b migration adds helper_names column.
+export async function addTaskHelperName(id: string, currentHelpers: string[], name: string) {
+  const trimmed = name.trim()
+  if (!trimmed) return { data: null, error: null }
+  const names = currentHelpers.includes(trimmed) ? currentHelpers : [...currentHelpers, trimmed]
+  return updateTask(id, { helper_names: names })
+}
+
+export async function removeTaskHelperName(id: string, currentHelpers: string[], name: string) {
+  return updateTask(id, { helper_names: currentHelpers.filter(n => n !== name) })
 }
 
 export interface ClientOption {

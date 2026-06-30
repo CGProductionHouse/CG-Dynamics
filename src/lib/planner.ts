@@ -83,6 +83,8 @@ export interface MonthlyDeliverable {
   moved_from_deliverable_id: string | null
   replaced_by_request_id: string | null
   notes: string | null
+  // Collaborative assignments — added in phase-7b.
+  helper_names?: string[]
   created_by: string | null
   created_at: string
   updated_at: string
@@ -767,6 +769,8 @@ export interface PlannerTask {
   original_bucket_name: string | null
   original_task_id: string | null
   import_hash: string
+  // Collaborative assignments — added in phase-7b.
+  helper_names?: string[]
   created_at: string
   updated_at: string
 }
@@ -826,6 +830,8 @@ export interface UpdatePlannerTaskInput {
   due_date?: string | null
   notes?: string | null
   bucket_id?: string | null
+  // phase-7b
+  helper_names?: string[]
 }
 
 export async function updatePlannerTask(id: string, updates: UpdatePlannerTaskInput) {
@@ -835,4 +841,28 @@ export async function updatePlannerTask(id: string, updates: UpdatePlannerTaskIn
     .eq('id', id)
     .select()
     .single()
+}
+
+// ── Helper / collaborator mutations (ready after phase-7b migration) ──
+
+export async function addPlannerHelperName(id: string, currentHelpers: string[], name: string) {
+  const trimmed = name.trim()
+  if (!trimmed) return { data: null, error: null }
+  const names = currentHelpers.includes(trimmed) ? currentHelpers : [...currentHelpers, trimmed]
+  return updatePlannerTask(id, { helper_names: names })
+}
+
+export async function removePlannerHelperName(id: string, currentHelpers: string[], name: string) {
+  return updatePlannerTask(id, { helper_names: currentHelpers.filter(n => n !== name) })
+}
+
+export async function addDeliverableHelperName(id: string, currentHelpers: string[], name: string) {
+  const trimmed = name.trim()
+  if (!trimmed) return { data: null, error: null }
+  const names = currentHelpers.includes(trimmed) ? currentHelpers : [...currentHelpers, trimmed]
+  return supabase.from(DELIVERABLES_TABLE).update({ helper_names: names }).eq('id', id).select().single()
+}
+
+export async function removeDeliverableHelperName(id: string, currentHelpers: string[], name: string) {
+  return supabase.from(DELIVERABLES_TABLE).update({ helper_names: currentHelpers.filter(n => n !== name) }).eq('id', id).select().single()
 }

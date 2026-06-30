@@ -1301,11 +1301,23 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
             />
           </div>
 
-          <div className="rounded-lg border border-white/[0.06] bg-brand-surface/40 px-3 py-2.5">
-            <p className="text-xs text-brand-primary/60">
-              <span className="font-medium text-brand-primary">Helpers / collaborators</span>
-              {' '}— coming soon
-            </p>
+          <div>
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p>
+            {task.helper_names !== undefined ? (
+              task.helper_names.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {task.helper_names.map(name => (
+                    <span key={name} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[11px] text-white/70">
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-white/40">No helpers yet</p>
+              )
+            ) : (
+              <p className="text-[11px] text-white/30">After migration phase-7b</p>
+            )}
           </div>
 
           {isAdmin && task.priority === 'client_request' && (

@@ -699,6 +699,25 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
               className={`resize-none ${inputCls}`}
             />
           </div>
+
+          <div>
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p>
+            {task.helper_names !== undefined ? (
+              task.helper_names.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {task.helper_names.map(name => (
+                    <span key={name} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[11px] text-white/70">
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-white/40">No helpers yet</p>
+              )
+            ) : (
+              <p className="text-[11px] text-white/30">After migration phase-7b</p>
+            )}
+          </div>
         </div>
 
         <div className="border-t border-white/[0.08] px-5 py-4">
