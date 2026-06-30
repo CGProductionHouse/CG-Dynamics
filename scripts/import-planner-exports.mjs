@@ -409,7 +409,7 @@ function sqlJson(value) {
 }
 
 function normalisedClientPredicate(bucket) {
-  return `lower(regexp_replace(coalesce(c.name, ''), '[^a-z0-9]+', '', 'g')) = ${sql(normalise(bucket))}`
+  return `regexp_replace(lower(coalesce(c.name, '')), '[^a-z0-9]+', '', 'g') = ${sql(normalise(bucket))}`
 }
 
 function generateSql(preview) {
