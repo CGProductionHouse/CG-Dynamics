@@ -25,6 +25,7 @@ import { listImportGroups } from '../../lib/db/importedMetaPosts'
 import { listManualMetrics } from '../../lib/db/manualMetrics'
 import { ClientLogo } from '../../components/ClientLogo'
 import { listReports } from '../../lib/db/reports'
+import { supabase } from '../../lib/supabase'
 
 interface OverviewStats {
   totalClients: number
@@ -32,6 +33,13 @@ interface OverviewStats {
   draftReports: number
   imports: number
   manualSummaries: number
+}
+
+interface ClientOpsSummary {
+  activePackage: boolean
+  packageTemplates: number
+  monthlyDeliverables: number
+  openTasks: number
 }
 
 function errorMessage(error: unknown, fallback: string) {
@@ -87,6 +95,7 @@ export default function ClientsList() {
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active')
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const [packageNotice, setPackageNotice] = useState<string | null>(null)
+  const [opsSummary, setOpsSummary] = useState<Record<string, ClientOpsSummary>>({})
 
   const displayClients = useMemo(() => {
     if (viewFilter === 'active') return clients.filter(c => c.active)
@@ -161,6 +170,7 @@ export default function ClientsList() {
         imports: importsRes.data.length,
         manualSummaries: manualRes.data.length,
       })
+      void loadOperationalSummary(clientsRes.data)
       setError(null)
       return null
     } catch (error) {
@@ -170,6 +180,53 @@ export default function ClientsList() {
     } finally {
       if (!options.silent) setLoading(false)
     }
+  }
+
+  async function loadOperationalSummary(clientRows: Client[]) {
+    const clientIds = clientRows.map(client => client.id)
+    if (clientIds.length === 0) {
+      setOpsSummary({})
+      return
+    }
+
+    const [packagesRes, templatesRes, deliverablesRes, tasksRes] = await Promise.all([
+      supabase.from('client_packages').select('id, client_id').in('client_id', clientIds).eq('status', 'active').is('archived_at', null),
+      supabase.from('package_deliverable_templates').select('package_id').eq('active', true),
+      supabase.from('monthly_deliverables').select('client_id').in('client_id', clientIds).is('archived_at', null),
+      supabase.from('planner_tasks').select('client_id, status').in('client_id', clientIds),
+    ])
+
+    const next: Record<string, ClientOpsSummary> = Object.fromEntries(
+      clientRows.map(client => [client.id, {
+        activePackage: false,
+        packageTemplates: 0,
+        monthlyDeliverables: 0,
+        openTasks: 0,
+      }]),
+    )
+
+    const packageClientById = new Map<string, string>()
+    for (const pkg of packagesRes.data ?? []) {
+      packageClientById.set(pkg.id, pkg.client_id)
+      if (next[pkg.client_id]) next[pkg.client_id].activePackage = true
+    }
+
+    for (const template of templatesRes.data ?? []) {
+      const clientId = packageClientById.get(template.package_id)
+      if (clientId && next[clientId]) next[clientId].packageTemplates += 1
+    }
+
+    for (const deliverable of deliverablesRes.data ?? []) {
+      if (next[deliverable.client_id]) next[deliverable.client_id].monthlyDeliverables += 1
+    }
+
+    for (const task of tasksRes.data ?? []) {
+      if (task.client_id && next[task.client_id] && task.status !== 'scheduled' && task.status !== 'approved') {
+        next[task.client_id].openTasks += 1
+      }
+    }
+
+    setOpsSummary(next)
   }
 
   async function handleSave(
@@ -321,6 +378,7 @@ export default function ClientsList() {
                       <div className="mt-2">
                         <PackageChips client={c} />
                       </div>
+                      <ClientOpsChips summary={opsSummary[c.id]} />
                     </div>
                   </div>
 
@@ -392,6 +450,7 @@ export default function ClientsList() {
                       </td>
                       <td className="px-4 py-3">
                         <PackageChips client={c} />
+                        <ClientOpsChips summary={opsSummary[c.id]} compact />
                       </td>
                       {c.active ? (
                         <>
@@ -514,6 +573,33 @@ function PackageChips({ client }: { client: Client }) {
 }
 
 // Mobile card actions — split into Performance and Production groups
+function ClientOpsChips({ summary, compact = false }: { summary?: ClientOpsSummary; compact?: boolean }) {
+  if (!summary) {
+    return <p className="mt-2 text-[11px] text-white/25">Loading production summary...</p>
+  }
+
+  return (
+    <div className={`mt-2 flex flex-wrap gap-1.5 ${compact ? 'max-w-xs' : ''}`}>
+      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${
+        summary.activePackage
+          ? 'border-brand-teal/25 bg-brand-teal/[0.07] text-[#2dd4bf]'
+          : 'border-amber-400/20 bg-amber-400/[0.06] text-amber-300'
+      }`}>
+        {summary.activePackage ? 'Active package' : 'No active package'}
+      </span>
+      <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-bold text-white/55">
+        {summary.packageTemplates} package items
+      </span>
+      <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-bold text-white/55">
+        {summary.monthlyDeliverables} deliverables
+      </span>
+      <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-bold text-white/55">
+        {summary.openTasks} open tasks
+      </span>
+    </div>
+  )
+}
+
 function ClientQuickActions({
   client,
   isAdmin,

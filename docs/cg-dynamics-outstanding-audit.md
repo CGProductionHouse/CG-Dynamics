@@ -39,7 +39,7 @@ The biggest missing pieces are:
 
 | Request | Status | Notes |
 |---|---|---|
-| Replace Teams/Planner as the main internal operations system | PARTIAL | Navigation, Daily Tasks, Planner and Monthly Planner exist. Teams Planner production data has now been imported, and app verification/polish for imported rows has started. |
+| Replace Teams/Planner as the main internal operations system | PARTIAL | Navigation, Daily Tasks, Planner and Monthly Planner exist. Teams Planner production data has now been imported, and imported-data workflow polish is build-verified. Live signed-in browser testing is still required. |
 | Make the app easier than Teams, not more complicated | PARTIAL | Several pages were simplified, but the app still needs real workflow testing with imported data. |
 | Keep CG Hub and Performance separate | DONE | Navigation zones were split and pushed. |
 | Same Clients page available from both zones | DONE | Shared Clients route preserved. |
@@ -74,11 +74,11 @@ The biggest missing pieces are:
 
 | Request | Status | Notes |
 |---|---|---|
-| Import Teams/Planner Excel exports so user can cancel Teams | PARTIAL | Import script fixed and production import has run. Current production counts reported: planner_tasks 4,143; client_packages 38; package_deliverable_templates 243; monthly_deliverables 2,931. App data verification/polish has started. |
+| Import Teams/Planner Excel exports so user can cancel Teams | DONE | Import script fixed and production import has run. Current production counts reported: planner_tasks 4,143; client_packages 38; package_deliverable_templates 243; monthly_deliverables 2,931. |
 | Import must not use raw Planner IDs as bucket/client names | DONE | Importer was fixed and dry run showed bucket names resolving. |
 | Review regenerated preview SQL/JSON before running | OUTSTANDING | Generated files are local/ignored and need review before Supabase run. |
-| Import operational boards/tasks | PARTIAL | Live planner_tasks import completed. Daily Tasks now needs ongoing verification with real staff roles and imported task updates. |
-| Import client schedule/monthly package data | PARTIAL | Live client packages/templates/monthly deliverables import completed. Monthly Planner, Master Schedule and Package views are being adjusted for imported data. |
+| Import operational boards/tasks | PARTIAL | Live planner_tasks import completed. Daily Tasks now loads imported tasks with native quick-add tasks, readable buckets and useful filters. Needs live signed-in browser testing with staff/admin roles. |
+| Import client schedule/monthly package data | PARTIAL | Live client packages/templates/monthly deliverables import completed. Monthly Planner, Master Schedule, Package and Clients pages now surface imported production data. Needs live signed-in browser testing. |
 | Protect admin-sensitive checklist boards | PREPARED | Admin board logic exists, but must be verified with imported data. |
 
 Known source workbooks:

@@ -112,7 +112,7 @@ function monthKeyFromValue(value: string): string {
 }
 
 function displayDateForDeliverable(deliverable: MonthlyDeliverable) {
-  return deliverable.scheduled_date ?? deliverable.due_date
+  return deliverable.scheduled_date ?? deliverable.due_date ?? deliverable.month
 }
 
 // ── Page ───────────────────────────────────────────────────────
@@ -189,15 +189,17 @@ export default function MasterSchedulePage() {
         if (aDate && bDate) return aDate.localeCompare(bDate)
         if (aDate) return -1
         if (bDate) return 1
+        const clientCompare = (clientNameById.get(a.client_id) ?? '').localeCompare(clientNameById.get(b.client_id) ?? '')
+        if (clientCompare !== 0) return clientCompare
         return a.code.localeCompare(b.code) || a.instance_number - b.instance_number
       })
     }
     return map
-  }, [filteredDeliverables, selectedYear])
+  }, [clientNameById, filteredDeliverables, selectedYear])
 
   const yearStats = useMemo(() => {
     const total = filteredDeliverables.length
-    const scheduled = filteredDeliverables.filter(d => displayDateForDeliverable(d)).length
+    const scheduled = filteredDeliverables.filter(d => d.scheduled_date || d.due_date).length
     const posted = filteredDeliverables.filter(
       d => simplifyProductionStatus(d.production_status) === 'scheduled_posted'
     ).length

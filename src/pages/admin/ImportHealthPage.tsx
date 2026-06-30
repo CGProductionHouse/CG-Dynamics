@@ -38,6 +38,11 @@ type ClientRow = {
 
 type MonthlyRow = {
   client_id: string
+  package_id: string | null
+  template_id: string | null
+  month: string
+  due_date: string | null
+  scheduled_date: string | null
 }
 
 const EMPTY_COUNTS: Counts = {
@@ -102,7 +107,7 @@ export default function ImportHealthPage() {
         supabase.from('planner_buckets').select('id, board_id, name, bucket_type'),
         supabase.from('planner_boards').select('id, name, slug, board_type'),
         supabase.from('clients').select('id, name').eq('active', true).order('name'),
-        supabase.from('monthly_deliverables').select('client_id').is('archived_at', null),
+        supabase.from('monthly_deliverables').select('client_id, package_id, template_id, month, due_date, scheduled_date').is('archived_at', null),
       ])
 
       const firstError = tasksResult.error
@@ -165,6 +170,29 @@ export default function ImportHealthPage() {
     return countBy(monthlyDeliverables, item => clientNameById.get(item.client_id) ?? 'Unknown client')
   }, [clientNameById, monthlyDeliverables])
 
+  const deliverablesByMonth = useMemo(() => {
+    return countBy(monthlyDeliverables, item => item.month?.slice(0, 7) ?? 'No month')
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [monthlyDeliverables])
+
+  const missingDueOrSchedule = useMemo(
+    () => monthlyDeliverables.filter(item => !item.due_date && !item.scheduled_date).length,
+    [monthlyDeliverables],
+  )
+
+  const missingLinks = useMemo(() => ({
+    client: monthlyDeliverables.filter(item => !item.client_id || !clientNameById.has(item.client_id)).length,
+    package: monthlyDeliverables.filter(item => !item.package_id).length,
+    template: monthlyDeliverables.filter(item => !item.template_id).length,
+  }), [clientNameById, monthlyDeliverables])
+
+  const unmatchedClientBuckets = useMemo(
+    () => clientScheduleBuckets.filter(row => row.matchedClient === 'No client match').length,
+    [clientScheduleBuckets],
+  )
+
+  const needsAttention = missingDueOrSchedule > 0 || missingLinks.client > 0 || unmatchedClientBuckets > 0
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -197,6 +225,21 @@ export default function ImportHealthPage() {
         <EmptyState title="Could not load import health" message="Refresh or check the planner tables." centered={false} />
       ) : (
         <>
+          <div className={`mb-5 rounded-xl border px-4 py-3 ${
+            needsAttention
+              ? 'border-amber-400/25 bg-amber-400/[0.07]'
+              : 'border-brand-teal/25 bg-brand-teal/[0.06]'
+          }`}>
+            <p className={`text-sm font-bold ${needsAttention ? 'text-amber-200' : 'text-[#2dd4bf]'}`}>
+              {needsAttention ? 'Needs attention' : 'Data looks healthy'}
+            </p>
+            <p className="mt-1 text-xs text-brand-primary/65">
+              {needsAttention
+                ? 'Review missing dates, client matches or links before relying on production views.'
+                : 'Imported tasks, packages and deliverables are present and linked enough for production views.'}
+            </p>
+          </div>
+
           <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <HealthStat label="Planner tasks" value={counts.plannerTasks} />
             <HealthStat label="Client packages" value={counts.clientPackages} />
@@ -204,10 +247,18 @@ export default function ImportHealthPage() {
             <HealthStat label="Monthly deliverables" value={counts.monthlyDeliverables} />
           </div>
 
+          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <HealthStat label="Missing date" value={missingDueOrSchedule} warn={missingDueOrSchedule > 0} />
+            <HealthStat label="Missing client" value={missingLinks.client} warn={missingLinks.client > 0} />
+            <HealthStat label="Missing package" value={missingLinks.package} warn={missingLinks.package > 0} />
+            <HealthStat label="Missing template" value={missingLinks.template} warn={missingLinks.template > 0} />
+          </div>
+
           <div className="grid gap-4 lg:grid-cols-3">
             <HealthList title="Planner buckets with tasks" rows={plannerBucketCounts} />
             <ClientMatchList rows={clientScheduleBuckets} />
             <HealthList title="Monthly deliverables by client" rows={monthlyByClient} />
+            <HealthList title="Deliverables by month" rows={deliverablesByMonth} />
           </div>
         </>
       )}
@@ -215,11 +266,11 @@ export default function ImportHealthPage() {
   )
 }
 
-function HealthStat({ label, value }: { label: string; value: number }) {
+function HealthStat({ label, value, warn = false }: { label: string; value: number; warn?: boolean }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
+    <div className={`rounded-xl border p-4 ${warn ? 'border-amber-400/25 bg-amber-400/[0.06]' : 'border-white/10 bg-white/[0.035]'}`}>
       <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">{label}</p>
-      <p className="mt-2 text-3xl font-black text-white">{value.toLocaleString()}</p>
+      <p className={`mt-2 text-3xl font-black ${warn ? 'text-amber-300' : 'text-white'}`}>{value.toLocaleString()}</p>
     </div>
   )
 }

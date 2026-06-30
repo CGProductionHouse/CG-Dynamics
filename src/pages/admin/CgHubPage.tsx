@@ -75,6 +75,10 @@ function taskPriorityRank(t: CommandCentreTask, today: string): number {
   return 5
 }
 
+function deliverableDate(deliverable: MonthlyDeliverable) {
+  return deliverable.scheduled_date ?? deliverable.due_date ?? deliverable.month
+}
+
 export default function CgHubPage() {
   const navigate = useNavigate()
   const { profile } = useAuth()
@@ -121,9 +125,16 @@ export default function CgHubPage() {
   }, [tasks, todayStr])
 
   const scheduledToday = useMemo(
-    () => deliverables.filter(d => d.scheduled_date === todayStr),
+    () => deliverables.filter(d => deliverableDate(d) === todayStr),
     [deliverables, todayStr],
   )
+
+  const waitingWork = useMemo(() => {
+    return deliverables.filter(d => {
+      const status = simplifyProductionStatus(d.production_status)
+      return status === 'ready_review' || status === 'awaiting_client' || status === 'meta_drafts'
+    })
+  }, [deliverables])
 
   const myActiveWork = useMemo(() => {
     const myName = profile?.full_name
@@ -171,6 +182,7 @@ export default function CgHubPage() {
         todayLabel={todayLabel}
         priorityQueue={priorityQueue}
         scheduledToday={scheduledToday}
+        waitingWork={waitingWork}
         myActiveWork={myActiveWork}
         quickTitle={quickTitle}
         quickSaving={quickSaving}
@@ -281,6 +293,7 @@ function TodayFocus({
   todayLabel,
   priorityQueue,
   scheduledToday,
+  waitingWork,
   myActiveWork,
   quickTitle,
   quickSaving,
@@ -292,6 +305,7 @@ function TodayFocus({
   todayLabel: string
   priorityQueue: CommandCentreTask[]
   scheduledToday: MonthlyDeliverable[]
+  waitingWork: MonthlyDeliverable[]
   myActiveWork: CommandCentreTask[]
   quickTitle: string
   quickSaving: boolean
@@ -325,7 +339,7 @@ function TodayFocus({
       </div>
 
       {loading ? (
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[0, 1, 2].map(i => (
             <div key={i} className="h-36 animate-pulse rounded-xl bg-white/[0.04]" />
           ))}
@@ -343,12 +357,22 @@ function TodayFocus({
             ))}
           </SectionCard>
           <SectionCard
-            title="Scheduled today"
+            title="Package due today"
             totalCount={scheduledToday.length}
             viewAllTo="/admin/monthly-planner"
-            emptyText="Nothing scheduled for today"
+            emptyText="No package deliverables due today"
           >
             {scheduledToday.slice(0, 5).map(d => (
+              <DeliverableRow key={d.id} deliverable={d} />
+            ))}
+          </SectionCard>
+          <SectionCard
+            title="Waiting"
+            totalCount={waitingWork.length}
+            viewAllTo="/admin/monthly-planner"
+            emptyText="Nothing waiting for review or scheduling"
+          >
+            {waitingWork.slice(0, 5).map(d => (
               <DeliverableRow key={d.id} deliverable={d} />
             ))}
           </SectionCard>

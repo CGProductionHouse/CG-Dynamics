@@ -52,6 +52,7 @@ const STATUS_STAT_TONE: Record<SimplifiedProductionStatus, string> = {
 }
 
 type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
+type SourceFilterValue = 'all' | DeliverableSource | 'unscheduled'
 
 function deliverableSource(d: MonthlyDeliverable): DeliverableSource {
   if (d.moved_from_deliverable_id) return 'moved'
@@ -101,7 +102,7 @@ function formatMonthHeading(key: string) {
 }
 
 function displayDateForDeliverable(deliverable: MonthlyDeliverable) {
-  return deliverable.scheduled_date ?? deliverable.due_date
+  return deliverable.scheduled_date ?? deliverable.due_date ?? deliverable.month
 }
 
 const STAFF_STATUSES: SimplifiedProductionStatus[] = ['not_started', 'in_progress', 'ready_review', 'awaiting_client']
@@ -120,6 +121,7 @@ export default function MonthlyPlannerPage() {
   const [clientSearch, setClientSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | SimplifiedProductionStatus>('all')
   const [typeFilter, setTypeFilter] = useState<'all' | DeliverableType>('all')
+  const [sourceFilter, setSourceFilter] = useState<SourceFilterValue>('all')
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [tableMissing, setTableMissing] = useState(false)
@@ -154,11 +156,13 @@ export default function MonthlyPlannerPage() {
     return deliverables.filter(deliverable => {
       if (!PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)) return false
       if (statusFilter !== 'all' && simplifyProductionStatus(deliverable.production_status) !== statusFilter) return false
+      if (sourceFilter === 'unscheduled' && (deliverable.scheduled_date || deliverable.due_date)) return false
+      if (sourceFilter !== 'all' && sourceFilter !== 'unscheduled' && deliverableSource(deliverable) !== sourceFilter) return false
       if (!search) return true
       const clientName = clientNameById.get(deliverable.client_id) ?? 'Unknown client'
       return clientName.toLowerCase().includes(search)
     })
-  }, [clientNameById, clientSearch, deliverables, statusFilter])
+  }, [clientNameById, clientSearch, deliverables, sourceFilter, statusFilter])
 
   const groupedDeliverables = useMemo(() => {
     const groups = new Map<string, MonthlyDeliverable[]>()
@@ -205,14 +209,14 @@ export default function MonthlyPlannerPage() {
   }, [filteredDeliverables])
 
   const unscheduled = useMemo(
-    () => filteredDeliverables.filter(d => !displayDateForDeliverable(d)),
+    () => filteredDeliverables.filter(d => !d.scheduled_date && !d.due_date),
     [filteredDeliverables]
   )
 
   const calendarStats = useMemo(() => ({
     total: filteredDeliverables.length,
     scheduled: filteredDeliverables.filter(d => displayDateForDeliverable(d)).length,
-    unscheduled: filteredDeliverables.filter(d => !displayDateForDeliverable(d)).length,
+    unscheduled: filteredDeliverables.filter(d => !d.scheduled_date && !d.due_date).length,
     clientRequests: filteredDeliverables.filter(d => deliverableSource(d) === 'client_request').length,
     packageItems: filteredDeliverables.filter(d => deliverableSource(d) === 'package').length,
   }), [filteredDeliverables])
@@ -509,7 +513,7 @@ export default function MonthlyPlannerPage() {
       )}
 
       {/* Filters */}
-      <div className="mb-4 grid gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 md:grid-cols-4">
+      <div className="mb-4 grid gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 md:grid-cols-5">
         <select
           value={clientFilter}
           onChange={event => setClientFilter(event.target.value)}
@@ -540,6 +544,19 @@ export default function MonthlyPlannerPage() {
         >
           <option value="all">All types</option>
           {PACKAGE_DELIVERABLE_TYPES.map(type => <option key={type} value={type}>{TYPE_LABELS[type]}</option>)}
+        </select>
+        <select
+          value={sourceFilter}
+          onChange={event => setSourceFilter(event.target.value as SourceFilterValue)}
+          className="rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white outline-none focus:border-brand-accent/50"
+        >
+          <option value="all">All sources</option>
+          <option value="package">Package</option>
+          <option value="client_request">Client request</option>
+          <option value="moved">Moved</option>
+          <option value="replaced">Replaced</option>
+          <option value="unlinked">Unlinked</option>
+          <option value="unscheduled">Needs scheduling</option>
         </select>
       </div>
 

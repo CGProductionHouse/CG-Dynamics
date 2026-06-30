@@ -23,6 +23,7 @@ import {
   type TaskBucket,
   type TaskPriority,
   type TaskStatus,
+  type PackageAction,
   type ClientOption,
   type ParsedMorningTask,
   type MorningTaskEdit,
@@ -30,14 +31,33 @@ import {
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
 
+type WorkFilter = 'focus' | 'today' | 'overdue' | 'client_requests' | 'in_progress' | 'done'
+
 function focusSortOrder(task: CommandCentreTask, today: string, now: Date): number {
   if (task.priority === 'client_request') return 0
   if (task.priority === 'urgent') return 1
-  const dueDate = new Date(`${task.due_date}T00:00:00`)
-  if (dueDate < now) return 2
+  const dueDate = task.due_date ? new Date(`${task.due_date}T00:00:00`) : null
+  if (dueDate && dueDate < now) return 2
   if (task.due_date === today) return 3
   if (task.status === 'in_progress') return 4
-  return 5
+  if (dueDate && dueDate.getTime() - now.getTime() <= 7 * 86400000) return 5
+  if (!dueDate) return 7
+  return 6
+}
+
+function isOverdue(task: CommandCentreTask, now: Date) {
+  if (!task.due_date || task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  return new Date(`${task.due_date}T00:00:00`) < now
+}
+
+function matchesWorkFilter(task: CommandCentreTask, filter: WorkFilter, today: string, now: Date) {
+  if (filter === 'done') return task.status === 'done'
+  if (task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  if (filter === 'today') return task.due_date === today
+  if (filter === 'overdue') return isOverdue(task, now)
+  if (filter === 'client_requests') return task.priority === 'client_request' || task.bucket === 'Client Requests'
+  if (filter === 'in_progress') return task.status === 'in_progress'
+  return true
 }
 
 function todayStr() {
@@ -142,6 +162,9 @@ export default function CommandCentrePage() {
   const [copiedSection, setCopiedSection] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [filterStaff, setFilterStaff] = useState<string>('__my__')
+  const [workFilter, setWorkFilter] = useState<WorkFilter>('focus')
+  const [bucketFilter, setBucketFilter] = useState('')
+  const [clientSearch, setClientSearch] = useState('')
   const [showDone, setShowDone] = useState(false)
 
   async function load() {
@@ -181,16 +204,28 @@ export default function CommandCentrePage() {
 
   const focusTasks = useMemo(() => {
     let filtered: CommandCentreTask[]
+    const taskPool = workFilter === 'done' ? tasks : allActiveTasks
     if (filterStaff === '__my__') {
       const myName = profile?.full_name ?? ''
-      filtered = allActiveTasks.filter(t => t.assigned_to_name === myName)
+      filtered = taskPool.filter(t => t.assigned_to_name === myName)
     } else if (filterStaff) {
-      filtered = allActiveTasks.filter(t => t.assigned_to_name === filterStaff)
+      filtered = taskPool.filter(t => t.assigned_to_name === filterStaff)
     } else {
-      filtered = allActiveTasks
+      filtered = taskPool
+    }
+    if (workFilter !== 'focus') {
+      filtered = filtered.filter(t => matchesWorkFilter(t, workFilter, today, now))
+    }
+    if (bucketFilter) filtered = filtered.filter(t => t.bucket === bucketFilter)
+    if (clientSearch.trim()) {
+      const search = clientSearch.trim().toLowerCase()
+      filtered = filtered.filter(t =>
+        (t.client_name ?? '').toLowerCase().includes(search) ||
+        t.title.toLowerCase().includes(search)
+      )
     }
     return [...filtered].sort((a, b) => focusSortOrder(a, today, now) - focusSortOrder(b, today, now))
-  }, [allActiveTasks, filterStaff, profile, today, now])
+  }, [allActiveTasks, bucketFilter, clientSearch, filterStaff, profile, tasks, today, now, workFilter])
 
   const doneTodayTasks = useMemo(() => {
     let base = tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today)
@@ -256,7 +291,8 @@ export default function CommandCentrePage() {
     clientRequests: allActiveTasks.filter(t => t.priority === 'client_request').length,
     inProgress: allActiveTasks.filter(t => t.status === 'in_progress').length,
     doneToday: tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today).length,
-    overdue: allActiveTasks.filter(t => new Date(`${t.due_date}T00:00:00`) < now).length,
+    overdue: allActiveTasks.filter(t => isOverdue(t, now)).length,
+    today: allActiveTasks.filter(t => t.due_date === today).length,
   }), [tasks, allActiveTasks, focusTasks, today, now])
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
@@ -375,7 +411,7 @@ export default function CommandCentrePage() {
       </div>
 
       {/* D — Filter row */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setFilterStaff('__my__')}
@@ -410,14 +446,57 @@ export default function CommandCentrePage() {
         </select>
       </div>
 
+      <div className="mb-4 grid gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex flex-wrap gap-1 sm:col-span-2 lg:col-span-2">
+          {([
+            ['focus', 'Focus'],
+            ['today', `Today ${stats.today}`],
+            ['overdue', `Overdue ${stats.overdue}`],
+            ['client_requests', `Client requests ${stats.clientRequests}`],
+            ['in_progress', `In progress ${stats.inProgress}`],
+            ['done', 'Done'],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setWorkFilter(value)}
+              className={`rounded-md px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
+                workFilter === value
+                  ? 'bg-brand-accent text-black'
+                  : 'border border-white/10 text-brand-primary/65 hover:text-white hover:border-white/20'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <select
+          value={bucketFilter}
+          onChange={e => setBucketFilter(e.target.value)}
+          className="rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+        >
+          <option value="">All work sections</option>
+          {BUCKETS.map(bucket => <option key={bucket} value={bucket}>{bucket}</option>)}
+        </select>
+        <input
+          type="search"
+          value={clientSearch}
+          onChange={e => setClientSearch(e.target.value)}
+          placeholder="Search client or task"
+          className="rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-xs text-white placeholder:text-brand-primary/35 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+        />
+      </div>
+
       {/* E — Focus list */}
       <div className="mb-4">
         <div className="mb-3 flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-white">Focus</h2>
+          <h2 className="text-sm font-semibold text-white">
+            {workFilter === 'focus' ? 'Focus' : workFilter === 'client_requests' ? 'Client Requests' : workFilter.replace('_', ' ')}
+          </h2>
           <span className="rounded-full bg-brand-accent/10 px-2 py-0.5 text-xs font-medium text-brand-accent">{focusTasks.length}</span>
         </div>
         {focusTasks.length === 0 ? (
-          <EmptyState title="All clear" message="No tasks to focus on right now." centered={false} />
+          <EmptyState title="All clear" message="No tasks match these filters." centered={false} />
         ) : filterStaff !== '' ? (
           <div className="space-y-2">
             {focusTasks.map(task => (
@@ -1172,6 +1251,9 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
   const [status, setStatus] = useState<TaskStatus>(task.status)
   const [dueDate, setDueDate] = useState(task.due_date)
   const [notes, setNotes] = useState(task.notes ?? '')
+  const [packageAction, setPackageAction] = useState<PackageAction | ''>(task.package_action ?? '')
+  const [quoteNeeded, setQuoteNeeded] = useState(Boolean(task.quote_needed))
+  const [adminPackageNote, setAdminPackageNote] = useState(task.admin_package_note ?? '')
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -1216,6 +1298,13 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
         status,
         due_date: dueDate,
         notes: notes.trim() || null,
+        ...(task.data_origin !== 'planner_tasks'
+          ? {
+              package_action: packageAction || null,
+              quote_needed: quoteNeeded,
+              admin_package_note: adminPackageNote.trim() || null,
+            }
+          : {}),
       }
       const { error } = await updateTask(task.id, updates)
       if (error) { setSaveError(error.message); return }
@@ -1250,6 +1339,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
   }
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
+  const isClientRequest = priority === 'client_request' || bucket === 'Client Requests' || task.source === 'whatsapp_paste'
 
   return (
     <>
@@ -1267,7 +1357,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-          {task.priority === 'client_request' && (
+          {isClientRequest && (
             <div className="flex items-center gap-2">
               <Pill tone="accent">
                 {task.source === 'whatsapp_paste' ? 'Client req · WA' : 'Client request'}
@@ -1378,22 +1468,49 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
             )}
           </div>
 
-          {isAdmin && task.priority === 'client_request' && (
+          {isAdmin && isClientRequest && (
             <div className="rounded-lg border border-white/[0.06] bg-brand-surface/40 px-3 py-3">
-              <p className="mb-2.5 text-xs font-medium text-brand-primary">Package action</p>
+              <p className="mb-2.5 text-xs font-medium text-brand-primary">Client request decision</p>
+              {task.data_origin === 'planner_tasks' && (
+                <p className="mb-3 rounded-md border border-amber-400/20 bg-amber-400/[0.06] px-2.5 py-2 text-[11px] text-amber-200">
+                  Imported Planner request. Edit task details here; handle package decisions in Monthly Planner/Package until request linking is migrated.
+                </p>
+              )}
               <div className="flex flex-wrap gap-2">
                 {(['use_slot', 'addon', 'move_work'] as const).map(action => (
                   <button
                     key={action}
                     type="button"
-                    disabled
-                    className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-brand-primary/40 cursor-not-allowed"
+                    disabled={task.data_origin === 'planner_tasks'}
+                    onClick={() => setPackageAction(action)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
+                      packageAction === action
+                        ? 'border-brand-accent/40 bg-brand-accent/10 text-brand-accent'
+                        : 'border-white/10 text-brand-primary/60 hover:text-white'
+                    } disabled:cursor-not-allowed disabled:opacity-40`}
                   >
                     {action === 'use_slot' ? 'Use package slot' : action === 'addon' ? 'Mark as add-on' : 'Move to another month'}
                   </button>
                 ))}
               </div>
-              <p className="mt-2 text-[11px] text-brand-primary/40">After migration phase-7a</p>
+              <label className="mt-3 flex items-center gap-2 text-xs text-brand-primary/75">
+                <input
+                  type="checkbox"
+                  checked={quoteNeeded}
+                  disabled={task.data_origin === 'planner_tasks'}
+                  onChange={e => setQuoteNeeded(e.target.checked)}
+                  className="h-4 w-4 rounded border-white/20 bg-black"
+                />
+                Quote needed
+              </label>
+              <textarea
+                value={adminPackageNote}
+                disabled={task.data_origin === 'planner_tasks'}
+                onChange={e => setAdminPackageNote(e.target.value)}
+                rows={2}
+                placeholder="Admin package note"
+                className={`mt-3 resize-none ${inputCls} disabled:opacity-40`}
+              />
             </div>
           )}
 
