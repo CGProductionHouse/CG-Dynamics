@@ -30,6 +30,16 @@ import {
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
 
+function focusSortOrder(task: CommandCentreTask, today: string, now: Date): number {
+  if (task.priority === 'client_request') return 0
+  if (task.priority === 'urgent') return 1
+  const dueDate = new Date(`${task.due_date}T00:00:00`)
+  if (dueDate < now) return 2
+  if (task.due_date === today) return 3
+  if (task.status === 'in_progress') return 4
+  return 5
+}
+
 function todayStr() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -58,13 +68,6 @@ function dateClass(dateStr: string) {
 function priorityColor(p: TaskPriority) {
   if (p === 'urgent') return 'amber'
   if (p === 'client_request') return 'accent'
-  return 'neutral'
-}
-
-function statusTone(s: TaskStatus) {
-  if (s === 'done') return 'teal'
-  if (s === 'in_progress') return 'accent'
-  if (s === 'blocked' || s === 'waiting_client') return 'amber'
   return 'neutral'
 }
 
@@ -139,6 +142,7 @@ export default function CommandCentrePage() {
   const [copiedSection, setCopiedSection] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [filterStaff, setFilterStaff] = useState<string>('__my__')
+  const [showDone, setShowDone] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -171,49 +175,60 @@ export default function CommandCentrePage() {
   now.setHours(0, 0, 0, 0)
   const today = todayStr()
 
-  const activeTasks = useMemo(() => {
-    return tasks
-      .filter(t => t.status !== 'done' && t.status !== 'moved_to_tomorrow')
-      .sort((a, b) => {
-        const aDate = new Date(`${a.due_date}T00:00:00`)
-        const bDate = new Date(`${b.due_date}T00:00:00`)
-        const aOver = aDate < now ? 1 : 0
-        const bOver = bDate < now ? 1 : 0
-        if (aOver !== bOver) return bOver - aOver
-        const pr = (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99)
-        if (pr !== 0) return pr
-        return (a.assigned_to_name ?? '').localeCompare(b.assigned_to_name ?? '')
-      })
-  }, [tasks, now])
+  const allActiveTasks = useMemo(() =>
+    tasks.filter(t => t.status !== 'done' && t.status !== 'moved_to_tomorrow'),
+  [tasks])
 
-  const allRelevant = useMemo(() => {
-    return tasks
-      .filter(t => t.status !== 'done' || (t.completed_at && t.completed_at.slice(0, 10) === today))
-      .sort((a, b) => (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99))
-  }, [tasks, today])
-
-  const stats = useMemo(() => ({
-    total: activeTasks.length,
-    clientRequests: tasks.filter(t => t.priority === 'client_request' && t.status !== 'done').length,
-    doneToday: tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today).length,
-    blocked: tasks.filter(t => t.status === 'blocked').length,
-    overdue: activeTasks.filter(t => new Date(`${t.due_date}T00:00:00`) < now).length,
-    movedToTomorrow: tasks.filter(t => t.status === 'moved_to_tomorrow').length,
-  }), [tasks, activeTasks, today, now])
-
-  const filteredActiveTasks = useMemo(() => {
-    if (!filterStaff) return activeTasks
+  const focusTasks = useMemo(() => {
+    let filtered: CommandCentreTask[]
     if (filterStaff === '__my__') {
       const myName = profile?.full_name ?? ''
-      if (KNOWN_STAFF.includes(myName)) return activeTasks.filter(t => t.assigned_to_name === myName)
-      return activeTasks.filter(t => t.assigned_to_name === profile?.full_name)
+      filtered = allActiveTasks.filter(t => t.assigned_to_name === myName)
+    } else if (filterStaff) {
+      filtered = allActiveTasks.filter(t => t.assigned_to_name === filterStaff)
+    } else {
+      filtered = allActiveTasks
     }
-    return activeTasks.filter(t => t.assigned_to_name === filterStaff)
-  }, [activeTasks, filterStaff, profile])
+    return [...filtered].sort((a, b) => focusSortOrder(a, today, now) - focusSortOrder(b, today, now))
+  }, [allActiveTasks, filterStaff, profile, today, now])
+
+  const doneTodayTasks = useMemo(() => {
+    let base = tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today)
+    if (filterStaff === '__my__') {
+      const myName = profile?.full_name ?? ''
+      base = base.filter(t => t.assigned_to_name === myName)
+    } else if (filterStaff) {
+      base = base.filter(t => t.assigned_to_name === filterStaff)
+    }
+    return base
+  }, [tasks, filterStaff, profile, today])
+
+  const focusGrouped = useMemo(() => {
+    const groups = new Map<string, CommandCentreTask[]>()
+    for (const t of focusTasks) {
+      const name = t.assigned_to_name ?? 'Unassigned'
+      if (!groups.has(name)) groups.set(name, [])
+      groups.get(name)!.push(t)
+    }
+    return groups
+  }, [focusTasks])
+
+  const focusGroupEntries = useMemo(() =>
+    [...focusGrouped.entries()].sort(([a], [b]) => {
+      const ai = KNOWN_STAFF.indexOf(a)
+      const bi = KNOWN_STAFF.indexOf(b)
+      if (ai !== -1 && bi !== -1) return ai - bi
+      if (ai !== -1) return -1
+      if (bi !== -1) return 1
+      if (a === 'Unassigned') return 1
+      if (b === 'Unassigned') return -1
+      return a.localeCompare(b)
+    }),
+  [focusGrouped])
 
   const staffGroups = useMemo(() => {
     const groups = new Map<string, CommandCentreTask[]>()
-    for (const t of filteredActiveTasks) {
+    for (const t of allActiveTasks) {
       const name = t.assigned_to_name ?? 'Unassigned'
       if (!groups.has(name)) groups.set(name, [])
       groups.get(name)!.push(t)
@@ -228,7 +243,21 @@ export default function CommandCentrePage() {
       if (b === 'Unassigned') return -1
       return a.localeCompare(b)
     })
-  }, [filteredActiveTasks])
+  }, [allActiveTasks])
+
+  const allRelevant = useMemo(() =>
+    tasks
+      .filter(t => t.status !== 'done' || (t.completed_at && t.completed_at.slice(0, 10) === today))
+      .sort((a, b) => (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99)),
+  [tasks, today])
+
+  const stats = useMemo(() => ({
+    focus: focusTasks.length,
+    clientRequests: allActiveTasks.filter(t => t.priority === 'client_request').length,
+    inProgress: allActiveTasks.filter(t => t.status === 'in_progress').length,
+    doneToday: tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today).length,
+    overdue: allActiveTasks.filter(t => new Date(`${t.due_date}T00:00:00`) < now).length,
+  }), [tasks, allActiveTasks, focusTasks, today, now])
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
     setBusyId(id)
@@ -285,18 +314,15 @@ export default function CommandCentrePage() {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <div className="h-4 w-32 animate-pulse rounded-lg bg-white/10" />
-          <div className="mt-3 h-8 w-64 animate-pulse rounded-lg bg-white/10" />
+          <div className="h-3 w-24 animate-pulse rounded-lg bg-white/10" />
+          <div className="mt-3 h-8 w-48 animate-pulse rounded-lg bg-white/10" />
         </div>
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="h-20 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
           ))}
         </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="h-64 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
-          <div className="h-64 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
-        </div>
+        <div className="h-64 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
       </div>
     )
   }
@@ -329,19 +355,26 @@ export default function CommandCentrePage() {
 
       {/* A — Header */}
       <div className="mb-5">
-        <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
+        <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub</p>
+        <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
+        <p className="mt-1 text-sm text-brand-primary/60">Today's work list.</p>
       </div>
 
-      <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Active" value={stats.total} />
+      {/* B — Quick Add */}
+      <div className="mb-5">
+        <QuickAddCard onTaskCreated={load} />
+      </div>
+
+      {/* C — Stats */}
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        <StatCard label="Focus" value={stats.focus} />
         <StatCard label="Client requests" value={stats.clientRequests} accent />
+        <StatCard label="In progress" value={stats.inProgress} />
         <StatCard label="Done today" value={stats.doneToday} teal />
-        <StatCard label="Blocked" value={stats.blocked} amber />
         <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
-        <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} />
       </div>
 
-      {/* B — Filter row */}
+      {/* D — Filter row */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -377,31 +410,31 @@ export default function CommandCentrePage() {
         </select>
       </div>
 
-      {/* C — Quick Add */}
-      <div className="mb-6">
-        <QuickAddCard onTaskCreated={load} />
-      </div>
-
-      {/* D — Today's tasks */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-6 w-1 rounded-full bg-brand-accent/50" />
-          <h2 className="text-lg font-bold text-white">Today's tasks</h2>
-          <span className="rounded-full bg-brand-accent/10 px-2 py-0.5 text-xs font-medium text-brand-accent">{filteredActiveTasks.length}</span>
+      {/* E — Focus list */}
+      <div className="mb-4">
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-white">Focus</h2>
+          <span className="rounded-full bg-brand-accent/10 px-2 py-0.5 text-xs font-medium text-brand-accent">{focusTasks.length}</span>
         </div>
-        {staffGroups.length === 0 ? (
-          <EmptyState
-            title="No tasks yet"
-            message="Add a task above."
-            centered={false}
-          />
+        {focusTasks.length === 0 ? (
+          <EmptyState title="All clear" message="No tasks to focus on right now." centered={false} />
+        ) : filterStaff !== '' ? (
+          <div className="space-y-2">
+            {focusTasks.map(task => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                busyId={busyId}
+                onStatusChange={handleStatusChange}
+                onOpenDetails={handleOpenDetails}
+              />
+            ))}
+          </div>
         ) : (
           <div className="space-y-3">
-            {staffGroups.map(([staffName, staffTasks]) => (
+            {focusGroupEntries.map(([staffName, staffTasks]) => (
               <PremiumCard key={staffName} padding="sm">
-                {filterStaff !== '__my__' && (
-                  <h3 className="mb-3 text-sm font-semibold text-brand-accent">@{staffName}</h3>
-                )}
+                <h3 className="mb-2 text-xs font-semibold text-brand-accent">@{staffName}</h3>
                 <div className="space-y-2">
                   {staffTasks.map(task => (
                     <TaskRow
@@ -419,7 +452,39 @@ export default function CommandCentrePage() {
         )}
       </div>
 
-      {/* E — WhatsApp morning + end-of-day */}
+      {/* F — Done today */}
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => setShowDone(v => !v)}
+          className="flex items-center gap-2 text-sm text-brand-primary/50 hover:text-brand-primary transition-colors"
+        >
+          <span>Done today</span>
+          <span className="rounded-full bg-white/[0.05] px-2 py-0.5 text-xs">{doneTodayTasks.length}</span>
+          <span className="text-xs">{showDone ? '▴' : '▾'}</span>
+        </button>
+        {showDone && (
+          <div className="mt-2">
+            {doneTodayTasks.length === 0 ? (
+              <p className="text-xs text-brand-primary/40">Nothing done today yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {doneTodayTasks.map(task => (
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    busyId={busyId}
+                    onStatusChange={handleStatusChange}
+                    onOpenDetails={handleOpenDetails}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* G — WhatsApp morning + end-of-day */}
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         <MorningMessageCard
           staffGroups={staffGroups}
@@ -433,7 +498,7 @@ export default function CommandCentrePage() {
         />
       </div>
 
-      {/* F — Morning List Import */}
+      {/* H — Morning List Import */}
       <div id="morning-import" className="mb-6">
         <MorningImportCard onTasksCreated={load} />
       </div>
@@ -720,16 +785,9 @@ function TaskRow({ task, busyId, onStatusChange, onOpenDetails }: {
               <span className={dateClass(task.due_date)}>{formatDate(task.due_date)}</span>
               <span className="text-brand-primary/50">·</span>
               <span className="text-brand-primary/60">{task.bucket}</span>
-              {task.notes && (
-                <>
-                  <span className="text-brand-primary/50">·</span>
-                  <span className="max-w-[200px] truncate text-brand-primary/60">{task.notes}</span>
-                </>
-              )}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Pill tone={statusTone(task.status)}>{statusLabel(task.status)}</Pill>
             {task.status !== 'done' && (
               <select
                 value={task.status}
