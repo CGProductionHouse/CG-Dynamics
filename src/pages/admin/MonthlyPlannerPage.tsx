@@ -16,6 +16,7 @@ import {
   monthKey,
   simplifyProductionStatus,
   updateMonthlyDeliverableStatus,
+  updateMonthlyDeliverableSchedule,
   type DeliverableType,
   type MonthlyDeliverable,
   type SimplifiedProductionStatus,
@@ -121,6 +122,8 @@ export default function MonthlyPlannerPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [statusError, setStatusError] = useState<string | null>(null)
+  const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
+  const [drawerClientName, setDrawerClientName] = useState('')
 
   const monthStart = toMonthStart(selectedMonth)
 
@@ -223,6 +226,18 @@ export default function MonthlyPlannerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthStart, clientFilter, typeFilter])
 
+  useEffect(() => {
+    if (!drawerDeliverable) return
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDrawerDeliverable(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [drawerDeliverable])
+
+  function openDrawer(deliverable: MonthlyDeliverable, clientName: string) {
+    setDrawerDeliverable(deliverable)
+    setDrawerClientName(clientName)
+  }
+
   async function handleGenerate() {
     if (!isAdmin) return
     setGenerating(true)
@@ -257,6 +272,17 @@ export default function MonthlyPlannerPage() {
       return
     }
     setDeliverables(current => current.map(item => item.id === id ? { ...item, production_status: backendStatus } : item))
+    setDrawerDeliverable(prev => prev?.id === id ? { ...prev, production_status: backendStatus } : prev)
+  }
+
+  async function handleScheduleChange(id: string, scheduledDate: string | null) {
+    const { error } = await updateMonthlyDeliverableSchedule(id, scheduledDate)
+    if (error) {
+      setErrorMessage(error.message ?? 'Could not update schedule.')
+      return
+    }
+    setDeliverables(current => current.map(item => item.id === id ? { ...item, scheduled_date: scheduledDate } : item))
+    setDrawerDeliverable(prev => prev?.id === id ? { ...prev, scheduled_date: scheduledDate } : prev)
   }
 
   if (loading) {
@@ -478,25 +504,33 @@ export default function MonthlyPlannerPage() {
                               </span>
                             )}
                           </div>
-                          <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white">{deliverable.title}</h3>
+                          <button type="button" onClick={() => openDrawer(deliverable, group.clientName)} className="mt-1 text-left">
+                            <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-white hover:text-brand-accent transition-colors">
+                              {deliverable.title}
+                            </h3>
+                          </button>
                         </div>
-                        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
-                          {SIMPLIFIED_STATUS_LABELS[simplified]}
-                        </span>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                            {SIMPLIFIED_STATUS_LABELS[simplified]}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => openDrawer(deliverable, group.clientName)}
+                            className="rounded-md border border-white/[0.08] px-1.5 py-0.5 text-[11px] text-white/30 hover:text-white hover:border-white/20 transition-colors"
+                            title="Open details"
+                          >
+                            ···
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-0.5 text-xs text-white/40">
                         {deliverable.assigned_to_name && (
                           <p>Staff: <span className="text-white/65">{deliverable.assigned_to_name}</span></p>
                         )}
-                        {deliverable.scheduled_date && (
-                          <p>Scheduled: <span className="text-white/65">{formatDate(deliverable.scheduled_date)}</span></p>
-                        )}
                         {deliverable.due_date && (
                           <p>Due: <span className="text-white/65">{formatDate(deliverable.due_date)}</span></p>
-                        )}
-                        {deliverable.notes && (
-                          <p className="line-clamp-2">Notes: <span className="text-white/55">{deliverable.notes}</span></p>
                         )}
                       </div>
 
@@ -520,8 +554,6 @@ export default function MonthlyPlannerPage() {
                           </select>
                         )
                       )}
-
-                      {isAdmin && <PackageActionMenu />}
                     </article>
                   )
                 })}
@@ -529,6 +561,18 @@ export default function MonthlyPlannerPage() {
             </section>
           ))}
         </div>
+      )}
+
+      {drawerDeliverable && (
+        <DeliverableDetailDrawer
+          deliverable={drawerDeliverable}
+          clientName={drawerClientName}
+          isAdmin={isAdmin}
+          isScheduleController={isScheduleController}
+          onClose={() => setDrawerDeliverable(null)}
+          onStatusChange={handleStatusChange}
+          onScheduleChange={handleScheduleChange}
+        />
       )}
     </div>
   )
@@ -566,37 +610,185 @@ const PACKAGE_ACTIONS = [
   { value: 'move_work', label: 'Move to another month' },
 ] as const
 
-// Placeholder menu — reserves the workflow position.
-// Saving is not active until phase-7a migration is applied and
-// the full linking UI is built.
-function PackageActionMenu() {
-  const [open, setOpen] = useState(false)
+function DeliverableDetailDrawer({
+  deliverable,
+  clientName,
+  isAdmin,
+  isScheduleController,
+  onClose,
+  onStatusChange,
+  onScheduleChange,
+}: {
+  deliverable: MonthlyDeliverable
+  clientName: string
+  isAdmin: boolean
+  isScheduleController: boolean
+  onClose: () => void
+  onStatusChange: (id: string, status: SimplifiedProductionStatus) => void
+  onScheduleChange: (id: string, date: string | null) => Promise<void>
+}) {
+  const simplified = simplifyProductionStatus(deliverable.production_status)
+  const source = deliverableSource(deliverable)
+  const [schedDate, setSchedDate] = useState(deliverable.scheduled_date ?? '')
+  const [schedSaving, setSchedSaving] = useState(false)
+  const [schedMsg, setSchedMsg] = useState<string | null>(null)
+
+  async function handleScheduleSave() {
+    if (schedSaving) return
+    setSchedSaving(true)
+    setSchedMsg(null)
+    await onScheduleChange(deliverable.id, schedDate || null)
+    setSchedSaving(false)
+    setSchedMsg('Saved')
+    setTimeout(() => setSchedMsg(null), 2000)
+  }
+
+  const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
+
   return (
-    <div className="mt-2 border-t border-white/[0.06] pt-2">
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        className="flex w-full items-center justify-between text-[11px] font-semibold text-white/35 hover:text-white/55 transition-colors"
-      >
-        <span>Package action</span>
-        <span className="text-[10px]">{open ? '▲' : '▼'}</span>
-      </button>
-      {open && (
-        <div className="mt-2 space-y-0.5">
-          {PACKAGE_ACTIONS.map(action => (
-            <button
-              key={action.value}
-              type="button"
-              disabled
-              className="flex w-full cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-white/25"
-            >
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/15" />
-              {action.label}
-            </button>
-          ))}
-          <p className="pt-0.5 text-[10px] text-white/20">Coming soon</p>
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-y-auto border-l border-white/[0.08] bg-[#111111] sm:w-[460px]">
+        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+          <div className="min-w-0">
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+              <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                {displayDeliverableCode(deliverable)}
+              </span>
+              <span className="text-[11px] text-white/40">{TYPE_LABELS[deliverable.deliverable_type]}</span>
+              <SourceChip source={source} />
+              {deliverable.priority === 'urgent' && (
+                <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">Urgent</span>
+              )}
+            </div>
+            <h2 className="text-base font-bold text-white leading-snug">{deliverable.title}</h2>
+            <p className="mt-0.5 text-xs text-white/40">{clientName}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 rounded-md p-1 text-white/40 hover:text-white transition-colors"
+          >
+            ✕
+          </button>
         </div>
-      )}
-    </div>
+
+        <div className="flex-1 space-y-5 px-5 py-4">
+          {deliverable.moved_from_deliverable_id && (
+            <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-white/50">
+              Moved from another month
+            </div>
+          )}
+          {deliverable.replaced_by_request_id && (
+            <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-white/50">
+              Replaced by client request
+            </div>
+          )}
+
+          <div>
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Status</p>
+            {FINAL_STATUSES.includes(simplified) && !isScheduleController ? (
+              <div className="flex items-center gap-2">
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                  {SIMPLIFIED_STATUS_LABELS[simplified]}
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/25">Final</span>
+              </div>
+            ) : (
+              <select
+                value={simplified}
+                onChange={event => onStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
+                className="w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              >
+                {(isScheduleController ? SIMPLIFIED_STATUS_OPTIONS : STAFF_STATUSES).map(status => (
+                  <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {deliverable.assigned_to_name && (
+              <div>
+                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Staff</p>
+                <p className="text-sm text-white/70">{deliverable.assigned_to_name}</p>
+              </div>
+            )}
+            {deliverable.due_date && (
+              <div>
+                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Due date</p>
+                <p className="text-sm text-white/70">{formatDate(deliverable.due_date)}</p>
+              </div>
+            )}
+            {!isAdmin && deliverable.scheduled_date && (
+              <div>
+                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Scheduled</p>
+                <p className="text-sm text-white/70">{formatDate(deliverable.scheduled_date)}</p>
+              </div>
+            )}
+          </div>
+
+          {isAdmin && (
+            <div>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Scheduled date</p>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={schedDate}
+                  onChange={e => setSchedDate(e.target.value)}
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={handleScheduleSave}
+                  disabled={schedSaving}
+                  className="shrink-0 rounded-lg border border-brand-accent/30 bg-brand-accent/10 px-3 py-2 text-sm font-semibold text-brand-accent hover:bg-brand-accent/20 disabled:opacity-50 transition-colors"
+                >
+                  {schedSaving ? '…' : 'Save'}
+                </button>
+              </div>
+              {schedMsg && <p className="mt-1 text-[11px] text-brand-accent">{schedMsg}</p>}
+            </div>
+          )}
+
+          {deliverable.notes && (
+            <div>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Notes</p>
+              <p className="whitespace-pre-wrap text-sm text-white/60">{deliverable.notes}</p>
+            </div>
+          )}
+
+          {isAdmin && (
+            <div className="border-t border-white/[0.06] pt-4">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/35">Package action</p>
+              <div className="space-y-0.5">
+                {PACKAGE_ACTIONS.map(action => (
+                  <button
+                    key={action.value}
+                    type="button"
+                    disabled
+                    className="flex w-full cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-white/25"
+                  >
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/15" />
+                    {action.label}
+                  </button>
+                ))}
+                <p className="pt-0.5 text-[10px] text-white/20">After migration phase-7a</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-white/[0.08] px-5 py-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-white/60 hover:text-white transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </>
   )
 }
