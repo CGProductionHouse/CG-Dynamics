@@ -726,3 +726,113 @@ export async function generateMonthFromPackages(monthStartDate: string) {
 export async function generateAllForMonth(monthStartDate: string) {
   return generateMonthFromPackages(monthStartDate)
 }
+
+// ── PlannerTask (from planner_tasks table, phase-6e) ─────────
+
+export type PlannerTaskStatus =
+  | 'to_do'
+  | 'in_progress'
+  | 'ready_internal_review'
+  | 'approved'
+  | 'scheduled'
+
+export const PLANNER_TASK_STATUSES: PlannerTaskStatus[] = [
+  'to_do', 'in_progress', 'ready_internal_review', 'approved', 'scheduled',
+]
+
+export const PLANNER_TASK_STATUS_LABELS: Record<PlannerTaskStatus, string> = {
+  to_do: 'To do',
+  in_progress: 'In progress',
+  ready_internal_review: 'Ready for review',
+  approved: 'Approved',
+  scheduled: 'Scheduled',
+}
+
+export interface PlannerTask {
+  id: string
+  board_id: string | null
+  bucket_id: string | null
+  title: string
+  client_id: string | null
+  client_name: string | null
+  assigned_to_name: string | null
+  status: PlannerTaskStatus
+  priority: TaskPriority
+  start_date: string | null
+  due_date: string | null
+  notes: string | null
+  checklist: unknown[]
+  source: string
+  original_plan_name: string | null
+  original_bucket_name: string | null
+  original_task_id: string | null
+  import_hash: string
+  created_at: string
+  updated_at: string
+}
+
+const PLANNER_TASKS_TABLE = 'planner_tasks'
+
+export async function listPlannerTasks(boardId: string) {
+  return supabase
+    .from(PLANNER_TASKS_TABLE)
+    .select('*')
+    .eq('board_id', boardId)
+    .order('created_at')
+}
+
+export interface CreatePlannerTaskInput {
+  board_id: string
+  bucket_id: string
+  title: string
+  assigned_to_name?: string | null
+  client_id?: string | null
+  client_name?: string | null
+  status?: PlannerTaskStatus
+  priority?: TaskPriority
+  due_date?: string | null
+  notes?: string | null
+}
+
+export async function createPlannerTask(input: CreatePlannerTaskInput) {
+  const importHash = `manual-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  return supabase
+    .from(PLANNER_TASKS_TABLE)
+    .insert({
+      board_id: input.board_id,
+      bucket_id: input.bucket_id,
+      title: input.title.trim(),
+      client_id: input.client_id ?? null,
+      client_name: input.client_name ?? null,
+      assigned_to_name: input.assigned_to_name ?? null,
+      status: input.status ?? 'to_do',
+      priority: input.priority ?? 'normal',
+      due_date: input.due_date ?? null,
+      notes: input.notes ?? null,
+      source: 'manual',
+      import_hash: importHash,
+    })
+    .select()
+    .single()
+}
+
+export interface UpdatePlannerTaskInput {
+  title?: string
+  client_id?: string | null
+  client_name?: string | null
+  assigned_to_name?: string | null
+  status?: PlannerTaskStatus
+  priority?: TaskPriority
+  due_date?: string | null
+  notes?: string | null
+  bucket_id?: string | null
+}
+
+export async function updatePlannerTask(id: string, updates: UpdatePlannerTaskInput) {
+  return supabase
+    .from(PLANNER_TASKS_TABLE)
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+}

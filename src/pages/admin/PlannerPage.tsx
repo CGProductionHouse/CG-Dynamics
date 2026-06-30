@@ -1,14 +1,24 @@
-import { useState, useEffect, useMemo, type ReactNode } from 'react'
+import { useState, useEffect, useMemo, type ReactNode, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
+import { ActionButton } from '../../components/ui/Buttons'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   listPlannerBoards,
   listPlannerBuckets,
+  listPlannerTasks,
+  createPlannerTask,
+  updatePlannerTask,
   SIMPLIFIED_STATUS_LABELS,
   SIMPLIFIED_STATUS_OPTIONS,
+  PRIORITIES,
+  PLANNER_TASK_STATUSES,
+  PLANNER_TASK_STATUS_LABELS,
   type PlannerBoard,
   type PlannerBucket,
+  type PlannerTask,
+  type PlannerTaskStatus,
+  type TaskPriority,
 } from '../../lib/planner'
 
 const BOARD_LABELS: Record<string, string> = {
@@ -48,7 +58,7 @@ const BOARD_ICONS: Record<string, ReactNode> = {
   ),
 }
 
-const STATUS_TONES: Record<string, string> = {
+const MONTHLY_STATUS_TONES: Record<string, string> = {
   not_started: 'text-white/50 border-white/10',
   in_progress: 'text-brand-accent border-brand-accent/25',
   ready_review: 'text-amber-300 border-amber-400/25',
@@ -57,15 +67,33 @@ const STATUS_TONES: Record<string, string> = {
   scheduled_posted: 'text-[#2dd4bf] border-[#2dd4bf]/25',
 }
 
+function formatPlannerDate(dateStr: string) {
+  const d = new Date(`${dateStr}T00:00:00`)
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+function plannerStatusTone(status: PlannerTaskStatus) {
+  if (status === 'in_progress') return 'text-brand-accent border-brand-accent/20'
+  if (status === 'ready_internal_review') return 'text-amber-300 border-amber-400/20'
+  if (status === 'approved' || status === 'scheduled') return 'text-[#2dd4bf] border-[#2dd4bf]/20'
+  return 'text-white/35 border-white/10'
+}
+
 export default function PlannerPage() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
+  const myName = profile?.full_name ?? null
+
   const [boards, setBoards] = useState<PlannerBoard[]>([])
   const [buckets, setBuckets] = useState<PlannerBucket[]>([])
+  const [tasks, setTasks] = useState<PlannerTask[]>([])
   const [activeBoard, setActiveBoard] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [tasksLoading, setTasksLoading] = useState(false)
   const [tableMissing, setTableMissing] = useState(false)
+  const [drawerTask, setDrawerTask] = useState<PlannerTask | null>(null)
 
+  // Load boards
   useEffect(() => {
     let active = true
     setLoading(true)
@@ -91,6 +119,7 @@ export default function PlannerPage() {
     return () => { active = false }
   }, [activeBoard])
 
+  // Load buckets when board changes
   useEffect(() => {
     if (!activeBoard) return
     const board = boards.find(b => b.slug === activeBoard)
@@ -105,7 +134,35 @@ export default function PlannerPage() {
     return () => { active = false }
   }, [activeBoard, boards])
 
-  // Admin boards always appear last
+  // Load tasks when board changes
+  useEffect(() => {
+    setTasks([])
+    if (!activeBoard || boards.length === 0) return
+    const board = boards.find(b => b.slug === activeBoard)
+    if (!board) return
+
+    let active = true
+    setTasksLoading(true)
+    listPlannerTasks(board.id).then(({ data }) => {
+      if (!active) return
+      setTasks(data ?? [])
+      setTasksLoading(false)
+    }).catch(() => {
+      if (active) setTasksLoading(false)
+    })
+
+    return () => { active = false }
+  }, [activeBoard, boards])
+
+  // Escape to close drawer
+  useEffect(() => {
+    if (!drawerTask) return
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDrawerTask(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [drawerTask])
+
+  // Admin board always last
   const sortedBoards = useMemo(() => {
     return [...boards].sort((a, b) => {
       const aLast = a.board_type === 'admin' || a.slug === 'admin-check-list'
@@ -116,12 +173,37 @@ export default function PlannerPage() {
     })
   }, [boards])
 
+  const activeBoardId = useMemo(
+    () => boards.find(b => b.slug === activeBoard)?.id ?? null,
+    [boards, activeBoard],
+  )
+
+  // Group tasks by bucket for O(1) column lookup
+  const tasksByBucket = useMemo(() => {
+    const map = new Map<string, PlannerTask[]>()
+    for (const t of tasks) {
+      const key = t.bucket_id ?? '__none__'
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(t)
+    }
+    return map
+  }, [tasks])
+
+  function handleTaskCreated(task: PlannerTask) {
+    setTasks(prev => [...prev, task])
+  }
+
+  function handleTaskSaved(updated: PlannerTask) {
+    setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
+    setDrawerTask(updated)
+  }
+
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="mb-4 h-6 w-40 animate-pulse rounded bg-white/10" />
         <div className="mb-4 h-24 w-full animate-pulse rounded-xl bg-white/[0.04]" />
-        <div className="flex gap-1.5 mb-4">
+        <div className="mb-4 flex gap-1.5">
           {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="h-7 w-20 animate-pulse rounded-md bg-white/10" />
           ))}
@@ -180,7 +262,7 @@ export default function PlannerPage() {
         )}
       </div>
 
-      {/* Monthly Work — primary entry point */}
+      {/* Monthly Work entry point */}
       <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.035] p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -198,13 +280,11 @@ export default function PlannerPage() {
             </svg>
           </Link>
         </div>
-
-        {/* Status chips — structural preview */}
         <div className="mt-4 flex flex-wrap gap-1.5">
           {SIMPLIFIED_STATUS_OPTIONS.map(s => (
             <span
               key={s}
-              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${STATUS_TONES[s] ?? 'text-white/40 border-white/10'}`}
+              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${MONTHLY_STATUS_TONES[s] ?? 'text-white/40 border-white/10'}`}
             >
               {SIMPLIFIED_STATUS_LABELS[s]}
             </span>
@@ -248,9 +328,8 @@ export default function PlannerPage() {
         })}
       </div>
 
-      {/* Schedule board callout */}
       {activeIsScheduleBoard && (
-        <div className="mb-3 rounded-lg border border-white/8 bg-white/[0.025] px-3 py-2 text-xs text-brand-primary/55">
+        <div className="mb-3 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-xs text-brand-primary/55">
           Master schedule — full client content plan across all months.
         </div>
       )}
@@ -265,28 +344,385 @@ export default function PlannerPage() {
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
           {buckets.map(bucket => (
-            <BucketColumn key={bucket.id} bucket={bucket} />
+            <BucketColumn
+              key={bucket.id}
+              bucket={bucket}
+              boardId={activeBoardId ?? ''}
+              tasks={tasksByBucket.get(bucket.id) ?? []}
+              tasksLoading={tasksLoading}
+              myName={myName}
+              onOpenTask={setDrawerTask}
+              onTaskCreated={handleTaskCreated}
+            />
           ))}
         </div>
+      )}
+
+      {drawerTask && (
+        <PlannerTaskDrawer
+          task={drawerTask}
+          buckets={buckets}
+          onClose={() => setDrawerTask(null)}
+          onSaved={handleTaskSaved}
+        />
       )}
     </div>
   )
 }
 
-function BucketColumn({ bucket }: { bucket: PlannerBucket }) {
+function BucketColumn({ bucket, boardId, tasks, tasksLoading, myName, onOpenTask, onTaskCreated }: {
+  bucket: PlannerBucket
+  boardId: string
+  tasks: PlannerTask[]
+  tasksLoading: boolean
+  myName: string | null
+  onOpenTask: (task: PlannerTask) => void
+  onTaskCreated: (task: PlannerTask) => void
+}) {
+  const [showAdd, setShowAdd] = useState(false)
+  const [addTitle, setAddTitle] = useState('')
+  const [addBusy, setAddBusy] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+
+  async function handleAdd(e: FormEvent) {
+    e.preventDefault()
+    if (!addTitle.trim() || addBusy || !boardId) return
+    setAddBusy(true)
+    setAddError(null)
+    try {
+      const { data, error } = await createPlannerTask({
+        board_id: boardId,
+        bucket_id: bucket.id,
+        title: addTitle.trim(),
+        assigned_to_name: myName ?? null,
+      })
+      if (error) {
+        setAddError(error.code === '42501' ? 'Admin permission needed.' : error.message)
+        return
+      }
+      if (data) {
+        onTaskCreated(data)
+        setAddTitle('')
+        setShowAdd(false)
+      }
+    } catch {
+      setAddError('Could not create task.')
+    } finally {
+      setAddBusy(false)
+    }
+  }
+
+  function cancelAdd() {
+    setShowAdd(false)
+    setAddTitle('')
+    setAddError(null)
+  }
+
   return (
     <div className="w-56 shrink-0 sm:w-60">
-      <div className="mb-2 flex items-center gap-2 px-1">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-white/45 truncate">
+      <div className="mb-2 flex items-center justify-between gap-2 px-1">
+        <h3 className="truncate text-[11px] font-semibold uppercase tracking-wider text-white/45">
           {bucket.name}
         </h3>
-        <span className="text-[11px] text-white/20">0</span>
+        {tasks.length > 0 && (
+          <span className="shrink-0 text-[11px] text-white/25">{tasks.length}</span>
+        )}
       </div>
-      <div className="min-h-[8rem] rounded-lg border border-white/[0.06] bg-white/[0.018] p-2">
-        <div className="flex h-[5rem] items-center justify-center">
-          <p className="text-[11px] text-white/20">—</p>
-        </div>
+
+      <div className="min-h-[7rem] rounded-lg border border-white/[0.06] bg-white/[0.018] p-2">
+        {tasksLoading ? (
+          <div className="flex h-16 items-center justify-center">
+            <div className="h-1.5 w-12 animate-pulse rounded-full bg-white/10" />
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {tasks.map(task => (
+              <PlannerTaskCard key={task.id} task={task} onClick={() => onOpenTask(task)} />
+            ))}
+
+            {tasks.length === 0 && !showAdd && (
+              <div className="flex flex-col items-center gap-1.5 py-4">
+                <p className="text-[11px] text-white/20">No tasks</p>
+                <button
+                  type="button"
+                  onClick={() => setShowAdd(true)}
+                  className="text-[11px] text-brand-primary/40 hover:text-brand-primary transition-colors"
+                >
+                  + Add task
+                </button>
+              </div>
+            )}
+
+            {showAdd ? (
+              <form onSubmit={handleAdd} className="pt-0.5">
+                <input
+                  autoFocus
+                  value={addTitle}
+                  onChange={e => setAddTitle(e.target.value)}
+                  placeholder="Task title..."
+                  className="w-full rounded-md border border-white/10 bg-black/40 px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                />
+                {addError && <p className="mt-1 text-[11px] text-red-400">{addError}</p>}
+                <div className="mt-1.5 flex gap-1.5">
+                  <button
+                    type="submit"
+                    disabled={addBusy || !addTitle.trim()}
+                    className="rounded-md bg-brand-accent/90 px-2.5 py-1 text-[11px] font-semibold text-brand-bg disabled:opacity-50"
+                  >
+                    {addBusy ? '…' : 'Save'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelAdd}
+                    className="rounded-md border border-white/10 px-2.5 py-1 text-[11px] text-white/50 hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : tasks.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowAdd(true)}
+                className="mt-1 w-full rounded-md border border-dashed border-white/[0.07] py-1.5 text-[11px] text-white/25 hover:border-white/15 hover:text-white/50 transition-colors"
+              >
+                + Add task
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
+  )
+}
+
+function PlannerTaskCard({ task, onClick }: { task: PlannerTask; onClick: () => void }) {
+  const dotColor = task.priority === 'urgent'
+    ? 'bg-amber-400/60'
+    : task.priority === 'client_request'
+    ? 'bg-brand-accent/60'
+    : 'bg-white/15'
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full rounded-md border border-white/[0.06] bg-white/[0.03] p-2.5 text-left transition-all hover:border-white/[0.1] hover:bg-white/[0.06]"
+    >
+      <div className="flex items-start gap-1.5">
+        <div className={`mt-[4px] h-1.5 w-1.5 shrink-0 rounded-full ${dotColor}`} />
+        <p className="text-[12px] font-medium leading-snug text-white">{task.title}</p>
+      </div>
+      {(task.client_name || task.assigned_to_name || task.due_date) && (
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-3">
+          {task.client_name && (
+            <span className="text-[10px] text-brand-primary/60">{task.client_name}</span>
+          )}
+          {task.assigned_to_name && (
+            <span className="text-[10px] text-white/30">{task.assigned_to_name}</span>
+          )}
+          {task.due_date && (
+            <span className="text-[10px] text-white/30">{formatPlannerDate(task.due_date)}</span>
+          )}
+        </div>
+      )}
+      {task.status !== 'to_do' && (
+        <div className="mt-1.5 pl-3">
+          <span className={`inline-block rounded-full border px-1.5 py-px text-[9px] font-semibold ${plannerStatusTone(task.status)}`}>
+            {PLANNER_TASK_STATUS_LABELS[task.status]}
+          </span>
+        </div>
+      )}
+    </button>
+  )
+}
+
+function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
+  task: PlannerTask
+  buckets: PlannerBucket[]
+  onClose: () => void
+  onSaved: (updated: PlannerTask) => void
+}) {
+  const [title, setTitle] = useState(task.title)
+  const [clientName, setClientName] = useState(task.client_name ?? '')
+  const [assignedTo, setAssignedTo] = useState(task.assigned_to_name ?? '')
+  const [status, setStatus] = useState<PlannerTaskStatus>(task.status)
+  const [priority, setPriority] = useState<TaskPriority>(task.priority)
+  const [dueDate, setDueDate] = useState(task.due_date ?? '')
+  const [notes, setNotes] = useState(task.notes ?? '')
+  const [bucketId, setBucketId] = useState(task.bucket_id ?? '')
+  const [saving, setSaving] = useState(false)
+  const [saveMsg, setSaveMsg] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  async function handleSave() {
+    if (saving || !title.trim()) return
+    setSaving(true)
+    setSaveMsg(null)
+    setSaveError(null)
+    try {
+      const { data, error } = await updatePlannerTask(task.id, {
+        title: title.trim(),
+        client_name: clientName.trim() || null,
+        assigned_to_name: assignedTo.trim() || null,
+        status,
+        priority,
+        due_date: dueDate || null,
+        notes: notes.trim() || null,
+        bucket_id: bucketId || null,
+      })
+      if (error) {
+        setSaveError(error.code === '42501' ? 'Admin permission needed.' : error.message)
+        return
+      }
+      if (data) {
+        onSaved(data)
+        setSaveMsg('Saved')
+        setTimeout(() => setSaveMsg(null), 2000)
+      }
+    } catch {
+      setSaveError('Could not save.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-y-auto border-l border-white/[0.08] bg-[#111111] sm:w-[440px]">
+        <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Task details</h2>
+            {task.original_plan_name && (
+              <p className="mt-0.5 text-[10px] text-white/30">{task.original_plan_name}</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-brand-primary hover:text-white transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-4 px-5 py-5">
+          {task.priority !== 'normal' && (
+            <div>
+              <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${
+                task.priority === 'urgent'
+                  ? 'text-amber-400 border-amber-400/25'
+                  : 'text-brand-accent border-brand-accent/25'
+              }`}>
+                {task.priority === 'urgent' ? 'Urgent' : 'Client request'}
+              </span>
+            </div>
+          )}
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Title</label>
+            <input value={title} onChange={e => setTitle(e.target.value)} className={inputCls} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
+              <select value={status} onChange={e => setStatus(e.target.value as PlannerTaskStatus)} className={inputCls}>
+                {PLANNER_TASK_STATUSES.map(s => (
+                  <option key={s} value={s}>{PLANNER_TASK_STATUS_LABELS[s]}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Priority</label>
+              <select value={priority} onChange={e => setPriority(e.target.value as TaskPriority)} className={inputCls}>
+                {PRIORITIES.map(p => (
+                  <option key={p} value={p}>
+                    {p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
+              <input
+                value={clientName}
+                onChange={e => setClientName(e.target.value)}
+                placeholder="Client name"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label>
+              <input
+                value={assignedTo}
+                onChange={e => setAssignedTo(e.target.value)}
+                placeholder="Name"
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Due date</label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Column</label>
+              <select value={bucketId} onChange={e => setBucketId(e.target.value)} className={inputCls}>
+                <option value="">— None —</option>
+                {buckets.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Notes</label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              rows={4}
+              className={`resize-none ${inputCls}`}
+            />
+          </div>
+        </div>
+
+        <div className="border-t border-white/[0.08] px-5 py-4">
+          {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
+          {saveMsg && <p className="mb-2 text-xs text-[#2dd4bf]">{saveMsg}</p>}
+          <div className="flex items-center gap-3">
+            <ActionButton
+              variant="primary"
+              onClick={handleSave}
+              disabled={saving || !title.trim()}
+              loading={saving}
+            >
+              Save
+            </ActionButton>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-brand-primary hover:text-white transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
