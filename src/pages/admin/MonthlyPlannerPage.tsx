@@ -50,6 +50,32 @@ const STATUS_STAT_TONE: Record<SimplifiedProductionStatus, string> = {
   scheduled_posted: 'text-[#2dd4bf]',
 }
 
+type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
+
+function deliverableSource(d: MonthlyDeliverable): DeliverableSource {
+  if (d.moved_from_deliverable_id) return 'moved'
+  if (d.replaced_by_request_id) return 'replaced'
+  if (d.priority === 'client_request') return 'client_request'
+  if (d.package_id || d.template_id) return 'package'
+  return 'unlinked'
+}
+
+const SOURCE_LABEL: Record<DeliverableSource, string> = {
+  package: 'Package',
+  client_request: 'Client request',
+  moved: 'Moved',
+  replaced: 'Replaced',
+  unlinked: 'Unlinked',
+}
+
+const SOURCE_CHIP_STYLE: Record<DeliverableSource, string> = {
+  package: 'border-brand-teal/25 bg-brand-teal/[0.07] text-[#2dd4bf]',
+  client_request: 'border-amber-400/25 bg-amber-400/[0.07] text-amber-300',
+  moved: 'border-white/10 bg-white/[0.03] text-white/40',
+  replaced: 'border-white/10 bg-white/[0.03] text-white/40',
+  unlinked: 'border-white/[0.06] bg-white/[0.015] text-white/25',
+}
+
 function toMonthStart(key: string) {
   return `${key}-01`
 }
@@ -139,6 +165,18 @@ export default function MonthlyPlannerPage() {
   }, [clientNameById, filteredDeliverables])
 
   const overallTotals = useMemo(() => getMonthlyPackageTotals(filteredDeliverables), [filteredDeliverables])
+
+  const sourceCounts = useMemo(() => {
+    let pkg = 0, clientReq = 0, movedOrReplaced = 0, unlinked = 0
+    for (const d of filteredDeliverables) {
+      const src = deliverableSource(d)
+      if (src === 'package') pkg++
+      else if (src === 'client_request') clientReq++
+      else if (src === 'moved' || src === 'replaced') movedOrReplaced++
+      else unlinked++
+    }
+    return { pkg, clientReq, movedOrReplaced, unlinked }
+  }, [filteredDeliverables])
 
   async function loadData() {
     setLoading(true)
@@ -318,6 +356,27 @@ export default function MonthlyPlannerPage() {
         ))}
       </div>
 
+      {/* Package usage summary */}
+      {filteredDeliverables.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-white/30">Package usage</span>
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.package}`}>
+              Package {sourceCounts.pkg}
+            </span>
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.client_request}`}>
+              Client request {sourceCounts.clientReq}
+            </span>
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.moved}`}>
+              Moved/Replaced {sourceCounts.movedOrReplaced}
+            </span>
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.unlinked}`}>
+              Unlinked {sourceCounts.unlinked}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="mb-4 grid gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 md:grid-cols-4">
         <select
@@ -356,8 +415,8 @@ export default function MonthlyPlannerPage() {
       {/* Deliverable groups */}
       {groupedDeliverables.length === 0 ? (
         <EmptyState
-          title="No deliverables for this month"
-          message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : 'Use Generate month to create this month\'s deliverables.'}
+          title="No deliverables this month."
+          message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : isAdmin ? 'Use Generate month to create deliverables.' : ''}
           action={isAdmin ? (
             <ActionButton variant="outline" onClick={handleGenerate} loading={generating}>
               Generate month
@@ -395,9 +454,10 @@ export default function MonthlyPlannerPage() {
                               {displayDeliverableCode(deliverable)}
                             </span>
                             <span className="text-[11px] text-white/35">{TYPE_LABELS[deliverable.deliverable_type]}</span>
-                            {deliverable.priority !== 'normal' && (
+                            <SourceChip source={deliverableSource(deliverable)} />
+                            {deliverable.priority === 'urgent' && (
                               <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                                {deliverable.priority === 'urgent' ? 'Urgent' : 'Client req'}
+                                Urgent
                               </span>
                             )}
                           </div>
@@ -461,5 +521,13 @@ function MiniTotal({ label, total, complete }: { label: string; total: number; c
       <p className="text-white/30">{label}</p>
       <p className="font-bold text-white/70">{complete}/{total}</p>
     </div>
+  )
+}
+
+function SourceChip({ source }: { source: DeliverableSource }) {
+  return (
+    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SOURCE_CHIP_STYLE[source]}`}>
+      {SOURCE_LABEL[source]}
+    </span>
   )
 }
