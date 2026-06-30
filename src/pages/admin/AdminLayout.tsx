@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Link, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 
@@ -8,7 +8,7 @@ type Zone = 'dynamics' | 'hub'
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 
 const dynamicsNav = [
-  { to: '/admin/client-performance', label: 'Performance' },
+  { to: '/admin/client-performance', label: 'Performance Dashboard' },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/reports', label: 'Reports' },
   { to: '/admin/published', label: 'Client Preview' },
@@ -60,7 +60,7 @@ function ZoneSwitcher({ zone, onChange }: { zone: Zone; onChange: (z: Zone) => v
             : 'text-brand-primary/60 hover:text-brand-primary'
         }`}
       >
-        Dynamics
+        Performance
       </button>
       <button
         type="button"
@@ -90,7 +90,7 @@ export default function AdminLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [zone, setZone] = useState<Zone>(() => {
     try {
-      return (localStorage.getItem('cg-zone') as Zone) ?? 'dynamics'
+      return (localStorage.getItem('cg-zone') as Zone) ?? 'hub'
     } catch {
       return 'dynamics'
     }
@@ -107,12 +107,20 @@ export default function AdminLayout() {
     if (zone === 'dynamics') {
       return (
         <>
-          <NavSection label="CG Dynamics" />
+          <NavSection label="Performance" />
           {dynamicsNav.map(item => (
             <NavLink key={item.to} to={item.to} className={navClass} onClick={close}>
               <span>{item.label}</span>
             </NavLink>
           ))}
+          <Link
+            to="/admin/cg-hub"
+            onClick={() => { switchZone('hub'); close() }}
+            className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-brand-primary/50 transition-colors hover:bg-white/[0.05] hover:text-white"
+          >
+            <span className="text-base leading-none">←</span>
+            <span>Back to Hub</span>
+          </Link>
         </>
       )
     }
