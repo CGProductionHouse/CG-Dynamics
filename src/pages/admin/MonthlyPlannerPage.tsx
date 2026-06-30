@@ -99,10 +99,14 @@ function formatMonthHeading(key: string) {
   return new Date(year, month - 1, 1).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
 }
 
+const STAFF_STATUSES: SimplifiedProductionStatus[] = ['not_started', 'in_progress', 'ready_review', 'awaiting_client']
+const FINAL_STATUSES: SimplifiedProductionStatus[] = ['meta_drafts', 'scheduled_posted']
+
 export default function MonthlyPlannerPage() {
   const [searchParams] = useSearchParams()
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
+  const isScheduleController = isAdmin
   const [selectedMonth, setSelectedMonth] = useState(monthKey(new Date()))
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
@@ -116,6 +120,7 @@ export default function MonthlyPlannerPage() {
   const [tableMissing, setTableMissing] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [statusError, setStatusError] = useState<string | null>(null)
 
   const monthStart = toMonthStart(selectedMonth)
 
@@ -237,7 +242,13 @@ export default function MonthlyPlannerPage() {
   }
 
   async function handleStatusChange(id: string, status: SimplifiedProductionStatus) {
-    if (!isAdmin) return
+    if (!profile) return
+    setStatusError(null)
+    // TODO: confirm RLS allows staff production-status updates.
+    if (FINAL_STATUSES.includes(status) && !isScheduleController) {
+      setStatusError('Only admin can set final scheduling statuses.')
+      return
+    }
     setErrorMessage(null)
     const backendStatus = SIMPLIFIED_TO_BACKEND_STATUS[status]
     const { error } = await updateMonthlyDeliverableStatus(id, backendStatus)
@@ -313,6 +324,12 @@ export default function MonthlyPlannerPage() {
       {(message || errorMessage) && (
         <div className={`mb-3 rounded-lg px-3 py-2 text-sm ${errorMessage ? 'bg-red-400/10 text-red-200' : 'bg-brand-accent/10 text-brand-accent'}`}>
           {errorMessage ?? message}
+        </div>
+      )}
+
+      {statusError && (
+        <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">
+          {statusError}
         </div>
       )}
 
@@ -483,16 +500,25 @@ export default function MonthlyPlannerPage() {
                         )}
                       </div>
 
-                      {isAdmin && (
-                        <select
-                          value={simplified}
-                          onChange={event => handleStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
-                          className="mt-3 w-full rounded-md border border-white/10 bg-brand-bg px-2 py-1.5 text-xs text-white outline-none focus:border-brand-accent/50"
-                        >
-                          {SIMPLIFIED_STATUS_OPTIONS.map(status => (
-                            <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>
-                          ))}
-                        </select>
+                      {profile && (
+                        FINAL_STATUSES.includes(simplified) && !isScheduleController ? (
+                          <div className="mt-3 flex items-center gap-2">
+                            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                              {SIMPLIFIED_STATUS_LABELS[simplified]}
+                            </span>
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/25">Final</span>
+                          </div>
+                        ) : (
+                          <select
+                            value={simplified}
+                            onChange={event => handleStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
+                            className="mt-3 w-full rounded-md border border-white/10 bg-brand-bg px-2 py-1.5 text-xs text-white outline-none focus:border-brand-accent/50"
+                          >
+                            {(isScheduleController ? SIMPLIFIED_STATUS_OPTIONS : STAFF_STATUSES).map(status => (
+                              <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>
+                            ))}
+                          </select>
+                        )
                       )}
                     </article>
                   )
