@@ -19,6 +19,8 @@ const hubNav = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/planner', label: 'Planner' },
+  { to: '/admin/monthly-planner', label: 'Monthly Planner' },
+  { to: '/admin/master-schedule', label: 'Master Schedule' },
   { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
 ]

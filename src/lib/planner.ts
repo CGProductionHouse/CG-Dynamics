@@ -396,6 +396,25 @@ export async function listMonthlyDeliverablesByMonth(month: string, filters?: Om
   return listMonthlyDeliverables({ ...filters, month })
 }
 
+export async function listMonthlyDeliverablesByYear(
+  year: number,
+  filters?: Omit<DeliverableFilters, 'month'>,
+) {
+  let query = supabase
+    .from(DELIVERABLES_TABLE)
+    .select('*')
+    .is('archived_at', null)
+    .gte('month', `${year}-01`)
+    .lte('month', `${year}-12`)
+    .order('month')
+    .order('instance_number')
+
+  if (filters?.clientId) query = query.eq('client_id', filters.clientId)
+  if (filters?.deliverableType) query = query.eq('deliverable_type', filters.deliverableType)
+
+  return query
+}
+
 // ── Mutation helpers ──────────────────────────────────────────
 
 export interface CreateClientPackageInput {

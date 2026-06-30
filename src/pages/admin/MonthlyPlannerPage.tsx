@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
@@ -370,6 +370,12 @@ export default function MonthlyPlannerPage() {
               Generate month
             </ActionButton>
           )}
+          <Link
+            to="/admin/master-schedule"
+            className="rounded-md border border-white/[0.07] px-3 py-2 text-xs font-bold text-brand-primary/50 hover:text-brand-primary"
+          >
+            Year view
+          </Link>
         </div>
       </div>
 

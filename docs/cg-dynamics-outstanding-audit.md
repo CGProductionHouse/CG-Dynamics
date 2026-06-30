@@ -63,7 +63,7 @@ The biggest missing pieces are:
 | Full calendar view with real month/day layout | PARTIAL | Calendar grid added to Monthly Planner with real weekdays and day numbers. |
 | Calendar must use real dates for 2026, 2027, etc. | PARTIAL | Date math uses native JS Date (year, month, day) — works for any year. |
 | Full-screen calendar/schedule view like screenshots shared | PARTIAL | Month grid exists in Monthly Planner. Full master schedule (all clients, full year) still missing. |
-| Master schedule must show the whole year/content plan | OUTSTANDING | Monthly calendar foundation built; full-year cross-client master schedule not yet built. |
+| Master schedule must show the whole year/content plan | PARTIAL | Master Schedule page built at /admin/master-schedule. Shows all 12 months, all clients, real dates, source/status/type/client filters. Drag/drop, bulk scheduling, and imported real data still outstanding. |
 | Monthly Planner must connect directly to master schedule/calendar | PARTIAL | Monthly Planner now has calendar view using scheduled_date. Full master schedule backbone still missing. |
 | Staff should see monthly summary, not full-year complexity | PARTIAL | Monthly Planner calendar view shows current month only. Needs real imported data. |
 | CA/Amonique control final schedule dates and Scheduled/Posted states | PREPARED | UI/role split exists in Monthly Planner; RLS migration still pending. |
@@ -271,15 +271,16 @@ This must be added as a core goal, not a forgotten side note.
 
 These items are not acceptable as “done” yet:
 
-- empty Planner/Monthly Planner without imported data
-- Monthly Planner without a real calendar/master schedule connection
+- empty Planner/Monthly Planner/Master Schedule without imported data
+- Master Schedule without real Teams/Planner data loaded (all months appear empty until import runs)
+- Master Schedule without drag/drop date assignment or bulk scheduling
+- RLS migrations not applied — final scheduling status restrictions (Meta Drafts, Scheduled/Posted) not enforced at DB level yet
 - package action buttons that only say after migration
 - helper/collaborator placeholders without active save logic
 - timer placeholders without active timer logic
 - client package tracking without actual usage/add-on/move save workflow
 - app visual style that is only partly aligned with CG Production House/client report style
 - client brand update workflow missing entirely
-- no real live calendar view
 
 ## Correct next implementation priority
 
@@ -291,8 +292,8 @@ Next order should be:
 2. Apply pending Supabase migrations.
 3. Regenerate and review Teams import preview.
 4. Import real Teams/Planner data.
-5. Build the real calendar/master schedule month view.
-6. Link Monthly Planner to the master schedule/calendar.
+5. ~~Build the real calendar/master schedule month view.~~ DONE — Monthly Planner calendar + Master Schedule page built.
+6. ~~Link Monthly Planner to the master schedule/calendar.~~ DONE — "Year view" link in Monthly Planner, "Monthly view" link in Master Schedule.
 7. Activate package request workflow: package slot, add-on, moved work, quote needed.
 8. Add client brand update workflow.
 9. Activate helpers/collaborators.

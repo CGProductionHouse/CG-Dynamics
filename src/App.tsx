@@ -30,6 +30,7 @@ import AssistantPage from './pages/admin/AssistantPage'
 import PlannerPage from './pages/admin/PlannerPage'
 import PackageMasterPage from './pages/admin/PackageMasterPage'
 import MonthlyPlannerPage from './pages/admin/MonthlyPlannerPage'
+import MasterSchedulePage from './pages/admin/MasterSchedulePage'
 import PlannerImportPage from './pages/admin/PlannerImportPage'
 import Dashboard from './pages/client/Dashboard'
 
@@ -75,6 +76,7 @@ export default function App() {
               <Route path="/admin/planner" element={<PlannerPage />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/monthly-planner" element={<MonthlyPlannerPage />} />
+              <Route path="/admin/master-schedule" element={<MasterSchedulePage />} />
               <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/assistant" element={<AssistantPage />} />
