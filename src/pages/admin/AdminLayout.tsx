@@ -250,7 +250,7 @@ function MobileNavItem({ to, label }: { to: string; label: string }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `rounded-md px-2 py-2 text-center text-[11px] font-bold transition-colors ${
+        `rounded-md px-2 py-2.5 text-center text-[11px] font-bold transition-colors ${
           isActive ? 'bg-white/[0.08] text-white shadow-[inset_0_2px_0_rgba(45,212,191,0.85)]' : 'text-brand-primary hover:text-white'
         }`
       }

@@ -592,7 +592,7 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-y-auto border-l border-white/[0.08] bg-[#111111] sm:w-[440px]">
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[440px]">
         <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
           <div>
             <h2 className="text-sm font-semibold text-white">Task details</h2>
@@ -609,7 +609,7 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
           </button>
         </div>
 
-        <div className="flex-1 space-y-4 px-5 py-5">
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
           {task.priority !== 'normal' && (
             <div>
               <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${

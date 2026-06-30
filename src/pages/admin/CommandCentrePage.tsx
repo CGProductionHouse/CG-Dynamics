@@ -1254,7 +1254,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-[#111111] sm:w-[480px] border-l border-white/[0.08] overflow-y-auto">
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-[#111111] sm:w-[480px] border-l border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
           <h2 className="text-base font-semibold text-white">Task details</h2>
           <button
@@ -1266,7 +1266,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
           </button>
         </div>
 
-        <div className="flex-1 space-y-4 px-5 py-5">
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
           {task.priority === 'client_request' && (
             <div className="flex items-center gap-2">
               <Pill tone="accent">

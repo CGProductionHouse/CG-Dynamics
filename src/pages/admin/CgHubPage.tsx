@@ -34,7 +34,7 @@ export default function CgHubPage() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <div className="mb-8">
         <p className="text-xs font-black uppercase tracking-[0.28em] text-[#f2b66f]">CG Production House</p>
-        <h1 className="mt-3 font-display text-5xl font-black uppercase leading-none tracking-wide text-white sm:text-7xl">
+        <h1 className="mt-3 font-display text-4xl font-black uppercase leading-none tracking-wide text-white sm:text-7xl">
           CG Hub
         </h1>
         <p className="mt-3 text-base text-brand-primary/78">Internal staff workspace.</p>
