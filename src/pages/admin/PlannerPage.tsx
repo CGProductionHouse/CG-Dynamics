@@ -1,10 +1,12 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect, useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   listPlannerBoards,
   listPlannerBuckets,
+  SIMPLIFIED_STATUS_LABELS,
+  SIMPLIFIED_STATUS_OPTIONS,
   type PlannerBoard,
   type PlannerBucket,
 } from '../../lib/planner'
@@ -44,6 +46,15 @@ const BOARD_ICONS: Record<string, ReactNode> = {
       <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   ),
+}
+
+const STATUS_TONES: Record<string, string> = {
+  not_started: 'text-white/50 border-white/10',
+  in_progress: 'text-brand-accent border-brand-accent/25',
+  ready_review: 'text-amber-300 border-amber-400/25',
+  awaiting_client: 'text-sky-300 border-sky-300/25',
+  meta_drafts: 'text-[#2dd4bf] border-[#2dd4bf]/25',
+  scheduled_posted: 'text-[#2dd4bf] border-[#2dd4bf]/25',
 }
 
 export default function PlannerPage() {
@@ -94,10 +105,22 @@ export default function PlannerPage() {
     return () => { active = false }
   }, [activeBoard, boards])
 
+  // Admin boards always appear last
+  const sortedBoards = useMemo(() => {
+    return [...boards].sort((a, b) => {
+      const aLast = a.board_type === 'admin' || a.slug === 'admin-check-list'
+      const bLast = b.board_type === 'admin' || b.slug === 'admin-check-list'
+      if (aLast && !bLast) return 1
+      if (!aLast && bLast) return -1
+      return a.sort_order - b.sort_order
+    })
+  }, [boards])
+
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="mb-4 h-6 w-40 animate-pulse rounded bg-white/10" />
+        <div className="mb-4 h-24 w-full animate-pulse rounded-xl bg-white/[0.04]" />
         <div className="flex gap-1.5 mb-4">
           {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="h-7 w-20 animate-pulse rounded-md bg-white/10" />
@@ -105,7 +128,7 @@ export default function PlannerPage() {
         </div>
         <div className="flex gap-3 overflow-x-auto pb-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-60 w-64 shrink-0 animate-pulse rounded-lg bg-white/[0.04]" />
+            <div key={i} className="h-48 w-64 shrink-0 animate-pulse rounded-lg bg-white/[0.04]" />
           ))}
         </div>
       </div>
@@ -115,7 +138,7 @@ export default function PlannerPage() {
   if (tableMissing) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-6 text-xl font-black tracking-tight text-white">CG Planner</h1>
+        <h1 className="mb-6 text-xl font-black tracking-tight text-white">Planner</h1>
         <EmptyState
           title="Planner tables not set up yet"
           message="Run phase-6 and phase-6b migrations."
@@ -127,7 +150,7 @@ export default function PlannerPage() {
   if (boards.length === 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-6 text-xl font-black tracking-tight text-white">CG Planner</h1>
+        <h1 className="mb-6 text-xl font-black tracking-tight text-white">Planner</h1>
         <EmptyState
           title="No boards found"
           message="Run the phase-6b seed migration to create boards."
@@ -136,86 +159,134 @@ export default function PlannerPage() {
     )
   }
 
+  const activeIsScheduleBoard = activeBoard === 'client-schedule'
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+
       {/* Header */}
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-5 flex items-end justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Schedule</p>
           <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Planner</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
+        {isAdmin && (
+          <Link
+            to="/admin/planner-import"
+            className="text-xs font-semibold text-brand-primary/60 hover:text-brand-primary transition-colors"
+          >
+            Import
+          </Link>
+        )}
+      </div>
+
+      {/* Monthly Work — primary entry point */}
+      <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.035] p-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal/70">Monthly work</p>
+            <h2 className="mt-1 text-lg font-black text-white">Monthly Planner</h2>
+            <p className="mt-0.5 text-xs text-brand-primary/60">Current month deliverables, statuses and client work.</p>
+          </div>
           <Link
             to="/admin/monthly-planner"
-            className="rounded-md border border-white/10 bg-white/[0.05] px-3 py-2 text-sm font-bold text-brand-primary transition hover:border-brand-accent/40 hover:text-white"
+            className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-[#2dd4bf] transition-all hover:border-brand-teal/60 hover:bg-brand-teal/[0.14] hover:text-white"
           >
-            Monthly Planner
+            Open Monthly Work
+            <svg className="h-4 w-4 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
           </Link>
-          {isAdmin && (
-            <Link
-              to="/admin/planner-import"
-              className="rounded-md bg-brand-accent px-3 py-2 text-sm font-bold text-black transition hover:brightness-110"
+        </div>
+
+        {/* Status chips — structural preview */}
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {SIMPLIFIED_STATUS_OPTIONS.map(s => (
+            <span
+              key={s}
+              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${STATUS_TONES[s] ?? 'text-white/40 border-white/10'}`}
             >
-              Import
-            </Link>
-          )}
+              {SIMPLIFIED_STATUS_LABELS[s]}
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* Board tabs — Teams Planner style */}
+      {/* Board tabs */}
       <div className="mb-4 flex flex-wrap gap-1">
-        {boards.map(board => {
+        {sortedBoards.map(board => {
           const isActive = activeBoard === board.slug
+          const isScheduleBoard = board.slug === 'client-schedule'
           const isAdminOnly = board.visibility === 'admin_only'
           return (
             <button
               key={board.slug}
               type="button"
               onClick={() => setActiveBoard(board.slug)}
-              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+              className={`flex flex-col items-start rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 isActive
-                  ? 'bg-brand-accent text-black shadow-sm'
-                  : 'text-white/55 hover:text-white hover:bg-white/[0.04]'
+                  ? 'bg-white/[0.08] text-white shadow-[inset_0_-2px_0_rgba(45,212,191,0.6)]'
+                  : 'text-white/45 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
-              <span className="shrink-0">{BOARD_ICONS[board.slug]}</span>
-              <span>{BOARD_LABELS[board.slug] ?? board.name}</span>
-              {isAdminOnly && (
-                <svg className="h-2.5 w-2.5 text-amber-400/60" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                </svg>
+              <span className="flex items-center gap-1.5">
+                <span className="shrink-0">{BOARD_ICONS[board.slug]}</span>
+                <span>{BOARD_LABELS[board.slug] ?? board.name}</span>
+                {isAdminOnly && (
+                  <svg className="h-2.5 w-2.5 text-amber-400/60" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                )}
+              </span>
+              {isScheduleBoard && (
+                <span className="mt-0.5 pl-[1.375rem] text-[9px] font-bold uppercase tracking-[0.12em] text-brand-primary/35">
+                  Master schedule
+                </span>
               )}
             </button>
           )
         })}
       </div>
 
+      {/* Schedule board callout */}
+      {activeIsScheduleBoard && (
+        <div className="mb-3 rounded-lg border border-white/8 bg-white/[0.025] px-3 py-2 text-xs text-brand-primary/55">
+          Master schedule — full client content plan across all months.
+        </div>
+      )}
+
       {/* Bucket columns */}
       {buckets.length === 0 ? (
         <EmptyState
-          title="No buckets configured"
+          title="No columns configured"
           message="This board has no columns yet."
           centered={false}
         />
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
           {buckets.map(bucket => (
-            <div key={bucket.id} className="w-60 shrink-0 sm:w-64">
-              <div className="mb-2 flex items-center gap-2 px-2">
-                <h3 className="text-[11px] font-semibold text-white/50 uppercase tracking-wider truncate">
-                  {bucket.name}
-                </h3>
-                <span className="text-[11px] text-white/25">0</span>
-              </div>
-              <div className="min-h-[15rem] rounded-lg border border-white/8 bg-white/[0.025] p-2.5">
-                <p className="pt-5 text-center text-xs text-white/35">
-                  Empty
-                </p>
-              </div>
-            </div>
+            <BucketColumn key={bucket.id} bucket={bucket} />
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function BucketColumn({ bucket }: { bucket: PlannerBucket }) {
+  return (
+    <div className="w-56 shrink-0 sm:w-60">
+      <div className="mb-2 flex items-center gap-2 px-1">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-white/45 truncate">
+          {bucket.name}
+        </h3>
+        <span className="text-[11px] text-white/20">0</span>
+      </div>
+      <div className="min-h-[8rem] rounded-lg border border-white/[0.06] bg-white/[0.018] p-2">
+        <div className="flex h-[5rem] items-center justify-center">
+          <p className="text-[11px] text-white/20">—</p>
+        </div>
+      </div>
     </div>
   )
 }

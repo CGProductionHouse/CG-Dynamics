@@ -3,16 +3,24 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 
+type Zone = 'dynamics' | 'hub'
+
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 
-const navItems = [
-  { to: '/admin/cg-hub', label: 'Hub', end: true },
+const dynamicsNav = [
   { to: '/admin/client-performance', label: 'Performance' },
+  { to: '/admin/clients', label: 'Clients' },
+  { to: '/admin/reports', label: 'Reports' },
+  { to: '/admin/published', label: 'Client Preview' },
+  { to: '/admin/integrations', label: 'Meta / Integrations' },
+]
+
+const hubNav = [
+  { to: '/admin/cg-hub', label: 'Hub', end: true },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/planner', label: 'Planner' },
   { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
-  { to: '/admin/published', label: 'Client Preview' },
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -34,21 +42,84 @@ function ExternalHoursLink({ onClick }: { onClick?: () => void }) {
     >
       <span>CG Hours</span>
       <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">
-        External
+        Ext
       </span>
     </a>
+  )
+}
+
+function ZoneSwitcher({ zone, onChange }: { zone: Zone; onChange: (z: Zone) => void }) {
+  return (
+    <div className="flex rounded-lg border border-white/10 bg-white/[0.03] p-1">
+      <button
+        type="button"
+        onClick={() => onChange('dynamics')}
+        className={`flex-1 rounded-md px-2 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-colors ${
+          zone === 'dynamics'
+            ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+            : 'text-brand-primary/60 hover:text-brand-primary'
+        }`}
+      >
+        Dynamics
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('hub')}
+        className={`flex-1 rounded-md px-2 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-colors ${
+          zone === 'hub'
+            ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+            : 'text-brand-primary/60 hover:text-brand-primary'
+        }`}
+      >
+        Hub
+      </button>
+    </div>
+  )
+}
+
+function NavSection({ label }: { label: string }) {
+  return (
+    <p className="mb-1 mt-3 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40">
+      {label}
+    </p>
   )
 }
 
 export default function AdminLayout() {
   const { profile, signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [zone, setZone] = useState<Zone>(() => {
+    try {
+      return (localStorage.getItem('cg-zone') as Zone) ?? 'dynamics'
+    } catch {
+      return 'dynamics'
+    }
+  })
+
+  function switchZone(z: Zone) {
+    setZone(z)
+    try { localStorage.setItem('cg-zone', z) } catch { /* ignore */ }
+  }
+
   const close = () => setMobileMenuOpen(false)
 
   function renderNav() {
+    if (zone === 'dynamics') {
+      return (
+        <>
+          <NavSection label="CG Dynamics" />
+          {dynamicsNav.map(item => (
+            <NavLink key={item.to} to={item.to} className={navClass} onClick={close}>
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </>
+      )
+    }
     return (
       <>
-        {navItems.map(item => (
+        <NavSection label="CG Hub" />
+        {hubNav.map(item => (
           <NavLink key={item.to} to={item.to} end={item.end} className={navClass} onClick={close}>
             <span>{item.label}</span>
           </NavLink>
@@ -57,6 +128,22 @@ export default function AdminLayout() {
       </>
     )
   }
+
+  const dynamicsMobileItems = [
+    { to: '/admin/client-performance', label: 'Perf' },
+    { to: '/admin/clients', label: 'Clients' },
+    { to: '/admin/reports', label: 'Reports' },
+    { to: '/admin/published', label: 'Preview' },
+    { to: '/admin/integrations', label: 'Meta' },
+  ]
+  const hubMobileItems = [
+    { to: '/admin/cg-hub', label: 'Hub' },
+    { to: '/admin/clients', label: 'Clients' },
+    { to: '/admin/planner', label: 'Planner' },
+    { to: '/admin/command-centre', label: 'Daily' },
+    { to: '/admin/assistant', label: 'Assist' },
+  ]
+  const mobileItems = zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems
 
   return (
     <div className="min-h-screen bg-brand-bg md:flex">
@@ -94,6 +181,9 @@ export default function AdminLayout() {
                 Close
               </button>
             </div>
+            <div className="border-b border-white/10 p-3">
+              <ZoneSwitcher zone={zone} onChange={switchZone} />
+            </div>
             <nav className="flex-1 space-y-1 overflow-y-auto p-3">{renderNav()}</nav>
             <div className="border-t border-white/10 p-3">
               <UserBlock name={profile?.full_name ?? 'Staff user'} role={profile?.role ?? 'staff'} onSignOut={signOut} />
@@ -105,6 +195,9 @@ export default function AdminLayout() {
       <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-black/72 md:flex md:flex-col">
         <div className="border-b border-white/10 px-5 py-5">
           <BrandMark subtitle={profile?.role ?? 'staff'} compact />
+        </div>
+        <div className="border-b border-white/10 p-3">
+          <ZoneSwitcher zone={zone} onChange={switchZone} />
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">{renderNav()}</nav>
         <div className="border-t border-white/10 p-3">
@@ -118,11 +211,9 @@ export default function AdminLayout() {
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden">
         <div className="grid grid-cols-5 gap-1 px-2 py-1.5">
-          <MobileNavItem to="/admin/cg-hub" label="Hub" />
-          <MobileNavItem to="/admin/clients" label="Clients" />
-          <MobileNavItem to="/admin/planner" label="Planner" />
-          <MobileNavItem to="/admin/command-centre" label="Daily" />
-          <MobileNavItem to="/admin/published" label="Preview" />
+          {mobileItems.map(item => (
+            <MobileNavItem key={item.to} to={item.to} label={item.label} />
+          ))}
         </div>
       </nav>
     </div>

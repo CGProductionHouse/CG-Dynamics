@@ -318,6 +318,9 @@ export default function ClientsList() {
                           variant={c.active ? 'published' : 'internal-draft'}
                         />
                       </div>
+                      <div className="mt-2">
+                        <PackageChips client={c} />
+                      </div>
                     </div>
                   </div>
 
@@ -346,16 +349,17 @@ export default function ClientsList() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 bg-white/[0.025] text-left">
-                  <th className="px-4 py-3 text-brand-primary/80 font-bold">Client</th>
-                  <th className="px-4 py-3 text-brand-primary/80 font-bold">Tier</th>
-                  <th className="px-4 py-3 text-brand-primary/80 font-bold">Status</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-[0.12em] text-white/35">Client</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-[0.12em] text-white/35">Package</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-[0.12em] text-white/35">Performance</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-[0.12em] text-white/35">Production</th>
                   {isAdmin && <th className="px-4 py-3" />}
                 </tr>
               </thead>
               <tbody>
                 {displayClients.length === 0 ? (
                   <tr>
-                    <td colSpan={isAdmin ? 4 : 3} className="px-4 py-8">
+                    <td colSpan={isAdmin ? 5 : 4} className="px-4 py-8">
                       <div className="mx-auto max-w-sm">
                         <EmptyState
                           title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
@@ -369,43 +373,63 @@ export default function ClientsList() {
                   displayClients.map(c => (
                     <tr
                       key={c.id}
-                      className="border-b border-white/8 last:border-0 hover:bg-white/[0.035] transition-colors"
+                      className="border-b border-white/8 last:border-0 hover:bg-white/[0.035] transition-colors align-top"
                     >
-                      <td className="px-4 py-3 text-white font-medium">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <ClientLogo client={c} />
-                          <span>{c.name}</span>
+                          <div>
+                            <span className="text-sm font-semibold text-white">{c.name}</span>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
+                              <StatusBadge
+                                label={c.active ? 'Active' : 'Archived'}
+                                variant={c.active ? 'published' : 'internal-draft'}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
+                        <PackageChips client={c} />
                       </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge
-                          label={c.active ? 'Active' : 'Archived'}
-                          variant={c.active ? 'published' : 'internal-draft'}
-                        />
-                      </td>
-                      {isAdmin && (
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap items-center justify-end gap-2">
-                            {c.active ? (
-                              <>
-                                <ClientActionLink to={`/admin/reports?client=${c.id}`} label="Reports" primary />
-                                <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Sync" />
-                                <ClientActionLink to={`/admin/package-master?client=${c.id}`} label="Package" />
-                                <ClientActionLink to={`/admin/monthly-planner?client=${c.id}`} label="Monthly Planner" />
+                      {c.active ? (
+                        <>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              <ClientActionLink to={`/admin/reports?client=${c.id}`} label="Reports" teal />
+                              {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Meta / Sync" />}
+                              <ClientActionLink to="/admin/published" label="Client Preview" />
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              <ClientActionLink to={`/admin/package-master?client=${c.id}`} label="Package" />
+                              <ClientActionLink to={`/admin/monthly-planner?client=${c.id}`} label="Monthly Planner" />
+                            </div>
+                          </td>
+                          {isAdmin && (
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex flex-wrap items-center justify-end gap-1.5">
                                 <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
                                 <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
-                              </>
-                            ) : (
-                              <>
+                              </div>
+                            </td>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-4 py-3" />
+                          <td className="px-4 py-3" />
+                          {isAdmin && (
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex flex-wrap items-center justify-end gap-1.5">
                                 <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
                                 <ActionButton variant="danger" size="sm" onClick={() => void openDeleteConfirm(c)}>Delete</ActionButton>
-                              </>
-                            )}
-                          </div>
-                        </td>
+                              </div>
+                            </td>
+                          )}
+                        </>
                       )}
                     </tr>
                   ))
@@ -445,21 +469,51 @@ export default function ClientsList() {
   )
 }
 
-// Compact per-client action chip. Meta sync is the primary action; the rest are
-// secondary links into the reporting workflow.
-function ClientActionLink({ to, label, primary = false }: { to: string; label: string; primary?: boolean }) {
-  const classes = primary
-    ? 'border-brand-accent bg-brand-accent text-black'
-    : 'border-white/10 bg-white/[0.04] text-brand-primary hover:text-white hover:border-brand-accent/40'
-
+function ClientActionLink({ to, label, teal = false }: { to: string; label: string; teal?: boolean }) {
   return (
-    <Link to={to} className={`rounded-md border px-3 py-1.5 text-xs font-bold transition ${classes}`}>
+    <Link
+      to={to}
+      className={`rounded-md border px-2.5 py-1 text-xs font-bold transition ${
+        teal
+          ? 'border-brand-teal/30 bg-brand-teal/[0.07] text-[#2dd4bf] hover:border-brand-teal/60 hover:text-white'
+          : 'border-white/8 bg-white/[0.03] text-brand-primary hover:border-white/20 hover:text-white'
+      }`}
+    >
       {label}
     </Link>
   )
 }
 
-// Per-client workflow actions: Reports, Sync, Package, Monthly Planner, Edit.
+// Compact package chip row derived from client.package_settings
+function PackageChips({ client }: { client: Client }) {
+  const pkg = client.package_settings ? readPackageSettings(client.package_settings) : null
+  const chips = pkg
+    ? [
+        { label: 'DP', value: pkg.design_posters_per_month },
+        { label: 'F', value: pkg.photo_posts_per_month },
+        { label: 'Video', value: pkg.professional_videos_per_month },
+        { label: 'Reel', value: pkg.reels_per_month },
+      ].filter(c => c.value > 0)
+    : []
+
+  if (chips.length === 0) {
+    return <span className="text-[11px] text-white/25">Package not set</span>
+  }
+  return (
+    <div className="flex flex-wrap gap-1">
+      {chips.map(chip => (
+        <span
+          key={chip.label}
+          className="rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] font-bold text-white/65"
+        >
+          {chip.label} {chip.value}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+// Mobile card actions — split into Performance and Production groups
 function ClientQuickActions({
   client,
   isAdmin,
@@ -470,22 +524,33 @@ function ClientQuickActions({
   onEdit: () => void
 }) {
   return (
-    <div className="mt-4 flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
-        <ClientActionLink to={`/admin/reports?client=${client.id}`} label="Reports" primary />
-        {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Sync" />}
-        <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
-        <ClientActionLink to={`/admin/monthly-planner?client=${client.id}`} label="Monthly Planner" />
-        {isAdmin && (
+    <div className="mt-4 space-y-2.5">
+      <div>
+        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/25">Performance</p>
+        <div className="flex flex-wrap gap-1.5">
+          <ClientActionLink to={`/admin/reports?client=${client.id}`} label="Reports" teal />
+          {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Meta / Sync" />}
+          <ClientActionLink to="/admin/published" label="Client Preview" />
+        </div>
+      </div>
+      <div>
+        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/25">Production</p>
+        <div className="flex flex-wrap gap-1.5">
+          <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
+          <ClientActionLink to={`/admin/monthly-planner?client=${client.id}`} label="Monthly Planner" />
+        </div>
+      </div>
+      {isAdmin && (
+        <div className="pt-1">
           <button
             type="button"
             onClick={onEdit}
-            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-brand-primary transition hover:border-brand-accent/40 hover:text-white"
+            className="rounded-md border border-white/8 px-3 py-1 text-xs font-bold text-brand-primary/60 transition hover:border-white/20 hover:text-white"
           >
             Edit
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -634,15 +699,12 @@ function ClientModal({
           )}
 
           <fieldset className="rounded-lg border border-brand-muted bg-brand-bg/40 p-3.5">
-            <legend className="px-1.5 text-sm font-semibold text-brand-accent">Monthly package</legend>
-            <p className="mb-3 px-0.5 text-xs text-brand-primary">
-              Deliverables included each month. These drive the report action plan.
-            </p>
+            <legend className="px-1.5 text-sm font-semibold text-brand-accent">Package</legend>
             <div className="grid grid-cols-2 gap-3">
               <PackageNumber label="Video" value={pkg.professional_videos_per_month} onChange={v => setPkgNum('professional_videos_per_month', v)} />
               <PackageNumber label="Reel" value={pkg.reels_per_month} onChange={v => setPkgNum('reels_per_month', v)} />
-              <PackageNumber label="F (Photo)" value={pkg.photo_posts_per_month} onChange={v => setPkgNum('photo_posts_per_month', v)} />
-              <PackageNumber label="DP (Designed Poster)" value={pkg.design_posters_per_month} onChange={v => setPkgNum('design_posters_per_month', v)} />
+              <PackageNumber label="F" value={pkg.photo_posts_per_month} onChange={v => setPkgNum('photo_posts_per_month', v)} />
+              <PackageNumber label="DP" value={pkg.design_posters_per_month} onChange={v => setPkgNum('design_posters_per_month', v)} />
               <PackageNumber label="Animated posters" value={pkg.animated_posters_per_month} onChange={v => setPkgNum('animated_posters_per_month', v)} />
               <PackageNumber label="Shoot days" value={pkg.shoot_days_per_month} onChange={v => setPkgNum('shoot_days_per_month', v)} />
             </div>

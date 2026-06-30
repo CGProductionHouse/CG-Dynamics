@@ -112,7 +112,7 @@ function buildEndOfDay(activeTasks: CommandCentreTask[]) {
     else if (t.status === 'blocked') groups['BLOCKED'].push(t)
     else if (t.status === 'waiting_client') groups['WAITING CLIENT'].push(t)
     else if (t.status === 'moved_to_tomorrow') groups['MOVED TO TOMORROW'].push(t)
-    else groups['STILL BUSY / IN PROGRESS'].push(t) // to_do → still busy
+    else groups['STILL BUSY / IN PROGRESS'].push(t)
   }
   const lines: string[] = ['CGPH END OF DAY UPDATE', '']
   for (const [heading, items] of Object.entries(groups)) {
@@ -136,7 +136,7 @@ export default function CommandCentrePage() {
   const [tableMissing, setTableMissing] = useState(false)
   const [copiedSection, setCopiedSection] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
-  const [filterStaff, setFilterStaff] = useState<string>('')
+  const [filterStaff, setFilterStaff] = useState<string>('__my__')
 
   async function load() {
     setLoading(true)
@@ -279,12 +279,12 @@ export default function CommandCentrePage() {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Command Centre</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Command Centre</h1>
+          <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub</p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Daily Tasks</h1>
         </div>
         <EmptyState
           title="Migration required"
-          message="Command Centre tables are not set up yet. Run the phase-5 CG Command Centre migration."
+          message="Daily Tasks tables are not set up yet. Run the phase-5 CG Command Centre migration."
         />
       </div>
     )
@@ -299,32 +299,24 @@ export default function CommandCentrePage() {
   }
 
   return (
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">CG Command Centre</h1>
-        </div>
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
 
-        <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          <StatCard label="Active" value={stats.total} />
-          <StatCard label="Client requests" value={stats.clientRequests} accent />
-          <StatCard label="Done today" value={stats.doneToday} teal />
-          <StatCard label="Blocked" value={stats.blocked} amber />
-          <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
-          <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} />
-        </div>
+      {/* A — Header */}
+      <div className="mb-5">
+        <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
+      </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setFilterStaff('')}
-          className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
-            !filterStaff
-              ? 'bg-brand-accent text-brand-bg shadow-sm'
-              : 'border border-brand-muted/60 text-brand-primary hover:text-white hover:border-brand-muted'
-          }`}
-        >
-          All tasks
-        </button>
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <StatCard label="Active" value={stats.total} />
+        <StatCard label="Client requests" value={stats.clientRequests} accent />
+        <StatCard label="Done today" value={stats.doneToday} teal />
+        <StatCard label="Blocked" value={stats.blocked} amber />
+        <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
+        <StatCard label="Moved → tomorrow" value={stats.movedToTomorrow} />
+      </div>
+
+      {/* B — Filter row */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setFilterStaff('__my__')}
@@ -335,6 +327,17 @@ export default function CommandCentrePage() {
           }`}
         >
           My tasks
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilterStaff('')}
+          className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
+            !filterStaff
+              ? 'bg-brand-accent text-brand-bg shadow-sm'
+              : 'border border-brand-muted/60 text-brand-primary hover:text-white hover:border-brand-muted'
+          }`}
+        >
+          All tasks
         </button>
         <select
           value={filterStaff !== '__my__' && filterStaff !== '' ? filterStaff : ''}
@@ -348,19 +351,12 @@ export default function CommandCentrePage() {
         </select>
       </div>
 
-      <div className="mb-6 grid gap-4 lg:grid-cols-2">
-        <AddTaskCard onTaskCreated={load} />
-        <CaptureRequestCard onTaskCreated={load} />
+      {/* C — Quick Add */}
+      <div className="mb-6">
+        <QuickAddCard onTaskCreated={load} />
       </div>
 
-      <div id="morning-import" className="mb-6">
-        <MorningImportCard onTasksCreated={load} />
-      </div>
-
-      <p className="mb-6 text-xs text-brand-primary/60">
-        WhatsApp messages are generated for copy/paste only. No WhatsApp API is connected yet.
-      </p>
-
+      {/* D — Today's tasks */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-6 w-1 rounded-full bg-brand-accent/50" />
@@ -369,15 +365,17 @@ export default function CommandCentrePage() {
         </div>
         {staffGroups.length === 0 ? (
           <EmptyState
-            title="No tasks for today yet"
-            message="Add a task or capture a client request."
+            title="No tasks yet"
+            message="Add a task above."
             centered={false}
           />
         ) : (
           <div className="space-y-3">
             {staffGroups.map(([staffName, staffTasks]) => (
               <PremiumCard key={staffName} padding="sm">
-                <h3 className="mb-3 text-sm font-semibold text-brand-accent">@{staffName}</h3>
+                {filterStaff !== '__my__' && (
+                  <h3 className="mb-3 text-sm font-semibold text-brand-accent">@{staffName}</h3>
+                )}
                 <div className="space-y-2">
                   {staffTasks.map(task => (
                     <TaskRow
@@ -394,6 +392,7 @@ export default function CommandCentrePage() {
         )}
       </div>
 
+      {/* E — WhatsApp morning + end-of-day */}
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         <MorningMessageCard
           staffGroups={staffGroups}
@@ -405,6 +404,11 @@ export default function CommandCentrePage() {
           copiedSection={copiedSection}
           onCopy={handleCopy}
         />
+      </div>
+
+      {/* F — Morning List Import */}
+      <div id="morning-import" className="mb-6">
+        <MorningImportCard onTasksCreated={load} />
       </div>
     </div>
   )
@@ -429,6 +433,219 @@ function StatCard({ label, value, accent, teal, amber, danger }: {
       <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
       <p className={`mt-1.5 text-xl font-semibold ${valClass}`}>{value}</p>
     </div>
+  )
+}
+
+function QuickAddCard({ onTaskCreated }: { onTaskCreated: () => void }) {
+  const { profile } = useAuth()
+  const [title, setTitle] = useState('')
+  const [showDetails, setShowDetails] = useState(false)
+  const [clientId, setClientId] = useState('')
+  const [manualClientName, setManualClientName] = useState('')
+  const [assignedName, setAssignedName] = useState(profile?.full_name ?? '')
+  const [bucket, setBucket] = useState<TaskBucket>('Admin / To Do')
+  const [priority, setPriority] = useState<TaskPriority>('normal')
+  const [dueDate, setDueDate] = useState(todayStr)
+  const [notes, setNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [clientsLoading, setClientsLoading] = useState(false)
+  const [clientsError, setClientsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!showDetails || clients.length > 0) return
+    let active = true
+    setClientsLoading(true)
+    setClientsError(null)
+    listActiveClients().then(({ data, error }) => {
+      if (!active) return
+      setClientsLoading(false)
+      if (error) { setClientsError('Client list unavailable.'); return }
+      setClients(data ?? [])
+    }).catch(() => {
+      if (active) { setClientsLoading(false); setClientsError('Client list unavailable.') }
+    })
+    return () => { active = false }
+  }, [showDetails, clients.length])
+
+  const isManualClient = clientId === '__manual__'
+  const selectedClient = clients.find(c => c.id === clientId)
+
+  function resetForm() {
+    setTitle('')
+    setClientId('')
+    setManualClientName('')
+    setAssignedName(profile?.full_name ?? '')
+    setBucket('Admin / To Do')
+    setPriority('normal')
+    setDueDate(todayStr)
+    setNotes('')
+    setShowDetails(false)
+    setError(null)
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (saving || !title.trim()) return
+    setSaving(true)
+    setError(null)
+    try {
+      const input: TaskInput = {
+        title: title.trim(),
+        client_id: selectedClient?.id ?? null,
+        client_name: isManualClient ? manualClientName.trim() || null : selectedClient?.name ?? null,
+        assigned_to_name: assignedName.trim() || null,
+        bucket,
+        priority,
+        status: 'to_do',
+        due_date: dueDate,
+        notes: notes.trim() || null,
+        source: 'manual',
+      }
+      const { error } = await createTask(input)
+      if (error) { setError(error.message); return }
+      resetForm()
+      onTaskCreated()
+    } catch {
+      setError('Could not save task.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <PremiumCard padding="md">
+      <form onSubmit={handleSubmit}>
+        <div className="flex gap-2">
+          <input
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            required
+            placeholder="Add a task..."
+            className="min-w-0 flex-1 rounded-lg border border-brand-muted bg-brand-bg px-3 py-2.5 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          />
+          <ActionButton
+            variant="primary"
+            type="submit"
+            disabled={saving || !title.trim()}
+            loading={saving}
+          >
+            Add
+          </ActionButton>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowDetails(v => !v)}
+          className="mt-2 text-xs text-brand-primary/55 hover:text-brand-primary transition-colors"
+        >
+          {showDetails ? '− Hide details' : '+ Details'}
+        </button>
+
+        {showDetails && (
+          <div className="mt-3 space-y-3 border-t border-white/[0.06] pt-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs text-brand-primary">Client</label>
+                {clientsLoading ? (
+                  <p className="py-2 text-xs text-brand-primary/60">Loading clients...</p>
+                ) : (
+                  <>
+                    <select
+                      value={clientId}
+                      onChange={e => setClientId(e.target.value)}
+                      className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                    >
+                      <option value="">No client</option>
+                      {clients.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                      <option value="__manual__">Manual / other client</option>
+                    </select>
+                    {clientsError && (
+                      <p className="mt-1 text-xs text-amber-400">{clientsError}</p>
+                    )}
+                  </>
+                )}
+                {isManualClient && (
+                  <input
+                    value={manualClientName}
+                    onChange={e => setManualClientName(e.target.value)}
+                    placeholder="Type client name"
+                    className="mt-2 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-brand-primary">Assigned to</label>
+                <select
+                  value={assignedName}
+                  onChange={e => setAssignedName(e.target.value)}
+                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                >
+                  <option value="">Unassigned</option>
+                  {KNOWN_STAFF.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                  <option value="__other__">Other...</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-brand-primary">Bucket</label>
+                <select
+                  value={bucket}
+                  onChange={e => setBucket(e.target.value as TaskBucket)}
+                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                >
+                  {BUCKETS.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-brand-primary">Priority</label>
+                <select
+                  value={priority}
+                  onChange={e => setPriority(e.target.value as TaskPriority)}
+                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                >
+                  {PRIORITIES.map(p => (
+                    <option key={p} value={p}>
+                      {p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-brand-primary">Due date</label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={e => setDueDate(e.target.value)}
+                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-brand-primary">Notes</label>
+              <textarea
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                rows={2}
+                placeholder="Client request? Paste WhatsApp message here."
+                className="w-full resize-none rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+              />
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <p className="mt-2 text-xs text-red-400">{error}</p>
+        )}
+      </form>
+    </PremiumCard>
   )
 }
 
@@ -462,423 +679,39 @@ function TaskRow({ task, busyId, onStatusChange }: {
               {task.notes && (
                 <>
                   <span className="text-brand-primary/50">·</span>
-                  <span className="text-brand-primary/60 truncate max-w-[200px]">{task.notes}</span>
+                  <span className="max-w-[200px] truncate text-brand-primary/60">{task.notes}</span>
                 </>
               )}
             </div>
           </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Pill tone={statusTone(task.status)}>{statusLabel(task.status)}</Pill>
-          {task.status !== 'done' && (
-            <select
-              value={task.status}
-              onChange={e => onStatusChange(task.id, e.target.value as TaskStatus)}
-              disabled={busyId === task.id}
-              className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
-            >
-              {STATUSES.map(s => (
-                <option key={s} value={s}>{statusLabel(s)}</option>
-              ))}
-            </select>
-          )}
-          {task.status === 'done' && (
-            <button
-              type="button"
-              onClick={() => onStatusChange(task.id, 'to_do')}
-              disabled={busyId === task.id}
-              className="rounded-lg border border-brand-muted/60 px-2 py-1.5 text-xs text-brand-primary hover:text-white disabled:opacity-60"
-            >
-              Reopen
-            </button>
-          )}
-        </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Pill tone={statusTone(task.status)}>{statusLabel(task.status)}</Pill>
+            {task.status !== 'done' && (
+              <select
+                value={task.status}
+                onChange={e => onStatusChange(task.id, e.target.value as TaskStatus)}
+                disabled={busyId === task.id}
+                className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
+              >
+                {STATUSES.map(s => (
+                  <option key={s} value={s}>{statusLabel(s)}</option>
+                ))}
+              </select>
+            )}
+            {task.status === 'done' && (
+              <button
+                type="button"
+                onClick={() => onStatusChange(task.id, 'to_do')}
+                disabled={busyId === task.id}
+                className="rounded-lg border border-brand-muted/60 px-2 py-1.5 text-xs text-brand-primary hover:text-white disabled:opacity-60"
+              >
+                Reopen
+              </button>
+            )}
+          </div>
         </div>
       </PremiumCard>
     </div>
-  )
-}
-
-function AddTaskCard({ onTaskCreated }: {
-  onTaskCreated: () => void
-}) {
-  const [title, setTitle] = useState('')
-  const [clientId, setClientId] = useState('')
-  const [manualClientName, setManualClientName] = useState('')
-  const [assignedName, setAssignedName] = useState('')
-  const [bucket, setBucket] = useState<TaskBucket>('Admin / To Do')
-  const [priority, setPriority] = useState<TaskPriority>('normal')
-  const [dueDate, setDueDate] = useState(todayStr)
-  const [status, setStatus] = useState<TaskStatus>('to_do')
-  const [notes, setNotes] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const [clients, setClients] = useState<ClientOption[]>([])
-  const [clientsLoading, setClientsLoading] = useState(true)
-  const [clientsError, setClientsError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let active = true
-    setClientsLoading(true)
-    setClientsError(null)
-    listActiveClients().then(({ data, error }) => {
-      if (!active) return
-      setClientsLoading(false)
-      if (error) {
-        setClientsError('Client list unavailable.')
-        return
-      }
-      setClients(data ?? [])
-    }).catch(() => {
-      if (active) {
-        setClientsLoading(false)
-        setClientsError('Client list unavailable.')
-      }
-    })
-    return () => { active = false }
-  }, [])
-
-  const isManualClient = clientId === '__manual__'
-  const selectedClient = clients.find(c => c.id === clientId)
-
-  function resetForm() {
-    setTitle('')
-    setClientId('')
-    setManualClientName('')
-    setAssignedName('')
-    setBucket('Admin / To Do')
-    setPriority('normal')
-    setDueDate(todayStr)
-    setStatus('to_do')
-    setNotes('')
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    if (saving || !title.trim()) return
-    setSaving(true)
-    setError(null)
-    try {
-      const input: TaskInput = {
-        title: title.trim(),
-        client_id: selectedClient?.id ?? null,
-        client_name: isManualClient ? manualClientName.trim() || null : selectedClient?.name ?? null,
-        assigned_to_name: assignedName.trim() || null,
-        bucket,
-        priority,
-        status,
-        due_date: dueDate,
-        notes: notes.trim() || null,
-        source: 'manual',
-      }
-      const { error } = await createTask(input)
-      if (error) {
-        setError(error.message)
-        return
-      }
-      resetForm()
-      onTaskCreated()
-    } catch {
-      setError('Could not save task.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <PremiumCard padding="md">
-      <h2 className="mb-1 text-base font-semibold text-white">Add task</h2>
-      <p className="mb-4 text-xs text-brand-primary">Create a new task for the team.</p>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Title *</label>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              required
-              placeholder="What needs to be done?"
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Client</label>
-            {clientsLoading ? (
-              <p className="text-xs text-brand-primary/60 py-2">Loading clients...</p>
-            ) : (
-              <>
-                <select
-                  value={clientId}
-                  onChange={e => setClientId(e.target.value)}
-                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-                >
-                  <option value="">No client</option>
-                  {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                  <option value="__manual__">Manual / other client</option>
-                </select>
-                {clientsError && (
-                  <p className="mt-1 text-xs text-amber-400">{clientsError} You can still type a client name.</p>
-                )}
-              </>
-            )}
-            {isManualClient && (
-              <input
-                value={manualClientName}
-                onChange={e => setManualClientName(e.target.value)}
-                placeholder="Type client name"
-                className="mt-2 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-              />
-            )}
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Assigned to</label>
-            <select
-              value={assignedName}
-              onChange={e => setAssignedName(e.target.value)}
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            >
-              <option value="">Unassigned</option>
-              {KNOWN_STAFF.map(name => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-              <option value="__other__">Other...</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Bucket</label>
-            <select
-              value={bucket}
-              onChange={e => setBucket(e.target.value as TaskBucket)}
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            >
-              {BUCKETS.map(b => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Priority</label>
-            <select
-              value={priority}
-              onChange={e => setPriority(e.target.value as TaskPriority)}
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            >
-              {PRIORITIES.map(p => (
-                <option key={p} value={p}>{p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Due date</label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={e => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-brand-primary">Notes</label>
-          <textarea
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            rows={2}
-            placeholder="Any details about this task."
-            className="w-full resize-none rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-          />
-        </div>
-        {error && (
-          <p className="text-xs text-red-400">{error}</p>
-        )}
-        <ActionButton variant="primary" type="submit" disabled={saving || !title.trim()} loading={saving}>
-          Add task
-        </ActionButton>
-      </form>
-    </PremiumCard>
-  )
-}
-
-function CaptureRequestCard({ onTaskCreated }: {
-  onTaskCreated: () => void
-}) {
-  const [whatsappText, setWhatsappText] = useState('')
-  const [title, setTitle] = useState('')
-  const [clientId, setClientId] = useState('')
-  const [manualClientName, setManualClientName] = useState('')
-  const [assignedName, setAssignedName] = useState('')
-  const [dueDate, setDueDate] = useState(todayStr)
-  const [notes, setNotes] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const [clients, setClients] = useState<ClientOption[]>([])
-  const [clientsLoading, setClientsLoading] = useState(true)
-  const [clientsError, setClientsError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let active = true
-    setClientsLoading(true)
-    setClientsError(null)
-    listActiveClients().then(({ data, error }) => {
-      if (!active) return
-      setClientsLoading(false)
-      if (error) {
-        setClientsError('Client list unavailable.')
-        return
-      }
-      setClients(data ?? [])
-    }).catch(() => {
-      if (active) {
-        setClientsLoading(false)
-        setClientsError('Client list unavailable.')
-      }
-    })
-    return () => { active = false }
-  }, [])
-
-  const isManualClient = clientId === '__manual__'
-  const selectedClient = clients.find(c => c.id === clientId)
-
-  function resetForm() {
-    setWhatsappText('')
-    setTitle('')
-    setClientId('')
-    setManualClientName('')
-    setAssignedName('')
-    setDueDate(todayStr)
-    setNotes('')
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    if (saving || !whatsappText.trim()) return
-    setSaving(true)
-    setError(null)
-    try {
-      const input: TaskInput = {
-        title: title.trim() || `Client request`,
-        client_id: selectedClient?.id ?? null,
-        client_name: isManualClient ? manualClientName.trim() || null : selectedClient?.name ?? null,
-        assigned_to_name: assignedName.trim() || null,
-        bucket: 'Client Requests',
-        priority: 'client_request',
-        status: 'to_do',
-        due_date: dueDate,
-        notes: notes.trim() || whatsappText.trim() || null,
-        source: 'whatsapp_paste',
-        whatsapp_source_text: whatsappText.trim() || null,
-      }
-      const { error } = await createTask(input)
-      if (error) {
-        setError(error.message)
-        return
-      }
-      resetForm()
-      onTaskCreated()
-    } catch {
-      setError('Could not save client request.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <PremiumCard padding="md">
-      <h2 className="mb-1 text-base font-semibold text-white">Capture WhatsApp client request</h2>
-      <p className="mb-4 text-xs text-brand-primary">Paste a client's WhatsApp message to create a tracked task.</p>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <label className="mb-1 block text-xs text-brand-primary">WhatsApp message *</label>
-          <textarea
-            value={whatsappText}
-            onChange={e => {
-              setWhatsappText(e.target.value)
-              if (!title.trim()) {
-                const firstLine = e.target.value.split('\n')[0].trim().slice(0, 80)
-                if (firstLine) setTitle(firstLine)
-              }
-            }}
-            required
-            rows={3}
-            placeholder="Paste the WhatsApp request text here..."
-            className="w-full resize-none rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-          />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Task title</label>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Auto-filled from first line"
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Client</label>
-            {clientsLoading ? (
-              <p className="text-xs text-brand-primary/60 py-2">Loading clients...</p>
-            ) : (
-              <>
-                <select
-                  value={clientId}
-                  onChange={e => setClientId(e.target.value)}
-                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-                >
-                  <option value="">No client</option>
-                  {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                  <option value="__manual__">Manual / other client</option>
-                </select>
-                {clientsError && (
-                  <p className="mt-1 text-xs text-amber-400">{clientsError} You can still type a client name.</p>
-                )}
-              </>
-            )}
-            {isManualClient && (
-              <input
-                value={manualClientName}
-                onChange={e => setManualClientName(e.target.value)}
-                placeholder="Type client name"
-                className="mt-2 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-              />
-            )}
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Assigned to</label>
-            <select
-              value={assignedName}
-              onChange={e => setAssignedName(e.target.value)}
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            >
-              <option value="">Unassigned</option>
-              {KNOWN_STAFF.map(name => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-brand-primary">Due date</label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={e => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            />
-          </div>
-        </div>
-        {error && (
-          <p className="text-xs text-red-400">{error}</p>
-        )}
-        <ActionButton variant="primary" type="submit" disabled={saving || !whatsappText.trim()} loading={saving}>
-          Capture client request
-        </ActionButton>
-      </form>
-    </PremiumCard>
   )
 }
 
@@ -958,7 +791,6 @@ function MorningImportCard({ onTasksCreated }: {
     let created = 0
     for (const edit of edits) {
       const input = morningEditToInput(edit)
-      // Attach staff name from the original parsed task
       const original = parsed?.find(p => p.id === edit.id)
       input.assigned_to_name = original?.staffName === 'Unassigned' ? null : original?.staffName ?? null
       const { error } = await createTask(input)
@@ -979,10 +811,7 @@ function MorningImportCard({ onTasksCreated }: {
 
   return (
     <PremiumCard padding="md">
-      <h2 className="mb-1 text-base font-semibold text-white">Morning List Import</h2>
-      <p className="mb-4 text-xs text-brand-primary">
-        Paste the daily WhatsApp to-do list here. Voice note import will come later — for now, paste the typed list.
-      </p>
+      <h2 className="mb-3 text-base font-semibold text-white">Morning List Import</h2>
 
       {!parsed ? (
         <>
@@ -1036,7 +865,7 @@ function MorningImportCard({ onTasksCreated }: {
                     <div>
                       <label className="mb-1 block text-[11px] text-brand-primary">Client</label>
                       {clientsLoading ? (
-                        <p className="text-xs text-brand-primary/60 py-1">Loading...</p>
+                        <p className="py-1 text-xs text-brand-primary/60">Loading...</p>
                       ) : (
                         <>
                           <select
@@ -1092,7 +921,9 @@ function MorningImportCard({ onTasksCreated }: {
                         className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
                       >
                         {PRIORITIES.map(p => (
-                          <option key={p} value={p}>{p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                          <option key={p} value={p}>
+                            {p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}
+                          </option>
                         ))}
                       </select>
                     </div>

@@ -11,7 +11,7 @@ import {
   type AssistantToolStatus,
 } from '../../lib/assistant'
 import { ActionButton } from '../../components/ui/Buttons'
-import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
+import { PremiumCard } from '../../components/ui/PremiumCard'
 import { Pill } from '../../components/ui/Badges'
 
 const SESSION_KEY = 'cg-assistant-chat-session-v1'
@@ -19,9 +19,7 @@ const SESSION_KEY = 'cg-assistant-chat-session-v1'
 const STARTER_PROMPTS = [
   'What should I focus on today?',
   'Summarise my tasks.',
-  'What is urgent?',
   'Help me write a client update.',
-  'What can you help with?',
   'What is connected?',
 ]
 
@@ -65,7 +63,7 @@ const DEFAULT_TOOLS: AssistantToolStatus[] = [
   },
   {
     key: 'meta',
-    name: 'Meta Business',
+    name: 'Meta',
     status: 'planned',
     description: 'Future connection for approved social/reporting context without exposing credentials.',
   },
@@ -162,6 +160,8 @@ export default function AssistantPage() {
   const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null)
   const [providerTest, setProviderTest] = useState<AssistantProviderTestResponse['result'] | null>(null)
   const [providerTesting, setProviderTesting] = useState(false)
+  const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [showProtected, setShowProtected] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const profileRole = profile?.role as string | undefined
   const isAdminDiagnosticsUser = profileRole === 'admin' || profileRole === 'owner'
@@ -194,7 +194,7 @@ export default function AssistantPage() {
     if (response.setupRequired) setSetupRequired(true)
 
     if (!response.ok) {
-      setError(response.error ?? 'CG Assistant could not complete that request. Please try again.')
+      setError(response.error ?? 'Assistant unavailable. Check setup.')
     }
 
     setMessages((current) => [
@@ -229,7 +229,7 @@ export default function AssistantPage() {
     setDiagnosticsLoading(false)
 
     if (!response.ok || !response.diagnostics) {
-      setDiagnosticsError(response.error ?? 'Could not load CG Assistant diagnostics.')
+      setDiagnosticsError(response.error ?? 'Could not load diagnostics.')
       return
     }
 
@@ -253,193 +253,158 @@ export default function AssistantPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg p-3 sm:p-6 lg:p-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5">
-        <header className="overflow-hidden rounded-2xl border border-brand-muted bg-brand-surface">
-          <div className="border-b border-white/10 bg-gradient-to-r from-brand-muted/70 via-brand-surface to-brand-accent/10 px-4 py-5 sm:px-7">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent/80">
-                  Staff portal
-                </p>
-                <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
-                  CG Assistant
-                </h1>
-                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-primary/70">
-                  Practical, role-aware help for CG operations. It answers from approved context only and says clearly
-                  when a module is not connected yet.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Pill tone="accent">{roleLabel(profile?.role)} access</Pill>
-                <Pill tone="amber">Finance and payroll protected</Pill>
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+
+      {/* Header */}
+      <div className="mb-5 flex items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Staff portal</p>
+          <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">CG Assistant</h1>
+          <p className="mt-1 text-sm text-brand-primary/60">Ask for drafts, task summaries and checks.</p>
+        </div>
+        <Pill tone="accent">{roleLabel(profile?.role)}</Pill>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+
+        {/* Main chat panel */}
+        <PremiumCard padding="none" className="flex min-h-[74vh] flex-col overflow-hidden">
+          <div className="border-b border-brand-muted/50 px-4 py-3 sm:px-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-base font-bold text-white">Assistant chat</h2>
+              <div className="flex items-center gap-2">
+                {setupRequired && (
+                  <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200">
+                    AI provider key needed
+                  </span>
+                )}
+                {messages.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearSession}
+                    className="rounded-full border border-brand-muted px-3 py-1 text-xs font-semibold text-brand-primary hover:border-white/30 hover:text-white"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
             </div>
           </div>
-          <div className="px-4 py-4 sm:px-7">
-            <p className="text-sm leading-relaxed text-brand-primary">
-              Salary, payroll, bank, Xero, profit/loss, revenue, invoice totals, tax, ID numbers, and personal HR
-              details are protected for staff and managers. CG Assistant will refuse restricted requests instead of
-              guessing or exposing data.
-            </p>
-          </div>
-        </header>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <PremiumCard padding="none" className="flex min-h-[74vh] flex-col overflow-hidden">
-            <div className="border-b border-brand-muted/50 px-4 py-4 sm:px-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-brand-accent/50" />
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">Assistant chat</h2>
-                    <p className="text-sm text-brand-primary/70">
-                      Ask for priorities, drafts, checklists, operational summaries, or setup status.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {setupRequired && (
-                    <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200">
-                      AI provider key needed
-                    </span>
-                  )}
-                  {messages.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={clearSession}
-                      className="rounded-full border border-brand-muted px-3 py-1 text-xs font-semibold text-brand-primary hover:border-white/30 hover:text-white"
-                    >
-                      Clear chat
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
-              {messages.length === 0 && (
-                <div className="mx-auto flex min-h-[22rem] max-w-2xl flex-col items-center justify-center rounded-2xl border border-brand-muted bg-brand-bg/50 px-5 py-8 text-center">
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-accent">
-                    Ready when you are
-                  </p>
-                  <h3 className="mt-3 text-2xl font-black text-white">Start with an operational question</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-brand-primary">
-                    CG Assistant can help draft client updates, plan priorities, explain what is connected, and create
-                    practical checklists. It will not invent task or finance data.
-                  </p>
-                  <div className="mt-5 flex flex-wrap justify-center gap-2">
-                    {STARTER_PROMPTS.slice(0, 4).map((prompt) => (
-                      <button
-                        key={prompt}
-                        type="button"
-                        onClick={() => void sendMessage(prompt)}
-                        disabled={isSending}
-                        className="rounded-full border border-brand-muted bg-brand-surface px-3 py-1.5 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-accent/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {prompt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {messages.map((message) => {
-                const isUser = message.role === 'user'
-                return (
-                  <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[min(44rem,92%)] ${isUser ? 'items-end' : 'items-start'}`}>
-                      <div
-                        className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
-                          isUser
-                            ? 'bg-brand-accent text-brand-bg'
-                            : message.restricted
-                              ? 'border border-amber-400/30 bg-amber-400/10 text-amber-100'
-                              : message.setupRequired
-                                ? 'border border-sky-300/30 bg-sky-300/10 text-sky-100'
-                                : 'border border-brand-muted bg-brand-bg/70 text-brand-primary'
-                        }`}
-                      >
-                        <p className="whitespace-pre-wrap">{message.content}</p>
-                      </div>
-                      <p className={`mt-1 px-1 text-[11px] text-brand-primary/60 ${isUser ? 'text-right' : ''}`}>
-                        {isUser ? 'You' : 'CG Assistant'} {formatTime(message.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })}
-
-              {isSending && (
-                <div className="flex justify-start">
-                  <div className="rounded-2xl border border-brand-muted bg-brand-bg/70 px-4 py-3 text-sm text-brand-primary">
-                    <div className="flex items-center gap-3">
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
-                      <span>Checking access and preparing a short answer...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {error && (
-              <div className="border-t border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200 sm:px-5">
-                {error} If this keeps happening, confirm the Edge Function is deployed and the user is signed in.
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
+            {messages.length === 0 && (
+              <div className="flex min-h-[18rem] items-center justify-center">
+                <p className="text-sm text-brand-primary/50">Start with a quick request.</p>
               </div>
             )}
 
-            <div className="border-t border-brand-muted bg-brand-surface/90 px-4 py-4 sm:px-5">
-              <div className="mb-3 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
-                {STARTER_PROMPTS.map((prompt) => (
-                  <button
-                    key={prompt}
-                    type="button"
-                    onClick={() => void sendMessage(prompt)}
-                    disabled={isSending}
-                    className="shrink-0 rounded-full border border-brand-muted bg-brand-bg/60 px-3 py-1.5 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-accent/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {prompt}
-                  </button>
-                ))}
+            {messages.map((message) => {
+              const isUser = message.role === 'user'
+              return (
+                <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[min(44rem,92%)] ${isUser ? 'items-end' : 'items-start'}`}>
+                    <div
+                      className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                        isUser
+                          ? 'bg-brand-accent text-brand-bg'
+                          : message.restricted
+                            ? 'border border-amber-400/30 bg-amber-400/10 text-amber-100'
+                            : message.setupRequired
+                              ? 'border border-sky-300/30 bg-sky-300/10 text-sky-100'
+                              : 'border border-brand-muted bg-brand-bg/70 text-brand-primary'
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    </div>
+                    <p className={`mt-1 px-1 text-[11px] text-brand-primary/60 ${isUser ? 'text-right' : ''}`}>
+                      {isUser ? 'You' : 'CG Assistant'} {formatTime(message.createdAt)}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+
+            {isSending && (
+              <div className="flex justify-start">
+                <div className="rounded-2xl border border-brand-muted bg-brand-bg/70 px-4 py-3 text-sm text-brand-primary">
+                  <div className="flex items-center gap-3">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
+                    <span>Checking access and preparing a short answer...</span>
+                  </div>
+                </div>
               </div>
+            )}
+          </div>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(event) => setInput(event.target.value)}
-                  rows={2}
-                  maxLength={2000}
-                  placeholder="Ask CG Assistant for operational help..."
-                  className="min-h-[4.5rem] flex-1 resize-none rounded-xl border border-brand-muted bg-brand-bg px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-brand-primary/60 focus:border-brand-accent"
-                />
-                <ActionButton
-                  type="submit"
-                  loading={isSending}
-                  disabled={!input.trim()}
-                  fullWidth
-                  className="sm:w-auto sm:self-end"
-                >
-                  Send
-                </ActionButton>
-              </form>
-              <p className="mt-2 text-xs text-brand-primary/70">
-                Session history stays in this browser tab. Keep requests operational and avoid pasting confidential
-                payroll, finance, or private HR details.
-              </p>
+          {error && (
+            <div className="border-t border-red-400/20 bg-red-400/10 px-4 py-2.5 text-xs text-red-200 sm:px-5">
+              Assistant unavailable. Check setup.
             </div>
-          </PremiumCard>
+          )}
 
-          <aside className="space-y-5">
-            {isAdminDiagnosticsUser && (
-              <PremiumCard>
-                <PremiumCardHeader
-                  eyebrow="Admin only"
-                  title="Assistant diagnostics"
-                  subtitle="Provider setup, audit readiness, and safe launch checks. Secret values are never shown."
-                />
+          <div className="border-t border-brand-muted bg-brand-surface/90 px-4 py-4 sm:px-5">
+            <div className="mb-3 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
+              {STARTER_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => void sendMessage(prompt)}
+                  disabled={isSending}
+                  className="shrink-0 rounded-full border border-brand-muted bg-brand-bg/60 px-3 py-1.5 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-accent/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
 
-                <div className="space-y-3">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                rows={2}
+                maxLength={2000}
+                placeholder="Ask CG Assistant..."
+                className="min-h-[4.5rem] flex-1 resize-none rounded-xl border border-brand-muted bg-brand-bg px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-brand-primary/60 focus:border-brand-accent"
+              />
+              <ActionButton
+                type="submit"
+                loading={isSending}
+                disabled={!input.trim()}
+                fullWidth
+                className="sm:w-auto sm:self-end"
+              >
+                Send
+              </ActionButton>
+            </form>
+          </div>
+        </PremiumCard>
+
+        {/* Aside */}
+        <aside className="space-y-4">
+
+          {/* Admin diagnostics — collapsed by default */}
+          {isAdminDiagnosticsUser && (
+            <div className="rounded-xl border border-white/8 bg-white/[0.035] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowDiagnostics(prev => !prev)}
+                className="flex w-full items-center justify-between px-4 py-3 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className={`h-3.5 w-3.5 text-white/40 transition-transform ${showDiagnostics ? 'rotate-90' : ''}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  <span className="text-sm font-bold text-white/70">Admin diagnostics</span>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.14em] text-amber-400/60">Admin only</span>
+              </button>
+
+              {showDiagnostics && (
+                <div className="border-t border-white/8 px-4 py-4 space-y-3">
                   <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-1">
                     <div className="rounded-xl border border-brand-muted bg-brand-bg/50 p-3">
                       <p className="font-bold text-white">Assistant status</p>
@@ -458,7 +423,7 @@ export default function AssistantPage() {
                       <div className="rounded-xl border border-brand-muted bg-brand-bg/50 p-3">
                         <p className="text-xs font-bold text-white">Provider order</p>
                         <p className="mt-1 break-words text-xs text-brand-primary">
-                          {diagnostics.providerOrder.join(' -> ')}
+                          {diagnostics.providerOrder.join(' → ')}
                         </p>
                       </div>
                       <div className="space-y-2">
@@ -492,9 +457,7 @@ export default function AssistantPage() {
                     >
                       <p className="font-bold">{providerTest.success ? 'Provider test passed' : 'Provider test failed'}</p>
                       {providerTest.success ? (
-                        <p className="mt-1">
-                          {providerTest.provider} / {providerTest.model}
-                        </p>
+                        <p className="mt-1">{providerTest.provider} / {providerTest.model}</p>
                       ) : (
                         <p className="mt-1">{providerTest.error}</p>
                       )}
@@ -545,44 +508,53 @@ export default function AssistantPage() {
                     </div>
                   </div>
                 </div>
-              </PremiumCard>
-            )}
+              )}
+            </div>
+          )}
 
-            <PremiumCard>
-              <PremiumCardHeader
-                eyebrow="Capabilities"
-                title="What is connected"
-                subtitle="The assistant is ready for safe tool connections, but this version does not fake live data."
-              />
-              <div className="space-y-3">
-                {tools.map((tool) => (
-                  <div key={tool.key} className="rounded-xl border border-brand-muted bg-brand-bg/50 p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-sm font-bold text-white">{tool.name}</h3>
-                      <Pill tone={toolTone(tool.status)}>
-                        {tool.status === 'available' ? 'Live' : tool.status === 'protected' ? 'Protected' : 'Planned'}
-                      </Pill>
-                    </div>
-                    <p className="mt-2 text-xs leading-relaxed text-brand-primary">{tool.description}</p>
-                  </div>
-                ))}
+          {/* Capabilities — compact, name + status only */}
+          <div className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-white/35">Capabilities</p>
+            <div className="space-y-1.5">
+              {tools.map((tool) => (
+                <div
+                  key={tool.key}
+                  className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2"
+                >
+                  <span className="text-sm font-medium text-white/80">{tool.name}</span>
+                  <Pill tone={toolTone(tool.status)}>
+                    {tool.status === 'available' ? 'Live' : tool.status === 'protected' ? 'Protected' : 'Planned'}
+                  </Pill>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Protected data — collapsed */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowProtected(prev => !prev)}
+              className="flex items-center gap-1.5 text-xs font-medium text-white/30 transition-colors hover:text-white/55"
+            >
+              <svg
+                className={`h-3.5 w-3.5 transition-transform ${showProtected ? 'rotate-90' : ''}`}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+              Protected data
+            </button>
+            {showProtected && (
+              <div className="mt-3 rounded-lg border border-white/8 bg-white/[0.02] p-3">
+                <p className="text-xs leading-relaxed text-brand-primary/65">
+                  Salary, payroll, bank, Xero, profit/loss, revenue, invoice totals, tax, ID numbers, and personal HR details are protected. CG Assistant will refuse restricted requests rather than guess or expose data.
+                </p>
               </div>
-            </PremiumCard>
+            )}
+          </div>
 
-            <PremiumCard>
-              <PremiumCardHeader
-                eyebrow="Access"
-                title="Role-aware answers"
-                subtitle="The server checks role and protected topics before any AI response."
-              />
-              <ul className="space-y-2 text-sm leading-relaxed text-brand-primary">
-                <li>Staff: general operational help and future own-task/public-schedule context.</li>
-                <li>Managers: future team workload, status, and approvals without finance or payroll details.</li>
-                <li>Owner/admin: setup planning is allowed, but unavailable finance data is never invented.</li>
-              </ul>
-            </PremiumCard>
-          </aside>
-        </div>
+        </aside>
       </div>
     </div>
   )

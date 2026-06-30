@@ -22,7 +22,7 @@ import {
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
-const TYPE_LABELS = {
+const TYPE_LABELS: Record<DeliverableType, string> = {
   ...PACKAGE_DELIVERABLE_LABELS,
   dp: 'DP',
   photo: 'F',
@@ -31,6 +31,50 @@ const TYPE_LABELS = {
 }
 
 const DISPLAY_TYPES: DeliverableType[] = ['dp', 'photo', 'video', 'reel']
+
+const STATUS_TONE: Record<SimplifiedProductionStatus, string> = {
+  not_started: 'text-white/50 border-white/10 bg-white/[0.03]',
+  in_progress: 'text-brand-accent border-brand-accent/25 bg-brand-accent/[0.07]',
+  ready_review: 'text-amber-300 border-amber-400/25 bg-amber-400/[0.07]',
+  awaiting_client: 'text-sky-200 border-sky-300/25 bg-sky-300/[0.07]',
+  meta_drafts: 'text-[#2dd4bf] border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.07]',
+  scheduled_posted: 'text-[#2dd4bf] border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.07]',
+}
+
+const STATUS_STAT_TONE: Record<SimplifiedProductionStatus, string> = {
+  not_started: 'text-white',
+  in_progress: 'text-brand-accent',
+  ready_review: 'text-amber-300',
+  awaiting_client: 'text-sky-300',
+  meta_drafts: 'text-[#2dd4bf]',
+  scheduled_posted: 'text-[#2dd4bf]',
+}
+
+type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
+
+function deliverableSource(d: MonthlyDeliverable): DeliverableSource {
+  if (d.moved_from_deliverable_id) return 'moved'
+  if (d.replaced_by_request_id) return 'replaced'
+  if (d.priority === 'client_request') return 'client_request'
+  if (d.package_id || d.template_id) return 'package'
+  return 'unlinked'
+}
+
+const SOURCE_LABEL: Record<DeliverableSource, string> = {
+  package: 'Package',
+  client_request: 'Client request',
+  moved: 'Moved',
+  replaced: 'Replaced',
+  unlinked: 'Unlinked',
+}
+
+const SOURCE_CHIP_STYLE: Record<DeliverableSource, string> = {
+  package: 'border-brand-teal/25 bg-brand-teal/[0.07] text-[#2dd4bf]',
+  client_request: 'border-amber-400/25 bg-amber-400/[0.07] text-amber-300',
+  moved: 'border-white/10 bg-white/[0.03] text-white/40',
+  replaced: 'border-white/10 bg-white/[0.03] text-white/40',
+  unlinked: 'border-white/[0.06] bg-white/[0.015] text-white/25',
+}
 
 function toMonthStart(key: string) {
   return `${key}-01`
@@ -50,26 +94,19 @@ function formatDate(value: string | null) {
   })
 }
 
-function statusTone(status: SimplifiedProductionStatus) {
-  if (status === 'scheduled_posted' || status === 'meta_drafts') return 'text-brand-accent border-brand-accent/25 bg-brand-accent/10'
-  if (status === 'awaiting_client') return 'text-sky-200 border-sky-300/25 bg-sky-300/10'
-  if (status === 'ready_review') return 'text-amber-300 border-amber-400/25 bg-amber-400/10'
-  return 'text-white/60 border-white/10 bg-white/[0.03]'
+function formatMonthHeading(key: string) {
+  const [year, month] = key.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
 }
 
-function displayDeliverableCode(deliverable: MonthlyDeliverable) {
-  const instance = String(deliverable.instance_number)
-  if (deliverable.code.trim().endsWith(instance)) return deliverable.code
-  if (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel') {
-    return `${deliverable.code} ${instance}`
-  }
-  return `${deliverable.code}${instance}`
-}
+const STAFF_STATUSES: SimplifiedProductionStatus[] = ['not_started', 'in_progress', 'ready_review', 'awaiting_client']
+const FINAL_STATUSES: SimplifiedProductionStatus[] = ['meta_drafts', 'scheduled_posted']
 
 export default function MonthlyPlannerPage() {
-  const { profile } = useAuth()
   const [searchParams] = useSearchParams()
+  const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
+  const isScheduleController = isAdmin
   const [selectedMonth, setSelectedMonth] = useState(monthKey(new Date()))
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
@@ -83,12 +120,26 @@ export default function MonthlyPlannerPage() {
   const [tableMissing, setTableMissing] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [statusError, setStatusError] = useState<string | null>(null)
 
   const monthStart = toMonthStart(selectedMonth)
 
   const clientNameById = useMemo(() => {
     return new Map(clients.map(client => [client.id, client.name]))
   }, [clients])
+
+  // Status counts from all package deliverables this month (unfiltered)
+  const statusCounts = useMemo(() => {
+    const counts: Record<SimplifiedProductionStatus, number> = {
+      not_started: 0, in_progress: 0, ready_review: 0,
+      awaiting_client: 0, meta_drafts: 0, scheduled_posted: 0,
+    }
+    for (const d of deliverables) {
+      if (!PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type)) continue
+      counts[simplifyProductionStatus(d.production_status)]++
+    }
+    return counts
+  }, [deliverables])
 
   const filteredDeliverables = useMemo(() => {
     const search = clientSearch.trim().toLowerCase()
@@ -119,6 +170,18 @@ export default function MonthlyPlannerPage() {
   }, [clientNameById, filteredDeliverables])
 
   const overallTotals = useMemo(() => getMonthlyPackageTotals(filteredDeliverables), [filteredDeliverables])
+
+  const sourceCounts = useMemo(() => {
+    let pkg = 0, clientReq = 0, movedOrReplaced = 0, unlinked = 0
+    for (const d of filteredDeliverables) {
+      const src = deliverableSource(d)
+      if (src === 'package') pkg++
+      else if (src === 'client_request') clientReq++
+      else if (src === 'moved' || src === 'replaced') movedOrReplaced++
+      else unlinked++
+    }
+    return { pkg, clientReq, movedOrReplaced, unlinked }
+  }, [filteredDeliverables])
 
   async function loadData() {
     setLoading(true)
@@ -179,7 +242,13 @@ export default function MonthlyPlannerPage() {
   }
 
   async function handleStatusChange(id: string, status: SimplifiedProductionStatus) {
-    if (!isAdmin) return
+    if (!profile) return
+    setStatusError(null)
+    // TODO: confirm RLS allows staff production-status updates.
+    if (FINAL_STATUSES.includes(status) && !isScheduleController) {
+      setStatusError('Only admin can set final scheduling statuses.')
+      return
+    }
     setErrorMessage(null)
     const backendStatus = SIMPLIFIED_TO_BACKEND_STATUS[status]
     const { error } = await updateMonthlyDeliverableStatus(id, backendStatus)
@@ -213,20 +282,23 @@ export default function MonthlyPlannerPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-      <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+
+      {/* Header */}
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Planner</p>
-          <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Monthly Planner</h1>
-          <p className="mt-1 text-sm text-brand-primary/75">Schedule monthly content work.</p>
+          <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">
+            {formatMonthHeading(selectedMonth)}
+          </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setSelectedMonth(shiftMonth(selectedMonth, -1))}
-            className="rounded-md bg-white/[0.05] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
+            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
           >
-            Previous
+            ← Prev
           </button>
           <input
             type="month"
@@ -237,13 +309,13 @@ export default function MonthlyPlannerPage() {
           <button
             type="button"
             onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))}
-            className="rounded-md bg-white/[0.05] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
+            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
           >
-            Next
+            Next →
           </button>
           {isAdmin && (
-            <ActionButton size="sm" onClick={handleGenerate} loading={generating}>
-              Generate Month
+            <ActionButton size="sm" variant="outline" onClick={handleGenerate} loading={generating}>
+              Generate month
             </ActionButton>
           )}
         </div>
@@ -255,7 +327,75 @@ export default function MonthlyPlannerPage() {
         </div>
       )}
 
-      <div className="mb-3 grid gap-2 rounded-xl border border-white/8 bg-white/[0.035] p-3 md:grid-cols-4">
+      {statusError && (
+        <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">
+          {statusError}
+        </div>
+      )}
+
+      {/* Status summary */}
+      <div className="mb-4 grid grid-cols-3 gap-2 lg:grid-cols-6">
+        {SIMPLIFIED_STATUS_OPTIONS.map(s => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
+            className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
+              statusFilter === s
+                ? `${STATUS_TONE[s]} ring-1 ring-inset ring-white/20`
+                : 'border-white/8 bg-white/[0.025] hover:bg-white/[0.04]'
+            }`}
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/35 truncate">
+              {SIMPLIFIED_STATUS_LABELS[s]}
+            </p>
+            <p className={`mt-1 text-xl font-black ${statusFilter === s ? STATUS_STAT_TONE[s] : 'text-white'}`}>
+              {statusCounts[s]}
+            </p>
+          </button>
+        ))}
+      </div>
+
+      {/* Type totals */}
+      <div className="mb-4 grid grid-cols-5 gap-2">
+        <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+          <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Total</p>
+          <p className="mt-1 text-lg font-black text-white">{overallTotals.total}</p>
+        </div>
+        {DISPLAY_TYPES.map(type => (
+          <div key={type} className="rounded-lg bg-white/[0.02] px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">{TYPE_LABELS[type]}</p>
+            <p className="mt-1 text-lg font-black text-white">
+              {overallTotals.byType[type].complete}
+              <span className="text-sm font-medium text-white/30">/{overallTotals.byType[type].total}</span>
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Package usage summary */}
+      {filteredDeliverables.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-white/30">Package usage</span>
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.package}`}>
+              Package {sourceCounts.pkg}
+            </span>
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.client_request}`}>
+              Client request {sourceCounts.clientReq}
+            </span>
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.moved}`}>
+              Moved/Replaced {sourceCounts.movedOrReplaced}
+            </span>
+            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.unlinked}`}>
+              Unlinked {sourceCounts.unlinked}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="mb-4 grid gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 md:grid-cols-4">
         <select
           value={clientFilter}
           onChange={event => setClientFilter(event.target.value)}
@@ -289,82 +429,100 @@ export default function MonthlyPlannerPage() {
         </select>
       </div>
 
-      <div className="mb-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        <StatBox label="Total" value={overallTotals.total} />
-        <StatBox label="Remaining" value={overallTotals.remaining} warn={overallTotals.remaining > 0} />
-        <StatBox label="DP" value={`${overallTotals.byType.dp.complete}/${overallTotals.byType.dp.total}`} />
-        <StatBox label="F" value={`${overallTotals.byType.photo.complete}/${overallTotals.byType.photo.total}`} />
-        <StatBox label="Video" value={`${overallTotals.byType.video.complete}/${overallTotals.byType.video.total}`} />
-        <StatBox label="Reel" value={`${overallTotals.byType.reel.complete}/${overallTotals.byType.reel.total}`} />
-      </div>
-
+      {/* Deliverable groups */}
       {groupedDeliverables.length === 0 ? (
         <EmptyState
-          title="No deliverables for this month."
-          message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : 'Generate this month from Package Master.'}
+          title="No deliverables this month."
+          message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : isAdmin ? 'Use Generate month to create deliverables.' : ''}
           action={isAdmin ? (
-            <ActionButton onClick={handleGenerate} loading={generating}>Generate Month</ActionButton>
+            <ActionButton variant="outline" onClick={handleGenerate} loading={generating}>
+              Generate month
+            </ActionButton>
           ) : undefined}
           centered={false}
         />
       ) : (
         <div className="space-y-3">
           {groupedDeliverables.map(group => (
-            <section key={group.clientId} className="rounded-xl border border-white/8 bg-white/[0.03] p-3">
+            <section key={group.clientId} className="rounded-xl border border-white/8 bg-white/[0.025] p-3">
               <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h2 className="text-base font-bold text-white">{group.clientName}</h2>
-                  <p className="text-xs text-white/40">{group.totals.remaining}/{group.totals.total} remaining</p>
+                  <p className="text-xs text-white/35">
+                    {group.totals.total - group.totals.remaining}/{group.totals.total} done
+                  </p>
                 </div>
-                <div className="grid grid-cols-3 gap-1.5 text-[11px] sm:grid-cols-6">
+                <div className="grid grid-cols-4 gap-1.5 text-[11px] sm:flex">
                   {DISPLAY_TYPES.map(type => (
                     <MiniTotal key={type} label={TYPE_LABELS[type]} total={group.totals.byType[type].total} complete={group.totals.byType[type].complete} />
                   ))}
-                  <MiniTotal label="Remaining" total={group.totals.total} complete={group.totals.total - group.totals.remaining} warn />
                 </div>
               </div>
 
               <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-                {group.items.map(deliverable => (
-                  <article key={deliverable.id} className="rounded-lg border border-white/8 bg-black/35 p-3">
-                    <div className="mb-2 flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] font-bold text-white">
-                            {displayDeliverableCode(deliverable)}
-                          </span>
-                          <span className="text-[11px] text-white/40">{TYPE_LABELS[deliverable.deliverable_type]}</span>
-                          {deliverable.priority !== 'normal' && (
-                            <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                              {deliverable.priority === 'urgent' ? 'Urgent' : 'Client request'}
+                {group.items.map(deliverable => {
+                  const simplified = simplifyProductionStatus(deliverable.production_status)
+                  return (
+                    <article key={deliverable.id} className="rounded-lg border border-white/8 bg-black/30 p-3">
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                              {displayDeliverableCode(deliverable)}
                             </span>
-                          )}
+                            <span className="text-[11px] text-white/35">{TYPE_LABELS[deliverable.deliverable_type]}</span>
+                            <SourceChip source={deliverableSource(deliverable)} />
+                            {deliverable.priority === 'urgent' && (
+                              <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                                Urgent
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white">{deliverable.title}</h3>
                         </div>
-                        <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white">{deliverable.title}</h3>
+                        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                          {SIMPLIFIED_STATUS_LABELS[simplified]}
+                        </span>
                       </div>
-                      <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(simplifyProductionStatus(deliverable.production_status))}`}>
-                        {SIMPLIFIED_STATUS_LABELS[simplifyProductionStatus(deliverable.production_status)]}
-                      </span>
-                    </div>
 
-                    <div className="space-y-1 text-xs text-white/45">
-                      {deliverable.assigned_to_name && <p>Staff: <span className="text-white/70">{deliverable.assigned_to_name}</span></p>}
-                      {deliverable.scheduled_date && <p>Scheduled: <span className="text-white/70">{formatDate(deliverable.scheduled_date)}</span></p>}
-                      {deliverable.due_date && <p>Due: <span className="text-white/70">{formatDate(deliverable.due_date)}</span></p>}
-                      {deliverable.notes && <p className="line-clamp-2">Notes: <span className="text-white/60">{deliverable.notes}</span></p>}
-                    </div>
+                      <div className="space-y-0.5 text-xs text-white/40">
+                        {deliverable.assigned_to_name && (
+                          <p>Staff: <span className="text-white/65">{deliverable.assigned_to_name}</span></p>
+                        )}
+                        {deliverable.scheduled_date && (
+                          <p>Scheduled: <span className="text-white/65">{formatDate(deliverable.scheduled_date)}</span></p>
+                        )}
+                        {deliverable.due_date && (
+                          <p>Due: <span className="text-white/65">{formatDate(deliverable.due_date)}</span></p>
+                        )}
+                        {deliverable.notes && (
+                          <p className="line-clamp-2">Notes: <span className="text-white/55">{deliverable.notes}</span></p>
+                        )}
+                      </div>
 
-                    {isAdmin && (
-                      <select
-                        value={simplifyProductionStatus(deliverable.production_status)}
-                        onChange={event => handleStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
-                        className="mt-3 w-full rounded-md border border-white/10 bg-brand-bg px-2 py-1.5 text-xs text-white outline-none focus:border-brand-accent/50"
-                      >
-                        {SIMPLIFIED_STATUS_OPTIONS.map(status => <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>)}
-                      </select>
-                    )}
-                  </article>
-                ))}
+                      {profile && (
+                        FINAL_STATUSES.includes(simplified) && !isScheduleController ? (
+                          <div className="mt-3 flex items-center gap-2">
+                            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                              {SIMPLIFIED_STATUS_LABELS[simplified]}
+                            </span>
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/25">Final</span>
+                          </div>
+                        ) : (
+                          <select
+                            value={simplified}
+                            onChange={event => handleStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
+                            className="mt-3 w-full rounded-md border border-white/10 bg-brand-bg px-2 py-1.5 text-xs text-white outline-none focus:border-brand-accent/50"
+                          >
+                            {(isScheduleController ? SIMPLIFIED_STATUS_OPTIONS : STAFF_STATUSES).map(status => (
+                              <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>
+                            ))}
+                          </select>
+                        )
+                      )}
+                    </article>
+                  )
+                })}
               </div>
             </section>
           ))}
@@ -374,20 +532,28 @@ export default function MonthlyPlannerPage() {
   )
 }
 
-function StatBox({ label, value, warn = false }: { label: string; value: string | number; warn?: boolean }) {
+function displayDeliverableCode(deliverable: MonthlyDeliverable) {
+  const instance = String(deliverable.instance_number)
+  if (deliverable.code.trim().endsWith(instance)) return deliverable.code
+  if (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel') {
+    return `${deliverable.code} ${instance}`
+  }
+  return `${deliverable.code}${instance}`
+}
+
+function MiniTotal({ label, total, complete }: { label: string; total: number; complete: number }) {
   return (
-    <div className="rounded-lg bg-white/[0.025] px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
-      <p className={`mt-1 text-lg font-black ${warn ? 'text-amber-300' : 'text-white'}`}>{value}</p>
+    <div className="rounded-md bg-white/[0.02] px-2 py-1">
+      <p className="text-white/30">{label}</p>
+      <p className="font-bold text-white/70">{complete}/{total}</p>
     </div>
   )
 }
 
-function MiniTotal({ label, total, complete, warn = false }: { label: string; total: number; complete: number; warn?: boolean }) {
+function SourceChip({ source }: { source: DeliverableSource }) {
   return (
-    <div className="rounded-md bg-white/[0.025] px-2 py-1">
-      <p className="text-white/35">{label}</p>
-      <p className={`font-bold ${warn ? 'text-amber-300' : 'text-white/80'}`}>{complete}/{total}</p>
-    </div>
+    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SOURCE_CHIP_STYLE[source]}`}>
+      {SOURCE_LABEL[source]}
+    </span>
   )
 }
