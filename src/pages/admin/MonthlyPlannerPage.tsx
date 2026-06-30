@@ -124,6 +124,7 @@ export default function MonthlyPlannerPage() {
   const [statusError, setStatusError] = useState<string | null>(null)
   const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
   const [drawerClientName, setDrawerClientName] = useState('')
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar')
 
   const monthStart = toMonthStart(selectedMonth)
 
@@ -185,6 +186,31 @@ export default function MonthlyPlannerPage() {
     }
     return { pkg, clientReq, movedOrReplaced, unlinked }
   }, [filteredDeliverables])
+
+  // Group by scheduled_date for calendar view
+  const byDate = useMemo(() => {
+    const map = new Map<string, MonthlyDeliverable[]>()
+    for (const d of filteredDeliverables) {
+      if (!d.scheduled_date) continue
+      const list = map.get(d.scheduled_date) ?? []
+      list.push(d)
+      map.set(d.scheduled_date, list)
+    }
+    return map
+  }, [filteredDeliverables])
+
+  const unscheduled = useMemo(
+    () => filteredDeliverables.filter(d => !d.scheduled_date),
+    [filteredDeliverables]
+  )
+
+  const calendarStats = useMemo(() => ({
+    total: filteredDeliverables.length,
+    scheduled: filteredDeliverables.filter(d => d.scheduled_date).length,
+    unscheduled: filteredDeliverables.filter(d => !d.scheduled_date).length,
+    clientRequests: filteredDeliverables.filter(d => deliverableSource(d) === 'client_request').length,
+    packageItems: filteredDeliverables.filter(d => deliverableSource(d) === 'package').length,
+  }), [filteredDeliverables])
 
   async function loadData() {
     setLoading(true)
@@ -359,6 +385,32 @@ export default function MonthlyPlannerPage() {
         </div>
       )}
 
+      {/* View mode toggle */}
+      <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+        <button
+          type="button"
+          onClick={() => setViewMode('calendar')}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+            viewMode === 'calendar'
+              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+              : 'text-brand-primary/60 hover:text-brand-primary'
+          }`}
+        >
+          Calendar
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewMode('list')}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+            viewMode === 'list'
+              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+              : 'text-brand-primary/60 hover:text-brand-primary'
+          }`}
+        >
+          List
+        </button>
+      </div>
+
       {/* Status summary */}
       <div className="mb-4 grid grid-cols-3 gap-2 lg:grid-cols-6">
         {SIMPLIFIED_STATUS_OPTIONS.map(s => (
@@ -372,7 +424,7 @@ export default function MonthlyPlannerPage() {
                 : 'border-white/8 bg-white/[0.025] hover:bg-white/[0.04]'
             }`}
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/35 truncate">
+            <p className="truncate text-[10px] font-semibold uppercase tracking-[0.1em] text-white/35">
               {SIMPLIFIED_STATUS_LABELS[s]}
             </p>
             <p className={`mt-1 text-xl font-black ${statusFilter === s ? STATUS_STAT_TONE[s] : 'text-white'}`}>
@@ -382,22 +434,47 @@ export default function MonthlyPlannerPage() {
         ))}
       </div>
 
-      {/* Type totals */}
-      <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
-        <div className="rounded-lg bg-white/[0.02] px-3 py-2">
-          <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Total</p>
-          <p className="mt-1 text-lg font-black text-white">{overallTotals.total}</p>
-        </div>
-        {DISPLAY_TYPES.map(type => (
-          <div key={type} className="rounded-lg bg-white/[0.02] px-3 py-2">
-            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">{TYPE_LABELS[type]}</p>
-            <p className="mt-1 text-lg font-black text-white">
-              {overallTotals.byType[type].complete}
-              <span className="text-sm font-medium text-white/30">/{overallTotals.byType[type].total}</span>
-            </p>
+      {/* Stats row — calendar mode shows schedule stats, list mode shows type totals */}
+      {viewMode === 'list' ? (
+        <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+          <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Total</p>
+            <p className="mt-1 text-lg font-black text-white">{overallTotals.total}</p>
           </div>
-        ))}
-      </div>
+          {DISPLAY_TYPES.map(type => (
+            <div key={type} className="rounded-lg bg-white/[0.02] px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">{TYPE_LABELS[type]}</p>
+              <p className="mt-1 text-lg font-black text-white">
+                {overallTotals.byType[type].complete}
+                <span className="text-sm font-medium text-white/30">/{overallTotals.byType[type].total}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+          <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Total</p>
+            <p className="mt-1 text-lg font-black text-white">{calendarStats.total}</p>
+          </div>
+          <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Scheduled</p>
+            <p className="mt-1 text-lg font-black text-[#2dd4bf]">{calendarStats.scheduled}</p>
+          </div>
+          <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Unscheduled</p>
+            <p className="mt-1 text-lg font-black text-amber-400">{calendarStats.unscheduled}</p>
+          </div>
+          <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Client req</p>
+            <p className="mt-1 text-lg font-black text-brand-accent">{calendarStats.clientRequests}</p>
+          </div>
+          <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Package</p>
+            <p className="mt-1 text-lg font-black text-white">{calendarStats.packageItems}</p>
+          </div>
+        </div>
+      )}
 
       {/* Package usage summary */}
       {filteredDeliverables.length > 0 && (
@@ -455,112 +532,135 @@ export default function MonthlyPlannerPage() {
         </select>
       </div>
 
-      {/* Deliverable groups */}
-      {groupedDeliverables.length === 0 ? (
-        <EmptyState
-          title="No deliverables this month."
-          message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : isAdmin ? 'Use Generate month to create deliverables.' : ''}
-          action={isAdmin ? (
-            <ActionButton variant="outline" onClick={handleGenerate} loading={generating}>
-              Generate month
-            </ActionButton>
-          ) : undefined}
-          centered={false}
-        />
+      {/* Main content: calendar or list */}
+      {viewMode === 'calendar' ? (
+        filteredDeliverables.length === 0 ? (
+          <EmptyState
+            title="No deliverables this month."
+            message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : isAdmin ? 'Use Generate month to create deliverables.' : ''}
+            action={isAdmin ? (
+              <ActionButton variant="outline" onClick={handleGenerate} loading={generating}>
+                Generate month
+              </ActionButton>
+            ) : undefined}
+            centered={false}
+          />
+        ) : (
+          <CalendarGrid
+            monthKey={selectedMonth}
+            byDate={byDate}
+            unscheduled={unscheduled}
+            onOpen={openDrawer}
+            clientNameById={clientNameById}
+          />
+        )
       ) : (
-        <div className="space-y-3">
-          {groupedDeliverables.map(group => (
-            <section key={group.clientId} className="rounded-xl border border-white/8 bg-white/[0.025] p-3">
-              <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <h2 className="text-base font-bold text-white">{group.clientName}</h2>
-                  <p className="text-xs text-white/35">
-                    {group.totals.total - group.totals.remaining}/{group.totals.total} done
-                  </p>
+        groupedDeliverables.length === 0 ? (
+          <EmptyState
+            title="No deliverables this month."
+            message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : isAdmin ? 'Use Generate month to create deliverables.' : ''}
+            action={isAdmin ? (
+              <ActionButton variant="outline" onClick={handleGenerate} loading={generating}>
+                Generate month
+              </ActionButton>
+            ) : undefined}
+            centered={false}
+          />
+        ) : (
+          <div className="space-y-3">
+            {groupedDeliverables.map(group => (
+              <section key={group.clientId} className="rounded-xl border border-white/8 bg-white/[0.025] p-3">
+                <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-bold text-white">{group.clientName}</h2>
+                    <p className="text-xs text-white/35">
+                      {group.totals.total - group.totals.remaining}/{group.totals.total} done
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5 text-[11px] sm:flex">
+                    {DISPLAY_TYPES.map(type => (
+                      <MiniTotal key={type} label={TYPE_LABELS[type]} total={group.totals.byType[type].total} complete={group.totals.byType[type].complete} />
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 gap-1.5 text-[11px] sm:flex">
-                  {DISPLAY_TYPES.map(type => (
-                    <MiniTotal key={type} label={TYPE_LABELS[type]} total={group.totals.byType[type].total} complete={group.totals.byType[type].complete} />
-                  ))}
-                </div>
-              </div>
 
-              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-                {group.items.map(deliverable => {
-                  const simplified = simplifyProductionStatus(deliverable.production_status)
-                  return (
-                    <article key={deliverable.id} className="rounded-lg border border-white/8 bg-black/30 p-3">
-                      <div className="mb-2 flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] font-bold text-white">
-                              {displayDeliverableCode(deliverable)}
-                            </span>
-                            <span className="text-[11px] text-white/35">{TYPE_LABELS[deliverable.deliverable_type]}</span>
-                            <SourceChip source={deliverableSource(deliverable)} />
-                            {deliverable.priority === 'urgent' && (
-                              <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                                Urgent
+                <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                  {group.items.map(deliverable => {
+                    const simplified = simplifyProductionStatus(deliverable.production_status)
+                    return (
+                      <article key={deliverable.id} className="rounded-lg border border-white/8 bg-black/30 p-3">
+                        <div className="mb-2 flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                                {displayDeliverableCode(deliverable)}
                               </span>
-                            )}
+                              <span className="text-[11px] text-white/35">{TYPE_LABELS[deliverable.deliverable_type]}</span>
+                              <SourceChip source={deliverableSource(deliverable)} />
+                              {deliverable.priority === 'urgent' && (
+                                <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                                  Urgent
+                                </span>
+                              )}
+                            </div>
+                            <button type="button" onClick={() => openDrawer(deliverable, group.clientName)} className="mt-1 text-left">
+                              <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-white hover:text-brand-accent transition-colors">
+                                {deliverable.title}
+                              </h3>
+                            </button>
                           </div>
-                          <button type="button" onClick={() => openDrawer(deliverable, group.clientName)} className="mt-1 text-left">
-                            <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-white hover:text-brand-accent transition-colors">
-                              {deliverable.title}
-                            </h3>
-                          </button>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
-                          <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
-                            {SIMPLIFIED_STATUS_LABELS[simplified]}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => openDrawer(deliverable, group.clientName)}
-                            className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[11px] text-white/30 hover:text-white hover:border-white/20 transition-colors"
-                            title="Open details"
-                          >
-                            ···
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-0.5 text-xs text-white/40">
-                        {deliverable.assigned_to_name && (
-                          <p>Staff: <span className="text-white/65">{deliverable.assigned_to_name}</span></p>
-                        )}
-                        {deliverable.due_date && (
-                          <p>Due: <span className="text-white/65">{formatDate(deliverable.due_date)}</span></p>
-                        )}
-                      </div>
-
-                      {profile && (
-                        FINAL_STATUSES.includes(simplified) && !isScheduleController ? (
-                          <div className="mt-3 flex items-center gap-2">
-                            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
                               {SIMPLIFIED_STATUS_LABELS[simplified]}
                             </span>
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/25">Final</span>
+                            <button
+                              type="button"
+                              onClick={() => openDrawer(deliverable, group.clientName)}
+                              className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[11px] text-white/30 hover:text-white hover:border-white/20 transition-colors"
+                              title="Open details"
+                            >
+                              ···
+                            </button>
                           </div>
-                        ) : (
-                          <select
-                            value={simplified}
-                            onChange={event => handleStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
-                            className="mt-3 w-full rounded-md border border-white/10 bg-brand-bg px-2 py-1.5 text-xs text-white outline-none focus:border-brand-accent/50"
-                          >
-                            {(isScheduleController ? SIMPLIFIED_STATUS_OPTIONS : STAFF_STATUSES).map(status => (
-                              <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>
-                            ))}
-                          </select>
-                        )
-                      )}
-                    </article>
-                  )
-                })}
-              </div>
-            </section>
-          ))}
-        </div>
+                        </div>
+
+                        <div className="space-y-0.5 text-xs text-white/40">
+                          {deliverable.assigned_to_name && (
+                            <p>Staff: <span className="text-white/65">{deliverable.assigned_to_name}</span></p>
+                          )}
+                          {deliverable.due_date && (
+                            <p>Due: <span className="text-white/65">{formatDate(deliverable.due_date)}</span></p>
+                          )}
+                        </div>
+
+                        {profile && (
+                          FINAL_STATUSES.includes(simplified) && !isScheduleController ? (
+                            <div className="mt-3 flex items-center gap-2">
+                              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                                {SIMPLIFIED_STATUS_LABELS[simplified]}
+                              </span>
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-white/25">Final</span>
+                            </div>
+                          ) : (
+                            <select
+                              value={simplified}
+                              onChange={event => handleStatusChange(deliverable.id, event.target.value as SimplifiedProductionStatus)}
+                              className="mt-3 w-full rounded-md border border-white/10 bg-brand-bg px-2 py-1.5 text-xs text-white outline-none focus:border-brand-accent/50"
+                            >
+                              {(isScheduleController ? SIMPLIFIED_STATUS_OPTIONS : STAFF_STATUSES).map(status => (
+                                <option key={status} value={status}>{SIMPLIFIED_STATUS_LABELS[status]}</option>
+                              ))}
+                            </select>
+                          )
+                        )}
+                      </article>
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )
       )}
 
       {drawerDeliverable && (
@@ -601,6 +701,190 @@ function SourceChip({ source }: { source: DeliverableSource }) {
     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SOURCE_CHIP_STYLE[source]}`}>
       {SOURCE_LABEL[source]}
     </span>
+  )
+}
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+function CalendarChip({
+  deliverable,
+  clientName,
+  onOpen,
+}: {
+  deliverable: MonthlyDeliverable
+  clientName: string
+  onOpen: (d: MonthlyDeliverable, name: string) => void
+}) {
+  const source = deliverableSource(deliverable)
+  const chipColor =
+    source === 'client_request'
+      ? 'border-amber-400/25 bg-amber-400/[0.08] text-amber-200 hover:bg-amber-400/[0.14]'
+      : source === 'package'
+      ? 'border-brand-teal/20 bg-brand-teal/[0.06] text-[#2dd4bf] hover:bg-brand-teal/[0.12]'
+      : 'border-white/[0.08] bg-white/[0.03] text-white/50 hover:bg-white/[0.07]'
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(deliverable, clientName)}
+      title={`${displayDeliverableCode(deliverable)} — ${clientName}`}
+      className={`flex w-full items-center gap-1 rounded border px-1 py-0.5 text-left transition-colors ${chipColor}`}
+    >
+      <span className="shrink-0 text-[10px] font-bold leading-none">{displayDeliverableCode(deliverable)}</span>
+      {clientName && (
+        <span className="min-w-0 flex-1 truncate text-[9px] leading-none opacity-60">{clientName}</span>
+      )}
+    </button>
+  )
+}
+
+function CalendarGrid({
+  monthKey: month,
+  byDate,
+  unscheduled,
+  onOpen,
+  clientNameById,
+}: {
+  monthKey: string
+  byDate: Map<string, MonthlyDeliverable[]>
+  unscheduled: MonthlyDeliverable[]
+  onOpen: (d: MonthlyDeliverable, name: string) => void
+  clientNameById: Map<string, string>
+}) {
+  const [year, m] = month.split('-').map(Number)
+  const firstDay = new Date(year, m - 1, 1).getDay() // 0 = Sunday
+  const daysInMonth = new Date(year, m, 0).getDate()
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const isCurrentMonth = todayStr.slice(0, 7) === month
+  const todayDay = isCurrentMonth ? parseInt(todayStr.slice(8, 10)) : -1
+
+  const cells: Array<number | null> = [
+    ...Array.from({ length: firstDay }, (): null => null),
+    ...Array.from({ length: daysInMonth }, (_, i): number => i + 1),
+  ]
+
+  // Mobile: only days that have deliverables
+  const mobileDays = Array.from({ length: daysInMonth }, (_, i) => i + 1).filter(day => {
+    const dateStr = `${month}-${String(day).padStart(2, '0')}`
+    return (byDate.get(dateStr) ?? []).length > 0
+  })
+
+  return (
+    <>
+      {/* Desktop: 7-column calendar grid */}
+      <div className="hidden sm:block">
+        <div className="mb-1 grid grid-cols-7 gap-px">
+          {DAY_NAMES.map(d => (
+            <div key={d} className="py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/25">
+              {d}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.04]">
+          {cells.map((day, idx) => {
+            if (day === null) {
+              return <div key={`empty-${idx}`} className="min-h-[90px] bg-[#0c0c0c]" />
+            }
+            const dateStr = `${month}-${String(day).padStart(2, '0')}`
+            const items = byDate.get(dateStr) ?? []
+            const isToday = day === todayDay
+            return (
+              <div
+                key={dateStr}
+                className={`min-h-[90px] p-1.5 ${isToday ? 'bg-brand-teal/[0.055]' : 'bg-[#0c0c0c]'}`}
+              >
+                <span className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold leading-none ${
+                  isToday ? 'bg-brand-teal text-black' : 'text-white/30'
+                }`}>
+                  {day}
+                </span>
+                <div className="space-y-0.5">
+                  {items.map(d => (
+                    <CalendarChip
+                      key={d.id}
+                      deliverable={d}
+                      clientName={clientNameById.get(d.client_id) ?? ''}
+                      onOpen={onOpen}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Mobile: vertical list of days with deliverables */}
+      <div className="block sm:hidden space-y-2">
+        {mobileDays.length === 0 ? (
+          <p className="py-4 text-center text-sm text-white/30">No scheduled deliverables this month.</p>
+        ) : (
+          mobileDays.map(day => {
+            const dateStr = `${month}-${String(day).padStart(2, '0')}`
+            const items = byDate.get(dateStr) ?? []
+            const isToday = day === todayDay
+            const dayLabel = new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-ZA', {
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+            })
+            return (
+              <div
+                key={dateStr}
+                className={`rounded-xl border p-3 ${
+                  isToday
+                    ? 'border-brand-teal/30 bg-brand-teal/[0.04]'
+                    : 'border-white/[0.07] bg-white/[0.02]'
+                }`}
+              >
+                <p className={`mb-2 text-xs font-bold ${isToday ? 'text-brand-teal' : 'text-white/40'}`}>
+                  {dayLabel}{isToday ? ' · Today' : ''}
+                </p>
+                <div className="space-y-1">
+                  {items.map(d => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => onOpen(d, clientNameById.get(d.client_id) ?? '')}
+                      className="flex w-full items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 text-left transition-colors hover:bg-white/[0.05]"
+                    >
+                      <span className="shrink-0 rounded bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                        {displayDeliverableCode(d)}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-xs text-white/60">
+                        {clientNameById.get(d.client_id) ?? ''}
+                      </span>
+                      <SourceChip source={deliverableSource(d)} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* Unscheduled section */}
+      {unscheduled.length > 0 && (
+        <div className="mt-4 rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-3">
+          <p className="mb-2.5 text-xs font-bold uppercase tracking-[0.12em] text-amber-400/60">
+            Unscheduled this month ({unscheduled.length})
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {unscheduled.map(d => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => onOpen(d, clientNameById.get(d.client_id) ?? '')}
+                className="flex items-center gap-1.5 rounded-lg border border-white/[0.07] bg-white/[0.03] px-2.5 py-1.5 text-left transition-colors hover:bg-white/[0.05]"
+              >
+                <span className="text-[11px] font-bold text-white/70">{displayDeliverableCode(d)}</span>
+                <span className="text-[11px] text-white/40">{clientNameById.get(d.client_id) ?? ''}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

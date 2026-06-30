@@ -60,15 +60,15 @@ The biggest missing pieces are:
 
 | Request | Status | Notes |
 |---|---|---|
-| Full calendar view with real month/day layout | OUTSTANDING | Not built yet. This is a major missing core feature. |
-| Calendar must use real dates for 2026, 2027, etc. | OUTSTANDING | Needs actual date-aware calendar logic, not fake cards. |
-| Full-screen calendar/schedule view like screenshots shared | OUTSTANDING | Must be a proper month grid with days. |
-| Master schedule must show the whole year/content plan | OUTSTANDING | Current Planner board is not enough. |
-| Monthly Planner must connect directly to master schedule/calendar | PARTIAL | Monthly Planner exists, but direct calendar backbone still missing. |
-| Staff should see monthly summary, not full-year complexity | PARTIAL | Monthly Planner exists, but needs real imported content and date linkage. |
+| Full calendar view with real month/day layout | PARTIAL | Calendar grid added to Monthly Planner with real weekdays and day numbers. |
+| Calendar must use real dates for 2026, 2027, etc. | PARTIAL | Date math uses native JS Date (year, month, day) — works for any year. |
+| Full-screen calendar/schedule view like screenshots shared | PARTIAL | Month grid exists in Monthly Planner. Full master schedule (all clients, full year) still missing. |
+| Master schedule must show the whole year/content plan | OUTSTANDING | Monthly calendar foundation built; full-year cross-client master schedule not yet built. |
+| Monthly Planner must connect directly to master schedule/calendar | PARTIAL | Monthly Planner now has calendar view using scheduled_date. Full master schedule backbone still missing. |
+| Staff should see monthly summary, not full-year complexity | PARTIAL | Monthly Planner calendar view shows current month only. Needs real imported data. |
 | CA/Amonique control final schedule dates and Scheduled/Posted states | PREPARED | UI/role split exists in Monthly Planner; RLS migration still pending. |
-| Staff can view schedule but not control final scheduling | PARTIAL | Needs proper master schedule permissions and live testing. |
-| Calendar dates must support CG Hours recommendations later | OUTSTANDING | Timer prep exists, but date-aware calendar workflow is missing. |
+| Staff can view schedule but not control final scheduling | PARTIAL | Calendar view built; permissions need live testing after RLS migration. |
+| Calendar dates must support CG Hours recommendations later | OUTSTANDING | Date foundation exists; CG Hours bridge still future work. |
 
 ## 4. Teams/Planner Excel data import
 
@@ -233,11 +233,11 @@ This must be added as a core goal, not a forgotten side note.
 
 | Request | Status | Notes |
 |---|---|---|
-| Tasks/deliverables must be date-aware | PARTIAL | Due dates and scheduled dates exist in places, but no full calendar UI. |
-| Staff must know what day work belongs to | PARTIAL/OUTSTANDING | Daily Tasks has due dates; Monthly Planner needs calendar view. |
-| Full month calendar must show actual weekdays/dates | OUTSTANDING | Major missing feature. |
+| Tasks/deliverables must be date-aware | PARTIAL | Due dates and scheduled dates exist; Monthly Planner now has calendar view using scheduled_date. |
+| Staff must know what day work belongs to | PARTIAL | Daily Tasks has due dates; Monthly Planner calendar view now shows which day each deliverable falls on. |
+| Full month calendar must show actual weekdays/dates | PARTIAL | Month calendar grid built in Monthly Planner with Sun–Sat headers, real day numbers and Today marker. |
 | Future CG Hours suggestions need correct work date | OUTSTANDING | Timer/date context must be connected later. |
-| Real date handling for 2026/2027 and future years | OUTSTANDING | Needs proper date library/calendar logic. |
+| Real date handling for 2026/2027 and future years | PARTIAL | Calendar uses native JS Date arithmetic — correct for any year including 2026, 2027+. |
 
 ## 18. Performance/reporting side
 
