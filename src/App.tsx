@@ -29,8 +29,7 @@ import MetaIntegrationPage from './pages/admin/MetaIntegrationPage'
 import AssistantPage from './pages/admin/AssistantPage'
 import PlannerPage from './pages/admin/PlannerPage'
 import PackageMasterPage from './pages/admin/PackageMasterPage'
-import MonthlyPlannerPage from './pages/admin/MonthlyPlannerPage'
-import MasterSchedulePage from './pages/admin/MasterSchedulePage'
+import ClientSchedulePage from './pages/admin/ClientSchedulePage'
 import PlannerImportPage from './pages/admin/PlannerImportPage'
 import ImportHealthPage from './pages/admin/ImportHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
@@ -77,15 +76,17 @@ export default function App() {
               <Route path="/admin/command-centre" element={<CommandCentrePage />} />
               <Route path="/admin/planner" element={<PlannerPage />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
-              <Route path="/admin/monthly-planner" element={<MonthlyPlannerPage />} />
-              <Route path="/admin/master-schedule" element={<MasterSchedulePage />} />
+              <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
+              <Route path="/admin/monthly-planner" element={<Navigate to="/admin/client-schedule?view=calendar" replace />} />
+              <Route path="/admin/master-schedule" element={<Navigate to="/admin/client-schedule?view=year" replace />} />
               <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/assistant" element={<AssistantPage />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
               <Route path="/admin/integrations" element={<IntegrationsPage />} />
               <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
-              <Route path="/admin/company-calendar" element={<CompanyCalendarPage />} />
+              <Route path="/admin/cg-calendar" element={<CompanyCalendarPage />} />
+              <Route path="/admin/company-calendar" element={<Navigate to="/admin/cg-calendar" replace />} />
 
               {/* Consolidated Import workspace (CSV import is admin-gated inside
                   the hub; manual summaries + history are staff read-only). */}

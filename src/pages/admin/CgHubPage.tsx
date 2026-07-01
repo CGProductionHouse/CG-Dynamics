@@ -189,7 +189,7 @@ export default function CgHubPage() {
     }),
   [deliverables])
 
-  // Company Calendar derived
+  // CG Calendar derived
   const todayCompanyEvents = useMemo(() => {
     const todayStart = `${today}T00:00:00`
     const todayEnd = `${today}T23:59:59`
@@ -359,7 +359,7 @@ export default function CgHubPage() {
             stats={stats}
           />
 
-          {/* C — Today's Company Calendar */}
+          {/* C — Today's CG Calendar */}
           <CompanyCalendarSection
             todayCompanyEvents={todayCompanyEvents}
             upcomingCompanyEvents={upcomingCompanyEvents}
@@ -497,7 +497,7 @@ function TodayFocusSection({
   )
 }
 
-// ── C: Today's Company Calendar ───────────────────────────────
+// ── C: Today's CG Calendar ───────────────────────────────
 
 function CompanyCalendarSection({
   todayCompanyEvents,
@@ -511,16 +511,16 @@ function CompanyCalendarSection({
   if (companyEventsMissing) {
     return (
       <div className="mb-8">
-        <HubSectionHeader title="Today's Company Calendar" />
+        <HubSectionHeader title="Today's CG Calendar" />
         <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-4">
           <p className="text-xs text-amber-300/80">
-            Company calendar setup needed. Run phase-10a SQL to enable company events.
+            CG Calendar setup needed. Run phase-10a SQL to enable company events.
           </p>
           <Link
-            to="/admin/company-calendar"
+            to="/admin/cg-calendar"
             className="mt-2 inline-block text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
           >
-            Open Company Calendar →
+            Open CG Calendar →
           </Link>
         </div>
       </div>
@@ -532,7 +532,7 @@ function CompanyCalendarSection({
   return (
     <div className="mb-8">
       <HubSectionHeader
-        title="Today's Company Calendar"
+        title="Today's CG Calendar"
         subtitle={todayCompanyEvents.length > 0 ? `${todayCompanyEvents.length} event${todayCompanyEvents.length === 1 ? '' : 's'} today` : 'No events today'}
       />
 
@@ -540,10 +540,10 @@ function CompanyCalendarSection({
         <div className="rounded-xl border border-white/8 bg-brand-surface/90 p-4">
           <p className="text-sm text-brand-primary/60">No company events today.</p>
           <Link
-            to="/admin/company-calendar"
+            to="/admin/cg-calendar"
             className="mt-2 inline-block text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
           >
-            Open Company Calendar →
+            Open CG Calendar →
           </Link>
         </div>
       ) : (
@@ -551,7 +551,7 @@ function CompanyCalendarSection({
           {displayEvents.slice(0, 5).map(event => (
             <Link
               key={event.id}
-              to="/admin/company-calendar"
+              to="/admin/cg-calendar"
               className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.04]"
             >
               <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
@@ -579,7 +579,7 @@ function CompanyCalendarSection({
             </Link>
           ))}
           <Link
-            to="/admin/company-calendar"
+            to="/admin/cg-calendar"
             className="mt-1 text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
           >
             View all →
@@ -612,7 +612,7 @@ function ProductionScheduleSection({
         <HubWorkCard
           title="Package Due Today"
           count={dueTodayDeliverables.length}
-          viewAllTo="/admin/monthly-planner"
+          viewAllTo="/admin/client-schedule?view=calendar"
           emptyText="No package work due today"
           accentColor
         >
@@ -624,7 +624,7 @@ function ProductionScheduleSection({
         <HubWorkCard
           title="Upcoming Scheduled"
           count={upcomingDeliverables.length}
-          viewAllTo="/admin/monthly-planner"
+          viewAllTo="/admin/client-schedule?view=calendar"
           emptyText="No upcoming scheduled package work"
         >
           {upcomingDeliverables.slice(0, 5).map(d => (
@@ -635,7 +635,7 @@ function ProductionScheduleSection({
         <HubWorkCard
           title="Needs Scheduling"
           count={unscheduledDeliverables.length}
-          viewAllTo="/admin/master-schedule"
+          viewAllTo="/admin/client-schedule?mode=unscheduled"
           emptyText="Package schedule is clean"
           danger={unscheduledDeliverables.length > 0}
         >
@@ -691,11 +691,11 @@ function ClientsAttentionSection({ clients }: {
 
 const LAUNCH_ITEMS = [
   { label: 'Daily Tasks', detail: 'Your work list for today', to: '/admin/command-centre', icon: '📋' },
-  { label: 'Package Calendar', detail: 'Monthly deliverables', to: '/admin/monthly-planner', icon: '📅' },
-  { label: 'Company Calendar', detail: 'Meetings & events', to: '/admin/company-calendar', icon: '🗓' },
-  { label: 'Planner Board', detail: 'Board overview', to: '/admin/planner', icon: '📊' },
-  { label: 'Master Schedule', detail: 'Full schedule view', to: '/admin/master-schedule', icon: '📆' },
+  { label: 'Client Schedule', detail: 'Monthly deliverables', to: '/admin/client-schedule?view=calendar', icon: '📅' },
+  { label: 'CG Calendar', detail: 'Meetings & events', to: '/admin/cg-calendar', icon: '🗓' },
   { label: 'Clients', detail: 'Reports, Meta, packages', to: '/admin/clients', icon: '👥' },
+  { label: 'Assistant', detail: 'Staff helper', to: '/admin/assistant', icon: 'AI' },
+  { label: 'CG Hours', detail: 'Time tracking', to: 'https://cg-hours.vercel.app', icon: 'HR' },
 ]
 
 function QuickLaunchSection({ isAdmin }: { isAdmin: boolean }) {
@@ -713,7 +713,7 @@ function QuickLaunchSection({ isAdmin }: { isAdmin: boolean }) {
           <button
             key={item.label}
             type="button"
-            onClick={() => navigate(item.to)}
+            onClick={() => item.to.startsWith('https://') ? window.open(item.to, '_blank', 'noopener,noreferrer') : navigate(item.to)}
             className="group min-h-24 rounded-xl border border-white/8 bg-white/[0.035] p-4 text-left transition-all hover:border-[#2dd4bf]/30 hover:bg-[#2dd4bf]/[0.06]"
           >
             <div className="flex h-full flex-col justify-between">
@@ -880,7 +880,7 @@ function DeliverableRow({ deliverable }: { deliverable: MonthlyDeliverable }) {
 
   return (
     <Link
-      to="/admin/monthly-planner"
+      to="/admin/client-schedule?view=calendar"
       className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]"
     >
       <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#2dd4bf]/10 text-[#2dd4bf]">

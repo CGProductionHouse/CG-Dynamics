@@ -432,19 +432,19 @@ export default function PlannerPage() {
         )}
       </div>
 
-      {/* Monthly Work entry point */}
+      {/* Client Schedule entry point */}
       <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.035] p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal/70">Monthly work</p>
-            <h2 className="mt-1 text-lg font-black text-white">Monthly Planner</h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal/70">Client schedule</p>
+            <h2 className="mt-1 text-lg font-black text-white">Client Schedule</h2>
             <p className="mt-0.5 text-xs text-brand-primary/60">Current month deliverables, statuses and client work.</p>
           </div>
           <Link
-            to="/admin/monthly-planner"
+            to="/admin/client-schedule?view=calendar"
             className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-[#2dd4bf] transition-all hover:border-brand-teal/60 hover:bg-brand-teal/[0.14] hover:text-white"
           >
-            Open Monthly Work
+            Open Client Schedule
             <svg className="h-4 w-4 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -532,11 +532,11 @@ export default function PlannerPage() {
             >
               Next
             </button>
-            <Link to="/admin/monthly-planner" className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">
-              Open Calendar
+            <Link to="/admin/client-schedule?view=calendar" className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">
+              Open Client Schedule
             </Link>
-            <Link to="/admin/master-schedule" className="rounded-md border border-white/[0.08] px-3 py-2 text-xs font-bold text-brand-primary/60 hover:text-white">
-              Master Schedule
+            <Link to="/admin/client-schedule?view=year" className="rounded-md border border-white/[0.08] px-3 py-2 text-xs font-bold text-brand-primary/60 hover:text-white">
+              Year / Master
             </Link>
           </div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
