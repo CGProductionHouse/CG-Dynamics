@@ -588,11 +588,24 @@ export async function updateMonthlyDeliverableSchedule(id: string, scheduledDate
 
 export async function updateMonthlyDeliverableCore(
   id: string,
-  patch: { priority?: TaskPriority; assigned_to_name?: string | null; client_id?: string },
+  patch: { priority?: TaskPriority; assigned_to_name?: string | null; client_id?: string | null },
 ) {
   return supabase
     .from(DELIVERABLES_TABLE)
     .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+}
+
+// Explicit, dedicated client link/unlink for a monthly deliverable. Only ever
+// called from an explicit user save — never for inferred/auto matches. Passing
+// null unlinks the client. An empty string is coerced to null so we never send
+// an invalid UUID to Postgres.
+export async function updateMonthlyDeliverableClient(id: string, clientId: string | null) {
+  return supabase
+    .from(DELIVERABLES_TABLE)
+    .update({ client_id: clientId ? clientId : null })
     .eq('id', id)
     .select()
     .single()

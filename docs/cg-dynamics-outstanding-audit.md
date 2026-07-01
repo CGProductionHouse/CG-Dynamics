@@ -49,6 +49,10 @@ These are enforced in `src/pages/admin/ClientSchedulePage.tsx` and `src/lib/plan
   - Needs Action = `isNeedsActionStatus` (excludes scheduled/posted and Meta drafts/approved).
   - Posted / History = `isPostedOrHistoryStatus` (scheduled or posted). It is styled muted/low-attention.
 - Unknown client: if `client_id` has no match but the title/code clearly names a known client, show "Client match needed: <name>" (display-only inference). Never silently save a guessed `client_id` in this pass.
+  - Inferred "Client match needed" labels are DISPLAY-ONLY and are never written to the database.
+  - The client display resolver prioritises a real `client_id` over any inferred title text: a linked deliverable always shows its real client, never the inferred hint.
+  - Manual client selection in the deliverable drawer MUST persist the selected client's real `clients.id` into `monthly_deliverables.client_id` (via `updateMonthlyDeliverableCore` / `updateMonthlyDeliverableClient`), on an explicit user Save only. After saving, the card moves into the real client lane and the "Client match needed" state clears.
+  - No inferred client is ever written automatically. "Clear" unlinks by writing `client_id = null` (empty string is coerced to null so an invalid UUID is never sent). The drawer only pre-fills the client field from a real linked client, never from an inferred hint.
 - Board/card ordering is display-only: schedule date, then post category (DP, F, Video, Reel, Other), then item number, then title. Do NOT rename or resequence the underlying data here.
 - Client Schedule opens on the current active month (July 2026), never January. Year/Master focuses the current month first.
 

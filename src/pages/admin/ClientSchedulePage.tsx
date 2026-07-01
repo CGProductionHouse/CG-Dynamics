@@ -362,8 +362,12 @@ export default function ClientSchedulePage() {
 
       {drawerDeliverable && (
         <DeliverableDrawer
+          // Key by id so the drawer remounts per deliverable — otherwise the
+          // useState initializers keep the previous card's values and a save
+          // could write the wrong client_id.
+          key={drawerDeliverable.id}
           deliverable={drawerDeliverable}
-          clientName={clientDisplay(drawerDeliverable).label}
+          clientDisplay={clientDisplay(drawerDeliverable)}
           onClose={() => setDrawerDeliverable(null)}
           onSaved={saveUpdated}
         />
@@ -660,11 +664,15 @@ function BarPanel({ title, rows }: { title: string; rows: Array<{ label: string;
   )
 }
 
-function DeliverableDrawer({ deliverable, clientName, onClose, onSaved }: { deliverable: MonthlyDeliverable; clientName: string; onClose: () => void; onSaved: (updated: MonthlyDeliverable) => void }) {
+function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { deliverable: MonthlyDeliverable; clientDisplay: ClientDisplay; onClose: () => void; onSaved: (updated: MonthlyDeliverable) => void }) {
   const [status, setStatus] = useState<SimplifiedProductionStatus>(normalizeScheduleStatus(deliverable.production_status))
   const [date, setDate] = useState(getEffectiveScheduleDate(deliverable) ?? '')
   const [assigned, setAssigned] = useState(deliverable.assigned_to_name ?? '')
-  const [clientId, setClientId] = useState(deliverable.client_id)
+  // Only a real, currently-linked client_id seeds the picker — an inferred
+  // "Client match needed" hint is display-only and never pre-fills the field.
+  const [clientId, setClientId] = useState<string | null>(
+    clientDisplay.state === 'known' ? deliverable.client_id : null,
+  )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -679,11 +687,18 @@ function DeliverableDrawer({ deliverable, clientName, onClose, onSaved }: { deli
     const scheduleResult = await updateMonthlyDeliverableSchedule(deliverable.id, date || null)
     if (scheduleResult.error) { setError(scheduleResult.error.message); setSaving(false); return }
     if (scheduleResult.data) next = scheduleResult.data
-    const coreResult = await updateMonthlyDeliverableCore(deliverable.id, { assigned_to_name: assigned.trim() || null, client_id: clientId })
+    // Explicit client link/unlink — '' is coerced to null so we never send an
+    // invalid UUID. This is the only place client_id is written, and only on an
+    // explicit user save.
+    const coreResult = await updateMonthlyDeliverableCore(deliverable.id, {
+      assigned_to_name: assigned.trim() || null,
+      client_id: clientId || null,
+    })
     if (coreResult.error) { setError(coreResult.error.message); setSaving(false); return }
     if (coreResult.data) next = coreResult.data
     onSaved(next)
     setSaving(false)
+    onClose()
   }
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
@@ -692,11 +707,19 @@ function DeliverableDrawer({ deliverable, clientName, onClose, onSaved }: { deli
       <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
       <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[460px]">
         <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
-          <div><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-accent">Package post</p><h2 className="mt-1 text-base font-bold leading-snug text-white">{displayCode(deliverable)} · {deliverable.title}</h2><p className="mt-0.5 text-xs text-brand-primary/60">{clientName}</p></div>
+          <div><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-accent">Package post</p><h2 className="mt-1 text-base font-bold leading-snug text-white">{displayCode(deliverable)} · {deliverable.title}</h2><p className={`mt-0.5 text-xs ${clientDisplay.state === 'known' ? 'text-brand-primary/60' : 'text-amber-300'}`}>{clientDisplay.label}</p></div>
           <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-brand-primary hover:text-white">X</button>
         </div>
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-          <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label><ClientPicker value={clientId} label={clientName} onChange={client => setClientId(client?.id ?? '')} /></div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
+            <ClientPicker value={clientId} label={clientDisplay.state === 'known' ? clientDisplay.label : ''} onChange={client => setClientId(client?.id ?? null)} />
+            {clientDisplay.state !== 'known' && (
+              <p className="mt-1.5 text-[11px] text-amber-300/80">
+                Not linked to a client yet{clientDisplay.state === 'inferred' ? ` — ${clientDisplay.label}` : ''}. Select the real client and Save to link it.
+              </p>
+            )}
+          </div>
           <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Schedule date</label><input type="date" value={date} onChange={event => setDate(event.target.value)} className={inputCls} /></div>
           <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label><select value={status} onChange={event => setStatus(event.target.value as SimplifiedProductionStatus)} className={inputCls}>{SIMPLIFIED_STATUS_OPTIONS.map(option => <option key={option} value={option}>{SIMPLIFIED_STATUS_LABELS[option]}</option>)}</select></div>
           <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label><input value={assigned} onChange={event => setAssigned(event.target.value)} className={inputCls} /></div>
