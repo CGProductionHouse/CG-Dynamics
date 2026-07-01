@@ -15,6 +15,7 @@ type PlannerTaskRow = {
   bucket_id: string | null
   original_bucket_name: string | null
   client_id: string | null
+  status?: string | null
 }
 
 type BucketRow = {
@@ -43,6 +44,7 @@ type MonthlyRow = {
   month: string
   due_date: string | null
   scheduled_date: string | null
+  production_status?: string | null
 }
 
 const EMPTY_COUNTS: Counts = {
@@ -103,11 +105,11 @@ export default function ImportHealthPage() {
         getTableCount('client_packages'),
         getTableCount('package_deliverable_templates'),
         getTableCount('monthly_deliverables'),
-        supabase.from('planner_tasks').select('bucket_id, original_bucket_name, client_id'),
+        supabase.from('planner_tasks').select('bucket_id, original_bucket_name, client_id, status'),
         supabase.from('planner_buckets').select('id, board_id, name, bucket_type'),
         supabase.from('planner_boards').select('id, name, slug, board_type'),
         supabase.from('clients').select('id, name').eq('active', true).order('name'),
-        supabase.from('monthly_deliverables').select('client_id, package_id, template_id, month, due_date, scheduled_date').is('archived_at', null),
+        supabase.from('monthly_deliverables').select('client_id, package_id, template_id, month, due_date, scheduled_date, production_status').is('archived_at', null),
       ])
 
       const firstError = tasksResult.error
@@ -174,6 +176,19 @@ export default function ImportHealthPage() {
     return countBy(monthlyDeliverables, item => item.month?.slice(0, 7) ?? 'No month')
       .sort((a, b) => a.label.localeCompare(b.label))
   }, [monthlyDeliverables])
+
+  const deliverablesByStatus = useMemo(() => {
+    return countBy(monthlyDeliverables, item => item.production_status ?? 'No status')
+  }, [monthlyDeliverables])
+
+  const selectedYear = new Date().getFullYear()
+  const visibleThisYear = useMemo(
+    () => monthlyDeliverables.filter(item => item.month?.startsWith(String(selectedYear))).length,
+    [monthlyDeliverables, selectedYear],
+  )
+
+  const plannerLinked = useMemo(() => plannerTasks.filter(task => task.client_id).length, [plannerTasks])
+  const plannerUnlinked = plannerTasks.length - plannerLinked
 
   const missingDueOrSchedule = useMemo(
     () => monthlyDeliverables.filter(item => !item.due_date && !item.scheduled_date).length,
@@ -254,14 +269,32 @@ export default function ImportHealthPage() {
             <HealthStat label="Missing template" value={missingLinks.template} warn={missingLinks.template > 0} />
           </div>
 
+          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <HealthStat label={`${selectedYear} master visible`} value={visibleThisYear} />
+            <HealthStat label="Planner linked clients" value={plannerLinked} />
+            <HealthStat label="Planner unlinked" value={plannerUnlinked} warn={plannerUnlinked > 0} />
+            <HealthNote title="Client Schedule source" value="monthly_deliverables" />
+          </div>
+
           <div className="grid gap-4 lg:grid-cols-3">
             <HealthList title="Planner buckets with tasks" rows={plannerBucketCounts} />
             <ClientMatchList rows={clientScheduleBuckets} />
             <HealthList title="Monthly deliverables by client" rows={monthlyByClient} />
             <HealthList title="Deliverables by month" rows={deliverablesByMonth} />
+            <HealthList title="Deliverables by status" rows={deliverablesByStatus} />
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+function HealthNote({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-brand-teal/25 bg-brand-teal/[0.06] p-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">{title}</p>
+      <p className="mt-2 text-sm font-black text-[#2dd4bf]">{value}</p>
+      <p className="mt-1 text-xs text-white/45">Planner Board Client Schedule no longer uses empty planner buckets as its source.</p>
     </div>
   )
 }

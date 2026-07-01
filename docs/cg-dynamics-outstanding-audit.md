@@ -64,6 +64,7 @@ The biggest missing pieces are:
 | Calendar must use real dates for 2026, 2027, etc. | PARTIAL | Date math uses native JS Date (year, month, day) — works for any year. |
 | Full-screen calendar/schedule view like screenshots shared | PARTIAL | Month grid exists in Monthly Planner. Full master schedule (all clients, full year) still missing. |
 | Master schedule must show the whole year/content plan | PARTIAL | Master Schedule page built at /admin/master-schedule. Imported monthly deliverables are now being surfaced by year/month using imported month and due-date data. Drag/drop and bulk scheduling are still outstanding. |
+| Planner Board Client Schedule must use the same schedule source | PARTIAL | Updated so the Client Schedule Board reads monthly_deliverables grouped by client instead of empty planner_buckets. Needs live browser testing with imported data. |
 | Monthly Planner must connect directly to master schedule/calendar | PARTIAL | Monthly Planner now has calendar view using scheduled_date. Full master schedule backbone still missing. |
 | Staff should see monthly summary, not full-year complexity | PARTIAL | Monthly Planner calendar view shows current month only. Needs real imported data. |
 | CA/Amonique control final schedule dates and Scheduled/Posted states | PREPARED | UI/role split exists in Monthly Planner; RLS migration still pending. |
@@ -79,6 +80,7 @@ The biggest missing pieces are:
 | Review regenerated preview SQL/JSON before running | OUTSTANDING | Generated files are local/ignored and need review before Supabase run. |
 | Import operational boards/tasks | PARTIAL | Live planner_tasks import completed. Daily Tasks now loads imported tasks with native quick-add tasks, readable buckets and useful filters. Needs live signed-in browser testing with staff/admin roles. |
 | Import client schedule/monthly package data | PARTIAL | Live client packages/templates/monthly deliverables import completed. Monthly Planner, Master Schedule, Package and Clients pages now surface imported production data. Needs live signed-in browser testing. |
+| Remove imported Planner tasks from active views | PREPARED | UI/code path added. Requires running supabase/phase-9a-planner-task-archive.sql before imported planner_tasks can be archived instead of hard deleted. |
 | Protect admin-sensitive checklist boards | PREPARED | Admin board logic exists, but must be verified with imported data. |
 
 Known source workbooks:

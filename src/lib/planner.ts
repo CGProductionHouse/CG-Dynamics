@@ -536,7 +536,7 @@ export async function updateMonthlyDeliverableSchedule(id: string, scheduledDate
 
 export async function updateMonthlyDeliverableCore(
   id: string,
-  patch: { priority?: TaskPriority; assigned_to_name?: string | null },
+  patch: { priority?: TaskPriority; assigned_to_name?: string | null; client_id?: string },
 ) {
   return supabase
     .from(DELIVERABLES_TABLE)
@@ -802,6 +802,9 @@ export interface PlannerTask {
   import_hash: string
   // Collaborative assignments — added in phase-7b.
   helper_names?: string[]
+  archived_at?: string | null
+  archived_by_name?: string | null
+  archive_reason?: string | null
   created_at: string
   updated_at: string
 }
@@ -814,6 +817,10 @@ export async function listPlannerTasks(boardId: string) {
     .select('*')
     .eq('board_id', boardId)
     .order('created_at')
+}
+
+export async function listClientScheduleDeliverablesForYear(year: number) {
+  return listMonthlyDeliverablesByYear(year)
 }
 
 export interface CreatePlannerTaskInput {
@@ -869,6 +876,19 @@ export async function updatePlannerTask(id: string, updates: UpdatePlannerTaskIn
   return supabase
     .from(PLANNER_TASKS_TABLE)
     .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+}
+
+export async function archivePlannerTask(id: string, actorName: string | null, reason = 'Removed from active work') {
+  return supabase
+    .from(PLANNER_TASKS_TABLE)
+    .update({
+      archived_at: new Date().toISOString(),
+      archived_by_name: actorName,
+      archive_reason: reason,
+    })
     .eq('id', id)
     .select()
     .single()

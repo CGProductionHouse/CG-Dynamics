@@ -99,6 +99,9 @@ type PlannerTaskRow = {
   created_at: string
   updated_at: string
   helper_names?: string[]
+  archived_at?: string | null
+  archived_by_name?: string | null
+  archive_reason?: string | null
 }
 
 type PlannerBucketRow = {
@@ -203,7 +206,7 @@ export async function listTasks() {
     return { data: nativeResult.data ?? [], error: plannerResult.error }
   }
 
-  const plannerRows = (plannerResult.data ?? []) as PlannerTaskRow[]
+  const plannerRows = ((plannerResult.data ?? []) as PlannerTaskRow[]).filter(row => !row.archived_at)
   const bucketIds = unique(plannerRows.map(row => row.bucket_id))
   const bucketNames = new Map<string, string>()
 
@@ -248,6 +251,22 @@ export async function createTask(input: TaskInput) {
       source: input.source,
       whatsapp_source_text: input.whatsapp_source_text ?? null,
     })
+    .select()
+    .single()
+}
+
+export async function archiveImportedPlannerTask(id: string, actorName: string | null, reason = 'Removed from active work') {
+  if (!isPlannerTaskId(id)) {
+    return { data: null, error: { message: 'Only imported Planner tasks can be archived here.' } }
+  }
+  return supabase
+    .from(PLANNER_TASKS_TABLE)
+    .update({
+      archived_at: new Date().toISOString(),
+      archived_by_name: actorName,
+      archive_reason: reason,
+    })
+    .eq('id', stripPlannerTaskId(id))
     .select()
     .single()
 }

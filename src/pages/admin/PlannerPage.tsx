@@ -2,24 +2,35 @@ import { useState, useEffect, useMemo, type ReactNode, type FormEvent } from 're
 import { Link } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
 import { ActionButton } from '../../components/ui/Buttons'
+import { ClientPicker } from '../../components/ClientPicker'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   listPlannerBoards,
   listPlannerBuckets,
   listPlannerTasks,
+  listClientScheduleDeliverablesForYear,
   createPlannerTask,
   updatePlannerTask,
+  archivePlannerTask,
+  updateMonthlyDeliverableCore,
+  updateMonthlyDeliverableSchedule,
+  updateMonthlyDeliverableStatus,
   SIMPLIFIED_STATUS_LABELS,
   SIMPLIFIED_STATUS_OPTIONS,
+  SIMPLIFIED_TO_BACKEND_STATUS,
   PRIORITIES,
   PLANNER_TASK_STATUSES,
   PLANNER_TASK_STATUS_LABELS,
+  simplifyProductionStatus,
   type PlannerBoard,
   type PlannerBucket,
   type PlannerTask,
   type PlannerTaskStatus,
+  type MonthlyDeliverable,
+  type SimplifiedProductionStatus,
   type TaskPriority,
 } from '../../lib/planner'
+import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
 const BOARD_LABELS: Record<string, string> = {
   'operations-todo': 'Operations',
@@ -75,7 +86,7 @@ function formatPlannerDate(dateStr: string) {
 }
 
 function isPlannerHistoryTask(task: PlannerTask) {
-  return task.status === 'approved' || task.status === 'scheduled'
+  return Boolean(task.archived_at) || task.status === 'approved' || task.status === 'scheduled'
 }
 
 function plannerTaskSortRank(task: PlannerTask) {
@@ -100,6 +111,20 @@ function plannerStatusTone(status: PlannerTaskStatus) {
   return 'text-white/35 border-white/10'
 }
 
+function displayDeliverableCode(deliverable: MonthlyDeliverable) {
+  const instance = String(deliverable.instance_number)
+  if (deliverable.code.trim().endsWith(instance)) return deliverable.code
+  if (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel') {
+    return `${deliverable.code} ${instance}`
+  }
+  return `${deliverable.code}${instance}`
+}
+
+function formatDeliverableDate(value: string | null) {
+  if (!value) return 'Unscheduled'
+  return new Date(`${value}T00:00:00`).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })
+}
+
 export default function PlannerPage() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
@@ -114,6 +139,12 @@ export default function PlannerPage() {
   const [tableMissing, setTableMissing] = useState(false)
   const [drawerTask, setDrawerTask] = useState<PlannerTask | null>(null)
   const [workView, setWorkView] = useState<PlannerWorkView>('active')
+  const [scheduleYear, setScheduleYear] = useState(new Date().getFullYear())
+  const [scheduleDeliverables, setScheduleDeliverables] = useState<MonthlyDeliverable[]>([])
+  const [scheduleLoading, setScheduleLoading] = useState(false)
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
+  const [scheduleError, setScheduleError] = useState<string | null>(null)
 
   // Load boards
   useEffect(() => {
@@ -176,13 +207,49 @@ export default function PlannerPage() {
     return () => { active = false }
   }, [activeBoard, boards])
 
+  useEffect(() => {
+    let active = true
+    listActiveClients().then(({ data }) => {
+      if (active) setClients(data ?? [])
+    })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    if (activeBoard !== 'client-schedule') return
+    let active = true
+    setScheduleLoading(true)
+    setScheduleError(null)
+    listClientScheduleDeliverablesForYear(scheduleYear).then(({ data, error }) => {
+      if (!active) return
+      setScheduleLoading(false)
+      if (error) {
+        setScheduleError(error.message ?? 'Could not load client schedule.')
+        setScheduleDeliverables([])
+        return
+      }
+      setScheduleDeliverables(data ?? [])
+    }).catch(() => {
+      if (!active) return
+      setScheduleLoading(false)
+      setScheduleError('Could not load client schedule.')
+      setScheduleDeliverables([])
+    })
+    return () => { active = false }
+  }, [activeBoard, scheduleYear])
+
   // Escape to close drawer
   useEffect(() => {
-    if (!drawerTask) return
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDrawerTask(null) }
+    if (!drawerTask && !drawerDeliverable) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setDrawerTask(null)
+        setDrawerDeliverable(null)
+      }
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [drawerTask])
+  }, [drawerTask, drawerDeliverable])
 
   // Admin board always last
   const sortedBoards = useMemo(() => {
@@ -236,6 +303,29 @@ export default function PlannerPage() {
     [visibleTasks],
   )
 
+  const clientNameById = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
+
+  const deliverablesByClient = useMemo(() => {
+    const groups = new Map<string, MonthlyDeliverable[]>()
+    for (const deliverable of scheduleDeliverables) {
+      const key = deliverable.client_id
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key)!.push(deliverable)
+    }
+    return Array.from(groups.entries())
+      .map(([clientId, items]) => ({
+        clientId,
+        clientName: clientNameById.get(clientId) ?? 'Unknown client',
+        items: items.sort((a, b) => {
+          const aDate = a.scheduled_date ?? a.due_date ?? '9999-12-31'
+          const bDate = b.scheduled_date ?? b.due_date ?? '9999-12-31'
+          if (aDate !== bDate) return aDate.localeCompare(bDate)
+          return a.code.localeCompare(b.code) || a.instance_number - b.instance_number
+        }),
+      }))
+      .sort((a, b) => a.clientName.localeCompare(b.clientName))
+  }, [clientNameById, scheduleDeliverables])
+
   function handleTaskCreated(task: PlannerTask) {
     setTasks(prev => [...prev, task])
   }
@@ -243,6 +333,11 @@ export default function PlannerPage() {
   function handleTaskSaved(updated: PlannerTask) {
     setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
     setDrawerTask(updated)
+  }
+
+  function handleDeliverableSaved(updated: MonthlyDeliverable) {
+    setScheduleDeliverables(prev => prev.map(item => item.id === updated.id ? updated : item))
+    setDrawerDeliverable(updated)
   }
 
   if (loading) {
@@ -389,6 +484,40 @@ export default function PlannerPage() {
         </div>
       )}
 
+      {activeIsScheduleBoard ? (
+        <>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setScheduleYear(year => year - 1)}
+              className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
+            >
+              Prev
+            </button>
+            <span className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-black text-white">
+              {scheduleYear}
+            </span>
+            <button
+              type="button"
+              onClick={() => setScheduleYear(year => year + 1)}
+              className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
+            >
+              Next
+            </button>
+            <Link to="/admin/monthly-planner" className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">
+              Open Calendar
+            </Link>
+            <Link to="/admin/master-schedule" className="rounded-md border border-white/[0.08] px-3 py-2 text-xs font-bold text-brand-primary/60 hover:text-white">
+              Master Schedule
+            </Link>
+          </div>
+          {scheduleError && (
+            <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{scheduleError}</div>
+          )}
+          <ClientScheduleBoard groups={deliverablesByClient} loading={scheduleLoading} onOpen={setDrawerDeliverable} />
+        </>
+      ) : (
+        <>
       <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
         <button
           type="button"
@@ -446,16 +575,224 @@ export default function PlannerPage() {
           </div>
         </>
       )}
+        </>
+      )}
 
       {drawerTask && (
         <PlannerTaskDrawer
           task={drawerTask}
           buckets={buckets}
+          actorName={myName}
           onClose={() => setDrawerTask(null)}
           onSaved={handleTaskSaved}
+          onRemoved={id => {
+            setTasks(prev => prev.filter(task => task.id !== id))
+            setDrawerTask(null)
+          }}
+        />
+      )}
+      {drawerDeliverable && (
+        <ScheduleDeliverableDrawer
+          deliverable={drawerDeliverable}
+          clientName={clientNameById.get(drawerDeliverable.client_id) ?? 'Unknown client'}
+          onClose={() => setDrawerDeliverable(null)}
+          onSaved={handleDeliverableSaved}
         />
       )}
     </div>
+  )
+}
+
+function ClientScheduleBoard({
+  groups,
+  loading,
+  onOpen,
+}: {
+  groups: Array<{ clientId: string; clientName: string; items: MonthlyDeliverable[] }>
+  loading: boolean
+  onOpen: (deliverable: MonthlyDeliverable) => void
+}) {
+  if (loading) {
+    return (
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map(item => <div key={item} className="h-48 animate-pulse rounded-xl bg-white/[0.04]" />)}
+      </div>
+    )
+  }
+
+  if (groups.length === 0) {
+    return (
+      <EmptyState
+        title="No schedule deliverables found"
+        message="Client Schedule Board reads monthly deliverables. Generate or import monthly deliverables to populate this board."
+        centered={false}
+      />
+    )
+  }
+
+  return (
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      {groups.map(group => (
+        <section key={group.clientId} className="rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.055] to-white/[0.018] p-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="truncate text-sm font-black text-white">{group.clientName}</h2>
+            <span className="rounded-full bg-brand-teal/[0.08] px-2 py-0.5 text-xs font-bold text-[#2dd4bf]">{group.items.length}</span>
+          </div>
+          <div className="max-h-[34rem] space-y-2 overflow-y-auto pr-1">
+            {group.items.map(deliverable => {
+              const simplified = simplifyProductionStatus(deliverable.production_status)
+              return (
+                <button
+                  key={deliverable.id}
+                  type="button"
+                  onClick={() => onOpen(deliverable)}
+                  className="w-full rounded-lg border border-white/[0.07] bg-black/25 p-3 text-left transition-colors hover:border-brand-accent/25 hover:bg-white/[0.04]"
+                >
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                        {displayDeliverableCode(deliverable)}
+                      </span>
+                      <p className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white">{deliverable.title}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${MONTHLY_STATUS_TONES[simplified]}`}>
+                      {SIMPLIFIED_STATUS_LABELS[simplified]}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 text-[10px] font-semibold">
+                    <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-white/55">
+                      {formatDeliverableDate(deliverable.scheduled_date ?? deliverable.due_date)}
+                    </span>
+                    {deliverable.assigned_to_name && (
+                      <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-white/55">
+                        {deliverable.assigned_to_name}
+                      </span>
+                    )}
+                    {(deliverable.helper_names ?? []).map(name => (
+                      <span key={name} className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2 py-0.5 text-[#2dd4bf]">
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      ))}
+    </div>
+  )
+}
+
+function ScheduleDeliverableDrawer({
+  deliverable,
+  clientName,
+  onClose,
+  onSaved,
+}: {
+  deliverable: MonthlyDeliverable
+  clientName: string
+  onClose: () => void
+  onSaved: (updated: MonthlyDeliverable) => void
+}) {
+  const [status, setStatus] = useState<SimplifiedProductionStatus>(simplifyProductionStatus(deliverable.production_status))
+  const [scheduledDate, setScheduledDate] = useState(deliverable.scheduled_date ?? '')
+  const [assignedTo, setAssignedTo] = useState(deliverable.assigned_to_name ?? '')
+  const [clientId, setClientId] = useState(deliverable.client_id)
+  const [saving, setSaving] = useState(false)
+  const [saveMsg, setSaveMsg] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  async function handleSave() {
+    if (saving) return
+    setSaving(true)
+    setSaveMsg(null)
+    setSaveError(null)
+    try {
+      let next: MonthlyDeliverable = deliverable
+      const statusResult = await updateMonthlyDeliverableStatus(deliverable.id, SIMPLIFIED_TO_BACKEND_STATUS[status])
+      if (statusResult.error) { setSaveError(statusResult.error.message); return }
+      if (statusResult.data) next = statusResult.data
+
+      const scheduleResult = await updateMonthlyDeliverableSchedule(deliverable.id, scheduledDate || null)
+      if (scheduleResult.error) { setSaveError(scheduleResult.error.message); return }
+      if (scheduleResult.data) next = scheduleResult.data
+
+      const coreResult = await updateMonthlyDeliverableCore(deliverable.id, {
+        assigned_to_name: assignedTo.trim() || null,
+        client_id: clientId,
+      })
+      if (coreResult.error) { setSaveError(coreResult.error.message); return }
+      if (coreResult.data) next = coreResult.data
+
+      onSaved(next)
+      setSaveMsg('Saved')
+      setTimeout(() => setSaveMsg(null), 2000)
+    } catch {
+      setSaveError('Could not save deliverable.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[460px]">
+        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-accent">Schedule deliverable</p>
+            <h2 className="mt-1 text-base font-bold leading-snug text-white">{displayDeliverableCode(deliverable)} · {deliverable.title}</h2>
+            <p className="mt-0.5 text-xs text-brand-primary/60">{clientName}</p>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-brand-primary hover:text-white">X</button>
+        </div>
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
+            <ClientPicker
+              value={clientId}
+              label={clientName}
+              onChange={client => setClientId(client?.id ?? '')}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
+            <select value={status} onChange={event => setStatus(event.target.value as SimplifiedProductionStatus)} className={inputCls}>
+              {SIMPLIFIED_STATUS_OPTIONS.map(option => <option key={option} value={option}>{SIMPLIFIED_STATUS_LABELS[option]}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Scheduled date</label>
+            <input type="date" value={scheduledDate} onChange={event => setScheduledDate(event.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label>
+            <input value={assignedTo} onChange={event => setAssignedTo(event.target.value)} className={inputCls} />
+          </div>
+          {(deliverable.helper_names ?? []).length > 0 && (
+            <div>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(deliverable.helper_names ?? []).map(name => (
+                  <span key={name} className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2.5 py-0.5 text-[11px] text-[#2dd4bf]">{name}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="border-t border-white/[0.08] px-5 py-4">
+          {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
+          {saveMsg && <p className="mb-2 text-xs text-[#2dd4bf]">{saveMsg}</p>}
+          <div className="flex gap-3">
+            <ActionButton variant="primary" onClick={handleSave} loading={saving}>Save</ActionButton>
+            <button type="button" onClick={onClose} className="rounded-lg border border-white/10 px-4 py-2 text-sm text-brand-primary hover:text-white">Close</button>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -702,13 +1039,16 @@ function PlannerTaskCard({ task, onClick }: { task: PlannerTask; onClick: () => 
   )
 }
 
-function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
+function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemoved }: {
   task: PlannerTask
   buckets: PlannerBucket[]
+  actorName: string | null
   onClose: () => void
   onSaved: (updated: PlannerTask) => void
+  onRemoved: (id: string) => void
 }) {
   const [title, setTitle] = useState(task.title)
+  const [clientId, setClientId] = useState(task.client_id ?? '')
   const [clientName, setClientName] = useState(task.client_name ?? '')
   const [assignedTo, setAssignedTo] = useState(task.assigned_to_name ?? '')
   const [status, setStatus] = useState<PlannerTaskStatus>(task.status)
@@ -719,6 +1059,8 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [removing, setRemoving] = useState(false)
+  const [confirmRemove, setConfirmRemove] = useState(false)
 
   async function handleSave() {
     if (saving || !title.trim()) return
@@ -728,6 +1070,7 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
     try {
       const { data, error } = await updatePlannerTask(task.id, {
         title: title.trim(),
+        client_id: clientId || null,
         client_name: clientName.trim() || null,
         assigned_to_name: assignedTo.trim() || null,
         status,
@@ -750,6 +1093,21 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
     } finally {
       setSaving(false)
     }
+  }
+
+  async function handleRemoveFromActive() {
+    if (removing) return
+    setRemoving(true)
+    setSaveError(null)
+    const { error } = await archivePlannerTask(task.id, actorName)
+    if (error) {
+      setSaveError(error.code === '42703'
+        ? 'Archive migration is not applied yet. Run phase-9a-planner-task-archive.sql in Supabase.'
+        : error.message ?? 'Could not remove task from active.')
+      setRemoving(false)
+      return
+    }
+    onRemoved(task.id)
   }
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
@@ -816,11 +1174,13 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
-              <input
-                value={clientName}
-                onChange={e => setClientName(e.target.value)}
-                placeholder="Client name"
-                className={inputCls}
+              <ClientPicker
+                value={clientId}
+                label={clientName}
+                onChange={client => {
+                  setClientId(client?.id ?? '')
+                  setClientName(client?.name ?? '')
+                }}
               />
             </div>
             <div>
@@ -914,6 +1274,34 @@ function PlannerTaskDrawer({ task, buckets, onClose, onSaved }: {
             >
               Close
             </button>
+            {!confirmRemove ? (
+              <button
+                type="button"
+                onClick={() => setConfirmRemove(true)}
+                className="ml-auto text-xs text-amber-300/75 hover:text-amber-200 transition-colors"
+              >
+                Remove from active
+              </button>
+            ) : (
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs text-brand-primary">Remove?</span>
+                <button
+                  type="button"
+                  onClick={handleRemoveFromActive}
+                  disabled={removing}
+                  className="text-xs text-amber-300 hover:text-amber-200 disabled:opacity-60"
+                >
+                  {removing ? 'Removing...' : 'Yes'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmRemove(false)}
+                  className="text-xs text-brand-primary hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

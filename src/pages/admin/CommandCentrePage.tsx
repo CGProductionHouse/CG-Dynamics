@@ -4,6 +4,7 @@ import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 import { EmptyState } from '../../components/ui/States'
+import { ClientPicker } from '../../components/ClientPicker'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   listTasks,
@@ -11,6 +12,7 @@ import {
   updateTask,
   updateTaskStatus,
   deleteTask,
+  archiveImportedPlannerTask,
   listActiveClients,
   parseMorningList,
   morningEditToInput,
@@ -1240,11 +1242,10 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
   onSaved: (updated: CommandCentreTask) => void
   onDeleted: (id: string) => void
 }) {
+  const { profile } = useAuth()
   const [title, setTitle] = useState(task.title)
-  const [clientId, setClientId] = useState(task.client_id ?? (task.client_name ? '__manual__' : ''))
-  const [manualClientName, setManualClientName] = useState(
-    task.client_id ? '' : (task.client_name ?? '')
-  )
+  const [clientId, setClientId] = useState(task.client_id ?? '')
+  const [clientName, setClientName] = useState(task.client_name ?? '')
   const [assignedName, setAssignedName] = useState(task.assigned_to_name ?? '')
   const [bucket, setBucket] = useState<TaskBucket>(task.bucket)
   const [priority, setPriority] = useState<TaskPriority>(task.priority)
@@ -1260,38 +1261,16 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  const [clients, setClients] = useState<ClientOption[]>([])
-  const [clientsLoading, setClientsLoading] = useState(true)
-
-  useEffect(() => {
-    let active = true
-    listActiveClients().then(({ data }) => {
-      if (!active) return
-      setClients(data ?? [])
-      setClientsLoading(false)
-    }).catch(() => {
-      if (active) setClientsLoading(false)
-    })
-    return () => { active = false }
-  }, [])
-
-  const isManualClient = clientId === '__manual__'
-  const selectedClient = clients.find(c => c.id === clientId)
-
   async function handleSave() {
     if (saving || !title.trim()) return
     setSaving(true)
     setSaveMsg(null)
     setSaveError(null)
     try {
-      const resolvedClientId = selectedClient?.id ?? null
-      const resolvedClientName = isManualClient
-        ? (manualClientName.trim() || null)
-        : (selectedClient?.name ?? null)
       const updates = {
         title: title.trim(),
-        client_id: resolvedClientId,
-        client_name: resolvedClientName,
+        client_id: clientId || null,
+        client_name: clientName || null,
         assigned_to_name: assignedName.trim() || null,
         bucket,
         priority,
@@ -1330,7 +1309,17 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
     if (deleting) return
     setDeleting(true)
     try {
-      await deleteTask(task.id)
+      const result = task.data_origin === 'planner_tasks'
+        ? await archiveImportedPlannerTask(task.id, profile?.full_name ?? null)
+        : await deleteTask(task.id)
+      if (result.error) {
+        const err = result.error as { code?: string; message?: string }
+        setSaveError(err.code === '42703'
+          ? 'Archive migration is not applied yet. Run phase-9a-planner-task-archive.sql in Supabase.'
+          : err.message ?? 'Could not remove task.')
+        setDeleting(false)
+        return
+      }
       onDeleted(task.id)
       onClose()
     } catch {
@@ -1375,23 +1364,14 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
-            {clientsLoading ? (
-              <p className="py-2 text-xs text-brand-primary/60">Loading clients...</p>
-            ) : (
-              <select value={clientId} onChange={e => setClientId(e.target.value)} className={inputCls}>
-                <option value="">No client</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                <option value="__manual__">Manual / other client</option>
-              </select>
-            )}
-            {isManualClient && (
-              <input
-                value={manualClientName}
-                onChange={e => setManualClientName(e.target.value)}
-                placeholder="Type client name"
-                className={`mt-2 ${inputCls}`}
-              />
-            )}
+            <ClientPicker
+              value={clientId}
+              label={clientName}
+              onChange={client => {
+                setClientId(client?.id ?? '')
+                setClientName(client?.name ?? '')
+              }}
+            />
           </div>
 
           <div>
@@ -1544,16 +1524,16 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
             >
               Close
             </button>
-            {isAdmin && task.data_origin !== 'planner_tasks' && !confirmDelete && (
+            {isAdmin && !confirmDelete && (
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
                 className="ml-auto text-xs text-red-400/70 hover:text-red-400 transition-colors"
               >
-                Delete task
+                {task.data_origin === 'planner_tasks' ? 'Remove from active' : 'Delete task'}
               </button>
             )}
-            {isAdmin && task.data_origin !== 'planner_tasks' && confirmDelete && (
+            {isAdmin && confirmDelete && (
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-brand-primary">Sure?</span>
                 <button
@@ -1562,7 +1542,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
                   disabled={deleting}
                   className="text-xs text-red-400 hover:text-red-300 disabled:opacity-60"
                 >
-                  {deleting ? 'Deleting...' : 'Yes, delete'}
+                  {deleting ? 'Removing...' : task.data_origin === 'planner_tasks' ? 'Yes, remove' : 'Yes, delete'}
                 </button>
                 <button
                   type="button"

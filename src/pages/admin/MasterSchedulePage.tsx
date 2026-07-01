@@ -21,7 +21,7 @@ import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
 type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
 type SourceFilterValue = 'all' | 'package' | 'client_request' | 'moved' | 'unlinked'
-type ScheduleWorkMode = 'active' | 'history'
+type ScheduleWorkMode = 'all' | 'needs_action' | 'unscheduled' | 'posted_history'
 
 // ── Local helpers (mirrors MonthlyPlannerPage patterns) ────────
 
@@ -76,8 +76,12 @@ const STAFF_STATUSES: SimplifiedProductionStatus[] = [
 ]
 const FINAL_STATUSES: SimplifiedProductionStatus[] = ['meta_drafts', 'scheduled_posted']
 
-function isFinalDeliverable(deliverable: MonthlyDeliverable) {
-  return FINAL_STATUSES.includes(simplifyProductionStatus(deliverable.production_status))
+function isPostedHistory(deliverable: MonthlyDeliverable) {
+  return simplifyProductionStatus(deliverable.production_status) === 'scheduled_posted'
+}
+
+function needsAction(deliverable: MonthlyDeliverable) {
+  return !FINAL_STATUSES.includes(simplifyProductionStatus(deliverable.production_status))
 }
 
 const SOURCE_FILTER_OPTIONS: Array<{ value: SourceFilterValue; label: string }> = [
@@ -140,7 +144,7 @@ export default function MasterSchedulePage() {
   const [statusFilter, setStatusFilter] = useState<'all' | SimplifiedProductionStatus>('all')
   const [typeFilter, setTypeFilter] = useState<'all' | DeliverableType>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilterValue>('all')
-  const [workMode, setWorkMode] = useState<ScheduleWorkMode>('active')
+  const [workMode, setWorkMode] = useState<ScheduleWorkMode>('all')
   const [loading, setLoading] = useState(true)
   const [tableMissing, setTableMissing] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -159,9 +163,9 @@ export default function MasterSchedulePage() {
     const search = clientSearch.trim().toLowerCase()
     return deliverables.filter(d => {
       if (!PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type)) return false
-      const isFinal = isFinalDeliverable(d)
-      if (workMode === 'active' && isFinal) return false
-      if (workMode === 'history' && !isFinal) return false
+      if (workMode === 'needs_action' && !needsAction(d)) return false
+      if (workMode === 'unscheduled' && (d.scheduled_date || d.due_date)) return false
+      if (workMode === 'posted_history' && !isPostedHistory(d)) return false
       if (clientFilter && d.client_id !== clientFilter) return false
       if (statusFilter !== 'all' && simplifyProductionStatus(d.production_status) !== statusFilter) return false
       if (typeFilter !== 'all' && d.deliverable_type !== typeFilter) return false
@@ -181,13 +185,23 @@ export default function MasterSchedulePage() {
     })
   }, [clientFilter, clientNameById, clientSearch, deliverables, sourceFilter, statusFilter, typeFilter, workMode])
 
-  const activeDeliverableCount = useMemo(
-    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type) && !isFinalDeliverable(d)).length,
+  const plannedDeliverableCount = useMemo(
+    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type)).length,
     [deliverables],
   )
 
-  const historyDeliverableCount = useMemo(
-    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type) && isFinalDeliverable(d)).length,
+  const needsActionCount = useMemo(
+    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type) && needsAction(d)).length,
+    [deliverables],
+  )
+
+  const unscheduledCount = useMemo(
+    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type) && !d.scheduled_date && !d.due_date).length,
+    [deliverables],
+  )
+
+  const postedHistoryCount = useMemo(
+    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type) && isPostedHistory(d)).length,
     [deliverables],
   )
 
@@ -363,29 +377,26 @@ export default function MasterSchedulePage() {
         </div>
       )}
 
-      <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
-        <button
-          type="button"
-          onClick={() => setWorkMode('active')}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-            workMode === 'active'
-              ? 'bg-brand-accent text-black'
-              : 'text-brand-primary/60 hover:text-brand-primary'
-          }`}
-        >
-          Active {activeDeliverableCount}
-        </button>
-        <button
-          type="button"
-          onClick={() => setWorkMode('history')}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-            workMode === 'history'
-              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-              : 'text-brand-primary/60 hover:text-brand-primary'
-          }`}
-        >
-          History {historyDeliverableCount}
-        </button>
+      <div className="mb-4 flex flex-wrap items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+        {([
+          ['all', `All scheduled plan ${plannedDeliverableCount}`],
+          ['needs_action', `Needs action ${needsActionCount}`],
+          ['unscheduled', `Unscheduled ${unscheduledCount}`],
+          ['posted_history', `Posted/history ${postedHistoryCount}`],
+        ] as const).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setWorkMode(value)}
+            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+              workMode === value
+                ? 'bg-brand-accent text-black'
+                : 'text-brand-primary/60 hover:text-brand-primary'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Year stats */}

@@ -53,7 +53,7 @@ const STATUS_STAT_TONE: Record<SimplifiedProductionStatus, string> = {
 
 type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
 type SourceFilterValue = 'all' | DeliverableSource | 'unscheduled'
-type MonthlyWorkMode = 'active' | 'history'
+type MonthlyWorkMode = 'all' | 'needs_action' | 'unscheduled' | 'posted_history'
 
 function deliverableSource(d: MonthlyDeliverable): DeliverableSource {
   if (d.moved_from_deliverable_id) return 'moved'
@@ -109,8 +109,12 @@ function displayDateForDeliverable(deliverable: MonthlyDeliverable) {
 const STAFF_STATUSES: SimplifiedProductionStatus[] = ['not_started', 'in_progress', 'ready_review', 'awaiting_client']
 const FINAL_STATUSES: SimplifiedProductionStatus[] = ['meta_drafts', 'scheduled_posted']
 
-function isFinalDeliverable(deliverable: MonthlyDeliverable) {
-  return FINAL_STATUSES.includes(simplifyProductionStatus(deliverable.production_status))
+function isPostedHistory(deliverable: MonthlyDeliverable) {
+  return simplifyProductionStatus(deliverable.production_status) === 'scheduled_posted'
+}
+
+function needsAction(deliverable: MonthlyDeliverable) {
+  return !FINAL_STATUSES.includes(simplifyProductionStatus(deliverable.production_status))
 }
 
 export default function MonthlyPlannerPage() {
@@ -138,7 +142,7 @@ export default function MonthlyPlannerPage() {
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>(() => (
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'list' : 'calendar'
   ))
-  const [workMode, setWorkMode] = useState<MonthlyWorkMode>('active')
+  const [workMode, setWorkMode] = useState<MonthlyWorkMode>('all')
 
   const monthStart = toMonthStart(selectedMonth)
 
@@ -163,9 +167,9 @@ export default function MonthlyPlannerPage() {
     const search = clientSearch.trim().toLowerCase()
     return deliverables.filter(deliverable => {
       if (!PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)) return false
-      const isFinal = isFinalDeliverable(deliverable)
-      if (workMode === 'active' && isFinal) return false
-      if (workMode === 'history' && !isFinal) return false
+      if (workMode === 'needs_action' && !needsAction(deliverable)) return false
+      if (workMode === 'unscheduled' && (deliverable.scheduled_date || deliverable.due_date)) return false
+      if (workMode === 'posted_history' && !isPostedHistory(deliverable)) return false
       if (statusFilter !== 'all' && simplifyProductionStatus(deliverable.production_status) !== statusFilter) return false
       if (sourceFilter === 'unscheduled' && (deliverable.scheduled_date || deliverable.due_date)) return false
       if (sourceFilter !== 'all' && sourceFilter !== 'unscheduled' && deliverableSource(deliverable) !== sourceFilter) return false
@@ -175,13 +179,23 @@ export default function MonthlyPlannerPage() {
     })
   }, [clientNameById, clientSearch, deliverables, sourceFilter, statusFilter, workMode])
 
-  const activeDeliverableCount = useMemo(
-    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && !isFinalDeliverable(deliverable)).length,
+  const plannedDeliverableCount = useMemo(
+    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)).length,
     [deliverables],
   )
 
-  const historyDeliverableCount = useMemo(
-    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && isFinalDeliverable(deliverable)).length,
+  const needsActionCount = useMemo(
+    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && needsAction(deliverable)).length,
+    [deliverables],
+  )
+
+  const unscheduledCount = useMemo(
+    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && !deliverable.scheduled_date && !deliverable.due_date).length,
+    [deliverables],
+  )
+
+  const postedHistoryCount = useMemo(
+    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && isPostedHistory(deliverable)).length,
     [deliverables],
   )
 
@@ -454,29 +468,26 @@ export default function MonthlyPlannerPage() {
             Agenda
           </button>
         </div>
-        <div className="flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
-          <button
-            type="button"
-            onClick={() => setWorkMode('active')}
-            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-              workMode === 'active'
-                ? 'bg-brand-accent text-black'
-                : 'text-brand-primary/60 hover:text-brand-primary'
-            }`}
-          >
-            Active {activeDeliverableCount}
-          </button>
-          <button
-            type="button"
-            onClick={() => setWorkMode('history')}
-            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-              workMode === 'history'
-                ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-                : 'text-brand-primary/60 hover:text-brand-primary'
-            }`}
-          >
-            History {historyDeliverableCount}
-          </button>
+        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+          {([
+            ['all', `All schedule ${plannedDeliverableCount}`],
+            ['needs_action', `Needs action ${needsActionCount}`],
+            ['unscheduled', `Unscheduled ${unscheduledCount}`],
+            ['posted_history', `Posted/history ${postedHistoryCount}`],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setWorkMode(value)}
+              className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+                workMode === value
+                  ? 'bg-brand-accent text-black'
+                  : 'text-brand-primary/60 hover:text-brand-primary'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -880,7 +891,7 @@ function CalendarGrid({
                   {day}
                 </span>
                 <div className="space-y-0.5">
-                  {items.map(d => (
+                  {items.slice(0, 4).map(d => (
                     <CalendarChip
                       key={d.id}
                       deliverable={d}
@@ -888,6 +899,11 @@ function CalendarGrid({
                       onOpen={onOpen}
                     />
                   ))}
+                  {items.length > 4 && (
+                    <div className="rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-[10px] font-semibold text-white/35">
+                      +{items.length - 4} more
+                    </div>
+                  )}
                 </div>
               </div>
             )
