@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, type ReactNode, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
 import { ActionButton } from '../../components/ui/Buttons'
 import { ClientPicker } from '../../components/ClientPicker'
@@ -130,6 +130,7 @@ export default function PlannerPage() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
   const myName = profile?.full_name ?? null
+  const navigate = useNavigate()
 
   const [boards, setBoards] = useState<PlannerBoard[]>([])
   const [buckets, setBuckets] = useState<PlannerBucket[]>([])
@@ -168,7 +169,10 @@ export default function PlannerPage() {
       const result = data ?? []
       setBoards(result)
       if (result.length > 0 && !activeBoard) {
-        setActiveBoard(result[0].slug)
+        // Default to the first OPERATIONAL board — never the Client Schedule
+        // board (that is a separate system reached via /admin/client-schedule).
+        const firstOperational = result.find(b => b.slug !== 'client-schedule') ?? result[0]
+        setActiveBoard(firstOperational.slug)
       }
     })
 
@@ -472,7 +476,10 @@ export default function PlannerPage() {
             <button
               key={board.slug}
               type="button"
-              onClick={() => setActiveBoard(board.slug)}
+              // The Client Schedule board is a SEPARATE system — this tab is only
+              // a shortcut into /admin/client-schedule, never an in-Planner
+              // duplicate of package scheduling logic.
+              onClick={() => isScheduleBoard ? navigate('/admin/client-schedule?view=board') : setActiveBoard(board.slug)}
               className={`flex flex-col items-start rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 isActive
                   ? 'bg-white/[0.08] text-white shadow-[inset_0_-2px_0_rgba(45,212,191,0.6)]'
@@ -490,7 +497,7 @@ export default function PlannerPage() {
               </span>
               {isScheduleBoard && (
                 <span className="mt-0.5 pl-[1.375rem] text-[9px] font-bold uppercase tracking-[0.12em] text-brand-primary/35">
-                  Master schedule
+                  Shortcut · opens Client Schedule
                 </span>
               )}
             </button>

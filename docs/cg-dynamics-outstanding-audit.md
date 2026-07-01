@@ -93,6 +93,17 @@ The biggest missing pieces are:
 - staff-facing calendar dates and schedule clarity
 - live app verification after each deployed change
 
+## Client Schedule vs Planner Board (separate systems, both linked from Hub)
+
+Restored during fix/restore-operational-planner-board-navigation:
+
+- Client Schedule = package posting schedule. Source `monthly_deliverables`. Route `/admin/client-schedule`.
+- Planner Board = operational work boards (Operations, Websites, CG Socials, Admin, Client Requests, etc.). Source `planner_tasks`. Route `/admin/planner`.
+- Daily Tasks = focused task execution list. Route `/admin/command-centre`.
+- These are DIFFERENT systems. Package scheduling must never be put inside Planner Board, and operational boards must never be removed from the Hub sidebar again.
+- The Hub sidebar shows: Hub, Clients, Client Schedule, Planner Board, CG Calendar, Daily Tasks, Assistant, CG Hours.
+- Inside Planner Board, the old "Client Schedule Board" tab is only a SHORTCUT that opens `/admin/client-schedule?view=board`; it does not duplicate scheduling logic, and the operational board never defaults to it.
+
 ## Current scheduling architecture rule
 
 - Client Schedule is the unified package posting schedule module.
@@ -100,6 +111,7 @@ The biggest missing pieces are:
 - Client Schedule source of truth is `monthly_deliverables`.
 - Client Schedule views are Grid, Board, Calendar, Charts, and Year / Master.
 - Current month is the default Client Schedule context.
+- Planner Board (`planner_tasks`) is the operational work board and stays separate from Client Schedule, linked from the Hub sidebar.
 - CG Calendar is separate and uses `company_calendar_events` for meetings, shoots, content runs, client events, and deadlines.
 - Any page called Calendar must show an actual calendar grid.
 - Completed Teams history must not enter active work views. Future imports should import active tasks, current/future package schedule, and selected June 2026 package schedule history only.

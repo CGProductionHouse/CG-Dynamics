@@ -18,7 +18,10 @@ const dynamicsNav = [
 const hubNav = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
   { to: '/admin/clients', label: 'Clients' },
+  // Client Schedule (package posting, monthly_deliverables) and Planner Board
+  // (operational work boards, planner_tasks) are separate systems — both linked.
   { to: '/admin/client-schedule', label: 'Client Schedule' },
+  { to: '/admin/planner', label: 'Planner Board' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
   { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
@@ -147,8 +150,8 @@ export default function AdminLayout() {
   ]
   const hubMobileItems = [
     { to: '/admin/cg-hub', label: 'Hub' },
-    { to: '/admin/clients', label: 'Clients' },
     { to: '/admin/client-schedule?view=calendar', label: 'Schedule' },
+    { to: '/admin/planner', label: 'Planner' },
     { to: '/admin/command-centre', label: 'Daily' },
     { to: '/admin/assistant', label: 'Assist' },
   ]
