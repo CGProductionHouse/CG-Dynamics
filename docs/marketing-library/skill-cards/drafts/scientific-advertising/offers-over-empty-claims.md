@@ -73,6 +73,21 @@ This card prevents marketing teams from blaming creative execution when the real
 - SCI-ADV-002: Track before scaling
 - SCI-ADV-003: Specificity over superlatives
 
+## Verification flags
+
+**Direct source support:** Pending manual verification  
+**Page/chapter reference:** Missing  
+**Modern translation present:** Yes — free strategy session, consultation, product recommendation examples  
+**Extrapolation risk:** Medium  
+
+Specific items to verify manually:
+
+- Check whether Hopkins used the word "offer" as centrally as this card suggests, or whether he used terms like "service", "benefit" or "product advantage".
+- The list "service, convenience, risk reduction, guarantee, exclusivity and specific results" as alternatives to price — confirm which of these Hopkins discussed directly and which may be modern expansions.
+- "The advertisement is just the delivery mechanism for the offer" — confirm whether Hopkins used this framing or a different one.
+- Verify whether Hopkins discussed risk reduction (guarantees, free trials) in the context of offers, or whether this was added from later direct response frameworks.
+- The card states "price alone is rarely the best offer". Confirm whether Hopkins made this specific comparison or whether it is inferred.
+
 ## Notes
 
 - This card is a draft based on the source note.

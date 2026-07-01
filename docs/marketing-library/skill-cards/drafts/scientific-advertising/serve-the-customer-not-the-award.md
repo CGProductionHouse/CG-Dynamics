@@ -72,6 +72,21 @@ This card is a corrective force. It keeps marketing grounded in business outcome
 - SCI-ADV-001: Advertising is salesmanship
 - SCI-ADV-004: Offers over empty claims
 
+## Verification flags
+
+**Direct source support:** Pending manual verification  
+**Page/chapter reference:** Missing  
+**Modern translation present:** Yes — agency culture references, portfolio work, modern advertising awards context  
+**Extrapolation risk:** High  
+
+Specific items to verify manually:
+
+- Confirm whether Hopkins explicitly discussed advertising awards. The modern advertising awards industry was far less prominent in 1923. This principle may be extrapolated from his broader philosophy about results versus showmanship rather than from a specific passage.
+- "Most award-winning advertising is not profitable advertising" — this is a strong claim that is not attributable to Hopkins without direct evidence. It is more likely a later industry observation.
+- "Using client budgets to build an agency portfolio" — this is a modern agency critique. Confirm if there is any basis for this in the source text.
+- The card's principle is consistent with Hopkins' emphasis on service and results, but the specific framing around awards, portfolios and agency behaviour is likely a modern interpretation.
+- Confirm whether Hopkins specifically said the customer does not care how creative the ad is, or whether this is a paraphrase of his broader stance.
+
 ## Notes
 
 - This card is a draft based on the source note.

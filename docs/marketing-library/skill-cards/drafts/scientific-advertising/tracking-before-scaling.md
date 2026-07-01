@@ -71,6 +71,21 @@ This principle prevents teams from doubling down on weak messaging simply becaus
 
 - SCI-ADV-004: Offers over empty claims
 
+## Verification flags
+
+**Direct source support:** Pending manual verification  
+**Page/chapter reference:** Missing  
+**Modern translation present:** Yes — paid ads testing, landing page examples, digital campaign structures  
+**Extrapolation risk:** Medium  
+
+Specific items to verify manually:
+
+- Confirm that Hopkins described a split-testing or controlled-experiment method, and note the exact terms he used.
+- Confirm whether Hopkins explicitly said "test one variable at a time" or whether this is inferred from general scientific method.
+- Confirm whether Hopkins discussed scaling budget based on test results, or whether his focus was purely on measuring response.
+- The coupon-based tracking method Hopkins described is specific to mail order. The card's examples extend this to digital advertising, which is a modern translation.
+- The phrase "without tracking, there is no science, only opinion" — confirm whether this specific wording appears in the book or is a paraphrase.
+
 ## Notes
 
 - This card is a draft based on the source note.

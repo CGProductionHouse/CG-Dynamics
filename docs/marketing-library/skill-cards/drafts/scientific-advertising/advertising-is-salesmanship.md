@@ -71,6 +71,20 @@ This principle protects marketing from becoming self-indulgent. When teams treat
 - SCI-ADV-003: Specificity over superlatives
 - SCI-ADV-004: Offers over empty claims
 
+## Verification flags
+
+**Direct source support:** Pending manual verification  
+**Page/chapter reference:** Missing  
+**Modern translation present:** Yes — social media captions, landing pages, AIDA framework  
+**Extrapolation risk:** Medium  
+
+Specific items to verify manually:
+
+- The phrase "salesmanship multiplied by media" — confirm whether Hopkins used this wording or a different one.
+- The "attention, interest, desire, action" structure is the AIDA framework, developed by E. St. Elmo Lewis (1898) and widely used in later copywriting training. It may not appear in Scientific Advertising. Flag this unless verified in the source.
+- "Explain the offer, build trust, overcome objections and ask for the action" — confirm whether Hopkins listed these specific sales functions or whether this is a modern composite.
+- The principle itself is widely attributed to Hopkins and is consistent with his philosophy, but the exact chapter and wording need verification.
+
 ## Notes
 
 - This card is a draft based on the source note.

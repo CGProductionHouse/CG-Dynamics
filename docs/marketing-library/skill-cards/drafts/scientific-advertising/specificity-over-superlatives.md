@@ -72,6 +72,20 @@ Most advertising noise comes from vague claims that say nothing. Replacing them 
 - SCI-ADV-001: Advertising is salesmanship
 - SCI-ADV-004: Offers over empty claims
 
+## Verification flags
+
+**Direct source support:** Pending manual verification  
+**Page/chapter reference:** Missing  
+**Modern translation present:** Yes — feed context, social media examples, South African real estate example  
+**Extrapolation risk:** Medium  
+
+Specific items to verify manually:
+
+- Confirm that Hopkins specifically criticised superlatives like "best", "greatest", "amazing" and "revolutionary", and note whether he listed specific examples.
+- Confirm the wording and tone Hopkins used when discussing vague claims. The card's framing ("Specificity signals honesty. Superlatives signal exaggeration.") is interpretive and should be checked.
+- The examples in this card (social media captions, landing pages, feeds) are modern translations. The principle itself is consistent with Hopkins but the formats are not from the source.
+- The term "specificity over superlatives" as a branded principle does not come from Hopkins. It is a card title, not a quote.
+
 ## Notes
 
 - This card is a draft based on the source note.
