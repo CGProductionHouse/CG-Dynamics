@@ -70,11 +70,19 @@ function displayCode(deliverable: MonthlyDeliverable) {
   return `${deliverable.code}${instance}`
 }
 
-// Schedule date is the planned/scheduled date ONLY. It is deliberately NOT the
-// due_date — a monthly_deliverable with only a due_date is Unscheduled until it
-// is given a real schedule date. (Schedule date and status are separate fields.)
-function scheduleDate(deliverable: MonthlyDeliverable) {
-  return deliverable.scheduled_date ?? null
+// Effective display schedule date. During the July 2026 Teams shadow-run the
+// real schedule dates for imported package items may still live in due_date, so
+// we prefer scheduled_date and fall back to due_date as the legacy Teams import
+// date. This is DISPLAY/READ logic only — no data is mutated. The fallback is
+// still labelled "Schedule date" in the UI, never "Due date".
+function getEffectiveScheduleDate(deliverable: MonthlyDeliverable) {
+  return deliverable.scheduled_date ?? deliverable.due_date ?? null
+}
+
+// True when a deliverable's date came from the legacy due_date fallback rather
+// than a real scheduled_date (used only for an optional shadow-run note).
+function usesLegacyScheduleDate(deliverable: MonthlyDeliverable) {
+  return !deliverable.scheduled_date && !!deliverable.due_date
 }
 
 function scheduleStatusOf(deliverable: MonthlyDeliverable): SimplifiedProductionStatus {
@@ -99,7 +107,7 @@ function matchesMode(deliverable: MonthlyDeliverable, mode: ScheduleMode) {
   const status = scheduleStatusOf(deliverable)
   if (mode === 'all') return true
   // Unscheduled is defined purely by a MISSING schedule date, never by status.
-  if (mode === 'unscheduled') return !scheduleDate(deliverable)
+  if (mode === 'unscheduled') return !getEffectiveScheduleDate(deliverable)
   if (mode === 'posted-history') return isPostedOrHistoryStatus(status)
   return isNeedsActionStatus(status)
 }
@@ -148,8 +156,8 @@ const CATEGORY_ORDER: Record<DeliverableType, number> = {
 }
 
 function compareForBoard(a: MonthlyDeliverable, b: MonthlyDeliverable) {
-  const aDate = scheduleDate(a) ?? '9999-12-31'
-  const bDate = scheduleDate(b) ?? '9999-12-31'
+  const aDate = getEffectiveScheduleDate(a) ?? '9999-12-31'
+  const bDate = getEffectiveScheduleDate(b) ?? '9999-12-31'
   if (aDate !== bDate) return aDate.localeCompare(bDate)
   const aCat = CATEGORY_ORDER[a.deliverable_type] ?? 99
   const bCat = CATEGORY_ORDER[b.deliverable_type] ?? 99
@@ -235,8 +243,8 @@ export default function ClientSchedulePage() {
       }
       return true
     }).sort((a, b) => {
-      const aDate = scheduleDate(a) ?? '9999-12-31'
-      const bDate = scheduleDate(b) ?? '9999-12-31'
+      const aDate = getEffectiveScheduleDate(a) ?? '9999-12-31'
+      const bDate = getEffectiveScheduleDate(b) ?? '9999-12-31'
       if (aDate !== bDate) return aDate.localeCompare(bDate)
       return (clientNameById.get(a.client_id) ?? '').localeCompare(clientNameById.get(b.client_id) ?? '') ||
         a.code.localeCompare(b.code) ||
@@ -247,9 +255,12 @@ export default function ClientSchedulePage() {
   const counts = useMemo(() => ({
     all: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)).length,
     needsAction: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && matchesMode(deliverable, 'needs-action')).length,
-    unscheduled: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && !scheduleDate(deliverable)).length,
+    unscheduled: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && !getEffectiveScheduleDate(deliverable)).length,
     history: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && matchesMode(deliverable, 'posted-history')).length,
   }), [deliverables])
+
+  // Shadow-run: some dates are shown from the legacy Teams due_date fallback.
+  const hasLegacyDates = useMemo(() => deliverables.some(usesLegacyScheduleDate), [deliverables])
 
   function saveUpdated(updated: MonthlyDeliverable) {
     setDeliverables(current => current.map(item => item.id === updated.id ? updated : item))
@@ -320,11 +331,17 @@ export default function ClientSchedulePage() {
         ))}
       </div>
 
-      <p className="mb-4 text-xs text-brand-primary/55">
+      <p className="mb-1 text-xs text-brand-primary/55">
         {mode === 'unscheduled'
-          ? 'Unscheduled means package items without a schedule date. Status (work progress) is separate.'
+          ? 'Unscheduled means package items with no schedule date and no legacy date. Status (work progress) is separate.'
           : 'Schedule date is when a post is planned. Status is the work progress. A dated post can still be Not started.'}
       </p>
+      {hasLegacyDates && (
+        <p className="mb-4 text-[11px] text-amber-300/70">
+          Some dates are shown from legacy Teams import data during the July shadow-run. They stay labelled as Schedule date until reconciled.
+        </p>
+      )}
+      {!hasLegacyDates && <div className="mb-4" />}
 
       {error && <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</div>}
       {loading ? (
@@ -448,7 +465,7 @@ function ClientLine({ display }: { display: ClientDisplay }) {
 
 function ScheduleCard({ item, display, onOpen }: { item: MonthlyDeliverable; display: ClientDisplay; onOpen: () => void }) {
   const status = scheduleStatusOf(item)
-  const date = scheduleDate(item)
+  const date = getEffectiveScheduleDate(item)
   return (
     <button type="button" onClick={onOpen} className={`w-full rounded-lg border p-3 text-left transition-colors hover:border-brand-accent/30 ${status === 'scheduled_posted' ? 'border-white/[0.05] bg-white/[0.018] opacity-75' : 'border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-white/[0.018]'}`}>
       <div className="mb-2 flex items-start justify-between gap-2">
@@ -480,7 +497,7 @@ function GridView({ items, clientDisplay, onOpen }: { items: MonthlyDeliverable[
         {items.map(item => {
           const status = scheduleStatusOf(item)
           const display = clientDisplay(item)
-          const date = scheduleDate(item)
+          const date = getEffectiveScheduleDate(item)
           return (
             <button key={item.id} type="button" onClick={() => onOpen(item)} className="grid w-full gap-2 px-4 py-3 text-left transition-colors hover:bg-white/[0.03] md:grid-cols-[0.5fr_2fr_1fr_1fr_1fr_1.2fr_1fr] md:items-center md:gap-3">
               <span className={`h-2.5 w-2.5 rounded-full ${status === 'scheduled_posted' ? 'bg-white/25' : 'bg-brand-accent'}`} />
@@ -536,7 +553,7 @@ function CalendarView({ month, items, clientDisplay, onOpen, onMore }: { month: 
   const cells: Array<number | null> = [...Array.from({ length: firstDay }, () => null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)]
   const byDate = new Map<string, MonthlyDeliverable[]>()
   for (const item of items) {
-    const date = scheduleDate(item)
+    const date = getEffectiveScheduleDate(item)
     if (!date) continue
     if (!byDate.has(date)) byDate.set(date, [])
     byDate.get(date)!.push(item)
@@ -620,7 +637,7 @@ function ChartsView({ items, clientDisplay }: { items: MonthlyDeliverable[]; cli
         <h2 className="mb-3 text-sm font-bold text-white">Attention counts</h2>
         <p className="text-3xl font-black text-brand-accent">{items.filter(item => matchesMode(item, 'needs-action')).length}</p>
         <p className="mt-1 text-xs text-brand-primary/60">Needs action</p>
-        <p className="mt-4 text-3xl font-black text-amber-300">{items.filter(item => !scheduleDate(item)).length}</p>
+        <p className="mt-4 text-3xl font-black text-amber-300">{items.filter(item => !getEffectiveScheduleDate(item)).length}</p>
         <p className="mt-1 text-xs text-brand-primary/60">Unscheduled</p>
       </div>
     </div>
@@ -645,7 +662,7 @@ function BarPanel({ title, rows }: { title: string; rows: Array<{ label: string;
 
 function DeliverableDrawer({ deliverable, clientName, onClose, onSaved }: { deliverable: MonthlyDeliverable; clientName: string; onClose: () => void; onSaved: (updated: MonthlyDeliverable) => void }) {
   const [status, setStatus] = useState<SimplifiedProductionStatus>(normalizeScheduleStatus(deliverable.production_status))
-  const [date, setDate] = useState(scheduleDate(deliverable) ?? '')
+  const [date, setDate] = useState(getEffectiveScheduleDate(deliverable) ?? '')
   const [assigned, setAssigned] = useState(deliverable.assigned_to_name ?? '')
   const [clientId, setClientId] = useState(deliverable.client_id)
   const [saving, setSaving] = useState(false)

@@ -40,10 +40,11 @@ Applied during fix/client-schedule-shadow-run (Client Schedule Safety Pass - Tas
 These are enforced in `src/pages/admin/ClientSchedulePage.tsx` and `src/lib/planner.ts`:
 
 - Schedule date and status are SEPARATE fields.
-  - Schedule date = when the package post is planned/scheduled (`scheduled_date` only — never `due_date`).
+  - Schedule date = when the package post is planned/scheduled. `getEffectiveScheduleDate()` prefers `scheduled_date` and falls back to `due_date` as the legacy Teams import date during the July shadow-run. It is always labelled "Schedule date" in the UI, never "Due date".
   - Status = work progress (`production_status`, normalised via `normalizeScheduleStatus`).
   - A dated item can still be "Not started". "Not started" does not mean unscheduled.
-- Unscheduled means a package item has NO schedule date (`scheduled_date` is null). It is never defined by status. If every package post has a date, Unscheduled = 0 is valid.
+- Unscheduled (July shadow-run) means a package item has NO `scheduled_date` AND NO `due_date`. Items dated only via the legacy `due_date` fallback are NOT counted as Unscheduled. It is never defined by status.
+- Shadow-run display rule: during July 2026, display Schedule date uses `scheduled_date`, falling back to legacy `due_date` from Teams imports. This is display/read logic only — no data is mutated. Future Teams reconciliation should migrate/normalise real schedule dates into `scheduled_date` so the fallback can be retired.
 - Status filtering is shared across Grid, Board, Calendar, Charts and Year/Master through `normalizeScheduleStatus` + `matchesScheduleStatusFilter`. Unknown/legacy/null status values normalise to "Not started" so they are never hidden.
   - Needs Action = `isNeedsActionStatus` (excludes scheduled/posted and Meta drafts/approved).
   - Posted / History = `isPostedOrHistoryStatus` (scheduled or posted). It is styled muted/low-attention.
