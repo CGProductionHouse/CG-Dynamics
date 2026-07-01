@@ -7,6 +7,7 @@ import {
   createTask,
   type CommandCentreTask,
   type TaskInput,
+  type TaskStatus,
 } from '../../lib/commandCentre'
 import {
   listMonthlyDeliverablesByMonth,
@@ -14,42 +15,29 @@ import {
   simplifyProductionStatus,
   type MonthlyDeliverable,
 } from '../../lib/planner'
+import {
+  listCompanyEvents,
+  EVENT_TYPE_LABELS,
+  type CompanyCalendarEvent,
+} from '../../lib/companyCalendar'
 
-const CG_HOURS_URL = 'https://cg-hours.vercel.app'
+// ── Constants ─────────────────────────────────────────────────
 
-const ONE_DRIVE_LINKS = [
-  {
-    label: 'CG OneDrive',
-    detail: 'Internal files and assets',
-    href: 'https://cgproductionhouse365-my.sharepoint.com/:f:/g/personal/info_cgproductionhouse_com/IgC0gAsW73aeQq8CjNUBdEfmAUK5IYEyo8z5crwYCYmKPh0?e=dJbeui',
-  },
-  {
-    label: 'Client OneDrive',
-    detail: 'Client-shared folders',
-    href: '', // TODO: add Client OneDrive URL
-  },
-  {
-    label: 'Once-Off OneDrive',
-    detail: 'Once-off project files',
-    href: '', // TODO: add Once-Off OneDrive URL
-  },
-]
+const HUB_COMPLETED = new Set<TaskStatus>(['done', 'moved_to_tomorrow'])
+const HUB_EXCLUDED_STATUS = new Set<TaskStatus>(['done', 'moved_to_tomorrow'])
 
-const launchItems = [
-  { label: 'Planner', detail: 'Schedule and monthly content', to: '/admin/planner' },
-  { label: 'Daily Tasks', detail: 'Your work list for today', to: '/admin/command-centre' },
-  { label: 'Clients', detail: 'Reports, Meta, packages', to: '/admin/clients' },
-  { label: 'Assistant', detail: 'Drafts and checks', to: '/admin/assistant' },
-]
 
-const HUB_COMPLETED = new Set(['done', 'approved', 'scheduled', 'scheduled_posted', 'moved_to_tomorrow'])
+const PRIORITY_RANK: Record<string, number> = {
+  client_request: 0,
+  urgent: 1,
+  normal: 3,
+}
 
 const TASK_STATUS_SHORT: Record<string, string> = {
   to_do: 'To do',
   in_progress: 'In progress',
   blocked: 'Blocked',
   waiting_client: 'Waiting',
-  moved_to_tomorrow: 'Moved',
   done: 'Done',
 }
 
@@ -68,6 +56,22 @@ const DELIVERABLE_STATUS_SHORT: Record<string, string> = {
   scheduled_posted: 'Scheduled',
 }
 
+// ── Helpers ───────────────────────────────────────────────────
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function todayLabel() {
+  return new Date().toLocaleDateString('en-GB', {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+  })
+}
+
+function isOverdueTask(task: CommandCentreTask, today: string) {
+  return !!task.due_date && task.due_date < today && !HUB_COMPLETED.has(task.status)
+}
+
 function taskPriorityRank(t: CommandCentreTask, today: string): number {
   if (t.priority === 'client_request') return 0
   if (t.priority === 'urgent') return 1
@@ -77,75 +81,206 @@ function taskPriorityRank(t: CommandCentreTask, today: string): number {
   return 5
 }
 
-function deliverableDate(deliverable: MonthlyDeliverable) {
-  return deliverable.scheduled_date ?? deliverable.due_date ?? deliverable.month
+function deliverableDate(d: MonthlyDeliverable) {
+  return d.scheduled_date ?? d.due_date ?? d.month
 }
 
+// ── Hub Page ──────────────────────────────────────────────────
+
 export default function CgHubPage() {
-  const navigate = useNavigate()
   const { profile } = useAuth()
 
-  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const today = useMemo(() => todayStr(), [])
   const currentMonth = useMemo(() => monthKey(new Date()), [])
-  const todayLabel = useMemo(
-    () => new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
-    [],
-  )
+  const todayNice = useMemo(() => todayLabel(), [])
 
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
+  const [companyEvents, setCompanyEvents] = useState<CompanyCalendarEvent[]>([])
+  const [companyEventsMissing, setCompanyEventsMissing] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
   const [quickTitle, setQuickTitle] = useState('')
   const [quickSaving, setQuickSaving] = useState(false)
 
-  useEffect(() => {
-    let mounted = true
-    async function load() {
-      const [tasksRes, delRes] = await Promise.all([
-        listTasks(),
-        listMonthlyDeliverablesByMonth(currentMonth),
-      ])
-      if (!mounted) return
-      if (tasksRes.data) setTasks(tasksRes.data as CommandCentreTask[])
-      if (delRes.data) setDeliverables(delRes.data as MonthlyDeliverable[])
-      setLoadingData(false)
+  async function loadAll() {
+    setLoadingData(true)
+    const [tasksRes, delRes] = await Promise.all([
+      listTasks(),
+      listMonthlyDeliverablesByMonth(currentMonth),
+    ])
+    if (tasksRes.data) setTasks(tasksRes.data as CommandCentreTask[])
+    if (delRes.data) setDeliverables(delRes.data as MonthlyDeliverable[])
+
+    const companyRes = await listCompanyEvents()
+    if (companyRes.tableMissing) {
+      setCompanyEventsMissing(true)
+    } else if (companyRes.data) {
+      setCompanyEvents(companyRes.data as CompanyCalendarEvent[])
     }
-    void load()
-    return () => { mounted = false }
-  }, [currentMonth])
+    setLoadingData(false)
+  }
+
+  useEffect(() => { void loadAll() }, [currentMonth])
+
+  // ── Derived data ────────────────────────────────────────────
+
+  const activeTasks = useMemo(() =>
+    tasks.filter(t => !HUB_EXCLUDED_STATUS.has(t.status)),
+  [tasks])
 
   const priorityQueue = useMemo(() => {
-    return tasks
+    return activeTasks
       .filter(t =>
-        !HUB_COMPLETED.has(t.status as string) &&
-        (t.priority === 'client_request' ||
-          t.priority === 'urgent' ||
-          (t.due_date !== null && t.due_date <= todayStr) ||
-          t.status === 'in_progress')
+        t.priority === 'client_request' ||
+        t.priority === 'urgent' ||
+        (t.due_date && t.due_date <= today) ||
+        t.status === 'in_progress'
       )
-      .sort((a, b) => taskPriorityRank(a, todayStr) - taskPriorityRank(b, todayStr))
-  }, [tasks, todayStr])
+      .sort((a, b) => taskPriorityRank(a, today) - taskPriorityRank(b, today))
+  }, [activeTasks, today])
 
-  const scheduledToday = useMemo(
-    () => deliverables.filter(d => deliverableDate(d) === todayStr),
-    [deliverables, todayStr],
-  )
+  const dueToday = useMemo(() =>
+    activeTasks.filter(t => t.due_date === today).sort((a, b) =>
+      (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99)),
+  [activeTasks, today])
 
-  const waitingWork = useMemo(() => {
-    return deliverables.filter(d => {
-      const status = simplifyProductionStatus(d.production_status)
-      return status === 'ready_review' || status === 'awaiting_client' || status === 'meta_drafts'
-    })
-  }, [deliverables])
+  const overdue = useMemo(() =>
+    activeTasks.filter(t => isOverdueTask(t, today)).sort((a, b) =>
+      (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99)),
+  [activeTasks, today])
+
+  const clientRequests = useMemo(() =>
+    activeTasks.filter(t => t.priority === 'client_request'),
+  [activeTasks])
+
+  const waitingReview = useMemo(() =>
+    activeTasks.filter(t => t.status === 'blocked' || t.status === 'waiting_client'),
+  [activeTasks])
 
   const myActiveWork = useMemo(() => {
     const myName = profile?.full_name
     if (!myName) return []
-    return tasks.filter(t =>
-      t.assigned_to_name === myName &&
-      !HUB_COMPLETED.has(t.status as string)
+    return activeTasks.filter(t => t.assigned_to_name === myName)
+  }, [activeTasks, profile])
+
+  // Production Schedule derived
+  const dueTodayDeliverables = useMemo(() =>
+    deliverables.filter(d => deliverableDate(d) === today),
+  [deliverables, today])
+
+  const upcomingDeliverables = useMemo(() =>
+    deliverables.filter(d => {
+      const date = deliverableDate(d)
+      return date && date > today
+    }).sort((a, b) => (deliverableDate(a) ?? '').localeCompare(deliverableDate(b) ?? '')).slice(0, 10),
+  [deliverables, today])
+
+  const unscheduledDeliverables = useMemo(() =>
+    deliverables.filter(d => {
+      const prodStatus = simplifyProductionStatus(d.production_status)
+      return prodStatus !== 'scheduled_posted' && !d.scheduled_date && !d.due_date
+    }),
+  [deliverables])
+
+  const waitingDeliverables = useMemo(() =>
+    deliverables.filter(d => {
+      const s = simplifyProductionStatus(d.production_status)
+      return s === 'ready_review' || s === 'awaiting_client' || s === 'meta_drafts'
+    }),
+  [deliverables])
+
+  // Company Calendar derived
+  const todayCompanyEvents = useMemo(() => {
+    const todayStart = `${today}T00:00:00`
+    const todayEnd = `${today}T23:59:59`
+    return companyEvents.filter(e =>
+      e.status !== 'cancelled' &&
+      e.start_at >= todayStart &&
+      e.start_at <= todayEnd
     )
-  }, [tasks, profile])
+  }, [companyEvents, today])
+
+  const upcomingCompanyEvents = useMemo(() => {
+    const todayStart = `${today}T00:00:00`
+    return companyEvents.filter(e =>
+      e.status !== 'cancelled' &&
+      e.start_at >= todayStart
+    ).sort((a, b) => a.start_at.localeCompare(b.start_at)).slice(0, 5)
+  }, [companyEvents, today])
+
+  // Clients needing attention
+  const clientsNeedingAttention = useMemo(() => {
+    const clientMap = new Map<string, {
+      name: string
+      clientId: string
+      openRequests: number
+      overdueTasks: number
+      waitingDeliverables: number
+      unscheduledItems: number
+    }>()
+
+    for (const t of clientRequests) {
+      const name = t.client_name ?? 'Unknown'
+      if (!clientMap.has(name)) clientMap.set(name, { name, clientId: t.client_id ?? '', openRequests: 0, overdueTasks: 0, waitingDeliverables: 0, unscheduledItems: 0 })
+      clientMap.get(name)!.openRequests++
+    }
+
+    for (const t of overdue) {
+      const name = t.client_name ?? 'Unknown'
+      if (!clientMap.has(name)) clientMap.set(name, { name, clientId: t.client_id ?? '', openRequests: 0, overdueTasks: 0, waitingDeliverables: 0, unscheduledItems: 0 })
+      clientMap.get(name)!.overdueTasks++
+    }
+
+    for (const d of waitingDeliverables) {
+      const name = deliverables.find(dd => dd.id === d.id)?.title ?? 'Unknown'
+      if (!clientMap.has(name)) {
+        const clientName = deliverables.find(dd => dd.id === d.id)?.client_id ?? ''
+        if (clientName) {
+          if (!clientMap.has(clientName)) {
+            const clientObj = tasks.find(t => t.client_id === clientName)
+            clientMap.set(clientName, { name: clientObj?.client_name ?? 'Unknown', clientId: clientName, openRequests: 0, overdueTasks: 0, waitingDeliverables: 0, unscheduledItems: 0 })
+          }
+        }
+      }
+    }
+
+    const clientTaskMap = new Map<string, { openRequests: number; overdueTasks: number }>()
+    for (const t of clientRequests) {
+      const id = t.client_id ?? '__unknown__'
+      if (!clientTaskMap.has(id)) clientTaskMap.set(id, { openRequests: 0, overdueTasks: 0 })
+      const entry = clientTaskMap.get(id)!
+      entry.openRequests++
+    }
+    for (const t of overdue) {
+      const id = t.client_id ?? '__unknown__'
+      if (!clientTaskMap.has(id)) clientTaskMap.set(id, { openRequests: 0, overdueTasks: 0 })
+      const entry = clientTaskMap.get(id)!
+      entry.overdueTasks++
+    }
+
+    const result: Array<{ name: string; clientId: string; openRequests: number; overdueTasks: number; waitingDeliverables: number; unscheduledItems: number }> = []
+
+    for (const [id, counts] of clientTaskMap) {
+      if (id === '__unknown__') continue
+      const name = tasks.find(t => t.client_id === id)?.client_name ?? id
+      result.push({ name, clientId: id, ...counts, waitingDeliverables: 0, unscheduledItems: 0 })
+    }
+
+    return result.sort((a, b) => (b.openRequests + b.overdueTasks) - (a.openRequests + a.overdueTasks))
+  }, [clientRequests, overdue, waitingDeliverables, deliverables, tasks])
+
+  const stats = useMemo(() => ({
+    focus: priorityQueue.length,
+    clientRequests: clientRequests.length,
+    dueToday: dueToday.length,
+    overdue: overdue.length,
+    inProgress: activeTasks.filter(t => t.status === 'in_progress').length,
+    waitingReview: waitingReview.length,
+    dueTodayDeliverables: dueTodayDeliverables.length,
+    unscheduledDeliverables: unscheduledDeliverables.length,
+  }), [priorityQueue, clientRequests, dueToday, overdue, activeTasks, waitingReview, dueTodayDeliverables, unscheduledDeliverables.length])
+
+  const isAdmin = profile?.role === 'admin'
 
   async function handleQuickAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -156,268 +291,535 @@ export default function CgHubPage() {
       bucket: 'Admin / To Do',
       priority: 'normal',
       status: 'to_do',
-      due_date: todayStr,
+      due_date: today,
       source: 'manual',
       assigned_to_name: profile?.full_name ?? null,
     }
     await createTask(input)
     setQuickTitle('')
-    const { data } = await listTasks()
-    if (data) setTasks(data as CommandCentreTask[])
+    void loadAll()
     setQuickSaving(false)
   }
 
+  // ── Render ──────────────────────────────────────────────────
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
+      {/* A — Hero Header */}
       <div className="mb-8">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-[#f2b66f]">CG Production House</p>
-        <h1 className="mt-3 font-display text-4xl font-black uppercase leading-none tracking-wide text-white sm:text-7xl">
-          CG Hub
-        </h1>
-        <p className="mt-3 text-base text-brand-primary/78">Internal staff workspace.</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2dd4bf]">CG Production House</p>
+            <h1 className="mt-2 font-display text-4xl font-black uppercase leading-none tracking-wide text-white sm:text-6xl">
+              CG Hub
+            </h1>
+            <p className="mt-2 text-sm text-brand-primary/70">{todayNice}</p>
+          </div>
+          <form onSubmit={handleQuickAdd} className="flex min-w-0 items-center gap-2 sm:max-w-xs">
+            <input
+              type="text"
+              value={quickTitle}
+              onChange={e => setQuickTitle(e.target.value)}
+              placeholder="Quick Add Task..."
+              disabled={quickSaving}
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 text-sm text-white placeholder:text-brand-primary/30 focus:border-[#2dd4bf]/40 focus:outline-none focus:ring-1 focus:ring-[#2dd4bf]/20 disabled:opacity-50"
+            />
+            <button
+              type="submit"
+              disabled={!quickTitle.trim() || quickSaving}
+              className="shrink-0 rounded-lg bg-[#2dd4bf] px-4 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-black transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {quickSaving ? '...' : 'Add'}
+            </button>
+          </form>
+        </div>
       </div>
 
-      <TodayFocus
-        loading={loadingData}
-        todayStr={todayStr}
-        todayLabel={todayLabel}
-        priorityQueue={priorityQueue}
-        scheduledToday={scheduledToday}
-        waitingWork={waitingWork}
-        myActiveWork={myActiveWork}
-        quickTitle={quickTitle}
-        quickSaving={quickSaving}
-        onQuickTitleChange={setQuickTitle}
-        onQuickAdd={handleQuickAdd}
+      {loadingData ? (
+        <div className="space-y-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-24 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
+            ))}
+          </div>
+          <div className="h-48 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
+          <div className="h-48 animate-pulse rounded-2xl bg-brand-surface border border-brand-muted" />
+        </div>
+      ) : (
+        <>
+          {/* B — Today Focus */}
+          <TodayFocusSection
+            today={today}
+            priorityQueue={priorityQueue}
+            dueToday={dueToday}
+            overdue={overdue}
+            clientRequests={clientRequests}
+            waitingReview={waitingReview}
+            myActiveWork={myActiveWork}
+            stats={stats}
+          />
+
+          {/* C — Today's Company Calendar */}
+          <CompanyCalendarSection
+            todayCompanyEvents={todayCompanyEvents}
+            upcomingCompanyEvents={upcomingCompanyEvents}
+            companyEventsMissing={companyEventsMissing}
+          />
+
+          {/* D — Production Schedule */}
+          <ProductionScheduleSection
+            dueTodayDeliverables={dueTodayDeliverables}
+            upcomingDeliverables={upcomingDeliverables}
+            unscheduledDeliverables={unscheduledDeliverables}
+          />
+
+          {/* E — Clients Needing Attention */}
+          {clientsNeedingAttention.length > 0 && (
+            <ClientsAttentionSection clients={clientsNeedingAttention} />
+          )}
+
+          {/* F — Quick Launch */}
+          <QuickLaunchSection isAdmin={isAdmin} />
+
+          {/* G — AI Marketing Agent */}
+          <AiMarketingSection />
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── B: Today Focus ─────────────────────────────────────────────
+
+function TodayFocusSection({
+  today,
+  priorityQueue,
+  dueToday,
+  overdue,
+  clientRequests,
+  waitingReview,
+  myActiveWork,
+  stats,
+}: {
+  today: string
+  priorityQueue: CommandCentreTask[]
+  dueToday: CommandCentreTask[]
+  overdue: CommandCentreTask[]
+  clientRequests: CommandCentreTask[]
+  waitingReview: CommandCentreTask[]
+  myActiveWork: CommandCentreTask[]
+  stats: { focus: number; clientRequests: number; dueToday: number; overdue: number; inProgress: number; waitingReview: number; dueTodayDeliverables: number; unscheduledDeliverables: number }
+}) {
+  return (
+    <div className="mb-8">
+      <HubSectionHeader
+        title="Today Focus"
+        subtitle="What needs your attention"
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-10">
-        {launchItems.map(item => (
-          <button
-            key={item.label}
-            type="button"
-            onClick={() => navigate(item.to)}
-            className="group min-h-28 rounded-xl border border-white/8 bg-white/[0.035] p-5 text-left transition-all hover:border-brand-teal/30 hover:bg-brand-teal/[0.06]"
-          >
-            <div className="flex h-full flex-col justify-between">
-              <h2 className="font-display text-xl font-black uppercase tracking-wide text-white">
-                {item.label}
-              </h2>
-              <div>
-                <p className="mt-2 text-sm text-brand-primary/72">{item.detail}</p>
-                <span className="mt-3 block text-sm font-bold text-[#f2b66f] group-hover:text-white">
-                  Open →
-                </span>
-              </div>
-            </div>
-          </button>
-        ))}
+      {/* Stats row */}
+      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <HubMetricCard label="Priority Queue" value={stats.focus} accent={stats.focus > 0} />
+        <HubMetricCard label="Due Today" value={stats.dueToday} accent={stats.dueToday > 0} />
+        <HubMetricCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
+        <HubMetricCard label="Client Requests" value={stats.clientRequests} accent={stats.clientRequests > 0} />
       </div>
 
-      <div className="mb-6">
-        <div className="mb-4 flex items-center gap-3">
-          <h2 className="font-display text-2xl font-black uppercase tracking-wide text-white">OneDrive</h2>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {ONE_DRIVE_LINKS.map(link =>
-            link.href ? (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex flex-col justify-between rounded-xl border border-white/10 bg-white/[0.03] p-5 transition-all hover:border-brand-teal/35 hover:bg-brand-teal/[0.05]"
-              >
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-teal/70">OneDrive</p>
-                  <h3 className="mt-1.5 font-display text-lg font-black uppercase tracking-wide text-white">
-                    {link.label}
-                  </h3>
-                  <p className="mt-1 text-sm text-brand-primary/65">{link.detail}</p>
-                </div>
-                <span className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-brand-teal/30 bg-brand-teal/[0.08] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-brand-teal transition-colors group-hover:border-brand-teal/60 group-hover:bg-brand-teal/[0.14] group-hover:text-white">
-                  Open in OneDrive
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                  </svg>
-                </span>
-              </a>
-            ) : (
-              <div
-                key={link.label}
-                className="flex flex-col justify-between rounded-xl border border-white/[0.06] bg-white/[0.015] p-5 opacity-60"
-              >
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-primary/40">OneDrive</p>
-                  <h3 className="mt-1.5 font-display text-lg font-black uppercase tracking-wide text-white/60">
-                    {link.label}
-                  </h3>
-                  <p className="mt-1 text-sm text-brand-primary/45">{link.detail}</p>
-                </div>
-                <span className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-brand-primary/40">
-                  Link not configured
-                </span>
-              </div>
-            )
-          )}
-        </div>
-      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <HubWorkCard
+          title="Priority Queue"
+          count={priorityQueue.length}
+          viewAllTo="/admin/command-centre"
+          emptyText="No urgent tasks right now"
+        >
+          {priorityQueue.slice(0, 5).map(t => (
+            <TaskRow key={t.id} task={t} todayStr={today} />
+          ))}
+        </HubWorkCard>
 
-      <div className="border-t border-white/10 pt-6">
-        <div className="flex items-center gap-3">
-          <a
-            href={CG_HOURS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-2.5 text-sm font-bold text-brand-primary transition-all hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
-          >
-            <span>CG Hours</span>
-            <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/70 group-hover:text-white">
-              External
-            </span>
-            <svg className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-            </svg>
-          </a>
-        </div>
+        <HubWorkCard
+          title="Due Today"
+          count={dueToday.length}
+          viewAllTo="/admin/command-centre"
+          emptyText="No tasks due today"
+        >
+          {dueToday.slice(0, 5).map(t => (
+            <TaskRow key={t.id} task={t} todayStr={today} />
+          ))}
+        </HubWorkCard>
+
+        <HubWorkCard
+          title="Overdue"
+          count={overdue.length}
+          viewAllTo="/admin/command-centre"
+          emptyText="Nothing overdue"
+          danger
+        >
+          {overdue.slice(0, 5).map(t => (
+            <TaskRow key={t.id} task={t} todayStr={today} />
+          ))}
+        </HubWorkCard>
+
+        <HubWorkCard
+          title="Client Requests"
+          count={clientRequests.length}
+          viewAllTo="/admin/command-centre"
+          emptyText="No client requests waiting"
+        >
+          {clientRequests.slice(0, 5).map(t => (
+            <TaskRow key={t.id} task={t} todayStr={today} />
+          ))}
+        </HubWorkCard>
+
+        <HubWorkCard
+          title="Waiting for Review"
+          count={waitingReview.length}
+          viewAllTo="/admin/command-centre"
+          emptyText="Nothing waiting for review"
+        >
+          {waitingReview.slice(0, 5).map(t => (
+            <TaskRow key={t.id} task={t} todayStr={today} />
+          ))}
+        </HubWorkCard>
+
+        <HubWorkCard
+          title="My Active Work"
+          count={myActiveWork.length}
+          viewAllTo="/admin/command-centre"
+          emptyText="No active tasks assigned to you"
+        >
+          {myActiveWork.slice(0, 5).map(t => (
+            <TaskRow key={t.id} task={t} todayStr={today} />
+          ))}
+        </HubWorkCard>
       </div>
     </div>
   )
 }
 
-// ── Today Focus panel ─────────────────────────────────────────────────────────
+// ── C: Today's Company Calendar ───────────────────────────────
 
-function TodayFocus({
-  loading,
-  todayStr,
-  todayLabel,
-  priorityQueue,
-  scheduledToday,
-  waitingWork,
-  myActiveWork,
-  quickTitle,
-  quickSaving,
-  onQuickTitleChange,
-  onQuickAdd,
+function CompanyCalendarSection({
+  todayCompanyEvents,
+  upcomingCompanyEvents,
+  companyEventsMissing,
 }: {
-  loading: boolean
-  todayStr: string
-  todayLabel: string
-  priorityQueue: CommandCentreTask[]
-  scheduledToday: MonthlyDeliverable[]
-  waitingWork: MonthlyDeliverable[]
-  myActiveWork: CommandCentreTask[]
-  quickTitle: string
-  quickSaving: boolean
-  onQuickTitleChange: (v: string) => void
-  onQuickAdd: (e: FormEvent<HTMLFormElement>) => void
+  todayCompanyEvents: CompanyCalendarEvent[]
+  upcomingCompanyEvents: CompanyCalendarEvent[]
+  companyEventsMissing: boolean
 }) {
-  return (
-    <div className="mb-10 rounded-2xl border border-brand-teal/15 bg-white/[0.02] p-5">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-brand-teal/60">Today</p>
-          <h2 className="font-display text-lg font-black uppercase tracking-wide text-white">{todayLabel}</h2>
-        </div>
-        <form onSubmit={onQuickAdd} className="flex min-w-0 flex-1 items-center gap-2 sm:max-w-xs">
-          <input
-            type="text"
-            value={quickTitle}
-            onChange={e => onQuickTitleChange(e.target.value)}
-            placeholder="Quick add task…"
-            disabled={quickSaving}
-            className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-brand-primary/30 focus:border-brand-teal/40 focus:outline-none focus:ring-1 focus:ring-brand-teal/20 disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={!quickTitle.trim() || quickSaving}
-            className="shrink-0 rounded-lg border border-brand-teal/25 bg-brand-teal/[0.08] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-brand-teal transition-colors hover:border-brand-teal/45 hover:bg-brand-teal/[0.14] disabled:cursor-not-allowed disabled:opacity-40"
+  if (companyEventsMissing) {
+    return (
+      <div className="mb-8">
+        <HubSectionHeader title="Today's Company Calendar" />
+        <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-4">
+          <p className="text-xs text-amber-300/80">
+            Company calendar setup needed. Run phase-10a SQL to enable company events.
+          </p>
+          <Link
+            to="/admin/company-calendar"
+            className="mt-2 inline-block text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
           >
-            {quickSaving ? '…' : 'Add'}
-          </button>
-        </form>
+            Open Company Calendar →
+          </Link>
+        </div>
       </div>
+    )
+  }
 
-      {loading ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2].map(i => (
-            <div key={i} className="h-36 animate-pulse rounded-xl bg-white/[0.04]" />
-          ))}
+  const displayEvents = todayCompanyEvents.length > 0 ? todayCompanyEvents : upcomingCompanyEvents.slice(0, 5)
+
+  return (
+    <div className="mb-8">
+      <HubSectionHeader
+        title="Today's Company Calendar"
+        subtitle={todayCompanyEvents.length > 0 ? `${todayCompanyEvents.length} event${todayCompanyEvents.length === 1 ? '' : 's'} today` : 'No events today'}
+      />
+
+      {displayEvents.length === 0 ? (
+        <div className="rounded-xl border border-white/8 bg-brand-surface/90 p-4">
+          <p className="text-sm text-brand-primary/60">No company events today.</p>
+          <Link
+            to="/admin/company-calendar"
+            className="mt-2 inline-block text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
+          >
+            Open Company Calendar →
+          </Link>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <SectionCard
-            title="Priority queue"
-            totalCount={priorityQueue.length}
-            viewAllTo="/admin/command-centre"
-            emptyText="No urgent tasks right now"
+        <div className="grid gap-2">
+          {displayEvents.slice(0, 5).map(event => (
+            <Link
+              key={event.id}
+              to="/admin/company-calendar"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.04]"
+            >
+              <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                event.event_type === 'content_run'
+                  ? 'bg-emerald-400/15 text-emerald-300'
+                  : event.event_type === 'shoot'
+                    ? 'bg-purple-400/15 text-purple-300'
+                    : event.event_type === 'meeting'
+                      ? 'bg-sky-400/15 text-sky-300'
+                      : event.event_type === 'deadline'
+                        ? 'bg-red-400/15 text-red-300'
+                        : 'bg-white/10 text-brand-primary'
+              }`}>
+                {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
+              </span>
+              <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{event.title}</p>
+              {event.client_name && (
+                <span className="shrink-0 rounded-full border border-brand-teal/25 bg-brand-teal/[0.08] px-2 py-0.5 text-[10px] font-semibold text-[#2dd4bf]">
+                  {event.client_name}
+                </span>
+              )}
+              <span className="shrink-0 text-xs text-brand-primary/60">
+                {new Date(event.start_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </Link>
+          ))}
+          <Link
+            to="/admin/company-calendar"
+            className="mt-1 text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
           >
-            {priorityQueue.slice(0, 5).map(t => (
-              <TaskRow key={t.id} task={t} todayStr={todayStr} />
-            ))}
-          </SectionCard>
-          <SectionCard
-            title="Package due today"
-            totalCount={scheduledToday.length}
-            viewAllTo="/admin/monthly-planner"
-            emptyText="No package deliverables due today"
-          >
-            {scheduledToday.slice(0, 5).map(d => (
-              <DeliverableRow key={d.id} deliverable={d} />
-            ))}
-          </SectionCard>
-          <SectionCard
-            title="Waiting"
-            totalCount={waitingWork.length}
-            viewAllTo="/admin/monthly-planner"
-            emptyText="Nothing waiting for review or scheduling"
-          >
-            {waitingWork.slice(0, 5).map(d => (
-              <DeliverableRow key={d.id} deliverable={d} />
-            ))}
-          </SectionCard>
-          <SectionCard
-            title="My active work"
-            totalCount={myActiveWork.length}
-            viewAllTo="/admin/command-centre"
-            emptyText="No active tasks assigned to you"
-          >
-            {myActiveWork.slice(0, 5).map(t => (
-              <TaskRow key={t.id} task={t} todayStr={todayStr} />
-            ))}
-          </SectionCard>
+            View all →
+          </Link>
         </div>
       )}
     </div>
   )
 }
 
-function SectionCard({
+// ── D: Production Schedule ────────────────────────────────────
+
+function ProductionScheduleSection({
+  dueTodayDeliverables,
+  upcomingDeliverables,
+  unscheduledDeliverables,
+}: {
+  dueTodayDeliverables: MonthlyDeliverable[]
+  upcomingDeliverables: MonthlyDeliverable[]
+  unscheduledDeliverables: MonthlyDeliverable[]
+}) {
+  return (
+    <div className="mb-8">
+      <HubSectionHeader
+        title="Production Schedule"
+        subtitle="Package deliverables and schedule"
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <HubWorkCard
+          title="Package Due Today"
+          count={dueTodayDeliverables.length}
+          viewAllTo="/admin/monthly-planner"
+          emptyText="No package work due today"
+          accentColor
+        >
+          {dueTodayDeliverables.slice(0, 5).map(d => (
+            <DeliverableRow key={d.id} deliverable={d} />
+          ))}
+        </HubWorkCard>
+
+        <HubWorkCard
+          title="Upcoming Scheduled"
+          count={upcomingDeliverables.length}
+          viewAllTo="/admin/monthly-planner"
+          emptyText="No upcoming scheduled package work"
+        >
+          {upcomingDeliverables.slice(0, 5).map(d => (
+            <DeliverableRow key={d.id} deliverable={d} />
+          ))}
+        </HubWorkCard>
+
+        <HubWorkCard
+          title="Needs Scheduling"
+          count={unscheduledDeliverables.length}
+          viewAllTo="/admin/master-schedule"
+          emptyText="Package schedule is clean"
+          danger={unscheduledDeliverables.length > 0}
+        >
+          {unscheduledDeliverables.slice(0, 5).map(d => (
+            <DeliverableRow key={d.id} deliverable={d} />
+          ))}
+        </HubWorkCard>
+      </div>
+    </div>
+  )
+}
+
+// ── E: Clients Needing Attention ──────────────────────────────
+
+function ClientsAttentionSection({ clients }: {
+  clients: Array<{ name: string; clientId: string; openRequests: number; overdueTasks: number; waitingDeliverables: number; unscheduledItems: number }>
+}) {
+  return (
+    <div className="mb-8">
+      <HubSectionHeader
+        title="Clients Needing Attention"
+        subtitle={`${clients.length} client${clients.length === 1 ? '' : 's'} with open items`}
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {clients.slice(0, 6).map(client => (
+          <Link
+            key={client.clientId}
+            to="/admin/clients"
+            className="rounded-xl border border-white/8 bg-brand-surface/90 p-4 transition-all hover:border-white/20"
+          >
+            <p className="text-sm font-semibold text-white">{client.name}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {client.openRequests > 0 && (
+                <span className="rounded-full border border-brand-accent/25 bg-brand-accent/10 px-2 py-0.5 text-[10px] font-semibold text-[#f2b66f]">
+                  {client.openRequests} request{client.openRequests !== 1 ? 's' : ''}
+                </span>
+              )}
+              {client.overdueTasks > 0 && (
+                <span className="rounded-full border border-red-400/25 bg-red-400/10 px-2 py-0.5 text-[10px] font-semibold text-red-300">
+                  {client.overdueTasks} overdue
+                </span>
+              )}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── F: Quick Launch ───────────────────────────────────────────
+
+const LAUNCH_ITEMS = [
+  { label: 'Daily Tasks', detail: 'Your work list for today', to: '/admin/command-centre', icon: '📋' },
+  { label: 'Package Calendar', detail: 'Monthly deliverables', to: '/admin/monthly-planner', icon: '📅' },
+  { label: 'Company Calendar', detail: 'Meetings & events', to: '/admin/company-calendar', icon: '🗓' },
+  { label: 'Planner Board', detail: 'Board overview', to: '/admin/planner', icon: '📊' },
+  { label: 'Master Schedule', detail: 'Full schedule view', to: '/admin/master-schedule', icon: '📆' },
+  { label: 'Clients', detail: 'Reports, Meta, packages', to: '/admin/clients', icon: '👥' },
+]
+
+function QuickLaunchSection({ isAdmin }: { isAdmin: boolean }) {
+  const navigate = useNavigate()
+  const items = isAdmin
+    ? [...LAUNCH_ITEMS, { label: 'Import Health', detail: 'Admin only', to: '/admin/import-health', icon: '🔧' }]
+    : LAUNCH_ITEMS
+
+  return (
+    <div className="mb-8">
+      <HubSectionHeader title="Quick Launch" />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map(item => (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => navigate(item.to)}
+            className="group min-h-24 rounded-xl border border-white/8 bg-white/[0.035] p-4 text-left transition-all hover:border-[#2dd4bf]/30 hover:bg-[#2dd4bf]/[0.06]"
+          >
+            <div className="flex h-full flex-col justify-between">
+              <h2 className="font-display text-lg font-black uppercase tracking-wide text-white">
+                {item.label}
+              </h2>
+              <p className="mt-1 text-sm text-brand-primary/72">{item.detail}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── G: AI Marketing Agent ─────────────────────────────────────
+
+const AI_MARKETING_ITEMS = [
+  { label: 'Master Marketing Library', to: '/admin/marketing-library', status: 'coming_soon' as const },
+  { label: 'Skill Cards', to: '/admin/skill-cards', status: 'coming_soon' as const },
+  { label: 'Campaign Builder', to: '/admin/campaign-builder', status: 'coming_soon' as const },
+  { label: 'Client Brand Knowledge', to: '/admin/client-brand-knowledge', status: 'coming_soon' as const },
+]
+
+function AiMarketingSection() {
+  return (
+    <div className="mb-8">
+      <HubSectionHeader
+        title="AI Marketing Agent"
+        subtitle="Separate section — coming soon"
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {AI_MARKETING_ITEMS.map(item => (
+          <div
+            key={item.label}
+            className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-4 opacity-60"
+          >
+            <h3 className="text-sm font-semibold text-white/70">{item.label}</h3>
+            <p className="mt-1 text-xs text-brand-primary/50 capitalize">{item.status.replace('_', ' ')}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Shared Sub-Components ─────────────────────────────────────
+
+function HubSectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-4 flex items-center gap-3">
+      <h2 className="font-display text-xl font-black uppercase tracking-wide text-white sm:text-2xl">{title}</h2>
+      <div className="h-px flex-1 bg-white/10" />
+      {subtitle && <p className="shrink-0 text-xs text-brand-primary/50">{subtitle}</p>}
+    </div>
+  )
+}
+
+function HubMetricCard({ label, value, accent, danger }: {
+  label: string
+  value: number
+  accent?: boolean
+  danger?: boolean
+}) {
+  const valClass = danger
+    ? 'text-red-400'
+    : accent ? 'text-[#2dd4bf]'
+    : 'text-white'
+  return (
+    <div className="rounded-xl border border-white/8 bg-brand-surface/80 p-3">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
+      <p className={`mt-1 text-xl font-semibold ${valClass}`}>{value}</p>
+    </div>
+  )
+}
+
+function HubWorkCard({
   title,
-  totalCount,
+  count,
   viewAllTo,
   emptyText,
+  danger,
+  accentColor,
   children,
 }: {
   title: string
-  totalCount: number
+  count: number
   viewAllTo: string
   emptyText: string
+  danger?: boolean
+  accentColor?: boolean
   children: ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
+    <div className={`rounded-xl border ${danger ? 'border-red-400/15' : accentColor ? 'border-[#2dd4bf]/15' : 'border-white/8'} bg-brand-surface/80 p-4`}>
       <div className="mb-3 flex items-center justify-between gap-2">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/55">{title}</p>
-        {totalCount > 5 && (
-          <Link to={viewAllTo} className="shrink-0 text-xs font-bold text-brand-teal/75 hover:text-brand-teal">
-            All {totalCount} →
+        {count > 0 && (
+          <Link to={viewAllTo} className="shrink-0 text-xs font-bold text-[#2dd4bf]/75 hover:text-[#2dd4bf]">
+            All {count} →
           </Link>
         )}
       </div>
-      {totalCount === 0 ? (
-        <p className="py-1 text-sm text-brand-primary/35">{emptyText}</p>
+      {count === 0 ? (
+        <p className="text-sm text-brand-primary/40">{emptyText}</p>
       ) : (
         <div className="space-y-0.5">{children}</div>
       )}
@@ -434,17 +836,10 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
   const dotClass = isClientReq
     ? 'bg-[#f2b66f]'
     : isUrgent || isOverdue
-      ? 'bg-rose-400'
+      ? 'bg-red-400'
       : isToday
-        ? 'bg-brand-teal'
+        ? 'bg-[#2dd4bf]'
         : 'bg-white/20'
-
-  const statusClass =
-    task.status === 'in_progress'
-      ? 'text-brand-teal/80'
-      : task.status === 'blocked'
-        ? 'text-rose-400/80'
-        : 'text-brand-primary/40'
 
   const dueDateLabel = isOverdue
     ? 'Overdue'
@@ -466,7 +861,7 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
         <p className="truncate text-sm font-semibold text-white">{task.title}</p>
         {meta && <p className="mt-0.5 text-xs text-brand-primary/45">{meta}</p>}
       </div>
-      <span className={`shrink-0 text-xs font-semibold ${statusClass}`}>
+      <span className="shrink-0 text-xs font-semibold text-brand-primary/40">
         {TASK_STATUS_SHORT[task.status] ?? task.status}
       </span>
     </Link>
@@ -478,9 +873,9 @@ function DeliverableRow({ deliverable }: { deliverable: MonthlyDeliverable }) {
 
   const statusClass =
     simplified === 'scheduled_posted'
-      ? 'text-brand-teal'
+      ? 'text-[#2dd4bf]'
       : simplified === 'in_progress'
-        ? 'text-brand-teal/65'
+        ? 'text-[#2dd4bf]/65'
         : 'text-brand-primary/40'
 
   return (
@@ -488,7 +883,7 @@ function DeliverableRow({ deliverable }: { deliverable: MonthlyDeliverable }) {
       to="/admin/monthly-planner"
       className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]"
     >
-      <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-brand-teal/10 text-brand-teal">
+      <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#2dd4bf]/10 text-[#2dd4bf]">
         {DELIVERABLE_TYPE_CODE[deliverable.deliverable_type] ?? deliverable.deliverable_type}
       </span>
       <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{deliverable.title}</p>

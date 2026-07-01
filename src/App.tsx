@@ -33,6 +33,7 @@ import MonthlyPlannerPage from './pages/admin/MonthlyPlannerPage'
 import MasterSchedulePage from './pages/admin/MasterSchedulePage'
 import PlannerImportPage from './pages/admin/PlannerImportPage'
 import ImportHealthPage from './pages/admin/ImportHealthPage'
+import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -84,6 +85,7 @@ export default function App() {
               <Route path="/admin/published" element={<PublishedPreview />} />
               <Route path="/admin/integrations" element={<IntegrationsPage />} />
               <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
+              <Route path="/admin/company-calendar" element={<CompanyCalendarPage />} />
 
               {/* Consolidated Import workspace (CSV import is admin-gated inside
                   the hub; manual summaries + history are staff read-only). */}
@@ -100,7 +102,7 @@ export default function App() {
                 <Route path="/admin/users" element={<UsersHub />} />
                 {/* Legacy deep link kept working. */}
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
-                <Route path="/admin/planner-import" element={<PlannerImportPage />} />
+              <Route path="/admin/planner-import" element={<PlannerImportPage />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
               </Route>
             </Route>
