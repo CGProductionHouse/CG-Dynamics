@@ -13,6 +13,18 @@ When user feedback changes direction:
 3. If it changes the actual product direction, update `docs/cg-dynamics-product-goals.md` too.
 4. Do not treat small UI feedback as permission to forget the bigger workflow.
 
+## Strict import rules (from scheduler Teams parity pass)
+
+Applied during feat/scheduler-teams-parity:
+
+- `scheduled_date` is the single canonical "Schedule Date" field in all UI labels — do not expose `due_date` to users in schedule views
+- `scheduled_posted` status uses muted/opacity styling (`text-white/25 border-white/5`) instead of teal accent in all STATUS_TONE maps
+- "Needs Action" filter excludes `approved`, `scheduled`, `posted`, `completed`, `done`, `archived` statuses
+- "+N more" in calendar grids must be clickable and open a day detail drawer
+- Client Schedule Board defaults to current month with month controls, not a year-long client list
+- Master Schedule defaults to current month section expanded, not January
+- Two separate calendars must stay separate: Package Calendar (monthly_deliverables) and Company Calendar (company_calendar_events)
+
 ## Current trust issue to correct
 
 The app has had too much UI polishing and future-prep while core workflow gaps remain.
@@ -62,11 +74,14 @@ The biggest missing pieces are:
 |---|---|---|
 | Full calendar view with real month/day layout | PARTIAL | Calendar grid added to Monthly Planner with real weekdays and day numbers. |
 | Calendar must use real dates for 2026, 2027, etc. | PARTIAL | Date math uses native JS Date (year, month, day) — works for any year. |
-| Full-screen calendar/schedule view like screenshots shared | PARTIAL | Month grid exists in Monthly Planner. Full master schedule (all clients, full year) still missing. |
-| Master schedule must show the whole year/content plan | PARTIAL | Master Schedule page built at /admin/master-schedule. Imported monthly deliverables are now being surfaced by year/month using imported month and due-date data. Drag/drop and bulk scheduling are still outstanding. |
-| Planner Board Client Schedule must use the same schedule source | PARTIAL | Updated so the Client Schedule Board reads monthly_deliverables grouped by client instead of empty planner_buckets. Needs live browser testing with imported data. |
-| Monthly Planner must connect directly to master schedule/calendar | PARTIAL | Monthly Planner now has calendar view using scheduled_date. Full master schedule backbone still missing. |
-| Staff should see monthly summary, not full-year complexity | PARTIAL | Monthly Planner calendar view shows current month only. Needs real imported data. |
+| Full-screen calendar/schedule view like screenshots shared | PARTIAL | Month grid exists in Monthly Planner. Day detail drawer added for "+N more" click-through. Full master schedule (all clients, full year) exists. |
+| Master schedule must show the whole year/content plan | PARTIAL | Master Schedule page built at /admin/master-schedule. Defaults to current month section expanded. Month tab strip and "Jump to current" button added. Needs drag/drop and bulk scheduling. |
+| Planner Board Client Schedule must use the same schedule source | PARTIAL | Client Schedule Board now filters by selected month with search and status filter. Reads monthly_deliverables grouped by client. |
+| Monthly Planner must connect directly to master schedule/calendar | PARTIAL | Monthly Planner now has calendar view using scheduled_date. Links to Master Schedule and vice versa. |
+| Staff should see monthly summary, not full-year complexity | PARTIAL | Monthly Planner calendar view shows current month only. Master Schedule now defaults to current month expanded. |
+| Scheduled/Posted status visually muted (not teal) like completed work | DONE | STATUS_TONE in MonthlyPlannerPage, PlannerPage, MasterSchedulePage, and CgHubPage updated to mute scheduled_posted with grey/opacity styling. |
+| "+N more" day cell overflow opens detail drawer | DONE | "+N more" buttons in MonthlyPlannerPage calendar grid open a DayDetailPanel drawer showing all items for that date. |
+| "Due date" label renamed to "Schedule Date" across all schedule views | DONE | Labels changed from "Due date"/"Scheduled"/"Due" to "Schedule date" in MonthlyPlannerDetailDrawer, ScheduleDeliverableDrawer, MasterScheduleDrawer, and inline card displays. |
 | CA/Amonique control final schedule dates and Scheduled/Posted states | PREPARED | UI/role split exists in Monthly Planner; RLS migration still pending. |
 | Staff can view schedule but not control final scheduling | PARTIAL | Calendar view built; permissions need live testing after RLS migration. |
 | Calendar dates must support CG Hours recommendations later | OUTSTANDING | Date foundation exists; CG Hours bridge still future work. |
@@ -121,13 +136,16 @@ Known source workbooks:
 
 | Request | Status | Notes |
 |---|---|---|
-| Monthly Planner is the main staff-facing content production summary | PARTIAL | Page exists, but needs imported data and real calendar connection. |
-| Show current month summary | PARTIAL | Summary exists, but without real data it remains empty. |
+| Monthly Planner is the main staff-facing content production summary | PARTIAL | Page exists with calendar grid, day detail drawer, and Teams-style status semantics. |
+| Show current month summary | PARTIAL | Summary exists with status counts, stats, and calendar grid. |
 | Show DP/F/Video/Reel totals | DONE/PARTIAL | Totals exist, but need data verification. |
 | Use short codes: DP, F, Video, Reel | DONE/PARTIAL | Implemented in package/client pages and monthly views. Verify globally. |
-| Show status counts | DONE/PARTIAL | Existing status counts/totals exist. Needs testing. |
-| Source chips: Package, Client request, Moved/Replaced, Unlinked | DONE/PARTIAL | Added to Monthly Planner. Needs real data. |
-| Deliverable drawer | DONE | Added. |
+| Show status counts | DONE/PARTIAL | Existing status counts/totals exist. |
+| Source chips: Package, Client request, Moved/Replaced, Unlinked | DONE/PARTIAL | Added to Monthly Planner. |
+| Deliverable drawer | DONE | Fully functional. |
+| Calendar day cells show "+N more" overflow | DONE | Clickable buttons open DayDetailPanel drawer with all items for that date. |
+| "Schedule date" is canonical label throughout UI | DONE | Changed from "Due date"/"Scheduled" to "Schedule date" in drawer and card displays. |
+| scheduled_posted status visually muted as completed work | DONE | Uses `text-white/25 border-white/5 bg-white/[0.02]` instead of teal. |
 | Staff/admin status split | PREPARED | UI exists; RLS migration pending. |
 | Admin package action placeholder | PREPARED | Buttons exist as placeholder after migration. Not saving yet. |
 

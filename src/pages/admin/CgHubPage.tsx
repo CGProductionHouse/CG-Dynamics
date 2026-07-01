@@ -873,7 +873,7 @@ function DeliverableRow({ deliverable }: { deliverable: MonthlyDeliverable }) {
 
   const statusClass =
     simplified === 'scheduled_posted'
-      ? 'text-[#2dd4bf]'
+      ? 'text-white/25'
       : simplified === 'in_progress'
         ? 'text-[#2dd4bf]/65'
         : 'text-brand-primary/40'

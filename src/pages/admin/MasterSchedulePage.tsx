@@ -67,8 +67,8 @@ const STATUS_TONE: Record<SimplifiedProductionStatus, string> = {
   in_progress: 'text-brand-accent border-brand-accent/25 bg-brand-accent/[0.07]',
   ready_review: 'text-amber-300 border-amber-400/25 bg-amber-400/[0.07]',
   awaiting_client: 'text-sky-200 border-sky-300/25 bg-sky-300/[0.07]',
-  meta_drafts: 'text-[#2dd4bf] border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.07]',
-  scheduled_posted: 'text-[#2dd4bf] border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.07]',
+  meta_drafts: 'text-brand-teal border-brand-teal/25 bg-brand-teal/[0.07]',
+  scheduled_posted: 'text-white/25 border-white/5 bg-white/[0.02]',
 }
 
 const STAFF_STATUSES: SimplifiedProductionStatus[] = [
@@ -151,7 +151,7 @@ export default function MasterSchedulePage() {
   const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
   const [drawerClientName, setDrawerClientName] = useState('')
   const [expandedMonths, setExpandedMonths] = useState<Set<number>>(
-    () => new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    () => new Set([currentMonth])
   )
 
   const clientNameById = useMemo(
@@ -361,6 +361,20 @@ export default function MasterSchedulePage() {
             className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
           >
             {selectedYear + 1} →
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedYear(currentYear)
+              setExpandedMonths(new Set([currentMonth]))
+              setTimeout(() => {
+                const mk = `${currentYear}-${String(currentMonth).padStart(2, '0')}`
+                document.getElementById(`month-${mk}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }, 50)
+            }}
+            className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-brand-teal hover:text-white"
+          >
+            Jump to current
           </button>
           <Link
             to="/admin/monthly-planner"
@@ -800,11 +814,11 @@ function MasterScheduleDrawer({
             )}
           </div>
 
-          {/* Scheduled date */}
+          {/* Schedule date */}
           {isAdmin ? (
             <div>
               <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">
-                Scheduled date
+                Schedule date
               </p>
               <div className="flex gap-2">
                 <input
@@ -826,7 +840,7 @@ function MasterScheduleDrawer({
             </div>
           ) : deliverable.scheduled_date ? (
             <div>
-              <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Scheduled</p>
+              <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Schedule date</p>
               <p className="text-sm text-white/70">{deliverable.scheduled_date}</p>
             </div>
           ) : null}
@@ -836,14 +850,6 @@ function MasterScheduleDrawer({
             <div>
               <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Staff</p>
               <p className="text-sm text-white/70">{deliverable.assigned_to_name}</p>
-            </div>
-          )}
-
-          {/* Due date */}
-          {deliverable.due_date && (
-            <div>
-              <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Due date</p>
-              <p className="text-sm text-white/70">{deliverable.due_date}</p>
             </div>
           )}
 

@@ -38,8 +38,8 @@ const STATUS_TONE: Record<SimplifiedProductionStatus, string> = {
   in_progress: 'text-brand-accent border-brand-accent/25 bg-brand-accent/[0.07]',
   ready_review: 'text-amber-300 border-amber-400/25 bg-amber-400/[0.07]',
   awaiting_client: 'text-sky-200 border-sky-300/25 bg-sky-300/[0.07]',
-  meta_drafts: 'text-[#2dd4bf] border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.07]',
-  scheduled_posted: 'text-[#2dd4bf] border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.07]',
+  meta_drafts: 'text-brand-teal border-brand-teal/25 bg-brand-teal/[0.07]',
+  scheduled_posted: 'text-white/25 border-white/5 bg-white/[0.02]',
 }
 
 const STATUS_STAT_TONE: Record<SimplifiedProductionStatus, string> = {
@@ -47,8 +47,8 @@ const STATUS_STAT_TONE: Record<SimplifiedProductionStatus, string> = {
   in_progress: 'text-brand-accent',
   ready_review: 'text-amber-300',
   awaiting_client: 'text-sky-300',
-  meta_drafts: 'text-[#2dd4bf]',
-  scheduled_posted: 'text-[#2dd4bf]',
+  meta_drafts: 'text-brand-teal',
+  scheduled_posted: 'text-white/30',
 }
 
 type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
@@ -139,6 +139,7 @@ export default function MonthlyPlannerPage() {
   const [statusError, setStatusError] = useState<string | null>(null)
   const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
   const [drawerClientName, setDrawerClientName] = useState('')
+  const [dayDetailDate, setDayDetailDate] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>(() => (
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'list' : 'calendar'
   ))
@@ -652,6 +653,7 @@ export default function MonthlyPlannerPage() {
             unscheduled={unscheduled}
             onOpen={openDrawer}
             clientNameById={clientNameById}
+            onShowDayDetail={setDayDetailDate}
           />
         )
       ) : (
@@ -727,11 +729,8 @@ export default function MonthlyPlannerPage() {
                           {deliverable.assigned_to_name && (
                             <p>Staff: <span className="text-white/65">{deliverable.assigned_to_name}</span></p>
                           )}
-                          {deliverable.due_date && (
-                            <p>Due: <span className="text-white/65">{formatDate(deliverable.due_date)}</span></p>
-                          )}
                           {deliverable.scheduled_date && (
-                            <p>Scheduled: <span className="text-white/65">{formatDate(deliverable.scheduled_date)}</span></p>
+                            <p>Schedule: <span className="text-white/65">{formatDate(deliverable.scheduled_date)}</span></p>
                           )}
                         </div>
 
@@ -765,6 +764,16 @@ export default function MonthlyPlannerPage() {
         )
       )}
 
+      {dayDetailDate && (
+        <DayDetailPanel
+          dateStr={dayDetailDate}
+          items={byDate.get(dayDetailDate) ?? []}
+          clientNameById={clientNameById}
+          onOpen={openDrawer}
+          onClose={() => setDayDetailDate(null)}
+        />
+      )}
+
       {drawerDeliverable && (
         <DeliverableDetailDrawer
           deliverable={drawerDeliverable}
@@ -794,6 +803,82 @@ function SourceChip({ source }: { source: DeliverableSource }) {
     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SOURCE_CHIP_STYLE[source]}`}>
       {SOURCE_LABEL[source]}
     </span>
+  )
+}
+
+function DayDetailPanel({
+  dateStr,
+  items,
+  clientNameById,
+  onOpen,
+  onClose,
+}: {
+  dateStr: string
+  items: MonthlyDeliverable[]
+  clientNameById: Map<string, string>
+  onOpen: (d: MonthlyDeliverable, name: string) => void
+  onClose: () => void
+}) {
+  const headerDate = new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-ZA', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[460px]">
+        <div className="flex items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+          <h2 className="text-base font-bold text-white">{headerDate}</h2>
+          <button type="button" onClick={onClose} className="shrink-0 rounded-md p-1 text-white/40 hover:text-white transition-colors">
+            ✕
+          </button>
+        </div>
+        <div className="flex-1 space-y-2 overflow-y-auto px-5 py-4">
+          {items.length === 0 ? (
+            <p className="text-sm text-white/30">No items this day.</p>
+          ) : (
+            items.map(d => {
+              const simplified = simplifyProductionStatus(d.production_status)
+              const clientName = clientNameById.get(d.client_id) ?? ''
+              const source = deliverableSource(d)
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => { onOpen(d, clientName); onClose() }}
+                  className="flex w-full items-center gap-3 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.06]"
+                >
+                  <span className="shrink-0 rounded bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                    {displayDeliverableCode(d)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-white">{d.title}</p>
+                    <p className="truncate text-xs text-white/40">{clientName}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {d.priority === 'urgent' && (
+                      <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">Urgent</span>
+                    )}
+                    <SourceChip source={source} />
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
+                      {SIMPLIFIED_STATUS_LABELS[simplified]}
+                    </span>
+                  </div>
+                </button>
+              )
+            })
+          )}
+        </div>
+        <div className="border-t border-white/[0.08] px-5 py-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-white/60 hover:text-white transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -836,12 +921,14 @@ function CalendarGrid({
   unscheduled,
   onOpen,
   clientNameById,
+  onShowDayDetail,
 }: {
   monthKey: string
   byDate: Map<string, MonthlyDeliverable[]>
   unscheduled: MonthlyDeliverable[]
   onOpen: (d: MonthlyDeliverable, name: string) => void
   clientNameById: Map<string, string>
+  onShowDayDetail?: (dateStr: string) => void
 }) {
   const [year, m] = month.split('-').map(Number)
   const firstDay = new Date(year, m - 1, 1).getDay() // 0 = Sunday
@@ -900,9 +987,13 @@ function CalendarGrid({
                     />
                   ))}
                   {items.length > 4 && (
-                    <div className="rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-[10px] font-semibold text-white/35">
+                    <button
+                      type="button"
+                      onClick={() => onShowDayDetail?.(dateStr)}
+                      className="w-full rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-[10px] font-semibold text-white/45 hover:bg-white/[0.05] hover:text-white/65 transition-colors"
+                    >
                       +{items.length - 4} more
-                    </div>
+                    </button>
                   )}
                 </div>
               </div>
@@ -1096,15 +1187,9 @@ function DeliverableDetailDrawer({
                 <p className="text-sm text-white/70">{deliverable.assigned_to_name}</p>
               </div>
             )}
-            {deliverable.due_date && (
+            {deliverable.scheduled_date && (
               <div>
-                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Due date</p>
-                <p className="text-sm text-white/70">{formatDate(deliverable.due_date)}</p>
-              </div>
-            )}
-            {!isAdmin && deliverable.scheduled_date && (
-              <div>
-                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Scheduled</p>
+                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Schedule date</p>
                 <p className="text-sm text-white/70">{formatDate(deliverable.scheduled_date)}</p>
               </div>
             )}

@@ -21,6 +21,7 @@ import {
   PRIORITIES,
   PLANNER_TASK_STATUSES,
   PLANNER_TASK_STATUS_LABELS,
+  monthKey,
   simplifyProductionStatus,
   type PlannerBoard,
   type PlannerBucket,
@@ -74,8 +75,8 @@ const MONTHLY_STATUS_TONES: Record<string, string> = {
   in_progress: 'text-brand-accent border-brand-accent/25',
   ready_review: 'text-amber-300 border-amber-400/25',
   awaiting_client: 'text-sky-300 border-sky-300/25',
-  meta_drafts: 'text-[#2dd4bf] border-[#2dd4bf]/25',
-  scheduled_posted: 'text-[#2dd4bf] border-[#2dd4bf]/25',
+  meta_drafts: 'text-brand-teal border-brand-teal/25',
+  scheduled_posted: 'text-white/25 border-white/5',
 }
 
 type PlannerWorkView = 'active' | 'history'
@@ -139,12 +140,14 @@ export default function PlannerPage() {
   const [tableMissing, setTableMissing] = useState(false)
   const [drawerTask, setDrawerTask] = useState<PlannerTask | null>(null)
   const [workView, setWorkView] = useState<PlannerWorkView>('active')
-  const [scheduleYear, setScheduleYear] = useState(new Date().getFullYear())
+  const [scheduleMonthKey, setScheduleMonthKey] = useState(monthKey(new Date()))
   const [scheduleDeliverables, setScheduleDeliverables] = useState<MonthlyDeliverable[]>([])
   const [scheduleLoading, setScheduleLoading] = useState(false)
   const [clients, setClients] = useState<ClientOption[]>([])
   const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
   const [scheduleError, setScheduleError] = useState<string | null>(null)
+  const [scheduleSearch, setScheduleSearch] = useState('')
+  const [scheduleStatusFilter, setScheduleStatusFilter] = useState<'all' | SimplifiedProductionStatus>('all')
 
   // Load boards
   useEffect(() => {
@@ -220,7 +223,8 @@ export default function PlannerPage() {
     let active = true
     setScheduleLoading(true)
     setScheduleError(null)
-    listClientScheduleDeliverablesForYear(scheduleYear).then(({ data, error }) => {
+    const year = parseInt(scheduleMonthKey.split('-')[0], 10)
+    listClientScheduleDeliverablesForYear(year).then(({ data, error }) => {
       if (!active) return
       setScheduleLoading(false)
       if (error) {
@@ -236,7 +240,7 @@ export default function PlannerPage() {
       setScheduleDeliverables([])
     })
     return () => { active = false }
-  }, [activeBoard, scheduleYear])
+  }, [activeBoard, scheduleMonthKey])
 
   // Escape to close drawer
   useEffect(() => {
@@ -305,9 +309,25 @@ export default function PlannerPage() {
 
   const clientNameById = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
 
+  const scheduleMonthDeliverables = useMemo(() => {
+    const search = scheduleSearch.trim().toLowerCase()
+    return scheduleDeliverables.filter(d => {
+      const date = d.scheduled_date ?? d.due_date
+      if (!date || !date.startsWith(scheduleMonthKey)) return false
+      if (scheduleStatusFilter !== 'all' && simplifyProductionStatus(d.production_status) !== scheduleStatusFilter) return false
+      if (search) {
+        const code = displayDeliverableCode(d).toLowerCase()
+        const title = (d.title ?? '').toLowerCase()
+        const client = (clientNameById.get(d.client_id) ?? '').toLowerCase()
+        if (!code.includes(search) && !title.includes(search) && !client.includes(search)) return false
+      }
+      return true
+    })
+  }, [clientNameById, scheduleDeliverables, scheduleMonthKey, scheduleSearch, scheduleStatusFilter])
+
   const deliverablesByClient = useMemo(() => {
     const groups = new Map<string, MonthlyDeliverable[]>()
-    for (const deliverable of scheduleDeliverables) {
+    for (const deliverable of scheduleMonthDeliverables) {
       const key = deliverable.client_id
       if (!groups.has(key)) groups.set(key, [])
       groups.get(key)!.push(deliverable)
@@ -324,7 +344,7 @@ export default function PlannerPage() {
         }),
       }))
       .sort((a, b) => a.clientName.localeCompare(b.clientName))
-  }, [clientNameById, scheduleDeliverables])
+  }, [clientNameById, scheduleMonthDeliverables])
 
   function handleTaskCreated(task: PlannerTask) {
     setTasks(prev => [...prev, task])
@@ -489,17 +509,25 @@ export default function PlannerPage() {
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setScheduleYear(year => year - 1)}
+              onClick={() => {
+                const [y, m] = scheduleMonthKey.split('-').map(Number)
+                const d = new Date(y, m - 2, 1)
+                setScheduleMonthKey(monthKey(d))
+              }}
               className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
             >
               Prev
             </button>
             <span className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-black text-white">
-              {scheduleYear}
+              {new Date(scheduleMonthKey + '-01').toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })}
             </span>
             <button
               type="button"
-              onClick={() => setScheduleYear(year => year + 1)}
+              onClick={() => {
+                const [y, m] = scheduleMonthKey.split('-').map(Number)
+                const d = new Date(y, m, 1)
+                setScheduleMonthKey(monthKey(d))
+              }}
               className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
             >
               Next
@@ -510,6 +538,28 @@ export default function PlannerPage() {
             <Link to="/admin/master-schedule" className="rounded-md border border-white/[0.08] px-3 py-2 text-xs font-bold text-brand-primary/60 hover:text-white">
               Master Schedule
             </Link>
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              placeholder="Search client, code or title…"
+              value={scheduleSearch}
+              onChange={e => setScheduleSearch(e.target.value)}
+              className="w-48 rounded-lg border border-white/10 bg-[#111111] px-3 py-1.5 text-xs text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            />
+            <select
+              value={scheduleStatusFilter}
+              onChange={e => setScheduleStatusFilter(e.target.value as 'all' | SimplifiedProductionStatus)}
+              className="rounded-lg border border-white/10 bg-[#111111] px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            >
+              <option value="all">All statuses</option>
+              {SIMPLIFIED_STATUS_OPTIONS.map(s => (
+                <option key={s} value={s}>{SIMPLIFIED_STATUS_LABELS[s]}</option>
+              ))}
+            </select>
+            <span className="text-[10px] font-semibold text-white/30">
+              {scheduleMonthDeliverables.length} deliverable{scheduleMonthDeliverables.length !== 1 ? 's' : ''}
+            </span>
           </div>
           {scheduleError && (
             <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{scheduleError}</div>
@@ -765,7 +815,7 @@ function ScheduleDeliverableDrawer({
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Scheduled date</label>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Schedule date</label>
             <input type="date" value={scheduledDate} onChange={event => setScheduledDate(event.target.value)} className={inputCls} />
           </div>
           <div>
