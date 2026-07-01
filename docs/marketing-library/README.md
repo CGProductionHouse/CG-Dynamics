@@ -240,3 +240,13 @@ Quality matters more than quantity.
 The Marketing Library must make CG Dynamics smarter, not noisier.
 
 Do not add content just because it sounds useful. Add content because it is sourced, actionable and can improve decision making.
+
+## Library documents
+
+| Document | Purpose |
+|---|---|
+| [LIBRARY-TRACKER.md](LIBRARY-TRACKER.md) | Central tracker for sources, draft cards, review queue and activation rules |
+| [source-notes/README.md](source-notes/README.md) | Source note conventions, priority order and review statuses |
+| [skill-cards/drafts/scientific-advertising/README.md](skill-cards/drafts/scientific-advertising/README.md) | First draft Skill Cards from Scientific Advertising |
+
+More source notes and skill card folders will be added as the library grows.
