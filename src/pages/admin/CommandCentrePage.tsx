@@ -955,6 +955,7 @@ function MorningImportCard({ onTasksCreated }: {
       id: t.id,
       clientOption: t.clientId || '',
       manualClientName: '',
+      clientName: t.clientName,
       title: t.title,
       bucket: t.bucket,
       priority: t.priority,
@@ -1038,12 +1039,21 @@ function MorningImportCard({ onTasksCreated }: {
             {edits.map((edit, i) => {
               const original = parsed?.find(p => p.id === edit.id)
               const isManual = edit.clientOption === '__manual__'
+              const confidence = original?.clientConfidence ?? 'needs_review'
               return (
                 <div key={edit.id} className="rounded-lg border border-brand-muted bg-brand-bg p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-brand-accent">
-                      {original?.staffName ?? `Task ${i + 1}`}
-                    </span>
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-semibold text-brand-accent">
+                        {original?.staffName ?? `Task ${i + 1}`}
+                      </span>
+                      <ConfidenceBadge confidence={confidence} />
+                      {original?.clientName && (
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium text-brand-primary/70">
+                          {confidence === 'suggested' ? 'Suggested client' : 'Client'}: {original.clientName}
+                        </span>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleDeleteRow(edit.id)}
@@ -1052,6 +1062,12 @@ function MorningImportCard({ onTasksCreated }: {
                       Remove
                     </button>
                   </div>
+                  {original?.reviewReasons.length ? (
+                    <p className="mb-2 text-[11px] text-amber-300/85">{original.reviewReasons.join(' · ')}</p>
+                  ) : null}
+                  {original?.originalText ? (
+                    <p className="mb-2 text-[11px] text-brand-primary/45">Original WhatsApp: {original.originalText}</p>
+                  ) : null}
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                       <label className="mb-1 block text-[11px] text-brand-primary">Client</label>
@@ -1061,7 +1077,15 @@ function MorningImportCard({ onTasksCreated }: {
                         <>
                           <select
                             value={edit.clientOption}
-                            onChange={e => updateEdit(edit.id, { clientOption: e.target.value, manualClientName: '' })}
+                            onChange={e => {
+                              const value = e.target.value
+                              const selected = clients.find(c => c.id === value)
+                              updateEdit(edit.id, {
+                                clientOption: value,
+                                clientName: selected?.name ?? null,
+                                manualClientName: '',
+                              })
+                            }}
                             className="w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
                           >
                             <option value="">No client</option>
@@ -1078,7 +1102,10 @@ function MorningImportCard({ onTasksCreated }: {
                       {isManual && (
                         <input
                           value={edit.manualClientName}
-                          onChange={e => updateEdit(edit.id, { manualClientName: e.target.value })}
+                          onChange={e => updateEdit(edit.id, {
+                            manualClientName: e.target.value,
+                            clientName: e.target.value.trim() || null,
+                          })}
                           placeholder="Type client name"
                           className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-2 py-1.5 text-xs text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
                         />
@@ -1161,6 +1188,21 @@ function MorningImportCard({ onTasksCreated }: {
         </>
       )}
     </PremiumCard>
+  )
+}
+
+function ConfidenceBadge({ confidence }: { confidence: ParsedMorningTask['clientConfidence'] }) {
+  const label = confidence === 'matched' ? 'Matched' : confidence === 'suggested' ? 'Suggested' : 'Needs review'
+  const tone = confidence === 'matched'
+    ? 'border-brand-teal/25 bg-brand-teal/[0.08] text-[#2dd4bf]'
+    : confidence === 'suggested'
+      ? 'border-amber-400/25 bg-amber-400/[0.08] text-amber-300'
+      : 'border-red-400/25 bg-red-400/[0.08] text-red-300'
+
+  return (
+    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${tone}`}>
+      {label}
+    </span>
   )
 }
 

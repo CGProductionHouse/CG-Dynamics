@@ -145,6 +145,17 @@ Known source workbooks:
 | Morning message and end-of-day update are useful but lower priority | DONE/PARTIAL | Moved lower, needs live review. |
 | Staff should update their own production status | PARTIAL | UI supports status; RLS migration pending for monthly deliverables. |
 
+### WhatsApp / Morning List Import v2 rules
+
+- Morning List Import must preserve the original WhatsApp line in task notes and show it during review.
+- Client matching uses active clients plus parser aliases. Current important aliases: `WFF` -> `Zooz Lifestyle WFF`, `Madison`/`Madisons` -> `Madison Wear`.
+- Alias matching should stay local and conservative until aliases can be managed from the database.
+- Parser must not create blank titles. If the wording is too vague, use `Confirm task details` and flag the row for review.
+- Bucket rules: poster/photo/design/menu/logo -> Graphic Design; video/BTS/reel/liedjie/audio/music -> Video; changes/request/client asked or the All Client Requests section -> Client Requests; website/web/shopify/wordpress -> Websites; content guide/content plan/posting guide -> Content Guides; otherwise Admin / To Do with review warning.
+- Priority rules: ASAP/urgent -> urgent; Client Requests bucket or request/change wording -> client_request; otherwise normal.
+- Review UI must show confidence badges: Matched, Suggested, Needs review. Suggested/needs-review rows should be checked before creating tasks.
+- Future improvement: move client aliases and confidence thresholds into a small admin-maintained table instead of hard-coded parser aliases.
+
 ## 7. Monthly Planner
 
 | Request | Status | Notes |

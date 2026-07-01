@@ -410,6 +410,9 @@ export interface ParsedMorningTask {
   staffName: string
   clientId: string | null
   clientName: string | null
+  clientConfidence: 'matched' | 'suggested' | 'needs_review'
+  reviewReasons: string[]
+  originalText: string
   title: string
   bucket: TaskBucket
   priority: TaskPriority
@@ -421,6 +424,7 @@ export interface MorningTaskEdit {
   id: string
   clientOption: '' | '__manual__' | string // client ID, '__manual__', or empty
   manualClientName: string
+  clientName: string | null
   title: string
   bucket: TaskBucket
   priority: TaskPriority
@@ -428,37 +432,140 @@ export interface MorningTaskEdit {
   notes: string
 }
 
-function inferBucket(text: string): TaskBucket {
-  const lower = text.toLowerCase()
-  if (/\b(website|shopify|wordpress)\b/.test(lower)) return 'Websites'
-  if (/\b(content guide|guideline)\b/.test(lower)) return 'Content Guides'
-  if (/\b(video|reel)\b/.test(lower)) return 'Video'
-  if (/\b(design|poster|menu|logo)\b/.test(lower)) return 'Graphic Design'
-  if (/\b(photo|photos)\b/.test(lower)) return 'Graphic Design'
-  if (/\b(schedule|calendar|post)\b/.test(lower)) return 'Client Schedules'
-  if (/\b(strategy|report|campaign ideas|next month)\b/.test(lower)) return 'Admin / To Do'
-  return 'Admin / To Do'
+const CLIENT_ALIASES: Record<string, string[]> = {
+  'Zooz Lifestyle WFF': ['WFF', 'Zooz', 'Lifestyle WFF'],
+  'Madison Wear': ['Madison', 'Madisons'],
+  'Bouwer & Coetzee': ['Bouwer', 'Bouwer & Coetsee', 'Bouwer and Coetzee'],
+  'EHP Slaghuis': ['EHP', 'EHP slaguis', 'EHP slaghuis'],
+  'Supa Quick BFN': ['Supa Quick BFN', 'BFN'],
+  'Supa Quick Centurion': ['Supa Quick Centurion', 'Centurion'],
+  'Wiseman Group': ['Wiseman', 'Wiseman group'],
+  'Red Oak': ['Red Oak'],
+  'Watch Addict': ['Watch Addict'],
+  Loraclox: ['Loraclox'],
+  Securiforce: ['Securiforce'],
+  Germoparts: ['Germoparts'],
 }
 
-function inferPriority(text: string): TaskPriority {
+const COMMON_CLIENT_WORDS = new Set(['and', 'the', 'group', 'pty', 'ltd', 'cc', 'co', 'company', 'production', 'house', 'vir', 'for', 'in', 'on', 'of'])
+
+function normaliseText(value: string) {
+  return value.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ')
+}
+
+function tokenise(value: string) {
+  return normaliseText(value).split(' ').filter(token => token.length > 1 && !COMMON_CLIENT_WORDS.has(token))
+}
+
+function getClientAliases(clientName: string) {
+  const aliases = new Set<string>([clientName])
+  const normalisedClient = normaliseText(clientName)
+  for (const [canonical, values] of Object.entries(CLIENT_ALIASES)) {
+    const normalisedCanonical = normaliseText(canonical)
+    if (normalisedClient.includes(normalisedCanonical) || normalisedCanonical.includes(normalisedClient)) {
+      aliases.add(canonical)
+      values.forEach(alias => aliases.add(alias))
+    }
+  }
+  const initials = clientName.split(/\s+/).map(part => part[0]).join('').toUpperCase()
+  if (initials.length >= 2) aliases.add(initials)
+  return Array.from(aliases).sort((a, b) => b.length - a.length)
+}
+
+function removeClientAlias(text: string, alias: string) {
+  const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return text
+    .replace(new RegExp(`(^|\\b)${escaped}(\\b|$)`, 'i'), ' ')
+    .replace(/\b(vir|for)\s*$/i, ' ')
+    .replace(/^\s*(vir|for)\b/i, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function tryMatchClient(text: string, clients: ClientOption[]) {
+  const normalised = normaliseText(text)
+  const textTokens = new Set(tokenise(text))
+  let best: { client: ClientOption; alias: string; score: number } | null = null
+
+  for (const client of clients) {
+    for (const alias of getClientAliases(client.name)) {
+      const aliasNorm = normaliseText(alias)
+      const aliasTokens = tokenise(alias)
+      let score = 0
+      if (aliasNorm && new RegExp(`(^|\\s)${aliasNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(normalised)) {
+        score = aliasTokens.length <= 1 ? 82 : 96
+      } else if (aliasTokens.length > 0 && aliasTokens.every(token => textTokens.has(token))) {
+        score = aliasTokens.length === 1 ? 58 : 88
+      } else {
+        const overlap = aliasTokens.filter(token => textTokens.has(token)).length
+        if (overlap > 0) score = Math.round((overlap / aliasTokens.length) * 62)
+      }
+      if (!best || score > best.score || (score === best.score && alias.length > best.alias.length)) best = { client, alias, score }
+    }
+  }
+
+  if (!best || best.score < 55) {
+    return { clientId: null, clientName: null, confidence: 'needs_review' as const, remaining: text }
+  }
+
+  return {
+    clientId: best.client.id,
+    clientName: best.client.name,
+    confidence: best.score >= 80 ? 'matched' as const : 'suggested' as const,
+    remaining: removeClientAlias(text, best.alias) || text,
+  }
+}
+
+function inferBucket(text: string, sectionBucket: TaskBucket | null): { bucket: TaskBucket; confident: boolean } {
   const lower = text.toLowerCase()
-  if (/\burgent\b/.test(lower)) return 'urgent'
-  if (/\b(client request|client asked)\b/.test(lower)) return 'client_request'
+  if (/\b(website|web|landing page|google site|shopify|wordpress)\b/.test(lower)) return { bucket: 'Websites', confident: true }
+  if (/\b(content guide|content plan|posting guide|caption guide|guideline)\b/.test(lower)) return { bucket: 'Content Guides', confident: true }
+  if (/\b(video|bts|reel|liedjie|liedjue|audio|music|content run)\b/.test(lower)) return { bucket: 'Video', confident: true }
+  if (/\b(designed poster|poster|posters|design|designs|photo|photos|menu|profile|logo)\b/.test(lower)) return { bucket: 'Graphic Design', confident: true }
+  if (/\b(changes|change|requests|request|client asked|meeting changes)\b/.test(lower)) return { bucket: 'Client Requests', confident: true }
+  if (sectionBucket) return { bucket: sectionBucket, confident: true }
+  if (/\b(strategy|report|campaign ideas|next month|admin)\b/.test(lower)) return { bucket: 'Admin / To Do', confident: true }
+  return { bucket: 'Admin / To Do', confident: false }
+}
+
+function inferPriority(text: string, bucket: TaskBucket): TaskPriority {
+  const lower = text.toLowerCase()
+  if (/\b(urgent|asap)\b/.test(lower)) return 'urgent'
+  if (bucket === 'Client Requests') return 'client_request'
+  if (/\b(client request|client asked|changes|change|requests|request)\b/.test(lower)) return 'client_request'
   return 'normal'
 }
 
-function tryMatchClient(text: string, clients: ClientOption[]): { clientId: string | null; clientName: string | null; remaining: string } {
-  const sorted = [...clients].sort((a, b) => b.name.length - a.name.length)
-  const lower = text.toLowerCase()
-  for (const c of sorted) {
-    const idx = lower.indexOf(c.name.toLowerCase())
-    if (idx === -1) continue
-    const before = text.slice(0, idx).trim()
-    const after = text.slice(idx + c.name.length).trim()
-    const remaining = (before + ' ' + after).trim().replace(/\s+/g, ' ')
-    return { clientId: c.id, clientName: c.name, remaining }
+function extractNotes(text: string) {
+  const notes: string[] = []
+  let title = text.replace(/\(([^)]+)\)/g, (_, note: string) => {
+    notes.push(note.trim())
+    return ' '
+  })
+  const parts = title.split(/\.\s+/)
+  if (parts.length > 1) {
+    title = parts.shift() ?? title
+    notes.push(parts.join('. ').trim())
   }
-  return { clientId: null, clientName: null, remaining: text }
+  return { title: title.replace(/\s+/g, ' ').trim(), notes: notes.filter(Boolean) }
+}
+
+function titleCaseFirst(value: string) {
+  const trimmed = value.trim()
+  return trimmed ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1) : ''
+}
+
+function cleanTitle(text: string, clientName: string | null, sectionBucket: TaskBucket | null) {
+  let cleaned = text.replace(/\b(asap|urgent)\b/gi, ' ').replace(/\s+/g, ' ').trim()
+  const countMatches = Array.from(cleaned.matchAll(/\b(\d+)\s+(designed\s+posters|posters|poster|photos|photo)\b/gi))
+  const counts = countMatches.map(match => `${match[1]} ${match[2].toLowerCase().replace('designed ', '')}`)
+  if (counts.length > 0) cleaned = cleaned.replace(/\b(\d+)\s+(designed\s+posters|posters|poster|photos|photo)\b/gi, ' ')
+  cleaned = cleaned.replace(/\b(vir|for)\b/gi, ' ').replace(/\s+/g, ' ').trim()
+  if (counts.length > 0 && (!cleaned || !/\b(change|changes|request|content|guide|video|run|poster|design|photo)\b/i.test(cleaned))) return counts.join(', ')
+  if (!cleaned && sectionBucket === 'Client Requests' && clientName) return 'Client request'
+  if (!cleaned && clientName) return 'Confirm task details'
+  if (!cleaned) return 'Confirm task details'
+  return titleCaseFirst(cleaned)
 }
 
 let importIdCounter = 0
@@ -470,6 +577,7 @@ export function parseMorningList(input: string, clients: ClientOption[]): Parsed
   const lines = input.split('\n')
   const result: ParsedMorningTask[] = []
   let currentStaff = 'Unassigned'
+  let sectionBucket: TaskBucket | null = null
 
   for (const raw of lines) {
     const line = raw.trim()
@@ -477,11 +585,23 @@ export function parseMorningList(input: string, clients: ClientOption[]): Parsed
 
     const staffMatch = line.match(/^@(.+)$/)
     if (staffMatch) {
-      currentStaff = staffMatch[1].trim()
+      currentStaff = staffMatch[1].replace(/\s*\([^)]*\)\s*/g, '').trim()
+      sectionBucket = null
       continue
     }
     if (KNOWN_STAFF.includes(line)) {
       currentStaff = line
+      sectionBucket = null
+      continue
+    }
+
+    const header = line.replace(/:$/, '').trim().toLowerCase()
+    if (header === 'all client requests' || header === 'client requests') {
+      sectionBucket = 'Client Requests'
+      continue
+    }
+    if (header === 'normal list' || header === 'normal') {
+      sectionBucket = null
       continue
     }
 
@@ -491,44 +611,43 @@ export function parseMorningList(input: string, clients: ClientOption[]): Parsed
     const content = bulletMatch[1].trim()
     if (!content) continue
 
-    let titleText = content
-    let extraNotes = ''
+    const originalText = content
+    const reviewReasons: string[] = []
+    const extracted = extractNotes(content)
+    let titleText = extracted.title
+    const extraNotes = [...extracted.notes]
 
-    const { clientId, clientName, remaining } = tryMatchClient(titleText, clients)
+    const { clientId, clientName, confidence, remaining } = tryMatchClient(titleText, clients)
     titleText = remaining || titleText
 
-    if (!titleText && clientName) {
-      titleText = clientName
-    }
+    if (confidence === 'suggested') reviewReasons.push('Suggested client match')
+    if (confidence === 'needs_review') reviewReasons.push('No confident client match')
 
-    const colonIdx = titleText.indexOf(':')
-    if (colonIdx > 0) {
-      extraNotes = titleText.slice(colonIdx + 1).trim()
-      titleText = titleText.slice(0, colonIdx).trim()
-    }
+    const bucketResult = inferBucket(content, sectionBucket)
+    if (!bucketResult.confident) reviewReasons.push('Bucket needs review')
 
-    const countPattern = /\d+\s+\w+/g
-    const countMatches = titleText.match(countPattern)
-    if (countMatches && countMatches.length >= 2) {
-      const counts = countMatches.join(', ')
-      titleText = titleText.replace(/\d+\s+\w+/g, '').trim()
-      extraNotes = extraNotes ? counts + ' — ' + extraNotes : counts
-    }
+    const title = cleanTitle(titleText, clientName, sectionBucket)
+    if (title === 'Confirm task details') reviewReasons.push('Task details need review')
 
-    titleText = titleText.replace(/\s+/g, ' ').trim()
-    const bucket = inferBucket(content)
-    const priority = inferPriority(content)
+    const priority = inferPriority(content, bucketResult.bucket)
+    const notes = [
+      ...extraNotes,
+      `Original WhatsApp: ${originalText}`,
+    ].filter(Boolean).join('\n')
 
     result.push({
       id: nextImportId(),
       staffName: currentStaff,
       clientId,
       clientName: clientName || null,
-      title: titleText || content,
-      bucket,
+      clientConfidence: reviewReasons.length > 0 && confidence === 'matched' ? 'needs_review' : confidence,
+      reviewReasons,
+      originalText,
+      title,
+      bucket: bucketResult.bucket,
       priority,
-      dueDate: new Date().toISOString().slice(0, 10),
-      notes: extraNotes || null,
+      dueDate: todayStr(),
+      notes: notes || null,
     })
   }
 
@@ -541,7 +660,7 @@ export function morningEditToInput(edit: MorningTaskEdit): TaskInput {
   return {
     title: edit.title,
     client_id: selectedClientId,
-    client_name: isManual ? edit.manualClientName.trim() || null : null,
+    client_name: isManual ? edit.manualClientName.trim() || null : edit.clientName,
     assigned_to_name: null,
     bucket: edit.bucket,
     priority: edit.priority,
