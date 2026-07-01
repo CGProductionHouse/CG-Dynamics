@@ -67,9 +67,30 @@ const MONTHLY_STATUS_TONES: Record<string, string> = {
   scheduled_posted: 'text-[#2dd4bf] border-[#2dd4bf]/25',
 }
 
+type PlannerWorkView = 'active' | 'history'
+
 function formatPlannerDate(dateStr: string) {
   const d = new Date(`${dateStr}T00:00:00`)
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+function isPlannerHistoryTask(task: PlannerTask) {
+  return task.status === 'approved' || task.status === 'scheduled'
+}
+
+function plannerTaskSortRank(task: PlannerTask) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayKey = today.toISOString().slice(0, 10)
+  const due = task.due_date ? new Date(`${task.due_date}T00:00:00`) : null
+  if (task.priority === 'client_request') return 0
+  if (task.priority === 'urgent') return 1
+  if (due && due < today) return 2
+  if (task.due_date === todayKey) return 3
+  if (task.status === 'in_progress') return 4
+  if (task.status === 'ready_internal_review') return 5
+  if (due) return 6
+  return 7
 }
 
 function plannerStatusTone(status: PlannerTaskStatus) {
@@ -92,6 +113,7 @@ export default function PlannerPage() {
   const [tasksLoading, setTasksLoading] = useState(false)
   const [tableMissing, setTableMissing] = useState(false)
   const [drawerTask, setDrawerTask] = useState<PlannerTask | null>(null)
+  const [workView, setWorkView] = useState<PlannerWorkView>('active')
 
   // Load boards
   useEffect(() => {
@@ -178,16 +200,41 @@ export default function PlannerPage() {
     [boards, activeBoard],
   )
 
+  const bucketNameById = useMemo(
+    () => new Map(buckets.map(bucket => [bucket.id, bucket.name])),
+    [buckets],
+  )
+
+  const activeTaskCount = useMemo(() => tasks.filter(task => !isPlannerHistoryTask(task)).length, [tasks])
+  const historyTaskCount = useMemo(() => tasks.filter(isPlannerHistoryTask).length, [tasks])
+
+  const visibleTasks = useMemo(
+    () => tasks.filter(task => workView === 'history' ? isPlannerHistoryTask(task) : !isPlannerHistoryTask(task)),
+    [tasks, workView],
+  )
+
   // Group tasks by bucket for O(1) column lookup
   const tasksByBucket = useMemo(() => {
     const map = new Map<string, PlannerTask[]>()
-    for (const t of tasks) {
+    for (const t of visibleTasks) {
       const key = t.bucket_id ?? '__none__'
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(t)
     }
     return map
-  }, [tasks])
+  }, [visibleTasks])
+
+  const mobileTasks = useMemo(
+    () => [...visibleTasks].sort((a, b) => {
+      const rank = plannerTaskSortRank(a) - plannerTaskSortRank(b)
+      if (rank !== 0) return rank
+      const aDue = a.due_date ?? '9999-12-31'
+      const bDue = b.due_date ?? '9999-12-31'
+      if (aDue !== bDue) return aDue.localeCompare(bDue)
+      return a.title.localeCompare(b.title)
+    }),
+    [visibleTasks],
+  )
 
   function handleTaskCreated(task: PlannerTask) {
     setTasks(prev => [...prev, task])
@@ -342,6 +389,31 @@ export default function PlannerPage() {
         </div>
       )}
 
+      <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+        <button
+          type="button"
+          onClick={() => setWorkView('active')}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+            workView === 'active'
+              ? 'bg-brand-accent text-black'
+              : 'text-brand-primary/60 hover:text-brand-primary'
+          }`}
+        >
+          Active {activeTaskCount}
+        </button>
+        <button
+          type="button"
+          onClick={() => setWorkView('history')}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+            workView === 'history'
+              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+              : 'text-brand-primary/60 hover:text-brand-primary'
+          }`}
+        >
+          History {historyTaskCount}
+        </button>
+      </div>
+
       {/* Bucket columns */}
       {buckets.length === 0 ? (
         <EmptyState
@@ -350,20 +422,29 @@ export default function PlannerPage() {
           centered={false}
         />
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {buckets.map(bucket => (
-            <BucketColumn
-              key={bucket.id}
-              bucket={bucket}
-              boardId={activeBoardId ?? ''}
-              tasks={tasksByBucket.get(bucket.id) ?? []}
-              tasksLoading={tasksLoading}
-              myName={myName}
-              onOpenTask={setDrawerTask}
-              onTaskCreated={handleTaskCreated}
-            />
-          ))}
-        </div>
+        <>
+          <PlannerMobileTaskList
+            tasks={mobileTasks}
+            tasksLoading={tasksLoading}
+            bucketNameById={bucketNameById}
+            workView={workView}
+            onOpenTask={setDrawerTask}
+          />
+          <div className="hidden gap-3 overflow-x-auto pb-6 md:flex">
+            {buckets.map(bucket => (
+              <BucketColumn
+                key={bucket.id}
+                bucket={bucket}
+                boardId={activeBoardId ?? ''}
+                tasks={tasksByBucket.get(bucket.id) ?? []}
+                tasksLoading={tasksLoading}
+                myName={myName}
+                onOpenTask={setDrawerTask}
+                onTaskCreated={handleTaskCreated}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {drawerTask && (
@@ -374,6 +455,82 @@ export default function PlannerPage() {
           onSaved={handleTaskSaved}
         />
       )}
+    </div>
+  )
+}
+
+function PlannerMobileTaskList({
+  tasks,
+  tasksLoading,
+  bucketNameById,
+  workView,
+  onOpenTask,
+}: {
+  tasks: PlannerTask[]
+  tasksLoading: boolean
+  bucketNameById: Map<string, string>
+  workView: PlannerWorkView
+  onOpenTask: (task: PlannerTask) => void
+}) {
+  if (tasksLoading) {
+    return (
+      <div className="space-y-2 md:hidden">
+        {[1, 2, 3].map(i => <div key={i} className="h-24 animate-pulse rounded-xl bg-white/[0.04]" />)}
+      </div>
+    )
+  }
+
+  if (tasks.length === 0) {
+    return (
+      <div className="md:hidden">
+        <EmptyState
+          title={workView === 'active' ? 'No active planner tasks' : 'No completed planner history'}
+          message={workView === 'active' ? 'Approved and scheduled import history is hidden here.' : 'Completed planner work will appear here.'}
+          centered={false}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2 md:hidden">
+      {tasks.map(task => (
+        <button
+          key={task.id}
+          type="button"
+          onClick={() => onOpenTask(task)}
+          className="w-full rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.055] to-white/[0.02] p-3 text-left shadow-[0_18px_40px_rgba(0,0,0,0.18)] transition-colors hover:border-brand-accent/25"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">{task.title}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {task.client_name && (
+                  <span className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2 py-0.5 text-[10px] font-semibold text-[#2dd4bf]">
+                    {task.client_name}
+                  </span>
+                )}
+                <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold text-white/45">
+                  {task.bucket_id ? bucketNameById.get(task.bucket_id) ?? 'Planner' : 'Planner'}
+                </span>
+                {task.assigned_to_name && (
+                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold text-white/45">
+                    {task.assigned_to_name}
+                  </span>
+                )}
+                {task.due_date && (
+                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold text-white/45">
+                    {formatPlannerDate(task.due_date)}
+                  </span>
+                )}
+              </div>
+            </div>
+            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${plannerStatusTone(task.status)}`}>
+              {PLANNER_TASK_STATUS_LABELS[task.status]}
+            </span>
+          </div>
+        </button>
+      ))}
     </div>
   )
 }

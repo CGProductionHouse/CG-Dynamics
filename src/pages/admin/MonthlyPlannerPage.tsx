@@ -53,6 +53,7 @@ const STATUS_STAT_TONE: Record<SimplifiedProductionStatus, string> = {
 
 type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
 type SourceFilterValue = 'all' | DeliverableSource | 'unscheduled'
+type MonthlyWorkMode = 'active' | 'history'
 
 function deliverableSource(d: MonthlyDeliverable): DeliverableSource {
   if (d.moved_from_deliverable_id) return 'moved'
@@ -102,11 +103,15 @@ function formatMonthHeading(key: string) {
 }
 
 function displayDateForDeliverable(deliverable: MonthlyDeliverable) {
-  return deliverable.scheduled_date ?? deliverable.due_date ?? deliverable.month
+  return deliverable.scheduled_date ?? deliverable.due_date ?? null
 }
 
 const STAFF_STATUSES: SimplifiedProductionStatus[] = ['not_started', 'in_progress', 'ready_review', 'awaiting_client']
 const FINAL_STATUSES: SimplifiedProductionStatus[] = ['meta_drafts', 'scheduled_posted']
+
+function isFinalDeliverable(deliverable: MonthlyDeliverable) {
+  return FINAL_STATUSES.includes(simplifyProductionStatus(deliverable.production_status))
+}
 
 export default function MonthlyPlannerPage() {
   const [searchParams] = useSearchParams()
@@ -130,7 +135,10 @@ export default function MonthlyPlannerPage() {
   const [statusError, setStatusError] = useState<string | null>(null)
   const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
   const [drawerClientName, setDrawerClientName] = useState('')
-  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar')
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'list' : 'calendar'
+  ))
+  const [workMode, setWorkMode] = useState<MonthlyWorkMode>('active')
 
   const monthStart = toMonthStart(selectedMonth)
 
@@ -155,6 +163,9 @@ export default function MonthlyPlannerPage() {
     const search = clientSearch.trim().toLowerCase()
     return deliverables.filter(deliverable => {
       if (!PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)) return false
+      const isFinal = isFinalDeliverable(deliverable)
+      if (workMode === 'active' && isFinal) return false
+      if (workMode === 'history' && !isFinal) return false
       if (statusFilter !== 'all' && simplifyProductionStatus(deliverable.production_status) !== statusFilter) return false
       if (sourceFilter === 'unscheduled' && (deliverable.scheduled_date || deliverable.due_date)) return false
       if (sourceFilter !== 'all' && sourceFilter !== 'unscheduled' && deliverableSource(deliverable) !== sourceFilter) return false
@@ -162,23 +173,40 @@ export default function MonthlyPlannerPage() {
       const clientName = clientNameById.get(deliverable.client_id) ?? 'Unknown client'
       return clientName.toLowerCase().includes(search)
     })
-  }, [clientNameById, clientSearch, deliverables, sourceFilter, statusFilter])
+  }, [clientNameById, clientSearch, deliverables, sourceFilter, statusFilter, workMode])
 
-  const groupedDeliverables = useMemo(() => {
+  const activeDeliverableCount = useMemo(
+    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && !isFinalDeliverable(deliverable)).length,
+    [deliverables],
+  )
+
+  const historyDeliverableCount = useMemo(
+    () => deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && isFinalDeliverable(deliverable)).length,
+    [deliverables],
+  )
+
+  const agendaGroups = useMemo(() => {
     const groups = new Map<string, MonthlyDeliverable[]>()
     for (const deliverable of filteredDeliverables) {
-      const current = groups.get(deliverable.client_id) ?? []
+      const date = displayDateForDeliverable(deliverable) ?? 'unscheduled'
+      const current = groups.get(date) ?? []
       current.push(deliverable)
-      groups.set(deliverable.client_id, current)
+      groups.set(date, current)
     }
     return Array.from(groups.entries())
-      .map(([clientId, items]) => ({
-        clientId,
-        clientName: clientNameById.get(clientId) ?? 'Unknown client',
-        items: items.sort((a, b) => a.deliverable_type.localeCompare(b.deliverable_type) || a.code.localeCompare(b.code) || a.instance_number - b.instance_number),
-        totals: getMonthlyPackageTotals(items),
+      .sort(([a], [b]) => {
+        if (a === 'unscheduled') return 1
+        if (b === 'unscheduled') return -1
+        return a.localeCompare(b)
+      })
+      .map(([date, items]) => ({
+        date,
+        items: items.sort((a, b) => {
+          const clientCompare = (clientNameById.get(a.client_id) ?? '').localeCompare(clientNameById.get(b.client_id) ?? '')
+          if (clientCompare !== 0) return clientCompare
+          return a.deliverable_type.localeCompare(b.deliverable_type) || a.code.localeCompare(b.code) || a.instance_number - b.instance_number
+        }),
       }))
-      .sort((a, b) => a.clientName.localeCompare(b.clientName))
   }, [clientNameById, filteredDeliverables])
 
   const overallTotals = useMemo(() => getMonthlyPackageTotals(filteredDeliverables), [filteredDeliverables])
@@ -401,33 +429,64 @@ export default function MonthlyPlannerPage() {
       )}
 
       {/* View mode toggle */}
-      <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
-        <button
-          type="button"
-          onClick={() => setViewMode('calendar')}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-            viewMode === 'calendar'
-              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-              : 'text-brand-primary/60 hover:text-brand-primary'
-          }`}
-        >
-          Calendar
-        </button>
-        <button
-          type="button"
-          onClick={() => setViewMode('list')}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-            viewMode === 'list'
-              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-              : 'text-brand-primary/60 hover:text-brand-primary'
-          }`}
-        >
-          List
-        </button>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <div className="flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+          <button
+            type="button"
+            onClick={() => setViewMode('calendar')}
+            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+              viewMode === 'calendar'
+                ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+                : 'text-brand-primary/60 hover:text-brand-primary'
+            }`}
+          >
+            Calendar
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+              viewMode === 'list'
+                ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+                : 'text-brand-primary/60 hover:text-brand-primary'
+            }`}
+          >
+            Agenda
+          </button>
+        </div>
+        <div className="flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+          <button
+            type="button"
+            onClick={() => setWorkMode('active')}
+            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+              workMode === 'active'
+                ? 'bg-brand-accent text-black'
+                : 'text-brand-primary/60 hover:text-brand-primary'
+            }`}
+          >
+            Active {activeDeliverableCount}
+          </button>
+          <button
+            type="button"
+            onClick={() => setWorkMode('history')}
+            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+              workMode === 'history'
+                ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+                : 'text-brand-primary/60 hover:text-brand-primary'
+            }`}
+          >
+            History {historyDeliverableCount}
+          </button>
+        </div>
       </div>
 
+      <details className="mb-4 rounded-xl border border-white/[0.08] bg-white/[0.025] p-3">
+        <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.14em] text-brand-primary/60 hover:text-brand-primary">
+          Filters and totals
+        </summary>
+        <div className="mt-3 space-y-4">
       {/* Status summary */}
-      <div className="mb-4 grid grid-cols-3 gap-2 lg:grid-cols-6">
+      <div className="grid grid-cols-3 gap-2 lg:grid-cols-6">
         {SIMPLIFIED_STATUS_OPTIONS.map(s => (
           <button
             key={s}
@@ -451,7 +510,7 @@ export default function MonthlyPlannerPage() {
 
       {/* Stats row — calendar mode shows schedule stats, list mode shows type totals */}
       {viewMode === 'list' ? (
-        <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           <div className="rounded-lg bg-white/[0.02] px-3 py-2">
             <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Total</p>
             <p className="mt-1 text-lg font-black text-white">{overallTotals.total}</p>
@@ -467,7 +526,7 @@ export default function MonthlyPlannerPage() {
           ))}
         </div>
       ) : (
-        <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           <div className="rounded-lg bg-white/[0.02] px-3 py-2">
             <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Total</p>
             <p className="mt-1 text-lg font-black text-white">{calendarStats.total}</p>
@@ -493,7 +552,7 @@ export default function MonthlyPlannerPage() {
 
       {/* Package usage summary */}
       {filteredDeliverables.length > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
           <span className="text-[10px] font-black uppercase tracking-[0.14em] text-white/30">Package usage</span>
           <div className="flex flex-wrap gap-1.5">
             <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${SOURCE_CHIP_STYLE.package}`}>
@@ -513,7 +572,7 @@ export default function MonthlyPlannerPage() {
       )}
 
       {/* Filters */}
-      <div className="mb-4 grid gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 md:grid-cols-5">
+      <div className="grid gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 md:grid-cols-5">
         <select
           value={clientFilter}
           onChange={event => setClientFilter(event.target.value)}
@@ -559,6 +618,8 @@ export default function MonthlyPlannerPage() {
           <option value="unscheduled">Needs scheduling</option>
         </select>
       </div>
+        </div>
+      </details>
 
       {/* Main content: calendar or list */}
       {viewMode === 'calendar' ? (
@@ -583,7 +644,7 @@ export default function MonthlyPlannerPage() {
           />
         )
       ) : (
-        groupedDeliverables.length === 0 ? (
+        agendaGroups.length === 0 ? (
           <EmptyState
             title="No deliverables this month."
             message={activePackageCount === 0 ? 'Set up packages in Package Master first.' : isAdmin ? 'Use Generate month to create deliverables.' : ''}
@@ -596,25 +657,23 @@ export default function MonthlyPlannerPage() {
           />
         ) : (
           <div className="space-y-3">
-            {groupedDeliverables.map(group => (
-              <section key={group.clientId} className="rounded-xl border border-white/8 bg-white/[0.025] p-3">
-                <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <h2 className="text-base font-bold text-white">{group.clientName}</h2>
-                    <p className="text-xs text-white/35">
-                      {group.totals.total - group.totals.remaining}/{group.totals.total} done
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5 text-[11px] sm:flex">
-                    {DISPLAY_TYPES.map(type => (
-                      <MiniTotal key={type} label={TYPE_LABELS[type]} total={group.totals.byType[type].total} complete={group.totals.byType[type].complete} />
-                    ))}
-                  </div>
+            {agendaGroups.map(group => (
+              <section key={group.date} className="rounded-xl border border-white/8 bg-white/[0.025] p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="text-sm font-bold text-white">
+                    {group.date === 'unscheduled'
+                      ? 'Unscheduled'
+                      : new Date(`${group.date}T00:00:00`).toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'short' })}
+                  </h2>
+                  <span className="rounded-full bg-white/[0.05] px-2 py-0.5 text-xs font-semibold text-white/35">
+                    {group.items.length}
+                  </span>
                 </div>
 
                 <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                   {group.items.map(deliverable => {
                     const simplified = simplifyProductionStatus(deliverable.production_status)
+                    const clientName = clientNameById.get(deliverable.client_id) ?? 'Unknown client'
                     return (
                       <article key={deliverable.id} className="rounded-lg border border-white/8 bg-black/30 p-3">
                         <div className="mb-2 flex items-start justify-between gap-2">
@@ -631,11 +690,12 @@ export default function MonthlyPlannerPage() {
                                 </span>
                               )}
                             </div>
-                            <button type="button" onClick={() => openDrawer(deliverable, group.clientName)} className="mt-1 text-left">
+                            <button type="button" onClick={() => openDrawer(deliverable, clientName)} className="mt-1 text-left">
                               <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-white hover:text-brand-accent transition-colors">
                                 {deliverable.title}
                               </h3>
                             </button>
+                            <p className="mt-1 text-xs font-semibold text-brand-primary/55">{clientName}</p>
                           </div>
                           <div className="flex shrink-0 items-center gap-1.5">
                             <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[simplified]}`}>
@@ -643,7 +703,7 @@ export default function MonthlyPlannerPage() {
                             </span>
                             <button
                               type="button"
-                              onClick={() => openDrawer(deliverable, group.clientName)}
+                              onClick={() => openDrawer(deliverable, clientName)}
                               className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[11px] text-white/30 hover:text-white hover:border-white/20 transition-colors"
                               title="Open details"
                             >
@@ -658,6 +718,9 @@ export default function MonthlyPlannerPage() {
                           )}
                           {deliverable.due_date && (
                             <p>Due: <span className="text-white/65">{formatDate(deliverable.due_date)}</span></p>
+                          )}
+                          {deliverable.scheduled_date && (
+                            <p>Scheduled: <span className="text-white/65">{formatDate(deliverable.scheduled_date)}</span></p>
                           )}
                         </div>
 
@@ -713,15 +776,6 @@ function displayDeliverableCode(deliverable: MonthlyDeliverable) {
     return `${deliverable.code} ${instance}`
   }
   return `${deliverable.code}${instance}`
-}
-
-function MiniTotal({ label, total, complete }: { label: string; total: number; complete: number }) {
-  return (
-    <div className="rounded-md bg-white/[0.02] px-2 py-1">
-      <p className="text-white/30">{label}</p>
-      <p className="font-bold text-white/70">{complete}/{total}</p>
-    </div>
-  )
 }
 
 function SourceChip({ source }: { source: DeliverableSource }) {

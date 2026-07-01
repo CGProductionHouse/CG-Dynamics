@@ -21,6 +21,7 @@ import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 
 type DeliverableSource = 'package' | 'client_request' | 'moved' | 'replaced' | 'unlinked'
 type SourceFilterValue = 'all' | 'package' | 'client_request' | 'moved' | 'unlinked'
+type ScheduleWorkMode = 'active' | 'history'
 
 // ── Local helpers (mirrors MonthlyPlannerPage patterns) ────────
 
@@ -75,6 +76,10 @@ const STAFF_STATUSES: SimplifiedProductionStatus[] = [
 ]
 const FINAL_STATUSES: SimplifiedProductionStatus[] = ['meta_drafts', 'scheduled_posted']
 
+function isFinalDeliverable(deliverable: MonthlyDeliverable) {
+  return FINAL_STATUSES.includes(simplifyProductionStatus(deliverable.production_status))
+}
+
 const SOURCE_FILTER_OPTIONS: Array<{ value: SourceFilterValue; label: string }> = [
   { value: 'all', label: 'All sources' },
   { value: 'package', label: 'Package' },
@@ -112,7 +117,7 @@ function monthKeyFromValue(value: string): string {
 }
 
 function displayDateForDeliverable(deliverable: MonthlyDeliverable) {
-  return deliverable.scheduled_date ?? deliverable.due_date ?? deliverable.month
+  return deliverable.scheduled_date ?? deliverable.due_date ?? null
 }
 
 // ── Page ───────────────────────────────────────────────────────
@@ -135,6 +140,7 @@ export default function MasterSchedulePage() {
   const [statusFilter, setStatusFilter] = useState<'all' | SimplifiedProductionStatus>('all')
   const [typeFilter, setTypeFilter] = useState<'all' | DeliverableType>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilterValue>('all')
+  const [workMode, setWorkMode] = useState<ScheduleWorkMode>('active')
   const [loading, setLoading] = useState(true)
   const [tableMissing, setTableMissing] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -153,6 +159,9 @@ export default function MasterSchedulePage() {
     const search = clientSearch.trim().toLowerCase()
     return deliverables.filter(d => {
       if (!PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type)) return false
+      const isFinal = isFinalDeliverable(d)
+      if (workMode === 'active' && isFinal) return false
+      if (workMode === 'history' && !isFinal) return false
       if (clientFilter && d.client_id !== clientFilter) return false
       if (statusFilter !== 'all' && simplifyProductionStatus(d.production_status) !== statusFilter) return false
       if (typeFilter !== 'all' && d.deliverable_type !== typeFilter) return false
@@ -170,7 +179,17 @@ export default function MasterSchedulePage() {
       }
       return true
     })
-  }, [clientFilter, clientNameById, clientSearch, deliverables, sourceFilter, statusFilter, typeFilter])
+  }, [clientFilter, clientNameById, clientSearch, deliverables, sourceFilter, statusFilter, typeFilter, workMode])
+
+  const activeDeliverableCount = useMemo(
+    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type) && !isFinalDeliverable(d)).length,
+    [deliverables],
+  )
+
+  const historyDeliverableCount = useMemo(
+    () => deliverables.filter(d => PACKAGE_DELIVERABLE_TYPES.includes(d.deliverable_type) && isFinalDeliverable(d)).length,
+    [deliverables],
+  )
 
   // Build 12-month map, sorted within each month (scheduled by date first, then unscheduled)
   const byMonth = useMemo(() => {
@@ -343,6 +362,31 @@ export default function MasterSchedulePage() {
           {errorMessage}
         </div>
       )}
+
+      <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+        <button
+          type="button"
+          onClick={() => setWorkMode('active')}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+            workMode === 'active'
+              ? 'bg-brand-accent text-black'
+              : 'text-brand-primary/60 hover:text-brand-primary'
+          }`}
+        >
+          Active {activeDeliverableCount}
+        </button>
+        <button
+          type="button"
+          onClick={() => setWorkMode('history')}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+            workMode === 'history'
+              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
+              : 'text-brand-primary/60 hover:text-brand-primary'
+          }`}
+        >
+          History {historyDeliverableCount}
+        </button>
+      </div>
 
       {/* Year stats */}
       <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -615,7 +659,7 @@ function DeliverableRow({
     <button
       type="button"
       onClick={() => onOpen(deliverable, clientName)}
-      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-white/[0.025] sm:gap-3"
+      className="flex w-full flex-col items-start gap-2 px-4 py-3 text-left transition-colors hover:bg-white/[0.025] sm:flex-row sm:items-center sm:gap-3 sm:py-2.5"
     >
       {/* Date */}
       <span
