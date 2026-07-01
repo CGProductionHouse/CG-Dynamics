@@ -40,7 +40,7 @@ export default function PlannerImportPage() {
         <div className="flex flex-wrap gap-2">
           <Link to="/admin/planner"><ActionButton variant="outline" size="sm">Planner</ActionButton></Link>
           <Link to="/admin/package-master"><ActionButton variant="outline" size="sm">Package</ActionButton></Link>
-          <Link to="/admin/monthly-planner"><ActionButton variant="outline" size="sm">Monthly Planner</ActionButton></Link>
+          <Link to="/admin/client-schedule?view=calendar"><ActionButton variant="outline" size="sm">Client Schedule</ActionButton></Link>
         </div>
       </div>
     </div>

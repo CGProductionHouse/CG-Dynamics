@@ -464,7 +464,7 @@ export default function ClientsList() {
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1.5">
                               <ClientActionLink to={`/admin/package-master?client=${c.id}`} label="Package" />
-                              <ClientActionLink to={`/admin/monthly-planner?client=${c.id}`} label="Monthly Planner" />
+                              <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${c.id}`} label="Client Schedule" />
                             </div>
                           </td>
                           {isAdmin && (
@@ -623,7 +623,7 @@ function ClientQuickActions({
         <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/25">Production</p>
         <div className="flex flex-wrap gap-1.5">
           <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
-          <ClientActionLink to={`/admin/monthly-planner?client=${client.id}`} label="Monthly Planner" />
+          <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${client.id}`} label="Client Schedule" />
         </div>
       </div>
       {isAdmin && (

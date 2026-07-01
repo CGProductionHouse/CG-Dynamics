@@ -31,13 +31,26 @@ The app has had too much UI polishing and future-prep while core workflow gaps r
 
 The biggest missing pieces are:
 
-- real calendar / master schedule view
+- unified Client Schedule views over monthly_deliverables
+- real CG Calendar view over company_calendar_events
 - Teams/Planner data imported into the live app
 - package request workflow actually saving
 - client brand update workflow
 - content guideline / OneDrive workflow
 - staff-facing calendar dates and schedule clarity
 - live app verification after each deployed change
+
+## Current scheduling architecture rule
+
+- Client Schedule is the unified package posting schedule module.
+- Package Calendar and Master Schedule are views of Client Schedule, not separate systems.
+- Client Schedule source of truth is `monthly_deliverables`.
+- Client Schedule views are Grid, Board, Calendar, Charts, and Year / Master.
+- Current month is the default Client Schedule context.
+- CG Calendar is separate and uses `company_calendar_events` for meetings, shoots, content runs, client events, and deadlines.
+- Any page called Calendar must show an actual calendar grid.
+- Completed Teams history must not enter active work views. Future imports should import active tasks, current/future package schedule, and selected June 2026 package schedule history only.
+- Any capped list, +N more, expand, or view-all control must work.
 
 ## Status key
 

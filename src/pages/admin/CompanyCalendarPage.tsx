@@ -19,6 +19,9 @@ import {
 } from '../../lib/companyCalendar'
 
 type EventFilter = 'all' | CompanyEventType
+type CalendarViewMode = 'calendar' | 'agenda'
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const EVENT_ORDER: Record<CompanyEventType, number> = {
   meeting: 0,
@@ -57,6 +60,20 @@ function formatShortDate(dateStr: string) {
   return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
+function monthKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+function shiftMonth(key: string, amount: number) {
+  const [year, month] = key.split('-').map(Number)
+  return monthKey(new Date(year, month - 1 + amount, 1))
+}
+
+function formatMonthHeading(key: string) {
+  const [year, month] = key.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
+}
+
 function statusStyle(status: CompanyEventStatus) {
   switch (status) {
     case 'confirmed': return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'
@@ -84,6 +101,8 @@ export default function CompanyCalendarPage() {
   const [tableMissing, setTableMissing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<EventFilter>('all')
+  const [selectedMonth, setSelectedMonth] = useState(monthKey(new Date()))
+  const [viewMode, setViewMode] = useState<CalendarViewMode>('calendar')
   const [drawerEvent, setDrawerEvent] = useState<CompanyCalendarEvent | null>(null)
 
   const isAdmin = profile?.role === 'admin'
@@ -128,15 +147,20 @@ export default function CompanyCalendarPage() {
     return sortEvents(active.filter(e => e.event_type === filter))
   }, [events, filter])
 
+  const monthEvents = useMemo(
+    () => filtered.filter(event => event.start_at.slice(0, 7) === selectedMonth),
+    [filtered, selectedMonth],
+  )
+
   const grouped = useMemo(() => {
     const groups = new Map<string, CompanyCalendarEvent[]>()
-    for (const event of filtered) {
+    for (const event of monthEvents) {
       const day = event.start_at.slice(0, 10)
       if (!groups.has(day)) groups.set(day, [])
       groups.get(day)!.push(event)
     }
     return [...groups.entries()]
-  }, [filtered])
+  }, [monthEvents])
 
   const counts = useMemo(() => {
     const active = events.filter(e => e.status !== 'cancelled')
@@ -150,8 +174,9 @@ export default function CompanyCalendarPage() {
     }
   }, [events])
 
-  const handleCreateEvent = useCallback(() => {
-    setDrawerEvent({ id: '', title: '', event_type: 'internal', client_id: null, client_name: null, start_at: '', end_at: null, all_day: false, location: null, notes: null, assigned_to_name: null, status: 'planned', linked_deliverable_id: null, linked_task_id: null, created_at: '', updated_at: '' })
+  const handleCreateEvent = useCallback((date?: string) => {
+    const start = date ? `${date}T09:00` : ''
+    setDrawerEvent({ id: '', title: '', event_type: 'internal', client_id: null, client_name: null, start_at: start, end_at: null, all_day: false, location: null, notes: null, assigned_to_name: null, status: 'planned', linked_deliverable_id: null, linked_task_id: null, created_at: '', updated_at: '' })
   }, [])
 
   const handleSaved = useCallback(() => {
@@ -180,14 +205,14 @@ export default function CompanyCalendarPage() {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
           <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Calendar</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Company Calendar</h1>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
         </div>
         <EmptyState
-          title="Company calendar setup needed"
-          message="Run phase-10a-company-calendar-events.sql in Supabase SQL editor to enable the Company Events Calendar."
+          title="CG Calendar setup needed"
+          message="Run phase-10a-company-calendar-events.sql in Supabase SQL editor to enable CG Calendar."
           action={
             <p className="mt-2 text-xs text-amber-400/80 bg-amber-400/10 border border-amber-400/20 rounded-lg px-4 py-2">
-              Admin note: Company calendar SQL not applied yet.
+              Admin note: CG Calendar SQL not applied yet.
             </p>
           }
         />
@@ -217,12 +242,24 @@ export default function CompanyCalendarPage() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Calendar</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-white sm:text-4xl">Company Calendar</h1>
+          <h1 className="mt-1 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
           <p className="mt-1 text-sm text-brand-primary/60">Meetings, shoots, content runs and internal events.</p>
         </div>
-        <ActionButton variant="primary" onClick={handleCreateEvent}>
+        <ActionButton variant="primary" onClick={() => handleCreateEvent()}>
           + Add Event
         </ActionButton>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <button type="button" onClick={() => setSelectedMonth(shiftMonth(selectedMonth, -1))} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white">Prev</button>
+        <button type="button" onClick={() => setSelectedMonth(monthKey(new Date()))} className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">Today</button>
+        <input type="month" value={selectedMonth} onChange={event => setSelectedMonth(event.target.value)} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-accent/50" />
+        <button type="button" onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white">Next</button>
+        <div className="ml-auto flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+          {(['calendar', 'agenda'] as const).map(option => (
+            <button key={option} type="button" onClick={() => setViewMode(option)} className={`rounded-md px-3 py-1.5 text-xs font-bold capitalize transition-colors ${viewMode === option ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>{option}</button>
+          ))}
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -250,17 +287,10 @@ export default function CompanyCalendarPage() {
         ))}
       </div>
 
-      {/* Event list */}
-      {filtered.length === 0 ? (
-        <EmptyState
-          title={filter === 'all' ? 'No events scheduled' : `No ${EVENT_TYPE_LABELS[filter as CompanyEventType]?.toLowerCase() ?? ''} events`}
-          message="Add an event to get started."
-          action={
-            <ActionButton variant="outline" size="sm" onClick={handleCreateEvent}>
-              + Add Event
-            </ActionButton>
-          }
-        />
+      {viewMode === 'calendar' ? (
+        <CgCalendarGrid month={selectedMonth} events={monthEvents} onAdd={handleCreateEvent} onOpen={setDrawerEvent} />
+      ) : monthEvents.length === 0 ? (
+        <EmptyState title={`No events in ${formatMonthHeading(selectedMonth)}`} message="Add an event to get started." action={<ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton>} />
       ) : (
         <div className="space-y-6">
           {grouped.map(([day, dayEvents]) => (
@@ -290,6 +320,84 @@ export default function CompanyCalendarPage() {
           onSaved={handleSaved}
         />
       )}
+    </div>
+  )
+}
+
+function CgCalendarGrid({
+  month,
+  events,
+  onAdd,
+  onOpen,
+}: {
+  month: string
+  events: CompanyCalendarEvent[]
+  onAdd: (date?: string) => void
+  onOpen: (event: CompanyCalendarEvent) => void
+}) {
+  const [year, m] = month.split('-').map(Number)
+  const firstDay = new Date(year, m - 1, 1).getDay()
+  const daysInMonth = new Date(year, m, 0).getDate()
+  const cells: Array<number | null> = [
+    ...Array.from({ length: firstDay }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ]
+  const today = new Date().toISOString().slice(0, 10)
+  const byDate = new Map<string, CompanyCalendarEvent[]>()
+  for (const event of events) {
+    const day = event.start_at.slice(0, 10)
+    if (!byDate.has(day)) byDate.set(day, [])
+    byDate.get(day)!.push(event)
+  }
+
+  return (
+    <div>
+      <div className="mb-1 hidden grid-cols-7 gap-px sm:grid">
+        {DAY_NAMES.map(day => (
+          <div key={day} className="py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/30">{day}</div>
+        ))}
+      </div>
+      <div className="hidden grid-cols-7 gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.04] sm:grid">
+        {cells.map((day, index) => {
+          if (day === null) return <div key={`empty-${index}`} className="min-h-[108px] bg-[#0c0c0c]" />
+          const date = `${month}-${String(day).padStart(2, '0')}`
+          const dayEvents = byDate.get(date) ?? []
+          return (
+            <div key={date} className={`min-h-[108px] p-1.5 ${date === today ? 'bg-brand-teal/[0.055]' : 'bg-[#0c0c0c]'}`}>
+              <button
+                type="button"
+                onClick={() => onAdd(date)}
+                className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${date === today ? 'bg-brand-teal text-black' : 'text-white/35 hover:bg-white/[0.06] hover:text-white'}`}
+                title="Add event"
+              >
+                {day}
+              </button>
+              <div className="space-y-0.5">
+                {dayEvents.slice(0, 4).map(event => (
+                  <button
+                    key={event.id}
+                    type="button"
+                    onClick={() => onOpen(event)}
+                    className={`flex w-full items-center gap-1 rounded border px-1 py-0.5 text-left text-[10px] ${eventTypeStyle(event.event_type)}`}
+                  >
+                    <span className="min-w-0 truncate font-semibold">{event.title}</span>
+                  </button>
+                ))}
+                {dayEvents.length > 4 && (
+                  <div className="rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-[10px] font-semibold text-white/35">
+                    +{dayEvents.length - 4} more
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="space-y-2 sm:hidden">
+        {events.length === 0 ? (
+          <EmptyState title={`No events in ${formatMonthHeading(month)}`} message="Add an event to get started." action={<ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton>} centered={false} />
+        ) : events.map(event => <EventCard key={event.id} event={event} onClick={() => onOpen(event)} />)}
+      </div>
     </div>
   )
 }
