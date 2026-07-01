@@ -25,6 +25,59 @@ Applied during feat/scheduler-teams-parity:
 - Master Schedule defaults to current month section expanded, not January
 - Two separate calendars must stay separate: Package Calendar (monthly_deliverables) and Company Calendar (company_calendar_events)
 
+## July 2026 parallel run rule (shadow-run safety)
+
+Applied during fix/client-schedule-shadow-run (Client Schedule Safety Pass - Task 1):
+
+- Teams remains the OFFICIAL source of truth for July 2026. Amonique keeps managing the official schedule in Teams during July.
+- CG Dynamics runs as a SHADOW system during July 2026. It is not trusted yet and must not be treated as the source of truth.
+- Do NOT manually clean all app schedule data while Teams is still actively changing.
+- Fix the app logic first (this pass). Only after the logic is stable should a fresh Teams Excel export be reconciled.
+- No blind imports, no truncation, no automatic overwrites, no live-Supabase edits during the shadow run.
+
+## Client Schedule logic rules (canonical)
+
+These are enforced in `src/pages/admin/ClientSchedulePage.tsx` and `src/lib/planner.ts`:
+
+- Schedule date and status are SEPARATE fields.
+  - Schedule date = when the package post is planned/scheduled (`scheduled_date` only — never `due_date`).
+  - Status = work progress (`production_status`, normalised via `normalizeScheduleStatus`).
+  - A dated item can still be "Not started". "Not started" does not mean unscheduled.
+- Unscheduled means a package item has NO schedule date (`scheduled_date` is null). It is never defined by status. If every package post has a date, Unscheduled = 0 is valid.
+- Status filtering is shared across Grid, Board, Calendar, Charts and Year/Master through `normalizeScheduleStatus` + `matchesScheduleStatusFilter`. Unknown/legacy/null status values normalise to "Not started" so they are never hidden.
+  - Needs Action = `isNeedsActionStatus` (excludes scheduled/posted and Meta drafts/approved).
+  - Posted / History = `isPostedOrHistoryStatus` (scheduled or posted). It is styled muted/low-attention.
+- Unknown client: if `client_id` has no match but the title/code clearly names a known client, show "Client match needed: <name>" (display-only inference). Never silently save a guessed `client_id` in this pass.
+- Board/card ordering is display-only: schedule date, then post category (DP, F, Video, Reel, Other), then item number, then title. Do NOT rename or resequence the underlying data here.
+- Client Schedule opens on the current active month (July 2026), never January. Year/Master focuses the current month first.
+
+## Teams import future sequence
+
+- Task 1 (this pass): fix Client Schedule usability and logic bugs. DONE for the logic layer.
+- Task 2: build a Teams export audit / import PREVIEW (read-only, no writes).
+- Task 3: add safe reconciliation (create missing, update existing, flag unknown clients, detect removed/changed, preserve existing app data where appropriate).
+- Task 4: after a fresh July Teams export, run the audit, review mismatches, apply the import, compare against Teams, then decide the August cutover.
+
+### Future import rules (do not import blindly)
+
+- Read the latest Teams Excel export.
+- Compare against clients / package items / monthly_deliverables.
+- Create missing items; update existing items; flag unknown clients; detect removed/changed items.
+- Preserve existing app data where appropriate.
+- Show a PREVIEW before applying and a change SUMMARY after applying.
+- Ideally track import batches so an import can be reviewed or reverted.
+
+### Future renumbering rule (Teams import only, not this pass)
+
+- When importing the latest Teams Excel, normalise package item numbering per client and per post category.
+- Do NOT change actual schedule dates.
+- Rename/resequence item codes only WITHIN the same post category.
+  - DP dates can only be reassigned between DP items.
+  - F dates can only be reassigned between F items.
+  - Video dates can only be reassigned between Video items.
+  - Reel dates can only be reassigned between Reel items.
+- Never swap categories.
+
 ## Current trust issue to correct
 
 The app has had too much UI polishing and future-prep while core workflow gaps remain.

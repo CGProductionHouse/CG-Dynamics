@@ -261,13 +261,65 @@ export const SIMPLIFIED_TO_BACKEND_STATUS: Record<SimplifiedProductionStatus, Pr
   scheduled_posted: 'scheduled',
 }
 
+// Normalises ANY stored status value into a SimplifiedProductionStatus so that
+// filtering behaves identically across every Client Schedule view. It tolerates
+// the typed enum, legacy/imported raw strings (any case, spaces or hyphens) and
+// null/empty. This is the single source of truth for schedule status buckets.
+//
+// Critical: an unknown or unset status resolves to `not_started` (work still to
+// do) rather than `in_progress`, so imported items are never hidden from the
+// "Not started" / Needs Action views.
+export function normalizeScheduleStatus(
+  raw: ProductionStatus | string | null | undefined,
+): SimplifiedProductionStatus {
+  if (raw === null || raw === undefined) return 'not_started'
+  const key = String(raw).trim().toLowerCase().replace(/[\s/-]+/g, '_')
+  if (key === '') return 'not_started'
+
+  if (['scheduled', 'posted', 'published', 'live', 'scheduled_posted', 'complete', 'completed', 'done'].includes(key)) {
+    return 'scheduled_posted'
+  }
+  if (['approved', 'meta_drafts', 'meta_draft', 'draft', 'drafts', 'ready_to_schedule'].includes(key)) {
+    return 'meta_drafts'
+  }
+  if (['ready_client_approval', 'waiting_client', 'awaiting_client', 'client_approval', 'sent_to_client', 'with_client', 'client_changes'].includes(key)) {
+    return 'awaiting_client'
+  }
+  if (['ready_internal_review', 'ready_review', 'internal_review', 'review'].includes(key)) {
+    return 'ready_review'
+  }
+  if (['in_progress', 'inprogress', 'doing', 'wip', 'started', 'internal_changes', 'blocked'].includes(key)) {
+    return 'in_progress'
+  }
+  if (['to_do', 'todo', 'not_started', 'notstarted', 'new', 'backlog', 'moved', 'unstarted', 'pending', 'open'].includes(key)) {
+    return 'not_started'
+  }
+
+  // Unknown / legacy value: surface as not started for review, never hide it.
+  return 'not_started'
+}
+
 export function simplifyProductionStatus(status: ProductionStatus): SimplifiedProductionStatus {
-  if (status === 'to_do' || status === 'moved') return 'not_started'
-  if (status === 'ready_internal_review') return 'ready_review'
-  if (status === 'ready_client_approval' || status === 'waiting_client') return 'awaiting_client'
-  if (status === 'approved') return 'meta_drafts'
-  if (status === 'scheduled' || status === 'posted') return 'scheduled_posted'
-  return 'in_progress'
+  return normalizeScheduleStatus(status)
+}
+
+// Does a normalised status pass the status dropdown filter?
+export function matchesScheduleStatusFilter(
+  status: SimplifiedProductionStatus,
+  filter: 'all' | SimplifiedProductionStatus,
+): boolean {
+  return filter === 'all' || status === filter
+}
+
+// Needs Action = work that still needs attention. Excludes drafts queued in
+// Meta and anything scheduled/posted (history).
+export function isNeedsActionStatus(status: SimplifiedProductionStatus): boolean {
+  return status !== 'scheduled_posted' && status !== 'meta_drafts'
+}
+
+// Posted / History = completed scheduling state (scheduled or posted).
+export function isPostedOrHistoryStatus(status: SimplifiedProductionStatus): boolean {
+  return status === 'scheduled_posted'
 }
 
 // ── Helpers ───────────────────────────────────────────────────

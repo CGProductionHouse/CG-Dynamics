@@ -8,6 +8,25 @@
   box-sizing: border-box;
 }
 
+/* Sticky synthetic horizontal scrollbar (Client Schedule wide views). Force a
+   visible, draggable horizontal scrollbar even on WebKit overlay-scrollbar
+   platforms so wide schedule content can be scrubbed from any scroll position. */
+.scrollbar-always {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+}
+.scrollbar-always::-webkit-scrollbar {
+  height: 10px;
+  -webkit-appearance: none;
+}
+.scrollbar-always::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 9999px;
+}
+.scrollbar-always::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
 body {
   margin: 0;
   background:
