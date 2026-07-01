@@ -303,6 +303,30 @@ export async function updateTask(
     .single()
 }
 
+const MIGRATION_FIELDS_7A = ['package_action', 'quote_needed', 'admin_package_note'] as const
+
+function isColumnMissingError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const e = error as { code?: string }
+  return e.code === '42703'
+}
+
+export async function updateTaskSafe(
+  id: string,
+  updates: Partial<Omit<CommandCentreTask, 'id' | 'created_at' | 'created_by'>>,
+): Promise<{ data: unknown; error: unknown; packageFieldsSkipped: boolean }> {
+  const result = await updateTask(id, updates)
+  if (result.error && isColumnMissingError(result.error) && !isPlannerTaskId(id)) {
+    const safeUpdates: Partial<Omit<CommandCentreTask, 'id' | 'created_at' | 'created_by'>> = { ...updates }
+    for (const field of MIGRATION_FIELDS_7A) {
+      delete (safeUpdates as Record<string, unknown>)[field]
+    }
+    const retry = await updateTask(id, safeUpdates)
+    return { data: retry.data, error: retry.error, packageFieldsSkipped: true }
+  }
+  return { data: result.data, error: result.error, packageFieldsSkipped: false }
+}
+
 export async function deleteTask(id: string) {
   if (isPlannerTaskId(id)) {
     return { data: null, error: { message: 'Imported Planner tasks cannot be deleted from Daily Tasks.' } }
