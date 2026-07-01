@@ -42,6 +42,8 @@ const launchItems = [
   { label: 'Assistant', detail: 'Drafts and checks', to: '/admin/assistant' },
 ]
 
+const HUB_COMPLETED = new Set(['done', 'approved', 'scheduled', 'scheduled_posted', 'moved_to_tomorrow'])
+
 const TASK_STATUS_SHORT: Record<string, string> = {
   to_do: 'To do',
   in_progress: 'In progress',
@@ -115,7 +117,7 @@ export default function CgHubPage() {
   const priorityQueue = useMemo(() => {
     return tasks
       .filter(t =>
-        t.status !== 'done' &&
+        !HUB_COMPLETED.has(t.status as string) &&
         (t.priority === 'client_request' ||
           t.priority === 'urgent' ||
           (t.due_date !== null && t.due_date <= todayStr) ||
@@ -141,8 +143,7 @@ export default function CgHubPage() {
     if (!myName) return []
     return tasks.filter(t =>
       t.assigned_to_name === myName &&
-      t.status !== 'done' &&
-      t.status !== 'moved_to_tomorrow'
+      !HUB_COMPLETED.has(t.status as string)
     )
   }, [tasks, profile])
 

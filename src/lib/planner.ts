@@ -534,6 +534,18 @@ export async function updateMonthlyDeliverableSchedule(id: string, scheduledDate
     .single()
 }
 
+export async function updateMonthlyDeliverableCore(
+  id: string,
+  patch: { priority?: TaskPriority; assigned_to_name?: string | null },
+) {
+  return supabase
+    .from(DELIVERABLES_TABLE)
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+}
+
 export interface UpdatePackageDeliverableTemplateInput {
   code?: string
   deliverable_type?: DeliverableType
