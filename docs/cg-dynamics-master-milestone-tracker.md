@@ -31,6 +31,12 @@ Last updated: 2026-07-02
 - Preserve existing CG Dynamics work where possible and flag conflicts instead of blindly overwriting.
 - Useful future flow: latest Teams data -> preview mapped tasks/buckets/recurrence/staff assignments -> approve import -> update Hub.
 
+### Small Hub UI polish
+
+- Tighten the Hub sidebar/menu spacing so the full menu fits more comfortably without the ugly internal scrollbar.
+- Keep the menu readable and touch-friendly, but reduce excess vertical gaps, row heights, and section spacing where possible.
+- Review the Hub/Performance sidebar split so navigation feels consistent and less cramped.
+
 ## Notes
 
 - These are parked milestones, not current implementation tasks.
