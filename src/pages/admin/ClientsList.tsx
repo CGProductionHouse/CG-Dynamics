@@ -456,9 +456,8 @@ export default function ClientsList() {
                         <>
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1.5">
-                              <ClientActionLink to={`/admin/reports?client=${c.id}`} label="Reports" teal />
+                              <ClientActionLink to={`/admin/client-dashboard?client=${c.id}`} label="Client Dashboard" teal />
                               {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Meta / Sync" />}
-                              <ClientActionLink to="/admin/published" label="Client Preview" />
                             </div>
                           </td>
                           <td className="px-4 py-3">
@@ -614,9 +613,8 @@ function ClientQuickActions({
       <div>
         <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/25">Performance</p>
         <div className="flex flex-wrap gap-1.5">
-          <ClientActionLink to={`/admin/reports?client=${client.id}`} label="Reports" teal />
+          <ClientActionLink to={`/admin/client-dashboard?client=${client.id}`} label="Client Dashboard" teal />
           {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Meta / Sync" />}
-          <ClientActionLink to="/admin/published" label="Client Preview" />
         </div>
       </div>
       <div>

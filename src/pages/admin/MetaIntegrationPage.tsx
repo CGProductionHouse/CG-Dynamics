@@ -947,8 +947,8 @@ export default function MetaIntegrationPage() {
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {syncResult.status !== 'failed' && (
-                  <ActionButton variant="primary" onClick={() => window.location.href = '/admin/reports'}>
-                    Go to reports
+                  <ActionButton variant="primary" onClick={() => window.location.href = '/admin/client-dashboard'}>
+                    Open Client Dashboard
                   </ActionButton>
                 )}
                 <ActionButton variant="secondary" onClick={() => setSyncResult(null)}>
