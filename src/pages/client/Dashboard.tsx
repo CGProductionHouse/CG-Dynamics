@@ -13,6 +13,7 @@ import {
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from './ClientReportView'
+import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -210,6 +211,10 @@ export default function Dashboard() {
           message="Choose a month above to view its master dashboard."
         />
       )}
+
+      {/* Forward-looking: this month's CG plan (client-safe; renders nothing
+          until the client has visible schedule data). */}
+      {profile.client_id && <ClientMonthAhead clientId={profile.client_id} />}
     </ClientDashboardShell>
   )
 }

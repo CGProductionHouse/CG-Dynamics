@@ -16,6 +16,7 @@ import {
   formatDate,
   formatNumber,
   formatPercent,
+  isMetaSyncedManualMetric,
   reportPostToStatsPost,
   shortCaption,
 } from '../../lib/reportStats'
@@ -67,6 +68,7 @@ export function ClientReportView({
   previousReport = null,
   previousManualMetrics = [],
   showEmptyStrategy = false,
+  showAdminDiagnostics = false,
 }: {
   report: ReportWithPosts
   client?: Client | null
@@ -74,6 +76,8 @@ export function ClientReportView({
   previousReport?: ReportWithPosts | null
   previousManualMetrics?: ManualPlatformMetric[]
   showEmptyStrategy?: boolean
+  /** Staff-only: renders the data-health panel. Never enable on client routes. */
+  showAdminDiagnostics?: boolean
 }) {
   const [tab, setTab] = useState<TabKey>('overview')
 
@@ -142,6 +146,7 @@ export function ClientReportView({
           performance={performance}
           showEmptyStrategy={showEmptyStrategy}
           nextSteps={performance.nextSteps}
+          showAdminDiagnostics={showAdminDiagnostics}
         />
       ) : (
         <PlatformTab
@@ -270,6 +275,7 @@ function OverviewTab({
   performance,
   showEmptyStrategy,
   nextSteps,
+  showAdminDiagnostics,
 }: {
   report: ReportWithPosts
   master: MasterReportData
@@ -277,6 +283,7 @@ function OverviewTab({
   performance: ReportPerformance
   showEmptyStrategy: boolean
   nextSteps: NextStep[]
+  showAdminDiagnostics: boolean
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
@@ -295,6 +302,9 @@ function OverviewTab({
 
   return (
     <>
+      {/* A - Combined executive hero (only safely-summable metrics headline it) */}
+      <CombinedHero master={master} performance={performance} />
+
       {/* B - Performance overview */}
       <section className="mb-14">
         <SectionHeading eyebrow="Performance overview" title="The month at a glance" />
@@ -349,7 +359,129 @@ function OverviewTab({
 
       {/* G - CG action plan */}
       <StrategyBlocks report={report} strategy={strategy} showEmptyStrategy={showEmptyStrategy} nextSteps={nextSteps} recommendations={performance.recommendations} />
+
+      {/* H - Staff-only data health (never rendered on client routes) */}
+      {showAdminDiagnostics && <AdminDataHealth master={master} performance={performance} />}
     </>
+  )
+}
+
+// A. The "all your channels together" moment. Headlines ONLY metrics that are
+// safe to sum across platforms (views, content interactions). Reach audiences
+// overlap between platforms, so when reach is the only signal we headline the
+// strongest single platform instead of a misleading combined total.
+function CombinedHero({ master, performance }: { master: MasterReportData; performance: ReportPerformance }) {
+  const withData = master.platforms.filter(view => view.source !== 'none')
+  if (withData.length === 0) return null
+
+  let value: number | null = null
+  let line: string | null = null
+  if (typeof master.totalViews === 'number' && master.totalViews > 0) {
+    value = master.totalViews
+    line = `times your content was seen across your channels in ${performance.monthLabel}`
+  } else if (master.totalEngagements > 0) {
+    value = master.totalEngagements
+    line = `interactions with your content across your channels in ${performance.monthLabel}`
+  } else {
+    const strongest = withData
+      .filter(view => typeof view.reach === 'number' && view.reach > 0)
+      .sort((a, b) => (b.reach ?? 0) - (a.reach ?? 0))[0]
+    if (strongest) {
+      value = strongest.reach as number
+      line = `accounts reached on ${strongest.label} in ${performance.monthLabel}`
+    }
+  }
+  if (value === null || !line) return null
+
+  const chips = withData
+    .map(view => {
+      const metric =
+        typeof view.views === 'number' && view.views > 0
+          ? `${formatCompact(view.views)} views`
+          : typeof view.reach === 'number' && view.reach > 0
+            ? `${formatCompact(view.reach)} reach`
+            : view.engagements > 0
+              ? `${formatCompact(view.engagements)} interactions`
+              : null
+      return metric ? { label: view.label, metric } : null
+    })
+    .filter((chip): chip is { label: string; metric: string } => chip !== null)
+
+  return (
+    <section className="relative mb-14 overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311] p-8 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)] sm:p-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(45,212,191,0.22),transparent_38%),radial-gradient(circle_at_0%_100%,rgba(249,115,22,0.14),transparent_30%)]" />
+      <div className="relative">
+        <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2dd4bf]">All channels together</p>
+        <p className="mt-5 text-6xl font-black leading-none tracking-[-0.05em] text-white sm:text-8xl">
+          {formatNumber(value)}
+        </p>
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">{line}.</p>
+        {chips.length > 1 && (
+          <div className="mt-7 flex flex-wrap gap-2">
+            {chips.map(chip => (
+              <span
+                key={chip.label}
+                className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-1.5 text-sm font-bold text-slate-200"
+              >
+                {chip.label} <span className="ml-1 font-medium text-slate-400">{chip.metric}</span>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+// H. Staff-only transparency panel: where every number came from and what the
+// sync could not fetch. Surfaces diagnostics the performance model already
+// computes so staff can trust (or fix) the data before a client ever sees it.
+function AdminDataHealth({ master, performance }: { master: MasterReportData; performance: ReportPerformance }) {
+  const sources = master.platforms
+    .filter(view => view.source !== 'none')
+    .map(view => ({
+      label: view.label,
+      source:
+        view.manual && isMetaSyncedManualMetric(view.manual)
+          ? `Meta account totals${view.postCount > 0 ? ` + ${view.postCount} synced posts` : ''}`
+          : view.source === 'manual'
+            ? 'Manual summary'
+            : `Post-level data (${view.postCount} posts)`,
+    }))
+
+  return (
+    <section className="mt-14 rounded-3xl border border-dashed border-[#f59e0b]/30 bg-[#f59e0b]/[0.04] p-6 sm:p-7">
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-[#f59e0b]">
+        Data health — internal only, not visible to clients
+      </p>
+      <div className="mt-4 grid gap-6 text-sm sm:grid-cols-2">
+        <div>
+          <p className="font-bold text-slate-300">Metric sources</p>
+          <ul className="mt-2 space-y-1 text-slate-400">
+            {sources.map(item => (
+              <li key={item.label}>
+                <span className="font-semibold text-slate-300">{item.label}:</span> {item.source}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="font-bold text-slate-300">Not synced this month</p>
+          {performance.adminMissingMetrics.length > 0 ? (
+            <ul className="mt-2 space-y-1 text-slate-400">
+              {performance.adminMissingMetrics.map(item => <li key={item}>{item}</li>)}
+            </ul>
+          ) : (
+            <p className="mt-2 text-slate-400">All account-level metrics synced.</p>
+          )}
+          {performance.topContent?.toneReason && (
+            <p className="mt-4 text-xs leading-relaxed text-slate-500">
+              Content framing: {performance.topContent.toneReason}
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
   )
 }
 

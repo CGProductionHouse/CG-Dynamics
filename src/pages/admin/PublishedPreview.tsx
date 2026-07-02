@@ -15,6 +15,7 @@ import {
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from '../client/ClientReportView'
+import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -272,7 +273,11 @@ export default function PublishedPreview() {
               previousReport={previousReport}
               previousManualMetrics={previousManualMetrics}
               showEmptyStrategy
+              showAdminDiagnostics={isAdmin}
             />
+            {/* Same client-safe month-ahead module the client portal renders.
+                Staff RLS can read the schedule, so this previews the real thing. */}
+            {selectedClientId && <ClientMonthAhead clientId={selectedClientId} />}
           </ClientDashboardShell>
         </div>
       ) : (
