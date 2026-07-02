@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom'
 // Meta sync is the main workflow. CSV import is a fallback, not a primary step.
 const STEPS: { step: number; title: string; hint: string; to: string }[] = [
   { step: 1, title: 'Sync data', hint: 'Meta · Instagram & Facebook', to: '/admin/integrations/meta' },
-  { step: 2, title: 'Review report', hint: 'Check draft & data', to: '/admin/reports' },
-  { step: 3, title: 'Add CG action plan', hint: 'Strategy & next steps', to: '/admin/reports' },
-  { step: 4, title: 'Preview & publish', hint: 'Client-ready report', to: '/admin/published' },
+  { step: 2, title: 'Review dashboard', hint: 'Editor workspace', to: '/admin/client-dashboard' },
+  { step: 3, title: 'Add dashboard action plan', hint: 'Strategy & next steps', to: '/admin/client-dashboard' },
+  { step: 4, title: 'Client view & publish', hint: 'Client-ready view', to: '/admin/client-dashboard' },
 ]
 
 export default function WorkflowGuide() {

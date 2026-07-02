@@ -84,6 +84,7 @@ export default function App() {
               <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/assistant" element={<AssistantPage />} />
+              <Route path="/admin/client-dashboard" element={<PublishedPreview />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
               <Route path="/admin/integrations" element={<IntegrationsPage />} />
               <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />

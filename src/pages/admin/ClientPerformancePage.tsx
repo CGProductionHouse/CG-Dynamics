@@ -36,12 +36,13 @@ const LINKS = [
     ),
   },
   {
-    title: 'Reports',
-    description: 'Monthly reports and publishing summary.',
-    to: '/admin/reports',
+    title: 'Client Dashboard',
+    description: 'Review, edit, preview and publish client dashboards.',
+    to: '/admin/client-dashboard',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        <path d="M3.75 5.25A2.25 2.25 0 016 3h12a2.25 2.25 0 012.25 2.25v9A2.25 2.25 0 0118 16.5H6a2.25 2.25 0 01-2.25-2.25v-9z" />
+        <path d="M7.5 20.25h9M12 16.5v3.75M7.5 8.25h9M7.5 11.25h5.25" />
       </svg>
     ),
   },
@@ -56,19 +57,19 @@ const LINKS = [
     ),
   },
   {
-    title: 'Client Preview',
-    description: 'Published dashboard as clients see it.',
-    to: '/admin/published',
+    title: 'Content Calendar',
+    description: 'Client-ready calendar presentation.',
+    to: '/admin/client-calendar',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path d="M6.75 3v2.25M17.25 3v2.25M3.75 8.25h16.5M5.25 5.25h13.5A1.5 1.5 0 0120.25 6.75v12A1.5 1.5 0 0118.75 20.25H5.25A1.5 1.5 0 013.75 18.75v-12A1.5 1.5 0 015.25 5.25z" />
+        <path d="M7.5 12h.008v.008H7.5V12zm4.5 0h.008v.008H12V12zm4.5 0h.008v.008H16.5V12zm-9 4.5h.008v.008H7.5V16.5zm4.5 0h.008v.008H12V16.5z" />
       </svg>
     ),
   },
   {
     title: 'Import & Data',
-    description: 'CSV imports and manual metrics.',
+    description: 'Fallback CSV imports and manual metrics support.',
     to: '/admin/import',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -85,19 +86,19 @@ const WORKFLOW_STEPS = [
     to: '/admin/integrations/meta',
   },
   {
-    title: 'Review reports',
-    description: 'Check the monthly report status and source quality.',
-    to: '/admin/reports',
+    title: 'Review dashboard',
+    description: 'Open the Client Dashboard Editor and check the monthly workspace.',
+    to: '/admin/client-dashboard',
   },
   {
-    title: 'Add CG action plan',
+    title: 'Add dashboard action plan',
     description: 'Turn the numbers into the next practical client move.',
-    to: '/admin/reports',
+    to: '/admin/client-dashboard',
   },
   {
-    title: 'Preview and publish',
+    title: 'Client view and publish',
     description: 'Check the client view, then make the report live.',
-    to: '/admin/published',
+    to: '/admin/client-dashboard',
   },
 ]
 
@@ -129,6 +130,10 @@ function reportMonthLabel(report: Report) {
 
 function reportTime(report: Report) {
   return report.updated_at ?? report.created_at
+}
+
+function dashboardPath(report: Report) {
+  return `/admin/client-dashboard?reportId=${report.id}`
 }
 
 function formatDate(value: string | null | undefined) {
@@ -231,8 +236,8 @@ export default function ClientPerformancePage() {
             state === 'needs-repair'
               ? 'Fix the report period before the client view is trusted.'
               : state === 'ready-to-publish'
-                ? 'Review the report, preview the client view, then publish.'
-                : 'Add the CG action plan before publishing.',
+                ? 'Review the dashboard, check Client View, then publish.'
+                : 'Add the dashboard action plan before publishing.',
           priority:
             state === 'needs-repair'
               ? 0
@@ -288,13 +293,13 @@ export default function ClientPerformancePage() {
               Performance
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-primary/80 sm:text-base">
-              A quick read on active clients, report publishing status and what needs attention before month-end reporting.
+              A quick read on active clients, dashboard publishing status and what needs attention before month-end reporting.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <HeaderAction to="/admin/integrations/meta">Sync Meta</HeaderAction>
-            <HeaderAction to="/admin/reports" primary>Review reports</HeaderAction>
+            <HeaderAction to="/admin/client-dashboard" primary>Client Dashboard</HeaderAction>
           </div>
         </div>
       </section>
@@ -320,13 +325,13 @@ export default function ClientPerformancePage() {
               tone="teal"
             />
             <SnapshotCard
-              label="Published reports"
+              label="Published dashboards"
               value={snapshot.publishedReports}
-              helper="Live in the client preview"
+              helper="Live in Client View"
               tone="accent"
             />
             <SnapshotCard
-              label="Draft reports"
+              label="Draft dashboards"
               value={snapshot.draftReports}
               helper={`${snapshot.stateCounts['ready-to-publish']} ready to publish`}
               tone="neutral"
@@ -344,7 +349,7 @@ export default function ClientPerformancePage() {
               <PremiumCardHeader
                 eyebrow="Month-end workflow"
                 title="Reporting flow"
-                subtitle="Keep the monthly report path visible from data sync to published client view."
+                subtitle="Meta Sync -> Client Dashboard Editor -> Client View -> Publish."
               />
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -371,7 +376,7 @@ export default function ClientPerformancePage() {
             <PremiumCard padding="lg" className="bg-white/[0.035]">
               <PremiumCardHeader
                 eyebrow="Needs attention"
-                title="Report queue"
+                title="Dashboard queue"
                 subtitle="Based on existing report status and readiness only."
               />
 
@@ -379,7 +384,7 @@ export default function ClientPerformancePage() {
                 <div className="rounded-2xl border border-brand-teal/20 bg-brand-teal/[0.06] p-4">
                   <StatusBadge label="Clean" variant="published" />
                   <p className="mt-3 text-sm text-brand-primary/80">
-                    No reports currently need repair, publishing or strategy action.
+                    No dashboards currently need repair, publishing or strategy action.
                   </p>
                 </div>
               ) : (
@@ -387,7 +392,7 @@ export default function ClientPerformancePage() {
                   {snapshot.attention.map(item => (
                     <Link
                       key={item.report.id}
-                      to={`/admin/reports/${item.report.id}/edit`}
+                      to={dashboardPath(item.report)}
                       className="block rounded-2xl border border-white/8 bg-white/[0.03] p-4 transition-all hover:border-brand-teal/30 hover:bg-brand-teal/[0.05]"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -412,7 +417,7 @@ export default function ClientPerformancePage() {
               <PremiumCardHeader
                 eyebrow="Quick links"
                 title="Performance workspaces"
-                subtitle="Secondary navigation for client setup, report review, integrations, preview and imports."
+                subtitle="Secondary navigation for client setup, dashboard review, integrations, calendar and internal data support."
               />
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

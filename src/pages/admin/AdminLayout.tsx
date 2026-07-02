@@ -10,8 +10,7 @@ const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 const dynamicsNav = [
   { to: '/admin/client-performance', label: 'Performance Dashboard' },
   { to: '/admin/clients', label: 'Clients' },
-  { to: '/admin/reports', label: 'Reports' },
-  { to: '/admin/published', label: 'Client Preview' },
+  { to: '/admin/client-dashboard', label: 'Client Dashboard' },
   { to: '/admin/client-calendar', label: 'Content Calendar' },
   { to: '/admin/integrations', label: 'Meta / Integrations' },
 ]
@@ -145,8 +144,8 @@ export default function AdminLayout() {
   const dynamicsMobileItems = [
     { to: '/admin/client-performance', label: 'Perf' },
     { to: '/admin/clients', label: 'Clients' },
-    { to: '/admin/reports', label: 'Reports' },
-    { to: '/admin/published', label: 'Preview' },
+    { to: '/admin/client-dashboard', label: 'Dash' },
+    { to: '/admin/client-calendar', label: 'Calendar' },
     { to: '/admin/integrations', label: 'Meta' },
   ]
   const hubMobileItems = [
