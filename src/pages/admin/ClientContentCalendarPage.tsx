@@ -30,26 +30,26 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 // Client-facing post type badges. Only package post types (dp/photo/video/
 // reel) are shown on this calendar; anything else is filtered out upstream.
 const TYPE_BADGES: Partial<Record<DeliverableType, { short: string; label: string; cls: string }>> = {
-  dp: { short: 'DP', label: 'Designed poster', cls: 'border-report-sand/35 bg-report-sand/10 text-report-sand' },
-  photo: { short: 'PH', label: 'Photo', cls: 'border-report-accent/35 bg-report-accent/10 text-report-accent' },
-  video: { short: 'VID', label: 'Video', cls: 'border-[#b3a1d8]/35 bg-[#b3a1d8]/10 text-[#b3a1d8]' },
-  reel: { short: 'RL', label: 'Reel', cls: 'border-[#d89a8f]/35 bg-[#d89a8f]/10 text-[#d89a8f]' },
+  dp: { short: 'Poster', label: 'Designed poster', cls: 'border-[#2dd4bf]/30 bg-[#2dd4bf]/10 text-[#8af5e8]' },
+  photo: { short: 'Photo', label: 'Photo', cls: 'border-report-sand/35 bg-report-sand/10 text-report-sand' },
+  video: { short: 'Video', label: 'Video', cls: 'border-[#b3a1d8]/35 bg-[#b3a1d8]/10 text-[#cfc1f1]' },
+  reel: { short: 'Reel', label: 'Reel', cls: 'border-[#f97316]/25 bg-[#f97316]/8 text-[#f5b071]' },
 }
 
 const STATUS_DOT: Record<ClientSafeStatus, string> = {
-  planned: 'bg-report-faint',
-  in_production: 'bg-report-sand',
+  planned: 'bg-slate-500',
+  in_production: 'bg-[#2dd4bf]',
   for_review: 'bg-[#e9dcc3]',
   awaiting_approval: 'bg-[#9ec3d8]',
-  scheduled_posted: 'bg-report-accent',
+  scheduled_posted: 'bg-[#f97316]',
 }
 
 const STATUS_PILL: Record<ClientSafeStatus, string> = {
-  planned: 'border-report-line bg-white/[0.03] text-report-muted',
-  in_production: 'border-report-sand/30 bg-report-sand/[0.08] text-report-sand',
+  planned: 'border-white/10 bg-white/[0.035] text-slate-400',
+  in_production: 'border-[#2dd4bf]/25 bg-[#2dd4bf]/10 text-[#8af5e8]',
   for_review: 'border-[#e9dcc3]/30 bg-[#e9dcc3]/[0.08] text-[#e9dcc3]',
   awaiting_approval: 'border-[#9ec3d8]/30 bg-[#9ec3d8]/[0.08] text-[#9ec3d8]',
-  scheduled_posted: 'border-report-accent/30 bg-report-accent/[0.08] text-report-accent',
+  scheduled_posted: 'border-[#f97316]/25 bg-[#f97316]/8 text-[#f5b071]',
 }
 
 const STATUS_ORDER: ClientSafeStatus[] = [
@@ -148,48 +148,64 @@ export default function ClientContentCalendarPage() {
   const editLink = `/admin/client-schedule?view=calendar&mode=all${clientId ? `&client=${clientId}` : ''}&month=${month}`
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
+    <div className="relative min-h-[calc(100vh-1px)] overflow-hidden px-4 py-6 text-slate-50 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[#030706]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_0%,rgba(45,212,191,0.20),transparent_32%),radial-gradient(circle_at_88%_10%,rgba(249,115,22,0.11),transparent_24%),linear-gradient(180deg,#06110f_0%,#030706_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.13] bg-[linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      <div className="mx-auto max-w-6xl">
       {presenting ? (
         <div className="mb-4 flex justify-end">
           <button
             type="button"
             onClick={() => setPresenting(false)}
-            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-brand-primary hover:text-white"
+            className="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-bold text-slate-300 shadow-[0_18px_45px_-32px_rgba(0,0,0,0.9)] backdrop-blur transition hover:border-[#2dd4bf]/35 hover:text-white"
           >
             Exit client preview
           </button>
         </div>
       ) : (
-        <div className="mb-5">
+        <div className="mb-6">
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">Client Intelligence</p>
-              <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Content Calendar</h1>
-              <p className="mt-1 text-sm text-brand-primary/65">Client-ready view of the month's planned posts · reads the Client Schedule (monthly_deliverables)</p>
+              <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white sm:text-5xl">Content Calendar</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">Client-ready monthly content view powered by the Client Schedule.</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setParam('month', shiftMonth(month, -1))} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white">Prev</button>
-              <button type="button" onClick={() => setParam('month', monthKey(new Date()))} className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">Today</button>
-              <input type="month" value={month} onChange={event => setParam('month', event.target.value)} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-accent/50" />
-              <button type="button" onClick={() => setParam('month', shiftMonth(month, 1))} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white">Next</button>
+              <button type="button" onClick={() => setParam('month', shiftMonth(month, -1))} className="rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-xs font-bold text-slate-300 backdrop-blur transition hover:border-white/20 hover:text-white">Prev</button>
+              <button type="button" onClick={() => setParam('month', monthKey(new Date()))} className="rounded-full border border-[#2dd4bf]/25 bg-[#2dd4bf]/10 px-4 py-2 text-xs font-bold text-[#8af5e8] backdrop-blur transition hover:text-white">Today</button>
+              <input type="month" value={month} onChange={event => setParam('month', event.target.value)} className="rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-bold text-white outline-none backdrop-blur focus:border-[#2dd4bf]/50" />
+              <button type="button" onClick={() => setParam('month', shiftMonth(month, 1))} className="rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-xs font-bold text-slate-300 backdrop-blur transition hover:border-white/20 hover:text-white">Next</button>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-amber-400/25 bg-amber-400/[0.03] p-3">
-            <span className="mr-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-300/70">Internal controls</span>
-            <div className="min-w-[220px] flex-1">
-              <ClientPicker value={clientId} label={client?.name ?? ''} onChange={next => setParam('client', next?.id ?? '')} />
+          <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[0_24px_80px_-52px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Staff controls</span>
+              <div className="min-w-[220px] flex-1">
+                <ClientPicker
+                  value={clientId}
+                  label={client?.name ?? ''}
+                  onChange={next => setParam('client', next?.id ?? '')}
+                  placeholder="Search all active clients"
+                  maxResults={0}
+                  showAllOnFocus
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setPresenting(true)}
+                disabled={!clientId}
+                className="rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-xs font-bold text-slate-300 transition hover:border-white/20 hover:text-white disabled:opacity-40"
+              >
+                Preview as client
+              </button>
+              <Link to={editLink} className="rounded-full border border-[#2dd4bf]/25 bg-[#2dd4bf]/10 px-4 py-2 text-xs font-bold text-[#8af5e8] transition hover:text-white">
+                Edit in Client Schedule
+              </Link>
             </div>
-            <button
-              type="button"
-              onClick={() => setPresenting(true)}
-              disabled={!clientId}
-              className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white disabled:opacity-40"
-            >
-              Preview as client
-            </button>
-            <Link to={editLink} className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">
-              Edit in Client Schedule
-            </Link>
+            <p className="mt-2 text-[11px] text-slate-500">
+              Client list uses active clients visible to your role. If a client is missing here, check the Clients table active flag or RLS access.
+            </p>
           </div>
         </div>
       )}
@@ -204,22 +220,25 @@ export default function ClientContentCalendarPage() {
       ) : loading ? (
         <div className="h-[480px] animate-pulse rounded-2xl border border-report-line bg-report-bg" />
       ) : (
-        <section className="overflow-hidden rounded-2xl border border-report-line bg-report-bg shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
-          <div className="border-b border-report-line px-5 py-6 sm:px-8 sm:py-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)]">
+          <div className="relative border-b border-white/10 px-5 py-7 sm:px-8 sm:py-9">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(45,212,191,0.28),transparent_36%),radial-gradient(circle_at_96%_0%,rgba(249,115,22,0.12),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_45%)]" />
+            <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-[#2dd4bf] via-[#14b8a6] to-[#f97316]" />
+            <div className="relative flex flex-wrap items-center justify-between gap-5">
               <div className="flex items-center gap-4">
                 {client && (
                   <ClientLogo
                     client={{ name: client.name }}
-                    boxClassName="h-14 w-14 rounded-xl"
-                    frameClassName="border border-report-line bg-report-surface"
-                    textClassName="text-sm font-semibold text-report-muted"
+                    boxClassName="h-16 w-16 rounded-2xl sm:h-20 sm:w-20"
+                    padding="p-2"
+                    frameClassName="border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]"
+                    textClassName="text-lg font-black text-[#2dd4bf]"
                   />
                 )}
                 <div>
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.26em] text-report-faint">Content calendar</p>
-                  <h2 className="mt-1 text-2xl font-semibold text-report-text sm:text-3xl">{client?.name ?? 'Client'}</h2>
-                  <p className="mt-0.5 text-sm text-report-muted">{formatMonthHeading(month)}</p>
+                  <p className="text-[0.65rem] font-black uppercase tracking-[0.28em] text-[#2dd4bf]">Content calendar</p>
+                  <h2 className="mt-2 text-3xl font-black leading-none tracking-[-0.04em] text-white sm:text-5xl">{client?.name ?? 'Client'}</h2>
+                  <p className="mt-3 text-base font-semibold text-slate-300">{formatMonthHeading(month)}</p>
                 </div>
               </div>
               {typeTotals.length > 0 && (
@@ -252,7 +271,7 @@ export default function ClientContentCalendarPage() {
                 <MonthGrid month={month} byDate={byDate} onOpenDay={setDayPanel} />
                 <MobileAgenda byDate={byDate} />
 
-                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-report-line pt-4">
+                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 pt-4">
                   {STATUS_ORDER.map(status => (
                     <span key={status} className="flex items-center gap-1.5 text-[11px] text-report-muted">
                       <span className={`h-2 w-2 rounded-full ${STATUS_DOT[status]}`} />
@@ -262,7 +281,7 @@ export default function ClientContentCalendarPage() {
                 </div>
 
                 {undated.length > 0 && (
-                  <div className="mt-6 rounded-xl border border-report-line bg-report-surface p-4 sm:p-5">
+                  <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.045] p-4 shadow-[0_24px_60px_-44px_rgba(0,0,0,0.9)] backdrop-blur sm:p-5">
                     <h3 className="text-sm font-semibold text-report-text">Being scheduled</h3>
                     <p className="mt-1 text-xs text-report-muted">
                       These posts are part of this month's plan and will be placed on the calendar soon.
@@ -276,7 +295,7 @@ export default function ClientContentCalendarPage() {
             )}
           </div>
 
-          <div className="border-t border-report-line px-5 py-4 text-center text-[11px] tracking-wide text-report-faint sm:px-8">
+          <div className="border-t border-white/10 px-5 py-4 text-center text-[11px] tracking-wide text-slate-500 sm:px-8">
             Prepared by CG Production House · {formatMonthHeading(month)}
           </div>
         </section>
@@ -285,6 +304,7 @@ export default function ClientContentCalendarPage() {
       {dayPanel && (
         <DayPanel date={dayPanel.date} items={dayPanel.items} onClose={() => setDayPanel(null)} />
       )}
+      </div>
     </div>
   )
 }
@@ -293,7 +313,7 @@ function TypeBadge({ type }: { type: DeliverableType }) {
   const badge = TYPE_BADGES[type]
   if (!badge) return null
   return (
-    <span className={`shrink-0 rounded border px-1 py-0.5 text-[9px] font-black leading-none tracking-wide ${badge.cls}`}>
+    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-black leading-none tracking-wide ${badge.cls}`}>
       {badge.short}
     </span>
   )
@@ -303,11 +323,11 @@ function TypeBadge({ type }: { type: DeliverableType }) {
 function PostCard({ item }: { item: MonthlyDeliverable }) {
   const status = toClientSafeStatus(item.production_status)
   return (
-    <div className="rounded-lg border border-report-line bg-report-elevated p-3">
+    <div className="rounded-2xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.075),rgba(255,255,255,0.035))] p-3.5 shadow-[0_18px_45px_-34px_rgba(0,0,0,0.95)] backdrop-blur">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-start gap-2">
           <TypeBadge type={item.deliverable_type} />
-          <p className="min-w-0 text-sm font-medium leading-snug text-report-text">{item.title}</p>
+          <p className="min-w-0 text-sm font-semibold leading-snug text-white">{item.title}</p>
         </div>
         <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_PILL[status]}`}>
           {CLIENT_SAFE_STATUS_LABELS[status]}
@@ -335,18 +355,18 @@ function MonthGrid({ month, byDate, onOpenDay }: {
     <div className="hidden sm:block">
       <div className="mb-1 grid grid-cols-7 gap-px">
         {DAY_NAMES.map(day => (
-          <div key={day} className="py-1 text-center text-[10px] font-bold uppercase tracking-wider text-report-faint">{day}</div>
+          <div key={day} className="py-2 text-center text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">{day}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-report-line bg-report-line">
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 shadow-[0_28px_80px_-54px_rgba(0,0,0,0.95)]">
         {cells.map((day, index) => {
-          if (day === null) return <div key={`empty-${index}`} className="min-h-[112px] bg-report-bg" />
+          if (day === null) return <div key={`empty-${index}`} className="min-h-[116px] bg-[#04100e]/80" />
           const date = `${month}-${String(day).padStart(2, '0')}`
           const dayItems = byDate.get(date) ?? []
           const isToday = date === today
           return (
-            <div key={date} className={`min-h-[112px] p-1.5 ${isToday ? 'bg-report-accent/[0.06]' : 'bg-report-surface'}`}>
-              <span className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${isToday ? 'bg-report-accent text-report-bg' : 'text-report-faint'}`}>{day}</span>
+            <div key={date} className={`min-h-[116px] p-1.5 ${isToday ? 'bg-[#2dd4bf]/[0.075]' : 'bg-[#081614]/86'}`}>
+              <span className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${isToday ? 'bg-[#2dd4bf] text-[#03110f] shadow-[0_0_22px_-7px_rgba(45,212,191,0.9)]' : 'text-slate-500'}`}>{day}</span>
               <div className="space-y-1">
                 {dayItems.slice(0, 3).map(item => {
                   const status = toClientSafeStatus(item.production_status)
@@ -356,10 +376,10 @@ function MonthGrid({ month, byDate, onOpenDay }: {
                       type="button"
                       onClick={() => onOpenDay({ date, items: dayItems })}
                       title={`${item.title} · ${CLIENT_SAFE_STATUS_LABELS[status]}`}
-                      className="flex w-full items-center gap-1.5 rounded-md border border-report-line bg-report-elevated px-1.5 py-1 text-left transition-colors hover:border-report-accent/40"
+                      className="flex w-full items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.055] px-1.5 py-1 text-left transition-colors hover:border-[#2dd4bf]/35 hover:bg-white/[0.08]"
                     >
                       <TypeBadge type={item.deliverable_type} />
-                      <span className="min-w-0 truncate text-[10px] text-report-text/85">{item.title}</span>
+                      <span className="min-w-0 truncate text-[10px] font-medium text-white/85">{item.title}</span>
                       <span className={`ml-auto h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[status]}`} />
                     </button>
                   )
@@ -368,7 +388,7 @@ function MonthGrid({ month, byDate, onOpenDay }: {
                   <button
                     type="button"
                     onClick={() => onOpenDay({ date, items: dayItems })}
-                    className="w-full rounded-md border border-report-line bg-report-bg px-1.5 py-1 text-left text-[10px] font-semibold text-report-muted hover:text-report-text"
+                    className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-1.5 py-1 text-left text-[10px] font-semibold text-slate-400 transition hover:text-white"
                   >
                     +{dayItems.length - 3} more
                   </button>
@@ -390,7 +410,7 @@ function MobileAgenda({ byDate }: { byDate: Map<string, MonthlyDeliverable[]> })
     <div className="space-y-4 sm:hidden">
       {days.map(([date, dayItems]) => (
         <div key={date}>
-          <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-report-faint">{formatDayHeading(date)}</h3>
+          <h3 className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500">{formatDayHeading(date)}</h3>
           <div className="space-y-2">
             {dayItems.map(item => <PostCard key={item.id} item={item} />)}
           </div>
@@ -404,13 +424,13 @@ function DayPanel({ date, items, onClose }: { date: string; items: MonthlyDelive
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-report-line bg-report-bg sm:w-[420px]">
-        <div className="flex items-start justify-between gap-3 border-b border-report-line px-5 py-4">
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/10 bg-[#030706] shadow-2xl sm:w-[420px]">
+        <div className="flex items-start justify-between gap-3 border-b border-white/10 bg-[radial-gradient(circle_at_10%_0%,rgba(45,212,191,0.16),transparent_34%)] px-5 py-4">
           <div>
-            <h2 className="text-base font-semibold text-report-text">{formatDayHeading(date)}</h2>
-            <p className="mt-0.5 text-xs text-report-muted">{items.length} planned post{items.length === 1 ? '' : 's'}</p>
+            <h2 className="text-base font-semibold text-white">{formatDayHeading(date)}</h2>
+            <p className="mt-0.5 text-xs text-slate-500">{items.length} planned post{items.length === 1 ? '' : 's'}</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-report-muted hover:text-report-text">X</button>
+          <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-slate-500 transition hover:text-white">X</button>
         </div>
         <div className="flex-1 space-y-2 overflow-y-auto px-5 py-4">
           {items.map(item => <PostCard key={item.id} item={item} />)}

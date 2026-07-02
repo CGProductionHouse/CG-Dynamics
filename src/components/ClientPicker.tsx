@@ -6,6 +6,8 @@ type ClientPickerProps = {
   label?: string | null
   onChange: (client: ClientOption | null) => void
   placeholder?: string
+  maxResults?: number
+  showAllOnFocus?: boolean
 }
 
 export function ClientPicker({
@@ -13,6 +15,8 @@ export function ClientPicker({
   label,
   onChange,
   placeholder = 'Search clients',
+  maxResults = 8,
+  showAllOnFocus = false,
 }: ClientPickerProps) {
   const [clients, setClients] = useState<ClientOption[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,9 +48,13 @@ export function ClientPicker({
   const selected = clients.find(client => client.id === value) ?? null
   const filtered = useMemo(() => {
     const search = query.trim().toLowerCase()
-    if (!search) return clients.slice(0, 8)
-    return clients.filter(client => client.name.toLowerCase().includes(search)).slice(0, 8)
-  }, [clients, query])
+    const matches = search
+      ? clients.filter(client => client.name.toLowerCase().includes(search))
+      : showAllOnFocus
+        ? clients
+        : clients.slice(0, maxResults)
+    return maxResults > 0 ? matches.slice(0, maxResults) : matches
+  }, [clients, maxResults, query, showAllOnFocus])
 
   function choose(client: ClientOption | null) {
     onChange(client)
@@ -82,7 +90,7 @@ export function ClientPicker({
         className="w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white placeholder:text-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-accent"
       />
       {open && !loading && (
-        <div className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-white/10 bg-[#151515] p-1 shadow-2xl">
+        <div className="absolute z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-white/10 bg-[#151515] p-1 shadow-2xl">
           <button
             type="button"
             onMouseDown={event => event.preventDefault()}
@@ -104,6 +112,11 @@ export function ClientPicker({
           ))}
           {filtered.length === 0 && (
             <p className="px-2.5 py-2 text-sm text-amber-200">No matching active client.</p>
+          )}
+          {clients.length > filtered.length && (
+            <p className="border-t border-white/10 px-2.5 py-2 text-[11px] text-brand-primary/45">
+              Showing {filtered.length} of {clients.length} active clients. Type to search the full list.
+            </p>
           )}
         </div>
       )}
