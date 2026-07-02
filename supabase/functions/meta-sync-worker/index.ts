@@ -513,7 +513,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  // ── Fire-and-forget next worker if items remain ────────────
+  // ── Trigger next worker if items remain ─────────────────────
   if (body.batchId && processed.length > 0) {
     const { count: remaining } = await sb
       .from('meta_sync_batch_items')
@@ -524,20 +524,23 @@ Deno.serve(async (req) => {
     if (remaining && remaining > 0) {
       const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
       const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
-      ;(async () => {
-        try {
-          await fetch(workerUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-worker-secret': workerSecret,
-            },
-            body: JSON.stringify({ batchId: body.batchId }),
-          })
-        } catch {
-          // Next chunk failed to trigger — batch stays running
-        }
-      })()
+      const triggerPromise = fetch(workerUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-worker-secret': workerSecret,
+        },
+        body: JSON.stringify({ batchId: body.batchId }),
+      })
+      // Keep runtime alive until the trigger completes
+      if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime.waitUntil === 'function') {
+        EdgeRuntime.waitUntil(triggerPromise)
+      }
+      try {
+        await Promise.race([triggerPromise, new Promise(resolve => setTimeout(resolve, 5_000))])
+      } catch {
+        // Trigger failed — batch stays running, next poll / retry will continue
+      }
     }
   }
 

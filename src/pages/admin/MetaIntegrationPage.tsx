@@ -536,7 +536,11 @@ export default function MetaIntegrationPage() {
       const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0 ? 'success' : totals.clientsSucceeded > 0 ? 'partial' : 'failed'
       setSyncResult({
         status, monthsAttempted: targets.length, syncEngineVersion,
-        message: status === 'success' ? `Synced ${targets.length} month(s) for ${totals.clientsSucceeded} client(s).` : status === 'partial' ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${targets.length} month(s).` : `Sync failed for all ${totals.clientsAttempted} client(s).`,
+        message: status === 'success'
+          ? `Synced ${syncableAssets.length} client${syncableAssets.length !== 1 ? 's' : ''} × ${targets.length} month${targets.length !== 1 ? 's' : ''} (${syncableAssets.length * targets.length} item${syncableAssets.length * targets.length !== 1 ? 's' : ''}).`
+          : status === 'partial'
+            ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${syncableAssets.length} client${syncableAssets.length !== 1 ? 's' : ''}, ${targets.length} month${targets.length !== 1 ? 's' : ''}.`
+            : `Sync failed for all ${syncableAssets.length * targets.length} item${syncableAssets.length * targets.length !== 1 ? 's' : ''}.`,
         clientsAttempted: totals.clientsAttempted, clientsSucceeded: totals.clientsSucceeded, clientsSynced: totals.clientsSucceeded, clientsFailed: totals.clientsFailed,
         reportsCreated: totals.reportsCreated, reportsReused: totals.reportsReused, reportsUpdated: totals.reportsUpdated, postsSynced: totals.postsSynced,
         warnings, failedClients, succeededClients, steps, diagnostics, details,
@@ -548,6 +552,68 @@ export default function MetaIntegrationPage() {
       setSyncProgress(null)
       setSyncing(false)
     }
+  }
+
+  async function handleBatchComplete(batchIdValue: string) {
+    if (pollRef.current) clearInterval(pollRef.current)
+    pollRef.current = null
+    setBatch(null)
+    setBatchStalled(false)
+    localStorage.removeItem('cg_meta_active_sync_batch_id')
+
+    const { data: items } = await supabase
+      .from('meta_sync_batch_items')
+      .select('status, client_name, month, posts_synced, reports_created, reports_reused, error')
+      .eq('batch_id', batchIdValue)
+    const itemList = (items ?? []) as Array<{ status: string; client_name: string; month: string; posts_synced: number; reports_created: number; reports_reused: number; error?: string | null }>
+
+    const uniqueClientNames = new Set(itemList.map(it => it.client_name))
+    const uniqueMonths = new Set(itemList.map(it => it.month))
+    const uniqueClients = uniqueClientNames.size
+    const monthCount = uniqueMonths.size
+    const totalItems = itemList.length
+
+    const totals = { clientsSucceeded: 0, clientsFailed: 0, postsSynced: 0, reportsCreated: 0, reportsReused: 0 }
+    const failedClients: { name: string; error: string }[] = []
+    const succeededClients: { name: string; postsSynced: number }[] = []
+    for (const it of itemList) {
+      totals.postsSynced += it.posts_synced ?? 0
+      totals.reportsCreated += it.reports_created ?? 0
+      totals.reportsReused += it.reports_reused ?? 0
+      if (it.status === 'completed' || it.status === 'warning') {
+        totals.clientsSucceeded++
+        succeededClients.push({ name: it.client_name, postsSynced: it.posts_synced ?? 0 })
+      } else if (it.status === 'failed') {
+        totals.clientsFailed++
+        failedClients.push({ name: it.client_name, error: it.error ?? 'Unknown error' })
+      }
+    }
+    const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0 ? 'success' : totals.clientsSucceeded > 0 ? 'partial' : 'failed'
+
+    let message: string
+    if (status === 'success') {
+      message = uniqueClients > 1 || monthCount > 1
+        ? `Synced ${uniqueClients} client${uniqueClients !== 1 ? 's' : ''} × ${monthCount} month${monthCount !== 1 ? 's' : ''} (${totalItems} item${totalItems !== 1 ? 's' : ''}).`
+        : `Synced 1 item.`
+    } else if (status === 'partial') {
+      message = `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${uniqueClients} client${uniqueClients !== 1 ? 's' : ''}, ${monthCount} month${monthCount !== 1 ? 's' : ''}.`
+    } else {
+      message = `Sync failed for all ${totalItems} item${totalItems !== 1 ? 's' : ''}.`
+    }
+
+    setSyncResult({
+      status, monthsAttempted: totalItems, clientsAttempted: totalItems,
+      clientsSucceeded: totals.clientsSucceeded, clientsSynced: totals.clientsSucceeded,
+      clientsFailed: totals.clientsFailed,
+      reportsCreated: totals.reportsCreated, reportsReused: totals.reportsReused,
+      postsSynced: totals.postsSynced,
+      message,
+      warnings: itemList.filter(it => it.status === 'warning').map(it => `${it.month} for ${it.client_name}: completed with warnings`),
+      succeededClients, failedClients,
+    })
+    await loadLinkedAssets()
+    setSyncing(false)
+    setSyncProgress(null)
   }
 
   async function startPolling(batchIdValue: string) {
@@ -564,50 +630,36 @@ export default function MetaIntegrationPage() {
           lastCompletedRef.current = batchData.completed_items
           stallRef.current = 0
           setBatchStalled(false)
-        } else if (batchData.status === 'running') {
+        } else if (batchData.status === 'queued' || batchData.status === 'running') {
           stallRef.current++
           if (stallRef.current >= 4) setBatchStalled(true)
         }
       }
       if (batchData?.status === 'completed' || batchData?.status === 'failed') {
-        if (pollRef.current) clearInterval(pollRef.current)
-        pollRef.current = null
-        setBatch(null)
-        setBatchStalled(false)
-        const { data: items } = await supabase
-          .from('meta_sync_batch_items')
-          .select('status, client_name, month, posts_synced, reports_created, reports_reused, error')
-          .eq('batch_id', batchIdValue)
-        const itemList = (items ?? []) as Array<{ status: string; client_name: string; month: string; posts_synced: number; reports_created: number; reports_reused: number; error?: string | null }>
-        const totals = { clientsSucceeded: 0, clientsFailed: 0, postsSynced: 0, reportsCreated: 0, reportsReused: 0 }
-        const failedClients: { name: string; error: string }[] = []
-        const succeededClients: { name: string; postsSynced: number }[] = []
-        for (const it of itemList) {
-          totals.postsSynced += it.posts_synced ?? 0
-          totals.reportsCreated += it.reports_created ?? 0
-          totals.reportsReused += it.reports_reused ?? 0
-          if (it.status === 'completed' || it.status === 'warning') {
-            totals.clientsSucceeded++
-            succeededClients.push({ name: it.client_name, postsSynced: it.posts_synced ?? 0 })
-          } else if (it.status === 'failed') {
-            totals.clientsFailed++
-            failedClients.push({ name: it.client_name, error: it.error ?? 'Unknown error' })
-          }
-        }
-        const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0 ? 'success' : totals.clientsSucceeded > 0 ? 'partial' : 'failed'
-        setSyncResult({
-          status, monthsAttempted: itemList.length, clientsAttempted: itemList.length, clientsSucceeded: totals.clientsSucceeded, clientsSynced: totals.clientsSucceeded, clientsFailed: totals.clientsFailed,
-          reportsCreated: totals.reportsCreated, reportsReused: totals.reportsReused, postsSynced: totals.postsSynced,
-          message: status === 'success' ? `Synced ${itemList.length} item(s) for ${totals.clientsSucceeded} client(s).` : status === 'partial' ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${itemList.length} item(s).` : `Sync failed for all ${itemList.length} item(s).`,
-          warnings: itemList.filter(it => it.status === 'warning').map(it => `${it.month} for ${it.client_name}: completed with warnings`),
-          succeededClients, failedClients,
-        })
-        await loadLinkedAssets()
-        setSyncing(false)
-        setSyncProgress(null)
+        await handleBatchComplete(batchIdValue)
       }
     }, 2500)
     pollRef.current = timer
+  }
+
+  async function handleRetryWorker() {
+    if (!batch?.id) return
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return
+      await fetch(`${SUPABASE_URL}/functions/v1/meta-sync-worker`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ batchId: batch.id }),
+      })
+      stallRef.current = 0
+      setBatchStalled(false)
+    } catch {
+      // Silently ignore — next poll will update UI
+    }
   }
 
   async function handleSync() {
@@ -649,6 +701,7 @@ export default function MetaIntegrationPage() {
       }
 
       setSyncProgress(`Queued sync: ${items.length} client(s) × ${months.length} month(s) = ${data.totalItems} item(s)`)
+      localStorage.setItem('cg_meta_active_sync_batch_id', data.batchId)
       await startPolling(data.batchId)
     } catch (e) {
       setSyncResult({ status: 'failed', message: redactForDisplay(e instanceof Error ? e.message : String(e)), phase: 'unknown', debug: safeStringify({ error: redactForDisplay(e instanceof Error ? e.message : String(e)) }) })
@@ -727,6 +780,53 @@ export default function MetaIntegrationPage() {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
     }
+  }, [])
+
+  // Restore active batch on mount (rehydration across page navigation)
+  useEffect(() => {
+    const savedBatchId = localStorage.getItem('cg_meta_active_sync_batch_id')
+
+    async function restore() {
+      if (savedBatchId) {
+        const { data } = await supabase
+          .from('meta_sync_batches')
+          .select('id, status, total_items, completed_items, failed_items')
+          .eq('id', savedBatchId)
+          .single()
+
+        if (data && (data.status === 'queued' || data.status === 'running')) {
+          setBatch(data as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
+          setSyncing(true)
+          setSyncProgress('Restoring sync progress...')
+          startPolling(data.id)
+          return
+        }
+        if (data) {
+          localStorage.removeItem('cg_meta_active_sync_batch_id')
+          handleBatchComplete(data.id)
+          return
+        }
+        localStorage.removeItem('cg_meta_active_sync_batch_id')
+      }
+
+      const { data: activeBatches } = await supabase
+        .from('meta_sync_batches')
+        .select('id, status, total_items, completed_items, failed_items')
+        .in('status', ['queued', 'running'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (activeBatches && activeBatches.length > 0) {
+        const active = activeBatches[0]
+        localStorage.setItem('cg_meta_active_sync_batch_id', active.id)
+        setBatch(active as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
+        setSyncing(true)
+        setSyncProgress('Restoring sync progress...')
+        startPolling(active.id)
+      }
+    }
+
+    restore()
   }, [])
 
   const loadLinkedAssets = useCallback(async () => {
@@ -1801,7 +1901,12 @@ export default function MetaIntegrationPage() {
               </div>
               {batchStalled && (
                 <div className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
-                  <p className="text-xs font-medium text-amber-200">Queue processing may have stalled. Check that the meta-sync-worker Edge Function is deployed. You can dismiss and retry or wait for the next sync cycle.</p>
+                  <p className="text-xs font-medium text-amber-200">Still processing or waiting for worker. Check that the meta-sync-worker Edge Function is deployed.</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <ActionButton variant="secondary" size="sm" onClick={handleRetryWorker}>
+                      Retry worker
+                    </ActionButton>
+                  </div>
                 </div>
               )}
             </div>
@@ -1967,6 +2072,7 @@ export default function MetaIntegrationPage() {
                   onClick={handleSync}
                   disabled={
                     syncing ||
+                    batch !== null ||
                     linkedAssets.length === 0 ||
                     (syncMode === 'selected' && !selectedSyncClientId)
                   }
@@ -1978,6 +2084,9 @@ export default function MetaIntegrationPage() {
                       ? `Sync selected client (${syncMonthCount} month${syncMonthCount > 1 ? 's' : ''})`
                       : `Sync all linked clients (${syncMonthCount} month${syncMonthCount > 1 ? 's' : ''})`}
                 </ActionButton>
+                {batch !== null && !syncing && (
+                  <span className="text-xs text-brand-primary/60">A sync batch is already running.</span>
+                )}
               </div>
             </div>
           )}
