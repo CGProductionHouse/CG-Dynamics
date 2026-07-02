@@ -1,31 +1,17 @@
 import { supabase } from './supabase'
-import {
-  PACKAGE_DELIVERABLE_TYPES,
-  getEffectiveScheduleDate,
-  listMonthlyDeliverablesByMonth,
-  toClientSafeStatus,
-  type ClientSafeStatus,
-  type DeliverableType,
-  type MonthlyDeliverable,
-} from './planner'
+import { type ClientSafeStatus, type DeliverableType } from './planner'
 import type { CompanyEventType } from './companyCalendar'
 
 // ── Client portal "month ahead" calendar ──────────────────────────────────────
 //
-// Read-only, client-safe view of what CG has planned for a client this month:
-// scheduled posts from monthly_deliverables (the schedule source of truth) and
-// client-relevant company calendar events (shoots, content runs, client
-// events). Never exposes assignees, helpers, internal notes or codes.
+// Read-only, client-safe view of what CG has planned for a client this month.
+// Data comes through safe RPCs that expose only client-facing fields, never
+// assignees, helpers, internal notes, codes, priorities or linked internal IDs.
 //
-// RLS note: monthly_deliverables and company_calendar_events are staff-select
-// today, so a client login receives empty lists until the prepared
-// phase-11a-client-portal-read-access.sql migration is applied. Callers should
-// hide the module when it has no content — staff previews (Client Preview)
-// already see the real data.
-
-// Only these event types are client-relevant. Internal meetings, internal
-// admin events and deadlines never reach the client portal.
-const CLIENT_SAFE_EVENT_TYPES: CompanyEventType[] = ['shoot', 'content_run', 'client_event']
+// RLS note: clients must not receive direct SELECT on monthly_deliverables or
+// company_calendar_events. The phase-11a migration creates RPCs that enforce
+// auth.uid() ownership and return only the columns used here. Staff/admin
+// previews pass a client id to the same safe RPCs.
 
 export interface ClientCalendarPost {
   id: string
@@ -56,53 +42,54 @@ export interface ClientMonthAhead {
   loadFailed: boolean
 }
 
-function toClientPost(deliverable: MonthlyDeliverable): ClientCalendarPost {
-  return {
-    id: deliverable.id,
-    date: getEffectiveScheduleDate(deliverable),
-    title: deliverable.title,
-    type: deliverable.deliverable_type,
-    status: toClientSafeStatus(deliverable.production_status),
-  }
+type ClientPortalPostRow = {
+  row_key: string
+  schedule_date: string | null
+  title: string
+  post_type: string
+  client_safe_status: string
+}
+
+type ClientPortalEventRow = {
+  row_key: string
+  title: string
+  event_type: string
+  start_time: string
+  end_time: string | null
+  all_day: boolean
+  location: string | null
 }
 
 export async function fetchClientMonthAhead(clientId: string, month: string): Promise<ClientMonthAhead> {
   const monthStart = `${month}-01`
-  const [year, m] = month.split('-').map(Number)
-  const nextMonthStart = `${m === 12 ? year + 1 : year}-${String(m === 12 ? 1 : m + 1).padStart(2, '0')}-01`
 
   const [postsResult, eventsResult] = await Promise.all([
-    listMonthlyDeliverablesByMonth(monthStart, { clientId }),
-    supabase
-      .from('company_calendar_events')
-      .select('id, title, event_type, start_at, end_at, all_day, location, status')
-      .eq('client_id', clientId)
-      .in('event_type', CLIENT_SAFE_EVENT_TYPES)
-      .neq('status', 'cancelled')
-      .gte('start_at', `${monthStart}T00:00:00Z`)
-      .lt('start_at', `${nextMonthStart}T00:00:00Z`)
-      .order('start_at'),
+    supabase.rpc('client_portal_month_ahead_posts', { p_client_id: clientId, p_month: monthStart }),
+    supabase.rpc('client_portal_month_ahead_events', { p_client_id: clientId, p_month: monthStart }),
   ])
 
-  const posts = (postsResult.data ?? [])
-    .filter(item => PACKAGE_DELIVERABLE_TYPES.includes(item.deliverable_type))
-    .map(toClientPost)
-    .sort((a, b) => (a.date ?? '9999-12-31').localeCompare(b.date ?? '9999-12-31'))
+  const posts: ClientCalendarPost[] = ((postsResult.data ?? []) as ClientPortalPostRow[]).map(row => ({
+    id: row.row_key,
+    date: row.schedule_date,
+    title: row.title,
+    type: row.post_type as DeliverableType,
+    status: row.client_safe_status as ClientSafeStatus,
+  }))
 
-  const events: ClientCalendarEvent[] = (eventsResult.data ?? []).map(row => ({
-    id: row.id as string,
-    startAt: row.start_at as string,
-    endAt: (row.end_at as string | null) ?? null,
-    allDay: Boolean(row.all_day),
-    title: row.title as string,
+  const events: ClientCalendarEvent[] = ((eventsResult.data ?? []) as ClientPortalEventRow[]).map(row => ({
+    id: row.row_key,
+    startAt: row.start_time,
+    endAt: row.end_time,
+    allDay: row.all_day,
+    title: row.title,
     type: row.event_type as CompanyEventType,
-    location: (row.location as string | null) ?? null,
+    location: row.location,
   }))
 
   return {
     month,
     posts,
     events,
-    loadFailed: Boolean(postsResult.error && eventsResult.error),
+    loadFailed: Boolean(postsResult.error || eventsResult.error),
   }
 }
