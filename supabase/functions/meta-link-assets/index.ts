@@ -10,6 +10,7 @@ interface LinkInput {
   adAccountId?: string | null
   adAccountName?: string | null
   allowOverwrite?: boolean
+  instagramNotApplicable?: boolean
 }
 
 interface ExistingLink {
@@ -116,7 +117,7 @@ Deno.serve(async (req) => {
       continue
     }
 
-    if (!link.facebookPageId && !link.instagramAccountId && !link.adAccountId) {
+    if (!link.facebookPageId && !link.instagramAccountId && !link.adAccountId && !link.instagramNotApplicable) {
       results.push({ clientId, status: 'skipped', message: 'No Meta asset ids supplied.' })
       continue
     }
@@ -134,15 +135,18 @@ Deno.serve(async (req) => {
       continue
     }
 
+    const isIgNa = link.instagramNotApplicable === true
     const payload = {
       client_id: clientId,
       connection_id: connectionId,
       facebook_page_id: link.facebookPageId || null,
       facebook_page_name: link.facebookPageName || null,
-      instagram_account_id: link.instagramAccountId || null,
-      instagram_username: link.instagramUsername || null,
+      instagram_account_id: isIgNa ? null : (link.instagramAccountId || null),
+      instagram_username: isIgNa ? null : (link.instagramUsername || null),
       ad_account_id: link.adAccountId || null,
       ad_account_name: link.adAccountName || null,
+      instagram_not_applicable: isIgNa,
+      instagram_not_applicable_updated_at: new Date().toISOString(),
       is_active: true,
     }
 
