@@ -31,7 +31,7 @@ The `client-websites` Planner board is only partially populated. Imported task d
 
 ## Calendar seed file
 
-`supabase/phase-10b-cg-calendar-teams-seed-2026.sql` — idempotent seed SQL for 27 Monday `MEETING - CG INTERNAL` events (2026-06-29 to 2026-12-28, SAST 09:00–10:00). One-off screenshot-derived events are commented-out placeholders pending screenshot review. **This file has NOT been applied to live Supabase.** Review in the SQL editor before running. No events will be duplicated because each INSERT uses `WHERE NOT EXISTS (title, start_at)`.
+`supabase/phase-10b-cg-calendar-teams-seed-2026.sql` — idempotent seed SQL for **57 total events**: 27 Monday `MEETING - CG INTERNAL` events (2026-06-29 to 2026-12-28, SAST 09:00–10:00) + 30 one-off screenshot-derived events (shoots, content runs, client events, internal meetings). All 57 INSERTs are active. **This file has NOT been applied to live Supabase.** Review in the SQL editor before running. No events will be duplicated because each INSERT uses `WHERE NOT EXISTS (title, start_at)`.
 
 ## Strict import rules (from scheduler Teams parity pass)
 
