@@ -30,6 +30,7 @@ import AssistantPage from './pages/admin/AssistantPage'
 import PlannerPage from './pages/admin/PlannerPage'
 import PackageMasterPage from './pages/admin/PackageMasterPage'
 import ClientSchedulePage from './pages/admin/ClientSchedulePage'
+import ClientContentCalendarPage from './pages/admin/ClientContentCalendarPage'
 import PlannerImportPage from './pages/admin/PlannerImportPage'
 import ImportHealthPage from './pages/admin/ImportHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
@@ -77,6 +78,7 @@ export default function App() {
               <Route path="/admin/planner" element={<PlannerPage />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
+              <Route path="/admin/client-calendar" element={<ClientContentCalendarPage />} />
               <Route path="/admin/monthly-planner" element={<Navigate to="/admin/client-schedule?view=calendar" replace />} />
               <Route path="/admin/master-schedule" element={<Navigate to="/admin/client-schedule?view=year" replace />} />
               <Route path="/admin/clients" element={<ClientsList />} />

@@ -322,6 +322,55 @@ export function isPostedOrHistoryStatus(status: SimplifiedProductionStatus): boo
   return status === 'scheduled_posted'
 }
 
+// ── Client-safe presentation mapping ──────────────────────────
+// Used by the client-ready content calendar (and any future client-facing
+// surface). Collapses internal production statuses into calm, client-safe
+// wording. Internal-only states (blocked, internal changes, review loops)
+// must never leak to a client view — they all resolve to a safe bucket here.
+
+export type ClientSafeStatus =
+  | 'planned'
+  | 'in_production'
+  | 'for_review'
+  | 'awaiting_approval'
+  | 'scheduled_posted'
+
+export const CLIENT_SAFE_STATUS_LABELS: Record<ClientSafeStatus, string> = {
+  planned: 'Planned',
+  in_production: 'In production',
+  for_review: 'For review',
+  awaiting_approval: 'Awaiting approval',
+  scheduled_posted: 'Scheduled / Posted',
+}
+
+export function toClientSafeStatus(
+  raw: ProductionStatus | string | null | undefined,
+): ClientSafeStatus {
+  switch (normalizeScheduleStatus(raw)) {
+    case 'scheduled_posted':
+      return 'scheduled_posted'
+    // Approved work queued in Meta drafts reads as scheduled to a client.
+    case 'meta_drafts':
+      return 'scheduled_posted'
+    case 'awaiting_client':
+      return 'awaiting_approval'
+    case 'ready_review':
+      return 'for_review'
+    case 'in_progress':
+      return 'in_production'
+    default:
+      return 'planned'
+  }
+}
+
+// Effective display schedule date shared across schedule surfaces. During the
+// July 2026 Teams shadow-run the real schedule dates for imported package
+// items may still live in due_date, so prefer scheduled_date and fall back to
+// due_date as the legacy Teams import date. Display/read logic only.
+export function getEffectiveScheduleDate(deliverable: MonthlyDeliverable): string | null {
+  return deliverable.scheduled_date ?? deliverable.due_date ?? null
+}
+
 // ── Helpers ───────────────────────────────────────────────────
 
 export function formatDeliverableCode(code: string, instance: number): string {

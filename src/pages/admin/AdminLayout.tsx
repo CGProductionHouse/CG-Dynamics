@@ -12,6 +12,7 @@ const dynamicsNav = [
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/reports', label: 'Reports' },
   { to: '/admin/published', label: 'Client Preview' },
+  { to: '/admin/client-calendar', label: 'Content Calendar' },
   { to: '/admin/integrations', label: 'Meta / Integrations' },
 ]
 
