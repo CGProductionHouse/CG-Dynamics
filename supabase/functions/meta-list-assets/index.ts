@@ -154,6 +154,7 @@ Deno.serve(async (req) => {
   // ── Fetch Ad Accounts ─────────────────────────────────────
   let adAccounts: AdAccount[] = []
   let adAccountsError: string | null = null
+  let adAccountsDiagnostic: Record<string, unknown> = { available: false }
 
   try {
     const adParams = new URLSearchParams({
@@ -165,11 +166,28 @@ Deno.serve(async (req) => {
     if (adRes.ok) {
       const adData: AdAccountResponse = await adRes.json()
       adAccounts = adData.data ?? []
+      adAccountsDiagnostic = { available: true, count: adAccounts.length }
     } else {
-      adAccountsError = 'Ad account access is not available yet.'
+      let safeMsg = `HTTP ${adRes.status}`
+      try {
+        const errBody = await adRes.json()
+        const err = errBody?.error
+        if (err && typeof err === 'object') {
+          safeMsg = redact([
+            err.message ? String(err.message) : null,
+            err.type ? `type ${err.type}` : null,
+            err.code !== undefined ? `code ${err.code}` : null,
+          ].filter(Boolean).join(', ')) || safeMsg
+        }
+      } catch {
+        // keep HTTP status fallback
+      }
+      adAccountsError = 'Ad account access is not available yet. The connected Meta user may lack Business Manager or ad account permissions.'
+      adAccountsDiagnostic = { available: false, status: safeMsg, hint: 'Verify the connected Meta user has Business Manager access and ad account permissions. Additional Meta app review may also be required.' }
     }
-  } catch {
-    adAccountsError = 'Ad account access is not available yet.'
+  } catch (e) {
+    adAccountsError = 'Ad account access is not available yet. The connected Meta user may lack Business Manager or ad account permissions.'
+    adAccountsDiagnostic = { available: false, networkError: true, hint: 'Verify the connected Meta user has Business Manager access and ad account permissions. Additional Meta app review may also be required.' }
   }
 
   // ── Return safe response (no tokens) ──────────────────────
@@ -196,5 +214,6 @@ Deno.serve(async (req) => {
       accountStatus: a.account_status ?? null,
     })),
     adAccountsError,
+    adAccountsDiagnostic,
   })
 })
