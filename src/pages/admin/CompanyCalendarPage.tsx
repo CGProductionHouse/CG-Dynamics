@@ -212,9 +212,9 @@ export default function CompanyCalendarPage() {
     [filtered, selectedMonth],
   )
 
-  const visibleTasks = layers.tasks ? monthTasks : []
-  const visiblePosts = layers.posts ? monthPosts : []
-  const visibleEvents = layers.events ? monthEvents : []
+  const visibleTasks = useMemo(() => (layers.tasks ? monthTasks : []), [layers.tasks, monthTasks])
+  const visiblePosts = useMemo(() => (layers.posts ? monthPosts : []), [layers.posts, monthPosts])
+  const visibleEvents = useMemo(() => (layers.events ? monthEvents : []), [layers.events, monthEvents])
 
   const postsByDate = useMemo(() => {
     const map = new Map<string, MonthlyDeliverable[]>()
