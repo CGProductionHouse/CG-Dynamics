@@ -32,6 +32,13 @@ interface AdAccountResponse {
   data: AdAccount[]
 }
 
+function redact(text: string): string {
+  return text
+    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
+    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -117,7 +124,7 @@ Deno.serve(async (req) => {
       pages = pageData.data ?? []
     }
   } catch (err) {
-    console.error('Failed to fetch Facebook Pages:', err)
+    console.error('Failed to fetch Facebook Pages:', redact(err instanceof Error ? err.message : String(err)))
   }
 
   // ── Build Instagram accounts list ─────────────────────────
