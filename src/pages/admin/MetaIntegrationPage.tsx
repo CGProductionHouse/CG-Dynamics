@@ -372,6 +372,7 @@ export default function MetaIntegrationPage() {
 
   // Table filter tabs
   const [tableFilter, setTableFilter] = useState<TableFilter>('needs')
+  const [selectedSuggestionClientId, setSelectedSuggestionClientId] = useState<string | null>(null)
 
   // Linked assets list
   const [linkedAssets, setLinkedAssets] = useState<LinkedAsset[]>([])
@@ -627,11 +628,6 @@ export default function MetaIntegrationPage() {
     () => clients.map(c => ({ value: c.id, label: c.name })).sort((a, b) => a.label.localeCompare(b.label)),
     [clients],
   )
-  const filteredIgOptions = useMemo(
-    () => igAccounts.map(a => ({ value: a.id, label: a.name || a.username || a.id })).sort((a, b) => a.label.localeCompare(b.label)),
-    [igAccounts],
-  )
-
   // Per-page IG options for inline row pickers.
   function igOptionsForPage(pageId: string | null | undefined) {
     const filtered = pageId ? igAccounts.filter(a => a.facebookPageId === pageId) : igAccounts
@@ -646,9 +642,52 @@ export default function MetaIntegrationPage() {
     return options.sort((a, b) => a.label.localeCompare(b.label))
   }
 
-  const selectedPage = pages.find(p => p.id === selectedPageId)
-  const selectedIg = igAccounts.find(a => a.id === selectedIgId)
-  const selectedAd = adAccounts.find(a => a.id === selectedAdId)
+  function pageAssetForId(id: string): FbPage | null {
+    if (!id) return null
+    const page = pages.find(p => p.id === id)
+    if (page) return page
+    const link = linkedAssets.find(asset => asset.facebook_page_id === id)
+    if (!link) return null
+    return {
+      id,
+      name: link.facebook_page_name ?? id,
+      category: null,
+      instagramAccount: null,
+    }
+  }
+
+  function instagramAssetForId(id: string): IgAccount | null {
+    if (!id) return null
+    const account = igAccounts.find(a => a.id === id)
+    if (account) return account
+    const link = linkedAssets.find(asset => asset.instagram_account_id === id)
+    if (!link) return null
+    return {
+      id,
+      username: link.instagram_username,
+      name: link.instagram_username,
+      profilePictureUrl: null,
+      facebookPageId: link.facebook_page_id ?? '',
+      facebookPageName: link.facebook_page_name ?? '',
+    }
+  }
+
+  function adAccountForId(id: string): AdAccount | null {
+    if (!id) return null
+    const account = adAccounts.find(a => a.id === id)
+    if (account) return account
+    const link = linkedAssets.find(asset => asset.ad_account_id === id)
+    if (!link) return null
+    return {
+      id,
+      name: link.ad_account_name ?? id,
+      accountStatus: null,
+    }
+  }
+
+  const selectedPage = pageAssetForId(selectedPageId)
+  const selectedIg = instagramAssetForId(selectedIgId)
+  const selectedAd = adAccountForId(selectedAdId)
 
   const linkedByClient = useMemo(() => {
     return new Map(linkedAssets.map(asset => [asset.client_id, asset]))
@@ -752,9 +791,29 @@ export default function MetaIntegrationPage() {
         !s.currentLink?.facebook_page_id ||
         !s.currentLink?.instagram_account_id ||
         (adAccounts.length > 0 && !s.currentLink?.ad_account_id) ||
-        s.confidence === 'low' || s.confidence === 'medium' || s.confidence === 'none'
+      s.confidence === 'low' || s.confidence === 'medium' || s.confidence === 'none'
     })
   }, [suggestions, tableFilter, adAccounts.length])
+
+  const filteredSuggestionIds = useMemo(
+    () => filteredSuggestions.map(s => s.client.id).join('|'),
+    [filteredSuggestions],
+  )
+
+  useEffect(() => {
+    if (!assetsLoaded) return
+    if (filteredSuggestions.length === 0) {
+      if (selectedSuggestionClientId !== null) setSelectedSuggestionClientId(null)
+      return
+    }
+    if (!selectedSuggestionClientId || !filteredSuggestions.some(s => s.client.id === selectedSuggestionClientId)) {
+      setSelectedSuggestionClientId(filteredSuggestions[0].client.id)
+    }
+  }, [assetsLoaded, filteredSuggestionIds, filteredSuggestions, selectedSuggestionClientId])
+
+  const selectedSuggestion = useMemo(() => {
+    return filteredSuggestions.find(s => s.client.id === selectedSuggestionClientId) ?? filteredSuggestions[0] ?? null
+  }, [filteredSuggestions, selectedSuggestionClientId])
 
   // Initialise row selections from suggestions when assets are loaded.
   useEffect(() => {
@@ -900,9 +959,9 @@ export default function MetaIntegrationPage() {
         action: 'upsert',
         link: buildLinkPayload({
           clientId,
-          page: pages.find(p => p.id === sel.facebookPageId) ?? null,
-          instagram: igAccounts.find(a => a.id === sel.instagramAccountId) ?? null,
-          adAccount: adAccounts.find(a => a.id === sel.adAccountId) ?? null,
+          page: pageAssetForId(sel.facebookPageId),
+          instagram: instagramAssetForId(sel.instagramAccountId),
+          adAccount: adAccountForId(sel.adAccountId),
           allowOverwrite,
         }),
       })
@@ -949,9 +1008,9 @@ export default function MetaIntegrationPage() {
             action: 'upsert',
             link: buildLinkPayload({
               clientId,
-              page: pages.find(p => p.id === sel.facebookPageId) ?? null,
-              instagram: igAccounts.find(a => a.id === sel.instagramAccountId) ?? null,
-              adAccount: adAccounts.find(a => a.id === sel.adAccountId) ?? null,
+              page: pageAssetForId(sel.facebookPageId),
+              instagram: instagramAssetForId(sel.instagramAccountId),
+              adAccount: adAccountForId(sel.adAccountId),
             }),
           })
           linked++
@@ -1394,45 +1453,68 @@ export default function MetaIntegrationPage() {
                 </div>
               )}
 
-              {/* Table filter tabs */}
-              <div className="flex gap-1 rounded-lg border border-brand-muted bg-brand-bg p-0.5 w-fit">
-                <ActionButton
-                  variant={tableFilter === 'needs' ? 'primary' : 'ghost'}
-                  size="sm"
+              {adPickerOptions.length === 0 && (
+                <div className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
+                  <p className="text-sm font-semibold text-white">Ad accounts unavailable</p>
+                  <p className="mt-1 text-xs leading-relaxed text-brand-primary/70">
+                    Facebook and Instagram organic reporting can still sync without ad accounts. Ad accounts are only needed for paid or boosted reporting.
+                  </p>
+                  <p className="mt-1 text-xs text-brand-primary/55">
+                    {adAccountsError || 'Meta returned no ad accounts. Check ad account permissions in Meta Business Suite if paid reporting is needed.'}
+                  </p>
+                  {adAccountsDiagnostic?.status !== undefined && adAccountsDiagnostic?.status !== null && (
+                    <p className="mt-1 text-xs text-brand-primary/40">Meta API response: {String(adAccountsDiagnostic.status)}</p>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
                   onClick={() => setTableFilter('needs')}
+                  className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition ${
+                    tableFilter === 'needs'
+                      ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent'
+                      : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'
+                  }`}
                 >
-                  Needs linking / review ({needsCount})
-                </ActionButton>
-                <ActionButton
-                  variant={tableFilter === 'linked' ? 'primary' : 'ghost'}
-                  size="sm"
+                  Needs review ({needsCount})
+                </button>
+                <button
+                  type="button"
                   onClick={() => setTableFilter('linked')}
+                  className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition ${
+                    tableFilter === 'linked'
+                      ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent'
+                      : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'
+                  }`}
                 >
                   Already linked ({linkedCount})
-                </ActionButton>
-                <ActionButton
-                  variant={tableFilter === 'all' ? 'primary' : 'ghost'}
-                  size="sm"
+                </button>
+                <button
+                  type="button"
                   onClick={() => setTableFilter('all')}
+                  className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition ${
+                    tableFilter === 'all'
+                      ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent'
+                      : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'
+                  }`}
                 >
                   All active clients ({suggestions.length})
-                </ActionButton>
+                </button>
               </div>
 
-              {/* Suggested matches table with inline editing */}
-              <div className="rounded-xl border border-brand-muted bg-brand-bg/55 p-4">
+              <div className="rounded-2xl border border-white/10 bg-[#071311]/80 p-4 shadow-[0_24px_80px_-54px_rgba(0,0,0,0.95)]">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Suggested matches</p>
-                    <h3 className="mt-1 text-base font-semibold text-white">
-                      {tableFilter === 'needs' && 'Review and correct matches needing attention'}
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Link assets workspace</p>
+                    <h3 className="mt-1 text-xl font-semibold text-white">
+                      {tableFilter === 'needs' && 'Needs review queue'}
                       {tableFilter === 'linked' && 'Already linked clients'}
                       {tableFilter === 'all' && 'All active clients'}
                     </h3>
-                    <p className="mt-1 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
-                      {tableFilter === 'needs' && 'High-confidence suggestions are preselected. Correct any wrong suggestions using the inline pickers, then link approved rows.'}
-                      {tableFilter === 'linked' && 'These clients already have active Meta asset links. Switch to "Needs linking / review" to see clients requiring action.'}
-                      {tableFilter === 'all' && 'Showing all active clients. Use the filter tabs above to focus on clients needing attention.'}
+                    <p className="mt-1 max-w-3xl text-sm leading-relaxed text-brand-primary/75">
+                      Select a client from the queue, review the suggested Facebook, Instagram and ad account matches, correct anything wrong, then save the client link.
                     </p>
                   </div>
                   <ActionButton
@@ -1441,138 +1523,189 @@ export default function MetaIntegrationPage() {
                     disabled={approvedCount === 0 || bulkSaving || tableFilter === 'linked'}
                     loading={bulkSaving}
                   >
-                    Link approved rows ({approvedCount})
+                    Link approved suggestions ({approvedCount})
                   </ActionButton>
                 </div>
 
-                <div className="mt-4 overflow-x-auto">
-                  <table className="min-w-[1200px] w-full text-left text-sm">
-                    <thead className="text-xs uppercase tracking-[0.12em] text-brand-primary/55">
-                      <tr className="border-b border-white/10">
-                        <th className="px-2 py-2">Active CG client</th>
-                        <th className="px-2 py-2 min-w-[180px]">Facebook Page</th>
-                        <th className="px-2 py-2 min-w-[180px]">Instagram</th>
-                        <th className="px-2 py-2 min-w-[180px]">Ad Account</th>
-                        <th className="px-2 py-2">Confidence</th>
-                        <th className="px-2 py-2 min-w-[140px]">Current / warning</th>
-                        <th className="px-2 py-2">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/8">
-                      {filteredSuggestions.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="px-2 py-8 text-center text-sm text-brand-primary/50">
-                            {tableFilter === 'needs' && 'All clients are linked. No items need review.'}
-                            {tableFilter === 'linked' && 'No clients with complete active Meta links yet.'}
-                            {tableFilter === 'all' && 'No active clients to display.'}
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredSuggestions.map(suggestion => {
-                          const clientId = suggestion.client.id
-                          const sel = linkFromSelections(clientId)
-                          const hasAny = Boolean(sel.pageId || sel.igId || sel.adId)
+                {filteredSuggestions.length === 0 ? (
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-10 text-center">
+                    <p className="text-sm font-semibold text-white">
+                      {tableFilter === 'needs' && 'All active clients are linked or no review items are available.'}
+                      {tableFilter === 'linked' && 'No complete active Meta links yet.'}
+                      {tableFilter === 'all' && 'No active clients to display.'}
+                    </p>
+                    <p className="mt-2 text-sm text-brand-primary/60">
+                      Load Meta assets or switch views to continue reviewing client links.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)]">
+                    <div className="space-y-2">
+                      {filteredSuggestions.map(suggestion => {
+                        const clientId = suggestion.client.id
+                        const sel = linkFromSelections(clientId)
+                        const isSelected = selectedSuggestion?.client.id === clientId
+                        const hasFacebook = Boolean(sel.pageId || suggestion.currentLink?.facebook_page_id)
+                        const hasInstagram = Boolean(sel.igId || suggestion.currentLink?.instagram_account_id)
+                        const hasAd = Boolean(sel.adId || suggestion.currentLink?.ad_account_id)
+                        const actionNeeded = suggestion.alreadyLinkedDifferently
+                          ? 'Review overwrite'
+                          : suggestion.alreadyLinkedSame
+                            ? 'Linked'
+                            : suggestion.confidence === 'high' && (sel.pageId || sel.igId || sel.adId)
+                              ? 'Ready to link'
+                              : 'Needs review'
+                        return (
+                          <button
+                            key={clientId}
+                            type="button"
+                            onClick={() => setSelectedSuggestionClientId(clientId)}
+                            className={`w-full rounded-2xl border p-4 text-left transition ${
+                              isSelected
+                                ? 'border-brand-accent/45 bg-brand-accent/[0.08] shadow-[0_0_0_1px_rgba(45,212,191,0.12)]'
+                                : 'border-white/10 bg-white/[0.035] hover:border-white/18 hover:bg-white/[0.055]'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-bold text-white">{suggestion.client.name}</p>
+                                <p className="mt-1 text-xs text-brand-primary/55">{actionNeeded}</p>
+                              </div>
+                              <ConfidencePill confidence={suggestion.confidence} />
+                            </div>
+                            <div className="mt-3 grid grid-cols-3 gap-1.5 text-[10px] font-black uppercase tracking-[0.08em]">
+                              <span className={`rounded-full border px-2 py-1 text-center ${hasFacebook ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]' : 'border-amber-300/25 bg-amber-300/10 text-amber-200'}`}>FB</span>
+                              <span className={`rounded-full border px-2 py-1 text-center ${hasInstagram ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]' : 'border-amber-300/25 bg-amber-300/10 text-amber-200'}`}>IG</span>
+                              <span className={`rounded-full border px-2 py-1 text-center ${hasAd ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]' : 'border-white/10 bg-white/[0.035] text-brand-primary/55'}`}>Ad</span>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
 
-                          return (
-                            <tr key={clientId} className="align-top">
-                              <td className="px-2 py-3 font-semibold text-white whitespace-nowrap">{suggestion.client.name}</td>
+                    {selectedSuggestion && (() => {
+                      const clientId = selectedSuggestion.client.id
+                      const sel = linkFromSelections(clientId)
+                      const hasAny = Boolean(sel.pageId || sel.igId || sel.adId)
+                      const pageOptions = pagePickerOptions
+                      const instagramOptions = igOptionsForPage(sel.pageId || selectedSuggestion.currentLink?.facebook_page_id)
+                      return (
+                        <div className="rounded-2xl border border-white/10 bg-black/18 p-4 sm:p-5">
+                          <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary/50">Selected client</p>
+                              <h4 className="mt-1 text-2xl font-semibold text-white">{selectedSuggestion.client.name}</h4>
+                              <p className="mt-1 text-sm text-brand-primary/65">{selectedSuggestion.reason}</p>
+                            </div>
+                            <ConfidencePill confidence={selectedSuggestion.confidence} />
+                          </div>
 
-                              {/* Facebook Page picker */}
-                              <td className="px-2 py-3 min-w-[180px]">
+                          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/50">Suggested Facebook</p>
+                              <p className="mt-1 text-sm font-semibold text-white">{selectedSuggestion.page.asset?.name ?? 'No safe match'}</p>
+                              <p className="mt-1 text-xs text-brand-primary/55">{selectedSuggestion.page.reason}</p>
+                            </div>
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/50">Suggested Instagram</p>
+                              <p className="mt-1 text-sm font-semibold text-white">
+                                {selectedSuggestion.instagram.asset?.username ? `@${selectedSuggestion.instagram.asset.username}` : selectedSuggestion.instagram.asset?.name ?? 'No safe match'}
+                              </p>
+                              <p className="mt-1 text-xs text-brand-primary/55">{selectedSuggestion.instagram.reason}</p>
+                            </div>
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/50">Suggested ad account</p>
+                              <p className="mt-1 text-sm font-semibold text-white">{selectedSuggestion.adAccount.asset?.name ?? 'Optional / unavailable'}</p>
+                              <p className="mt-1 text-xs text-brand-primary/55">{selectedSuggestion.adAccount.reason}</p>
+                            </div>
+                          </div>
+
+                          <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+                            <div className="space-y-4">
+                              <div>
+                                <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Facebook Page</label>
                                 <SearchablePicker
                                   value={sel.pageId}
                                   onChange={v => updateRowSelection(clientId, 'facebookPageId', v)}
-                                  options={pagePickerOptions}
-                                  placeholder={pagePickerOptions.length === 0 ? 'No pages' : 'Select page...'}
-                                  emptyLabel={pagePickerOptions.length === 0 ? 'No pages available' : 'No matching pages'}
+                                  options={pageOptions}
+                                  placeholder={pageOptions.length === 0 ? 'No Facebook Pages available' : 'Select Facebook Page'}
+                                  emptyLabel={pageOptions.length === 0 ? 'No Meta pages or existing linked pages available. Reconnect Meta or check Page permissions.' : 'No matching Facebook Pages'}
                                 />
-                              </td>
+                                {pageOptions.length === 0 && (
+                                  <p className="mt-1.5 text-xs text-amber-200/75">Meta returned no pages and there are no existing linked page fallbacks for this workspace.</p>
+                                )}
+                              </div>
 
-                              {/* Instagram picker */}
-                              <td className="px-2 py-3 min-w-[180px]">
+                              <div>
+                                <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Instagram account</label>
                                 <SearchablePicker
                                   value={sel.igId}
                                   onChange={v => updateRowSelection(clientId, 'instagramAccountId', v)}
-                                  options={igOptionsForPage(sel.pageId || suggestion.currentLink?.facebook_page_id)}
-                                  placeholder={igPickerOptions.length === 0 ? 'No IG accounts' : 'Select Instagram...'}
-                                  emptyLabel={sel.pageId ? 'No IG for this page' : 'Select a page first'}
+                                  options={instagramOptions}
+                                  placeholder={instagramOptions.length === 0 ? 'No Instagram accounts available' : 'Select Instagram account'}
+                                  emptyLabel={sel.pageId ? 'No Instagram account linked to this Facebook Page.' : 'Select a Facebook Page first, or choose from existing linked Instagram fallbacks.'}
                                 />
-                              </td>
+                                {instagramOptions.length === 0 && (
+                                  <p className="mt-1.5 text-xs text-brand-primary/55">Instagram accounts must be Business accounts connected to a Facebook Page in Meta Business Suite.</p>
+                                )}
+                              </div>
 
-                              {/* Ad Account picker */}
-                              <td className="px-2 py-3 min-w-[180px]">
+                              <div>
+                                <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Ad account</label>
                                 {adPickerOptions.length > 0 ? (
                                   <SearchablePicker
                                     value={sel.adId}
                                     onChange={v => updateRowSelection(clientId, 'adAccountId', v)}
                                     options={adPickerOptions}
-                                    placeholder="Select ad account..."
-                                    emptyLabel="No ad accounts"
+                                    placeholder="Select ad account (optional)"
+                                    emptyLabel="No matching ad accounts"
                                   />
                                 ) : (
-                                  <p className="text-xs leading-relaxed text-brand-primary/60">
-                                    {adAccountsError ? (
-                                      <>Ad accounts not available.<br />
-                                        <span className="text-amber-300/80">Facebook &amp; Instagram sync can still work without ad accounts.</span>
-                                        <span className="block mt-1 text-brand-primary/50">Ad accounts are needed for paid/boosted reporting.</span>
-                                        {adAccountsDiagnostic?.status && (
-                                          <span className="block mt-1 text-brand-primary/40">Meta response: {String(adAccountsDiagnostic.status)}</span>
-                                        )}
-                                      </>
-                                    ) : (
-                                      'No ad accounts loaded.'
-                                    )}
-                                  </p>
+                                  <div className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3 text-sm text-brand-primary/65">
+                                    {adAccountsError || 'No ad accounts loaded. Facebook and Instagram organic sync can still work.'}
+                                  </div>
                                 )}
-                              </td>
+                              </div>
+                            </div>
 
-                              {/* Confidence */}
-                              <td className="px-2 py-3">
-                                <ConfidencePill confidence={suggestion.confidence} />
-                                <p className="mt-1 text-xs text-brand-primary/60 max-w-[140px]">{suggestion.reason}</p>
-                              </td>
-
-                              {/* Current / warning */}
-                              <td className="px-2 py-3 text-xs text-brand-primary/75 max-w-[160px]">
-                                {suggestion.currentLink ? (
-                                  <>
-                                    <p className="font-semibold text-white">Currently linked</p>
-                                    <p>{suggestion.currentLink.facebook_page_name || 'No FB Page'}</p>
-                                    <p>{suggestion.currentLink.instagram_username ? `@${suggestion.currentLink.instagram_username}` : 'No IG'}</p>
-                                    <p>{suggestion.currentLink.ad_account_name || 'No ad account'}</p>
-                                  </>
-                                ) : (
-                                  <p>Not linked yet</p>
-                                )}
-                                {suggestion.alreadyLinkedDifferently && (
-                                  <p className="mt-1 rounded-md border border-amber-400/20 bg-amber-400/10 px-1.5 py-1 text-amber-300 text-[11px]">
-                                    Differs from current. Use per-row action to overwrite.
-                                  </p>
-                                )}
-                                {suggestion.alreadyLinkedSame && (
-                                  <p className="mt-1 text-brand-teal/70">Already linked with these assets.</p>
-                                )}
-                              </td>
-
-                              {/* Action */}
-                              <td className="px-2 py-3">
+                            <aside className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
+                              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary/50">Current linked assets</p>
+                              {selectedSuggestion.currentLink ? (
+                                <div className="mt-3 space-y-2 text-sm text-brand-primary/75">
+                                  <p><span className="text-white">Facebook:</span> {selectedSuggestion.currentLink.facebook_page_name || 'Not linked'}</p>
+                                  <p><span className="text-white">Instagram:</span> {selectedSuggestion.currentLink.instagram_username ? `@${selectedSuggestion.currentLink.instagram_username}` : 'Not linked'}</p>
+                                  <p><span className="text-white">Ad account:</span> {selectedSuggestion.currentLink.ad_account_name || 'Not linked'}</p>
+                                </div>
+                              ) : (
+                                <p className="mt-3 text-sm text-brand-primary/60">No active Meta link yet.</p>
+                              )}
+                              {selectedSuggestion.alreadyLinkedDifferently && (
+                                <p className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
+                                  The selected assets differ from the current link. Saving will ask before replacing the existing active link.
+                                </p>
+                              )}
+                              {selectedSuggestion.alreadyLinkedSame && (
+                                <p className="mt-4 rounded-lg border border-brand-teal/20 bg-brand-teal/10 px-3 py-2 text-xs leading-relaxed text-[#66d0c3]">
+                                  This client is already linked with the selected assets.
+                                </p>
+                              )}
+                              <div className="mt-5">
                                 <ActionButton
                                   variant="secondary"
-                                  size="sm"
                                   onClick={() => handleRowLink(clientId)}
-                                  disabled={!hasAny || suggestion.alreadyLinkedSame || linkingRows.has(clientId)}
+                                  disabled={!hasAny || selectedSuggestion.alreadyLinkedSame || linkingRows.has(clientId)}
                                   loading={linkingRows.has(clientId)}
                                 >
-                                  {suggestion.alreadyLinkedSame ? 'Linked' : 'Link this client'}
+                                  {selectedSuggestion.alreadyLinkedSame ? 'Already linked' : 'Link / update client'}
                                 </ActionButton>
-                              </td>
-                            </tr>
-                          )
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                              </div>
+                            </aside>
+                          </div>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
               </div>
 
               {/* Manual override (demoted fallback) */}
@@ -1610,7 +1743,7 @@ export default function MetaIntegrationPage() {
                           ? igAccounts.filter(a => a.facebookPageId === selectedPageId)
                               .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
                               .sort((a, b) => a.label.localeCompare(b.label))
-                          : filteredIgOptions
+                          : igPickerOptions
                       }
                       placeholder={igAccounts.length === 0 ? 'No Instagram accounts found' : 'Select an account...'}
                       emptyLabel={selectedPageId ? 'No Instagram linked to this page' : 'Select a Facebook Page first'}

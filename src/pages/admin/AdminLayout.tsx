@@ -158,7 +158,7 @@ export default function AdminLayout() {
   const mobileItems = zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems
 
   return (
-    <div className="min-h-screen bg-brand-bg md:flex">
+    <div className="min-h-screen bg-brand-bg md:flex md:h-screen md:overflow-hidden">
       <div className="fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-brand-teal/70 to-transparent pointer-events-none" />
 
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur md:hidden">
@@ -204,7 +204,7 @@ export default function AdminLayout() {
         </div>
       )}
 
-      <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-black/72 md:flex md:flex-col">
+      <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-black/72 md:flex md:h-screen md:flex-col">
         <div className="border-b border-white/10 px-5 py-5">
           <BrandMark subtitle={profile?.role ?? 'staff'} compact />
         </div>
@@ -217,7 +217,7 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 overflow-auto pb-16 md:pb-0">
+      <main className="min-w-0 flex-1 overflow-auto pb-16 md:h-screen md:pb-0">
         <Outlet />
       </main>
 
