@@ -76,6 +76,35 @@ interface ConnectionInfo {
   metaBusinessName: string | null
 }
 
+type ReadinessFilter = 'none' | 'active' | 'linked' | 'missingFacebook' | 'missingInstagram' | 'missingAdAccount'
+
+const SYNC_RANGE_OPTIONS = [
+  { value: 1, label: '1 completed month' },
+  { value: 3, label: '3 completed months' },
+  { value: 6, label: '6 completed months' },
+  { value: 12, label: '12 completed months' },
+] as const
+
+const CLIENT_ALIASES: Record<string, string> = {
+  staffy: 'staffordshire',
+  staffies: 'staffordshire',
+  ronni: 'ronnie',
+  ronnies: 'ronnie',
+  micky: 'mickey',
+  mickys: 'mickey',
+  bobby: 'bob',
+  bobbie: 'bob',
+  tommys: 'tommy',
+  tommy: 'tommy',
+  jimmys: 'jimmy',
+  jimmy: 'jimmy',
+  charlies: 'charlie',
+  charley: 'charlie',
+  da: 'the',
+  o: 'of',
+  n: 'and',
+}
+
 /* ---------- SearchablePicker ---------- */
 interface SearchablePickerProps {
   value: string
@@ -167,12 +196,17 @@ function redactForDisplay(text: string): string {
     .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
 }
 
+function applyAliases(value: string): string {
+  const tokens = value.split(/\s+/).filter(Boolean)
+  return tokens.map(token => CLIENT_ALIASES[token] ?? token).join(' ')
+}
+
 function normalizeMatchName(value: string | null | undefined): string {
   const suffixes = new Set([
     'pty', 'ltd', 'limited', 'restaurant', 'restaurants', 'bar', 'grill', 'cafe', 'coffee',
     'the', 'official', 'sa', 'south', 'africa', 'group', 'company', 'co', 'inc', 'llc',
   ])
-  return (value ?? '')
+  const normalized = (value ?? '')
     .toLowerCase()
     .replace(/&/g, ' and ')
     .replace(/[^a-z0-9\s]/g, ' ')
@@ -181,6 +215,7 @@ function normalizeMatchName(value: string | null | undefined): string {
     .filter(token => !suffixes.has(token))
     .join(' ')
     .trim()
+  return applyAliases(normalized)
 }
 
 function levenshtein(a: string, b: string): number {
@@ -208,7 +243,7 @@ function similarity(a: string, b: string): number {
   if (a === b) return 1
   const shorter = a.length <= b.length ? a : b
   const longer = a.length > b.length ? a : b
-  if (shorter.length >= 5 && longer.includes(shorter)) return 0.96
+  if (shorter.length >= 4 && longer.includes(shorter)) return 0.96
   const distance = levenshtein(a, b)
   const editScore = 1 - distance / Math.max(a.length, b.length)
   const aTokens = new Set(a.split(' ').filter(Boolean))
@@ -235,15 +270,15 @@ function bestMatch<T>(clientName: string, assets: T[], getNames: (asset: T) => A
       const score = similarity(clientKey, assetKey)
       if (score > best.score) {
         const reason = score >= 0.96 && clientKey !== assetKey
-          ? `Contained match: "${clientKey}" vs "${assetKey}".`
+          ? `Strong match: normalized "${clientKey}" matches "${assetKey}".`
           : clientKey === assetKey
-            ? `Exact normalized match: "${clientKey}".`
-            : `Name similarity ${(score * 100).toFixed(0)}%.`
+            ? `Exact match after aliases and normalisation.`
+            : `Similarity ${(score * 100).toFixed(0)}%.`
         best = { asset, score, reason }
       }
     }
   }
-  return best.score >= 0.55 ? best : { asset: null, score: 0, reason: 'No safe name match.' }
+  return best.score >= 0.55 ? best : { asset: null, score: 0, reason: 'No safe name match found.' }
 }
 
 function formatDateTime(value: string | null | undefined) {
@@ -257,12 +292,14 @@ function formatDateTime(value: string | null | undefined) {
   }).format(new Date(value))
 }
 
-// Calendar month before the given YYYY-MM, as YYYY-MM (used for baseline sync).
-function priorMonth(month: string): string {
-  const year = Number(month.slice(0, 4))
-  const m = Number(month.slice(5, 7)) // 1-12
-  const d = new Date(Date.UTC(year, m - 2, 1))
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+function getCompletedMonths(count: number): string[] {
+  const now = new Date()
+  const months: string[] = []
+  for (let i = 0; i < count; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - 1 - i, 1)
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+  }
+  return months
 }
 
 function CopyButton({ getPayload }: { getPayload: () => Record<string, unknown> }) {
@@ -310,9 +347,10 @@ export default function MetaIntegrationPage() {
   const [igAccounts, setIgAccounts] = useState<IgAccount[]>([])
   const [adAccounts, setAdAccounts] = useState<AdAccount[]>([])
   const [adAccountsError, setAdAccountsError] = useState<string | null>(null)
+  const [adAccountsDiagnostic, setAdAccountsDiagnostic] = useState<Record<string, unknown> | null>(null)
   const [assetError, setAssetError] = useState<string | null>(null)
 
-  // Linking form
+  // Linking form (manual fallback)
   const [clients, setClients] = useState<Client[]>([])
   const [selectedClientId, setSelectedClientId] = useState('')
   const [selectedPageId, setSelectedPageId] = useState('')
@@ -321,6 +359,13 @@ export default function MetaIntegrationPage() {
   const [saving, setSaving] = useState(false)
   const [bulkSaving, setBulkSaving] = useState(false)
   const [linkMsg, setLinkMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
+  // Row-level selections for inline editing
+  const [rowSelections, setRowSelections] = useState<Record<string, { facebookPageId: string; instagramAccountId: string; adAccountId: string }>>({})
+  const [linkingRows, setLinkingRows] = useState<Set<string>>(new Set())
+
+  // Readiness drilldown
+  const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter>('none')
 
   // Linked assets list
   const [linkedAssets, setLinkedAssets] = useState<LinkedAsset[]>([])
@@ -331,19 +376,17 @@ export default function MetaIntegrationPage() {
   const [syncProgress, setSyncProgress] = useState<string | null>(null)
   const [syncMode, setSyncMode] = useState<'all' | 'selected'>('all')
   const [selectedSyncClientId, setSelectedSyncClientId] = useState('')
-  // When on, the sync also pulls the previous calendar month so the report can
-  // show month-over-month growth.
-  const [syncBaseline, setSyncBaseline] = useState(false)
+  const [syncMonthCount, setSyncMonthCount] = useState(3)
   const [syncResult, setSyncResult] = useState<{
     status: string
     message: string
-    period?: { periodStart: string; periodEnd: string; month: string }
     phase?: string
     syncEngineVersion?: string
     clientsAttempted?: number
     clientsSucceeded?: number
     clientsSynced?: number
     clientsFailed?: number
+    monthsAttempted?: number
     reportsCreated?: number
     reportsReused?: number
     reportsUpdated?: number
@@ -425,13 +468,11 @@ export default function MetaIntegrationPage() {
     loadLinkedAssets()
   }, [checkConnection])
 
-  // OAuth result from URL query params – shows a success/error banner
-  // but does not override the server-driven connection state.
+  // OAuth result from URL query params.
   useEffect(() => {
     const meta = searchParams.get('meta')
     if (meta === 'connected') {
       setConnectMsg('Meta connected. Next step: link assets to clients.')
-      // Re-check server state to pick up the newly saved connection.
       checkConnection()
       window.history.replaceState(null, '', window.location.pathname)
     } else if (meta === 'error') {
@@ -441,8 +482,7 @@ export default function MetaIntegrationPage() {
   }, [searchParams, checkConnection])
 
   // Deep link from the Clients page (?client=<id>): preselect that client for a
-  // selected-client sync once its linked assets are known. One-shot so it never
-  // fights a later manual change.
+  // selected-client sync once its linked assets are known.
   const appliedClientParam = useRef(false)
   useEffect(() => {
     if (appliedClientParam.current) return
@@ -510,6 +550,7 @@ export default function MetaIntegrationPage() {
       setIgAccounts(data.instagramAccounts ?? [])
       setAdAccounts(data.adAccounts ?? [])
       setAdAccountsError(data.adAccountsError ?? null)
+      setAdAccountsDiagnostic(data.adAccountsDiagnostic ?? null)
       setAssetsLoaded(true)
     } catch {
       setAssetError('Could not load Meta assets.')
@@ -527,29 +568,23 @@ export default function MetaIntegrationPage() {
     () => pages.map(p => ({ value: p.id, label: p.category ? `${p.name} (${p.category})` : p.name })).sort((a, b) => a.label.localeCompare(b.label)),
     [pages],
   )
-  const filteredIgAccounts = selectedPageId
-    ? igAccounts.filter(a => a.facebookPageId === selectedPageId)
-    : igAccounts
-  const sortedIgOptions = useMemo(
-    () =>
-      filteredIgAccounts
-        .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    [filteredIgAccounts],
+  const filteredIgOptions = useMemo(
+    () => igAccounts.map(a => ({ value: a.id, label: a.name || a.username || a.id })).sort((a, b) => a.label.localeCompare(b.label)),
+    [igAccounts],
   )
   const sortedAdOptions = useMemo(
     () => adAccounts.map(a => ({ value: a.id, label: a.name })).sort((a, b) => a.label.localeCompare(b.label)),
     [adAccounts],
   )
 
-  // Auto-select Instagram when a Facebook Page is chosen and only one IG option.
-  useEffect(() => {
-    if (sortedIgOptions.length === 1 && (selectedIgId === '' || !selectedPageId)) {
-      setSelectedIgId(sortedIgOptions[0].value)
-    }
-  }, [sortedIgOptions, selectedIgId, selectedPageId])
+  // Per-page IG options for inline row pickers.
+  function igOptionsForPage(pageId: string | null | undefined) {
+    const filtered = pageId ? igAccounts.filter(a => a.facebookPageId === pageId) : igAccounts
+    return filtered
+      .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }
 
-  // Map selected IDs to display names for saving.
   const selectedPage = pages.find(p => p.id === selectedPageId)
   const selectedIg = igAccounts.find(a => a.id === selectedIgId)
   const selectedAd = adAccounts.find(a => a.id === selectedAdId)
@@ -570,6 +605,33 @@ export default function MetaIntegrationPage() {
     }
   }, [clients, linkedAssets, linkedByClient])
 
+  const filteredClientsForDrilldown = useMemo(() => {
+    if (readinessFilter === 'none') return null
+    if (readinessFilter === 'active') return clients.map(c => ({ client: c, reason: '' }))
+    if (readinessFilter === 'linked') {
+      return clients
+        .filter(c => linkedByClient.has(c.id))
+        .map(c => ({ client: c, reason: '' }))
+    }
+    if (readinessFilter === 'missingFacebook') {
+      return clients
+        .filter(c => !linkedByClient.get(c.id)?.facebook_page_id)
+        .map(c => ({ client: c, reason: 'Link a Facebook Page to enable content sync.' }))
+    }
+    if (readinessFilter === 'missingInstagram') {
+      return clients
+        .filter(c => !linkedByClient.get(c.id)?.instagram_account_id)
+        .map(c => ({ client: c, reason: 'Link an Instagram account to enable content sync.' }))
+    }
+    if (readinessFilter === 'missingAdAccount') {
+      return clients
+        .filter(c => !linkedByClient.get(c.id)?.ad_account_id)
+        .map(c => ({ client: c, reason: 'Ad accounts are needed for paid/boosted reporting later.' }))
+    }
+    return null
+  }, [readinessFilter, clients, linkedByClient])
+
+  // Build suggestions for the match table.
   const suggestions = useMemo<ClientAssetSuggestion[]>(() => {
     return clients.map(client => {
       const page = bestMatch(client.name, pages, asset => [asset.name])
@@ -580,7 +642,7 @@ export default function MetaIntegrationPage() {
         ? {
             asset: igCandidates[0] ?? null,
             score: page.score,
-            reason: igCandidates[0] ? `Instagram account linked to suggested Page "${page.asset.name}".` : 'Suggested Page has no Instagram account.',
+            reason: igCandidates[0] ? `Instagram of suggested Page "${page.asset.name}".` : 'Suggested Page has no Instagram account.',
           }
         : bestMatch(client.name, igCandidates, asset => [asset.name, asset.username])
       const adAccount = bestMatch(client.name, adAccounts, asset => [asset.name])
@@ -617,16 +679,36 @@ export default function MetaIntegrationPage() {
     })
   }, [adAccounts, clients, igAccounts, linkedByClient, pages])
 
-  const safeHighConfidenceSuggestions = useMemo(() => {
-    return suggestions.filter(suggestion =>
-      (suggestion.page.score >= 0.9 || suggestion.instagram.score >= 0.9 || suggestion.adAccount.score >= 0.9) &&
-      !suggestion.alreadyLinkedDifferently &&
-      !suggestion.alreadyLinkedSame &&
-      ((suggestion.page.score >= 0.9 && suggestion.page.asset) ||
-        (suggestion.instagram.score >= 0.9 && suggestion.instagram.asset) ||
-        (suggestion.adAccount.score >= 0.9 && suggestion.adAccount.asset))
-    )
-  }, [suggestions])
+  // Initialise row selections from suggestions when assets are loaded.
+  useEffect(() => {
+    if (!assetsLoaded) return
+    const initial: Record<string, { facebookPageId: string; instagramAccountId: string; adAccountId: string }> = {}
+    for (const s of suggestions) {
+      initial[s.client.id] = {
+        facebookPageId: s.page.score >= 0.9 && !s.alreadyLinkedDifferently && !s.alreadyLinkedSame
+          ? (s.page.asset?.id ?? '')
+          : (s.currentLink?.facebook_page_id ?? ''),
+        instagramAccountId: s.instagram.score >= 0.9 && !s.alreadyLinkedDifferently && !s.alreadyLinkedSame
+          ? (s.instagram.asset?.id ?? '')
+          : (s.currentLink?.instagram_account_id ?? ''),
+        adAccountId: s.adAccount.score >= 0.9 && !s.alreadyLinkedDifferently && !s.alreadyLinkedSame
+          ? (s.adAccount.asset?.id ?? '')
+          : (s.currentLink?.ad_account_id ?? ''),
+      }
+    }
+    setRowSelections(initial)
+  }, [assetsLoaded, suggestions])
+
+  function updateRowSelection(clientId: string, field: 'facebookPageId' | 'instagramAccountId' | 'adAccountId', value: string) {
+    setRowSelections(prev => ({
+      ...prev,
+      [clientId]: {
+        ...prev[clientId],
+        [field]: value,
+        ...(field === 'facebookPageId' ? { instagramAccountId: '' } : {}),
+      },
+    }))
+  }
 
   function buildLinkPayload(input: {
     clientId: string
@@ -695,7 +777,7 @@ export default function MetaIntegrationPage() {
           allowOverwrite,
         }),
       })
-      setLinkMsg({ ok: true, text: `${clientName} linked successfully. You can now link another client.` })
+      setLinkMsg({ ok: true, text: `${clientName} linked successfully.` })
       setSelectedClientId('')
       setSelectedPageId('')
       setSelectedIgId('')
@@ -713,31 +795,116 @@ export default function MetaIntegrationPage() {
     await loadLinkedAssets()
   }
 
-  async function handleBulkLinkHighConfidence() {
-    if (safeHighConfidenceSuggestions.length === 0) return
-    const confirmed = window.confirm(`Link ${safeHighConfidenceSuggestions.length} high-confidence Meta asset match(es)? Existing different links will not be overwritten.`)
+  async function handleRowLink(clientId: string) {
+    const sel = rowSelections[clientId]
+    if (!sel || (!sel.facebookPageId && !sel.instagramAccountId && !sel.adAccountId)) return
+    setLinkingRows(prev => new Set(prev).add(clientId))
+    setLinkMsg(null)
+
+    const clientName = clients.find(c => c.id === clientId)?.name ?? 'Client'
+    const existing = linkedByClient.get(clientId)
+    const overwriteNeeded = Boolean(existing && (
+      (existing.facebook_page_id ?? '') !== (sel.facebookPageId || '') ||
+      (existing.instagram_account_id ?? '') !== (sel.instagramAccountId || '') ||
+      (existing.ad_account_id ?? '') !== (sel.adAccountId || '')
+    ))
+    const allowOverwrite = overwriteNeeded
+      ? window.confirm(`${clientName} already has a different active Meta link. Replace it with the selected assets?`)
+      : false
+
+    if (overwriteNeeded && !allowOverwrite) {
+      setLinkingRows(prev => { const next = new Set(prev); next.delete(clientId); return next })
+      setLinkMsg({ ok: false, text: `${clientName}: existing link was not changed.` })
+      return
+    }
+
+    try {
+      await saveAssetLinks({
+        action: 'upsert',
+        link: buildLinkPayload({
+          clientId,
+          page: pages.find(p => p.id === sel.facebookPageId) ?? null,
+          instagram: igAccounts.find(a => a.id === sel.instagramAccountId) ?? null,
+          adAccount: adAccounts.find(a => a.id === sel.adAccountId) ?? null,
+          allowOverwrite,
+        }),
+      })
+      setLinkMsg({ ok: true, text: `${clientName} linked successfully.` })
+      await loadLinkedAssets()
+    } catch {
+      setLinkMsg({ ok: false, text: `${clientName}: failed to save link.` })
+    } finally {
+      setLinkingRows(prev => { const next = new Set(prev); next.delete(clientId); return next })
+    }
+  }
+
+  async function handleBulkLinkApproved() {
+    const entries = Object.entries(rowSelections).filter(([clientId, sel]) => {
+      if (!sel.facebookPageId && !sel.instagramAccountId && !sel.adAccountId) return false
+      const suggestion = suggestions.find(s => s.client.id === clientId)
+      if (!suggestion) return true
+      if (suggestion.alreadyLinkedDifferently) return false
+      if (suggestion.alreadyLinkedSame) return false
+      return true
+    })
+    if (entries.length === 0) {
+      setLinkMsg({ ok: false, text: 'No rows with new selections to link.' })
+      return
+    }
+
+    const confirmed = window.confirm(`Link ${entries.length} client(s) with the selected assets? Existing different links will not be overwritten.`)
     if (!confirmed) return
 
     setBulkSaving(true)
     setLinkMsg(null)
     try {
-      const result = await saveAssetLinks({
-        action: 'upsertMany',
-        links: safeHighConfidenceSuggestions.map(suggestion => buildLinkPayload({
-          clientId: suggestion.client.id,
-          page: suggestion.page.score >= 0.9 ? suggestion.page.asset : null,
-          instagram: suggestion.instagram.score >= 0.9 ? suggestion.instagram.asset : null,
-          adAccount: suggestion.adAccount.score >= 0.9 ? suggestion.adAccount.asset : null,
-        })),
-      })
-      setLinkMsg({ ok: true, text: `Bulk linking complete: ${result.linked ?? 0} linked, ${result.skipped ?? 0} skipped.` })
+      // Save each row individually (not upsertMany) so overwrite checks are per-client.
+      let linked = 0; let skipped = 0; let failed = 0
+      for (const [clientId, sel] of entries) {
+        const existing = linkedByClient.get(clientId)
+        const overwriteNeeded = Boolean(existing && (
+          (existing.facebook_page_id ?? '') !== (sel.facebookPageId || '') ||
+          (existing.instagram_account_id ?? '') !== (sel.instagramAccountId || '') ||
+          (existing.ad_account_id ?? '') !== (sel.adAccountId || '')
+        ))
+        if (overwriteNeeded) { skipped++; continue }
+        try {
+          await saveAssetLinks({
+            action: 'upsert',
+            link: buildLinkPayload({
+              clientId,
+              page: pages.find(p => p.id === sel.facebookPageId) ?? null,
+              instagram: igAccounts.find(a => a.id === sel.instagramAccountId) ?? null,
+              adAccount: adAccounts.find(a => a.id === sel.adAccountId) ?? null,
+            }),
+          })
+          linked++
+        } catch { failed++ }
+      }
+      setLinkMsg({ ok: true, text: `Bulk linking complete: ${linked} linked, ${skipped} skipped, ${failed} failed.` })
       await loadLinkedAssets()
     } catch {
-      setLinkMsg({ ok: false, text: 'Bulk linking failed. Review matches and try again.' })
+      setLinkMsg({ ok: false, text: 'Bulk linking failed.' })
     } finally {
       setBulkSaving(false)
     }
   }
+
+  function linkFromSelections(clientId: string): { pageId: string; igId: string; adId: string } {
+    const sel = rowSelections[clientId] ?? { facebookPageId: '', instagramAccountId: '', adAccountId: '' }
+    return { pageId: sel.facebookPageId, igId: sel.instagramAccountId, adId: sel.adAccountId }
+  }
+
+  const approvedCount = useMemo(() => {
+    return Object.entries(rowSelections).filter(([clientId, sel]) => {
+      if (!sel.facebookPageId && !sel.instagramAccountId && !sel.adAccountId) return false
+      const suggestion = suggestions.find(s => s.client.id === clientId)
+      if (!suggestion) return true
+      if (suggestion.alreadyLinkedDifferently) return false
+      if (suggestion.alreadyLinkedSame) return false
+      return true
+    }).length
+  }, [rowSelections, suggestions])
 
   async function handleSync() {
     setSyncing(true)
@@ -766,6 +933,7 @@ export default function MetaIntegrationPage() {
           clientsSucceeded: 0,
           clientsSynced: 0,
           clientsFailed: 0,
+          monthsAttempted: 0,
           reportsCreated: 0,
           reportsReused: 0,
           postsSynced: 0,
@@ -774,6 +942,8 @@ export default function MetaIntegrationPage() {
         })
         return
       }
+
+      const targets = getCompletedMonths(syncMonthCount)
 
       const totals = {
         clientsAttempted: syncableAssets.length,
@@ -791,28 +961,16 @@ export default function MetaIntegrationPage() {
       const diagnostics: unknown[] = []
       const details: unknown[] = []
       let syncEngineVersion: string | undefined
-      let syncResultPeriod: { periodStart: string; periodEnd: string; month: string } | null = null
-      // The primary (target) month as YYYY-MM — used to derive the baseline.
-      let targetMonth = ''
 
       const accessToken = sessionData.session.access_token
 
-      // Sync one asset for a given month. `isBaseline` keeps the previous-month
-      // pass from affecting the primary success/failure status — its data folds
-      // in (reports/posts) and any problem becomes a warning, not a failure.
-      async function processAsset(asset: LinkedAsset, monthParam: string | undefined, isBaseline: boolean) {
+      async function processAsset(asset: LinkedAsset, month: string) {
         const clientName = clientNameForAsset(asset)
-        const reqBody: Record<string, unknown> = { mode: 'previous_completed_month', clientId: asset.client_id }
-        if (monthParam) reqBody.month = monthParam
+        const reqBody: Record<string, unknown> = { mode: 'previous_completed_month', clientId: asset.client_id, month }
         const { response, data, text } = await invokeMetaSync(accessToken, reqBody)
 
         syncEngineVersion = typeof data?.syncEngineVersion === 'string' ? data.syncEngineVersion : syncEngineVersion
-        diagnostics.push({ clientName, month: monthParam ?? 'previous_completed', baseline: isBaseline, httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) })
-        const respPeriod = data?.period as { periodStart?: string; periodEnd?: string; month?: string } | undefined
-        if (respPeriod && !syncResultPeriod && typeof respPeriod.month === 'string') {
-          syncResultPeriod = { periodStart: respPeriod.periodStart ?? '', periodEnd: respPeriod.periodEnd ?? '', month: respPeriod.month }
-          if (!isBaseline) targetMonth = respPeriod.month
-        }
+        diagnostics.push({ clientName, month, httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) })
 
         if (!response.ok || !data?.ok) {
           const safeText = data ? null : redactForDisplay(text || 'No response body from sync service.').slice(0, 500)
@@ -822,19 +980,10 @@ export default function MetaIntegrationPage() {
             typeof data?.error === 'string' ? data.error : typeof data?.message === 'string' ? data.message : safeText || 'Sync failed.',
             !response.ok ? `(HTTP ${response.status})` : null,
           ].filter(Boolean).join(' ')
-          if (isBaseline) {
-            warnings.push(`Baseline ${monthParam ?? ''} for ${clientName}: ${error}`)
-          } else {
-            totals.clientsFailed++
-            failedClients.push({ name: clientName, error })
-            if (Array.isArray(data?.warnings)) warnings.push(...data.warnings.map(String))
-            if (Array.isArray(data?.steps)) steps.push(...data.steps.map(String))
-            if (Array.isArray(data?.details)) details.push(...data.details)
-          }
+          warnings.push(`${month} for ${clientName}: ${error}`)
           return
         }
 
-        // Report/post counts fold in for both passes.
         totals.reportsCreated += Number(data.reportsCreated ?? 0)
         totals.reportsReused += Number(data.reportsReused ?? data.reportsUpdated ?? 0)
         totals.reportsUpdated += Number(data.reportsUpdated ?? data.reportsReused ?? 0)
@@ -842,8 +991,6 @@ export default function MetaIntegrationPage() {
         if (Array.isArray(data.warnings)) warnings.push(...data.warnings.map(String))
         if (Array.isArray(data.steps)) steps.push(...data.steps.map(String))
         if (Array.isArray(data.details)) details.push(...data.details)
-
-        if (isBaseline) return
 
         totals.clientsSucceeded += Number(data.clientsSucceeded ?? data.clientsSynced ?? 0)
         totals.clientsFailed += Number(data.clientsFailed ?? 0)
@@ -861,19 +1008,13 @@ export default function MetaIntegrationPage() {
         }
       }
 
-      // Pass 1 — the target (previous completed) month.
-      for (let index = 0; index < syncableAssets.length; index++) {
-        setSyncProgress(`Syncing ${index + 1} of ${syncableAssets.length}: ${clientNameForAsset(syncableAssets[index])}`)
-        await processAsset(syncableAssets[index], undefined, false)
-      }
-
-      // Pass 2 (optional) — the previous-month baseline for growth comparison.
-      let baselineMonth: string | null = null
-      if (syncBaseline && targetMonth) {
-        baselineMonth = priorMonth(targetMonth)
-        for (let index = 0; index < syncableAssets.length; index++) {
-          setSyncProgress(`Syncing baseline ${index + 1} of ${syncableAssets.length}: ${clientNameForAsset(syncableAssets[index])}`)
-          await processAsset(syncableAssets[index], baselineMonth, true)
+      let monthIdx = 0
+      for (const month of targets) {
+        monthIdx++
+        for (let clientIdx = 0; clientIdx < syncableAssets.length; clientIdx++) {
+          const asset = syncableAssets[clientIdx]
+          setSyncProgress(`Syncing month ${monthIdx} of ${targets.length}, client ${clientIdx + 1} of ${syncableAssets.length}: ${clientNameForAsset(asset)}`)
+          await processAsset(asset, month)
         }
       }
 
@@ -887,12 +1028,12 @@ export default function MetaIntegrationPage() {
       setSyncResult({
         status,
         message: status === 'success'
-          ? `Synced previous completed month for ${totals.clientsSucceeded} client(s)${baselineMonth ? ' (incl. previous-month baseline)' : ''}.`
+          ? `Synced ${targets.length} month(s) for ${totals.clientsSucceeded} client(s).`
           : status === 'partial'
-            ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed${baselineMonth ? ' (previous-month baseline also attempted)' : ''}.`
+            ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${targets.length} month(s).`
             : `Sync failed for all ${totals.clientsAttempted} client(s).`,
-        period: syncResultPeriod ?? undefined,
         syncEngineVersion,
+        monthsAttempted: targets.length,
         clientsAttempted: totals.clientsAttempted,
         clientsSucceeded: totals.clientsSucceeded,
         clientsSynced: totals.clientsSucceeded,
@@ -907,7 +1048,7 @@ export default function MetaIntegrationPage() {
         steps,
         diagnostics,
         details,
-        debug: safeStringify({ syncEngineVersion, diagnostics, warnings, failedClients }),
+        debug: safeStringify({ syncEngineVersion, monthsAttempted: targets.length, diagnostics, warnings, failedClients }),
       })
     } catch (e) {
       setSyncResult({
@@ -951,6 +1092,7 @@ export default function MetaIntegrationPage() {
         ))}
       </div>
 
+      {/* Readiness cards */}
       <PremiumCard className="mt-6 max-w-4xl" padding="md">
         <PremiumCardHeader
           eyebrow="Readiness"
@@ -963,19 +1105,111 @@ export default function MetaIntegrationPage() {
           }
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <HealthTile label="Active clients" value={readiness.activeClients} />
-          <HealthTile label="Linked to Meta" value={readiness.linkedAny} />
-          <HealthTile label="Missing Facebook Page" value={readiness.missingFacebook} tone={readiness.missingFacebook > 0 ? 'warn' : 'ok'} />
-          <HealthTile label="Missing Instagram" value={readiness.missingInstagram} tone={readiness.missingInstagram > 0 ? 'warn' : 'ok'} />
-          <HealthTile label="Missing Ad Account" value={readiness.missingAdAccount} tone={readiness.missingAdAccount > 0 ? 'warn' : 'ok'} />
+          <HealthTile
+            label="Active clients"
+            value={readiness.activeClients}
+            active={readinessFilter === 'active'}
+            onClick={() => setReadinessFilter(readinessFilter === 'active' ? 'none' : 'active')}
+          />
+          <HealthTile
+            label="Linked to Meta"
+            value={readiness.linkedAny}
+            active={readinessFilter === 'linked'}
+            onClick={() => setReadinessFilter(readinessFilter === 'linked' ? 'none' : 'linked')}
+          />
+          <HealthTile
+            label="Missing Facebook Page"
+            value={readiness.missingFacebook}
+            tone={readiness.missingFacebook > 0 ? 'warn' : 'ok'}
+            active={readinessFilter === 'missingFacebook'}
+            onClick={() => setReadinessFilter(readinessFilter === 'missingFacebook' ? 'none' : 'missingFacebook')}
+          />
+          <HealthTile
+            label="Missing Instagram"
+            value={readiness.missingInstagram}
+            tone={readiness.missingInstagram > 0 ? 'warn' : 'ok'}
+            active={readinessFilter === 'missingInstagram'}
+            onClick={() => setReadinessFilter(readinessFilter === 'missingInstagram' ? 'none' : 'missingInstagram')}
+          />
+          <HealthTile
+            label="Missing Ad Account"
+            value={readiness.missingAdAccount}
+            tone={readiness.missingAdAccount > 0 ? 'warn' : 'ok'}
+            active={readinessFilter === 'missingAdAccount'}
+            onClick={() => setReadinessFilter(readinessFilter === 'missingAdAccount' ? 'none' : 'missingAdAccount')}
+          />
           <HealthTile label="Last connected" value={formatDateTime(connectionInfo?.lastConnectedAt)} />
-          <HealthTile label="OAuth state" value="Prepared SQL required" tone="warn" />
+          <HealthTile label="OAuth state" value="Review: Confirm phase-4b SQL is applied in Supabase" tone={connectState === 'connected' ? 'neutral' : 'warn'} />
           <HealthTile label="Token encryption" value="Not production-ready" tone="warn" />
         </div>
         <p className="mt-3 text-xs leading-relaxed text-brand-primary/70">
-          OAuth state verification is implemented in Edge Functions but requires the prepared `phase-4b` SQL to be applied. Tokens still live in a server-only table, but raw token storage remains a production-readiness risk until encryption is added.
+          OAuth state security is implemented in code. Confirm the prepared `phase-4b` SQL has been applied in the Supabase SQL editor. Tokens still live in a server-only table, but raw token storage remains a production-readiness risk until encryption is added.
         </p>
       </PremiumCard>
+
+      {/* Readiness drilldown */}
+      {filteredClientsForDrilldown && (
+        <PremiumCard className="mt-4 max-w-4xl" padding="md">
+          <PremiumCardHeader
+            eyebrow="Drilldown"
+            title={`${readinessFilter === 'active' ? 'All active clients' : readinessFilter === 'linked' ? 'Linked clients' : readinessFilter === 'missingFacebook' ? 'Clients missing Facebook Page' : readinessFilter === 'missingInstagram' ? 'Clients missing Instagram' : 'Clients missing Ad Account'}`}
+            action={
+              <button
+                type="button"
+                onClick={() => setReadinessFilter('none')}
+                className="text-xs text-brand-accent hover:underline"
+              >
+                Clear filter
+              </button>
+            }
+          />
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-xs uppercase tracking-[0.12em] text-brand-primary/55">
+                <tr className="border-b border-white/10">
+                  <th className="px-3 py-2">Client</th>
+                  <th className="px-3 py-2">Facebook Page</th>
+                  <th className="px-3 py-2">Instagram</th>
+                  <th className="px-3 py-2">Ad Account</th>
+                  <th className="px-3 py-2">Next action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/8">
+                {filteredClientsForDrilldown.map(({ client, reason }) => {
+                  const link = linkedByClient.get(client.id)
+                  return (
+                    <tr key={client.id} className="align-top">
+                      <td className="px-3 py-3 font-semibold text-white">{client.name}</td>
+                      <td className="px-3 py-3 text-brand-primary/75">
+                        {link?.facebook_page_name ? (
+                          <span className="text-brand-teal">{link.facebook_page_name}</span>
+                        ) : (
+                          <span className="text-amber-300">Not linked</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-brand-primary/75">
+                        {link?.instagram_username ? (
+                          <span className="text-brand-teal">@{link.instagram_username}</span>
+                        ) : (
+                          <span className="text-amber-300">Not linked</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-brand-primary/75">
+                        {link?.ad_account_name ? (
+                          <span className="text-brand-teal">{link.ad_account_name}</span>
+                        ) : (
+                          <span className="text-amber-300">Not linked</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-xs text-brand-primary/60">{reason || '—'}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </PremiumCard>
+      )}
 
       {/* Step cards */}
       <div className="mt-6 space-y-4 max-w-2xl">
@@ -1015,7 +1249,7 @@ export default function MetaIntegrationPage() {
           {connectState === 'connected' && !assetsLoaded && (
             <>
               <p className="text-sm leading-relaxed text-brand-primary">
-                Load your Meta assets, then choose which Facebook Page, Instagram account and ad account belong to each CG client.
+                Load your Meta assets, then review suggested matches for each active client. Correct any wrong suggestions inline, then link approved rows.
               </p>
               <div className="mt-4">
                 <ActionButton variant="outline" onClick={loadAssets} loading={loadingAssets}>
@@ -1039,75 +1273,147 @@ export default function MetaIntegrationPage() {
 
           {assetsLoaded && (
             <div className="mt-4 space-y-4">
+              {/* Suggested matches table with inline editing */}
               <div className="rounded-xl border border-brand-muted bg-brand-bg/55 p-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Bulk matching</p>
-                    <h3 className="mt-1 text-base font-semibold text-white">Review suggested matches for active clients</h3>
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Suggested matches</p>
+                    <h3 className="mt-1 text-base font-semibold text-white">Review and correct matches for active clients</h3>
                     <p className="mt-1 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
-                      Suggestions are generated from normalized names. High-confidence matches can be linked safely; medium and low matches stay manual review only.
+                      High-confidence suggestions are preselected. Correct any wrong suggestions using the inline pickers, then link approved rows.
                     </p>
                   </div>
                   <ActionButton
                     variant="primary"
-                    onClick={handleBulkLinkHighConfidence}
-                    disabled={safeHighConfidenceSuggestions.length === 0 || bulkSaving}
+                    onClick={handleBulkLinkApproved}
+                    disabled={approvedCount === 0 || bulkSaving}
                     loading={bulkSaving}
                   >
-                    Link high-confidence matches ({safeHighConfidenceSuggestions.length})
+                    Link approved rows ({approvedCount})
                   </ActionButton>
                 </div>
 
                 <div className="mt-4 overflow-x-auto">
-                  <table className="min-w-[980px] w-full text-left text-sm">
+                  <table className="min-w-[1200px] w-full text-left text-sm">
                     <thead className="text-xs uppercase tracking-[0.12em] text-brand-primary/55">
                       <tr className="border-b border-white/10">
-                        <th className="px-3 py-2">Active CG client</th>
-                        <th className="px-3 py-2">Facebook Page</th>
-                        <th className="px-3 py-2">Instagram</th>
-                        <th className="px-3 py-2">Ad Account</th>
-                        <th className="px-3 py-2">Confidence</th>
-                        <th className="px-3 py-2">Current / warning</th>
+                        <th className="px-2 py-2">Active CG client</th>
+                        <th className="px-2 py-2">Facebook Page</th>
+                        <th className="px-2 py-2">Instagram</th>
+                        <th className="px-2 py-2">Ad Account</th>
+                        <th className="px-2 py-2">Confidence</th>
+                        <th className="px-2 py-2">Current / warning</th>
+                        <th className="px-2 py-2">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/8">
-                      {suggestions.map(suggestion => (
-                        <tr key={suggestion.client.id} className="align-top">
-                          <td className="px-3 py-3 font-semibold text-white">{suggestion.client.name}</td>
-                          <SuggestedAssetCell label={suggestion.page.asset?.name ?? null} reason={suggestion.page.reason} />
-                          <SuggestedAssetCell
-                            label={suggestion.instagram.asset ? suggestion.instagram.asset.name || suggestion.instagram.asset.username || suggestion.instagram.asset.id : null}
-                            reason={suggestion.instagram.reason}
-                          />
-                          <SuggestedAssetCell label={suggestion.adAccount.asset?.name ?? null} reason={suggestion.adAccount.reason} />
-                          <td className="px-3 py-3">
-                            <ConfidencePill confidence={suggestion.confidence} />
-                            <p className="mt-1 text-xs text-brand-primary/60">{suggestion.reason}</p>
-                          </td>
-                          <td className="px-3 py-3 text-xs text-brand-primary/75">
-                            {suggestion.currentLink ? (
-                              <>
-                                <p className="font-semibold text-white">Currently linked</p>
-                                <p>{suggestion.currentLink.facebook_page_name || 'No Facebook Page'}</p>
-                                <p>{suggestion.currentLink.instagram_username ? `@${suggestion.currentLink.instagram_username}` : 'No Instagram'}</p>
-                                <p>{suggestion.currentLink.ad_account_name || 'No ad account'}</p>
-                              </>
-                            ) : (
-                              <p>Not linked yet</p>
-                            )}
-                            {suggestion.alreadyLinkedDifferently && (
-                              <p className="mt-2 rounded-md border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-amber-300">
-                                Existing active link differs. Bulk action will not overwrite it.
-                              </p>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                      {suggestions.map(suggestion => {
+                        const clientId = suggestion.client.id
+                        const sel = linkFromSelections(clientId)
+                        const hasAny = Boolean(sel.pageId || sel.igId || sel.adId)
+
+                        return (
+                          <tr key={clientId} className="align-top">
+                            <td className="px-2 py-3 font-semibold text-white whitespace-nowrap">{suggestion.client.name}</td>
+
+                            {/* Facebook Page picker */}
+                            <td className="px-2 py-3 min-w-[180px]">
+                              <SearchablePicker
+                                value={sel.pageId}
+                                onChange={v => updateRowSelection(clientId, 'facebookPageId', v)}
+                                options={sortedPageOptions}
+                                placeholder="Select page..."
+                                emptyLabel="No pages"
+                              />
+                            </td>
+
+                            {/* Instagram picker */}
+                            <td className="px-2 py-3 min-w-[180px]">
+                              <SearchablePicker
+                                value={sel.igId}
+                                onChange={v => updateRowSelection(clientId, 'instagramAccountId', v)}
+                                options={igOptionsForPage(sel.pageId || suggestion.currentLink?.facebook_page_id)}
+                                placeholder={igAccounts.length === 0 ? 'No IG accounts' : 'Select Instagram...'}
+                                emptyLabel={sel.pageId ? 'No IG for this page' : 'Select a page first'}
+                              />
+                            </td>
+
+                            {/* Ad Account picker */}
+                            <td className="px-2 py-3 min-w-[180px]">
+                              {adAccounts.length > 0 ? (
+                                <SearchablePicker
+                                  value={sel.adId}
+                                  onChange={v => updateRowSelection(clientId, 'adAccountId', v)}
+                                  options={sortedAdOptions}
+                                  placeholder="Select ad account..."
+                                  emptyLabel="No ad accounts"
+                                />
+                              ) : (
+                                <p className="text-xs leading-relaxed text-brand-primary/60">
+                                  {adAccountsError ? (
+                                    <>Ad accounts not available.<br />
+                                      <span className="text-amber-300/80">Facebook &amp; Instagram sync can still work without ad accounts.</span>
+                                      <span className="block mt-1 text-brand-primary/50">Ad accounts are needed for paid/boosted reporting.</span>
+                                      {adAccountsDiagnostic?.status && (
+                                        <span className="block mt-1 text-brand-primary/40">Meta response: {String(adAccountsDiagnostic.status)}</span>
+                                      )}
+                                    </>
+                                  ) : (
+                                    'No ad accounts loaded.'
+                                  )}
+                                </p>
+                              )}
+                            </td>
+
+                            {/* Confidence */}
+                            <td className="px-2 py-3">
+                              <ConfidencePill confidence={suggestion.confidence} />
+                              <p className="mt-1 text-xs text-brand-primary/60 max-w-[140px]">{suggestion.reason}</p>
+                            </td>
+
+                            {/* Current / warning */}
+                            <td className="px-2 py-3 text-xs text-brand-primary/75 max-w-[160px]">
+                              {suggestion.currentLink ? (
+                                <>
+                                  <p className="font-semibold text-white">Currently linked</p>
+                                  <p>{suggestion.currentLink.facebook_page_name || 'No FB Page'}</p>
+                                  <p>{suggestion.currentLink.instagram_username ? `@${suggestion.currentLink.instagram_username}` : 'No IG'}</p>
+                                  <p>{suggestion.currentLink.ad_account_name || 'No ad account'}</p>
+                                </>
+                              ) : (
+                                <p>Not linked yet</p>
+                              )}
+                              {suggestion.alreadyLinkedDifferently && (
+                                <p className="mt-1 rounded-md border border-amber-400/20 bg-amber-400/10 px-1.5 py-1 text-amber-300 text-[11px]">
+                                  Differs from current. Use per-row action to overwrite.
+                                </p>
+                              )}
+                              {suggestion.alreadyLinkedSame && (
+                                <p className="mt-1 text-brand-teal/70">Already linked with these assets.</p>
+                              )}
+                            </td>
+
+                            {/* Action */}
+                            <td className="px-2 py-3">
+                              <ActionButton
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => handleRowLink(clientId)}
+                                disabled={!hasAny || suggestion.alreadyLinkedSame || linkingRows.has(clientId)}
+                                loading={linkingRows.has(clientId)}
+                              >
+                                {suggestion.alreadyLinkedSame ? 'Linked' : 'Link this client'}
+                              </ActionButton>
+                            </td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
               </div>
 
+              {/* Manual override (demoted fallback) */}
               <details className="rounded-xl border border-brand-muted bg-brand-bg/35 p-4">
                 <summary className="cursor-pointer text-sm font-semibold text-white">Manual override for edge cases</summary>
                 <div className="mt-4 space-y-4">
@@ -1137,7 +1443,13 @@ export default function MetaIntegrationPage() {
                     <SearchablePicker
                       value={selectedIgId}
                       onChange={setSelectedIgId}
-                      options={sortedIgOptions}
+                      options={
+                        selectedPageId
+                          ? igAccounts.filter(a => a.facebookPageId === selectedPageId)
+                              .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
+                              .sort((a, b) => a.label.localeCompare(b.label))
+                          : filteredIgOptions
+                      }
                       placeholder={igAccounts.length === 0 ? 'No Instagram accounts found' : 'Select an account...'}
                       emptyLabel={selectedPageId ? 'No Instagram linked to this page' : 'Select a Facebook Page first'}
                     />
@@ -1184,7 +1496,7 @@ export default function MetaIntegrationPage() {
 
           {!syncResult && (
             <div className="space-y-2 text-sm leading-relaxed text-brand-primary">
-              <p>Sync the previous completed month from linked Meta assets. Reports are saved as internal drafts.</p>
+              <p>Sync completed months from linked Meta assets. Reports are saved as internal drafts.</p>
               <div className="rounded-lg border border-brand-muted bg-brand-bg/60 px-3 py-2.5">
                 <p className="text-xs text-brand-primary">
                   <span className="font-semibold text-white">Selected client</span> for quick updates between campaigns.
@@ -1211,6 +1523,7 @@ export default function MetaIntegrationPage() {
                 <ul className="mt-2 space-y-1 text-sm text-brand-primary">
                   {syncResult.phase && <li>Failed phase: {syncResult.phase}</li>}
                   {syncResult.syncEngineVersion && <li>Sync engine: {syncResult.syncEngineVersion}</li>}
+                  <li>Months attempted: {syncResult.monthsAttempted ?? 0}</li>
                   <li>Clients succeeded: {syncResult.clientsSucceeded ?? syncResult.clientsSynced ?? 0}{syncResult.clientsAttempted !== undefined ? ` of ${syncResult.clientsAttempted}` : ''}</li>
                   {syncResult.clientsFailed !== undefined && syncResult.clientsFailed > 0 && (
                     <li className="text-amber-400">Clients failed: {syncResult.clientsFailed}</li>
@@ -1248,7 +1561,7 @@ export default function MetaIntegrationPage() {
                         syncEngineVersion: syncResult.syncEngineVersion,
                         status: syncResult.status,
                         message: syncResult.message,
-                        period: syncResult.period,
+                        monthsAttempted: syncResult.monthsAttempted,
                         clientsAttempted: syncResult.clientsAttempted,
                         clientsSucceeded: syncResult.clientsSucceeded,
                         clientsFailed: syncResult.clientsFailed,
@@ -1265,16 +1578,6 @@ export default function MetaIntegrationPage() {
                       })}
                     />
                   </div>
-                  {syncResult.period && (
-                    <div className="mt-2">
-                      <p className="text-[11px] text-brand-primary/70">
-                        Current sync: <strong className="text-white">{syncResult.period.month}</strong> (<strong className="text-brand-primary/90">{syncResult.period.periodStart}</strong> to <strong className="text-brand-primary/90">{syncResult.period.periodEnd}</strong>)
-                      </p>
-                      <p className="text-[11px] text-brand-primary/70 mt-0.5">
-                        Compare these numbers against the same date range in Meta Business Suite.
-                      </p>
-                    </div>
-                  )}
                   {syncResult.steps && syncResult.steps.length > 0 && (
                     <div className="mt-2">
                       <p className="text-[11px] uppercase tracking-[0.14em] text-brand-primary/70">Steps</p>
@@ -1340,26 +1643,24 @@ export default function MetaIntegrationPage() {
                 </div>
               )}
 
-              <label className="flex max-w-md cursor-pointer items-start gap-2.5 rounded-lg border border-brand-muted bg-brand-bg/60 px-3.5 py-2.5">
-                <input
-                  type="checkbox"
-                  checked={syncBaseline}
-                  onChange={e => setSyncBaseline(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-brand-accent"
-                />
-                <span className="text-xs leading-relaxed text-brand-primary">
-                  <span className="font-semibold text-white">Also sync the previous month</span> as a baseline so the
-                  report can show month-over-month growth. Existing reports are reused, not duplicated.
-                </span>
-              </label>
-
-              {syncBaseline && (
-                <div className="max-w-md rounded-lg border border-brand-muted bg-brand-bg/40 px-3.5 py-2 text-xs text-brand-primary">
-                  Current sync: <span className="text-white">last completed month</span>
-                  <br />
-                  Baseline: <span className="text-white">previous month for growth comparison</span>
-                </div>
-              )}
+              {/* Sync range dropdown */}
+              <div className="max-w-xs">
+                <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-brand-primary/70 mb-1.5">
+                  Completed months to sync
+                </label>
+                <select
+                  value={syncMonthCount}
+                  onChange={e => setSyncMonthCount(Number(e.target.value))}
+                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
+                >
+                  {SYNC_RANGE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-brand-primary/50">
+                  Syncing 3 completed months (default) provides history for month-over-month growth comparisons.
+                </p>
+              </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 <ActionButton
@@ -1375,11 +1676,8 @@ export default function MetaIntegrationPage() {
                   {syncing
                     ? 'Syncing...'
                     : syncMode === 'selected'
-                      ? syncBaseline ? 'Sync selected client + baseline' : 'Sync selected client'
-                      : syncBaseline ? 'Sync all linked clients + baseline' : 'Sync all linked clients'}
-                </ActionButton>
-                <ActionButton variant="secondary" disabled>
-                  Sync current month as internal draft
+                      ? `Sync selected client (${syncMonthCount} month${syncMonthCount > 1 ? 's' : ''})`
+                      : `Sync all linked clients (${syncMonthCount} month${syncMonthCount > 1 ? 's' : ''})`}
                 </ActionButton>
               </div>
             </div>
@@ -1390,12 +1688,12 @@ export default function MetaIntegrationPage() {
         <PremiumCard>
           <PremiumCardHeader title={<span className="flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">4</span> Review monthly draft</span>} />
           <p className="text-sm leading-relaxed text-brand-primary">
-            After sync, CG Dynamics will create or update a monthly report draft. Staff can add strategy, preview as client, and publish.
+            After sync, CG Dynamics will create or update monthly report drafts. Staff can add strategy, preview as client, and publish.
           </p>
         </PremiumCard>
       </div>
 
-      {/* Linked clients section — always visible, independent of connection status */}
+      {/* Linked clients section */}
       <PremiumCard className="mt-8" padding="md">
         <PremiumCardHeader title="Linked clients" />
         {loadingLinked ? (
@@ -1454,23 +1752,28 @@ function ConfidencePill({ confidence }: { confidence: MatchConfidence }) {
   )
 }
 
-function SuggestedAssetCell({ label, reason }: { label: string | null; reason: string }) {
-  return (
-    <td className="px-3 py-3">
-      <p className={label ? 'font-semibold text-white' : 'text-brand-primary/45'}>{label ?? 'No safe suggestion'}</p>
-      <p className="mt-1 text-xs leading-relaxed text-brand-primary/60">{reason}</p>
-    </td>
-  )
-}
-
-function HealthTile({ label, value, tone = 'neutral' }: { label: string; value: string | number; tone?: 'neutral' | 'ok' | 'warn' }) {
+function HealthTile({ label, value, tone = 'neutral', active = false, onClick }: {
+  label: string
+  value: string | number
+  tone?: 'neutral' | 'ok' | 'warn'
+  active?: boolean
+  onClick?: () => void
+}) {
   const toneClass = {
     neutral: 'border-white/8 bg-white/[0.03] text-white',
     ok: 'border-brand-teal/20 bg-brand-teal/[0.06] text-[#66d0c3]',
     warn: 'border-amber-300/20 bg-amber-300/[0.06] text-amber-200',
   }[tone]
+  const activeClass = active ? 'ring-2 ring-brand-accent' : ''
+  const clickableClass = onClick ? 'cursor-pointer hover:bg-white/[0.06] transition-colors' : ''
   return (
-    <div className={`rounded-xl border p-3 ${toneClass}`}>
+    <div
+      className={`rounded-xl border p-3 ${toneClass} ${activeClass} ${clickableClass}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') onClick() } : undefined}
+    >
       <p className="text-[10px] font-black uppercase tracking-[0.15em] text-brand-primary/55">{label}</p>
       <p className="mt-2 text-sm font-bold">{value}</p>
     </div>
