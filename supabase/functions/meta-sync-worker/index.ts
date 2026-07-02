@@ -123,346 +123,348 @@ Deno.serve(async (req) => {
   const accessToken = tokenRows[0].encrypted_access_token
   const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
 
-  // ── Atomic claim items ─────────────────────────────────────
-  const { data: items, error: claimError } = await sb.rpc('claim_sync_batch_items', {
-    p_limit: body.maxItems ?? BATCH_SIZE,
-    p_batch_id: body.batchId ?? null,
-  })
-
-  if (claimError) {
-    return jsonResponse({ ok: false, error: 'Could not claim queue items. RPC may not exist yet.' }, 500)
-  }
-
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    return jsonResponse({ ok: true, processed: 0, message: 'No queued items to process.' })
-  }
-
+  // ── Process items in chunks (continuation loop) ─────────────
+  const MAX_CHUNKS = 5
   const processed: Array<{ itemId: string; clientName: string; month: string; status: string; postsSynced: number; error?: string }> = []
   const batchIds = new Set<string>()
-  for (const item of items) {
-    batchIds.add(item.batch_id)
+  let claimCount = 0
 
-    // Skip current/future months
-    if (item.month >= currentMonthStr()) {
-      await sb.from('meta_sync_batch_items').update({
-        status: 'skipped',
-        error: 'Month is not yet completed.',
-        finished_at: new Date().toISOString(),
-      }).eq('id', item.id)
-      processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
-      continue
+  while (claimCount < MAX_CHUNKS) {
+    const { data: items, error: claimError } = await sb.rpc('claim_sync_batch_items', {
+      p_limit: body.maxItems ?? BATCH_SIZE,
+      p_batch_id: body.batchId ?? null,
+    })
+
+    if (claimError) {
+      // RPC may not exist yet — process what we have so far
+      break
     }
 
-    const { periodStart, periodEnd } = monthBounds(item.month)
-    let postsSynced = 0
-    let reportsCreated = 0
-    let reportsReused = 0
-    let warnings: string[] = []
-    let itemError: string | null = null
-    let itemStatus = 'completed'
+    if (!items || !Array.isArray(items) || items.length === 0) break
 
-    try {
-      // ── Find or create report ──
-      const { data: existingReports } = await sb
-        .from('reports')
-        .select('id')
-        .eq('client_id', item.client_id)
-        .is('platform', null)
-        .gte('period_end', periodStart)
-        .lte('period_end', periodEnd)
-        .order('created_at', { ascending: false })
-        .limit(1)
+    claimCount++
 
-      let reportId: string | null = null
-      if (existingReports && existingReports.length > 0) {
-        reportId = existingReports[0].id
-        reportsReused = 1
-      } else {
-        const { data: newReport, error: insertError } = await sb
-          .from('reports')
-          .insert({
-            client_id: item.client_id,
-            platform: null,
-            period_start: periodStart,
-            period_end: periodEnd,
-            status: 'draft',
-            report_title: `${item.client_name} ${monthLabel(item.month)} Report`,
-          })
-          .select('id')
-          .single()
-        if (!insertError && newReport) {
-          reportId = newReport.id
-          reportsCreated = 1
-        }
-      }
+    for (const item of items) {
+      batchIds.add(item.batch_id)
 
-      if (!reportId) {
-        itemStatus = 'failed'
-        itemError = 'Could not create or find report'
+      // ── Skip current/future months ──
+      if (item.month >= currentMonthStr()) {
+        await sb.from('meta_sync_batch_items').update({
+          status: 'skipped',
+          error: 'Month is not yet completed.',
+          finished_at: new Date().toISOString(),
+        }).eq('id', item.id)
+        processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
         continue
       }
 
-      // ── Get page tokens ──
-      const pageTokenMap = new Map<string, string>()
-      {
-        let url: string | null = `${baseUrl}/me/accounts?fields=id,access_token&limit=100&access_token=${encodeURIComponent(accessToken)}`
-        let guard = 0
-        while (url && guard < 10) {
-          guard++
-          const res = await metaFetch(url)
-          if (!res.ok) break
-          const data = await res.json()
-          for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
-            if (p.id && p.access_token) pageTokenMap.set(p.id, p.access_token)
+      const { periodStart, periodEnd } = monthBounds(item.month)
+      let postsSynced = 0
+      let reportsCreated = 0
+      let reportsReused = 0
+      let warnings: string[] = []
+      let itemError: string | null = null
+      let itemStatus = 'completed'
+
+      try {
+        // ── Find or create report ──
+        const { data: existingReports } = await sb
+          .from('reports')
+          .select('id')
+          .eq('client_id', item.client_id)
+          .is('platform', null)
+          .gte('period_end', periodStart)
+          .lte('period_end', periodEnd)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        let reportId: string | null = null
+        if (existingReports && existingReports.length > 0) {
+          reportId = existingReports[0].id
+          reportsReused = 1
+        } else {
+          const { data: newReport, error: insertError } = await sb
+            .from('reports')
+            .insert({
+              client_id: item.client_id,
+              platform: null,
+              period_start: periodStart,
+              period_end: periodEnd,
+              status: 'draft',
+              report_title: `${item.client_name} ${monthLabel(item.month)} Report`,
+            })
+            .select('id')
+            .single()
+          if (!insertError && newReport) {
+            reportId = newReport.id
+            reportsCreated = 1
           }
-          url = (data.paging?.next as string | undefined) ?? null
         }
-      }
 
-      // ── Get linked assets for this client ──
-      const { data: linkedAssets } = await sb
-        .from('meta_client_assets')
-        .select('facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, instagram_not_applicable')
-        .eq('client_id', item.client_id)
-        .eq('is_active', true)
-        .limit(1)
+        if (!reportId) {
+          itemStatus = 'failed'
+          itemError = 'Could not create or find report'
+          continue
+        }
 
-      const asset = linkedAssets?.[0]
-      const facebookPageId = asset?.facebook_page_id ?? null
-      const instagramAccountId = (asset?.instagram_not_applicable === true) ? null : (asset?.instagram_account_id ?? null)
+        // ── Get page tokens ──
+        const pageTokenMap = new Map<string, string>()
+        {
+          let url: string | null = `${baseUrl}/me/accounts?fields=id,access_token&limit=100&access_token=${encodeURIComponent(accessToken)}`
+          let guard = 0
+          while (url && guard < 10) {
+            guard++
+            const res = await metaFetch(url)
+            if (!res.ok) break
+            const data = await res.json()
+            for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
+              if (p.id && p.access_token) pageTokenMap.set(p.id, p.access_token)
+            }
+            url = (data.paging?.next as string | undefined) ?? null
+          }
+        }
 
-      const now = new Date().toISOString()
+        // ── Get linked assets for this client ──
+        const { data: linkedAssets } = await sb
+          .from('meta_client_assets')
+          .select('facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, instagram_not_applicable')
+          .eq('client_id', item.client_id)
+          .eq('is_active', true)
+          .limit(1)
 
-      // ── Sync Facebook posts ──
-      if (facebookPageId) {
-        const pageToken = pageTokenMap.get(facebookPageId) ?? accessToken
-        try {
-          const params = new URLSearchParams({
-            access_token: pageToken,
-            fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
-            since: periodStart,
-            until: `${periodEnd}T23:59:59Z`,
-            limit: '100',
-          })
-          const res = await metaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`)
-          if (res.ok) {
-            const fbData = await res.json()
-            const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
-            for (const raw of rawPosts) {
-              const metaPostId = String(raw.id ?? '')
-              if (!metaPostId) continue
-              const { data: existing } = await sb
-                .from('meta_content_mappings')
-                .select('id, post_id')
-                .eq('client_id', item.client_id)
-                .eq('platform', 'facebook')
-                .eq('meta_object_id', metaPostId)
-                .limit(1)
+        const asset = linkedAssets?.[0]
+        const facebookPageId = asset?.facebook_page_id ?? null
+        const instagramAccountId = (asset?.instagram_not_applicable === true) ? null : (asset?.instagram_account_id ?? null)
 
-              const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
-              const caption = (raw.message as string | null) ?? null
-              const permalink = (raw.permalink_url as string | null) ?? null
-              const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-              const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-              const shares = (raw.shares as { count?: number })?.count ?? 0
-              const fullPicture = raw.full_picture as string | null ?? null
+        const now = new Date().toISOString()
 
-              // Basic feed endpoint does not return views / reach —
-              // preserve null in raw so consumers can check metric_availability.
-              const postPayload: Record<string, unknown> = {
-                report_id: reportId,
-                platform: 'facebook',
-                meta_post_id: metaPostId,
-                publish_time: publishTime,
-                caption,
-                permalink,
-                views: null,
-                reach: null,
-                reactions,
-                comments,
-                shares,
-                raw: {
-                  source: 'meta_sync',
+        // ── Sync Facebook posts ──
+        if (facebookPageId) {
+          const pageToken = pageTokenMap.get(facebookPageId) ?? accessToken
+          try {
+            const params = new URLSearchParams({
+              access_token: pageToken,
+              fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
+              since: periodStart,
+              until: `${periodEnd}T23:59:59Z`,
+              limit: '100',
+            })
+            const res = await metaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`)
+            if (res.ok) {
+              const fbData = await res.json()
+              const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
+              for (const raw of rawPosts) {
+                const metaPostId = String(raw.id ?? '')
+                if (!metaPostId) continue
+                const { data: existing } = await sb
+                  .from('meta_content_mappings')
+                  .select('id, post_id')
+                  .eq('client_id', item.client_id)
+                  .eq('platform', 'facebook')
+                  .eq('meta_object_id', metaPostId)
+                  .limit(1)
+
+                const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
+                const caption = (raw.message as string | null) ?? null
+                const permalink = (raw.permalink_url as string | null) ?? null
+                const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
+                const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
+                const shares = (raw.shares as { count?: number })?.count ?? 0
+                const fullPicture = raw.full_picture as string | null ?? null
+
+                const postPayload: Record<string, unknown> = {
+                  report_id: reportId,
                   platform: 'facebook',
-                  synced_at: now,
+                  meta_post_id: metaPostId,
+                  publish_time: publishTime,
+                  caption,
+                  permalink,
                   views: null,
                   reach: null,
-                  engagements: { reactions, comments, shares },
-                  metric_availability: {
-                    views: false,
-                    reach: false,
-                    content_interactions: true,
-                    source: 'direct_fields',
+                  reactions,
+                  comments,
+                  shares,
+                  raw: {
+                    source: 'meta_sync',
+                    platform: 'facebook',
+                    synced_at: now,
+                    views: null,
+                    reach: null,
+                    engagements: { reactions, comments, shares },
+                    metric_availability: {
+                      views: false,
+                      reach: false,
+                      content_interactions: true,
+                      source: 'direct_fields',
+                    },
+                    meta_payload: raw,
+                    ...(fullPicture ? { full_picture: fullPicture } : {}),
                   },
-                  meta_payload: raw,
-                  ...(fullPicture ? { full_picture: fullPicture } : {}),
-                },
-              }
+                }
 
-              if (existing && existing.length > 0) {
-                if (existing[0].post_id) {
-                  await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
+                if (existing && existing.length > 0) {
+                  if (existing[0].post_id) {
+                    await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
+                  }
+                  await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
+                } else {
+                  const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
+                  if (newPost) {
+                    await sb.from('meta_content_mappings').insert({
+                      client_id: item.client_id, report_id: reportId, post_id: newPost.id,
+                      platform: 'facebook', meta_object_id: metaPostId, last_synced_at: now,
+                    })
+                  }
                 }
-                await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
-              } else {
-                const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
-                if (newPost) {
-                  await sb.from('meta_content_mappings').insert({
-                    client_id: item.client_id, report_id: reportId, post_id: newPost.id,
-                    platform: 'facebook', meta_object_id: metaPostId, last_synced_at: now,
-                  })
-                }
+                postsSynced++
               }
-              postsSynced++
+            } else {
+              warnings.push(`Facebook posts fetch failed (HTTP ${res.status})`)
             }
-          } else {
-            warnings.push(`Facebook posts fetch failed (HTTP ${res.status})`)
+          } catch (e) {
+            warnings.push(`Facebook sync error: ${String(e)}`)
           }
-        } catch (e) {
-          warnings.push(`Facebook sync error: ${String(e)}`)
         }
-      }
 
-      // ── Sync Instagram media ──
-      if (instagramAccountId) {
-        const pageToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
-        try {
-          const params = new URLSearchParams({
-            access_token: pageToken,
-            fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
-            limit: '100',
-          })
-          const res = await metaFetch(`${baseUrl}/${instagramAccountId}/media?${params.toString()}`)
-          if (res.ok) {
-            const igData = await res.json()
-            const rawMedia: Array<Record<string, unknown>> = igData.data ?? []
-            for (const raw of rawMedia) {
-              const metaPostId = String(raw.id ?? '')
-              if (!metaPostId) continue
-              const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
-              if (!timestamp) continue
-              const ts = new Date(timestamp)
-              const pStart = new Date(periodStart + 'T00:00:00Z')
-              const pEnd = new Date(periodEnd + 'T23:59:59Z')
-              if (ts < pStart || ts > pEnd) continue
+        // ── Sync Instagram media ──
+        if (instagramAccountId) {
+          const pageToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
+          try {
+            const params = new URLSearchParams({
+              access_token: pageToken,
+              fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
+              limit: '100',
+            })
+            const res = await metaFetch(`${baseUrl}/${instagramAccountId}/media?${params.toString()}`)
+            if (res.ok) {
+              const igData = await res.json()
+              const rawMedia: Array<Record<string, unknown>> = igData.data ?? []
+              for (const raw of rawMedia) {
+                const metaPostId = String(raw.id ?? '')
+                if (!metaPostId) continue
+                const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
+                if (!timestamp) continue
+                const ts = new Date(timestamp)
+                const pStart = new Date(periodStart + 'T00:00:00Z')
+                const pEnd = new Date(periodEnd + 'T23:59:59Z')
+                if (ts < pStart || ts > pEnd) continue
 
-              const { data: existing } = await sb
-                .from('meta_content_mappings')
-                .select('id, post_id')
-                .eq('client_id', item.client_id)
-                .eq('platform', 'instagram')
-                .eq('meta_object_id', metaPostId)
-                .limit(1)
+                const { data: existing } = await sb
+                  .from('meta_content_mappings')
+                  .select('id, post_id')
+                  .eq('client_id', item.client_id)
+                  .eq('platform', 'instagram')
+                  .eq('meta_object_id', metaPostId)
+                  .limit(1)
 
-              const likes = (raw.like_count as number) ?? 0
-              const igComments = (raw.comments_count as number) ?? 0
-              const mediaType = (raw.media_type as string) ?? ''
-              const mediaProductType = raw.media_product_type as string | undefined
-              let postType = mediaType
-              if (mediaProductType === 'REELS') postType = 'Reel'
-              else if (mediaType === 'CAROUSEL_ALBUM') postType = 'Carousel'
-              else if (mediaType === 'VIDEO') postType = 'Video'
-              else if (mediaType === 'IMAGE') postType = 'Photo'
+                const likes = (raw.like_count as number) ?? 0
+                const igComments = (raw.comments_count as number) ?? 0
+                const mediaType = (raw.media_type as string) ?? ''
+                const mediaProductType = raw.media_product_type as string | undefined
+                let postType = mediaType
+                if (mediaProductType === 'REELS') postType = 'Reel'
+                else if (mediaType === 'CAROUSEL_ALBUM') postType = 'Carousel'
+                else if (mediaType === 'VIDEO') postType = 'Video'
+                else if (mediaType === 'IMAGE') postType = 'Photo'
 
-              const postPayload: Record<string, unknown> = {
-                report_id: reportId,
-                platform: 'instagram',
-                meta_post_id: metaPostId,
-                publish_time: timestamp,
-                caption: (raw.caption as string | null) ?? null,
-                permalink: (raw.permalink as string | null) ?? null,
-                views: null,
-                reach: null,
-                reactions: likes,
-                comments: igComments,
-                shares: 0,
-                raw: {
-                  source: 'meta_sync',
+                const postPayload: Record<string, unknown> = {
+                  report_id: reportId,
                   platform: 'instagram',
-                  synced_at: now,
-                  content_type: postType,
+                  meta_post_id: metaPostId,
+                  publish_time: timestamp,
+                  caption: (raw.caption as string | null) ?? null,
+                  permalink: (raw.permalink as string | null) ?? null,
                   views: null,
                   reach: null,
-                  engagements: { likes: likes, comments: igComments },
-                  metric_availability: {
-                    views: false,
-                    reach: false,
-                    content_interactions: true,
-                    source: 'media_fields',
+                  reactions: likes,
+                  comments: igComments,
+                  shares: 0,
+                  raw: {
+                    source: 'meta_sync',
+                    platform: 'instagram',
+                    synced_at: now,
+                    content_type: postType,
+                    views: null,
+                    reach: null,
+                    engagements: { likes: likes, comments: igComments },
+                    metric_availability: {
+                      views: false,
+                      reach: false,
+                      content_interactions: true,
+                      source: 'media_fields',
+                    },
+                    meta_payload: raw,
+                    ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}),
+                    ...(raw.media_url ? { media_url: raw.media_url as string } : {}),
                   },
-                  meta_payload: raw,
-                  ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}),
-                  ...(raw.media_url ? { media_url: raw.media_url as string } : {}),
-                },
-              }
+                }
 
-              if (existing && existing.length > 0) {
-                if (existing[0].post_id) {
-                  await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
+                if (existing && existing.length > 0) {
+                  if (existing[0].post_id) {
+                    await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
+                  }
+                  await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
+                } else {
+                  const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
+                  if (newPost) {
+                    await sb.from('meta_content_mappings').insert({
+                      client_id: item.client_id, report_id: reportId, post_id: newPost.id,
+                      platform: 'instagram', meta_object_id: metaPostId, last_synced_at: now,
+                    })
+                  }
                 }
-                await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
-              } else {
-                const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
-                if (newPost) {
-                  await sb.from('meta_content_mappings').insert({
-                    client_id: item.client_id, report_id: reportId, post_id: newPost.id,
-                    platform: 'instagram', meta_object_id: metaPostId, last_synced_at: now,
-                  })
-                }
+                postsSynced++
               }
-              postsSynced++
+            } else {
+              warnings.push(`Instagram media fetch failed (HTTP ${res.status})`)
             }
-          } else {
-            warnings.push(`Instagram media fetch failed (HTTP ${res.status})`)
+          } catch (e) {
+            warnings.push(`Instagram sync error: ${String(e)}`)
           }
-        } catch (e) {
-          warnings.push(`Instagram sync error: ${String(e)}`)
         }
+
+        if (postsSynced === 0 && warnings.length === 0 && !facebookPageId && !instagramAccountId) {
+          itemStatus = 'skipped'
+          warnings.push('No Facebook Page or Instagram account linked.')
+        }
+
+        await sb.from('meta_sync_runs').insert({
+          client_id: item.client_id,
+          connection_id: connections[0].id,
+          sync_type: 'previous_completed_month',
+          period_start: periodStart,
+          period_end: periodEnd,
+          status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
+          summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: SYNC_ENGINE_VERSION },
+          started_at: now,
+          finished_at: now,
+        }).catch(() => {})
+
+      } catch (e) {
+        itemStatus = 'failed'
+        itemError = String(e)
       }
 
-      if (postsSynced === 0 && warnings.length === 0 && !facebookPageId && !instagramAccountId) {
-        itemStatus = 'skipped'
-        warnings.push('No Facebook Page or Instagram account linked.')
+      const updatePayload: Record<string, unknown> = {
+        status: itemStatus,
+        posts_synced: postsSynced,
+        reports_created: reportsCreated,
+        reports_reused: reportsReused,
+        finished_at: new Date().toISOString(),
       }
+      if (warnings.length > 0) updatePayload.warnings = warnings
+      if (itemError) updatePayload.error = String(itemError).slice(0, 1000)
+      await sb.from('meta_sync_batch_items').update(updatePayload).eq('id', item.id)
 
-      // Record per-client run in existing meta_sync_runs table
-      await sb.from('meta_sync_runs').insert({
-        client_id: item.client_id,
-        connection_id: connections[0].id,
-        sync_type: 'previous_completed_month',
-        period_start: periodStart,
-        period_end: periodEnd,
-        status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
-        summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: SYNC_ENGINE_VERSION },
-        started_at: now,
-        finished_at: now,
-      }).catch(() => {})
-
-    } catch (e) {
-      itemStatus = 'failed'
-      itemError = String(e)
+      processed.push({
+        itemId: item.id,
+        clientName: item.client_name,
+        month: item.month,
+        status: itemStatus,
+        postsSynced,
+        error: itemError ?? undefined,
+      })
     }
-
-    // Update item to terminal state
-    const updatePayload: Record<string, unknown> = {
-      status: itemStatus,
-      posts_synced: postsSynced,
-      reports_created: reportsCreated,
-      reports_reused: reportsReused,
-      finished_at: new Date().toISOString(),
-    }
-    if (warnings.length > 0) updatePayload.warnings = warnings
-    if (itemError) updatePayload.error = String(itemError).slice(0, 1000)
-    await sb.from('meta_sync_batch_items').update(updatePayload).eq('id', item.id)
-
-    processed.push({
-      itemId: item.id,
-      clientName: item.client_name,
-      month: item.month,
-      status: itemStatus,
-      postsSynced,
-      error: itemError ?? undefined,
-    })
   }
 
   // ── Recalculate parent batch statuses ──────────────────────
@@ -474,9 +476,38 @@ Deno.serve(async (req) => {
     }
   }
 
+  // ── Fire-and-forget next worker if items remain ────────────
+  if (body.batchId && processed.length > 0) {
+    const { count: remaining } = await sb
+      .from('meta_sync_batch_items')
+      .select('id', { count: 'exact', head: true })
+      .eq('batch_id', body.batchId)
+      .eq('status', 'queued')
+
+    if (remaining && remaining > 0) {
+      const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
+      const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
+      ;(async () => {
+        try {
+          await fetch(workerUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-worker-secret': workerSecret,
+            },
+            body: JSON.stringify({ batchId: body.batchId }),
+          })
+        } catch {
+          // Next chunk failed to trigger — batch stays running
+        }
+      })()
+    }
+  }
+
   return jsonResponse({
     ok: true,
     syncEngineVersion: SYNC_ENGINE_VERSION,
+    chunksProcessed: claimCount,
     processed: processed.length,
     items: processed,
   })

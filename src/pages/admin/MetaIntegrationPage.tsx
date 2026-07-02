@@ -415,7 +415,10 @@ export default function MetaIntegrationPage() {
     completed_items: number
     failed_items: number
   } | null>(null)
+  const [batchStalled, setBatchStalled] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const stallRef = useRef(0)
+  const lastCompletedRef = useRef(0)
 
   type SyncResponse = Record<string, unknown>
 
@@ -554,11 +557,23 @@ export default function MetaIntegrationPage() {
         .select('id, status, total_items, completed_items, failed_items')
         .eq('id', batchIdValue)
         .single()
-      if (batchData) setBatch(batchData as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
+      if (batchData) {
+        setBatch(batchData as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
+        // Stall detection: increment counter if completed_items has not changed
+        if (batchData.completed_items > lastCompletedRef.current) {
+          lastCompletedRef.current = batchData.completed_items
+          stallRef.current = 0
+          setBatchStalled(false)
+        } else if (batchData.status === 'running') {
+          stallRef.current++
+          if (stallRef.current >= 4) setBatchStalled(true)
+        }
+      }
       if (batchData?.status === 'completed' || batchData?.status === 'failed') {
         if (pollRef.current) clearInterval(pollRef.current)
         pollRef.current = null
         setBatch(null)
+        setBatchStalled(false)
         const { data: items } = await supabase
           .from('meta_sync_batch_items')
           .select('status, client_name, month, posts_synced, reports_created, reports_reused, error')
@@ -1769,7 +1784,9 @@ export default function MetaIntegrationPage() {
           {batch && (
             <div className="mt-3 rounded-xl border border-brand-accent/20 bg-brand-accent/10 p-4">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-semibold text-brand-accent">Syncing in background...</p>
+                <p className="text-sm font-semibold text-brand-accent">
+                  {batchStalled ? 'Batch appears stuck' : 'Syncing in background...'}
+                </p>
                 <span className="text-xs text-brand-primary/60">{batch.completed_items ?? 0} / {batch.total_items ?? 0}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-brand-bg">
@@ -1782,6 +1799,11 @@ export default function MetaIntegrationPage() {
                 <span>Failed: {batch.failed_items ?? 0}</span>
                 <span>{batch.total_items > 0 ? Math.round(((batch.completed_items ?? 0) / batch.total_items) * 100) : 0}%</span>
               </div>
+              {batchStalled && (
+                <div className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
+                  <p className="text-xs font-medium text-amber-200">Queue processing may have stalled. Check that the meta-sync-worker Edge Function is deployed. You can dismiss and retry or wait for the next sync cycle.</p>
+                </div>
+              )}
             </div>
           )}
 
