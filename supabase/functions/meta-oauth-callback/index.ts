@@ -4,11 +4,53 @@ import { corsHeaders } from '../_shared/cors.ts'
 // This bypasses RLS — only Edge Functions should ever use this.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const REQUESTED_SCOPES = [
+  'pages_show_list',
+  'pages_read_engagement',
+  'instagram_basic',
+  'instagram_manage_insights',
+  'business_management',
+]
+
 function redirect(to: string): Response {
   return new Response(null, {
     status: 302,
     headers: { ...corsHeaders, Location: to },
   })
+}
+
+function redact(text: string): string {
+  return text
+    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
+    .replace(/client_secret=[^&\s"']+/gi, 'client_secret=[redacted]')
+    .replace(/code=[^&\s"']+/gi, 'code=[redacted]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
+    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const data = new TextEncoder().encode(value)
+  const digest = await crypto.subtle.digest('SHA-256', data)
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
+async function safeMetaError(res: Response): Promise<string> {
+  try {
+    const body = await res.json()
+    const err = body?.error
+    if (err && typeof err === 'object') {
+      return redact([
+        err.message ? String(err.message) : null,
+        err.type ? `type ${err.type}` : null,
+        err.code !== undefined ? `code ${err.code}` : null,
+        err.error_subcode !== undefined ? `subcode ${err.error_subcode}` : null,
+        err.fbtrace_id ? `trace ${err.fbtrace_id}` : null,
+      ].filter(Boolean).join(', '))
+    }
+  } catch {
+    // Keep HTTP status fallback.
+  }
+  return `HTTP ${res.status}`
 }
 
 Deno.serve(async (req) => {
@@ -24,15 +66,44 @@ Deno.serve(async (req) => {
   const errorDesc = url.searchParams.get('error_description')
 
   const appUrl = Deno.env.get('APP_PUBLIC_URL') || 'https://cg-dynamics.vercel.app'
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error('Meta OAuth missing Supabase server config')
+    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
+  }
+
+  const sb = createClient(supabaseUrl, serviceRoleKey)
 
   // If Meta returned an error, redirect back to the app with ?meta=error.
   if (errorParam) {
-    console.error('Meta OAuth error:', errorParam, errorDesc)
+    console.error('Meta OAuth provider error:', redact(`${errorParam} ${errorDesc ?? ''}`))
+    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
+  }
+
+  if (!state) {
+    console.error('Meta OAuth callback missing state param')
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
   if (!code) {
     console.error('Meta OAuth callback missing code param')
+    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
+  }
+
+  const stateHash = await sha256Hex(state)
+  const { data: consumedState, error: stateError } = await sb
+    .from('meta_oauth_states')
+    .update({ used_at: new Date().toISOString() })
+    .eq('state_hash', stateHash)
+    .is('used_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .select('id, user_id')
+    .single()
+
+  if (stateError || !consumedState) {
+    console.error('Meta OAuth invalid, used or expired state')
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
@@ -56,17 +127,20 @@ Deno.serve(async (req) => {
   let tokenResponse: Response
   try {
     tokenResponse = await fetch(
-      `https://graph.facebook.com/v22.0/oauth/access_token?${tokenParams.toString()}`,
-      { method: 'POST' },
+      'https://graph.facebook.com/v22.0/oauth/access_token',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: tokenParams.toString(),
+      },
     )
   } catch (err) {
-    console.error('Meta token exchange network error:', err)
+    console.error('Meta token exchange network error:', redact(err instanceof Error ? err.message : String(err)))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
   if (!tokenResponse.ok) {
-    const body = await tokenResponse.text()
-    console.error('Meta token exchange error:', tokenResponse.status, body)
+    console.error('Meta token exchange error:', await safeMetaError(tokenResponse))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
@@ -79,16 +153,6 @@ Deno.serve(async (req) => {
   }
 
   // ── Store connection metadata and token in database ──────────
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
-    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
-  }
-
-  const sb = createClient(supabaseUrl, serviceRoleKey)
-
   // Upsert: use the first existing connection, or create a new one.
   // For now, we always create/update a single global connection row.
   const { data: existing } = await sb
@@ -103,14 +167,17 @@ Deno.serve(async (req) => {
     const { error: updateError } = await sb
       .from('meta_connections')
       .update({
+        connected_by: consumedState.user_id,
         status: 'connected',
+        scopes: REQUESTED_SCOPES,
+        last_error: null,
         last_connected_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq('id', existing[0].id)
 
     if (updateError) {
-      console.error('Failed to update meta_connections:', updateError)
+      console.error('Failed to update meta_connections:', updateError.code ?? 'unknown')
     } else {
       connectionId = existing[0].id
     }
@@ -119,14 +186,16 @@ Deno.serve(async (req) => {
     const { data: inserted, error: insertError } = await sb
       .from('meta_connections')
       .insert({
+        connected_by: consumedState.user_id,
         status: 'connected',
+        scopes: REQUESTED_SCOPES,
         last_connected_at: new Date().toISOString(),
       })
       .select('id')
       .single()
 
     if (insertError) {
-      console.error('Failed to insert meta_connections:', insertError)
+      console.error('Failed to insert meta_connections:', insertError.code ?? 'unknown')
       return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
     }
     connectionId = inserted.id
@@ -138,11 +207,9 @@ Deno.serve(async (req) => {
   }
 
   // Store the token in the server-only tokens table.
-  // TODO: Replace with proper encryption (e.g. pgcrypto / pgsodium)
-  // before production app review. The value stored here is the raw
-  // Meta access token, but it lives in meta_connection_tokens which
-  // has RLS with NO frontend policies — only service_role keys can
-  // read it.
+  // IMPORTANT: This legacy column still stores the raw Meta token. It is
+  // protected by RLS/no frontend policies and service_role-only access, but
+  // production-ready encryption is still required before Meta app review.
   const { error: tokenError } = await sb
     .from('meta_connection_tokens')
     .upsert({
@@ -154,7 +221,7 @@ Deno.serve(async (req) => {
     }, { onConflict: 'connection_id' })
 
   if (tokenError) {
-    console.error('Failed to store token:', tokenError)
+    console.error('Failed to store token:', tokenError.code ?? 'unknown')
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 

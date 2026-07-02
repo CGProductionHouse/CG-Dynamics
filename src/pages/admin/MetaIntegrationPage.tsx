@@ -51,6 +51,31 @@ interface LinkedAsset {
   is_active: boolean
 }
 
+type MatchConfidence = 'high' | 'medium' | 'low' | 'none'
+
+interface AssetMatch<T> {
+  asset: T | null
+  score: number
+  reason: string
+}
+
+interface ClientAssetSuggestion {
+  client: Client
+  page: AssetMatch<FbPage>
+  instagram: AssetMatch<IgAccount>
+  adAccount: AssetMatch<AdAccount>
+  confidence: MatchConfidence
+  reason: string
+  currentLink: LinkedAsset | null
+  alreadyLinkedDifferently: boolean
+  alreadyLinkedSame: boolean
+}
+
+interface ConnectionInfo {
+  lastConnectedAt: string | null
+  metaBusinessName: string | null
+}
+
 /* ---------- SearchablePicker ---------- */
 interface SearchablePickerProps {
   value: string
@@ -142,6 +167,96 @@ function redactForDisplay(text: string): string {
     .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
 }
 
+function normalizeMatchName(value: string | null | undefined): string {
+  const suffixes = new Set([
+    'pty', 'ltd', 'limited', 'restaurant', 'restaurants', 'bar', 'grill', 'cafe', 'coffee',
+    'the', 'official', 'sa', 'south', 'africa', 'group', 'company', 'co', 'inc', 'llc',
+  ])
+  return (value ?? '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter(token => !suffixes.has(token))
+    .join(' ')
+    .trim()
+}
+
+function levenshtein(a: string, b: string): number {
+  if (a === b) return 0
+  if (!a) return b.length
+  if (!b) return a.length
+  const prev = Array.from({ length: b.length + 1 }, (_, index) => index)
+  const curr = Array.from({ length: b.length + 1 }, () => 0)
+  for (let i = 1; i <= a.length; i++) {
+    curr[0] = i
+    for (let j = 1; j <= b.length; j++) {
+      curr[j] = Math.min(
+        curr[j - 1] + 1,
+        prev[j] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      )
+    }
+    for (let j = 0; j <= b.length; j++) prev[j] = curr[j]
+  }
+  return prev[b.length]
+}
+
+function similarity(a: string, b: string): number {
+  if (!a || !b) return 0
+  if (a === b) return 1
+  const shorter = a.length <= b.length ? a : b
+  const longer = a.length > b.length ? a : b
+  if (shorter.length >= 5 && longer.includes(shorter)) return 0.96
+  const distance = levenshtein(a, b)
+  const editScore = 1 - distance / Math.max(a.length, b.length)
+  const aTokens = new Set(a.split(' ').filter(Boolean))
+  const bTokens = new Set(b.split(' ').filter(Boolean))
+  const shared = [...aTokens].filter(token => bTokens.has(token)).length
+  const tokenScore = shared / Math.max(aTokens.size, bTokens.size, 1)
+  return Math.max(editScore, tokenScore)
+}
+
+function confidenceFromScore(score: number): MatchConfidence {
+  if (score >= 0.9) return 'high'
+  if (score >= 0.75) return 'medium'
+  if (score >= 0.55) return 'low'
+  return 'none'
+}
+
+function bestMatch<T>(clientName: string, assets: T[], getNames: (asset: T) => Array<string | null | undefined>): AssetMatch<T> {
+  const clientKey = normalizeMatchName(clientName)
+  let best: AssetMatch<T> = { asset: null, score: 0, reason: 'No candidate match.' }
+  for (const asset of assets) {
+    for (const name of getNames(asset)) {
+      const assetKey = normalizeMatchName(name)
+      if (!assetKey) continue
+      const score = similarity(clientKey, assetKey)
+      if (score > best.score) {
+        const reason = score >= 0.96 && clientKey !== assetKey
+          ? `Contained match: "${clientKey}" vs "${assetKey}".`
+          : clientKey === assetKey
+            ? `Exact normalized match: "${clientKey}".`
+            : `Name similarity ${(score * 100).toFixed(0)}%.`
+        best = { asset, score, reason }
+      }
+    }
+  }
+  return best.score >= 0.55 ? best : { asset: null, score: 0, reason: 'No safe name match.' }
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return 'Never'
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
 // Calendar month before the given YYYY-MM, as YYYY-MM (used for baseline sync).
 function priorMonth(month: string): string {
   const year = Number(month.slice(0, 4))
@@ -186,6 +301,7 @@ export default function MetaIntegrationPage() {
   const [connectState, setConnectState] = useState<ConnectState>('idle')
   const [connectMsg, setConnectMsg] = useState<string | null>(null)
   const [connectionLoading, setConnectionLoading] = useState(true)
+  const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo | null>(null)
 
   // Assets
   const [loadingAssets, setLoadingAssets] = useState(false)
@@ -203,6 +319,7 @@ export default function MetaIntegrationPage() {
   const [selectedIgId, setSelectedIgId] = useState('')
   const [selectedAdId, setSelectedAdId] = useState('')
   const [saving, setSaving] = useState(false)
+  const [bulkSaving, setBulkSaving] = useState(false)
   const [linkMsg, setLinkMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   // Linked assets list
@@ -282,12 +399,18 @@ export default function MetaIntegrationPage() {
       })
       if (data?.ok && data?.connected) {
         setConnectState('connected')
+        setConnectionInfo({
+          lastConnectedAt: data.connection?.lastConnectedAt ?? null,
+          metaBusinessName: data.connection?.metaBusinessName ?? null,
+        })
         setConnectMsg(null)
       } else {
         setConnectState('idle')
+        setConnectionInfo(null)
       }
     } catch {
       setConnectState('idle')
+      setConnectionInfo(null)
     } finally {
       setConnectionLoading(false)
     }
@@ -431,64 +554,189 @@ export default function MetaIntegrationPage() {
   const selectedIg = igAccounts.find(a => a.id === selectedIgId)
   const selectedAd = adAccounts.find(a => a.id === selectedAdId)
 
+  const linkedByClient = useMemo(() => {
+    return new Map(linkedAssets.map(asset => [asset.client_id, asset]))
+  }, [linkedAssets])
+
+  const readiness = useMemo(() => {
+    const activeClients = clients.length
+    const linkedClientIds = new Set(linkedAssets.map(asset => asset.client_id))
+    return {
+      activeClients,
+      linkedAny: linkedClientIds.size,
+      missingFacebook: clients.filter(client => !linkedByClient.get(client.id)?.facebook_page_id).length,
+      missingInstagram: clients.filter(client => !linkedByClient.get(client.id)?.instagram_account_id).length,
+      missingAdAccount: clients.filter(client => !linkedByClient.get(client.id)?.ad_account_id).length,
+    }
+  }, [clients, linkedAssets, linkedByClient])
+
+  const suggestions = useMemo<ClientAssetSuggestion[]>(() => {
+    return clients.map(client => {
+      const page = bestMatch(client.name, pages, asset => [asset.name])
+      const igCandidates = page.asset?.instagramAccount?.id
+        ? igAccounts.filter(account => account.id === page.asset?.instagramAccount?.id)
+        : igAccounts
+      const instagram = page.asset?.instagramAccount
+        ? {
+            asset: igCandidates[0] ?? null,
+            score: page.score,
+            reason: igCandidates[0] ? `Instagram account linked to suggested Page "${page.asset.name}".` : 'Suggested Page has no Instagram account.',
+          }
+        : bestMatch(client.name, igCandidates, asset => [asset.name, asset.username])
+      const adAccount = bestMatch(client.name, adAccounts, asset => [asset.name])
+      const bestScore = Math.max(page.score, instagram.score, adAccount.score)
+      const confidence = confidenceFromScore(bestScore)
+      const currentLink = linkedByClient.get(client.id) ?? null
+      const suggested = {
+        facebookPageId: page.asset?.id ?? null,
+        instagramAccountId: instagram.asset?.id ?? null,
+        adAccountId: adAccount.asset?.id ?? null,
+      }
+      const alreadyLinkedDifferently = Boolean(currentLink && (
+        (suggested.facebookPageId && currentLink.facebook_page_id !== suggested.facebookPageId) ||
+        (suggested.instagramAccountId && currentLink.instagram_account_id !== suggested.instagramAccountId) ||
+        (suggested.adAccountId && currentLink.ad_account_id !== suggested.adAccountId)
+      ))
+      const alreadyLinkedSame = Boolean(currentLink && (
+        (!suggested.facebookPageId || currentLink.facebook_page_id === suggested.facebookPageId) &&
+        (!suggested.instagramAccountId || currentLink.instagram_account_id === suggested.instagramAccountId) &&
+        (!suggested.adAccountId || currentLink.ad_account_id === suggested.adAccountId)
+      ))
+      const reasons = [page.reason, instagram.reason, adAccount.reason].filter(reason => !reason.startsWith('No safe'))
+      return {
+        client,
+        page,
+        instagram,
+        adAccount,
+        confidence,
+        reason: reasons[0] ?? 'No safe match found.',
+        currentLink,
+        alreadyLinkedDifferently,
+        alreadyLinkedSame,
+      }
+    })
+  }, [adAccounts, clients, igAccounts, linkedByClient, pages])
+
+  const safeHighConfidenceSuggestions = useMemo(() => {
+    return suggestions.filter(suggestion =>
+      (suggestion.page.score >= 0.9 || suggestion.instagram.score >= 0.9 || suggestion.adAccount.score >= 0.9) &&
+      !suggestion.alreadyLinkedDifferently &&
+      !suggestion.alreadyLinkedSame &&
+      ((suggestion.page.score >= 0.9 && suggestion.page.asset) ||
+        (suggestion.instagram.score >= 0.9 && suggestion.instagram.asset) ||
+        (suggestion.adAccount.score >= 0.9 && suggestion.adAccount.asset))
+    )
+  }, [suggestions])
+
+  function buildLinkPayload(input: {
+    clientId: string
+    page: FbPage | null
+    instagram: IgAccount | null
+    adAccount: AdAccount | null
+    allowOverwrite?: boolean
+  }) {
+    return {
+      clientId: input.clientId,
+      facebookPageId: input.page?.id ?? null,
+      facebookPageName: input.page?.name ?? null,
+      instagramAccountId: input.instagram?.id ?? null,
+      instagramUsername: input.instagram?.username ?? input.instagram?.name ?? null,
+      adAccountId: input.adAccount?.id ?? null,
+      adAccountName: input.adAccount?.name ?? null,
+      allowOverwrite: input.allowOverwrite === true,
+    }
+  }
+
+  async function saveAssetLinks(body: Record<string, unknown>) {
+    const { data, error } = await supabase.functions.invoke('meta-link-assets', {
+      method: 'POST',
+      body,
+    })
+    if (error) throw new Error(error.message)
+    if (!data?.ok) throw new Error(data?.error || 'Could not save Meta asset links.')
+    return data as { linked?: number; skipped?: number; failed?: number; results?: Array<{ status: string; message: string }> }
+  }
+
   async function handleSaveLink() {
     if (!selectedClientId) return
+    if (!selectedPageId && !selectedIgId && !selectedAdId) {
+      setLinkMsg({ ok: false, text: 'Select at least one Meta asset before saving a manual link.' })
+      return
+    }
     setSaving(true)
     setLinkMsg(null)
 
     const clientName = clients.find(c => c.id === selectedClientId)?.name ?? 'Client'
 
-    // Check for existing active mapping for this client.
-    const { data: existing } = await supabase
-      .from('meta_client_assets')
-      .select('id')
-      .eq('client_id', selectedClientId)
-      .eq('is_active', true)
-      .limit(1)
+    const existing = linkedByClient.get(selectedClientId)
+    const overwriteNeeded = Boolean(existing && (
+      (existing.facebook_page_id ?? '') !== (selectedPageId || '') ||
+      (existing.instagram_account_id ?? '') !== (selectedIgId || '') ||
+      (existing.ad_account_id ?? '') !== (selectedAdId || '')
+    ))
+    const allowOverwrite = overwriteNeeded
+      ? window.confirm(`${clientName} already has a different active Meta link. Replace it with the selected assets?`)
+      : false
 
-    const payload = {
-      client_id: selectedClientId,
-      facebook_page_id: selectedPageId || null,
-      facebook_page_name: selectedPage?.name ?? null,
-      instagram_account_id: selectedIgId || null,
-      instagram_username: selectedIg?.username ?? null,
-      ad_account_id: selectedAdId || null,
-      ad_account_name: selectedAd?.name ?? null,
-      is_active: true,
+    if (overwriteNeeded && !allowOverwrite) {
+      setSaving(false)
+      setLinkMsg({ ok: false, text: 'Existing link was not changed.' })
+      return
     }
 
-    let result: { error?: unknown }
-    if (existing && existing.length > 0) {
-      result = await supabase
-        .from('meta_client_assets')
-        .update(payload)
-        .eq('id', existing[0].id)
-    } else {
-      result = await supabase
-        .from('meta_client_assets')
-        .insert(payload)
-    }
-
-    setSaving(false)
-    if (result.error) {
-      setLinkMsg({ ok: false, text: 'Failed to save link. Please try again.' })
-    } else {
+    try {
+      await saveAssetLinks({
+        action: 'upsert',
+        link: buildLinkPayload({
+          clientId: selectedClientId,
+          page: selectedPage ?? null,
+          instagram: selectedIg ?? null,
+          adAccount: selectedAd ?? null,
+          allowOverwrite,
+        }),
+      })
       setLinkMsg({ ok: true, text: `${clientName} linked successfully. You can now link another client.` })
-      // Clear form for next link.
       setSelectedClientId('')
       setSelectedPageId('')
       setSelectedIgId('')
       setSelectedAdId('')
       await loadLinkedAssets()
+    } catch {
+      setLinkMsg({ ok: false, text: 'Failed to save link. Please try again.' })
+    } finally {
+      setSaving(false)
     }
   }
 
   async function handleDeactivate(asset: LinkedAsset) {
-    await supabase
-      .from('meta_client_assets')
-      .update({ is_active: false })
-      .eq('id', asset.id)
+    await saveAssetLinks({ action: 'deactivate', assetId: asset.id })
     await loadLinkedAssets()
+  }
+
+  async function handleBulkLinkHighConfidence() {
+    if (safeHighConfidenceSuggestions.length === 0) return
+    const confirmed = window.confirm(`Link ${safeHighConfidenceSuggestions.length} high-confidence Meta asset match(es)? Existing different links will not be overwritten.`)
+    if (!confirmed) return
+
+    setBulkSaving(true)
+    setLinkMsg(null)
+    try {
+      const result = await saveAssetLinks({
+        action: 'upsertMany',
+        links: safeHighConfidenceSuggestions.map(suggestion => buildLinkPayload({
+          clientId: suggestion.client.id,
+          page: suggestion.page.score >= 0.9 ? suggestion.page.asset : null,
+          instagram: suggestion.instagram.score >= 0.9 ? suggestion.instagram.asset : null,
+          adAccount: suggestion.adAccount.score >= 0.9 ? suggestion.adAccount.asset : null,
+        })),
+      })
+      setLinkMsg({ ok: true, text: `Bulk linking complete: ${result.linked ?? 0} linked, ${result.skipped ?? 0} skipped.` })
+      await loadLinkedAssets()
+    } catch {
+      setLinkMsg({ ok: false, text: 'Bulk linking failed. Review matches and try again.' })
+    } finally {
+      setBulkSaving(false)
+    }
   }
 
   async function handleSync() {
@@ -703,6 +951,32 @@ export default function MetaIntegrationPage() {
         ))}
       </div>
 
+      <PremiumCard className="mt-6 max-w-4xl" padding="md">
+        <PremiumCardHeader
+          eyebrow="Readiness"
+          title="Meta connection health"
+          action={
+            <StatusBadge
+              label={connectionLoading ? 'Checking...' : connectState === 'connected' ? 'Connected' : 'Not connected'}
+              variant={connectState === 'connected' ? 'published' : 'needs-strategy'}
+            />
+          }
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <HealthTile label="Active clients" value={readiness.activeClients} />
+          <HealthTile label="Linked to Meta" value={readiness.linkedAny} />
+          <HealthTile label="Missing Facebook Page" value={readiness.missingFacebook} tone={readiness.missingFacebook > 0 ? 'warn' : 'ok'} />
+          <HealthTile label="Missing Instagram" value={readiness.missingInstagram} tone={readiness.missingInstagram > 0 ? 'warn' : 'ok'} />
+          <HealthTile label="Missing Ad Account" value={readiness.missingAdAccount} tone={readiness.missingAdAccount > 0 ? 'warn' : 'ok'} />
+          <HealthTile label="Last connected" value={formatDateTime(connectionInfo?.lastConnectedAt)} />
+          <HealthTile label="OAuth state" value="Prepared SQL required" tone="warn" />
+          <HealthTile label="Token encryption" value="Not production-ready" tone="warn" />
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-brand-primary/70">
+          OAuth state verification is implemented in Edge Functions but requires the prepared `phase-4b` SQL to be applied. Tokens still live in a server-only table, but raw token storage remains a production-readiness risk until encryption is added.
+        </p>
+      </PremiumCard>
+
       {/* Step cards */}
       <div className="mt-6 space-y-4 max-w-2xl">
         {/* Step 1 — Connect Meta */}
@@ -765,59 +1039,133 @@ export default function MetaIntegrationPage() {
 
           {assetsLoaded && (
             <div className="mt-4 space-y-4">
-              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                <span className="text-sm text-brand-primary">CG Client</span>
-                <SearchablePicker
-                  value={selectedClientId}
-                  onChange={setSelectedClientId}
-                  options={sortedClientOptions}
-                  placeholder="Select a client..."
-                />
+              <div className="rounded-xl border border-brand-muted bg-brand-bg/55 p-4">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Bulk matching</p>
+                    <h3 className="mt-1 text-base font-semibold text-white">Review suggested matches for active clients</h3>
+                    <p className="mt-1 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
+                      Suggestions are generated from normalized names. High-confidence matches can be linked safely; medium and low matches stay manual review only.
+                    </p>
+                  </div>
+                  <ActionButton
+                    variant="primary"
+                    onClick={handleBulkLinkHighConfidence}
+                    disabled={safeHighConfidenceSuggestions.length === 0 || bulkSaving}
+                    loading={bulkSaving}
+                  >
+                    Link high-confidence matches ({safeHighConfidenceSuggestions.length})
+                  </ActionButton>
+                </div>
+
+                <div className="mt-4 overflow-x-auto">
+                  <table className="min-w-[980px] w-full text-left text-sm">
+                    <thead className="text-xs uppercase tracking-[0.12em] text-brand-primary/55">
+                      <tr className="border-b border-white/10">
+                        <th className="px-3 py-2">Active CG client</th>
+                        <th className="px-3 py-2">Facebook Page</th>
+                        <th className="px-3 py-2">Instagram</th>
+                        <th className="px-3 py-2">Ad Account</th>
+                        <th className="px-3 py-2">Confidence</th>
+                        <th className="px-3 py-2">Current / warning</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/8">
+                      {suggestions.map(suggestion => (
+                        <tr key={suggestion.client.id} className="align-top">
+                          <td className="px-3 py-3 font-semibold text-white">{suggestion.client.name}</td>
+                          <SuggestedAssetCell label={suggestion.page.asset?.name ?? null} reason={suggestion.page.reason} />
+                          <SuggestedAssetCell
+                            label={suggestion.instagram.asset ? suggestion.instagram.asset.name || suggestion.instagram.asset.username || suggestion.instagram.asset.id : null}
+                            reason={suggestion.instagram.reason}
+                          />
+                          <SuggestedAssetCell label={suggestion.adAccount.asset?.name ?? null} reason={suggestion.adAccount.reason} />
+                          <td className="px-3 py-3">
+                            <ConfidencePill confidence={suggestion.confidence} />
+                            <p className="mt-1 text-xs text-brand-primary/60">{suggestion.reason}</p>
+                          </td>
+                          <td className="px-3 py-3 text-xs text-brand-primary/75">
+                            {suggestion.currentLink ? (
+                              <>
+                                <p className="font-semibold text-white">Currently linked</p>
+                                <p>{suggestion.currentLink.facebook_page_name || 'No Facebook Page'}</p>
+                                <p>{suggestion.currentLink.instagram_username ? `@${suggestion.currentLink.instagram_username}` : 'No Instagram'}</p>
+                                <p>{suggestion.currentLink.ad_account_name || 'No ad account'}</p>
+                              </>
+                            ) : (
+                              <p>Not linked yet</p>
+                            )}
+                            {suggestion.alreadyLinkedDifferently && (
+                              <p className="mt-2 rounded-md border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-amber-300">
+                                Existing active link differs. Bulk action will not overwrite it.
+                              </p>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
-              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                <span className="text-sm text-brand-primary">Facebook Page</span>
-                <SearchablePicker
-                  value={selectedPageId}
-                  onChange={v => { setSelectedPageId(v); setSelectedIgId('') }}
-                  options={sortedPageOptions}
-                  placeholder="Select a page..."
-                  emptyLabel="No pages found"
-                />
-              </div>
+              <details className="rounded-xl border border-brand-muted bg-brand-bg/35 p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-white">Manual override for edge cases</summary>
+                <div className="mt-4 space-y-4">
+                  <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                    <span className="text-sm text-brand-primary">CG Client</span>
+                    <SearchablePicker
+                      value={selectedClientId}
+                      onChange={setSelectedClientId}
+                      options={sortedClientOptions}
+                      placeholder="Select a client..."
+                    />
+                  </div>
 
-              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                <span className="text-sm text-brand-primary">Instagram Account</span>
-                <SearchablePicker
-                  value={selectedIgId}
-                  onChange={setSelectedIgId}
-                  options={sortedIgOptions}
-                  placeholder={igAccounts.length === 0 ? 'No Instagram accounts found' : 'Select an account...'}
-                  emptyLabel={selectedPageId ? 'No Instagram linked to this page' : 'Select a Facebook Page first'}
-                />
-              </div>
+                  <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                    <span className="text-sm text-brand-primary">Facebook Page</span>
+                    <SearchablePicker
+                      value={selectedPageId}
+                      onChange={v => { setSelectedPageId(v); setSelectedIgId('') }}
+                      options={sortedPageOptions}
+                      placeholder="Select a page..."
+                      emptyLabel="No pages found"
+                    />
+                  </div>
 
-              <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
-                <span className="text-sm text-brand-primary">Ad Account</span>
-                {adAccounts.length > 0 ? (
-                  <SearchablePicker
-                    value={selectedAdId}
-                    onChange={setSelectedAdId}
-                    options={sortedAdOptions}
-                    placeholder="Select an ad account (optional)..."
-                  />
-                ) : (
-                  <p className="text-sm text-brand-primary/60">
-                    {adAccountsError || 'No ad accounts available.'}
-                  </p>
-                )}
-              </div>
+                  <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                    <span className="text-sm text-brand-primary">Instagram Account</span>
+                    <SearchablePicker
+                      value={selectedIgId}
+                      onChange={setSelectedIgId}
+                      options={sortedIgOptions}
+                      placeholder={igAccounts.length === 0 ? 'No Instagram accounts found' : 'Select an account...'}
+                      emptyLabel={selectedPageId ? 'No Instagram linked to this page' : 'Select a Facebook Page first'}
+                    />
+                  </div>
 
-              <div className="flex items-center gap-3 pt-2">
-                <ActionButton variant="primary" onClick={handleSaveLink} disabled={saving || !selectedClientId} loading={saving}>
-                  {saving ? 'Saving...' : 'Save link'}
-                </ActionButton>
-              </div>
+                  <div className="grid gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-4">
+                    <span className="text-sm text-brand-primary">Ad Account</span>
+                    {adAccounts.length > 0 ? (
+                      <SearchablePicker
+                        value={selectedAdId}
+                        onChange={setSelectedAdId}
+                        options={sortedAdOptions}
+                        placeholder="Select an ad account (optional)..."
+                      />
+                    ) : (
+                      <p className="text-sm text-brand-primary/60">
+                        {adAccountsError || 'No ad accounts available.'}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <ActionButton variant="secondary" onClick={handleSaveLink} disabled={saving || !selectedClientId || (!selectedPageId && !selectedIgId && !selectedAdId)} loading={saving}>
+                      {saving ? 'Saving...' : 'Save manual link'}
+                    </ActionButton>
+                  </div>
+                </div>
+              </details>
             </div>
           )}
         </PremiumCard>
@@ -1087,6 +1435,44 @@ export default function MetaIntegrationPage() {
           <li className="flex items-start gap-2 before:mt-[5px] before:block before:h-1 before:w-1 before:shrink-0 before:rounded-full before:bg-brand-primary/50">Current month data stays as internal draft until month-end.</li>
         </ul>
       </PremiumCard>
+    </div>
+  )
+}
+
+function ConfidencePill({ confidence }: { confidence: MatchConfidence }) {
+  const styles: Record<MatchConfidence, string> = {
+    high: 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]',
+    medium: 'border-amber-300/30 bg-amber-300/10 text-amber-200',
+    low: 'border-white/10 bg-white/[0.04] text-brand-primary',
+    none: 'border-white/8 bg-white/[0.02] text-brand-primary/45',
+  }
+  const label = confidence === 'none' ? 'No match' : confidence
+  return (
+    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.12em] ${styles[confidence]}`}>
+      {label}
+    </span>
+  )
+}
+
+function SuggestedAssetCell({ label, reason }: { label: string | null; reason: string }) {
+  return (
+    <td className="px-3 py-3">
+      <p className={label ? 'font-semibold text-white' : 'text-brand-primary/45'}>{label ?? 'No safe suggestion'}</p>
+      <p className="mt-1 text-xs leading-relaxed text-brand-primary/60">{reason}</p>
+    </td>
+  )
+}
+
+function HealthTile({ label, value, tone = 'neutral' }: { label: string; value: string | number; tone?: 'neutral' | 'ok' | 'warn' }) {
+  const toneClass = {
+    neutral: 'border-white/8 bg-white/[0.03] text-white',
+    ok: 'border-brand-teal/20 bg-brand-teal/[0.06] text-[#66d0c3]',
+    warn: 'border-amber-300/20 bg-amber-300/[0.06] text-amber-200',
+  }[tone]
+  return (
+    <div className={`rounded-xl border p-3 ${toneClass}`}>
+      <p className="text-[10px] font-black uppercase tracking-[0.15em] text-brand-primary/55">{label}</p>
+      <p className="mt-2 text-sm font-bold">{value}</p>
     </div>
   )
 }
