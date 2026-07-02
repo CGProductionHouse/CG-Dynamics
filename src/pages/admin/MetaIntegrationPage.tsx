@@ -360,7 +360,6 @@ export default function MetaIntegrationPage() {
   const [selectedIgId, setSelectedIgId] = useState('')
   const [selectedAdId, setSelectedAdId] = useState('')
   const [saving, setSaving] = useState(false)
-  const [bulkSaving, setBulkSaving] = useState(false)
   const [linkMsg, setLinkMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   // Row-level selections for inline editing
@@ -372,8 +371,6 @@ export default function MetaIntegrationPage() {
 
   // Table filter tabs
   const [tableFilter, setTableFilter] = useState<TableFilter>('needs')
-  const [selectedSuggestionClientId, setSelectedSuggestionClientId] = useState<string | null>(null)
-
   // Linked assets list
   const [linkedAssets, setLinkedAssets] = useState<LinkedAsset[]>([])
   const [loadingLinked, setLoadingLinked] = useState(false)
@@ -779,41 +776,31 @@ export default function MetaIntegrationPage() {
     })
   }, [adAccounts, clients, igAccounts, linkedByClient, pages])
 
-  // Filtered suggestions based on table filter tab.
+  function isFullyLinked(suggestion: ClientAssetSuggestion) {
+    return Boolean(suggestion.currentLink?.facebook_page_id && suggestion.currentLink?.instagram_account_id)
+  }
+
+  function linkActionLabel(suggestion: ClientAssetSuggestion) {
+    if (isFullyLinked(suggestion)) return 'Already linked'
+    if (!suggestion.currentLink?.facebook_page_id) return 'Needs Facebook'
+    if (!suggestion.currentLink?.instagram_account_id) return 'Needs Instagram'
+    return 'Needs link'
+  }
+
+  function suggestionLabel(match: AssetMatch<unknown>) {
+    return match.asset ? 'Suggested match' : 'No suggestion'
+  }
+
+  // Filtered suggestions based on workflow tab.
   const filteredSuggestions = useMemo(() => {
     return suggestions.filter(s => {
       if (tableFilter === 'all') return true
       if (tableFilter === 'linked') {
-        return s.alreadyLinkedSame && !s.alreadyLinkedDifferently
+        return isFullyLinked(s)
       }
-      // 'needs': everything that needs attention
-      return !s.alreadyLinkedSame || s.alreadyLinkedDifferently ||
-        !s.currentLink?.facebook_page_id ||
-        !s.currentLink?.instagram_account_id ||
-        (adAccounts.length > 0 && !s.currentLink?.ad_account_id) ||
-      s.confidence === 'low' || s.confidence === 'medium' || s.confidence === 'none'
+      return !isFullyLinked(s)
     })
-  }, [suggestions, tableFilter, adAccounts.length])
-
-  const filteredSuggestionIds = useMemo(
-    () => filteredSuggestions.map(s => s.client.id).join('|'),
-    [filteredSuggestions],
-  )
-
-  useEffect(() => {
-    if (!assetsLoaded) return
-    if (filteredSuggestions.length === 0) {
-      if (selectedSuggestionClientId !== null) setSelectedSuggestionClientId(null)
-      return
-    }
-    if (!selectedSuggestionClientId || !filteredSuggestions.some(s => s.client.id === selectedSuggestionClientId)) {
-      setSelectedSuggestionClientId(filteredSuggestions[0].client.id)
-    }
-  }, [assetsLoaded, filteredSuggestionIds, filteredSuggestions, selectedSuggestionClientId])
-
-  const selectedSuggestion = useMemo(() => {
-    return filteredSuggestions.find(s => s.client.id === selectedSuggestionClientId) ?? filteredSuggestions[0] ?? null
-  }, [filteredSuggestions, selectedSuggestionClientId])
+  }, [suggestions, tableFilter])
 
   // Initialise row selections from suggestions when assets are loaded.
   useEffect(() => {
@@ -827,9 +814,7 @@ export default function MetaIntegrationPage() {
         instagramAccountId: s.instagram.score >= 0.9 && !s.alreadyLinkedDifferently && !s.alreadyLinkedSame
           ? (s.instagram.asset?.id ?? '')
           : (s.currentLink?.instagram_account_id ?? ''),
-        adAccountId: s.adAccount.score >= 0.9 && !s.alreadyLinkedDifferently && !s.alreadyLinkedSame
-          ? (s.adAccount.asset?.id ?? '')
-          : (s.currentLink?.ad_account_id ?? ''),
+        adAccountId: s.currentLink?.ad_account_id ?? '',
       }
     }
     setRowSelections(initial)
@@ -974,83 +959,17 @@ export default function MetaIntegrationPage() {
     }
   }
 
-  async function handleBulkLinkApproved() {
-    const entries = Object.entries(rowSelections).filter(([clientId, sel]) => {
-      if (!sel.facebookPageId && !sel.instagramAccountId && !sel.adAccountId) return false
-      const suggestion = suggestions.find(s => s.client.id === clientId)
-      if (!suggestion) return true
-      if (suggestion.alreadyLinkedDifferently) return false
-      if (suggestion.alreadyLinkedSame) return false
-      return true
-    })
-    if (entries.length === 0) {
-      setLinkMsg({ ok: false, text: 'No rows with new selections to link.' })
-      return
-    }
-
-    const confirmed = window.confirm(`Link ${entries.length} client(s) with the selected assets? Existing different links will not be overwritten.`)
-    if (!confirmed) return
-
-    setBulkSaving(true)
-    setLinkMsg(null)
-    try {
-      let linked = 0; let skipped = 0; let failed = 0
-      for (const [clientId, sel] of entries) {
-        const existing = linkedByClient.get(clientId)
-        const overwriteNeeded = Boolean(existing && (
-          (existing.facebook_page_id ?? '') !== (sel.facebookPageId || '') ||
-          (existing.instagram_account_id ?? '') !== (sel.instagramAccountId || '') ||
-          (existing.ad_account_id ?? '') !== (sel.adAccountId || '')
-        ))
-        if (overwriteNeeded) { skipped++; continue }
-        try {
-          await saveAssetLinks({
-            action: 'upsert',
-            link: buildLinkPayload({
-              clientId,
-              page: pageAssetForId(sel.facebookPageId),
-              instagram: instagramAssetForId(sel.instagramAccountId),
-              adAccount: adAccountForId(sel.adAccountId),
-            }),
-          })
-          linked++
-        } catch { failed++ }
-      }
-      setLinkMsg({ ok: true, text: `Bulk linking complete: ${linked} linked, ${skipped} skipped, ${failed} failed.` })
-      await loadLinkedAssets()
-    } catch {
-      setLinkMsg({ ok: false, text: 'Bulk linking failed.' })
-    } finally {
-      setBulkSaving(false)
-    }
-  }
-
   function linkFromSelections(clientId: string): { pageId: string; igId: string; adId: string } {
     const sel = rowSelections[clientId] ?? { facebookPageId: '', instagramAccountId: '', adAccountId: '' }
     return { pageId: sel.facebookPageId, igId: sel.instagramAccountId, adId: sel.adAccountId }
   }
 
-  const approvedCount = useMemo(() => {
-    return Object.entries(rowSelections).filter(([clientId, sel]) => {
-      if (!sel.facebookPageId && !sel.instagramAccountId && !sel.adAccountId) return false
-      const suggestion = suggestions.find(s => s.client.id === clientId)
-      if (!suggestion) return true
-      if (suggestion.alreadyLinkedDifferently) return false
-      if (suggestion.alreadyLinkedSame) return false
-      return true
-    }).length
-  }, [rowSelections, suggestions])
-
   const needsCount = useMemo(() => {
-    return suggestions.filter(s => !s.alreadyLinkedSame || s.alreadyLinkedDifferently ||
-      !s.currentLink?.facebook_page_id ||
-      !s.currentLink?.instagram_account_id ||
-      (adAccounts.length > 0 && !s.currentLink?.ad_account_id) ||
-      s.confidence === 'low' || s.confidence === 'medium' || s.confidence === 'none').length
-  }, [suggestions, adAccounts.length])
+    return suggestions.filter(s => !isFullyLinked(s)).length
+  }, [suggestions])
 
   const linkedCount = useMemo(() => {
-    return suggestions.filter(s => s.alreadyLinkedSame && !s.alreadyLinkedDifferently).length
+    return suggestions.filter(isFullyLinked).length
   }, [suggestions])
 
   async function handleSync() {
@@ -1478,7 +1397,7 @@ export default function MetaIntegrationPage() {
                       : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'
                   }`}
                 >
-                  Needs review ({needsCount})
+                  Needs linking ({needsCount})
                 </button>
                 <button
                   type="button"
@@ -1507,24 +1426,16 @@ export default function MetaIntegrationPage() {
               <div className="rounded-2xl border border-white/10 bg-[#071311]/80 p-4 shadow-[0_24px_80px_-54px_rgba(0,0,0,0.95)]">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Link assets workspace</p>
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Clients needing Meta links</p>
                     <h3 className="mt-1 text-xl font-semibold text-white">
-                      {tableFilter === 'needs' && 'Needs review queue'}
+                      {tableFilter === 'needs' && 'Link Facebook and Instagram'}
                       {tableFilter === 'linked' && 'Already linked clients'}
                       {tableFilter === 'all' && 'All active clients'}
                     </h3>
                     <p className="mt-1 max-w-3xl text-sm leading-relaxed text-brand-primary/75">
-                      Select a client from the queue, review the suggested Facebook, Instagram and ad account matches, correct anything wrong, then save the client link.
+                      Choose the correct Facebook Page and Instagram account for each client, then save. Strong matches are preselected when the app is confident.
                     </p>
                   </div>
-                  <ActionButton
-                    variant="primary"
-                    onClick={handleBulkLinkApproved}
-                    disabled={approvedCount === 0 || bulkSaving || tableFilter === 'linked'}
-                    loading={bulkSaving}
-                  >
-                    Link approved suggestions ({approvedCount})
-                  </ActionButton>
                 </div>
 
                 {filteredSuggestions.length === 0 ? (
@@ -1535,175 +1446,88 @@ export default function MetaIntegrationPage() {
                       {tableFilter === 'all' && 'No active clients to display.'}
                     </p>
                     <p className="mt-2 text-sm text-brand-primary/60">
-                      Load Meta assets or switch views to continue reviewing client links.
+                      Load Meta assets or switch views to continue linking clients.
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)]">
-                    <div className="space-y-2">
-                      {filteredSuggestions.map(suggestion => {
-                        const clientId = suggestion.client.id
-                        const sel = linkFromSelections(clientId)
-                        const isSelected = selectedSuggestion?.client.id === clientId
-                        const hasFacebook = Boolean(sel.pageId || suggestion.currentLink?.facebook_page_id)
-                        const hasInstagram = Boolean(sel.igId || suggestion.currentLink?.instagram_account_id)
-                        const hasAd = Boolean(sel.adId || suggestion.currentLink?.ad_account_id)
-                        const actionNeeded = suggestion.alreadyLinkedDifferently
-                          ? 'Review overwrite'
-                          : suggestion.alreadyLinkedSame
-                            ? 'Linked'
-                            : suggestion.confidence === 'high' && (sel.pageId || sel.igId || sel.adId)
-                              ? 'Ready to link'
-                              : 'Needs review'
-                        return (
-                          <button
-                            key={clientId}
-                            type="button"
-                            onClick={() => setSelectedSuggestionClientId(clientId)}
-                            className={`w-full rounded-2xl border p-4 text-left transition ${
-                              isSelected
-                                ? 'border-brand-accent/45 bg-brand-accent/[0.08] shadow-[0_0_0_1px_rgba(45,212,191,0.12)]'
-                                : 'border-white/10 bg-white/[0.035] hover:border-white/18 hover:bg-white/[0.055]'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-bold text-white">{suggestion.client.name}</p>
-                                <p className="mt-1 text-xs text-brand-primary/55">{actionNeeded}</p>
-                              </div>
-                              <ConfidencePill confidence={suggestion.confidence} />
-                            </div>
-                            <div className="mt-3 grid grid-cols-3 gap-1.5 text-[10px] font-black uppercase tracking-[0.08em]">
-                              <span className={`rounded-full border px-2 py-1 text-center ${hasFacebook ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]' : 'border-amber-300/25 bg-amber-300/10 text-amber-200'}`}>FB</span>
-                              <span className={`rounded-full border px-2 py-1 text-center ${hasInstagram ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]' : 'border-amber-300/25 bg-amber-300/10 text-amber-200'}`}>IG</span>
-                              <span className={`rounded-full border px-2 py-1 text-center ${hasAd ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]' : 'border-white/10 bg-white/[0.035] text-brand-primary/55'}`}>Ad</span>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-
-                    {selectedSuggestion && (() => {
-                      const clientId = selectedSuggestion.client.id
+                  <div className="mt-5 space-y-3">
+                    {filteredSuggestions.map(suggestion => {
+                      const clientId = suggestion.client.id
                       const sel = linkFromSelections(clientId)
-                      const hasAny = Boolean(sel.pageId || sel.igId || sel.adId)
+                      const hasCoreSelection = Boolean(sel.pageId || sel.igId)
                       const pageOptions = pagePickerOptions
-                      const instagramOptions = igOptionsForPage(sel.pageId || selectedSuggestion.currentLink?.facebook_page_id)
+                      const instagramOptions = igOptionsForPage(sel.pageId || suggestion.currentLink?.facebook_page_id)
+                      const fbSuggestion = suggestionLabel(suggestion.page)
+                      const igSuggestion = suggestionLabel(suggestion.instagram)
                       return (
-                        <div className="rounded-2xl border border-white/10 bg-black/18 p-4 sm:p-5">
-                          <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary/50">Selected client</p>
-                              <h4 className="mt-1 text-2xl font-semibold text-white">{selectedSuggestion.client.name}</h4>
-                              <p className="mt-1 text-sm text-brand-primary/65">{selectedSuggestion.reason}</p>
-                            </div>
-                            <ConfidencePill confidence={selectedSuggestion.confidence} />
-                          </div>
-
-                          <div className="mt-4 grid gap-3 lg:grid-cols-3">
-                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/50">Suggested Facebook</p>
-                              <p className="mt-1 text-sm font-semibold text-white">{selectedSuggestion.page.asset?.name ?? 'No safe match'}</p>
-                              <p className="mt-1 text-xs text-brand-primary/55">{selectedSuggestion.page.reason}</p>
-                            </div>
-                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/50">Suggested Instagram</p>
-                              <p className="mt-1 text-sm font-semibold text-white">
-                                {selectedSuggestion.instagram.asset?.username ? `@${selectedSuggestion.instagram.asset.username}` : selectedSuggestion.instagram.asset?.name ?? 'No safe match'}
-                              </p>
-                              <p className="mt-1 text-xs text-brand-primary/55">{selectedSuggestion.instagram.reason}</p>
-                            </div>
-                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/50">Suggested ad account</p>
-                              <p className="mt-1 text-sm font-semibold text-white">{selectedSuggestion.adAccount.asset?.name ?? 'Optional / unavailable'}</p>
-                              <p className="mt-1 text-xs text-brand-primary/55">{selectedSuggestion.adAccount.reason}</p>
-                            </div>
-                          </div>
-
-                          <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-                            <div className="space-y-4">
-                              <div>
-                                <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Facebook Page</label>
-                                <SearchablePicker
-                                  value={sel.pageId}
-                                  onChange={v => updateRowSelection(clientId, 'facebookPageId', v)}
-                                  options={pageOptions}
-                                  placeholder={pageOptions.length === 0 ? 'No Facebook Pages available' : 'Select Facebook Page'}
-                                  emptyLabel={pageOptions.length === 0 ? 'No Meta pages or existing linked pages available. Reconnect Meta or check Page permissions.' : 'No matching Facebook Pages'}
-                                />
-                                {pageOptions.length === 0 && (
-                                  <p className="mt-1.5 text-xs text-amber-200/75">Meta returned no pages and there are no existing linked page fallbacks for this workspace.</p>
-                                )}
+                        <div key={clientId} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                          <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[220px_minmax(220px,1fr)_minmax(220px,1fr)_auto] xl:items-start">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h4 className="text-base font-semibold text-white">{suggestion.client.name}</h4>
+                                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] ${
+                                  isFullyLinked(suggestion)
+                                    ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]'
+                                    : 'border-amber-300/25 bg-amber-300/10 text-amber-200'
+                                }`}>
+                                  {linkActionLabel(suggestion)}
+                                </span>
                               </div>
-
-                              <div>
-                                <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Instagram account</label>
-                                <SearchablePicker
-                                  value={sel.igId}
-                                  onChange={v => updateRowSelection(clientId, 'instagramAccountId', v)}
-                                  options={instagramOptions}
-                                  placeholder={instagramOptions.length === 0 ? 'No Instagram accounts available' : 'Select Instagram account'}
-                                  emptyLabel={sel.pageId ? 'No Instagram account linked to this Facebook Page.' : 'Select a Facebook Page first, or choose from existing linked Instagram fallbacks.'}
-                                />
-                                {instagramOptions.length === 0 && (
-                                  <p className="mt-1.5 text-xs text-brand-primary/55">Instagram accounts must be Business accounts connected to a Facebook Page in Meta Business Suite.</p>
-                                )}
-                              </div>
-
-                              <div>
-                                <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Ad account</label>
-                                {adPickerOptions.length > 0 ? (
-                                  <SearchablePicker
-                                    value={sel.adId}
-                                    onChange={v => updateRowSelection(clientId, 'adAccountId', v)}
-                                    options={adPickerOptions}
-                                    placeholder="Select ad account (optional)"
-                                    emptyLabel="No matching ad accounts"
-                                  />
-                                ) : (
-                                  <div className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3 text-sm text-brand-primary/65">
-                                    {adAccountsError || 'No ad accounts loaded. Facebook and Instagram organic sync can still work.'}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            <aside className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
-                              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary/50">Current linked assets</p>
-                              {selectedSuggestion.currentLink ? (
-                                <div className="mt-3 space-y-2 text-sm text-brand-primary/75">
-                                  <p><span className="text-white">Facebook:</span> {selectedSuggestion.currentLink.facebook_page_name || 'Not linked'}</p>
-                                  <p><span className="text-white">Instagram:</span> {selectedSuggestion.currentLink.instagram_username ? `@${selectedSuggestion.currentLink.instagram_username}` : 'Not linked'}</p>
-                                  <p><span className="text-white">Ad account:</span> {selectedSuggestion.currentLink.ad_account_name || 'Not linked'}</p>
+                              {suggestion.currentLink && (
+                                <div className="mt-2 space-y-1 text-xs text-brand-primary/55">
+                                  <p>Current Facebook: {suggestion.currentLink.facebook_page_name || 'Not linked'}</p>
+                                  <p>Current Instagram: {suggestion.currentLink.instagram_username ? `@${suggestion.currentLink.instagram_username}` : 'Not linked'}</p>
                                 </div>
-                              ) : (
-                                <p className="mt-3 text-sm text-brand-primary/60">No active Meta link yet.</p>
                               )}
-                              {selectedSuggestion.alreadyLinkedDifferently && (
-                                <p className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
-                                  The selected assets differ from the current link. Saving will ask before replacing the existing active link.
+                            </div>
+
+                            <div className="min-w-0">
+                              <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Facebook Page</label>
+                              <SearchablePicker
+                                value={sel.pageId}
+                                onChange={v => updateRowSelection(clientId, 'facebookPageId', v)}
+                                options={pageOptions}
+                                placeholder={pageOptions.length === 0 ? 'No Facebook Pages available' : 'Select Facebook Page'}
+                                emptyLabel={pageOptions.length === 0 ? 'No Facebook Pages available from Meta. Reconnect Meta or check Page access.' : 'No matching Facebook Pages'}
+                              />
+                              <p className="mt-1.5 text-xs text-brand-primary/50">
+                                {sel.pageId ? fbSuggestion : 'No suggestion'}
+                              </p>
+                            </div>
+
+                            <div className="min-w-0">
+                              <label className="mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-brand-primary/55">Instagram account</label>
+                              <SearchablePicker
+                                value={sel.igId}
+                                onChange={v => updateRowSelection(clientId, 'instagramAccountId', v)}
+                                options={instagramOptions}
+                                placeholder={instagramOptions.length === 0 ? 'No Instagram accounts available' : 'Select Instagram account'}
+                                emptyLabel={sel.pageId ? 'No Instagram account linked to this Facebook Page.' : 'Select a Facebook Page first, or choose from existing linked Instagram fallbacks.'}
+                              />
+                              <p className="mt-1.5 text-xs text-brand-primary/50">
+                                {sel.igId ? igSuggestion : 'No suggestion'}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-col gap-2 xl:min-w-[150px]">
+                              <ActionButton
+                                variant="secondary"
+                                onClick={() => handleRowLink(clientId)}
+                                disabled={!hasCoreSelection || isFullyLinked(suggestion) || linkingRows.has(clientId)}
+                                loading={linkingRows.has(clientId)}
+                              >
+                                {isFullyLinked(suggestion) ? 'Linked' : 'Save link'}
+                              </ActionButton>
+                              {suggestion.alreadyLinkedDifferently && (
+                                <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
+                                  Replacing an existing link will ask for confirmation.
                                 </p>
                               )}
-                              {selectedSuggestion.alreadyLinkedSame && (
-                                <p className="mt-4 rounded-lg border border-brand-teal/20 bg-brand-teal/10 px-3 py-2 text-xs leading-relaxed text-[#66d0c3]">
-                                  This client is already linked with the selected assets.
-                                </p>
-                              )}
-                              <div className="mt-5">
-                                <ActionButton
-                                  variant="secondary"
-                                  onClick={() => handleRowLink(clientId)}
-                                  disabled={!hasAny || selectedSuggestion.alreadyLinkedSame || linkingRows.has(clientId)}
-                                  loading={linkingRows.has(clientId)}
-                                >
-                                  {selectedSuggestion.alreadyLinkedSame ? 'Already linked' : 'Link / update client'}
-                                </ActionButton>
-                              </div>
-                            </aside>
+                            </div>
                           </div>
                         </div>
                       )
-                    })()}
+                    })}
                   </div>
                 )}
               </div>
@@ -2029,21 +1853,6 @@ export default function MetaIntegrationPage() {
         </ul>
       </PremiumCard>
     </div>
-  )
-}
-
-function ConfidencePill({ confidence }: { confidence: MatchConfidence }) {
-  const styles: Record<MatchConfidence, string> = {
-    high: 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]',
-    medium: 'border-amber-300/30 bg-amber-300/10 text-amber-200',
-    low: 'border-white/10 bg-white/[0.04] text-brand-primary',
-    none: 'border-white/8 bg-white/[0.02] text-brand-primary/45',
-  }
-  const label = confidence === 'none' ? 'No match' : confidence
-  return (
-    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.12em] ${styles[confidence]}`}>
-      {label}
-    </span>
   )
 }
 
