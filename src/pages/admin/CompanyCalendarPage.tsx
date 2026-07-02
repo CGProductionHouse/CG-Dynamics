@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { ClientPicker } from '../../components/ClientPicker'
@@ -17,6 +18,15 @@ import {
   type CompanyEventInput,
   type CompanyEventPatch,
 } from '../../lib/companyCalendar'
+import {
+  PACKAGE_DELIVERABLE_TYPES,
+  PLANNER_TASK_STATUS_LABELS,
+  getEffectiveScheduleDate,
+  listMonthlyDeliverablesByMonth,
+  listPlannerTasksDueBetween,
+  type CalendarTaskRow,
+  type MonthlyDeliverable,
+} from '../../lib/planner'
 
 type EventFilter = 'all' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
@@ -94,6 +104,31 @@ function eventTypeStyle(eventType: CompanyEventType) {
   }
 }
 
+// Cross-system layers: planner tasks (due dates) and scheduled posts
+// (monthly_deliverables) rendered alongside events so the calendar is the one
+// operational view. Both layers are READ-ONLY here — chips link back to
+// Planner Board / Client Schedule, the systems that own the data.
+const TASK_CHIP_CLS = 'border-amber-300/25 bg-amber-300/[0.08] text-amber-200'
+const POST_CHIP_CLS = 'border-brand-teal/25 bg-brand-teal/[0.08] text-[#2dd4bf]'
+
+interface CalendarLayers {
+  events: boolean
+  tasks: boolean
+  posts: boolean
+}
+
+interface DayPanelData {
+  date: string
+  events: CompanyCalendarEvent[]
+  tasks: CalendarTaskRow[]
+  posts: MonthlyDeliverable[]
+}
+
+function nextMonthStart(key: string) {
+  const [year, m] = key.split('-').map(Number)
+  return `${m === 12 ? year + 1 : year}-${String(m === 12 ? 1 : m + 1).padStart(2, '0')}-01`
+}
+
 export default function CompanyCalendarPage() {
   const { profile } = useAuth()
   const [events, setEvents] = useState<CompanyCalendarEvent[]>([])
@@ -104,6 +139,10 @@ export default function CompanyCalendarPage() {
   const [selectedMonth, setSelectedMonth] = useState(monthKey(new Date()))
   const [viewMode, setViewMode] = useState<CalendarViewMode>('calendar')
   const [drawerEvent, setDrawerEvent] = useState<CompanyCalendarEvent | null>(null)
+  const [layers, setLayers] = useState<CalendarLayers>({ events: true, tasks: true, posts: true })
+  const [monthTasks, setMonthTasks] = useState<CalendarTaskRow[]>([])
+  const [monthPosts, setMonthPosts] = useState<MonthlyDeliverable[]>([])
+  const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
 
   const isAdmin = profile?.role === 'admin'
 
@@ -134,6 +173,27 @@ export default function CompanyCalendarPage() {
 
   useEffect(() => { void load() }, [])
 
+  // Task + post layers reload per month. Best-effort: a failure in either
+  // layer never breaks the events calendar — the layer just stays empty.
+  useEffect(() => {
+    let cancelled = false
+    async function loadLayers() {
+      const monthStart = `${selectedMonth}-01`
+      const [taskResult, postResult] = await Promise.all([
+        listPlannerTasksDueBetween(monthStart, nextMonthStart(selectedMonth)),
+        listMonthlyDeliverablesByMonth(monthStart),
+      ])
+      if (cancelled) return
+      setMonthTasks((taskResult.data ?? []) as CalendarTaskRow[])
+      setMonthPosts(
+        ((postResult.data ?? []) as MonthlyDeliverable[])
+          .filter(item => PACKAGE_DELIVERABLE_TYPES.includes(item.deliverable_type)),
+      )
+    }
+    void loadLayers()
+    return () => { cancelled = true }
+  }, [selectedMonth])
+
   useEffect(() => {
     if (!drawerEvent) return
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDrawerEvent(null) }
@@ -152,15 +212,43 @@ export default function CompanyCalendarPage() {
     [filtered, selectedMonth],
   )
 
-  const grouped = useMemo(() => {
-    const groups = new Map<string, CompanyCalendarEvent[]>()
-    for (const event of monthEvents) {
-      const day = event.start_at.slice(0, 10)
-      if (!groups.has(day)) groups.set(day, [])
-      groups.get(day)!.push(event)
+  const visibleTasks = useMemo(() => (layers.tasks ? monthTasks : []), [layers.tasks, monthTasks])
+  const visiblePosts = useMemo(() => (layers.posts ? monthPosts : []), [layers.posts, monthPosts])
+  const visibleEvents = useMemo(() => (layers.events ? monthEvents : []), [layers.events, monthEvents])
+
+  const postsByDate = useMemo(() => {
+    const map = new Map<string, MonthlyDeliverable[]>()
+    for (const post of visiblePosts) {
+      const date = getEffectiveScheduleDate(post)
+      if (!date || date.slice(0, 7) !== selectedMonth) continue
+      if (!map.has(date)) map.set(date, [])
+      map.get(date)!.push(post)
     }
-    return [...groups.entries()]
-  }, [monthEvents])
+    return map
+  }, [visiblePosts, selectedMonth])
+
+  const tasksByDate = useMemo(() => {
+    const map = new Map<string, CalendarTaskRow[]>()
+    for (const task of visibleTasks) {
+      if (!map.has(task.due_date)) map.set(task.due_date, [])
+      map.get(task.due_date)!.push(task)
+    }
+    return map
+  }, [visibleTasks])
+
+  // Agenda groups: union of all visible layers per day, sorted by date.
+  const grouped = useMemo(() => {
+    const days = new Set<string>()
+    for (const event of visibleEvents) days.add(event.start_at.slice(0, 10))
+    for (const date of tasksByDate.keys()) days.add(date)
+    for (const date of postsByDate.keys()) days.add(date)
+    return [...days].sort().map(day => ({
+      day,
+      events: visibleEvents.filter(event => event.start_at.slice(0, 10) === day),
+      tasks: tasksByDate.get(day) ?? [],
+      posts: postsByDate.get(day) ?? [],
+    }))
+  }, [visibleEvents, tasksByDate, postsByDate])
 
   const counts = useMemo(() => {
     const active = events.filter(e => e.status !== 'cancelled')
@@ -262,6 +350,28 @@ export default function CompanyCalendarPage() {
         </div>
       </div>
 
+      {/* Layer toggles: the calendar shows the whole operational picture —
+          events, planner tasks and scheduled posts — each switchable. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Show</span>
+        {([
+          ['events', `Events (${monthEvents.length})`, 'border-sky-400/30 text-sky-300'],
+          ['tasks', `Planner tasks (${monthTasks.length})`, 'border-amber-300/30 text-amber-200'],
+          ['posts', `Scheduled posts (${monthPosts.length})`, 'border-brand-teal/30 text-[#2dd4bf]'],
+        ] as const).map(([key, label, tone]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setLayers(prev => ({ ...prev, [key]: !prev[key] }))}
+            className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
+              layers[key] ? `${tone} bg-white/[0.05]` : 'border-white/10 text-brand-primary/35 hover:text-brand-primary/60'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* Filter tabs */}
       <div className="mb-6 flex flex-wrap gap-1.5">
         {filterTabs.map(tab => (
@@ -288,28 +398,53 @@ export default function CompanyCalendarPage() {
       </div>
 
       {viewMode === 'calendar' ? (
-        <CgCalendarGrid month={selectedMonth} events={monthEvents} onAdd={handleCreateEvent} onOpen={setDrawerEvent} />
-      ) : monthEvents.length === 0 ? (
-        <EmptyState title={`No events in ${formatMonthHeading(selectedMonth)}`} message="Add an event to get started." action={<ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton>} />
+        <CgCalendarGrid
+          month={selectedMonth}
+          events={visibleEvents}
+          tasksByDate={tasksByDate}
+          postsByDate={postsByDate}
+          onAdd={handleCreateEvent}
+          onOpen={setDrawerEvent}
+          onOpenDay={setDayPanel}
+        />
+      ) : grouped.length === 0 ? (
+        <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No events, dated planner tasks or scheduled posts this month yet." action={<ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton>} />
       ) : (
         <div className="space-y-6">
-          {grouped.map(([day, dayEvents]) => (
-            <div key={day}>
+          {grouped.map(group => (
+            <div key={group.day}>
               <h3 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-brand-primary/50">
-                {formatShortDate(day)}
+                {formatShortDate(group.day)}
               </h3>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {dayEvents.map(event => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onClick={() => setDrawerEvent(event)}
-                  />
-                ))}
-              </div>
+              {group.events.length > 0 && (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.events.map(event => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      onClick={() => setDrawerEvent(event)}
+                    />
+                  ))}
+                </div>
+              )}
+              {(group.tasks.length > 0 || group.posts.length > 0) && (
+                <div className={`space-y-1.5 ${group.events.length > 0 ? 'mt-2' : ''}`}>
+                  {group.tasks.map(task => <TaskRowLink key={task.id} task={task} />)}
+                  {group.posts.map(post => <PostRowLink key={post.id} post={post} month={selectedMonth} />)}
+                </div>
+              )}
             </div>
           ))}
         </div>
+      )}
+
+      {dayPanel && (
+        <DayPanel
+          data={dayPanel}
+          month={selectedMonth}
+          onClose={() => setDayPanel(null)}
+          onOpenEvent={event => { setDayPanel(null); setDrawerEvent(event) }}
+        />
       )}
 
       {drawerEvent && (
@@ -327,13 +462,19 @@ export default function CompanyCalendarPage() {
 function CgCalendarGrid({
   month,
   events,
+  tasksByDate,
+  postsByDate,
   onAdd,
   onOpen,
+  onOpenDay,
 }: {
   month: string
   events: CompanyCalendarEvent[]
+  tasksByDate: Map<string, CalendarTaskRow[]>
+  postsByDate: Map<string, MonthlyDeliverable[]>
   onAdd: (date?: string) => void
   onOpen: (event: CompanyCalendarEvent) => void
+  onOpenDay: (data: DayPanelData) => void
 }) {
   const [year, m] = month.split('-').map(Number)
   const firstDay = new Date(year, m - 1, 1).getDay()
@@ -362,6 +503,15 @@ function CgCalendarGrid({
           if (day === null) return <div key={`empty-${index}`} className="min-h-[108px] bg-[#0c0c0c]" />
           const date = `${month}-${String(day).padStart(2, '0')}`
           const dayEvents = byDate.get(date) ?? []
+          const dayTasks = tasksByDate.get(date) ?? []
+          const dayPosts = postsByDate.get(date) ?? []
+          const totalCount = dayEvents.length + dayTasks.length + dayPosts.length
+          // Events first, then tasks, then posts — capped at 4 chips per cell.
+          const eventChips = dayEvents.slice(0, 4)
+          const taskChips = dayTasks.slice(0, Math.max(0, 4 - eventChips.length))
+          const postChips = dayPosts.slice(0, Math.max(0, 4 - eventChips.length - taskChips.length))
+          const shown = eventChips.length + taskChips.length + postChips.length
+          const openDay = () => onOpenDay({ date, events: dayEvents, tasks: dayTasks, posts: dayPosts })
           return (
             <div key={date} className={`min-h-[108px] p-1.5 ${date === today ? 'bg-brand-teal/[0.055]' : 'bg-[#0c0c0c]'}`}>
               <button
@@ -373,7 +523,7 @@ function CgCalendarGrid({
                 {day}
               </button>
               <div className="space-y-0.5">
-                {dayEvents.slice(0, 4).map(event => (
+                {eventChips.map(event => (
                   <button
                     key={event.id}
                     type="button"
@@ -383,10 +533,36 @@ function CgCalendarGrid({
                     <span className="min-w-0 truncate font-semibold">{event.title}</span>
                   </button>
                 ))}
-                {dayEvents.length > 4 && (
-                  <div className="rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-[10px] font-semibold text-white/35">
-                    +{dayEvents.length - 4} more
-                  </div>
+                {taskChips.map(task => (
+                  <button
+                    key={task.id}
+                    type="button"
+                    onClick={openDay}
+                    title={`Task: ${task.title}`}
+                    className={`flex w-full items-center gap-1 rounded border px-1 py-0.5 text-left text-[10px] ${TASK_CHIP_CLS}`}
+                  >
+                    <span className="min-w-0 truncate">{task.title}</span>
+                  </button>
+                ))}
+                {postChips.map(post => (
+                  <button
+                    key={post.id}
+                    type="button"
+                    onClick={openDay}
+                    title={`Post: ${post.title}`}
+                    className={`flex w-full items-center gap-1 rounded border px-1 py-0.5 text-left text-[10px] ${POST_CHIP_CLS}`}
+                  >
+                    <span className="min-w-0 truncate">{post.title}</span>
+                  </button>
+                ))}
+                {totalCount > shown && (
+                  <button
+                    type="button"
+                    onClick={openDay}
+                    className="w-full rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-left text-[10px] font-semibold text-white/45 hover:text-white"
+                  >
+                    +{totalCount - shown} more
+                  </button>
                 )}
               </div>
             </div>
@@ -395,10 +571,90 @@ function CgCalendarGrid({
       </div>
       <div className="space-y-2 sm:hidden">
         {events.length === 0 ? (
-          <EmptyState title={`No events in ${formatMonthHeading(month)}`} message="Add an event to get started." action={<ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton>} centered={false} />
+          <EmptyState title={`No events in ${formatMonthHeading(month)}`} message="Add an event, or switch to Agenda to see tasks and scheduled posts too." action={<ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton>} centered={false} />
         ) : events.map(event => <EventCard key={event.id} event={event} onClick={() => onOpen(event)} />)}
       </div>
     </div>
+  )
+}
+
+// Compact read-only rows for the agenda + day panel. Chips link back to the
+// systems that own the data — the calendar never edits tasks or posts.
+function TaskRowLink({ task }: { task: CalendarTaskRow }) {
+  return (
+    <Link
+      to="/admin/planner"
+      className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:border-amber-300/50 ${TASK_CHIP_CLS}`}
+    >
+      <span className="shrink-0 rounded bg-amber-300/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide">Task</span>
+      <span className="min-w-0 flex-1 truncate font-semibold">{task.title}</span>
+      {task.client_name && <span className="hidden shrink-0 text-amber-200/70 sm:inline">{task.client_name}</span>}
+      {task.assigned_to_name && <span className="hidden shrink-0 text-amber-200/60 md:inline">@{task.assigned_to_name}</span>}
+      <span className="shrink-0 text-amber-200/60">{PLANNER_TASK_STATUS_LABELS[task.status] ?? task.status}</span>
+    </Link>
+  )
+}
+
+function PostRowLink({ post, month }: { post: MonthlyDeliverable; month: string }) {
+  return (
+    <Link
+      to={`/admin/client-schedule?view=calendar&mode=all&month=${month}&client=${post.client_id}`}
+      className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:border-brand-teal/50 ${POST_CHIP_CLS}`}
+    >
+      <span className="shrink-0 rounded bg-brand-teal/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide">Post</span>
+      <span className="min-w-0 flex-1 truncate font-semibold">{post.title}</span>
+      <span className="shrink-0 uppercase text-[#2dd4bf]/70">{post.deliverable_type}</span>
+    </Link>
+  )
+}
+
+function DayPanel({ data, month, onClose, onOpenEvent }: {
+  data: DayPanelData
+  month: string
+  onClose: () => void
+  onOpenEvent: (event: CompanyCalendarEvent) => void
+}) {
+  const heading = new Date(`${data.date}T00:00:00`).toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long' })
+  const total = data.events.length + data.tasks.length + data.posts.length
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[440px]">
+        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+          <div>
+            <h2 className="text-base font-bold text-white">{heading}</h2>
+            <p className="mt-0.5 text-xs text-brand-primary/60">{total} item{total === 1 ? '' : 's'} across events, tasks and posts</p>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-brand-primary hover:text-white">X</button>
+        </div>
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+          {data.events.length > 0 && (
+            <div>
+              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-sky-300/70">Events</p>
+              <div className="space-y-2">
+                {data.events.map(event => <EventCard key={event.id} event={event} onClick={() => onOpenEvent(event)} />)}
+              </div>
+            </div>
+          )}
+          {data.tasks.length > 0 && (
+            <div>
+              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/70">Planner tasks</p>
+              <div className="space-y-1.5">
+                {data.tasks.map(task => <TaskRowLink key={task.id} task={task} />)}
+              </div>
+            </div>
+          )}
+          {data.posts.length > 0 && (
+            <div>
+              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#2dd4bf]/70">Scheduled posts</p>
+              <div className="space-y-1.5">
+                {data.posts.map(post => <PostRowLink key={post.id} post={post} month={month} />)}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   )
 }
 

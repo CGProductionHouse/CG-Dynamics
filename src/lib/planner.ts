@@ -916,6 +916,11 @@ export interface PlannerTask {
   import_hash: string
   // Collaborative assignments — added in phase-7b.
   helper_names?: string[]
+  // Recurrence foundation — added in phase-13a. Optional so the app keeps
+  // working before the migration is applied.
+  recurrence_rule?: string | null
+  recurrence_parent_id?: string | null
+  recurrence_until?: string | null
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
@@ -931,6 +936,30 @@ export async function listPlannerTasks(boardId: string) {
     .select('*')
     .eq('board_id', boardId)
     .order('created_at')
+}
+
+// Dated, non-archived planner tasks inside a date window — used by the CG
+// Calendar task layer so operational work appears next to events and posts.
+export async function listPlannerTasksDueBetween(startDate: string, endDateExclusive: string) {
+  return supabase
+    .from(PLANNER_TASKS_TABLE)
+    .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id')
+    .is('archived_at', null)
+    .gte('due_date', startDate)
+    .lt('due_date', endDateExclusive)
+    .order('due_date')
+}
+
+export interface CalendarTaskRow {
+  id: string
+  title: string
+  client_name: string | null
+  assigned_to_name: string | null
+  status: PlannerTaskStatus
+  priority: TaskPriority
+  due_date: string
+  board_id: string | null
+  bucket_id: string | null
 }
 
 export async function listClientScheduleDeliverablesForYear(year: number) {

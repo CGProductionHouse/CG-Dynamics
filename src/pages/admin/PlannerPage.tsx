@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, type ReactNode, type FormEvent } from 'react'
+import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
 import { Link, useNavigate } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
 import { ActionButton } from '../../components/ui/Buttons'
@@ -194,6 +195,12 @@ export default function PlannerPage() {
     return () => { active = false }
   }, [activeBoard, boards])
 
+  // Materialise upcoming recurring-task instances once per visit. Idempotent
+  // (unique import_hash) and a graceful no-op before phase-13a is applied.
+  useEffect(() => {
+    void materializeRecurringTasks()
+  }, [])
+
   // Load tasks when board changes
   useEffect(() => {
     setTasks([])
@@ -205,7 +212,9 @@ export default function PlannerPage() {
     setTasksLoading(true)
     listPlannerTasks(board.id).then(({ data }) => {
       if (!active) return
-      setTasks(data ?? [])
+      // Recurrence templates are definitions, not work — only their
+      // materialised instances belong on the board.
+      setTasks((data ?? []).filter(task => !isRecurringTemplate(task)))
       setTasksLoading(false)
     }).catch(() => {
       if (active) setTasksLoading(false)
