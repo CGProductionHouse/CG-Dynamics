@@ -916,6 +916,11 @@ export interface PlannerTask {
   import_hash: string
   // Collaborative assignments — added in phase-7b.
   helper_names?: string[]
+  // Recurrence foundation — added in phase-13a. Optional so the app keeps
+  // working before the migration is applied.
+  recurrence_rule?: string | null
+  recurrence_parent_id?: string | null
+  recurrence_until?: string | null
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
