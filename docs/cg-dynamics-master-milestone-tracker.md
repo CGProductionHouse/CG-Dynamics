@@ -4,6 +4,19 @@ Living tracker for cross-area CG Dynamics milestones, product notes and future f
 
 Last updated: 2026-07-02
 
+## Full-System Push Notes
+
+### Fable 5 improvement pass
+
+- Next larger agent prompt should not be a narrow bug-fix prompt only.
+- Give the agent the main CG Dynamics goals and enough freedom to improve the full app toward daily operational usefulness.
+- Required source of truth: repo docs, this milestone tracker, current codebase, active branches/PRs, Supabase schema/migrations and recent Meta integration work.
+- The agent should have access to the milestone tracker and use it before proposing or changing Hub/Calendar/Task workflows.
+- The agent should use available Microsoft connectors where possible to inspect/sync Teams, Planner and calendar structures, because the goal is for CG Dynamics to replace Teams workflows rather than duplicate them manually.
+- Main goal: make the app actually work better for CG Production House daily operations, with less friction, clearer navigation and useful workflows.
+- Allow the agent to improve more than one small file when the changes are coherent and move the app over the line.
+- Still require guardrails: run git status first, pull latest main, do not commit untracked local scratch files, build before committing, and keep secrets out of code.
+
 ## Hub / Task Manager Milestones
 
 ### Staff assignment
