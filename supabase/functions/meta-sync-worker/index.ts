@@ -428,17 +428,24 @@ Deno.serve(async (req) => {
           warnings.push('No Facebook Page or Instagram account linked.')
         }
 
-        await sb.from('meta_sync_runs').insert({
-          client_id: item.client_id,
-          connection_id: connections[0].id,
-          sync_type: 'previous_completed_month',
-          period_start: periodStart,
-          period_end: periodEnd,
-          status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
-          summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: SYNC_ENGINE_VERSION },
-          started_at: now,
-          finished_at: now,
-        }).catch(() => {})
+        try {
+          const { error: runError } = await sb.from('meta_sync_runs').insert({
+            client_id: item.client_id,
+            connection_id: connections[0].id,
+            sync_type: 'previous_completed_month',
+            period_start: periodStart,
+            period_end: periodEnd,
+            status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
+            summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: SYNC_ENGINE_VERSION },
+            started_at: now,
+            finished_at: now,
+          })
+          if (runError) {
+            warnings.push(`Sync run audit log failed: ${runError.message}`)
+          }
+        } catch (e) {
+          warnings.push(`Sync run audit log failed: ${String(e)}`)
+        }
 
       } catch (e) {
         itemStatus = 'failed'
