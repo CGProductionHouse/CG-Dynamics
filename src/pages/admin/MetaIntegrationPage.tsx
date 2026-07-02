@@ -49,6 +49,7 @@ interface LinkedAsset {
   ad_account_id: string | null
   ad_account_name: string | null
   is_active: boolean
+  instagram_not_applicable: boolean
 }
 
 type MatchConfidence = 'high' | 'medium' | 'low' | 'none'
@@ -69,6 +70,7 @@ interface ClientAssetSuggestion {
   currentLink: LinkedAsset | null
   alreadyLinkedDifferently: boolean
   alreadyLinkedSame: boolean
+  instagramNotApplicable: boolean
 }
 
 interface ConnectionInfo {
@@ -76,9 +78,9 @@ interface ConnectionInfo {
   metaBusinessName: string | null
 }
 
-type ReadinessFilter = 'none' | 'active' | 'linked' | 'missingFacebook' | 'missingInstagram' | 'missingAdAccount'
+type ReadinessFilter = 'none' | 'active' | 'linked' | 'missingFacebook' | 'missingInstagram' | 'missingAdAccount' | 'noInstagram'
 
-type TableFilter = 'needs' | 'linked' | 'all'
+type TableFilter = 'needs' | 'missingFacebook' | 'missingInstagram' | 'facebookOnly' | 'instagramOnly' | 'both' | 'noInstagram' | 'linked' | 'all'
 
 const SYNC_RANGE_OPTIONS = [
   { value: 1, label: '1 completed month' },
@@ -363,7 +365,7 @@ export default function MetaIntegrationPage() {
   const [linkMsg, setLinkMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   // Row-level selections for inline editing
-  const [rowSelections, setRowSelections] = useState<Record<string, { facebookPageId: string; instagramAccountId: string; adAccountId: string }>>({})
+  const [rowSelections, setRowSelections] = useState<Record<string, { facebookPageId: string; instagramAccountId: string; adAccountId: string; instagramNotApplicable: boolean }>>({})
   const [linkingRows, setLinkingRows] = useState<Set<string>>(new Set())
 
   // Readiness drilldown
@@ -697,8 +699,9 @@ export default function MetaIntegrationPage() {
       activeClients,
       linkedAny: linkedClientIds.size,
       missingFacebook: clients.filter(client => !linkedByClient.get(client.id)?.facebook_page_id).length,
-      missingInstagram: clients.filter(client => !linkedByClient.get(client.id)?.instagram_account_id).length,
+      missingInstagram: clients.filter(client => !linkedByClient.get(client.id)?.instagram_account_id && !linkedByClient.get(client.id)?.instagram_not_applicable).length,
       missingAdAccount: clients.filter(client => !linkedByClient.get(client.id)?.ad_account_id).length,
+      noInstagram: clients.filter(client => linkedByClient.get(client.id)?.instagram_not_applicable === true).length,
     }
   }, [clients, linkedAssets, linkedByClient])
 
@@ -717,8 +720,13 @@ export default function MetaIntegrationPage() {
     }
     if (readinessFilter === 'missingInstagram') {
       return clients
-        .filter(c => !linkedByClient.get(c.id)?.instagram_account_id)
+        .filter(c => !linkedByClient.get(c.id)?.instagram_account_id && !linkedByClient.get(c.id)?.instagram_not_applicable)
         .map(c => ({ client: c, reason: 'Link an Instagram account to enable content sync.' }))
+    }
+    if (readinessFilter === 'noInstagram') {
+      return clients
+        .filter(c => linkedByClient.get(c.id)?.instagram_not_applicable === true)
+        .map(c => ({ client: c, reason: 'Instagram marked as not applicable.' }))
     }
     if (readinessFilter === 'missingAdAccount') {
       return clients
@@ -772,17 +780,22 @@ export default function MetaIntegrationPage() {
         currentLink,
         alreadyLinkedDifferently,
         alreadyLinkedSame,
+        instagramNotApplicable: Boolean(currentLink?.instagram_not_applicable),
       }
     })
   }, [adAccounts, clients, igAccounts, linkedByClient, pages])
 
   function isFullyLinked(suggestion: ClientAssetSuggestion) {
-    return Boolean(suggestion.currentLink?.facebook_page_id && suggestion.currentLink?.instagram_account_id)
+    return Boolean(
+      suggestion.currentLink?.facebook_page_id &&
+      (suggestion.currentLink?.instagram_account_id || suggestion.currentLink?.instagram_not_applicable)
+    )
   }
 
   function linkActionLabel(suggestion: ClientAssetSuggestion) {
-    if (isFullyLinked(suggestion)) return 'Already linked'
+    if (isFullyLinked(suggestion)) return 'Linked'
     if (!suggestion.currentLink?.facebook_page_id) return 'Needs Facebook'
+    if (suggestion.currentLink?.instagram_not_applicable) return 'Has FB, IG N/A'
     if (!suggestion.currentLink?.instagram_account_id) return 'Needs Instagram'
     return 'Needs link'
   }
@@ -794,18 +807,36 @@ export default function MetaIntegrationPage() {
   // Filtered suggestions based on workflow tab.
   const filteredSuggestions = useMemo(() => {
     return suggestions.filter(s => {
-      if (tableFilter === 'all') return true
-      if (tableFilter === 'linked') {
-        return isFullyLinked(s)
+      const link = s.currentLink
+      switch (tableFilter) {
+        case 'all':
+          return true
+        case 'linked':
+          return isFullyLinked(s)
+        case 'needs':
+          return !isFullyLinked(s)
+        case 'missingFacebook':
+          return !link?.facebook_page_id
+        case 'missingInstagram':
+          return !link?.instagram_account_id && !link?.instagram_not_applicable
+        case 'facebookOnly':
+          return Boolean(link?.facebook_page_id && !link?.instagram_account_id && !link?.instagram_not_applicable)
+        case 'instagramOnly':
+          return Boolean(link?.instagram_account_id && !link?.facebook_page_id)
+        case 'both':
+          return Boolean(link?.facebook_page_id && link?.instagram_account_id)
+        case 'noInstagram':
+          return link?.instagram_not_applicable === true
+        default:
+          return true
       }
-      return !isFullyLinked(s)
     })
   }, [suggestions, tableFilter])
 
   // Initialise row selections from suggestions when assets are loaded.
   useEffect(() => {
     if (!assetsLoaded) return
-    const initial: Record<string, { facebookPageId: string; instagramAccountId: string; adAccountId: string }> = {}
+    const initial: Record<string, { facebookPageId: string; instagramAccountId: string; adAccountId: string; instagramNotApplicable: boolean }> = {}
     for (const s of suggestions) {
       initial[s.client.id] = {
         facebookPageId: s.page.score >= 0.9 && !s.alreadyLinkedDifferently && !s.alreadyLinkedSame
@@ -815,20 +846,34 @@ export default function MetaIntegrationPage() {
           ? (s.instagram.asset?.id ?? '')
           : (s.currentLink?.instagram_account_id ?? ''),
         adAccountId: s.currentLink?.ad_account_id ?? '',
+        instagramNotApplicable: Boolean(s.currentLink?.instagram_not_applicable),
       }
     }
     setRowSelections(initial)
   }, [assetsLoaded, suggestions])
 
-  function updateRowSelection(clientId: string, field: 'facebookPageId' | 'instagramAccountId' | 'adAccountId', value: string) {
-    setRowSelections(prev => ({
-      ...prev,
-      [clientId]: {
-        ...prev[clientId],
-        [field]: value,
-        ...(field === 'facebookPageId' ? { instagramAccountId: '' } : {}),
-      },
-    }))
+  function updateRowSelection(clientId: string, field: 'facebookPageId' | 'instagramAccountId' | 'adAccountId' | 'instagramNotApplicable', value: string | boolean) {
+    setRowSelections(prev => {
+      const current = prev[clientId] ?? { facebookPageId: '', instagramAccountId: '', adAccountId: '', instagramNotApplicable: false }
+      if (field === 'instagramNotApplicable') {
+        return {
+          ...prev,
+          [clientId]: {
+            ...current,
+            instagramNotApplicable: value as boolean,
+            instagramAccountId: value ? '' : current.instagramAccountId,
+          },
+        }
+      }
+      return {
+        ...prev,
+        [clientId]: {
+          ...current,
+          [field]: value as string,
+          ...(field === 'facebookPageId' ? { instagramAccountId: '' } : {}),
+        },
+      }
+    })
   }
 
   function buildLinkPayload(input: {
@@ -837,6 +882,7 @@ export default function MetaIntegrationPage() {
     instagram: IgAccount | null
     adAccount: AdAccount | null
     allowOverwrite?: boolean
+    instagramNotApplicable?: boolean
   }) {
     return {
       clientId: input.clientId,
@@ -847,6 +893,7 @@ export default function MetaIntegrationPage() {
       adAccountId: input.adAccount?.id ?? null,
       adAccountName: input.adAccount?.name ?? null,
       allowOverwrite: input.allowOverwrite === true,
+      instagramNotApplicable: input.instagramNotApplicable === true,
     }
   }
 
@@ -918,7 +965,7 @@ export default function MetaIntegrationPage() {
 
   async function handleRowLink(clientId: string) {
     const sel = rowSelections[clientId]
-    if (!sel || (!sel.facebookPageId && !sel.instagramAccountId && !sel.adAccountId)) return
+    if (!sel || (!sel.facebookPageId && !sel.instagramAccountId && !sel.adAccountId && !sel.instagramNotApplicable)) return
     setLinkingRows(prev => new Set(prev).add(clientId))
     setLinkMsg(null)
 
@@ -926,7 +973,7 @@ export default function MetaIntegrationPage() {
     const existing = linkedByClient.get(clientId)
     const overwriteNeeded = Boolean(existing && (
       (existing.facebook_page_id ?? '') !== (sel.facebookPageId || '') ||
-      (existing.instagram_account_id ?? '') !== (sel.instagramAccountId || '') ||
+      (!sel.instagramNotApplicable && (existing.instagram_account_id ?? '') !== (sel.instagramAccountId || '')) ||
       (existing.ad_account_id ?? '') !== (sel.adAccountId || '')
     ))
     const allowOverwrite = overwriteNeeded
@@ -945,9 +992,10 @@ export default function MetaIntegrationPage() {
         link: buildLinkPayload({
           clientId,
           page: pageAssetForId(sel.facebookPageId),
-          instagram: instagramAssetForId(sel.instagramAccountId),
+          instagram: sel.instagramNotApplicable ? null : instagramAssetForId(sel.instagramAccountId),
           adAccount: adAccountForId(sel.adAccountId),
           allowOverwrite,
+          instagramNotApplicable: sel.instagramNotApplicable,
         }),
       })
       setLinkMsg({ ok: true, text: `${clientName} linked successfully.` })
@@ -959,18 +1007,21 @@ export default function MetaIntegrationPage() {
     }
   }
 
-  function linkFromSelections(clientId: string): { pageId: string; igId: string; adId: string } {
-    const sel = rowSelections[clientId] ?? { facebookPageId: '', instagramAccountId: '', adAccountId: '' }
-    return { pageId: sel.facebookPageId, igId: sel.instagramAccountId, adId: sel.adAccountId }
+  function linkFromSelections(clientId: string): { pageId: string; igId: string; adId: string; instagramNotApplicable: boolean } {
+    const sel = rowSelections[clientId] ?? { facebookPageId: '', instagramAccountId: '', adAccountId: '', instagramNotApplicable: false }
+    return { pageId: sel.facebookPageId, igId: sel.instagramAccountId, adId: sel.adAccountId, instagramNotApplicable: sel.instagramNotApplicable }
   }
 
-  const needsCount = useMemo(() => {
-    return suggestions.filter(s => !isFullyLinked(s)).length
-  }, [suggestions])
-
-  const linkedCount = useMemo(() => {
-    return suggestions.filter(isFullyLinked).length
-  }, [suggestions])
+  const computedCounts = useMemo(() => ({
+    needs: suggestions.filter(s => !isFullyLinked(s)).length,
+    missingFacebook: suggestions.filter(s => !s.currentLink?.facebook_page_id).length,
+    missingInstagram: suggestions.filter(s => !s.currentLink?.instagram_account_id && !s.currentLink?.instagram_not_applicable).length,
+    facebookOnly: suggestions.filter(s => Boolean(s.currentLink?.facebook_page_id && !s.currentLink?.instagram_account_id && !s.currentLink?.instagram_not_applicable)).length,
+    instagramOnly: suggestions.filter(s => Boolean(s.currentLink?.instagram_account_id && !s.currentLink?.facebook_page_id)).length,
+    both: suggestions.filter(s => Boolean(s.currentLink?.facebook_page_id && s.currentLink?.instagram_account_id)).length,
+    noInstagram: suggestions.filter(s => s.currentLink?.instagram_not_applicable === true).length,
+    linked: suggestions.filter(isFullyLinked).length,
+  }), [suggestions])
 
   async function handleSync() {
     setSyncing(true)
@@ -1198,6 +1249,13 @@ export default function MetaIntegrationPage() {
             onClick={() => setReadinessFilter(readinessFilter === 'missingInstagram' ? 'none' : 'missingInstagram')}
           />
           <HealthTile
+            label="No Instagram account"
+            value={readiness.noInstagram}
+            tone={readiness.noInstagram > 0 ? 'neutral' : 'ok'}
+            active={readinessFilter === 'noInstagram'}
+            onClick={() => setReadinessFilter(readinessFilter === 'noInstagram' ? 'none' : 'noInstagram')}
+          />
+          <HealthTile
             label="Missing Ad Account"
             value={readiness.missingAdAccount}
             tone={readiness.missingAdAccount > 0 ? 'warn' : 'ok'}
@@ -1218,7 +1276,7 @@ export default function MetaIntegrationPage() {
         <PremiumCard className="mt-4 max-w-4xl" padding="md">
           <PremiumCardHeader
             eyebrow="Drilldown"
-            title={`${readinessFilter === 'active' ? 'All active clients' : readinessFilter === 'linked' ? 'Linked clients' : readinessFilter === 'missingFacebook' ? 'Clients missing Facebook Page' : readinessFilter === 'missingInstagram' ? 'Clients missing Instagram' : 'Clients missing Ad Account'}`}
+            title={`${readinessFilter === 'active' ? 'All active clients' : readinessFilter === 'linked' ? 'Linked clients' : readinessFilter === 'missingFacebook' ? 'Clients missing Facebook Page' : readinessFilter === 'missingInstagram' ? 'Clients missing Instagram' : readinessFilter === 'noInstagram' ? 'Clients with no Instagram account' : 'Clients missing Ad Account'}`}
             action={
               <button
                 type="button"
@@ -1388,38 +1446,41 @@ export default function MetaIntegrationPage() {
               )}
 
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTableFilter('needs')}
-                  className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition ${
-                    tableFilter === 'needs'
-                      ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent'
-                      : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'
-                  }`}
-                >
-                  Needs linking ({needsCount})
+                <button type="button" onClick={() => setTableFilter('needs')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'needs' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  Needs linking ({computedCounts.needs})
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setTableFilter('linked')}
-                  className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition ${
-                    tableFilter === 'linked'
-                      ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent'
-                      : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'
-                  }`}
-                >
-                  Already linked ({linkedCount})
+                <button type="button" onClick={() => setTableFilter('missingFacebook')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'missingFacebook' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  Missing FB ({computedCounts.missingFacebook})
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setTableFilter('all')}
-                  className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition ${
-                    tableFilter === 'all'
-                      ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent'
-                      : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'
-                  }`}
-                >
-                  All active clients ({suggestions.length})
+                <button type="button" onClick={() => setTableFilter('missingInstagram')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'missingInstagram' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  Missing IG ({computedCounts.missingInstagram})
+                </button>
+                <button type="button" onClick={() => setTableFilter('facebookOnly')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'facebookOnly' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  FB only ({computedCounts.facebookOnly})
+                </button>
+                <button type="button" onClick={() => setTableFilter('instagramOnly')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'instagramOnly' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  IG only ({computedCounts.instagramOnly})
+                </button>
+                <button type="button" onClick={() => setTableFilter('both')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'both' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  FB + IG ({computedCounts.both})
+                </button>
+                <button type="button" onClick={() => setTableFilter('noInstagram')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'noInstagram' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  No IG account ({computedCounts.noInstagram})
+                </button>
+                <button type="button" onClick={() => setTableFilter('linked')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'linked' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  Linked ({computedCounts.linked})
+                </button>
+                <button type="button" onClick={() => setTableFilter('all')}
+                  className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition ${tableFilter === 'all' ? 'border-brand-accent/40 bg-brand-accent/15 text-brand-accent' : 'border-white/10 bg-white/[0.035] text-brand-primary hover:text-white'}`}>
+                  All ({suggestions.length})
                 </button>
               </div>
 
@@ -1428,7 +1489,13 @@ export default function MetaIntegrationPage() {
                   <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Clients needing Meta links</p>
                     <h3 className="mt-1 text-xl font-semibold text-white">
-                      {tableFilter === 'needs' && 'Link Facebook and Instagram'}
+                      {tableFilter === 'needs' && 'Clients needing Meta links'}
+                      {tableFilter === 'missingFacebook' && 'Clients missing Facebook Page'}
+                      {tableFilter === 'missingInstagram' && 'Clients missing Instagram'}
+                      {tableFilter === 'facebookOnly' && 'Clients with Facebook only'}
+                      {tableFilter === 'instagramOnly' && 'Clients with Instagram only'}
+                      {tableFilter === 'both' && 'Clients with both linked'}
+                      {tableFilter === 'noInstagram' && 'Clients with no Instagram account'}
                       {tableFilter === 'linked' && 'Already linked clients'}
                       {tableFilter === 'all' && 'All active clients'}
                     </h3>
@@ -1442,6 +1509,12 @@ export default function MetaIntegrationPage() {
                   <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-10 text-center">
                     <p className="text-sm font-semibold text-white">
                       {tableFilter === 'needs' && 'All active clients are linked or no review items are available.'}
+                      {tableFilter === 'missingFacebook' && 'All active clients have a Facebook Page linked.'}
+                      {tableFilter === 'missingInstagram' && 'No clients missing Instagram (excluding those marked as not having one).'}
+                      {tableFilter === 'facebookOnly' && 'No clients with Facebook only.'}
+                      {tableFilter === 'instagramOnly' && 'No clients with Instagram only.'}
+                      {tableFilter === 'both' && 'No clients with both Facebook and Instagram linked.'}
+                      {tableFilter === 'noInstagram' && 'No clients marked as not having an Instagram account.'}
                       {tableFilter === 'linked' && 'No complete active Meta links yet.'}
                       {tableFilter === 'all' && 'No active clients to display.'}
                     </p>
@@ -1454,7 +1527,7 @@ export default function MetaIntegrationPage() {
                     {filteredSuggestions.map(suggestion => {
                       const clientId = suggestion.client.id
                       const sel = linkFromSelections(clientId)
-                      const hasCoreSelection = Boolean(sel.pageId || sel.igId)
+                      const hasCoreSelection = Boolean(sel.pageId || sel.igId || sel.instagramNotApplicable)
                       const pageOptions = pagePickerOptions
                       const instagramOptions = igOptionsForPage(sel.pageId || suggestion.currentLink?.facebook_page_id)
                       const fbSuggestion = suggestionLabel(suggestion.page)
@@ -1503,10 +1576,20 @@ export default function MetaIntegrationPage() {
                                 options={instagramOptions}
                                 placeholder={instagramOptions.length === 0 ? 'No Instagram accounts available' : 'Select Instagram account'}
                                 emptyLabel={sel.pageId ? 'No Instagram account linked to this Facebook Page.' : 'Select a Facebook Page first, or choose from existing linked Instagram fallbacks.'}
+                                disabled={sel.instagramNotApplicable}
                               />
                               <p className="mt-1.5 text-xs text-brand-primary/50">
                                 {sel.igId ? igSuggestion : 'No suggestion'}
                               </p>
+                              <label className="mt-2 flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={sel.instagramNotApplicable}
+                                  onChange={e => updateRowSelection(clientId, 'instagramNotApplicable', e.target.checked)}
+                                  className="h-4 w-4 rounded border-brand-muted bg-brand-bg text-brand-accent focus:ring-brand-accent"
+                                />
+                                <span className="text-xs text-brand-primary/70">This client does not have an Instagram account</span>
+                              </label>
                             </div>
 
                             <div className="flex flex-col gap-2 xl:min-w-[150px]">
@@ -1828,7 +1911,7 @@ export default function MetaIntegrationPage() {
                   <div className="min-w-0 flex-1 text-sm">
                     <p className="font-medium text-white">{client?.name ?? asset.client_id}</p>
                     <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
-                    <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : 'No Instagram account linked'}</p>
+                    <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : asset.instagram_not_applicable ? 'Instagram not applicable' : 'No Instagram account linked'}</p>
                     <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
                   </div>
                   <ActionButton variant="danger" size="sm" onClick={() => handleDeactivate(asset)}>

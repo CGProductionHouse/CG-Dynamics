@@ -105,11 +105,39 @@ The Meta page now summarizes:
 - active clients count
 - clients linked to any Meta asset
 - clients missing Facebook Page
-- clients missing Instagram
+- clients missing Instagram (excludes clients marked as "no Instagram account")
+- clients with no Instagram account
 - clients missing Ad Account
 - last connected time
 - OAuth state SQL warning
 - token encryption warning
+
+## Instagram Not Applicable Status
+
+Staff can mark any client as "No Instagram account" when a business does not have one:
+
+- Stored as `instagram_not_applicable boolean` on `meta_client_assets`.
+- Prepared SQL: `supabase/phase-11b-meta-instagram-not-applicable.sql`.
+- When set: the client no longer appears under "Needs Instagram" or "Missing Instagram".
+- The client counts as "Linked" if a Facebook Page is also linked.
+- The Instagram picker is disabled and cleared when the flag is checked.
+- Available under the "No IG account" filter tab and readiness health tile.
+- The client is visible under the "No Instagram account" filter tab.
+- Flags are stored durably in `meta_client_assets` and included in all Edge Function payloads.
+
+## Filters
+
+The linking workspace now provides 9 filter tabs:
+
+- Needs linking — any client not fully linked (missing FB or IG, excluding no-IG)
+- Missing FB — clients without a Facebook Page
+- Missing IG — clients without an Instagram account (excluding no-IG)
+- FB only — has Facebook, missing Instagram, not marked no-IG
+- IG only — has Instagram, missing Facebook
+- FB + IG — both linked
+- No IG account — clients intentionally marked as no-Instagram
+- Already linked — has Facebook + (Instagram or no-IG)
+- All active clients
 
 ## Product Principle
 
