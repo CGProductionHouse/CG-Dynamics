@@ -4,15 +4,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const META_GRAPH_VERSION = 'v22.0'
 const SYNC_ENGINE_VERSION = 'meta-sync-worker-v1'
 const BATCH_SIZE = 5
-const INSIGHT_TIMEOUT_MS = 70_000
-
-function describeDbError(err: { message?: string; code?: string } | null | undefined): string {
-  if (!err) return 'unknown database error'
-  const parts: string[] = []
-  if (err.message) parts.push(err.message)
-  if (err.code) parts.push(`code ${err.code}`)
-  return parts.length > 0 ? parts.join(' — ') : 'unknown database error'
-}
 
 function monthBounds(month: string): { periodStart: string; periodEnd: string } {
   const year = Number(month.slice(0, 4))
@@ -45,6 +36,41 @@ async function metaFetch(url: string, timeoutMs = 15_000): Promise<Response> {
   }
 }
 
+/* ---------- Auth ---------- */
+
+async function authorizeWorker(
+  req: Request,
+  sb: ReturnType<typeof createClient>,
+): Promise<{ ok: true } | { ok: false; status: number; body: unknown }> {
+  // 1. Internal worker secret (preferred for cron / enqueue triggers)
+  const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
+  const headerSecret = req.headers.get('x-worker-secret') ?? ''
+  if (workerSecret && headerSecret === workerSecret) {
+    return { ok: true }
+  }
+
+  // 2. Staff JWT (for manual invocations)
+  const authHeader = req.headers.get('Authorization') ?? ''
+  const token = authHeader.replace('Bearer ', '')
+  if (token) {
+    const { data: { user }, error: authError } = await sb.auth.getUser(token)
+    if (!authError && user) {
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      if (profile && ['admin', 'team'].includes(profile.role)) {
+        return { ok: true }
+      }
+    }
+  }
+
+  return { ok: false, status: 401, body: { ok: false, error: 'Unauthorized. Provide x-worker-secret header or a valid staff JWT.' } }
+}
+
+/* ---------- Main handler ---------- */
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -62,6 +88,9 @@ Deno.serve(async (req) => {
 
   const sb = createClient(supabaseUrl, serviceRoleKey)
 
+  const auth = await authorizeWorker(req, sb)
+  if (!auth.ok) return jsonResponse(auth.body, auth.status)
+
   let body: { batchId?: string; maxItems?: number } = {}
   try {
     body = await req.json()
@@ -69,7 +98,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400)
   }
 
-  // Get Meta access token
+  // ── Get Meta access token ──────────────────────────────────
   const { data: connections } = await sb
     .from('meta_connections')
     .select('id')
@@ -94,41 +123,24 @@ Deno.serve(async (req) => {
   const accessToken = tokenRows[0].encrypted_access_token
   const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
 
-  // Pick queued items
-  let itemsQuery = sb
-    .from('meta_sync_batch_items')
-    .select('id, batch_id, client_id, client_name, month')
-    .eq('status', 'queued')
-    .order('created_at', { ascending: true })
-    .limit(body.maxItems ?? BATCH_SIZE)
+  // ── Atomic claim items ─────────────────────────────────────
+  const { data: items, error: claimError } = await sb.rpc('claim_sync_batch_items', {
+    p_limit: body.maxItems ?? BATCH_SIZE,
+    p_batch_id: body.batchId ?? null,
+  })
 
-  if (body.batchId) {
-    itemsQuery = itemsQuery.eq('batch_id', body.batchId)
+  if (claimError) {
+    return jsonResponse({ ok: false, error: 'Could not claim queue items. RPC may not exist yet.' }, 500)
   }
 
-  const { data: items, error: itemsError } = await itemsQuery
-
-  if (itemsError) {
-    return jsonResponse({ ok: false, error: 'Could not read queue items.' }, 500)
-  }
-
-  if (!items || items.length === 0) {
+  if (!items || !Array.isArray(items) || items.length === 0) {
     return jsonResponse({ ok: true, processed: 0, message: 'No queued items to process.' })
   }
 
   const processed: Array<{ itemId: string; clientName: string; month: string; status: string; postsSynced: number; error?: string }> = []
-  const batchIds = new Set(items.map(i => i.batch_id))
-
+  const batchIds = new Set<string>()
   for (const item of items) {
-    // Mark running
-    const now = new Date().toISOString()
-    const { data: currentItem } = await sb.from('meta_sync_batch_items').select('attempts').eq('id', item.id).single()
-    const currentAttempts = (currentItem?.attempts ?? 0)
-    await sb.from('meta_sync_batch_items').update({
-      status: 'running',
-      attempts: currentAttempts + 1,
-      started_at: now,
-    }).eq('id', item.id)
+    batchIds.add(item.batch_id)
 
     // Skip current/future months
     if (item.month >= currentMonthStr()) {
@@ -137,6 +149,7 @@ Deno.serve(async (req) => {
         error: 'Month is not yet completed.',
         finished_at: new Date().toISOString(),
       }).eq('id', item.id)
+      processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
       continue
     }
 
@@ -218,13 +231,15 @@ Deno.serve(async (req) => {
       const facebookPageId = asset?.facebook_page_id ?? null
       const instagramAccountId = (asset?.instagram_not_applicable === true) ? null : (asset?.instagram_account_id ?? null)
 
+      const now = new Date().toISOString()
+
       // ── Sync Facebook posts ──
       if (facebookPageId) {
         const pageToken = pageTokenMap.get(facebookPageId) ?? accessToken
         try {
           const params = new URLSearchParams({
             access_token: pageToken,
-            fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true),attachments',
+            fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
             since: periodStart,
             until: `${periodEnd}T23:59:59Z`,
             limit: '100',
@@ -252,32 +267,49 @@ Deno.serve(async (req) => {
               const shares = (raw.shares as { count?: number })?.count ?? 0
               const fullPicture = raw.full_picture as string | null ?? null
 
-              const postPayload = {
+              // Basic feed endpoint does not return views / reach —
+              // preserve null in raw so consumers can check metric_availability.
+              const postPayload: Record<string, unknown> = {
                 report_id: reportId,
                 platform: 'facebook',
                 meta_post_id: metaPostId,
                 publish_time: publishTime,
                 caption,
                 permalink,
-                views: 0,
-                reach: 0,
+                views: null,
+                reach: null,
                 reactions,
                 comments,
                 shares,
-                raw: { source: 'meta_sync', platform: 'facebook', meta_payload: raw, ...(fullPicture ? { full_picture: fullPicture } : {}) },
+                raw: {
+                  source: 'meta_sync',
+                  platform: 'facebook',
+                  synced_at: now,
+                  views: null,
+                  reach: null,
+                  engagements: { reactions, comments, shares },
+                  metric_availability: {
+                    views: false,
+                    reach: false,
+                    content_interactions: true,
+                    source: 'direct_fields',
+                  },
+                  meta_payload: raw,
+                  ...(fullPicture ? { full_picture: fullPicture } : {}),
+                },
               }
 
               if (existing && existing.length > 0) {
                 if (existing[0].post_id) {
                   await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
                 }
-                await sb.from('meta_content_mappings').update({ last_synced_at: new Date().toISOString(), report_id: reportId }).eq('id', existing[0].id)
+                await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
               } else {
                 const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
                 if (newPost) {
                   await sb.from('meta_content_mappings').insert({
                     client_id: item.client_id, report_id: reportId, post_id: newPost.id,
-                    platform: 'facebook', meta_object_id: metaPostId, last_synced_at: new Date().toISOString(),
+                    platform: 'facebook', meta_object_id: metaPostId, last_synced_at: now,
                   })
                 }
               }
@@ -332,32 +364,49 @@ Deno.serve(async (req) => {
               else if (mediaType === 'VIDEO') postType = 'Video'
               else if (mediaType === 'IMAGE') postType = 'Photo'
 
-              const postPayload = {
+              const postPayload: Record<string, unknown> = {
                 report_id: reportId,
                 platform: 'instagram',
                 meta_post_id: metaPostId,
                 publish_time: timestamp,
                 caption: (raw.caption as string | null) ?? null,
                 permalink: (raw.permalink as string | null) ?? null,
-                views: 0,
-                reach: 0,
+                views: null,
+                reach: null,
                 reactions: likes,
                 comments: igComments,
                 shares: 0,
-                raw: { source: 'meta_sync', platform: 'instagram', meta_payload: raw, ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}), ...(raw.media_url ? { media_url: raw.media_url as string } : {}) },
+                raw: {
+                  source: 'meta_sync',
+                  platform: 'instagram',
+                  synced_at: now,
+                  content_type: postType,
+                  views: null,
+                  reach: null,
+                  engagements: { likes: likes, comments: igComments },
+                  metric_availability: {
+                    views: false,
+                    reach: false,
+                    content_interactions: true,
+                    source: 'media_fields',
+                  },
+                  meta_payload: raw,
+                  ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}),
+                  ...(raw.media_url ? { media_url: raw.media_url as string } : {}),
+                },
               }
 
               if (existing && existing.length > 0) {
                 if (existing[0].post_id) {
                   await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
                 }
-                await sb.from('meta_content_mappings').update({ last_synced_at: new Date().toISOString(), report_id: reportId }).eq('id', existing[0].id)
+                await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
               } else {
                 const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
                 if (newPost) {
                   await sb.from('meta_content_mappings').insert({
                     client_id: item.client_id, report_id: reportId, post_id: newPost.id,
-                    platform: 'instagram', meta_object_id: metaPostId, last_synced_at: new Date().toISOString(),
+                    platform: 'instagram', meta_object_id: metaPostId, last_synced_at: now,
                   })
                 }
               }
@@ -384,9 +433,9 @@ Deno.serve(async (req) => {
         period_start: periodStart,
         period_end: periodEnd,
         status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
-        summary: { postsSynced, warnings, reportsCreated, reportsReused },
-        started_at: new Date().toISOString(),
-        finished_at: new Date().toISOString(),
+        summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: SYNC_ENGINE_VERSION },
+        started_at: now,
+        finished_at: now,
       }).catch(() => {})
 
     } catch (e) {
@@ -394,7 +443,7 @@ Deno.serve(async (req) => {
       itemError = String(e)
     }
 
-    // Update item status
+    // Update item to terminal state
     const updatePayload: Record<string, unknown> = {
       status: itemStatus,
       posts_synced: postsSynced,
@@ -416,31 +465,13 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Update batch progress for all affected batches
+  // ── Recalculate parent batch statuses ──────────────────────
   for (const batchId of batchIds) {
-    const { count: total } = await sb.from('meta_sync_batch_items')
-      .select('id', { count: 'exact', head: true })
-      .eq('batch_id', batchId)
-    const { count: completed } = await sb.from('meta_sync_batch_items')
-      .select('id', { count: 'exact', head: true })
-      .eq('batch_id', batchId)
-      .in('status', ['completed', 'warning', 'skipped'])
-    const { count: failed } = await sb.from('meta_sync_batch_items')
-      .select('id', { count: 'exact', head: true })
-      .eq('batch_id', batchId)
-      .eq('status', 'failed')
-
-    const newStatus = completed === total
-      ? (failed > 0 ? 'completed' : 'completed')
-      : 'running'
-
-    await sb.from('meta_sync_batches').update({
-      status: newStatus,
-      completed_items: completed ?? 0,
-      failed_items: failed ?? 0,
-      started_at: new Date().toISOString(),
-      finished_at: newStatus === 'completed' ? new Date().toISOString() : null,
-    }).eq('id', batchId)
+    try {
+      await sb.rpc('recalculate_batch_status', { p_batch_id: batchId })
+    } catch {
+      // RPC may not exist yet — batch stays in current state
+    }
   }
 
   return jsonResponse({

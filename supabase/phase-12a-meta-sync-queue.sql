@@ -62,6 +62,9 @@ create index if not exists meta_sync_batch_items_status_idx
 alter table public.meta_sync_batches enable row level security;
 alter table public.meta_sync_batch_items enable row level security;
 
+drop policy if exists "meta_sync_batches: staff select"
+  on public.meta_sync_batches;
+
 create policy "meta_sync_batches: staff select"
   on public.meta_sync_batches for select
   using (
@@ -70,6 +73,9 @@ create policy "meta_sync_batches: staff select"
       false
     )
   );
+
+drop policy if exists "meta_sync_batch_items: staff select"
+  on public.meta_sync_batch_items;
 
 create policy "meta_sync_batch_items: staff select"
   on public.meta_sync_batch_items for select
@@ -82,3 +88,97 @@ create policy "meta_sync_batch_items: staff select"
 
 -- Service-role inserts/updates are handled by Edge Functions
 -- (bypass RLS via the service_role key).
+
+-- ── 4. ATOMIC CLAIM RPC ───────────────────────────────────────
+-- Used by meta-sync-worker to safely claim queued items without
+-- two workers racing on the same rows. Uses FOR UPDATE SKIP LOCKED
+-- within a single atomic statement.
+
+create or replace function public.claim_sync_batch_items(
+  p_limit integer default 5,
+  p_batch_id uuid default null
+)
+returns table (
+  id                uuid,
+  batch_id          uuid,
+  client_id         uuid,
+  client_name       text,
+  month             text,
+  status            text,
+  attempts          int,
+  posts_synced      int,
+  reports_created   int,
+  reports_reused    int,
+  reports_updated   int,
+  warnings          jsonb,
+  error             text,
+  started_at        timestamptz,
+  finished_at       timestamptz,
+  created_at        timestamptz
+)
+language plpgsql
+as $$
+begin
+  return query
+  with claimed as (
+    select i.id
+    from public.meta_sync_batch_items i
+    where i.status = 'queued'
+      and (p_batch_id is null or i.batch_id = p_batch_id)
+    order by i.created_at asc
+    limit p_limit
+    for update skip locked
+  )
+  update public.meta_sync_batch_items i
+  set
+    status = 'running',
+    attempts = i.attempts + 1,
+    started_at = now()
+  from claimed
+  where i.id = claimed.id
+  returning i.*;
+end;
+$$;
+
+-- ── 5. BATCH RECALCULATE RPC ──────────────────────────────────
+-- Called after worker finishes processing items to update parent
+-- batch totals and status. Idempotent — safe to call repeatedly.
+
+create or replace function public.recalculate_batch_status(
+  p_batch_id uuid
+)
+returns void
+language plpgsql
+as $$
+declare
+  v_total        int;
+  v_completed    int;
+  v_failed       int;
+  v_running      int;
+  v_queued       int;
+begin
+  select
+    count(*),
+    count(*) filter (where status in ('completed','warning','skipped')),
+    count(*) filter (where status = 'failed'),
+    count(*) filter (where status = 'running'),
+    count(*) filter (where status = 'queued')
+  into v_total, v_completed, v_failed, v_running, v_queued
+  from public.meta_sync_batch_items
+  where batch_id = p_batch_id;
+
+  update public.meta_sync_batches
+  set
+    completed_items = v_completed,
+    failed_items    = v_failed,
+    status          = case
+                        when v_queued = 0 and v_running = 0 then 'completed'
+                        else 'running'
+                      end,
+    finished_at     = case
+                        when v_queued = 0 and v_running = 0 then now()
+                        else finished_at
+                      end
+  where id = p_batch_id;
+end;
+$$;
