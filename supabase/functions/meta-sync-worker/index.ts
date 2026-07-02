@@ -526,6 +526,16 @@ Deno.serve(async (req) => {
       if (itemError) updatePayload.error = String(itemError).slice(0, 1000)
       await sb.from('meta_sync_batch_items').update(updatePayload).eq('id', item.id)
 
+      // Keep the parent batch counters live after EVERY item so the UI never
+      // shows a stale 0/N while this worker is mid-chunk. Safe while items
+      // remain queued/running — the RPC only completes the batch when nothing
+      // is left. The final per-batch recalc below stays as a safety net.
+      try {
+        await sb.rpc('recalculate_batch_status', { p_batch_id: item.batch_id })
+      } catch {
+        // RPC may not exist yet — final recalculation below still runs.
+      }
+
       processed.push({
         itemId: item.id,
         clientName: item.client_name,
