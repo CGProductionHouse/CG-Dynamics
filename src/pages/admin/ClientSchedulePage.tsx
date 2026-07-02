@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { ClientPicker } from '../../components/ClientPicker'
@@ -303,6 +303,12 @@ export default function ClientSchedulePage() {
             {VIEW_LABELS[option]}
           </button>
         ))}
+        <Link
+          to={`/admin/client-calendar?month=${selectedMonth}${clientId ? `&client=${clientId}` : ''}`}
+          className="ml-auto rounded-lg border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-black text-[#2dd4bf] transition-colors hover:text-white"
+        >
+          Client-ready calendar
+        </Link>
       </div>
 
       <div className="mb-4 grid gap-2 rounded-xl border border-white/[0.08] bg-white/[0.025] p-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
