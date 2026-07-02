@@ -933,6 +933,30 @@ export async function listPlannerTasks(boardId: string) {
     .order('created_at')
 }
 
+// Dated, non-archived planner tasks inside a date window — used by the CG
+// Calendar task layer so operational work appears next to events and posts.
+export async function listPlannerTasksDueBetween(startDate: string, endDateExclusive: string) {
+  return supabase
+    .from(PLANNER_TASKS_TABLE)
+    .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id')
+    .is('archived_at', null)
+    .gte('due_date', startDate)
+    .lt('due_date', endDateExclusive)
+    .order('due_date')
+}
+
+export interface CalendarTaskRow {
+  id: string
+  title: string
+  client_name: string | null
+  assigned_to_name: string | null
+  status: PlannerTaskStatus
+  priority: TaskPriority
+  due_date: string
+  board_id: string | null
+  bucket_id: string | null
+}
+
 export async function listClientScheduleDeliverablesForYear(year: number) {
   return listMonthlyDeliverablesByYear(year)
 }
