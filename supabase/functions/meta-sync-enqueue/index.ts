@@ -104,25 +104,29 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Could not create sync batch items.' }, 500)
   }
 
-  // ── Fire-and-forget: trigger worker immediately ──────────────
+  // ── Trigger worker immediately ──────────────────────────────
   const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
   const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
 
-  ;(async () => {
-    try {
-      await fetch(workerUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-worker-secret': workerSecret,
-        },
-        body: JSON.stringify({ batchId, maxItems: 5 }),
-      })
-    } catch {
-      // Worker may not be deployed yet — batch stays queued,
-      // frontend polling will show it and staff can trigger manually.
-    }
-  })()
+  const triggerPromise = fetch(workerUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-worker-secret': workerSecret,
+    },
+    body: JSON.stringify({ batchId, maxItems: 5 }),
+  })
+
+  // Keep runtime alive until trigger completes
+  if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime.waitUntil === 'function') {
+    EdgeRuntime.waitUntil(triggerPromise)
+  }
+  try {
+    await Promise.race([triggerPromise, new Promise(resolve => setTimeout(resolve, 5_000))])
+  } catch {
+    // Worker may not be deployed yet — batch stays queued;
+    // frontend polling shows it and staff can retry.
+  }
 
   return jsonResponse({
     ok: true,
