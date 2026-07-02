@@ -373,6 +373,10 @@ export default function MetaIntegrationPage() {
   // Table filter tabs
   const [tableFilter, setTableFilter] = useState<TableFilter>('needs')
 
+  // Match queue UX: client-name search + per-row expandable detail panels.
+  const [queueSearch, setQueueSearch] = useState('')
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+
   // Linked assets list
   const [linkedAssets, setLinkedAssets] = useState<LinkedAsset[]>([])
   const [loadingLinked, setLoadingLinked] = useState(false)
@@ -585,25 +589,6 @@ export default function MetaIntegrationPage() {
     return options.sort((a, b) => a.label.localeCompare(b.label))
   }, [pages, linkedAssets])
 
-  // Merge IG options with fallback from linked assets.
-  const igPickerOptions = useMemo(() => {
-    const seen = new Set<string>()
-    const options: { value: string; label: string }[] = []
-    for (const a of igAccounts) {
-      if (!seen.has(a.id)) {
-        seen.add(a.id)
-        options.push({ value: a.id, label: a.name || a.username || a.id })
-      }
-    }
-    for (const link of linkedAssets) {
-      if (link.instagram_account_id && !seen.has(link.instagram_account_id)) {
-        seen.add(link.instagram_account_id)
-        options.push({ value: link.instagram_account_id, label: `${link.instagram_username || link.instagram_account_id} (existing linked account)` })
-      }
-    }
-    return options.sort((a, b) => a.label.localeCompare(b.label))
-  }, [igAccounts, linkedAssets])
-
   // Merge Ad Account options with fallback from linked assets.
   const adPickerOptions = useMemo(() => {
     const seen = new Set<string>()
@@ -740,9 +725,11 @@ export default function MetaIntegrationPage() {
     })
   }, [adAccounts, clients, igAccounts, linkedByClient, pages])
 
-  // Filtered suggestions based on table filter tab.
+  // Filtered suggestions based on table filter tab + client search.
   const filteredSuggestions = useMemo(() => {
+    const q = queueSearch.trim().toLowerCase()
     return suggestions.filter(s => {
+      if (q && !s.client.name.toLowerCase().includes(q)) return false
       if (tableFilter === 'all') return true
       if (tableFilter === 'linked') {
         return s.alreadyLinkedSame && !s.alreadyLinkedDifferently
@@ -754,7 +741,7 @@ export default function MetaIntegrationPage() {
         (adAccounts.length > 0 && !s.currentLink?.ad_account_id) ||
         s.confidence === 'low' || s.confidence === 'medium' || s.confidence === 'none'
     })
-  }, [suggestions, tableFilter, adAccounts.length])
+  }, [suggestions, tableFilter, queueSearch, adAccounts.length])
 
   // Initialise row selections from suggestions when assets are loaded.
   useEffect(() => {
@@ -1419,159 +1406,189 @@ export default function MetaIntegrationPage() {
                 </ActionButton>
               </div>
 
-              {/* Suggested matches table with inline editing */}
-              <div className="rounded-xl border border-brand-muted bg-brand-bg/55 p-4">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-accent">Suggested matches</p>
-                    <h3 className="mt-1 text-base font-semibold text-white">
-                      {tableFilter === 'needs' && 'Review and correct matches needing attention'}
-                      {tableFilter === 'linked' && 'Already linked clients'}
-                      {tableFilter === 'all' && 'All active clients'}
-                    </h3>
-                    <p className="mt-1 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
-                      {tableFilter === 'needs' && 'High-confidence suggestions are preselected. Correct any wrong suggestions using the inline pickers, then link approved rows.'}
-                      {tableFilter === 'linked' && 'These clients already have active Meta asset links. Switch to "Needs linking / review" to see clients requiring action.'}
-                      {tableFilter === 'all' && 'Showing all active clients. Use the filter tabs above to focus on clients needing attention.'}
-                    </p>
+              {/* Ad accounts explained ONCE — never repeated per row */}
+              {adPickerOptions.length === 0 && (
+                <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.06] p-4">
+                  <p className="text-sm font-semibold text-amber-200">Ad accounts are not available from Meta right now</p>
+                  <p className="mt-1 text-xs leading-relaxed text-amber-200/75">
+                    Facebook and Instagram content sync still works without ad accounts — they are only needed for
+                    paid/boosted reporting later.
+                    {adAccountsError ? ` Meta said: ${adAccountsError}` : ''}
+                    {adAccountsDiagnostic?.status ? ` (response: ${String(adAccountsDiagnostic.status)})` : ''}
+                  </p>
+                </div>
+              )}
+
+              {/* Match queue: master rows + expandable detail panel */}
+              <div className="rounded-xl border border-brand-muted bg-brand-bg/55">
+                <div className="sticky top-0 z-10 flex flex-col gap-3 rounded-t-xl border-b border-white/10 bg-[#161311]/95 p-3 backdrop-blur sm:p-4 lg:flex-row lg:items-center">
+                  <div className="flex w-fit gap-1 rounded-lg border border-brand-muted bg-brand-bg p-0.5">
+                    <ActionButton variant={tableFilter === 'needs' ? 'primary' : 'ghost'} size="sm" onClick={() => setTableFilter('needs')}>
+                      Needs review ({needsCount})
+                    </ActionButton>
+                    <ActionButton variant={tableFilter === 'linked' ? 'primary' : 'ghost'} size="sm" onClick={() => setTableFilter('linked')}>
+                      Linked ({linkedCount})
+                    </ActionButton>
+                    <ActionButton variant={tableFilter === 'all' ? 'primary' : 'ghost'} size="sm" onClick={() => setTableFilter('all')}>
+                      All ({suggestions.length})
+                    </ActionButton>
                   </div>
-                  <ActionButton
-                    variant="primary"
-                    onClick={handleBulkLinkApproved}
-                    disabled={approvedCount === 0 || bulkSaving || tableFilter === 'linked'}
-                    loading={bulkSaving}
-                  >
-                    Link approved rows ({approvedCount})
-                  </ActionButton>
+                  <input
+                    value={queueSearch}
+                    onChange={e => setQueueSearch(e.target.value)}
+                    placeholder="Search clients..."
+                    className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder:text-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-accent lg:max-w-[220px]"
+                  />
+                  <div className="lg:ml-auto">
+                    <ActionButton
+                      variant="primary"
+                      onClick={handleBulkLinkApproved}
+                      disabled={approvedCount === 0 || bulkSaving || tableFilter === 'linked'}
+                      loading={bulkSaving}
+                    >
+                      Link approved ({approvedCount})
+                    </ActionButton>
+                  </div>
                 </div>
 
-                <div className="mt-4 overflow-x-auto">
-                  <table className="min-w-[1200px] w-full text-left text-sm">
-                    <thead className="text-xs uppercase tracking-[0.12em] text-brand-primary/55">
-                      <tr className="border-b border-white/10">
-                        <th className="px-2 py-2">Active CG client</th>
-                        <th className="px-2 py-2 min-w-[180px]">Facebook Page</th>
-                        <th className="px-2 py-2 min-w-[180px]">Instagram</th>
-                        <th className="px-2 py-2 min-w-[180px]">Ad Account</th>
-                        <th className="px-2 py-2">Confidence</th>
-                        <th className="px-2 py-2 min-w-[140px]">Current / warning</th>
-                        <th className="px-2 py-2">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/8">
-                      {filteredSuggestions.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="px-2 py-8 text-center text-sm text-brand-primary/50">
-                            {tableFilter === 'needs' && 'All clients are linked. No items need review.'}
-                            {tableFilter === 'linked' && 'No clients with complete active Meta links yet.'}
-                            {tableFilter === 'all' && 'No active clients to display.'}
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredSuggestions.map(suggestion => {
-                          const clientId = suggestion.client.id
-                          const sel = linkFromSelections(clientId)
-                          const hasAny = Boolean(sel.pageId || sel.igId || sel.adId)
+                <div className="p-3 sm:p-4">
+                  <p className="mb-3 text-xs leading-relaxed text-brand-primary/60">
+                    {tableFilter === 'needs' && 'High-confidence suggestions are preselected. Open a client to review or correct its Facebook, Instagram and ad account, then link it.'}
+                    {tableFilter === 'linked' && 'These clients already have active Meta links. Open one to review or update its assets.'}
+                    {tableFilter === 'all' && 'Every active client. Use the tabs to focus on the ones needing attention.'}
+                  </p>
 
-                          return (
-                            <tr key={clientId} className="align-top">
-                              <td className="px-2 py-3 font-semibold text-white whitespace-nowrap">{suggestion.client.name}</td>
+                  {filteredSuggestions.length === 0 ? (
+                    <p className="rounded-xl border border-white/8 bg-brand-bg/40 px-4 py-8 text-center text-sm text-brand-primary/50">
+                      {queueSearch
+                        ? 'No clients match this search.'
+                        : tableFilter === 'needs'
+                          ? 'All clients are linked. Nothing needs review.'
+                          : tableFilter === 'linked'
+                            ? 'No clients with complete active Meta links yet.'
+                            : 'No active clients to display.'}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredSuggestions.map(suggestion => {
+                        const clientId = suggestion.client.id
+                        const sel = linkFromSelections(clientId)
+                        const hasAny = Boolean(sel.pageId || sel.igId || sel.adId)
+                        const expanded = expandedRows.has(clientId)
+                        const igOptions = igOptionsForPage(sel.pageId || suggestion.currentLink?.facebook_page_id)
+                        const fbLabel = pickerLabel(pagePickerOptions, sel.pageId) ?? suggestion.currentLink?.facebook_page_name ?? null
+                        const igLabel = pickerLabel(igOptions, sel.igId) ?? suggestion.currentLink?.instagram_username ?? null
+                        const adLabel = pickerLabel(adPickerOptions, sel.adId) ?? suggestion.currentLink?.ad_account_name ?? null
 
-                              {/* Facebook Page picker */}
-                              <td className="px-2 py-3 min-w-[180px]">
-                                <SearchablePicker
-                                  value={sel.pageId}
-                                  onChange={v => updateRowSelection(clientId, 'facebookPageId', v)}
-                                  options={pagePickerOptions}
-                                  placeholder={pagePickerOptions.length === 0 ? 'No pages' : 'Select page...'}
-                                  emptyLabel={pagePickerOptions.length === 0 ? 'No pages available' : 'No matching pages'}
-                                />
-                              </td>
-
-                              {/* Instagram picker */}
-                              <td className="px-2 py-3 min-w-[180px]">
-                                <SearchablePicker
-                                  value={sel.igId}
-                                  onChange={v => updateRowSelection(clientId, 'instagramAccountId', v)}
-                                  options={igOptionsForPage(sel.pageId || suggestion.currentLink?.facebook_page_id)}
-                                  placeholder={igPickerOptions.length === 0 ? 'No IG accounts' : 'Select Instagram...'}
-                                  emptyLabel={sel.pageId ? 'No IG for this page' : 'Select a page first'}
-                                />
-                              </td>
-
-                              {/* Ad Account picker */}
-                              <td className="px-2 py-3 min-w-[180px]">
-                                {adPickerOptions.length > 0 ? (
-                                  <SearchablePicker
-                                    value={sel.adId}
-                                    onChange={v => updateRowSelection(clientId, 'adAccountId', v)}
-                                    options={adPickerOptions}
-                                    placeholder="Select ad account..."
-                                    emptyLabel="No ad accounts"
-                                  />
-                                ) : (
-                                  <p className="text-xs leading-relaxed text-brand-primary/60">
-                                    {adAccountsError ? (
-                                      <>Ad accounts not available.<br />
-                                        <span className="text-amber-300/80">Facebook &amp; Instagram sync can still work without ad accounts.</span>
-                                        <span className="block mt-1 text-brand-primary/50">Ad accounts are needed for paid/boosted reporting.</span>
-                                        {adAccountsDiagnostic?.status && (
-                                          <span className="block mt-1 text-brand-primary/40">Meta response: {String(adAccountsDiagnostic.status)}</span>
-                                        )}
-                                      </>
-                                    ) : (
-                                      'No ad accounts loaded.'
-                                    )}
-                                  </p>
-                                )}
-                              </td>
-
-                              {/* Confidence */}
-                              <td className="px-2 py-3">
+                        return (
+                          <div
+                            key={clientId}
+                            className={`rounded-xl border transition-colors ${expanded ? 'border-brand-accent/35 bg-brand-bg/80' : 'border-white/8 bg-brand-bg/40 hover:border-white/20'}`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setExpandedRows(prev => {
+                                const next = new Set(prev)
+                                if (next.has(clientId)) next.delete(clientId)
+                                else next.add(clientId)
+                                return next
+                              })}
+                              className="grid w-full items-center gap-x-4 gap-y-2 p-3.5 text-left sm:grid-cols-[minmax(9rem,13rem)_minmax(0,1fr)_auto] sm:px-4"
+                            >
+                              <span className="truncate text-sm font-semibold text-white">{suggestion.client.name}</span>
+                              <span className="flex min-w-0 flex-wrap items-center gap-1.5">
+                                <AssetSummary label="FB" value={fbLabel} />
+                                <AssetSummary label="IG" value={igLabel} />
+                                <AssetSummary label="Ads" value={adLabel} muteMissing={adPickerOptions.length === 0} />
+                              </span>
+                              <span className="flex items-center gap-2 justify-self-end">
                                 <ConfidencePill confidence={suggestion.confidence} />
-                                <p className="mt-1 text-xs text-brand-primary/60 max-w-[140px]">{suggestion.reason}</p>
-                              </td>
+                                <RowStatusChip suggestion={suggestion} />
+                                <span className={`text-brand-primary/50 transition-transform ${expanded ? 'rotate-180' : ''}`}>▾</span>
+                              </span>
+                            </button>
 
-                              {/* Current / warning */}
-                              <td className="px-2 py-3 text-xs text-brand-primary/75 max-w-[160px]">
-                                {suggestion.currentLink ? (
-                                  <>
-                                    <p className="font-semibold text-white">Currently linked</p>
-                                    <p>{suggestion.currentLink.facebook_page_name || 'No FB Page'}</p>
-                                    <p>{suggestion.currentLink.instagram_username ? `@${suggestion.currentLink.instagram_username}` : 'No IG'}</p>
-                                    <p>{suggestion.currentLink.ad_account_name || 'No ad account'}</p>
-                                  </>
-                                ) : (
-                                  <p>Not linked yet</p>
-                                )}
-                                {suggestion.alreadyLinkedDifferently && (
-                                  <p className="mt-1 rounded-md border border-amber-400/20 bg-amber-400/10 px-1.5 py-1 text-amber-300 text-[11px]">
-                                    Differs from current. Use per-row action to overwrite.
-                                  </p>
-                                )}
-                                {suggestion.alreadyLinkedSame && (
-                                  <p className="mt-1 text-brand-teal/70">Already linked with these assets.</p>
-                                )}
-                              </td>
+                            {expanded && (
+                              <div className="border-t border-white/8 p-4">
+                                <div className="grid gap-3 lg:grid-cols-3">
+                                  <div>
+                                    <label className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.14em] text-brand-primary/60">Facebook Page</label>
+                                    <SearchablePicker
+                                      value={sel.pageId}
+                                      onChange={v => updateRowSelection(clientId, 'facebookPageId', v)}
+                                      options={pagePickerOptions}
+                                      placeholder={pagePickerOptions.length === 0 ? 'No pages available' : 'Select page...'}
+                                      emptyLabel={pagePickerOptions.length === 0 ? 'No pages available' : 'No matching pages'}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.14em] text-brand-primary/60">Instagram</label>
+                                    <SearchablePicker
+                                      value={sel.igId}
+                                      onChange={v => updateRowSelection(clientId, 'instagramAccountId', v)}
+                                      options={igOptions}
+                                      placeholder={igOptions.length === 0 ? 'No IG accounts' : 'Select Instagram...'}
+                                      emptyLabel={sel.pageId ? 'No IG for this page' : 'Select a page first'}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.14em] text-brand-primary/60">Ad account</label>
+                                    {adPickerOptions.length > 0 ? (
+                                      <SearchablePicker
+                                        value={sel.adId}
+                                        onChange={v => updateRowSelection(clientId, 'adAccountId', v)}
+                                        options={adPickerOptions}
+                                        placeholder="Select ad account..."
+                                        emptyLabel="No ad accounts"
+                                      />
+                                    ) : (
+                                      <p className="rounded-lg border border-white/8 bg-brand-bg/60 px-3 py-2 text-xs text-brand-primary/55">
+                                        Not available — see the ad accounts note above.
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
 
-                              {/* Action */}
-                              <td className="px-2 py-3">
-                                <ActionButton
-                                  variant="secondary"
-                                  size="sm"
-                                  onClick={() => handleRowLink(clientId)}
-                                  disabled={!hasAny || suggestion.alreadyLinkedSame || linkingRows.has(clientId)}
-                                  loading={linkingRows.has(clientId)}
-                                >
-                                  {suggestion.alreadyLinkedSame ? 'Linked' : 'Link this client'}
-                                </ActionButton>
-                              </td>
-                            </tr>
-                          )
-                        })
-                      )}
-                    </tbody>
-                  </table>
+                                <div className="mt-4 flex flex-col gap-3 text-xs leading-relaxed lg:flex-row lg:items-end lg:justify-between">
+                                  <div className="min-w-0 space-y-1.5">
+                                    <p className="text-brand-primary/60">
+                                      <span className="font-semibold text-brand-primary/80">Match reason:</span> {suggestion.reason}
+                                    </p>
+                                    {suggestion.currentLink ? (
+                                      <p className="text-brand-primary/60">
+                                        <span className="font-semibold text-brand-primary/80">Currently linked:</span>{' '}
+                                        {suggestion.currentLink.facebook_page_name || 'no FB Page'} ·{' '}
+                                        {suggestion.currentLink.instagram_username ? `@${suggestion.currentLink.instagram_username}` : 'no IG'} ·{' '}
+                                        {suggestion.currentLink.ad_account_name || 'no ad account'}
+                                      </p>
+                                    ) : (
+                                      <p className="text-brand-primary/60">Not linked yet.</p>
+                                    )}
+                                    {suggestion.alreadyLinkedDifferently && (
+                                      <p className="w-fit rounded-md border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-amber-300">
+                                        Selection differs from the current link — linking here will ask before overwriting.
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="shrink-0">
+                                    <ActionButton
+                                      variant={suggestion.alreadyLinkedSame ? 'secondary' : 'primary'}
+                                      size="sm"
+                                      onClick={() => handleRowLink(clientId)}
+                                      disabled={!hasAny || suggestion.alreadyLinkedSame || linkingRows.has(clientId)}
+                                      loading={linkingRows.has(clientId)}
+                                    >
+                                      {suggestion.alreadyLinkedSame ? 'Already linked' : suggestion.currentLink ? 'Update link' : 'Link client'}
+                                    </ActionButton>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1897,6 +1914,41 @@ export default function MetaIntegrationPage() {
       </PremiumCard>
     </div>
   )
+}
+
+function pickerLabel(options: { value: string; label: string }[], value: string): string | null {
+  if (!value) return null
+  return options.find(o => o.value === value)?.label ?? null
+}
+
+// Compact FB / IG / Ads value chip for the collapsed queue row.
+function AssetSummary({ label, value, muteMissing = false }: { label: string; value: string | null; muteMissing?: boolean }) {
+  return (
+    <span className={`inline-flex max-w-[15rem] items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
+      value
+        ? 'border-white/8 bg-white/[0.03] text-brand-primary/85'
+        : muteMissing
+          ? 'border-white/5 bg-white/[0.015] text-brand-primary/35'
+          : 'border-amber-400/15 bg-amber-400/[0.05] text-amber-300/80'
+    }`}>
+      <span className="font-black uppercase tracking-wide text-[10px] opacity-70">{label}</span>
+      <span className="truncate">{value ?? '—'}</span>
+    </span>
+  )
+}
+
+// One clear status per client row.
+function RowStatusChip({ suggestion }: { suggestion: ClientAssetSuggestion }) {
+  if (suggestion.alreadyLinkedSame) {
+    return <span className="rounded-full border border-brand-teal/30 bg-brand-teal/10 px-2 py-0.5 text-[11px] font-bold text-[#66d0c3]">Linked</span>
+  }
+  if (suggestion.alreadyLinkedDifferently) {
+    return <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[11px] font-bold text-amber-300">Differs</span>
+  }
+  if (suggestion.currentLink) {
+    return <span className="rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-2 py-0.5 text-[11px] font-bold text-amber-200/90">Partial</span>
+  }
+  return <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] font-bold text-brand-primary/70">Not linked</span>
 }
 
 function ConfidencePill({ confidence }: { confidence: MatchConfidence }) {
