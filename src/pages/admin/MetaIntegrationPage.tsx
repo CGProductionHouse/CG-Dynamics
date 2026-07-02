@@ -407,6 +407,16 @@ export default function MetaIntegrationPage() {
     reportId?: string
   } | null>(null)
 
+  // Background sync (queue-based)
+  const [batch, setBatch] = useState<{
+    id: string
+    status: string
+    total_items: number
+    completed_items: number
+    failed_items: number
+  } | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   type SyncResponse = Record<string, unknown>
 
   async function invokeMetaSync(accessToken: string, body: Record<string, unknown>): Promise<{ response: Response; data: SyncResponse | null; text: string }> {
@@ -433,6 +443,202 @@ export default function MetaIntegrationPage() {
     }
 
     return { response, data, text }
+  }
+
+  // Legacy blocking sync fallback (used when queue tables do not exist)
+  async function handleSyncLegacy() {
+    setSyncing(true)
+    setSyncResult(null)
+    setSyncProgress(null)
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError || !sessionData.session?.access_token) {
+        setSyncResult({
+          status: 'failed',
+          message: 'Authentication required. Please sign in again before syncing.',
+          phase: 'auth',
+          debug: safeStringify({ error: sessionError?.message ?? 'No active session' }),
+        })
+        return
+      }
+
+      const syncableAssets = linkedAssets
+        .filter(asset => asset.facebook_page_id || asset.instagram_account_id)
+        .filter(asset => syncMode !== 'selected' || asset.client_id === selectedSyncClientId)
+      if (syncableAssets.length === 0) {
+        setSyncResult({
+          status: 'skipped',
+          message: 'No linked clients with a Facebook Page or Instagram account were found to sync.',
+          clientsAttempted: 0, clientsSucceeded: 0, clientsSynced: 0, clientsFailed: 0,
+          monthsAttempted: 0, reportsCreated: 0, reportsReused: 0, postsSynced: 0, warnings: [], steps: [],
+        })
+        return
+      }
+
+      const targets = getCompletedMonths(syncMonthCount)
+      const totals = { clientsAttempted: syncableAssets.length, clientsSucceeded: 0, clientsFailed: 0, reportsCreated: 0, reportsReused: 0, reportsUpdated: 0, postsSynced: 0 }
+      const warnings: string[] = []
+      const failedClients: { name: string; error: string }[] = []
+      const succeededClients: { name: string; postsSynced: number }[] = []
+      const steps: string[] = []
+      const diagnostics: unknown[] = []
+      const details: unknown[] = []
+      let syncEngineVersion: string | undefined
+
+      const accessToken = sessionData.session.access_token
+
+      async function processAsset(asset: LinkedAsset, month: string) {
+        const clientName = clientNameForAsset(asset)
+        const reqBody: Record<string, unknown> = { mode: 'previous_completed_month', clientId: asset.client_id, month }
+        const { response, data, text } = await invokeMetaSync(accessToken, reqBody)
+        syncEngineVersion = typeof data?.syncEngineVersion === 'string' ? data.syncEngineVersion : syncEngineVersion
+        diagnostics.push({ clientName, month, httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) })
+        if (!response.ok || !data?.ok) {
+          const safeText = data ? null : redactForDisplay(text || 'No response body from sync service.').slice(0, 500)
+          const phase = typeof data?.phase === 'string' ? data.phase : undefined
+          const error = [phase ? `Phase: ${phase}.` : null, typeof data?.error === 'string' ? data.error : typeof data?.message === 'string' ? data.message : safeText || 'Sync failed.', !response.ok ? `(HTTP ${response.status})` : null].filter(Boolean).join(' ')
+          warnings.push(`${month} for ${clientName}: ${error}`)
+          return
+        }
+        totals.reportsCreated += Number(data.reportsCreated ?? 0)
+        totals.reportsReused += Number(data.reportsReused ?? data.reportsUpdated ?? 0)
+        totals.reportsUpdated += Number(data.reportsUpdated ?? data.reportsReused ?? 0)
+        totals.postsSynced += Number(data.postsSynced ?? 0)
+        if (Array.isArray(data.warnings)) warnings.push(...data.warnings.map(String))
+        if (Array.isArray(data.steps)) steps.push(...data.steps.map(String))
+        if (Array.isArray(data.details)) details.push(...data.details)
+        totals.clientsSucceeded += Number(data.clientsSucceeded ?? data.clientsSynced ?? 0)
+        totals.clientsFailed += Number(data.clientsFailed ?? 0)
+        if (Array.isArray(data.failedClients)) failedClients.push(...data.failedClients.map(item => {
+          const row = item as { name?: unknown; error?: unknown }
+          return { name: String(row.name ?? clientName), error: String(row.error ?? 'Unknown error') }
+        }))
+        if (Array.isArray(data.succeededClients)) succeededClients.push(...data.succeededClients.map(item => {
+          const row = item as { name?: unknown; postsSynced?: unknown }
+          return { name: String(row.name ?? clientName), postsSynced: Number(row.postsSynced ?? 0) }
+        }))
+      }
+
+      let monthIdx = 0
+      for (const month of targets) {
+        monthIdx++
+        for (let clientIdx = 0; clientIdx < syncableAssets.length; clientIdx++) {
+          const asset = syncableAssets[clientIdx]
+          setSyncProgress(`Syncing month ${monthIdx} of ${targets.length}, client ${clientIdx + 1} of ${syncableAssets.length}: ${clientNameForAsset(asset)}`)
+          await processAsset(asset, month)
+        }
+      }
+
+      await loadLinkedAssets()
+      const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0 ? 'success' : totals.clientsSucceeded > 0 ? 'partial' : 'failed'
+      setSyncResult({
+        status, monthsAttempted: targets.length, syncEngineVersion,
+        message: status === 'success' ? `Synced ${targets.length} month(s) for ${totals.clientsSucceeded} client(s).` : status === 'partial' ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${targets.length} month(s).` : `Sync failed for all ${totals.clientsAttempted} client(s).`,
+        clientsAttempted: totals.clientsAttempted, clientsSucceeded: totals.clientsSucceeded, clientsSynced: totals.clientsSucceeded, clientsFailed: totals.clientsFailed,
+        reportsCreated: totals.reportsCreated, reportsReused: totals.reportsReused, reportsUpdated: totals.reportsUpdated, postsSynced: totals.postsSynced,
+        warnings, failedClients, succeededClients, steps, diagnostics, details,
+        debug: safeStringify({ syncEngineVersion, monthsAttempted: targets.length, diagnostics, warnings, failedClients }),
+      })
+    } catch (e) {
+      setSyncResult({ status: 'failed', message: redactForDisplay(e instanceof Error ? e.message : String(e)), phase: 'unknown', debug: safeStringify({ error: redactForDisplay(e instanceof Error ? e.message : String(e)) }) })
+    } finally {
+      setSyncProgress(null)
+      setSyncing(false)
+    }
+  }
+
+  async function startPolling(batchIdValue: string) {
+    const timer = setInterval(async () => {
+      const { data: batchData } = await supabase
+        .from('meta_sync_batches')
+        .select('id, status, total_items, completed_items, failed_items')
+        .eq('id', batchIdValue)
+        .single()
+      if (batchData) setBatch(batchData as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
+      if (batchData?.status === 'completed' || batchData?.status === 'failed') {
+        if (pollRef.current) clearInterval(pollRef.current)
+        pollRef.current = null
+        setBatch(null)
+        const { data: items } = await supabase
+          .from('meta_sync_batch_items')
+          .select('status, client_name, month, posts_synced, reports_created, reports_reused, error')
+          .eq('batch_id', batchIdValue)
+        const itemList = (items ?? []) as Array<{ status: string; client_name: string; month: string; posts_synced: number; reports_created: number; reports_reused: number; error?: string | null }>
+        const totals = { clientsSucceeded: 0, clientsFailed: 0, postsSynced: 0, reportsCreated: 0, reportsReused: 0 }
+        const failedClients: { name: string; error: string }[] = []
+        const succeededClients: { name: string; postsSynced: number }[] = []
+        for (const it of itemList) {
+          totals.postsSynced += it.posts_synced ?? 0
+          totals.reportsCreated += it.reports_created ?? 0
+          totals.reportsReused += it.reports_reused ?? 0
+          if (it.status === 'completed' || it.status === 'warning') {
+            totals.clientsSucceeded++
+            succeededClients.push({ name: it.client_name, postsSynced: it.posts_synced ?? 0 })
+          } else if (it.status === 'failed') {
+            totals.clientsFailed++
+            failedClients.push({ name: it.client_name, error: it.error ?? 'Unknown error' })
+          }
+        }
+        const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0 ? 'success' : totals.clientsSucceeded > 0 ? 'partial' : 'failed'
+        setSyncResult({
+          status, monthsAttempted: itemList.length, clientsAttempted: itemList.length, clientsSucceeded: totals.clientsSucceeded, clientsSynced: totals.clientsSucceeded, clientsFailed: totals.clientsFailed,
+          reportsCreated: totals.reportsCreated, reportsReused: totals.reportsReused, postsSynced: totals.postsSynced,
+          message: status === 'success' ? `Synced ${itemList.length} item(s) for ${totals.clientsSucceeded} client(s).` : status === 'partial' ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${itemList.length} item(s).` : `Sync failed for all ${itemList.length} item(s).`,
+          warnings: itemList.filter(it => it.status === 'warning').map(it => `${it.month} for ${it.client_name}: completed with warnings`),
+          succeededClients, failedClients,
+        })
+        await loadLinkedAssets()
+        setSyncing(false)
+        setSyncProgress(null)
+      }
+    }, 2500)
+    pollRef.current = timer
+  }
+
+  async function handleSync() {
+    setSyncing(true)
+    setSyncResult(null)
+    setSyncProgress(null)
+    setBatch(null)
+
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError || !sessionData.session?.access_token) {
+        setSyncResult({ status: 'failed', message: 'Authentication required. Please sign in again before syncing.', phase: 'auth', debug: safeStringify({ error: sessionError?.message ?? 'No active session' }) })
+        setSyncing(false)
+        return
+      }
+
+      const syncableAssets = linkedAssets
+        .filter(asset => asset.facebook_page_id || asset.instagram_account_id)
+        .filter(asset => syncMode !== 'selected' || asset.client_id === selectedSyncClientId)
+      if (syncableAssets.length === 0) {
+        setSyncResult({ status: 'skipped', message: 'No linked clients with a Facebook Page or Instagram account were found to sync.', clientsAttempted: 0, clientsSucceeded: 0, clientsSynced: 0, clientsFailed: 0, monthsAttempted: 0, reportsCreated: 0, reportsReused: 0, postsSynced: 0, warnings: [], steps: [] })
+        setSyncing(false)
+        return
+      }
+
+      const months = getCompletedMonths(syncMonthCount)
+      const items = syncableAssets.map(a => ({ clientId: a.client_id, clientName: clientNameForAsset(a) }))
+
+      const { data, error } = await supabase.functions.invoke('meta-sync-enqueue', {
+        method: 'POST',
+        body: { mode: syncMode === 'all' ? 'all' : 'selected', months, items, syncRangeMonths: syncMonthCount },
+      })
+
+      if (error || !data?.ok) {
+        // Queue table likely does not exist — fall back to legacy blocking sync
+        console.warn('meta-sync-enqueue failed, falling back to legacy sync:', data?.error ?? error?.message)
+        await handleSyncLegacy()
+        return
+      }
+
+      setSyncProgress(`Queued sync: ${items.length} client(s) × ${months.length} month(s) = ${data.totalItems} item(s)`)
+      await startPolling(data.batchId)
+    } catch (e) {
+      setSyncResult({ status: 'failed', message: redactForDisplay(e instanceof Error ? e.message : String(e)), phase: 'unknown', debug: safeStringify({ error: redactForDisplay(e instanceof Error ? e.message : String(e)) }) })
+      setSyncing(false)
+    }
   }
 
   function clientNameForAsset(asset: LinkedAsset): string {
@@ -500,6 +706,13 @@ export default function MetaIntegrationPage() {
       appliedClientParam.current = true
     }
   }, [searchParams, linkedAssets])
+
+  // Cleanup poll interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [])
 
   const loadLinkedAssets = useCallback(async () => {
     setLoadingLinked(true)
@@ -1022,163 +1235,6 @@ export default function MetaIntegrationPage() {
     noInstagram: suggestions.filter(s => s.currentLink?.instagram_not_applicable === true).length,
     linked: suggestions.filter(isFullyLinked).length,
   }), [suggestions])
-
-  async function handleSync() {
-    setSyncing(true)
-    setSyncResult(null)
-    setSyncProgress(null)
-    try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-      if (sessionError || !sessionData.session?.access_token) {
-        setSyncResult({
-          status: 'failed',
-          message: 'Authentication required. Please sign in again before syncing.',
-          phase: 'auth',
-          debug: safeStringify({ error: sessionError?.message ?? 'No active session' }),
-        })
-        return
-      }
-
-      const syncableAssets = linkedAssets
-        .filter(asset => asset.facebook_page_id || asset.instagram_account_id)
-        .filter(asset => syncMode !== 'selected' || asset.client_id === selectedSyncClientId)
-      if (syncableAssets.length === 0) {
-        setSyncResult({
-          status: 'skipped',
-          message: 'No linked clients with a Facebook Page or Instagram account were found to sync.',
-          clientsAttempted: 0,
-          clientsSucceeded: 0,
-          clientsSynced: 0,
-          clientsFailed: 0,
-          monthsAttempted: 0,
-          reportsCreated: 0,
-          reportsReused: 0,
-          postsSynced: 0,
-          warnings: [],
-          steps: [],
-        })
-        return
-      }
-
-      const targets = getCompletedMonths(syncMonthCount)
-
-      const totals = {
-        clientsAttempted: syncableAssets.length,
-        clientsSucceeded: 0,
-        clientsFailed: 0,
-        reportsCreated: 0,
-        reportsReused: 0,
-        reportsUpdated: 0,
-        postsSynced: 0,
-      }
-      const warnings: string[] = []
-      const failedClients: { name: string; error: string }[] = []
-      const succeededClients: { name: string; postsSynced: number }[] = []
-      const steps: string[] = []
-      const diagnostics: unknown[] = []
-      const details: unknown[] = []
-      let syncEngineVersion: string | undefined
-
-      const accessToken = sessionData.session.access_token
-
-      async function processAsset(asset: LinkedAsset, month: string) {
-        const clientName = clientNameForAsset(asset)
-        const reqBody: Record<string, unknown> = { mode: 'previous_completed_month', clientId: asset.client_id, month }
-        const { response, data, text } = await invokeMetaSync(accessToken, reqBody)
-
-        syncEngineVersion = typeof data?.syncEngineVersion === 'string' ? data.syncEngineVersion : syncEngineVersion
-        diagnostics.push({ clientName, month, httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) })
-
-        if (!response.ok || !data?.ok) {
-          const safeText = data ? null : redactForDisplay(text || 'No response body from sync service.').slice(0, 500)
-          const phase = typeof data?.phase === 'string' ? data.phase : undefined
-          const error = [
-            phase ? `Phase: ${phase}.` : null,
-            typeof data?.error === 'string' ? data.error : typeof data?.message === 'string' ? data.message : safeText || 'Sync failed.',
-            !response.ok ? `(HTTP ${response.status})` : null,
-          ].filter(Boolean).join(' ')
-          warnings.push(`${month} for ${clientName}: ${error}`)
-          return
-        }
-
-        totals.reportsCreated += Number(data.reportsCreated ?? 0)
-        totals.reportsReused += Number(data.reportsReused ?? data.reportsUpdated ?? 0)
-        totals.reportsUpdated += Number(data.reportsUpdated ?? data.reportsReused ?? 0)
-        totals.postsSynced += Number(data.postsSynced ?? 0)
-        if (Array.isArray(data.warnings)) warnings.push(...data.warnings.map(String))
-        if (Array.isArray(data.steps)) steps.push(...data.steps.map(String))
-        if (Array.isArray(data.details)) details.push(...data.details)
-
-        totals.clientsSucceeded += Number(data.clientsSucceeded ?? data.clientsSynced ?? 0)
-        totals.clientsFailed += Number(data.clientsFailed ?? 0)
-        if (Array.isArray(data.failedClients)) {
-          failedClients.push(...data.failedClients.map(item => {
-            const row = item as { name?: unknown; error?: unknown }
-            return { name: String(row.name ?? clientName), error: String(row.error ?? 'Unknown error') }
-          }))
-        }
-        if (Array.isArray(data.succeededClients)) {
-          succeededClients.push(...data.succeededClients.map(item => {
-            const row = item as { name?: unknown; postsSynced?: unknown }
-            return { name: String(row.name ?? clientName), postsSynced: Number(row.postsSynced ?? 0) }
-          }))
-        }
-      }
-
-      let monthIdx = 0
-      for (const month of targets) {
-        monthIdx++
-        for (let clientIdx = 0; clientIdx < syncableAssets.length; clientIdx++) {
-          const asset = syncableAssets[clientIdx]
-          setSyncProgress(`Syncing month ${monthIdx} of ${targets.length}, client ${clientIdx + 1} of ${syncableAssets.length}: ${clientNameForAsset(asset)}`)
-          await processAsset(asset, month)
-        }
-      }
-
-      await loadLinkedAssets()
-      const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0
-        ? 'success'
-        : totals.clientsSucceeded > 0
-          ? 'partial'
-          : 'failed'
-
-      setSyncResult({
-        status,
-        message: status === 'success'
-          ? `Synced ${targets.length} month(s) for ${totals.clientsSucceeded} client(s).`
-          : status === 'partial'
-            ? `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${targets.length} month(s).`
-            : `Sync failed for all ${totals.clientsAttempted} client(s).`,
-        syncEngineVersion,
-        monthsAttempted: targets.length,
-        clientsAttempted: totals.clientsAttempted,
-        clientsSucceeded: totals.clientsSucceeded,
-        clientsSynced: totals.clientsSucceeded,
-        clientsFailed: totals.clientsFailed,
-        reportsCreated: totals.reportsCreated,
-        reportsReused: totals.reportsReused,
-        reportsUpdated: totals.reportsUpdated,
-        postsSynced: totals.postsSynced,
-        warnings,
-        failedClients,
-        succeededClients,
-        steps,
-        diagnostics,
-        details,
-        debug: safeStringify({ syncEngineVersion, monthsAttempted: targets.length, diagnostics, warnings, failedClients }),
-      })
-    } catch (e) {
-      setSyncResult({
-        status: 'failed',
-        message: redactForDisplay(e instanceof Error ? e.message : String(e)),
-        phase: 'unknown',
-        debug: safeStringify({ error: redactForDisplay(e instanceof Error ? e.message : String(e)) }),
-      })
-    } finally {
-      setSyncProgress(null)
-      setSyncing(false)
-    }
-  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -1706,6 +1762,25 @@ export default function MetaIntegrationPage() {
                 <p className="mt-1 text-xs text-brand-primary">
                   <span className="font-semibold text-white">All linked clients</span> for month-end reporting across every client.
                 </p>
+              </div>
+            </div>
+          )}
+
+          {batch && (
+            <div className="mt-3 rounded-xl border border-brand-accent/20 bg-brand-accent/10 p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-semibold text-brand-accent">Syncing in background...</p>
+                <span className="text-xs text-brand-primary/60">{batch.completed_items ?? 0} / {batch.total_items ?? 0}</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-brand-bg">
+                <div
+                  className="h-full rounded-full bg-brand-accent transition-all duration-500"
+                  style={{ width: `${batch.total_items > 0 ? ((batch.completed_items ?? 0) / batch.total_items) * 100 : 0}%` }}
+                />
+              </div>
+              <div className="mt-1 flex justify-between text-xs text-brand-primary/50">
+                <span>Failed: {batch.failed_items ?? 0}</span>
+                <span>{batch.total_items > 0 ? Math.round(((batch.completed_items ?? 0) / batch.total_items) * 100) : 0}%</span>
               </div>
             </div>
           )}
