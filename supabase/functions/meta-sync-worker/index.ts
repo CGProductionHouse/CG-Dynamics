@@ -26,14 +26,41 @@ function currentMonthStr(): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
-async function metaFetch(url: string, timeoutMs = 15_000): Promise<Response> {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  try {
-    return await fetch(url, { signal: controller.signal })
-  } finally {
-    clearTimeout(timer)
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504])
+const RETRY_DELAYS = [750, 1500]
+
+async function retryMetaFetch(url: string, timeoutMs = 30_000): Promise<Response> {
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const res = await fetch(url, { signal: controller.signal })
+      clearTimeout(timer)
+      if (res.ok) return res
+      if (RETRYABLE_STATUSES.has(res.status)) {
+        lastError = new Error(`Meta API HTTP ${res.status} ${res.statusText}`)
+      } else {
+        return res
+      }
+    } catch (e) {
+      clearTimeout(timer)
+      if (e instanceof TypeError || (typeof DOMException !== 'undefined' && e instanceof DOMException && e.name === 'AbortError')) {
+        lastError = e instanceof Error ? e : new Error(String(e))
+      } else {
+        throw e
+      }
+    }
+    if (attempt < RETRY_DELAYS.length) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]))
+    }
   }
+
+  const msg = lastError?.name === 'AbortError'
+    ? `Meta API request timed out after ${timeoutMs}ms and ${RETRY_DELAYS.length + 1} attempt(s)`
+    : `Meta API request failed after retries: ${lastError?.message ?? 'unknown error'}`
+  throw new Error(msg)
 }
 
 /* ---------- Auth ---------- */
@@ -214,7 +241,7 @@ Deno.serve(async (req) => {
           let guard = 0
           while (url && guard < 10) {
             guard++
-            const res = await metaFetch(url)
+            const res = await retryMetaFetch(url)
             if (!res.ok) break
             const data = await res.json()
             for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
@@ -249,7 +276,7 @@ Deno.serve(async (req) => {
               until: `${periodEnd}T23:59:59Z`,
               limit: '100',
             })
-            const res = await metaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`)
+            const res = await retryMetaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`)
             if (res.ok) {
               const fbData = await res.json()
               const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
@@ -335,7 +362,7 @@ Deno.serve(async (req) => {
               fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
               limit: '100',
             })
-            const res = await metaFetch(`${baseUrl}/${instagramAccountId}/media?${params.toString()}`)
+            const res = await retryMetaFetch(`${baseUrl}/${instagramAccountId}/media?${params.toString()}`)
             if (res.ok) {
               const igData = await res.json()
               const rawMedia: Array<Record<string, unknown>> = igData.data ?? []
@@ -423,7 +450,10 @@ Deno.serve(async (req) => {
           }
         }
 
-        if (postsSynced === 0 && warnings.length === 0 && !facebookPageId && !instagramAccountId) {
+        if (postsSynced === 0 && warnings.length > 0) {
+          itemStatus = 'failed'
+          if (!itemError) itemError = warnings.join('; ')
+        } else if (postsSynced === 0 && warnings.length === 0 && !facebookPageId && !instagramAccountId) {
           itemStatus = 'skipped'
           warnings.push('No Facebook Page or Instagram account linked.')
         }
