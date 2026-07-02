@@ -21,6 +21,17 @@ Last updated: 2026-07-02
 - Recurrence should preserve history of completed occurrences while creating/updating future occurrences safely.
 - Avoid duplicate or runaway task creation.
 
+### Calendar and schedule workflow
+
+- The CG Calendar is still not fixed and should be treated as a core Hub/Teams replacement milestone, not visual polish.
+- Calendar must integrate properly with tasks so campaign work, posting schedules, shoots, meetings, client events and deadlines can be planned from the same operational workflow.
+- The calendar should support real posting schedules like the current Teams/Planner setup, where calendar dates and task buckets work together.
+- Tasks should be able to appear on the calendar with correct dates, clients, buckets, assignees, status and recurrence.
+- Recurring tasks and recurring schedule items must behave properly across both Planner Board and Calendar views.
+- Calendar should eventually support Microsoft Teams / Planner / calendar connector import or linking so existing schedules can be reconciled instead of manually rebuilt.
+- Future workflow should move toward: Teams/Planner data -> connector/import preview -> mapped tasks/calendar events/buckets/recurrence -> approved sync into CG Dynamics.
+- Avoid making the calendar a separate dead page. It must become part of the daily Hub workflow and make the app easier than Teams.
+
 ### Teams import and connector workflow
 
 - Add an easier way to link or import the latest Microsoft Teams / Planner task data.
