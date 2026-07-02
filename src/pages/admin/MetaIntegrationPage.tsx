@@ -407,18 +407,23 @@ export default function MetaIntegrationPage() {
     reportId?: string
   } | null>(null)
 
-  // Background sync (queue-based)
+  // Background sync (queue-based). Counts are derived live from the child
+  // meta_sync_batch_items rows so progress moves even while the parent batch
+  // counters are only recalculated between worker chunks.
   const [batch, setBatch] = useState<{
     id: string
     status: string
     total_items: number
     completed_items: number
     failed_items: number
+    running_items: number
+    queued_items: number
   } | null>(null)
   const [batchStalled, setBatchStalled] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const stallRef = useRef(0)
-  const lastCompletedRef = useRef(0)
+  // Signature of the last observed child-item state — ANY movement resets stall.
+  const lastProgressSigRef = useRef('')
 
   type SyncResponse = Record<string, unknown>
 
@@ -618,24 +623,55 @@ export default function MetaIntegrationPage() {
 
   async function startPolling(batchIdValue: string) {
     const timer = setInterval(async () => {
-      const { data: batchData } = await supabase
-        .from('meta_sync_batches')
-        .select('id, status, total_items, completed_items, failed_items')
-        .eq('id', batchIdValue)
-        .single()
-      if (batchData) {
-        setBatch(batchData as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
-        // Stall detection: increment counter if completed_items has not changed
-        if (batchData.completed_items > lastCompletedRef.current) {
-          lastCompletedRef.current = batchData.completed_items
-          stallRef.current = 0
-          setBatchStalled(false)
-        } else if (batchData.status === 'queued' || batchData.status === 'running') {
-          stallRef.current++
-          if (stallRef.current >= 4) setBatchStalled(true)
-        }
+      // Child items are the live source of truth: the worker updates each item
+      // as it finishes, while the parent counters may lag a chunk behind.
+      const [{ data: batchData }, { data: itemRows }] = await Promise.all([
+        supabase
+          .from('meta_sync_batches')
+          .select('id, status, total_items, completed_items, failed_items')
+          .eq('id', batchIdValue)
+          .single(),
+        supabase
+          .from('meta_sync_batch_items')
+          .select('status')
+          .eq('batch_id', batchIdValue),
+      ])
+
+      const rows = (itemRows ?? []) as Array<{ status: string }>
+      const doneCount = rows.filter(r => r.status === 'completed' || r.status === 'warning' || r.status === 'skipped').length
+      const failedCount = rows.filter(r => r.status === 'failed').length
+      const runningCount = rows.filter(r => r.status === 'running').length
+      const queuedCount = rows.filter(r => r.status === 'queued').length
+      const totalCount = rows.length > 0 ? rows.length : Number(batchData?.total_items ?? 0)
+
+      setBatch({
+        id: batchIdValue,
+        status: String(batchData?.status ?? 'running'),
+        total_items: totalCount,
+        completed_items: rows.length > 0 ? doneCount : Number(batchData?.completed_items ?? 0),
+        failed_items: rows.length > 0 ? failedCount : Number(batchData?.failed_items ?? 0),
+        running_items: runningCount,
+        queued_items: queuedCount,
+      })
+
+      // Stall detection: ANY child movement (done/failed/running/queued shifts)
+      // counts as progress. "Stuck" only shows after ~25s with zero movement
+      // AND nothing actively running.
+      const progressSig = `${doneCount}|${failedCount}|${runningCount}|${queuedCount}`
+      if (progressSig !== lastProgressSigRef.current) {
+        lastProgressSigRef.current = progressSig
+        stallRef.current = 0
+        setBatchStalled(false)
+      } else if (batchData?.status === 'queued' || batchData?.status === 'running') {
+        stallRef.current++
+        if (stallRef.current >= 10 && runningCount === 0) setBatchStalled(true)
       }
-      if (batchData?.status === 'completed' || batchData?.status === 'failed') {
+
+      const parentFinished = batchData?.status === 'completed' || batchData?.status === 'failed'
+      // Self-heal: if every child is terminal but the parent recalc was missed,
+      // finish anyway instead of appearing stuck at 100%.
+      const childrenFinished = rows.length > 0 && queuedCount === 0 && runningCount === 0
+      if (parentFinished || childrenFinished) {
         await handleBatchComplete(batchIdValue)
       }
     }, 2500)
@@ -795,7 +831,7 @@ export default function MetaIntegrationPage() {
           .single()
 
         if (data && (data.status === 'queued' || data.status === 'running')) {
-          setBatch(data as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
+          setBatch({ ...(data as { id: string; status: string; total_items: number; completed_items: number; failed_items: number }), running_items: 0, queued_items: 0 })
           setSyncing(true)
           setSyncProgress('Restoring sync progress...')
           startPolling(data.id)
@@ -819,7 +855,7 @@ export default function MetaIntegrationPage() {
       if (activeBatches && activeBatches.length > 0) {
         const active = activeBatches[0]
         localStorage.setItem('cg_meta_active_sync_batch_id', active.id)
-        setBatch(active as { id: string; status: string; total_items: number; completed_items: number; failed_items: number })
+        setBatch({ ...(active as { id: string; status: string; total_items: number; completed_items: number; failed_items: number }), running_items: 0, queued_items: 0 })
         setSyncing(true)
         setSyncProgress('Restoring sync progress...')
         startPolling(active.id)
@@ -1885,26 +1921,35 @@ export default function MetaIntegrationPage() {
             <div className="mt-3 rounded-xl border border-brand-accent/20 bg-brand-accent/10 p-4">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-sm font-semibold text-brand-accent">
-                  {batchStalled ? 'Batch appears stuck' : 'Syncing in background...'}
+                  {batchStalled ? 'Sync is not moving' : 'Syncing in background...'}
                 </p>
-                <span className="text-xs text-brand-primary/60">{batch.completed_items ?? 0} / {batch.total_items ?? 0}</span>
+                <span className="text-xs text-brand-primary/60">
+                  {(batch.completed_items ?? 0) + (batch.failed_items ?? 0)} / {batch.total_items ?? 0}
+                </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-brand-bg">
                 <div
                   className="h-full rounded-full bg-brand-accent transition-all duration-500"
-                  style={{ width: `${batch.total_items > 0 ? ((batch.completed_items ?? 0) / batch.total_items) * 100 : 0}%` }}
+                  style={{ width: `${batch.total_items > 0 ? (((batch.completed_items ?? 0) + (batch.failed_items ?? 0)) / batch.total_items) * 100 : 0}%` }}
                 />
               </div>
-              <div className="mt-1 flex justify-between text-xs text-brand-primary/50">
-                <span>Failed: {batch.failed_items ?? 0}</span>
-                <span>{batch.total_items > 0 ? Math.round(((batch.completed_items ?? 0) / batch.total_items) * 100) : 0}%</span>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-brand-primary/60">
+                <span className="text-brand-teal">Completed: {batch.completed_items ?? 0}</span>
+                <span className={batch.failed_items > 0 ? 'text-amber-300' : ''}>Failed: {batch.failed_items ?? 0}</span>
+                <span>Running: {batch.running_items ?? 0}</span>
+                <span>Queued: {batch.queued_items ?? 0}</span>
+                <span className="ml-auto">{batch.total_items > 0 ? Math.round((((batch.completed_items ?? 0) + (batch.failed_items ?? 0)) / batch.total_items) * 100) : 0}%</span>
               </div>
-              {batchStalled && (
+              {/* Retry only when nothing has moved for ~25s AND nothing is running —
+                  never while child items are actively processing. */}
+              {batchStalled && (batch.running_items ?? 0) === 0 && (
                 <div className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
-                  <p className="text-xs font-medium text-amber-200">Still processing or waiting for worker. Check that the meta-sync-worker Edge Function is deployed.</p>
+                  <p className="text-xs font-medium text-amber-200">
+                    No queued items have started for a while. The meta-sync-worker Edge Function may not be deployed or its trigger was lost.
+                  </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <ActionButton variant="secondary" size="sm" onClick={handleRetryWorker}>
-                      Retry worker
+                      Restart worker
                     </ActionButton>
                   </div>
                 </div>
