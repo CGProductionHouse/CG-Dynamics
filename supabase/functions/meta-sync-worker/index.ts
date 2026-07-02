@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
         if (!reportId) {
           itemStatus = 'failed'
           itemError = 'Could not create or find report'
-          continue
+          // Fall through to terminal update — do not continue
         }
 
         // ── Get page tokens ──
@@ -238,8 +238,8 @@ Deno.serve(async (req) => {
 
         const now = new Date().toISOString()
 
-        // ── Sync Facebook posts ──
-        if (facebookPageId) {
+      // ── Sync Facebook posts ──
+      if (facebookPageId && reportId) {
           const pageToken = pageTokenMap.get(facebookPageId) ?? accessToken
           try {
             const params = new URLSearchParams({
@@ -326,8 +326,8 @@ Deno.serve(async (req) => {
           }
         }
 
-        // ── Sync Instagram media ──
-        if (instagramAccountId) {
+      // ── Sync Instagram media ──
+      if (instagramAccountId && reportId) {
           const pageToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
           try {
             const params = new URLSearchParams({
