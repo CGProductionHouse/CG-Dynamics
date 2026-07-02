@@ -168,6 +168,30 @@ Deno.serve(async (req) => {
   const accessToken = tokenRows[0].encrypted_access_token
   const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
 
+  // ── Fetch page token map once per invocation ──────────────
+  const pageTokenMap = new Map<string, string>()
+  let pageTokenRateLimited = false
+  {
+    let url: string | null = `${baseUrl}/me/accounts?fields=id,access_token&limit=100&access_token=${encodeURIComponent(accessToken)}`
+    let guard = 0
+    while (url && guard < 10 && !pageTokenRateLimited) {
+      guard++
+      const res = await retryMetaFetch(url)
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null)
+        if (errBody?.error && (errBody.error.code === 4 || errBody.error.error_subcode === 2069032)) {
+          pageTokenRateLimited = true
+        }
+        break
+      }
+      const data = await res.json()
+      for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
+        if (p.id && p.access_token) pageTokenMap.set(p.id, p.access_token)
+      }
+      url = (data.paging?.next as string | undefined) ?? null
+    }
+  }
+
   // ── Process items in chunks (continuation loop) ─────────────
   const MAX_CHUNKS = 5
   const processed: Array<{ itemId: string; clientName: string; month: string; status: string; postsSynced: number; error?: string }> = []
@@ -252,26 +276,6 @@ Deno.serve(async (req) => {
           // Fall through to terminal update — do not continue
         }
 
-        // ── Get page tokens ──
-        const pageTokenMap = new Map<string, string>()
-        {
-          let url: string | null = `${baseUrl}/me/accounts?fields=id,access_token&limit=100&access_token=${encodeURIComponent(accessToken)}`
-          let guard = 0
-          while (url && guard < 10) {
-            guard++
-            const res = await retryMetaFetch(url)
-            if (!res.ok) {
-              warnings.push(await parseMetaError(res, 'Page tokens fetch'))
-              break
-            }
-            const data = await res.json()
-            for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
-              if (p.id && p.access_token) pageTokenMap.set(p.id, p.access_token)
-            }
-            url = (data.paging?.next as string | undefined) ?? null
-          }
-        }
-
         // ── Get linked assets for this client ──
         const { data: linkedAssets } = await sb
           .from('meta_client_assets')
@@ -288,89 +292,97 @@ Deno.serve(async (req) => {
 
       // ── Sync Facebook posts ──
       if (facebookPageId && reportId) {
-          const pageToken = pageTokenMap.get(facebookPageId) ?? accessToken
-          try {
-            const params = new URLSearchParams({
-              access_token: pageToken,
-              fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
-              since: periodStart,
-              until: `${periodEnd}T23:59:59Z`,
-              limit: '100',
-            })
-            const res = await retryMetaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`)
-            if (res.ok) {
-              const fbData = await res.json()
-              const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
-              for (const raw of rawPosts) {
-                const metaPostId = String(raw.id ?? '')
-                if (!metaPostId) continue
-                const { data: existing } = await sb
-                  .from('meta_content_mappings')
-                  .select('id, post_id')
-                  .eq('client_id', item.client_id)
-                  .eq('platform', 'facebook')
-                  .eq('meta_object_id', metaPostId)
-                  .limit(1)
-
-                const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
-                const caption = (raw.message as string | null) ?? null
-                const permalink = (raw.permalink_url as string | null) ?? null
-                const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-                const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-                const shares = (raw.shares as { count?: number })?.count ?? 0
-                const fullPicture = raw.full_picture as string | null ?? null
-
-                const postPayload: Record<string, unknown> = {
-                  report_id: reportId,
-                  platform: 'facebook',
-                  meta_post_id: metaPostId,
-                  publish_time: publishTime,
-                  caption,
-                  permalink,
-                  views: null,
-                  reach: null,
-                  reactions,
-                  comments,
-                  shares,
-                  raw: {
-                    source: 'meta_sync',
-                    platform: 'facebook',
-                    synced_at: now,
-                    views: null,
-                    reach: null,
-                    engagements: { reactions, comments, shares },
-                    metric_availability: {
-                      views: false,
-                      reach: false,
-                      content_interactions: true,
-                      source: 'direct_fields',
-                    },
-                    meta_payload: raw,
-                    ...(fullPicture ? { full_picture: fullPicture } : {}),
-                  },
-                }
-
-                if (existing && existing.length > 0) {
-                  if (existing[0].post_id) {
-                    await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
-                  }
-                  await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
-                } else {
-                  const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
-                  if (newPost) {
-                    await sb.from('meta_content_mappings').insert({
-                      client_id: item.client_id, report_id: reportId, post_id: newPost.id,
-                      platform: 'facebook', meta_object_id: metaPostId, last_synced_at: now,
-                    })
-                  }
-                }
-                postsSynced++
-              }
+          if (pageTokenRateLimited) {
+            warnings.push('Facebook sync skipped: Meta API rate limit reached (will retry on next sync cycle).')
+          } else {
+            const pageToken = pageTokenMap.get(facebookPageId)
+            if (!pageToken) {
+              warnings.push('Facebook page token unavailable for linked page. Relink Meta or verify page access.')
             } else {
-              warnings.push(await parseMetaError(res, 'Facebook posts fetch'))
+              try {
+                const params = new URLSearchParams({
+                  access_token: pageToken,
+                  fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
+                  since: periodStart,
+                  until: `${periodEnd}T23:59:59Z`,
+                  limit: '100',
+                })
+                const res = await retryMetaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`)
+                if (res.ok) {
+                  const fbData = await res.json()
+                  const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
+                  for (const raw of rawPosts) {
+                    const metaPostId = String(raw.id ?? '')
+                    if (!metaPostId) continue
+                    const { data: existing } = await sb
+                      .from('meta_content_mappings')
+                      .select('id, post_id')
+                      .eq('client_id', item.client_id)
+                      .eq('platform', 'facebook')
+                      .eq('meta_object_id', metaPostId)
+                      .limit(1)
+
+                    const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
+                    const caption = (raw.message as string | null) ?? null
+                    const permalink = (raw.permalink_url as string | null) ?? null
+                    const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
+                    const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
+                    const shares = (raw.shares as { count?: number })?.count ?? 0
+                    const fullPicture = raw.full_picture as string | null ?? null
+
+                    const postPayload: Record<string, unknown> = {
+                      report_id: reportId,
+                      platform: 'facebook',
+                      meta_post_id: metaPostId,
+                      publish_time: publishTime,
+                      caption,
+                      permalink,
+                      views: null,
+                      reach: null,
+                      reactions,
+                      comments,
+                      shares,
+                      raw: {
+                        source: 'meta_sync',
+                        platform: 'facebook',
+                        synced_at: now,
+                        views: null,
+                        reach: null,
+                        engagements: { reactions, comments, shares },
+                        metric_availability: {
+                          views: false,
+                          reach: false,
+                          content_interactions: true,
+                          source: 'direct_fields',
+                        },
+                        meta_payload: raw,
+                        ...(fullPicture ? { full_picture: fullPicture } : {}),
+                      },
+                    }
+
+                    if (existing && existing.length > 0) {
+                      if (existing[0].post_id) {
+                        await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
+                      }
+                      await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
+                    } else {
+                      const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
+                      if (newPost) {
+                        await sb.from('meta_content_mappings').insert({
+                          client_id: item.client_id, report_id: reportId, post_id: newPost.id,
+                          platform: 'facebook', meta_object_id: metaPostId, last_synced_at: now,
+                        })
+                      }
+                    }
+                    postsSynced++
+                  }
+                } else {
+                  warnings.push(await parseMetaError(res, 'Facebook posts fetch'))
+                }
+              } catch (e) {
+                warnings.push(`Facebook sync error: ${String(e)}`)
+              }
             }
-          } catch (e) {
-            warnings.push(`Facebook sync error: ${String(e)}`)
           }
         }
 
