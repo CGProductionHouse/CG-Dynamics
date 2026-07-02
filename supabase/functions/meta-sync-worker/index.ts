@@ -63,6 +63,24 @@ async function retryMetaFetch(url: string, timeoutMs = 30_000): Promise<Response
   throw new Error(msg)
 }
 
+async function parseMetaError(res: Response, context: string): Promise<string> {
+  let detail = ''
+  try {
+    const body = await res.json()
+    if (body?.error) {
+      const parts: string[] = []
+      if (body.error.message) parts.push(body.error.message)
+      if (body.error.type) parts.push(`type: ${body.error.type}`)
+      if (body.error.code) parts.push(`code: ${body.error.code}`)
+      if (body.error.error_subcode) parts.push(`subcode: ${body.error.error_subcode}`)
+      if (parts.length > 0) detail = `: ${parts.join(', ')}`
+    }
+  } catch {
+    // Response body not JSON — ignore
+  }
+  return `${context} failed (HTTP ${res.status})${detail}`
+}
+
 /* ---------- Auth ---------- */
 
 async function authorizeWorker(
@@ -242,7 +260,10 @@ Deno.serve(async (req) => {
           while (url && guard < 10) {
             guard++
             const res = await retryMetaFetch(url)
-            if (!res.ok) break
+            if (!res.ok) {
+              warnings.push(await parseMetaError(res, 'Page tokens fetch'))
+              break
+            }
             const data = await res.json()
             for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
               if (p.id && p.access_token) pageTokenMap.set(p.id, p.access_token)
@@ -346,7 +367,7 @@ Deno.serve(async (req) => {
                 postsSynced++
               }
             } else {
-              warnings.push(`Facebook posts fetch failed (HTTP ${res.status})`)
+              warnings.push(await parseMetaError(res, 'Facebook posts fetch'))
             }
           } catch (e) {
             warnings.push(`Facebook sync error: ${String(e)}`)
@@ -443,7 +464,7 @@ Deno.serve(async (req) => {
                 postsSynced++
               }
             } else {
-              warnings.push(`Instagram media fetch failed (HTTP ${res.status})`)
+              warnings.push(await parseMetaError(res, 'Instagram media fetch'))
             }
           } catch (e) {
             warnings.push(`Instagram sync error: ${String(e)}`)
