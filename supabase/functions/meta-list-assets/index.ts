@@ -112,6 +112,8 @@ Deno.serve(async (req) => {
 
   // ── Fetch Facebook Pages ─────────────────────────────────
   let pages: FbPage[] = []
+  let pagesDiagnostic: Record<string, unknown> = { available: false }
+
   try {
     const pageParams = new URLSearchParams({
       access_token: accessToken,
@@ -122,9 +124,27 @@ Deno.serve(async (req) => {
     if (pageRes.ok) {
       const pageData: FbPageResponse = await pageRes.json()
       pages = pageData.data ?? []
+      pagesDiagnostic = { available: true, count: pages.length }
+    } else {
+      let safeMsg = `HTTP ${pageRes.status}`
+      try {
+        const errBody = await pageRes.json()
+        const err = errBody?.error
+        if (err && typeof err === 'object') {
+          safeMsg = redact([
+            err.message ? String(err.message) : null,
+            err.type ? `type ${err.type}` : null,
+            err.code !== undefined ? `code ${err.code}` : null,
+          ].filter(Boolean).join(', ')) || safeMsg
+        }
+      } catch {
+        // keep HTTP status fallback
+      }
+      pagesDiagnostic = { available: false, status: safeMsg, hint: 'The connected Meta user may not have Pages management access. Verify the user has pages_show_list permission and manages the expected Facebook Pages.' }
     }
   } catch (err) {
     console.error('Failed to fetch Facebook Pages:', redact(err instanceof Error ? err.message : String(err)))
+    pagesDiagnostic = { available: false, networkError: true, hint: 'Network error fetching Facebook Pages. Check Edge Function logs for details.' }
   }
 
   // ── Build Instagram accounts list ─────────────────────────
@@ -193,6 +213,7 @@ Deno.serve(async (req) => {
   // ── Return safe response (no tokens) ──────────────────────
   return jsonResponse({
     ok: true,
+    pagesDiagnostic,
     pages: pages.map(p => ({
       id: p.id,
       name: p.name,
