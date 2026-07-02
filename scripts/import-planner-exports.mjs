@@ -291,6 +291,7 @@ function buildPreview() {
       packageUniqueConstraintProtected: 'client_packages active check + package_deliverable_templates(package_id, code) + monthly_deliverables unique constraints',
     },
     warnings: [],
+    checklistChildTasksPrepared: 0,
   }
 
   for (const source of FILES) {
@@ -367,6 +368,7 @@ function buildPreview() {
 
         if (source.kind === 'admin_tasks') preview.adminTasksPrepared.push(prepared)
         else preview.plannerTasksPrepared.push(prepared)
+        preview.checklistChildTasksPrepared += (prepared.checklist ?? []).length
       }
     }
   }
@@ -432,6 +434,10 @@ function generateSql(preview) {
 
   lines.push('-- Client matching happens at SQL runtime using normalised public.clients.name.')
   lines.push('-- Buckets that do not match an existing client will insert no package/monthly rows and need manual review.')
+  lines.push('--')
+  lines.push('-- Checklist subtask strategy: planner_tasks has no parent_task_id column.')
+  lines.push('-- Checklist items are inserted as sibling tasks with notes = \'Parent task: <title>\'.')
+  lines.push('-- When a parent_task_id column is added to the schema, regenerate SQL to use it instead.')
   lines.push('')
 
   for (const pkg of preview.clientPackagesPrepared) {
@@ -480,6 +486,22 @@ function generateSql(preview) {
     lines.push(`where b.slug = ${sql(task.boardSlug)}`)
     lines.push('on conflict (import_hash) do nothing;')
     lines.push('')
+
+    const checklist = task.checklist ?? []
+    for (let i = 0; i < checklist.length; i++) {
+      const item = checklist[i]
+      if (!item) continue
+      const childHash = hash(`${task.importHash}:child:${i}:${item}`)
+      lines.push(`-- Checklist child ${i + 1}/${checklist.length} of: ${task.title}`)
+      lines.push('-- No parent_task_id schema; parent reference stored in notes.')
+      lines.push('insert into public.planner_tasks (board_id, bucket_id, title, assigned_to_name, status, priority, start_date, due_date, notes, checklist, source, original_plan_name, original_bucket_name, original_task_id, import_hash)')
+      lines.push(`select b.id, bk.id, ${sql(item)}, ${sql(task.assignedTo)}, ${sql(task.status)}, ${sql(task.priority)}, null, ${task.dueDate ? `${sql(task.dueDate)}::date` : 'null'}, ${sql(`Parent task: ${task.title}`)}, '[]'::jsonb, 'teams_import', ${sql(task.plan)}, ${sql(task.bucket)}, null, ${sql(childHash)}`)
+      lines.push('from public.planner_boards b')
+      lines.push(`left join public.planner_buckets bk on bk.board_id = b.id and lower(bk.name) = lower(${sql(task.bucket)})`)
+      lines.push(`where b.slug = ${sql(task.boardSlug)}`)
+      lines.push('on conflict (import_hash) do nothing;')
+      lines.push('')
+    }
   }
 
   if (preview.warnings.length > 0) {
@@ -510,6 +532,7 @@ function printSummary(preview) {
   console.log(`Admin tasks prepared: ${preview.adminTasksPrepared.length}`)
   console.log(`Package templates prepared: ${preview.packageTemplatesPrepared.length}`)
   console.log(`Monthly deliverables prepared: ${preview.monthlyDeliverablesPrepared.length}`)
+  console.log(`Checklist child tasks prepared: ${preview.checklistChildTasksPrepared}`)
   console.log(`Warnings: ${preview.warnings.length}`)
   console.log(`JSON preview: ${path.relative(ROOT, PREVIEW_JSON)}`)
 }

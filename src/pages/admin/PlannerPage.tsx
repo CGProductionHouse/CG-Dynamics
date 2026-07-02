@@ -262,10 +262,13 @@ export default function PlannerPage() {
   // Admin board always last
   const sortedBoards = useMemo(() => {
     return [...boards].sort((a, b) => {
-      const aLast = a.board_type === 'admin' || a.slug === 'admin-check-list'
-      const bLast = b.board_type === 'admin' || b.slug === 'admin-check-list'
-      if (aLast && !bLast) return 1
-      if (!aLast && bLast) return -1
+      const rank = (board: PlannerBoard) => {
+        if (board.board_type === 'admin' || board.slug === 'admin-check-list') return 2
+        if (board.slug === 'client-schedule') return 1
+        return 0
+      }
+      const ra = rank(a), rb = rank(b)
+      if (ra !== rb) return ra - rb
       return a.sort_order - b.sort_order
     })
   }, [boards])

@@ -13,6 +13,26 @@ When user feedback changes direction:
 3. If it changes the actual product direction, update `docs/cg-dynamics-product-goals.md` too.
 4. Do not treat small UI feedback as permission to forget the bigger workflow.
 
+## Client Schedule board scroll rule
+
+Board view (`/admin/client-schedule?mode=all&view=board`) must be horizontally scrollable to the final client lane. The sticky scrollbar (`StickyHScroll`) uses ratio-based sync so the bar range maps correctly regardless of page padding vs bar width. Do not use direct `scrollLeft` copy — it clips the bar before the content reaches the end. Grid and Year views use the same `StickyHScroll` wrapper and must not regress.
+
+## Planner board tab order rule
+
+Inside Planner Board (`/admin/planner`), tabs must appear in this order: Operations, Websites, CG Socials, Client Schedule Board, Admin. The sort is enforced in `sortedBoards` with three rank buckets: 0 = regular boards (sorted by `sort_order`), 1 = `client-schedule` (just before Admin), 2 = `admin-check-list` / `board_type = 'admin'` (last). The Client Schedule Board tab is a shortcut only — clicking it navigates to `/admin/client-schedule?view=board`, never renders an in-Planner board.
+
+## Planner subtask / checklist requirement
+
+The import parser (`scripts/import-planner-exports.mjs`) already reads checklist items from Excel and generates SQL. Because `planner_tasks` has no `parent_task_id` column, checklist items are inserted as sibling tasks with `notes = 'Parent task: <title>'` (not as a true hierarchy). When a `parent_task_id` column is added to the schema, regenerate SQL using that column instead. The `checklistChildTasksPrepared` count is surfaced in the dry-run summary. The import SQL is generated-only; it is never run live automatically.
+
+## Websites board note
+
+The `client-websites` Planner board is only partially populated. Imported task data may be incomplete. Verify board content against the source `Client Websites.xlsx` before treating it as authoritative.
+
+## Calendar seed file
+
+`supabase/phase-10b-cg-calendar-teams-seed-2026.sql` — idempotent seed SQL for 27 Monday `MEETING - CG INTERNAL` events (2026-06-29 to 2026-12-28, SAST 09:00–10:00). One-off screenshot-derived events are commented-out placeholders pending screenshot review. **This file has NOT been applied to live Supabase.** Review in the SQL editor before running. No events will be duplicated because each INSERT uses `WHERE NOT EXISTS (title, start_at)`.
+
 ## Strict import rules (from scheduler Teams parity pass)
 
 Applied during feat/scheduler-teams-parity:

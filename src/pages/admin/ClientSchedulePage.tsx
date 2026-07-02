@@ -424,13 +424,17 @@ function StickyHScroll({ children }: { children: ReactNode }) {
     const fromContent = () => {
       if (syncing) return
       syncing = true
-      bar.scrollLeft = content.scrollLeft
+      const maxContent = content.scrollWidth - content.clientWidth
+      const maxBar = bar.scrollWidth - bar.clientWidth
+      if (maxContent > 0) bar.scrollLeft = (content.scrollLeft / maxContent) * maxBar
       syncing = false
     }
     const fromBar = () => {
       if (syncing) return
       syncing = true
-      content.scrollLeft = bar.scrollLeft
+      const maxBar = bar.scrollWidth - bar.clientWidth
+      const maxContent = content.scrollWidth - content.clientWidth
+      if (maxBar > 0) content.scrollLeft = (bar.scrollLeft / maxBar) * maxContent
       syncing = false
     }
     content.addEventListener('scroll', fromContent, { passive: true })
