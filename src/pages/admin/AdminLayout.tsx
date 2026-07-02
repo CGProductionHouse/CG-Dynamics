@@ -28,7 +28,7 @@ const hubNav = [
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {
-  return `group relative flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+  return `group relative flex items-center justify-between rounded-md px-3 py-2 md:py-1.5 text-sm font-bold transition-colors ${
     isActive
       ? 'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]'
       : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'
@@ -42,7 +42,7 @@ function ExternalHoursLink({ onClick }: { onClick?: () => void }) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={onClick}
-      className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white"
+      className="group flex items-center justify-between rounded-md px-3 py-2 md:py-1.5 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white"
     >
       <span>CG Hours</span>
       <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">
@@ -83,7 +83,7 @@ function ZoneSwitcher({ zone, onChange }: { zone: Zone; onChange: (z: Zone) => v
 
 function NavSection({ label }: { label: string }) {
   return (
-    <p className="mb-1 mt-3 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40">
+    <p className="mb-1 mt-3 md:mt-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40">
       {label}
     </p>
   )
@@ -193,11 +193,11 @@ export default function AdminLayout() {
                 Close
               </button>
             </div>
-            <div className="border-b border-white/10 p-3">
+            <div className="border-b border-white/10 p-3 md:p-2.5">
               <ZoneSwitcher zone={zone} onChange={switchZone} />
             </div>
-            <nav className="flex-1 space-y-1 overflow-y-auto p-3">{renderNav()}</nav>
-            <div className="border-t border-white/10 p-3">
+            <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
+            <div className="border-t border-white/10 p-3 md:p-2.5">
               <UserBlock name={profile?.full_name ?? 'Staff user'} role={profile?.role ?? 'staff'} onSignOut={signOut} />
             </div>
           </aside>
@@ -205,14 +205,14 @@ export default function AdminLayout() {
       )}
 
       <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-black/72 md:flex md:h-screen md:flex-col">
-        <div className="border-b border-white/10 px-5 py-5">
+        <div className="border-b border-white/10 px-5 py-4">
           <BrandMark subtitle={profile?.role ?? 'staff'} compact />
         </div>
-        <div className="border-b border-white/10 p-3">
+        <div className="border-b border-white/10 p-3 md:p-2.5">
           <ZoneSwitcher zone={zone} onChange={switchZone} />
         </div>
-        <nav className="flex-1 space-y-1 overflow-y-auto p-3">{renderNav()}</nav>
-        <div className="border-t border-white/10 p-3">
+        <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
+        <div className="border-t border-white/10 p-3 md:p-2.5">
           <UserBlock name={profile?.full_name ?? 'Staff user'} role={profile?.role ?? 'staff'} onSignOut={signOut} />
         </div>
       </aside>
@@ -234,14 +234,14 @@ export default function AdminLayout() {
 
 function UserBlock({ name, role, onSignOut }: { name: string; role: string; onSignOut: () => void }) {
   return (
-    <div className="space-y-2">
-      <div className="rounded-lg bg-white/[0.035] px-3 py-2">
-        <p className="truncate text-sm font-bold text-white">{name}</p>
-        <p className="mt-0.5 text-xs text-brand-primary/65">{role === 'admin' ? 'Admin' : 'Staff'}</p>
+    <div className="space-y-1.5">
+      <div className="flex items-baseline justify-between gap-2 rounded-lg bg-white/[0.035] px-3 py-2">
+        <p className="min-w-0 truncate text-sm font-bold text-white">{name}</p>
+        <p className="shrink-0 text-xs text-brand-primary/65">{role === 'admin' ? 'Admin' : 'Staff'}</p>
       </div>
       <button
         onClick={onSignOut}
-        className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-brand-primary transition-colors hover:bg-white/[0.06] hover:text-white"
+        className="w-full rounded-md px-3 py-2 md:py-1.5 text-left text-sm font-semibold text-brand-primary transition-colors hover:bg-white/[0.06] hover:text-white"
       >
         Sign out
       </button>
