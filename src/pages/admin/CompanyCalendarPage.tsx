@@ -22,11 +22,12 @@ import {
   PACKAGE_DELIVERABLE_TYPES,
   PLANNER_TASK_STATUS_LABELS,
   getEffectiveScheduleDate,
-  listMonthlyDeliverablesByMonth,
   listPlannerTasksDueBetween,
+  listScheduledPostsBetween,
   type CalendarTaskRow,
   type MonthlyDeliverable,
 } from '../../lib/planner'
+import { materializeRecurringTasks } from '../../lib/recurrence'
 
 type EventFilter = 'all' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
@@ -141,6 +142,7 @@ export default function CompanyCalendarPage() {
   const [drawerEvent, setDrawerEvent] = useState<CompanyCalendarEvent | null>(null)
   const [layers, setLayers] = useState<CalendarLayers>({ events: true, tasks: true, posts: true })
   const [monthTasks, setMonthTasks] = useState<CalendarTaskRow[]>([])
+  const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; posts: string | null }>({ tasks: null, posts: null })
   const [monthPosts, setMonthPosts] = useState<MonthlyDeliverable[]>([])
   const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
 
@@ -173,18 +175,32 @@ export default function CompanyCalendarPage() {
 
   useEffect(() => { void load() }, [])
 
-  // Task + post layers reload per month. Best-effort: a failure in either
-  // layer never breaks the events calendar — the layer just stays empty.
+  // Materialise upcoming recurring-task instances once per visit — idempotent
+  // (unique import_hash) and a graceful no-op before phase-13a is applied.
+  useEffect(() => {
+    void materializeRecurringTasks()
+  }, [])
+
+  // Task + post layers reload per month. Best-effort and independent: a
+  // failure in either layer (or in events) never blanks the others — errors
+  // surface as diagnostics instead.
   useEffect(() => {
     let cancelled = false
     async function loadLayers() {
       const monthStart = `${selectedMonth}-01`
       const [taskResult, postResult] = await Promise.all([
         listPlannerTasksDueBetween(monthStart, nextMonthStart(selectedMonth)),
-        listMonthlyDeliverablesByMonth(monthStart),
+        listScheduledPostsBetween(monthStart, nextMonthStart(selectedMonth)),
       ])
       if (cancelled) return
-      setMonthTasks((taskResult.data ?? []) as CalendarTaskRow[])
+      setLayerErrors({
+        tasks: taskResult.error?.message ?? null,
+        posts: postResult.error?.message ?? null,
+      })
+      // Completed/approved work is history, not active calendar load.
+      setMonthTasks(
+        ((taskResult.data ?? []) as CalendarTaskRow[]).filter(task => task.status !== 'approved'),
+      )
       setMonthPosts(
         ((postResult.data ?? []) as MonthlyDeliverable[])
           .filter(item => PACKAGE_DELIVERABLE_TYPES.includes(item.deliverable_type)),
@@ -288,34 +304,6 @@ export default function CompanyCalendarPage() {
     )
   }
 
-  if (tableMissing) {
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Calendar</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
-        </div>
-        <EmptyState
-          title="CG Calendar setup needed"
-          message="Run phase-10a-company-calendar-events.sql in Supabase SQL editor to enable CG Calendar."
-          action={
-            <p className="mt-2 text-xs text-amber-400/80 bg-amber-400/10 border border-amber-400/20 rounded-lg px-4 py-2">
-              Admin note: CG Calendar SQL not applied yet.
-            </p>
-          }
-        />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <p className="text-sm text-red-400">{error}</p>
-      </div>
-    )
-  }
-
   const filterTabs: { value: EventFilter; label: string; count: number }[] = [
     { value: 'all', label: 'All', count: counts.all },
     { value: 'meeting', label: 'Meetings', count: counts.meeting },
@@ -372,6 +360,50 @@ export default function CompanyCalendarPage() {
         ))}
       </div>
 
+      {/* Layer diagnostics — problems never blank the calendar, they surface here. */}
+      {(tableMissing || error || layerErrors.tasks || layerErrors.posts) && (
+        <div className="mb-4 space-y-2">
+          {tableMissing && (
+            <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
+              Events layer needs setup: apply <code className="rounded bg-black/30 px-1">supabase/phase-10a-company-calendar-events.sql</code> in
+              the Supabase SQL editor (the 2026 seed is prepared in <code className="rounded bg-black/30 px-1">phase-10b</code>).
+              Planner tasks and scheduled posts still show below.
+            </p>
+          )}
+          {error && !tableMissing && (
+            <p className="rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-xs leading-relaxed text-red-300">
+              Events could not load: {error}. Planner tasks and scheduled posts still show below.
+            </p>
+          )}
+          {layerErrors.tasks && (
+            <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
+              Planner task layer could not load: {layerErrors.tasks}
+            </p>
+          )}
+          {layerErrors.posts && (
+            <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
+              Scheduled post layer could not load: {layerErrors.posts}
+            </p>
+          )}
+        </div>
+      )}
+
+      {monthEvents.length + monthTasks.length + monthPosts.length === 0 && (
+        <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-xs leading-relaxed text-brand-primary/70">
+          <p className="font-bold text-white">Nothing to show for {formatMonthHeading(selectedMonth)} — layer diagnostics</p>
+          <ul className="mt-2 space-y-0.5">
+            <li>Events this month: {monthEvents.length}{tableMissing ? ' (table not set up)' : error ? ' (query failed)' : ''}</li>
+            <li>Dated planner tasks this month: {monthTasks.length}{layerErrors.tasks ? ' (query failed)' : ''}</li>
+            <li>Scheduled posts this month: {monthPosts.length}{layerErrors.posts ? ' (query failed)' : ''}</li>
+          </ul>
+          <p className="mt-2 text-brand-primary/50">
+            If Planner or Client Schedule shows work for this month but the counts above are 0, check that tasks have due
+            dates and posts have schedule dates. Layer toggles above also hide layers — all three are currently
+            {' '}{[layers.events, layers.tasks, layers.posts].filter(Boolean).length} of 3 on.
+          </p>
+        </div>
+      )}
+
       {/* Filter tabs */}
       <div className="mb-6 flex flex-wrap gap-1.5">
         {filterTabs.map(tab => (
@@ -403,6 +435,7 @@ export default function CompanyCalendarPage() {
           events={visibleEvents}
           tasksByDate={tasksByDate}
           postsByDate={postsByDate}
+          groups={grouped}
           onAdd={handleCreateEvent}
           onOpen={setDrawerEvent}
           onOpenDay={setDayPanel}
@@ -464,6 +497,7 @@ function CgCalendarGrid({
   events,
   tasksByDate,
   postsByDate,
+  groups,
   onAdd,
   onOpen,
   onOpenDay,
@@ -472,6 +506,7 @@ function CgCalendarGrid({
   events: CompanyCalendarEvent[]
   tasksByDate: Map<string, CalendarTaskRow[]>
   postsByDate: Map<string, MonthlyDeliverable[]>
+  groups: Array<{ day: string; events: CompanyCalendarEvent[]; tasks: CalendarTaskRow[]; posts: MonthlyDeliverable[] }>
   onAdd: (date?: string) => void
   onOpen: (event: CompanyCalendarEvent) => void
   onOpenDay: (data: DayPanelData) => void
@@ -569,10 +604,19 @@ function CgCalendarGrid({
           )
         })}
       </div>
-      <div className="space-y-2 sm:hidden">
-        {events.length === 0 ? (
-          <EmptyState title={`No events in ${formatMonthHeading(month)}`} message="Add an event, or switch to Agenda to see tasks and scheduled posts too." action={<ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton>} centered={false} />
-        ) : events.map(event => <EventCard key={event.id} event={event} onClick={() => onOpen(event)} />)}
+      <div className="space-y-5 sm:hidden">
+        {groups.length === 0 ? (
+          <EmptyState title={`Nothing in ${formatMonthHeading(month)}`} message="No events, dated planner tasks or scheduled posts this month. See the diagnostics above." action={<ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton>} centered={false} />
+        ) : groups.map(group => (
+          <div key={group.day}>
+            <h3 className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-brand-primary/50">{formatShortDate(group.day)}</h3>
+            <div className="space-y-2">
+              {group.events.map(event => <EventCard key={event.id} event={event} onClick={() => onOpen(event)} />)}
+              {group.tasks.map(task => <TaskRowLink key={task.id} task={task} />)}
+              {group.posts.map(post => <PostRowLink key={post.id} post={post} month={month} />)}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

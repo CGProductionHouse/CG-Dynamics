@@ -950,6 +950,21 @@ export async function listPlannerTasksDueBetween(startDate: string, endDateExclu
     .order('due_date')
 }
 
+// Scheduled posts by REAL operational date — scheduled_date first, falling
+// back to due_date for rows not yet formally scheduled — inside a window.
+// This is the CG Calendar post layer: a post moved into this month shows here
+// even when its package `month` row belongs to another month.
+export async function listScheduledPostsBetween(startDate: string, endDateExclusive: string) {
+  return supabase
+    .from(DELIVERABLES_TABLE)
+    .select('*')
+    .is('archived_at', null)
+    .or(
+      `and(scheduled_date.gte.${startDate},scheduled_date.lt.${endDateExclusive}),` +
+      `and(scheduled_date.is.null,due_date.gte.${startDate},due_date.lt.${endDateExclusive})`,
+    )
+}
+
 export interface CalendarTaskRow {
   id: string
   title: string
