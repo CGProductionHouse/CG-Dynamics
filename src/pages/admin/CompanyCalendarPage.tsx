@@ -142,9 +142,10 @@ export default function CompanyCalendarPage() {
   const [drawerEvent, setDrawerEvent] = useState<CompanyCalendarEvent | null>(null)
   const [layers, setLayers] = useState<CalendarLayers>({ events: true, tasks: true, posts: true })
   const [monthTasks, setMonthTasks] = useState<CalendarTaskRow[]>([])
-  const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; posts: string | null }>({ tasks: null, posts: null })
   const [monthPosts, setMonthPosts] = useState<MonthlyDeliverable[]>([])
   const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
+  const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; posts: string | null; recurrence: string | null }>({ tasks: null, posts: null, recurrence: null })
+  const [recurrenceMigrationNeeded, setRecurrenceMigrationNeeded] = useState(false)
 
   const isAdmin = profile?.role === 'admin'
 
@@ -175,12 +176,6 @@ export default function CompanyCalendarPage() {
 
   useEffect(() => { void load() }, [])
 
-  // Materialise upcoming recurring-task instances once per visit — idempotent
-  // (unique import_hash) and a graceful no-op before phase-13a is applied.
-  useEffect(() => {
-    void materializeRecurringTasks()
-  }, [])
-
   // Task + post layers reload per month. Best-effort and independent: a
   // failure in either layer (or in events) never blanks the others — errors
   // surface as diagnostics instead.
@@ -188,19 +183,34 @@ export default function CompanyCalendarPage() {
     let cancelled = false
     async function loadLayers() {
       const monthStart = `${selectedMonth}-01`
+      setLayerErrors({ tasks: null, posts: null, recurrence: null })
+      setRecurrenceMigrationNeeded(false)
+      const recurrenceResult = await materializeRecurringTasks()
+      if (cancelled) return
+      if (recurrenceResult.migrationNeeded) {
+        setRecurrenceMigrationNeeded(true)
+      } else if (recurrenceResult.error) {
+        setLayerErrors(prev => ({ ...prev, recurrence: recurrenceResult.error ?? null }))
+      }
       const [taskResult, postResult] = await Promise.all([
         listPlannerTasksDueBetween(monthStart, nextMonthStart(selectedMonth)),
         listScheduledPostsBetween(monthStart, nextMonthStart(selectedMonth)),
       ])
       if (cancelled) return
-      setLayerErrors({
+      setLayerErrors(prev => ({
+        ...prev,
         tasks: taskResult.error?.message ?? null,
         posts: postResult.error?.message ?? null,
-      })
-      // Completed/approved work is history, not active calendar load.
-      setMonthTasks(
-        ((taskResult.data ?? []) as CalendarTaskRow[]).filter(task => task.status !== 'approved'),
-      )
+      }))
+      if (taskResult.error) {
+        setMonthTasks([])
+      } else {
+        setMonthTasks((taskResult.data ?? []) as CalendarTaskRow[])
+      }
+      if (postResult.error) {
+        setMonthPosts([])
+        return
+      }
       setMonthPosts(
         ((postResult.data ?? []) as MonthlyDeliverable[])
           .filter(item => PACKAGE_DELIVERABLE_TYPES.includes(item.deliverable_type)),
@@ -360,48 +370,19 @@ export default function CompanyCalendarPage() {
         ))}
       </div>
 
-      {/* Layer diagnostics — problems never blank the calendar, they surface here. */}
-      {(tableMissing || error || layerErrors.tasks || layerErrors.posts) && (
-        <div className="mb-4 space-y-2">
-          {tableMissing && (
-            <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
-              Events layer needs setup: apply <code className="rounded bg-black/30 px-1">supabase/phase-10a-company-calendar-events.sql</code> in
-              the Supabase SQL editor (the 2026 seed is prepared in <code className="rounded bg-black/30 px-1">phase-10b</code>).
-              Planner tasks and scheduled posts still show below.
-            </p>
-          )}
-          {error && !tableMissing && (
-            <p className="rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-xs leading-relaxed text-red-300">
-              Events could not load: {error}. Planner tasks and scheduled posts still show below.
-            </p>
-          )}
-          {layerErrors.tasks && (
-            <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-              Planner task layer could not load: {layerErrors.tasks}
-            </p>
-          )}
-          {layerErrors.posts && (
-            <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-              Scheduled post layer could not load: {layerErrors.posts}
-            </p>
-          )}
-        </div>
-      )}
-
-      {monthEvents.length + monthTasks.length + monthPosts.length === 0 && (
-        <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-xs leading-relaxed text-brand-primary/70">
-          <p className="font-bold text-white">Nothing to show for {formatMonthHeading(selectedMonth)} — layer diagnostics</p>
-          <ul className="mt-2 space-y-0.5">
-            <li>Events this month: {monthEvents.length}{tableMissing ? ' (table not set up)' : error ? ' (query failed)' : ''}</li>
-            <li>Dated planner tasks this month: {monthTasks.length}{layerErrors.tasks ? ' (query failed)' : ''}</li>
-            <li>Scheduled posts this month: {monthPosts.length}{layerErrors.posts ? ' (query failed)' : ''}</li>
-          </ul>
-          <p className="mt-2 text-brand-primary/50">
-            If Planner or Client Schedule shows work for this month but the counts above are 0, check that tasks have due
-            dates and posts have schedule dates. Layer toggles above also hide layers — all three are currently
-            {' '}{[layers.events, layers.tasks, layers.posts].filter(Boolean).length} of 3 on.
-          </p>
-        </div>
+      {(tableMissing || error || layerErrors.tasks || layerErrors.posts || layerErrors.recurrence || recurrenceMigrationNeeded || (monthEvents.length + monthTasks.length + monthPosts.length === 0)) && (
+        <CalendarDiagnostics
+          month={selectedMonth}
+          eventCount={monthEvents.length}
+          taskCount={monthTasks.length}
+          postCount={monthPosts.length}
+          tableMissing={tableMissing}
+          eventError={error}
+          taskError={layerErrors.tasks}
+          postError={layerErrors.posts}
+          recurrenceError={layerErrors.recurrence}
+          recurrenceMigrationNeeded={recurrenceMigrationNeeded}
+        />
       )}
 
       {/* Filter tabs */}
@@ -492,6 +473,76 @@ export default function CompanyCalendarPage() {
   )
 }
 
+function CalendarDiagnostics({
+  month,
+  eventCount,
+  taskCount,
+  postCount,
+  tableMissing,
+  eventError,
+  taskError,
+  postError,
+  recurrenceError,
+  recurrenceMigrationNeeded,
+}: {
+  month: string
+  eventCount: number
+  taskCount: number
+  postCount: number
+  tableMissing: boolean
+  eventError: string | null
+  taskError: string | null
+  postError: string | null
+  recurrenceError: string | null
+  recurrenceMigrationNeeded: boolean
+}) {
+  const missingLayers = [
+    eventCount === 0 ? 'events' : null,
+    taskCount === 0 ? 'Planner dated tasks' : null,
+    postCount === 0 ? 'scheduled posts' : null,
+  ].filter(Boolean).join(', ')
+
+  return (
+    <div className="mb-5 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/45">Calendar diagnostics</p>
+          <p className="mt-1 text-sm font-semibold text-white">{formatMonthHeading(month)}</p>
+          <p className="mt-1 text-xs text-brand-primary/60">
+            {eventCount + taskCount + postCount === 0
+              ? 'No operational calendar items were returned for this selected month.'
+              : 'One or more calendar layers need attention.'}
+          </p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center sm:min-w-[320px]">
+          <div className="rounded-xl border border-sky-400/15 bg-sky-400/[0.05] px-3 py-2">
+            <p className="text-lg font-black text-white">{eventCount}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-sky-200/70">Events</p>
+          </div>
+          <div className="rounded-xl border border-amber-300/15 bg-amber-300/[0.05] px-3 py-2">
+            <p className="text-lg font-black text-white">{taskCount}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-amber-100/70">Tasks</p>
+          </div>
+          <div className="rounded-xl border border-brand-teal/15 bg-brand-teal/[0.05] px-3 py-2">
+            <p className="text-lg font-black text-white">{postCount}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#2dd4bf]/70">Posts</p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-3 space-y-1 text-xs text-brand-primary/65">
+        {missingLayers && <p>Empty layer this month: {missingLayers}.</p>}
+        {tableMissing && <p className="text-amber-200">Company calendar events table is missing. Apply `supabase/phase-10a-company-calendar-events.sql` before adding normal events.</p>}
+        {!tableMissing && eventCount === 0 && <p>Calendar event seed may not be applied yet. `phase-10b-cg-calendar-teams-seed-2026.sql` is optional, but the tasks/posts layers should still populate from operational data.</p>}
+        {recurrenceMigrationNeeded && <p>Recurring task columns are not applied yet. Calendar still shows existing dated tasks; apply `supabase/phase-13a-recurring-tasks.sql` to materialise future recurring instances.</p>}
+        {eventError && <p className="text-red-300">Events query error: {eventError}</p>}
+        {taskError && <p className="text-red-300">Planner task query error: {taskError}</p>}
+        {postError && <p className="text-red-300">Scheduled post query error: {postError}</p>}
+        {recurrenceError && <p className="text-red-300">Recurring task materialisation error: {recurrenceError}</p>}
+      </div>
+    </div>
+  )
+}
+
 function CgCalendarGrid({
   month,
   events,
@@ -525,7 +576,6 @@ function CgCalendarGrid({
     if (!byDate.has(day)) byDate.set(day, [])
     byDate.get(day)!.push(event)
   }
-
   return (
     <div>
       <div className="mb-1 hidden grid-cols-7 gap-px sm:grid">
@@ -609,8 +659,17 @@ function CgCalendarGrid({
           <EmptyState title={`Nothing in ${formatMonthHeading(month)}`} message="No events, dated planner tasks or scheduled posts this month. See the diagnostics above." action={<ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton>} centered={false} />
         ) : groups.map(group => (
           <div key={group.day}>
-            <h3 className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-brand-primary/50">{formatShortDate(group.day)}</h3>
-            <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => onOpenDay({ date: group.day, events: group.events, tasks: group.tasks, posts: group.posts })}
+              className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-left"
+            >
+              <span className="text-xs font-black uppercase tracking-[0.16em] text-white">{formatShortDate(group.day)}</span>
+              <span className="text-[10px] font-bold text-brand-primary/55">
+                {group.events.length + group.tasks.length + group.posts.length} item{group.events.length + group.tasks.length + group.posts.length === 1 ? '' : 's'}
+              </span>
+            </button>
+            <div className="space-y-1.5">
               {group.events.map(event => <EventCard key={event.id} event={event} onClick={() => onOpen(event)} />)}
               {group.tasks.map(task => <TaskRowLink key={task.id} task={task} />)}
               {group.posts.map(post => <PostRowLink key={post.id} post={post} month={month} />)}

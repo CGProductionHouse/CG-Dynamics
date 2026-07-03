@@ -173,10 +173,15 @@ export async function buildImportPreview(
   )
   const existingBucketNames = new Set((bucketResult.data ?? []).map(row => normalise(row.name)))
 
+  const seenIncomingHashes = new Set<string>()
   const rows: ClassifiedRow[] = parsed.tasks.map(task => {
     if (existingHashes.has(task.importHash)) {
       return { task, kind: 'exists', reason: null }
     }
+    if (seenIncomingHashes.has(task.importHash)) {
+      return { task, kind: 'conflict', reason: 'Duplicate row in this upload. Import one copy only.' }
+    }
+    seenIncomingHashes.add(task.importHash)
     if (boardTitles.has(normalise(task.title))) {
       return {
         task,
@@ -230,6 +235,7 @@ export async function applyApprovedRows(
   approved: ParsedPlannerTask[],
 ): Promise<ApplyResult> {
   if (approved.length === 0) return { bucketsCreated: 0, tasksInserted: 0, skippedAsDuplicates: 0, error: null }
+  const uniqueApproved = [...new Map(approved.map(task => [task.importHash, task])).values()]
 
   const bucketResult = await supabase
     .from('planner_buckets')
@@ -243,7 +249,7 @@ export async function applyApprovedRows(
   )
 
   const missingNames = [...new Set(
-    approved.map(task => task.bucket).filter(name => !bucketIdByName.has(normalise(name))),
+    uniqueApproved.map(task => task.bucket).filter(name => !bucketIdByName.has(normalise(name))),
   )]
   let bucketsCreated = 0
   if (missingNames.length > 0) {
@@ -256,7 +262,7 @@ export async function applyApprovedRows(
     bucketsCreated = createdBuckets?.length ?? 0
   }
 
-  const rows = approved.map(task => ({
+  const rows = uniqueApproved.map(task => ({
     board_id: boardId,
     bucket_id: bucketIdByName.get(normalise(task.bucket)) ?? null,
     title: task.title,

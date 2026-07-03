@@ -100,7 +100,7 @@ export default function PlannerImportPage() {
   }
 
   async function handleApply() {
-    if (!preview || !boardId || approved.size === 0) return
+    if (!isAdmin || !preview || !boardId || approved.size === 0) return
     const approvedTasks = preview.rows
       .filter(row => row.kind !== 'exists' && approved.has(row.task.importHash))
       .map(row => row.task)
