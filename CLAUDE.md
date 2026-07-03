@@ -17,6 +17,10 @@ notes follow.
   (see `docs/agent-operating-model.md`).
 - **Repo docs beat conversation memory.** If something you remember disagrees
   with the repo (`AGENTS.md`, `docs/*`, the code), the repo wins. Re-check.
+- **Read page contracts before page work.** Before changing page behavior,
+  navigation, permissions or product scope, read
+  `docs/cg-dynamics-page-vision-and-milestones.md`. Page contracts override
+  generic product ideas.
 - **Persist important corrections.** When the user corrects direction, write it
   into the relevant `docs/*` file or these memory files (via `/memory` or a
   direct edit) so it survives context loss — don't rely on the conversation.
