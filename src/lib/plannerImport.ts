@@ -235,7 +235,13 @@ export async function applyApprovedRows(
   approved: ParsedPlannerTask[],
 ): Promise<ApplyResult> {
   if (approved.length === 0) return { bucketsCreated: 0, tasksInserted: 0, skippedAsDuplicates: 0, error: null }
+  // Dedupe by import_hash so a repeated row in one file cannot double-insert.
   const uniqueApproved = [...new Map(approved.map(task => [task.importHash, task])).values()]
+  // Defensive guard: never create a bucket named like a raw Planner ID or an
+  // empty string, and never insert a task carrying one — even if a conflict
+  // row was ticked in the UI. Bad-bucket rows are skipped and counted.
+  const safe = uniqueApproved.filter(task => task.bucket.trim() !== '' && !looksLikePlannerId(task.bucket))
+  if (safe.length === 0) return { bucketsCreated: 0, tasksInserted: 0, skippedAsDuplicates: approved.length, error: null }
 
   const bucketResult = await supabase
     .from('planner_buckets')
@@ -249,7 +255,7 @@ export async function applyApprovedRows(
   )
 
   const missingNames = [...new Set(
-    uniqueApproved.map(task => task.bucket).filter(name => !bucketIdByName.has(normalise(name))),
+    safe.map(task => task.bucket).filter(name => !bucketIdByName.has(normalise(name))),
   )]
   let bucketsCreated = 0
   if (missingNames.length > 0) {
@@ -262,7 +268,7 @@ export async function applyApprovedRows(
     bucketsCreated = createdBuckets?.length ?? 0
   }
 
-  const rows = uniqueApproved.map(task => ({
+  const rows = safe.map(task => ({
     board_id: boardId,
     bucket_id: bucketIdByName.get(normalise(task.bucket)) ?? null,
     title: task.title,
@@ -291,6 +297,8 @@ export async function applyApprovedRows(
   return {
     bucketsCreated,
     tasksInserted: insertedCount,
+    // Everything approved but not inserted: existing-hash duplicates plus any
+    // rows dropped for an unsafe (Planner-ID / empty) bucket.
     skippedAsDuplicates: approved.length - insertedCount,
     error: null,
   }
