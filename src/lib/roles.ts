@@ -1,17 +1,18 @@
-export type AppRole = 'admin' | 'manager' | 'team' | 'client'
+export type AppRole = 'admin' | 'manager' | 'staff' | 'team' | 'client'
 
-export const STAFF_ROLES: AppRole[] = ['admin', 'manager', 'team']
+export const STAFF_ROLES: AppRole[] = ['admin', 'manager', 'staff', 'team']
 export const MANAGER_ROLES: AppRole[] = ['admin', 'manager']
 
 export const ROLE_LABELS: Record<AppRole, string> = {
   admin: 'Admin',
   manager: 'Manager',
+  staff: 'Staff',
   team: 'Staff',
   client: 'Client',
 }
 
-export function isStaffRole(role: string | null | undefined): role is 'admin' | 'manager' | 'team' {
-  return role === 'admin' || role === 'manager' || role === 'team'
+export function isStaffRole(role: string | null | undefined): role is 'admin' | 'manager' | 'staff' | 'team' {
+  return role === 'admin' || role === 'manager' || role === 'staff' || role === 'team'
 }
 
 export function isManagerRole(role: string | null | undefined): role is 'admin' | 'manager' {

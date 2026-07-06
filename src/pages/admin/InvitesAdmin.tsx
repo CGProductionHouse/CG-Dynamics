@@ -318,7 +318,7 @@ export default function InvitesAdmin() {
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
             >
               <option value="client">Client</option>
-              <option value="team">Staff</option>
+              <option value="staff">Staff</option>
               <option value="manager">Manager</option>
             </select>
           </Field>
