@@ -71,6 +71,33 @@ function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
 
+function localDateKey(value: string | Date) {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function localMonthKey(value: string | Date) {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return monthKey(date)
+}
+
+function isoToLocalDateTimeInput(value: string | null): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-') + `T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
+function localDateTimeInputToIso(value: string): string {
+  return new Date(value).toISOString()
+}
+
 function shiftMonth(key: string, amount: number) {
   const [year, month] = key.split('-').map(Number)
   return monthKey(new Date(year, month - 1 + amount, 1))
@@ -212,7 +239,7 @@ export default function CompanyCalendarPage() {
   }, [events, filter])
 
   const monthEvents = useMemo(
-    () => filtered.filter(event => event.start_at.slice(0, 7) === selectedMonth),
+    () => filtered.filter(event => localMonthKey(event.start_at) === selectedMonth),
     [filtered, selectedMonth],
   )
 
@@ -231,11 +258,11 @@ export default function CompanyCalendarPage() {
   // Agenda groups: union of all visible layers per day, sorted by date.
   const grouped = useMemo(() => {
     const days = new Set<string>()
-    for (const event of visibleEvents) days.add(event.start_at.slice(0, 10))
+    for (const event of visibleEvents) days.add(localDateKey(event.start_at))
     for (const date of tasksByDate.keys()) days.add(date)
     return [...days].sort().map(day => ({
       day,
-      events: visibleEvents.filter(event => event.start_at.slice(0, 10) === day),
+      events: visibleEvents.filter(event => localDateKey(event.start_at) === day),
       tasks: tasksByDate.get(day) ?? [],
     }))
   }, [visibleEvents, tasksByDate])
@@ -515,10 +542,10 @@ function CgCalendarGrid({
     ...Array.from({ length: firstDay }, () => null),
     ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
   ]
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDateKey(new Date())
   const byDate = new Map<string, CompanyCalendarEvent[]>()
   for (const event of events) {
-    const day = event.start_at.slice(0, 10)
+    const day = localDateKey(event.start_at)
     if (!byDate.has(day)) byDate.set(day, [])
     byDate.get(day)!.push(event)
   }
@@ -731,8 +758,8 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
   const [eventType, setEventType] = useState<CompanyEventType>(event.event_type)
   const [clientId, setClientId] = useState(event.client_id ?? '')
   const [clientName, setClientName] = useState(event.client_name ?? '')
-  const [startAt, setStartAt] = useState(event.start_at ? event.start_at.slice(0, 16) : '')
-  const [endAt, setEndAt] = useState(event.end_at ? event.end_at.slice(0, 16) : '')
+  const [startAt, setStartAt] = useState(isoToLocalDateTimeInput(event.start_at))
+  const [endAt, setEndAt] = useState(isoToLocalDateTimeInput(event.end_at))
   const [allDay, setAllDay] = useState(event.all_day)
   const [location, setLocation] = useState(event.location ?? '')
   const [notes, setNotes] = useState(event.notes ?? '')
@@ -750,7 +777,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
     setSaving(true)
     setSaveError(null)
     try {
-      const startIso = startAt ? new Date(startAt).toISOString() : new Date().toISOString()
+      const startIso = startAt ? localDateTimeInputToIso(startAt) : new Date().toISOString()
       if (isNew) {
         const input: CompanyEventInput = {
           title: title.trim(),
@@ -758,7 +785,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
           client_id: clientId || null,
           client_name: clientName || null,
           start_at: startIso,
-          end_at: endAt ? new Date(endAt).toISOString() : null,
+          end_at: endAt ? localDateTimeInputToIso(endAt) : null,
           all_day: allDay,
           location: location.trim() || null,
           notes: notes.trim() || null,
@@ -778,7 +805,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
           client_id: clientId || null,
           client_name: clientName || null,
           start_at: startIso,
-          end_at: endAt ? new Date(endAt).toISOString() : null,
+          end_at: endAt ? localDateTimeInputToIso(endAt) : null,
           all_day: allDay,
           location: location.trim() || null,
           notes: notes.trim() || null,
