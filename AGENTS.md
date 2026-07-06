@@ -3,6 +3,10 @@
 Shared operating instructions for Codex, Claude Code and any other coding
 agent working in this repo. Read this before making changes.
 
+Before changing page behavior, navigation, permissions or product scope, read
+`docs/cg-dynamics-page-vision-and-milestones.md`. The page contracts in that
+document override generic product ideas and agent assumptions.
+
 ## Product direction
 
 CG Dynamics is the internal operating system for CG Production House. It is

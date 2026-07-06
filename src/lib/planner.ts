@@ -916,6 +916,11 @@ export interface PlannerTask {
   import_hash: string
   // Collaborative assignments — added in phase-7b.
   helper_names?: string[]
+  // Recurrence foundation — added in phase-13a. Optional so the app keeps
+  // working before the migration is applied.
+  recurrence_rule?: string | null
+  recurrence_parent_id?: string | null
+  recurrence_until?: string | null
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
@@ -925,12 +930,77 @@ export interface PlannerTask {
 
 const PLANNER_TASKS_TABLE = 'planner_tasks'
 
+const PLANNER_CALENDAR_HISTORY_STATUSES = new Set<string>([
+  'approved',
+  'scheduled',
+  'done',
+  'completed',
+  'moved_to_tomorrow',
+])
+
+function isMissingRecurrenceColumnError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false
+  if (error.code === '42703') return true
+  const message = (error.message ?? '').toLowerCase()
+  return message.includes('recurrence_rule') && (message.includes('does not exist') || message.includes('schema cache'))
+}
+
+function activeCalendarTasks(data: unknown[] | null): CalendarTaskRow[] {
+  return ((data ?? []) as Array<CalendarTaskRow & { recurrence_rule?: string | null }>)
+    .filter(task => !PLANNER_CALENDAR_HISTORY_STATUSES.has(task.status))
+    .filter(task => !task.recurrence_rule)
+}
+
 export async function listPlannerTasks(boardId: string) {
   return supabase
     .from(PLANNER_TASKS_TABLE)
     .select('*')
     .eq('board_id', boardId)
     .order('created_at')
+}
+
+// Dated, non-archived planner tasks inside a date window — used by the CG
+// Calendar task layer so operational work appears next to events and posts.
+export async function listPlannerTasksDueBetween(startDate: string, endDateExclusive: string) {
+  const withRecurrence = await supabase
+    .from(PLANNER_TASKS_TABLE)
+    .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id, recurrence_rule')
+    .is('archived_at', null)
+    .gte('due_date', startDate)
+    .lt('due_date', endDateExclusive)
+    .order('due_date')
+
+  if (!withRecurrence.error) {
+    return { data: activeCalendarTasks(withRecurrence.data), error: null }
+  }
+
+  if (!isMissingRecurrenceColumnError(withRecurrence.error)) {
+    return { data: null, error: withRecurrence.error }
+  }
+
+  const fallback = await supabase
+    .from(PLANNER_TASKS_TABLE)
+    .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id')
+    .is('archived_at', null)
+    .gte('due_date', startDate)
+    .lt('due_date', endDateExclusive)
+    .order('due_date')
+
+  if (fallback.error) return { data: null, error: fallback.error }
+
+  return { data: activeCalendarTasks(fallback.data), error: null }
+}
+
+export interface CalendarTaskRow {
+  id: string
+  title: string
+  client_name: string | null
+  assigned_to_name: string | null
+  status: PlannerTaskStatus
+  priority: TaskPriority
+  due_date: string
+  board_id: string | null
+  bucket_id: string | null
 }
 
 export async function listClientScheduleDeliverablesForYear(year: number) {
