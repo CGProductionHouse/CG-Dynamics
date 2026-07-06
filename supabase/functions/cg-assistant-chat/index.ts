@@ -36,15 +36,24 @@ interface LocalWorkContext {
     calendarEvents: number
     clientScheduleItems: number
   }
+  todayCalendarEvents: number
   nextFocusTitle: string | null
   currentTaskTitle: string | null
+  currentTaskSource: string | null
   nextTaskTitle: string | null
+  nextTaskSource: string | null
   suggestedNextAction: string
   workloadWarning: string | null
   setupNotes: string[]
 }
 
 const TOOL_REGISTRY: AssistantToolStatus[] = [
+  {
+    key: 'my-day',
+    name: 'My Day',
+    status: 'available',
+    description: 'Sanitized summary of the signed-in user’s visible My Day plan: counts, current/next work, workload warning, and source labels only.',
+  },
   {
     key: 'tasks',
     name: 'Tasks',
@@ -216,9 +225,12 @@ function normalizeLocalWorkContext(value: unknown): LocalWorkContext | null {
       calendarEvents: numberFromPayload(sources.calendarEvents),
       clientScheduleItems: numberFromPayload(sources.clientScheduleItems),
     },
+    todayCalendarEvents: numberFromPayload(payload.todayCalendarEvents),
     nextFocusTitle: stringOrNull(payload.nextFocusTitle),
     currentTaskTitle: stringOrNull(payload.currentTaskTitle),
+    currentTaskSource: stringOrNull(payload.currentTaskSource, 80),
     nextTaskTitle: stringOrNull(payload.nextTaskTitle),
+    nextTaskSource: stringOrNull(payload.nextTaskSource, 80),
     suggestedNextAction: stringOrNull(payload.suggestedNextAction, 260) ?? 'No assigned focus work is due right now.',
     workloadWarning: stringOrNull(payload.workloadWarning, 220),
     setupNotes: Array.isArray(payload.setupNotes)
@@ -275,6 +287,7 @@ function buildCapabilitiesResponse(role: string): string {
     '- Help prioritise when you provide the context directly in the chat.',
     '',
     'Connected right now:',
+    '- Sanitized My Day context from visible assigned work when the app sends it with the request.',
     '- Role checks and protected-data filtering.',
     '- Server-side AI provider routing only.',
     '- Best-effort audit logging when the audit migration has been run.',
@@ -310,10 +323,12 @@ function buildLocalWorkResponse(context: LocalWorkContext): string {
     `- Overdue: ${context.overdueCount}`,
     `- Due today: ${context.dueTodayCount}`,
     `- Upcoming this week: ${context.upcomingCount}`,
+    `- Calendar events today: ${context.todayCalendarEvents}`,
+    `- Connected sources: ${context.connectedSources.plannerTasks} Planner, ${context.connectedSources.calendarEvents} CG Calendar, ${context.connectedSources.clientScheduleItems} Client Schedule`,
   ]
 
-  if (context.currentTaskTitle) lines.push(`- Start with: ${context.currentTaskTitle}`)
-  if (context.nextTaskTitle) lines.push(`- Next: ${context.nextTaskTitle}`)
+  if (context.currentTaskTitle) lines.push(`- Start with: ${context.currentTaskTitle}${context.currentTaskSource ? ` (${context.currentTaskSource})` : ''}`)
+  if (context.nextTaskTitle) lines.push(`- Next: ${context.nextTaskTitle}${context.nextTaskSource ? ` (${context.nextTaskSource})` : ''}`)
   if (context.workloadWarning) lines.push(`- Capacity note: ${context.workloadWarning}`)
 
   lines.push('', context.suggestedNextAction)

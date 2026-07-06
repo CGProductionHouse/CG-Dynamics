@@ -47,6 +47,12 @@ const DIAGNOSTIC_PROMPTS = [
 
 const DEFAULT_TOOLS: AssistantToolStatus[] = [
   {
+    key: 'my-day',
+    name: 'My Day',
+    status: 'available',
+    description: 'Sanitized summary of the signed-in user’s visible My Day plan: counts, current/next work, workload warning, and source labels only.',
+  },
+  {
     key: 'tasks',
     name: 'Tasks',
     status: 'planned',

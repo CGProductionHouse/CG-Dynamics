@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { MyDayContext } from './workforceMyDay'
+import { sourceLabel, type MyDayContext } from './workforceMyDay'
 
 export type AssistantRole = 'user' | 'assistant'
 
@@ -72,9 +72,12 @@ export interface AssistantLocalWorkContext {
     calendarEvents: number
     clientScheduleItems: number
   }
+  todayCalendarEvents: number
   nextFocusTitle: string | null
   currentTaskTitle: string | null
+  currentTaskSource: string | null
   nextTaskTitle: string | null
+  nextTaskSource: string | null
   suggestedNextAction: string
   workloadWarning: string | null
   setupNotes: string[]
@@ -95,9 +98,12 @@ export function buildAssistantLocalWorkContext(context: MyDayContext | null): As
       calendarEvents: context.events.length,
       clientScheduleItems: context.deliverables.length,
     },
+    todayCalendarEvents: context.events.filter(item => item.date === context.today).length,
     nextFocusTitle: nextFocus?.title ?? null,
     currentTaskTitle: context.summary.currentTask?.title ?? null,
+    currentTaskSource: context.summary.currentTask ? sourceLabel(context.summary.currentTask.source) : null,
     nextTaskTitle: context.summary.nextTask?.title ?? null,
+    nextTaskSource: context.summary.nextTask ? sourceLabel(context.summary.nextTask.source) : null,
     suggestedNextAction: context.summary.suggestedNextAction,
     workloadWarning: context.summary.workloadWarning,
     setupNotes: [
