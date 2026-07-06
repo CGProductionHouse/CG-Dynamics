@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/AuthContext'
 import { RequireStaff } from './components/guards/RequireStaff'
 import { RequireAdmin } from './components/guards/RequireAdmin'
+import { RequireManager } from './components/guards/RequireManager'
 import { RequireClient } from './components/guards/RequireClient'
 import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
@@ -98,15 +99,19 @@ export default function App() {
               <Route path="/admin/imports" element={<ImportsManagement />} />
               <Route path="/admin/manual-metrics" element={<ManualMetricsAdmin />} />
 
-              {/* Admin-only write routes nested inside AdminLayout */}
-              <Route element={<RequireAdmin />}>
+              {/* Manager/admin operational write routes nested inside AdminLayout */}
+              <Route element={<RequireManager />}>
                 <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
+                <Route path="/admin/planner-import" element={<PlannerImportPage />} />
+              </Route>
+
+              {/* Admin-only security/setup routes nested inside AdminLayout */}
+              <Route element={<RequireAdmin />}>
                 <Route path="/admin/users" element={<UsersHub />} />
                 {/* Legacy deep link kept working. */}
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
-              <Route path="/admin/planner-import" element={<PlannerImportPage />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
               </Route>
             </Route>

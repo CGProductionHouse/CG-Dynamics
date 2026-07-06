@@ -9,6 +9,7 @@ import {
   type ClientInvite,
   type InviteRole,
 } from '../../lib/db/invites'
+import { roleLabel } from '../../lib/roles'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -168,18 +169,104 @@ export default function InvitesAdmin() {
   }
 
   const activeClients = clients.filter(client => client.active)
+  const pendingInvites = invites.filter(invite => invite.status === 'pending')
+  const acceptedInvites = invites.filter(invite => invite.status === 'accepted')
+
+  function renderInviteRows(rows: ClientInvite[], emptyText: string) {
+    if (rows.length === 0) {
+      return (
+        <tr>
+          <td colSpan={7} className="px-4 py-8 text-center text-brand-primary">
+            {emptyText}
+          </td>
+        </tr>
+      )
+    }
+
+    return rows.map(invite => (
+      <tr key={invite.id} className="border-b border-brand-muted last:border-0">
+        <td className="px-4 py-3 text-white break-all">{invite.email}</td>
+        <td className="px-4 py-3 text-brand-primary">
+          {invite.client_id
+            ? clientNameById.get(invite.client_id) ?? invite.client_id.slice(0, 8)
+            : 'All clients'}
+        </td>
+        <td className="px-4 py-3 text-brand-primary">{roleLabel(invite.role)}</td>
+        <td className="px-4 py-3">
+          <span
+            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+              invite.status === 'accepted'
+                ? 'bg-brand-accent/20 text-brand-accent'
+                : 'bg-amber-400/10 text-amber-300'
+            }`}
+          >
+            {invite.status === 'accepted' ? 'Accepted' : 'Pending'}
+          </span>
+        </td>
+        <td className="px-4 py-3 text-brand-primary">{formatDateTime(invite.created_at)}</td>
+        <td className="px-4 py-3 text-brand-primary">{formatDateTime(invite.accepted_at)}</td>
+        <td className="px-4 py-3">
+          <div className="flex items-center justify-end gap-3 whitespace-nowrap">
+            {invite.status === 'pending' && (
+              <button
+                type="button"
+                onClick={() => void handleCopyMessage(invite)}
+                className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
+              >
+                {copiedId === invite.id ? 'Copied!' : 'Copy invite message'}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => void handleDelete(invite)}
+              disabled={busyId === invite.id}
+              className="text-xs text-red-300 hover:text-red-200 disabled:opacity-60"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    ))
+  }
+
+  function renderInviteTable(title: string, rows: ClientInvite[], emptyText: string) {
+    return (
+      <section className="overflow-hidden rounded-xl border border-brand-muted bg-brand-surface">
+        <div className="border-b border-brand-muted px-4 py-3">
+          <h2 className="text-sm font-semibold text-white">{title}</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-sm">
+            <thead>
+              <tr className="border-b border-brand-muted text-left">
+                <th className="px-4 py-3 font-medium text-brand-primary">Email</th>
+                <th className="px-4 py-3 font-medium text-brand-primary">Client</th>
+                <th className="px-4 py-3 font-medium text-brand-primary">Role</th>
+                <th className="px-4 py-3 font-medium text-brand-primary">Status</th>
+                <th className="px-4 py-3 font-medium text-brand-primary">Created</th>
+                <th className="px-4 py-3 font-medium text-brand-primary">Accepted</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody>{renderInviteRows(rows, emptyText)}</tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <div className="w-full max-w-4xl p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-white">Invites</h1>
         <p className="mt-2 text-sm text-brand-primary max-w-2xl">
-          Pre-approve a client email. When that person signs up or next logs in, their account is
-          automatically linked to the chosen client and they see their dashboard right away.
+          Pre-approve client and workforce emails. Client invites link to one client dashboard;
+          staff and manager invites are global operational accounts.
         </p>
         <p className="mt-3 max-w-2xl rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
           Creating an invite does not send an email yet. This pre-approves the email. Send the
-          client the app link manually - use <span className="font-medium">Copy invite message</span> below.
+          person the app link manually - use <span className="font-medium">Copy invite message</span> below.
         </p>
         <p className="mt-2 max-w-2xl text-xs text-brand-primary">
           Note: Auth emails (sign-up confirmations and password resets) require Supabase SMTP
@@ -231,8 +318,8 @@ export default function InvitesAdmin() {
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
             >
               <option value="client">Client</option>
-              <option value="team">Team</option>
-              <option value="admin">Admin</option>
+              <option value="team">Staff</option>
+              <option value="manager">Manager</option>
             </select>
           </Field>
           <button
@@ -249,70 +336,12 @@ export default function InvitesAdmin() {
         <p className="text-sm text-brand-primary">Loading invites...</p>
       ) : invites.length === 0 ? (
         <div className="rounded-xl border border-brand-muted bg-brand-surface p-8 text-center text-sm text-brand-primary">
-          No invites yet. Create one above to pre-approve a client.
+          No invites yet. Create one above to pre-approve a client or staff member.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-brand-muted bg-brand-surface">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-brand-muted text-left">
-                <th className="px-4 py-3 font-medium text-brand-primary">Email</th>
-                <th className="px-4 py-3 font-medium text-brand-primary">Client</th>
-                <th className="px-4 py-3 font-medium text-brand-primary">Role</th>
-                <th className="px-4 py-3 font-medium text-brand-primary">Status</th>
-                <th className="px-4 py-3 font-medium text-brand-primary">Created</th>
-                <th className="px-4 py-3 font-medium text-brand-primary">Accepted</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {invites.map(invite => (
-                <tr key={invite.id} className="border-b border-brand-muted last:border-0">
-                  <td className="px-4 py-3 text-white break-all">{invite.email}</td>
-                  <td className="px-4 py-3 text-brand-primary">
-                    {invite.client_id
-                      ? clientNameById.get(invite.client_id) ?? invite.client_id.slice(0, 8)
-                      : 'All clients'}
-                  </td>
-                  <td className="px-4 py-3 capitalize text-brand-primary">{invite.role}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                        invite.status === 'accepted'
-                          ? 'bg-brand-accent/20 text-brand-accent'
-                          : 'bg-amber-400/10 text-amber-300'
-                      }`}
-                    >
-                      {invite.status === 'accepted' ? 'Accepted' : 'Pending'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-brand-primary">{formatDateTime(invite.created_at)}</td>
-                  <td className="px-4 py-3 text-brand-primary">{formatDateTime(invite.accepted_at)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-3 whitespace-nowrap">
-                      {invite.status === 'pending' && (
-                        <button
-                          type="button"
-                          onClick={() => void handleCopyMessage(invite)}
-                          className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
-                        >
-                          {copiedId === invite.id ? 'Copied!' : 'Copy invite message'}
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => void handleDelete(invite)}
-                        disabled={busyId === invite.id}
-                        className="text-xs text-red-300 hover:text-red-200 disabled:opacity-60"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-5">
+          {renderInviteTable('Pending invites', pendingInvites, 'No pending invites.')}
+          {renderInviteTable('Accepted invites', acceptedInvites, 'No accepted invites yet.')}
         </div>
       )}
     </div>
