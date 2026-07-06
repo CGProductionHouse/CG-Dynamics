@@ -11,6 +11,7 @@ import {
   sourceLabel,
   type MyDayContext,
   type MyDayItem,
+  type MyDayTimelineBlock,
 } from '../../lib/workforceMyDay'
 
 function itemTone(item: MyDayItem, today: string) {
@@ -128,8 +129,10 @@ export default function MyDayPage() {
             <Metric label="Focus now" value={focusItems.length} />
             <Metric label="Overdue" value={context.overdue.length} danger={context.overdue.length > 0} />
             <Metric label="Today" value={context.dueToday.length} />
-            <Metric label="Next 7 days" value={context.upcoming.length} />
+            <Metric label="Planned hours" value={Math.round(context.summary.plannedMinutes / 60)} />
           </div>
+
+          <PlanSummary context={context} />
 
           <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
             <section className="space-y-5">
@@ -178,6 +181,56 @@ function Diagnostics({ context }: { context: MyDayContext }) {
       <ul className="mt-2 space-y-1 text-xs text-amber-100/80">
         {notes.map(note => <li key={note}>{note}</li>)}
       </ul>
+    </div>
+  )
+}
+
+function PlanSummary({ context }: { context: MyDayContext }) {
+  const { currentTask, nextTask, suggestedNextAction, workloadWarning, plannedMinutes, availableMinutes } = context.summary
+  const plannedLabel = `${Math.round(plannedMinutes / 60)}h planned of ${Math.round(availableMinutes / 60)}h`
+
+  return (
+    <section className="mb-6 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal">Recommended flow</p>
+          <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
+            {currentTask ? currentTask.title : 'No assigned focus work due now'}
+          </h2>
+          <p className="mt-2 text-sm text-brand-primary/65">{suggestedNextAction}</p>
+          {workloadWarning && (
+            <p className="mt-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs font-semibold text-amber-100">
+              {workloadWarning}
+            </p>
+          )}
+        </div>
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:w-[26rem]">
+          <PlanMiniCard label="Current" item={currentTask} context={context} />
+          <PlanMiniCard label="Next" item={nextTask} context={context} />
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3 sm:col-span-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/45">Capacity</p>
+            <p className="mt-1 text-sm font-semibold text-white">{plannedLabel}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PlanMiniCard({ label, item, context }: { label: string; item: MyDayItem | null; context: MyDayContext }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/45">{label}</p>
+      {item ? (
+        <>
+          <p className="mt-1 line-clamp-2 text-sm font-semibold text-white">{item.title}</p>
+          <p className="mt-1 text-xs text-brand-primary/50">
+            {sourceLabel(item.source)} · {myDayDateLabel(item, context.today)}
+          </p>
+        </>
+      ) : (
+        <p className="mt-1 text-sm text-brand-primary/45">Nothing assigned</p>
+      )}
     </div>
   )
 }
@@ -307,24 +360,52 @@ function WorkItemCard({
 function TimelineSection({ context }: { context: MyDayContext }) {
   return (
     <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-4 sm:p-5">
-      <h2 className="font-display text-2xl font-black uppercase tracking-wide text-white">Today timeline</h2>
-      <p className="mt-1 text-sm text-brand-primary/60">Fixed events and work due today.</p>
-      {context.timeline.length === 0 ? (
+      <h2 className="font-display text-2xl font-black uppercase tracking-wide text-white">Workday plan</h2>
+      <p className="mt-1 text-sm text-brand-primary/60">08:00 to 17:00, anchored by CG Calendar events.</p>
+      {context.timelineBlocks.length === 0 ? (
         <EmptyPanel title="No dated items today" text="Use the open time for upcoming assigned work." compact />
       ) : (
         <div className="mt-4 space-y-3">
-          {context.timeline.map(item => (
-            <Link key={item.id} to={item.href} className="flex gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 hover:border-white/20">
-              <span className="w-16 shrink-0 text-xs font-black text-brand-teal">{item.timeLabel ?? 'Today'}</span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{item.title}</p>
-                <p className="text-xs text-brand-primary/55">{sourceLabel(item.source)}{item.clientName ? ` - ${item.clientName}` : ''}</p>
-              </div>
-            </Link>
-          ))}
+          {context.timelineBlocks.map(block => <TimelineBlock key={block.id} block={block} />)}
         </div>
       )}
     </section>
+  )
+}
+
+function TimelineBlock({ block }: { block: MyDayTimelineBlock }) {
+  const tone = block.kind === 'fixed'
+    ? 'border-sky-300/20 bg-sky-300/[0.055]'
+    : block.kind === 'overload'
+      ? 'border-amber-300/25 bg-amber-300/[0.065]'
+      : block.kind === 'focus'
+        ? 'border-brand-teal/20 bg-brand-teal/[0.05]'
+        : 'border-white/8 bg-white/[0.025]'
+  const content = (
+    <>
+      <span className="w-24 shrink-0 text-xs font-black text-brand-teal">
+        {block.startLabel}
+        <span className="block text-[10px] font-semibold text-brand-primary/35">{block.endLabel}</span>
+      </span>
+      <div className="min-w-0">
+        <p className={`truncate text-sm font-semibold ${block.kind === 'buffer' ? 'text-brand-primary/55' : 'text-white'}`}>
+          {block.label}
+        </p>
+        <p className="text-xs text-brand-primary/55">
+          {block.sourceLabel}{block.item?.clientName ? ` · ${block.item.clientName}` : ''}
+        </p>
+      </div>
+    </>
+  )
+
+  if (!block.href) {
+    return <div className={`flex gap-3 rounded-xl border p-3 ${tone}`}>{content}</div>
+  }
+
+  return (
+    <Link to={block.href} className={`flex gap-3 rounded-xl border p-3 hover:border-white/20 ${tone}`}>
+      {content}
+    </Link>
   )
 }
 

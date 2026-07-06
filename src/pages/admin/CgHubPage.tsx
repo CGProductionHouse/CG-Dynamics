@@ -60,13 +60,26 @@ const DELIVERABLE_STATUS_SHORT: Record<string, string> = {
 // ── Helpers ───────────────────────────────────────────────────
 
 function todayStr() {
-  return new Date().toISOString().slice(0, 10)
+  return localDateKey(new Date())
 }
 
 function todayLabel() {
   return new Date().toLocaleDateString('en-GB', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
+}
+
+function localDateKey(date: Date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function localDateKeyFromIso(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10)
+  return localDateKey(date)
 }
 
 function isOverdueTask(task: CommandCentreTask, today: string) {
@@ -195,20 +208,16 @@ export default function CgHubPage() {
 
   // CG Calendar derived
   const todayCompanyEvents = useMemo(() => {
-    const todayStart = `${today}T00:00:00`
-    const todayEnd = `${today}T23:59:59`
     return companyEvents.filter(e =>
       e.status !== 'cancelled' &&
-      e.start_at >= todayStart &&
-      e.start_at <= todayEnd
+      localDateKeyFromIso(e.start_at) === today
     )
   }, [companyEvents, today])
 
   const upcomingCompanyEvents = useMemo(() => {
-    const todayStart = `${today}T00:00:00`
     return companyEvents.filter(e =>
       e.status !== 'cancelled' &&
-      e.start_at >= todayStart
+      localDateKeyFromIso(e.start_at) >= today
     ).sort((a, b) => a.start_at.localeCompare(b.start_at)).slice(0, 5)
   }, [companyEvents, today])
 
@@ -402,7 +411,8 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
   if (!context) return null
 
   const focusCount = context.overdue.length + context.dueToday.length
-  const nextItem = [...context.overdue, ...context.dueToday, ...context.upcoming][0]
+  const currentItem = context.summary.currentTask
+  const nextItem = context.summary.nextTask
 
   return (
     <div className="mb-8 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
@@ -410,11 +420,14 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">My Day</p>
           <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
-            {focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
+            {currentItem ? currentItem.title : focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
           </h2>
           <p className="mt-1 text-sm text-brand-primary/65">
-            {nextItem ? nextItem.title : 'No overdue or due-today assigned work found.'}
+            {nextItem ? `Next: ${nextItem.title}` : context.summary.suggestedNextAction}
           </p>
+          {context.summary.workloadWarning && (
+            <p className="mt-2 text-xs font-semibold text-amber-200">{context.summary.workloadWarning}</p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">

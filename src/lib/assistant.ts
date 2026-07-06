@@ -73,6 +73,10 @@ export interface AssistantLocalWorkContext {
     clientScheduleItems: number
   }
   nextFocusTitle: string | null
+  currentTaskTitle: string | null
+  nextTaskTitle: string | null
+  suggestedNextAction: string
+  workloadWarning: string | null
   setupNotes: string[]
 }
 
@@ -92,6 +96,10 @@ export function buildAssistantLocalWorkContext(context: MyDayContext | null): As
       clientScheduleItems: context.deliverables.length,
     },
     nextFocusTitle: nextFocus?.title ?? null,
+    currentTaskTitle: context.summary.currentTask?.title ?? null,
+    nextTaskTitle: context.summary.nextTask?.title ?? null,
+    suggestedNextAction: context.summary.suggestedNextAction,
+    workloadWarning: context.summary.workloadWarning,
     setupNotes: [
       context.diagnostics.profileNameMissing ? 'Profile full name is missing, so assigned-work matching may be incomplete.' : null,
       context.diagnostics.companyEventsMissing ? 'CG Calendar events table is not available yet.' : null,
@@ -102,12 +110,14 @@ export function buildAssistantLocalWorkContext(context: MyDayContext | null): As
 
 export async function sendAssistantMessage(
   message: string,
-  history: AssistantChatMessage[]
+  history: AssistantChatMessage[],
+  localWorkContext?: AssistantLocalWorkContext | null
 ): Promise<AssistantChatResponse> {
   const { data, error } = await supabase.functions.invoke<AssistantChatResponse>('cg-assistant-chat', {
     body: {
       message,
       history: history.slice(-8),
+      localWorkContext,
     },
   })
 

@@ -25,9 +25,32 @@ export interface MyDayItem {
   helperNames: string[]
   href: string
   sortRank: number
+  durationMinutes?: number
   nativePlannerId?: string | null
   deliverableId?: string
   eventId?: string
+}
+
+export type MyDayTimelineBlockKind = 'fixed' | 'focus' | 'buffer' | 'overload'
+
+export interface MyDayTimelineBlock {
+  id: string
+  kind: MyDayTimelineBlockKind
+  label: string
+  startLabel: string
+  endLabel: string
+  item: MyDayItem | null
+  href: string | null
+  sourceLabel: string
+}
+
+export interface MyDaySummary {
+  currentTask: MyDayItem | null
+  nextTask: MyDayItem | null
+  suggestedNextAction: string
+  workloadWarning: string | null
+  plannedMinutes: number
+  availableMinutes: number
 }
 
 export interface MyDayContext {
@@ -38,6 +61,8 @@ export interface MyDayContext {
   events: MyDayItem[]
   deliverables: MyDayItem[]
   timeline: MyDayItem[]
+  timelineBlocks: MyDayTimelineBlock[]
+  summary: MyDaySummary
   overdue: MyDayItem[]
   dueToday: MyDayItem[]
   upcoming: MyDayItem[]
@@ -49,12 +74,30 @@ export interface MyDayContext {
 }
 
 const ACTIVE_TASK_STATUSES = new Set(['to_do', 'in_progress', 'blocked', 'waiting_client'])
+const WORKDAY_START_MINUTES = 8 * 60
+const WORKDAY_END_MINUTES = 17 * 60
+const DEFAULT_TASK_MINUTES = 45
+const DEFAULT_DELIVERABLE_MINUTES = 60
+const DEFAULT_EVENT_MINUTES = 60
 
 function localDateKey(date: Date) {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
+}
+
+function localDateKeyFromIso(value: string | null | undefined) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return localDateKey(date)
+}
+
+function minutesToLabel(value: number) {
+  const hours = Math.floor(value / 60)
+  const minutes = value % 60
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
 function addDays(date: Date, days: number) {
@@ -69,6 +112,23 @@ function startOfDayIso(dateKey: string) {
 
 function nextMonthStartKey(date: Date) {
   return monthKey(new Date(date.getFullYear(), date.getMonth() + 1, 1))
+}
+
+function eventDurationMinutes(event: CompanyCalendarEvent) {
+  if (event.all_day) return DEFAULT_EVENT_MINUTES
+  const start = new Date(event.start_at)
+  const end = event.end_at ? new Date(event.end_at) : null
+  if (!end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+    return DEFAULT_EVENT_MINUTES
+  }
+  const minutes = Math.round((end.getTime() - start.getTime()) / 60000)
+  return Math.max(30, Math.min(minutes, 240))
+}
+
+function itemDurationMinutes(item: MyDayItem) {
+  if (item.source === 'calendar_event') return DEFAULT_EVENT_MINUTES
+  if (item.source === 'client_deliverable') return DEFAULT_DELIVERABLE_MINUTES
+  return DEFAULT_TASK_MINUTES
 }
 
 function nameMatches(value: string | null | undefined, userName: string | null) {
@@ -163,7 +223,7 @@ function toDeliverableItem(
 }
 
 function toEventItem(event: CompanyCalendarEvent, today: string): MyDayItem {
-  const date = event.start_at.slice(0, 10)
+  const date = localDateKeyFromIso(event.start_at) ?? event.start_at.slice(0, 10)
   const sortRank = date < today ? 2 : date === today ? 3 : 6
   return {
     id: `event:${event.id}`,
@@ -179,6 +239,153 @@ function toEventItem(event: CompanyCalendarEvent, today: string): MyDayItem {
     helperNames: [],
     href: '/admin/cg-calendar',
     sortRank,
+    durationMinutes: eventDurationMinutes(event),
+  }
+}
+
+function buildTimelineBlocks(todayItems: MyDayItem[], now = new Date()): MyDayTimelineBlock[] {
+  const fixedItems = todayItems
+    .filter(item => item.source === 'calendar_event')
+    .sort((a, b) => (a.timeLabel ?? '').localeCompare(b.timeLabel ?? ''))
+  const flexibleItems = todayItems
+    .filter(item => item.source !== 'calendar_event')
+    .sort((a, b) => {
+      if (a.sortRank !== b.sortRank) return a.sortRank - b.sortRank
+      return a.title.localeCompare(b.title)
+    })
+
+  const eventBlocks: Array<{ item: MyDayItem; start: number; end: number }> = fixedItems.map(item => {
+    const parsedStart = item.timeLabel && /^\d{2}:\d{2}$/.test(item.timeLabel)
+      ? Number(item.timeLabel.slice(0, 2)) * 60 + Number(item.timeLabel.slice(3, 5))
+      : WORKDAY_START_MINUTES
+    const duration = item.durationMinutes ?? DEFAULT_EVENT_MINUTES
+    return {
+      item,
+      start: Math.max(WORKDAY_START_MINUTES, Math.min(parsedStart, WORKDAY_END_MINUTES)),
+      end: Math.max(WORKDAY_START_MINUTES + 30, Math.min(parsedStart + duration, WORKDAY_END_MINUTES)),
+    }
+  })
+    .sort((a, b) => a.start - b.start)
+
+  const blocks: MyDayTimelineBlock[] = []
+  let cursor = WORKDAY_START_MINUTES
+  let flexIndex = 0
+
+  function addFlexibleUntil(limit: number) {
+    while (flexIndex < flexibleItems.length) {
+      const item = flexibleItems[flexIndex]
+      const duration = itemDurationMinutes(item)
+      if (cursor + duration > limit) break
+      blocks.push({
+        id: `block:${item.id}:${cursor}`,
+        kind: 'focus',
+        label: item.title,
+        startLabel: minutesToLabel(cursor),
+        endLabel: minutesToLabel(cursor + duration),
+        item,
+        href: item.href,
+        sourceLabel: sourceLabel(item.source),
+      })
+      cursor += duration
+      flexIndex += 1
+    }
+
+    if (limit - cursor >= 30) {
+      blocks.push({
+        id: `buffer:${cursor}:${limit}`,
+        kind: 'buffer',
+        label: 'Open planning time',
+        startLabel: minutesToLabel(cursor),
+        endLabel: minutesToLabel(limit),
+        item: null,
+        href: null,
+        sourceLabel: 'Available',
+      })
+    }
+    cursor = Math.max(cursor, limit)
+  }
+
+  for (const eventBlock of eventBlocks) {
+    addFlexibleUntil(eventBlock.start)
+    const end = Math.max(eventBlock.end, eventBlock.start + 30)
+    blocks.push({
+      id: `block:${eventBlock.item.id}:${eventBlock.start}`,
+      kind: 'fixed',
+      label: eventBlock.item.title,
+      startLabel: minutesToLabel(eventBlock.start),
+      endLabel: minutesToLabel(end),
+      item: eventBlock.item,
+      href: eventBlock.item.href,
+      sourceLabel: sourceLabel(eventBlock.item.source),
+    })
+    cursor = Math.max(cursor, end)
+  }
+
+  addFlexibleUntil(WORKDAY_END_MINUTES)
+
+  if (flexIndex < flexibleItems.length) {
+    const remaining = flexibleItems.length - flexIndex
+    blocks.push({
+      id: 'overload:remaining-work',
+      kind: 'overload',
+      label: `${remaining} assigned item${remaining === 1 ? '' : 's'} will not fit into a normal workday`,
+      startLabel: 'After 17:00',
+      endLabel: 'Move or delegate',
+      item: flexibleItems[flexIndex],
+      href: flexibleItems[flexIndex]?.href ?? null,
+      sourceLabel: 'Capacity',
+    })
+  }
+
+  const currentMinute = now.getHours() * 60 + now.getMinutes()
+  if (currentMinute < WORKDAY_START_MINUTES || currentMinute > WORKDAY_END_MINUTES) {
+    return blocks
+  }
+
+  return blocks
+}
+
+function buildSummary(
+  timelineBlocks: MyDayTimelineBlock[],
+  focusItems: MyDayItem[],
+  now = new Date(),
+): MyDaySummary {
+  const workBlocks = timelineBlocks.filter(block => block.item)
+  const currentMinute = now.getHours() * 60 + now.getMinutes()
+  const currentBlock = workBlocks.find(block => {
+    const start = Number(block.startLabel.slice(0, 2)) * 60 + Number(block.startLabel.slice(3, 5))
+    const end = Number(block.endLabel.slice(0, 2)) * 60 + Number(block.endLabel.slice(3, 5))
+    return currentMinute >= start && currentMinute < end
+  })
+  const nextBlock = workBlocks.find(block => {
+    const start = Number(block.startLabel.slice(0, 2)) * 60 + Number(block.startLabel.slice(3, 5))
+    return start > currentMinute
+  })
+  const currentTask = currentBlock?.item ?? focusItems[0] ?? null
+  const nextTask = nextBlock?.item && nextBlock.item.id !== currentTask?.id
+    ? nextBlock.item
+    : focusItems.find(item => item.id !== currentTask?.id) ?? null
+  const plannedMinutes = workBlocks.reduce((total, block) => {
+    if (!/^\d{2}:\d{2}$/.test(block.startLabel) || !/^\d{2}:\d{2}$/.test(block.endLabel)) return total
+    const start = Number(block.startLabel.slice(0, 2)) * 60 + Number(block.startLabel.slice(3, 5))
+    const end = Number(block.endLabel.slice(0, 2)) * 60 + Number(block.endLabel.slice(3, 5))
+    return total + Math.max(0, end - start)
+  }, 0)
+  const overloadBlock = timelineBlocks.find(block => block.kind === 'overload')
+
+  return {
+    currentTask,
+    nextTask,
+    suggestedNextAction: currentTask
+      ? `Start with ${currentTask.title}.`
+      : nextTask
+        ? `Next up: ${nextTask.title}.`
+        : 'No assigned focus work is due right now.',
+    workloadWarning: overloadBlock
+      ? overloadBlock.label
+      : null,
+    plannedMinutes,
+    availableMinutes: WORKDAY_END_MINUTES - WORKDAY_START_MINUTES,
   }
 }
 
@@ -241,7 +448,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
   const events = ((eventsResult.data ?? []) as CompanyCalendarEvent[])
     .filter(event => event.status !== 'cancelled')
     .filter(event => {
-      const eventDate = event.start_at.slice(0, 10)
+      const eventDate = localDateKeyFromIso(event.start_at)
       return eventDate === today || nameMatches(event.assigned_to_name, userName)
     })
     .map(event => toEventItem(event, today))
@@ -253,6 +460,11 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     return (a.timeLabel ?? '').localeCompare(b.timeLabel ?? '')
   })
 
+  const timeline = allItems.filter(item => item.date === today)
+  const focusItems = [...allItems.filter(item => item.date !== null && item.date < today), ...timeline]
+  const timelineBlocks = buildTimelineBlocks(timeline, baseDate)
+  const summary = buildSummary(timelineBlocks, focusItems, baseDate)
+
   return {
     today,
     todayLabel: new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(baseDate),
@@ -260,7 +472,9 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     tasks,
     events,
     deliverables,
-    timeline: allItems.filter(item => item.date === today),
+    timeline,
+    timelineBlocks,
+    summary,
     overdue: allItems.filter(item => item.date !== null && item.date < today),
     dueToday: allItems.filter(item => item.date === today),
     upcoming: allItems.filter(item => item.date === null || (item.date > today && item.date <= weekEnd)),
