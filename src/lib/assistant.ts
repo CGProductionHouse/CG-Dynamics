@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import type { MyDayContext } from './workforceMyDay'
 
 export type AssistantRole = 'user' | 'assistant'
 
@@ -57,6 +58,46 @@ export interface AssistantProviderTestResponse {
     error?: string
   }
   error?: string
+}
+
+export interface AssistantLocalWorkContext {
+  today: string
+  userName: string | null
+  focusCount: number
+  overdueCount: number
+  dueTodayCount: number
+  upcomingCount: number
+  connectedSources: {
+    plannerTasks: number
+    calendarEvents: number
+    clientScheduleItems: number
+  }
+  nextFocusTitle: string | null
+  setupNotes: string[]
+}
+
+export function buildAssistantLocalWorkContext(context: MyDayContext | null): AssistantLocalWorkContext | null {
+  if (!context) return null
+  const nextFocus = [...context.overdue, ...context.dueToday, ...context.upcoming][0] ?? null
+  return {
+    today: context.today,
+    userName: context.userName,
+    focusCount: context.overdue.length + context.dueToday.length,
+    overdueCount: context.overdue.length,
+    dueTodayCount: context.dueToday.length,
+    upcomingCount: context.upcoming.length,
+    connectedSources: {
+      plannerTasks: context.tasks.length,
+      calendarEvents: context.events.length,
+      clientScheduleItems: context.deliverables.length,
+    },
+    nextFocusTitle: nextFocus?.title ?? null,
+    setupNotes: [
+      context.diagnostics.profileNameMissing ? 'Profile full name is missing, so assigned-work matching may be incomplete.' : null,
+      context.diagnostics.companyEventsMissing ? 'CG Calendar events table is not available yet.' : null,
+      ...context.diagnostics.errors,
+    ].filter((note): note is string => Boolean(note)),
+  }
 }
 
 export async function sendAssistantMessage(

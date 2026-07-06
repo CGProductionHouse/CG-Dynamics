@@ -20,6 +20,7 @@ import {
   EVENT_TYPE_LABELS,
   type CompanyCalendarEvent,
 } from '../../lib/companyCalendar'
+import { getMyDayContext, type MyDayContext } from '../../lib/workforceMyDay'
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -98,6 +99,7 @@ export default function CgHubPage() {
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [companyEvents, setCompanyEvents] = useState<CompanyCalendarEvent[]>([])
   const [companyEventsMissing, setCompanyEventsMissing] = useState(false)
+  const [myDayContext, setMyDayContext] = useState<MyDayContext | null>(null)
   const [loadingData, setLoadingData] = useState(true)
   const [quickTitle, setQuickTitle] = useState('')
   const [quickSaving, setQuickSaving] = useState(false)
@@ -117,10 +119,12 @@ export default function CgHubPage() {
     } else if (companyRes.data) {
       setCompanyEvents(companyRes.data as CompanyCalendarEvent[])
     }
+    const myDay = await getMyDayContext(profile)
+    setMyDayContext(myDay)
     setLoadingData(false)
   }
 
-  useEffect(() => { void loadAll() }, [currentMonth])
+  useEffect(() => { void loadAll() }, [currentMonth, profile?.id])
 
   // ── Derived data ────────────────────────────────────────────
 
@@ -348,6 +352,9 @@ export default function CgHubPage() {
       ) : (
         <>
           {/* B — Today Focus */}
+          <MyDayHubCard context={myDayContext} />
+
+          {/* C — Today Focus */}
           <TodayFocusSection
             today={today}
             priorityQueue={priorityQueue}
@@ -359,29 +366,29 @@ export default function CgHubPage() {
             stats={stats}
           />
 
-          {/* C — Today's CG Calendar */}
+          {/* D — Today's CG Calendar */}
           <CompanyCalendarSection
             todayCompanyEvents={todayCompanyEvents}
             upcomingCompanyEvents={upcomingCompanyEvents}
             companyEventsMissing={companyEventsMissing}
           />
 
-          {/* D — Production Schedule */}
+          {/* E — Production Schedule */}
           <ProductionScheduleSection
             dueTodayDeliverables={dueTodayDeliverables}
             upcomingDeliverables={upcomingDeliverables}
             unscheduledDeliverables={unscheduledDeliverables}
           />
 
-          {/* E — Clients Needing Attention */}
+          {/* F — Clients Needing Attention */}
           {clientsNeedingAttention.length > 0 && (
             <ClientsAttentionSection clients={clientsNeedingAttention} />
           )}
 
-          {/* F — Quick Launch */}
+          {/* G — Quick Launch */}
           <QuickLaunchSection isAdmin={isAdmin} />
 
-          {/* G — AI Marketing Agent */}
+          {/* H — AI Marketing Agent */}
           <AiMarketingSection />
         </>
       )}
@@ -390,6 +397,46 @@ export default function CgHubPage() {
 }
 
 // ── B: Today Focus ─────────────────────────────────────────────
+
+function MyDayHubCard({ context }: { context: MyDayContext | null }) {
+  if (!context) return null
+
+  const focusCount = context.overdue.length + context.dueToday.length
+  const nextItem = [...context.overdue, ...context.dueToday, ...context.upcoming][0]
+
+  return (
+    <div className="mb-8 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">My Day</p>
+          <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
+            {focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
+          </h2>
+          <p className="mt-1 text-sm text-brand-primary/65">
+            {nextItem ? nextItem.title : 'No overdue or due-today assigned work found.'}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {context.events.length} calendar
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {context.tasks.length} planner
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {context.deliverables.length} schedule
+          </span>
+          <Link
+            to="/admin/my-day"
+            className="rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#2dd4bf] transition hover:border-brand-teal/60 hover:text-white"
+          >
+            Open My Day
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function TodayFocusSection({
   today,
