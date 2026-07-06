@@ -26,6 +26,7 @@ export interface MyDayItem {
   href: string
   sortRank: number
   durationMinutes?: number
+  startMinutes?: number | null
   nativePlannerId?: string | null
   deliverableId?: string
   eventId?: string
@@ -141,6 +142,24 @@ function helperMatches(values: string[] | undefined, userName: string | null) {
   return values.some(value => nameMatches(value, userName))
 }
 
+function userMatches(
+  assignedUserId: string | null | undefined,
+  assignedName: string | null | undefined,
+  helperNames: string[] | undefined,
+  profile: Profile | null,
+) {
+  if (assignedUserId && profile?.id && assignedUserId === profile.id) return true
+  const userName = profile?.full_name?.trim() || null
+  return nameMatches(assignedName, userName) || helperMatches(helperNames, userName)
+}
+
+function localMinutesFromIso(value: string | null | undefined) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.getHours() * 60 + date.getMinutes()
+}
+
 function formatDateLabel(value: string | null, today: string) {
   if (!value) return 'Unscheduled'
   if (value < today) return 'Overdue'
@@ -225,6 +244,7 @@ function toDeliverableItem(
 function toEventItem(event: CompanyCalendarEvent, today: string): MyDayItem {
   const date = localDateKeyFromIso(event.start_at) ?? event.start_at.slice(0, 10)
   const sortRank = date < today ? 2 : date === today ? 3 : 6
+  const startMinutes = event.all_day ? WORKDAY_START_MINUTES : localMinutesFromIso(event.start_at)
   return {
     id: `event:${event.id}`,
     eventId: event.id,
@@ -240,13 +260,14 @@ function toEventItem(event: CompanyCalendarEvent, today: string): MyDayItem {
     href: '/admin/cg-calendar',
     sortRank,
     durationMinutes: eventDurationMinutes(event),
+    startMinutes,
   }
 }
 
 function buildTimelineBlocks(todayItems: MyDayItem[], now = new Date()): MyDayTimelineBlock[] {
   const fixedItems = todayItems
     .filter(item => item.source === 'calendar_event')
-    .sort((a, b) => (a.timeLabel ?? '').localeCompare(b.timeLabel ?? ''))
+    .sort((a, b) => (a.startMinutes ?? WORKDAY_START_MINUTES) - (b.startMinutes ?? WORKDAY_START_MINUTES))
   const flexibleItems = todayItems
     .filter(item => item.source !== 'calendar_event')
     .sort((a, b) => {
@@ -255,9 +276,7 @@ function buildTimelineBlocks(todayItems: MyDayItem[], now = new Date()): MyDayTi
     })
 
   const eventBlocks: Array<{ item: MyDayItem; start: number; end: number }> = fixedItems.map(item => {
-    const parsedStart = item.timeLabel && /^\d{2}:\d{2}$/.test(item.timeLabel)
-      ? Number(item.timeLabel.slice(0, 2)) * 60 + Number(item.timeLabel.slice(3, 5))
-      : WORKDAY_START_MINUTES
+    const parsedStart = item.startMinutes ?? WORKDAY_START_MINUTES
     const duration = item.durationMinutes ?? DEFAULT_EVENT_MINUTES
     return {
       item,
@@ -422,7 +441,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
 
   const tasks = ((tasksResult.data ?? []) as CommandCentreTask[])
     .filter(task => ACTIVE_TASK_STATUSES.has(task.status))
-    .filter(task => nameMatches(task.assigned_to_name, userName) || helperMatches(task.helper_names, userName))
+    .filter(task => userMatches(task.assigned_to_user_id, task.assigned_to_name, task.helper_names, profile))
     .filter(task => !task.due_date || task.due_date <= weekEnd)
     .map(task => toTaskItem(task, today))
 
@@ -435,7 +454,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
       const status = normalizeScheduleStatus(deliverable.production_status)
       return status !== 'scheduled_posted' && status !== 'meta_drafts'
     })
-    .filter(deliverable => nameMatches(deliverable.assigned_to_name, userName) || helperMatches(deliverable.helper_names, userName))
+    .filter(deliverable => userMatches(deliverable.assigned_to_user_id, deliverable.assigned_to_name, deliverable.helper_names, profile))
     .filter(deliverable => {
       const date = getEffectiveScheduleDate(deliverable)
       return !date || date <= weekEnd
@@ -457,6 +476,8 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     if (a.sortRank !== b.sortRank) return a.sortRank - b.sortRank
     const dateCompare = (a.date ?? '9999-99-99').localeCompare(b.date ?? '9999-99-99')
     if (dateCompare !== 0) return dateCompare
+    const timeCompare = (a.startMinutes ?? Number.MAX_SAFE_INTEGER) - (b.startMinutes ?? Number.MAX_SAFE_INTEGER)
+    if (timeCompare !== 0) return timeCompare
     return (a.timeLabel ?? '').localeCompare(b.timeLabel ?? '')
   })
 
