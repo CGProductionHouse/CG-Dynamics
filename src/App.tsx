@@ -14,6 +14,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminHomePage from './pages/admin/AdminHomePage'
 import ClientPerformancePage from './pages/admin/ClientPerformancePage'
 import CgHubPage from './pages/admin/CgHubPage'
+import MyDayPage from './pages/admin/MyDayPage'
 import CommandCentrePage from './pages/admin/CommandCentrePage'
 import ClientsList from './pages/admin/ClientsList'
 import InvitesAdmin from './pages/admin/InvitesAdmin'
@@ -75,6 +76,7 @@ export default function App() {
               <Route path="/admin" element={<AdminHomePage />} />
               <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
+              <Route path="/admin/my-day" element={<MyDayPage />} />
               <Route path="/admin/command-centre" element={<CommandCentrePage />} />
               <Route path="/admin/planner" element={<PlannerPage />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
