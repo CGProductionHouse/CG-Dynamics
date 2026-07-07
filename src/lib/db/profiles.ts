@@ -1,11 +1,12 @@
 import { supabase } from '../supabase'
 import { withRequestTimeout } from './requestTimeout'
+import type { AppRole } from '../roles'
 
 export interface Profile {
   id: string
   full_name: string | null
   email: string | null
-  role: 'admin' | 'team' | 'client'
+  role: AppRole
   client_id: string | null
   created_at: string
 }

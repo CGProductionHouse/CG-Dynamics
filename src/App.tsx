@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/AuthContext'
 import { RequireStaff } from './components/guards/RequireStaff'
 import { RequireAdmin } from './components/guards/RequireAdmin'
+import { RequireManager } from './components/guards/RequireManager'
 import { RequireClient } from './components/guards/RequireClient'
 import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
@@ -13,6 +14,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminHomePage from './pages/admin/AdminHomePage'
 import ClientPerformancePage from './pages/admin/ClientPerformancePage'
 import CgHubPage from './pages/admin/CgHubPage'
+import MyDayPage from './pages/admin/MyDayPage'
 import CommandCentrePage from './pages/admin/CommandCentrePage'
 import ClientsList from './pages/admin/ClientsList'
 import InvitesAdmin from './pages/admin/InvitesAdmin'
@@ -74,6 +76,7 @@ export default function App() {
               <Route path="/admin" element={<AdminHomePage />} />
               <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
+              <Route path="/admin/my-day" element={<MyDayPage />} />
               <Route path="/admin/command-centre" element={<CommandCentrePage />} />
               <Route path="/admin/planner" element={<PlannerPage />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
@@ -98,15 +101,19 @@ export default function App() {
               <Route path="/admin/imports" element={<ImportsManagement />} />
               <Route path="/admin/manual-metrics" element={<ManualMetricsAdmin />} />
 
-              {/* Admin-only write routes nested inside AdminLayout */}
-              <Route element={<RequireAdmin />}>
+              {/* Manager/admin operational write routes nested inside AdminLayout */}
+              <Route element={<RequireManager />}>
                 <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
+                <Route path="/admin/planner-import" element={<PlannerImportPage />} />
+              </Route>
+
+              {/* Admin-only security/setup routes nested inside AdminLayout */}
+              <Route element={<RequireAdmin />}>
                 <Route path="/admin/users" element={<UsersHub />} />
                 {/* Legacy deep link kept working. */}
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
-              <Route path="/admin/planner-import" element={<PlannerImportPage />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
               </Route>
             </Route>

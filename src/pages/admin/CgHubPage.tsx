@@ -20,6 +20,7 @@ import {
   EVENT_TYPE_LABELS,
   type CompanyCalendarEvent,
 } from '../../lib/companyCalendar'
+import { getMyDayContext, sourceLabel, type MyDayContext, type MyDayItem } from '../../lib/workforceMyDay'
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -59,13 +60,34 @@ const DELIVERABLE_STATUS_SHORT: Record<string, string> = {
 // ── Helpers ───────────────────────────────────────────────────
 
 function todayStr() {
-  return new Date().toISOString().slice(0, 10)
+  return localDateKey(new Date())
 }
 
 function todayLabel() {
   return new Date().toLocaleDateString('en-GB', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
+}
+
+function localDateKey(date: Date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function localDateKeyFromIso(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10)
+  return localDateKey(date)
+}
+
+function taskMatchesProfile(task: CommandCentreTask, profile: { id?: string; full_name?: string | null } | null) {
+  if (task.assigned_to_user_id && profile?.id && task.assigned_to_user_id === profile.id) return true
+  const name = profile?.full_name?.trim().toLowerCase()
+  if (!name) return false
+  if (task.assigned_to_name?.trim().toLowerCase() === name) return true
+  return task.helper_names?.some(helper => helper.trim().toLowerCase() === name) ?? false
 }
 
 function isOverdueTask(task: CommandCentreTask, today: string) {
@@ -98,6 +120,7 @@ export default function CgHubPage() {
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [companyEvents, setCompanyEvents] = useState<CompanyCalendarEvent[]>([])
   const [companyEventsMissing, setCompanyEventsMissing] = useState(false)
+  const [myDayContext, setMyDayContext] = useState<MyDayContext | null>(null)
   const [loadingData, setLoadingData] = useState(true)
   const [quickTitle, setQuickTitle] = useState('')
   const [quickSaving, setQuickSaving] = useState(false)
@@ -117,10 +140,12 @@ export default function CgHubPage() {
     } else if (companyRes.data) {
       setCompanyEvents(companyRes.data as CompanyCalendarEvent[])
     }
+    const myDay = await getMyDayContext(profile)
+    setMyDayContext(myDay)
     setLoadingData(false)
   }
 
-  useEffect(() => { void loadAll() }, [currentMonth])
+  useEffect(() => { void loadAll() }, [currentMonth, profile?.id])
 
   // ── Derived data ────────────────────────────────────────────
 
@@ -158,9 +183,7 @@ export default function CgHubPage() {
   [activeTasks])
 
   const myActiveWork = useMemo(() => {
-    const myName = profile?.full_name
-    if (!myName) return []
-    return activeTasks.filter(t => t.assigned_to_name === myName)
+    return activeTasks.filter(t => taskMatchesProfile(t, profile))
   }, [activeTasks, profile])
 
   // Production Schedule derived
@@ -191,20 +214,16 @@ export default function CgHubPage() {
 
   // CG Calendar derived
   const todayCompanyEvents = useMemo(() => {
-    const todayStart = `${today}T00:00:00`
-    const todayEnd = `${today}T23:59:59`
     return companyEvents.filter(e =>
       e.status !== 'cancelled' &&
-      e.start_at >= todayStart &&
-      e.start_at <= todayEnd
+      localDateKeyFromIso(e.start_at) === today
     )
   }, [companyEvents, today])
 
   const upcomingCompanyEvents = useMemo(() => {
-    const todayStart = `${today}T00:00:00`
     return companyEvents.filter(e =>
       e.status !== 'cancelled' &&
-      e.start_at >= todayStart
+      localDateKeyFromIso(e.start_at) >= today
     ).sort((a, b) => a.start_at.localeCompare(b.start_at)).slice(0, 5)
   }, [companyEvents, today])
 
@@ -348,6 +367,9 @@ export default function CgHubPage() {
       ) : (
         <>
           {/* B — Today Focus */}
+          <MyDayHubCard context={myDayContext} />
+
+          {/* C — Today Focus */}
           <TodayFocusSection
             today={today}
             priorityQueue={priorityQueue}
@@ -359,29 +381,29 @@ export default function CgHubPage() {
             stats={stats}
           />
 
-          {/* C — Today's CG Calendar */}
+          {/* D — Today's CG Calendar */}
           <CompanyCalendarSection
             todayCompanyEvents={todayCompanyEvents}
             upcomingCompanyEvents={upcomingCompanyEvents}
             companyEventsMissing={companyEventsMissing}
           />
 
-          {/* D — Production Schedule */}
+          {/* E — Production Schedule */}
           <ProductionScheduleSection
             dueTodayDeliverables={dueTodayDeliverables}
             upcomingDeliverables={upcomingDeliverables}
             unscheduledDeliverables={unscheduledDeliverables}
           />
 
-          {/* E — Clients Needing Attention */}
+          {/* F — Clients Needing Attention */}
           {clientsNeedingAttention.length > 0 && (
             <ClientsAttentionSection clients={clientsNeedingAttention} />
           )}
 
-          {/* F — Quick Launch */}
+          {/* G — Quick Launch */}
           <QuickLaunchSection isAdmin={isAdmin} />
 
-          {/* G — AI Marketing Agent */}
+          {/* H — AI Marketing Agent */}
           <AiMarketingSection />
         </>
       )}
@@ -390,6 +412,80 @@ export default function CgHubPage() {
 }
 
 // ── B: Today Focus ─────────────────────────────────────────────
+
+function MyDayHubCard({ context }: { context: MyDayContext | null }) {
+  if (!context) return null
+
+  const focusCount = context.overdue.length + context.dueToday.length
+  const currentItem = context.summary.currentTask
+  const nextItem = context.summary.nextTask
+  const todayEvents = context.events.filter(item => item.date === context.today).length
+  const clientWork = context.deliverables.length
+
+  return (
+    <div className="mb-8 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">My Day</p>
+          <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
+            {currentItem ? currentItem.title : focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
+          </h2>
+          <p className="mt-1 text-sm text-brand-primary/65">
+            {nextItem ? `Next: ${nextItem.title}` : context.summary.suggestedNextAction}
+          </p>
+          {context.summary.workloadWarning && (
+            <p className="mt-2 text-xs font-semibold text-amber-200">{context.summary.workloadWarning}</p>
+          )}
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <MyDaySourceLink label="Current" item={currentItem} />
+            <MyDaySourceLink label="Next" item={nextItem} />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {context.overdue.length} overdue
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {context.dueToday.length} due today
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {todayEvents} event{todayEvents === 1 ? '' : 's'} today
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {clientWork} client work
+          </span>
+          <Link
+            to="/admin/my-day"
+            className="rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#2dd4bf] transition hover:border-brand-teal/60 hover:text-white"
+          >
+            Open My Day
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MyDaySourceLink({ label, item }: { label: string; item: MyDayItem | null }) {
+  if (!item) {
+    return (
+      <div className="rounded-xl border border-white/8 bg-black/20 p-3">
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/40">{label}</p>
+        <p className="mt-1 text-sm text-brand-primary/45">Nothing assigned</p>
+      </div>
+    )
+  }
+
+  return (
+    <Link to={item.href} className="rounded-xl border border-white/8 bg-black/20 p-3 transition hover:border-brand-teal/25">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/40">{label}</p>
+      <p className="mt-1 truncate text-sm font-semibold text-white">{item.title}</p>
+      <p className="mt-1 text-xs text-brand-primary/50">
+        {sourceLabel(item.source)}{item.clientName ? ` · ${item.clientName}` : ''}
+      </p>
+    </Link>
+  )
+}
 
 function TodayFocusSection({
   today,

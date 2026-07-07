@@ -1,8 +1,9 @@
 import { supabase } from '../supabase'
 import { withRequestTimeout } from './requestTimeout'
+import type { AppRole } from '../roles'
 
 export type InviteStatus = 'pending' | 'accepted'
-export type InviteRole = 'admin' | 'team' | 'client'
+export type InviteRole = AppRole
 
 export interface ClientInvite {
   id: string
@@ -38,7 +39,7 @@ export async function createInvite(input: {
       .from('client_invites')
       .insert({
         email: input.email.trim().toLowerCase(),
-        // Team/admin invites are global and not tied to a client.
+        // Staff/manager/admin invites are global and not tied to a client.
         client_id: input.role === 'client' ? input.client_id : null,
         role: input.role,
         created_by: input.created_by,

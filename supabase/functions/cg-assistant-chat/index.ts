@@ -24,7 +24,36 @@ interface AssistantToolStatus {
   description: string
 }
 
+interface LocalWorkContext {
+  today: string
+  userName: string | null
+  focusCount: number
+  overdueCount: number
+  dueTodayCount: number
+  upcomingCount: number
+  connectedSources: {
+    plannerTasks: number
+    calendarEvents: number
+    clientScheduleItems: number
+  }
+  todayCalendarEvents: number
+  nextFocusTitle: string | null
+  currentTaskTitle: string | null
+  currentTaskSource: string | null
+  nextTaskTitle: string | null
+  nextTaskSource: string | null
+  suggestedNextAction: string
+  workloadWarning: string | null
+  setupNotes: string[]
+}
+
 const TOOL_REGISTRY: AssistantToolStatus[] = [
+  {
+    key: 'my-day',
+    name: 'My Day',
+    status: 'available',
+    description: 'Sanitized summary of the signed-in user’s visible My Day plan: counts, current/next work, workload warning, and source labels only.',
+  },
   {
     key: 'tasks',
     name: 'Tasks',
@@ -164,6 +193,52 @@ function normalizeHistory(value: unknown): ChatMessage[] {
     }))
 }
 
+function numberFromPayload(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0
+}
+
+function stringOrNull(value: unknown, maxLength = 180): string | null {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  return trimmed ? trimmed.slice(0, maxLength) : null
+}
+
+function normalizeLocalWorkContext(value: unknown): LocalWorkContext | null {
+  if (!value || typeof value !== 'object') return null
+  const payload = value as Record<string, unknown>
+  const sources = payload.connectedSources && typeof payload.connectedSources === 'object'
+    ? payload.connectedSources as Record<string, unknown>
+    : {}
+  const today = stringOrNull(payload.today, 20)
+
+  if (!today) return null
+
+  return {
+    today,
+    userName: stringOrNull(payload.userName),
+    focusCount: numberFromPayload(payload.focusCount),
+    overdueCount: numberFromPayload(payload.overdueCount),
+    dueTodayCount: numberFromPayload(payload.dueTodayCount),
+    upcomingCount: numberFromPayload(payload.upcomingCount),
+    connectedSources: {
+      plannerTasks: numberFromPayload(sources.plannerTasks),
+      calendarEvents: numberFromPayload(sources.calendarEvents),
+      clientScheduleItems: numberFromPayload(sources.clientScheduleItems),
+    },
+    todayCalendarEvents: numberFromPayload(payload.todayCalendarEvents),
+    nextFocusTitle: stringOrNull(payload.nextFocusTitle),
+    currentTaskTitle: stringOrNull(payload.currentTaskTitle),
+    currentTaskSource: stringOrNull(payload.currentTaskSource, 80),
+    nextTaskTitle: stringOrNull(payload.nextTaskTitle),
+    nextTaskSource: stringOrNull(payload.nextTaskSource, 80),
+    suggestedNextAction: stringOrNull(payload.suggestedNextAction, 260) ?? 'No assigned focus work is due right now.',
+    workloadWarning: stringOrNull(payload.workloadWarning, 220),
+    setupNotes: Array.isArray(payload.setupNotes)
+      ? payload.setupNotes.map(note => stringOrNull(note, 180)).filter((note): note is string => Boolean(note)).slice(0, 4)
+      : [],
+  }
+}
+
 function isRestrictedRequest(message: string): boolean {
   return RESTRICTED_PATTERNS.some((pattern) => pattern.test(message))
 }
@@ -212,6 +287,7 @@ function buildCapabilitiesResponse(role: string): string {
     '- Help prioritise when you provide the context directly in the chat.',
     '',
     'Connected right now:',
+    '- Sanitized My Day context from visible assigned work when the app sends it with the request.',
     '- Role checks and protected-data filtering.',
     '- Server-side AI provider routing only.',
     '- Best-effort audit logging when the audit migration has been run.',
@@ -238,6 +314,30 @@ function buildTaskModulePendingResponse(): string {
     '',
     'Future connection placeholder: tasks will need role checks before lookup so staff only see task/project context already visible to them.',
   ].join('\n')
+}
+
+function buildLocalWorkResponse(context: LocalWorkContext): string {
+  const lines = [
+    `Today (${context.today}) from your visible My Day view:`,
+    `- Focus now: ${context.focusCount}`,
+    `- Overdue: ${context.overdueCount}`,
+    `- Due today: ${context.dueTodayCount}`,
+    `- Upcoming this week: ${context.upcomingCount}`,
+    `- Calendar events today: ${context.todayCalendarEvents}`,
+    `- Connected sources: ${context.connectedSources.plannerTasks} Planner, ${context.connectedSources.calendarEvents} CG Calendar, ${context.connectedSources.clientScheduleItems} Client Schedule`,
+  ]
+
+  if (context.currentTaskTitle) lines.push(`- Start with: ${context.currentTaskTitle}${context.currentTaskSource ? ` (${context.currentTaskSource})` : ''}`)
+  if (context.nextTaskTitle) lines.push(`- Next: ${context.nextTaskTitle}${context.nextTaskSource ? ` (${context.nextTaskSource})` : ''}`)
+  if (context.workloadWarning) lines.push(`- Capacity note: ${context.workloadWarning}`)
+
+  lines.push('', context.suggestedNextAction)
+
+  if (context.setupNotes.length > 0) {
+    lines.push('', 'Setup notes:', ...context.setupNotes.map(note => `- ${note}`))
+  }
+
+  return lines.join('\n')
 }
 
 function buildRestrictedResponse(role: string, setupAllowed: boolean): string {
@@ -460,6 +560,7 @@ Deno.serve(async (req) => {
 
   const message = normalizeMessage(body.message)
   const history = normalizeHistory(body.history)
+  const localWorkContext = normalizeLocalWorkContext(body.localWorkContext)
 
   if (!message) {
     return jsonResponse({ ok: false, error: 'Message is required.' }, 400)
@@ -509,16 +610,16 @@ Deno.serve(async (req) => {
   }
 
   if (isTaskLookupRequest(message)) {
-    const answer = buildTaskModulePendingResponse()
+    const answer = localWorkContext ? buildLocalWorkResponse(localWorkContext) : buildTaskModulePendingResponse()
 
     await auditAssistantRequest(sb, {
       userId: user.id,
       role,
       message,
-      responseStatus: 'task_module_not_connected',
+      responseStatus: localWorkContext ? 'local_work_context' : 'task_module_not_connected',
       restricted: false,
-      promptCategory: 'task_placeholder',
-      model: 'local:task_placeholder',
+      promptCategory: localWorkContext ? 'local_work' : 'task_placeholder',
+      model: localWorkContext ? 'local:my_day_context' : 'local:task_placeholder',
     })
 
     return jsonResponse({

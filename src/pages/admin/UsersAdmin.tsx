@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
 import { listProfiles, updateProfile, type Profile } from '../../lib/db/profiles'
 import { listClients, type Client } from '../../lib/db/clients'
+import { roleLabel } from '../../lib/roles'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -92,14 +93,10 @@ export default function UsersAdmin() {
     return clients.find(c => c.id === clientId)?.name ?? clientId.slice(0, 8)
   }
 
-  const roleLabel: Record<Profile['role'], string> = {
-    admin: 'Admin',
-    team: 'Team',
-    client: 'Client',
-  }
-
   const roleBadge: Record<Profile['role'], string> = {
     admin: 'bg-brand-accent/20 text-brand-accent',
+    manager: 'bg-cyan-400/10 text-cyan-300',
+    staff: 'bg-blue-400/10 text-blue-300',
     team: 'bg-blue-400/10 text-blue-400',
     client: 'bg-brand-muted text-brand-primary',
   }
@@ -149,11 +146,11 @@ export default function UsersAdmin() {
                         <p className="mt-0.5 text-sm text-brand-primary break-all">{p.email ?? 'No email'}</p>
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                           <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${roleBadge[p.role]}`}>
-                            {roleLabel[p.role]}
+                            {roleLabel(p.role)}
                           </span>
                           <StatusBadge pending={pending} />
                           <span className="text-sm text-brand-primary break-all">
-                            {p.role === 'team' ? 'All clients' : clientName(p.client_id)}
+                            {p.role === 'client' ? clientName(p.client_id) : 'All clients'}
                           </span>
                         </div>
                       </div>
@@ -211,11 +208,11 @@ export default function UsersAdmin() {
                           <span
                             className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${roleBadge[p.role]}`}
                           >
-                            {roleLabel[p.role]}
+                            {roleLabel(p.role)}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-brand-primary">
-                          {p.role === 'team' ? 'All clients' : clientName(p.client_id)}
+                          {p.role === 'client' ? clientName(p.client_id) : 'All clients'}
                         </td>
                         <td className="px-4 py-3">
                           <StatusBadge pending={pending} />
@@ -358,7 +355,9 @@ function UserEditModal({
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition"
             >
               <option value="client">Client</option>
-              <option value="team">Team</option>
+              <option value="staff">Staff</option>
+              {profile.role === 'team' && <option value="team">Staff (legacy team)</option>}
+              <option value="manager">Manager</option>
               <option value="admin">Admin</option>
             </select>
           </div>

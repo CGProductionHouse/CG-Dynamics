@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { sourceLabel, type MyDayContext } from './workforceMyDay'
 
 export type AssistantRole = 'user' | 'assistant'
 
@@ -59,14 +60,70 @@ export interface AssistantProviderTestResponse {
   error?: string
 }
 
+export interface AssistantLocalWorkContext {
+  today: string
+  userName: string | null
+  focusCount: number
+  overdueCount: number
+  dueTodayCount: number
+  upcomingCount: number
+  connectedSources: {
+    plannerTasks: number
+    calendarEvents: number
+    clientScheduleItems: number
+  }
+  todayCalendarEvents: number
+  nextFocusTitle: string | null
+  currentTaskTitle: string | null
+  currentTaskSource: string | null
+  nextTaskTitle: string | null
+  nextTaskSource: string | null
+  suggestedNextAction: string
+  workloadWarning: string | null
+  setupNotes: string[]
+}
+
+export function buildAssistantLocalWorkContext(context: MyDayContext | null): AssistantLocalWorkContext | null {
+  if (!context) return null
+  const nextFocus = [...context.overdue, ...context.dueToday, ...context.upcoming][0] ?? null
+  return {
+    today: context.today,
+    userName: context.userName,
+    focusCount: context.overdue.length + context.dueToday.length,
+    overdueCount: context.overdue.length,
+    dueTodayCount: context.dueToday.length,
+    upcomingCount: context.upcoming.length,
+    connectedSources: {
+      plannerTasks: context.tasks.length,
+      calendarEvents: context.events.length,
+      clientScheduleItems: context.deliverables.length,
+    },
+    todayCalendarEvents: context.events.filter(item => item.date === context.today).length,
+    nextFocusTitle: nextFocus?.title ?? null,
+    currentTaskTitle: context.summary.currentTask?.title ?? null,
+    currentTaskSource: context.summary.currentTask ? sourceLabel(context.summary.currentTask.source) : null,
+    nextTaskTitle: context.summary.nextTask?.title ?? null,
+    nextTaskSource: context.summary.nextTask ? sourceLabel(context.summary.nextTask.source) : null,
+    suggestedNextAction: context.summary.suggestedNextAction,
+    workloadWarning: context.summary.workloadWarning,
+    setupNotes: [
+      context.diagnostics.profileNameMissing ? 'Profile full name is missing, so assigned-work matching may be incomplete.' : null,
+      context.diagnostics.companyEventsMissing ? 'CG Calendar events table is not available yet.' : null,
+      ...context.diagnostics.errors,
+    ].filter((note): note is string => Boolean(note)),
+  }
+}
+
 export async function sendAssistantMessage(
   message: string,
-  history: AssistantChatMessage[]
+  history: AssistantChatMessage[],
+  localWorkContext?: AssistantLocalWorkContext | null
 ): Promise<AssistantChatResponse> {
   const { data, error } = await supabase.functions.invoke<AssistantChatResponse>('cg-assistant-chat', {
     body: {
       message,
       history: history.slice(-8),
+      localWorkContext,
     },
   })
 

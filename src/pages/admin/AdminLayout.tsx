@@ -2,29 +2,31 @@ import { useState } from 'react'
 import { NavLink, Link, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
+import { isAdminRole, isManagerRole, roleLabel } from '../../lib/roles'
 
 type Zone = 'dynamics' | 'hub'
+type NavAccess = 'staff' | 'manager' | 'admin'
+type NavItem = { to: string; label: string; end?: boolean; access?: NavAccess }
 
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 
-const dynamicsNav = [
+const dynamicsNav: NavItem[] = [
   { to: '/admin/client-performance', label: 'Performance Dashboard' },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/client-dashboard', label: 'Client Dashboard' },
   { to: '/admin/client-calendar', label: 'Content Calendar' },
-  { to: '/admin/integrations', label: 'Meta / Integrations' },
+  { to: '/admin/integrations', label: 'Meta / Integrations', access: 'manager' },
 ]
 
-const hubNav = [
+const hubNav: NavItem[] = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
-  { to: '/admin/clients', label: 'Clients' },
-  // Client Schedule (package posting, monthly_deliverables) and Planner Board
-  // (operational work boards, planner_tasks) are separate systems — both linked.
+  { to: '/admin/my-day', label: 'My Day' },
   { to: '/admin/client-schedule', label: 'Client Schedule' },
   { to: '/admin/planner', label: 'Planner Board' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
   { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
+  { to: '/admin/users', label: 'Users & Invites', access: 'admin' },
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -100,19 +102,26 @@ export default function AdminLayout() {
     }
   })
 
+  const currentRole = profile?.role ?? 'team'
+  const close = () => setMobileMenuOpen(false)
+
   function switchZone(z: Zone) {
     setZone(z)
     try { localStorage.setItem('cg-zone', z) } catch { /* ignore */ }
   }
 
-  const close = () => setMobileMenuOpen(false)
+  function canShow(item: NavItem) {
+    if (item.access === 'admin') return isAdminRole(currentRole)
+    if (item.access === 'manager') return isManagerRole(currentRole)
+    return true
+  }
 
   function renderNav() {
     if (zone === 'dynamics') {
       return (
         <>
           <NavSection label="Performance" />
-          {dynamicsNav.map(item => (
+          {dynamicsNav.filter(canShow).map(item => (
             <NavLink key={item.to} to={item.to} className={navClass} onClick={close}>
               <span>{item.label}</span>
             </NavLink>
@@ -122,16 +131,16 @@ export default function AdminLayout() {
             onClick={() => { switchZone('hub'); close() }}
             className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-brand-primary/50 transition-colors hover:bg-white/[0.05] hover:text-white"
           >
-            <span className="text-base leading-none">←</span>
             <span>Back to Hub</span>
           </Link>
         </>
       )
     }
+
     return (
       <>
         <NavSection label="CG Hub" />
-        {hubNav.map(item => (
+        {hubNav.filter(canShow).map(item => (
           <NavLink key={item.to} to={item.to} end={item.end} className={navClass} onClick={close}>
             <span>{item.label}</span>
           </NavLink>
@@ -141,21 +150,22 @@ export default function AdminLayout() {
     )
   }
 
-  const dynamicsMobileItems = [
+  const dynamicsMobileItems: NavItem[] = [
     { to: '/admin/client-performance', label: 'Perf' },
     { to: '/admin/clients', label: 'Clients' },
     { to: '/admin/client-dashboard', label: 'Dash' },
     { to: '/admin/client-calendar', label: 'Calendar' },
-    { to: '/admin/integrations', label: 'Meta' },
+    { to: '/admin/integrations', label: 'Meta', access: 'manager' },
   ]
-  const hubMobileItems = [
+  const hubMobileItems: NavItem[] = [
     { to: '/admin/cg-hub', label: 'Hub' },
-    { to: '/admin/client-schedule?view=calendar', label: 'Schedule' },
+    { to: '/admin/my-day', label: 'My Day' },
     { to: '/admin/planner', label: 'Planner' },
-    { to: '/admin/command-centre', label: 'Daily' },
+    { to: '/admin/cg-calendar', label: 'Calendar' },
     { to: '/admin/assistant', label: 'Assist' },
   ]
-  const mobileItems = zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems
+  const mobileItems = (zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems).filter(canShow)
+  const displayRole = roleLabel(profile?.role)
 
   return (
     <div className="min-h-screen bg-brand-bg md:flex md:h-screen md:overflow-hidden">
@@ -163,7 +173,7 @@ export default function AdminLayout() {
 
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
-          <BrandMark subtitle={profile?.role ?? 'staff'} compact />
+          <BrandMark subtitle={displayRole} compact />
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
@@ -184,7 +194,7 @@ export default function AdminLayout() {
           />
           <aside className="absolute right-0 top-0 flex h-full w-[min(20rem,86vw)] flex-col border-l border-white/10 bg-brand-surface shadow-2xl">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-              <BrandMark subtitle={profile?.role ?? 'staff'} compact />
+              <BrandMark subtitle={displayRole} compact />
               <button
                 type="button"
                 onClick={close}
@@ -198,7 +208,7 @@ export default function AdminLayout() {
             </div>
             <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
             <div className="border-t border-white/10 p-3 md:p-2.5">
-              <UserBlock name={profile?.full_name ?? 'Staff user'} role={profile?.role ?? 'staff'} onSignOut={signOut} />
+              <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
             </div>
           </aside>
         </div>
@@ -206,14 +216,14 @@ export default function AdminLayout() {
 
       <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-black/72 md:flex md:h-screen md:flex-col">
         <div className="border-b border-white/10 px-5 py-4">
-          <BrandMark subtitle={profile?.role ?? 'staff'} compact />
+          <BrandMark subtitle={displayRole} compact />
         </div>
         <div className="border-b border-white/10 p-3 md:p-2.5">
           <ZoneSwitcher zone={zone} onChange={switchZone} />
         </div>
         <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
         <div className="border-t border-white/10 p-3 md:p-2.5">
-          <UserBlock name={profile?.full_name ?? 'Staff user'} role={profile?.role ?? 'staff'} onSignOut={signOut} />
+          <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
         </div>
       </aside>
 
@@ -237,7 +247,7 @@ function UserBlock({ name, role, onSignOut }: { name: string; role: string; onSi
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2 rounded-lg bg-white/[0.035] px-3 py-2">
         <p className="min-w-0 truncate text-sm font-bold text-white">{name}</p>
-        <p className="shrink-0 text-xs text-brand-primary/65">{role === 'admin' ? 'Admin' : 'Staff'}</p>
+        <p className="shrink-0 text-xs text-brand-primary/65">{role}</p>
       </div>
       <button
         onClick={onSignOut}

@@ -2,14 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import {
+  buildAssistantLocalWorkContext,
   getAssistantDiagnostics,
   sendAssistantMessage,
   testAssistantProvider,
   type AssistantChatMessage,
   type AssistantDiagnostics,
+  type AssistantLocalWorkContext,
   type AssistantProviderTestResponse,
   type AssistantToolStatus,
 } from '../../lib/assistant'
+import { getMyDayContext } from '../../lib/workforceMyDay'
 import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { Pill } from '../../components/ui/Badges'
@@ -43,6 +46,12 @@ const DIAGNOSTIC_PROMPTS = [
 ]
 
 const DEFAULT_TOOLS: AssistantToolStatus[] = [
+  {
+    key: 'my-day',
+    name: 'My Day',
+    status: 'available',
+    description: 'Sanitized summary of the signed-in user’s visible My Day plan: counts, current/next work, workload warning, and source labels only.',
+  },
   {
     key: 'tasks',
     name: 'Tasks',
@@ -162,6 +171,7 @@ export default function AssistantPage() {
   const [providerTesting, setProviderTesting] = useState(false)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
   const [showProtected, setShowProtected] = useState(false)
+  const [localWorkContext, setLocalWorkContext] = useState<AssistantLocalWorkContext | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const profileRole = profile?.role as string | undefined
   const isAdminDiagnosticsUser = profileRole === 'admin' || profileRole === 'owner'
@@ -175,6 +185,22 @@ export default function AssistantPage() {
     window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(messages.slice(-30)))
   }, [messages])
 
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadLocalWork() {
+      try {
+        const context = await getMyDayContext(profile)
+        if (!cancelled) setLocalWorkContext(buildAssistantLocalWorkContext(context))
+      } catch {
+        if (!cancelled) setLocalWorkContext(null)
+      }
+    }
+
+    void loadLocalWork()
+    return () => { cancelled = true }
+  }, [profile?.id])
+
   async function sendMessage(messageText = input) {
     const cleanMessage = messageText.trim()
     if (!cleanMessage || isSending) return
@@ -187,7 +213,7 @@ export default function AssistantPage() {
     setError(null)
     setIsSending(true)
 
-    const response = await sendAssistantMessage(cleanMessage, historyBeforeSend)
+    const response = await sendAssistantMessage(cleanMessage, historyBeforeSend, localWorkContext)
 
     setIsSending(false)
     if (response.tools?.length) setTools(response.tools)
@@ -260,7 +286,9 @@ export default function AssistantPage() {
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Staff portal</p>
           <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">CG Assistant</h1>
-          <p className="mt-1 text-sm text-brand-primary/60">Ask for drafts, task summaries and checks.</p>
+          <p className="mt-1 text-sm text-brand-primary/60">
+            Ask for drafts, task summaries and checks. My Day context is used when available.
+          </p>
         </div>
         <Pill tone="accent">{roleLabel(profile?.role)}</Pill>
       </div>
