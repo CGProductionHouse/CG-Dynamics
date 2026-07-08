@@ -11,6 +11,12 @@
 --    client_invites.client_id for workforce invites.
 -- 2. Run phase-14b-staff-role-alias.sql immediately after this file to add
 --    the first-class `staff` role while preserving legacy `team`.
+--
+-- Rollback note:
+-- This file intentionally replaces role CHECK constraints and helper
+-- functions only. If a rollback is needed, restore the previous CHECK
+-- constraint definitions and helper functions from the database backup or
+-- migration history; do not delete profiles, invites or accepted user data.
 -- ============================================================
 
 -- Allow profiles.role = manager while preserving existing admin/team/client.

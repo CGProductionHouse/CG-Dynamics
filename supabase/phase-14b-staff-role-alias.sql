@@ -10,6 +10,12 @@
 -- Run phase-14a-workforce-roles.sql first, then this file.
 -- Do not run phase 14a again after this file unless you also rerun this file,
 -- because phase 14a intentionally predates the `staff` role alias.
+--
+-- Rollback note:
+-- This file only widens role constraints and helper functions to include
+-- `staff`. If a rollback is needed, first move any live `staff` accounts to
+-- an accepted legacy role such as `team`, then restore the previous
+-- constraints/functions from migration history. Do not delete user rows.
 -- ============================================================
 
 do $$
