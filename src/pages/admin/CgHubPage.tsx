@@ -421,6 +421,7 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
   const nextItem = context.summary.nextTask
   const todayEvents = context.events.filter(item => item.date === context.today).length
   const clientWork = context.deliverables.length
+  const plannedHours = Math.round(context.summary.plannedMinutes / 60)
 
   return (
     <div className="mb-8 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
@@ -437,8 +438,8 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
             <p className="mt-2 text-xs font-semibold text-amber-200">{context.summary.workloadWarning}</p>
           )}
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <MyDaySourceLink label="Current" item={currentItem} />
-            <MyDaySourceLink label="Next" item={nextItem} />
+            <MyDayFocusCard label="Current focus" item={currentItem} />
+            <MyDayFocusCard label="Next up" item={nextItem} />
           </div>
         </div>
         <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
@@ -454,9 +455,12 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
           <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
             {clientWork} client work
           </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+            {plannedHours}h planned
+          </span>
           <Link
             to="/admin/my-day"
-            className="rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#2dd4bf] transition hover:border-brand-teal/60 hover:text-white"
+            className="mt-1 w-full rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2.5 text-center text-xs font-black uppercase tracking-[0.1em] text-[#2dd4bf] transition hover:border-brand-teal/60 hover:text-white lg:mt-2"
           >
             Open My Day
           </Link>
@@ -466,7 +470,7 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
   )
 }
 
-function MyDaySourceLink({ label, item }: { label: string; item: MyDayItem | null }) {
+function MyDayFocusCard({ label, item }: { label: string; item: MyDayItem | null }) {
   if (!item) {
     return (
       <div className="rounded-xl border border-white/8 bg-black/20 p-3">
@@ -477,13 +481,13 @@ function MyDaySourceLink({ label, item }: { label: string; item: MyDayItem | nul
   }
 
   return (
-    <Link to={item.href} className="rounded-xl border border-white/8 bg-black/20 p-3 transition hover:border-brand-teal/25">
+    <div className="rounded-xl border border-white/8 bg-black/20 p-3">
       <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/40">{label}</p>
       <p className="mt-1 truncate text-sm font-semibold text-white">{item.title}</p>
       <p className="mt-1 text-xs text-brand-primary/50">
         {sourceLabel(item.source)}{item.clientName ? ` · ${item.clientName}` : ''}
       </p>
-    </Link>
+    </div>
   )
 }
 
