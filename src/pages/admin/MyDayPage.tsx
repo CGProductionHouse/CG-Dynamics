@@ -44,9 +44,9 @@ export default function MyDayPage() {
 
   useEffect(() => { void load() }, [profile?.id])
 
-  const focusItems = useMemo(() => {
+  const assignedItems = useMemo(() => {
     if (!context) return []
-    return [...context.overdue, ...context.dueToday].slice(0, 8)
+    return [...context.dueToday, ...context.upcoming].slice(0, 12)
   }, [context])
 
   async function startItem(item: MyDayItem) {
@@ -84,12 +84,12 @@ export default function MyDayPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10">
-      <div className="relative mb-6 overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-7">
+    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-10">
+      <div className="relative mb-5 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:rounded-3xl sm:p-7">
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.28em] text-brand-teal">Workforce</p>
-            <h1 className="mt-2 font-display text-4xl font-black uppercase leading-none tracking-wide text-white sm:text-6xl">
+            <h1 className="mt-2 font-display text-3xl font-black uppercase leading-none tracking-wide text-white sm:text-6xl">
               My Day
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-brand-primary/72">
@@ -125,40 +125,43 @@ export default function MyDayPage() {
         <>
           <Diagnostics context={context} />
 
-          <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Metric label="Focus now" value={focusItems.length} />
-            <Metric label="Overdue" value={context.overdue.length} danger={context.overdue.length > 0} />
-            <Metric label="Today" value={context.dueToday.length} />
-            <Metric label="Planned hours" value={Math.round(context.summary.plannedMinutes / 60)} />
-          </div>
-
           <PlanSummary context={context} />
 
-          <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-            <section className="space-y-5">
-              <WorkSection
-                title="Focus now"
-                subtitle="Overdue and due today, sorted by operational priority."
-                items={focusItems}
-                context={context}
-                busyId={busyId}
-                onStart={startItem}
-                onReview={sendToReview}
-              />
-              <WorkSection
-                title="Upcoming active work"
-                subtitle="Assigned work coming up this week."
-                items={context.upcoming.slice(0, 12)}
-                context={context}
-                busyId={busyId}
-                onStart={startItem}
-                onReview={sendToReview}
-              />
-            </section>
+          <div className="mb-5 grid gap-3 sm:grid-cols-3">
+            <Signal label="Overdue" value={context.overdue.length} danger={context.overdue.length > 0} />
+            <Signal label="Due today" value={context.dueToday.length} />
+            <Signal label="Upcoming" value={context.upcoming.length} />
+          </div>
 
-            <section className="space-y-5">
+          <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+            <section className="space-y-5 xl:order-2">
               <TimelineSection context={context} />
               <SourceSummary context={context} />
+            </section>
+
+            <section className="space-y-5 xl:order-1">
+              <WorkSection
+                title="Overdue work"
+                subtitle="Late assigned work that needs a decision, update or handoff."
+                items={context.overdue.slice(0, 10)}
+                context={context}
+                busyId={busyId}
+                onStart={startItem}
+                onReview={sendToReview}
+                emptyTitle="Nothing overdue"
+                emptyText="No overdue assigned work is showing for your profile."
+              />
+              <WorkSection
+                title="Assigned work"
+                subtitle="Due today and upcoming assigned work for the next seven days."
+                items={assignedItems}
+                context={context}
+                busyId={busyId}
+                onStart={startItem}
+                onReview={sendToReview}
+                emptyTitle="No assigned work found"
+                emptyText="If this looks wrong, ask admin to check your profile name or task assignment."
+              />
             </section>
           </div>
         </>
@@ -235,11 +238,11 @@ function PlanMiniCard({ label, item, context }: { label: string; item: MyDayItem
   )
 }
 
-function Metric({ label, value, danger }: { label: string; value: number; danger?: boolean }) {
+function Signal({ label, value, danger }: { label: string; value: number; danger?: boolean }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+    <div className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3">
       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">{label}</p>
-      <p className={`mt-2 text-3xl font-black ${danger ? 'text-red-300' : 'text-white'}`}>{value}</p>
+      <p className={`mt-1 text-2xl font-black ${danger ? 'text-red-300' : 'text-white'}`}>{value}</p>
     </div>
   )
 }
@@ -252,6 +255,8 @@ function WorkSection({
   busyId,
   onStart,
   onReview,
+  emptyTitle = 'Clear for now',
+  emptyText = 'No assigned active work in this section.',
 }: {
   title: string
   subtitle: string
@@ -260,6 +265,8 @@ function WorkSection({
   busyId: string | null
   onStart: (item: MyDayItem) => void
   onReview: (item: MyDayItem) => void
+  emptyTitle?: string
+  emptyText?: string
 }) {
   return (
     <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-4 sm:p-5">
@@ -271,7 +278,7 @@ function WorkSection({
         <span className="text-xs font-semibold text-brand-primary/45">{items.length} item{items.length === 1 ? '' : 's'}</span>
       </div>
       {items.length === 0 ? (
-        <EmptyPanel title="Clear for now" text="No assigned active work in this section." compact />
+        <EmptyPanel title={emptyTitle} text={emptyText} compact />
       ) : (
         <div className="space-y-3">
           {items.map(item => (
