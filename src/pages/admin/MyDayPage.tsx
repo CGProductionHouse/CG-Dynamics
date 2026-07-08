@@ -160,7 +160,7 @@ export default function MyDayPage() {
                 onStart={startItem}
                 onReview={sendToReview}
                 emptyTitle="No assigned work found"
-                emptyText="If this looks wrong, ask admin to check your profile name or task assignment."
+                emptyText="If this looks wrong, ask admin to check your profile name, helper names or direct task assignment."
               />
             </section>
           </div>
@@ -172,7 +172,7 @@ export default function MyDayPage() {
 
 function Diagnostics({ context }: { context: MyDayContext }) {
   const notes: string[] = []
-  if (context.diagnostics.profileNameMissing) notes.push('Add a full name to your profile so assigned work can match you.')
+  if (context.diagnostics.profileNameMissing) notes.push('Add a full name to your profile so imported name/helper assignments can match you. User-ID assignments can still match.')
   if (context.diagnostics.companyEventsMissing) notes.push('CG Calendar events table is not available yet.')
   notes.push(...context.diagnostics.errors)
 

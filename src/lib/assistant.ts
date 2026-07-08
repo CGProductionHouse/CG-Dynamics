@@ -107,7 +107,7 @@ export function buildAssistantLocalWorkContext(context: MyDayContext | null): As
     suggestedNextAction: context.summary.suggestedNextAction,
     workloadWarning: context.summary.workloadWarning,
     setupNotes: [
-      context.diagnostics.profileNameMissing ? 'Profile full name is missing, so assigned-work matching may be incomplete.' : null,
+      context.diagnostics.profileNameMissing ? 'Profile full name is missing. User-ID assignments can still match, but name/helper-based imported work may be incomplete.' : null,
       context.diagnostics.companyEventsMissing ? 'CG Calendar events table is not available yet.' : null,
       ...context.diagnostics.errors,
     ].filter((note): note is string => Boolean(note)),

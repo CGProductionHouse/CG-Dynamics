@@ -107,8 +107,9 @@ function addDays(date: Date, days: number) {
   return next
 }
 
-function startOfDayIso(dateKey: string) {
-  return `${dateKey}T00:00:00`
+function localDayBoundaryIso(dateKey: string, offsetDays = 0) {
+  const [year, month, day] = dateKey.split('-').map(Number)
+  return new Date(year, month - 1, day + offsetDays, 0, 0, 0, 0).toISOString()
 }
 
 function nextMonthStartKey(date: Date) {
@@ -461,7 +462,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     })
     .map(deliverable => toDeliverableItem(deliverable, clientNameById, today))
 
-  const eventsResult = await listCompanyEvents(startOfDayIso(today), startOfDayIso(localDateKey(addDays(baseDate, 8))))
+  const eventsResult = await listCompanyEvents(localDayBoundaryIso(today), localDayBoundaryIso(today, 8))
   if (eventsResult.error) errors.push(eventsResult.error.message)
 
   const events = ((eventsResult.data ?? []) as CompanyCalendarEvent[])
