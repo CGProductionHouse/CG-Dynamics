@@ -317,8 +317,9 @@ function buildTaskModulePendingResponse(): string {
 }
 
 function buildLocalWorkResponse(context: LocalWorkContext): string {
+  const hasAssignedWork = context.focusCount > 0 || context.upcomingCount > 0 || context.todayCalendarEvents > 0
   const lines = [
-    `Today (${context.today}) from your visible My Day view:`,
+    `Today (${context.today}), using only your visible My Day context:`,
     `- Focus now: ${context.focusCount}`,
     `- Overdue: ${context.overdueCount}`,
     `- Due today: ${context.dueTodayCount}`,
@@ -331,7 +332,11 @@ function buildLocalWorkResponse(context: LocalWorkContext): string {
   if (context.nextTaskTitle) lines.push(`- Next: ${context.nextTaskTitle}${context.nextTaskSource ? ` (${context.nextTaskSource})` : ''}`)
   if (context.workloadWarning) lines.push(`- Capacity note: ${context.workloadWarning}`)
 
-  lines.push('', context.suggestedNextAction)
+  if (!hasAssignedWork) {
+    lines.push('', 'You do not have assigned focus work or CG Calendar events showing for today. Check Planner, CG Calendar, or Client Schedule if you expected work to be assigned.')
+  } else {
+    lines.push('', context.suggestedNextAction)
+  }
 
   if (context.setupNotes.length > 0) {
     lines.push('', 'Setup notes:', ...context.setupNotes.map(note => `- ${note}`))

@@ -540,6 +540,8 @@ export default function AssistantPage() {
             </div>
           )}
 
+          <MyDayContextCard context={localWorkContext} />
+
           {/* Capabilities — compact, name + status only */}
           <div className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
             <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-white/35">Capabilities</p>
@@ -584,6 +586,53 @@ export default function AssistantPage() {
 
         </aside>
       </div>
+    </div>
+  )
+}
+
+function MyDayContextCard({ context }: { context: AssistantLocalWorkContext | null }) {
+  return (
+    <div className="rounded-xl border border-brand-teal/15 bg-brand-teal/[0.04] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-teal">My Day context</p>
+          <p className="mt-1 text-sm font-semibold text-white">
+            {context ? 'Ready for focus questions' : 'Not loaded yet'}
+          </p>
+        </div>
+        <Pill tone={context ? 'accent' : 'neutral'}>{context ? 'Live' : 'Pending'}</Pill>
+      </div>
+      {context ? (
+        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+          <ContextStat label="Overdue" value={context.overdueCount} />
+          <ContextStat label="Today" value={context.dueTodayCount} />
+          <ContextStat label="Upcoming" value={context.upcomingCount} />
+          <ContextStat label="Events" value={context.todayCalendarEvents} />
+          {context.currentTaskTitle && (
+            <p className="col-span-2 rounded-lg border border-white/8 bg-black/20 px-3 py-2 text-brand-primary">
+              <span className="font-semibold text-white">Current:</span> {context.currentTaskTitle}
+            </p>
+          )}
+          {context.workloadWarning && (
+            <p className="col-span-2 rounded-lg border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-amber-100">
+              {context.workloadWarning}
+            </p>
+          )}
+        </div>
+      ) : (
+        <p className="mt-3 text-xs leading-relaxed text-brand-primary/65">
+          The assistant will still answer, but focus questions may fall back to setup guidance until My Day context loads.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function ContextStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-white/8 bg-black/20 px-3 py-2">
+      <p className="text-[10px] uppercase tracking-[0.14em] text-brand-primary/45">{label}</p>
+      <p className="mt-1 text-lg font-black text-white">{value}</p>
     </div>
   )
 }
