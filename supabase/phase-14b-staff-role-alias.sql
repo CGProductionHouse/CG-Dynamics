@@ -5,6 +5,11 @@
 -- existing `team` role for already-created accounts and invites.
 -- Review in Supabase SQL editor before running. Additive only:
 -- no data is deleted or rewritten.
+--
+-- Run order:
+-- Run phase-14a-workforce-roles.sql first, then this file.
+-- Do not run phase 14a again after this file unless you also rerun this file,
+-- because phase 14a intentionally predates the `staff` role alias.
 -- ============================================================
 
 do $$
@@ -88,3 +93,8 @@ as $$
       and role = 'admin'
   );
 $$;
+
+-- Verification queries to run manually after this file:
+-- select role, count(*) from public.profiles group by role order by role;
+-- select role, status, count(*) from public.client_invites group by role, status order by role, status;
+-- select public.is_staff(), public.is_manager(), public.is_admin();

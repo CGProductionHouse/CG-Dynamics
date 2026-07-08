@@ -5,6 +5,12 @@
 -- Review in Supabase SQL editor before running. Additive only:
 -- no data is deleted or modified except replacing role CHECK constraints
 -- and helper functions.
+--
+-- Run order:
+-- 1. Run this file first to add manager/global invite support and relax
+--    client_invites.client_id for workforce invites.
+-- 2. Run phase-14b-staff-role-alias.sql immediately after this file to add
+--    the first-class `staff` role while preserving legacy `team`.
 -- ============================================================
 
 -- Allow profiles.role = manager while preserving existing admin/team/client.
@@ -176,3 +182,13 @@ begin
   return new;
 end;
 $$;
+
+-- Verification queries to run manually after phase 14a and 14b:
+-- select conname, pg_get_constraintdef(oid)
+-- from pg_constraint
+-- where conrelid in ('public.profiles'::regclass, 'public.client_invites'::regclass)
+--   and contype = 'c'
+-- order by conrelid::regclass::text, conname;
+--
+-- select role, count(*) from public.profiles group by role order by role;
+-- select role, status, count(*) from public.client_invites group by role, status order by role, status;

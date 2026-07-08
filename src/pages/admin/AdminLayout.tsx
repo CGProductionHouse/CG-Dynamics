@@ -21,12 +21,14 @@ const dynamicsNav: NavItem[] = [
 const hubNav: NavItem[] = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
   { to: '/admin/my-day', label: 'My Day' },
-  { to: '/admin/client-schedule', label: 'Client Schedule' },
-  { to: '/admin/planner', label: 'Planner Board' },
+  { to: '/admin/planner', label: 'Planner' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
+  { to: '/admin/client-schedule', label: 'Client Schedule' },
+  { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
-  { to: '/admin/users', label: 'Users & Invites', access: 'admin' },
+  { to: '/admin/users', label: 'Users', access: 'admin' },
+  { to: '/admin/invites', label: 'Invites', access: 'admin' },
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {

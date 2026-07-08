@@ -172,6 +172,12 @@ export default function InvitesAdmin() {
   const pendingInvites = invites.filter(invite => invite.status === 'pending')
   const acceptedInvites = invites.filter(invite => invite.status === 'accepted')
 
+  function inviteTarget(invite: ClientInvite) {
+    return invite.client_id
+      ? clientNameById.get(invite.client_id) ?? invite.client_id.slice(0, 8)
+      : 'Global workforce access'
+  }
+
   function renderInviteRows(rows: ClientInvite[], emptyText: string) {
     if (rows.length === 0) {
       return (
@@ -187,9 +193,7 @@ export default function InvitesAdmin() {
       <tr key={invite.id} className="border-b border-brand-muted last:border-0">
         <td className="px-4 py-3 text-white break-all">{invite.email}</td>
         <td className="px-4 py-3 text-brand-primary">
-          {invite.client_id
-            ? clientNameById.get(invite.client_id) ?? invite.client_id.slice(0, 8)
-            : 'All clients'}
+          {inviteTarget(invite)}
         </td>
         <td className="px-4 py-3 text-brand-primary">{roleLabel(invite.role)}</td>
         <td className="px-4 py-3">
@@ -230,13 +234,84 @@ export default function InvitesAdmin() {
     ))
   }
 
+  function renderInviteCards(rows: ClientInvite[], emptyText: string) {
+    if (rows.length === 0) {
+      return (
+        <div className="rounded-xl border border-brand-muted bg-brand-bg/40 px-4 py-6 text-center text-sm text-brand-primary">
+          {emptyText}
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-3">
+        {rows.map(invite => (
+          <article key={invite.id} className="rounded-xl border border-brand-muted bg-brand-bg/45 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="break-all text-sm font-semibold text-white">{invite.email}</p>
+                <p className="mt-1 text-xs text-brand-primary">{inviteTarget(invite)}</p>
+              </div>
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  invite.status === 'accepted'
+                    ? 'bg-brand-accent/20 text-brand-accent'
+                    : 'bg-amber-400/10 text-amber-300'
+                }`}
+              >
+                {invite.status === 'accepted' ? 'Accepted' : 'Pending'}
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+              <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-1 text-brand-primary">
+                {roleLabel(invite.role)}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-1 text-brand-primary">
+                Created {formatDateTime(invite.created_at)}
+              </span>
+              {invite.accepted_at && (
+                <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-1 text-brand-primary">
+                  Accepted {formatDateTime(invite.accepted_at)}
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              {invite.status === 'pending' && (
+                <button
+                  type="button"
+                  onClick={() => void handleCopyMessage(invite)}
+                  className="rounded-lg border border-brand-muted px-3 py-2 text-sm font-semibold text-brand-primary transition hover:border-brand-accent/40 hover:text-white"
+                >
+                  {copiedId === invite.id ? 'Copied!' : 'Copy invite message'}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => void handleDelete(invite)}
+                disabled={busyId === invite.id}
+                className="rounded-lg border border-red-400/20 px-3 py-2 text-sm font-semibold text-red-300 transition hover:border-red-400/40 hover:text-red-200 disabled:opacity-60"
+              >
+                Delete invite
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    )
+  }
+
   function renderInviteTable(title: string, rows: ClientInvite[], emptyText: string) {
     return (
       <section className="overflow-hidden rounded-xl border border-brand-muted bg-brand-surface">
         <div className="border-b border-brand-muted px-4 py-3">
           <h2 className="text-sm font-semibold text-white">{title}</h2>
         </div>
-        <div className="overflow-x-auto">
+        <div className="p-3 md:hidden">
+          {renderInviteCards(rows, emptyText)}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b border-brand-muted text-left">
@@ -283,7 +358,7 @@ export default function InvitesAdmin() {
       >
         <h2 className="text-sm font-semibold text-white mb-4">Create invite</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_0.8fr_auto] lg:items-end">
-          <Field label="Client email">
+          <Field label="Invite email">
             <input
               type="email"
               value={email}
