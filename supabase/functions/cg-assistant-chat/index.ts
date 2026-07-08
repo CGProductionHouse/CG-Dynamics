@@ -278,7 +278,14 @@ function getTaskLookupPlaceholder() {
 }
 
 function buildCapabilitiesResponse(role: string): string {
-  const notConnected = TOOL_REGISTRY.map((tool) => `- ${tool.name}: ${tool.description}`).join('\n')
+  const connected = TOOL_REGISTRY
+    .filter((tool) => tool.status === 'available')
+    .map((tool) => `- ${tool.name}: ${tool.description}`)
+    .join('\n')
+  const notConnected = TOOL_REGISTRY
+    .filter((tool) => tool.status !== 'available')
+    .map((tool) => `- ${tool.name}: ${tool.description}`)
+    .join('\n')
 
   return [
     'CG Assistant can help with practical operational work right now:',
@@ -287,7 +294,7 @@ function buildCapabilitiesResponse(role: string): string {
     '- Help prioritise when you provide the context directly in the chat.',
     '',
     'Connected right now:',
-    '- Sanitized My Day context from visible assigned work when the app sends it with the request.',
+    connected || '- None yet.',
     '- Role checks and protected-data filtering.',
     '- Server-side AI provider routing only.',
     '- Best-effort audit logging when the audit migration has been run.',
@@ -380,8 +387,8 @@ function buildSystemPrompt(role: string): string {
     'You are CG Assistant inside CG Dynamics.',
     'Be practical, short, operational, and clear.',
     `User role: ${role}. ${accessSummary(role)}`,
-    `Tool registry: ${tools}. No live operational tools are connected in this first version.`,
-    'If asked for live tasks, calendar items, client task details, approvals, Meta, or CG Hours data, say the integration is not connected yet and offer a useful checklist, draft, or workflow.',
+    `Tool registry: ${tools}. Only sanitized My Day context may be supplied with the request; other live operational tools are not connected yet.`,
+    'If asked for live tasks beyond the supplied My Day context, calendar lookups, client task details, approvals, Meta, or CG Hours data, say the integration is not connected yet and offer a useful checklist, draft, or workflow.',
     'Never reveal, infer, summarise, or guess salaries, payroll, bank details, Xero/accounting values, profit/loss, revenue, invoice totals, tax, owner notes, ID numbers, confidential finance, or private HR/payroll fields.',
     'Do not hallucinate data. If no data was provided or connected, say so.',
     'Answer as CG Assistant.',
