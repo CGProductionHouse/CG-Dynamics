@@ -68,6 +68,45 @@ supabase functions deploy cg-assistant-chat --no-verify-jwt
 > `--no-verify-jwt` is used because these functions handle their own auth
 > validation internally (JWT verification, role checks, or OAuth redirects).
 
+## Microsoft 365 import preview (setup contract only)
+
+`microsoft-import-preview` is an admin-authenticated, read-only endpoint
+contract. It currently returns `setup_required`; it does not call Microsoft
+Graph and must not be deployed as a working connector until the OAuth and token
+storage design below is implemented and reviewed.
+
+Use a delegated organisational connection. Required server-side Supabase
+secrets (never `VITE_` variables):
+
+```bash
+supabase secrets set MICROSOFT_CLIENT_ID=<entra-app-client-id>
+supabase secrets set MICROSOFT_CLIENT_SECRET=<entra-app-client-secret>
+supabase secrets set MICROSOFT_TENANT_ID=<organisation-tenant-id>
+supabase secrets set MICROSOFT_REDIRECT_URI=<full-microsoft-callback-function-url>
+```
+
+Required delegated permissions:
+
+- `User.Read`
+- `Calendars.Read`
+- `Tasks.Read`
+- `offline_access` for server-side refresh-token renewal
+- `Group.Read.All` only if Planner plan discovery cannot be restricted to
+  explicitly configured plan IDs
+
+Before Graph access is added, implement a one-time OAuth state flow and reviewed
+encrypted refresh-token storage. Do not copy the current Meta token storage
+implementation as an encryption design. Every Outlook event request must send
+`Prefer: IdType="ImmutableId"`. The preview endpoint must return only bounded,
+normalized records and must never return tokens, write to Graph, or write import
+records to Supabase.
+
+Once the complete authentication path exists, deploy separately with:
+
+```bash
+supabase functions deploy microsoft-import-preview --no-verify-jwt
+```
+
 ## Deploy note (cg-assistant-chat)
 
 Before deploying the CG Assistant function, run the repo migration
