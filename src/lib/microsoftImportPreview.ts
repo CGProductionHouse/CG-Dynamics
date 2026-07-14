@@ -239,7 +239,7 @@ export function previewPlannerTask(
     start_date: source.startDate,
     due_date: source.dueDate,
     notes: source.description,
-    source: 'microsoft_preview',
+    source: 'microsoft_import',
     original_plan_name: source.sourcePlanName,
     original_bucket_name: source.sourceBucketName,
     microsoft_source_type: 'planner_task',
@@ -478,6 +478,42 @@ function editedAfterLastSync(target: MicrosoftExistingTarget): boolean {
   const syncedAt = Date.parse(target.microsoftLastSyncedAt)
   if (Number.isNaN(updatedAt) || Number.isNaN(syncedAt)) return true
   return updatedAt > syncedAt
+}
+
+export function deliverableSlotKey(
+  packageId: string | null,
+  templateId: string | null,
+  instanceNumber: number | null,
+  month: string | null,
+): string | null {
+  if (!packageId || !templateId || !instanceNumber || !month) return null
+  return `${packageId}|${templateId}|${instanceNumber}|${month}`
+}
+
+// monthly_deliverables has a natural key the Microsoft source keys don't see:
+// unique (package_id, template_id, instance_number, month). A snapshot card
+// that lands on a slot already occupied in CG Dynamics (e.g. a deliverable
+// generated from the package template) must surface as a conflict, never as an
+// insert that would violate the constraint or duplicate work.
+export function flagDeliverableSlotConflicts(
+  items: MicrosoftImportPreviewItem[],
+  existingSlotKeys: Set<string>,
+): MicrosoftImportPreviewItem[] {
+  const seenInPreview = new Set<string>()
+  return items.map(item => {
+    const payload = item.proposedPayload
+    if (item.previewStatus !== 'new' || payload?.destination !== 'client_schedule') return item
+    const key = deliverableSlotKey(payload.package_id, payload.template_id, payload.instance_number, payload.month)
+    if (!key) return item
+    if (existingSlotKeys.has(key)) {
+      return { ...item, previewStatus: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
+    }
+    if (seenInPreview.has(key)) {
+      return { ...item, previewStatus: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'Another card in this snapshot already fills this package/template/instance/month slot.' }
+    }
+    seenInPreview.add(key)
+    return item
+  })
 }
 
 export function classifyMicrosoftPreviewAgainstExisting(

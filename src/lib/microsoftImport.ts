@@ -1,5 +1,3 @@
-import { supabase } from './supabase'
-
 export type MicrosoftImportSourceType = 'outlook_event' | 'planner_task' | 'planner_client_social'
 export type MicrosoftImportDestination = 'cg_calendar' | 'planner' | 'client_schedule' | 'review'
 export type MicrosoftPreviewStatus = 'new' | 'existing' | 'changed' | 'conflict' | 'skipped'
@@ -19,6 +17,7 @@ export type MicrosoftConflictCode =
   | 'missing_package'
   | 'ambiguous_package'
   | 'missing_template'
+  | 'existing_deliverable_slot'
 
 export interface MicrosoftOutlookEventSource {
   sourceType: 'outlook_event'
@@ -63,7 +62,8 @@ export interface MicrosoftPlannerPayload {
   start_date: string | null
   due_date: string | null
   notes: string | null
-  source: 'microsoft_preview'
+  /** The value apply writes — must match so reruns classify as existing. */
+  source: 'microsoft_import'
   original_plan_name: string
   original_bucket_name: string
   microsoft_source_type: 'planner_task'
@@ -174,19 +174,6 @@ export interface MicrosoftImportPreviewItem {
   proposedPayload: MicrosoftProposedPayload
 }
 
-export type MicrosoftPreviewSource =
-  | 'outlook-calendar'
-  | 'planner-to-do'
-  | 'planner-master-client-to-do'
-  | 'planner-cg-socials'
-  | 'planner-monthly-client-socials'
-
-export interface MicrosoftPreviewRequest {
-  source: MicrosoftPreviewSource
-  rangeStart: string
-  rangeEnd: string
-}
-
 export interface MicrosoftPreviewSummary {
   total: number
   new: number
@@ -196,38 +183,10 @@ export interface MicrosoftPreviewSummary {
   skipped: number
 }
 
-export interface MicrosoftPreviewReadyResponse {
-  ok: true
-  status: 'ready'
-  items: MicrosoftImportPreviewItem[]
-  summary: MicrosoftPreviewSummary
-}
-
-export interface MicrosoftPreviewSetupRequiredResponse {
-  ok: true
-  status: 'setup_required'
-  message: string
-  missingConfiguration: string[]
-  requiredPermissions: string[]
-}
-
-export type MicrosoftPreviewResponse = MicrosoftPreviewReadyResponse | MicrosoftPreviewSetupRequiredResponse
-
 export function summarizeMicrosoftPreview(items: MicrosoftImportPreviewItem[]): MicrosoftPreviewSummary {
   return items.reduce<MicrosoftPreviewSummary>((summary, item) => {
     summary.total += 1
     summary[item.previewStatus] += 1
     return summary
   }, { total: 0, new: 0, existing: 0, changed: 0, conflict: 0, skipped: 0 })
-}
-
-export async function requestMicrosoftImportPreview(request: MicrosoftPreviewRequest): Promise<MicrosoftPreviewResponse> {
-  const { data, error } = await supabase.functions.invoke<MicrosoftPreviewResponse>('microsoft-import-preview', {
-    method: 'POST',
-    body: request,
-  })
-
-  if (error) throw new Error(error.message || 'Microsoft preview request failed.')
-  if (!data) throw new Error('Microsoft preview returned no response.')
-  return data
 }

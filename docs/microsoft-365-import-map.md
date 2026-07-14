@@ -4,6 +4,67 @@ Architecture contract for importing Microsoft Planner and Outlook data into CG
 Dynamics. This is a one-way, preview-first migration path. It does not define a
 live two-way sync and does not authorize automatic writes.
 
+## Architecture decision (ratified)
+
+**Option A — once-off, operator-assisted migration.** CG Dynamics is replacing
+Teams/Planner, so the migration happens once and the deployed app never needs
+to talk to Microsoft Graph itself. Consequences:
+
+- There is **no** Entra app registration, OAuth flow, refresh-token store or
+  Microsoft Edge Function in this project. The earlier `setup_required` stub
+  endpoint was removed rather than built out.
+- An operator with delegated organisational access (the coding-agent Microsoft
+  connector authenticated as info@cgproductionhouse.com, or Graph Explorer)
+  exports a **snapshot file** (schema below). An admin uploads it at
+  `/admin/microsoft-import`; preview and insert-only apply run in the browser
+  against Supabase with the admin's own RLS-checked session.
+- Option B (reusable in-app importer) exists only to the extent that the same
+  snapshot can be re-exported and re-uploaded — reruns are idempotent and
+  classify already-imported rows as `existing`.
+- Option C (recurring connection) is deliberately **not** built. If it is ever
+  genuinely needed, it requires a new reviewed design (delegated OAuth,
+  encrypted token storage, immutable Outlook IDs) — see
+  `supabase/functions/README.md`.
+
+## Snapshot file contract
+
+The upload accepted by `/admin/microsoft-import` (parsed and strictly
+validated by `src/lib/microsoftSnapshot.ts`):
+
+```json
+{
+  "format": "cg-dynamics-microsoft-snapshot",
+  "version": 1,
+  "exportedAt": "2026-07-14T09:00:00Z",
+  "exportedBy": "info@cgproductionhouse.com via coding-agent Graph connector",
+  "records": [
+    {
+      "sourceType": "outlook_event",
+      "sourceCalendarId": "...", "sourceEventId": "...",
+      "title": "...", "safeSummary": null,
+      "startDate": "2026-07-15T09:00:00+02:00", "endDate": null,
+      "allDay": false, "location": null, "cancelled": false,
+      "assigneeMicrosoftIds": []
+    },
+    {
+      "sourceType": "planner_task",
+      "sourcePlanId": "...", "sourcePlanName": "To Do",
+      "sourceBucketId": "...", "sourceBucketName": "ADMIN / TO DO",
+      "sourceTaskId": "...", "title": "...", "description": null,
+      "startDate": null, "dueDate": "2026-07-20",
+      "assigneeMicrosoftIds": [], "percentComplete": 0
+    }
+  ]
+}
+```
+
+Rules: Outlook event IDs must be fetched with `Prefer: IdType="ImmutableId"`;
+Outlook dates keep their timezone offsets; Planner dates are plain
+`YYYY-MM-DD`; `exportedAt` becomes `microsoft_last_synced_at` on applied rows.
+The snapshot carries titles, dates, IDs and notes only — never tokens or
+credentials. Structural errors reject the whole file; content problems (blank
+IDs, unknown plans, unmatched clients) become preview conflicts instead.
+
 ## Product boundaries
 
 | Microsoft source | CG Dynamics destination | Source of truth |
@@ -210,11 +271,24 @@ separate admin-only design and security review.
 - Old rows may have only `import_hash` and no Microsoft source IDs; backfilling
   them is a separate reviewed operation.
 
-## Next implementation steps
+## Implementation status
 
-1. Review and manually apply `supabase/phase-15a-microsoft-source-tracking.sql`.
-2. Build read-only fetch/export adapters that output typed preview rows.
-3. Extend Planner Import to read all workbook lookup sheets consistently.
-4. Add Outlook event preview with immutable IDs and time-zone tests.
-5. Add Client Socials preview using existing package/deliverable helpers.
-6. Add approved batch apply with audit metadata and no automatic deletions.
+- Done: snapshot schema + strict parser (`src/lib/microsoftSnapshot.ts`),
+  preview classification and conflict detection
+  (`src/lib/microsoftImportPreview.ts`), live mapping context / existing-target
+  loading and insert-only apply (`src/lib/microsoftImportData.ts`), admin page
+  at `/admin/microsoft-import`.
+- Apply is **insert-only**: `changed` rows are surfaced but never written —
+  resolving them (accept Microsoft value vs keep CG edit) is a manual action
+  for now. No deletes, no archives, no Microsoft writes.
+- The `monthly_deliverables` natural key
+  `(package_id, template_id, instance_number, month)` is guarded: occupied
+  slots become conflicts instead of constraint violations.
+- Remaining before live migration:
+  1. Review and manually apply
+     `supabase/phase-15a-microsoft-source-tracking.sql` (Apply stays disabled
+     in the UI until it is present).
+  2. Export real snapshots via the Microsoft connector (Outlook operational
+     calendar + the four Planner plan families) and run them through preview.
+  3. Optional later: an explicit per-row "accept update" action for `changed`
+     rows.
