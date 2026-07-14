@@ -81,6 +81,28 @@ _Last updated: 2026-07-14_
   data could not be exercised because the automation browser has no accessible
   signed-in session; protected-route behavior remains covered at all required
   viewports.
+- **Loop 3 Planner:** operational statuses now preserve blocked, waiting-client
+  and done states; start dates can be edited; manager controls are separated
+  from assigned-staff status changes; archive results remain visible in
+  History; desktop buckets use the same priority/date ordering as mobile;
+  title/client/assignee and status filters are available; managers have a
+  phone-width task creator; helpers can be maintained as comma-separated names.
+- **Loop 3 Daily Tasks:** SAST supplies the default day, failed quick-status
+  writes are visible, self-assignment stores the profile ID, the invalid
+  `__other__` assignee sentinel was removed, suggested Morning List client
+  matches are no longer preselected for saving, and partial batch failures
+  remove already-created rows from retry state to prevent duplicates.
+- **Loop 3 permissions:** prepared
+  `supabase/phase-16a-operational-task-permissions.sql` aligns manager Planner
+  and Daily Tasks management, adds assigned-staff status RPCs, extends Planner
+  operational statuses, and fixes the live Daily Tasks bucket constraint. It
+  was not run against production; review and explicit approval are required.
+- **Loop 3 verification:** production build and targeted ESLint passed. Real
+  Edge checks at 1440x900, 1366x768 and 390x844 confirmed Planner and Daily
+  Tasks direct URLs remain protected, with no console errors or horizontal
+  overflow on the login result. Authenticated create/edit/archive testing and
+  temporary QA records were not attempted because no signed-in automation
+  session was accessible and Phase 16a is not live.
 
 ## Goals 3–8
 

@@ -12,6 +12,7 @@ import {
   listClientScheduleDeliverablesForYear,
   createPlannerTask,
   updatePlannerTask,
+  updatePlannerTaskStatus,
   archivePlannerTask,
   updateMonthlyDeliverableCore,
   updateMonthlyDeliverableSchedule,
@@ -33,6 +34,7 @@ import {
   type TaskPriority,
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
+import { isManagerRole } from '../../lib/roles'
 
 const BOARD_LABELS: Record<string, string> = {
   'operations-todo': 'Operations',
@@ -88,7 +90,7 @@ function formatPlannerDate(dateStr: string) {
 }
 
 function isPlannerHistoryTask(task: PlannerTask) {
-  return Boolean(task.archived_at) || task.status === 'approved' || task.status === 'scheduled'
+  return Boolean(task.archived_at) || task.status === 'approved' || task.status === 'scheduled' || task.status === 'done'
 }
 
 function plannerTaskSortRank(task: PlannerTask) {
@@ -109,7 +111,7 @@ function plannerTaskSortRank(task: PlannerTask) {
 function plannerStatusTone(status: PlannerTaskStatus) {
   if (status === 'in_progress') return 'text-brand-accent border-brand-accent/20'
   if (status === 'ready_internal_review') return 'text-amber-300 border-amber-400/20'
-  if (status === 'approved' || status === 'scheduled') return 'text-[#2dd4bf] border-[#2dd4bf]/20'
+  if (status === 'approved' || status === 'scheduled' || status === 'done') return 'text-[#2dd4bf] border-[#2dd4bf]/20'
   return 'text-white/35 border-white/10'
 }
 
@@ -130,6 +132,7 @@ function formatDeliverableDate(value: string | null) {
 export default function PlannerPage() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
+  const canManage = isManagerRole(profile?.role)
   const myName = profile?.full_name ?? null
   const navigate = useNavigate()
 
@@ -142,6 +145,8 @@ export default function PlannerPage() {
   const [tableMissing, setTableMissing] = useState(false)
   const [drawerTask, setDrawerTask] = useState<PlannerTask | null>(null)
   const [workView, setWorkView] = useState<PlannerWorkView>('active')
+  const [taskSearch, setTaskSearch] = useState('')
+  const [taskStatusFilter, setTaskStatusFilter] = useState<'all' | PlannerTaskStatus>('all')
   const [scheduleMonthKey, setScheduleMonthKey] = useState(monthKey(new Date()))
   const [scheduleDeliverables, setScheduleDeliverables] = useState<MonthlyDeliverable[]>([])
   const [scheduleLoading, setScheduleLoading] = useState(false)
@@ -154,31 +159,27 @@ export default function PlannerPage() {
   // Load boards
   useEffect(() => {
     let active = true
-    setLoading(true)
-    setTableMissing(false)
-
-    listPlannerBoards().then(({ data, error }) => {
-      if (!active) return
-      setLoading(false)
-      if (error) {
-        if (error.message?.includes('does not exist') || error.code === '42P01') {
-          setTableMissing(true)
+    const timer = window.setTimeout(() => {
+      setLoading(true)
+      setTableMissing(false)
+      listPlannerBoards().then(({ data, error }) => {
+        if (!active) return
+        setLoading(false)
+        if (error) {
+          if (error.message?.includes('does not exist') || error.code === '42P01') setTableMissing(true)
           return
         }
-        return
-      }
-      const result = data ?? []
-      setBoards(result)
-      if (result.length > 0 && !activeBoard) {
-        // Default to the first OPERATIONAL board — never the Client Schedule
-        // board (that is a separate system reached via /admin/client-schedule).
-        const firstOperational = result.find(b => b.slug !== 'client-schedule') ?? result[0]
-        setActiveBoard(firstOperational.slug)
-      }
-    })
+        const result = data ?? []
+        setBoards(result)
+        if (result.length > 0) {
+          const firstOperational = result.find(b => b.slug !== 'client-schedule')
+          setActiveBoard(current => current ?? firstOperational?.slug ?? null)
+        }
+      })
+    }, 0)
 
-    return () => { active = false }
-  }, [activeBoard])
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [])
 
   // Load buckets when board changes
   useEffect(() => {
@@ -195,33 +196,29 @@ export default function PlannerPage() {
     return () => { active = false }
   }, [activeBoard, boards])
 
-  // Materialise upcoming recurring-task instances once per visit. Idempotent
-  // (unique import_hash) and a graceful no-op before phase-13a is applied.
-  useEffect(() => {
-    void materializeRecurringTasks()
-  }, [])
-
   // Load tasks when board changes
   useEffect(() => {
-    setTasks([])
     if (!activeBoard || boards.length === 0) return
     const board = boards.find(b => b.slug === activeBoard)
     if (!board) return
+    const boardId = board.id
 
     let active = true
-    setTasksLoading(true)
-    listPlannerTasks(board.id).then(({ data }) => {
+    const timer = window.setTimeout(() => {
+      setTasks([])
+      setTasksLoading(true)
+      void loadBoardTasks().catch(() => { if (active) setTasksLoading(false) })
+    }, 0)
+    async function loadBoardTasks() {
+      if (canManage) await materializeRecurringTasks()
+      const { data } = await listPlannerTasks(boardId)
       if (!active) return
-      // Recurrence templates are definitions, not work — only their
-      // materialised instances belong on the board.
       setTasks((data ?? []).filter(task => !isRecurringTemplate(task)))
       setTasksLoading(false)
-    }).catch(() => {
-      if (active) setTasksLoading(false)
-    })
+    }
 
-    return () => { active = false }
-  }, [activeBoard, boards])
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [activeBoard, boards, canManage])
 
   useEffect(() => {
     let active = true
@@ -234,25 +231,27 @@ export default function PlannerPage() {
   useEffect(() => {
     if (activeBoard !== 'client-schedule') return
     let active = true
-    setScheduleLoading(true)
-    setScheduleError(null)
     const year = parseInt(scheduleMonthKey.split('-')[0], 10)
-    listClientScheduleDeliverablesForYear(year).then(({ data, error }) => {
-      if (!active) return
-      setScheduleLoading(false)
-      if (error) {
-        setScheduleError(error.message ?? 'Could not load client schedule.')
+    const timer = window.setTimeout(() => {
+      setScheduleLoading(true)
+      setScheduleError(null)
+      listClientScheduleDeliverablesForYear(year).then(({ data, error }) => {
+        if (!active) return
+        setScheduleLoading(false)
+        if (error) {
+          setScheduleError(error.message ?? 'Could not load client schedule.')
+          setScheduleDeliverables([])
+          return
+        }
+        setScheduleDeliverables(data ?? [])
+      }).catch(() => {
+        if (!active) return
+        setScheduleLoading(false)
+        setScheduleError('Could not load client schedule.')
         setScheduleDeliverables([])
-        return
-      }
-      setScheduleDeliverables(data ?? [])
-    }).catch(() => {
-      if (!active) return
-      setScheduleLoading(false)
-      setScheduleError('Could not load client schedule.')
-      setScheduleDeliverables([])
-    })
-    return () => { active = false }
+      })
+    }, 0)
+    return () => { active = false; window.clearTimeout(timer) }
   }, [activeBoard, scheduleMonthKey])
 
   // Escape to close drawer
@@ -296,8 +295,16 @@ export default function PlannerPage() {
   const historyTaskCount = useMemo(() => tasks.filter(isPlannerHistoryTask).length, [tasks])
 
   const visibleTasks = useMemo(
-    () => tasks.filter(task => workView === 'history' ? isPlannerHistoryTask(task) : !isPlannerHistoryTask(task)),
-    [tasks, workView],
+    () => {
+      const search = taskSearch.trim().toLowerCase()
+      return tasks.filter(task => {
+        if (workView === 'history' ? !isPlannerHistoryTask(task) : isPlannerHistoryTask(task)) return false
+        if (taskStatusFilter !== 'all' && task.status !== taskStatusFilter) return false
+        if (search && ![task.title, task.client_name, task.assigned_to_name].some(value => value?.toLowerCase().includes(search))) return false
+        return true
+      })
+    },
+    [taskSearch, taskStatusFilter, tasks, workView],
   )
 
   // Group tasks by bucket for O(1) column lookup
@@ -307,6 +314,11 @@ export default function PlannerPage() {
       const key = t.bucket_id ?? '__none__'
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(t)
+    }
+    for (const bucketTasks of map.values()) {
+      bucketTasks.sort((a, b) => plannerTaskSortRank(a) - plannerTaskSortRank(b)
+        || (a.due_date ?? '9999-12-31').localeCompare(b.due_date ?? '9999-12-31')
+        || a.title.localeCompare(b.title))
     }
     return map
   }, [visibleTasks])
@@ -612,6 +624,14 @@ export default function PlannerPage() {
         </button>
       </div>
 
+      <div className="mb-4 grid gap-2 sm:grid-cols-2">
+        <input type="search" value={taskSearch} onChange={event => setTaskSearch(event.target.value)} placeholder="Search title, client or assignee" className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-xs text-white placeholder:text-white/30" />
+        <select value={taskStatusFilter} onChange={event => setTaskStatusFilter(event.target.value as 'all' | PlannerTaskStatus)} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-xs text-white">
+          <option value="all">All statuses</option>
+          {PLANNER_TASK_STATUSES.map(status => <option key={status} value={status}>{PLANNER_TASK_STATUS_LABELS[status]}</option>)}
+        </select>
+      </div>
+
       {/* Bucket columns */}
       {buckets.length === 0 ? (
         <EmptyState
@@ -628,6 +648,9 @@ export default function PlannerPage() {
             workView={workView}
             onOpenTask={setDrawerTask}
           />
+          {canManage && activeBoardId && (
+            <MobileTaskCreator boardId={activeBoardId} buckets={buckets} myName={myName} onTaskCreated={handleTaskCreated} />
+          )}
           <div className="hidden gap-3 overflow-x-auto pb-6 md:flex">
             {buckets.map(bucket => (
               <BucketColumn
@@ -637,6 +660,7 @@ export default function PlannerPage() {
                 tasks={tasksByBucket.get(bucket.id) ?? []}
                 tasksLoading={tasksLoading}
                 myName={myName}
+                canManage={canManage}
                 onOpenTask={setDrawerTask}
                 onTaskCreated={handleTaskCreated}
               />
@@ -652,11 +676,13 @@ export default function PlannerPage() {
           task={drawerTask}
           buckets={buckets}
           actorName={myName}
+          canManage={canManage}
           onClose={() => setDrawerTask(null)}
           onSaved={handleTaskSaved}
-          onRemoved={id => {
-            setTasks(prev => prev.filter(task => task.id !== id))
+          onArchived={archived => {
+            setTasks(prev => prev.map(task => task.id === archived.id ? archived : task))
             setDrawerTask(null)
+            setWorkView('history')
           }}
         />
       )}
@@ -941,12 +967,62 @@ function PlannerMobileTaskList({
   )
 }
 
-function BucketColumn({ bucket, boardId, tasks, tasksLoading, myName, onOpenTask, onTaskCreated }: {
+function MobileTaskCreator({ boardId, buckets, myName, onTaskCreated }: {
+  boardId: string
+  buckets: PlannerBucket[]
+  myName: string | null
+  onTaskCreated: (task: PlannerTask) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState('')
+  const [bucketId, setBucketId] = useState(buckets[0]?.id ?? '')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function submit(event: FormEvent) {
+    event.preventDefault()
+    if (!title.trim() || !bucketId || saving) return
+    setSaving(true)
+    setError(null)
+    const result = await createPlannerTask({ board_id: boardId, bucket_id: bucketId, title: title.trim(), assigned_to_name: myName })
+    setSaving(false)
+    if (result.error) {
+      setError(result.error.message)
+      return
+    }
+    if (result.data) onTaskCreated(result.data)
+    setTitle('')
+    setOpen(false)
+  }
+
+  return (
+    <div className="mb-4 md:hidden">
+      {!open ? (
+        <button type="button" onClick={() => setOpen(true)} className="w-full rounded-xl border border-brand-teal/25 bg-brand-teal/[0.07] px-4 py-3 text-sm font-black text-brand-teal">+ New Planner task</button>
+      ) : (
+        <form onSubmit={submit} className="space-y-3 rounded-xl border border-white/10 bg-white/[0.035] p-3">
+          <input autoFocus value={title} onChange={event => setTitle(event.target.value)} placeholder="Task title" className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white" />
+          <select value={bucketId} onChange={event => setBucketId(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 text-sm text-white">
+            {buckets.map(bucket => <option key={bucket.id} value={bucket.id}>{bucket.name}</option>)}
+          </select>
+          {error && <p className="text-xs text-red-300">{error}</p>}
+          <div className="flex gap-2">
+            <button type="submit" disabled={saving || !title.trim() || !bucketId} className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-black text-black disabled:opacity-50">{saving ? 'Saving...' : 'Create'}</button>
+            <button type="button" onClick={() => setOpen(false)} className="rounded-lg border border-white/10 px-4 py-2 text-xs text-brand-primary">Cancel</button>
+          </div>
+        </form>
+      )}
+    </div>
+  )
+}
+
+function BucketColumn({ bucket, boardId, tasks, tasksLoading, myName, canManage, onOpenTask, onTaskCreated }: {
   bucket: PlannerBucket
   boardId: string
   tasks: PlannerTask[]
   tasksLoading: boolean
   myName: string | null
+  canManage: boolean
   onOpenTask: (task: PlannerTask) => void
   onTaskCreated: (task: PlannerTask) => void
 }) {
@@ -1014,17 +1090,11 @@ function BucketColumn({ bucket, boardId, tasks, tasksLoading, myName, onOpenTask
             {tasks.length === 0 && !showAdd && (
               <div className="flex flex-col items-center gap-1.5 py-4">
                 <p className="text-[11px] text-white/20">No tasks</p>
-                <button
-                  type="button"
-                  onClick={() => setShowAdd(true)}
-                  className="text-[11px] text-brand-primary/40 hover:text-brand-primary transition-colors"
-                >
-                  + Add task
-                </button>
+                {canManage && <button type="button" onClick={() => setShowAdd(true)} className="text-[11px] text-brand-primary/40 hover:text-brand-primary transition-colors">+ Add task</button>}
               </div>
             )}
 
-            {showAdd ? (
+            {canManage && showAdd ? (
               <form onSubmit={handleAdd} className="pt-0.5">
                 <input
                   autoFocus
@@ -1051,7 +1121,7 @@ function BucketColumn({ bucket, boardId, tasks, tasksLoading, myName, onOpenTask
                   </button>
                 </div>
               </form>
-            ) : tasks.length > 0 && (
+            ) : canManage && tasks.length > 0 && (
               <button
                 type="button"
                 onClick={() => setShowAdd(true)}
@@ -1108,13 +1178,14 @@ function PlannerTaskCard({ task, onClick }: { task: PlannerTask; onClick: () => 
   )
 }
 
-function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemoved }: {
+function PlannerTaskDrawer({ task, buckets, actorName, canManage, onClose, onSaved, onArchived }: {
   task: PlannerTask
   buckets: PlannerBucket[]
   actorName: string | null
+  canManage: boolean
   onClose: () => void
   onSaved: (updated: PlannerTask) => void
-  onRemoved: (id: string) => void
+  onArchived: (task: PlannerTask) => void
 }) {
   const [title, setTitle] = useState(task.title)
   const [clientId, setClientId] = useState(task.client_id ?? '')
@@ -1122,14 +1193,19 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
   const [assignedTo, setAssignedTo] = useState(task.assigned_to_name ?? '')
   const [status, setStatus] = useState<PlannerTaskStatus>(task.status)
   const [priority, setPriority] = useState<TaskPriority>(task.priority)
+  const [startDate, setStartDate] = useState(task.start_date ?? '')
   const [dueDate, setDueDate] = useState(task.due_date ?? '')
   const [notes, setNotes] = useState(task.notes ?? '')
+  const [helperNames, setHelperNames] = useState((task.helper_names ?? []).join(', '))
   const [bucketId, setBucketId] = useState(task.bucket_id ?? '')
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [removing, setRemoving] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
+  const normalizedActor = actorName?.trim().toLowerCase() ?? ''
+  const canUpdateStatus = canManage || task.assigned_to_name?.trim().toLowerCase() === normalizedActor
+    || task.helper_names?.some(name => name.trim().toLowerCase() === normalizedActor)
 
   async function handleSave() {
     if (saving || !title.trim()) return
@@ -1137,6 +1213,21 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
     setSaveMsg(null)
     setSaveError(null)
     try {
+      if (!canManage) {
+        if (!canUpdateStatus) {
+          setSaveError('This task is read-only because it is not assigned to you.')
+          return
+        }
+        const result = await updatePlannerTaskStatus(task.id, status)
+        if (result.error) { setSaveError(result.error.message); return }
+        if (result.data) onSaved(result.data as PlannerTask)
+        setSaveMsg('Status saved')
+        return
+      }
+      if (startDate && dueDate && startDate > dueDate) {
+        setSaveError('Start date cannot be after the due date.')
+        return
+      }
       const { data, error } = await updatePlannerTask(task.id, {
         title: title.trim(),
         client_id: clientId || null,
@@ -1144,12 +1235,14 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
         assigned_to_name: assignedTo.trim() || null,
         status,
         priority,
+        start_date: startDate || null,
         due_date: dueDate || null,
         notes: notes.trim() || null,
         bucket_id: bucketId || null,
+        helper_names: helperNames.split(',').map(name => name.trim()).filter(Boolean),
       })
       if (error) {
-        setSaveError(error.code === '42501' ? 'Admin permission needed.' : error.message)
+        setSaveError(error.code === '42501' ? 'Manager permission needed.' : error.message)
         return
       }
       if (data) {
@@ -1168,7 +1261,7 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
     if (removing) return
     setRemoving(true)
     setSaveError(null)
-    const { error } = await archivePlannerTask(task.id, actorName)
+    const { data, error } = await archivePlannerTask(task.id, actorName)
     if (error) {
       setSaveError(error.code === '42703'
         ? 'Archive migration is not applied yet. Run phase-9a-planner-task-archive.sql in Supabase.'
@@ -1176,7 +1269,7 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
       setRemoving(false)
       return
     }
-    onRemoved(task.id)
+    if (data) onArchived(data as PlannerTask)
   }
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
@@ -1216,13 +1309,13 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Title</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} className={inputCls} />
+            <input value={title} onChange={e => setTitle(e.target.value)} disabled={!canManage} className={inputCls} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
-              <select value={status} onChange={e => setStatus(e.target.value as PlannerTaskStatus)} className={inputCls}>
+              <select value={status} onChange={e => setStatus(e.target.value as PlannerTaskStatus)} disabled={!canUpdateStatus} className={inputCls}>
                 {PLANNER_TASK_STATUSES.map(s => (
                   <option key={s} value={s}>{PLANNER_TASK_STATUS_LABELS[s]}</option>
                 ))}
@@ -1230,7 +1323,7 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">Priority</label>
-              <select value={priority} onChange={e => setPriority(e.target.value as TaskPriority)} className={inputCls}>
+              <select value={priority} onChange={e => setPriority(e.target.value as TaskPriority)} disabled={!canManage} className={inputCls}>
                 {PRIORITIES.map(p => (
                   <option key={p} value={p}>
                     {p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}
@@ -1258,6 +1351,7 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
                 value={assignedTo}
                 onChange={e => setAssignedTo(e.target.value)}
                 placeholder="Name"
+                disabled={!canManage}
                 className={inputCls}
               />
             </div>
@@ -1265,23 +1359,27 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Due date</label>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Start date</label>
               <input
                 type="date"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+                disabled={!canManage}
                 className={inputCls}
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Column</label>
-              <select value={bucketId} onChange={e => setBucketId(e.target.value)} className={inputCls}>
-                <option value="">— None —</option>
-                {buckets.map(b => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
+              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Due date</label>
+              <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} disabled={!canManage} className={inputCls} />
             </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Column</label>
+            <select value={bucketId} onChange={e => setBucketId(e.target.value)} disabled={!canManage} className={inputCls}>
+              <option value="">— None —</option>
+              {buckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
           </div>
 
           <div>
@@ -1290,13 +1388,16 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={4}
+              disabled={!canManage}
               className={`resize-none ${inputCls}`}
             />
           </div>
 
           <div>
             <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p>
-            {task.helper_names !== undefined ? (
+            {canManage ? (
+              <input value={helperNames} onChange={event => setHelperNames(event.target.value)} placeholder="Names separated by commas" className={inputCls} />
+            ) : task.helper_names !== undefined ? (
               task.helper_names.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                   {task.helper_names.map(name => (
@@ -1343,7 +1444,7 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
             >
               Close
             </button>
-            {!confirmRemove ? (
+            {canManage && (!confirmRemove ? (
               <button
                 type="button"
                 onClick={() => setConfirmRemove(true)}
@@ -1370,7 +1471,7 @@ function PlannerTaskDrawer({ task, buckets, actorName, onClose, onSaved, onRemov
                   Cancel
                 </button>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>

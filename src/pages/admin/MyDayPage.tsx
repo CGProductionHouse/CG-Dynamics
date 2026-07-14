@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { updateTaskStatus } from '../../lib/commandCentre'
-import { updatePlannerTask } from '../../lib/planner'
+import { updatePlannerTaskStatus } from '../../lib/planner'
 import { updateMonthlyDeliverableStatus } from '../../lib/planner'
 import {
   getMyDayContext,
@@ -77,7 +77,7 @@ export default function MyDayPage() {
     setMessage(null)
     try {
       if (item.nativePlannerId) {
-        const result = await updatePlannerTask(item.nativePlannerId, { status: 'ready_internal_review' })
+        const result = await updatePlannerTaskStatus(item.nativePlannerId, 'ready_internal_review')
         if (result.error) throw new Error(result.error.message)
       } else if (item.source === 'client_deliverable' && item.deliverableId) {
         const result = await updateMonthlyDeliverableStatus(item.deliverableId, 'ready_internal_review')

@@ -891,20 +891,26 @@ export async function generateAllForMonth(monthStartDate: string) {
 export type PlannerTaskStatus =
   | 'to_do'
   | 'in_progress'
+  | 'blocked'
+  | 'waiting_client'
   | 'ready_internal_review'
   | 'approved'
   | 'scheduled'
+  | 'done'
 
 export const PLANNER_TASK_STATUSES: PlannerTaskStatus[] = [
-  'to_do', 'in_progress', 'ready_internal_review', 'approved', 'scheduled',
+  'to_do', 'in_progress', 'blocked', 'waiting_client', 'ready_internal_review', 'approved', 'scheduled', 'done',
 ]
 
 export const PLANNER_TASK_STATUS_LABELS: Record<PlannerTaskStatus, string> = {
   to_do: 'To do',
   in_progress: 'In progress',
+  blocked: 'Blocked',
+  waiting_client: 'Waiting client',
   ready_internal_review: 'Ready for review',
   approved: 'Approved',
   scheduled: 'Scheduled',
+  done: 'Done',
 }
 
 export interface PlannerTask {
@@ -1034,6 +1040,7 @@ export interface CreatePlannerTaskInput {
   client_name?: string | null
   status?: PlannerTaskStatus
   priority?: TaskPriority
+  start_date?: string | null
   due_date?: string | null
   notes?: string | null
 }
@@ -1051,6 +1058,7 @@ export async function createPlannerTask(input: CreatePlannerTaskInput) {
       assigned_to_name: input.assigned_to_name ?? null,
       status: input.status ?? 'to_do',
       priority: input.priority ?? 'normal',
+      start_date: input.start_date ?? null,
       due_date: input.due_date ?? null,
       notes: input.notes ?? null,
       source: 'manual',
@@ -1067,6 +1075,7 @@ export interface UpdatePlannerTaskInput {
   assigned_to_name?: string | null
   status?: PlannerTaskStatus
   priority?: TaskPriority
+  start_date?: string | null
   due_date?: string | null
   notes?: string | null
   bucket_id?: string | null
@@ -1081,6 +1090,12 @@ export async function updatePlannerTask(id: string, updates: UpdatePlannerTaskIn
     .eq('id', id)
     .select()
     .single()
+}
+
+export async function updatePlannerTaskStatus(id: string, status: PlannerTaskStatus) {
+  const rpcResult = await supabase.rpc('update_planner_task_status', { p_task_id: id, p_status: status })
+  if (!rpcResult.error || rpcResult.error.code !== 'PGRST202') return rpcResult
+  return updatePlannerTask(id, { status })
 }
 
 export async function archivePlannerTask(id: string, actorName: string | null, reason = 'Removed from active work') {
