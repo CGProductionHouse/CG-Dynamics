@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Link, Outlet } from 'react-router-dom'
+import { NavLink, Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 import { isAdminRole, isManagerRole, roleLabel } from '../../lib/roles'
@@ -9,6 +9,12 @@ type NavAccess = 'staff' | 'manager' | 'admin'
 type NavItem = { to: string; label: string; end?: boolean; access?: NavAccess }
 
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
+
+const DYNAMICS_PATHS = ['/admin/client-performance', '/admin/clients', '/admin/client-dashboard', '/admin/client-calendar', '/admin/integrations']
+
+function zoneForPath(pathname: string): Zone {
+  return DYNAMICS_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`)) ? 'dynamics' : 'hub'
+}
 
 const dynamicsNav: NavItem[] = [
   { to: '/admin/client-performance', label: 'Performance Dashboard' },
@@ -96,21 +102,17 @@ function NavSection({ label }: { label: string }) {
 
 export default function AdminLayout() {
   const { profile, signOut } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [zone, setZone] = useState<Zone>(() => {
-    try {
-      return (localStorage.getItem('cg-zone') as Zone) ?? 'hub'
-    } catch {
-      return 'dynamics'
-    }
-  })
+  const zone = zoneForPath(location.pathname)
 
   const currentRole = profile?.role ?? 'team'
   const close = () => setMobileMenuOpen(false)
 
   function switchZone(z: Zone) {
-    setZone(z)
-    try { localStorage.setItem('cg-zone', z) } catch { /* ignore */ }
+    navigate(z === 'hub' ? '/admin/cg-hub' : '/admin/client-performance')
+    close()
   }
 
   function canShow(item: NavItem) {
@@ -165,7 +167,7 @@ export default function AdminLayout() {
     { to: '/admin/my-day', label: 'My Day' },
     { to: '/admin/planner', label: 'Planner' },
     { to: '/admin/cg-calendar', label: 'Calendar' },
-    { to: '/admin/assistant', label: 'Assist' },
+    { to: '/admin/command-centre', label: 'Tasks' },
   ]
   const mobileItems = (zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems).filter(canShow)
   const displayRole = roleLabel(profile?.role)

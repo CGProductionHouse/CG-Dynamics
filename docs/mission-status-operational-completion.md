@@ -28,19 +28,38 @@ _Last updated: 2026-07-14_
   list). Authenticated end-to-end browser testing is **not possible from this
   environment** (no Supabase credentials here) — first live run must be
   watched by an admin.
-- **Blockers (human):**
-  1. Apply `supabase/phase-15a-microsoft-source-tracking.sql` in the Supabase
-     SQL editor (UI blocks Apply until then).
-  2. Reconnect the Microsoft 365 connector for the export session — it
+- **Live schema correction (verified 2026-07-14):** Phase 15a is already live.
+  A read-only Management API query confirmed all Microsoft source columns on
+  `planner_tasks`, `monthly_deliverables`, and `company_calendar_events`, plus
+  the unique indexes `planner_tasks_microsoft_source_key`,
+  `monthly_deliverables_microsoft_source_key`, and
+  `company_calendar_events_microsoft_source_key`. Do not rerun Phase 15a.
+- **Blocker (human):**
+  1. Reconnect the Microsoft 365 connector for the export session — it
      disconnected mid-mission; real plan/calendar snapshots are not yet
      exported.
-- **State:** architecture resolved; import tooling ready; real data migration
-  pending the two blockers above.
+- **State:** architecture resolved; import tooling and live schema ready; real
+  data migration is pending only the future connector-assisted snapshot export.
 
 ## Goal 2 — daily operating system (Hub, My Day, Planner, Command Centre, CG Calendar)
 
 - Month-key dates leaking into My Day/Hub date logic fixed (part of PR #25).
-- Remaining audit not started this pass.
+- **Loop 1 route baseline:** `/admin` and successful staff login now resolve to
+  `/admin/cg-hub`; protected deep links survive login; unknown routes recover
+  through the role-aware root redirect; navigation zones follow the current
+  URL; Daily Tasks replaces Assistant in the five-item mobile operations bar;
+  auth/profile loading states are visible instead of blank screens.
+- **Role baseline:** Users, Invites and Microsoft Import remain admin-only.
+  Hub, My Day, Planner, Daily Tasks and CG Calendar remain staff workspace
+  routes; clients are redirected to their dashboard.
+- **Loop 1 browser verification:** real headless Edge at 1440x900, 1366x768
+  and 390x844. Landing, direct Hub protection, Microsoft Import protection,
+  wildcard recovery and browser Back passed with no console errors or
+  horizontal overflow. Navigation-related font requests aborted during route
+  changes only; no repeated application request loop was observed.
+- **Loop 1 limitation:** no signed-in browser session was accessible to the
+  automation context, so authenticated admin/team menu visibility is not yet
+  recorded as passed.
 
 ## Goals 3–8
 
@@ -51,11 +70,11 @@ release (Goal 8), then the OpenClaw handoff doc.
 
 ## Standing environment constraints
 
-- No Supabase credentials and no live DB access from this working environment;
-  schema state (which phase-N migrations are applied) cannot be verified from
-  here. Code must degrade gracefully when a prepared migration is missing.
-- Supabase and Microsoft 365 MCP connectors disconnected mid-mission; both are
-  needed again for live verification and snapshot export.
+- The configured Supabase project is available for read-only schema checks.
+  Production data mutations and migration execution still require explicit
+  approval and review in the Supabase SQL editor.
+- The Microsoft 365 connector is not part of the deployed app and is only
+  needed later for operator-assisted snapshot export.
 - `docs/pending-supabase-migrations.md` is stale (2026-06-30): it predates
   phases 10a–15a. Treat every phase-≥10 migration as unverified until checked
   live.

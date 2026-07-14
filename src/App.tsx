@@ -11,7 +11,6 @@ import Signup from './pages/Signup'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
-import AdminHomePage from './pages/admin/AdminHomePage'
 import ClientPerformancePage from './pages/admin/ClientPerformancePage'
 import CgHubPage from './pages/admin/CgHubPage'
 import MyDayPage from './pages/admin/MyDayPage'
@@ -74,7 +73,7 @@ export default function App() {
           <Route element={<RequireStaff />}>
             <Route element={<AdminLayout />}>
               {/* Read access for all staff (admin + team) */}
-              <Route path="/admin" element={<AdminHomePage />} />
+              <Route path="/admin" element={<Navigate to="/admin/cg-hub" replace />} />
               <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
               <Route path="/admin/my-day" element={<MyDayPage />} />
@@ -125,6 +124,7 @@ export default function App() {
           <Route element={<RequireClient />}>
             <Route path="/dashboard" element={<Dashboard />} />
           </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
