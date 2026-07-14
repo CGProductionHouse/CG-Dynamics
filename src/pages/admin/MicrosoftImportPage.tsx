@@ -46,7 +46,9 @@ function addDays(date: Date, days: number) {
 }
 
 function sourceKey(item: MicrosoftImportPreviewItem) {
-  return item.sourceEventId ?? item.sourceTaskId ?? `${item.sourceName}:${item.title}`
+  if (item.sourceEventId) return `${item.sourceCalendarId}:${item.sourceEventId}`
+  if (item.sourceTaskId) return `${item.sourcePlanId}:${item.sourceTaskId}`
+  return `${item.sourceName}:${item.title}`
 }
 
 function destinationLabel(destination: MicrosoftImportPreviewItem['destination']) {
@@ -93,6 +95,7 @@ function PreviewCard({ item }: { item: MicrosoftImportPreviewItem }) {
           {item.conflictReason}
         </p>
       )}
+      {item.warnings.map(warning => <p key={warning} className="mt-3 text-xs leading-relaxed text-amber-100/75">{warning}</p>)}
     </article>
   )
 }
@@ -137,6 +140,11 @@ export default function MicrosoftImportPage() {
     }
   }
 
+  function resetPreview() {
+    setResponse(null)
+    setError(null)
+  }
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
       <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.16),transparent_38%),linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.015))] p-5 sm:p-8">
@@ -163,7 +171,7 @@ export default function MicrosoftImportPage() {
             <button
               key={option.id}
               type="button"
-              onClick={() => setSource(option.id)}
+              onClick={() => { setSource(option.id); resetPreview() }}
               className={`rounded-2xl border p-4 text-left transition-colors ${source === option.id ? 'border-brand-teal/55 bg-brand-teal/[0.09]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}
             >
               <span className="block text-sm font-black text-white">{option.name}</span>
@@ -178,11 +186,11 @@ export default function MicrosoftImportPage() {
         <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <label className="block text-xs font-bold text-white/60">
             From
-            <input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none focus:border-brand-teal/50" />
+            <input type="date" value={rangeStart} onChange={event => { setRangeStart(event.target.value); resetPreview() }} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none focus:border-brand-teal/50" />
           </label>
           <label className="block text-xs font-bold text-white/60">
             To
-            <input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none focus:border-brand-teal/50" />
+            <input type="date" value={rangeEnd} onChange={event => { setRangeEnd(event.target.value); resetPreview() }} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none focus:border-brand-teal/50" />
           </label>
           <button type="button" onClick={runPreview} disabled={loading} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black transition-opacity disabled:cursor-wait disabled:opacity-55">
             {loading ? 'Checking Microsoft...' : 'Preview'}
@@ -200,6 +208,8 @@ export default function MicrosoftImportPage() {
           <p className="mt-2 text-sm leading-relaxed text-white/60">{response.message}</p>
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-white/35">Required permissions</p>
           <p className="mt-2 text-sm text-white/70">{response.requiredPermissions.join(', ')}</p>
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-white/35">Missing configuration</p>
+          <ul className="mt-2 space-y-1 text-sm text-white/70">{response.missingConfiguration.map(item => <li key={item}>{item}</li>)}</ul>
         </section>
       )}
 

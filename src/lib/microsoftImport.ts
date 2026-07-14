@@ -15,6 +15,10 @@ export type MicrosoftConflictCode =
   | 'existing_row_changed'
   | 'ambiguous_client_match'
   | 'missing_source_id'
+  | 'unsupported_deliverable'
+  | 'missing_package'
+  | 'ambiguous_package'
+  | 'missing_template'
 
 export interface MicrosoftOutlookEventSource {
   sourceType: 'outlook_event'
@@ -71,11 +75,16 @@ export interface MicrosoftPlannerPayload {
 export interface MicrosoftClientSchedulePayload {
   destination: 'client_schedule'
   client_id: string | null
+  package_id: string | null
+  template_id: string | null
+  board_id: string | null
+  bucket_id: string | null
   month: string | null
   code: string | null
+  instance_number: number | null
   title: string
   deliverable_type: 'dp' | 'photo' | 'video' | 'reel' | null
-  production_status: 'not_started' | 'in_production' | 'internal_review' | 'scheduled_posted'
+  production_status: 'to_do' | 'in_progress' | 'scheduled'
   priority: 'normal'
   scheduled_date: string | null
   notes: string | null
@@ -161,6 +170,7 @@ export interface MicrosoftImportPreviewItem {
   previewStatus: MicrosoftPreviewStatus
   conflictCode: MicrosoftConflictCode | null
   conflictReason: string | null
+  warnings: string[]
   proposedPayload: MicrosoftProposedPayload
 }
 

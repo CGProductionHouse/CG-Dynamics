@@ -32,10 +32,26 @@ export interface MicrosoftPreviewBucket {
   name: string
 }
 
+export interface MicrosoftPreviewClientPackage {
+  id: string
+  clientId: string
+  status: 'active' | 'paused' | 'archived'
+}
+
+export interface MicrosoftPreviewDeliverableTemplate {
+  id: string
+  packageId: string
+  code: string
+  deliverableType: 'dp' | 'photo' | 'video' | 'reel' | 'content_run' | 'website_update' | 'monthly_report' | 'strategy' | 'admin' | 'other'
+  active: boolean
+}
+
 export interface MicrosoftPreviewMappingContext {
   clients: MicrosoftPreviewClient[]
   boards: MicrosoftPreviewBoard[]
   buckets: MicrosoftPreviewBucket[]
+  packages: MicrosoftPreviewClientPackage[]
+  templates: MicrosoftPreviewDeliverableTemplate[]
 }
 
 type ClientResolution =
@@ -67,7 +83,7 @@ function validDateOnly(value: string): boolean {
 }
 
 function validIsoDate(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(Date.parse(value))
+  return /^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/i.test(value) && !Number.isNaN(Date.parse(value))
 }
 
 function plannerDateIsValid(value: string | null): boolean {
@@ -95,14 +111,15 @@ function planMonth(planName: string): string | null {
   return month ? `${match[2]}-${month}` : null
 }
 
-function deliverableIdentity(title: string): Pick<MicrosoftClientSchedulePayload, 'code' | 'deliverable_type'> {
-  const match = /^\s*(DP|F|PHOTO|VIDEO|REEL)(?:\s*[-#]?\s*\d+)?\b/i.exec(title)
-  if (!match) return { code: null, deliverable_type: null }
+function deliverableIdentity(title: string): Pick<MicrosoftClientSchedulePayload, 'code' | 'deliverable_type' | 'instance_number'> {
+  const match = /^\s*(DP|F|PHOTO|VIDEO|REEL)\s*[-#]?\s*(\d+)\b/i.exec(title)
+  if (!match) return { code: null, deliverable_type: null, instance_number: null }
   const code = match[1].toUpperCase()
-  if (code === 'DP') return { code: 'DP', deliverable_type: 'dp' }
-  if (code === 'F' || code === 'PHOTO') return { code: 'F', deliverable_type: 'photo' }
-  if (code === 'VIDEO') return { code: 'VIDEO', deliverable_type: 'video' }
-  return { code: 'REEL', deliverable_type: 'reel' }
+  const instance_number = Number(match[2])
+  if (code === 'DP') return { code: `DP${instance_number}`, deliverable_type: 'dp', instance_number }
+  if (code === 'F' || code === 'PHOTO') return { code: `F${instance_number}`, deliverable_type: 'photo', instance_number }
+  if (code === 'VIDEO') return { code: `Video ${instance_number}`, deliverable_type: 'video', instance_number }
+  return { code: `Reel ${instance_number}`, deliverable_type: 'reel', instance_number }
 }
 
 function plannerBase(source: MicrosoftPlannerTaskSource): Omit<MicrosoftImportPreviewItem, 'previewStatus' | 'conflictCode' | 'conflictReason'> {
@@ -124,6 +141,9 @@ function plannerBase(source: MicrosoftPlannerTaskSource): Omit<MicrosoftImportPr
     mappedClientId: null,
     mappedClientName: null,
     existingTargetId: null,
+    warnings: source.assigneeMicrosoftIds.length > 0
+      ? ['Microsoft assignee IDs are unresolved and will remain unassigned.']
+      : [],
     proposedPayload: null,
   }
 }
@@ -152,17 +172,37 @@ export function previewPlannerTask(
   }
 
   if (plan.target === 'client_schedule') {
-    const month = planMonth(source.sourcePlanName)
+    const monthKey = planMonth(source.sourcePlanName)
+      ?? (normalizeMicrosoftMatchName(source.sourcePlanName) === '2025 clients schedule' ? (source.dueDate ?? source.startDate)?.slice(0, 7) ?? null : null)
+    const month = monthKey ? `${monthKey}-01` : null
     const client = resolveMicrosoftClient(source.sourceBucketName, context.clients)
     const identity = deliverableIdentity(source.title)
+    const clientId = client.client?.id ?? null
+    const packages = clientId
+      ? context.packages.filter(item => item.clientId === clientId && item.status === 'active')
+      : []
+    const clientPackage = packages.length === 1 ? packages[0] : null
+    const identityCode = identity.code
+    const template = clientPackage && identityCode && identity.deliverable_type
+      ? context.templates.find(item => item.packageId === clientPackage.id
+          && item.active
+          && normalizeMicrosoftMatchName(item.code) === normalizeMicrosoftMatchName(identityCode)
+          && item.deliverableType === identity.deliverable_type) ?? null
+      : null
+    const progress = plannerProgress(source.percentComplete)
     const payload: MicrosoftClientSchedulePayload = {
       destination: 'client_schedule',
       client_id: client.client?.id ?? null,
+      package_id: clientPackage?.id ?? null,
+      template_id: template?.id ?? null,
+      board_id: null,
+      bucket_id: null,
       month,
       code: identity.code,
+      instance_number: identity.instance_number,
       title: source.title.trim(),
       deliverable_type: identity.deliverable_type,
-      production_status: plannerProgress(source.percentComplete) === 'approved' ? 'scheduled_posted' : plannerProgress(source.percentComplete) === 'in_progress' ? 'in_production' : 'not_started',
+      production_status: progress === 'approved' ? 'scheduled' : progress,
       priority: 'normal',
       scheduled_date: source.dueDate,
       notes: source.description,
@@ -175,7 +215,10 @@ export function previewPlannerTask(
     if (!month) return conflict(mapped, 'invalid_date', 'The monthly plan name must include a valid month and year.')
     if (client.status === 'ambiguous') return conflict(mapped, 'ambiguous_client_match', `More than one active client exactly matches "${source.sourceBucketName}".`)
     if (client.status === 'unresolved') return conflict(mapped, 'unresolved_client', `No active client exactly matches "${source.sourceBucketName}".`)
-    if (!identity.deliverable_type) return conflict(mapped, 'unsupported_bucket', 'The card title must start with DP, F, Photo, Video, or Reel.')
+    if (!identity.deliverable_type || !identity.instance_number) return conflict(mapped, 'unsupported_deliverable', 'The card title must include a numbered DP, F, Photo, Video, or Reel code.')
+    if (packages.length === 0) return conflict(mapped, 'missing_package', `Client "${client.client?.name ?? source.sourceBucketName}" has no active package.`)
+    if (packages.length > 1) return conflict(mapped, 'ambiguous_package', `Client "${client.client?.name ?? source.sourceBucketName}" has more than one active package.`)
+    if (!template) return conflict(mapped, 'missing_template', `No active package template exactly matches "${identity.code}".`)
     return { ...mapped, previewStatus: 'new', conflictCode: null, conflictReason: null }
   }
 
@@ -231,6 +274,9 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
     mappedClientId: null,
     mappedClientName: null,
     existingTargetId: null,
+    warnings: source.assigneeMicrosoftIds.length > 0
+      ? ['Outlook attendee or assignee IDs are not imported.']
+      : [],
     proposedPayload: null,
   }
   if (!microsoftOutlookSourceKey(source.sourceCalendarId, source.sourceEventId)) {
@@ -239,6 +285,9 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
   if (!source.title.trim()) return conflict(base, 'missing_title', 'The Outlook event has no title.')
   if (!validIsoDate(source.startDate) || (source.endDate !== null && !validIsoDate(source.endDate))) {
     return conflict(base, 'invalid_date', 'Outlook event dates must be timezone-preserving ISO values.')
+  }
+  if (source.endDate !== null && Date.parse(source.endDate) <= Date.parse(source.startDate)) {
+    return conflict(base, 'invalid_date', 'The Outlook event end must be after its start.')
   }
   const payload = {
     destination: 'cg_calendar' as const,
@@ -272,14 +321,14 @@ export function buildMicrosoftImportPreview(
     const key = item.sourceType === 'outlook_event'
       ? microsoftOutlookSourceKey(item.sourceCalendarId ?? '', item.sourceEventId ?? '')
       : microsoftPlannerSourceKey(item.sourcePlanId ?? '', item.sourceTaskId ?? '')
-    if (key) counts.set(`${item.destination}:${key}`, (counts.get(`${item.destination}:${key}`) ?? 0) + 1)
+    if (key) counts.set(key, (counts.get(key) ?? 0) + 1)
   }
 
   return items.map(item => {
     const key = item.sourceType === 'outlook_event'
       ? microsoftOutlookSourceKey(item.sourceCalendarId ?? '', item.sourceEventId ?? '')
       : microsoftPlannerSourceKey(item.sourcePlanId ?? '', item.sourceTaskId ?? '')
-    if (!key || counts.get(`${item.destination}:${key}`) === 1) return item
+    if (!key || counts.get(key) === 1) return item
     return { ...item, previewStatus: 'conflict', conflictCode: 'duplicate_source_key', conflictReason: 'This exact Microsoft source key appears more than once in the preview.' }
   })
 }
@@ -329,8 +378,13 @@ function plannerMaterial(payload: Extract<MicrosoftImportPreviewItem['proposedPa
 function scheduleMaterial(payload: Extract<MicrosoftImportPreviewItem['proposedPayload'], { destination: 'client_schedule' }>) {
   return {
     client_id: payload.client_id,
+    package_id: payload.package_id,
+    template_id: payload.template_id,
+    board_id: payload.board_id,
+    bucket_id: payload.bucket_id,
     month: payload.month,
     code: payload.code,
+    instance_number: payload.instance_number,
     title: payload.title,
     deliverable_type: payload.deliverable_type,
     production_status: payload.production_status,
@@ -384,8 +438,13 @@ function materialTarget(target: MicrosoftExistingTarget): object {
   if (target.destination === 'client_schedule') {
     return {
       client_id: target.payload.client_id,
+      package_id: target.payload.package_id,
+      template_id: target.payload.template_id,
+      board_id: target.payload.board_id,
+      bucket_id: target.payload.bucket_id,
       month: target.payload.month,
       code: target.payload.code,
+      instance_number: target.payload.instance_number,
       title: target.payload.title,
       deliverable_type: target.payload.deliverable_type,
       production_status: target.payload.production_status,
@@ -414,10 +473,11 @@ function sameMaterialFields(item: MicrosoftImportPreviewItem, target: MicrosoftE
 }
 
 function editedAfterLastSync(target: MicrosoftExistingTarget): boolean {
-  if (!target.microsoftLastSyncedAt) return false
+  if (!target.microsoftLastSyncedAt) return true
   const updatedAt = Date.parse(target.updatedAt)
   const syncedAt = Date.parse(target.microsoftLastSyncedAt)
-  return !Number.isNaN(updatedAt) && !Number.isNaN(syncedAt) && updatedAt > syncedAt
+  if (Number.isNaN(updatedAt) || Number.isNaN(syncedAt)) return true
+  return updatedAt > syncedAt
 }
 
 export function classifyMicrosoftPreviewAgainstExisting(
