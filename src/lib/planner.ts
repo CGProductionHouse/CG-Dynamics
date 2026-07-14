@@ -85,6 +85,12 @@ export interface MonthlyDeliverable {
   notes: string | null
   // Collaborative assignments — added in phase-7b.
   helper_names?: string[]
+  // Microsoft source identity - added in phase-15a.
+  microsoft_source_type?: string | null
+  microsoft_plan_id?: string | null
+  microsoft_bucket_id?: string | null
+  microsoft_task_id?: string | null
+  microsoft_last_synced_at?: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -926,6 +932,12 @@ export interface PlannerTask {
   recurrence_rule?: string | null
   recurrence_parent_id?: string | null
   recurrence_until?: string | null
+  // Microsoft source identity - added in phase-15a.
+  microsoft_source_type?: string | null
+  microsoft_plan_id?: string | null
+  microsoft_bucket_id?: string | null
+  microsoft_task_id?: string | null
+  microsoft_last_synced_at?: string | null
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
