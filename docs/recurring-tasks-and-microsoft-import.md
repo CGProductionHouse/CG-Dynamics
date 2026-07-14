@@ -69,11 +69,12 @@ in `docs/cg-dynamics-outstanding-audit.md`.
 session, use it read-only to enumerate plans/buckets/labels and validate the
 mapping above against the real structure before writing any importer code.
 
-## 3. Calendar ↔ tasks connection (next pass)
+## 3. Calendar and task connection
 
-CG Calendar should stop being events-only. Next pass: read-only overlays on
-`/admin/cg-calendar` — scheduled posts (`monthly_deliverables` via
-`getEffectiveScheduleDate`) and dated planner tasks (`planner_tasks.due_date`)
-as toggleable chip layers with a legend, each chip linking back to Client
-Schedule / Planner for editing. No new tables; the calendar stays a
-presentation layer over the existing sources of truth.
+The page vision contract supersedes the older scheduled-post overlay idea.
+CG Calendar remains the Teams-style operational calendar: Outlook events map to
+`company_calendar_events`, with dated operational Planner tasks available as an
+optional layer. Client Schedule posts and `monthly_deliverables` stay in Client
+Schedule, Master Schedule and client-safe schedule views only.
+
+See `docs/microsoft-365-import-map.md` for the canonical Microsoft source map.
