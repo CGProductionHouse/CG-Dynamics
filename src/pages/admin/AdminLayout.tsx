@@ -29,6 +29,7 @@ const hubNav: NavItem[] = [
   { to: '/admin/assistant', label: 'Assistant' },
   { to: '/admin/users', label: 'Users', access: 'admin' },
   { to: '/admin/invites', label: 'Invites', access: 'admin' },
+  { to: '/admin/microsoft-import', label: 'Microsoft Import', access: 'admin' },
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {

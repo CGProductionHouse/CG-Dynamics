@@ -36,6 +36,7 @@ import ClientContentCalendarPage from './pages/admin/ClientContentCalendarPage'
 import PlannerImportPage from './pages/admin/PlannerImportPage'
 import ImportHealthPage from './pages/admin/ImportHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
+import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -115,6 +116,7 @@ export default function App() {
                 {/* Legacy deep link kept working. */}
                 <Route path="/admin/invites" element={<InvitesAdmin />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
+                <Route path="/admin/microsoft-import" element={<MicrosoftImportPage />} />
               </Route>
             </Route>
           </Route>
