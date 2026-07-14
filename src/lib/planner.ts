@@ -383,6 +383,11 @@ export function monthKey(date: Date): string {
   return `${y}-${m}`
 }
 
+/** True when a value is a YYYY-MM month key, not a full YYYY-MM-DD date. */
+export function isMonthKey(value: string): boolean {
+  return /^\d{4}-\d{2}$/.test(value)
+}
+
 export function monthStart(date: Date): string {
   return `${monthKey(date)}-01`
 }

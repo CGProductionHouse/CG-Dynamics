@@ -1,6 +1,7 @@
 import { listTasks, type CommandCentreTask } from './commandCentre'
 import {
   getEffectiveScheduleDate,
+  isMonthKey,
   listMonthlyDeliverablesByMonth,
   monthKey,
   normalizeScheduleStatus,
@@ -163,6 +164,7 @@ function localMinutesFromIso(value: string | null | undefined) {
 
 function formatDateLabel(value: string | null, today: string) {
   if (!value) return 'Unscheduled'
+  if (isMonthKey(value)) return 'This month'
   if (value < today) return 'Overdue'
   if (value === today) return 'Today'
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(new Date(`${value}T00:00:00`))
@@ -222,7 +224,8 @@ function toDeliverableItem(
   clientNameById: Map<string, string>,
   today: string,
 ): MyDayItem {
-  const date = getEffectiveScheduleDate(deliverable)
+  const rawDate = getEffectiveScheduleDate(deliverable)
+  const date = rawDate && !isMonthKey(rawDate) ? rawDate : null
   const status = normalizeScheduleStatus(deliverable.production_status)
   const sortRank = date && date < today ? 2 : date === today ? 3 : status === 'in_progress' ? 4 : 8
   return {
@@ -457,7 +460,8 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     })
     .filter(deliverable => userMatches(deliverable.assigned_to_user_id, deliverable.assigned_to_name, deliverable.helper_names, profile))
     .filter(deliverable => {
-      const date = getEffectiveScheduleDate(deliverable)
+      const rawDate = getEffectiveScheduleDate(deliverable)
+      const date = rawDate && !isMonthKey(rawDate) ? rawDate : null
       return !date || date <= weekEnd
     })
     .map(deliverable => toDeliverableItem(deliverable, clientNameById, today))
