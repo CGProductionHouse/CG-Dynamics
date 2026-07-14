@@ -29,6 +29,11 @@ export interface CompanyCalendarEvent {
   status: CompanyEventStatus
   linked_deliverable_id: string | null
   linked_task_id: string | null
+  // Microsoft source identity - added in phase-15a.
+  microsoft_source_type?: string | null
+  microsoft_calendar_id?: string | null
+  microsoft_event_id?: string | null
+  microsoft_last_synced_at?: string | null
   created_at: string
   updated_at: string
 }

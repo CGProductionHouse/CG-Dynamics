@@ -104,7 +104,7 @@ function taskPriorityRank(t: CommandCentreTask, today: string): number {
 }
 
 function deliverableDate(d: MonthlyDeliverable) {
-  return d.scheduled_date ?? d.due_date ?? d.month
+  return d.scheduled_date ?? d.due_date ?? null
 }
 
 // ── Hub Page ──────────────────────────────────────────────────

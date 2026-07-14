@@ -85,6 +85,12 @@ export interface MonthlyDeliverable {
   notes: string | null
   // Collaborative assignments — added in phase-7b.
   helper_names?: string[]
+  // Microsoft source identity - added in phase-15a.
+  microsoft_source_type?: string | null
+  microsoft_plan_id?: string | null
+  microsoft_bucket_id?: string | null
+  microsoft_task_id?: string | null
+  microsoft_last_synced_at?: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -381,6 +387,11 @@ export function monthKey(date: Date): string {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
   return `${y}-${m}`
+}
+
+/** True when a value is a YYYY-MM month key, not a full YYYY-MM-DD date. */
+export function isMonthKey(value: string): boolean {
+  return /^\d{4}-\d{2}$/.test(value)
 }
 
 export function monthStart(date: Date): string {
@@ -921,6 +932,12 @@ export interface PlannerTask {
   recurrence_rule?: string | null
   recurrence_parent_id?: string | null
   recurrence_until?: string | null
+  // Microsoft source identity - added in phase-15a.
+  microsoft_source_type?: string | null
+  microsoft_plan_id?: string | null
+  microsoft_bucket_id?: string | null
+  microsoft_task_id?: string | null
+  microsoft_last_synced_at?: string | null
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null

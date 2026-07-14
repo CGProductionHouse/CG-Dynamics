@@ -68,6 +68,21 @@ supabase functions deploy cg-assistant-chat --no-verify-jwt
 > `--no-verify-jwt` is used because these functions handle their own auth
 > validation internally (JWT verification, role checks, or OAuth redirects).
 
+## Microsoft 365 import (no Edge Function — deliberate)
+
+The Microsoft migration is a once-off, operator-assisted import (Option A in
+`docs/microsoft-365-import-map.md`). There is NO Microsoft Edge Function, no
+Entra app registration, no OAuth flow, and no token storage in this project —
+the deployed app never talks to Microsoft Graph.
+
+An operator with delegated organisational access exports a normalized JSON
+snapshot; an admin uploads it at `/admin/microsoft-import` where preview and
+apply run in the browser against Supabase. If a *recurring* Microsoft
+connection is ever genuinely needed, that becomes a new reviewed design
+(delegated OAuth, encrypted refresh-token storage, `Prefer:
+IdType="ImmutableId"` on every Outlook request) — do not resurrect the old
+stub endpoint without that review.
+
 ## Deploy note (cg-assistant-chat)
 
 Before deploying the CG Assistant function, run the repo migration
