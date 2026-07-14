@@ -108,6 +108,38 @@ export type MicrosoftProposedPayload =
   | MicrosoftCalendarPayload
   | null
 
+interface MicrosoftExistingTargetBase {
+  id: string
+  updatedAt: string
+  microsoftLastSyncedAt: string | null
+}
+
+export interface MicrosoftExistingPlannerTarget extends MicrosoftExistingTargetBase {
+  destination: 'planner'
+  microsoftPlanId: string
+  microsoftTaskId: string
+  payload: Omit<MicrosoftPlannerPayload, 'destination' | 'microsoft_source_type' | 'microsoft_plan_id' | 'microsoft_bucket_id' | 'microsoft_task_id'>
+}
+
+export interface MicrosoftExistingClientScheduleTarget extends MicrosoftExistingTargetBase {
+  destination: 'client_schedule'
+  microsoftPlanId: string
+  microsoftTaskId: string
+  payload: Omit<MicrosoftClientSchedulePayload, 'destination' | 'microsoft_source_type' | 'microsoft_plan_id' | 'microsoft_bucket_id' | 'microsoft_task_id'>
+}
+
+export interface MicrosoftExistingCalendarTarget extends MicrosoftExistingTargetBase {
+  destination: 'cg_calendar'
+  microsoftCalendarId: string
+  microsoftEventId: string
+  payload: Omit<MicrosoftCalendarPayload, 'destination' | 'microsoft_source_type' | 'microsoft_calendar_id' | 'microsoft_event_id'>
+}
+
+export type MicrosoftExistingTarget =
+  | MicrosoftExistingPlannerTarget
+  | MicrosoftExistingClientScheduleTarget
+  | MicrosoftExistingCalendarTarget
+
 export interface MicrosoftImportPreviewItem {
   sourceType: MicrosoftImportSourceType
   sourcePlanId: string | null

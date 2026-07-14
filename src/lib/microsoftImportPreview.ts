@@ -10,6 +10,7 @@ import type {
   MicrosoftConflictCode,
   MicrosoftImportPreviewItem,
   MicrosoftImportSourceRecord,
+  MicrosoftExistingTarget,
   MicrosoftOutlookEventSource,
   MicrosoftPlannerPayload,
   MicrosoftPlannerTaskSource,
@@ -280,5 +281,179 @@ export function buildMicrosoftImportPreview(
       : microsoftPlannerSourceKey(item.sourcePlanId ?? '', item.sourceTaskId ?? '')
     if (!key || counts.get(`${item.destination}:${key}`) === 1) return item
     return { ...item, previewStatus: 'conflict', conflictCode: 'duplicate_source_key', conflictReason: 'This exact Microsoft source key appears more than once in the preview.' }
+  })
+}
+
+function itemSourceKey(item: MicrosoftImportPreviewItem): string | null {
+  if (item.sourceType === 'outlook_event') {
+    const key = microsoftOutlookSourceKey(item.sourceCalendarId ?? '', item.sourceEventId ?? '')
+    return key ? `outlook:${key}` : null
+  }
+  const key = microsoftPlannerSourceKey(item.sourcePlanId ?? '', item.sourceTaskId ?? '')
+  return key ? `planner:${key}` : null
+}
+
+function targetSourceKey(target: MicrosoftExistingTarget): string | null {
+  if (target.destination === 'cg_calendar') {
+    const key = microsoftOutlookSourceKey(target.microsoftCalendarId, target.microsoftEventId)
+    return key ? `outlook:${key}` : null
+  }
+  const key = microsoftPlannerSourceKey(target.microsoftPlanId, target.microsoftTaskId)
+  return key ? `planner:${key}` : null
+}
+
+function normalizedIso(value: string | null): string | null {
+  if (!value) return null
+  const time = Date.parse(value)
+  return Number.isNaN(time) ? value : new Date(time).toISOString()
+}
+
+function plannerMaterial(payload: Extract<MicrosoftImportPreviewItem['proposedPayload'], { destination: 'planner' }>) {
+  return {
+    board_id: payload.board_id,
+    bucket_id: payload.bucket_id,
+    title: payload.title,
+    client_id: payload.client_id,
+    client_name: payload.client_name,
+    status: payload.status,
+    priority: payload.priority,
+    start_date: payload.start_date,
+    due_date: payload.due_date,
+    notes: payload.notes,
+    source: payload.source,
+    original_plan_name: payload.original_plan_name,
+    original_bucket_name: payload.original_bucket_name,
+  }
+}
+
+function scheduleMaterial(payload: Extract<MicrosoftImportPreviewItem['proposedPayload'], { destination: 'client_schedule' }>) {
+  return {
+    client_id: payload.client_id,
+    month: payload.month,
+    code: payload.code,
+    title: payload.title,
+    deliverable_type: payload.deliverable_type,
+    production_status: payload.production_status,
+    priority: payload.priority,
+    scheduled_date: payload.scheduled_date,
+    notes: payload.notes,
+  }
+}
+
+function calendarMaterial(payload: Extract<MicrosoftImportPreviewItem['proposedPayload'], { destination: 'cg_calendar' }>) {
+  return {
+    title: payload.title,
+    event_type: payload.event_type,
+    client_id: payload.client_id,
+    client_name: payload.client_name,
+    start_at: normalizedIso(payload.start_at),
+    end_at: normalizedIso(payload.end_at),
+    all_day: payload.all_day,
+    location: payload.location,
+    notes: payload.notes,
+    status: payload.status,
+  }
+}
+
+function materialPayload(item: MicrosoftImportPreviewItem): object | null {
+  const payload = item.proposedPayload
+  if (!payload) return null
+  if (payload.destination === 'planner') return plannerMaterial(payload)
+  if (payload.destination === 'client_schedule') return scheduleMaterial(payload)
+  return calendarMaterial(payload)
+}
+
+function materialTarget(target: MicrosoftExistingTarget): object {
+  if (target.destination === 'planner') {
+    return {
+      board_id: target.payload.board_id,
+      bucket_id: target.payload.bucket_id,
+      title: target.payload.title,
+      client_id: target.payload.client_id,
+      client_name: target.payload.client_name,
+      status: target.payload.status,
+      priority: target.payload.priority,
+      start_date: target.payload.start_date,
+      due_date: target.payload.due_date,
+      notes: target.payload.notes,
+      source: target.payload.source,
+      original_plan_name: target.payload.original_plan_name,
+      original_bucket_name: target.payload.original_bucket_name,
+    }
+  }
+  if (target.destination === 'client_schedule') {
+    return {
+      client_id: target.payload.client_id,
+      month: target.payload.month,
+      code: target.payload.code,
+      title: target.payload.title,
+      deliverable_type: target.payload.deliverable_type,
+      production_status: target.payload.production_status,
+      priority: target.payload.priority,
+      scheduled_date: target.payload.scheduled_date,
+      notes: target.payload.notes,
+    }
+  }
+  return {
+    title: target.payload.title,
+    event_type: target.payload.event_type,
+    client_id: target.payload.client_id,
+    client_name: target.payload.client_name,
+    start_at: normalizedIso(target.payload.start_at),
+    end_at: normalizedIso(target.payload.end_at),
+    all_day: target.payload.all_day,
+    location: target.payload.location,
+    notes: target.payload.notes,
+    status: target.payload.status,
+  }
+}
+
+function sameMaterialFields(item: MicrosoftImportPreviewItem, target: MicrosoftExistingTarget): boolean {
+  const proposed = materialPayload(item)
+  return proposed !== null && JSON.stringify(proposed) === JSON.stringify(materialTarget(target))
+}
+
+function editedAfterLastSync(target: MicrosoftExistingTarget): boolean {
+  if (!target.microsoftLastSyncedAt) return false
+  const updatedAt = Date.parse(target.updatedAt)
+  const syncedAt = Date.parse(target.microsoftLastSyncedAt)
+  return !Number.isNaN(updatedAt) && !Number.isNaN(syncedAt) && updatedAt > syncedAt
+}
+
+export function classifyMicrosoftPreviewAgainstExisting(
+  items: MicrosoftImportPreviewItem[],
+  existingTargets: MicrosoftExistingTarget[],
+): MicrosoftImportPreviewItem[] {
+  const targetsBySource = new Map<string, MicrosoftExistingTarget[]>()
+  for (const target of existingTargets) {
+    const key = targetSourceKey(target)
+    if (!key) continue
+    const matches = targetsBySource.get(key) ?? []
+    matches.push(target)
+    targetsBySource.set(key, matches)
+  }
+
+  return items.map(item => {
+    if (item.previewStatus === 'conflict' || item.previewStatus === 'skipped') return item
+    const key = itemSourceKey(item)
+    if (!key) return { ...item, previewStatus: 'conflict', conflictCode: 'missing_source_id', conflictReason: 'An exact Microsoft source key is required for comparison.' }
+
+    const sourceMatches = targetsBySource.get(key) ?? []
+    if (sourceMatches.length === 0) return item
+    if (sourceMatches.length > 1) {
+      return { ...item, previewStatus: 'conflict', conflictCode: 'duplicate_source_key', conflictReason: 'More than one CG Dynamics row uses this exact Microsoft source key.' }
+    }
+
+    const target = sourceMatches[0]
+    if (target.destination !== item.destination) {
+      return { ...item, existingTargetId: target.id, previewStatus: 'conflict', conflictCode: 'wrong_destination', conflictReason: `This Microsoft source already belongs to ${target.destination}, not ${item.destination}.` }
+    }
+    if (sameMaterialFields(item, target)) {
+      return { ...item, existingTargetId: target.id, previewStatus: 'existing', conflictCode: null, conflictReason: null }
+    }
+    if (editedAfterLastSync(target)) {
+      return { ...item, existingTargetId: target.id, previewStatus: 'conflict', conflictCode: 'existing_row_changed', conflictReason: 'This CG Dynamics row was edited after its last Microsoft sync.' }
+    }
+    return { ...item, existingTargetId: target.id, previewStatus: 'changed', conflictCode: null, conflictReason: null }
   })
 }
