@@ -102,6 +102,7 @@ type PlannerTaskRow = {
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
+  recurrence_rule?: string | null
 }
 
 type PlannerBucketRow = {
@@ -173,7 +174,7 @@ function plannerTaskToCommandTask(row: PlannerTaskRow, bucketName: string | unde
     bucket: bucket as TaskBucket,
     priority: row.priority ?? 'normal',
     status: taskStatusFromPlanner(row.status),
-    due_date: row.due_date ?? row.start_date ?? todayStr(),
+    due_date: row.due_date ?? row.start_date ?? '',
     notes: row.notes,
     source: row.source === 'teams_import' ? 'teams_import' : 'other',
     whatsapp_source_text: null,
@@ -206,7 +207,8 @@ export async function listTasks() {
     return { data: nativeResult.data ?? [], error: plannerResult.error }
   }
 
-  const plannerRows = ((plannerResult.data ?? []) as PlannerTaskRow[]).filter(row => !row.archived_at)
+  const plannerRows = ((plannerResult.data ?? []) as PlannerTaskRow[])
+    .filter(row => !row.archived_at && !row.recurrence_rule)
   const bucketIds = unique(plannerRows.map(row => row.bucket_id))
   const bucketNames = new Map<string, string>()
 

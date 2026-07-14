@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { updateTaskStatus } from '../../lib/commandCentre'
@@ -42,7 +42,11 @@ export default function MyDayPage() {
     }
   }
 
-  useEffect(() => { void load() }, [profile?.id])
+  const loadEvent = useEffectEvent(load)
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [profile?.id])
 
   const assignedItems = useMemo(() => {
     if (!context) return []
@@ -53,10 +57,12 @@ export default function MyDayPage() {
     setBusyId(item.id)
     setMessage(null)
     try {
-      if (item.source === 'planner_task') {
-        await updateTaskStatus(item.id, 'in_progress')
+      if (item.source === 'planner_task' || item.source === 'daily_task') {
+        const result = await updateTaskStatus(item.id, 'in_progress')
+        if (result.error) throw new Error(result.error.message)
       } else if (item.source === 'client_deliverable' && item.deliverableId) {
-        await updateMonthlyDeliverableStatus(item.deliverableId, 'in_progress')
+        const result = await updateMonthlyDeliverableStatus(item.deliverableId, 'in_progress')
+        if (result.error) throw new Error(result.error.message)
       }
       await load()
     } catch (error) {
@@ -71,9 +77,11 @@ export default function MyDayPage() {
     setMessage(null)
     try {
       if (item.nativePlannerId) {
-        await updatePlannerTask(item.nativePlannerId, { status: 'ready_internal_review' })
+        const result = await updatePlannerTask(item.nativePlannerId, { status: 'ready_internal_review' })
+        if (result.error) throw new Error(result.error.message)
       } else if (item.source === 'client_deliverable' && item.deliverableId) {
-        await updateMonthlyDeliverableStatus(item.deliverableId, 'ready_internal_review')
+        const result = await updateMonthlyDeliverableStatus(item.deliverableId, 'ready_internal_review')
+        if (result.error) throw new Error(result.error.message)
       }
       await load()
     } catch (error) {
@@ -310,7 +318,7 @@ function WorkItemCard({
   onStart: (item: MyDayItem) => void
   onReview: (item: MyDayItem) => void
 }) {
-  const canStart = item.source === 'planner_task' || item.source === 'client_deliverable'
+  const canStart = item.source === 'daily_task' || item.source === 'planner_task' || item.source === 'client_deliverable'
   const canReview = Boolean(item.nativePlannerId) || item.source === 'client_deliverable'
 
   return (

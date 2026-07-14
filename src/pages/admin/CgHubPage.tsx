@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useEffectEvent, useMemo } from 'react'
 import type { ReactNode, FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   listTasks,
@@ -11,7 +11,6 @@ import {
 } from '../../lib/commandCentre'
 import {
   listMonthlyDeliverablesByMonth,
-  monthKey,
   simplifyProductionStatus,
   type MonthlyDeliverable,
 } from '../../lib/planner'
@@ -21,6 +20,8 @@ import {
   type CompanyCalendarEvent,
 } from '../../lib/companyCalendar'
 import { getMyDayContext, sourceLabel, type MyDayContext, type MyDayItem } from '../../lib/workforceMyDay'
+import { businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
+import { isManagerRole } from '../../lib/roles'
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -60,34 +61,25 @@ const DELIVERABLE_STATUS_SHORT: Record<string, string> = {
 // ── Helpers ───────────────────────────────────────────────────
 
 function todayStr() {
-  return localDateKey(new Date())
+  return businessDateKey()
 }
 
 function todayLabel() {
-  return new Date().toLocaleDateString('en-GB', {
+  return formatBusinessDate(new Date(), {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
 }
 
-function localDateKey(date: Date) {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
-
 function localDateKeyFromIso(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value.slice(0, 10)
-  return localDateKey(date)
+  return businessDateKey(value) || value.slice(0, 10)
 }
 
-function taskMatchesProfile(task: CommandCentreTask, profile: { id?: string; full_name?: string | null } | null) {
-  if (task.assigned_to_user_id && profile?.id && task.assigned_to_user_id === profile.id) return true
+function workMatchesProfile(work: { assigned_to_user_id?: string | null; assigned_to_name?: string | null; helper_names?: string[] }, profile: { id?: string; full_name?: string | null } | null) {
+  if (work.assigned_to_user_id && profile?.id && work.assigned_to_user_id === profile.id) return true
   const name = profile?.full_name?.trim().toLowerCase()
   if (!name) return false
-  if (task.assigned_to_name?.trim().toLowerCase() === name) return true
-  return task.helper_names?.some(helper => helper.trim().toLowerCase() === name) ?? false
+  if (work.assigned_to_name?.trim().toLowerCase() === name) return true
+  return work.helper_names?.some(helper => helper.trim().toLowerCase() === name) ?? false
 }
 
 function isOverdueTask(task: CommandCentreTask, today: string) {
@@ -113,7 +105,7 @@ export default function CgHubPage() {
   const { profile } = useAuth()
 
   const today = useMemo(() => todayStr(), [])
-  const currentMonth = useMemo(() => monthKey(new Date()), [])
+  const currentMonth = useMemo(() => businessMonthKey(), [])
   const todayNice = useMemo(() => todayLabel(), [])
 
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
@@ -124,34 +116,52 @@ export default function CgHubPage() {
   const [loadingData, setLoadingData] = useState(true)
   const [quickTitle, setQuickTitle] = useState('')
   const [quickSaving, setQuickSaving] = useState(false)
+  const [quickMessage, setQuickMessage] = useState<string | null>(null)
+  const [loadErrors, setLoadErrors] = useState<string[]>([])
 
   async function loadAll() {
     setLoadingData(true)
-    const [tasksRes, delRes] = await Promise.all([
-      listTasks(),
-      listMonthlyDeliverablesByMonth(currentMonth),
-    ])
-    if (tasksRes.data) setTasks(tasksRes.data as CommandCentreTask[])
-    if (delRes.data) setDeliverables(delRes.data as MonthlyDeliverable[])
-
-    const companyRes = await listCompanyEvents()
-    if (companyRes.tableMissing) {
-      setCompanyEventsMissing(true)
-    } else if (companyRes.data) {
-      setCompanyEvents(companyRes.data as CompanyCalendarEvent[])
+    setLoadErrors([])
+    try {
+      const [tasksRes, delRes, companyRes, myDay] = await Promise.all([
+        listTasks(),
+        listMonthlyDeliverablesByMonth(currentMonth),
+        listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 31)),
+        getMyDayContext(profile),
+      ])
+      setLoadErrors([tasksRes.error?.message, delRes.error?.message, companyRes.error?.message].filter(Boolean) as string[])
+      setTasks((tasksRes.data ?? []) as CommandCentreTask[])
+      setDeliverables((delRes.data ?? []) as MonthlyDeliverable[])
+      setCompanyEventsMissing(companyRes.tableMissing)
+      setCompanyEvents((companyRes.data ?? []) as CompanyCalendarEvent[])
+      setMyDayContext(myDay)
+    } catch (error) {
+      setLoadErrors([error instanceof Error ? error.message : 'Could not load Hub data.'])
+      setTasks([])
+      setDeliverables([])
+      setCompanyEvents([])
+      setMyDayContext(null)
+    } finally {
+      setLoadingData(false)
     }
-    const myDay = await getMyDayContext(profile)
-    setMyDayContext(myDay)
-    setLoadingData(false)
   }
 
-  useEffect(() => { void loadAll() }, [currentMonth, profile?.id])
+  const loadAllEvent = useEffectEvent(loadAll)
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadAllEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [currentMonth, profile?.id])
 
   // ── Derived data ────────────────────────────────────────────
 
-  const activeTasks = useMemo(() =>
-    tasks.filter(t => !HUB_EXCLUDED_STATUS.has(t.status)),
-  [tasks])
+  const canSeeTeamWork = isManagerRole(profile?.role)
+  const activeTasks = useMemo(() => tasks.filter(task =>
+    !HUB_EXCLUDED_STATUS.has(task.status) && (canSeeTeamWork || workMatchesProfile(task, profile))),
+  [canSeeTeamWork, profile, tasks])
+
+  const relevantDeliverables = useMemo(() => deliverables.filter(deliverable =>
+    canSeeTeamWork || workMatchesProfile(deliverable, profile)),
+  [canSeeTeamWork, deliverables, profile])
 
   const priorityQueue = useMemo(() => {
     return activeTasks
@@ -183,34 +193,34 @@ export default function CgHubPage() {
   [activeTasks])
 
   const myActiveWork = useMemo(() => {
-    return activeTasks.filter(t => taskMatchesProfile(t, profile))
+    return activeTasks.filter(t => workMatchesProfile(t, profile))
   }, [activeTasks, profile])
 
   // Production Schedule derived
   const dueTodayDeliverables = useMemo(() =>
-    deliverables.filter(d => deliverableDate(d) === today),
-  [deliverables, today])
+    relevantDeliverables.filter(d => deliverableDate(d) === today && simplifyProductionStatus(d.production_status) !== 'scheduled_posted'),
+  [relevantDeliverables, today])
 
   const upcomingDeliverables = useMemo(() =>
-    deliverables.filter(d => {
+    relevantDeliverables.filter(d => {
       const date = deliverableDate(d)
-      return date && date > today
+      return date && date > today && simplifyProductionStatus(d.production_status) !== 'scheduled_posted'
     }).sort((a, b) => (deliverableDate(a) ?? '').localeCompare(deliverableDate(b) ?? '')).slice(0, 10),
-  [deliverables, today])
+  [relevantDeliverables, today])
 
   const unscheduledDeliverables = useMemo(() =>
-    deliverables.filter(d => {
+    relevantDeliverables.filter(d => {
       const prodStatus = simplifyProductionStatus(d.production_status)
       return prodStatus !== 'scheduled_posted' && !d.scheduled_date && !d.due_date
     }),
-  [deliverables])
+  [relevantDeliverables])
 
   const waitingDeliverables = useMemo(() =>
-    deliverables.filter(d => {
+    relevantDeliverables.filter(d => {
       const s = simplifyProductionStatus(d.production_status)
       return s === 'ready_review' || s === 'awaiting_client' || s === 'meta_drafts'
     }),
-  [deliverables])
+  [relevantDeliverables])
 
   // CG Calendar derived
   const todayCompanyEvents = useMemo(() => {
@@ -299,12 +309,11 @@ export default function CgHubPage() {
     unscheduledDeliverables: unscheduledDeliverables.length,
   }), [priorityQueue, clientRequests, dueToday, overdue, activeTasks, waitingReview, dueTodayDeliverables, unscheduledDeliverables.length])
 
-  const isAdmin = profile?.role === 'admin'
-
   async function handleQuickAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!quickTitle.trim() || quickSaving) return
     setQuickSaving(true)
+    setQuickMessage(null)
     const input: TaskInput = {
       title: quickTitle.trim(),
       bucket: 'Admin / To Do',
@@ -312,12 +321,23 @@ export default function CgHubPage() {
       status: 'to_do',
       due_date: today,
       source: 'manual',
+      assigned_to_user_id: profile?.id ?? null,
       assigned_to_name: profile?.full_name ?? null,
     }
-    await createTask(input)
-    setQuickTitle('')
-    void loadAll()
-    setQuickSaving(false)
+    try {
+      const result = await createTask(input)
+      if (result.error) {
+        setQuickMessage(result.error.message)
+        return
+      }
+      setQuickTitle('')
+      setQuickMessage('Task added to Daily Tasks.')
+      await loadAll()
+    } catch (error) {
+      setQuickMessage(error instanceof Error ? error.message : 'Could not add task.')
+    } finally {
+      setQuickSaving(false)
+    }
   }
 
   // ── Render ──────────────────────────────────────────────────
@@ -352,7 +372,15 @@ export default function CgHubPage() {
             </button>
           </form>
         </div>
+        {quickMessage && <p className="mt-2 text-xs text-brand-primary/70">{quickMessage}</p>}
       </div>
+
+      {loadErrors.length > 0 && (
+        <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/[0.07] px-4 py-3 text-sm text-red-100">
+          <p className="font-semibold">Some Hub data could not load.</p>
+          {loadErrors.map(error => <p key={error} className="mt-1 text-xs text-red-100/75">{error}</p>)}
+        </div>
+      )}
 
       {loadingData ? (
         <div className="space-y-6">
@@ -400,11 +428,6 @@ export default function CgHubPage() {
             <ClientsAttentionSection clients={clientsNeedingAttention} />
           )}
 
-          {/* G — Quick Launch */}
-          <QuickLaunchSection isAdmin={isAdmin} />
-
-          {/* H — AI Marketing Agent */}
-          <AiMarketingSection />
         </>
       )}
     </div>
@@ -674,7 +697,7 @@ function CompanyCalendarSection({
                 </span>
               )}
               <span className="shrink-0 text-xs text-brand-primary/60">
-                {new Date(event.start_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                {event.all_day ? 'All day' : formatBusinessTime(event.start_at)}
               </span>
             </Link>
           ))}
@@ -787,80 +810,6 @@ function ClientsAttentionSection({ clients }: {
   )
 }
 
-// ── F: Quick Launch ───────────────────────────────────────────
-
-const LAUNCH_ITEMS = [
-  { label: 'Daily Tasks', detail: 'Your work list for today', to: '/admin/command-centre', icon: '📋' },
-  { label: 'Client Schedule', detail: 'Monthly deliverables', to: '/admin/client-schedule?view=calendar', icon: '📅' },
-  { label: 'CG Calendar', detail: 'Meetings & events', to: '/admin/cg-calendar', icon: '🗓' },
-  { label: 'Clients', detail: 'Reports, Meta, packages', to: '/admin/clients', icon: '👥' },
-  { label: 'Assistant', detail: 'Staff helper', to: '/admin/assistant', icon: 'AI' },
-  { label: 'CG Hours', detail: 'Time tracking', to: 'https://cg-hours.vercel.app', icon: 'HR' },
-]
-
-function QuickLaunchSection({ isAdmin }: { isAdmin: boolean }) {
-  const navigate = useNavigate()
-  const items = isAdmin
-    ? [...LAUNCH_ITEMS, { label: 'Import Health', detail: 'Admin only', to: '/admin/import-health', icon: '🔧' }]
-    : LAUNCH_ITEMS
-
-  return (
-    <div className="mb-8">
-      <HubSectionHeader title="Quick Launch" />
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map(item => (
-          <button
-            key={item.label}
-            type="button"
-            onClick={() => item.to.startsWith('https://') ? window.open(item.to, '_blank', 'noopener,noreferrer') : navigate(item.to)}
-            className="group min-h-24 rounded-xl border border-white/8 bg-white/[0.035] p-4 text-left transition-all hover:border-[#2dd4bf]/30 hover:bg-[#2dd4bf]/[0.06]"
-          >
-            <div className="flex h-full flex-col justify-between">
-              <h2 className="font-display text-lg font-black uppercase tracking-wide text-white">
-                {item.label}
-              </h2>
-              <p className="mt-1 text-sm text-brand-primary/72">{item.detail}</p>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ── G: AI Marketing Agent ─────────────────────────────────────
-
-const AI_MARKETING_ITEMS = [
-  { label: 'Master Marketing Library', to: '/admin/marketing-library', status: 'coming_soon' as const },
-  { label: 'Skill Cards', to: '/admin/skill-cards', status: 'coming_soon' as const },
-  { label: 'Campaign Builder', to: '/admin/campaign-builder', status: 'coming_soon' as const },
-  { label: 'Client Brand Knowledge', to: '/admin/client-brand-knowledge', status: 'coming_soon' as const },
-]
-
-function AiMarketingSection() {
-  return (
-    <div className="mb-8">
-      <HubSectionHeader
-        title="AI Marketing Agent"
-        subtitle="Separate section — coming soon"
-      />
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {AI_MARKETING_ITEMS.map(item => (
-          <div
-            key={item.label}
-            className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-4 opacity-60"
-          >
-            <h3 className="text-sm font-semibold text-white/70">{item.label}</h3>
-            <p className="mt-1 text-xs text-brand-primary/50 capitalize">{item.status.replace('_', ' ')}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // ── Shared Sub-Components ─────────────────────────────────────
 
 function HubSectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
@@ -953,7 +902,7 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
 
   return (
     <Link
-      to="/admin/command-centre"
+      to={task.data_origin === 'planner_tasks' ? '/admin/planner' : '/admin/command-centre'}
       className="flex items-start gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]"
     >
       <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} />

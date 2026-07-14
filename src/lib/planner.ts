@@ -505,7 +505,8 @@ export async function listMonthlyDeliverables(filters?: DeliverableFilters) {
 }
 
 export async function listMonthlyDeliverablesByMonth(month: string, filters?: Omit<DeliverableFilters, 'month'>) {
-  return listMonthlyDeliverables({ ...filters, month })
+  const monthStart = /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : month
+  return listMonthlyDeliverables({ ...filters, month: monthStart })
 }
 
 export async function listMonthlyDeliverablesByYear(

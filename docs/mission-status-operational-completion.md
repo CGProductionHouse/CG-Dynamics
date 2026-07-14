@@ -60,6 +60,27 @@ _Last updated: 2026-07-14_
 - **Loop 1 limitation:** no signed-in browser session was accessible to the
   automation context, so authenticated admin/team menu visibility is not yet
   recorded as passed.
+- **Loop 2 Hub/My Day:** staff Hub task and deliverable summaries are now
+  assignment-scoped while admin/manager roles retain operational summaries.
+  Hub query and Quick Add failures are visible, Quick Add stores the current
+  profile ID, completed schedule/event history is excluded, and the generic
+  launcher/placeholder AI sections no longer displace daily work.
+- **Loop 2 data correctness:** recurrence templates are excluded from the
+  combined task feed; undated Planner rows stay undated; monthly-deliverable
+  queries normalize `YYYY-MM` to a real month-start date; My Day reads the
+  current schedule year so overdue assigned work is not limited to the current
+  month; native Daily Tasks and Planner items keep distinct labels/links.
+- **Loop 2 time/timeline:** business date, grouping, query boundaries and event
+  labels use `Africa/Johannesburg`. Completed events are not active work,
+  assigned events for another person do not enter a personal day, all-day
+  events consume the workday, outside-hours events are not relocated into the
+  08:00–17:00 timeline, and Current is set only during an actual work block.
+- **Loop 2 verification:** production build and targeted ESLint passed. Live
+  read-only aggregates confirmed 57 active Calendar events and no active
+  recurrence templates at verification time. Authenticated Hub/My Day browser
+  data could not be exercised because the automation browser has no accessible
+  signed-in session; protected-route behavior remains covered at all required
+  viewports.
 
 ## Goals 3–8
 
