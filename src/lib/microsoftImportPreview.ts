@@ -98,7 +98,7 @@ function conflict(
   return { ...item, previewStatus: 'conflict', conflictCode: code, conflictReason: reason }
 }
 
-function plannerProgress(percentComplete: number | null): MicrosoftPlannerPayload['status'] {
+function plannerProgress(percentComplete: number | null): 'to_do' | 'in_progress' | 'approved' {
   if (percentComplete === 100) return 'approved'
   if (percentComplete !== null && percentComplete > 0) return 'in_progress'
   return 'to_do'
@@ -210,6 +210,7 @@ export function previewPlannerTask(
       microsoft_plan_id: source.sourcePlanId,
       microsoft_bucket_id: source.sourceBucketId,
       microsoft_task_id: source.sourceTaskId,
+      microsoft_source_description: source.description,
     }
     const mapped = { ...base, sourceType: 'planner_client_social' as const, destination: 'client_schedule' as const, mappedClientId: client.client?.id ?? null, mappedClientName: client.client?.name ?? null, proposedPayload: payload }
     if (!month) return conflict(mapped, 'invalid_date', 'The monthly plan name must include a valid month and year.')
@@ -246,6 +247,7 @@ export function previewPlannerTask(
     microsoft_plan_id: source.sourcePlanId,
     microsoft_bucket_id: source.sourceBucketId,
     microsoft_task_id: source.sourceTaskId,
+    microsoft_source_description: source.description,
   }
   const mapped = { ...base, destination: 'planner' as const, mappedClientId: client?.client?.id ?? null, mappedClientName: client?.client?.name ?? null, proposedPayload: payload }
   if (!board) return conflict(mapped, 'wrong_destination', `Planner board "${plan.targetBoardSlug}" is not available.`)
@@ -282,6 +284,7 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
   if (!microsoftOutlookSourceKey(source.sourceCalendarId, source.sourceEventId)) {
     return conflict(base, 'missing_source_id', 'Immutable Outlook event and calendar IDs are required for exact deduplication.')
   }
+  if (source.private) return { ...base, previewStatus: 'skipped', conflictCode: null, conflictReason: null, warnings: ['Private Outlook event retained by identity but excluded from reconciliation.'] }
   if (!source.title.trim()) return conflict(base, 'missing_title', 'The Outlook event has no title.')
   if (!validIsoDate(source.startDate) || (source.endDate !== null && !validIsoDate(source.endDate))) {
     return conflict(base, 'invalid_date', 'Outlook event dates must be timezone-preserving ISO values.')
@@ -304,6 +307,7 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
     microsoft_source_type: 'outlook_event' as const,
     microsoft_calendar_id: source.sourceCalendarId,
     microsoft_event_id: source.sourceEventId,
+    microsoft_source_description: source.safeSummary,
   }
   return { ...base, proposedPayload: payload, previewStatus: 'new', conflictCode: null, conflictReason: null }
 }

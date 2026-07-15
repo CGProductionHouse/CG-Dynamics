@@ -33,7 +33,7 @@ const hubNav: NavItem[] = [
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/assistant', label: 'Assistant' },
   { to: '/admin/team', label: 'Team', access: 'admin' },
-  { to: '/admin/microsoft-import', label: 'Microsoft Import', access: 'admin' },
+  { to: '/admin/microsoft-import', label: 'Microsoft Sync', access: 'admin' },
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {

@@ -68,20 +68,49 @@ supabase functions deploy cg-assistant-chat --no-verify-jwt
 > `--no-verify-jwt` is used because these functions handle their own auth
 > validation internally (JWT verification, role checks, or OAuth redirects).
 
-## Microsoft 365 import (no Edge Function — deliberate)
+## Microsoft transition sync
 
-The Microsoft migration is a once-off, operator-assisted import (Option A in
-`docs/microsoft-365-import-map.md`). There is NO Microsoft Edge Function, no
-Entra app registration, no OAuth flow, and no token storage in this project —
-the deployed app never talks to Microsoft Graph.
+`microsoft-transition-sync` is a temporary, read-only Microsoft Graph bridge.
+It fetches only an allowlisted operational calendar and Planner plans, returns
+a normalized snapshot to the admin reconciliation page, and never writes to
+Microsoft. Credentials stay in Supabase Edge Function secrets.
 
-An operator with delegated organisational access exports a normalized JSON
-snapshot; an admin uploads it at `/admin/microsoft-import` where preview and
-apply run in the browser against Supabase. If a *recurring* Microsoft
-connection is ever genuinely needed, that becomes a new reviewed design
-(delegated OAuth, encrypted refresh-token storage, `Prefer:
-IdType="ImmutableId"` on every Outlook request) — do not resurrect the old
-stub endpoint without that review.
+Required secrets:
+
+```bash
+supabase secrets set MICROSOFT_TENANT_ID=<tenant-id>
+supabase secrets set MICROSOFT_CLIENT_ID=<application-id>
+supabase secrets set MICROSOFT_CLIENT_SECRET=<application-secret>
+supabase secrets set MICROSOFT_SYNC_SOURCES_JSON='<allowlisted-source-manifest>'
+```
+
+Manifest shape:
+
+```json
+{
+  "userId": "operational-calendar-owner-user-id",
+  "calendar": { "id": "calendar-id", "name": "CG Operational Calendar" },
+  "plans": [
+    { "id": "plan-id", "name": "To Do" },
+    { "id": "plan-id", "name": "MASTER CLIENT TO DO" },
+    { "id": "plan-id", "name": "CG Socials" },
+    { "id": "plan-id", "name": "Client Socials - July 2026" }
+  ]
+}
+```
+
+Deploy only after reviewing and applying Phase 17a:
+
+```bash
+npx supabase functions deploy microsoft-transition-sync --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
+```
+
+The function verifies the caller JWT and requires the `admin` role. The Entra
+application needs read-only Graph permissions for the configured calendar,
+Planner tasks/buckets/details and user context. Do not grant write permissions.
+At transition completion, set the app lifecycle status to `complete`, then
+remove or revoke the Microsoft secret/application access. Imported identities
+and audit history remain in CG Dynamics.
 
 ## Deploy note (cg-assistant-chat)
 

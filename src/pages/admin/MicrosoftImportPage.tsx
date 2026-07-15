@@ -1,338 +1,284 @@
-import { useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { addBusinessDays, businessDateKey } from '../../lib/businessTime'
 import {
-  summarizeMicrosoftPreview,
+  summarizeMicrosoftReconciliation,
   type MicrosoftImportPreviewItem,
-  type MicrosoftPreviewStatus,
+  type MicrosoftReconciliationAction,
 } from '../../lib/microsoftImport'
 import {
-  buildMicrosoftImportPreview,
-  classifyMicrosoftPreviewAgainstExisting,
-  flagDeliverableSlotConflicts,
-} from '../../lib/microsoftImportPreview'
-import {
-  applyMicrosoftImport,
+  applyMicrosoftReconciliation,
+  fetchLatestMicrosoftSnapshot,
+  getMicrosoftConnectionStatus,
   loadMicrosoftExistingTargets,
   loadMicrosoftMappingContext,
-  type MicrosoftApplyResult,
+  loadMicrosoftSyncRunItems,
+  loadMicrosoftSyncState,
+  updateMicrosoftTransitionStatus,
+  type MicrosoftConnectionStatus,
+  type MicrosoftReconciliationApplyResult,
+  type MicrosoftSyncRunSummary,
+  type MicrosoftSyncRunItem,
+  type MicrosoftTransitionStatus,
 } from '../../lib/microsoftImportData'
+import { buildMicrosoftReconciliation } from '../../lib/microsoftSync'
 import { parseMicrosoftSnapshot, type MicrosoftSnapshot } from '../../lib/microsoftSnapshot'
 
-// ── Microsoft 365 Import (Option A: operator-assisted, once-off) ─────────────
-//
-// The deployed app never talks to Microsoft. An operator with delegated Graph
-// access exports a normalized JSON snapshot (docs/microsoft-365-import-map.md
-// documents the exact shape); an admin uploads it here. Preview runs entirely
-// in the browser against live Supabase mapping data, conflicts stay conflicts,
-// and Apply inserts only `new` rows — never updates, never deletes, and never
-// writes anything back to Microsoft.
-
-const STATUS_OPTIONS: Array<{ value: MicrosoftPreviewStatus; label: string }> = [
-  { value: 'new', label: 'New' },
-  { value: 'existing', label: 'Existing' },
-  { value: 'changed', label: 'Changed' },
-  { value: 'conflict', label: 'Conflicts' },
-  { value: 'skipped', label: 'Skipped' },
+const ACTIONS: Array<{ value: MicrosoftReconciliationAction; label: string }> = [
+  { value: 'create', label: 'Create' }, { value: 'update', label: 'Update' },
+  { value: 'complete', label: 'Complete' }, { value: 'reopen', label: 'Reopen' },
+  { value: 'move', label: 'Moved' }, { value: 'cancel', label: 'Cancelled' },
+  { value: 'archive', label: 'Source removed' }, { value: 'unchanged', label: 'Unchanged' },
+  { value: 'conflict', label: 'Conflicts' }, { value: 'skipped', label: 'Skipped' },
+  { value: 'failed', label: 'Failed' },
 ]
 
-const STATUS_TONES: Record<MicrosoftPreviewStatus, string> = {
-  new: 'border-emerald-300/25 bg-emerald-300/10 text-emerald-200',
-  existing: 'border-white/15 bg-white/[0.05] text-white/65',
-  changed: 'border-amber-300/25 bg-amber-300/10 text-amber-200',
+const ACTION_TONES: Record<MicrosoftReconciliationAction, string> = {
+  create: 'border-emerald-300/25 bg-emerald-300/10 text-emerald-200',
+  update: 'border-blue-300/25 bg-blue-300/10 text-blue-200',
+  unchanged: 'border-white/15 bg-white/[0.05] text-white/60',
+  complete: 'border-teal-300/25 bg-teal-300/10 text-teal-200',
+  reopen: 'border-cyan-300/25 bg-cyan-300/10 text-cyan-200',
+  move: 'border-violet-300/25 bg-violet-300/10 text-violet-200',
+  cancel: 'border-orange-300/25 bg-orange-300/10 text-orange-200',
+  archive: 'border-orange-300/25 bg-orange-300/10 text-orange-200',
   conflict: 'border-red-300/25 bg-red-300/10 text-red-200',
   skipped: 'border-slate-300/15 bg-slate-300/[0.05] text-slate-300/70',
+  failed: 'border-red-300/25 bg-red-300/10 text-red-200',
 }
 
-function sourceKey(item: MicrosoftImportPreviewItem) {
-  if (item.sourceEventId) return `${item.sourceCalendarId}:${item.sourceEventId}`
-  if (item.sourceTaskId) return `${item.sourcePlanId}:${item.sourceTaskId}`
-  return `${item.sourceName}:${item.title}`
-}
-
-function destinationLabel(destination: MicrosoftImportPreviewItem['destination']) {
-  if (destination === 'cg_calendar') return 'CG Calendar'
-  if (destination === 'client_schedule') return 'Client Schedule'
-  if (destination === 'planner') return 'Planner'
+function destinationLabel(item: MicrosoftImportPreviewItem) {
+  if (item.destination === 'cg_calendar') return 'CG Calendar'
+  if (item.destination === 'client_schedule') return 'Client Schedule'
+  if (item.destination === 'planner') return 'Planner / My Day'
   return 'Review required'
 }
 
-function displayDate(item: MicrosoftImportPreviewItem) {
-  return item.dueDate ?? item.startDate ?? 'No date'
+function itemKey(item: MicrosoftImportPreviewItem, index: number) {
+  return `${item.sourceCalendarId ?? item.sourcePlanId}:${item.sourceEventId ?? item.sourceTaskId}:${index}`
 }
 
-function PreviewCard({ item }: { item: MicrosoftImportPreviewItem }) {
+function SourceCompleteness({ snapshot }: { snapshot: MicrosoftSnapshot }) {
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-4 shadow-[0_16px_45px_rgba(0,0,0,0.18)]">
+    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+      {snapshot.sources.map(source => (
+        <article key={`${source.sourceType}:${source.sourceId}`} className={`rounded-xl border p-3 ${source.complete ? 'border-emerald-300/15 bg-emerald-300/[0.045]' : 'border-amber-300/20 bg-amber-300/[0.055]'}`}>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-black text-white">{source.sourceName}</p>
+            <span className={`rounded-full px-2 py-1 text-[9px] font-black uppercase ${source.complete ? 'bg-emerald-300/10 text-emerald-200' : 'bg-amber-300/10 text-amber-100'}`}>{source.complete ? 'Complete' : 'Incomplete'}</span>
+          </div>
+          <p className="mt-1 text-xs text-white/45">{source.recordCount} source records{source.rangeStart ? ` · ${source.rangeStart.slice(0, 10)} to ${source.rangeEnd?.slice(0, 10)}` : ''}</p>
+          {source.safeError && <p className="mt-2 text-xs text-amber-100/80">{source.safeError}</p>}
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function PreviewItem({ item }: { item: MicrosoftImportPreviewItem }) {
+  const action = item.reconciliationAction ?? 'skipped'
+  return (
+    <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-teal/80">{item.sourceName}</p>
-          <h3 className="mt-1 break-words text-base font-black text-white">{item.title || 'Untitled Microsoft item'}</h3>
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-brand-teal/75">{item.sourceName}</p>
+          <h3 className="mt-1 break-words text-sm font-black text-white">{item.title || 'Untitled Microsoft item'}</h3>
         </div>
-        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${STATUS_TONES[item.previewStatus]}`}>
-          {item.previewStatus}
-        </span>
+        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${ACTION_TONES[action]}`}>{action}</span>
       </div>
-
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-        <div>
-          <dt className="font-bold uppercase tracking-[0.1em] text-white/35">Destination</dt>
-          <dd className="mt-1 font-bold text-white/80">{destinationLabel(item.destination)}</dd>
-        </div>
-        <div>
-          <dt className="font-bold uppercase tracking-[0.1em] text-white/35">Date</dt>
-          <dd className="mt-1 font-bold text-white/80">{displayDate(item)}</dd>
-        </div>
-        <div className="col-span-2">
-          <dt className="font-bold uppercase tracking-[0.1em] text-white/35">Mapped client</dt>
-          <dd className="mt-1 font-bold text-white/80">{item.mappedClientName ?? 'Not linked'}</dd>
-        </div>
-      </dl>
-
-      {item.conflictReason && (
-        <p className="mt-4 rounded-xl border border-red-300/15 bg-red-300/[0.06] px-3 py-2 text-xs leading-relaxed text-red-100">
-          {item.conflictReason}
-        </p>
-      )}
-      {item.warnings.map(warning => <p key={warning} className="mt-3 text-xs leading-relaxed text-amber-100/75">{warning}</p>)}
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/50">
+        <span>{destinationLabel(item)}</span>
+        <span>{item.dueDate ?? item.startDate ?? 'No date'}</span>
+        {item.mappedClientName && <span>{item.mappedClientName}</span>}
+      </div>
+      {item.requiresRemovalApproval && <p className="mt-3 rounded-lg border border-orange-300/15 bg-orange-300/[0.06] px-3 py-2 text-xs text-orange-100">Missing from a complete source fetch. Explicit source-removal approval is required.</p>}
+      {item.conflictReason && <p className="mt-3 rounded-lg border border-red-300/15 bg-red-300/[0.06] px-3 py-2 text-xs text-red-100">{item.conflictReason}</p>}
+      {item.warnings.map(warning => <p key={warning} className="mt-2 text-xs text-amber-100/70">{warning}</p>)}
     </article>
   )
 }
 
-interface PreviewState {
-  items: MicrosoftImportPreviewItem[]
-  migrationNeeded: boolean
+function RunHistory({ runs, onSelect }: { runs: MicrosoftSyncRunSummary[]; onSelect: (runId: string) => void }) {
+  if (runs.length === 0) return <p className="text-sm text-white/40">No transition sync runs have been recorded yet.</p>
+  return <div className="space-y-2">{runs.map(run => (
+    <button type="button" onClick={() => onSelect(run.id)} key={run.id} className="flex w-full flex-col gap-2 rounded-xl border border-white/10 bg-black/20 p-3 text-left transition-colors hover:bg-white/[0.04] sm:flex-row sm:items-center sm:justify-between">
+      <div><p className="text-sm font-black text-white">{new Date(run.createdAt).toLocaleString('en-ZA')} · {run.triggerType}</p><p className="mt-1 text-xs text-white/45">Source {new Date(run.snapshotExportedAt).toLocaleString('en-ZA')} · {run.sourceCompleteness.filter(source => source.complete).length}/{run.sourceCompleteness.length} complete</p></div>
+      <div className="text-left sm:text-right"><p className="text-xs font-black uppercase text-brand-teal">{run.status}</p><p className="mt-1 text-xs text-white/45">{run.summary.create ?? 0} create · {run.summary.update ?? 0} update · {run.summary.conflict ?? 0} conflict</p></div>
+    </button>
+  ))}</div>
 }
 
 export default function MicrosoftImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [fileName, setFileName] = useState<string | null>(null)
-  const [parseErrors, setParseErrors] = useState<string[]>([])
+  const [connection, setConnection] = useState<MicrosoftConnectionStatus | null>(null)
+  const [connectionError, setConnectionError] = useState<string | null>(null)
+  const [transitionStatus, setTransitionStatus] = useState<MicrosoftTransitionStatus>('active')
+  const [runs, setRuns] = useState<MicrosoftSyncRunSummary[]>([])
+  const [runItems, setRunItems] = useState<MicrosoftSyncRunItem[]>([])
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
+  const [migrationNeeded, setMigrationNeeded] = useState(false)
+  const [rangeStart, setRangeStart] = useState(addBusinessDays(businessDateKey(), -31))
+  const [rangeEnd, setRangeEnd] = useState(addBusinessDays(businessDateKey(), 93))
   const [snapshot, setSnapshot] = useState<MicrosoftSnapshot | null>(null)
-  const [preview, setPreview] = useState<PreviewState | null>(null)
+  const [items, setItems] = useState<MicrosoftImportPreviewItem[]>([])
+  const [activeAction, setActiveAction] = useState<MicrosoftReconciliationAction>('create')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [activeStatus, setActiveStatus] = useState<MicrosoftPreviewStatus>('new')
-  const [reviewed, setReviewed] = useState(false)
   const [applying, setApplying] = useState(false)
-  const [applyResult, setApplyResult] = useState<MicrosoftApplyResult | null>(null)
+  const [progress, setProgress] = useState({ completed: 0, total: 0 })
+  const [reviewed, setReviewed] = useState(false)
+  const [approveRemovals, setApproveRemovals] = useState(false)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [parseErrors, setParseErrors] = useState<string[]>([])
+  const [applyResult, setApplyResult] = useState<MicrosoftReconciliationApplyResult | null>(null)
 
-  const items = preview?.items ?? []
-  const summary = summarizeMicrosoftPreview(items)
-  const visibleItems = items.filter(item => item.previewStatus === activeStatus)
-  const unresolvedClients = items.filter(item => item.conflictCode === 'unresolved_client' || item.conflictCode === 'ambiguous_client_match')
+  const summary = summarizeMicrosoftReconciliation(items)
+  const visibleItems = items.filter(item => (item.reconciliationAction ?? 'skipped') === activeAction)
+  const removalCount = items.filter(item => item.requiresRemovalApproval).length
+  const lastSuccess = runs.find(run => run.status === 'completed')
+  const writableCount = summary.create + summary.update + summary.complete + summary.reopen + summary.move + summary.cancel + summary.archive
+  const applicableCount = writableCount - (approveRemovals ? 0 : removalCount)
 
-  async function buildPreview(records: MicrosoftSnapshot['records']) {
+  async function loadStatus() {
+    const [syncState, connectionState] = await Promise.all([loadMicrosoftSyncState(), getMicrosoftConnectionStatus()])
+    setTransitionStatus(syncState.transitionStatus)
+    setRuns(syncState.runs)
+    setMigrationNeeded(syncState.migrationNeeded)
+    setConnection(connectionState.data)
+    setConnectionError(connectionState.error ?? syncState.error)
+  }
+  const loadStatusEvent = useEffectEvent(loadStatus)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadStatusEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  async function prepareSnapshot(nextSnapshot: MicrosoftSnapshot) {
     setLoading(true)
     setError(null)
-    setPreview(null)
-    setApplyResult(null)
+    setItems([])
     setReviewed(false)
+    setApproveRemovals(false)
+    setApplyResult(null)
     try {
-      const [contextResult, existingResult] = await Promise.all([
-        loadMicrosoftMappingContext(),
-        loadMicrosoftExistingTargets(),
-      ])
-      if (contextResult.error || !contextResult.context) {
-        setError(`Could not load CG Dynamics mapping data: ${contextResult.error ?? 'unknown error'}`)
-        return
-      }
-      if (existingResult.error) {
-        setError(`Could not load existing import targets: ${existingResult.error}`)
-        return
-      }
-      const mapped = buildMicrosoftImportPreview(records, contextResult.context)
-      const classified = classifyMicrosoftPreviewAgainstExisting(mapped, existingResult.targets)
-      const guarded = flagDeliverableSlotConflicts(classified, existingResult.deliverableSlotKeys)
-      setPreview({ items: guarded, migrationNeeded: existingResult.migrationNeeded })
-      const firstPopulated = STATUS_OPTIONS.find(option => summarizeMicrosoftPreview(guarded)[option.value] > 0)
-      setActiveStatus(firstPopulated?.value ?? 'new')
+      const [contextResult, existingResult] = await Promise.all([loadMicrosoftMappingContext(), loadMicrosoftExistingTargets()])
+      if (contextResult.error || !contextResult.context) throw new Error(contextResult.error ?? 'Could not load mapping context.')
+      if (existingResult.error) throw new Error(existingResult.error)
+      setMigrationNeeded(existingResult.migrationNeeded)
+      const reconciled = buildMicrosoftReconciliation(nextSnapshot, contextResult.context, existingResult.targets, existingResult.deliverableSlotKeys)
+      setSnapshot(nextSnapshot)
+      setItems(reconciled)
+      const first = ACTIONS.find(option => reconciled.some(item => item.reconciliationAction === option.value))
+      setActiveAction(first?.value ?? 'unchanged')
     } catch (previewError) {
-      setError(previewError instanceof Error ? previewError.message : 'Preview failed.')
+      setError(previewError instanceof Error ? previewError.message : 'Reconciliation preview failed.')
     } finally {
       setLoading(false)
     }
   }
 
-  async function onFileChange(files: FileList | null) {
-    const file = files?.[0]
-    if (!file) return
-    setFileName(file.name)
-    setSnapshot(null)
-    setPreview(null)
-    setApplyResult(null)
-    setParseErrors([])
+  async function previewLatest() {
+    if (loading || transitionStatus !== 'active') return
+    setLoading(true)
     setError(null)
-    const text = await file.text()
-    const parsed = parseMicrosoftSnapshot(text)
-    if (!parsed.snapshot) {
-      setParseErrors(parsed.errors)
-      return
-    }
-    setSnapshot(parsed.snapshot)
-    await buildPreview(parsed.snapshot.records)
+    const fetched = await fetchLatestMicrosoftSnapshot(`${rangeStart}T00:00:00+02:00`, `${rangeEnd}T00:00:00+02:00`)
+    setLoading(false)
+    if (!fetched.snapshot) { setError(fetched.error ?? 'Microsoft fetch failed.'); return }
+    await prepareSnapshot(fetched.snapshot)
   }
 
-  async function runApply() {
-    if (!snapshot || !preview || applying) return
+  async function onSnapshotFile(files: FileList | null) {
+    const file = files?.[0]
+    if (!file) return
+    setParseErrors([])
+    const parsed = parseMicrosoftSnapshot(await file.text())
+    if (!parsed.snapshot) { setParseErrors(parsed.errors); return }
+    await prepareSnapshot(parsed.snapshot)
+  }
+
+  async function applyReviewed() {
+    if (!snapshot || applying || !reviewed || migrationNeeded) return
+    const currentState = await loadMicrosoftSyncState()
+    if (currentState.error || currentState.migrationNeeded || currentState.transitionStatus !== 'active') {
+      setTransitionStatus(currentState.transitionStatus)
+      setError(currentState.error ?? (currentState.migrationNeeded ? 'Phase 17a is required before apply.' : `Microsoft transition sync is ${currentState.transitionStatus}. Preview was not applied.`))
+      return
+    }
     setApplying(true)
     setError(null)
+    setProgress({ completed: 0, total: items.length })
     try {
-      const result = await applyMicrosoftImport(preview.items, snapshot.exportedAt)
+      const result = await applyMicrosoftReconciliation(items, snapshot, approveRemovals, (completed, total) => setProgress({ completed, total }))
       setApplyResult(result)
-      // Re-preview so applied rows now show as `existing`.
-      await buildPreview(snapshot.records)
-      setApplyResult(result)
-    } catch (applyError) {
-      setError(applyError instanceof Error ? applyError.message : 'Apply failed.')
+      await loadStatus()
+      if (result.errors.length > 0) setError(result.errors.join(' '))
+      else {
+        await prepareSnapshot(snapshot)
+        setApplyResult(result)
+      }
+    } catch {
+      setError('Microsoft reconciliation apply stopped unexpectedly. Check sync history before retrying.')
     } finally {
       setApplying(false)
     }
   }
 
-  const canApply = Boolean(snapshot) && !loading && !applying && summary.new > 0 && preview !== null && !preview.migrationNeeded
+  async function changeTransitionStatus(status: MicrosoftTransitionStatus) {
+    const statusError = await updateMicrosoftTransitionStatus(status)
+    if (statusError) { setError(statusError); return }
+    setTransitionStatus(status)
+    setReviewed(false)
+    await loadStatus()
+  }
+
+  async function selectRun(runId: string) {
+    setSelectedRunId(runId)
+    const result = await loadMicrosoftSyncRunItems(runId)
+    if (result.error) { setError(result.error); return }
+    setRunItems(result.data)
+  }
+
+  const actionCounts = useMemo(() => new Map(ACTIONS.map(action => [action.value, summary[action.value]])), [summary])
+  const canApply = Boolean(snapshot) && transitionStatus === 'active' && reviewed && !migrationNeeded && !applying && applicableCount > 0
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
-      <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.16),transparent_38%),linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.015))] p-5 sm:p-8">
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Once-off migration - preview first</p>
-        <h1 className="mt-3 max-w-3xl text-3xl font-black tracking-tight text-white sm:text-5xl">Microsoft 365 Import</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-primary/75 sm:text-base">
-          Upload a Microsoft snapshot file exported by the operator. Every record is previewed and classified before
-          anything is written. Only new records are inserted - nothing is updated, deleted, or written back to Microsoft.
-        </p>
-        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs font-bold text-amber-100">
-          One-way import: Microsoft is never modified
+    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
+      <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.18),transparent_38%),linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-5 sm:p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div><p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Temporary one-way coexistence bridge</p><h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-5xl">Microsoft Sync</h1><p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-primary/70 sm:text-base">Preview and reconcile Outlook, Planner and active Client Socials into CG Dynamics. Microsoft is read-only; every destination change remains reviewable and auditable.</p></div>
+          <div className="shrink-0 rounded-2xl border border-white/10 bg-black/25 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Transition mode</p><select value={transitionStatus} onChange={event => void changeTransitionStatus(event.target.value as MicrosoftTransitionStatus)} className="mt-2 rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm font-black text-white"><option value="active">Active</option><option value="paused">Paused</option><option value="complete">Complete</option></select></div>
         </div>
       </header>
 
-      <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">Step 1</p>
-            <h2 className="mt-1 text-lg font-black text-white">Upload the snapshot file</h2>
-            <p className="mt-1 text-xs leading-relaxed text-white/45">
-              JSON produced from Microsoft Graph by the operator - see docs/microsoft-365-import-map.md for the exact format.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="shrink-0 rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black transition-opacity disabled:opacity-55"
-            disabled={loading || applying}
-          >
-            {fileName ? 'Choose another file' : 'Choose snapshot file'}
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json,application/json"
-            className="hidden"
-            onChange={event => { void onFileChange(event.target.files); event.target.value = '' }}
-          />
+      <section className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Connection</p><h2 className="mt-1 text-xl font-black text-white">{connection?.connected ? 'Microsoft available' : 'Microsoft setup required'}</h2><p className="mt-1 text-sm text-white/50">{connection?.message ?? connectionError ?? 'Checking server-side connection...'}</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-xs font-black ${connection?.connected ? 'bg-emerald-300/10 text-emerald-200' : 'bg-amber-300/10 text-amber-100'}`}>{connection?.connected ? 'Connected' : 'Unavailable'}</span></div>
+          {connection?.sources && connection.sources.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{connection.sources.map(source => <span key={`${source.type}:${source.id}`} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/65">{source.name}</span>)}</div>}
         </div>
-        {fileName && (
-          <p className="mt-3 text-xs font-bold text-white/60">
-            {fileName}
-            {snapshot && (
-              <span className="ml-2 font-semibold text-white/40">
-                {snapshot.records.length} records · exported {new Date(snapshot.exportedAt).toLocaleString('en-ZA')} · {snapshot.exportedBy}
-              </span>
-            )}
-          </p>
-        )}
-        {parseErrors.length > 0 && (
-          <div className="mt-4 rounded-xl border border-red-300/20 bg-red-300/[0.07] p-4">
-            <p className="text-sm font-black text-red-100">The file was rejected - nothing was previewed or written.</p>
-            <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto text-xs text-red-100/85">
-              {parseErrors.slice(0, 30).map(problem => <li key={problem}>{problem}</li>)}
-              {parseErrors.length > 30 && <li>...and {parseErrors.length - 30} more.</li>}
-            </ul>
-          </div>
-        )}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Last successful sync</p><p className="mt-2 text-xl font-black text-white">{lastSuccess ? new Date(lastSuccess.finishedAt ?? lastSuccess.createdAt).toLocaleString('en-ZA') : 'Not run yet'}</p><p className="mt-1 text-xs text-white/45">{lastSuccess ? `${lastSuccess.summary.create ?? 0} created · ${lastSuccess.summary.update ?? 0} updated` : 'A reviewed run will appear here.'}</p></div>
       </section>
 
-      {loading && <p className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] px-5 py-6 text-sm text-white/55">Building preview against live CG Dynamics data...</p>}
-      {error && <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.07] p-4 text-sm leading-relaxed text-red-100">{error}</div>}
+      <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview latest changes</p><h2 className="mt-1 text-xl font-black text-white">Fetch complete configured sources</h2><p className="mt-1 text-sm text-white/45">The date range applies only to Outlook. Planner plans are fetched in full with pagination.</p></div><div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><label className="text-xs text-white/45">From<input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">To<input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><button type="button" onClick={() => void previewLatest()} disabled={!connection?.connected || transitionStatus !== 'active' || loading} className="self-end rounded-xl bg-brand-teal px-5 py-2.5 text-sm font-black text-black disabled:opacity-35">{loading ? 'Fetching...' : 'Preview latest changes'}</button></div></div>
+        <button type="button" onClick={() => setAdvancedOpen(value => !value)} className="mt-4 text-xs font-bold text-white/40 hover:text-white/70">{advancedOpen ? 'Hide' : 'Show'} connected-agent snapshot transport</button>
+        {advancedOpen && <div className="mt-3 rounded-xl border border-dashed border-white/10 p-4"><p className="text-xs leading-relaxed text-white/45">For an authorised connected agent or recovery only. Version 2 snapshots must declare per-source completeness; legacy snapshots can never archive missing items.</p><button type="button" disabled={transitionStatus !== 'active'} onClick={() => fileInputRef.current?.click()} className="mt-3 rounded-lg border border-white/10 px-4 py-2 text-xs font-black text-white disabled:opacity-35">Choose normalized snapshot</button><input ref={fileInputRef} type="file" accept=".json,application/json" className="hidden" onChange={event => { void onSnapshotFile(event.target.files); event.target.value = '' }} /></div>}
+        {parseErrors.length > 0 && <div className="mt-3 rounded-xl border border-red-300/20 bg-red-300/[0.06] p-3 text-xs text-red-100">{parseErrors.join(' ')}</div>}
+      </section>
 
-      {preview?.migrationNeeded && (
-        <section className="mt-6 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/70">Migration required</p>
-          <h2 className="mt-2 text-xl font-black text-white">Apply is blocked until phase-15a is applied</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/60">
-            The Microsoft source-tracking columns (supabase/phase-15a-microsoft-source-tracking.sql) are not present in the
-            database yet, so imported rows could not be deduplicated on re-runs. Preview still works; Apply stays disabled.
-          </p>
-        </section>
-      )}
+      {migrationNeeded && <section className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5"><h2 className="text-lg font-black text-white">Phase 17a review is required</h2><p className="mt-2 text-sm text-white/60">Preview is available after the transition-sync schema is reviewed and applied. Apply remains blocked; no migration is run from this page.</p></section>}
+      {error && <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</div>}
+      {applyResult && <section className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-4"><p className="font-black text-white">Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied, {applyResult.failed} failed.</p><p className="mt-1 text-xs text-white/50">No Microsoft writes were made.</p></section>}
 
-      {applyResult && (
-        <section className="mt-6 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-5">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-200/70">Apply result</p>
-          <p className="mt-2 text-sm font-bold text-white">
-            Inserted {applyResult.plannerInserted} Planner tasks, {applyResult.deliverablesInserted} Client Schedule deliverables,
-            {' '}{applyResult.eventsInserted} CG Calendar events. {applyResult.skippedNotNew} records were not new and were left untouched.
-          </p>
-          {applyResult.errors.map(message => (
-            <p key={message} className="mt-2 rounded-xl border border-red-300/15 bg-red-300/[0.06] px-3 py-2 text-xs text-red-100">{message}</p>
-          ))}
-        </section>
-      )}
+      {snapshot && <section className="mt-6"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Source completeness</p><h2 className="mt-1 text-xl font-black text-white">{snapshot.records.length} records · {new Date(snapshot.exportedAt).toLocaleString('en-ZA')}</h2></div><SourceCompleteness snapshot={snapshot} /></section>}
 
-      {preview && !loading && (
-        <>
-          <section className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-6">
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><p className="text-[10px] font-black uppercase text-white/35">Total</p><p className="mt-1 text-2xl font-black text-white">{summary.total}</p></div>
-            {STATUS_OPTIONS.map(option => <div key={option.value} className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><p className="text-[10px] font-black uppercase text-white/35">{option.label}</p><p className="mt-1 text-2xl font-black text-white">{summary[option.value]}</p></div>)}
-          </section>
+      {items.length > 0 && <>
+        <section className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-6">{ACTIONS.map(action => <button key={action.value} type="button" onClick={() => setActiveAction(action.value)} className={`rounded-xl border p-3 text-left ${activeAction === action.value ? 'border-brand-teal/50 bg-brand-teal/[0.08]' : 'border-white/10 bg-white/[0.025]'}`}><p className="text-[9px] font-black uppercase text-white/40">{action.label}</p><p className="mt-1 text-2xl font-black text-white">{actionCounts.get(action.value) ?? 0}</p></button>)}</section>
+        <section className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{visibleItems.map((item, index) => <PreviewItem key={itemKey(item, index)} item={item} />)}</section>
+        {visibleItems.length === 0 && <p className="mt-3 rounded-xl border border-dashed border-white/10 py-8 text-center text-sm text-white/35">No {activeAction} items.</p>}
+        <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>
+      </>}
 
-          {unresolvedClients.length > 0 && (
-            <section className="mt-6 rounded-2xl border border-red-300/20 bg-red-300/[0.055] p-4 sm:p-5">
-              <h2 className="text-lg font-black text-white">Unresolved client mapping</h2>
-              <p className="mt-1 text-sm text-white/55">No client ID is ever guessed. These stay conflicts until the client names match exactly or an admin resolves them manually.</p>
-              <div className="mt-3 flex flex-wrap gap-2">{unresolvedClients.map(item => <span key={sourceKey(item)} className="rounded-full border border-red-200/15 bg-black/20 px-3 py-1.5 text-xs font-bold text-red-100">{item.title}</span>)}</div>
-            </section>
-          )}
-
-          <div className="mt-6 flex gap-2 overflow-x-auto pb-2">
-            {STATUS_OPTIONS.map(option => (
-              <button key={option.value} type="button" onClick={() => setActiveStatus(option.value)} className={`shrink-0 rounded-full border px-4 py-2 text-xs font-black ${activeStatus === option.value ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/45'}`}>
-                {option.label} {summary[option.value]}
-              </button>
-            ))}
-          </div>
-
-          <section className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {visibleItems.map(item => <PreviewCard key={`${item.destination}:${sourceKey(item)}`} item={item} />)}
-          </section>
-          {visibleItems.length === 0 && <p className="mt-3 rounded-2xl border border-dashed border-white/10 px-5 py-10 text-center text-sm text-white/40">No {activeStatus} items in this preview.</p>}
-
-          <footer className="mt-8 flex flex-col gap-4 rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
-            <label className="flex items-start gap-3 text-xs leading-relaxed text-white/60">
-              <input
-                type="checkbox"
-                checked={reviewed}
-                onChange={event => setReviewed(event.target.checked)}
-                disabled={!canApply}
-                className="mt-0.5 h-4 w-4 accent-teal-400"
-              />
-              I reviewed the preview. Apply inserts only the {summary.new} new records; existing, changed, conflict and
-              skipped records are left untouched.
-            </label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs leading-relaxed text-white/45">
-                Changed rows are never auto-overwritten - newer CG Dynamics edits always win until resolved manually.
-              </p>
-              <button
-                type="button"
-                onClick={() => void runApply()}
-                disabled={!canApply || !reviewed}
-                className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black transition-opacity disabled:cursor-not-allowed disabled:opacity-35"
-              >
-                {applying ? 'Applying...' : `Apply ${summary.new} new records`}
-              </button>
-            </div>
-          </footer>
-        </>
-      )}
+      <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Sync history</p><h2 className="mb-4 mt-1 text-xl font-black text-white">Recent reconciliation runs</h2><RunHistory runs={runs} onSelect={runId => void selectRun(runId)} />{selectedRunId && <div className="mt-5 border-t border-white/10 pt-4"><p className="mb-3 text-xs font-black uppercase tracking-wider text-white/40">Per-item results</p><div className="max-h-96 space-y-2 overflow-y-auto">{runItems.map(item => <article key={item.id} className="rounded-lg border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold text-white">{item.details.title ?? 'Microsoft item'}</p><p className="mt-1 text-xs text-white/40">{item.sourceName} · {item.destination}</p></div><span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase ${ACTION_TONES[item.action]}`}>{item.action} · {item.resultStatus}</span></div>{item.safeError && <p className="mt-2 text-xs text-red-200">{item.safeError}</p>}</article>)}{runItems.length === 0 && <p className="text-sm text-white/35">No per-item results are available for this run.</p>}</div></div>}</section>
     </div>
   )
 }
