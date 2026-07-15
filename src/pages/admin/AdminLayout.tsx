@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Link, Outlet } from 'react-router-dom'
+import { NavLink, Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 import { isAdminRole, isManagerRole, roleLabel } from '../../lib/roles'
@@ -9,6 +9,12 @@ type NavAccess = 'staff' | 'manager' | 'admin'
 type NavItem = { to: string; label: string; end?: boolean; access?: NavAccess }
 
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
+
+const DYNAMICS_PATHS = ['/admin/client-performance', '/admin/clients', '/admin/client-dashboard', '/admin/client-calendar', '/admin/integrations']
+
+function zoneForPath(pathname: string): Zone {
+  return DYNAMICS_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`)) ? 'dynamics' : 'hub'
+}
 
 const dynamicsNav: NavItem[] = [
   { to: '/admin/client-performance', label: 'Performance Dashboard' },
@@ -20,15 +26,13 @@ const dynamicsNav: NavItem[] = [
 
 const hubNav: NavItem[] = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
-  { to: '/admin/my-day', label: 'My Day' },
+  { to: '/admin/my-work', label: 'My Work' },
   { to: '/admin/planner', label: 'Planner' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
   { to: '/admin/client-schedule', label: 'Client Schedule' },
   { to: '/admin/clients', label: 'Clients' },
-  { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
-  { to: '/admin/users', label: 'Users', access: 'admin' },
-  { to: '/admin/invites', label: 'Invites', access: 'admin' },
+  { to: '/admin/team', label: 'Team', access: 'admin' },
   { to: '/admin/microsoft-import', label: 'Microsoft Import', access: 'admin' },
 ]
 
@@ -96,21 +100,17 @@ function NavSection({ label }: { label: string }) {
 
 export default function AdminLayout() {
   const { profile, signOut } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [zone, setZone] = useState<Zone>(() => {
-    try {
-      return (localStorage.getItem('cg-zone') as Zone) ?? 'hub'
-    } catch {
-      return 'dynamics'
-    }
-  })
+  const zone = zoneForPath(location.pathname)
 
   const currentRole = profile?.role ?? 'team'
   const close = () => setMobileMenuOpen(false)
 
   function switchZone(z: Zone) {
-    setZone(z)
-    try { localStorage.setItem('cg-zone', z) } catch { /* ignore */ }
+    navigate(z === 'hub' ? '/admin/cg-hub' : '/admin/client-performance')
+    close()
   }
 
   function canShow(item: NavItem) {
@@ -162,10 +162,10 @@ export default function AdminLayout() {
   ]
   const hubMobileItems: NavItem[] = [
     { to: '/admin/cg-hub', label: 'Hub' },
-    { to: '/admin/my-day', label: 'My Day' },
+    { to: '/admin/my-work', label: 'My Work' },
     { to: '/admin/planner', label: 'Planner' },
     { to: '/admin/cg-calendar', label: 'Calendar' },
-    { to: '/admin/assistant', label: 'Assist' },
+    { to: '/admin/client-schedule', label: 'Schedule' },
   ]
   const mobileItems = (zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems).filter(canShow)
   const displayRole = roleLabel(profile?.role)
@@ -209,7 +209,7 @@ export default function AdminLayout() {
             <div className="border-b border-white/10 p-3 md:p-2.5">
               <ZoneSwitcher zone={zone} onChange={switchZone} />
             </div>
-            <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
+            <nav className="flex-1 space-y-1 overflow-y-auto p-3 md:space-y-0.5 md:p-2.5">{renderNav()}</nav>
             <div className="border-t border-white/10 p-3 md:p-2.5">
               <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
             </div>
@@ -224,7 +224,7 @@ export default function AdminLayout() {
         <div className="border-b border-white/10 p-3 md:p-2.5">
           <ZoneSwitcher zone={zone} onChange={switchZone} />
         </div>
-        <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
+        <nav className="flex-1 space-y-0.5 p-2.5">{renderNav()}</nav>
         <div className="border-t border-white/10 p-3 md:p-2.5">
           <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
         </div>

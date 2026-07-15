@@ -2,16 +2,16 @@ import { listTasks, type CommandCentreTask } from './commandCentre'
 import {
   getEffectiveScheduleDate,
   isMonthKey,
-  listMonthlyDeliverablesByMonth,
-  monthKey,
+  listMonthlyDeliverablesByYear,
   normalizeScheduleStatus,
   type MonthlyDeliverable,
 } from './planner'
 import { listCompanyEvents, EVENT_TYPE_LABELS, type CompanyCalendarEvent } from './companyCalendar'
 import { listActiveClients } from './commandCentre'
 import type { Profile } from './db/profiles'
+import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMinutes, businessMonthKey, formatBusinessDate, formatBusinessTime } from './businessTime'
 
-export type MyDaySource = 'planner_task' | 'calendar_event' | 'client_deliverable'
+export type MyDaySource = 'daily_task' | 'planner_task' | 'calendar_event' | 'client_deliverable'
 
 export interface MyDayItem {
   id: string
@@ -82,18 +82,9 @@ const DEFAULT_TASK_MINUTES = 45
 const DEFAULT_DELIVERABLE_MINUTES = 60
 const DEFAULT_EVENT_MINUTES = 60
 
-function localDateKey(date: Date) {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
-
 function localDateKeyFromIso(value: string | null | undefined) {
   if (!value) return null
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-  return localDateKey(date)
+  return businessDateKey(value) || null
 }
 
 function minutesToLabel(value: number) {
@@ -102,23 +93,8 @@ function minutesToLabel(value: number) {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
-function addDays(date: Date, days: number) {
-  const next = new Date(date)
-  next.setDate(next.getDate() + days)
-  return next
-}
-
-function localDayBoundaryIso(dateKey: string, offsetDays = 0) {
-  const [year, month, day] = dateKey.split('-').map(Number)
-  return new Date(year, month - 1, day + offsetDays, 0, 0, 0, 0).toISOString()
-}
-
-function nextMonthStartKey(date: Date) {
-  return monthKey(new Date(date.getFullYear(), date.getMonth() + 1, 1))
-}
-
 function eventDurationMinutes(event: CompanyCalendarEvent) {
-  if (event.all_day) return DEFAULT_EVENT_MINUTES
+  if (event.all_day) return WORKDAY_END_MINUTES - WORKDAY_START_MINUTES
   const start = new Date(event.start_at)
   const end = event.end_at ? new Date(event.end_at) : null
   if (!end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
@@ -156,10 +132,7 @@ function userMatches(
 }
 
 function localMinutesFromIso(value: string | null | undefined) {
-  if (!value) return null
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-  return date.getHours() * 60 + date.getMinutes()
+  return value ? businessMinutes(value) : null
 }
 
 function formatDateLabel(value: string | null, today: string) {
@@ -172,7 +145,7 @@ function formatDateLabel(value: string | null, today: string) {
 
 function formatTime(value: string | null) {
   if (!value) return null
-  return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+  return formatBusinessTime(value)
 }
 
 function taskStatusLabel(status: CommandCentreTask['status']) {
@@ -205,16 +178,16 @@ function toTaskItem(task: CommandCentreTask, today: string): MyDayItem {
   return {
     id: task.id,
     nativePlannerId: task.data_origin === 'planner_tasks' ? task.native_id ?? null : null,
-    source: 'planner_task',
+    source: task.data_origin === 'planner_tasks' ? 'planner_task' : 'daily_task',
     title: task.title,
     clientName: task.client_name,
-    date: task.due_date,
+    date: task.due_date || null,
     timeLabel: null,
     statusLabel: taskStatusLabel(task.status),
     priority: task.priority,
     assignedTo: task.assigned_to_name,
     helperNames: task.helper_names ?? [],
-    href: '/admin/planner',
+    href: task.data_origin === 'planner_tasks' ? '/admin/planner' : '/admin/command-centre',
     sortRank: taskSortRank(task, today),
   }
 }
@@ -284,10 +257,11 @@ function buildTimelineBlocks(todayItems: MyDayItem[], now = new Date()): MyDayTi
     const duration = item.durationMinutes ?? DEFAULT_EVENT_MINUTES
     return {
       item,
-      start: Math.max(WORKDAY_START_MINUTES, Math.min(parsedStart, WORKDAY_END_MINUTES)),
-      end: Math.max(WORKDAY_START_MINUTES + 30, Math.min(parsedStart + duration, WORKDAY_END_MINUTES)),
+      start: Math.max(WORKDAY_START_MINUTES, parsedStart),
+      end: Math.min(parsedStart + duration, WORKDAY_END_MINUTES),
     }
   })
+    .filter(block => block.start < WORKDAY_END_MINUTES && block.end > WORKDAY_START_MINUTES)
     .sort((a, b) => a.start - b.start)
 
   const blocks: MyDayTimelineBlock[] = []
@@ -384,10 +358,11 @@ function buildSummary(
     const start = Number(block.startLabel.slice(0, 2)) * 60 + Number(block.startLabel.slice(3, 5))
     return start > currentMinute
   })
-  const currentTask = currentBlock?.item ?? focusItems[0] ?? null
+  const insideWorkday = currentMinute >= WORKDAY_START_MINUTES && currentMinute < WORKDAY_END_MINUTES
+  const currentTask = insideWorkday ? currentBlock?.item ?? null : null
   const nextTask = nextBlock?.item && nextBlock.item.id !== currentTask?.id
     ? nextBlock.item
-    : focusItems.find(item => item.id !== currentTask?.id) ?? null
+    : insideWorkday ? focusItems.find(item => item.id !== currentTask?.id) ?? null : null
   const plannedMinutes = workBlocks.reduce((total, block) => {
     if (!/^\d{2}:\d{2}$/.test(block.startLabel) || !/^\d{2}:\d{2}$/.test(block.endLabel)) return total
     const start = Number(block.startLabel.slice(0, 2)) * 60 + Number(block.startLabel.slice(3, 5))
@@ -415,6 +390,7 @@ function buildSummary(
 export function sourceLabel(source: MyDaySource) {
   if (source === 'calendar_event') return 'CG Calendar'
   if (source === 'client_deliverable') return 'Client Schedule'
+  if (source === 'daily_task') return 'Daily Tasks'
   return 'Planner'
 }
 
@@ -425,19 +401,18 @@ export function sourceAccent(source: MyDaySource) {
 }
 
 export async function getMyDayContext(profile: Profile | null, baseDate = new Date()): Promise<MyDayContext> {
-  const today = localDateKey(baseDate)
-  const weekEnd = localDateKey(addDays(baseDate, 7))
+  const today = businessDateKey(baseDate)
+  const weekEnd = addBusinessDays(today, 7)
   const userName = profile?.full_name?.trim() || null
   const errors: string[] = []
 
-  const currentMonth = monthKey(baseDate)
-  const finalMonth = nextMonthStartKey(addDays(baseDate, 7))
-  const monthKeys = currentMonth === finalMonth ? [currentMonth] : [currentMonth, finalMonth]
+  const currentMonth = businessMonthKey(baseDate)
+  const currentYear = Number(currentMonth.slice(0, 4))
 
-  const [tasksResult, clientsResult, ...deliverableResults] = await Promise.all([
+  const [tasksResult, clientsResult, deliverablesResult] = await Promise.all([
     listTasks(),
     listActiveClients(),
-    ...monthKeys.map(key => listMonthlyDeliverablesByMonth(key)),
+    listMonthlyDeliverablesByYear(currentYear),
   ])
 
   if (tasksResult.error) errors.push(tasksResult.error.message)
@@ -450,30 +425,30 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     .map(task => toTaskItem(task, today))
 
   const clientNameById = new Map((clientsResult.data ?? []).map(client => [client.id, client.name]))
-  const deliverables = deliverableResults.flatMap(result => {
-    if (result.error) errors.push(result.error.message)
-    return ((result.data ?? []) as MonthlyDeliverable[])
-  })
+  if (deliverablesResult.error) errors.push(deliverablesResult.error.message)
+  const deliverables = ((deliverablesResult.data ?? []) as MonthlyDeliverable[])
     .filter(deliverable => {
       const status = normalizeScheduleStatus(deliverable.production_status)
-      return status !== 'scheduled_posted' && status !== 'meta_drafts'
+      return status !== 'scheduled_posted' && status !== 'meta_drafts' && deliverable.production_status !== 'moved'
     })
     .filter(deliverable => userMatches(deliverable.assigned_to_user_id, deliverable.assigned_to_name, deliverable.helper_names, profile))
     .filter(deliverable => {
       const rawDate = getEffectiveScheduleDate(deliverable)
       const date = rawDate && !isMonthKey(rawDate) ? rawDate : null
-      return !date || date <= weekEnd
+      return date ? date <= weekEnd : deliverable.month.startsWith(currentMonth)
     })
     .map(deliverable => toDeliverableItem(deliverable, clientNameById, today))
 
-  const eventsResult = await listCompanyEvents(localDayBoundaryIso(today), localDayBoundaryIso(today, 8))
+  const eventsResult = await listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 8))
   if (eventsResult.error) errors.push(eventsResult.error.message)
 
   const events = ((eventsResult.data ?? []) as CompanyCalendarEvent[])
-    .filter(event => event.status !== 'cancelled')
+    .filter(event => event.status !== 'cancelled' && event.status !== 'completed')
     .filter(event => {
       const eventDate = localDateKeyFromIso(event.start_at)
-      return eventDate === today || nameMatches(event.assigned_to_name, userName)
+      return eventDate === today
+        ? !event.assigned_to_name || nameMatches(event.assigned_to_name, userName)
+        : nameMatches(event.assigned_to_name, userName)
     })
     .map(event => toEventItem(event, today))
 
@@ -493,7 +468,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
 
   return {
     today,
-    todayLabel: new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(baseDate),
+    todayLabel: formatBusinessDate(baseDate, { weekday: 'long', day: 'numeric', month: 'long' }),
     userName,
     tasks,
     events,

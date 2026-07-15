@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { updateTaskStatus } from '../../lib/commandCentre'
-import { updatePlannerTask } from '../../lib/planner'
+import { updatePlannerTaskStatus } from '../../lib/planner'
 import { updateMonthlyDeliverableStatus } from '../../lib/planner'
 import {
   getMyDayContext,
@@ -22,7 +22,7 @@ function itemTone(item: MyDayItem, today: string) {
   return 'border-white/10 bg-white/[0.035]'
 }
 
-export default function MyDayPage() {
+export default function MyDayPage({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
   const [context, setContext] = useState<MyDayContext | null>(null)
   const [loading, setLoading] = useState(true)
@@ -42,7 +42,11 @@ export default function MyDayPage() {
     }
   }
 
-  useEffect(() => { void load() }, [profile?.id])
+  const loadEvent = useEffectEvent(load)
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [profile?.id])
 
   const assignedItems = useMemo(() => {
     if (!context) return []
@@ -53,10 +57,12 @@ export default function MyDayPage() {
     setBusyId(item.id)
     setMessage(null)
     try {
-      if (item.source === 'planner_task') {
-        await updateTaskStatus(item.id, 'in_progress')
+      if (item.source === 'planner_task' || item.source === 'daily_task') {
+        const result = await updateTaskStatus(item.id, 'in_progress')
+        if (result.error) throw new Error(result.error.message)
       } else if (item.source === 'client_deliverable' && item.deliverableId) {
-        await updateMonthlyDeliverableStatus(item.deliverableId, 'in_progress')
+        const result = await updateMonthlyDeliverableStatus(item.deliverableId, 'in_progress')
+        if (result.error) throw new Error(result.error.message)
       }
       await load()
     } catch (error) {
@@ -71,9 +77,11 @@ export default function MyDayPage() {
     setMessage(null)
     try {
       if (item.nativePlannerId) {
-        await updatePlannerTask(item.nativePlannerId, { status: 'ready_internal_review' })
+        const result = await updatePlannerTaskStatus(item.nativePlannerId, 'ready_internal_review')
+        if (result.error) throw new Error(result.error.message)
       } else if (item.source === 'client_deliverable' && item.deliverableId) {
-        await updateMonthlyDeliverableStatus(item.deliverableId, 'ready_internal_review')
+        const result = await updateMonthlyDeliverableStatus(item.deliverableId, 'ready_internal_review')
+        if (result.error) throw new Error(result.error.message)
       }
       await load()
     } catch (error) {
@@ -85,11 +93,11 @@ export default function MyDayPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-10">
-      <div className="relative mb-5 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:rounded-3xl sm:p-7">
+      <div className={`relative mb-5 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:rounded-3xl ${embedded ? 'sm:p-5' : 'sm:p-7'}`}>
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.28em] text-brand-teal">Workforce</p>
-            <h1 className="mt-2 font-display text-3xl font-black uppercase leading-none tracking-wide text-white sm:text-6xl">
+            <h1 className={`mt-2 font-display font-black uppercase leading-none tracking-wide text-white ${embedded ? 'text-3xl sm:text-4xl' : 'text-3xl sm:text-6xl'}`}>
               My Day
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-brand-primary/72">
@@ -310,7 +318,7 @@ function WorkItemCard({
   onStart: (item: MyDayItem) => void
   onReview: (item: MyDayItem) => void
 }) {
-  const canStart = item.source === 'planner_task' || item.source === 'client_deliverable'
+  const canStart = item.source === 'daily_task' || item.source === 'planner_task' || item.source === 'client_deliverable'
   const canReview = Boolean(item.nativePlannerId) || item.source === 'client_deliverable'
 
   return (

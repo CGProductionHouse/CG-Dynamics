@@ -6,6 +6,8 @@ import { Pill } from '../../components/ui/Badges'
 import { EmptyState } from '../../components/ui/States'
 import { ClientPicker } from '../../components/ClientPicker'
 import { useAuth } from '../../contexts/AuthContext'
+import { businessDateKey } from '../../lib/businessTime'
+import { isManagerRole } from '../../lib/roles'
 import {
   listTasks,
   createTask,
@@ -63,10 +65,11 @@ function matchesWorkFilter(task: CommandCentreTask, filter: WorkFilter, today: s
 }
 
 function todayStr() {
-  return new Date().toISOString().slice(0, 10)
+  return businessDateKey()
 }
 
 function formatDate(dateStr: string) {
+  if (!dateStr) return 'No date'
   const d = new Date(`${dateStr}T00:00:00`)
   const now = new Date()
   now.setHours(0, 0, 0, 0)
@@ -79,6 +82,7 @@ function formatDate(dateStr: string) {
 }
 
 function dateClass(dateStr: string) {
+  if (!dateStr) return 'text-brand-primary/45'
   const d = new Date(`${dateStr}T00:00:00`)
   const now = new Date()
   now.setHours(0, 0, 0, 0)
@@ -155,7 +159,7 @@ function buildEndOfDay(activeTasks: CommandCentreTask[]) {
   return lines.join('\n')
 }
 
-export default function CommandCentrePage() {
+export default function CommandCentrePage({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
   const [loading, setLoading] = useState(true)
@@ -194,11 +198,16 @@ export default function CommandCentrePage() {
     }
   }
 
-  useEffect(() => { void load() }, [])
-
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
   const today = todayStr()
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  const now = useMemo(() => {
+    const value = new Date(`${today}T00:00:00`)
+    return value
+  }, [today])
 
   const allActiveTasks = useMemo(() =>
     tasks.filter(t => t.status !== 'done' && t.status !== 'moved_to_tomorrow'),
@@ -299,9 +308,12 @@ export default function CommandCentrePage() {
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
     setBusyId(id)
+    setError(null)
     try {
       const { error } = await updateTaskStatus(id, status)
-      if (!error) {
+      if (error) {
+        setError(error.message)
+      } else {
         setTasks(prev => prev.map(t => {
           if (t.id !== id) return t
           const now = new Date().toISOString()
@@ -325,6 +337,7 @@ export default function CommandCentrePage() {
   }, [])
 
   const isAdmin = profile?.role === 'admin'
+  const canManage = isManagerRole(profile?.role)
   const [drawerTask, setDrawerTask] = useState<CommandCentreTask | null>(null)
 
   useEffect(() => {
@@ -392,7 +405,7 @@ export default function CommandCentrePage() {
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
 
       {/* A — Header */}
-      <div className="mb-5">
+      <div className={`mb-5 ${embedded ? 'rounded-xl border border-white/8 bg-white/[0.025] p-4' : ''}`}>
         <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub</p>
         <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
         <p className="mt-1 text-sm text-brand-primary/60">Today's work list.</p>
@@ -588,6 +601,7 @@ export default function CommandCentrePage() {
         <TaskDetailDrawer
           task={drawerTask}
           isAdmin={isAdmin}
+          canManage={canManage}
           onClose={() => setDrawerTask(null)}
           onSaved={handleSaveTask}
           onDeleted={handleDeleteTask}
@@ -640,17 +654,19 @@ function QuickAddCard({ onTaskCreated }: { onTaskCreated: () => void }) {
   useEffect(() => {
     if (!showDetails || clients.length > 0) return
     let active = true
-    setClientsLoading(true)
-    setClientsError(null)
-    listActiveClients().then(({ data, error }) => {
-      if (!active) return
-      setClientsLoading(false)
-      if (error) { setClientsError('Client list unavailable.'); return }
-      setClients(data ?? [])
-    }).catch(() => {
-      if (active) { setClientsLoading(false); setClientsError('Client list unavailable.') }
-    })
-    return () => { active = false }
+    const timer = window.setTimeout(() => {
+      setClientsLoading(true)
+      setClientsError(null)
+      listActiveClients().then(({ data, error }) => {
+        if (!active) return
+        setClientsLoading(false)
+        if (error) { setClientsError('Client list unavailable.'); return }
+        setClients(data ?? [])
+      }).catch(() => {
+        if (active) { setClientsLoading(false); setClientsError('Client list unavailable.') }
+      })
+    }, 0)
+    return () => { active = false; window.clearTimeout(timer) }
   }, [showDetails, clients.length])
 
   const isManualClient = clientId === '__manual__'
@@ -680,6 +696,7 @@ function QuickAddCard({ onTaskCreated }: { onTaskCreated: () => void }) {
         client_id: selectedClient?.id ?? null,
         client_name: isManualClient ? manualClientName.trim() || null : selectedClient?.name ?? null,
         assigned_to_name: assignedName.trim() || null,
+        assigned_to_user_id: assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null,
         bucket,
         priority,
         status: 'to_do',
@@ -772,7 +789,6 @@ function QuickAddCard({ onTaskCreated }: { onTaskCreated: () => void }) {
                   {KNOWN_STAFF.map(name => (
                     <option key={name} value={name}>{name}</option>
                   ))}
-                  <option value="__other__">Other...</option>
                 </select>
               </div>
               <div>
@@ -922,8 +938,6 @@ function MorningImportCard({ onTasksCreated }: {
 
   useEffect(() => {
     let active = true
-    setClientsLoading(true)
-    setClientsError(null)
     listActiveClients().then(({ data, error }) => {
       if (!active) return
       setClientsLoading(false)
@@ -953,7 +967,7 @@ function MorningImportCard({ onTasksCreated }: {
     setParsed(parsedTasks)
     setEdits(parsedTasks.map(t => ({
       id: t.id,
-      clientOption: t.clientId || '',
+      clientOption: t.clientConfidence === 'matched' ? t.clientId || '' : '',
       manualClientName: '',
       clientName: t.clientName,
       title: t.title,
@@ -981,17 +995,21 @@ function MorningImportCard({ onTasksCreated }: {
     setError(null)
     setSuccess(null)
     let created = 0
+    const createdIds: string[] = []
     for (const edit of edits) {
       const input = morningEditToInput(edit)
       const original = parsed?.find(p => p.id === edit.id)
       input.assigned_to_name = original?.staffName === 'Unassigned' ? null : original?.staffName ?? null
       const { error } = await createTask(input)
       if (error) {
+        setEdits(previous => previous.filter(item => !createdIds.includes(item.id)))
+        setParsed(previous => previous ? previous.filter(item => !createdIds.includes(item.id)) : null)
         setError(`Error creating task "${edit.title}": ${error.message}`)
         setSaving(false)
         return
       }
       created++
+      createdIds.push(edit.id)
     }
     setSaving(false)
     setSuccess(`Created ${created} task${created === 1 ? '' : 's'}.`)
@@ -1211,8 +1229,7 @@ function MorningMessageCard({ staffGroups, copiedSection, onCopy }: {
   copiedSection: string | null
   onCopy: (section: string, text: string) => void
 }) {
-  const nonEmptyGroups = new Map(staffGroups.filter(([, tasks]) => tasks.length > 0))
-  const message = useMemo(() => buildMorningMessage(nonEmptyGroups), [nonEmptyGroups])
+  const message = useMemo(() => buildMorningMessage(new Map(staffGroups.filter(([, tasks]) => tasks.length > 0))), [staffGroups])
   const isCopied = copiedSection === 'morning'
 
   return (
@@ -1277,9 +1294,10 @@ function EndOfDayCard({ allRelevant, copiedSection, onCopy }: {
   )
 }
 
-function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
+function TaskDetailDrawer({ task, isAdmin, canManage, onClose, onSaved, onDeleted }: {
   task: CommandCentreTask
   isAdmin: boolean
+  canManage: boolean
   onClose: () => void
   onSaved: (updated: CommandCentreTask) => void
   onDeleted: (id: string) => void
@@ -1294,6 +1312,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
   const [status, setStatus] = useState<TaskStatus>(task.status)
   const [dueDate, setDueDate] = useState(task.due_date)
   const [notes, setNotes] = useState(task.notes ?? '')
+  const [helperNames, setHelperNames] = useState((task.helper_names ?? []).join(', '))
   const [packageAction, setPackageAction] = useState<PackageAction | ''>(task.package_action ?? '')
   const [quoteNeeded, setQuoteNeeded] = useState(Boolean(task.quote_needed))
   const [adminPackageNote, setAdminPackageNote] = useState(task.admin_package_note ?? '')
@@ -1309,16 +1328,27 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
     setSaveMsg(null)
     setSaveError(null)
     try {
+      if (!canManage) {
+        const result = await updateTaskStatus(task.id, status)
+        if (result.error) { setSaveError(result.error.message); return }
+        onSaved({ ...task, status, updated_at: new Date().toISOString(), completed_at: status === 'done' ? new Date().toISOString() : null })
+        setSaveMsg('Status saved')
+        return
+      }
       const updates = {
         title: title.trim(),
         client_id: clientId || null,
         client_name: clientName || null,
         assigned_to_name: assignedName.trim() || null,
+        assigned_to_user_id: task.data_origin === 'planner_tasks'
+          ? null
+          : assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null,
         bucket,
         priority,
         status,
         due_date: dueDate,
         notes: notes.trim() || null,
+        helper_names: helperNames.split(',').map(name => name.trim()).filter(Boolean),
         ...(task.data_origin !== 'planner_tasks'
           ? {
               package_action: packageAction || null,
@@ -1398,6 +1428,9 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
               )}
             </div>
           )}
+          {!canManage && (
+            <p className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-brand-primary/70">Task details are manager-controlled. You can update the status of work assigned to you.</p>
+          )}
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Title</label>
@@ -1421,7 +1454,6 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
             <select value={assignedName} onChange={e => setAssignedName(e.target.value)} className={inputCls}>
               <option value="">Unassigned</option>
               {KNOWN_STAFF.map(name => <option key={name} value={name}>{name}</option>)}
-              <option value="__other__">Other...</option>
             </select>
           </div>
 
@@ -1473,7 +1505,9 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
 
           <div>
             <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p>
-            {task.helper_names !== undefined ? (
+            {canManage ? (
+              <input value={helperNames} onChange={event => setHelperNames(event.target.value)} placeholder="Names separated by commas" className={inputCls} />
+            ) : task.helper_names !== undefined ? (
               task.helper_names.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                   {task.helper_names.map(name => (
@@ -1566,7 +1600,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
             >
               Close
             </button>
-            {isAdmin && !confirmDelete && (
+            {canManage && !confirmDelete && (
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
@@ -1575,7 +1609,7 @@ function TaskDetailDrawer({ task, isAdmin, onClose, onSaved, onDeleted }: {
                 {task.data_origin === 'planner_tasks' ? 'Remove from active' : 'Delete task'}
               </button>
             )}
-            {isAdmin && confirmDelete && (
+            {canManage && confirmDelete && (
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-brand-primary">Sure?</span>
                 <button

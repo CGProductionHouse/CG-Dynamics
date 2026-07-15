@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
@@ -17,6 +17,7 @@ function isNotConfirmed(error: { message?: string; code?: string } | null) {
 export default function Login() {
   const { signIn, resendConfirmation } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +45,11 @@ export default function Login() {
     } else if (!role) {
       setError('Could not load your profile after sign in.')
     } else {
-      navigate(role === 'client' ? '/dashboard' : '/admin')
+      const requestedPath = (location.state as { from?: string } | null)?.from
+      const destination = role === 'client'
+        ? '/dashboard'
+        : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
+      navigate(destination, { replace: true })
     }
   }
 

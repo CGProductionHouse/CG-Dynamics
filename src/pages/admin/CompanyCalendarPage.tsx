@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
@@ -24,8 +24,10 @@ import {
   type CalendarTaskRow,
 } from '../../lib/planner'
 import { materializeRecurringTasks } from '../../lib/recurrence'
+import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
+import { isManagerRole } from '../../lib/roles'
 
-type EventFilter = 'all' | CompanyEventType
+type EventFilter = 'all' | 'cancelled' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -49,53 +51,55 @@ function sortEvents(events: CompanyCalendarEvent[]): CompanyCalendarEvent[] {
 
 function formatEventTime(dateStr: string) {
   const d = new Date(dateStr)
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  const eventDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-  const diff = (eventDate.getTime() - now.getTime()) / 86400000
+  const eventKey = businessDateKey(d)
+  const today = businessDateKey()
+  const diff = (Date.parse(`${eventKey}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000
   const datePart = diff === 0 ? 'Today'
     : diff === 1 ? 'Tomorrow'
     : diff < 0 && diff > -2 ? 'Yesterday'
-    : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : formatBusinessDate(d, { day: 'numeric', month: 'short', year: 'numeric' })
 
-  const timePart = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  const timePart = formatBusinessTime(d)
   return { datePart, timePart, full: `${datePart} · ${timePart}` }
 }
 
 function formatShortDate(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+  return formatBusinessDate(`${dateStr}T12:00:00+02:00`, { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
 function monthKey(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+  return businessMonthKey(date)
 }
 
 function localDateKey(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  return businessDateKey(value)
 }
 
-function localMonthKey(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return monthKey(date)
+function eventEndTimestamp(event: CompanyCalendarEvent): number {
+  if (event.end_at) return Date.parse(event.end_at)
+  return Date.parse(event.start_at) + (event.all_day ? 24 : 1) * 60 * 60 * 1000
+}
+
+function eventOccursOnDate(event: CompanyCalendarEvent, date: string): boolean {
+  const dayStart = Date.parse(businessDayBoundaryIso(date))
+  const dayEnd = Date.parse(businessDayBoundaryIso(date, 1))
+  return Date.parse(event.start_at) < dayEnd && eventEndTimestamp(event) > dayStart
+}
+
+function monthDates(month: string): string[] {
+  const [year, monthNumber] = month.split('-').map(Number)
+  const count = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate()
+  return Array.from({ length: count }, (_, index) => `${month}-${String(index + 1).padStart(2, '0')}`)
 }
 
 function isoToLocalDateTimeInput(value: string | null): string {
   if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0'),
-  ].join('-') + `T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+  const date = businessDateKey(value)
+  return date ? `${date}T${formatBusinessTime(value)}` : ''
 }
 
 function localDateTimeInputToIso(value: string): string {
-  return new Date(value).toISOString()
+  return new Date(`${value}:00+02:00`).toISOString()
 }
 
 function shiftMonth(key: string, amount: number) {
@@ -163,15 +167,21 @@ export default function CompanyCalendarPage() {
   const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
   const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; recurrence: string | null }>({ tasks: null, recurrence: null })
   const [recurrenceMigrationNeeded, setRecurrenceMigrationNeeded] = useState(false)
+  const loadRequestRef = useRef(0)
 
-  const isAdmin = profile?.role === 'admin'
+  const canManage = isManagerRole(profile?.role)
 
   async function load() {
+    const requestId = ++loadRequestRef.current
     setLoading(true)
     setError(null)
     setTableMissing(false)
     try {
-      const result = await listCompanyEvents()
+      const result = await listCompanyEvents(
+        businessDayBoundaryIso(`${selectedMonth}-01`),
+        businessDayBoundaryIso(nextMonthStart(selectedMonth)),
+      )
+      if (requestId !== loadRequestRef.current) return
       if (result.tableMissing) {
         setTableMissing(true)
         setEvents([])
@@ -184,14 +194,20 @@ export default function CompanyCalendarPage() {
       }
       setEvents(result.data ?? [])
     } catch {
+      if (requestId !== loadRequestRef.current) return
       setError('Could not load events.')
       setEvents([])
     } finally {
-      setLoading(false)
+      if (requestId === loadRequestRef.current) setLoading(false)
     }
   }
 
-  useEffect(() => { void load() }, [])
+  const loadEvent = useEffectEvent(load)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [selectedMonth])
 
   // Task layer reloads per month. Best-effort and independent: a failure in
   // tasks (or events) never blanks the other layer — errors surface as diagnostics.
@@ -199,14 +215,19 @@ export default function CompanyCalendarPage() {
     let cancelled = false
     async function loadLayers() {
       const monthStart = `${selectedMonth}-01`
-      setLayerErrors({ tasks: null, recurrence: null })
-      setRecurrenceMigrationNeeded(false)
-      const recurrenceResult = await materializeRecurringTasks()
-      if (cancelled) return
-      if (recurrenceResult.migrationNeeded) {
-        setRecurrenceMigrationNeeded(true)
-      } else if (recurrenceResult.error) {
-        setLayerErrors(prev => ({ ...prev, recurrence: recurrenceResult.error ?? null }))
+      if (!layers.tasks) {
+        setMonthTasks([])
+        return
+      }
+      setMonthTasks([])
+      if (canManage) {
+        const recurrenceResult = await materializeRecurringTasks()
+        if (cancelled) return
+        if (recurrenceResult.migrationNeeded) {
+          setRecurrenceMigrationNeeded(true)
+        } else if (recurrenceResult.error) {
+          setLayerErrors(prev => ({ ...prev, recurrence: recurrenceResult.error ?? null }))
+        }
       }
       const taskResult = await listPlannerTasksDueBetween(monthStart, nextMonthStart(selectedMonth))
       if (cancelled) return
@@ -221,9 +242,13 @@ export default function CompanyCalendarPage() {
         setMonthTasks(((taskResult.data ?? []) as CalendarTaskRow[]).filter(task => task.status !== 'approved'))
       }
     }
-    void loadLayers()
-    return () => { cancelled = true }
-  }, [selectedMonth])
+    const timer = window.setTimeout(() => {
+      setLayerErrors({ tasks: null, recurrence: null })
+      setRecurrenceMigrationNeeded(false)
+      void loadLayers()
+    }, 0)
+    return () => { cancelled = true; window.clearTimeout(timer) }
+  }, [canManage, layers.tasks, selectedMonth])
 
   useEffect(() => {
     if (!drawerEvent) return
@@ -233,15 +258,14 @@ export default function CompanyCalendarPage() {
   }, [drawerEvent])
 
   const filtered = useMemo(() => {
-    const active = events.filter(e => e.status !== 'cancelled')
+    if (filter === 'cancelled') return sortEvents(events.filter(event => event.status === 'cancelled'))
+    const active = events.filter(event => event.status !== 'cancelled')
     if (filter === 'all') return sortEvents(active)
     return sortEvents(active.filter(e => e.event_type === filter))
   }, [events, filter])
 
-  const monthEvents = useMemo(
-    () => filtered.filter(event => localMonthKey(event.start_at) === selectedMonth),
-    [filtered, selectedMonth],
-  )
+  const allMonthEvents = events
+  const monthEvents = filtered
 
   const visibleTasks = useMemo(() => (layers.tasks ? monthTasks : []), [layers.tasks, monthTasks])
   const visibleEvents = useMemo(() => (layers.events ? monthEvents : []), [layers.events, monthEvents])
@@ -258,14 +282,16 @@ export default function CompanyCalendarPage() {
   // Agenda groups: union of all visible layers per day, sorted by date.
   const grouped = useMemo(() => {
     const days = new Set<string>()
-    for (const event of visibleEvents) days.add(localDateKey(event.start_at))
+    for (const date of monthDates(selectedMonth)) {
+      if (visibleEvents.some(event => eventOccursOnDate(event, date))) days.add(date)
+    }
     for (const date of tasksByDate.keys()) days.add(date)
     return [...days].sort().map(day => ({
       day,
-      events: visibleEvents.filter(event => localDateKey(event.start_at) === day),
+      events: visibleEvents.filter(event => eventOccursOnDate(event, day)),
       tasks: tasksByDate.get(day) ?? [],
     }))
-  }, [visibleEvents, tasksByDate])
+  }, [selectedMonth, visibleEvents, tasksByDate])
 
   const counts = useMemo(() => {
     const active = events.filter(e => e.status !== 'cancelled')
@@ -276,18 +302,21 @@ export default function CompanyCalendarPage() {
       content_run: active.filter(e => e.event_type === 'content_run').length,
       client_event: active.filter(e => e.event_type === 'client_event').length,
       deadline: active.filter(e => e.event_type === 'deadline').length,
+      internal: active.filter(e => e.event_type === 'internal').length,
+      cancelled: events.filter(e => e.status === 'cancelled').length,
     }
   }, [events])
 
   const handleCreateEvent = useCallback((date?: string) => {
-    const start = date ? `${date}T09:00` : ''
+    const defaultDate = date ?? (selectedMonth === businessMonthKey() ? businessDateKey() : `${selectedMonth}-01`)
+    const start = `${defaultDate}T09:00`
     setDrawerEvent({ id: '', title: '', event_type: 'internal', client_id: null, client_name: null, start_at: start, end_at: null, all_day: false, location: null, notes: null, assigned_to_name: null, status: 'planned', linked_deliverable_id: null, linked_task_id: null, created_at: '', updated_at: '' })
-  }, [])
+  }, [selectedMonth])
 
-  const handleSaved = useCallback(() => {
+  function handleSaved() {
     setDrawerEvent(null)
     void load()
-  }, [])
+  }
 
   if (loading) {
     return (
@@ -312,6 +341,8 @@ export default function CompanyCalendarPage() {
     { value: 'content_run', label: 'Content Runs', count: counts.content_run },
     { value: 'client_event', label: 'Client Events', count: counts.client_event },
     { value: 'deadline', label: 'Deadlines', count: counts.deadline },
+    { value: 'internal', label: 'Internal', count: counts.internal },
+    { value: 'cancelled', label: 'Cancelled', count: counts.cancelled },
   ]
 
   return (
@@ -322,9 +353,9 @@ export default function CompanyCalendarPage() {
           <h1 className="mt-1 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
           <p className="mt-1 text-sm text-brand-primary/60">Meetings, shoots, content runs and internal events.</p>
         </div>
-        <ActionButton variant="primary" onClick={() => handleCreateEvent()}>
+        {canManage && <ActionButton variant="primary" onClick={() => handleCreateEvent()}>
           + Add Event
-        </ActionButton>
+        </ActionButton>}
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -360,10 +391,10 @@ export default function CompanyCalendarPage() {
         ))}
       </div>
 
-      {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (monthEvents.length + monthTasks.length === 0)) && (
+      {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (allMonthEvents.length + monthTasks.length === 0)) && (
         <CalendarDiagnostics
           month={selectedMonth}
-          eventCount={monthEvents.length}
+          eventCount={allMonthEvents.length}
           taskCount={monthTasks.length}
           tableMissing={tableMissing}
           eventError={error}
@@ -404,12 +435,13 @@ export default function CompanyCalendarPage() {
           events={visibleEvents}
           tasksByDate={tasksByDate}
           groups={grouped}
+          canManage={canManage}
           onAdd={handleCreateEvent}
           onOpen={setDrawerEvent}
           onOpenDay={setDayPanel}
         />
       ) : grouped.length === 0 ? (
-        <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No company events or dated Planner tasks this month yet." action={<ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton>} />
+        <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No company events or dated Planner tasks this month yet." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton> : undefined} />
       ) : (
         <div className="space-y-6">
           {grouped.map(group => (
@@ -449,7 +481,8 @@ export default function CompanyCalendarPage() {
       {drawerEvent && (
         <EventDrawer
           event={drawerEvent}
-          isAdmin={isAdmin}
+          canManage={canManage}
+          events={events}
           onClose={() => setDrawerEvent(null)}
           onSaved={handleSaved}
         />
@@ -523,6 +556,7 @@ function CgCalendarGrid({
   events,
   tasksByDate,
   groups,
+  canManage,
   onAdd,
   onOpen,
   onOpenDay,
@@ -531,6 +565,7 @@ function CgCalendarGrid({
   events: CompanyCalendarEvent[]
   tasksByDate: Map<string, CalendarTaskRow[]>
   groups: Array<{ day: string; events: CompanyCalendarEvent[]; tasks: CalendarTaskRow[] }>
+  canManage: boolean
   onAdd: (date?: string) => void
   onOpen: (event: CompanyCalendarEvent) => void
   onOpenDay: (data: DayPanelData) => void
@@ -544,10 +579,9 @@ function CgCalendarGrid({
   ]
   const today = localDateKey(new Date())
   const byDate = new Map<string, CompanyCalendarEvent[]>()
-  for (const event of events) {
-    const day = localDateKey(event.start_at)
-    if (!byDate.has(day)) byDate.set(day, [])
-    byDate.get(day)!.push(event)
+  for (const date of monthDates(month)) {
+    const dayEvents = events.filter(event => eventOccursOnDate(event, date))
+    if (dayEvents.length > 0) byDate.set(date, dayEvents)
   }
   return (
     <div>
@@ -570,14 +604,8 @@ function CgCalendarGrid({
           const openDay = () => onOpenDay({ date, events: dayEvents, tasks: dayTasks })
           return (
             <div key={date} className={`min-h-[108px] p-1.5 ${date === today ? 'bg-brand-teal/[0.055]' : 'bg-[#0c0c0c]'}`}>
-              <button
-                type="button"
-                onClick={() => onAdd(date)}
-                className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${date === today ? 'bg-brand-teal text-black' : 'text-white/35 hover:bg-white/[0.06] hover:text-white'}`}
-                title="Add event"
-              >
-                {day}
-              </button>
+              {canManage ? <button type="button" onClick={() => onAdd(date)} className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${date === today ? 'bg-brand-teal text-black' : 'text-white/35 hover:bg-white/[0.06] hover:text-white'}`} title="Add event">{day}</button>
+                : <span className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${date === today ? 'bg-brand-teal text-black' : 'text-white/35'}`}>{day}</span>}
               <div className="space-y-0.5">
                 {eventChips.map(event => (
                   <button
@@ -616,7 +644,7 @@ function CgCalendarGrid({
       </div>
       <div className="space-y-5 sm:hidden">
         {groups.length === 0 ? (
-          <EmptyState title={`Nothing in ${formatMonthHeading(month)}`} message="No company events or dated Planner tasks this month. See the diagnostics above." action={<ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton>} centered={false} />
+          <EmptyState title={`Nothing in ${formatMonthHeading(month)}`} message="No company events or dated Planner tasks this month. See the diagnostics above." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} centered={false} />
         ) : groups.map(group => (
           <div key={group.day}>
             <button
@@ -729,10 +757,11 @@ function EventCard({ event, onClick }: { event: CompanyCalendarEvent; onClick: (
             <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusStyle(event.status)}`}>
               {EVENT_STATUS_LABELS[event.status]}
             </span>
+            {event.microsoft_source_type === 'outlook_event' && <span className="rounded-full border border-blue-300/20 bg-blue-300/[0.07] px-2 py-0.5 text-[10px] font-bold text-blue-200">Outlook</span>}
           </div>
           <div className="mt-2 space-y-0.5">
             <p className="text-xs text-brand-primary/70">
-              {datePart} · {timePart}
+              {datePart} · {event.all_day ? 'All day' : timePart}
             </p>
             {event.location && (
               <p className="text-xs text-brand-primary/50">{event.location}</p>
@@ -747,9 +776,10 @@ function EventCard({ event, onClick }: { event: CompanyCalendarEvent; onClick: (
   )
 }
 
-function EventDrawer({ event, isAdmin, onClose, onSaved }: {
+function EventDrawer({ event, canManage, events, onClose, onSaved }: {
   event: CompanyCalendarEvent
-  isAdmin: boolean
+  canManage: boolean
+  events: CompanyCalendarEvent[]
   onClose: () => void
   onSaved: () => void
 }) {
@@ -772,12 +802,37 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
 
+  const overlapTitles = useMemo(() => {
+    if (!startAt) return []
+    const startIso = allDay
+      ? new Date(`${startAt.slice(0, 10)}T00:00:00+02:00`).toISOString()
+      : localDateTimeInputToIso(startAt)
+    const endIso = allDay
+      ? new Date(`${(endAt || addBusinessDays(startAt.slice(0, 10), 1)).slice(0, 10)}T00:00:00+02:00`).toISOString()
+      : endAt ? localDateTimeInputToIso(endAt) : new Date(Date.parse(startIso) + 60 * 60 * 1000).toISOString()
+    return events.filter(item => item.id !== event.id && item.status !== 'cancelled'
+      && Date.parse(item.start_at) < Date.parse(endIso)
+      && eventEndTimestamp(item) > Date.parse(startIso))
+      .map(item => item.title)
+  }, [allDay, endAt, event.id, events, startAt])
+
   async function handleSave() {
-    if (saving || !title.trim()) return
+    if (saving || !title.trim() || !canManage) return
     setSaving(true)
     setSaveError(null)
     try {
-      const startIso = startAt ? localDateTimeInputToIso(startAt) : new Date().toISOString()
+      if (!startAt) { setSaveError('Choose a start date and time.'); return }
+      const startDate = startAt.slice(0, 10)
+      const startIso = allDay
+        ? new Date(`${startDate}T00:00:00+02:00`).toISOString()
+        : localDateTimeInputToIso(startAt)
+      const endIso = allDay
+        ? new Date(`${(endAt ? endAt.slice(0, 10) : addBusinessDays(startDate, 1))}T00:00:00+02:00`).toISOString()
+        : endAt ? localDateTimeInputToIso(endAt) : null
+      if (endIso && Date.parse(endIso) <= Date.parse(startIso)) {
+        setSaveError('End must be after start.')
+        return
+      }
       if (isNew) {
         const input: CompanyEventInput = {
           title: title.trim(),
@@ -785,7 +840,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
           client_id: clientId || null,
           client_name: clientName || null,
           start_at: startIso,
-          end_at: endAt ? localDateTimeInputToIso(endAt) : null,
+          end_at: endIso,
           all_day: allDay,
           location: location.trim() || null,
           notes: notes.trim() || null,
@@ -805,7 +860,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
           client_id: clientId || null,
           client_name: clientName || null,
           start_at: startIso,
-          end_at: endAt ? localDateTimeInputToIso(endAt) : null,
+          end_at: endIso,
           all_day: allDay,
           location: location.trim() || null,
           notes: notes.trim() || null,
@@ -828,7 +883,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
   }
 
   async function handleDelete() {
-    if (deleting) return
+    if (deleting || !canManage) return
     setDeleting(true)
     try {
       const result = await deleteCompanyEvent(event.id)
@@ -854,8 +909,9 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
       <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-[#111111] sm:w-[480px] border-l border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
           <h2 className="text-base font-semibold text-white">
-            {isNew ? 'Add Event' : 'Edit Event'}
+            {isNew ? 'Add Event' : canManage ? 'Edit Event' : 'Event details'}
           </h2>
+          {event.microsoft_source_type === 'outlook_event' && <p className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Outlook import</p>}
           <button
             type="button"
             onClick={onClose}
@@ -865,7 +921,8 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
           </button>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+        <fieldset disabled={!canManage} className="flex-1 space-y-4 overflow-y-auto px-5 py-5 disabled:opacity-75">
+          {!canManage && <p className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-brand-primary/70">Calendar events are read-only for staff. Ask a manager to make changes.</p>}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Title</label>
             <input value={title} onChange={e => setTitle(e.target.value)} className={inputCls} placeholder="Event title" />
@@ -892,16 +949,18 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">Start</label>
-              <input type="datetime-local" value={startAt} onChange={e => setStartAt(e.target.value)} className={inputCls} />
+              <input type={allDay ? 'date' : 'datetime-local'} value={allDay ? startAt.slice(0, 10) : startAt} onChange={e => setStartAt(allDay ? `${e.target.value}T00:00` : e.target.value)} className={inputCls} />
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">End</label>
-              <input type="datetime-local" value={endAt} onChange={e => setEndAt(e.target.value)} className={inputCls} />
+              <input type={allDay ? 'date' : 'datetime-local'} value={allDay ? endAt.slice(0, 10) : endAt} onChange={e => setEndAt(allDay ? `${e.target.value}T00:00` : e.target.value)} className={inputCls} />
             </div>
           </div>
+
+          {overlapTitles.length > 0 && <p className="rounded-lg border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs text-amber-100">Overlaps with: {overlapTitles.slice(0, 3).join(', ')}{overlapTitles.length > 3 ? ` and ${overlapTitles.length - 3} more` : ''}.</p>}
 
           <label className="flex items-center gap-2 text-xs text-brand-primary/75">
             <input
@@ -941,19 +1000,19 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
               className={`resize-none ${inputCls}`}
             />
           </div>
-        </div>
+        </fieldset>
 
         <div className="border-t border-white/[0.08] px-5 py-4">
           {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
           <div className="flex items-center gap-3">
-            <ActionButton
+            {canManage && <ActionButton
               variant="primary"
               onClick={handleSave}
               disabled={saving || !title.trim()}
               loading={saving}
             >
               {isNew ? 'Create Event' : 'Save'}
-            </ActionButton>
+            </ActionButton>}
             <button
               type="button"
               onClick={onClose}
@@ -961,7 +1020,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
             >
               Close
             </button>
-            {!isNew && isAdmin && !confirmDelete && (
+            {!isNew && canManage && !confirmDelete && (
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
@@ -970,7 +1029,7 @@ function EventDrawer({ event, isAdmin, onClose, onSaved }: {
                 Delete
               </button>
             )}
-            {!isNew && isAdmin && confirmDelete && (
+            {!isNew && canManage && confirmDelete && (
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-brand-primary">Sure?</span>
                 <button

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
@@ -46,7 +46,7 @@ function inviteMessage(email: string) {
   ].join('\n')
 }
 
-export default function InvitesAdmin() {
+export default function InvitesAdmin({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
   const [invites, setInvites] = useState<ClientInvite[]>([])
   const [clients, setClients] = useState<Client[]>([])
@@ -86,9 +86,11 @@ export default function InvitesAdmin() {
     }
   }
 
+  const loadEvent = useEffectEvent(load)
+
   useEffect(() => {
-    void load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const timer = window.setTimeout(() => { void loadEvent() }, 0)
+    return () => window.clearTimeout(timer)
   }, [])
 
   async function handleCreate(event: FormEvent) {
@@ -332,9 +334,9 @@ export default function InvitesAdmin() {
   }
 
   return (
-    <div className="w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+    <div className={embedded ? 'w-full' : 'w-full max-w-4xl p-4 sm:p-6 lg:p-8'}>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-white">Invites</h1>
+        {embedded ? <h2 className="text-xl font-semibold text-white">Invites</h2> : <h1 className="text-xl font-semibold text-white">Invites</h1>}
         <p className="mt-2 text-sm text-brand-primary max-w-2xl">
           Pre-approve client and workforce emails. Client invites link to one client dashboard;
           staff and manager invites are global operational accounts.

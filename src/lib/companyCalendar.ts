@@ -124,8 +124,10 @@ export async function listCompanyEvents(
       .select('*')
       .order('start_at', { ascending: true })
 
-    if (rangeStart) query = query.gte('start_at', rangeStart)
     if (rangeEnd) query = query.lt('start_at', rangeEnd)
+    if (rangeStart) {
+      query = query.or(`end_at.gt.${rangeStart},and(end_at.is.null,start_at.gte.${rangeStart})`)
+    }
 
     const { data, error } = await query
 

@@ -102,6 +102,7 @@ type PlannerTaskRow = {
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
+  recurrence_rule?: string | null
 }
 
 type PlannerBucketRow = {
@@ -148,14 +149,18 @@ function cleanBucketName(value: string | null | undefined): string {
 
 function taskStatusFromPlanner(status: string): TaskStatus {
   if (status === 'in_progress') return 'in_progress'
-  if (status === 'scheduled' || status === 'approved') return 'done'
+  if (status === 'blocked') return 'blocked'
+  if (status === 'waiting_client') return 'waiting_client'
+  if (status === 'scheduled' || status === 'approved' || status === 'done') return 'done'
   if (status === 'ready_internal_review') return 'in_progress'
   return 'to_do'
 }
 
 function plannerStatusFromTask(status: TaskStatus): string {
   if (status === 'in_progress') return 'in_progress'
-  if (status === 'done') return 'scheduled'
+  if (status === 'blocked') return 'blocked'
+  if (status === 'waiting_client') return 'waiting_client'
+  if (status === 'done') return 'done'
   return 'to_do'
 }
 
@@ -173,7 +178,7 @@ function plannerTaskToCommandTask(row: PlannerTaskRow, bucketName: string | unde
     bucket: bucket as TaskBucket,
     priority: row.priority ?? 'normal',
     status: taskStatusFromPlanner(row.status),
-    due_date: row.due_date ?? row.start_date ?? todayStr(),
+    due_date: row.due_date ?? row.start_date ?? '',
     notes: row.notes,
     source: row.source === 'teams_import' ? 'teams_import' : 'other',
     whatsapp_source_text: null,
@@ -206,7 +211,8 @@ export async function listTasks() {
     return { data: nativeResult.data ?? [], error: plannerResult.error }
   }
 
-  const plannerRows = ((plannerResult.data ?? []) as PlannerTaskRow[]).filter(row => !row.archived_at)
+  const plannerRows = ((plannerResult.data ?? []) as PlannerTaskRow[])
+    .filter(row => !row.archived_at && !row.recurrence_rule)
   const bucketIds = unique(plannerRows.map(row => row.bucket_id))
   const bucketNames = new Map<string, string>()
 
@@ -273,20 +279,16 @@ export async function archiveImportedPlannerTask(id: string, actorName: string |
 
 export async function updateTaskStatus(id: string, status: TaskStatus) {
   if (isPlannerTaskId(id)) {
-    return supabase
-      .from(PLANNER_TASKS_TABLE)
-      .update({ status: plannerStatusFromTask(status) })
-      .eq('id', stripPlannerTaskId(id))
-      .select()
-      .single()
+    const taskId = stripPlannerTaskId(id)
+    const mappedStatus = plannerStatusFromTask(status)
+    const rpcResult = await supabase.rpc('update_planner_task_status', { p_task_id: taskId, p_status: mappedStatus })
+    if (!rpcResult.error || rpcResult.error.code !== 'PGRST202') return rpcResult
+    return supabase.from(PLANNER_TASKS_TABLE).update({ status: mappedStatus }).eq('id', taskId).select().single()
   }
 
-  return supabase
-    .from(TABLE)
-    .update({ status })
-    .eq('id', id)
-    .select()
-    .single()
+  const rpcResult = await supabase.rpc('update_command_centre_task_status', { p_task_id: id, p_status: status })
+  if (!rpcResult.error || rpcResult.error.code !== 'PGRST202') return rpcResult
+  return supabase.from(TABLE).update({ status }).eq('id', id).select().single()
 }
 
 export async function updateTask(
