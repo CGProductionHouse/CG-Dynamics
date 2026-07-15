@@ -22,7 +22,7 @@ function itemTone(item: MyDayItem, today: string) {
   return 'border-white/10 bg-white/[0.035]'
 }
 
-export default function MyDayPage() {
+export default function MyDayPage({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
   const [context, setContext] = useState<MyDayContext | null>(null)
   const [loading, setLoading] = useState(true)
@@ -93,11 +93,11 @@ export default function MyDayPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-10">
-      <div className="relative mb-5 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:rounded-3xl sm:p-7">
+      <div className={`relative mb-5 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:rounded-3xl ${embedded ? 'sm:p-5' : 'sm:p-7'}`}>
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.28em] text-brand-teal">Workforce</p>
-            <h1 className="mt-2 font-display text-3xl font-black uppercase leading-none tracking-wide text-white sm:text-6xl">
+            <h1 className={`mt-2 font-display font-black uppercase leading-none tracking-wide text-white ${embedded ? 'text-3xl sm:text-4xl' : 'text-3xl sm:text-6xl'}`}>
               My Day
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-brand-primary/72">

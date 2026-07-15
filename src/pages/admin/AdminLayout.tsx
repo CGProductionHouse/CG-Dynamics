@@ -26,15 +26,13 @@ const dynamicsNav: NavItem[] = [
 
 const hubNav: NavItem[] = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
-  { to: '/admin/my-day', label: 'My Day' },
+  { to: '/admin/my-work', label: 'My Work' },
   { to: '/admin/planner', label: 'Planner' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
   { to: '/admin/client-schedule', label: 'Client Schedule' },
   { to: '/admin/clients', label: 'Clients' },
-  { to: '/admin/command-centre', label: 'Daily Tasks' },
   { to: '/admin/assistant', label: 'Assistant' },
-  { to: '/admin/users', label: 'Users', access: 'admin' },
-  { to: '/admin/invites', label: 'Invites', access: 'admin' },
+  { to: '/admin/team', label: 'Team', access: 'admin' },
   { to: '/admin/microsoft-import', label: 'Microsoft Import', access: 'admin' },
 ]
 
@@ -164,10 +162,10 @@ export default function AdminLayout() {
   ]
   const hubMobileItems: NavItem[] = [
     { to: '/admin/cg-hub', label: 'Hub' },
-    { to: '/admin/my-day', label: 'My Day' },
+    { to: '/admin/my-work', label: 'My Work' },
     { to: '/admin/planner', label: 'Planner' },
     { to: '/admin/cg-calendar', label: 'Calendar' },
-    { to: '/admin/command-centre', label: 'Tasks' },
+    { to: '/admin/client-schedule', label: 'Schedule' },
   ]
   const mobileItems = (zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems).filter(canShow)
   const displayRole = roleLabel(profile?.role)
@@ -211,7 +209,7 @@ export default function AdminLayout() {
             <div className="border-b border-white/10 p-3 md:p-2.5">
               <ZoneSwitcher zone={zone} onChange={switchZone} />
             </div>
-            <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
+            <nav className="flex-1 space-y-1 overflow-y-auto p-3 md:space-y-0.5 md:p-2.5">{renderNav()}</nav>
             <div className="border-t border-white/10 p-3 md:p-2.5">
               <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
             </div>
@@ -226,7 +224,7 @@ export default function AdminLayout() {
         <div className="border-b border-white/10 p-3 md:p-2.5">
           <ZoneSwitcher zone={zone} onChange={switchZone} />
         </div>
-        <nav className="flex-1 space-y-1 md:space-y-0.5 overflow-y-auto p-3 md:p-2.5">{renderNav()}</nav>
+        <nav className="flex-1 space-y-0.5 p-2.5">{renderNav()}</nav>
         <div className="border-t border-white/10 p-3 md:p-2.5">
           <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
         </div>

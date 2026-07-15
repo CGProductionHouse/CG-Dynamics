@@ -159,7 +159,7 @@ function buildEndOfDay(activeTasks: CommandCentreTask[]) {
   return lines.join('\n')
 }
 
-export default function CommandCentrePage() {
+export default function CommandCentrePage({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
   const [loading, setLoading] = useState(true)
@@ -405,7 +405,7 @@ export default function CommandCentrePage() {
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
 
       {/* A — Header */}
-      <div className="mb-5">
+      <div className={`mb-5 ${embedded ? 'rounded-xl border border-white/8 bg-white/[0.025] p-4' : ''}`}>
         <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub</p>
         <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
         <p className="mt-1 text-sm text-brand-primary/60">Today's work list.</p>

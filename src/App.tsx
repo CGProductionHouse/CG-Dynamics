@@ -13,10 +13,7 @@ import ResetPassword from './pages/ResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
 import ClientPerformancePage from './pages/admin/ClientPerformancePage'
 import CgHubPage from './pages/admin/CgHubPage'
-import MyDayPage from './pages/admin/MyDayPage'
-import CommandCentrePage from './pages/admin/CommandCentrePage'
 import ClientsList from './pages/admin/ClientsList'
-import InvitesAdmin from './pages/admin/InvitesAdmin'
 import ImportMetaCsv from './pages/admin/ImportMetaCsv'
 import ImportsManagement from './pages/admin/ImportsManagement'
 import ImportHub from './pages/admin/ImportHub'
@@ -36,6 +33,7 @@ import PlannerImportPage from './pages/admin/PlannerImportPage'
 import ImportHealthPage from './pages/admin/ImportHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
+import MyWorkPage from './pages/admin/MyWorkPage'
 import Dashboard from './pages/client/Dashboard'
 
 function HomeRedirect() {
@@ -76,8 +74,9 @@ export default function App() {
               <Route path="/admin" element={<Navigate to="/admin/cg-hub" replace />} />
               <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
-              <Route path="/admin/my-day" element={<MyDayPage />} />
-              <Route path="/admin/command-centre" element={<CommandCentrePage />} />
+              <Route path="/admin/my-work" element={<MyWorkPage />} />
+              <Route path="/admin/my-day" element={<Navigate to="/admin/my-work?tab=my-day" replace />} />
+              <Route path="/admin/command-centre" element={<Navigate to="/admin/my-work?tab=daily-tasks" replace />} />
               <Route path="/admin/planner" element={<PlannerPage />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
@@ -112,8 +111,8 @@ export default function App() {
               {/* Admin-only security/setup routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>
                 <Route path="/admin/users" element={<UsersHub />} />
-                {/* Legacy deep link kept working. */}
-                <Route path="/admin/invites" element={<InvitesAdmin />} />
+                <Route path="/admin/team" element={<UsersHub />} />
+                <Route path="/admin/invites" element={<Navigate to="/admin/team?tab=invites" replace />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
                 <Route path="/admin/microsoft-import" element={<MicrosoftImportPage />} />
               </Route>

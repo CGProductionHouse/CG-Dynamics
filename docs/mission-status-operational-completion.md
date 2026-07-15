@@ -4,7 +4,7 @@ Live status for the "CG Dynamics operational completion" mission. Updated as
 work lands. Format per goal: problem found → chosen solution → verification →
 blockers → state.
 
-_Last updated: 2026-07-14_
+_Last updated: 2026-07-15_
 
 ## Goal 1 — Microsoft migration
 
@@ -103,6 +103,29 @@ _Last updated: 2026-07-14_
   overflow on the login result. Authenticated create/edit/archive testing and
   temporary QA records were not attempted because no signed-in automation
   session was accessible and Phase 16a is not live.
+- **Loop 4 Calendar:** event queries are bounded to the visible SAST month;
+  default Calendar content remains operational events only; optional Planner
+  tasks load only when enabled and exclude recurrence templates, archives and
+  history. Event type filters now include Internal and Cancelled, imported
+  Outlook events are labelled, and managers/admins have create/edit/delete
+  controls while staff receive a read-only drawer.
+- **Loop 4 event safety:** timed and all-day inputs are converted with explicit
+  `Africa/Johannesburg` boundaries, end-before-start is rejected, all-day
+  events default to a one-day exclusive end, and overlapping active events are
+  warned before save without blocking intentional overlaps.
+- **Loop 4 navigation:** Team now contains URL-backed Users and Invites tabs;
+  My Work contains URL-backed My Day and Daily Tasks tabs. Existing deep links
+  redirect to the matching tab, sidebar entries are consolidated, and Planner
+  has synced sticky top/bottom horizontal navigation plus Shift+wheel support.
+- **Loop 4 permissions:** prepared
+  `supabase/phase-16b-calendar-manager-permissions.sql` to retain staff read
+  access while restricting event writes to manager/admin roles. It was not run
+  against production; review and explicit approval are required.
+- **Loop 4 verification:** production build and focused ESLint passed. The
+  signed-in role matrix, Calendar CRUD, tab history/refresh behavior, Planner
+  scrollbar synchronization and desktop sidebar fit still require an
+  authenticated browser session. No QA records or production writes were
+  created.
 
 ## Goals 3–8
 

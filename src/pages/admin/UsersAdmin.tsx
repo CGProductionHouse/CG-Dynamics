@@ -18,16 +18,12 @@ function isPending(profile: Profile) {
   return profile.role === 'client' && !profile.client_id
 }
 
-export default function UsersAdmin() {
+export default function UsersAdmin({ embedded = false }: { embedded?: boolean }) {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<Profile | null>(null)
-
-  useEffect(() => {
-    void loadAll()
-  }, [])
 
   // Pending/unlinked users float to the top; otherwise newest first.
   const sortedProfiles = useMemo(() => {
@@ -66,6 +62,11 @@ export default function UsersAdmin() {
     }
   }
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadAll() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
   async function handleSave(
     userId: string,
     updates: { role: Profile['role']; client_id: string | null; full_name: string | null }
@@ -102,9 +103,10 @@ export default function UsersAdmin() {
   }
 
   return (
-    <div className="w-full max-w-5xl p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-white">Users</h1>
+    <div className={embedded ? 'w-full' : 'w-full max-w-5xl p-4 sm:p-6 lg:p-8'}>
+      <div className="mb-6 flex items-center justify-between">
+        {!embedded && <h1 className="text-xl font-semibold text-white">Users</h1>}
+        {embedded && <h2 className="text-xl font-semibold text-white">Users</h2>}
         {pendingCount > 0 && (
           <span className="rounded-full bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
             {pendingCount} pending setup

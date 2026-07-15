@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, type ReactNode, type FormEvent } from 'react'
+import { useState, useEffect, useMemo, useRef, type ReactNode, type FormEvent, type WheelEvent } from 'react'
 import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
 import { Link, useNavigate } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
@@ -155,6 +155,9 @@ export default function PlannerPage() {
   const [scheduleError, setScheduleError] = useState<string | null>(null)
   const [scheduleSearch, setScheduleSearch] = useState('')
   const [scheduleStatusFilter, setScheduleStatusFilter] = useState<'all' | SimplifiedProductionStatus>('all')
+  const topScrollRef = useRef<HTMLDivElement>(null)
+  const topScrollSpacerRef = useRef<HTMLDivElement>(null)
+  const boardScrollRef = useRef<HTMLDivElement>(null)
 
   // Load boards
   useEffect(() => {
@@ -373,6 +376,31 @@ export default function PlannerPage() {
       }))
       .sort((a, b) => a.clientName.localeCompare(b.clientName))
   }, [clientNameById, scheduleMonthDeliverables])
+
+  useEffect(() => {
+    const board = boardScrollRef.current
+    const spacer = topScrollSpacerRef.current
+    if (!board || !spacer) return
+    const updateWidth = () => { spacer.style.width = `${board.scrollWidth}px` }
+    const frame = window.requestAnimationFrame(updateWidth)
+    const observer = new ResizeObserver(updateWidth)
+    observer.observe(board)
+    return () => { window.cancelAnimationFrame(frame); observer.disconnect() }
+  }, [buckets.length, tasksLoading, visibleTasks.length])
+
+  function syncHorizontalScroll(source: HTMLDivElement, target: HTMLDivElement | null) {
+    if (!target) return
+    const sourceMax = source.scrollWidth - source.clientWidth
+    const targetMax = target.scrollWidth - target.clientWidth
+    const next = sourceMax > 0 ? (source.scrollLeft / sourceMax) * targetMax : 0
+    if (Math.abs(target.scrollLeft - next) > 1) target.scrollLeft = next
+  }
+
+  function handleBoardWheel(event: WheelEvent<HTMLDivElement>) {
+    if (!event.shiftKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return
+    event.currentTarget.scrollLeft += event.deltaY
+    event.preventDefault()
+  }
 
   function handleTaskCreated(task: PlannerTask) {
     setTasks(prev => [...prev, task])
@@ -651,7 +679,12 @@ export default function PlannerPage() {
           {canManage && activeBoardId && (
             <MobileTaskCreator boardId={activeBoardId} buckets={buckets} myName={myName} onTaskCreated={handleTaskCreated} />
           )}
-          <div className="hidden gap-3 overflow-x-auto pb-6 md:flex">
+          <div className="sticky top-0 z-20 mb-2 hidden rounded-lg border border-white/10 bg-[#0b0b0b]/95 px-2 pt-1 backdrop-blur md:block" aria-label="Planner horizontal navigation">
+            <div ref={topScrollRef} onScroll={event => syncHorizontalScroll(event.currentTarget, boardScrollRef.current)} className="h-4 overflow-x-auto overflow-y-hidden">
+              <div ref={topScrollSpacerRef} className="h-px" />
+            </div>
+          </div>
+          <div ref={boardScrollRef} onScroll={event => syncHorizontalScroll(event.currentTarget, topScrollRef.current)} onWheel={handleBoardWheel} className="hidden gap-3 overflow-x-auto overscroll-x-contain pb-6 md:flex">
             {buckets.map(bucket => (
               <BucketColumn
                 key={bucket.id}
