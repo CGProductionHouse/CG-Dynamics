@@ -21,6 +21,7 @@ export type MicrosoftConflictCode =
   | 'ambiguous_package'
   | 'missing_template'
   | 'existing_deliverable_slot'
+  | 'restricted_content'
 
 export interface MicrosoftOutlookEventSource {
   sourceType: 'outlook_event'

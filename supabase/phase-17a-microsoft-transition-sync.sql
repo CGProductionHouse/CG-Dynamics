@@ -121,6 +121,10 @@ begin
 end;
 $$;
 
+revoke all on function public.protect_microsoft_sync_metadata() from public;
+revoke all on function public.protect_microsoft_sync_metadata() from anon;
+revoke all on function public.protect_microsoft_sync_metadata() from authenticated;
+
 drop trigger if exists planner_tasks_protect_microsoft_sync on public.planner_tasks;
 create trigger planner_tasks_protect_microsoft_sync before insert or update on public.planner_tasks
 for each row execute function public.protect_microsoft_sync_metadata();
@@ -344,6 +348,7 @@ end;
 $$;
 
 revoke all on function public.apply_microsoft_sync_item(uuid,text,text,uuid,timestamptz,text,boolean,jsonb,text,text,text,text,boolean,jsonb) from public;
+revoke all on function public.apply_microsoft_sync_item(uuid,text,text,uuid,timestamptz,text,boolean,jsonb,text,text,text,text,boolean,jsonb) from anon;
 grant execute on function public.apply_microsoft_sync_item(uuid,text,text,uuid,timestamptz,text,boolean,jsonb,text,text,text,text,boolean,jsonb) to authenticated;
 
 comment on table public.microsoft_sync_runs is

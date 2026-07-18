@@ -4,7 +4,7 @@ Live status for the "CG Dynamics operational completion" mission. Updated as
 work lands. Format per goal: problem found → chosen solution → verification →
 blockers → state.
 
-_Last updated: 2026-07-15_
+_Last updated: 2026-07-18_
 
 ## Goal 1 — Microsoft migration
 
@@ -36,12 +36,33 @@ _Last updated: 2026-07-15_
   the unique indexes `planner_tasks_microsoft_source_key`,
   `monthly_deliverables_microsoft_source_key`, and
   `company_calendar_events_microsoft_source_key`. Do not rerun Phase 15a.
-- **Blockers (human/review):** review Phase 17a; configure read-only Entra Graph
-  permissions and allowlisted source IDs; deploy the Edge Function; reconnect
-  the Microsoft agent connector; then review the first real dry reconciliation.
-- **State:** transition-sync implementation is local and build-verified. No new
-  migration or Edge Function was applied/deployed, no live reconciliation was
-  run and no Microsoft writes occurred.
+- **Activation verification (2026-07-18):** Phase 17a tables, tracking columns,
+  triggers, RLS policies and admin apply RPC were already present from a manual
+  SQL Editor run. The transition is `active` and no sync runs or linked rows
+  exist yet. A tracked hardening migration removed anonymous execution from
+  the apply RPC and all browser execution from its trigger helper. Phase 16a
+  and Phase 16b remain unapplied; neither is required for a dry reconciliation.
+- **Microsoft source discovery:** the connected `info@cgproductionhouse.com`
+  account can read its default Calendar and the exact approved Planner plans:
+  `To Do`, `MASTER CLIENT TO DO`, `CG Socials`, and
+  `Client Socials - July 2026`. Historical monthly plans remain excluded.
+  The bounded Calendar window contains operational events and paginates beyond
+  100 rows; the selected Planner plans and real buckets are readable.
+- **Confidentiality correction:** a real `To Do` item demonstrated that the
+  staff-visible operational board can contain confidential admin work.
+  Finance, payroll, banking, identity-number and private HR terms now produce
+  an admin-only `restricted_content` conflict instead of a destination write.
+- **Edge deployment:** `microsoft-transition-sync` version 1 is active in the
+  production Supabase project. Its custom authorization returned HTTP 401 for
+  an anonymous status request and logged no secret values.
+- **Current blocker:** this environment can read Outlook and Planner through
+  delegated connectors but cannot manage Entra applications or securely enter
+  a new client secret. A CG-owned read-only app registration with
+  `Calendars.Read` and `Tasks.Read.All`, admin consent, and four Supabase secret
+  values is still required before authenticated status, fetch, preview or apply.
+- **State:** schema and Edge deployment are activated and source IDs are
+  verified. No live reconciliation has been run and no destination business
+  rows were changed.
 - **Browser check:** local Edge at 1440x900 and 390x844 confirmed Microsoft
   Sync, Calendar, Planner, My Work, Hub and Client Schedule remain protected,
   with no console errors, failed requests or horizontal overflow on the login

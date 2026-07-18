@@ -119,6 +119,11 @@ an active `clients.name`, but it must show that match in preview and only save
 the `client_id` after explicit approval. It must never guess a UUID or use a raw
 Planner bucket ID as a client/bucket name.
 
+Planner titles and descriptions that appear to contain confidential finance,
+payroll, banking, identity-number or private HR information are never proposed
+for a staff-visible destination. They remain in the admin preview as a
+`restricted_content` conflict for private review.
+
 Unknown readable bucket names may be proposed as new Planner buckets. Raw IDs,
 blank values and unresolved lookup values are conflicts and cannot be
 pre-approved.
@@ -281,10 +286,14 @@ separate admin-only design and security review.
 - Version 2 snapshot completeness, reusable reconciliation, server Graph fetch,
   transition lifecycle, progress and history UI are implemented on
   `feature/microsoft-transition-sync`.
-- `supabase/phase-17a-microsoft-transition-sync.sql` is additive and review-only
-  until the first real dry reconciliation is ready for review.
+- Phase 17a is live. Its tables, tracking fields, RLS, metadata triggers and
+  admin-only apply RPC were verified on 2026-07-18; anonymous RPC execution was
+  explicitly revoked by a tracked hardening migration.
 - The `monthly_deliverables` natural key remains guarded and Client Socials
   never enter CG Calendar.
-- Live source validation, Edge Function deployment, secrets/source manifest,
-  Phase 17a application and the first bounded apply remain outstanding. No
-  Microsoft writes are part of this architecture.
+- The production Edge Function is deployed and rejects anonymous requests. The
+  default operational Calendar and approved Planner plans (`To Do`, `MASTER
+  CLIENT TO DO`, `CG Socials`, and `Client Socials - July 2026`) are verified
+  readable through the connected Microsoft account. The read-only Entra app,
+  Supabase secrets, authenticated fetch, first dry preview and reviewed apply
+  remain outstanding. No Microsoft writes are part of this architecture.

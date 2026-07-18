@@ -104,6 +104,26 @@ function plannerProgress(percentComplete: number | null): 'to_do' | 'in_progress
   return 'to_do'
 }
 
+const RESTRICTED_PLANNER_CONTENT = [
+  /\bsalar(?:y|ies)\b/i,
+  /\bpayroll\b/i,
+  /\bpayslips?\b/i,
+  /\bbonuses?\b/i,
+  /\bbank(?:ing)? details?\b/i,
+  /\bprofit(?: and | & )loss\b/i,
+  /\brevenue\b/i,
+  /\binvoice totals?\b/i,
+  /\btax(?:ation)?\b/i,
+  /\b(?:id|identity) numbers?\b/i,
+  /\bdisciplinary\b/i,
+  /\bprivate hr\b/i,
+]
+
+function containsRestrictedPlannerContent(source: MicrosoftPlannerTaskSource): boolean {
+  const searchable = `${source.title}\n${source.description ?? ''}`
+  return RESTRICTED_PLANNER_CONTENT.some(pattern => pattern.test(searchable))
+}
+
 function planMonth(planName: string): string | null {
   const match = /^client socials\s*-\s*([a-z]+)\s+(\d{4})$/i.exec(planName.trim())
   if (!match) return null
@@ -159,6 +179,9 @@ export function previewPlannerTask(
     return conflict(base, 'missing_source_id', 'Planner plan and task IDs are required for exact deduplication.')
   }
   if (!source.title.trim()) return conflict(base, 'missing_title', 'The Microsoft task has no title.')
+  if (containsRestrictedPlannerContent(source)) {
+    return conflict(base, 'restricted_content', 'This task may contain confidential finance, payroll, or HR information and requires private admin review.')
+  }
   if (!plannerDateIsValid(source.startDate) || !plannerDateIsValid(source.dueDate)) {
     return conflict(base, 'invalid_date', 'Planner dates must be valid YYYY-MM-DD values.')
   }
