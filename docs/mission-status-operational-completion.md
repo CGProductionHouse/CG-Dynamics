@@ -46,23 +46,32 @@ _Last updated: 2026-07-18_
   account can read its default Calendar and the exact approved Planner plans:
   `To Do`, `MASTER CLIENT TO DO`, `CG Socials`, and
   `Client Socials - July 2026`. Historical monthly plans remain excluded.
-  The bounded Calendar window contains operational events and paginates beyond
-  100 rows; the selected Planner plans and real buckets are readable.
+  A direct app-only read over the required 60-day-back/120-day-forward window
+  returned 166 Calendar events. Complete Planner pagination returned 532 `To
+  Do` tasks/7 buckets, 182 `MASTER CLIENT TO DO` tasks/34 buckets, 396 `CG
+  Socials` tasks/2 buckets, and 339 `Client Socials - July 2026` tasks/43
+  buckets. All 1,449 task details were readable across the bounded validation
+  runs.
 - **Confidentiality correction:** a real `To Do` item demonstrated that the
   staff-visible operational board can contain confidential admin work.
   Finance, payroll, banking, identity-number and private HR terms now produce
   an admin-only `restricted_content` conflict instead of a destination write.
-- **Edge deployment:** `microsoft-transition-sync` version 1 is active in the
-  production Supabase project. Its custom authorization returned HTTP 401 for
-  an anonymous status request and logged no secret values.
-- **Current blocker:** this environment can read Outlook and Planner through
-  delegated connectors but cannot manage Entra applications or securely enter
-  a new client secret. A CG-owned read-only app registration with
-  `Calendars.Read` and `Tasks.Read.All`, admin consent, and four Supabase secret
-  values is still required before authenticated status, fetch, preview or apply.
-- **State:** schema and Edge deployment are activated and source IDs are
-  verified. No live reconciliation has been run and no destination business
-  rows were changed.
+- **Edge deployment:** the production `microsoft-transition-sync` function is
+  deployed with the CG-owned read-only Entra credentials and exact allowlisted
+  source manifest stored as Supabase Edge Function secrets. The function fixes
+  an invalid Outlook `isPrivate` selection, batches Planner detail requests,
+  honors Graph throttling backoff, and still marks exhausted/partial sources
+  incomplete. Its custom authorization returns HTTP 401 anonymously and
+  requires an admin profile; no secret values are returned or logged.
+- **Current blocker:** the available production browser session is authenticated
+  as `staff`, and the app correctly blocks `/admin/microsoft-import`. An admin
+  session must confirm connected status and run the first reconciliation dry
+  preview for the exact create/update/unchanged/conflict/restricted/removal
+  counts. Do not apply items or approve source removals during that checkpoint.
+- **State:** Phase 17a, transition lifecycle, Entra read permissions, Supabase
+  secrets, exact source identities, complete direct Graph reads and the hardened
+  Edge deployment are activated. No live reconciliation has been run, no
+  destination business rows were changed, and no Microsoft writes occurred.
 - **Browser check:** local Edge at 1440x900 and 390x844 confirmed Microsoft
   Sync, Calendar, Planner, My Work, Hub and Client Schedule remain protected,
   with no console errors, failed requests or horizontal overflow on the login

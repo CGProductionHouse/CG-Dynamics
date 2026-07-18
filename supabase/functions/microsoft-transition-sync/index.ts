@@ -13,7 +13,108 @@ interface GraphPageResult {
   safeError: string | null
 }
 
+interface GraphBatchItem {
+  id: string
+  status: number
+  headers?: Record<string, string>
+  body?: { description?: unknown }
+}
+
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
+const GRAPH_MAX_ATTEMPTS = 5
+const GRAPH_BATCH_MAX_ATTEMPTS = 8
+const GRAPH_RETRY_CAP_MS = 10_000
+
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+
+function retryDelay(response: Response | null, attempt: number): number {
+  const retryAfter = response?.headers.get('Retry-After')
+  if (retryAfter) {
+    const seconds = Number(retryAfter)
+    if (Number.isFinite(seconds)) return Math.min(Math.max(seconds * 1000, 0), GRAPH_RETRY_CAP_MS)
+    const date = Date.parse(retryAfter)
+    if (!Number.isNaN(date)) return Math.min(Math.max(date - Date.now(), 0), GRAPH_RETRY_CAP_MS)
+  }
+  return Math.min(500 * (2 ** attempt), GRAPH_RETRY_CAP_MS)
+}
+
+function shouldRetry(response: Response): boolean {
+  return shouldRetryStatus(response.status)
+}
+
+function shouldRetryStatus(status: number): boolean {
+  return status === 408 || status === 429 || status >= 500
+}
+
+function batchRetryDelay(items: GraphBatchItem[], attempt: number): number {
+  const retryAfterMilliseconds = items.reduce((maximum, item) => {
+    const entry = Object.entries(item.headers ?? {}).find(([name]) => name.toLowerCase() === 'retry-after')
+    const seconds = Number(entry?.[1])
+    return Number.isFinite(seconds) ? Math.max(maximum, seconds * 1000) : maximum
+  }, 0)
+  return Math.min(Math.max(retryAfterMilliseconds, retryDelay(null, attempt)), GRAPH_RETRY_CAP_MS)
+}
+
+async function fetchGraph(url: string, token: string, prefer?: string, init: RequestInit = {}): Promise<Response | null> {
+  for (let attempt = 0; attempt < GRAPH_MAX_ATTEMPTS; attempt += 1) {
+    let response: Response | null = null
+    try {
+      const headers = new Headers(init.headers)
+      headers.set('Authorization', `Bearer ${token}`)
+      if (prefer) headers.set('Prefer', prefer)
+      response = await fetch(url, {
+        ...init,
+        headers,
+        signal: AbortSignal.timeout(30_000),
+      })
+      if (response.ok || !shouldRetry(response)) return response
+    } catch {
+      // A bounded retry handles transient network and timeout failures.
+    }
+    if (attempt < GRAPH_MAX_ATTEMPTS - 1) await sleep(retryDelay(response, attempt))
+  }
+  return null
+}
+
+async function graphTaskDescriptions(taskIds: string[], token: string): Promise<{ descriptions: Map<string, string | null>; complete: boolean }> {
+  const descriptions = new Map<string, string | null>()
+  let complete = true
+  for (let index = 0; index < taskIds.length; index += 20) {
+    let pending = taskIds.slice(index, index + 20)
+    for (let attempt = 0; pending.length > 0 && attempt < GRAPH_BATCH_MAX_ATTEMPTS; attempt += 1) {
+      const response = await fetchGraph(`${GRAPH_ROOT}/$batch`, token, undefined, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests: pending.map(taskId => ({ id: taskId, method: 'GET', url: `/planner/tasks/${encodeURIComponent(taskId)}/details` })) }),
+      })
+      if (!response?.ok) { complete = false; break }
+      const body = await response.json() as { responses?: GraphBatchItem[] }
+      const results = new Map((body.responses ?? []).map(item => [item.id, item]))
+      const retry: string[] = []
+      const throttled: GraphBatchItem[] = []
+      for (const taskId of pending) {
+        const item = results.get(taskId)
+        if (item?.status === 200) {
+          descriptions.set(taskId, typeof item.body?.description === 'string' ? item.body.description : null)
+        } else if (item && shouldRetryStatus(item.status)) {
+          retry.push(taskId)
+          throttled.push(item)
+        } else if (!item) {
+          retry.push(taskId)
+        } else {
+          complete = false
+        }
+      }
+      pending = retry
+      if (pending.length > 0 && attempt < GRAPH_BATCH_MAX_ATTEMPTS - 1) await sleep(batchRetryDelay(throttled, attempt))
+    }
+    if (pending.length > 0) complete = false
+    if (index + 20 < taskIds.length) await sleep(250)
+  }
+  return { descriptions, complete }
+}
 
 function safeMessage(status: number): string {
   if (status === 401 || status === 403) return 'Microsoft permission or connection failure.'
@@ -25,12 +126,8 @@ async function graphPages(path: string, token: string, prefer?: string): Promise
   const values: Array<Record<string, unknown>> = []
   let next: string | null = path.startsWith('https://') ? path : `${GRAPH_ROOT}${path}`
   while (next) {
-    let response: Response
-    try {
-      response = await fetch(next, { headers: { Authorization: `Bearer ${token}`, ...(prefer ? { Prefer: prefer } : {}) }, signal: AbortSignal.timeout(30_000) })
-    } catch {
-      return { values, complete: false, safeError: 'Microsoft connector request failed.' }
-    }
+    const response = await fetchGraph(next, token, prefer)
+    if (!response) return { values, complete: false, safeError: 'Microsoft connector request failed after bounded retries.' }
     if (!response.ok) return { values, complete: false, safeError: safeMessage(response.status) }
     const body = await response.json() as { value?: Array<Record<string, unknown>>; '@odata.nextLink'?: string }
     values.push(...(body.value ?? []))
@@ -128,10 +225,10 @@ Deno.serve(async request => {
   const sources: Array<Record<string, unknown>> = []
 
   if (manifest.calendar) {
-    const path = `/users/${encodeURIComponent(manifest.userId)}/calendars/${encodeURIComponent(manifest.calendar.id)}/calendarView?startDateTime=${encodeURIComponent(body.rangeStart)}&endDateTime=${encodeURIComponent(body.rangeEnd)}&$select=id,subject,bodyPreview,start,end,isAllDay,isCancelled,isPrivate,sensitivity,location,attendees,lastModifiedDateTime`
+    const path = `/users/${encodeURIComponent(manifest.userId)}/calendars/${encodeURIComponent(manifest.calendar.id)}/calendarView?startDateTime=${encodeURIComponent(body.rangeStart)}&endDateTime=${encodeURIComponent(body.rangeEnd)}&$select=id,subject,bodyPreview,start,end,isAllDay,isCancelled,sensitivity,location,attendees,lastModifiedDateTime`
     const result = await graphPages(path, graphToken, 'IdType="ImmutableId", outlook.timezone="South Africa Standard Time"')
     for (const event of result.values) {
-      const privateEvent = Boolean(event.isPrivate) || Boolean(event.sensitivity && event.sensitivity !== 'normal')
+      const privateEvent = Boolean(event.sensitivity && event.sensitivity !== 'normal')
       records.push({
         sourceType: 'outlook_event', sourceCalendarId: manifest.calendar.id, sourceEventId: String(event.id ?? ''),
         title: privateEvent ? 'Private Outlook event' : String(event.subject ?? ''), safeSummary: !privateEvent && typeof event.bodyPreview === 'string' ? event.bodyPreview : null,
@@ -152,34 +249,22 @@ Deno.serve(async request => {
       graphPages(`/planner/plans/${encodeURIComponent(plan.id)}/buckets`, graphToken),
     ])
     const buckets = new Map(bucketResult.values.map(bucket => [String(bucket.id ?? ''), String(bucket.name ?? '')]))
-    let detailsComplete = true
-    const descriptions = new Map<string, string | null>()
-    for (let index = 0; index < taskResult.values.length; index += 10) {
-      await Promise.all(taskResult.values.slice(index, index + 10).map(async task => {
-        const taskId = String(task.id ?? '')
-        try {
-          const response = await fetch(`${GRAPH_ROOT}/planner/tasks/${encodeURIComponent(taskId)}/details`, { headers: { Authorization: `Bearer ${graphToken}` }, signal: AbortSignal.timeout(30_000) })
-          if (!response.ok) { detailsComplete = false; return }
-          const details = await response.json() as { description?: unknown }
-          descriptions.set(taskId, typeof details.description === 'string' ? details.description : null)
-        } catch { detailsComplete = false }
-      }))
-    }
+    const detailResult = await graphTaskDescriptions(taskResult.values.map(task => String(task.id ?? '')).filter(Boolean), graphToken)
     for (const task of taskResult.values) {
       const taskId = String(task.id ?? '')
       const bucketId = String(task.bucketId ?? '')
       records.push({
         sourceType: 'planner_task', sourcePlanId: plan.id, sourcePlanName: plan.name,
         sourceBucketId: bucketId, sourceBucketName: buckets.get(bucketId) ?? '', sourceTaskId: taskId,
-        title: String(task.title ?? ''), description: descriptions.get(taskId) ?? null,
+        title: String(task.title ?? ''), description: detailResult.descriptions.get(taskId) ?? null,
         startDate: dateOnly(task.startDateTime), dueDate: dateOnly(task.dueDateTime),
         assigneeMicrosoftIds: task.assignments && typeof task.assignments === 'object' ? Object.keys(task.assignments as Record<string, unknown>) : [],
         percentComplete: typeof task.percentComplete === 'number' ? task.percentComplete : null,
         sourceModifiedAt: typeof task.lastModifiedDateTime === 'string' ? task.lastModifiedDateTime : null,
       })
     }
-    const complete = taskResult.complete && bucketResult.complete && detailsComplete
-    sources.push({ sourceType: 'planner_plan', sourceId: plan.id, sourceName: plan.name, complete, rangeStart: null, rangeEnd: null, recordCount: taskResult.values.length, safeError: taskResult.safeError ?? bucketResult.safeError ?? (detailsComplete ? null : 'Some Planner task details could not be fetched.') })
+    const complete = taskResult.complete && bucketResult.complete && detailResult.complete
+    sources.push({ sourceType: 'planner_plan', sourceId: plan.id, sourceName: plan.name, complete, rangeStart: null, rangeEnd: null, recordCount: taskResult.values.length, safeError: taskResult.safeError ?? bucketResult.safeError ?? (detailResult.complete ? null : 'Some Planner task details could not be fetched.') })
   }
 
   return jsonResponse({
