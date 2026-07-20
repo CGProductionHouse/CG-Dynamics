@@ -4,7 +4,7 @@ Live status for the "CG Dynamics operational completion" mission. Updated as
 work lands. Format per goal: problem found → chosen solution → verification →
 blockers → state.
 
-_Last updated: 2026-07-18_
+_Last updated: 2026-07-20_
 
 ## Goal 1 — Microsoft migration
 
@@ -63,11 +63,24 @@ _Last updated: 2026-07-18_
   honors Graph throttling backoff, and still marks exhausted/partial sources
   incomplete. Its custom authorization returns HTTP 401 anonymously and
   requires an admin profile; no secret values are returned or logged.
-- **Current blocker:** the available production browser session is authenticated
-  as `staff`, and the app correctly blocks `/admin/microsoft-import`. An admin
-  session must confirm connected status and run the first reconciliation dry
-  preview for the exact create/update/unchanged/conflict/restricted/removal
-  counts. Do not apply items or approve source removals during that checkpoint.
+- **Second dry preview (2026-07-20, before bucket correction):** all five
+  sources were complete with 1,616 records, 369 creates, 1,103 conflicts, 144
+  skipped and no failures. Of the conflicts, 946 were architectural
+  `unsupported_bucket` results: 460 `To Do` recurring tasks, 304 `CG Socials`
+  schedule tasks and 182 `MASTER CLIENT TO DO` client-bucket tasks.
+- **Operational bucket correction:** all seven known `To Do` categories now map
+  deterministically to existing `operations-todo` buckets. `MASTER CLIENT TO
+  DO` resolves the source bucket as an active client and routes it to the shared
+  `CLIENT REQUESTS` bucket. `CG SECHEDULE (NEW)` and `CG STUDIO SCHEDULE` map
+  to the existing `CG Schedule` and `CG Studio Schedule` buckets on the
+  `cg-socials` board. Unknown categories and unresolved or ambiguous clients
+  remain conflicts; Client Socials and Outlook destinations are unchanged.
+- **Current blocker:** commit `b40c47b` is deployed successfully to the PR
+  preview, but that deployment is protected by Vercel authentication and the
+  available browser has no authenticated admin session. The corrected no-apply
+  preview must still be run with Outlook 2026-05-19 through 2026-11-15 and the
+  Planner completion cutoff 2026-07-01. Record final counts and verify
+  `unsupported_bucket = 0`; do not Apply or approve source removals.
 - **State:** Phase 17a, transition lifecycle, Entra read permissions, Supabase
   secrets, exact source identities, complete direct Graph reads and the hardened
   Edge deployment are activated. No live reconciliation has been run, no
