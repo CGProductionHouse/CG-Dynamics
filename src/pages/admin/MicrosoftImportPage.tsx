@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { addBusinessDays, businessDateKey } from '../../lib/businessTime'
 import {
   summarizeMicrosoftReconciliation,
+  type MicrosoftConflictCode,
   type MicrosoftImportPreviewItem,
   type MicrosoftReconciliationAction,
 } from '../../lib/microsoftImport'
@@ -21,6 +22,14 @@ import {
   type MicrosoftTransitionStatus,
 } from '../../lib/microsoftImportData'
 import { buildMicrosoftReconciliation } from '../../lib/microsoftSync'
+import {
+  buildMicrosoftConflictBreakdown,
+  filterMicrosoftPreviewItems,
+  microsoftIncomingStatus,
+  microsoftIncomingStatusLabel,
+  summarizeMicrosoftCreateStatuses,
+  type MicrosoftIncomingStatus,
+} from '../../lib/microsoftSyncPresentation'
 import { parseMicrosoftSnapshot, type MicrosoftSnapshot } from '../../lib/microsoftSnapshot'
 
 const ACTIONS: Array<{ value: MicrosoftReconciliationAction; label: string }> = [
@@ -76,6 +85,7 @@ function SourceCompleteness({ snapshot }: { snapshot: MicrosoftSnapshot }) {
 
 function PreviewItem({ item }: { item: MicrosoftImportPreviewItem }) {
   const action = item.reconciliationAction ?? 'skipped'
+  const incomingStatus = microsoftIncomingStatus(item)
   return (
     <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
       <div className="flex items-start justify-between gap-3">
@@ -83,7 +93,10 @@ function PreviewItem({ item }: { item: MicrosoftImportPreviewItem }) {
           <p className="text-[10px] font-black uppercase tracking-[0.15em] text-brand-teal/75">{item.sourceName}</p>
           <h3 className="mt-1 break-words text-sm font-black text-white">{item.title || 'Untitled Microsoft item'}</h3>
         </div>
-        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${ACTION_TONES[action]}`}>{action}</span>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <span className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${ACTION_TONES[action]}`}>{action}</span>
+          {action === 'create' && <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[9px] font-black text-white/70">Create as {microsoftIncomingStatusLabel(incomingStatus)}</span>}
+        </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/50">
         <span>{destinationLabel(item)}</span>
@@ -91,6 +104,7 @@ function PreviewItem({ item }: { item: MicrosoftImportPreviewItem }) {
         {item.mappedClientName && <span>{item.mappedClientName}</span>}
       </div>
       {item.requiresRemovalApproval && <p className="mt-3 rounded-lg border border-orange-300/15 bg-orange-300/[0.06] px-3 py-2 text-xs text-orange-100">Missing from a complete source fetch. Explicit source-removal approval is required.</p>}
+      {item.conflictCode && <p className="mt-3 text-[10px] font-black uppercase tracking-wider text-red-200/70">Conflict: {item.conflictCode.replaceAll('_', ' ')}</p>}
       {item.conflictReason && <p className="mt-3 rounded-lg border border-red-300/15 bg-red-300/[0.06] px-3 py-2 text-xs text-red-100">{item.conflictReason}</p>}
       {item.warnings.map(warning => <p key={warning} className="mt-2 text-xs text-amber-100/70">{warning}</p>)}
     </article>
@@ -118,9 +132,13 @@ export default function MicrosoftImportPage() {
   const [migrationNeeded, setMigrationNeeded] = useState(false)
   const [rangeStart, setRangeStart] = useState(addBusinessDays(businessDateKey(), -31))
   const [rangeEnd, setRangeEnd] = useState(addBusinessDays(businessDateKey(), 93))
+  const [plannerCompletedCutoff, setPlannerCompletedCutoff] = useState(`${businessDateKey().slice(0, 7)}-01`)
   const [snapshot, setSnapshot] = useState<MicrosoftSnapshot | null>(null)
   const [items, setItems] = useState<MicrosoftImportPreviewItem[]>([])
-  const [activeAction, setActiveAction] = useState<MicrosoftReconciliationAction>('create')
+  const [sourceFilter, setSourceFilter] = useState('all')
+  const [actionFilter, setActionFilter] = useState<MicrosoftReconciliationAction | 'all'>('create')
+  const [statusFilter, setStatusFilter] = useState<MicrosoftIncomingStatus | 'all'>('all')
+  const [conflictFilter, setConflictFilter] = useState<MicrosoftConflictCode | 'uncoded' | 'all'>('all')
   const [loading, setLoading] = useState(false)
   const [applying, setApplying] = useState(false)
   const [progress, setProgress] = useState({ completed: 0, total: 0 })
@@ -132,7 +150,13 @@ export default function MicrosoftImportPage() {
   const [applyResult, setApplyResult] = useState<MicrosoftReconciliationApplyResult | null>(null)
 
   const summary = summarizeMicrosoftReconciliation(items)
-  const visibleItems = items.filter(item => (item.reconciliationAction ?? 'skipped') === activeAction)
+  const visibleItems = filterMicrosoftPreviewItems(items, { source: sourceFilter, action: actionFilter, status: statusFilter, conflict: conflictFilter })
+  const sourceOptions = [...new Set(items.map(item => item.sourceName))].sort()
+  const statusOptions = [...new Set(items.map(microsoftIncomingStatus))].sort()
+  const conflictOptions = [...new Set(items.filter(item => item.reconciliationAction === 'conflict').map(item => item.conflictCode ?? 'uncoded'))].sort()
+  const conflictBreakdown = buildMicrosoftConflictBreakdown(items)
+  const createStatusCounts = summarizeMicrosoftCreateStatuses(items)
+  const historicalCompletedSkipped = items.filter(item => item.skipCode === 'historical_completed' && item.reconciliationAction === 'skipped').length
   const removalCount = items.filter(item => item.requiresRemovalApproval).length
   const lastSuccess = runs.find(run => run.status === 'completed')
   const writableCount = summary.create + summary.update + summary.complete + summary.reopen + summary.move + summary.cancel + summary.archive
@@ -169,7 +193,10 @@ export default function MicrosoftImportPage() {
       setSnapshot(nextSnapshot)
       setItems(reconciled)
       const first = ACTIONS.find(option => reconciled.some(item => item.reconciliationAction === option.value))
-      setActiveAction(first?.value ?? 'unchanged')
+      setSourceFilter('all')
+      setActionFilter(first?.value ?? 'all')
+      setStatusFilter('all')
+      setConflictFilter('all')
     } catch (previewError) {
       setError(previewError instanceof Error ? previewError.message : 'Reconciliation preview failed.')
     } finally {
@@ -181,7 +208,7 @@ export default function MicrosoftImportPage() {
     if (loading || transitionStatus !== 'active') return
     setLoading(true)
     setError(null)
-    const fetched = await fetchLatestMicrosoftSnapshot(`${rangeStart}T00:00:00+02:00`, `${rangeEnd}T00:00:00+02:00`)
+    const fetched = await fetchLatestMicrosoftSnapshot(`${rangeStart}T00:00:00+02:00`, `${rangeEnd}T00:00:00+02:00`, plannerCompletedCutoff)
     setLoading(false)
     if (!fetched.snapshot) { setError(fetched.error ?? 'Microsoft fetch failed.'); return }
     await prepareSnapshot(fetched.snapshot)
@@ -259,7 +286,7 @@ export default function MicrosoftImportPage() {
       </section>
 
       <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview latest changes</p><h2 className="mt-1 text-xl font-black text-white">Fetch complete configured sources</h2><p className="mt-1 text-sm text-white/45">The date range applies only to Outlook. Planner plans are fetched in full with pagination.</p></div><div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><label className="text-xs text-white/45">From<input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">To<input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><button type="button" onClick={() => void previewLatest()} disabled={!connection?.connected || transitionStatus !== 'active' || loading} className="self-end rounded-xl bg-brand-teal px-5 py-2.5 text-sm font-black text-black disabled:opacity-35">{loading ? 'Fetching...' : 'Preview latest changes'}</button></div></div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview latest changes</p><h2 className="mt-1 text-xl font-black text-white">Fetch complete configured sources</h2><p className="mt-1 text-sm text-white/45">The Outlook range and Planner completed-history cutoff are explicit and independent. Planner plans are still fetched in full.</p></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]"><label className="text-xs text-white/45">Outlook from<input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">Outlook to<input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">Completed-task cutoff<input type="date" value={plannerCompletedCutoff} onChange={event => setPlannerCompletedCutoff(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><button type="button" onClick={() => void previewLatest()} disabled={!connection?.connected || transitionStatus !== 'active' || loading || !plannerCompletedCutoff} className="self-end rounded-xl bg-brand-teal px-5 py-2.5 text-sm font-black text-black disabled:opacity-35">{loading ? 'Fetching...' : 'Preview latest changes'}</button></div></div>
         <button type="button" onClick={() => setAdvancedOpen(value => !value)} className="mt-4 text-xs font-bold text-white/40 hover:text-white/70">{advancedOpen ? 'Hide' : 'Show'} connected-agent snapshot transport</button>
         {advancedOpen && <div className="mt-3 rounded-xl border border-dashed border-white/10 p-4"><p className="text-xs leading-relaxed text-white/45">For an authorised connected agent or recovery only. Version 2 snapshots must declare per-source completeness; legacy snapshots can never archive missing items.</p><button type="button" disabled={transitionStatus !== 'active'} onClick={() => fileInputRef.current?.click()} className="mt-3 rounded-lg border border-white/10 px-4 py-2 text-xs font-black text-white disabled:opacity-35">Choose normalized snapshot</button><input ref={fileInputRef} type="file" accept=".json,application/json" className="hidden" onChange={event => { void onSnapshotFile(event.target.files); event.target.value = '' }} /></div>}
         {parseErrors.length > 0 && <div className="mt-3 rounded-xl border border-red-300/20 bg-red-300/[0.06] p-3 text-xs text-red-100">{parseErrors.join(' ')}</div>}
@@ -269,12 +296,37 @@ export default function MicrosoftImportPage() {
       {error && <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</div>}
       {applyResult && <section className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-4"><p className="font-black text-white">Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied, {applyResult.failed} failed.</p><p className="mt-1 text-xs text-white/50">No Microsoft writes were made.</p></section>}
 
-      {snapshot && <section className="mt-6"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Source completeness</p><h2 className="mt-1 text-xl font-black text-white">{snapshot.records.length} records · {new Date(snapshot.exportedAt).toLocaleString('en-ZA')}</h2></div><SourceCompleteness snapshot={snapshot} /></section>}
+      {snapshot && <section className="mt-6"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Source completeness</p><h2 className="mt-1 text-xl font-black text-white">{snapshot.records.length} records · {new Date(snapshot.exportedAt).toLocaleString('en-ZA')}</h2><p className="mt-1 text-xs text-white/45">Unlinked completed operational tasks before {snapshot.plannerCompletedCutoff ?? 'the Planner cutoff'} are retained for completeness and skipped. Linked incomplete tasks can still complete; all Client Socials remain eligible.</p></div><SourceCompleteness snapshot={snapshot} /></section>}
 
       {items.length > 0 && <>
-        <section className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-6">{ACTIONS.map(action => <button key={action.value} type="button" onClick={() => setActiveAction(action.value)} className={`rounded-xl border p-3 text-left ${activeAction === action.value ? 'border-brand-teal/50 bg-brand-teal/[0.08]' : 'border-white/10 bg-white/[0.025]'}`}><p className="text-[9px] font-black uppercase text-white/40">{action.label}</p><p className="mt-1 text-2xl font-black text-white">{actionCounts.get(action.value) ?? 0}</p></button>)}</section>
+        <section className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-6">{ACTIONS.map(action => <button key={action.value} type="button" onClick={() => { setSourceFilter('all'); setActionFilter(action.value); setStatusFilter('all'); setConflictFilter('all') }} className={`rounded-xl border p-3 text-left ${actionFilter === action.value ? 'border-brand-teal/50 bg-brand-teal/[0.08]' : 'border-white/10 bg-white/[0.025]'}`}><p className="text-[9px] font-black uppercase text-white/40">{action.label}</p><p className="mt-1 text-2xl font-black text-white">{actionCounts.get(action.value) ?? 0}</p></button>)}</section>
+
+        <section className="mt-4 grid gap-3 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+            <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Incoming create status</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {(['to_do', 'in_progress', 'completed', 'scheduled', 'planned', 'cancelled'] as MicrosoftIncomingStatus[]).filter(status => createStatusCounts[status] > 0).map(status => <button key={status} type="button" onClick={() => { setSourceFilter('all'); setActionFilter('create'); setStatusFilter(status); setConflictFilter('all') }} className="rounded-xl border border-white/10 bg-black/20 p-3 text-left"><p className="text-[10px] font-bold text-white/45">Create as {microsoftIncomingStatusLabel(status)}</p><p className="mt-1 text-xl font-black text-white">{createStatusCounts[status]}</p></button>)}
+            </div>
+            <p className="mt-3 text-xs text-white/45">Historical completed skipped: <span className="font-black text-white">{historicalCompletedSkipped}</span></p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+            <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Conflict breakdown by source and type</p>
+            <div className="mt-3 max-h-52 space-y-2 overflow-y-auto">{conflictBreakdown.map(entry => <button key={`${entry.source}:${entry.code}`} type="button" onClick={() => { setSourceFilter(entry.source); setActionFilter('conflict'); setStatusFilter('all'); setConflictFilter(entry.code) }} className="flex w-full items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-left"><span className="min-w-0 truncate text-xs text-white/65">{entry.source} · {entry.code.replaceAll('_', ' ')}</span><span className="text-sm font-black text-red-200">{entry.count}</span></button>)}</div>
+          </div>
+        </section>
+
+        <section className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <label className="text-xs text-white/45">Source<select value={sourceFilter} onChange={event => setSourceFilter(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white"><option value="all">All sources</option>{sourceOptions.map(source => <option key={source} value={source}>{source}</option>)}</select></label>
+            <label className="text-xs text-white/45">Action<select value={actionFilter} onChange={event => { const action = event.target.value as MicrosoftReconciliationAction | 'all'; setActionFilter(action); if (action !== 'conflict') setConflictFilter('all') }} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white"><option value="all">All actions</option>{ACTIONS.map(action => <option key={action.value} value={action.value}>{action.label}</option>)}</select></label>
+            <label className="text-xs text-white/45">Incoming status<select value={statusFilter} onChange={event => setStatusFilter(event.target.value as MicrosoftIncomingStatus | 'all')} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white"><option value="all">All statuses</option>{statusOptions.map(status => <option key={status} value={status}>{microsoftIncomingStatusLabel(status)}</option>)}</select></label>
+            <label className="text-xs text-white/45">Conflict type<select value={conflictFilter} onChange={event => setConflictFilter(event.target.value as MicrosoftConflictCode | 'uncoded' | 'all')} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white"><option value="all">All conflict types</option>{conflictOptions.map(code => <option key={code} value={code}>{code.replaceAll('_', ' ')}</option>)}</select></label>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3"><p className="text-xs text-white/40">Showing {visibleItems.length} of {items.length} records</p><button type="button" onClick={() => { setSourceFilter('all'); setActionFilter('all'); setStatusFilter('all'); setConflictFilter('all') }} className="text-xs font-black text-brand-teal">Clear filters</button></div>
+        </section>
+
         <section className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{visibleItems.map((item, index) => <PreviewItem key={itemKey(item, index)} item={item} />)}</section>
-        {visibleItems.length === 0 && <p className="mt-3 rounded-xl border border-dashed border-white/10 py-8 text-center text-sm text-white/35">No {activeAction} items.</p>}
+        {visibleItems.length === 0 && <p className="mt-3 rounded-xl border border-dashed border-white/10 py-8 text-center text-sm text-white/35">No items match these filters.</p>}
         <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>
       </>}
 

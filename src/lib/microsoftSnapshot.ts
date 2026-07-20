@@ -30,6 +30,7 @@ export interface MicrosoftSnapshot {
   /** Human note on who/what produced the export. Never a credential. */
   exportedBy: string
   triggerType: 'admin' | 'agent'
+  plannerCompletedCutoff: string | null
   sources: MicrosoftSnapshotSource[]
   records: MicrosoftImportSourceRecord[]
 }
@@ -86,9 +87,17 @@ function plannerRecordError(row: Record<string, unknown>): string | null {
     return 'percentComplete must be a number or null'
   }
   if (typeof record.percentComplete === 'number' && (record.percentComplete < 0 || record.percentComplete > 100)) return 'percentComplete must be between 0 and 100'
+  if (record.completedDate !== undefined && !optionalString(record.completedDate)) return 'completedDate must be a string or null'
+  if (record.completedDate && !/^\d{4}-\d{2}-\d{2}$/.test(record.completedDate)) return 'completedDate must be YYYY-MM-DD'
   if (record.sourceModifiedAt !== undefined && !optionalString(record.sourceModifiedAt)) return 'sourceModifiedAt must be a string or null'
   if (record.sourceModifiedAt && Number.isNaN(Date.parse(record.sourceModifiedAt))) return 'sourceModifiedAt must be an ISO timestamp'
   return null
+}
+
+function validDateOnly(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
 }
 
 function sourceError(value: unknown): string | null {
@@ -154,6 +163,11 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
   if (parsed.records.length > MICROSOFT_SNAPSHOT_MAX_RECORDS) {
     return { snapshot: null, errors: [`Snapshots are capped at ${MICROSOFT_SNAPSHOT_MAX_RECORDS} records. Split the export.`] }
   }
+  if (parsed.version === MICROSOFT_SNAPSHOT_VERSION
+    && parsed.plannerCompletedCutoff !== undefined
+    && (typeof parsed.plannerCompletedCutoff !== 'string' || !validDateOnly(parsed.plannerCompletedCutoff))) {
+    return { snapshot: null, errors: ['"plannerCompletedCutoff" must be a valid YYYY-MM-DD date when provided.'] }
+  }
 
   const errors: string[] = []
   const sources: MicrosoftSnapshotSource[] = []
@@ -213,6 +227,7 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
       exportedAt: parsed.exportedAt,
       exportedBy: parsed.exportedBy,
       triggerType: parsed.triggerType === 'agent' ? 'agent' : 'admin',
+      plannerCompletedCutoff: parsed.version === 1 || typeof parsed.plannerCompletedCutoff !== 'string' ? null : parsed.plannerCompletedCutoff,
       sources: parsed.version === 1 ? incompleteV1Sources(records) : sources,
       records,
     },

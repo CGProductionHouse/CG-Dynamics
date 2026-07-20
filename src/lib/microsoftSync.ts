@@ -223,7 +223,8 @@ export function buildMicrosoftReconciliation(
   existingTargets: MicrosoftExistingTarget[],
   deliverableSlotKeys: Set<string>,
 ): MicrosoftImportPreviewItem[] {
-  const mapped = buildMicrosoftImportPreview(snapshot.records, context)
+  const historicalCompletedCutoff = snapshot.plannerCompletedCutoff ?? null
+  const mapped = buildMicrosoftImportPreview(snapshot.records, context, historicalCompletedCutoff)
   const targetsByKey = new Map<string, MicrosoftExistingTarget[]>()
   for (const target of existingTargets) {
     const key = targetKey(target)
@@ -238,9 +239,13 @@ export function buildMicrosoftReconciliation(
     const key = itemKey(item)
     if (key) seen.add(key)
     if (item.previewStatus === 'conflict') return { ...item, reconciliationAction: 'conflict' as const, sourceComplete }
+    if (item.previewStatus === 'skipped') return { ...item, reconciliationAction: 'skipped' as const, sourceComplete }
     if (!key) return { ...item, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, sourceComplete }
     const targets = targetsByKey.get(key) ?? []
     if (targets.length === 0) {
+      if (item.skipCode === 'historical_completed') {
+        return { ...item, previewStatus: 'skipped' as const, reconciliationAction: 'skipped' as const, sourceComplete }
+      }
       const sourceHash = stableHash(ownedPayload(item.proposedPayload))
       return { ...item, reconciliationAction: 'create' as const, sourceHash, sourceComplete }
     }
@@ -252,7 +257,7 @@ export function buildMicrosoftReconciliation(
       return { ...item, existingTargetId: target.id, expectedTargetUpdatedAt: target.updatedAt, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, conflictCode: 'wrong_destination' as const, conflictReason: `This Microsoft item is already linked to ${target.destination}.`, sourceComplete }
     }
     if (target.microsoftLastSyncedAt && Date.parse(snapshot.exportedAt) < Date.parse(target.microsoftLastSyncedAt)) {
-      return { ...item, existingTargetId: target.id, expectedTargetUpdatedAt: target.updatedAt, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, conflictReason: 'This snapshot is older than the last applied Microsoft state.', sourceComplete }
+      return { ...item, existingTargetId: target.id, expectedTargetUpdatedAt: target.updatedAt, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, conflictCode: 'stale_snapshot' as const, conflictReason: 'This snapshot is older than the last applied Microsoft state.', sourceComplete }
     }
     const currentHash = stableHash(ownedTarget(target))
     const sourceHash = stableHash(ownedPayload(item.proposedPayload))

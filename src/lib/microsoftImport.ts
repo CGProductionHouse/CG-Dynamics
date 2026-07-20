@@ -1,6 +1,7 @@
 export type MicrosoftImportSourceType = 'outlook_event' | 'planner_task' | 'planner_client_social'
 export type MicrosoftImportDestination = 'cg_calendar' | 'planner' | 'client_schedule' | 'review'
 export type MicrosoftPreviewStatus = 'new' | 'existing' | 'changed' | 'conflict' | 'skipped'
+export type MicrosoftSkipCode = 'historical_completed' | 'private_event'
 export type MicrosoftReconciliationAction =
   | 'create' | 'update' | 'unchanged' | 'complete' | 'reopen' | 'move'
   | 'cancel' | 'archive' | 'conflict' | 'skipped' | 'failed'
@@ -22,6 +23,7 @@ export type MicrosoftConflictCode =
   | 'missing_template'
   | 'existing_deliverable_slot'
   | 'restricted_content'
+  | 'stale_snapshot'
 
 export interface MicrosoftOutlookEventSource {
   sourceType: 'outlook_event'
@@ -52,6 +54,7 @@ export interface MicrosoftPlannerTaskSource {
   dueDate: string | null
   assigneeMicrosoftIds: string[]
   percentComplete: number | null
+  completedDate?: string | null
   sourceModifiedAt?: string | null
 }
 
@@ -182,6 +185,7 @@ export interface MicrosoftImportPreviewItem {
   previewStatus: MicrosoftPreviewStatus
   conflictCode: MicrosoftConflictCode | null
   conflictReason: string | null
+  skipCode?: MicrosoftSkipCode | null
   warnings: string[]
   proposedPayload: MicrosoftProposedPayload
   reconciliationAction?: MicrosoftReconciliationAction

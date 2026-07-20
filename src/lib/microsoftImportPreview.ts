@@ -171,6 +171,7 @@ function plannerBase(source: MicrosoftPlannerTaskSource): Omit<MicrosoftImportPr
 export function previewPlannerTask(
   source: MicrosoftPlannerTaskSource,
   context: MicrosoftPreviewMappingContext,
+  historicalCompletedCutoff: string | null = null,
 ): MicrosoftImportPreviewItem {
   const base = plannerBase(source)
   const plan = resolveMicrosoftPlanMapping(source.sourcePlanName)
@@ -179,15 +180,20 @@ export function previewPlannerTask(
     return conflict(base, 'missing_source_id', 'Planner plan and task IDs are required for exact deduplication.')
   }
   if (!source.title.trim()) return conflict(base, 'missing_title', 'The Microsoft task has no title.')
-  if (containsRestrictedPlannerContent(source)) {
-    return conflict(base, 'restricted_content', 'This task may contain confidential finance, payroll, or HR information and requires private admin review.')
-  }
-  if (!plannerDateIsValid(source.startDate) || !plannerDateIsValid(source.dueDate)) {
+  if (!plannerDateIsValid(source.startDate) || !plannerDateIsValid(source.dueDate) || !plannerDateIsValid(source.completedDate ?? null)) {
     return conflict(base, 'invalid_date', 'Planner dates must be valid YYYY-MM-DD values.')
   }
   if (plan.target === 'review') {
     return conflict(base, 'unsupported_plan', `Plan "${source.sourcePlanName}" has no approved destination mapping.`)
   }
+  if (containsRestrictedPlannerContent(source)) {
+    return conflict(base, 'restricted_content', 'This task may contain confidential finance, payroll, or HR information and requires private admin review.')
+  }
+  const historicalCompleted = plan.target === 'planner'
+    && historicalCompletedCutoff
+    && source.percentComplete === 100
+    && source.completedDate
+    && source.completedDate < historicalCompletedCutoff
 
   const bucketMapping = resolveMicrosoftBucketMapping(source.sourcePlanName, source.sourceBucketName)
   if (!source.sourceBucketId.trim() || !source.sourceBucketName.trim()) {
@@ -277,7 +283,16 @@ export function previewPlannerTask(
   if (!bucket) return conflict(mapped, 'unsupported_bucket', `No exact Planner bucket matches "${bucketMapping.targetBucket}".`)
   if (client?.status === 'ambiguous') return conflict(mapped, 'ambiguous_client_match', `More than one active client exactly matches "${source.sourceBucketName}".`)
   if (client?.status === 'unresolved') return conflict(mapped, 'unresolved_client', `No active client exactly matches "${source.sourceBucketName}".`)
-  return { ...mapped, previewStatus: 'new', conflictCode: null, conflictReason: null }
+  return {
+    ...mapped,
+    previewStatus: 'new',
+    conflictCode: null,
+    conflictReason: null,
+    ...(historicalCompleted ? {
+      skipCode: 'historical_completed' as const,
+      warnings: [...mapped.warnings, `Completed before the Planner cutoff (${historicalCompletedCutoff}); unlinked history is excluded from import.`],
+    } : {}),
+  }
 }
 
 export function previewOutlookEvent(source: MicrosoftOutlookEventSource): MicrosoftImportPreviewItem {
@@ -307,7 +322,7 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
   if (!microsoftOutlookSourceKey(source.sourceCalendarId, source.sourceEventId)) {
     return conflict(base, 'missing_source_id', 'Immutable Outlook event and calendar IDs are required for exact deduplication.')
   }
-  if (source.private) return { ...base, previewStatus: 'skipped', conflictCode: null, conflictReason: null, warnings: ['Private Outlook event retained by identity but excluded from reconciliation.'] }
+  if (source.private) return { ...base, previewStatus: 'skipped', conflictCode: null, conflictReason: null, skipCode: 'private_event', warnings: ['Private Outlook event retained by identity but excluded from reconciliation.'] }
   if (!source.title.trim()) return conflict(base, 'missing_title', 'The Outlook event has no title.')
   if (!validIsoDate(source.startDate) || (source.endDate !== null && !validIsoDate(source.endDate))) {
     return conflict(base, 'invalid_date', 'Outlook event dates must be timezone-preserving ISO values.')
@@ -338,10 +353,11 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
 export function buildMicrosoftImportPreview(
   sources: MicrosoftImportSourceRecord[],
   context: MicrosoftPreviewMappingContext,
+  historicalCompletedCutoff: string | null = null,
 ): MicrosoftImportPreviewItem[] {
   const items = sources.map(source => source.sourceType === 'outlook_event'
     ? previewOutlookEvent(source)
-    : previewPlannerTask(source, context))
+    : previewPlannerTask(source, context, historicalCompletedCutoff))
   const counts = new Map<string, number>()
 
   for (const item of items) {
@@ -533,10 +549,10 @@ export function flagDeliverableSlotConflicts(
     const key = deliverableSlotKey(payload.package_id, payload.template_id, payload.instance_number, payload.month)
     if (!key) return item
     if (existingSlotKeys.has(key)) {
-      return { ...item, previewStatus: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
+      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
     }
     if (seenInPreview.has(key)) {
-      return { ...item, previewStatus: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'Another card in this snapshot already fills this package/template/instance/month slot.' }
+      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'Another card in this snapshot already fills this package/template/instance/month slot.' }
     }
     seenInPreview.add(key)
     return item

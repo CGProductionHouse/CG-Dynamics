@@ -143,6 +143,12 @@ function dateOnly(value: unknown): string | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10)
 }
 
+function validDateOnly(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const parsed = new Date(`${value}T00:00:00Z`)
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
+}
+
 function outlookIso(value: unknown): string {
   if (!value || typeof value !== 'object') return ''
   const dateTime = (value as { dateTime?: unknown }).dateTime
@@ -184,7 +190,7 @@ Deno.serve(async request => {
   const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
 
-  let body: { action?: string; rangeStart?: string; rangeEnd?: string }
+  let body: { action?: string; rangeStart?: string; rangeEnd?: string; plannerCompletedCutoff?: string }
   try { body = await request.json() } catch { return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400) }
 
   const tenantId = Deno.env.get('MICROSOFT_TENANT_ID')
@@ -217,6 +223,8 @@ Deno.serve(async request => {
   if (!body.rangeStart || !body.rangeEnd || Number.isNaN(Date.parse(body.rangeStart)) || Number.isNaN(Date.parse(body.rangeEnd)) || Date.parse(body.rangeEnd) <= Date.parse(body.rangeStart)) {
     return jsonResponse({ ok: false, error: 'A valid bounded calendar range is required.' }, 400)
   }
+  const plannerCompletedCutoff = body.plannerCompletedCutoff ?? body.rangeStart.slice(0, 10)
+  if (!validDateOnly(plannerCompletedCutoff)) return jsonResponse({ ok: false, error: 'A valid Planner completion cutoff is required.' }, 400)
   if (Date.parse(body.rangeEnd) - Date.parse(body.rangeStart) > 370 * 24 * 60 * 60 * 1000) return jsonResponse({ ok: false, error: 'Outlook range cannot exceed 370 days.' }, 400)
 
   const graphToken = await accessToken(tenantId, clientId, clientSecret)
@@ -260,6 +268,7 @@ Deno.serve(async request => {
         startDate: dateOnly(task.startDateTime), dueDate: dateOnly(task.dueDateTime),
         assigneeMicrosoftIds: task.assignments && typeof task.assignments === 'object' ? Object.keys(task.assignments as Record<string, unknown>) : [],
         percentComplete: typeof task.percentComplete === 'number' ? task.percentComplete : null,
+        completedDate: dateOnly(task.completedDateTime),
         sourceModifiedAt: typeof task.lastModifiedDateTime === 'string' ? task.lastModifiedDateTime : null,
       })
     }
@@ -269,6 +278,6 @@ Deno.serve(async request => {
 
   return jsonResponse({
     ok: true,
-    snapshot: { format: 'cg-dynamics-microsoft-snapshot', version: 2, exportedAt: new Date().toISOString(), exportedBy: 'CG Dynamics Microsoft transition sync', triggerType: 'admin', sources, records },
+    snapshot: { format: 'cg-dynamics-microsoft-snapshot', version: 2, exportedAt: new Date().toISOString(), exportedBy: 'CG Dynamics Microsoft transition sync', triggerType: 'admin', plannerCompletedCutoff, sources, records },
   })
 })

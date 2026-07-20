@@ -34,6 +34,7 @@ validated by `src/lib/microsoftSnapshot.ts`):
   "exportedAt": "2026-07-14T09:00:00Z",
   "exportedBy": "CG Dynamics Microsoft transition sync",
   "triggerType": "admin",
+  "plannerCompletedCutoff": "2026-07-01",
   "sources": [{
     "sourceType": "planner_plan", "sourceId": "...", "sourceName": "To Do",
     "complete": true, "rangeStart": null, "rangeEnd": null,
@@ -54,7 +55,7 @@ validated by `src/lib/microsoftSnapshot.ts`):
       "sourceBucketId": "...", "sourceBucketName": "ADMIN / TO DO",
       "sourceTaskId": "...", "title": "...", "description": null,
       "startDate": null, "dueDate": "2026-07-20",
-      "assigneeMicrosoftIds": [], "percentComplete": 0
+      "completedDate": null, "assigneeMicrosoftIds": [], "percentComplete": 0
     }
   ]
 }
@@ -63,6 +64,10 @@ validated by `src/lib/microsoftSnapshot.ts`):
 Rules: Outlook event IDs must be fetched with `Prefer: IdType="ImmutableId"`;
 Outlook dates keep their timezone offsets; Planner dates are plain
 `YYYY-MM-DD`; `exportedAt` becomes `microsoft_last_synced_at` on applied rows.
+Version 2 snapshots may include a valid `plannerCompletedCutoff` (`YYYY-MM-DD`)
+to exclude unlinked operational tasks completed before that date. Existing
+version 2 connected-agent snapshots without it remain valid and do not apply a
+historical completion filter.
 The snapshot carries titles, dates, IDs and notes only — never tokens or
 credentials. Every source declares completeness and record count. Version 1
 snapshots remain readable but are always incomplete and can never prove source

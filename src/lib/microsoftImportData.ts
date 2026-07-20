@@ -305,11 +305,12 @@ export async function getMicrosoftConnectionStatus(): Promise<{ data: MicrosoftC
   return { data: { connected: Boolean(data.connected), message: data.message as string, sources: data.sources ?? [] }, error: null }
 }
 
-export async function fetchLatestMicrosoftSnapshot(rangeStart: string, rangeEnd: string): Promise<{ snapshot: MicrosoftSnapshot | null; error: string | null }> {
-  const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'fetch', rangeStart, rangeEnd } })
+export async function fetchLatestMicrosoftSnapshot(rangeStart: string, rangeEnd: string, plannerCompletedCutoff: string): Promise<{ snapshot: MicrosoftSnapshot | null; error: string | null }> {
+  const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'fetch', rangeStart, rangeEnd, plannerCompletedCutoff } })
   if (error) return { snapshot: null, error: error.message }
   if (!data?.ok || !data.snapshot) return { snapshot: null, error: data?.error ?? 'Microsoft fetch failed.' }
-  return { snapshot: data.snapshot as MicrosoftSnapshot, error: null }
+  const snapshot = data.snapshot as MicrosoftSnapshot
+  return { snapshot: { ...snapshot, plannerCompletedCutoff: snapshot.plannerCompletedCutoff ?? plannerCompletedCutoff }, error: null }
 }
 
 export interface MicrosoftReconciliationApplyResult {
