@@ -13,6 +13,7 @@ export interface MicrosoftBucketMapping {
   sourceBucket: string
   targetBucket: string
   requiresClientReview: boolean
+  clientAliases: string[]
 }
 
 const EXACT_PLAN_MAPPINGS: Record<string, Omit<MicrosoftPlanMapping, 'sourcePlan'>> = {
@@ -39,17 +40,52 @@ const EXACT_PLAN_MAPPINGS: Record<string, Omit<MicrosoftPlanMapping, 'sourcePlan
 }
 
 const TODO_BUCKETS: Record<string, string> = {
-  'once-off': 'Once-off',
-  'content guides': 'Content Guides',
-  websites: 'Websites',
-  'admin / to do': 'Admin / To Do',
-  'graphic design': 'Graphic Design',
-  'client requests': 'Client Requests',
-  'cg admin - recurring': 'Recurring',
+  'once off': 'ONCE-OFF',
+  'once offs': 'ONCE-OFF',
+  'content guide': 'CONTENT GUIDES',
+  'content guides': 'CONTENT GUIDES',
+  website: 'WEBSITES',
+  websites: 'WEBSITES',
+  'admin to do': 'ADMIN / TO DO',
+  'admin todo': 'ADMIN / TO DO',
+  'graphic design': 'GRAPHIC DESIGN',
+  'graphic designs': 'GRAPHIC DESIGN',
+  'client request': 'CLIENT REQUESTS',
+  'client requests': 'CLIENT REQUESTS',
+  'cg admin recurring': 'CG ADMIN - RECURRING',
+  recurring: 'CG ADMIN - RECURRING',
 }
 
-function normalizeMicrosoftLabel(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, ' ')
+const CG_SOCIAL_BUCKETS: Record<string, string> = {
+  'cg studio schedule': 'CG Studio Schedule',
+  'cg sechedule new': 'CG Schedule',
+  'cg schedule new': 'CG Schedule',
+  'cg schedule': 'CG Schedule',
+}
+
+const MASTER_CLIENT_ALIASES: Record<string, string[]> = {
+  'ehrlich park': ['Ehrlich Park Butchery'],
+  'supa quick': ['Supa Quick BFN', 'Supa Quick Centurion'],
+}
+
+const CLIENT_SCHEDULE_ALIASES: Record<string, string[]> = {
+  'braize promotions': ['Braize'],
+  'hmhi attorneys': ['HMH Attorneys'],
+  'human auto ford': ['Human Auto'],
+  'rc polypipe': ['RC-Polypipe'],
+  'the staffordhire pub': ['The Staffy'],
+}
+
+export function normalizeMicrosoftLabel(value: string): string {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u2010-\u2015]/g, '-')
+    .trim()
+    .toLocaleLowerCase('en-ZA')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
 }
 
 export function resolveMicrosoftPlanMapping(planName: string): MicrosoftPlanMapping {
@@ -57,7 +93,7 @@ export function resolveMicrosoftPlanMapping(planName: string): MicrosoftPlanMapp
   const exact = EXACT_PLAN_MAPPINGS[normalized]
   if (exact) return { sourcePlan: planName.trim(), ...exact }
 
-  if (normalized.startsWith('client socials - ')) {
+  if (normalized.startsWith('client socials ')) {
     return {
       sourcePlan: planName.trim(),
       target: 'client_schedule',
@@ -85,17 +121,37 @@ export function resolveMicrosoftBucketMapping(
   if (plan === 'to do') {
     return {
       sourceBucket,
-      targetBucket: TODO_BUCKETS[normalizedBucket] ?? sourceBucket,
+      targetBucket: TODO_BUCKETS[normalizedBucket] ?? '',
       requiresClientReview: false,
+      clientAliases: [],
+    }
+  }
+
+  if (plan === 'master client to do') {
+    return {
+      sourceBucket,
+      targetBucket: 'CLIENT REQUESTS',
+      requiresClientReview: true,
+      clientAliases: MASTER_CLIENT_ALIASES[normalizedBucket] ?? [],
+    }
+  }
+
+  if (plan === 'cg socials') {
+    return {
+      sourceBucket,
+      targetBucket: CG_SOCIAL_BUCKETS[normalizedBucket] ?? '',
+      requiresClientReview: false,
+      clientAliases: [],
     }
   }
 
   const planMapping = resolveMicrosoftPlanMapping(planName)
-  const usesClientBuckets = plan === 'master client to do' || planMapping.target === 'client_schedule'
+  const usesClientBuckets = planMapping.target === 'client_schedule'
   return {
     sourceBucket,
     targetBucket: sourceBucket,
     requiresClientReview: usesClientBuckets,
+    clientAliases: usesClientBuckets ? CLIENT_SCHEDULE_ALIASES[normalizedBucket] ?? [] : [],
   }
 }
 

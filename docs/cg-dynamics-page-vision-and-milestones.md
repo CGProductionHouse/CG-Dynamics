@@ -766,6 +766,57 @@ Re-uploading an imported file shows rows as Already imported.
 ### Regression Tests
 `xlsx` lazy-loaded; duplicate rows do not create duplicate tasks.
 
+## 11A. Microsoft Sync
+
+### Page Purpose
+Temporary one-way transition reconciliation while Microsoft and CG Dynamics
+coexist. Microsoft is read-only upstream; CG Dynamics is the execution view.
+
+### Primary Users
+Admin. Connected agents may provide the same normalized transport through the
+documented operator workflow.
+
+### What Belongs
+- Server-side connection and allowlisted source availability.
+- Complete Outlook and Planner source fetches with explicit Outlook range.
+- Preview actions: create, update, unchanged, complete, reopen, move, cancel,
+  archive/source-removed, conflict, skipped and failed.
+- Explicit approval for writes and separate source-removal approval.
+- Progress, run history, per-item results and transition lifecycle state.
+
+### What Must Not Belong
+- Microsoft write-back or two-way sync.
+- Browser-visible Microsoft credentials.
+- Client Socials cards in CG Calendar.
+- Removal inference from incomplete sources or narrow/failed ranges.
+- Hard deletion of Microsoft-linked records.
+
+### Correct Data Sources
+- Allowlisted operational Outlook calendar and Planner plans.
+- `planner_tasks` for operational Planner work.
+- `monthly_deliverables` for Client Socials and no duplicate schedule table.
+- `company_calendar_events` for operational Outlook events.
+- Phase 15a exact Microsoft source IDs and Microsoft sync run/item audit tables.
+
+### Allowed Actions
+- Admin fetches and previews current Microsoft state.
+- Admin applies reviewed Microsoft-owned field changes.
+- Admin pauses or completes transition mode.
+- Connected agent submits a complete normalized version 2 snapshot.
+
+### Role Access
+Admin only. Staff consume reconciled work through Hub, My Work, Planner,
+Calendar and Client Schedule. Clients have no access.
+
+### Done Criteria
+Repeat runs are idempotent, source completeness is explicit, CG-only fields are
+preserved, removals require complete-source proof and no Microsoft writes occur.
+
+### Regression Tests
+Client Socials never enter CG Calendar; incomplete sources never create removal
+actions; local baseline conflicts remain blocked; paused/complete mode blocks
+fetch and apply; imported exact source IDs never duplicate.
+
 ## 12. User Management
 
 ### Page Purpose

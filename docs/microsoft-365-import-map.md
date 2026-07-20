@@ -1,30 +1,26 @@
 # Microsoft 365 Import Map
 
-Architecture contract for importing Microsoft Planner and Outlook data into CG
-Dynamics. This is a one-way, preview-first migration path. It does not define a
-live two-way sync and does not authorize automatic writes.
+Architecture contract for the temporary one-way Microsoft transition sync into
+CG Dynamics. During the coexistence window Microsoft is the upstream source for
+configured Outlook and Planner sources; CG Dynamics is where staff see and
+execute the reconciled work. Microsoft is never modified.
 
 ## Architecture decision (ratified)
 
-**Option A — once-off, operator-assisted migration.** CG Dynamics is replacing
-Teams/Planner, so the migration happens once and the deployed app never needs
-to talk to Microsoft Graph itself. Consequences:
+**Temporary one-way transition sync.** For roughly one to two months the app
+supports repeat preview-first reconciliation. It is not permanent two-way
+integration and can be paused or completed cleanly. Consequences:
 
-- There is **no** Entra app registration, OAuth flow, refresh-token store or
-  Microsoft Edge Function in this project. The earlier `setup_required` stub
-  endpoint was removed rather than built out.
-- An operator with delegated organisational access (the coding-agent Microsoft
-  connector authenticated as info@cgproductionhouse.com, or Graph Explorer)
-  exports a **snapshot file** (schema below). An admin uploads it at
-  `/admin/microsoft-import`; preview and insert-only apply run in the browser
-  against Supabase with the admin's own RLS-checked session.
-- Option B (reusable in-app importer) exists only to the extent that the same
-  snapshot can be re-exported and re-uploaded — reruns are idempotent and
-  classify already-imported rows as `existing`.
-- Option C (recurring connection) is deliberately **not** built. If it is ever
-  genuinely needed, it requires a new reviewed design (delegated OAuth,
-  encrypted token storage, immutable Outlook IDs) — see
-  `supabase/functions/README.md`.
+- The normal admin flow calls the `microsoft-transition-sync` Edge Function.
+  App-only Microsoft credentials stay in Supabase secrets and never reach the
+  browser, database business rows, logs or snapshots.
+- Configured sources are allowlisted in `MICROSOFT_SYNC_SOURCES_JSON`. The
+  function fetches every Planner source with pagination and a bounded Outlook
+  range with immutable event IDs.
+- Connected agents may provide the same normalized version 2 snapshot through
+  the advanced transport. Both triggers use the same reconciliation engine.
+- `active`, `paused` and `complete` lifecycle states ensure Microsoft does not
+  become a hidden dependency after transition.
 
 ## Snapshot file contract
 
@@ -34,9 +30,16 @@ validated by `src/lib/microsoftSnapshot.ts`):
 ```json
 {
   "format": "cg-dynamics-microsoft-snapshot",
-  "version": 1,
+  "version": 2,
   "exportedAt": "2026-07-14T09:00:00Z",
-  "exportedBy": "info@cgproductionhouse.com via coding-agent Graph connector",
+  "exportedBy": "CG Dynamics Microsoft transition sync",
+  "triggerType": "admin",
+  "plannerCompletedCutoff": "2026-07-01",
+  "sources": [{
+    "sourceType": "planner_plan", "sourceId": "...", "sourceName": "To Do",
+    "complete": true, "rangeStart": null, "rangeEnd": null,
+    "recordCount": 1, "safeError": null
+  }],
   "records": [
     {
       "sourceType": "outlook_event",
@@ -52,7 +55,7 @@ validated by `src/lib/microsoftSnapshot.ts`):
       "sourceBucketId": "...", "sourceBucketName": "ADMIN / TO DO",
       "sourceTaskId": "...", "title": "...", "description": null,
       "startDate": null, "dueDate": "2026-07-20",
-      "assigneeMicrosoftIds": [], "percentComplete": 0
+      "completedDate": null, "assigneeMicrosoftIds": [], "percentComplete": 0
     }
   ]
 }
@@ -61,8 +64,14 @@ validated by `src/lib/microsoftSnapshot.ts`):
 Rules: Outlook event IDs must be fetched with `Prefer: IdType="ImmutableId"`;
 Outlook dates keep their timezone offsets; Planner dates are plain
 `YYYY-MM-DD`; `exportedAt` becomes `microsoft_last_synced_at` on applied rows.
+Version 2 snapshots may include a valid `plannerCompletedCutoff` (`YYYY-MM-DD`)
+to exclude unlinked operational tasks completed before that date. Existing
+version 2 connected-agent snapshots without it remain valid and do not apply a
+historical completion filter.
 The snapshot carries titles, dates, IDs and notes only — never tokens or
-credentials. Structural errors reject the whole file; content problems (blank
+credentials. Every source declares completeness and record count. Version 1
+snapshots remain readable but are always incomplete and can never prove source
+removal. Structural errors reject the whole file; content problems (blank
 IDs, unknown plans, unmatched clients) become preview conflicts instead.
 
 ## Product boundaries
@@ -115,6 +124,11 @@ an active `clients.name`, but it must show that match in preview and only save
 the `client_id` after explicit approval. It must never guess a UUID or use a raw
 Planner bucket ID as a client/bucket name.
 
+Planner titles and descriptions that appear to contain confidential finance,
+payroll, banking, identity-number or private HR information are never proposed
+for a staff-visible destination. They remain in the admin preview as a
+`restricted_content` conflict for private review.
+
 Unknown readable bucket names may be proposed as new Planner buckets. Raw IDs,
 blank values and unresolved lookup values are conflicts and cannot be
 pre-approved.
@@ -133,7 +147,7 @@ pre-approved.
 | due date | `due_date` |
 | progress | `status` |
 | priority/categories | `priority` after preview |
-| description/checklist | `notes` / `checklist` |
+| description | `microsoft_source_description` (local `notes` remain CG-owned) |
 | assignments | resolved profile/name fields after review |
 
 Assignment keys from Microsoft are user IDs, not staff names. A future fetcher
@@ -176,7 +190,7 @@ Outlook operational events import to `company_calendar_events`:
 | all-day flag | `all_day` |
 | location display name | `location` |
 | cancellation state | `status = cancelled` |
-| body preview | optional reviewed `notes` |
+| non-private body preview | `microsoft_source_description` (local `notes` remain CG-owned) |
 
 Event type is inferred conservatively from the subject:
 
@@ -204,15 +218,14 @@ Every importer follows the same sequence:
 2. Resolve plans, buckets, members, clients and dates.
 3. Build a preview classified as `create`, `update`, `unchanged`, `conflict` or
    `skip`.
-4. Preselect only safe creates and unchanged rows never need an action.
-5. Require an admin to approve writes. Managers may review only if permission
-   is explicitly added later.
-6. Apply approved rows in one bounded batch and record safe audit metadata.
+4. Classify create, update, unchanged, complete, reopen, move, cancel,
+   archive/source-removed, conflict, skipped and failed actions.
+5. Require an admin to approve writes and separately approve source removals.
+6. Apply approved rows idempotently and record a run plus per-item results.
 7. Refresh source pages so the new work is visible.
 
-The first implementation is manual and one-way. It does not write back to
-Microsoft, run background synchronization, or silently overwrite a newer CG
-Dynamics edit.
+The transition implementation is repeatable and one-way. It does not write
+back to Microsoft or make Microsoft a permanent Planner/Calendar dependency.
 
 ## Dedupe and conflict rules
 
@@ -230,8 +243,9 @@ Dynamics edit.
   identity.
 - Missing source IDs cannot be auto-updated; use the existing import hash when
   available or require manual review.
-- Microsoft deletions are reported in preview. The first version does not
-  delete or archive CG Dynamics rows automatically.
+- A missing item becomes source-removed only when the matching source reports a
+  complete successful fetch and, for Outlook, the existing event is inside the
+  explicit fetch range. Removal requires separate approval and never hard-deletes.
 
 ## Source tracking requirements
 
@@ -273,22 +287,18 @@ separate admin-only design and security review.
 
 ## Implementation status
 
-- Done: snapshot schema + strict parser (`src/lib/microsoftSnapshot.ts`),
-  preview classification and conflict detection
-  (`src/lib/microsoftImportPreview.ts`), live mapping context / existing-target
-  loading and insert-only apply (`src/lib/microsoftImportData.ts`), admin page
-  at `/admin/microsoft-import`.
-- Apply is **insert-only**: `changed` rows are surfaced but never written —
-  resolving them (accept Microsoft value vs keep CG edit) is a manual action
-  for now. No deletes, no archives, no Microsoft writes.
-- The `monthly_deliverables` natural key
-  `(package_id, template_id, instance_number, month)` is guarded: occupied
-  slots become conflicts instead of constraint violations.
-- Remaining before live migration:
-  1. Review and manually apply
-     `supabase/phase-15a-microsoft-source-tracking.sql` (Apply stays disabled
-     in the UI until it is present).
-  2. Export real snapshots via the Microsoft connector (Outlook operational
-     calendar + the four Planner plan families) and run them through preview.
-  3. Optional later: an explicit per-row "accept update" action for `changed`
-     rows.
+- Phase 15a exact source identities are live and remain canonical.
+- Version 2 snapshot completeness, reusable reconciliation, server Graph fetch,
+  transition lifecycle, progress and history UI are implemented on
+  `feature/microsoft-transition-sync`.
+- Phase 17a is live. Its tables, tracking fields, RLS, metadata triggers and
+  admin-only apply RPC were verified on 2026-07-18; anonymous RPC execution was
+  explicitly revoked by a tracked hardening migration.
+- The `monthly_deliverables` natural key remains guarded and Client Socials
+  never enter CG Calendar.
+- The production Edge Function is deployed and rejects anonymous requests. The
+  default operational Calendar and approved Planner plans (`To Do`, `MASTER
+  CLIENT TO DO`, `CG Socials`, and `Client Socials - July 2026`) are verified
+  readable through the connected Microsoft account. The read-only Entra app,
+  Supabase secrets, authenticated fetch, first dry preview and reviewed apply
+  remain outstanding. No Microsoft writes are part of this architecture.

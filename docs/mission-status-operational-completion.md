@@ -4,42 +4,91 @@ Live status for the "CG Dynamics operational completion" mission. Updated as
 work lands. Format per goal: problem found → chosen solution → verification →
 blockers → state.
 
-_Last updated: 2026-07-15_
+_Last updated: 2026-07-20_
 
 ## Goal 1 — Microsoft migration
 
-- **Problem:** PR #25 shipped good preview/classification logic behind a
-  dead-end transport: an Edge Function that always returned `setup_required`
-  and could only ever work after building a full Entra OAuth + encrypted
-  refresh-token platform — over-engineering for a once-off migration.
-- **Decision:** **Option A — once-off, operator-assisted migration** (ratified
-  in `docs/microsoft-365-import-map.md`). No Microsoft OAuth in the deployed
-  app, ever, unless a recurring connection is genuinely needed later. The
-  operator exports a normalized JSON snapshot via the coding-agent Microsoft
-  connector; an admin uploads it at `/admin/microsoft-import`; preview +
-  insert-only apply run in the browser under the admin's RLS session.
-- **Done in this pass:** snapshot parser, live mapping-context and
-  existing-target loaders (graceful `migrationNeeded` before phase-15a),
-  natural-key slot guard for `monthly_deliverables`, insert-only apply with
-  three idempotency layers, page rewrite, stub Edge Function removed, PR #25
-  month-key bug fix retained.
-- **Verification:** build + targeted lint pass; pure preview/parse logic
-  exercised by a scripted test run (see PR #25 description for the scenario
-  list). Authenticated end-to-end browser testing is **not possible from this
-  environment** (no Supabase credentials here) — first live run must be
-  watched by an admin.
+- **Requirement correction (2026-07-15):** Microsoft is a temporary upstream
+  source during a one-to-two-month coexistence period. The normal experience is
+  repeat one-way transition sync, not a once-off JSON migration and never
+  Microsoft write-back.
+- **Transition architecture:** the admin page fetches allowlisted Outlook and
+  Planner sources through a server-only Edge Function; connected agents can
+  provide the same normalized version 2 snapshot through an advanced transport.
+  Both triggers use one completeness-aware reconciliation engine.
+- **Reconciliation:** exact Phase 15a IDs classify create, update, unchanged,
+  complete, reopen, move, cancel, archive/source-removed, conflict, skipped and
+  failed. Microsoft-owned baselines protect newer CG edits; CG-only notes and
+  workflow fields are preserved. Missing items become removal candidates only
+  after a complete successful source fetch and separate admin approval.
+- **Audit/lifecycle:** prepared review-only Phase 17a with active/paused/complete
+  transition state, per-run and per-item audit, source baselines/removal markers,
+  metadata protection and transactional item apply.
+- **Verification:** production build and focused lint pass; pure reconciliation
+  checks passed across create, unchanged, complete, move, local conflict,
+  complete/incomplete removal, invalid identity, reopen, baseline adoption and
+  Client Schedule identity/type changes. Authenticated/live validation remains
+  blocked until Phase 17a, the Edge Function and read-only Graph connection are
+  reviewed and configured.
 - **Live schema correction (verified 2026-07-14):** Phase 15a is already live.
   A read-only Management API query confirmed all Microsoft source columns on
   `planner_tasks`, `monthly_deliverables`, and `company_calendar_events`, plus
   the unique indexes `planner_tasks_microsoft_source_key`,
   `monthly_deliverables_microsoft_source_key`, and
   `company_calendar_events_microsoft_source_key`. Do not rerun Phase 15a.
-- **Blocker (human):**
-  1. Reconnect the Microsoft 365 connector for the export session — it
-     disconnected mid-mission; real plan/calendar snapshots are not yet
-     exported.
-- **State:** architecture resolved; import tooling and live schema ready; real
-  data migration is pending only the future connector-assisted snapshot export.
+- **Activation verification (2026-07-18):** Phase 17a tables, tracking columns,
+  triggers, RLS policies and admin apply RPC were already present from a manual
+  SQL Editor run. The transition is `active` and no sync runs or linked rows
+  exist yet. A tracked hardening migration removed anonymous execution from
+  the apply RPC and all browser execution from its trigger helper. Phase 16a
+  and Phase 16b remain unapplied; neither is required for a dry reconciliation.
+- **Microsoft source discovery:** the connected `info@cgproductionhouse.com`
+  account can read its default Calendar and the exact approved Planner plans:
+  `To Do`, `MASTER CLIENT TO DO`, `CG Socials`, and
+  `Client Socials - July 2026`. Historical monthly plans remain excluded.
+  A direct app-only read over the required 60-day-back/120-day-forward window
+  returned 166 Calendar events. Complete Planner pagination returned 532 `To
+  Do` tasks/7 buckets, 182 `MASTER CLIENT TO DO` tasks/34 buckets, 396 `CG
+  Socials` tasks/2 buckets, and 339 `Client Socials - July 2026` tasks/43
+  buckets. All 1,449 task details were readable across the bounded validation
+  runs.
+- **Confidentiality correction:** a real `To Do` item demonstrated that the
+  staff-visible operational board can contain confidential admin work.
+  Finance, payroll, banking, identity-number and private HR terms now produce
+  an admin-only `restricted_content` conflict instead of a destination write.
+- **Edge deployment:** the production `microsoft-transition-sync` function is
+  deployed with the CG-owned read-only Entra credentials and exact allowlisted
+  source manifest stored as Supabase Edge Function secrets. The function fixes
+  an invalid Outlook `isPrivate` selection, batches Planner detail requests,
+  honors Graph throttling backoff, and still marks exhausted/partial sources
+  incomplete. Its custom authorization returns HTTP 401 anonymously and
+  requires an admin profile; no secret values are returned or logged.
+- **Second dry preview (2026-07-20, before bucket correction):** all five
+  sources were complete with 1,616 records, 369 creates, 1,103 conflicts, 144
+  skipped and no failures. Of the conflicts, 946 were architectural
+  `unsupported_bucket` results: 460 `To Do` recurring tasks, 304 `CG Socials`
+  schedule tasks and 182 `MASTER CLIENT TO DO` client-bucket tasks.
+- **Operational bucket correction:** all seven known `To Do` categories now map
+  deterministically to existing `operations-todo` buckets. `MASTER CLIENT TO
+  DO` resolves the source bucket as an active client and routes it to the shared
+  `CLIENT REQUESTS` bucket. `CG SECHEDULE (NEW)` and `CG STUDIO SCHEDULE` map
+  to the existing `CG Schedule` and `CG Studio Schedule` buckets on the
+  `cg-socials` board. Unknown categories and unresolved or ambiguous clients
+  remain conflicts; Client Socials and Outlook destinations are unchanged.
+- **Current blocker:** commit `b40c47b` is deployed successfully to the PR
+  preview, but that deployment is protected by Vercel authentication and the
+  available browser has no authenticated admin session. The corrected no-apply
+  preview must still be run with Outlook 2026-05-19 through 2026-11-15 and the
+  Planner completion cutoff 2026-07-01. Record final counts and verify
+  `unsupported_bucket = 0`; do not Apply or approve source removals.
+- **State:** Phase 17a, transition lifecycle, Entra read permissions, Supabase
+  secrets, exact source identities, complete direct Graph reads and the hardened
+  Edge deployment are activated. No live reconciliation has been run, no
+  destination business rows were changed, and no Microsoft writes occurred.
+- **Browser check:** local Edge at 1440x900 and 390x844 confirmed Microsoft
+  Sync, Calendar, Planner, My Work, Hub and Client Schedule remain protected,
+  with no console errors, failed requests or horizontal overflow on the login
+  result. Authenticated sync and destination verification remain outstanding.
 
 ## Goal 2 — daily operating system (Hub, My Day, Planner, Command Centre, CG Calendar)
 
@@ -49,7 +98,7 @@ _Last updated: 2026-07-15_
   through the role-aware root redirect; navigation zones follow the current
   URL; Daily Tasks replaces Assistant in the five-item mobile operations bar;
   auth/profile loading states are visible instead of blank screens.
-- **Role baseline:** Users, Invites and Microsoft Import remain admin-only.
+- **Role baseline:** Users, Invites and Microsoft Sync remain admin-only.
   Hub, My Day, Planner, Daily Tasks and CG Calendar remain staff workspace
   routes; clients are redirected to their dashboard.
 - **Loop 1 browser verification:** real headless Edge at 1440x900, 1366x768
