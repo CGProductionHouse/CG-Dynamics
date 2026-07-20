@@ -4,6 +4,7 @@ import { createServer } from 'vite'
 
 let server
 let previewPlannerTask
+let resolveMicrosoftBucketMapping
 let buildMicrosoftReconciliation
 let buildMicrosoftConflictBreakdown
 let filterMicrosoftPreviewItems
@@ -12,11 +13,23 @@ let summarizeMicrosoftCreateStatuses
 let parseMicrosoftSnapshot
 
 const context = {
-  clients: [{ id: 'client-1', name: 'Acme' }],
+  clients: [
+    { id: 'client-1', name: 'Acme' },
+    { id: 'client-ehrlich', name: 'Ehrlich Park Butchery' },
+    { id: 'client-supa-bfn', name: 'Supa Quick BFN' },
+    { id: 'client-supa-centurion', name: 'Supa Quick Centurion' },
+  ],
   boards: [{ id: 'board-ops', slug: 'operations-todo' }, { id: 'board-social', slug: 'cg-socials' }],
   buckets: [
-    { id: 'bucket-admin', boardId: 'board-ops', name: 'Admin / To Do' },
-    { id: 'bucket-once', boardId: 'board-ops', name: 'Once-off' },
+    { id: 'bucket-admin', boardId: 'board-ops', name: 'ADMIN / TO DO' },
+    { id: 'bucket-once', boardId: 'board-ops', name: 'ONCE-OFF' },
+    { id: 'bucket-guides', boardId: 'board-ops', name: 'CONTENT GUIDES' },
+    { id: 'bucket-websites', boardId: 'board-ops', name: 'WEBSITES' },
+    { id: 'bucket-design', boardId: 'board-ops', name: 'GRAPHIC DESIGN' },
+    { id: 'bucket-requests', boardId: 'board-ops', name: 'CLIENT REQUESTS' },
+    { id: 'bucket-recurring', boardId: 'board-ops', name: 'CG ADMIN - RECURRING' },
+    { id: 'bucket-cg-schedule', boardId: 'board-social', name: 'CG Schedule' },
+    { id: 'bucket-studio-schedule', boardId: 'board-social', name: 'CG Studio Schedule' },
   ],
   packages: [{ id: 'package-1', clientId: 'client-1', status: 'active' }],
   templates: [{ id: 'template-dp1', packageId: 'package-1', code: 'DP1', deliverableType: 'dp', active: true }],
@@ -59,12 +72,103 @@ function snapshot(records, rangeStart = '2026-05-19T00:00:00+02:00') {
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
   ;({ previewPlannerTask } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
+  ;({ resolveMicrosoftBucketMapping } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
   ;({ buildMicrosoftReconciliation } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   ;({ buildMicrosoftConflictBreakdown, filterMicrosoftPreviewItems, microsoftIncomingStatus, summarizeMicrosoftCreateStatuses } = await server.ssrLoadModule('/src/lib/microsoftSyncPresentation.ts'))
   ;({ parseMicrosoftSnapshot } = await server.ssrLoadModule('/src/lib/microsoftSnapshot.ts'))
 })
 
 after(async () => { await server.close() })
+
+test('all known To Do buckets resolve to approved operational buckets', () => {
+  const expected = new Map([
+    ['ONCE-OFF', 'ONCE-OFF'],
+    ['CONTENT GUIDES', 'CONTENT GUIDES'],
+    ['WEBSITES', 'WEBSITES'],
+    ['ADMIN / TO DO', 'ADMIN / TO DO'],
+    ['GRAPHIC DESIGN', 'GRAPHIC DESIGN'],
+    ['CLIENT REQUESTS', 'CLIENT REQUESTS'],
+    ['CG ADMIN - RECURRING', 'CG ADMIN - RECURRING'],
+  ])
+
+  for (const [sourceBucket, targetBucket] of expected) {
+    assert.equal(resolveMicrosoftBucketMapping('To Do', sourceBucket).targetBucket, targetBucket)
+    assert.equal(previewPlannerTask(plannerTask({ sourceBucketName: sourceBucket }), context, '2026-07-01').previewStatus, 'new')
+  }
+})
+
+test('harmless To Do bucket variations resolve deterministically', () => {
+  assert.equal(resolveMicrosoftBucketMapping('To Do', '  Admin - To Do  ').targetBucket, 'ADMIN / TO DO')
+  assert.equal(resolveMicrosoftBucketMapping('To Do', 'Once Off').targetBucket, 'ONCE-OFF')
+  assert.equal(resolveMicrosoftBucketMapping('To Do', 'CG Admin – Recurring').targetBucket, 'CG ADMIN - RECURRING')
+})
+
+test('unknown To Do buckets fail closed as unsupported', () => {
+  const item = previewPlannerTask(plannerTask({ sourceBucketName: 'UNREVIEWED BUCKET' }), context, '2026-07-01')
+  assert.equal(item.previewStatus, 'conflict')
+  assert.equal(item.conflictCode, 'unsupported_bucket')
+  assert.match(item.conflictReason, /no approved deterministic mapping/i)
+})
+
+test('MASTER CLIENT TO DO resolves client aliases into the shared Client Requests bucket', () => {
+  const item = previewPlannerTask(plannerTask({
+    sourcePlanId: 'plan-master',
+    sourcePlanName: 'MASTER CLIENT TO DO',
+    sourceBucketName: 'EHRLICH PARK',
+  }), context, '2026-07-01')
+  assert.equal(item.previewStatus, 'new')
+  assert.equal(item.mappedClientId, 'client-ehrlich')
+  assert.equal(item.mappedClientName, 'Ehrlich Park Butchery')
+  assert.equal(item.proposedPayload.bucket_id, 'bucket-requests')
+  assert.equal(item.proposedPayload.original_plan_name, 'MASTER CLIENT TO DO')
+  assert.equal(item.proposedPayload.original_bucket_name, 'EHRLICH PARK')
+})
+
+test('ambiguous MASTER CLIENT TO DO aliases remain conflicts', () => {
+  const item = previewPlannerTask(plannerTask({
+    sourcePlanId: 'plan-master',
+    sourcePlanName: 'MASTER CLIENT TO DO',
+    sourceBucketName: 'SUPA QUICK',
+  }), context, '2026-07-01')
+  assert.equal(item.previewStatus, 'conflict')
+  assert.equal(item.conflictCode, 'ambiguous_client_match')
+})
+
+test('unresolved MASTER CLIENT TO DO clients remain conflicts', () => {
+  const item = previewPlannerTask(plannerTask({
+    sourcePlanId: 'plan-master',
+    sourcePlanName: 'MASTER CLIENT TO DO',
+    sourceBucketName: 'UNKNOWN CLIENT',
+  }), context, '2026-07-01')
+  assert.equal(item.previewStatus, 'conflict')
+  assert.equal(item.conflictCode, 'unresolved_client')
+})
+
+test('CG Socials source buckets map to the CG Socials board', () => {
+  const schedule = previewPlannerTask(plannerTask({
+    sourcePlanId: 'plan-cg-socials',
+    sourcePlanName: 'CG Socials',
+    sourceBucketName: 'CG SECHEDULE (NEW)',
+  }), context, '2026-07-01')
+  const studio = previewPlannerTask(plannerTask({
+    sourcePlanId: 'plan-cg-socials',
+    sourcePlanName: 'CG Socials',
+    sourceBucketName: 'CG STUDIO SCHEDULE',
+  }), context, '2026-07-01')
+
+  assert.equal(schedule.previewStatus, 'new')
+  assert.equal(schedule.proposedPayload.board_id, 'board-social')
+  assert.equal(schedule.proposedPayload.bucket_id, 'bucket-cg-schedule')
+  assert.equal(studio.previewStatus, 'new')
+  assert.equal(studio.proposedPayload.bucket_id, 'bucket-studio-schedule')
+})
+
+test('restricted operational content remains blocked before destination mapping', () => {
+  const item = previewPlannerTask(plannerTask({ title: 'Review payroll figures' }), context, '2026-07-01')
+  assert.equal(item.previewStatus, 'conflict')
+  assert.equal(item.conflictCode, 'restricted_content')
+  assert.equal(item.proposedPayload, null)
+})
 
 test('historical completed operational tasks are skipped before the preview cutoff', () => {
   const source = plannerTask({ percentComplete: 100, completedDate: '2026-05-18' })

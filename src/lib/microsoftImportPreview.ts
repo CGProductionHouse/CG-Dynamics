@@ -67,10 +67,10 @@ export function normalizeMicrosoftMatchName(value: string): string {
   return value.trim().toLocaleLowerCase('en-ZA').replace(/\s+/g, ' ')
 }
 
-export function resolveMicrosoftClient(name: string, clients: MicrosoftPreviewClient[]): ClientResolution {
-  const key = normalizeMicrosoftMatchName(name)
-  if (!key) return { status: 'unresolved', client: null }
-  const matches = clients.filter(client => normalizeMicrosoftMatchName(client.name) === key)
+export function resolveMicrosoftClient(name: string, clients: MicrosoftPreviewClient[], aliases: string[] = []): ClientResolution {
+  const keys = new Set([name, ...aliases].map(normalizeMicrosoftMatchName).filter(Boolean))
+  if (keys.size === 0) return { status: 'unresolved', client: null }
+  const matches = clients.filter(client => keys.has(normalizeMicrosoftMatchName(client.name)))
   if (matches.length === 1) return { status: 'matched', client: matches[0] }
   if (matches.length > 1) return { status: 'ambiguous', client: null }
   return { status: 'unresolved', client: null }
@@ -256,7 +256,7 @@ export function previewPlannerTask(
   const bucket = board
     ? context.buckets.find(item => item.boardId === board.id && normalizeMicrosoftMatchName(item.name) === normalizeMicrosoftMatchName(bucketMapping.targetBucket)) ?? null
     : null
-  const client = bucketMapping.requiresClientReview ? resolveMicrosoftClient(source.sourceBucketName, context.clients) : null
+  const client = bucketMapping.requiresClientReview ? resolveMicrosoftClient(source.sourceBucketName, context.clients, bucketMapping.clientAliases) : null
   const payload: MicrosoftPlannerPayload = {
     destination: 'planner',
     board_id: board?.id ?? null,
@@ -280,7 +280,9 @@ export function previewPlannerTask(
   }
   const mapped = { ...base, destination: 'planner' as const, mappedClientId: client?.client?.id ?? null, mappedClientName: client?.client?.name ?? null, proposedPayload: payload }
   if (!board) return conflict(mapped, 'wrong_destination', `Planner board "${plan.targetBoardSlug}" is not available.`)
-  if (!bucket) return conflict(mapped, 'unsupported_bucket', `No exact Planner bucket matches "${bucketMapping.targetBucket}".`)
+  if (!bucket) return conflict(mapped, 'unsupported_bucket', bucketMapping.targetBucket
+    ? `No approved Planner bucket matches "${bucketMapping.targetBucket}".`
+    : `Microsoft bucket "${source.sourceBucketName}" has no approved deterministic mapping.`)
   if (client?.status === 'ambiguous') return conflict(mapped, 'ambiguous_client_match', `More than one active client exactly matches "${source.sourceBucketName}".`)
   if (client?.status === 'unresolved') return conflict(mapped, 'unresolved_client', `No active client exactly matches "${source.sourceBucketName}".`)
   return {
