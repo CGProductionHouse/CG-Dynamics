@@ -68,6 +68,14 @@ const MASTER_CLIENT_ALIASES: Record<string, string[]> = {
   'supa quick': ['Supa Quick BFN', 'Supa Quick Centurion'],
 }
 
+const CLIENT_SCHEDULE_ALIASES: Record<string, string[]> = {
+  'braize promotions': ['Braize'],
+  'hmhi attorneys': ['HMH Attorneys'],
+  'human auto ford': ['Human Auto'],
+  'rc polypipe': ['RC-Polypipe'],
+  'the staffordhire pub': ['The Staffy'],
+}
+
 export function normalizeMicrosoftLabel(value: string): string {
   return value
     .normalize('NFKD')
@@ -143,7 +151,7 @@ export function resolveMicrosoftBucketMapping(
     sourceBucket,
     targetBucket: sourceBucket,
     requiresClientReview: usesClientBuckets,
-    clientAliases: [],
+    clientAliases: usesClientBuckets ? CLIENT_SCHEDULE_ALIASES[normalizedBucket] ?? [] : [],
   }
 }
 

@@ -204,7 +204,7 @@ export function previewPlannerTask(
     const monthKey = planMonth(source.sourcePlanName)
       ?? (normalizeMicrosoftMatchName(source.sourcePlanName) === '2025 clients schedule' ? (source.dueDate ?? source.startDate)?.slice(0, 7) ?? null : null)
     const month = monthKey ? `${monthKey}-01` : null
-    const client = resolveMicrosoftClient(source.sourceBucketName, context.clients)
+    const client = resolveMicrosoftClient(source.sourceBucketName, context.clients, bucketMapping.clientAliases)
     const identity = deliverableIdentity(source.title)
     const clientId = client.client?.id ?? null
     const packages = clientId

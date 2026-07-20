@@ -206,6 +206,34 @@ test('completed July Client Socials cards remain eligible and map to Scheduled',
   assert.equal(item.proposedPayload.production_status, 'scheduled')
 })
 
+test('Client Socials resolves reviewed client bucket aliases without guessing IDs', () => {
+  const aliases = [
+    ['BRAIZE PROMOTIONS', 'Braize'],
+    ['HMHI ATTORNEYS', 'HMH Attorneys'],
+    ['HUMAN AUTO FORD', 'Human Auto'],
+    ['RC POLYPIPE', 'RC-Polypipe'],
+    ['THE STAFFORDHIRE PUB', 'The Staffy'],
+  ]
+  const clients = aliases.map(([, name], index) => ({ id: `alias-client-${index}`, name }))
+  const packages = clients.map((client, index) => ({ id: `alias-package-${index}`, clientId: client.id, status: 'active' }))
+  const templates = packages.map((item, index) => ({ id: `alias-template-${index}`, packageId: item.id, code: 'DP1', deliverableType: 'dp', active: true }))
+  const aliasContext = { ...context, clients, packages, templates }
+
+  for (const [sourceBucketName, expectedClientName] of aliases) {
+    const item = previewPlannerTask(plannerTask({
+      sourcePlanId: 'plan-july',
+      sourcePlanName: 'Client Socials - July 2026',
+      sourceBucketId: `bucket-${sourceBucketName}`,
+      sourceBucketName,
+      sourceTaskId: `task-${sourceBucketName}`,
+      title: 'DP1 Launch',
+    }), aliasContext, '2026-07-01')
+    assert.equal(item.previewStatus, 'new')
+    assert.equal(item.mappedClientName, expectedClientName)
+    assert.equal(item.proposedPayload.client_id, clients.find(client => client.name === expectedClientName).id)
+  }
+})
+
 test('historical linked incomplete tasks remain seen and reconcile to Complete', () => {
   const active = plannerTask()
   const created = buildMicrosoftReconciliation(snapshot([active]), context, [], new Set())[0]
