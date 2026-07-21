@@ -36,6 +36,12 @@ const hubNav: NavItem[] = [
   { to: '/admin/microsoft-import', label: 'Microsoft Sync', access: 'admin' },
 ]
 
+// Small AI Workforce group inside the Hub navigation. Kept separate from the
+// operational Hub items but NOT a third app zone yet.
+const aiWorkforceNav: NavItem[] = [
+  { to: '/admin/marketing-library', label: 'Marketing Library', access: 'admin' },
+]
+
 function navClass({ isActive }: { isActive: boolean }) {
   return `group relative flex items-center justify-between rounded-md px-3 py-2 md:py-1.5 text-sm font-bold transition-colors ${
     isActive
@@ -140,6 +146,7 @@ export default function AdminLayout() {
       )
     }
 
+    const aiWorkforceItems = aiWorkforceNav.filter(canShow)
     return (
       <>
         <NavSection label="CG Hub" />
@@ -148,6 +155,16 @@ export default function AdminLayout() {
             <span>{item.label}</span>
           </NavLink>
         ))}
+        {aiWorkforceItems.length > 0 && (
+          <>
+            <NavSection label="AI Workforce" />
+            {aiWorkforceItems.map(item => (
+              <NavLink key={item.to} to={item.to} className={navClass} onClick={close}>
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </>
+        )}
         <ExternalHoursLink onClick={close} />
       </>
     )
