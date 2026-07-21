@@ -8,6 +8,8 @@ This framework defines the knowledge system shared by Client Intelligence, Opera
 
 The framework is product architecture. It does not activate any knowledge, create specialist agents or replace the existing Skill Card review gate.
 
+The runtime implementation contract for the first retrieval milestone is defined in [`docs/assistant-retrieval-contract.md`](./assistant-retrieval-contract.md).
+
 ## Core rule
 
 Knowledge is not usable merely because it exists in the database.
@@ -356,6 +358,8 @@ It must:
 - exclude `needs_review`, rejected, deprecated and expired items;
 - log usage without logging hidden reasoning;
 - produce a clear no-approved-knowledge result rather than filling gaps from ungoverned content.
+
+The detailed runtime and implementation rules for this milestone are defined in [`docs/assistant-retrieval-contract.md`](./assistant-retrieval-contract.md).
 
 ### Milestone 2 — Admin review completion
 
