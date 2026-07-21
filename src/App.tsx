@@ -33,6 +33,7 @@ import PlannerImportPage from './pages/admin/PlannerImportPage'
 import ImportHealthPage from './pages/admin/ImportHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
+import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
 import MyWorkPage from './pages/admin/MyWorkPage'
 import Dashboard from './pages/client/Dashboard'
 
@@ -115,6 +116,7 @@ export default function App() {
                 <Route path="/admin/invites" element={<Navigate to="/admin/team?tab=invites" replace />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
                 <Route path="/admin/microsoft-import" element={<MicrosoftImportPage />} />
+                <Route path="/admin/marketing-library" element={<MarketingLibraryPage />} />
               </Route>
             </Route>
           </Route>
