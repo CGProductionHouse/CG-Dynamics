@@ -25,6 +25,7 @@ import {
   type SourceTrustTier,
 } from '../../lib/marketing-library/skillCardsData'
 import MarketingLibraryPlatformsTab from './MarketingLibraryPlatformsTab'
+import SkillCardReviewSection from './MarketingLibraryReviewSection'
 
 // ── Marketing Library (AI Workforce) — admin-only foundation screen ───────────
 //
@@ -218,8 +219,12 @@ function SkillCardForm({
         </Field>
         <Field label="Status">
           <select className={INPUT_CLS} value={form.status} onChange={event => set('status', event.target.value as SkillCardStatus)}>
-            {STATUS_OPTIONS.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+            {/* 'active' is never a free-choice here — a card only becomes active
+                through the review gate below. Kept selectable only if the card
+                is already active so editing other fields doesn't reset it. */}
+            {STATUS_OPTIONS.filter(option => option !== 'active' || form.status === 'active').map(option => <option key={option} value={option}>{humanize(option)}</option>)}
           </select>
+          <span className="mt-1 block text-[11px] text-white/40">Cards become active through Review &amp; activation, not here.</span>
         </Field>
         <Field label="Knowledge layer">
           <select className={INPUT_CLS} value={form.knowledge_layer} onChange={event => set('knowledge_layer', event.target.value as KnowledgeLayer)}>
@@ -716,7 +721,14 @@ export default function MarketingLibraryPage() {
                 <SkillCardForm initial={cardToForm(selectedCard)} sources={sources} saving={cardSaving} error={cardError} onCancel={() => setCardMode('view')} onSubmit={submitCard} />
               </>
             ) : selectedCard ? (
-              <SkillCardDetail card={selectedCard} sources={sources} onEdit={() => { setCardMode('edit'); setCardError(null) }} />
+              <>
+                <SkillCardDetail card={selectedCard} sources={sources} onEdit={() => { setCardMode('edit'); setCardError(null) }} />
+                <SkillCardReviewSection
+                  card={selectedCard}
+                  source={sources.find(source => source.id === selectedCard.source_id) ?? null}
+                  onChanged={loadAll}
+                />
+              </>
             ) : (
               <EmptyState title="Select a Skill Card" message="Choose a card from the list to see its detail, or create a new one." />
             )}

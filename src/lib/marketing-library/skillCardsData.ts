@@ -264,3 +264,134 @@ export async function createSkillCardReview(
   const { data, error } = await supabase.from('skill_card_reviews').insert(input).select('*').single()
   return result((data as SkillCardReviewRecord) ?? null, error, null)
 }
+
+// ── Activation readiness + review lifecycle ───────────────────────────────────
+//
+// The database gate (phase-18c) is the real guard; these mirror it so the UI
+// can show requirements and only offer Activate when they pass. Keeping the
+// rule in one pure function keeps client and server in agreement.
+
+export type SkillCardReviewAction = 'approve' | 'request_changes' | 'reject' | 'deprecate'
+
+// Trust tiers that are NOT trusted enough to activate a card.
+export const BLOCKED_ACTIVATION_TRUST_TIERS: SourceTrustTier[] = ['needs_review', 'tier_4_low_trust']
+
+export interface SkillCardActivationReadiness {
+  ready: boolean
+  hasSource: boolean
+  sourceTrustAcceptable: boolean
+  hasApprovedReview: boolean
+  lastReviewedSet: boolean
+  /** Human-readable missing requirements, empty when ready. */
+  missing: string[]
+}
+
+// Pure activation-readiness check. Mirrors phase-18c exactly:
+// linked source + trusted tier + an approved review + a last_reviewed date.
+export function evaluateSkillCardActivation(
+  card: Pick<SkillCardRecord, 'source_id' | 'last_reviewed'>,
+  source: Pick<MarketingLibrarySource, 'trust_tier'> | null,
+  reviews: Array<Pick<SkillCardReviewRecord, 'review_status'>>,
+): SkillCardActivationReadiness {
+  const hasSource = Boolean(card.source_id)
+  const sourceTrustAcceptable = hasSource && source != null && !BLOCKED_ACTIVATION_TRUST_TIERS.includes(source.trust_tier)
+  const hasApprovedReview = reviews.some(review => review.review_status === 'approved')
+  const lastReviewedSet = Boolean(card.last_reviewed)
+
+  const missing: string[] = []
+  if (!hasSource) missing.push('Link a source')
+  else if (source == null) missing.push('Linked source could not be loaded to verify its trust tier')
+  else if (!sourceTrustAcceptable) missing.push('Source trust tier must not be "needs review" or "tier 4 low trust"')
+  if (!hasApprovedReview) missing.push('At least one approved review')
+  if (!lastReviewedSet) missing.push('Last reviewed date must be set')
+
+  return {
+    ready: hasSource && sourceTrustAcceptable && hasApprovedReview && lastReviewedSet,
+    hasSource,
+    sourceTrustAcceptable,
+    hasApprovedReview,
+    lastReviewedSet,
+    missing,
+  }
+}
+
+// Load the card, its linked source and its reviews, then evaluate readiness.
+export async function checkSkillCardActivationReadiness(
+  cardId: string,
+): Promise<QueryResult<SkillCardActivationReadiness | null>> {
+  const { data: card, error: cardError } = await supabase
+    .from('skill_cards')
+    .select('source_id, last_reviewed')
+    .eq('id', cardId)
+    .single()
+  if (cardError) return result(null, cardError, null)
+  const cardRow = card as Pick<SkillCardRecord, 'source_id' | 'last_reviewed'>
+
+  let source: Pick<MarketingLibrarySource, 'trust_tier'> | null = null
+  if (cardRow.source_id) {
+    const { data: sourceRow, error: sourceError } = await supabase
+      .from('marketing_library_sources')
+      .select('trust_tier')
+      .eq('id', cardRow.source_id)
+      .single()
+    if (sourceError) return result(null, sourceError, null)
+    source = (sourceRow as { trust_tier: SourceTrustTier } | null) ?? null
+  }
+
+  const { data: reviews, error: reviewError } = await supabase
+    .from('skill_card_reviews')
+    .select('review_status')
+    .eq('skill_card_id', cardId)
+  if (reviewError) return result(null, reviewError, null)
+
+  const readiness = evaluateSkillCardActivation(cardRow, source, (reviews ?? []) as Array<Pick<SkillCardReviewRecord, 'review_status'>>)
+  return { data: readiness, error: null, migrationNeeded: false }
+}
+
+// Maps each review action to the review row it logs and the card status it sets.
+const REVIEW_ACTION_MAP: Record<SkillCardReviewAction, { review: SkillCardReviewStatus; card: SkillCardStatus; setLastReviewed: boolean }> = {
+  approve: { review: 'approved', card: 'reviewed', setLastReviewed: true },
+  request_changes: { review: 'changes_requested', card: 'needs_review', setLastReviewed: false },
+  reject: { review: 'rejected', card: 'draft', setLastReviewed: false },
+  deprecate: { review: 'deprecated', card: 'deprecated', setLastReviewed: false },
+}
+
+// Record a review action: log the review (note required), then move the card to
+// the matching status. Never activates — activation is a separate gated step.
+export async function submitSkillCardReviewAction(params: {
+  skillCardId: string
+  action: SkillCardReviewAction
+  note: string
+  reviewedBy?: string | null
+}): Promise<QueryResult<SkillCardRecord | null>> {
+  const note = params.note.trim()
+  if (!note) return { data: null, error: 'A short review note is required.', migrationNeeded: false }
+
+  const mapping = REVIEW_ACTION_MAP[params.action]
+  const reviewResponse = await createSkillCardReview({
+    skill_card_id: params.skillCardId,
+    review_status: mapping.review,
+    reviewed_by: params.reviewedBy ?? null,
+    review_notes: note,
+  })
+  if (reviewResponse.error || reviewResponse.migrationNeeded) {
+    return { data: null, error: reviewResponse.error, migrationNeeded: reviewResponse.migrationNeeded }
+  }
+
+  const patch: Partial<SkillCardInput> = { status: mapping.card }
+  if (mapping.setLastReviewed) patch.last_reviewed = new Date().toISOString().slice(0, 10)
+  return updateSkillCard(params.skillCardId, patch)
+}
+
+// Activate a card only after readiness passes. The phase-18c trigger is the
+// authoritative backstop; this pre-check gives a clear message without a write.
+export async function activateSkillCard(cardId: string): Promise<QueryResult<SkillCardRecord | null>> {
+  const readiness = await checkSkillCardActivationReadiness(cardId)
+  if (readiness.error || readiness.migrationNeeded) {
+    return { data: null, error: readiness.error, migrationNeeded: readiness.migrationNeeded }
+  }
+  if (!readiness.data || !readiness.data.ready) {
+    return { data: null, error: `Cannot activate: ${readiness.data?.missing.join('; ') ?? 'requirements not met'}.`, migrationNeeded: false }
+  }
+  return updateSkillCard(cardId, { status: 'active' })
+}
