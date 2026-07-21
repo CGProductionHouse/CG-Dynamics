@@ -24,6 +24,7 @@ import {
   type SkillCardRecord,
   type SourceTrustTier,
 } from '../../lib/marketing-library/skillCardsData'
+import MarketingLibraryPlatformsTab from './MarketingLibraryPlatformsTab'
 
 // ── Marketing Library (AI Workforce) — admin-only foundation screen ───────────
 //
@@ -33,7 +34,7 @@ import {
 // phases per docs/CORE_PRINCIPLES.md (Skill Cards remain untrusted until
 // reviewed; AI-generated output is never treated as a trusted source).
 
-type Tab = 'cards' | 'sources'
+type Tab = 'cards' | 'sources' | 'platforms'
 type PaneMode = 'view' | 'edit' | 'create'
 
 const STATUS_OPTIONS: SkillCardStatus[] = ['draft', 'needs_review', 'reviewed', 'active', 'deprecated']
@@ -626,6 +627,13 @@ export default function MarketingLibraryPage() {
           >
             Sources {sources.length > 0 && <span className="opacity-60">{sources.length}</span>}
           </button>
+          <button
+            type="button"
+            onClick={() => setTab('platforms')}
+            className={`rounded-full border px-4 py-2 text-sm font-black transition-colors ${tab === 'platforms' ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/45 hover:text-white/70'}`}
+          >
+            Platforms
+          </button>
         </div>
       )}
 
@@ -714,7 +722,7 @@ export default function MarketingLibraryPage() {
             )}
           </section>
         </div>
-      ) : (
+      ) : tab === 'sources' ? (
         <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <section className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -790,6 +798,8 @@ export default function MarketingLibraryPage() {
             )}
           </section>
         </div>
+      ) : (
+        <MarketingLibraryPlatformsTab sources={sources} />
       )}
     </div>
   )
