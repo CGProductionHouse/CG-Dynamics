@@ -37,7 +37,7 @@ All five Phase 18 migrations are applied to the linked Supabase project
   `skill_card_reviews`, `skill_card_usage_logs`, `platform_experts`,
   `platform_surfaces`, `platform_knowledge_items`.
 - Seven platform shells exist (Instagram, Facebook, LinkedIn, TikTok,
-  YouTube, X/Twitter, Google Ads / YouTube Ads) — all empty.
+  Google Business Profile, YouTube, WhatsApp Business) — all empty.
 - One Scientific Advertising source (`tier_1_primary`) exists.
 - Five Skill Cards exist, all `needs_review`.
 - No approved reviews, no `last_reviewed` dates, no active cards.
