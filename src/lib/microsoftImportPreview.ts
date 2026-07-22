@@ -98,8 +98,8 @@ function conflict(
   return { ...item, previewStatus: 'conflict', conflictCode: code, conflictReason: reason }
 }
 
-function plannerProgress(percentComplete: number | null): 'to_do' | 'in_progress' | 'approved' {
-  if (percentComplete === 100) return 'approved'
+function plannerProgress(percentComplete: number | null, destination: 'planner' | 'client_schedule'): 'to_do' | 'in_progress' | 'done' | 'scheduled' {
+  if (percentComplete === 100) return destination === 'client_schedule' ? 'scheduled' : 'done'
   if (percentComplete !== null && percentComplete > 0) return 'in_progress'
   return 'to_do'
 }
@@ -171,7 +171,6 @@ function plannerBase(source: MicrosoftPlannerTaskSource): Omit<MicrosoftImportPr
 export function previewPlannerTask(
   source: MicrosoftPlannerTaskSource,
   context: MicrosoftPreviewMappingContext,
-  historicalCompletedCutoff: string | null = null,
 ): MicrosoftImportPreviewItem {
   const base = plannerBase(source)
   const plan = resolveMicrosoftPlanMapping(source.sourcePlanName)
@@ -189,11 +188,6 @@ export function previewPlannerTask(
   if (containsRestrictedPlannerContent(source)) {
     return conflict(base, 'restricted_content', 'This task may contain confidential finance, payroll, or HR information and requires private admin review.')
   }
-  const historicalCompleted = plan.target === 'planner'
-    && historicalCompletedCutoff
-    && source.percentComplete === 100
-    && source.completedDate
-    && source.completedDate < historicalCompletedCutoff
 
   const bucketMapping = resolveMicrosoftBucketMapping(source.sourcePlanName, source.sourceBucketName)
   if (!source.sourceBucketId.trim() || !source.sourceBucketName.trim()) {
@@ -218,7 +212,7 @@ export function previewPlannerTask(
           && normalizeMicrosoftMatchName(item.code) === normalizeMicrosoftMatchName(identityCode)
           && item.deliverableType === identity.deliverable_type) ?? null
       : null
-    const progress = plannerProgress(source.percentComplete)
+    const progress = source.percentComplete === 100 ? 'scheduled' as const : source.percentComplete !== null && source.percentComplete > 0 ? 'in_progress' as const : 'to_do' as const
     const payload: MicrosoftClientSchedulePayload = {
       destination: 'client_schedule',
       client_id: client.client?.id ?? null,
@@ -231,7 +225,7 @@ export function previewPlannerTask(
       instance_number: identity.instance_number,
       title: source.title.trim(),
       deliverable_type: identity.deliverable_type,
-      production_status: progress === 'approved' ? 'scheduled' : progress,
+      production_status: progress,
       priority: 'normal',
       scheduled_date: source.dueDate,
       notes: source.description,
@@ -264,7 +258,7 @@ export function previewPlannerTask(
     title: source.title.trim(),
     client_id: client?.client?.id ?? null,
     client_name: client?.client?.name ?? null,
-    status: plannerProgress(source.percentComplete),
+    status: plannerProgress(source.percentComplete, 'planner'),
     priority: 'normal',
     start_date: source.startDate,
     due_date: source.dueDate,
@@ -290,10 +284,6 @@ export function previewPlannerTask(
     previewStatus: 'new',
     conflictCode: null,
     conflictReason: null,
-    ...(historicalCompleted ? {
-      skipCode: 'historical_completed' as const,
-      warnings: [...mapped.warnings, `Completed before the Planner cutoff (${historicalCompletedCutoff}); unlinked history is excluded from import.`],
-    } : {}),
   }
 }
 
@@ -355,11 +345,10 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
 export function buildMicrosoftImportPreview(
   sources: MicrosoftImportSourceRecord[],
   context: MicrosoftPreviewMappingContext,
-  historicalCompletedCutoff: string | null = null,
 ): MicrosoftImportPreviewItem[] {
   const items = sources.map(source => source.sourceType === 'outlook_event'
     ? previewOutlookEvent(source)
-    : previewPlannerTask(source, context, historicalCompletedCutoff))
+    : previewPlannerTask(source, context))
   const counts = new Map<string, number>()
 
   for (const item of items) {

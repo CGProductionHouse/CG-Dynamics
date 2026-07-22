@@ -12,6 +12,8 @@ import {
   getMicrosoftConnectionStatus,
   loadMicrosoftExistingTargets,
   loadMicrosoftMappingContext,
+  loadMicrosoftProfiles,
+  loadMicrosoftUserMappings,
   loadMicrosoftSyncRunItems,
   loadMicrosoftSyncState,
   updateMicrosoftTransitionStatus,
@@ -31,6 +33,7 @@ import {
   type MicrosoftIncomingStatus,
 } from '../../lib/microsoftSyncPresentation'
 import { parseMicrosoftSnapshot, type MicrosoftSnapshot } from '../../lib/microsoftSnapshot'
+import { resolvePreviewAssignees } from '../../lib/microsoftAssigneeMapping'
 
 const ACTIONS: Array<{ value: MicrosoftReconciliationAction; label: string }> = [
   { value: 'create', label: 'Create' }, { value: 'update', label: 'Update' },
@@ -103,6 +106,13 @@ function PreviewItem({ item }: { item: MicrosoftImportPreviewItem }) {
         <span>{item.dueDate ?? item.startDate ?? 'No date'}</span>
         {item.mappedClientName && <span>{item.mappedClientName}</span>}
       </div>
+      {item.resolvedAssignees && item.resolvedAssignees.length > 0 && <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+        {item.resolvedAssignees.map(resolution => (
+          <span key={resolution.microsoftUserId} className={`${resolution.resolved ? 'text-emerald-200/80' : 'text-amber-200/60'}`}>
+            {resolution.resolved ? `${resolution.cgProfileName ?? resolution.displayName}` : `Unresolved: ${resolution.displayName}`}
+          </span>
+        ))}
+      </div>}
       {item.requiresRemovalApproval && <p className="mt-3 rounded-lg border border-orange-300/15 bg-orange-300/[0.06] px-3 py-2 text-xs text-orange-100">Missing from a complete source fetch. Explicit source-removal approval is required.</p>}
       {item.conflictCode && <p className="mt-3 text-[10px] font-black uppercase tracking-wider text-red-200/70">Conflict: {item.conflictCode.replaceAll('_', ' ')}</p>}
       {item.conflictReason && <p className="mt-3 rounded-lg border border-red-300/15 bg-red-300/[0.06] px-3 py-2 text-xs text-red-100">{item.conflictReason}</p>}
@@ -132,7 +142,6 @@ export default function MicrosoftImportPage() {
   const [migrationNeeded, setMigrationNeeded] = useState(false)
   const [rangeStart, setRangeStart] = useState(addBusinessDays(businessDateKey(), -31))
   const [rangeEnd, setRangeEnd] = useState(addBusinessDays(businessDateKey(), 93))
-  const [plannerCompletedCutoff, setPlannerCompletedCutoff] = useState(`${businessDateKey().slice(0, 7)}-01`)
   const [snapshot, setSnapshot] = useState<MicrosoftSnapshot | null>(null)
   const [items, setItems] = useState<MicrosoftImportPreviewItem[]>([])
   const [sourceFilter, setSourceFilter] = useState('all')
@@ -156,7 +165,7 @@ export default function MicrosoftImportPage() {
   const conflictOptions = [...new Set(items.filter(item => item.reconciliationAction === 'conflict').map(item => item.conflictCode ?? 'uncoded'))].sort()
   const conflictBreakdown = buildMicrosoftConflictBreakdown(items)
   const createStatusCounts = summarizeMicrosoftCreateStatuses(items)
-  const historicalCompletedSkipped = items.filter(item => item.skipCode === 'historical_completed' && item.reconciliationAction === 'skipped').length
+  const completedOperationalSkipped = items.filter(item => item.skipCode === 'completed_operational_not_imported' && item.reconciliationAction === 'skipped').length
   const removalCount = items.filter(item => item.requiresRemovalApproval).length
   const lastSuccess = runs.find(run => run.status === 'completed')
   const writableCount = summary.create + summary.update + summary.complete + summary.reopen + summary.move + summary.cancel + summary.archive
@@ -185,14 +194,16 @@ export default function MicrosoftImportPage() {
     setApproveRemovals(false)
     setApplyResult(null)
     try {
-      const [contextResult, existingResult] = await Promise.all([loadMicrosoftMappingContext(), loadMicrosoftExistingTargets()])
+      const [contextResult, existingResult, profilesResult, mappingsResult] = await Promise.all([loadMicrosoftMappingContext(), loadMicrosoftExistingTargets(), loadMicrosoftProfiles(), loadMicrosoftUserMappings()])
       if (contextResult.error || !contextResult.context) throw new Error(contextResult.error ?? 'Could not load mapping context.')
       if (existingResult.error) throw new Error(existingResult.error)
+      if (profilesResult.error) throw new Error(profilesResult.error)
       setMigrationNeeded(existingResult.migrationNeeded)
       const reconciled = buildMicrosoftReconciliation(nextSnapshot, contextResult.context, existingResult.targets, existingResult.deliverableSlotKeys)
+      const resolved = resolvePreviewAssignees(reconciled, nextSnapshot.assigneeMap ?? {}, mappingsResult.data, profilesResult.data)
       setSnapshot(nextSnapshot)
-      setItems(reconciled)
-      const first = ACTIONS.find(option => reconciled.some(item => item.reconciliationAction === option.value))
+      setItems(resolved)
+      const first = ACTIONS.find(option => resolved.some(item => item.reconciliationAction === option.value))
       setSourceFilter('all')
       setActionFilter(first?.value ?? 'all')
       setStatusFilter('all')
@@ -208,7 +219,7 @@ export default function MicrosoftImportPage() {
     if (loading || transitionStatus !== 'active') return
     setLoading(true)
     setError(null)
-    const fetched = await fetchLatestMicrosoftSnapshot(`${rangeStart}T00:00:00+02:00`, `${rangeEnd}T00:00:00+02:00`, plannerCompletedCutoff)
+    const fetched = await fetchLatestMicrosoftSnapshot(`${rangeStart}T00:00:00+02:00`, `${rangeEnd}T00:00:00+02:00`)
     setLoading(false)
     if (!fetched.snapshot) { setError(fetched.error ?? 'Microsoft fetch failed.'); return }
     await prepareSnapshot(fetched.snapshot)
@@ -286,9 +297,9 @@ export default function MicrosoftImportPage() {
       </section>
 
       <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview latest changes</p><h2 className="mt-1 text-xl font-black text-white">Fetch complete configured sources</h2><p className="mt-1 text-sm text-white/45">The Outlook range and Planner completed-history cutoff are explicit and independent. Planner plans are still fetched in full.</p></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]"><label className="text-xs text-white/45">Outlook from<input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">Outlook to<input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">Completed-task cutoff<input type="date" value={plannerCompletedCutoff} onChange={event => setPlannerCompletedCutoff(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><button type="button" onClick={() => void previewLatest()} disabled={!connection?.connected || transitionStatus !== 'active' || loading || !plannerCompletedCutoff} className="self-end rounded-xl bg-brand-teal px-5 py-2.5 text-sm font-black text-black disabled:opacity-35">{loading ? 'Fetching...' : 'Preview latest changes'}</button></div></div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview latest changes</p><h2 className="mt-1 text-xl font-black text-white">Fetch complete configured sources</h2><p className="mt-1 text-sm text-white/45">Newly completed operational tasks are not imported (they are automatically skipped). Existing linked tasks can still complete. Client Socials items are never skipped.</p></div><div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><label className="text-xs text-white/45">Outlook from<input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">Outlook to<input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><button type="button" onClick={() => void previewLatest()} disabled={!connection?.connected || transitionStatus !== 'active' || loading} className="self-end rounded-xl bg-brand-teal px-5 py-2.5 text-sm font-black text-black disabled:opacity-35">{loading ? 'Fetching...' : 'Preview latest changes'}</button></div></div>
         <button type="button" onClick={() => setAdvancedOpen(value => !value)} className="mt-4 text-xs font-bold text-white/40 hover:text-white/70">{advancedOpen ? 'Hide' : 'Show'} connected-agent snapshot transport</button>
-        {advancedOpen && <div className="mt-3 rounded-xl border border-dashed border-white/10 p-4"><p className="text-xs leading-relaxed text-white/45">For an authorised connected agent or recovery only. Version 2 snapshots must declare per-source completeness; legacy snapshots can never archive missing items.</p><button type="button" disabled={transitionStatus !== 'active'} onClick={() => fileInputRef.current?.click()} className="mt-3 rounded-lg border border-white/10 px-4 py-2 text-xs font-black text-white disabled:opacity-35">Choose normalized snapshot</button><input ref={fileInputRef} type="file" accept=".json,application/json" className="hidden" onChange={event => { void onSnapshotFile(event.target.files); event.target.value = '' }} /></div>}
+        {advancedOpen && <div className="mt-3 rounded-xl border border-dashed border-white/10 p-4"><p className="text-xs leading-relaxed text-white/45">For an authorised connected agent or recovery only. Version 3 snapshots include assignee identity metadata for staff assignment resolution. Version 2 and legacy snapshots are also accepted.</p><button type="button" disabled={transitionStatus !== 'active'} onClick={() => fileInputRef.current?.click()} className="mt-3 rounded-lg border border-white/10 px-4 py-2 text-xs font-black text-white disabled:opacity-35">Choose normalized snapshot</button><input ref={fileInputRef} type="file" accept=".json,application/json" className="hidden" onChange={event => { void onSnapshotFile(event.target.files); event.target.value = '' }} /></div>}
         {parseErrors.length > 0 && <div className="mt-3 rounded-xl border border-red-300/20 bg-red-300/[0.06] p-3 text-xs text-red-100">{parseErrors.join(' ')}</div>}
       </section>
 
@@ -296,7 +307,7 @@ export default function MicrosoftImportPage() {
       {error && <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</div>}
       {applyResult && <section className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-4"><p className="font-black text-white">Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied, {applyResult.failed} failed.</p><p className="mt-1 text-xs text-white/50">No Microsoft writes were made.</p></section>}
 
-      {snapshot && <section className="mt-6"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Source completeness</p><h2 className="mt-1 text-xl font-black text-white">{snapshot.records.length} records · {new Date(snapshot.exportedAt).toLocaleString('en-ZA')}</h2><p className="mt-1 text-xs text-white/45">Unlinked completed operational tasks before {snapshot.plannerCompletedCutoff ?? 'the Planner cutoff'} are retained for completeness and skipped. Linked incomplete tasks can still complete; all Client Socials remain eligible.</p></div><SourceCompleteness snapshot={snapshot} /></section>}
+      {snapshot && <section className="mt-6"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Source completeness</p><h2 className="mt-1 text-xl font-black text-white">{snapshot.records.length} records · {new Date(snapshot.exportedAt).toLocaleString('en-ZA')}</h2><p className="mt-1 text-xs text-white/45">Newly completed operational tasks (Planner status "done") are automatically skipped — they represent finished history. Existing linked tasks can still complete. Client Socials items are never skipped and map 100% to "scheduled" in the Client Schedule.</p></div><SourceCompleteness snapshot={snapshot} /></section>}
 
       {items.length > 0 && <>
         <section className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-6">{ACTIONS.map(action => <button key={action.value} type="button" onClick={() => { setSourceFilter('all'); setActionFilter(action.value); setStatusFilter('all'); setConflictFilter('all') }} className={`rounded-xl border p-3 text-left ${actionFilter === action.value ? 'border-brand-teal/50 bg-brand-teal/[0.08]' : 'border-white/10 bg-white/[0.025]'}`}><p className="text-[9px] font-black uppercase text-white/40">{action.label}</p><p className="mt-1 text-2xl font-black text-white">{actionCounts.get(action.value) ?? 0}</p></button>)}</section>
@@ -307,7 +318,7 @@ export default function MicrosoftImportPage() {
             <div className="mt-3 grid grid-cols-2 gap-2">
               {(['to_do', 'in_progress', 'completed', 'scheduled', 'planned', 'cancelled'] as MicrosoftIncomingStatus[]).filter(status => createStatusCounts[status] > 0).map(status => <button key={status} type="button" onClick={() => { setSourceFilter('all'); setActionFilter('create'); setStatusFilter(status); setConflictFilter('all') }} className="rounded-xl border border-white/10 bg-black/20 p-3 text-left"><p className="text-[10px] font-bold text-white/45">Create as {microsoftIncomingStatusLabel(status)}</p><p className="mt-1 text-xl font-black text-white">{createStatusCounts[status]}</p></button>)}
             </div>
-            <p className="mt-3 text-xs text-white/45">Historical completed skipped: <span className="font-black text-white">{historicalCompletedSkipped}</span></p>
+            <p className="mt-3 text-xs text-white/45">Newly done operational skipped: <span className="font-black text-white">{completedOperationalSkipped}</span></p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Conflict breakdown by source and type</p>

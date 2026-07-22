@@ -1,4 +1,5 @@
 import type {
+  MicrosoftAssigneeMapEntry,
   MicrosoftImportSourceRecord,
   MicrosoftOutlookEventSource,
   MicrosoftPlannerTaskSource,
@@ -24,15 +25,18 @@ export interface MicrosoftSnapshotSource {
 
 export interface MicrosoftSnapshot {
   format: typeof MICROSOFT_SNAPSHOT_FORMAT
-  version: 1 | typeof MICROSOFT_SNAPSHOT_VERSION
+  version: 1 | 2 | 3
   /** ISO timestamp of the Graph export — becomes microsoft_last_synced_at. */
   exportedAt: string
   /** Human note on who/what produced the export. Never a credential. */
   exportedBy: string
   triggerType: 'admin' | 'agent'
+  /** @deprecated v2 field — no longer used for v3+ snapshots. */
   plannerCompletedCutoff: string | null
   sources: MicrosoftSnapshotSource[]
   records: MicrosoftImportSourceRecord[]
+  /** Microsoft user identity metadata keyed by user ID (v3+). */
+  assigneeMap: Record<string, MicrosoftAssigneeMapEntry>
 }
 
 export interface MicrosoftSnapshotParseResult {
@@ -148,8 +152,8 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
   if (parsed.format !== MICROSOFT_SNAPSHOT_FORMAT) {
     return { snapshot: null, errors: [`"format" must be "${MICROSOFT_SNAPSHOT_FORMAT}".`] }
   }
-  if (parsed.version !== 1 && parsed.version !== MICROSOFT_SNAPSHOT_VERSION) {
-    return { snapshot: null, errors: [`"version" must be 1 or ${MICROSOFT_SNAPSHOT_VERSION}.`] }
+  if (parsed.version !== 1 && parsed.version !== MICROSOFT_SNAPSHOT_VERSION && parsed.version !== 3) {
+    return { snapshot: null, errors: [`"version" must be 1, 2 or ${MICROSOFT_SNAPSHOT_VERSION}.`] }
   }
   if (typeof parsed.exportedAt !== 'string' || Number.isNaN(Date.parse(parsed.exportedAt))) {
     return { snapshot: null, errors: ['"exportedAt" must be a valid ISO timestamp.'] }
@@ -165,8 +169,9 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
   }
   if (parsed.version === MICROSOFT_SNAPSHOT_VERSION
     && parsed.plannerCompletedCutoff !== undefined
+    && parsed.plannerCompletedCutoff !== null
     && (typeof parsed.plannerCompletedCutoff !== 'string' || !validDateOnly(parsed.plannerCompletedCutoff))) {
-    return { snapshot: null, errors: ['"plannerCompletedCutoff" must be a valid YYYY-MM-DD date when provided.'] }
+    return { snapshot: null, errors: ['"plannerCompletedCutoff" must be a valid YYYY-MM-DD date or null when provided.'] }
   }
 
   const errors: string[] = []
@@ -223,13 +228,16 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
   return {
     snapshot: {
       format: MICROSOFT_SNAPSHOT_FORMAT,
-      version: parsed.version as 1 | typeof MICROSOFT_SNAPSHOT_VERSION,
+      version: parsed.version as 1 | 2 | 3,
       exportedAt: parsed.exportedAt,
       exportedBy: parsed.exportedBy,
       triggerType: parsed.triggerType === 'agent' ? 'agent' : 'admin',
       plannerCompletedCutoff: parsed.version === 1 || typeof parsed.plannerCompletedCutoff !== 'string' ? null : parsed.plannerCompletedCutoff,
       sources: parsed.version === 1 ? incompleteV1Sources(records) : sources,
       records,
+      assigneeMap: parsed.version === 3 && typeof parsed.assigneeMap === 'object' && parsed.assigneeMap !== null && !Array.isArray(parsed.assigneeMap)
+        ? parsed.assigneeMap as Record<string, MicrosoftAssigneeMapEntry>
+        : {},
     },
     errors: [],
   }

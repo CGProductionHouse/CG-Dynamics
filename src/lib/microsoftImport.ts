@@ -1,7 +1,7 @@
 export type MicrosoftImportSourceType = 'outlook_event' | 'planner_task' | 'planner_client_social'
 export type MicrosoftImportDestination = 'cg_calendar' | 'planner' | 'client_schedule' | 'review'
 export type MicrosoftPreviewStatus = 'new' | 'existing' | 'changed' | 'conflict' | 'skipped'
-export type MicrosoftSkipCode = 'historical_completed' | 'private_event'
+export type MicrosoftSkipCode = 'historical_completed' | 'completed_operational_not_imported' | 'private_event'
 export type MicrosoftReconciliationAction =
   | 'create' | 'update' | 'unchanged' | 'complete' | 'reopen' | 'move'
   | 'cancel' | 'archive' | 'conflict' | 'skipped' | 'failed'
@@ -164,6 +164,24 @@ export type MicrosoftExistingTarget =
   | MicrosoftExistingClientScheduleTarget
   | MicrosoftExistingCalendarTarget
 
+export interface MicrosoftAssigneeMapEntry {
+  displayName: string
+  mail: string | null
+  userPrincipalName: string | null
+}
+
+export interface MicrosoftAssigneeResolution {
+  microsoftUserId: string
+  displayName: string
+  mail: string | null
+  cgProfileId: string | null
+  cgProfileName: string | null
+  resolved: boolean
+  method: 'stored' | 'email_match' | 'unresolved'
+}
+
+export type MicrosoftAssigneeResolutions = MicrosoftAssigneeResolution[]
+
 export interface MicrosoftImportPreviewItem {
   sourceType: MicrosoftImportSourceType
   sourcePlanId: string | null
@@ -193,6 +211,7 @@ export interface MicrosoftImportPreviewItem {
   sourceHash?: string | null
   sourceComplete?: boolean
   requiresRemovalApproval?: boolean
+  resolvedAssignees?: MicrosoftAssigneeResolution[]
 }
 
 export interface MicrosoftReconciliationSummary {

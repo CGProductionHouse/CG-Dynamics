@@ -305,12 +305,30 @@ export async function getMicrosoftConnectionStatus(): Promise<{ data: MicrosoftC
   return { data: { connected: Boolean(data.connected), message: data.message as string, sources: data.sources ?? [] }, error: null }
 }
 
-export async function fetchLatestMicrosoftSnapshot(rangeStart: string, rangeEnd: string, plannerCompletedCutoff: string): Promise<{ snapshot: MicrosoftSnapshot | null; error: string | null }> {
-  const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'fetch', rangeStart, rangeEnd, plannerCompletedCutoff } })
+export async function fetchLatestMicrosoftSnapshot(rangeStart: string, rangeEnd: string): Promise<{ snapshot: MicrosoftSnapshot | null; error: string | null }> {
+  const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'fetch', rangeStart, rangeEnd } })
   if (error) return { snapshot: null, error: error.message }
   if (!data?.ok || !data.snapshot) return { snapshot: null, error: data?.error ?? 'Microsoft fetch failed.' }
-  const snapshot = data.snapshot as MicrosoftSnapshot
-  return { snapshot: { ...snapshot, plannerCompletedCutoff: snapshot.plannerCompletedCutoff ?? plannerCompletedCutoff }, error: null }
+  return { snapshot: data.snapshot as MicrosoftSnapshot, error: null }
+}
+
+export async function loadMicrosoftProfiles(): Promise<{ data: Array<{ id: string; email: string | null; full_name: string | null }>; error: string | null }> {
+  const { data, error } = await supabase.from('profiles').select('id, email, full_name')
+  if (error) return { data: [], error: error.message }
+  return { data: data ?? [], error: null }
+}
+
+export async function loadMicrosoftUserMappings(): Promise<{ data: Map<string, string>; error: string | null }> {
+  const { data, error } = await supabase.from('microsoft_user_mappings').select('microsoft_user_id, cg_user_id')
+  if (error) {
+    if (error.code === '42P01' || error.code === '42703') return { data: new Map(), error: null }
+    return { data: new Map(), error: error.message }
+  }
+  const map = new Map<string, string>()
+  for (const row of data ?? []) {
+    if (row.cg_user_id) map.set(row.microsoft_user_id as string, row.cg_user_id as string)
+  }
+  return { data: map, error: null }
 }
 
 export interface MicrosoftReconciliationApplyResult {

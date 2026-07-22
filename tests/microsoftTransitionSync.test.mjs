@@ -66,7 +66,7 @@ function snapshot(records, rangeStart = '2026-05-19T00:00:00+02:00') {
     plans.set(record.sourcePlanId, current)
   }
   sources.push(...plans.values())
-  return { format: 'cg-dynamics-microsoft-snapshot', version: 2, exportedAt: '2026-07-18T09:00:00Z', exportedBy: 'test', triggerType: 'admin', plannerCompletedCutoff: rangeStart.slice(0, 10), sources, records }
+  return { format: 'cg-dynamics-microsoft-snapshot', version: 3, exportedAt: '2026-07-18T09:00:00Z', exportedBy: 'test', triggerType: 'admin', sources, records, assigneeMap: {} }
 }
 
 before(async () => {
@@ -79,6 +79,8 @@ before(async () => {
 })
 
 after(async () => { await server.close() })
+
+// ── Bucket and plan resolution (unchanged behaviour) ──────────────────────
 
 test('all known To Do buckets resolve to approved operational buckets', () => {
   const expected = new Map([
@@ -93,7 +95,7 @@ test('all known To Do buckets resolve to approved operational buckets', () => {
 
   for (const [sourceBucket, targetBucket] of expected) {
     assert.equal(resolveMicrosoftBucketMapping('To Do', sourceBucket).targetBucket, targetBucket)
-    assert.equal(previewPlannerTask(plannerTask({ sourceBucketName: sourceBucket }), context, '2026-07-01').previewStatus, 'new')
+    assert.equal(previewPlannerTask(plannerTask({ sourceBucketName: sourceBucket }), context).previewStatus, 'new')
   }
 })
 
@@ -104,7 +106,7 @@ test('harmless To Do bucket variations resolve deterministically', () => {
 })
 
 test('unknown To Do buckets fail closed as unsupported', () => {
-  const item = previewPlannerTask(plannerTask({ sourceBucketName: 'UNREVIEWED BUCKET' }), context, '2026-07-01')
+  const item = previewPlannerTask(plannerTask({ sourceBucketName: 'UNREVIEWED BUCKET' }), context)
   assert.equal(item.previewStatus, 'conflict')
   assert.equal(item.conflictCode, 'unsupported_bucket')
   assert.match(item.conflictReason, /no approved deterministic mapping/i)
@@ -115,7 +117,7 @@ test('MASTER CLIENT TO DO resolves client aliases into the shared Client Request
     sourcePlanId: 'plan-master',
     sourcePlanName: 'MASTER CLIENT TO DO',
     sourceBucketName: 'EHRLICH PARK',
-  }), context, '2026-07-01')
+  }), context)
   assert.equal(item.previewStatus, 'new')
   assert.equal(item.mappedClientId, 'client-ehrlich')
   assert.equal(item.mappedClientName, 'Ehrlich Park Butchery')
@@ -129,7 +131,7 @@ test('ambiguous MASTER CLIENT TO DO aliases remain conflicts', () => {
     sourcePlanId: 'plan-master',
     sourcePlanName: 'MASTER CLIENT TO DO',
     sourceBucketName: 'SUPA QUICK',
-  }), context, '2026-07-01')
+  }), context)
   assert.equal(item.previewStatus, 'conflict')
   assert.equal(item.conflictCode, 'ambiguous_client_match')
 })
@@ -139,7 +141,7 @@ test('unresolved MASTER CLIENT TO DO clients remain conflicts', () => {
     sourcePlanId: 'plan-master',
     sourcePlanName: 'MASTER CLIENT TO DO',
     sourceBucketName: 'UNKNOWN CLIENT',
-  }), context, '2026-07-01')
+  }), context)
   assert.equal(item.previewStatus, 'conflict')
   assert.equal(item.conflictCode, 'unresolved_client')
 })
@@ -149,12 +151,12 @@ test('CG Socials source buckets map to the CG Socials board', () => {
     sourcePlanId: 'plan-cg-socials',
     sourcePlanName: 'CG Socials',
     sourceBucketName: 'CG SECHEDULE (NEW)',
-  }), context, '2026-07-01')
+  }), context)
   const studio = previewPlannerTask(plannerTask({
     sourcePlanId: 'plan-cg-socials',
     sourcePlanName: 'CG Socials',
     sourceBucketName: 'CG STUDIO SCHEDULE',
-  }), context, '2026-07-01')
+  }), context)
 
   assert.equal(schedule.previewStatus, 'new')
   assert.equal(schedule.proposedPayload.board_id, 'board-social')
@@ -164,46 +166,106 @@ test('CG Socials source buckets map to the CG Socials board', () => {
 })
 
 test('restricted operational content remains blocked before destination mapping', () => {
-  const item = previewPlannerTask(plannerTask({ title: 'Review payroll figures' }), context, '2026-07-01')
+  const item = previewPlannerTask(plannerTask({ title: 'Review payroll figures' }), context)
   assert.equal(item.previewStatus, 'conflict')
   assert.equal(item.conflictCode, 'restricted_content')
   assert.equal(item.proposedPayload, null)
 })
 
-test('historical completed operational tasks are skipped before the preview cutoff', () => {
-  const source = plannerTask({ percentComplete: 100, completedDate: '2026-05-18' })
-  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
-  assert.equal(items[0].reconciliationAction, 'skipped')
-  assert.equal(items[0].skipCode, 'historical_completed')
-})
+// ── Destination-aware progress mapping (A, B) ─────────────────────────────
 
-test('incomplete old operational tasks remain eligible', () => {
-  const source = plannerTask({ dueDate: '2025-01-01', percentComplete: 50 })
+test('0% operational task creates as to_do', () => {
+  const source = plannerTask({ percentComplete: 0 })
   const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
   assert.equal(items[0].reconciliationAction, 'create')
+  assert.equal(items[0].proposedPayload.status, 'to_do')
+  assert.equal(microsoftIncomingStatus(items[0]), 'to_do')
+})
+
+test('50% operational task creates as in_progress', () => {
+  const source = plannerTask({ percentComplete: 50 })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  assert.equal(items[0].reconciliationAction, 'create')
+  assert.equal(items[0].proposedPayload.status, 'in_progress')
   assert.equal(microsoftIncomingStatus(items[0]), 'in_progress')
 })
 
-test('completed tasks on the cutoff remain eligible as Completed', () => {
-  const source = plannerTask({ percentComplete: 100, completedDate: '2026-05-19' })
+test('new 100% operational task is skipped (completed_operational_not_imported)', () => {
+  const source = plannerTask({ percentComplete: 100, completedDate: '2026-05-18' })
   const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
-  assert.equal(items[0].reconciliationAction, 'create')
-  assert.equal(microsoftIncomingStatus(items[0]), 'completed')
+  assert.equal(items[0].reconciliationAction, 'skipped')
+  assert.equal(items[0].skipCode, 'completed_operational_not_imported')
 })
 
-test('completed tasks without a completion date remain eligible conservatively', () => {
-  const source = plannerTask({ percentComplete: 100, completedDate: null, dueDate: '2025-01-01' })
+test('new 100% operational task without completedDate is also skipped', () => {
+  const source = plannerTask({ percentComplete: 100, completedDate: null })
   const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
-  assert.equal(items[0].reconciliationAction, 'create')
-  assert.equal(microsoftIncomingStatus(items[0]), 'completed')
+  assert.equal(items[0].reconciliationAction, 'skipped')
+  assert.equal(items[0].skipCode, 'completed_operational_not_imported')
 })
 
-test('completed July Client Socials cards remain eligible and map to Scheduled', () => {
-  const source = plannerTask({ sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026', sourceBucketId: 'ms-acme', sourceBucketName: 'Acme', sourceTaskId: 'social-1', title: 'DP1 Launch', percentComplete: 100, completedDate: '2026-05-01' })
-  const item = previewPlannerTask(source, context, '2026-05-19')
-  assert.equal(item.previewStatus, 'new')
-  assert.equal(item.destination, 'client_schedule')
-  assert.equal(item.proposedPayload.production_status, 'scheduled')
+test('existing linked task at 50% now at 100% reconciles to complete', () => {
+  const active = plannerTask({ percentComplete: 50 })
+  const created = buildMicrosoftReconciliation(snapshot([active]), context, [], new Set())[0]
+  const target = {
+    destination: 'planner', id: 'target-1', updatedAt: '2026-07-18T08:30:00Z', microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash, microsoftSourceRemovedAt: null,
+    microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1', payload: { ...created.proposedPayload },
+  }
+  const completed = plannerTask({ percentComplete: 100, completedDate: '2026-07-19' })
+  const items = buildMicrosoftReconciliation(snapshot([completed]), context, [target], new Set())
+  assert.equal(items[0].reconciliationAction, 'complete')
+})
+
+test('existing done task reopened to 50% reconciles to reopen', () => {
+  const inProgress = plannerTask({ percentComplete: 50 })
+  const created = buildMicrosoftReconciliation(snapshot([inProgress]), context, [], new Set())[0]
+  const target = {
+    destination: 'planner', id: 'target-1', updatedAt: '2026-07-18T08:30:00Z', microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash, microsoftSourceRemovedAt: null,
+    microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1', payload: { ...created.proposedPayload },
+  }
+  const done = plannerTask({ percentComplete: 100, completedDate: '2026-07-19' })
+  const completed = buildMicrosoftReconciliation(snapshot([done]), context, [target], new Set())[0]
+  assert.equal(completed.reconciliationAction, 'complete')
+  const doneTarget = { ...target, microsoftSourceHash: completed.sourceHash, payload: { ...completed.proposedPayload } }
+  const reopened = plannerTask({ percentComplete: 50, completedDate: null })
+  const items = buildMicrosoftReconciliation(snapshot([reopened]), context, [doneTarget], new Set())
+  assert.equal(items[0].reconciliationAction, 'reopen')
+})
+
+test('existing task unchanged at same progress reconciles to unchanged', () => {
+  const source = plannerTask({ percentComplete: 50 })
+  const created = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())[0]
+  const target = {
+    destination: 'planner', id: 'target-1', updatedAt: '2026-07-18T08:30:00Z', microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash, microsoftSourceRemovedAt: null,
+    microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1', payload: { ...created.proposedPayload },
+  }
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [target], new Set())
+  assert.equal(items[0].reconciliationAction, 'unchanged')
+})
+
+test('0% Client Socials creates as to_do in client schedule', () => {
+  const source = plannerTask({
+    sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026',
+    sourceBucketId: 'ms-acme', sourceBucketName: 'Acme', sourceTaskId: 'social-todo',
+    title: 'DP1 Launch', percentComplete: 0,
+  })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  assert.equal(items[0].reconciliationAction, 'create')
+  assert.equal(items[0].destination, 'client_schedule')
+  assert.equal(items[0].proposedPayload.production_status, 'to_do')
+})
+
+test('100% Client Socials creates as scheduled (never skipped)', () => {
+  const source = plannerTask({
+    sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026',
+    sourceBucketId: 'ms-acme', sourceBucketName: 'Acme', sourceTaskId: 'social-done',
+    title: 'DP1 Launch', percentComplete: 100, completedDate: '2026-05-01',
+  })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  assert.equal(items[0].reconciliationAction, 'create')
+  assert.equal(items[0].destination, 'client_schedule')
+  assert.equal(items[0].proposedPayload.production_status, 'scheduled')
+  assert.equal(items[0].skipCode, undefined)
 })
 
 test('Client Socials resolves reviewed client bucket aliases without guessing IDs', () => {
@@ -227,26 +289,16 @@ test('Client Socials resolves reviewed client bucket aliases without guessing ID
       sourceBucketName,
       sourceTaskId: `task-${sourceBucketName}`,
       title: 'DP1 Launch',
-    }), aliasContext, '2026-07-01')
+    }), aliasContext)
     assert.equal(item.previewStatus, 'new')
     assert.equal(item.mappedClientName, expectedClientName)
     assert.equal(item.proposedPayload.client_id, clients.find(client => client.name === expectedClientName).id)
   }
 })
 
-test('historical linked incomplete tasks remain seen and reconcile to Complete', () => {
-  const active = plannerTask()
-  const created = buildMicrosoftReconciliation(snapshot([active]), context, [], new Set())[0]
-  const target = {
-    destination: 'planner', id: 'target-1', updatedAt: '2026-07-18T08:30:00Z', microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash, microsoftSourceRemovedAt: null,
-    microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1', payload: { ...created.proposedPayload },
-  }
-  const historical = plannerTask({ percentComplete: 100, completedDate: '2026-05-18' })
-  const items = buildMicrosoftReconciliation(snapshot([historical]), context, [target], new Set())
-  assert.deepEqual(items.map(item => item.reconciliationAction), ['complete'])
-})
+// ── Status grouping ───────────────────────────────────────────────────────
 
-test('progress status breakdown distinguishes To do, In progress, Completed, and Scheduled', () => {
+test('progress status breakdown correctly groups by destination-aware mapping', () => {
   const records = [
     plannerTask({ sourceTaskId: 'todo', percentComplete: 0 }),
     plannerTask({ sourceTaskId: 'progress', percentComplete: 50 }),
@@ -257,9 +309,18 @@ test('progress status breakdown distinguishes To do, In progress, Completed, and
   const counts = summarizeMicrosoftCreateStatuses(items)
   assert.equal(counts.to_do, 1)
   assert.equal(counts.in_progress, 1)
-  assert.equal(counts.completed, 1)
+  assert.equal(counts.completed, 0)
   assert.equal(counts.scheduled, 1)
 })
+
+test('completed incoming status still renders for existing linked tasks', () => {
+  const source = plannerTask({ percentComplete: 100, completedDate: '2026-07-10' })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  assert.equal(items[0].skipCode, 'completed_operational_not_imported')
+  assert.equal(microsoftIncomingStatus(items[0]), 'completed')
+})
+
+// ── Reconciliation semantics ──────────────────────────────────────────────
 
 test('source-removed tasks reopen when they return', () => {
   const source = plannerTask()
@@ -294,18 +355,69 @@ test('occupied Client Schedule slots are non-actionable conflicts', () => {
   assert.equal(items[0].conflictCode, 'existing_deliverable_slot')
 })
 
-test('existing version 2 agent snapshots remain valid without a Planner cutoff', () => {
-  const compatible = snapshot([plannerTask()])
-  delete compatible.plannerCompletedCutoff
-  const parsed = parseMicrosoftSnapshot(JSON.stringify(compatible))
+test('idempotent rerun of same snapshot produces same actions', () => {
+  const sources = [
+    plannerTask({ sourceTaskId: 'todo', percentComplete: 0 }),
+    plannerTask({ sourceTaskId: 'progress', percentComplete: 50 }),
+    plannerTask({ sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026', sourceBucketId: 'ms-acme', sourceBucketName: 'Acme', sourceTaskId: 'social-1', title: 'DP1 Launch', percentComplete: 100, completedDate: '2026-05-01' }),
+  ]
+  const first = buildMicrosoftReconciliation(snapshot(sources), context, [], new Set())
+  const second = buildMicrosoftReconciliation(snapshot(sources), context, [], new Set())
+  assert.equal(first.length, second.length)
+  for (let index = 0; index < first.length; index += 1) {
+    assert.equal(first[index].reconciliationAction, second[index].reconciliationAction)
+    assert.equal(first[index].skipCode, second[index].skipCode)
+  }
+})
+
+// ── Snapshot backward compatibility (E) ───────────────────────────────────
+
+test('v3 snapshots with empty assigneeMap parse correctly', () => {
+  const raw = snapshot([plannerTask()])
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 0)
+  assert.equal(parsed.snapshot.version, 3)
+  assert.deepEqual(parsed.snapshot.assigneeMap, {})
+})
+
+test('v2 snapshots with plannerCompletedCutoff remain parseable', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 2
+  raw.plannerCompletedCutoff = '2026-06-01'
+  delete raw.assigneeMap
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 0)
+  assert.equal(parsed.snapshot.plannerCompletedCutoff, '2026-06-01')
+})
+
+test('v2 snapshots without plannerCompletedCutoff parse with null cutoff', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 2
+  delete raw.plannerCompletedCutoff
+  delete raw.assigneeMap
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
   assert.equal(parsed.errors.length, 0)
   assert.equal(parsed.snapshot.plannerCompletedCutoff, null)
 })
 
-test('invalid Planner cutoff dates are rejected', () => {
-  const invalid = snapshot([plannerTask()])
-  invalid.plannerCompletedCutoff = '2026-99-99'
-  const parsed = parseMicrosoftSnapshot(JSON.stringify(invalid))
-  assert.equal(parsed.snapshot, null)
-  assert.match(parsed.errors[0], /plannerCompletedCutoff/)
+test('v1 legacy snapshots parse with incomplete sources', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 1
+  delete raw.sources
+  delete raw.plannerCompletedCutoff
+  delete raw.assigneeMap
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 0)
+  assert.ok(parsed.snapshot.sources.length > 0)
+  assert.equal(parsed.snapshot.sources[0].complete, false)
+})
+
+test('null plannerCompletedCutoff in v2 is accepted', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 2
+  raw.plannerCompletedCutoff = null
+  delete raw.assigneeMap
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 0)
+  assert.equal(parsed.snapshot.plannerCompletedCutoff, null)
 })

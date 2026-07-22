@@ -223,8 +223,7 @@ export function buildMicrosoftReconciliation(
   existingTargets: MicrosoftExistingTarget[],
   deliverableSlotKeys: Set<string>,
 ): MicrosoftImportPreviewItem[] {
-  const historicalCompletedCutoff = snapshot.plannerCompletedCutoff ?? null
-  const mapped = buildMicrosoftImportPreview(snapshot.records, context, historicalCompletedCutoff)
+  const mapped = buildMicrosoftImportPreview(snapshot.records, context)
   const targetsByKey = new Map<string, MicrosoftExistingTarget[]>()
   for (const target of existingTargets) {
     const key = targetKey(target)
@@ -243,8 +242,8 @@ export function buildMicrosoftReconciliation(
     if (!key) return { ...item, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, sourceComplete }
     const targets = targetsByKey.get(key) ?? []
     if (targets.length === 0) {
-      if (item.skipCode === 'historical_completed') {
-        return { ...item, previewStatus: 'skipped' as const, reconciliationAction: 'skipped' as const, sourceComplete }
+      if (item.destination === 'planner' && item.proposedPayload?.destination === 'planner' && item.proposedPayload.status === 'done') {
+        return { ...item, previewStatus: 'skipped' as const, reconciliationAction: 'skipped' as const, skipCode: 'completed_operational_not_imported' as const, sourceComplete, warnings: [...item.warnings, 'Newly completed operational task is not imported. Existing linked tasks can still complete.'] }
       }
       const sourceHash = stableHash(ownedPayload(item.proposedPayload))
       return { ...item, reconciliationAction: 'create' as const, sourceHash, sourceComplete }

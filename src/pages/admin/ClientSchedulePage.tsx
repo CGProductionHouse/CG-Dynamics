@@ -252,6 +252,29 @@ export default function ClientSchedulePage() {
     })
   }, [clientDisplay, clientNameById, deliverables, mode, search, statusFilter])
 
+  const calendarItems = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return deliverables.filter(deliverable => {
+      if (!PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)) return false
+      if (!getEffectiveScheduleDate(deliverable)) return false
+      const status = scheduleStatusOf(deliverable)
+      if (!matchesScheduleStatusFilter(status, statusFilter)) return false
+      if (q) {
+        const clientName = clientDisplay(deliverable).label
+        const haystack = `${clientName} ${deliverable.title} ${deliverable.code}`.toLowerCase()
+        if (!haystack.includes(q)) return false
+      }
+      return true
+    }).sort((a, b) => {
+      const aDate = getEffectiveScheduleDate(a) ?? '9999-12-31'
+      const bDate = getEffectiveScheduleDate(b) ?? '9999-12-31'
+      if (aDate !== bDate) return aDate.localeCompare(bDate)
+      return (clientNameById.get(a.client_id) ?? '').localeCompare(clientNameById.get(b.client_id) ?? '') ||
+        a.code.localeCompare(b.code) ||
+        a.instance_number - b.instance_number
+    })
+  }, [clientDisplay, clientNameById, deliverables, search, statusFilter])
+
   const counts = useMemo(() => ({
     all: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)).length,
     needsAction: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type) && matchesMode(deliverable, 'needs-action')).length,
@@ -363,7 +386,7 @@ export default function ClientSchedulePage() {
       ) : view === 'year' ? (
         <YearView items={filtered} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} />
       ) : (
-        <CalendarView month={selectedMonth} items={filtered} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} onMore={setDayDrawer} />
+        <CalendarView month={selectedMonth} items={calendarItems} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} onMore={setDayDrawer} />
       )}
 
       {drawerDeliverable && (
