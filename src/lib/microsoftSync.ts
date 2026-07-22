@@ -232,8 +232,9 @@ export function buildMicrosoftReconciliation(
   context: MicrosoftPreviewMappingContext,
   existingTargets: MicrosoftExistingTarget[],
   deliverableSlotKeys: Set<string>,
+  prepareItems: (items: MicrosoftImportPreviewItem[]) => MicrosoftImportPreviewItem[] = items => items,
 ): MicrosoftImportPreviewItem[] {
-  const mapped = buildMicrosoftImportPreview(snapshot.records, context)
+  const mapped = prepareItems(buildMicrosoftImportPreview(snapshot.records, context))
   const targetsByKey = new Map<string, MicrosoftExistingTarget[]>()
   for (const target of existingTargets) {
     const key = targetKey(target)

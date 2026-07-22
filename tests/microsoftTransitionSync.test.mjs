@@ -245,6 +245,20 @@ test('existing task unchanged at same progress reconciles to unchanged', () => {
   assert.equal(items[0].reconciliationAction, 'unchanged')
 })
 
+test('a source ID written before a failed or partial run is not created again', () => {
+  const source = plannerTask({ sourceTaskId: 'partial-run-task', percentComplete: 50 })
+  const created = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())[0]
+  const existingWrittenTarget = {
+    destination: 'planner', id: 'written-before-failure', updatedAt: '2026-07-18T08:30:00Z',
+    microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash,
+    microsoftSourceRemovedAt: null, microsoftPlanId: 'plan-todo', microsoftTaskId: 'partial-run-task',
+    payload: { ...created.proposedPayload },
+  }
+  const rerun = buildMicrosoftReconciliation(snapshot([source]), context, [existingWrittenTarget], new Set())
+  assert.equal(rerun[0].reconciliationAction, 'unchanged')
+  assert.notEqual(rerun[0].reconciliationAction, 'create')
+})
+
 test('0% Client Socials creates as to_do in client schedule', () => {
   const source = plannerTask({
     sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026',
@@ -428,11 +442,12 @@ test('null plannerCompletedCutoff in v2 is accepted', () => {
 
 test('one resolved assignee populates planner assigned_to_name on payload', () => {
   const source = plannerTask({ assigneeMicrosoftIds: ['user-alice'] })
-  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set(),
+    mapped => resolvePreviewAssignees(mapped, assigneeMap, storedMappings, profiles))
   assert.equal(items.length, 1)
   assert.equal(items[0].assigneeMicrosoftIds.length, 1)
   assert.equal(items[0].proposedPayload.destination, 'planner')
-  assert.equal(items[0].proposedPayload.assigned_to_name, null)
+  assert.equal(items[0].proposedPayload.assigned_to_name, 'Alice Smith')
 })
 
 test('one resolved assignee populates client schedule assigned_to_user_id and assigned_to_name on payload', () => {
@@ -441,21 +456,34 @@ test('one resolved assignee populates client schedule assigned_to_user_id and as
     sourceBucketId: 'ms-acme', sourceBucketName: 'Acme', sourceTaskId: 'social-assign',
     title: 'DP1 Launch', assigneeMicrosoftIds: ['user-alice'],
   })
-  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set(),
+    mapped => resolvePreviewAssignees(mapped, assigneeMap, storedMappings, profiles))
   assert.equal(items.length, 1)
   assert.equal(items[0].proposedPayload.destination, 'client_schedule')
-  assert.equal(items[0].proposedPayload.assigned_to_user_id, null)
-  assert.equal(items[0].proposedPayload.assigned_to_name, null)
+  assert.equal(items[0].proposedPayload.assigned_to_user_id, 'profile-alice')
+  assert.equal(items[0].proposedPayload.assigned_to_name, 'Alice Smith')
   assert.equal(items[0].proposedPayload.helper_names, null)
 })
 
 test('multiple assignees produce primary and helpers in planner payload', () => {
   const source = plannerTask({ assigneeMicrosoftIds: ['user-alice', 'user-bob', 'user-carol'] })
-  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  const map = {
+    ...assigneeMap,
+    'user-bob': { displayName: 'Bob Jones', mail: 'bob@example.com', userPrincipalName: null },
+    'user-carol': { displayName: 'Carol King', mail: 'carol@example.com', userPrincipalName: null },
+  }
+  const staff = [
+    ...profiles,
+    { id: 'profile-bob', email: 'bob@example.com', full_name: 'Bob Jones' },
+    { id: 'profile-carol', email: 'carol@example.com', full_name: 'Carol King' },
+  ]
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set(),
+    mapped => resolvePreviewAssignees(mapped, map, storedMappings, staff))
   const item = items[0]
   assert.equal(item.assigneeMicrosoftIds.length, 3)
   assert.equal(item.proposedPayload.destination, 'planner')
-  assert.equal(item.proposedPayload.assigned_to_name, null)
+  assert.equal(item.proposedPayload.assigned_to_name, 'Alice Smith')
+  assert.deepEqual(item.proposedPayload.helper_names, ['Bob Jones', 'Carol King'])
 })
 
 test('genuinely unassigned item remains valid and assignable', () => {
@@ -578,6 +606,39 @@ function assignableItem(assigneeIds = []) {
 const assigneeMap = { 'user-alice': { displayName: 'Alice Smith', mail: 'alice@example.com', userPrincipalName: 'alice@contoso.com' } }
 const storedMappings = new Map()
 const profiles = [{ id: 'profile-alice', email: 'alice@example.com', full_name: 'Alice Smith' }]
+
+test('resolved assignments are hashed before reconciliation and remain idempotent', () => {
+  const source = plannerTask({ assigneeMicrosoftIds: ['user-alice'] })
+  const prepare = mapped => resolvePreviewAssignees(mapped, assigneeMap, storedMappings, profiles)
+  const created = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set(), prepare)[0]
+  const target = {
+    destination: 'planner', id: 'assigned-target', updatedAt: '2026-07-18T08:30:00Z',
+    microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash,
+    microsoftSourceRemovedAt: null, microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1',
+    payload: { ...created.proposedPayload },
+  }
+  const rerun = buildMicrosoftReconciliation(snapshot([source]), context, [target], new Set(), prepare)
+  assert.equal(rerun[0].reconciliationAction, 'unchanged')
+})
+
+test('resolved assignment changes produce an update instead of a false local-edit conflict', () => {
+  const aliceSource = plannerTask({ assigneeMicrosoftIds: ['user-alice'] })
+  const alicePrepare = mapped => resolvePreviewAssignees(mapped, assigneeMap, storedMappings, profiles)
+  const created = buildMicrosoftReconciliation(snapshot([aliceSource]), context, [], new Set(), alicePrepare)[0]
+  const target = {
+    destination: 'planner', id: 'assigned-target', updatedAt: '2026-07-18T08:30:00Z',
+    microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash,
+    microsoftSourceRemovedAt: null, microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1',
+    payload: { ...created.proposedPayload },
+  }
+  const bobSource = plannerTask({ assigneeMicrosoftIds: ['user-bob'] })
+  const bobMap = { 'user-bob': { displayName: 'Bob Jones', mail: 'bob@example.com', userPrincipalName: null } }
+  const bobProfiles = [{ id: 'profile-bob', email: 'bob@example.com', full_name: 'Bob Jones' }]
+  const changed = buildMicrosoftReconciliation(snapshot([bobSource]), context, [target], new Set(),
+    mapped => resolvePreviewAssignees(mapped, bobMap, storedMappings, bobProfiles))
+  assert.equal(changed[0].reconciliationAction, 'update')
+  assert.equal(changed[0].conflictCode, null)
+})
 
 test('resolvePreviewAssignees populates assigned_to_name from email match', () => {
   const items = resolvePreviewAssignees([assignableItem(['user-alice'])], assigneeMap, storedMappings, profiles)
