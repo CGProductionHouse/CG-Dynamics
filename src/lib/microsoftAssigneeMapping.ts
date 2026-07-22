@@ -28,6 +28,41 @@ export function resolveMicrosoftAssignee(
   return { microsoftUserId, displayName, mail, cgProfileId: null, cgProfileName: null, resolved: false, method: 'unresolved' }
 }
 
+function populateAssignmentPayload(
+  item: MicrosoftImportPreviewItem,
+  resolved: MicrosoftAssigneeResolution[],
+): MicrosoftImportPreviewItem {
+  if (!item.proposedPayload) return item
+  const resolvedList = resolved.filter(r => r.resolved)
+  if (resolvedList.length === 0) return item
+
+  const primary = resolvedList[0]
+  const helpers = resolvedList.slice(1).map(r => r.cgProfileName ?? r.displayName).filter((n): n is string => Boolean(n))
+
+  if (item.proposedPayload.destination === 'planner') {
+    return {
+      ...item,
+      proposedPayload: {
+        ...item.proposedPayload,
+        assigned_to_name: primary.cgProfileName ?? primary.displayName,
+        helper_names: helpers.length > 0 ? helpers : null,
+      },
+    }
+  }
+  if (item.proposedPayload.destination === 'client_schedule') {
+    return {
+      ...item,
+      proposedPayload: {
+        ...item.proposedPayload,
+        assigned_to_user_id: primary.cgProfileId,
+        assigned_to_name: primary.cgProfileName ?? primary.displayName,
+        helper_names: helpers.length > 0 ? helpers : null,
+      },
+    }
+  }
+  return item
+}
+
 export function resolvePreviewAssignees(
   items: MicrosoftImportPreviewItem[],
   assigneeMap: Record<string, MicrosoftAssigneeMapEntry>,
@@ -39,9 +74,21 @@ export function resolvePreviewAssignees(
     const resolved = item.assigneeMicrosoftIds.map(msId => resolveMicrosoftAssignee(msId, assigneeMap[msId], storedMappings, profiles))
     const unresolved = resolved.filter(r => !r.resolved)
     const warnings: string[] = [...item.warnings]
+    const withResolutions = { ...item, warnings, resolvedAssignees: resolved }
+
     if (unresolved.length > 0) {
-      warnings.push(`Microsoft assignee${unresolved.length > 1 ? 's' : ''} ${unresolved.map(r => r.displayName).join(', ')} ${unresolved.length > 1 ? 'are' : 'is'} not matched to a CG Dynamics staff member.`)
+      const names = unresolved.map(r => r.displayName).join(', ')
+      warnings.push(`Microsoft assignee${unresolved.length > 1 ? 's' : ''} ${names} ${unresolved.length > 1 ? 'are' : 'is'} not matched to a CG Dynamics staff member.`)
+      return {
+        ...withResolutions,
+        warnings,
+        previewStatus: 'conflict' as const,
+        reconciliationAction: 'conflict' as const,
+        conflictCode: 'unresolved_assignee' as const,
+        conflictReason: `One or more Microsoft assignees (${names}) could not be matched to a CG Dynamics staff member. Resolve manually and update the mapping table before applying.`,
+      }
     }
-    return { ...item, warnings, resolvedAssignees: resolved }
+
+    return populateAssignmentPayload(withResolutions, resolved)
   })
 }

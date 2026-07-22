@@ -234,6 +234,9 @@ export function previewPlannerTask(
       microsoft_bucket_id: source.sourceBucketId,
       microsoft_task_id: source.sourceTaskId,
       microsoft_source_description: source.description,
+      assigned_to_user_id: null,
+      assigned_to_name: null,
+      helper_names: null,
     }
     const mapped = { ...base, sourceType: 'planner_client_social' as const, destination: 'client_schedule' as const, mappedClientId: client.client?.id ?? null, mappedClientName: client.client?.name ?? null, proposedPayload: payload }
     if (!month) return conflict(mapped, 'invalid_date', 'The monthly plan name must include a valid month and year.')
@@ -271,6 +274,8 @@ export function previewPlannerTask(
     microsoft_bucket_id: source.sourceBucketId,
     microsoft_task_id: source.sourceTaskId,
     microsoft_source_description: source.description,
+    assigned_to_name: null,
+    helper_names: null,
   }
   const mapped = { ...base, destination: 'planner' as const, mappedClientId: client?.client?.id ?? null, mappedClientName: client?.client?.name ?? null, proposedPayload: payload }
   if (!board) return conflict(mapped, 'wrong_destination', `Planner board "${plan.targetBoardSlug}" is not available.`)

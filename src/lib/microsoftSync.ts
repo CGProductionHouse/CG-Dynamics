@@ -42,6 +42,8 @@ function ownedPayload(payload: MicrosoftProposedPayload): object | null {
       original_plan_name: payload.original_plan_name,
       original_bucket_name: payload.original_bucket_name,
       microsoft_source_description: payload.microsoft_source_description,
+      assigned_to_name: payload.assigned_to_name ?? null,
+      helper_names: payload.helper_names ?? [],
     }
   }
   if (payload.destination === 'client_schedule') {
@@ -57,6 +59,9 @@ function ownedPayload(payload: MicrosoftProposedPayload): object | null {
       production_status: payload.production_status,
       scheduled_date: payload.scheduled_date,
       microsoft_source_description: payload.microsoft_source_description,
+      assigned_to_user_id: payload.assigned_to_user_id ?? null,
+      assigned_to_name: payload.assigned_to_name ?? null,
+      helper_names: payload.helper_names ?? [],
     }
   }
   return {
@@ -83,6 +88,8 @@ function ownedTarget(target: MicrosoftExistingTarget): object {
       original_plan_name: target.payload.original_plan_name,
       original_bucket_name: target.payload.original_bucket_name,
       microsoft_source_description: target.payload.microsoft_source_description,
+      assigned_to_name: (target.payload as Record<string, unknown>).assigned_to_name ?? null,
+      helper_names: (target.payload as Record<string, unknown>).helper_names ?? [],
     }
   }
   if (target.destination === 'client_schedule') {
@@ -98,6 +105,9 @@ function ownedTarget(target: MicrosoftExistingTarget): object {
       production_status: target.payload.production_status,
       scheduled_date: target.payload.scheduled_date,
       microsoft_source_description: target.payload.microsoft_source_description,
+      assigned_to_user_id: (target.payload as Record<string, unknown>).assigned_to_user_id ?? null,
+      assigned_to_name: (target.payload as Record<string, unknown>).assigned_to_name ?? null,
+      helper_names: (target.payload as Record<string, unknown>).helper_names ?? [],
     }
   }
   return {

@@ -24,6 +24,7 @@ export type MicrosoftConflictCode =
   | 'existing_deliverable_slot'
   | 'restricted_content'
   | 'stale_snapshot'
+  | 'unresolved_assignee'
 
 export interface MicrosoftOutlookEventSource {
   sourceType: 'outlook_event'
@@ -81,6 +82,8 @@ export interface MicrosoftPlannerPayload {
   microsoft_bucket_id: string
   microsoft_task_id: string
   microsoft_source_description: string | null
+  assigned_to_name: string | null
+  helper_names: string[] | null
 }
 
 export interface MicrosoftClientSchedulePayload {
@@ -104,6 +107,9 @@ export interface MicrosoftClientSchedulePayload {
   microsoft_bucket_id: string
   microsoft_task_id: string
   microsoft_source_description: string | null
+  assigned_to_user_id: string | null
+  assigned_to_name: string | null
+  helper_names: string[] | null
 }
 
 export interface MicrosoftCalendarPayload {

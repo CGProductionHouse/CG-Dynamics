@@ -9,7 +9,7 @@ import type {
 // connected agents. It carries mapped source data and completeness, never tokens.
 
 export const MICROSOFT_SNAPSHOT_FORMAT = 'cg-dynamics-microsoft-snapshot'
-export const MICROSOFT_SNAPSHOT_VERSION = 2
+export const MICROSOFT_SNAPSHOT_VERSION = 3
 export const MICROSOFT_SNAPSHOT_MAX_RECORDS = 5000
 
 export interface MicrosoftSnapshotSource {
@@ -152,8 +152,8 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
   if (parsed.format !== MICROSOFT_SNAPSHOT_FORMAT) {
     return { snapshot: null, errors: [`"format" must be "${MICROSOFT_SNAPSHOT_FORMAT}".`] }
   }
-  if (parsed.version !== 1 && parsed.version !== MICROSOFT_SNAPSHOT_VERSION && parsed.version !== 3) {
-    return { snapshot: null, errors: [`"version" must be 1, 2 or ${MICROSOFT_SNAPSHOT_VERSION}.`] }
+  if (parsed.version !== 1 && parsed.version !== 2 && parsed.version !== 3) {
+    return { snapshot: null, errors: ['"version" must be 1, 2 or 3.'] }
   }
   if (typeof parsed.exportedAt !== 'string' || Number.isNaN(Date.parse(parsed.exportedAt))) {
     return { snapshot: null, errors: ['"exportedAt" must be a valid ISO timestamp.'] }
@@ -167,7 +167,7 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
   if (parsed.records.length > MICROSOFT_SNAPSHOT_MAX_RECORDS) {
     return { snapshot: null, errors: [`Snapshots are capped at ${MICROSOFT_SNAPSHOT_MAX_RECORDS} records. Split the export.`] }
   }
-  if (parsed.version === MICROSOFT_SNAPSHOT_VERSION
+  if (parsed.version === 2
     && parsed.plannerCompletedCutoff !== undefined
     && parsed.plannerCompletedCutoff !== null
     && (typeof parsed.plannerCompletedCutoff !== 'string' || !validDateOnly(parsed.plannerCompletedCutoff))) {
@@ -176,9 +176,9 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
 
   const errors: string[] = []
   const sources: MicrosoftSnapshotSource[] = []
-  if (parsed.version === MICROSOFT_SNAPSHOT_VERSION) {
+  if (parsed.version === 2 || parsed.version === 3) {
     if (!Array.isArray(parsed.sources) || parsed.sources.length === 0) {
-      return { snapshot: null, errors: ['Version 2 snapshots require a non-empty "sources" array.'] }
+      return { snapshot: null, errors: [`Version ${parsed.version} snapshots require a non-empty "sources" array.`] }
     }
     parsed.sources.forEach((source, index) => {
       const problem = sourceError(source)
@@ -210,7 +210,7 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
     errors.push(`Record ${index + 1}: sourceType must be "outlook_event" or "planner_task".`)
   })
 
-  if (parsed.version === MICROSOFT_SNAPSHOT_VERSION) {
+  if (parsed.version === 2 || parsed.version === 3) {
     for (const source of sources) {
       const count = records.filter(record => source.sourceType === 'outlook_calendar'
         ? record.sourceType === 'outlook_event' && record.sourceCalendarId === source.sourceId
@@ -221,6 +221,23 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
       const declared = sources.some(source => source.sourceType === (record.sourceType === 'outlook_event' ? 'outlook_calendar' : 'planner_plan')
         && source.sourceId === (record.sourceType === 'outlook_event' ? record.sourceCalendarId : record.sourcePlanId))
       if (!declared) errors.push(`Record source "${record.sourceType === 'outlook_event' ? record.sourceCalendarId : record.sourcePlanId}" is not declared in sources.`)
+    }
+  }
+
+  if (parsed.version === 3) {
+    if (typeof parsed.assigneeMap !== 'object' || parsed.assigneeMap === null || Array.isArray(parsed.assigneeMap)) {
+      errors.push('"assigneeMap" must be an object mapping Microsoft user IDs to { displayName, mail, userPrincipalName }.')
+    } else {
+      for (const [userId, entry] of Object.entries(parsed.assigneeMap as Record<string, unknown>)) {
+        if (!entry || typeof entry !== 'object') {
+          errors.push(`Assignee entry "${userId}" must be an object.`)
+          continue
+        }
+        const e = entry as Record<string, unknown>
+        if (typeof e.displayName !== 'string') errors.push(`Assignee entry "${userId}" is missing a required "displayName" string.`)
+        if (e.mail !== undefined && e.mail !== null && typeof e.mail !== 'string') errors.push(`Assignee entry "${userId}" "mail" must be a string or null.`)
+        if (e.userPrincipalName !== undefined && e.userPrincipalName !== null && typeof e.userPrincipalName !== 'string') errors.push(`Assignee entry "${userId}" "userPrincipalName" must be a string or null.`)
+      }
     }
   }
 

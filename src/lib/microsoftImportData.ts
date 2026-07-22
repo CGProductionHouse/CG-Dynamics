@@ -77,12 +77,12 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
   const [plannerRows, deliverableRows, calendarRows, slotRows] = await Promise.all([
     supabase
       .from('planner_tasks')
-      .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, board_id, bucket_id, title, client_id, client_name, status, priority, start_date, due_date, notes, source, original_plan_name, original_bucket_name')
+      .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, board_id, bucket_id, title, client_id, client_name, status, priority, start_date, due_date, notes, source, original_plan_name, original_bucket_name, assigned_to_name, helper_names')
       .not('microsoft_plan_id', 'is', null)
       .not('microsoft_task_id', 'is', null),
     supabase
       .from('monthly_deliverables')
-      .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, client_id, package_id, template_id, board_id, bucket_id, month, code, instance_number, title, deliverable_type, production_status, priority, scheduled_date, notes')
+      .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, client_id, package_id, template_id, board_id, bucket_id, month, code, instance_number, title, deliverable_type, production_status, priority, scheduled_date, notes, assigned_to_user_id, assigned_to_name, helper_names')
       .not('microsoft_plan_id', 'is', null)
       .not('microsoft_task_id', 'is', null),
     supabase
@@ -135,6 +135,8 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
         original_plan_name: row.original_plan_name as string,
         original_bucket_name: row.original_bucket_name as string,
         microsoft_source_description: row.microsoft_source_description as string | null,
+        assigned_to_name: (row.assigned_to_name as string | null) ?? null,
+        helper_names: Array.isArray(row.helper_names) ? row.helper_names as string[] : null,
       },
     })
   }
@@ -164,6 +166,9 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
         scheduled_date: row.scheduled_date as string | null,
         notes: row.notes as string | null,
         microsoft_source_description: row.microsoft_source_description as string | null,
+        assigned_to_user_id: (row.assigned_to_user_id as string | null) ?? null,
+        assigned_to_name: (row.assigned_to_name as string | null) ?? null,
+        helper_names: Array.isArray(row.helper_names) ? row.helper_names as string[] : null,
       },
     })
   }
@@ -371,17 +376,17 @@ async function applyReconciliationItem(item: MicrosoftImportPreviewItem, snapsho
   let patch: Record<string, unknown> = shouldApply ? commonSyncFields(item, snapshot, runId) : {}
   const payload = item.proposedPayload
   if (action === 'create' && payload?.destination === 'planner') {
-    patch = { ...patch, board_id: payload.board_id, bucket_id: payload.bucket_id, title: payload.title, client_id: payload.client_id, client_name: payload.client_name, status: payload.status, priority: payload.priority, start_date: payload.start_date, due_date: payload.due_date, source: payload.source, original_plan_name: payload.original_plan_name, original_bucket_name: payload.original_bucket_name, original_task_id: payload.microsoft_task_id, import_hash: `ms-${payload.microsoft_plan_id}-${payload.microsoft_task_id}`, microsoft_source_type: payload.microsoft_source_type, microsoft_plan_id: payload.microsoft_plan_id, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_task_id: payload.microsoft_task_id, microsoft_source_description: payload.microsoft_source_description }
+    patch = { ...patch, board_id: payload.board_id, bucket_id: payload.bucket_id, title: payload.title, client_id: payload.client_id, client_name: payload.client_name, status: payload.status, priority: payload.priority, start_date: payload.start_date, due_date: payload.due_date, source: payload.source, original_plan_name: payload.original_plan_name, original_bucket_name: payload.original_bucket_name, original_task_id: payload.microsoft_task_id, import_hash: `ms-${payload.microsoft_plan_id}-${payload.microsoft_task_id}`, microsoft_source_type: payload.microsoft_source_type, microsoft_plan_id: payload.microsoft_plan_id, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_task_id: payload.microsoft_task_id, microsoft_source_description: payload.microsoft_source_description, assigned_to_name: payload.assigned_to_name, helper_names: payload.helper_names }
   } else if (action === 'create' && payload?.destination === 'client_schedule') {
-    patch = { ...patch, client_id: payload.client_id, package_id: payload.package_id, template_id: payload.template_id, board_id: payload.board_id, bucket_id: payload.bucket_id, month: payload.month, code: payload.code, instance_number: payload.instance_number, title: payload.title, deliverable_type: payload.deliverable_type, production_status: payload.production_status, priority: payload.priority, scheduled_date: payload.scheduled_date, microsoft_source_type: payload.microsoft_source_type, microsoft_plan_id: payload.microsoft_plan_id, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_task_id: payload.microsoft_task_id, microsoft_source_description: payload.microsoft_source_description }
+    patch = { ...patch, client_id: payload.client_id, package_id: payload.package_id, template_id: payload.template_id, board_id: payload.board_id, bucket_id: payload.bucket_id, month: payload.month, code: payload.code, instance_number: payload.instance_number, title: payload.title, deliverable_type: payload.deliverable_type, production_status: payload.production_status, priority: payload.priority, scheduled_date: payload.scheduled_date, microsoft_source_type: payload.microsoft_source_type, microsoft_plan_id: payload.microsoft_plan_id, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_task_id: payload.microsoft_task_id, microsoft_source_description: payload.microsoft_source_description, assigned_to_user_id: payload.assigned_to_user_id, assigned_to_name: payload.assigned_to_name, helper_names: payload.helper_names }
   } else if (action === 'create' && payload?.destination === 'cg_calendar') {
     patch = { ...patch, title: payload.title, event_type: payload.event_type, client_id: payload.client_id, client_name: payload.client_name, start_at: payload.start_at, end_at: payload.end_at, all_day: payload.all_day, location: payload.location, status: payload.status, microsoft_source_type: payload.microsoft_source_type, microsoft_calendar_id: payload.microsoft_calendar_id, microsoft_event_id: payload.microsoft_event_id, microsoft_source_description: payload.microsoft_source_description }
   } else if (item.destination === 'planner') {
     if (removedAt) patch = { archived_at: removedAt, microsoft_source_removed_at: removedAt, microsoft_sync_run_id: runId }
-    else if (payload?.destination === 'planner') patch = { ...patch, board_id: payload.board_id, bucket_id: payload.bucket_id, title: payload.title, status: payload.status, start_date: payload.start_date, due_date: payload.due_date, original_plan_name: payload.original_plan_name, original_bucket_name: payload.original_bucket_name, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_source_description: payload.microsoft_source_description, archived_at: null }
+    else if (payload?.destination === 'planner') patch = { ...patch, board_id: payload.board_id, bucket_id: payload.bucket_id, title: payload.title, status: payload.status, start_date: payload.start_date, due_date: payload.due_date, original_plan_name: payload.original_plan_name, original_bucket_name: payload.original_bucket_name, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_source_description: payload.microsoft_source_description, archived_at: null, assigned_to_name: payload.assigned_to_name, helper_names: payload.helper_names }
   } else if (item.destination === 'client_schedule') {
     if (removedAt) patch = { archived_at: removedAt, microsoft_source_removed_at: removedAt, microsoft_sync_run_id: runId }
-    else if (payload?.destination === 'client_schedule') patch = { ...patch, client_id: payload.client_id, package_id: payload.package_id, template_id: payload.template_id, month: payload.month, code: payload.code, instance_number: payload.instance_number, deliverable_type: payload.deliverable_type, title: payload.title, production_status: payload.production_status, scheduled_date: payload.scheduled_date, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_source_description: payload.microsoft_source_description, archived_at: null }
+    else if (payload?.destination === 'client_schedule') patch = { ...patch, client_id: payload.client_id, package_id: payload.package_id, template_id: payload.template_id, month: payload.month, code: payload.code, instance_number: payload.instance_number, deliverable_type: payload.deliverable_type, title: payload.title, production_status: payload.production_status, scheduled_date: payload.scheduled_date, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_source_description: payload.microsoft_source_description, archived_at: null, assigned_to_user_id: payload.assigned_to_user_id, assigned_to_name: payload.assigned_to_name, helper_names: payload.helper_names }
   } else {
     if (removedAt) patch = { status: 'cancelled', microsoft_source_removed_at: removedAt, microsoft_sync_run_id: runId }
     else if (payload?.destination === 'cg_calendar') patch = { ...patch, title: payload.title, event_type: payload.event_type, start_at: payload.start_at, end_at: payload.end_at, all_day: payload.all_day, location: payload.location, ...(action === 'cancel' ? { status: 'cancelled' } : action === 'reopen' ? { status: 'planned' } : {}), microsoft_source_description: payload.microsoft_source_description }

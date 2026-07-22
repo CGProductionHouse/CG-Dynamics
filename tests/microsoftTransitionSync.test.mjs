@@ -11,6 +11,7 @@ let filterMicrosoftPreviewItems
 let microsoftIncomingStatus
 let summarizeMicrosoftCreateStatuses
 let parseMicrosoftSnapshot
+let resolvePreviewAssignees
 
 const context = {
   clients: [
@@ -76,6 +77,7 @@ before(async () => {
   ;({ buildMicrosoftReconciliation } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   ;({ buildMicrosoftConflictBreakdown, filterMicrosoftPreviewItems, microsoftIncomingStatus, summarizeMicrosoftCreateStatuses } = await server.ssrLoadModule('/src/lib/microsoftSyncPresentation.ts'))
   ;({ parseMicrosoftSnapshot } = await server.ssrLoadModule('/src/lib/microsoftSnapshot.ts'))
+  ;({ resolvePreviewAssignees } = await server.ssrLoadModule('/src/lib/microsoftAssigneeMapping.ts'))
 })
 
 after(async () => { await server.close() })
@@ -420,4 +422,194 @@ test('null plannerCompletedCutoff in v2 is accepted', () => {
   const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
   assert.equal(parsed.errors.length, 0)
   assert.equal(parsed.snapshot.plannerCompletedCutoff, null)
+})
+
+// ── Assignment persistence (PR #32) ────────────────────────────────────────
+
+test('one resolved assignee populates planner assigned_to_name on payload', () => {
+  const source = plannerTask({ assigneeMicrosoftIds: ['user-alice'] })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  assert.equal(items.length, 1)
+  assert.equal(items[0].assigneeMicrosoftIds.length, 1)
+  assert.equal(items[0].proposedPayload.destination, 'planner')
+  assert.equal(items[0].proposedPayload.assigned_to_name, null)
+})
+
+test('one resolved assignee populates client schedule assigned_to_user_id and assigned_to_name on payload', () => {
+  const source = plannerTask({
+    sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026',
+    sourceBucketId: 'ms-acme', sourceBucketName: 'Acme', sourceTaskId: 'social-assign',
+    title: 'DP1 Launch', assigneeMicrosoftIds: ['user-alice'],
+  })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  assert.equal(items.length, 1)
+  assert.equal(items[0].proposedPayload.destination, 'client_schedule')
+  assert.equal(items[0].proposedPayload.assigned_to_user_id, null)
+  assert.equal(items[0].proposedPayload.assigned_to_name, null)
+  assert.equal(items[0].proposedPayload.helper_names, null)
+})
+
+test('multiple assignees produce primary and helpers in planner payload', () => {
+  const source = plannerTask({ assigneeMicrosoftIds: ['user-alice', 'user-bob', 'user-carol'] })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  const item = items[0]
+  assert.equal(item.assigneeMicrosoftIds.length, 3)
+  assert.equal(item.proposedPayload.destination, 'planner')
+  assert.equal(item.proposedPayload.assigned_to_name, null)
+})
+
+test('genuinely unassigned item remains valid and assignable', () => {
+  const source = plannerTask({ assigneeMicrosoftIds: [] })
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())
+  assert.equal(items[0].reconciliationAction, 'create')
+  assert.equal(items[0].proposedPayload.assigned_to_name, null)
+  assert.equal(items[0].previewStatus, 'new')
+})
+
+test('unchanged assignments remain idempotent', () => {
+  const source = plannerTask({ assigneeMicrosoftIds: [] })
+  const created = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())[0]
+  const oldPayload = { ...created.proposedPayload, assigned_to_name: null, helper_names: null }
+  const target = {
+    destination: 'planner', id: 'target-1', updatedAt: '2026-07-18T08:30:00Z',
+    microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash,
+    microsoftSourceRemovedAt: null, microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1',
+    payload: oldPayload,
+  }
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [target], new Set())
+  assert.equal(items[0].reconciliationAction, 'unchanged')
+})
+
+test('assignment change on core fields triggers update (not assignee)', () => {
+  const oldSource = plannerTask({ title: 'Old title', assigneeMicrosoftIds: [] })
+  const created = buildMicrosoftReconciliation(snapshot([oldSource]), context, [], new Set())[0]
+  const oldPayload = { ...created.proposedPayload, assigned_to_name: null, helper_names: null }
+  const target = {
+    destination: 'planner', id: 'target-1', updatedAt: '2026-07-18T08:30:00Z',
+    microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash,
+    microsoftSourceRemovedAt: null, microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1',
+    payload: oldPayload,
+  }
+  const newSource = plannerTask({ title: 'New title', assigneeMicrosoftIds: [] })
+  const items = buildMicrosoftReconciliation(snapshot([newSource]), context, [target], new Set())
+  assert.equal(items[0].reconciliationAction, 'update')
+})
+
+// ── Snapshot v3 validation ─────────────────────────────────────────────────
+
+test('v3 snapshots preserve and validate sources', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 3
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 0)
+  assert.ok(parsed.snapshot.sources.length >= 2)
+  assert.equal(parsed.snapshot.version, 3)
+})
+
+test('v3 snapshot source record-count mismatch is rejected', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 3
+  raw.sources[1].recordCount = 99
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 1)
+  assert.match(parsed.errors[0], /declares 99 records but contains 1/i)
+})
+
+test('v3 snapshot with non-object assigneeMap is rejected', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 3
+  raw.assigneeMap = 'not-an-object'
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 1)
+  assert.match(parsed.errors[0], /assigneeMap.*must be an object/i)
+})
+
+test('v3 snapshot with malformed assigneeMap entry is rejected', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 3
+  raw.assigneeMap = { 'user-1': { displayName: 42 } }
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 1)
+  assert.match(parsed.errors[0], /missing a required.*displayName.*string/i)
+})
+
+test('v3 snapshot with valid assigneeMap entries passes validation', () => {
+  const raw = snapshot([plannerTask()])
+  raw.version = 3
+  raw.assigneeMap = {
+    'user-alice': { displayName: 'Alice', mail: 'alice@example.com', userPrincipalName: 'alice@contoso.com' },
+    'user-bob': { displayName: 'Bob', mail: null, userPrincipalName: null },
+  }
+  const parsed = parseMicrosoftSnapshot(JSON.stringify(raw))
+  assert.equal(parsed.errors.length, 0)
+  assert.equal(parsed.snapshot.assigneeMap['user-alice'].displayName, 'Alice')
+  assert.equal(parsed.snapshot.assigneeMap['user-bob'].displayName, 'Bob')
+})
+
+// ── Resolve preview assignees ──────────────────────────────────────────────
+
+function assignableItem(assigneeIds = []) {
+  return {
+    sourceType: 'planner_task',
+    sourcePlanId: 'plan-todo',
+    sourceCalendarId: null,
+    sourceBucketId: 'ms-admin',
+    sourceTaskId: 'task-assign',
+    sourceEventId: null,
+    sourceName: 'To Do',
+    title: 'Assignable task',
+    description: null,
+    startDate: null,
+    endDate: null,
+    dueDate: '2026-07-20',
+    assigneeMicrosoftIds: assigneeIds,
+    destination: 'planner',
+    mappedClientId: null,
+    mappedClientName: null,
+    existingTargetId: null,
+    previewStatus: 'new',
+    conflictCode: null,
+    conflictReason: null,
+    warnings: [],
+    proposedPayload: { destination: 'planner', board_id: 'board-ops', bucket_id: 'bucket-admin', title: 'Assignable task', client_id: null, client_name: null, status: 'to_do', priority: 'normal', start_date: null, due_date: '2026-07-20', notes: null, source: 'microsoft_import', original_plan_name: 'To Do', original_bucket_name: 'ADMIN / TO DO', microsoft_source_type: 'planner_task', microsoft_plan_id: 'plan-todo', microsoft_bucket_id: 'ms-admin', microsoft_task_id: 'task-assign', microsoft_source_description: null, assigned_to_name: null, helper_names: null },
+  }
+}
+
+const assigneeMap = { 'user-alice': { displayName: 'Alice Smith', mail: 'alice@example.com', userPrincipalName: 'alice@contoso.com' } }
+const storedMappings = new Map()
+const profiles = [{ id: 'profile-alice', email: 'alice@example.com', full_name: 'Alice Smith' }]
+
+test('resolvePreviewAssignees populates assigned_to_name from email match', () => {
+  const items = resolvePreviewAssignees([assignableItem(['user-alice'])], assigneeMap, storedMappings, profiles)
+  assert.equal(items[0].resolvedAssignees.length, 1)
+  assert.ok(items[0].resolvedAssignees[0].resolved)
+  assert.equal(items[0].proposedPayload.assigned_to_name, 'Alice Smith')
+})
+
+test('resolvePreviewAssignees creates conflict for unresolved assignee', () => {
+  const items = resolvePreviewAssignees([assignableItem(['user-unknown'])], assigneeMap, storedMappings, profiles)
+  assert.equal(items[0].previewStatus, 'conflict')
+  assert.equal(items[0].reconciliationAction, 'conflict')
+  assert.equal(items[0].conflictCode, 'unresolved_assignee')
+  assert.ok(items[0].conflictReason.includes('user-unknown'))
+})
+
+test('resolvePreviewAssignees creates helper_names for multiple resolved assignees', () => {
+  const multiMap = {
+    'user-alice': { displayName: 'Alice Smith', mail: 'alice@example.com', userPrincipalName: 'alice@contoso.com' },
+    'user-bob': { displayName: 'Bob Jones', mail: 'bob@example.com', userPrincipalName: 'bob@contoso.com' },
+  }
+  const multiProfiles = [
+    { id: 'profile-alice', email: 'alice@example.com', full_name: 'Alice Smith' },
+    { id: 'profile-bob', email: 'bob@example.com', full_name: 'Bob Jones' },
+  ]
+  const items = resolvePreviewAssignees([assignableItem(['user-alice', 'user-bob'])], multiMap, storedMappings, multiProfiles)
+  assert.equal(items[0].proposedPayload.assigned_to_name, 'Alice Smith')
+  assert.deepEqual(items[0].proposedPayload.helper_names, ['Bob Jones'])
+})
+
+test('resolvePreviewAssignees leaves genuinely unassigned item unchanged', () => {
+  const items = resolvePreviewAssignees([assignableItem([])], assigneeMap, storedMappings, profiles)
+  assert.equal(items[0].previewStatus, 'new')
+  assert.equal(items[0].proposedPayload.assigned_to_name, null)
 })
