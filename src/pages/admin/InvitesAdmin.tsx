@@ -1,11 +1,10 @@
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
-  createInvite,
   deleteInvite,
   listInvites,
+  sendInvite,
   type ClientInvite,
   type InviteRole,
 } from '../../lib/db/invites'
@@ -30,24 +29,7 @@ function formatDateTime(value: string | null) {
   }).format(new Date(value))
 }
 
-const APP_LINK = 'https://cg-dynamics.vercel.app'
-
-function inviteMessage(email: string) {
-  return [
-    "Hi, you've been invited to access your CG Dynamics dashboard.",
-    '',
-    'Please sign up using this email address:',
-    email,
-    '',
-    'App link:',
-    APP_LINK,
-    '',
-    'Once your account is created, your dashboard access will be linked automatically.',
-  ].join('\n')
-}
-
 export default function InvitesAdmin({ embedded = false }: { embedded?: boolean }) {
-  const { profile } = useAuth()
   const [invites, setInvites] = useState<ClientInvite[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,7 +41,6 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
   const [role, setRole] = useState<InviteRole>('client')
   const [saving, setSaving] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const clientNameById = useMemo(
     () => new Map(clients.map(client => [client.id, client.name])),
@@ -110,28 +91,50 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
     setError(null)
     setSuccess(null)
     try {
-      const { error } = await createInvite({
+      const { data, error } = await sendInvite({
         email: trimmed,
         client_id: role === 'client' ? clientId : null,
         role,
-        created_by: profile?.id ?? null,
       })
       if (error) {
-        const isDuplicate = error.message.toLowerCase().includes('duplicate')
-        setError(
-          isDuplicate
-            ? 'There is already a pending invite for that email.'
-            : error.message
-        )
+        setError(error.message)
         return
       }
-      setSuccess(`Invite created for ${trimmed.toLowerCase()}.`)
+      setSuccess(
+        data?.delivery === 'resent'
+          ? `Invitation resent to ${trimmed.toLowerCase()}.`
+          : `Invitation sent to ${trimmed.toLowerCase()}.`
+      )
       setEmail('')
       await load({ silent: true })
     } catch (error) {
       setError(errorMessage(error, 'Could not create invite.'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleResend(invite: ClientInvite) {
+    if (busyId) return
+    setBusyId(invite.id)
+    setError(null)
+    setSuccess(null)
+    try {
+      const { error } = await sendInvite({
+        email: invite.email,
+        client_id: invite.client_id,
+        role: invite.role,
+      })
+      if (error) {
+        setError(error.message)
+        return
+      }
+      setSuccess(`Invitation resent to ${invite.email}.`)
+      await load({ silent: true })
+    } catch (error) {
+      setError(errorMessage(error, 'Could not resend the invitation.'))
+    } finally {
+      setBusyId(null)
     }
   }
 
@@ -154,19 +157,6 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
       setError(errorMessage(error, 'Could not delete invite.'))
     } finally {
       setBusyId(null)
-    }
-  }
-
-  async function handleCopyMessage(invite: ClientInvite) {
-    setError(null)
-    try {
-      await navigator.clipboard.writeText(inviteMessage(invite.email))
-      setCopiedId(invite.id)
-      window.setTimeout(() => {
-        setCopiedId(current => (current === invite.id ? null : current))
-      }, 2000)
-    } catch (error) {
-      setError(errorMessage(error, 'Could not copy the invite message.'))
     }
   }
 
@@ -216,10 +206,11 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
             {invite.status === 'pending' && (
               <button
                 type="button"
-                onClick={() => void handleCopyMessage(invite)}
-                className="text-xs text-brand-primary hover:text-brand-accent transition-colors"
+                onClick={() => void handleResend(invite)}
+                disabled={busyId === invite.id}
+                className="text-xs text-brand-primary hover:text-brand-accent transition-colors disabled:opacity-60"
               >
-                {copiedId === invite.id ? 'Copied!' : 'Copy invite message'}
+                {busyId === invite.id ? 'Sending...' : 'Resend invite'}
               </button>
             )}
             <button
@@ -283,10 +274,11 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
               {invite.status === 'pending' && (
                 <button
                   type="button"
-                  onClick={() => void handleCopyMessage(invite)}
-                  className="rounded-lg border border-brand-muted px-3 py-2 text-sm font-semibold text-brand-primary transition hover:border-brand-accent/40 hover:text-white"
+                  onClick={() => void handleResend(invite)}
+                  disabled={busyId === invite.id}
+                  className="rounded-lg border border-brand-muted px-3 py-2 text-sm font-semibold text-brand-primary transition hover:border-brand-accent/40 hover:text-white disabled:opacity-60"
                 >
-                  {copiedId === invite.id ? 'Copied!' : 'Copy invite message'}
+                  {busyId === invite.id ? 'Sending...' : 'Resend invite'}
                 </button>
               )}
               <button
@@ -338,12 +330,12 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
       <div className="mb-6">
         {embedded ? <h2 className="text-xl font-semibold text-white">Invites</h2> : <h1 className="text-xl font-semibold text-white">Invites</h1>}
         <p className="mt-2 text-sm text-brand-primary max-w-2xl">
-          Pre-approve client and workforce emails. Client invites link to one client dashboard;
-          staff and manager invites are global operational accounts.
+          Send secure invitations for client and workforce access. Client invites link to one
+          active client; staff and manager invites are global operational accounts.
         </p>
-        <p className="mt-3 max-w-2xl rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
-          Creating an invite does not send an email yet. This pre-approves the email. Send the
-          person the app link manually - use <span className="font-medium">Copy invite message</span> below.
+        <p className="mt-3 max-w-2xl rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2 text-sm text-brand-accent">
+          CG Dynamics sends a Supabase Auth invitation email. The recipient uses that secure link
+          to set a password and complete their assigned access.
         </p>
         <p className="mt-2 max-w-2xl text-xs text-brand-primary">
           Note: Auth emails (sign-up confirmations and password resets) require Supabase SMTP
@@ -358,7 +350,7 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
         onSubmit={handleCreate}
         className="mb-6 rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5"
       >
-        <h2 className="text-sm font-semibold text-white mb-4">Create invite</h2>
+        <h2 className="text-sm font-semibold text-white mb-4">Send invitation</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_0.8fr_auto] lg:items-end">
           <Field label="Invite email">
             <input
@@ -404,7 +396,7 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
             disabled={saving}
             className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-bg hover:brightness-110 transition disabled:opacity-60"
           >
-            {saving ? 'Saving...' : 'Create invite'}
+            {saving ? 'Sending...' : 'Send invite'}
           </button>
         </div>
       </form>
@@ -413,7 +405,7 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
         <p className="text-sm text-brand-primary">Loading invites...</p>
       ) : invites.length === 0 ? (
         <div className="rounded-xl border border-brand-muted bg-brand-surface p-8 text-center text-sm text-brand-primary">
-          No invites yet. Create one above to pre-approve a client or staff member.
+          No invites yet. Send one above to add a client or workforce user.
         </div>
       ) : (
         <div className="space-y-5">

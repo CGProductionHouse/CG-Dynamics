@@ -16,6 +16,20 @@ export interface ClientInvite {
   accepted_at: string | null
 }
 
+interface AdminInviteResponse {
+  ok?: boolean
+  inviteId?: string
+  delivery?: 'sent' | 'resent'
+  code?: string
+  error?: string
+}
+
+interface AcceptedInviteResult {
+  invite_id: string
+  role: InviteRole
+  client_id: string | null
+}
+
 export async function listInvites() {
   const { data, error } = await withRequestTimeout(
     supabase
@@ -28,27 +42,38 @@ export async function listInvites() {
   return { data: (data ?? []) as ClientInvite[], error }
 }
 
-export async function createInvite(input: {
+async function functionError(error: unknown, fallback: string): Promise<Error> {
+  if (error && typeof error === 'object' && 'context' in error) {
+    const context = error.context
+    if (context instanceof Response) {
+      try {
+        const body = await context.clone().json() as AdminInviteResponse
+        if (body.error) return new Error(body.error)
+      } catch {
+        // Fall back to the safe SDK error below.
+      }
+    }
+  }
+  if (error instanceof Error && error.message) return error
+  return new Error(fallback)
+}
+
+export async function sendInvite(input: {
   email: string
   client_id: string | null
   role: InviteRole
-  created_by: string | null
 }) {
-  const { data, error } = await withRequestTimeout(
-    supabase
-      .from('client_invites')
-      .insert({
-        email: input.email.trim().toLowerCase(),
-        // Staff/manager/admin invites are global and not tied to a client.
-        client_id: input.role === 'client' ? input.client_id : null,
-        role: input.role,
-        created_by: input.created_by,
-      })
-      .select()
-      .single(),
-    'Saving the invite took too long. Please try again.'
-  )
-  return { data: data as ClientInvite | null, error }
+  const { data, error } = await supabase.functions.invoke<AdminInviteResponse>('admin-invite-user', {
+    body: {
+      email: input.email.trim().toLowerCase(),
+      inviteType: input.role === 'client' ? 'client' : 'workforce',
+      role: input.role,
+      clientId: input.role === 'client' ? input.client_id : null,
+    },
+  })
+  if (error) return { data: null, error: await functionError(error, 'Could not send the invitation.') }
+  if (!data?.ok) return { data: null, error: new Error(data?.error ?? 'Could not send the invitation.') }
+  return { data, error: null }
 }
 
 export async function deleteInvite(id: string) {
@@ -59,10 +84,14 @@ export async function deleteInvite(id: string) {
   return { error }
 }
 
-// Security-definer RPC: links the signed-in user to any pending invite
-// for their email. No-op (and safely ignored) when there is none, or
-// before the phase-3f migration has been run.
-export async function claimInvite() {
-  const { error } = await supabase.rpc('claim_invite')
+export async function acceptInvite(fullName?: string) {
+  const { data, error } = await supabase.rpc('accept_invite', {
+    requested_full_name: fullName?.trim() || null,
+  })
+  return { data: data as AcceptedInviteResult | null, error }
+}
+
+export async function validatePendingInvite() {
+  const { error } = await supabase.rpc('validate_pending_invite')
   return { error }
 }

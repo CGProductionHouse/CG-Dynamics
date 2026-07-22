@@ -26,6 +26,11 @@ AI provider keys are server-side only. Set them as Supabase Edge Function
 secrets, not as `VITE_` browser variables. If no provider key is configured, the
 assistant page still loads and shows a clear setup message.
 
+Public Supabase signup is intentionally disabled. Administrators onboard users
+from **Admin > Team > Invites**, which calls the JWT-protected
+`admin-invite-user` Edge Function. Deployment details are in
+`supabase/functions/README.md`.
+
 Provider variables:
 
 - `OPENROUTER_API_KEY` / `OPENROUTER_MODEL`: OpenRouter chat completions, useful

@@ -52,6 +52,9 @@ function HomeRedirect() {
     )
   }
   if (!profile) return <div className="min-h-screen bg-brand-bg" />
+  if (user.invited_at && profile.role === 'client' && !profile.client_id) {
+    return <Navigate to="/signup" replace />
+  }
   if (profile.role === 'client') return <Navigate to="/dashboard" replace />
   return <Navigate to="/admin/cg-hub" replace />
 }
