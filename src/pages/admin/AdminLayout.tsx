@@ -30,6 +30,7 @@ const hubNav: NavItem[] = [
   { to: '/admin/planner', label: 'Planner' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
   { to: '/admin/client-schedule', label: 'Client Schedule' },
+  { to: '/admin/content-workflow', label: 'Content Workflow' },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/assistant', label: 'Assistant' },
   { to: '/admin/team', label: 'Team', access: 'admin' },
