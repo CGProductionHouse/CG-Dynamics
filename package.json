@@ -11,7 +11,8 @@
     "test:invites": "node --test tests/adminInvitePolicy.test.mjs",
     "test:skill-card": "node --test tests/skillCardActivation.test.mjs tests/initialSkillCardBatch.mjs",
     "test:content-workflow": "node --test tests/contentWorkflow.test.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:video-pipeline": "node --test tests/videoPipeline.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",

@@ -6,6 +6,12 @@ import {
   type ContentGuideStatus,
   type ContentRunStatus,
 } from './contentWorkflowRules'
+import {
+  applyVideoTransition,
+  type VideoAction,
+  type VideoProductionStatus,
+  type VideoTransitionContext,
+} from './videoPipelineRules'
 
 // ── Content Workflow data access ──────────────────────────────────────────────
 //
@@ -32,6 +38,22 @@ export interface ContentGuideIdea {
   deliverable_id: string | null
   status: ContentGuideStatus
   notes: string | null
+  // ── Video production pipeline (phase-19e, additive) ──
+  video_number: number | null
+  folder_client_code: string | null
+  canonical_name: string | null
+  script: string | null
+  shot_breakdown: string | null
+  requirements: string | null
+  editor_user_id: string | null
+  editor_name: string | null
+  production_status: VideoProductionStatus
+  production_note: string | null
+  onedrive_footage_url: string | null
+  onedrive_internal_review_url: string | null
+  onedrive_client_approval_url: string | null
+  onedrive_final_url: string | null
+  production_status_updated_at: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -200,4 +222,71 @@ export async function listGuideIdeasForDeliverables(deliverableIds: string[]): P
     .select('*')
     .in('deliverable_id', deliverableIds)
   return wrap((data ?? []) as ContentGuideIdea[], error, [])
+}
+
+// ── Video production pipeline ─────────────────────────────────────────────────
+
+export interface StaffProfileOption {
+  id: string
+  full_name: string | null
+}
+
+export async function listStaffProfiles(): Promise<QueryResult<StaffProfileOption[]>> {
+  const { data, error } = await supabase.from('profiles').select('id, full_name').order('full_name')
+  return wrap((data ?? []) as StaffProfileOption[], error, [])
+}
+
+// Persist a production-status change through the single guarded path. The
+// transition rule validates the move and its required URL/editor; the matching
+// DB fields are written alongside the new status so the guard and the stored
+// data never disagree.
+export async function transitionVideo(
+  idea: ContentGuideIdea,
+  action: VideoAction,
+  ctx: VideoTransitionContext & { editorName?: string | null } = {},
+): Promise<QueryResult<ContentGuideIdea | null>> {
+  const result = applyVideoTransition(idea.production_status, action, ctx)
+  if (!result.ok || !result.next) {
+    return { data: null, error: result.error ?? 'Invalid transition.', migrationNeeded: false }
+  }
+  const patch: Partial<ContentGuideIdea> = {
+    production_status: result.next,
+    production_status_updated_at: new Date().toISOString(),
+  }
+  if (ctx.footageUrl != null) patch.onedrive_footage_url = ctx.footageUrl
+  if (ctx.clientApprovalUrl != null) patch.onedrive_client_approval_url = ctx.clientApprovalUrl
+  if (ctx.editorUserId != null) {
+    patch.editor_user_id = ctx.editorUserId
+    patch.editor_name = ctx.editorName ?? null
+  }
+  return updateGuideIdea(idea.id, patch)
+}
+
+// Non-archived video records (guides that link to a deliverable are tracked
+// videos). Used by the Video Pipeline board and Hub counts.
+export async function listPipelineVideos(): Promise<QueryResult<ContentGuideIdea[]>> {
+  const { data, error } = await supabase
+    .from('content_guide_ideas')
+    .select('*')
+    .neq('status', 'archived')
+    .order('updated_at', { ascending: false })
+  return wrap((data ?? []) as ContentGuideIdea[], error, [])
+}
+
+export interface DeliverableLabel {
+  id: string
+  code: string
+  instance_number: number
+  title: string
+}
+
+// Read-only labels for linked Client Schedule deliverables (display only —
+// never mutates monthly_deliverables).
+export async function listDeliverableLabels(ids: string[]): Promise<QueryResult<DeliverableLabel[]>> {
+  if (ids.length === 0) return { data: [], error: null, migrationNeeded: false }
+  const { data, error } = await supabase
+    .from('monthly_deliverables')
+    .select('id, code, instance_number, title')
+    .in('id', ids)
+  return wrap((data ?? []) as DeliverableLabel[], error, [])
 }

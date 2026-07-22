@@ -28,16 +28,19 @@ import {
   updateRunItem,
   type ContentGuideIdea,
   type ContentGuideInput,
+  listStaffProfiles,
   type ContentRun,
   type ContentRunInput,
   type ContentRunItem,
+  type StaffProfileOption,
 } from '../../lib/contentWorkflow'
+import VideoPipelineTab from './VideoPipelineTab'
 
 // ── Content Workflow — staff Content Guides + Content Runs (MVP) ──────────────
 // All data goes through src/lib/contentWorkflow.ts. Reuses the existing design
 // language. No redesign, no AI generation, no hard deletes of ideas/runs.
 
-type Tab = 'guides' | 'runs'
+type Tab = 'guides' | 'pipeline' | 'runs'
 
 const INPUT_CLS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
 const LABEL_CLS = 'block text-[11px] font-black uppercase tracking-[0.12em] text-white/40'
@@ -273,6 +276,7 @@ export default function ContentWorkflowPage() {
   const [migrationNeeded, setMigrationNeeded] = useState(false)
 
   const [clients, setClients] = useState<ClientOption[]>([])
+  const [staff, setStaff] = useState<StaffProfileOption[]>([])
   const [guides, setGuides] = useState<ContentGuideIdea[]>([])
   const [runs, setRuns] = useState<ContentRun[]>([])
 
@@ -295,13 +299,14 @@ export default function ContentWorkflowPage() {
   async function loadAll() {
     setLoading(true)
     setLoadError(null)
-    const [clientResult, guideResult, runResult] = await Promise.all([listActiveClients(), listGuideIdeas(), listRuns()])
+    const [clientResult, staffResult, guideResult, runResult] = await Promise.all([listActiveClients(), listStaffProfiles(), listGuideIdeas(), listRuns()])
     if (guideResult.migrationNeeded || runResult.migrationNeeded) {
       setMigrationNeeded(true); setLoading(false); return
     }
     setMigrationNeeded(false)
     setLoadError(guideResult.error ?? runResult.error ?? clientResult.error?.message ?? null)
     setClients((clientResult.data ?? []) as ClientOption[])
+    setStaff(staffResult.migrationNeeded ? [] : staffResult.data)
     setGuides(guideResult.data)
     setRuns(runResult.data)
     setLoading(false)
@@ -441,7 +446,7 @@ export default function ContentWorkflowPage() {
         </p>
       </header>
 
-      {!migrationNeeded && <div className="mt-6 flex gap-2">{tabButton('guides', 'Content Guides', guides.length)}{tabButton('runs', 'Content Runs', runs.length)}</div>}
+      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2">{tabButton('guides', 'Content Guides', guides.length)}{tabButton('pipeline', 'Video Pipeline', 0)}{tabButton('runs', 'Content Runs', runs.length)}</div>}
 
       {migrationNeeded ? (
         <div className="mt-6 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5 sm:p-6">
@@ -531,6 +536,8 @@ export default function ContentWorkflowPage() {
             )}
           </section>
         </div>
+      ) : tab === 'pipeline' ? (
+        <VideoPipelineTab clients={clients} staff={staff} />
       ) : (
         <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
           <section className="space-y-3">

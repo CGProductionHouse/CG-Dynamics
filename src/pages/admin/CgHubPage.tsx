@@ -22,7 +22,7 @@ import {
 import { getMyDayContext, sourceLabel, type MyDayContext, type MyDayItem } from '../../lib/workforceMyDay'
 import { businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
 import { buildHubSevenDayCalendar, formatHubCalendarDay, type HubCalendarDay } from '../../lib/hubCalendar'
-import { listRuns, type ContentRun } from '../../lib/contentWorkflow'
+import { listRuns, listPipelineVideos, type ContentRun, type ContentGuideIdea } from '../../lib/contentWorkflow'
 import { isRunUpcoming } from '../../lib/contentWorkflowRules'
 import { isManagerRole } from '../../lib/roles'
 
@@ -111,6 +111,7 @@ export default function CgHubPage() {
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [companyEvents, setCompanyEvents] = useState<CompanyCalendarEvent[]>([])
   const [contentRuns, setContentRuns] = useState<ContentRun[]>([])
+  const [contentVideos, setContentVideos] = useState<ContentGuideIdea[]>([])
   const [companyEventsMissing, setCompanyEventsMissing] = useState(false)
   const [myDayContext, setMyDayContext] = useState<MyDayContext | null>(null)
   const [loadingData, setLoadingData] = useState(true)
@@ -135,9 +136,11 @@ export default function CgHubPage() {
       setCompanyEventsMissing(companyRes.tableMissing)
       setCompanyEvents((companyRes.data ?? []) as CompanyCalendarEvent[])
       setMyDayContext(myDay)
-      // Best-effort: Content Runs are optional (phase-19d). Never block the Hub.
+      // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block the Hub.
       const runsRes = await listRuns()
       setContentRuns(runsRes.migrationNeeded ? [] : runsRes.data)
+      const videosRes = await listPipelineVideos()
+      setContentVideos(videosRes.migrationNeeded ? [] : videosRes.data)
     } catch (error) {
       setLoadErrors([error instanceof Error ? error.message : 'Could not load Hub data.'])
       setTasks([])
@@ -236,6 +239,14 @@ export default function CgHubPage() {
       .slice(0, 6),
     [contentRuns, today],
   )
+
+  // Compact video pipeline counts.
+  const videoCounts = useMemo(() => ({
+    ready_to_edit: contentVideos.filter(v => v.production_status === 'ready_to_edit').length,
+    internal_review: contentVideos.filter(v => v.production_status === 'internal_review').length,
+    ready_for_client: contentVideos.filter(v => v.production_status === 'ready_for_client').length,
+  }), [contentVideos])
+  const hasVideoCounts = videoCounts.ready_to_edit + videoCounts.internal_review + videoCounts.ready_for_client > 0
 
   // Clients needing attention
   const clientsNeedingAttention = useMemo(() => {
@@ -414,6 +425,24 @@ export default function CgHubPage() {
             days={companyCalendarDays}
             companyEventsMissing={companyEventsMissing}
           />
+
+          {/* D1 — Video pipeline snapshot (compact) */}
+          {hasVideoCounts && (
+            <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Video Pipeline</h2>
+                <Link to="/admin/content-workflow" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {[['Ready to edit', videoCounts.ready_to_edit], ['In internal review', videoCounts.internal_review], ['Ready for client', videoCounts.ready_for_client]].map(([label, count]) => (
+                  <div key={label as string} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-center">
+                    <p className="text-2xl font-black text-white">{count as number}</p>
+                    <p className="mt-1 text-[11px] text-white/45">{label as string}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* D2 — Upcoming Content Runs (next seven days) */}
           {upcomingRuns.length > 0 && (
