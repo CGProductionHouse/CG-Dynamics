@@ -34,6 +34,7 @@ import ImportHealthPage from './pages/admin/ImportHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
 import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
+import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
 import MyWorkPage from './pages/admin/MyWorkPage'
 import Dashboard from './pages/client/Dashboard'
 
@@ -84,6 +85,7 @@ export default function App() {
               <Route path="/admin/planner" element={<PlannerPage />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
+              <Route path="/admin/content-workflow" element={<ContentWorkflowPage />} />
               <Route path="/admin/client-calendar" element={<ClientContentCalendarPage />} />
               <Route path="/admin/monthly-planner" element={<Navigate to="/admin/client-schedule?view=calendar" replace />} />
               <Route path="/admin/master-schedule" element={<Navigate to="/admin/client-schedule?view=year" replace />} />

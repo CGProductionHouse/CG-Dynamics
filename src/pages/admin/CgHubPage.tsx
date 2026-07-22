@@ -22,6 +22,8 @@ import {
 import { getMyDayContext, sourceLabel, type MyDayContext, type MyDayItem } from '../../lib/workforceMyDay'
 import { businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
 import { buildHubSevenDayCalendar, formatHubCalendarDay, type HubCalendarDay } from '../../lib/hubCalendar'
+import { listRuns, type ContentRun } from '../../lib/contentWorkflow'
+import { isRunUpcoming } from '../../lib/contentWorkflowRules'
 import { isManagerRole } from '../../lib/roles'
 
 // ── Constants ─────────────────────────────────────────────────
@@ -108,6 +110,7 @@ export default function CgHubPage() {
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [companyEvents, setCompanyEvents] = useState<CompanyCalendarEvent[]>([])
+  const [contentRuns, setContentRuns] = useState<ContentRun[]>([])
   const [companyEventsMissing, setCompanyEventsMissing] = useState(false)
   const [myDayContext, setMyDayContext] = useState<MyDayContext | null>(null)
   const [loadingData, setLoadingData] = useState(true)
@@ -132,6 +135,9 @@ export default function CgHubPage() {
       setCompanyEventsMissing(companyRes.tableMissing)
       setCompanyEvents((companyRes.data ?? []) as CompanyCalendarEvent[])
       setMyDayContext(myDay)
+      // Best-effort: Content Runs are optional (phase-19d). Never block the Hub.
+      const runsRes = await listRuns()
+      setContentRuns(runsRes.migrationNeeded ? [] : runsRes.data)
     } catch (error) {
       setLoadErrors([error instanceof Error ? error.message : 'Could not load Hub data.'])
       setTasks([])
@@ -221,6 +227,15 @@ export default function CgHubPage() {
 
   // CG Calendar derived
   const companyCalendarDays = useMemo(() => buildHubSevenDayCalendar(companyEvents, today), [companyEvents, today])
+
+  // Upcoming Content Runs (next seven days), soonest first.
+  const upcomingRuns = useMemo(
+    () => contentRuns
+      .filter(run => isRunUpcoming(run, today))
+      .sort((a, b) => (a.run_date ?? '').localeCompare(b.run_date ?? ''))
+      .slice(0, 6),
+    [contentRuns, today],
+  )
 
   // Clients needing attention
   const clientsNeedingAttention = useMemo(() => {
@@ -399,6 +414,29 @@ export default function CgHubPage() {
             days={companyCalendarDays}
             companyEventsMissing={companyEventsMissing}
           />
+
+          {/* D2 — Upcoming Content Runs (next seven days) */}
+          {upcomingRuns.length > 0 && (
+            <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Upcoming Content Runs</h2>
+                <Link to="/admin/content-workflow" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
+              </div>
+              <ul className="space-y-2">
+                {upcomingRuns.map(run => (
+                  <li key={run.id}>
+                    <Link to="/admin/content-workflow" className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-white">{run.name}</p>
+                        <p className="truncate text-xs text-white/45">{run.run_date ?? 'No date'}{run.client_name ? ` · ${run.client_name}` : ''}{run.lead_name ? ` · ${run.lead_name}` : ''}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-primary/70">{run.status.replace(/_/g, ' ')}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {/* E — Production Schedule */}
           <ProductionScheduleSection

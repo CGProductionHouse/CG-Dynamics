@@ -10,6 +10,7 @@
     "test:microsoft-sync": "node --test tests/microsoftTransitionSync.test.mjs",
     "test:invites": "node --test tests/adminInvitePolicy.test.mjs",
     "test:skill-card": "node --test tests/skillCardActivation.test.mjs tests/initialSkillCardBatch.mjs",
+    "test:content-workflow": "node --test tests/contentWorkflow.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
