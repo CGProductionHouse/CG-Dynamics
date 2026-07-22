@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { listGuideIdeasForDeliverables, type ContentGuideIdea } from '../../lib/contentWorkflow'
+import { VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { ClientPicker } from '../../components/ClientPicker'
@@ -708,6 +710,18 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Best-effort read-only link to the Content Workflow video for this
+  // deliverable. Never mutates the schedule; silent if phase-19d/19e is absent.
+  const [linkedVideo, setLinkedVideo] = useState<ContentGuideIdea | null>(null)
+  const loadLinkedVideo = useEffectEvent(async () => {
+    const result = await listGuideIdeasForDeliverables([deliverable.id])
+    if (result.error || result.migrationNeeded) { setLinkedVideo(null); return }
+    setLinkedVideo(result.data.find(video => video.status !== 'archived') ?? null)
+  })
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadLinkedVideo() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [deliverable.id])
 
   async function save() {
     if (saving) return
@@ -744,6 +758,17 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
           <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-brand-primary hover:text-white">X</button>
         </div>
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+          {linkedVideo && (
+            <div className="rounded-lg border border-brand-teal/20 bg-brand-teal/[0.05] p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-teal/80">Linked video</p>
+                <Link to="/admin/content-workflow" className="text-[11px] font-bold text-brand-teal hover:text-white">Open in Content Workflow</Link>
+              </div>
+              {linkedVideo.canonical_name && <p className="mt-1.5 break-all font-mono text-[11px] text-white/60">{linkedVideo.canonical_name}</p>}
+              <p className="mt-1 text-sm font-bold text-white">{linkedVideo.title}</p>
+              <p className="mt-1 text-[11px] text-white/50">Production: {VIDEO_STATUS_LABELS[linkedVideo.production_status]}</p>
+            </div>
+          )}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
             <ClientPicker value={clientId} label={clientDisplay.state === 'known' ? clientDisplay.label : ''} onChange={client => setClientId(client?.id ?? null)} />

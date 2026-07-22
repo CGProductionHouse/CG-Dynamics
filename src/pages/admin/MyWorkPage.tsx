@@ -3,10 +3,56 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import MyDayPage from './MyDayPage'
 import CommandCentrePage from './CommandCentrePage'
-import { listRuns, type ContentRun } from '../../lib/contentWorkflow'
+import { listPipelineVideos, listRuns, type ContentGuideIdea, type ContentRun } from '../../lib/contentWorkflow'
 import { runInvolvesUser } from '../../lib/contentWorkflowRules'
+import { editorQueueMatch, internalReviewMatch, VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
+import { isManagerRole } from '../../lib/roles'
 
 type MyWorkTab = 'my-day' | 'daily-tasks'
+
+// Videos the signed-in editor is actively working, plus internal reviews the
+// signed-in manager/admin owns. Compact; silent before phase-19e.
+function MyVideoQueue() {
+  const { profile } = useAuth()
+  const [videos, setVideos] = useState<ContentGuideIdea[]>([])
+
+  const load = useEffectEvent(async () => {
+    const result = await listPipelineVideos()
+    if (result.error || result.migrationNeeded) { setVideos([]); return }
+    const isManager = isManagerRole(profile?.role)
+    const mine = result.data.filter(video => editorQueueMatch(video, profile?.id) || internalReviewMatch(video, isManager))
+    setVideos(mine.slice(0, 8))
+  })
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [profile?.id])
+
+  if (videos.length === 0) return null
+  return (
+    <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-10">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <h2 className="text-[11px] font-black uppercase tracking-[0.14em] text-white/45">My Video Queue</h2>
+          <Link to="/admin/content-workflow" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
+        </div>
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {videos.map(video => (
+            <li key={video.id}>
+              <Link to="/admin/content-workflow" className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-white">{video.title}</p>
+                  <p className="truncate font-mono text-[11px] text-white/45">{video.canonical_name ?? '—'}</p>
+                </div>
+                <span className="shrink-0 rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-primary/70">{VIDEO_STATUS_LABELS[video.production_status]}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
 
 // Compact band: content runs the signed-in person leads or helps on, so staff
 // see their shoot responsibilities without being told. Best-effort — silent if
@@ -81,6 +127,7 @@ export default function MyWorkPage() {
           </div>
         </div>
       </div>
+      <MyVideoQueue />
       <MyContentRuns />
       {tab === 'my-day' ? <MyDayPage embedded /> : <CommandCentrePage embedded />}
     </div>
