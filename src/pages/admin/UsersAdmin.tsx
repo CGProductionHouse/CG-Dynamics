@@ -115,8 +115,8 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
       </div>
 
       <p className="text-xs text-brand-primary mb-5">
-        Users appear here after signing up. Assign roles and link clients as needed. Pending users
-        with no linked client are highlighted and sorted to the top.
+        Users appear here after accepting an admin invitation. Assign roles and link clients as
+        needed. Pending users with no linked client are highlighted and sorted to the top.
       </p>
 
       {loading ? (

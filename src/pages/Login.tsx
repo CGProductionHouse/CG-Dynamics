@@ -6,7 +6,6 @@ import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
 import { AuthMessage } from '../components/AuthShell'
 import { friendlyAuthError } from '../lib/authErrors'
-import { useCooldown } from '../hooks/useCooldown'
 
 function isNotConfirmed(error: { message?: string; code?: string } | null) {
   if (!error) return false
@@ -15,7 +14,7 @@ function isNotConfirmed(error: { message?: string; code?: string } | null) {
 }
 
 export default function Login() {
-  const { signIn, resendConfirmation } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [email, setEmail] = useState('')
@@ -23,17 +22,13 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [unconfirmed, setUnconfirmed] = useState(false)
-  const [resending, setResending] = useState(false)
-  const [resendMessage, setResendMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
-  const resendCooldown = useCooldown(60)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
     setUnconfirmed(false)
-    setResendMessage(null)
     setLoading(true)
-    const { error, role } = await signIn(email, password)
+    const { error, role, pendingInviteSetup } = await signIn(email, password)
     setLoading(false)
     if (error) {
       if (isNotConfirmed(error as { message?: string; code?: string })) {
@@ -46,30 +41,13 @@ export default function Login() {
       setError('Could not load your profile after sign in.')
     } else {
       const requestedPath = (location.state as { from?: string } | null)?.from
-      const destination = role === 'client'
-        ? '/dashboard'
-        : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
+      const destination = pendingInviteSetup
+        ? '/signup'
+        : role === 'client'
+          ? '/dashboard'
+          : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
       navigate(destination, { replace: true })
     }
-  }
-
-  async function handleResend() {
-    if (resending || resendCooldown.active) return
-    if (!email.trim()) {
-      setResendMessage({ tone: 'error', text: 'Enter your email above first.' })
-      return
-    }
-    setResending(true)
-    setResendMessage(null)
-    const { error } = await resendConfirmation(email.trim())
-    setResending(false)
-    if (error) {
-      setResendMessage({ tone: 'error', text: friendlyAuthError(error, 'Could not resend the confirmation email.') })
-    } else {
-      setResendMessage({ tone: 'success', text: 'Confirmation email sent. Check your inbox (and spam folder).' })
-    }
-    // Throttle repeat requests regardless of outcome.
-    resendCooldown.start()
   }
 
   return (
@@ -120,21 +98,8 @@ export default function Login() {
           {unconfirmed && (
             <div className="space-y-3 rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-3">
               <p className="text-xs text-brand-primary">
-                Didn't get the confirmation email? We can send it again.
+                Ask an admin to resend your pending CG Dynamics invitation.
               </p>
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={resending || resendCooldown.active}
-                className="w-full rounded-lg border border-brand-accent/40 bg-brand-accent/10 py-2 text-sm font-medium text-brand-accent hover:bg-brand-accent/20 transition disabled:opacity-60"
-              >
-                {resending
-                  ? 'Sending...'
-                  : resendCooldown.active
-                    ? `Please wait ${resendCooldown.remaining}s before requesting another email`
-                    : 'Resend confirmation email'}
-              </button>
-              {resendMessage && <AuthMessage tone={resendMessage.tone}>{resendMessage.text}</AuthMessage>}
             </div>
           )}
 
@@ -148,9 +113,9 @@ export default function Login() {
         </form>
 
         <p className="mt-6 text-center text-sm text-brand-primary">
-          Don't have an account?{' '}
+          Have an invitation?{' '}
           <Link to="/signup" className="text-brand-accent hover:brightness-110 font-medium transition">
-            Sign up
+            Complete setup
           </Link>
         </p>
       </div>

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { User, AuthError, PostgrestError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { getProfile, type Profile } from '../lib/db/profiles'
-import { claimInvite } from '../lib/db/invites'
+import { acceptInvite, validatePendingInvite } from '../lib/db/invites'
 
 type AuthContextError = AuthError | PostgrestError | Error
 
@@ -17,11 +17,10 @@ interface AuthContextType {
   // the user to /reset-password instead of /admin or /dashboard.
   isPasswordRecovery: boolean
   endPasswordRecovery: () => void
-  signIn: (email: string, password: string) => Promise<{ error: AuthContextError | null; role: string | null }>
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: AuthError | null; alreadyRegistered: boolean }>
+  signIn: (email: string, password: string) => Promise<{ error: AuthContextError | null; role: string | null; pendingInviteSetup: boolean }>
+  completeInvite: (password: string, fullName?: string) => Promise<{ error: AuthContextError | null; role: string | null }>
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>
   updatePassword: (password: string) => Promise<{ error: AuthError | null }>
-  resendConfirmation: (email: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
 }
 
@@ -82,10 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function fetchProfile(userId: string) {
-    // Auto-link any pending client invite for this account before we read
-    // the profile, so an invited user lands on their dashboard immediately.
-    // Safe no-op if there is no invite (or the phase-3f migration is unrun).
-    await claimInvite().catch(() => {})
     const { data, error } = await getProfile(userId)
     if (error) {
       return { profile: null, error }
@@ -99,10 +94,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
-
-    // Catch a recovery link even if the PASSWORD_RECOVERY event fires before
-    // our listener is attached.
-    if (urlHasRecovery()) markRecovery(true)
 
     // `silent` updates user/profile without flipping the global loading flag,
     // so the routed tree (and any in-progress admin work) is never unmounted.
@@ -174,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error || !data.user) return { error, role: null }
+    if (error || !data.user) return { error, role: null, pendingInviteSetup: false }
 
     // A normal password sign-in ends any lingering recovery mode so the user
     // is not bounced back to /reset-password.
@@ -194,7 +185,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false)
         initialResolvedRef.current = true
       }
-      return { error: profileLoadError, role: profileData?.role ?? null }
+      return {
+        error: profileLoadError,
+        role: profileData?.role ?? null,
+        pendingInviteSetup: Boolean(data.user.invited_at && profileData?.role === 'client' && !profileData.client_id),
+      }
     } catch (error) {
       const profileLoadError = error instanceof Error
         ? error
@@ -204,24 +199,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfileError(profileLoadError.message)
         setLoading(false)
       }
-      return { error: profileLoadError, role: null }
+      return { error: profileLoadError, role: null, pendingInviteSetup: false }
     }
   }
 
-  async function signUp(email: string, password: string, fullName?: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
+  async function completeInvite(password: string, fullName?: string) {
+    const { error: validationError } = await validatePendingInvite()
+    if (validationError) return { error: validationError, role: null }
+
+    const { data: updateData, error: updateError } = await supabase.auth.updateUser({
       password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${appOrigin()}/login`,
-      },
+      data: fullName?.trim() ? { full_name: fullName.trim() } : undefined,
     })
-    // With email confirmations enabled, signing up an existing address returns
-    // an obfuscated user with no identities (and no error) so we don't leak
-    // which emails exist. Treat that as "already registered".
-    const alreadyRegistered = !error && !!data.user && (data.user.identities?.length ?? 0) === 0
-    return { error, alreadyRegistered }
+    if (updateError) return { error: updateError, role: null }
+
+    const { data: inviteData, error: inviteError } = await acceptInvite(fullName)
+    if (inviteError || !inviteData) {
+      return { error: inviteError ?? new Error('Could not complete this invitation.'), role: null }
+    }
+
+    const invitedUser = updateData.user
+    const { data: profileData, error: profileLoadError } = await getProfile(invitedUser.id)
+    if (profileLoadError || !profileData) {
+      return { error: profileLoadError ?? new Error('Could not load your new profile.'), role: null }
+    }
+
+    setUser(invitedUser)
+    userIdRef.current = invitedUser.id
+    setProfile(profileData)
+    setProfileError(null)
+    setLoading(false)
+    initialResolvedRef.current = true
+    return { error: null, role: inviteData.role }
   }
 
   async function resetPasswordForEmail(email: string) {
@@ -233,15 +242,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function updatePassword(password: string) {
     const { error } = await supabase.auth.updateUser({ password })
-    return { error }
-  }
-
-  async function resendConfirmation(email: string) {
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: `${appOrigin()}/login` },
-    })
     return { error }
   }
 
@@ -259,12 +259,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, profileError, loading, isPasswordRecovery, endPasswordRecovery, signIn, signUp, resetPasswordForEmail, updatePassword, resendConfirmation, signOut }}>
+    <AuthContext.Provider value={{ user, profile, profileError, loading, isPasswordRecovery, endPasswordRecovery, signIn, completeInvite, resetPasswordForEmail, updatePassword, signOut }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- colocated with the provider by the existing auth API.
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) throw new Error('useAuth must be used within AuthProvider')

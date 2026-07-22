@@ -112,6 +112,54 @@ At transition completion, set the app lifecycle status to `complete`, then
 remove or revoke the Microsoft secret/application access. Imported identities
 and audit history remain in CG Dynamics.
 
+## Secure admin invitations
+
+`admin-invite-user` is the only browser-triggered path that sends new CG
+Dynamics account invitations. Public Supabase signup remains disabled.
+
+Before deploying the function:
+
+1. Review and run `supabase/phase-19a-secure-admin-invites.sql` in the Supabase
+   SQL editor. It keeps Auth Admin invitations pending and profiles provisional
+   until the recipient validates the link, sets a password and atomically
+   claims the matching `client_invites` row.
+2. Confirm `APP_PUBLIC_URL` is set to the production app origin:
+
+```bash
+npx supabase secrets set APP_PUBLIC_URL=https://cg-dynamics.vercel.app --project-ref ehtjfntukiwbgptqgbzy
+```
+
+   Also confirm `https://cg-dynamics.vercel.app/signup?invited=1` is covered by
+   the Supabase Auth allowed redirect URLs. Supabase silently falls back to the
+   Site URL when a requested redirect is not allowed.
+
+3. Deploy with JWT verification enabled. Do not add `--no-verify-jwt`:
+
+```bash
+npx supabase functions deploy admin-invite-user --project-ref ehtjfntukiwbgptqgbzy
+```
+
+The platform verifies the caller JWT before execution. The function then
+validates the same JWT with Supabase Auth and independently requires
+`profiles.role = 'admin'` before using the server-only service-role client.
+Only client, staff and manager invitations are accepted. Client invitations
+require an active client; workforce invitations cannot carry a `client_id`.
+Role and client access come from the server-controlled `client_invites` row,
+never from user-editable Auth metadata.
+
+Production checks after deployment:
+
+- Admin can send a new staff invitation and resend the same pending invitation
+  without creating a duplicate row.
+- Admin can send a client invitation only after selecting an active client.
+- A non-admin function call receives `403`; an unauthenticated call receives
+  `401` or is rejected by the Edge gateway.
+- The email link opens `/signup?invited=1`, lets the recipient set a password,
+  marks the invite accepted, and routes staff to CG Hub or clients to their
+  dashboard.
+- A missing, used, mismatched or expired invitation shows a clear failure and
+  never falls back to public `signUp`.
+
 ## Deploy note (cg-assistant-chat)
 
 Before deploying the CG Assistant function, run the repo migration

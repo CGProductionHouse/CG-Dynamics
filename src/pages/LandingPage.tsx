@@ -46,7 +46,7 @@ export default function LandingPage() {
                 to="/signup"
                 className="text-sm bg-brand-accent text-brand-bg font-semibold px-4 py-2 rounded-lg hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg transition"
               >
-                Sign up
+                Accept invite
               </Link>
             </>
           )}

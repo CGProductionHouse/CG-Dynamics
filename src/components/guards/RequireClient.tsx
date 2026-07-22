@@ -10,6 +10,9 @@ export function RequireClient() {
   if (!user) return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}${location.hash}` }} />
   if (profileError) return <ProfileError message={profileError} />
   if (!profile) return <RouteLoading label="Loading your client profile..." />
+  if (user.invited_at && profile.role === 'client' && !profile.client_id) {
+    return <Navigate to="/signup" replace />
+  }
   if (profile.role !== 'client') return <Navigate to="/admin/cg-hub" replace />
 
   return <Outlet />
