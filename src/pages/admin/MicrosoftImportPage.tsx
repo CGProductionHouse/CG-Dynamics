@@ -199,8 +199,13 @@ export default function MicrosoftImportPage() {
       if (existingResult.error) throw new Error(existingResult.error)
       if (profilesResult.error) throw new Error(profilesResult.error)
       setMigrationNeeded(existingResult.migrationNeeded)
-      const reconciled = buildMicrosoftReconciliation(nextSnapshot, contextResult.context, existingResult.targets, existingResult.deliverableSlotKeys)
-      const resolved = resolvePreviewAssignees(reconciled, nextSnapshot.assigneeMap ?? {}, mappingsResult.data, profilesResult.data)
+      const resolved = buildMicrosoftReconciliation(
+        nextSnapshot,
+        contextResult.context,
+        existingResult.targets,
+        existingResult.deliverableSlotKeys,
+        mapped => resolvePreviewAssignees(mapped, nextSnapshot.assigneeMap ?? {}, mappingsResult.data, profilesResult.data),
+      )
       setSnapshot(nextSnapshot)
       setItems(resolved)
       const first = ACTIONS.find(option => resolved.some(item => item.reconciliationAction === option.value))
@@ -249,7 +254,7 @@ export default function MicrosoftImportPage() {
       const result = await applyMicrosoftReconciliation(items, snapshot, approveRemovals, (completed, total) => setProgress({ completed, total }))
       setApplyResult(result)
       await loadStatus()
-      if (result.errors.length > 0) setError(result.errors.join(' '))
+      if (result.errors.length > 0) setError(result.errors[0])
       else {
         await prepareSnapshot(snapshot)
         setApplyResult(result)
@@ -338,7 +343,7 @@ export default function MicrosoftImportPage() {
 
         <section className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{visibleItems.map((item, index) => <PreviewItem key={itemKey(item, index)} item={item} />)}</section>
         {visibleItems.length === 0 && <p className="mt-3 rounded-xl border border-dashed border-white/10 py-8 text-center text-sm text-white/35">No items match these filters.</p>}
-        <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>
+        <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><p className="mb-3 rounded-lg border border-brand-teal/20 bg-brand-teal/[0.06] px-3 py-2 text-xs text-brand-teal">Sync continues while this Microsoft Sync tab remains open. You may use CG Dynamics in another tab.</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>
       </>}
 
       <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Sync history</p><h2 className="mb-4 mt-1 text-xl font-black text-white">Recent reconciliation runs</h2><RunHistory runs={runs} onSelect={runId => void selectRun(runId)} />{selectedRunId && <div className="mt-5 border-t border-white/10 pt-4"><p className="mb-3 text-xs font-black uppercase tracking-wider text-white/40">Per-item results</p><div className="max-h-96 space-y-2 overflow-y-auto">{runItems.map(item => <article key={item.id} className="rounded-lg border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold text-white">{item.details.title ?? 'Microsoft item'}</p><p className="mt-1 text-xs text-white/40">{item.sourceName} · {item.destination}</p></div><span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase ${ACTION_TONES[item.action]}`}>{item.action} · {item.resultStatus}</span></div>{item.safeError && <p className="mt-2 text-xs text-red-200">{item.safeError}</p>}</article>)}{runItems.length === 0 && <p className="text-sm text-white/35">No per-item results are available for this run.</p>}</div></div>}</section>
