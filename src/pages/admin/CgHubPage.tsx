@@ -21,6 +21,7 @@ import {
 } from '../../lib/companyCalendar'
 import { getMyDayContext, sourceLabel, type MyDayContext, type MyDayItem } from '../../lib/workforceMyDay'
 import { businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
+import { buildHubSevenDayCalendar, formatHubCalendarDay, type HubCalendarDay } from '../../lib/hubCalendar'
 import { isManagerRole } from '../../lib/roles'
 
 // ── Constants ─────────────────────────────────────────────────
@@ -68,10 +69,6 @@ function todayLabel() {
   return formatBusinessDate(new Date(), {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
-}
-
-function localDateKeyFromIso(value: string) {
-  return businessDateKey(value) || value.slice(0, 10)
 }
 
 function workMatchesProfile(work: { assigned_to_user_id?: string | null; assigned_to_name?: string | null; helper_names?: string[] }, profile: { id?: string; full_name?: string | null } | null) {
@@ -223,19 +220,7 @@ export default function CgHubPage() {
   [relevantDeliverables])
 
   // CG Calendar derived
-  const todayCompanyEvents = useMemo(() => {
-    return companyEvents.filter(e =>
-      e.status !== 'cancelled' &&
-      localDateKeyFromIso(e.start_at) === today
-    )
-  }, [companyEvents, today])
-
-  const upcomingCompanyEvents = useMemo(() => {
-    return companyEvents.filter(e =>
-      e.status !== 'cancelled' &&
-      localDateKeyFromIso(e.start_at) >= today
-    ).sort((a, b) => a.start_at.localeCompare(b.start_at)).slice(0, 5)
-  }, [companyEvents, today])
+  const companyCalendarDays = useMemo(() => buildHubSevenDayCalendar(companyEvents, today), [companyEvents, today])
 
   // Clients needing attention
   const clientsNeedingAttention = useMemo(() => {
@@ -409,10 +394,9 @@ export default function CgHubPage() {
             stats={stats}
           />
 
-          {/* D — Today's CG Calendar */}
+          {/* D — CG Calendar */}
           <CompanyCalendarSection
-            todayCompanyEvents={todayCompanyEvents}
-            upcomingCompanyEvents={upcomingCompanyEvents}
+            days={companyCalendarDays}
             companyEventsMissing={companyEventsMissing}
           />
 
@@ -620,21 +604,19 @@ function TodayFocusSection({
   )
 }
 
-// ── C: Today's CG Calendar ───────────────────────────────
+// ── C: CG Calendar ───────────────────────────────────────
 
 function CompanyCalendarSection({
-  todayCompanyEvents,
-  upcomingCompanyEvents,
+  days,
   companyEventsMissing,
 }: {
-  todayCompanyEvents: CompanyCalendarEvent[]
-  upcomingCompanyEvents: CompanyCalendarEvent[]
+  days: HubCalendarDay[]
   companyEventsMissing: boolean
 }) {
   if (companyEventsMissing) {
     return (
       <div className="mb-8">
-        <HubSectionHeader title="Today's CG Calendar" />
+        <HubSectionHeader title="CG Calendar — Next 7 Days" />
         <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-4">
           <p className="text-xs text-amber-300/80">
             CG Calendar setup needed. Run phase-10a SQL to enable company events.
@@ -650,65 +632,74 @@ function CompanyCalendarSection({
     )
   }
 
-  const displayEvents = todayCompanyEvents.length > 0 ? todayCompanyEvents : upcomingCompanyEvents.slice(0, 5)
+  const eventCount = days.reduce((count, day) => count + day.events.length, 0)
 
   return (
     <div className="mb-8">
       <HubSectionHeader
-        title="Today's CG Calendar"
-        subtitle={todayCompanyEvents.length > 0 ? `${todayCompanyEvents.length} event${todayCompanyEvents.length === 1 ? '' : 's'} today` : 'No events today'}
+        title="CG Calendar — Next 7 Days"
+        subtitle={`${eventCount} event${eventCount === 1 ? '' : 's'}`}
       />
 
-      {displayEvents.length === 0 ? (
-        <div className="rounded-xl border border-white/8 bg-brand-surface/90 p-4">
-          <p className="text-sm text-brand-primary/60">No company events today.</p>
-          <Link
-            to="/admin/cg-calendar"
-            className="mt-2 inline-block text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
+      <div className="grid gap-3 sm:grid-cols-2">
+        {days.map(day => (
+          <div
+            key={day.date}
+            className={`rounded-xl border p-3 ${day.isToday ? 'border-brand-teal/30 bg-brand-teal/[0.06]' : 'border-white/8 bg-brand-surface/80'}`}
           >
-            Open CG Calendar →
-          </Link>
-        </div>
-      ) : (
-        <div className="grid gap-2">
-          {displayEvents.slice(0, 5).map(event => (
-            <Link
-              key={event.id}
-              to="/admin/cg-calendar"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.04]"
-            >
-              <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
-                event.event_type === 'content_run'
-                  ? 'bg-emerald-400/15 text-emerald-300'
-                  : event.event_type === 'shoot'
-                    ? 'bg-purple-400/15 text-purple-300'
-                    : event.event_type === 'meeting'
-                      ? 'bg-sky-400/15 text-sky-300'
-                      : event.event_type === 'deadline'
-                        ? 'bg-red-400/15 text-red-300'
-                        : 'bg-white/10 text-brand-primary'
-              }`}>
-                {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
-              </span>
-              <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{event.title}</p>
-              {event.client_name && (
-                <span className="shrink-0 rounded-full border border-brand-teal/25 bg-brand-teal/[0.08] px-2 py-0.5 text-[10px] font-semibold text-[#2dd4bf]">
-                  {event.client_name}
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${day.isToday ? 'text-brand-teal' : 'text-brand-primary/55'}`}>
+                {formatHubCalendarDay(day.date)}
+              </p>
+              {day.isToday && (
+                <span className="rounded-full border border-brand-teal/25 bg-brand-teal/[0.08] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-brand-teal">
+                  Today
                 </span>
               )}
-              <span className="shrink-0 text-xs text-brand-primary/60">
-                {event.all_day ? 'All day' : formatBusinessTime(event.start_at)}
-              </span>
-            </Link>
-          ))}
-          <Link
-            to="/admin/cg-calendar"
-            className="mt-1 text-xs font-semibold text-[#2dd4bf] hover:text-white transition-colors"
-          >
-            View all →
-          </Link>
-        </div>
-      )}
+            </div>
+            {day.events.length === 0 ? (
+              <p className="px-1 py-1 text-xs text-brand-primary/40">No events</p>
+            ) : (
+              <div className="space-y-0.5">
+                {day.events.map(event => (
+                  <Link
+                    key={event.id}
+                    to="/admin/cg-calendar"
+                    className="flex items-center gap-2 rounded-lg px-1 py-1.5 transition-colors hover:bg-white/[0.04]"
+                  >
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                      event.event_type === 'content_run'
+                        ? 'bg-emerald-400/15 text-emerald-300'
+                        : event.event_type === 'shoot'
+                          ? 'bg-purple-400/15 text-purple-300'
+                          : event.event_type === 'meeting'
+                            ? 'bg-sky-400/15 text-sky-300'
+                            : event.event_type === 'deadline'
+                              ? 'bg-red-400/15 text-red-300'
+                              : 'bg-white/10 text-brand-primary'
+                    }`}>
+                      {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-white">{event.title}</p>
+                      {event.client_name && <p className="truncate text-[10px] text-brand-teal/75">{event.client_name}</p>}
+                    </div>
+                    <span className="shrink-0 text-xs text-brand-primary/60">
+                      {event.all_day ? 'All day' : formatBusinessTime(event.start_at)}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <Link
+        to="/admin/cg-calendar"
+        className="mt-3 inline-block text-xs font-semibold text-[#2dd4bf] transition-colors hover:text-white"
+      >
+        View full CG Calendar →
+      </Link>
     </div>
   )
 }
