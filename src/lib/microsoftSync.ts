@@ -42,6 +42,8 @@ function ownedPayload(payload: MicrosoftProposedPayload): object | null {
       original_plan_name: payload.original_plan_name,
       original_bucket_name: payload.original_bucket_name,
       microsoft_source_description: payload.microsoft_source_description,
+      assigned_to_name: payload.assigned_to_name ?? null,
+      helper_names: payload.helper_names ?? [],
     }
   }
   if (payload.destination === 'client_schedule') {
@@ -57,6 +59,9 @@ function ownedPayload(payload: MicrosoftProposedPayload): object | null {
       production_status: payload.production_status,
       scheduled_date: payload.scheduled_date,
       microsoft_source_description: payload.microsoft_source_description,
+      assigned_to_user_id: payload.assigned_to_user_id ?? null,
+      assigned_to_name: payload.assigned_to_name ?? null,
+      helper_names: payload.helper_names ?? [],
     }
   }
   return {
@@ -83,6 +88,8 @@ function ownedTarget(target: MicrosoftExistingTarget): object {
       original_plan_name: target.payload.original_plan_name,
       original_bucket_name: target.payload.original_bucket_name,
       microsoft_source_description: target.payload.microsoft_source_description,
+      assigned_to_name: (target.payload as Record<string, unknown>).assigned_to_name ?? null,
+      helper_names: (target.payload as Record<string, unknown>).helper_names ?? [],
     }
   }
   if (target.destination === 'client_schedule') {
@@ -98,6 +105,9 @@ function ownedTarget(target: MicrosoftExistingTarget): object {
       production_status: target.payload.production_status,
       scheduled_date: target.payload.scheduled_date,
       microsoft_source_description: target.payload.microsoft_source_description,
+      assigned_to_user_id: (target.payload as Record<string, unknown>).assigned_to_user_id ?? null,
+      assigned_to_name: (target.payload as Record<string, unknown>).assigned_to_name ?? null,
+      helper_names: (target.payload as Record<string, unknown>).helper_names ?? [],
     }
   }
   return {
@@ -223,8 +233,7 @@ export function buildMicrosoftReconciliation(
   existingTargets: MicrosoftExistingTarget[],
   deliverableSlotKeys: Set<string>,
 ): MicrosoftImportPreviewItem[] {
-  const historicalCompletedCutoff = snapshot.plannerCompletedCutoff ?? null
-  const mapped = buildMicrosoftImportPreview(snapshot.records, context, historicalCompletedCutoff)
+  const mapped = buildMicrosoftImportPreview(snapshot.records, context)
   const targetsByKey = new Map<string, MicrosoftExistingTarget[]>()
   for (const target of existingTargets) {
     const key = targetKey(target)
@@ -243,8 +252,8 @@ export function buildMicrosoftReconciliation(
     if (!key) return { ...item, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, sourceComplete }
     const targets = targetsByKey.get(key) ?? []
     if (targets.length === 0) {
-      if (item.skipCode === 'historical_completed') {
-        return { ...item, previewStatus: 'skipped' as const, reconciliationAction: 'skipped' as const, sourceComplete }
+      if (item.destination === 'planner' && item.proposedPayload?.destination === 'planner' && item.proposedPayload.status === 'done') {
+        return { ...item, previewStatus: 'skipped' as const, reconciliationAction: 'skipped' as const, skipCode: 'completed_operational_not_imported' as const, sourceComplete, warnings: [...item.warnings, 'Newly completed operational task is not imported. Existing linked tasks can still complete.'] }
       }
       const sourceHash = stableHash(ownedPayload(item.proposedPayload))
       return { ...item, reconciliationAction: 'create' as const, sourceHash, sourceComplete }

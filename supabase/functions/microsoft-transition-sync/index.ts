@@ -143,12 +143,6 @@ function dateOnly(value: unknown): string | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10)
 }
 
-function validDateOnly(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
-  const parsed = new Date(`${value}T00:00:00Z`)
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
-}
-
 function outlookIso(value: unknown): string {
   if (!value || typeof value !== 'object') return ''
   const dateTime = (value as { dateTime?: unknown }).dateTime
@@ -190,7 +184,7 @@ Deno.serve(async request => {
   const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
 
-  let body: { action?: string; rangeStart?: string; rangeEnd?: string; plannerCompletedCutoff?: string }
+  let body: { action?: string; rangeStart?: string; rangeEnd?: string }
   try { body = await request.json() } catch { return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400) }
 
   const tenantId = Deno.env.get('MICROSOFT_TENANT_ID')
@@ -223,8 +217,6 @@ Deno.serve(async request => {
   if (!body.rangeStart || !body.rangeEnd || Number.isNaN(Date.parse(body.rangeStart)) || Number.isNaN(Date.parse(body.rangeEnd)) || Date.parse(body.rangeEnd) <= Date.parse(body.rangeStart)) {
     return jsonResponse({ ok: false, error: 'A valid bounded calendar range is required.' }, 400)
   }
-  const plannerCompletedCutoff = body.plannerCompletedCutoff ?? body.rangeStart.slice(0, 10)
-  if (!validDateOnly(plannerCompletedCutoff)) return jsonResponse({ ok: false, error: 'A valid Planner completion cutoff is required.' }, 400)
   if (Date.parse(body.rangeEnd) - Date.parse(body.rangeStart) > 370 * 24 * 60 * 60 * 1000) return jsonResponse({ ok: false, error: 'Outlook range cannot exceed 370 days.' }, 400)
 
   const graphToken = await accessToken(tenantId, clientId, clientSecret)
@@ -276,8 +268,36 @@ Deno.serve(async request => {
     sources.push({ sourceType: 'planner_plan', sourceId: plan.id, sourceName: plan.name, complete, rangeStart: null, rangeEnd: null, recordCount: taskResult.values.length, safeError: taskResult.safeError ?? bucketResult.safeError ?? (detailResult.complete ? null : 'Some Planner task details could not be fetched.') })
   }
 
+  const assigneeIds = new Set<string>()
+  for (const record of records) {
+    if (record.sourceType === 'planner_task') {
+      const ids = record.assigneeMicrosoftIds as string[]
+      for (const id of ids) assigneeIds.add(id)
+    }
+  }
+  const assigneeMap: Record<string, { displayName: string; mail: string | null; userPrincipalName: string | null }> = {}
+  const idList = [...assigneeIds]
+  for (let index = 0; index < idList.length; index += 20) {
+    const batch = idList.slice(index, index + 20)
+    const batchResult = await fetchGraph(`${GRAPH_ROOT}/$batch`, graphToken, undefined, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: batch.map(id => ({ id, method: 'GET', url: `/users/${encodeURIComponent(id)}?$select=id,displayName,mail,userPrincipalName` })) }),
+    })
+    if (batchResult?.ok) {
+      const batchBody = await batchResult.json() as { responses?: Array<{ id: string; status: number; body?: { id?: string; displayName?: string; mail?: string; userPrincipalName?: string } }> }
+      for (const item of batchBody.responses ?? []) {
+        if (item.status === 200 && item.body) {
+          const user = item.body
+          assigneeMap[user.id ?? item.id] = { displayName: user.displayName ?? 'Unknown', mail: user.mail ?? null, userPrincipalName: user.userPrincipalName ?? null }
+        }
+      }
+    }
+    if (index + 20 < idList.length) await sleep(250)
+  }
+
   return jsonResponse({
     ok: true,
-    snapshot: { format: 'cg-dynamics-microsoft-snapshot', version: 2, exportedAt: new Date().toISOString(), exportedBy: 'CG Dynamics Microsoft transition sync', triggerType: 'admin', plannerCompletedCutoff, sources, records },
+    snapshot: { format: 'cg-dynamics-microsoft-snapshot', version: 3, exportedAt: new Date().toISOString(), exportedBy: 'CG Dynamics Microsoft transition sync', triggerType: 'admin', sources, records, assigneeMap },
   })
 })
