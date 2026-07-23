@@ -1,5 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { resolveMetaGraphConfig } from '../_shared/meta.ts'
 
 // Scopes required for future Meta asset discovery and reporting:
 // - pages_show_list          - list Facebook Pages the connected user manages
@@ -10,6 +11,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SCOPES = [
   'pages_show_list',
   'pages_read_engagement',
+  'read_insights',
   'instagram_basic',
   'instagram_manage_insights',
   'business_management',
@@ -56,6 +58,16 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Method not allowed' }, 405)
   }
 
+  let graphVersion: string
+  try {
+    graphVersion = resolveMetaGraphConfig().version
+  } catch (error) {
+    return jsonResponse({
+      ok: false,
+      error: error instanceof Error ? error.message : 'Internal Meta configuration error.',
+    }, 500)
+  }
+
   const appId = Deno.env.get('META_APP_ID')
   const redirectUri = Deno.env.get('META_REDIRECT_URI')
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -100,7 +112,7 @@ Deno.serve(async (req) => {
     scope: SCOPES.join(','),
   })
 
-  const url = `https://www.facebook.com/v22.0/dialog/oauth?${params.toString()}`
+  const url = `https://www.facebook.com/${graphVersion}/dialog/oauth?${params.toString()}`
 
   return jsonResponse({
     ok: true,

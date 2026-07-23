@@ -1,4 +1,5 @@
 import { corsHeaders } from '../_shared/cors.ts'
+import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
 
 // Server-side Supabase client using the service_role key.
 // This bypasses RLS — only Edge Functions should ever use this.
@@ -7,6 +8,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const REQUESTED_SCOPES = [
   'pages_show_list',
   'pages_read_engagement',
+  'read_insights',
   'instagram_basic',
   'instagram_manage_insights',
   'business_management',
@@ -19,38 +21,21 @@ function redirect(to: string): Response {
   })
 }
 
-function redact(text: string): string {
-  return text
-    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
-    .replace(/client_secret=[^&\s"']+/gi, 'client_secret=[redacted]')
-    .replace(/code=[^&\s"']+/gi, 'code=[redacted]')
-    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
-    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
-}
-
 async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value)
   const digest = await crypto.subtle.digest('SHA-256', data)
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
-async function safeMetaError(res: Response): Promise<string> {
-  try {
-    const body = await res.json()
-    const err = body?.error
-    if (err && typeof err === 'object') {
-      return redact([
-        err.message ? String(err.message) : null,
-        err.type ? `type ${err.type}` : null,
-        err.code !== undefined ? `code ${err.code}` : null,
-        err.error_subcode !== undefined ? `subcode ${err.error_subcode}` : null,
-        err.fbtrace_id ? `trace ${err.fbtrace_id}` : null,
-      ].filter(Boolean).join(', '))
-    }
-  } catch {
-    // Keep HTTP status fallback.
-  }
-  return `HTTP ${res.status}`
+async function safeMetaError(res: Response, tokens: Array<string | null | undefined>): Promise<string> {
+  const error = await readMetaError(res, tokens)
+  return [
+    error.message,
+    error.type ? `type ${error.type}` : null,
+    error.code ? `code ${error.code}` : null,
+    error.subcode ? `subcode ${error.subcode}` : null,
+    error.trace ? `trace ${error.trace}` : null,
+  ].filter(Boolean).join(', ')
 }
 
 Deno.serve(async (req) => {
@@ -74,11 +59,19 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
+  let graphBaseUrl: string
+  try {
+    graphBaseUrl = resolveMetaGraphConfig().baseUrl
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : 'Internal Meta configuration error.')
+    return redirect(`${appUrl}/admin/integrations/meta?meta=config_error`)
+  }
+
   const sb = createClient(supabaseUrl, serviceRoleKey)
 
   // If Meta returned an error, redirect back to the app with ?meta=error.
   if (errorParam) {
-    console.error('Meta OAuth provider error:', redact(`${errorParam} ${errorDesc ?? ''}`))
+    console.error('Meta OAuth provider error:', redact(`${errorParam} ${errorDesc ?? ''}`, [code]))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
@@ -126,8 +119,8 @@ Deno.serve(async (req) => {
 
   let tokenResponse: Response
   try {
-    tokenResponse = await fetch(
-      'https://graph.facebook.com/v22.0/oauth/access_token',
+    tokenResponse = await metaFetch(
+      `${graphBaseUrl}/oauth/access_token`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -135,12 +128,12 @@ Deno.serve(async (req) => {
       },
     )
   } catch (err) {
-    console.error('Meta token exchange network error:', redact(err instanceof Error ? err.message : String(err)))
+    console.error('Meta token exchange network error:', redact(err instanceof Error ? err.message : String(err), [appSecret, code]))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
   if (!tokenResponse.ok) {
-    console.error('Meta token exchange error:', await safeMetaError(tokenResponse))
+    console.error('Meta token exchange error:', await safeMetaError(tokenResponse, [appSecret, code]))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 

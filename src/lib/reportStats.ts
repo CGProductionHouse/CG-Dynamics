@@ -27,6 +27,7 @@ export interface ReportStatsPost {
   post_type: string | null
   platform: Platform | null
   imageUrl: string | null
+  metaObjectId: string | null
 }
 
 export interface ReportStats {
@@ -59,6 +60,7 @@ export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
     post_type: post.post_type,
     platform: post.platform,
     imageUrl: null,
+    metaObjectId: post.meta_post_id,
   }
 }
 
@@ -113,6 +115,7 @@ export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
     post_type: raw.content_type ?? post.meta_post_type,
     platform: post.platform,
     imageUrl: raw.full_picture ?? raw.thumbnail_url ?? raw.media_url ?? null,
+    metaObjectId: post.meta_post_id,
   }
 }
 
@@ -149,8 +152,8 @@ export function rankPostsByStrength(posts: ReportStatsPost[]): {
   return { posts: ranked, metric }
 }
 
-export function calculateReportStats(posts: ReportStatsPost[]): ReportStats {
-  const { posts: ranked } = rankPostsByStrength(posts)
+export function calculateReportStats(posts: ReportStatsPost[], evidencePosts: ReportStatsPost[] = posts): ReportStats {
+  const { posts: ranked } = rankPostsByStrength(evidencePosts)
 
   return {
     totalReach: sumOrNull(posts.map(post => post.reach)),
@@ -266,14 +269,16 @@ export interface PerformanceMovement {
 // double counted.
 export function buildMasterReport(
   posts: ReportStatsPost[],
-  manualMetrics: ManualPlatformMetric[]
+  manualMetrics: ManualPlatformMetric[],
+  excludedContentKeys: ReadonlySet<string> = new Set(),
 ): MasterReportData {
   const platforms: PlatformView[] = PLATFORMS.map(platform => {
     const platformPosts = posts.filter(post => post.platform === platform)
+    const evidencePosts = platformPosts.filter(post => !excludedContentKeys.has(contentEvidenceKey(post)))
     const manual = manualMetrics.find(metric => metric.platform === platform) ?? null
 
     if (platformPosts.length > 0) {
-      const stats = calculateReportStats(platformPosts)
+      const stats = calculateReportStats(platformPosts, evidencePosts)
       // Meta synced manual metric is the PRIMARY source for account-level totals.
       // Post data provides post count, top content, captions, and engagement fallback.
       const viewsAvailable = metaMetricAvailable(manual, 'views')
@@ -348,8 +353,14 @@ export function buildMasterReport(
     totalViews: null,
     totalEngagements: withData.reduce((sum, view) => sum + view.engagements, 0),
     bestPlatform,
-    bestPostOverall: posts.length > 0 ? calculateReportStats(posts).bestPost : null,
+    bestPostOverall: posts.length > 0
+      ? calculateReportStats(posts, posts.filter(post => !excludedContentKeys.has(contentEvidenceKey(post)))).bestPost
+      : null,
   }
+}
+
+export function contentEvidenceKey(post: Pick<ReportStatsPost, 'platform' | 'metaObjectId'>): string {
+  return `${post.platform ?? 'unknown'}:${post.metaObjectId ?? ''}`
 }
 
 export function totalManualProfileVisits(manualMetrics: ManualPlatformMetric[]): number | null {

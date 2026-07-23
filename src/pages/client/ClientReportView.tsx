@@ -18,6 +18,7 @@ import {
   formatPercent,
   isMetaSyncedManualMetric,
   reportPostToStatsPost,
+  contentEvidenceKey,
   shortCaption,
 } from '../../lib/reportStats'
 import {
@@ -39,6 +40,13 @@ import {
   formatGoogleAdsCurrencyValue,
   formatGoogleAdsMoney,
 } from '../../lib/googleAds'
+import {
+  buildOverviewSections,
+  type OverviewSection as VerifiedSection,
+  type OverviewLine as VerifiedLine,
+  type PlatformFact,
+} from '../../lib/overviewModel'
+import type { ReportContentExclusion, ReportFactHealth } from '../../lib/db/reportingTruth'
 import type {
   GoogleAdsDashboardData,
   GoogleAdsDashboardState,
@@ -73,14 +81,19 @@ export function ClientReportView({
   report,
   client = null,
   manualMetrics = [],
-  previousReport = null,
-  previousManualMetrics = [],
   googleAds,
   previousGoogleAds,
   googleAdsState,
   googleAdsError,
   showEmptyStrategy = false,
   showAdminDiagnostics = false,
+  facts = [],
+  previousFacts = [],
+  normalizedFactsAttempted = false,
+  dataHealth = [],
+  contentExclusions = [],
+  onSetContentExcluded,
+  curationBusyId = null,
 }: {
   report: ReportWithPosts
   client?: Client | null
@@ -94,32 +107,51 @@ export function ClientReportView({
   showEmptyStrategy?: boolean
   /** Staff-only: renders the data-health panel. Never enable on client routes. */
   showAdminDiagnostics?: boolean
+  /** Normalized verified facts for the report month (server-mediated / RLS-scoped). */
+  facts?: PlatformFact[]
+  /** Normalized verified facts for the previous month (comparability gate input). */
+  previousFacts?: PlatformFact[]
+  /** True once normalized syncing was attempted, even if persistence returned no rows. */
+  normalizedFactsAttempted?: boolean
+  /** Staff-only connector health rows. Never rendered on client routes. */
+  dataHealth?: ReportFactHealth[]
+  /** Report-bound safe exclusion flags. They affect highlights, never totals. */
+  contentExclusions?: ReportContentExclusion[]
+  /** Staff-only explicit curation action. Omitted on client routes. */
+  onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
+  curationBusyId?: string | null
 }) {
   const [tab, setTab] = useState<TabKey>('overview')
 
-  const statsPosts = useMemo<ReportStatsPost[]>(() => postsForReportMonth(report), [report])
-  const master = useMemo(() => buildMasterReport(statsPosts, manualMetrics), [statsPosts, manualMetrics])
+  // Verified, availability-aware Overview sections built ONLY from normalized
+  // facts. Per-platform (no cross-platform unique summing); the comparability
+  // gate inside buildOverviewSections suppresses invalid month-on-month movement.
+  const verifiedSections = useMemo(() => buildOverviewSections(facts, previousFacts), [facts, previousFacts])
 
-  const previousStatsPosts = useMemo<ReportStatsPost[]>(
-    () => (previousReport ? postsForReportMonth(previousReport) : []),
-    [previousReport]
+  const normalizedFactsActive = normalizedFactsAttempted || facts.length > 0
+  const excludedContentKeys = useMemo(
+    () => new Set(contentExclusions.filter(item => item.excluded).map(item => `${item.platform}:${item.meta_object_id}`)),
+    [contentExclusions],
   )
-
-  const previousMaster = useMemo(
-    () =>
-      previousReport || previousManualMetrics.length > 0
-        ? buildMasterReport(previousStatsPosts, previousManualMetrics)
-        : null,
-    [previousManualMetrics, previousReport, previousStatsPosts]
+  const statsPosts = useMemo<ReportStatsPost[]>(() => postsForReportMonth(report), [report])
+  const master = useMemo(
+    () => buildMasterReport(statsPosts, manualMetrics, excludedContentKeys),
+    [excludedContentKeys, manualMetrics, statsPosts],
   )
 
   const availablePlatforms = master.platforms.filter(view => view.source !== 'none')
-  const hasMeta = availablePlatforms.length > 0
+  const reportPlatforms = Array.from(new Set<Platform>([
+    ...availablePlatforms.map(view => view.platform),
+    ...facts
+      .map(fact => fact.platform)
+      .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram'),
+  ]))
+  const hasMeta = availablePlatforms.length > 0 || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
   const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
   const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'overview', label: 'Overview' },
-    ...availablePlatforms.map(view => ({ key: view.platform as TabKey, label: view.label })),
+    ...reportPlatforms.map(platform => ({ key: platform as TabKey, label: PLATFORM_LABELS[platform] })),
     ...(hasGoogleAds ? [{ key: 'google_ads' as const, label: 'Google Ads' }] : []),
   ]
 
@@ -133,13 +165,13 @@ export function ClientReportView({
     () =>
       buildReportPerformance({
         master,
-        previousMaster,
+        previousMaster: null,
         currentManual: manualMetrics,
-        previousManual: previousManualMetrics,
+        previousManual: [],
         monthLabel: month,
         previousMonthLabel,
       }),
-    [master, previousMaster, manualMetrics, previousManualMetrics, month, previousMonthLabel]
+    [master, manualMetrics, month, previousMonthLabel]
   )
 
   return (
@@ -162,7 +194,6 @@ export function ClientReportView({
         <OverviewTab
           report={report}
           master={master}
-          previousMaster={previousMaster}
           performance={performance}
           showEmptyStrategy={showEmptyStrategy}
           nextSteps={performance.nextSteps}
@@ -171,6 +202,13 @@ export function ClientReportView({
           previousGoogleAds={previousGoogleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
+          verifiedSections={verifiedSections}
+          normalizedFactsActive={normalizedFactsActive}
+          dataHealth={dataHealth}
+          contentExclusions={contentExclusions}
+          statsPosts={statsPosts}
+          onSetContentExcluded={onSetContentExcluded}
+          curationBusyId={curationBusyId}
         />
       ) : tab === 'google_ads' ? (
         <GoogleAdsTab
@@ -182,10 +220,13 @@ export function ClientReportView({
       ) : (
         <PlatformTab
           view={master.platforms.find(item => item.platform === tab)!}
-          previousView={previousMaster?.platforms.find(item => item.platform === tab) ?? null}
-          previousManual={previousManualMetrics.find(metric => metric.platform === tab) ?? null}
+          previousView={null}
+          previousManual={null}
           previousMonthLabel={previousMonthLabel}
           monthLabel={month}
+          facts={facts.filter(fact => fact.platform === tab)}
+          previousFacts={previousFacts.filter(fact => fact.platform === tab)}
+          normalizedFactsActive={normalizedFactsActive}
         />
       )}
 
@@ -198,6 +239,7 @@ export function ClientReportView({
               : 'Source: Meta Business Sync.'}
         </p>
       )}
+      <MethodologyDisclaimer />
     </div>
   )
 }
@@ -308,7 +350,6 @@ function ReportTabs({
 function OverviewTab({
   report,
   master,
-  previousMaster,
   performance,
   showEmptyStrategy,
   nextSteps,
@@ -317,10 +358,16 @@ function OverviewTab({
   previousGoogleAds,
   googleAdsState,
   googleAdsError,
+  verifiedSections,
+  normalizedFactsActive,
+  dataHealth,
+  contentExclusions,
+  statsPosts,
+  onSetContentExcluded,
+  curationBusyId,
 }: {
   report: ReportWithPosts
   master: MasterReportData
-  previousMaster: MasterReportData | null
   performance: ReportPerformance
   showEmptyStrategy: boolean
   nextSteps: NextStep[]
@@ -329,11 +376,19 @@ function OverviewTab({
   previousGoogleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
   googleAdsError: string | null
+  verifiedSections: VerifiedSection[]
+  normalizedFactsActive: boolean
+  dataHealth: ReportFactHealth[]
+  contentExclusions: ReportContentExclusion[]
+  statsPosts: ReportStatsPost[]
+  onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
+  curationBusyId: string | null
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
   const hasGoogleAdsSection = googleAds !== null || String(googleAdsState) !== 'idle'
-  const hasData = platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection
+  const hasVerified = verifiedSections.length > 0
+  const hasData = normalizedFactsActive || platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection
 
   if (!hasData) {
     return (
@@ -348,53 +403,58 @@ function OverviewTab({
 
   return (
     <>
-      {/* A - Combined executive hero (only safely-summable metrics headline it) */}
-      <CombinedHero master={master} performance={performance} />
-
-      {/* B - Performance overview */}
-      {platformsWithData.length > 0 && (
-        <section className="mb-14">
-          <SectionHeading eyebrow="Performance overview" title="The month at a glance" />
-          <p className="-mt-2 mb-6 max-w-2xl text-base leading-relaxed text-slate-300">
-            {performance.performanceHeadline}
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {performance.metrics.map(metric => (
-              <PerformanceCard key={metric.key} metric={metric} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* C - Growth trend */}
-      {performance.growthSeries.length > 0 && performance.previousMonthLabel && (
-        <section className="mb-14">
-          <SectionHeading
-            eyebrow="Growth trend"
-            title={`${shortMonth(performance.previousMonthLabel)} → ${shortMonth(performance.monthLabel)}`}
-          />
-          <GrowthChart
-            series={performance.growthSeries}
-            currentLabel={shortMonth(performance.monthLabel)}
-            previousLabel={shortMonth(performance.previousMonthLabel)}
-          />
-        </section>
-      )}
-
-      {/* D - Channel performance */}
-      {platformsWithData.length > 0 && (
-        <section className="mb-14">
-          <SectionHeading eyebrow="Channel performance" title="How each channel performed" />
-          <div className="grid gap-4 lg:grid-cols-3">
-            {platformsWithData.map(view => (
-              <ChannelCard
-                key={view.platform}
-                view={view}
-                previousView={previousMaster?.platforms.find(p => p.platform === view.platform) ?? null}
+      {normalizedFactsActive ? (
+        /* Verified, availability-aware Overview — per-platform, never combined,
+           invalid month-on-month movement suppressed by the comparability gate. */
+        hasVerified
+          ? <VerifiedOverview sections={verifiedSections} monthLabel={performance.monthLabel} />
+          : <VerifiedFactsUnavailable />
+      ) : (
+        <>
+          {/* Legacy fallback for reports synced before normalized facts exist.
+              No combined views/reach headline (those totals are null now). */}
+          <CombinedHero master={master} performance={performance} />
+          {platformsWithData.length > 0 && (
+            <section className="mb-14">
+              <SectionHeading eyebrow="Performance overview" title="The month at a glance" />
+              <p className="-mt-2 mb-6 max-w-2xl text-base leading-relaxed text-slate-300">
+                {performance.performanceHeadline}
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {performance.metrics.map(metric => (
+                  <PerformanceCard key={metric.key} metric={metric} />
+                ))}
+              </div>
+            </section>
+          )}
+          {performance.growthSeries.length > 0 && performance.previousMonthLabel && (
+            <section className="mb-14">
+              <SectionHeading
+                eyebrow="Growth trend"
+                title={`${shortMonth(performance.previousMonthLabel)} → ${shortMonth(performance.monthLabel)}`}
               />
-            ))}
-          </div>
-        </section>
+              <GrowthChart
+                series={performance.growthSeries}
+                currentLabel={shortMonth(performance.monthLabel)}
+                previousLabel={shortMonth(performance.previousMonthLabel)}
+              />
+            </section>
+          )}
+          {platformsWithData.length > 0 && (
+            <section className="mb-14">
+              <SectionHeading eyebrow="Channel performance" title="How each channel performed" />
+              <div className="grid gap-4 lg:grid-cols-3">
+                {platformsWithData.map(view => (
+                  <ChannelCard
+                    key={view.platform}
+                    view={view}
+                    previousView={null}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
       )}
 
       {hasGoogleAdsSection && (
@@ -406,21 +466,185 @@ function OverviewTab({
         />
       )}
 
-      {/* E - Content */}
-      <ContentSection topContent={performance.topContent} strategy={strategy} />
+      {/* Content */}
+      <ContentSection
+        topContent={performance.topContent}
+        strategy={strategy}
+        exclusions={contentExclusions}
+        statsPosts={statsPosts}
+        onSetContentExcluded={onSetContentExcluded}
+        curationBusyId={curationBusyId}
+      />
 
-      {/* F - Recommendations */}
-      {performance.recommendations.length > 0 && (
+      {/* Recommendations */}
+      {!normalizedFactsActive && performance.recommendations.length > 0 && (
         <RecommendationsSection recommendations={performance.recommendations} />
       )}
 
-      {/* G - CG action plan */}
-      <StrategyBlocks report={report} strategy={strategy} showEmptyStrategy={showEmptyStrategy} nextSteps={nextSteps} recommendations={performance.recommendations} />
+      {/* CG action plan */}
+      <StrategyBlocks
+        report={report}
+        strategy={strategy}
+        showEmptyStrategy={showEmptyStrategy}
+        nextSteps={normalizedFactsActive ? [] : nextSteps}
+        recommendations={normalizedFactsActive ? [] : performance.recommendations}
+      />
 
-      {/* H - Staff-only data health (never rendered on client routes) */}
+      {/* Staff-only connector data health (never rendered on client routes) */}
       {showAdminDiagnostics && <AdminDataHealth master={master} performance={performance} />}
+      {showAdminDiagnostics && dataHealth.length > 0 && <ConnectorDataHealth rows={dataHealth} />}
+
     </>
   )
+}
+
+function VerifiedFactsUnavailable() {
+  return (
+    <section className="mb-14 rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6">
+      <p className="font-semibold text-white">Verified platform figures are unavailable for this month</p>
+      <p className="mt-2 text-sm leading-relaxed text-slate-400">
+        Missing or permission-blocked platform values are not shown as zero. CG will review the connection before using them in comparisons or recommendations.
+      </p>
+    </section>
+  )
+}
+
+// ── Verified Overview (facts-driven, per-platform, comparability-gated) ───────
+function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabel: string }) {
+  return (
+    <div className="mb-14 space-y-10">
+      {sections.map(section => (
+        <section key={section.key}>
+          <SectionHeading eyebrow="Verified performance" title={section.title} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {section.lines.map(line => (
+              <VerifiedMetricCard key={`${line.platform}:${line.metricKey}`} line={line} />
+            ))}
+          </div>
+        </section>
+      ))}
+      <p className="text-xs leading-relaxed text-slate-500">
+        Figures are shown per platform. Views, viewers and reach are never added together across
+        platforms because the same person can appear on more than one. A month-on-month change is
+        shown only when both months measured the same thing the same way.
+      </p>
+    </div>
+  )
+}
+
+function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
+  const showMovement = line.comparable && typeof line.changePercent === 'number'
+  const up = (line.changePercent ?? 0) > 0
+  const down = (line.changePercent ?? 0) < 0
+  return (
+    <div className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5">
+      <p className="text-[0.7rem] uppercase tracking-[0.18em] text-slate-400">{line.label}</p>
+      <p className="mt-2 text-3xl font-semibold text-white">
+        {line.hasValue && typeof line.value === 'number' ? formatNumber(line.value) : '—'}
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        {line.reconstructed && (
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-slate-300">Estimated from posts</span>
+        )}
+        {line.availability === 'partial' && !line.reconstructed && (
+          <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-amber-200">Partial platform coverage</span>
+        )}
+        {line.isSnapshot ? (
+          <span className="text-slate-500">Current followers snapshot at the latest sync</span>
+        ) : showMovement ? (
+          <span className={up ? 'text-emerald-300' : down ? 'text-amber-300' : 'text-slate-400'}>
+            {formatPercent(line.changePercent as number)} vs last month
+          </span>
+        ) : (
+          <span className="text-slate-500">{clientComparisonMessage(line.comparisonReason)}</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function clientComparisonMessage(reason: string | null): string {
+  if (!reason) return 'No comparable prior month'
+  if (/source|aggregation|paid and organic/i.test(reason)) return 'Comparison unavailable because the reporting definition changed'
+  if (/incomplete|verified|numeric/i.test(reason)) return 'Comparison unavailable because both months are not complete'
+  if (/snapshot/i.test(reason)) return 'Current snapshot only'
+  return 'No comparable prior month'
+}
+
+// ── Reporting methodology & disclaimer ───────────────────────────────────────
+function MethodologyDisclaimer() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mx-auto mt-14 max-w-3xl border-t border-white/10 pt-6 text-center">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="text-xs font-medium text-slate-400 underline decoration-dotted underline-offset-4 hover:text-slate-200"
+      >
+        Reporting methodology &amp; disclaimer
+      </button>
+      {open && (
+        <div className="mx-auto mt-4 max-w-2xl space-y-2 text-left text-xs leading-relaxed text-slate-500">
+          <p>Platform data may be delayed, incomplete or later revised by the platform.</p>
+          <p>Figures come from connected first-party sources (e.g. Meta, Google Ads). Different platforms may define similar-sounding metrics differently, so they are shown separately.</p>
+          <p>Unique audiences such as reach and viewers are not added together across platforms.</p>
+          <p>Featured content prioritises CG-created or CG-managed work; client-created posts may remain in totals while being excluded from CG creative analysis.</p>
+          <p>AI may assist with analysis. CG reviews all client-facing strategy. Recommendations do not guarantee sales.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Staff-only connector data health (never on client routes) ────────────────
+function ConnectorDataHealth({ rows }: { rows: ReportFactHealth[] }) {
+  return (
+    <section className="mb-6 mt-10 rounded-3xl border border-amber-400/20 bg-amber-400/[0.04] p-5">
+      <p className="text-[0.7rem] uppercase tracking-[0.2em] text-amber-300/80">Staff only · connector health</p>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full min-w-[1100px] text-left text-xs text-slate-300">
+          <thead className="text-slate-500">
+            <tr>
+              <th className="py-1 pr-3">Platform</th>
+              <th className="py-1 pr-3">Month</th>
+              <th className="py-1 pr-3">Metric / source</th>
+              <th className="py-1 pr-3">Availability</th>
+              <th className="py-1 pr-3">Last attempted</th>
+              <th className="py-1 pr-3">Last successful</th>
+              <th className="py-1 pr-3">API</th>
+              <th className="py-1 pr-3">Connector</th>
+              <th className="py-1 pr-3">Comparison</th>
+              <th className="py-1 pr-3">Readiness</th>
+              <th className="py-1 pr-3">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={`${r.period_month}-${r.platform}-${r.metric_key ?? 'run'}-${i}`} className="border-t border-white/5 align-top">
+                <td className="py-1 pr-3">{PLATFORM_LABELS[r.platform as Platform] ?? r.platform}</td>
+                <td className="py-1 pr-3">{r.period_month}</td>
+                <td className="py-1 pr-3">{r.metric_key ?? 'Connector run'}{r.source_metric ? <span className="block text-slate-500">{r.source_metric}</span> : null}</td>
+                <td className="py-1 pr-3">{r.fact_availability ?? r.latest_health_state ?? r.latest_run_status ?? 'Not attempted'}{r.permission_blocked ? <span className="block text-amber-300">Permission blocked</span> : null}{r.partial_error_or_stale ? <span className="block text-amber-300">Partial, error or stale</span> : null}</td>
+                <td className="py-1 pr-3">{formatHealthTimestamp(r.latest_attempted_at)}</td>
+                <td className="py-1 pr-3">{formatHealthTimestamp(r.last_successful_at)}</td>
+                <td className="py-1 pr-3">{r.api_version ?? '—'}</td>
+                <td className="py-1 pr-3">{r.connector_version ?? '—'}</td>
+                <td className="py-1 pr-3">{r.metric_key ? (r.comparison_eligible ? 'Eligible' : 'Not eligible') : '—'}</td>
+                <td className={`py-1 pr-3 ${r.ready_for_client_reporting ? 'text-emerald-300' : 'text-amber-300'}`}>{r.ready_for_client_reporting ? 'Ready' : 'Review required'}</td>
+                <td className="py-1 pr-3 font-mono text-slate-500">{r.safe_reference ? r.safe_reference.slice(0, 8) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+}
+
+function formatHealthTimestamp(value: string | null): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString()
 }
 
 // A. The "all your channels together" moment. Headlines ONLY metrics that are
@@ -719,17 +943,31 @@ const BASELINE_COPY =
 function ContentSection({
   topContent,
   strategy,
+  exclusions,
+  statsPosts,
+  onSetContentExcluded,
+  curationBusyId,
 }: {
   topContent: TopContent | null
   strategy: ReturnType<typeof readStrategyData>
+  exclusions: ReportContentExclusion[]
+  statsPosts: ReportStatsPost[]
+  onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
+  curationBusyId: string | null
 }) {
+  const [reviewSkipped, setReviewSkipped] = useState(false)
   const tc = strategy.topContent
   const best = topContent?.post ?? null
+  const skippedPosts = exclusions
+    .filter(item => item.excluded)
+    .map(item => statsPosts.find(post => contentEvidenceKey(post) === `${item.platform}:${item.meta_object_id}`) ?? null)
+    .filter((post): post is ReportStatsPost => post !== null)
+  const strategyMatchesBest = Boolean(best) && (!tc.autoCaption || tc.autoCaption.trim() === (best?.caption ?? '').trim())
 
-  const caption = (tc.autoCaption && tc.autoCaption.trim()) || (best ? shortCaption(best.caption) : null)
-  const coverImage = (tc.coverImageUrl?.trim() || tc.autoImageUrl?.trim() || best?.imageUrl || '').trim()
-  const contentType = tc.contentType.trim() || (best?.post_type ? displayContentType(best.post_type) : null)
-  const platformLabel = topContent?.platformLabel || (tc.autoPlatform ? PLATFORM_LABELS[tc.autoPlatform] : null)
+  const caption = best ? shortCaption(best.caption) : null
+  const coverImage = (best?.imageUrl || (strategyMatchesBest ? tc.coverImageUrl?.trim() || tc.autoImageUrl?.trim() : '') || '').trim()
+  const contentType = (best?.post_type ? displayContentType(best.post_type) : null) || (strategyMatchesBest ? tc.contentType.trim() : null)
+  const platformLabel = topContent?.platformLabel ?? null
 
   const tone = topContent?.tone ?? 'baseline'
   const bestPost = topContent?.post ?? null
@@ -751,10 +989,11 @@ function ContentSection({
   if (bestPost && bestPost.engagements > 0) allMetrics.push({ label: 'content interactions', value: formatNumber(bestPost.engagements) })
   const metricRow = allMetrics.map(m => `${m.value} ${m.label}`).join(' · ')
 
-  const cgInsight = tc.whatThisTellsUs.trim()
-  const hasCG = tc.whyItWorked.length > 0 || cgInsight.length > 0
+  const cgInsight = strategyMatchesBest ? tc.whatThisTellsUs.trim() : ''
+  const whyItWorked = strategyMatchesBest ? tc.whyItWorked : []
+  const hasCG = whyItWorked.length > 0 || cgInsight.length > 0
 
-  if (!caption && !coverImage && !hasCG) return null
+  if (!caption && !coverImage && !hasCG && (!onSetContentExcluded || skippedPosts.length === 0)) return null
 
   const heading =
     tone === 'top'
@@ -768,6 +1007,22 @@ function ContentSection({
   return (
     <section className="mb-14">
       <SectionHeading eyebrow={heading.eyebrow} title={heading.title} />
+
+      {onSetContentExcluded && skippedPosts.length > 0 && (
+        <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <button type="button" className="text-sm font-semibold text-slate-200 underline underline-offset-4" onClick={() => setReviewSkipped(value => !value)}>
+            Review skipped posts ({skippedPosts.length})
+          </button>
+          {reviewSkipped && <div className="mt-3 space-y-2">{skippedPosts.map(post => (
+            <div key={contentEvidenceKey(post)} className="flex flex-col gap-2 rounded-xl border border-white/5 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+              <span className="line-clamp-1 text-sm text-slate-400">{shortCaption(post.caption)}</span>
+              <button type="button" disabled={curationBusyId === post.metaObjectId} onClick={() => void onSetContentExcluded(post, false)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-200 disabled:opacity-50">Undo skip</button>
+            </div>
+          ))}</div>}
+        </div>
+      )}
+
+      {best && (
 
       <div className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#071311] shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)]">
         <div className={`grid ${tone === 'top' ? 'lg:grid-cols-[0.95fr_1.05fr]' : 'lg:grid-cols-[0.55fr_1.45fr]'}`}>
@@ -793,6 +1048,7 @@ function ContentSection({
                 {contentType && <Pill tone="teal">{contentType}</Pill>}
                 {platformLabel && <Pill>{platformLabel}</Pill>}
                 {rankingMetric && tone === 'top' && <Pill tone="teal">Top content by {rankingMetric}</Pill>}
+                <Pill tone="teal">Top overall performer</Pill>
                 {tone === 'learning' && <Pill tone="amber">Highest activity post this month</Pill>}
                 {tone === 'baseline' && <Pill tone="neutral">Content baseline</Pill>}
               </div>
@@ -821,11 +1077,11 @@ function ContentSection({
                 </div>
               ) : null}
 
-              {tc.whyItWorked.length > 0 && (
+              {whyItWorked.length > 0 && (
                 <div className="mt-7">
                   <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Why it worked</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {tc.whyItWorked.map((item, index) => (
+                    {whyItWorked.map((item, index) => (
                       <Pill key={index} tone="amber">
                         {item}
                       </Pill>
@@ -837,10 +1093,16 @@ function ContentSection({
               {insight && (
                 <p className="mt-7 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">{insight}</p>
               )}
+              {onSetContentExcluded && best.metaObjectId && (
+                <button type="button" disabled={curationBusyId === best.metaObjectId} onClick={() => void onSetContentExcluded(best, true)} className="mt-7 rounded-lg border border-amber-300/25 bg-amber-300/10 px-3 py-2 text-xs font-semibold text-amber-200 disabled:opacity-50">
+                  Skip from report
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+      )}
     </section>
   )
 }
@@ -1364,14 +1626,20 @@ function PlatformTab({
   previousManual,
   previousMonthLabel,
   monthLabel,
+  facts,
+  previousFacts,
+  normalizedFactsActive,
 }: {
   view: PlatformView
   previousView: PlatformView | null
   previousManual: ManualPlatformMetric | null
   previousMonthLabel: string | null
   monthLabel: string
+  facts: PlatformFact[]
+  previousFacts: PlatformFact[]
+  normalizedFactsActive: boolean
 }) {
-  if (view.source === 'none') return null
+  if (view.source === 'none' && facts.length === 0 && !normalizedFactsActive) return null
 
   const performance = buildPlatformPerformance({
     view,
@@ -1380,6 +1648,18 @@ function PlatformTab({
     monthLabel,
     previousMonthLabel,
   })
+
+  if (normalizedFactsActive) {
+    const sections = buildOverviewSections(facts, previousFacts)
+    return (
+      <>
+        <SectionHeading eyebrow={performance.label} title={`${performance.label} performance`} />
+        {sections.length > 0 ? <VerifiedOverview sections={sections} monthLabel={monthLabel} /> : <VerifiedFactsUnavailable />}
+        <PlatformContent performance={performance} view={view} />
+        <PlatformNotes view={view} />
+      </>
+    )
+  }
 
   return <PlatformPerformanceView performance={performance} view={view} />
 }

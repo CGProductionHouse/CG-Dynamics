@@ -30,6 +30,8 @@ export interface PlatformFact {
   aggregation: string | null // 'sum' | 'unique' | 'snapshot' | 'reconstructed'
   includesPaid?: string | null
   sourceMetric?: string | null
+  periodStart?: string | null
+  periodEnd?: string | null
 }
 
 // A metric has a shown value when the provider gave a definitive figure — a real
@@ -41,6 +43,18 @@ export function hasShownValue(a: Availability): boolean {
 
 export function isDefinitive(a: Availability): boolean {
   return a === 'complete' || a === 'valid_zero'
+}
+
+export function hasRenderableFact(fact: PlatformFact): boolean {
+  return hasShownValue(fact.availability) && typeof fact.value === 'number'
+}
+
+function isFullCalendarMonth(start: string | null | undefined, end: string | null | undefined): boolean {
+  if (!start || !end || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end)) return false
+  const [year, month, day] = start.split('-').map(Number)
+  if (day !== 1 || end.slice(0, 7) !== start.slice(0, 7)) return false
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate()
+  return Number(end.slice(8, 10)) === lastDay
 }
 
 // A unique-audience metric (reach / unique viewers) must never be summed across
@@ -63,6 +77,9 @@ export function compareFacts(current: PlatformFact, previous: PlatformFact | nul
   if (!isDefinitive(current.availability) || !isDefinitive(previous.availability)) {
     return { comparable: false, changePercent: null, reason: 'One period is not verified (missing or unavailable data).' }
   }
+  if (typeof current.value !== 'number' || typeof previous.value !== 'number') {
+    return { comparable: false, changePercent: null, reason: 'One period has no verified numeric value.' }
+  }
   if (current.metricKey !== previous.metricKey || current.platform !== previous.platform) {
     return { comparable: false, changePercent: null, reason: 'Metric or platform differs.' }
   }
@@ -75,8 +92,15 @@ export function compareFacts(current: PlatformFact, previous: PlatformFact | nul
   if ((current.sourceMetric ?? '') !== (previous.sourceMetric ?? '')) {
     return { comparable: false, changePercent: null, reason: 'Comparison unavailable because the reporting source changed.' }
   }
-  const cur = current.value ?? 0
-  const prev = previous.value ?? 0
+  if ((current.includesPaid ?? '') !== (previous.includesPaid ?? '')) {
+    return { comparable: false, changePercent: null, reason: 'Comparison unavailable because paid and organic coverage changed.' }
+  }
+  if (!isFullCalendarMonth(current.periodStart, current.periodEnd)
+      || !isFullCalendarMonth(previous.periodStart, previous.periodEnd)) {
+    return { comparable: false, changePercent: null, reason: 'Comparison unavailable because one period is incomplete.' }
+  }
+  const cur = current.value
+  const prev = previous.value
   const changePercent = prev === 0 ? null : ((cur - prev) / prev) * 100
   return { comparable: true, changePercent, reason: null }
 }
@@ -149,8 +173,8 @@ function lineFor(current: PlatformFact, previous: PlatformFact | null): Overview
     platform: current.platform,
     metricKey: current.metricKey,
     label,
-    value: hasShownValue(current.availability) ? current.value : null,
-    hasValue: hasShownValue(current.availability),
+    value: hasRenderableFact(current) ? current.value : null,
+    hasValue: hasRenderableFact(current),
     isValidZero: current.availability === 'valid_zero',
     reconstructed: current.aggregation === 'reconstructed',
     isSnapshot,
@@ -176,7 +200,7 @@ export function buildOverviewSections(
     const lines: OverviewLine[] = []
     for (const metricKey of SECTION_METRICS[key]) {
       const facts = current
-        .filter(f => f.metricKey === metricKey && hasShownValue(f.availability))
+        .filter(f => f.metricKey === metricKey && hasRenderableFact(f))
         .sort((a, b) => {
           const ai = PLATFORM_ORDER.indexOf(a.platform); const bi = PLATFORM_ORDER.indexOf(b.platform)
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)

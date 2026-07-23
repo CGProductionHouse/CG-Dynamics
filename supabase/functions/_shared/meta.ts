@@ -12,36 +12,28 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // ── Graph API version resolution ─────────────────────────────────────────────
-// One controlled server-side source. The version is NEVER silently assumed:
-//  • an explicit META_GRAPH_VERSION override must be a supported version, else we
-//    fail fast with a clear configuration error (no obsolete silent fallback);
-//  • when unset we use DEFAULT_GRAPH_VERSION, and expose `configured: false` so
-//    connector health can flag that the production version is still the default
-//    pending confirmation.
-// The exact production version is confirmed against Meta Developers by Codex; the
-// code refuses to run on an unrecognised/typo'd version.
-export const SUPPORTED_GRAPH_VERSIONS = ['v21.0', 'v22.0', 'v23.0', 'v24.0'] as const
-// Last version verified working for this app's post + insight sync. Codex confirms
-// / bumps this against the live Meta app configuration and sets the secret.
-const DEFAULT_GRAPH_VERSION = 'v22.0'
+// One controlled server-side source. The version is NEVER silently assumed.
+// Meta Developers is the authority for the verified production value; code does
+// not carry a second version allowlist that can silently become stale.
 
-export function resolveGraphVersion(): { version: string; configured: boolean } {
-  const raw = (Deno.env.get('META_GRAPH_VERSION') ?? '').trim()
-  if (raw) {
-    if (!/^v\d+\.\d+$/.test(raw) || !SUPPORTED_GRAPH_VERSIONS.includes(raw as typeof SUPPORTED_GRAPH_VERSIONS[number])) {
-      throw new Error(
-        `META_GRAPH_VERSION "${raw}" is not a supported Meta Graph API version ` +
-        `(supported: ${SUPPORTED_GRAPH_VERSIONS.join(', ')}). Refusing to run on an unverified version.`,
-      )
-    }
-    return { version: raw, configured: true }
+export class MetaConfigurationError extends Error {
+  constructor(message: string) {
+    super(`Internal Meta configuration error: ${message}`)
+    this.name = 'MetaConfigurationError'
   }
-  return { version: DEFAULT_GRAPH_VERSION, configured: false }
 }
 
-const RESOLVED_GRAPH = resolveGraphVersion()
-export const META_GRAPH_VERSION = RESOLVED_GRAPH.version
-export const META_GRAPH_VERSION_CONFIGURED = RESOLVED_GRAPH.configured
+export function resolveMetaGraphConfig(): { version: string; baseUrl: string } {
+  const raw = (Deno.env.get('META_GRAPH_VERSION') ?? '').trim()
+  if (!raw) {
+    throw new MetaConfigurationError('META_GRAPH_VERSION is missing. Refusing to call Meta without an explicitly configured version.')
+  }
+  if (!/^v\d+\.\d+$/.test(raw)) {
+    throw new MetaConfigurationError(`META_GRAPH_VERSION "${raw}" is invalid. Refusing to call Meta.`)
+  }
+  return { version: raw, baseUrl: `https://graph.facebook.com/${raw}` }
+}
+
 export const META_CONNECTOR_VERSION = 'meta-connector-v2'
 
 export type Availability =
@@ -59,6 +51,9 @@ export function redact(text: string, tokens: Array<string | null | undefined>): 
   for (const t of tokens) if (t && t.length >= 8) out = out.split(t).join('[redacted]')
   return out
     .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
+    .replace(/client_secret=[^&\s"']+/gi, 'client_secret=[redacted]')
+    .replace(/code=[^&\s"']+/gi, 'code=[redacted]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
     .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
 }
 
@@ -66,13 +61,21 @@ export function redact(text: string, tokens: Array<string | null | undefined>): 
 const RETRYABLE = new Set([429, 500, 502, 503, 504])
 const BACKOFF = [500, 1200]
 
-export async function metaFetch(url: string, timeoutMs = 12_000): Promise<Response> {
+export async function metaFetch(
+  url: string,
+  initOrTimeout: RequestInit | number = {},
+  requestedTimeoutMs = 12_000,
+): Promise<Response> {
+  const init = typeof initOrTimeout === 'number' ? {} : initOrTimeout
+  const timeoutMs = typeof initOrTimeout === 'number' ? initOrTimeout : requestedTimeoutMs
+  const canRetry = !init.method || ['GET', 'HEAD'].includes(init.method.toUpperCase())
+  const backoff = canRetry ? BACKOFF : []
   let lastErr: unknown = null
-  for (let attempt = 0; attempt <= BACKOFF.length; attempt++) {
+  for (let attempt = 0; attempt <= backoff.length; attempt++) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
-      const res = await fetch(url, { signal: controller.signal })
+      const res = await fetch(url, { ...init, signal: controller.signal })
       clearTimeout(timer)
       if (res.ok || !RETRYABLE.has(res.status)) return res
       lastErr = new Error(`HTTP ${res.status}`)
@@ -80,7 +83,7 @@ export async function metaFetch(url: string, timeoutMs = 12_000): Promise<Respon
       clearTimeout(timer)
       lastErr = e
     }
-    if (attempt < BACKOFF.length) await new Promise(r => setTimeout(r, BACKOFF[attempt]))
+    if (attempt < backoff.length) await new Promise(r => setTimeout(r, backoff[attempt]))
   }
   throw lastErr instanceof Error ? lastErr : new Error(String(lastErr))
 }
@@ -217,7 +220,16 @@ export interface MetricProbe {
   availability: Availability
   responseShape: string
   metricType: string
+  rawSnapshot?: unknown
   error?: MetaErrorInfo
+}
+
+function tokenSafeSnapshot(value: unknown, tokens: Array<string | null | undefined>): unknown {
+  try {
+    return JSON.parse(redact(JSON.stringify(value), tokens))
+  } catch {
+    return null
+  }
 }
 
 // Probes a single metric in isolation. One failing metric never affects another.
@@ -243,10 +255,15 @@ export async function probeMetric(
         return { ...base, value: null, availability: classifyError(err), responseShape: 'error', metricType: 'field', error: err }
       }
       const body = await res.json()
-      const v = typeof body[spec.sourceMetric] === 'number'
-        ? body[spec.sourceMetric]
-        : (spec.fallbackField && typeof body[spec.fallbackField] === 'number' ? body[spec.fallbackField] : null)
-      return { ...base, value: v, availability: classifyValue(v), responseShape: 'field', metricType: 'field' }
+      const primaryValue = body[spec.sourceMetric]
+      const fallbackValue = spec.fallbackField ? body[spec.fallbackField] : undefined
+      const v = typeof primaryValue === 'number'
+        ? primaryValue
+        : (typeof fallbackValue === 'number' ? fallbackValue : null)
+      const sourceMetric = typeof primaryValue === 'number'
+        ? spec.sourceMetric
+        : (typeof fallbackValue === 'number' && spec.fallbackField ? spec.fallbackField : spec.sourceMetric)
+      return { ...base, sourceMetric, value: v, availability: classifyValue(v), responseShape: 'field', metricType: 'field', rawSnapshot: tokenSafeSnapshot(body, tokens) }
     } catch (e) {
       return { ...base, value: null, availability: 'error', responseShape: 'error', metricType: 'field', error: { code: null, subcode: null, message: redact(String(e), tokens), type: null, trace: null } }
     }
@@ -279,7 +296,7 @@ export async function probeMetric(
       const body = await res.json()
       const value = parseInsight(body.data as Array<Record<string, unknown>>)
       if (value !== null) {
-        return { ...base, value, availability: classifyValue(value), responseShape: attempt.metricType, metricType: attempt.metricType }
+        return { ...base, value, availability: classifyValue(value), responseShape: attempt.metricType, metricType: attempt.metricType, rawSnapshot: tokenSafeSnapshot(body, tokens) }
       }
       // ok but empty → try next shape
     } catch (e) {
@@ -308,37 +325,40 @@ export async function upsertMonthlyFact(
     provenance: Record<string, unknown>; syncRunId: string | null
   },
 ): Promise<'inserted' | 'updated' | 'kept_verified'> {
-  const { data: existing } = await sb
-    .from('platform_metric_facts_monthly')
-    .select('id, availability')
-    .eq('client_id', fact.clientId)
-    .eq('platform', fact.platform)
-    .eq('period_month', fact.periodMonth)
-    .eq('metric_key', fact.metricKey)
-    .limit(1)
-
-  const incomingDefinitive = DEFINITIVE.includes(fact.availability)
-  const row = {
-    client_id: fact.clientId, asset_id: fact.assetId, platform: fact.platform,
-    period_month: fact.periodMonth, period_start: fact.periodStart, period_end: fact.periodEnd,
-    metric_key: fact.metricKey, source_metric: fact.sourceMetric,
-    value: fact.value, availability: fact.availability,
-    includes_paid: fact.includesPaid, aggregation: fact.aggregation,
-    comparable_group: fact.comparableGroup, api_version: fact.apiVersion,
-    connector_version: META_CONNECTOR_VERSION, source_timezone: fact.sourceTimezone,
-    provenance: fact.provenance, sync_run_id: fact.syncRunId, verified_at: new Date().toISOString(),
+  // Phase20e contract: the RPC owns the unique-key upsert and atomically keeps a
+  // prior complete/valid_zero fact when the incoming value is non-definitive.
+  const { data, error } = await sb.rpc('upsert_platform_metric_fact_preserving_verified', {
+    p_client_id: fact.clientId,
+    p_asset_id: fact.assetId,
+    p_platform: fact.platform,
+    p_period_month: fact.periodMonth,
+    p_period_start: fact.periodStart,
+    p_period_end: fact.periodEnd,
+    p_metric_key: fact.metricKey,
+    p_source_metric: fact.sourceMetric,
+    p_value: fact.value,
+    p_availability: fact.availability,
+    p_includes_paid: fact.includesPaid,
+    p_aggregation: fact.aggregation,
+    p_comparable_group: fact.comparableGroup,
+    p_api_version: fact.apiVersion,
+    p_connector_version: META_CONNECTOR_VERSION,
+    p_source_timezone: fact.sourceTimezone,
+    p_provenance: fact.provenance,
+    p_sync_run_id: fact.syncRunId,
+    p_verified_at: new Date().toISOString(),
+  })
+  if (error) throw new Error(`Failed to upsert ${fact.platform}/${fact.metricKey} fact: ${error.message} (${error.code ?? 'unknown'})`)
+  const result = Array.isArray(data) ? data[0] : data
+  const action = typeof result === 'string'
+    ? result
+    : (result && typeof result === 'object' && 'outcome' in result
+      ? String(result.outcome)
+      : (result && typeof result === 'object' && 'action' in result ? String(result.action) : 'updated'))
+  if (action === 'inserted' || action === 'kept_verified') {
+    return action
   }
-
-  if (existing && existing.length > 0) {
-    const prevVerified = DEFINITIVE.includes(existing[0].availability as Availability)
-    if (!incomingDefinitive && prevVerified) {
-      return 'kept_verified' // preserve last verified dataset
-    }
-    await sb.from('platform_metric_facts_monthly').update(row).eq('id', existing[0].id)
-    return 'updated'
-  }
-  await sb.from('platform_metric_facts_monthly').insert(row)
-  return 'inserted'
+  return 'updated'
 }
 
 export interface AccountFactsResult {
@@ -360,51 +380,67 @@ export async function syncAccountFacts(
     periodMonth: string; periodStart: string; periodEnd: string
     tokens: Array<string | null | undefined>
     tokenClass: 'page' | 'user' | 'system_user'
+    runType: 'manual' | 'scheduled' | 'historical_resync'
     reconstructInteractions?: number | null // fallback FB content interactions from post sums
   },
 ): Promise<AccountFactsResult> {
   const specs = args.platform === 'facebook' ? FB_ACCOUNT_METRICS : IG_ACCOUNT_METRICS
 
   // 1. Open a sync run row.
-  const { data: runRow } = await sb.from('platform_sync_runs').insert({
+  const { data: runRow, error: runInsertError } = await sb.from('platform_sync_runs').insert({
     client_id: args.clientId, asset_id: args.assetId, connection_id: args.connectionId,
-    platform: args.platform, run_type: 'manual', period_month: args.periodMonth,
+    platform: args.platform, run_type: args.runType, period_month: args.periodMonth,
     period_start: args.periodStart, period_end: args.periodEnd,
     api_version: args.apiVersion, connector_version: META_CONNECTOR_VERSION,
     token_class: args.tokenClass, requested_bounds: { since: args.periodStart, until: args.periodEnd },
-    business_timezone: 'Africa/Johannesburg', status: 'success', health_state: 'verified',
+    business_timezone: 'Africa/Johannesburg', status: 'running', health_state: 'sync_error',
     started_at: new Date().toISOString(),
   }).select('id').single()
-  const syncRunId = (runRow?.id as string) ?? null
+  if (runInsertError || !runRow?.id) {
+    throw new Error(`Failed to create ${args.platform} sync run: ${runInsertError?.message ?? 'missing run id'} (${runInsertError?.code ?? 'unknown'})`)
+  }
+  const syncRunId = runRow.id as string
 
   const probes: MetricProbe[] = []
   const facts: AccountFactsResult['facts'] = {}
-  let anyPermissionBlock = false
-  let anyComplete = false
-  let anyUnavailable = false
 
-  for (const spec of specs) {
+  try {
+    for (const spec of specs) {
     let probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, args.periodStart, args.periodEnd, args.tokens)
 
     // FB content interactions fallback: reconstruct from post engagement sums when
     // the Page metric is unavailable. Stored as reconstructed, never claimed as
     // Business Suite parity.
-    let sourceMetric = spec.sourceMetric
+    let sourceMetric = probe.sourceMetric
     let aggregation = spec.aggregation
     if (args.platform === 'facebook' && spec.metricKey === 'content_interactions'
         && probe.availability !== 'complete' && typeof args.reconstructInteractions === 'number' && args.reconstructInteractions > 0) {
-      probe = { ...probe, value: args.reconstructInteractions, availability: 'partial', responseShape: 'reconstructed_sum', metricType: 'reconstructed' }
+      probe = { ...probe, sourceMetric: 'reconstructed_post_engagements', value: args.reconstructInteractions, availability: 'partial', responseShape: 'reconstructed_sum', metricType: 'reconstructed' }
       sourceMetric = 'reconstructed_post_engagements'
       aggregation = 'reconstructed'
     }
 
     probes.push(probe)
-    if (probe.availability === 'permission_blocked') anyPermissionBlock = true
-    if (probe.availability === 'complete') anyComplete = true
-    if (probe.availability === 'unavailable') anyUnavailable = true
-
     // 2. Provenance snapshot for every attempt (definitive or not).
-    await sb.from('platform_metric_snapshots').insert({
+    const retrievedAt = new Date().toISOString()
+    const safeSnapshot = {
+      metric_key: spec.metricKey,
+      source_metric: sourceMetric,
+      endpoint_mode: spec.mode,
+      response_shape: probe.responseShape,
+      metric_type: probe.metricType,
+      availability: probe.availability,
+      value: probe.value,
+      error: probe.error ? {
+        code: probe.error.code,
+        subcode: probe.error.subcode,
+        message: redact(probe.error.message, args.tokens),
+        type: probe.error.type,
+        trace: probe.error.trace,
+      } : null,
+      source_response: probe.rawSnapshot ?? null,
+    }
+    const { data: snapshotRow, error: snapshotError } = await sb.from('platform_metric_snapshots').insert({
       sync_run_id: syncRunId, client_id: args.clientId, asset_id: args.assetId, platform: args.platform,
       source_endpoint: spec.mode === 'page_field' || spec.mode === 'ig_field' ? `/${args.platform}-object` : `/${args.platform}-object/insights`,
       source_metric: sourceMetric, api_version: args.apiVersion, token_class: args.tokenClass,
@@ -412,9 +448,12 @@ export async function syncAccountFacts(
       metric_type: probe.metricType, response_shape: probe.responseShape,
       value: probe.value, availability: probe.availability,
       error_code: probe.error?.code ?? null, error_subcode: probe.error?.subcode ?? null,
-      error_message: probe.error?.message ?? null, trace_id: probe.error?.trace ?? null,
-      raw_snapshot: null, retrieved_at: new Date().toISOString(),
-    })
+      error_message: probe.error ? redact(probe.error.message, args.tokens) : null, trace_id: probe.error?.trace ?? null,
+      raw_snapshot: safeSnapshot, retrieved_at: retrievedAt,
+    }).select('id').single()
+    if (snapshotError || !snapshotRow?.id) {
+      throw new Error(`Failed to persist ${args.platform}/${spec.metricKey} snapshot: ${snapshotError?.message ?? 'missing snapshot id'} (${snapshotError?.code ?? 'unknown'})`)
+    }
 
     // 3. Normalized fact (preserve-verified on failure).
     await upsertMonthlyFact(sb, {
@@ -425,34 +464,60 @@ export async function syncAccountFacts(
       apiVersion: args.apiVersion, sourceTimezone: null,
       provenance: {
         endpoint: spec.mode, token_class: args.tokenClass, response_shape: probe.responseShape,
-        sync_run_id: syncRunId, retrieved_at: new Date().toISOString(),
+        snapshot_id: snapshotRow.id, sync_run_id: syncRunId, retrieved_at: retrievedAt,
         error_code: probe.error?.code ?? null,
       },
       syncRunId,
     })
 
-    facts[spec.metricKey] = { value: probe.value, availability: probe.availability, sourceMetric }
-  }
-
-  // 4. Finalize run health.
-  const healthState = anyPermissionBlock
-    ? 'permission_blocked'
-    : anyComplete && anyUnavailable
-      ? 'verified_partial'
-      : anyComplete
-        ? 'verified'
-        : 'sync_error'
-  const status = anyComplete ? (anyUnavailable || anyPermissionBlock ? 'partial' : 'success') : 'failed'
-  if (syncRunId) {
-    await sb.from('platform_sync_runs').update({
-      status, health_state: healthState, finished_at: new Date().toISOString(),
+      facts[spec.metricKey] = { value: probe.value, availability: probe.availability, sourceMetric }
+    }
+  } catch (error) {
+    const safeError = redact(error instanceof Error ? error.message : String(error), args.tokens)
+    const { error: failureUpdateError } = await sb.from('platform_sync_runs').update({
+      status: 'failed',
+      health_state: 'sync_error',
+      finished_at: new Date().toISOString(),
       summary: {
         facts,
         connector: META_CONNECTOR_VERSION,
         graph_version: args.apiVersion,
-        graph_version_configured: META_GRAPH_VERSION_CONFIGURED,
+        persistence_error: safeError,
       },
     }).eq('id', syncRunId)
+    if (failureUpdateError) {
+      throw new Error(`${safeError}; failed to mark sync run failed: ${failureUpdateError.message} (${failureUpdateError.code ?? 'unknown'})`)
+    }
+    throw new Error(safeError)
+  }
+
+  // 4. Finalize run health.
+  const states = probes.map(probe => probe.availability)
+  const hasDefinitive = states.some(state => DEFINITIVE.includes(state))
+  const hasPartial = states.includes('partial')
+  const hasError = states.includes('error')
+  const hasPermissionBlock = states.includes('permission_blocked')
+  const allDefinitive = states.length > 0 && states.every(state => DEFINITIVE.includes(state))
+  const healthState = allDefinitive
+    ? 'verified'
+    : (hasDefinitive || hasPartial)
+      ? 'verified_partial'
+      : hasError
+        ? 'sync_error'
+        : hasPermissionBlock
+          ? 'permission_blocked'
+          : 'sync_error'
+  const status = allDefinitive ? 'success' : (hasDefinitive || hasPartial) ? 'partial' : 'failed'
+  const { error: runUpdateError } = await sb.from('platform_sync_runs').update({
+    status, health_state: healthState, finished_at: new Date().toISOString(),
+    summary: {
+      facts,
+      connector: META_CONNECTOR_VERSION,
+      graph_version: args.apiVersion,
+    },
+  }).eq('id', syncRunId)
+  if (runUpdateError) {
+    throw new Error(`Failed to finalize ${args.platform} sync run: ${runUpdateError.message} (${runUpdateError.code ?? 'unknown'})`)
   }
 
   return { platform: args.platform, syncRunId, healthState, probes, facts }

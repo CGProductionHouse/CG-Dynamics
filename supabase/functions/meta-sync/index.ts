@@ -1,8 +1,14 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { syncAccountFacts, META_GRAPH_VERSION } from '../_shared/meta.ts'
-
-const SYNC_ENGINE_VERSION = 'meta-connector-v2'
+import {
+  fetchPageTokens,
+  META_CONNECTOR_VERSION,
+  metaFetch,
+  readMetaError as readSharedMetaError,
+  redact,
+  resolveMetaGraphConfig,
+  syncAccountFacts,
+} from '../_shared/meta.ts'
 
 type ErrorPhase = 'auth' | 'env' | 'request_parse' | 'connection' | 'assets' | 'sync' | 'unknown'
 
@@ -148,22 +154,8 @@ function safeTimestamp(ts: string | null | undefined): string | null {
   return Number.isNaN(d.getTime()) ? null : d.toISOString()
 }
 
-// ── Token-safe Meta helpers ──────────────────────────────────
-// Removes any access token from a string so tokens never appear in warnings,
-// summaries, logs or responses.
-function redact(text: string, tokens: Array<string | null | undefined>): string {
-  let out = text
-  for (const t of tokens) {
-    if (t && t.length >= 8) out = out.split(t).join('[redacted]')
-  }
-  return out
-    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
-    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
-    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
-}
-
 function safeJsonResponse(data: Record<string, unknown>, status = 200): Response {
-  return jsonResponse({ syncEngineVersion: SYNC_ENGINE_VERSION, ...data }, status)
+  return jsonResponse({ syncEngineVersion: META_CONNECTOR_VERSION, ...data }, status)
 }
 
 function failureResponse(
@@ -198,35 +190,14 @@ function failureResponse(
 // Reads a Meta Graph API error response into a safe, detailed, token-free string
 // (message, type, code, subcode, fbtrace_id).
 async function readMetaError(res: Response, tokens: Array<string | null | undefined>): Promise<string> {
-  let detail = `HTTP ${res.status}`
-  try {
-    const body = await res.json()
-    const e = body?.error
-    if (e && typeof e === 'object') {
-      const parts: string[] = []
-      if (e.message) parts.push(String(e.message))
-      if (e.type) parts.push(`type ${e.type}`)
-      if (e.code !== undefined) parts.push(`code ${e.code}`)
-      if (e.error_subcode !== undefined && e.error_subcode !== null) parts.push(`subcode ${e.error_subcode}`)
-      if (e.fbtrace_id) parts.push(`trace ${e.fbtrace_id}`)
-      if (parts.length > 0) detail = parts.join(', ')
-    }
-  } catch {
-    // keep HTTP status
-  }
-  return redact(detail, tokens)
-}
-
-// fetch with a hard timeout so a slow/hung Meta request can never stall the
-// whole function (which would blow the Edge runtime wall-clock limit).
-async function metaFetch(url: string, timeoutMs = 8000): Promise<Response> {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  try {
-    return await fetch(url, { signal: controller.signal })
-  } finally {
-    clearTimeout(timer)
-  }
+  const error = await readSharedMetaError(res, tokens)
+  return [
+    error.message,
+    error.type ? `type ${error.type}` : null,
+    error.code ? `code ${error.code}` : null,
+    error.subcode ? `subcode ${error.subcode}` : null,
+    error.trace ? `trace ${error.trace}` : null,
+  ].filter(Boolean).join(', ')
 }
 
 function sumInsightValue(v: {
@@ -255,8 +226,8 @@ interface InsightFetchResult {
   error: string | null
 }
 
-// Media-level insight metrics for CONTENT cards (per-post). `views` is the v22
-// replacement for the deprecated `plays`/`impressions` and is valid across reels,
+// Media-level insight metrics for CONTENT cards (per-post). `views` replaces
+// deprecated `plays`/`impressions` and is valid across reels,
 // videos, images and carousels — previously non-reel media requested no views
 // metric at all, so post views never imported.
 function igInsightMetricsForType(_postType: string): string[] {
@@ -311,28 +282,6 @@ async function fetchInsights(
   return { values, error: errors.length > 0 ? errors.join('; ') : batch.error }
 }
 
-// Fetches Facebook Page access tokens for the connected user. Page endpoints
-// (Page posts/insights) and the IG Business endpoints behind a page generally
-// require the PAGE access token, not the user token. Tokens are used in-memory
-// only and never stored or logged.
-async function fetchPageTokens(baseUrl: string, userToken: string): Promise<Map<string, string>> {
-  const map = new Map<string, string>()
-  let url: string | null =
-    `${baseUrl}/me/accounts?fields=id,access_token&limit=100&access_token=${encodeURIComponent(userToken)}`
-  let guard = 0
-  while (url && guard < 10) {
-    guard++
-    const res = await metaFetch(url)
-    if (!res.ok) break
-    const data = await res.json()
-    for (const p of (data.data as Array<{ id?: string; access_token?: string }> ?? [])) {
-      if (p.id && p.access_token) map.set(p.id, p.access_token)
-    }
-    url = (data.paging?.next as string | undefined) ?? null
-  }
-  return map
-}
-
 // NOTE: Automated Meta account totals are NO LONGER written into
 // manual_platform_metrics (its NOT NULL integer columns cannot represent
 // "unavailable", which is exactly what forced missing metrics to be stored as
@@ -377,6 +326,7 @@ async function handleRequest(req: Request): Promise<Response> {
     phase = 'auth'
     const authHeader = req.headers.get('Authorization') ?? ''
     phase = 'env'
+  const graphConfig = resolveMetaGraphConfig()
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
@@ -422,6 +372,7 @@ async function handleRequest(req: Request): Promise<Response> {
       error: `Unsupported mode "${body.mode ?? ''}". Only "previous_completed_month" is supported.`,
     }, 400)
   }
+  const historicalMonth = typeof body.month === 'string' && /^\d{4}-\d{2}$/.test(body.month) ? body.month : null
 
   // ── Calculate period ─────────────────────────────────────
   // Default: previous completed calendar month. An optional `month` (YYYY-MM)
@@ -430,16 +381,16 @@ async function handleRequest(req: Request): Promise<Response> {
   let periodStart: string
   let periodEnd: string
   let month: string
-  if (typeof body.month === 'string' && /^\d{4}-\d{2}$/.test(body.month)) {
-    if (body.month >= currentMonthStr()) {
+  if (historicalMonth) {
+    if (historicalMonth >= currentMonthStr()) {
       return safeJsonResponse({
         ok: false,
         status: 'failed',
         phase: 'request_parse',
-        error: `Month ${body.month} is not a completed calendar month yet.`,
+        error: `Month ${historicalMonth} is not a completed calendar month yet.`,
       }, 400)
     }
-    ;({ periodStart, periodEnd, month } = monthBoundsFor(body.month))
+    ;({ periodStart, periodEnd, month } = monthBoundsFor(historicalMonth))
   } else {
     ;({ periodStart, periodEnd, month } = getPreviousMonthBounds())
   }
@@ -469,7 +420,7 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   const accessToken = tokenRows[0].encrypted_access_token
-  const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
+  const { baseUrl, version: graphVersion } = graphConfig
 
   steps.push('meta token loaded')
 
@@ -531,6 +482,19 @@ async function handleRequest(req: Request): Promise<Response> {
   const clientNameMap = new Map<string, string>()
   if (clientRows) {
     for (const c of clientRows) clientNameMap.set(c.id, c.name)
+  }
+
+  const assetCounts = new Map<string, number>()
+  for (const asset of linkedAssets) assetCounts.set(asset.client_id, (assetCounts.get(asset.client_id) ?? 0) + 1)
+  const ambiguousClients = [...assetCounts.entries()].filter(([, count]) => count > 1).map(([clientId]) => clientNameMap.get(clientId) ?? 'Unknown client')
+  if (ambiguousClients.length > 0) {
+    return failureResponse(
+      'assets',
+      `Multiple active Meta asset mappings require review before sync: ${ambiguousClients.join(', ')}. Configure one active Page/Instagram mapping row per client.`,
+      409,
+      knownTokens,
+      { steps },
+    )
   }
 
   const allMappedClients: SyncClient[] = linkedAssets.map(a => ({
@@ -1078,6 +1042,7 @@ async function handleRequest(req: Request): Promise<Response> {
       // failing metric never affects another. Facebook content interactions fall
       // back to a reconstructed post-engagement sum (labelled reconstructed).
       const DEFINITIVE_OR_SHOWN = new Set(['complete', 'valid_zero', 'partial'])
+      let accountFactsFailed = false
       const applyFacts = (platform: 'facebook' | 'instagram', facts: Record<string, { value: number | null; availability: string; sourceMetric: string }>) => {
         result.connectorFacts[platform] = facts
         result.accountTotals[platform] = Object.fromEntries(
@@ -1104,14 +1069,16 @@ async function handleRequest(req: Request): Promise<Response> {
           const fb = await syncAccountFacts(sb, {
             clientId: client.clientId, assetId: client.assetId, connectionId: connections[0].id,
             platform: 'facebook', objectId: client.facebookPageId, token: pageToken,
-            baseUrl, apiVersion: META_GRAPH_VERSION,
+            baseUrl, apiVersion: graphVersion,
             periodMonth: month, periodStart, periodEnd,
             tokens: knownTokens,
             tokenClass: pageTokenMap.get(client.facebookPageId) ? 'page' : 'user',
+            runType: historicalMonth ? 'historical_resync' : 'manual',
             reconstructInteractions: fbContentInteractions,
           })
           applyFacts('facebook', fb.facts)
         } catch (err) {
+          accountFactsFailed = true
           result.warnings.push(redact(`Error syncing Facebook account facts: ${String(err)}`, knownTokens))
         }
       }
@@ -1121,16 +1088,26 @@ async function handleRequest(req: Request): Promise<Response> {
           const ig = await syncAccountFacts(sb, {
             clientId: client.clientId, assetId: client.assetId, connectionId: connections[0].id,
             platform: 'instagram', objectId: client.instagramAccountId, token: igToken,
-            baseUrl, apiVersion: META_GRAPH_VERSION,
+            baseUrl, apiVersion: graphVersion,
             periodMonth: month, periodStart, periodEnd,
             tokens: knownTokens,
             tokenClass: client.facebookPageId && pageTokenMap.get(client.facebookPageId) ? 'page' : 'user',
+            runType: historicalMonth ? 'historical_resync' : 'manual',
             reconstructInteractions: null,
           })
           applyFacts('instagram', ig.facts)
         } catch (err) {
+          accountFactsFailed = true
           result.warnings.push(redact(`Error syncing Instagram account facts: ${String(err)}`, knownTokens))
         }
+      }
+
+      if ((client.facebookPageId || client.instagramAccountId) && Date.now() >= insightDeadline) {
+        accountFactsFailed = true
+        result.warnings.push('Normalized account facts were not completed before the sync time budget expired.')
+      }
+      if (accountFactsFailed) {
+        throw new Error('Normalized account facts failed. Post content was preserved, but this reporting sync is not complete.')
       }
 
       result.status = 'success'

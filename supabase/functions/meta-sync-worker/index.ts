@@ -1,11 +1,17 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { syncAccountFacts, META_GRAPH_VERSION, metaFetch as sharedMetaFetch, redact } from '../_shared/meta.ts'
+import {
+  META_CONNECTOR_VERSION,
+  metaFetch,
+  readMetaError,
+  redact,
+  resolveMetaGraphConfig,
+  syncAccountFacts,
+} from '../_shared/meta.ts'
 
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
 // normalized facts + provenance, shared retry/backoff and token handling.
-const SYNC_ENGINE_VERSION = 'meta-connector-v2'
 const BATCH_SIZE = 5
 
 function monthBounds(month: string): { periodStart: string; periodEnd: string } {
@@ -29,28 +35,19 @@ function currentMonthStr(): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
-// Shared connector fetch (timeout + retry/backoff on transient failures). Both
-// manual and scheduled syncing use the same network behaviour.
-async function retryMetaFetch(url: string, timeoutMs = 30_000): Promise<Response> {
-  return await sharedMetaFetch(url, timeoutMs)
-}
-
-async function parseMetaError(res: Response, context: string): Promise<string> {
-  let detail = ''
-  try {
-    const body = await res.json()
-    if (body?.error) {
-      const parts: string[] = []
-      if (body.error.message) parts.push(body.error.message)
-      if (body.error.type) parts.push(`type: ${body.error.type}`)
-      if (body.error.code) parts.push(`code: ${body.error.code}`)
-      if (body.error.error_subcode) parts.push(`subcode: ${body.error.error_subcode}`)
-      if (parts.length > 0) detail = `: ${parts.join(', ')}`
-    }
-  } catch {
-    // Response body not JSON — ignore
-  }
-  return `${context} failed (HTTP ${res.status})${detail}`
+async function parseMetaError(
+  res: Response,
+  context: string,
+  tokens: Array<string | null | undefined>,
+): Promise<string> {
+  const error = await readMetaError(res, tokens)
+  const detail = [
+    error.message,
+    error.type ? `type: ${error.type}` : null,
+    error.code ? `code: ${error.code}` : null,
+    error.subcode ? `subcode: ${error.subcode}` : null,
+  ].filter(Boolean).join(', ')
+  return redact(`${context} failed (HTTP ${res.status}): ${detail}`, tokens)
 }
 
 /* ---------- Auth ---------- */
@@ -108,6 +105,13 @@ Deno.serve(async (req) => {
   const auth = await authorizeWorker(req, sb)
   if (!auth.ok) return jsonResponse(auth.body, auth.status)
 
+  let graphConfig: ReturnType<typeof resolveMetaGraphConfig>
+  try {
+    graphConfig = resolveMetaGraphConfig()
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error instanceof Error ? error.message : 'Internal Meta configuration error.' }, 500)
+  }
+
   let body: { batchId?: string; maxItems?: number } = {}
   try {
     body = await req.json()
@@ -138,7 +142,7 @@ Deno.serve(async (req) => {
   }
 
   const accessToken = tokenRows[0].encrypted_access_token
-  const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
+  const { baseUrl, version: graphVersion } = graphConfig
 
   // ── Fetch page token map once per invocation ──────────────
   const pageTokenMap = new Map<string, string>()
@@ -148,7 +152,7 @@ Deno.serve(async (req) => {
     let guard = 0
     while (url && guard < 10 && !pageTokenRateLimited) {
       guard++
-      const res = await retryMetaFetch(url)
+      const res = await metaFetch(url, 30_000)
       if (!res.ok) {
         const errBody = await res.json().catch(() => null)
         if (errBody?.error && (errBody.error.code === 4 || errBody.error.error_subcode === 2069032)) {
@@ -251,10 +255,13 @@ Deno.serve(async (req) => {
         // ── Get linked assets for this client ──
         const { data: linkedAssets } = await sb
           .from('meta_client_assets')
-          .select('facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, instagram_not_applicable')
+          .select('id, facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, instagram_not_applicable')
           .eq('client_id', item.client_id)
           .eq('is_active', true)
-          .limit(1)
+
+        if ((linkedAssets?.length ?? 0) > 1) {
+          throw new Error('Multiple active Meta asset mappings require review. Configure one active Page/Instagram mapping row for this client.')
+        }
 
         const asset = linkedAssets?.[0]
         const facebookPageId = asset?.facebook_page_id ?? null
@@ -279,7 +286,7 @@ Deno.serve(async (req) => {
                   until: `${periodEnd}T23:59:59Z`,
                   limit: '100',
                 })
-                const res = await retryMetaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`)
+                const res = await metaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`, 30_000)
                 if (res.ok) {
                   const fbData = await res.json()
                   const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
@@ -349,10 +356,10 @@ Deno.serve(async (req) => {
                     postsSynced++
                   }
                 } else {
-                  warnings.push(await parseMetaError(res, 'Facebook posts fetch'))
+                  warnings.push(await parseMetaError(res, 'Facebook posts fetch', [accessToken, ...pageTokenMap.values()]))
                 }
               } catch (e) {
-                warnings.push(`Facebook sync error: ${String(e)}`)
+                warnings.push(redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()]))
               }
             }
           }
@@ -367,7 +374,7 @@ Deno.serve(async (req) => {
               fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
               limit: '100',
             })
-            const res = await retryMetaFetch(`${baseUrl}/${instagramAccountId}/media?${params.toString()}`)
+            const res = await metaFetch(`${baseUrl}/${instagramAccountId}/media?${params.toString()}`, 30_000)
             if (res.ok) {
               const igData = await res.json()
               const rawMedia: Array<Record<string, unknown>> = igData.data ?? []
@@ -448,10 +455,10 @@ Deno.serve(async (req) => {
                 postsSynced++
               }
             } else {
-              warnings.push(await parseMetaError(res, 'Instagram media fetch'))
+              warnings.push(await parseMetaError(res, 'Instagram media fetch', [accessToken, ...pageTokenMap.values()]))
             }
           } catch (e) {
-            warnings.push(`Instagram sync error: ${String(e)}`)
+            warnings.push(redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()]))
           }
         }
 
@@ -459,6 +466,7 @@ Deno.serve(async (req) => {
         // Identical engine to the manual sync: per-metric availability states,
         // provenance snapshots, preserve-verified-on-failure. Missing/unavailable
         // account metrics are never stored as zero.
+        let accountFactsFailed = false
         if (!pageTokenRateLimited && (facebookPageId || instagramAccountId)) {
           const allTokens = [accessToken, ...pageTokenMap.values()]
           if (facebookPageId) {
@@ -466,33 +474,48 @@ Deno.serve(async (req) => {
             if (fbPageToken) {
               try {
                 await syncAccountFacts(sb, {
-                  clientId: item.client_id, assetId: null, connectionId: connections[0].id,
+                  clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
                   platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
-                  baseUrl, apiVersion: META_GRAPH_VERSION,
+                  baseUrl, apiVersion: graphVersion,
                   periodMonth: item.month, periodStart, periodEnd,
                   tokens: allTokens, tokenClass: 'page', reconstructInteractions: null,
+                  runType: 'scheduled',
                 })
               } catch (e) {
+                accountFactsFailed = true
                 warnings.push(redact(`Facebook account facts error: ${String(e)}`, allTokens))
               }
+            } else {
+              accountFactsFailed = true
+              warnings.push('Facebook account facts failed: Page access token unavailable.')
             }
           }
           if (instagramAccountId) {
             const igToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
             try {
               await syncAccountFacts(sb, {
-                clientId: item.client_id, assetId: null, connectionId: connections[0].id,
+                clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
                 platform: 'instagram', objectId: instagramAccountId, token: igToken,
-                baseUrl, apiVersion: META_GRAPH_VERSION,
+                baseUrl, apiVersion: graphVersion,
                 periodMonth: item.month, periodStart, periodEnd,
                 tokens: allTokens,
                 tokenClass: facebookPageId && pageTokenMap.get(facebookPageId) ? 'page' : 'user',
                 reconstructInteractions: null,
+                runType: 'scheduled',
               })
             } catch (e) {
+              accountFactsFailed = true
               warnings.push(redact(`Instagram account facts error: ${String(e)}`, allTokens))
             }
           }
+        }
+        if (pageTokenRateLimited && (facebookPageId || instagramAccountId)) {
+          accountFactsFailed = true
+          warnings.push('Normalized account facts failed because Meta rate-limited the Page token request.')
+        }
+        if (accountFactsFailed) {
+          itemStatus = 'failed'
+          itemError = 'Normalized account facts failed. Post content was preserved, but reporting truth is incomplete.'
         }
 
         if (postsSynced === 0 && warnings.length > 0) {
@@ -511,7 +534,7 @@ Deno.serve(async (req) => {
             period_start: periodStart,
             period_end: periodEnd,
             status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
-            summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: SYNC_ENGINE_VERSION },
+            summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: META_CONNECTOR_VERSION },
             started_at: now,
             finished_at: now,
           })
@@ -519,12 +542,12 @@ Deno.serve(async (req) => {
             warnings.push(`Sync run audit log failed: ${runError.message}`)
           }
         } catch (e) {
-          warnings.push(`Sync run audit log failed: ${String(e)}`)
+          warnings.push(redact(`Sync run audit log failed: ${String(e)}`, [accessToken, ...pageTokenMap.values()]))
         }
 
       } catch (e) {
         itemStatus = 'failed'
-        itemError = String(e)
+        itemError = redact(String(e), [accessToken, ...pageTokenMap.values()])
       }
 
       const updatePayload: Record<string, unknown> = {
@@ -601,7 +624,7 @@ Deno.serve(async (req) => {
 
   return jsonResponse({
     ok: true,
-    syncEngineVersion: SYNC_ENGINE_VERSION,
+    syncEngineVersion: META_CONNECTOR_VERSION,
     chunksProcessed: claimCount,
     processed: processed.length,
     items: processed,

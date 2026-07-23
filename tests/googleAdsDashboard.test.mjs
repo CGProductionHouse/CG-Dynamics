@@ -147,7 +147,7 @@ test('admin Client View passes Google Ads while diagnostics remain role-gated', 
   assert.match(PREVIEW_SOURCE, />\s*Client View\s*</)
   assert.match(PREVIEW_SOURCE, /googleAds=\{googleAds\}/)
   assert.match(PREVIEW_SOURCE, /previousGoogleAds=\{previousGoogleAds\}/)
-  assert.match(PREVIEW_SOURCE, /showAdminDiagnostics=\{isAdmin\}/)
+  assert.match(PREVIEW_SOURCE, /showAdminDiagnostics=\{isStaff\}/)
   assert.match(REPORT_VIEW_SOURCE, /\{showAdminDiagnostics && <AdminDataHealth/)
 })
 
@@ -205,7 +205,7 @@ test('source labels are exact and existing Meta report construction remains in p
   assert.match(REPORT_VIEW_SOURCE, /'Sources: Meta Business Sync and Google Ads Sync\.'/)
   assert.match(REPORT_VIEW_SOURCE, /'Source: Google Ads Sync\.'/)
   assert.match(REPORT_VIEW_SOURCE, /'Source: Meta Business Sync\.'/)
-  assert.match(REPORT_VIEW_SOURCE, /buildMasterReport\(statsPosts, manualMetrics\)/)
+  assert.match(REPORT_VIEW_SOURCE, /buildMasterReport\(statsPosts, manualMetrics, excludedContentKeys\)/)
   assert.match(REPORT_VIEW_SOURCE, /buildMetaPlatformMetrics\(view\)/)
   assert.match(REPORT_VIEW_SOURCE, /isMetaSyncedManualMetric\(view\.manual\)/)
 })

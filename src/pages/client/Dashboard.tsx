@@ -19,6 +19,12 @@ import {
   type GoogleAdsDashboardData,
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
+import {
+  loadReportContentExclusions,
+  loadReportPlatformFacts,
+  type ReportContentExclusion,
+} from '../../lib/db/reportingTruth'
+import type { PlatformFact } from '../../lib/overviewModel'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -45,6 +51,10 @@ export default function Dashboard() {
   const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
   const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
+  const [facts, setFacts] = useState<PlatformFact[]>([])
+  const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
+  const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
+  const [contentExclusions, setContentExclusions] = useState<ReportContentExclusion[]>([])
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -99,6 +109,10 @@ export default function Dashboard() {
       setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
+      setFacts([])
+      setPreviousFacts([])
+      setNormalizedFactsAttempted(false)
+      setContentExclusions([])
       setReportLoading(true)
       setError(null)
       try {
@@ -115,7 +129,7 @@ export default function Dashboard() {
           const previous = previousMonth
             ? reports.find(item => getReportMonthFromPeriod(item) === previousMonth)
             : null
-          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult] = await Promise.all([
+          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult, factsResult, exclusionsResult] = await Promise.all([
             listManualMetricsForClientMonth(data.client_id, currentMonth),
             previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
             previousMonth ? listManualMetricsForClientMonth(data.client_id, previousMonth) : Promise.resolve({ data: [], error: null }),
@@ -123,8 +137,14 @@ export default function Dashboard() {
             previousMonth
               ? loadGoogleAdsDashboard(data.id, previousMonth)
               : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
+            loadReportPlatformFacts(data.id, currentMonth, previousMonth),
+            loadReportContentExclusions(data.id),
           ])
           if (!active) return
+          if (factsResult.error || exclusionsResult.error) {
+            setError('Verified reporting data could not be loaded safely. Please try again later.')
+            return
+          }
           setManualMetrics(metricsResult.data)
           setPreviousReport(previousReportResult.data)
           setPreviousManualMetrics(previousMetricsResult.data)
@@ -132,6 +152,10 @@ export default function Dashboard() {
           setPreviousGoogleAds(previousGoogleAdsResult.data)
           setGoogleAdsState(googleAdsResult.state)
           setGoogleAdsError(googleAdsResult.error ?? previousGoogleAdsResult.error)
+          setFacts(factsResult.facts)
+          setPreviousFacts(factsResult.previousFacts)
+          setNormalizedFactsAttempted(factsResult.normalizedAttempted)
+          setContentExclusions(exclusionsResult.data)
         }
       } catch (error) {
         if (!active) return
@@ -229,6 +253,10 @@ export default function Dashboard() {
           previousGoogleAds={previousGoogleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
+          facts={facts}
+          previousFacts={previousFacts}
+          normalizedFactsAttempted={normalizedFactsAttempted}
+          contentExclusions={contentExclusions}
         />
       ) : (
         <EmptyReportState
