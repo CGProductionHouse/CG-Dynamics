@@ -26,6 +26,57 @@ Each item should include:
 
 ## Parking lot items
 
+### 2026-07-23 - Unified client portal landing page and strategy journey
+
+Division: Client Intelligence, Operations Hub, AI Workforce
+Status: Ready for milestone planning
+
+Current finding:
+The client-facing experience is split across separate report, campaign and calendar surfaces without one obvious home that explains the full CG service. Clients should not need to understand the internal app structure to find performance results, paid campaign activity, upcoming content or the strategy CG is implementing.
+
+Product direction:
+Create a polished client portal landing page that acts as the front door to the client relationship. It should present three clear primary areas: Performance Dashboard, Campaigns and Content Calendar. The portal must also show how the current CG strategy and performance-dashboard game plan connects the evidence from past results to campaign optimisation and the upcoming content plan.
+
+Required behaviour:
+
+- Add a client-facing landing page with a concise account summary, current reporting period, active priorities and clear navigation cards.
+- Primary option 1: `Performance Dashboard`.
+  - Organic and profile performance for Instagram, Facebook, TikTok and Google Business Profile where connected and supported.
+  - Keep each platform clearly identified and never imply a disconnected or unavailable source is reporting data.
+  - Show verified results, meaningful comparisons, top-performing content and CG's reviewed interpretation.
+- Primary option 2: `Campaigns`.
+  - Paid campaign reporting for Google Ads, Meta Ads and TikTok Ads where connected.
+  - Separate platform-attributed actions from confirmed business outcomes.
+  - Show campaign objectives, reporting-period results, current lifecycle, CG review and next optimisation direction.
+- Primary option 3: `Content Calendar`.
+  - Show the client-ready monthly calendar inside the portal.
+  - Include access to the relevant content guidelines, video concepts/scripts, planned deliverables and approval-ready content information.
+  - Preserve the connection to Client Schedule and canonical deliverable identities.
+- The landing page must not be a collection of disconnected links. It should tell one clear story:
+  1. What happened in performance.
+  2. What CG learned from it.
+  3. Which paid or organic actions CG is taking next.
+  4. How those decisions are represented in the upcoming content calendar and content guidelines.
+- Add a client-safe `Current strategy` or `Game plan` area that is generated from verified evidence and reviewed by CG before publication.
+- The strategy area should connect specific observations to actions, for example:
+  - performance finding;
+  - commercial meaning;
+  - platform decision;
+  - campaign or content action;
+  - upcoming calendar implementation;
+  - KPI or evidence that will be reviewed next.
+- Strategy must not become generic AI copy or an isolated report paragraph. It must remain visible as the operating thread across Performance, Campaigns and Content Calendar.
+- The portal should make the reporting month and upcoming action month clear. Past results belong to the reporting period; the game plan and calendar should point forward.
+- Only show platform sections that are connected, configured or deliberately marked as upcoming. Do not display fake zeros or empty dashboards as though reporting is active.
+- Design the client landing page as a premium, readable and mobile-friendly experience that makes CG's value, activity and next steps obvious at a glance.
+- Keep staff editing and technical connector diagnostics out of the normal client view.
+
+Why it matters:
+The strongest client experience is not three separate tools. It is one understandable journey from evidence to strategy to execution. A unified portal helps clients see what CG achieved, what is being improved, what campaigns are active and exactly what content is planned next, making the service more transparent, valuable and difficult to replace.
+
+Revisit:
+After the Meta reporting-truth and three-client parity milestone, then align this architecture with the Google Ads campaign-intelligence follow-up, Microsoft Client Schedule parity work and full content-guide redesign before rebuilding the client portal navigation.
+
 ### 2026-07-23 - Microsoft client package and schedule parity audit
 
 Division: Operations Hub
