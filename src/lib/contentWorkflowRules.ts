@@ -99,3 +99,78 @@ export function runInvolvesUser(
   if ((run.lead_name ?? '').trim().toLowerCase() === name) return true
   return run.helper_names.some(helper => helper.trim().toLowerCase() === name)
 }
+
+// ── Unified Content Run identity (CG Calendar ⇄ Content Workflow) ─────────────
+//
+// A Content Run has ONE shared identity: a company_calendar_events row
+// (event_type = 'content_run') plus an operational content_runs row that links
+// to it via calendar_event_id. Calendar-owned fields are the shared identity
+// (name/client/date/time/location/status); operational fields (crew, guides,
+// shot list, notes) live only on the Content Workflow side. These pure helpers
+// keep the two status models and the field ownership consistent everywhere,
+// with no Supabase import (mirrors companyCalendar's CompanyEventStatus).
+
+export type CalendarEventStatus = 'planned' | 'confirmed' | 'completed' | 'cancelled'
+
+// Calendar status → run status. Conservative and matches the phase-19f backfill:
+// planned→planning, confirmed→ready, completed→completed, cancelled→cancelled.
+export function mapCalendarStatusToRun(status: CalendarEventStatus): ContentRunStatus {
+  switch (status) {
+    case 'planned': return 'planning'
+    case 'confirmed': return 'ready'
+    case 'completed': return 'completed'
+    case 'cancelled': return 'cancelled'
+    default: return 'planning'
+  }
+}
+
+// Run status → calendar status. The richer run lifecycle collapses onto the four
+// calendar states; any active/in-production state reads as 'confirmed' so the
+// calendar keeps showing the run as a committed booking.
+export function mapRunStatusToCalendar(status: ContentRunStatus): CalendarEventStatus {
+  switch (status) {
+    case 'planning': return 'planned'
+    case 'completed': return 'completed'
+    case 'cancelled': return 'cancelled'
+    case 'ready':
+    case 'in_progress':
+    case 'captured':
+    case 'processing':
+      return 'confirmed'
+    default: return 'planned'
+  }
+}
+
+// A calendar event owned by Microsoft (Outlook import). Its date/title/location
+// are source-controlled during the transition and must never be overwritten
+// from Content Workflow.
+export function isMicrosoftOwnedEvent(
+  event: { microsoft_source_type?: string | null; microsoft_event_id?: string | null } | null | undefined,
+): boolean {
+  if (!event) return false
+  return Boolean(event.microsoft_source_type) || Boolean(event.microsoft_event_id)
+}
+
+// Fields whose source of truth is the CG Calendar event (the shared identity).
+export const CALENDAR_OWNED_RUN_FIELDS: readonly string[] = [
+  'name', 'client_id', 'client_name', 'run_date', 'start_time', 'location', 'status',
+]
+
+// Fields that live only on the operational Content Workflow side.
+export const OPERATIONAL_RUN_FIELDS: readonly string[] = [
+  'lead_user_id', 'lead_name', 'helper_names', 'internal_notes',
+]
+
+// Whether a Content Run field may be edited from Content Workflow. Operational
+// fields are always editable. Calendar-owned fields are editable for CG-created
+// runs (edits mirror back to the event), but read-only when the linked calendar
+// event is Microsoft-owned (its fields are source-controlled). Unknown fields
+// (shot list, guide links — handled by their own records) default to editable.
+export function canEditRunFieldInWorkflow(
+  field: string,
+  event: { microsoft_source_type?: string | null; microsoft_event_id?: string | null } | null | undefined,
+): boolean {
+  if (OPERATIONAL_RUN_FIELDS.includes(field)) return true
+  if (CALENDAR_OWNED_RUN_FIELDS.includes(field)) return !isMicrosoftOwnedEvent(event)
+  return true
+}

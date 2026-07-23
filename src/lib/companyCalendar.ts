@@ -142,6 +142,40 @@ export async function listCompanyEvents(
   }
 }
 
+// A single event by id. Used to check a linked Content Run's calendar event
+// (e.g. Microsoft ownership) before mirroring edits back to it.
+export async function getCompanyEvent(
+  id: string,
+): Promise<CompanyEventResult<CompanyCalendarEvent>> {
+  try {
+    const { data, error } = await supabase.from(TABLE).select('*').eq('id', id).single()
+    if (error) {
+      if (isTableMissing(error)) return { data: null, error: null, tableMissing: true }
+      return { data: null, error: handleError(error), tableMissing: false }
+    }
+    return { data: data as CompanyCalendarEvent, error: null, tableMissing: false }
+  } catch (err) {
+    return { data: null, error: handleError(err), tableMissing: false }
+  }
+}
+
+// Events for a set of ids (linked Content Run events). Empty ids short-circuits.
+export async function listCompanyEventsByIds(
+  ids: string[],
+): Promise<CompanyEventResult<CompanyCalendarEvent[]>> {
+  if (ids.length === 0) return { data: [], error: null, tableMissing: false }
+  try {
+    const { data, error } = await supabase.from(TABLE).select('*').in('id', ids)
+    if (error) {
+      if (isTableMissing(error)) return { data: null, error: null, tableMissing: true }
+      return { data: null, error: handleError(error), tableMissing: false }
+    }
+    return { data: (data ?? []) as CompanyCalendarEvent[], error: null, tableMissing: false }
+  } catch (err) {
+    return { data: null, error: handleError(err), tableMissing: false }
+  }
+}
+
 export async function createCompanyEvent(
   payload: CompanyEventInput,
 ): Promise<CompanyEventResult<CompanyCalendarEvent>> {

@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
@@ -10,6 +11,7 @@ import {
   CONTENT_RUN_STATUSES,
   canAddGuideToRun,
   canRunGuideAction,
+  isMicrosoftOwnedEvent,
   type ContentGuideStatus,
   type ContentRunStatus,
 } from '../../lib/contentWorkflowRules'
@@ -17,14 +19,14 @@ import {
   addApprovedIdeaToRun,
   addRunItem,
   createGuideIdea,
-  createRun,
+  createRunWithCalendarEvent,
   listGuideIdeas,
   listRunItems,
   listRuns,
   removeRunItem,
   runGuideAction,
   updateGuideIdea,
-  updateRun,
+  updateRunLinked,
   updateRunItem,
   type ContentGuideIdea,
   type ContentGuideInput,
@@ -34,6 +36,7 @@ import {
   type ContentRunItem,
   type StaffProfileOption,
 } from '../../lib/contentWorkflow'
+import { listCompanyEventsByIds, type CompanyCalendarEvent } from '../../lib/companyCalendar'
 import VideoPipelineTab from './VideoPipelineTab'
 
 // ── Content Workflow — staff Content Guides + Content Runs (MVP) ──────────────
@@ -70,9 +73,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   )
 }
 
-function ClientSelect({ value, clients, onChange }: { value: string; clients: ClientOption[]; onChange: (id: string) => void }) {
+function ClientSelect({ value, clients, onChange, disabled = false }: { value: string; clients: ClientOption[]; onChange: (id: string) => void; disabled?: boolean }) {
   return (
-    <select className={INPUT_CLS} value={value} onChange={event => onChange(event.target.value)}>
+    <select className={INPUT_CLS} value={value} disabled={disabled} onChange={event => onChange(event.target.value)}>
       <option value="">No client</option>
       {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
     </select>
@@ -233,33 +236,47 @@ function formToRunInput(form: RunFormState): ContentRunInput {
 }
 
 function RunForm({
-  initial, clients, saving, error, onCancel, onSubmit,
+  initial, clients, saving, error, microsoftOwned = false, onCancel, onSubmit,
 }: {
   initial: ContentRun | null
   clients: ClientOption[]
   saving: boolean
   error: string | null
+  // The linked calendar event is Microsoft-owned: its date/title/location and
+  // client/status are source-controlled and shown read-only.
+  microsoftOwned?: boolean
   onCancel: () => void
   onSubmit: (input: ContentRunInput) => void
 }) {
   const [form, setForm] = useState<RunFormState>(runToForm(initial))
   const set = <K extends keyof RunFormState>(key: K, value: RunFormState[K]) => setForm(prev => ({ ...prev, [key]: value }))
   const resolvedClientName = form.client_id ? (clients.find(client => client.id === form.client_id)?.name ?? null) : null
+  const isNew = initial === null
+  // A new CG run also creates its linked calendar event, which needs a start —
+  // so a date is required on create. Calendar-owned fields lock for Microsoft events.
+  const dateMissing = isNew && !form.run_date
+  const lockCalendarFields = microsoftOwned
   return (
-    <form className="space-y-4" onSubmit={event => { event.preventDefault(); if (form.name.trim()) onSubmit({ ...formToRunInput(form), client_name: resolvedClientName }) }}>
+    <form className="space-y-4" onSubmit={event => { event.preventDefault(); if (form.name.trim() && !dateMissing) onSubmit({ ...formToRunInput(form), client_name: resolvedClientName }) }}>
+      {lockCalendarFields && (
+        <p className="rounded-lg border border-blue-300/20 bg-blue-300/[0.07] px-3 py-2 text-xs text-blue-100">
+          Name, client, date, time and location for this run are managed in Microsoft/Outlook and are read-only here. Crew, guides and the shot list stay editable.
+        </p>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Run name *"><input className={INPUT_CLS} value={form.name} onChange={event => set('name', event.target.value)} /></Field>
-        <Field label="Client"><ClientSelect value={form.client_id} clients={clients} onChange={id => set('client_id', id)} /></Field>
-        <Field label="Date"><input type="date" className={INPUT_CLS} value={form.run_date} onChange={event => set('run_date', event.target.value)} /></Field>
-        <Field label="Start time"><input type="time" className={INPUT_CLS} value={form.start_time} onChange={event => set('start_time', event.target.value)} /></Field>
-        <Field label="Location"><input className={INPUT_CLS} value={form.location} onChange={event => set('location', event.target.value)} /></Field>
+        <Field label="Run name *"><input className={INPUT_CLS} value={form.name} disabled={lockCalendarFields} onChange={event => set('name', event.target.value)} /></Field>
+        <Field label="Client"><ClientSelect value={form.client_id} clients={clients} disabled={lockCalendarFields} onChange={id => set('client_id', id)} /></Field>
+        <Field label={isNew ? 'Date *' : 'Date'}><input type="date" className={INPUT_CLS} value={form.run_date} disabled={lockCalendarFields} onChange={event => set('run_date', event.target.value)} /></Field>
+        <Field label="Start time"><input type="time" className={INPUT_CLS} value={form.start_time} disabled={lockCalendarFields} onChange={event => set('start_time', event.target.value)} /></Field>
+        <Field label="Location"><input className={INPUT_CLS} value={form.location} disabled={lockCalendarFields} onChange={event => set('location', event.target.value)} /></Field>
         <Field label="Lead staff member"><input className={INPUT_CLS} value={form.lead_name} onChange={event => set('lead_name', event.target.value)} placeholder="Staff name" /></Field>
       </div>
       <Field label="Helpers (comma-separated names)"><input className={INPUT_CLS} value={form.helpers} onChange={event => set('helpers', event.target.value)} /></Field>
       <Field label="Internal notes"><textarea className={`${INPUT_CLS} min-h-[56px]`} value={form.internal_notes} onChange={event => set('internal_notes', event.target.value)} /></Field>
+      {dateMissing && <p className="text-xs text-amber-100/80">A date is required — a new run also creates its CG Calendar event.</p>}
       {error && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
       <div className="flex items-center gap-3">
-        <ActionButton type="submit" loading={saving} disabled={!form.name.trim()}>Save run</ActionButton>
+        <ActionButton type="submit" loading={saving} disabled={!form.name.trim() || dateMissing}>Save run</ActionButton>
         <ActionButton type="button" variant="ghost" onClick={onCancel}>Cancel</ActionButton>
       </div>
     </form>
@@ -270,6 +287,7 @@ function RunForm({
 
 export default function ContentWorkflowPage() {
   const { profile } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [tab, setTab] = useState<Tab>('guides')
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -279,6 +297,9 @@ export default function ContentWorkflowPage() {
   const [staff, setStaff] = useState<StaffProfileOption[]>([])
   const [guides, setGuides] = useState<ContentGuideIdea[]>([])
   const [runs, setRuns] = useState<ContentRun[]>([])
+  // Linked CG Calendar events for the loaded runs, keyed by event id — used to
+  // detect Microsoft-owned (source-controlled) runs in the UI.
+  const [linkedEvents, setLinkedEvents] = useState<Record<string, CompanyCalendarEvent>>({})
 
   const [guideSearch, setGuideSearch] = useState('')
   const [guideStatusFilter, setGuideStatusFilter] = useState<ContentGuideStatus | 'all'>('all')
@@ -309,6 +330,17 @@ export default function ContentWorkflowPage() {
     setStaff(staffResult.migrationNeeded ? [] : staffResult.data)
     setGuides(guideResult.data)
     setRuns(runResult.data)
+    // Best-effort: fetch the calendar events linked to these runs so the UI can
+    // mark Microsoft-owned runs read-only. Silent if the calendar layer is absent.
+    const linkedIds = runResult.data.map(run => run.calendar_event_id).filter((id): id is string => Boolean(id))
+    if (linkedIds.length > 0) {
+      const eventsResult = await listCompanyEventsByIds(linkedIds)
+      const map: Record<string, CompanyCalendarEvent> = {}
+      for (const event of eventsResult.data ?? []) map[event.id] = event
+      setLinkedEvents(map)
+    } else {
+      setLinkedEvents({})
+    }
     setLoading(false)
   }
   const loadAllEvent = useEffectEvent(loadAll)
@@ -316,6 +348,20 @@ export default function ContentWorkflowPage() {
     const timer = window.setTimeout(() => { void loadAllEvent() }, 0)
     return () => window.clearTimeout(timer)
   }, [])
+
+  // Deep link from the CG Calendar: ?tab=runs&event=<calendar_event_id> opens the
+  // matching run. Runs the query once the runs are loaded, then clears the param.
+  const openFromCalendarEvent = useEffectEvent((eventId: string) => {
+    const match = runs.find(run => run.calendar_event_id === eventId)
+    if (match) { setTab('runs'); setSelectedRunId(match.id); setRunMode('view') }
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('event'); return next }, { replace: true })
+  })
+  useEffect(() => {
+    const eventId = searchParams.get('event')
+    if (!eventId || runs.length === 0) return
+    const timer = window.setTimeout(() => openFromCalendarEvent(eventId), 0)
+    return () => window.clearTimeout(timer)
+  }, [searchParams, runs])
 
   async function loadRunItems(runId: string) {
     const result = await listRunItems(runId)
@@ -333,6 +379,8 @@ export default function ContentWorkflowPage() {
 
   const selectedGuide = guides.find(guide => guide.id === selectedGuideId) ?? null
   const selectedRun = runs.find(run => run.id === selectedRunId) ?? null
+  const selectedRunEvent = selectedRun?.calendar_event_id ? (linkedEvents[selectedRun.calendar_event_id] ?? null) : null
+  const selectedRunMicrosoftOwned = isMicrosoftOwnedEvent(selectedRunEvent)
   const approvedGuidesForRun = useMemo(() => guides.filter(guide => canAddGuideToRun(guide.status)), [guides])
   const openRuns = useMemo(() => runs.filter(run => run.status !== 'completed' && run.status !== 'cancelled'), [runs])
 
@@ -388,8 +436,9 @@ export default function ContentWorkflowPage() {
 
   async function submitRun(input: ContentRunInput) {
     setRunSaving(true); setRunError(null)
-    const withCreator = runMode === 'create' ? { ...input, created_by: profile?.id ?? null } : input
-    const response = runMode === 'create' ? await createRun(withCreator) : await updateRun(selectedRunId as string, input)
+    const response = runMode === 'create'
+      ? await createRunWithCalendarEvent({ ...input, created_by: profile?.id ?? null })
+      : selectedRun ? await updateRunLinked(selectedRun, input) : { data: null, error: 'No run selected.', migrationNeeded: false }
     setRunSaving(false)
     if (response.error) { setRunError(response.error); return }
     if (response.migrationNeeded) { setMigrationNeeded(true); return }
@@ -400,7 +449,8 @@ export default function ContentWorkflowPage() {
 
   async function setRunStatus(status: ContentRunStatus) {
     if (!selectedRun) return
-    await updateRun(selectedRun.id, { status })
+    // Cancelling/completing keeps the linked calendar event aligned (no hard delete).
+    await updateRunLinked(selectedRun, { status })
     await loadAll()
   }
 
@@ -572,7 +622,7 @@ export default function ContentWorkflowPage() {
             {runMode === 'create' ? (
               <><h2 className="mb-4 text-lg font-black text-white">New content run</h2><RunForm initial={null} clients={clients} saving={runSaving} error={runError} onCancel={() => setRunMode('view')} onSubmit={submitRun} /></>
             ) : runMode === 'edit' && selectedRun ? (
-              <><h2 className="mb-4 text-lg font-black text-white">Edit run</h2><RunForm initial={selectedRun} clients={clients} saving={runSaving} error={runError} onCancel={() => setRunMode('view')} onSubmit={submitRun} /></>
+              <><h2 className="mb-4 text-lg font-black text-white">Edit run</h2><RunForm initial={selectedRun} clients={clients} saving={runSaving} error={runError} microsoftOwned={selectedRunMicrosoftOwned} onCancel={() => setRunMode('view')} onSubmit={submitRun} /></>
             ) : selectedRun ? (
               <div className="space-y-5">
                 <div className="flex items-start justify-between gap-3">
@@ -587,7 +637,14 @@ export default function ContentWorkflowPage() {
                   <Pill tone={runStatusTone(selectedRun.status)}>{humanize(selectedRun.status)}</Pill>
                   {selectedRun.lead_name && <Pill tone="teal">Lead: {selectedRun.lead_name}</Pill>}
                   {selectedRun.helper_names.map(helper => <Pill key={helper}>{helper}</Pill>)}
+                  {selectedRun.calendar_event_id && <Pill tone="teal">On CG Calendar</Pill>}
+                  {selectedRunMicrosoftOwned && <Pill>Outlook-managed</Pill>}
                 </div>
+                {selectedRunMicrosoftOwned && (
+                  <p className="rounded-lg border border-blue-300/20 bg-blue-300/[0.07] px-3 py-2 text-xs text-blue-100">
+                    Date, name and location come from Microsoft/Outlook and are read-only here. Crew, guides and the shot list stay editable.
+                  </p>
+                )}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[11px] font-black uppercase tracking-[0.12em] text-white/40">Set status:</span>
                   {CONTENT_RUN_STATUSES.map(status => (
