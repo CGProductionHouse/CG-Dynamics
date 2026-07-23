@@ -24,6 +24,7 @@ import ManualMetricsAdmin from './pages/admin/ManualMetricsAdmin'
 import PublishedPreview from './pages/admin/PublishedPreview'
 import IntegrationsPage from './pages/admin/IntegrationsPage'
 import MetaIntegrationPage from './pages/admin/MetaIntegrationPage'
+import GoogleAdsIntegrationPage from './pages/admin/GoogleAdsIntegrationPage'
 import AssistantPage from './pages/admin/AssistantPage'
 import PlannerPage from './pages/admin/PlannerPage'
 import PackageMasterPage from './pages/admin/PackageMasterPage'
@@ -108,6 +109,7 @@ export default function App() {
 
               {/* Manager/admin operational write routes nested inside AdminLayout */}
               <Route element={<RequireManager />}>
+                <Route path="/admin/integrations/google-ads" element={<GoogleAdsIntegrationPage />} />
                 <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
