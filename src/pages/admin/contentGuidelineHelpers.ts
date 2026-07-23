@@ -1,6 +1,7 @@
 import type { ClientOption } from '../../lib/commandCentre'
 import type { DeliverableLabel } from '../../lib/contentWorkflow'
 import type { ContentGuideStatus } from '../../lib/contentWorkflowRules'
+import type { MonthlyDeliverable } from '../../lib/planner'
 import type { VideoProductionStatus } from '../../lib/videoPipelineRules'
 
 // ── Shared Content Guideline helpers (no JSX) ────────────────────────────────
@@ -23,6 +24,25 @@ export function copyToClipboard(text: string) {
 export function deliverableLabelText(label: DeliverableLabel | undefined): string | null {
   if (!label) return null
   return `${label.code} ${label.instance_number} · ${label.title}`
+}
+
+export function contentGuidelineVideoChoices(
+  deliverables: MonthlyDeliverable[],
+  clientId: string,
+  month: string,
+): MonthlyDeliverable[] {
+  const monthStart = /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : month
+  return deliverables
+    .filter(deliverable => deliverable.client_id === clientId
+      && deliverable.month === monthStart
+      && deliverable.deliverable_type === 'video')
+    .sort((left, right) => left.instance_number - right.instance_number)
+}
+
+export function contentGuidelineDeliverableLabel(deliverable: Pick<MonthlyDeliverable, 'instance_number' | 'title'>): string {
+  const prefix = `Video ${deliverable.instance_number}`
+  const title = deliverable.title.trim()
+  return title ? `${prefix} — ${title}` : prefix
 }
 
 export function videoStatusTone(status: VideoProductionStatus): 'teal' | 'amber' | 'neutral' {
