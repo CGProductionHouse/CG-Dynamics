@@ -11,15 +11,17 @@ import { createServer } from 'vite'
 let server
 let rules
 let video
+let guideHelpers
 
 before(async () => {
   server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   rules = await server.ssrLoadModule('/src/lib/contentWorkflowRules.ts')
   video = await server.ssrLoadModule('/src/lib/videoPipelineRules.ts')
+  guideHelpers = await server.ssrLoadModule('/src/pages/admin/contentGuidelineHelpers.ts')
 })
 after(async () => { await server?.close() })
 
-const read = name => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8')
+const read = name => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const PAGE = read('src/pages/admin/ContentWorkflowPage.tsx')
 const GUIDE = read('src/pages/admin/contentGuideline.tsx')
 const DATA = read('src/lib/contentWorkflow.ts')
@@ -72,6 +74,71 @@ test('the guideline form saves canonical name and video fields', () => {
 test('a linked deliverable supplies the video number (read-only)', () => {
   assert.match(GUIDE, /videoNumberFromInstance\(/)
   assert.match(GUIDE, /disabled=\{deliverableLinked\}/)
+})
+
+// ── Linked monthly video selector ────────────────────────────────────────────
+
+function deliverable(id, instanceNumber, overrides = {}) {
+  return {
+    id,
+    client_id: 'client-1',
+    month: '2026-07-01',
+    deliverable_type: 'video',
+    code: 'Video',
+    instance_number: instanceNumber,
+    title: `VIDEO ${instanceNumber} - DULUX`,
+    ...overrides,
+  }
+}
+
+test('Video 1 selector label never renders as Video 11 or exposes the internal code', () => {
+  const label = guideHelpers.contentGuidelineDeliverableLabel(deliverable('video-1', 1, { code: 'Video 1' }))
+  assert.equal(label, 'Video 1 — VIDEO 1 - DULUX')
+  assert.doesNotMatch(label, /Video 11/)
+})
+
+test('Content Guideline choices exclude DP, F, photo, other clients and other months', () => {
+  const choices = guideHelpers.contentGuidelineVideoChoices([
+    deliverable('video', 1),
+    deliverable('dp', 1, { deliverable_type: 'dp', code: 'DP' }),
+    deliverable('photo', 1, { deliverable_type: 'photo', code: 'F' }),
+    deliverable('other-client', 2, { client_id: 'client-2' }),
+    deliverable('other-month', 2, { month: '2026-08-01' }),
+  ], 'client-1', '2026-07')
+  assert.deepEqual(choices.map(choice => choice.id), ['video'])
+})
+
+test('different months may each contain their own Video 1', () => {
+  const rows = [
+    deliverable('july-video-1', 1, { month: '2026-07-01' }),
+    deliverable('august-video-1', 1, { month: '2026-08-01' }),
+  ]
+  const july = guideHelpers.contentGuidelineVideoChoices(rows, 'client-1', '2026-07')
+  const august = guideHelpers.contentGuidelineVideoChoices(rows, 'client-1', '2026-08')
+  assert.equal(july[0].instance_number, 1)
+  assert.equal(august[0].instance_number, 1)
+  assert.equal(july[0].id, 'july-video-1')
+  assert.equal(august[0].id, 'august-video-1')
+})
+
+test('video choices sort numerically by monthly instance number', () => {
+  const choices = guideHelpers.contentGuidelineVideoChoices([
+    deliverable('four', 4), deliverable('two', 2), deliverable('one', 1), deliverable('three', 3),
+  ], 'client-1', '2026-07')
+  assert.deepEqual(choices.map(choice => choice.instance_number), [1, 2, 3, 4])
+})
+
+test('canonical naming uses the selected monthly instance number', () => {
+  const selected = deliverable('august-video-1', 1, { month: '2026-08-01' })
+  const number = video.videoNumberFromInstance(selected.instance_number)
+  assert.equal(number, 1)
+  assert.equal(video.buildCanonicalName({ month: selected.month, clientCode: 'DULUX', videoNumber: number, conceptTitle: 'Summer colour' }), '2026_08_DULUX_VIDEO_01_SUMMER_COLOUR')
+})
+
+test('client and month changes clear linked deliverable and stale video number', () => {
+  assert.match(GUIDE, /client_id: event\.target\.value, deliverable_id: '', video_number: ''/)
+  assert.match(GUIDE, /month: event\.target\.value, deliverable_id: '', video_number: ''/)
+  assert.match(GUIDE, /deliverableType: 'video'/)
 })
 
 // ── 5. One active guideline per deliverable ──────────────────────────────────

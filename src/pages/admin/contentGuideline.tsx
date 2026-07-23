@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 import type { ClientOption } from '../../lib/commandCentre'
@@ -15,6 +15,8 @@ import {
   INPUT_CLS,
   LABEL_CLS,
   clientName,
+  contentGuidelineDeliverableLabel,
+  contentGuidelineVideoChoices,
   copyToClipboard,
   guideStatusTone,
   humanizeStatus,
@@ -134,14 +136,23 @@ export function GuidelineForm({
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const set = <K extends keyof GuidelineFormState>(key: K, value: GuidelineFormState[K]) => setForm(prev => ({ ...prev, [key]: value }))
 
-  const loadDeliverables = useEffectEvent(async () => {
-    if (!form.client_id || !form.month) { setDeliverables([]); return }
-    const { data } = await listMonthlyDeliverablesByMonth(form.month, { clientId: form.client_id })
-    setDeliverables((data ?? []) as MonthlyDeliverable[])
-  })
   useEffect(() => {
-    const timer = window.setTimeout(() => { void loadDeliverables() }, 0)
-    return () => window.clearTimeout(timer)
+    const clientId = form.client_id
+    const month = form.month
+    let active = true
+    const timer = window.setTimeout(() => {
+      if (!clientId || !month) {
+        setDeliverables([])
+        return
+      }
+      void listMonthlyDeliverablesByMonth(month, { clientId, deliverableType: 'video' }).then(({ data }) => {
+        if (active) setDeliverables(contentGuidelineVideoChoices((data ?? []) as MonthlyDeliverable[], clientId, month))
+      })
+    }, 0)
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
   }, [form.client_id, form.month])
 
   const resolvedClientName = form.client_id ? (clients.find(client => client.id === form.client_id)?.name ?? null) : null
@@ -214,18 +225,18 @@ export function GuidelineForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block space-y-1.5">
           <span className={LABEL_CLS}>Client</span>
-          <select className={INPUT_CLS} value={form.client_id} onChange={event => { set('client_id', event.target.value); set('deliverable_id', '') }}>
+          <select className={INPUT_CLS} value={form.client_id} onChange={event => { setDeliverables([]); setForm(prev => ({ ...prev, client_id: event.target.value, deliverable_id: '', video_number: '' })) }}>
             <option value="">No client</option>
             {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
           </select>
         </label>
-        <label className="block space-y-1.5"><span className={LABEL_CLS}>Month</span><input type="month" className={INPUT_CLS} value={form.month} onChange={event => { set('month', event.target.value); set('deliverable_id', '') }} /></label>
+        <label className="block space-y-1.5"><span className={LABEL_CLS}>Month</span><input type="month" className={INPUT_CLS} value={form.month} onChange={event => { setDeliverables([]); setForm(prev => ({ ...prev, month: event.target.value, deliverable_id: '', video_number: '' })) }} /></label>
       </div>
       <label className="block space-y-1.5">
         <span className={LABEL_CLS}>Linked Client Schedule deliverable</span>
         <select className={INPUT_CLS} value={form.deliverable_id} onChange={event => set('deliverable_id', event.target.value)} disabled={!form.client_id || !form.month}>
           <option value="">Not linked</option>
-          {deliverables.map(d => <option key={d.id} value={d.id}>{d.code}{d.instance_number} — {d.title}</option>)}
+          {deliverables.map(deliverable => <option key={deliverable.id} value={deliverable.id}>{contentGuidelineDeliverableLabel(deliverable)}</option>)}
         </select>
       </label>
 
