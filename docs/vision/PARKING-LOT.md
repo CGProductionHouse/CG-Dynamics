@@ -26,6 +26,40 @@ Each item should include:
 
 ## Parking lot items
 
+### 2026-07-23 - Microsoft client package and schedule parity audit
+
+Division: Operations Hub
+Status: Ready for milestone planning
+
+Current finding:
+The current Client Schedule and client-facing Content Calendar do not reliably match the existing Microsoft Planner client schedules. Some client package counts, deliverable types, task identities and dates were imported incorrectly or incompletely during the legacy Teams shadow import. Action Sport is one confirmed example: Microsoft Planner clearly contains a `VIDEO - ACTION` item together with `F1` to `F4` and `DP1` to `DP4`, while the CG Dynamics July client calendar currently presents only four designed posters and four photos and does not reflect the video correctly. This is one faulty client among multiple suspected mismatches.
+
+Product direction:
+Treat Microsoft Planner as the transition source of truth and run a proper preview-first parity reconciliation across every active client before retiring Teams. Do not patch Action Sport alone. The import must determine the real monthly package and deliverables from source tasks, preserve exact Microsoft identities, and reconcile CG Dynamics safely without duplicating or silently deleting work.
+
+Required behaviour:
+
+- Audit every active client bucket in the approved monthly Client Socials plan against the corresponding CG Dynamics client package, monthly deliverables and client-facing calendar.
+- Parse source task labels and readable variations consistently, including `VIDEO`, `REEL`, `DP`, `F`, numbered forms such as `DP1`, `DP 1`, `F1`, `F 1`, and client-name suffixes.
+- Preserve `microsoft_plan_id`, `microsoft_bucket_id` and `microsoft_task_id` as the canonical source identity so repeat imports update the same deliverable instead of creating duplicates.
+- Compare source task type, number, title, due date, completion state and client bucket with the stored CG Dynamics row.
+- Distinguish true package composition from scheduled post dates. Package counts must reflect the actual source deliverables, while each task keeps its own scheduled date.
+- Surface creates, updates, unchanged rows, missing-source candidates, duplicates, type conflicts, date conflicts, unmatched clients and ambiguous task labels in the preview before any write.
+- Never infer a missing video, reel, poster or photo from package totals alone when the source task is available.
+- Do not silently omit unsupported or unfamiliar task names. Keep them as visible review conflicts.
+- Do not auto-create clients or packages from guessed names.
+- Do not hard-delete existing CG work when a source task is absent. Source-removal requires a complete successful fetch and explicit approval.
+- After applying the reviewed reconciliation, verify Client Schedule, client Content Calendar, Content Workflow deliverable selectors and package badges against Microsoft for every active client.
+- Use Action Sport as an acceptance case: the source video plus all four `F` and four `DP` items must be represented with the correct identities and dates.
+- Add additional representative acceptance clients with videos, reels, mixed packages, completed tasks, changed dates and imperfect naming.
+- Produce a parity report showing source count, created, updated, unchanged, conflict, skipped and missing-source totals per client.
+
+Why it matters:
+The client calendar and downstream content workflow depend on accurate monthly deliverables. Missing videos, incorrect package counts or wrong dates make the production system untrustworthy and force staff to keep checking Teams manually, which defeats the transition to CG Dynamics.
+
+Revisit:
+Immediately after the Meta reporting-truth and three-client parity milestone. Complete this before treating the Microsoft transition sync as ready for normal operational use or retiring the Teams client schedule.
+
 ### 2026-07-23 - Full content guide workspace instead of fragmented video forms
 
 Division: Operations Hub, AI Workforce
