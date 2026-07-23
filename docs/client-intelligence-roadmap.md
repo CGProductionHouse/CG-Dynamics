@@ -1,105 +1,215 @@
 # Client Intelligence — audit, architecture and roadmap
 
-Audit of the client-facing dashboard, the V1 shipped on
-`feature/client-intelligence-dashboard-v1`, and the roadmap to the full
-client marketing command centre.
+Last updated: 2026-07-23
+Status: Active roadmap
 
-## A. Product audit (what exists, what was missing)
+## Purpose
 
-**Already strong (keep):**
+Client Intelligence is the client-facing value layer of CG Dynamics.
 
-- The truthful metric model (`lib/metaMetrics.ts` `METRIC_DEFINITIONS`) with
-  per-metric source types, `safeForClient` and `sumAcrossPlatforms` flags.
-- Null-vs-zero discipline: `sumOrNull`, `compareNullable`, `unavailableMetric`
-  — missing metrics are omitted, never faked as 0.
-- Meta sync (`supabase/functions/meta-sync`) redacts tokens everywhere, stores
-  account totals as marked manual metrics ("Meta sync account totals") and
-  post-level truth in `posts.raw` (null = Meta did not return it).
-- Growth only renders when the previous month genuinely exists
-  (`hasComparison`); follower count is snapshot-only, never shown as growth.
-- Rules-driven recommendations/next steps grounded in real metric directions.
-- The premium visual language of the report.
+It must automatically collect trustworthy performance data, explain what happened, connect activity to commercial intent, show what CG recommends next, and remain premium enough to send directly to clients.
 
-**Was missing / misleading (V1 addressed):**
+The detailed Meta data architecture and research basis now lives in:
 
-1. **No forward-looking value.** The dashboard was 100% retrospective — no
-   schedule, no shoots, no "what's happening this month". → Month-ahead module.
-2. **No combined "wow" moment.** Metrics rendered as an even grid; nothing
-   answered "how did all my pages do together?" → Combined hero.
-3. **Combined reach is summed across platforms** in `buildMasterReport`
-   despite `reach.sumAcrossPlatforms: false` (audiences overlap). The new hero
-   never headlines a combined reach figure; the overview card remains and
-   should be relabelled in V2 (see below).
-4. **Admin diagnostics computed but never rendered** — `adminMissingMetrics`,
-   `cardSources`, `toneReason`, `followerGrowthSkippedReason` existed in the
-   model with no UI. → Data-health panel in Client Preview.
-5. **Clients cannot read schedule data** (staff-only RLS) — no portal calendar
-   was possible. → Prepared `phase-11a-client-portal-read-access.sql`.
+- `docs/client-intelligence/META-REPORTING-TRUTH-STRATEGY.md`
 
-## B. Client dashboard information architecture (target)
+## A. Current product position
 
-1. Combined executive hero — "all channels together" (safe sums only) ✅ V1
-2. Performance overview cards + growth trend ✅ existing
-3. Channel performance (per platform) ✅ existing
-4. Content that worked (honest tone: top / learning / baseline) ✅ existing
-5. **Your month ahead** — scheduled posts + shoots/events ✅ V1
-6. Recommendations / CG action plan ✅ existing (rules-driven)
-7. What CG needs from you (strategy `clientActionsRequired`) ✅ existing card;
-   promote to its own checklist section in V2
-8. Data transparency footnote (client-safe wording) — V2
-9. Admin-only data health ✅ V1 (Client Preview)
+### Already strong
 
-## C. What V1 shipped
+- Premium client-facing visual language.
+- Monthly reports and platform tabs.
+- Post-level Meta content records.
+- Null-aware helper functions in parts of the reporting model.
+- Admin data-health concepts.
+- Google Ads account discovery, shared-account campaign mapping and client-isolated reporting.
+- Google Ads dashboard loading for admin preview and published client reports.
+- Marketing Library and Skill Card foundations for future specialist agents.
 
-- `src/lib/clientPortalCalendar.ts` — client-safe month-ahead data layer over
-  `monthly_deliverables` + `company_calendar_events` (shoot / content_run /
-  client_event only, cancelled excluded). Read-only; presentation layer.
-- `src/components/client/ClientMonthAhead.tsx` — "Your {month} plan with CG":
-  content going live (type badges DP/Photo/Video/Reel + client-safe statuses)
-  and shoots & events. Renders nothing when there is nothing to show, so
-  client logins never see an empty promise pre-migration.
-- Client `Dashboard.tsx` + `PublishedPreview.tsx` render the module (staff
-  preview sees real data today).
-- `CombinedHero` in `ClientReportView` — headlines views (summable) →
-  interactions (summable) → strongest single-platform reach. Never sums reach.
-- `AdminDataHealth` panel (Client Preview only): per-platform metric sources,
-  metrics not synced, content-tone reasoning.
-- `supabase/phase-11a-client-portal-read-access.sql` — PREPARED, not applied.
+### Current critical weakness
 
-## D. Strategy Intelligence architecture (future AI specialists)
+The reporting stack is not yet consistently truthful across the full data path.
 
-Layered design — each layer only consumes real data:
+The current Meta connector can treat unavailable Facebook Page visibility metrics as database zero values while Instagram totals are available. The Overview can then present partial visibility as all-channel performance and compare it with a previous month built from different source coverage.
 
-1. **Signals (exists):** metric directions, content tones, platform strengths
-   from `reportPerformance.ts`.
-2. **Rules (exists):** deterministic next-steps/recommendations from signals.
-3. **Client context (partial):** package settings, strategy_data, campaign
-   history in `reports`.
-4. **Marketing library (placeholder):** `docs/marketing-library/` +
-   `skillCards` exist as seeds. Needs a curated, sourced knowledge base —
-   never fabricate citations; a recommendation may only cite a library entry
-   that exists.
-5. **Industry specialists (future):** per-industry prompt+knowledge bundles
-   (restaurants, real estate, retail, events, automotive, professional
-   services) that combine layers 1–4 via an Edge Function (server-side keys),
-   returning recommendations tagged with which signals and library entries
-   produced them. UI state for "specialist not yet available" — no fake AI.
+This creates false movement, weak narratives and unsafe recommendation inputs.
 
-## E. Roadmap
+Client Intelligence must therefore solve data truth before expanding AI strategy.
 
-- **V1 (this branch):** month-ahead module, combined hero, data-health panel,
-  client read-access migration prepared, this doc.
-- **V2 — Meta accuracy & diagnostics:** relabel/fix combined reach ("combined
-  reach" → per-platform or "up to X"), client-safe data footnote, sync-freshness
-  stamp on the dashboard, admin sync-health page consolidating
-  `adminMissingMetrics` across clients/months, apply phase-11a after review.
-- **V3 — Platform connectors:** TikTok first (type already exists through the
-  pipeline), then LinkedIn: extend `Platform` union + `PLATFORM_LABELS` +
-  manual-metrics CHECK constraint migration; per-platform sync adapters in
-  Edge Functions; no UI changes needed thanks to the PlatformView abstraction.
-- **V4 — Marketing library & industry specialists:** curated library schema
-  (sourced entries), specialist bundles, Edge Function orchestration, admin
-  review flow before anything reaches a client.
-- **V5 — Client command centre:** approvals in the portal (client approves
-  content from the month-ahead list), request intake, campaign planning view,
-  notification digest.
+## B. Non-negotiable reporting principles
+
+1. Missing is not zero.
+2. Every metric has provenance.
+3. Month-on-month movement requires compatible definitions.
+4. Unique audiences are not summed across platforms.
+5. Organic visibility, audience response, paid demand and commercial intent remain distinct.
+6. Connector failures become internal alerts, not client performance claims.
+7. AI strategy consumes verified evidence, not raw tables or incomplete totals.
+8. Client-facing strategy is reviewed before publication.
+
+## C. Target data architecture
+
+### 1. Connector adapters
+
+Each platform owns its authentication, API version, metric map, request rules, retries and safe errors.
+
+Initial adapters:
+
+- Meta Facebook Pages.
+- Meta Instagram professional accounts.
+- Google Ads.
+
+### 2. Raw source snapshots
+
+Store or reference safe source responses before transformation so every displayed number can be traced back to the platform response.
+
+### 3. Canonical metric registry
+
+The registry defines:
+
+- canonical concept;
+- platform source metric;
+- API version;
+- aggregation method;
+- whether the metric is safe for client display;
+- whether it can be summed across platforms;
+- which historical definitions are comparable;
+- retirement or migration status.
+
+### 4. Normalized facts
+
+Build reproducible daily and monthly facts from source snapshots. Automated API truth should no longer depend on overloading generic manual metric rows.
+
+### 5. Data-quality and comparability engine
+
+Every client/platform/month receives a quality state and comparison eligibility.
+
+### 6. Client presentation
+
+The report uses only client-safe normalized facts. Technical source diagnostics remain admin-only.
+
+### 7. Strategy evidence package
+
+Verified metrics, valid comparisons, eligible CG content, Google Ads results, active-client knowledge and relevant Skill Cards become a reviewed strategy input.
+
+## D. Client dashboard information architecture
+
+### Cover and context
+
+- Client identity.
+- Report month.
+- Status.
+- Reporting freshness and client-safe source note.
+
+### Overview
+
+Do not force all channels into one headline total.
+
+Use clearly separated sections:
+
+- Brand visibility.
+- Audience response.
+- Paid demand.
+- Commercial intent.
+- What changed and why.
+- CG strategy and next campaign.
+
+### Platform tabs
+
+- Facebook.
+- Instagram.
+- Google Ads when mapped and synced.
+- Future connectors only when real data exists.
+
+### Content intelligence
+
+- Top performing content.
+- Admin curation for CG-created or CG-managed highlights.
+- Raw page winner remains available in admin diagnostics.
+- Excluded content stays in truthful aggregate totals but is not used as positive strategy evidence.
+
+### Month ahead
+
+- Scheduled content.
+- Shoots and events.
+- Client actions required.
+
+### Strategy
+
+The client report must show:
+
+- observed outcome;
+- commercial meaning;
+- platform role;
+- next campaign recommendation;
+- audience and offer;
+- content requirement;
+- KPI and test period;
+- what CG needs from the client.
+
+## E. Active roadmap phases
+
+### Phase 20d — Meta reporting truth and parity
+
+Status: Active
+
+- Desktop-agent comparison of Meta Business Suite, Graph API, Supabase and CG Dynamics.
+- Confirm current Graph API version, Page token, permissions, metric replacements, parameters and date rules.
+- Stop persisting unavailable metrics as zero.
+- Introduce provenance, completeness and compatibility.
+- Add idempotent historical re-sync and recent-period rollback refresh.
+- Verify Cape Lumber and representative client configurations.
+
+### Phase 20e — Overview and publication quality gate
+
+- Remove unsafe all-channel claims.
+- Block invalid comparisons.
+- Add verified/partial/not-comparable/sync-error states.
+- Prevent publication of misleading client reports.
+- Add connector freshness and health monitoring.
+
+### Phase 20f — Cape Lumber benchmark intelligence
+
+- Complete Meta parity.
+- Run Google Ads sync.
+- Curate featured CG content.
+- Activate Cape Lumber client knowledge and construction/timber Skill Cards.
+- Generate and review the first evidence-based sales and campaign strategy.
+- Establish the benchmark report structure for future clients.
+
+### Phase 21 — Scale specialist intelligence
+
+- Expand verified reporting patterns to all active clients.
+- Add industry specialists.
+- Add strategy review and approval workflow.
+- Track whether recommendations were implemented and what they produced.
+
+### Future platform connectors
+
+Add TikTok, LinkedIn, website analytics and SEO only through the same connector/provenance architecture. Do not add platform tabs that rely on manual monthly patching.
+
+## F. Cape Lumber definition of success
+
+Cape Lumber becomes the first complete reference client when:
+
+- Meta Business Suite and API results are explainably aligned for the same calendar month;
+- Facebook and Instagram remain correctly defined and separated;
+- Google Ads campaign data is synced and isolated to Cape Lumber;
+- every client-facing movement is comparable;
+- the Overview communicates channel roles and commercial meaning;
+- featured content represents CG-created or CG-managed work;
+- the strategy identifies the next best sales campaign and why;
+- the client can clearly see what CG learned, what CG is changing and how success will be measured.
+
+## G. Long-term outcome
+
+Client Intelligence should become a monthly marketing command centre that is difficult to replace because it combines:
+
+- trustworthy first-party data;
+- client and industry knowledge;
+- creative and paid-media performance;
+- operational plans;
+- reviewed specialist strategy;
+- a permanent learning history.
+
+The moat is not a prettier chart. The moat is reliable data, explainable strategy and accumulated client intelligence.
