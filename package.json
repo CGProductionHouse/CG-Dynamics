@@ -11,6 +11,7 @@
     "test:invites": "node --test tests/adminInvitePolicy.test.mjs",
     "test:skill-card": "node --test tests/skillCardActivation.test.mjs tests/initialSkillCardBatch.mjs",
     "test:content-workflow": "node --test tests/contentWorkflow.test.mjs",
+    "test:google-ads": "node --test tests/googleAds.test.mjs",
     "preview": "vite preview",
     "test:video-pipeline": "node --test tests/videoPipeline.test.mjs"
   },

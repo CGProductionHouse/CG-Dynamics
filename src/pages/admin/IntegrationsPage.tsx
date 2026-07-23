@@ -4,13 +4,20 @@ import { supabase } from '../../lib/supabase'
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { StatusBadge, Pill } from '../../components/ui/Badges'
+import { getGoogleAdsWorkspace } from '../../lib/googleAds'
+import { useAuth } from '../../contexts/AuthContext'
+import { isManagerRole } from '../../lib/roles'
 
 type MetaState = 'loading' | 'connected' | 'disconnected'
 
 export default function IntegrationsPage() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  const canManageGoogleAds = isManagerRole(profile?.role)
   const [metaState, setMetaState] = useState<MetaState>('loading')
   const [linkedClients, setLinkedClients] = useState<number | null>(null)
+  const [googleState, setGoogleState] = useState<MetaState>('loading')
+  const [googleLinkedClients, setGoogleLinkedClients] = useState<number | null>(null)
 
   useEffect(() => {
     let active = true
@@ -36,10 +43,22 @@ export default function IntegrationsPage() {
         setLinkedClients(new Set(data.map(r => r.client_id as string)).size)
       })
 
+    if (canManageGoogleAds) {
+      getGoogleAdsWorkspace()
+        .then(workspace => {
+          if (!active) return
+          setGoogleState(workspace.status.connected ? 'connected' : 'disconnected')
+          setGoogleLinkedClients(new Set(workspace.links.filter(link => link.active).map(link => link.clientId)).size)
+        })
+        .catch(() => {
+          if (active) setGoogleState('disconnected')
+        })
+    }
+
     return () => {
       active = false
     }
-  }, [])
+  }, [canManageGoogleAds])
 
   const metaConnected = metaState === 'connected'
   const metaStatus =
@@ -50,6 +69,15 @@ export default function IntegrationsPage() {
       : 'Facebook and Instagram are connected. Link clients to start syncing monthly reports.'
     : 'Connect Facebook Pages and Instagram accounts to create monthly report drafts automatically.'
   const metaButtonLabel = metaConnected ? 'Manage Meta' : 'Set up Meta'
+  const googleConnected = googleState === 'connected'
+  const googleStatus = !canManageGoogleAds ? 'Manager access' : googleState === 'loading' ? 'Checking…' : googleConnected ? 'Connected' : 'Not connected'
+  const googleDescription = !canManageGoogleAds
+    ? 'Google Ads account setup and sync controls are available to managers and admins.'
+    : googleConnected
+    ? googleLinkedClients && googleLinkedClients > 0
+      ? `${googleLinkedClients} client${googleLinkedClients === 1 ? '' : 's'} linked for Google Ads reporting.`
+      : 'Google Ads is connected. Link a client account to begin reporting.'
+    : 'Connect and map Google Ads accounts for internal campaign reporting.'
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -127,31 +155,28 @@ export default function IntegrationsPage() {
           </div>
         </PremiumCard>
 
-        {/* Google Ads — planned */}
-        <PremiumCard padding="md">
+        {/* Google Ads — live manager workspace */}
+        <PremiumCard padding="md" className="relative">
+          <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-amber-300 via-emerald-400 to-sky-400" />
           <div className="flex flex-col">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-sm font-bold text-brand-primary">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-300/15 text-sm font-bold text-amber-200">
                 G
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-base font-semibold text-white">Google Ads</h2>
-                  <Pill tone="neutral">Planned</Pill>
+                  <StatusBadge label={googleStatus} variant={googleConnected ? 'published' : googleState === 'loading' ? 'default' : 'internal-draft'} size="sm" />
                 </div>
                 <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
-                  Google Ads and campaign reporting will be added later.
+                  {googleDescription}
                 </p>
               </div>
             </div>
             <div className="mt-auto pt-5">
-              <button
-                type="button"
-                disabled
-                className="w-full cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-4 py-2.5 text-sm font-semibold text-brand-primary"
-              >
-                Coming later
-              </button>
+              <ActionButton variant="outline" disabled={!canManageGoogleAds} onClick={() => navigate('/admin/integrations/google-ads')} fullWidth>
+                {!canManageGoogleAds ? 'Manager only' : googleConnected ? 'Manage Google Ads' : 'Set up Google Ads'}
+              </ActionButton>
             </div>
           </div>
         </PremiumCard>
