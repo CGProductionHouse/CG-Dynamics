@@ -26,6 +26,37 @@ Each item should include:
 
 ## Parking lot items
 
+### 2026-07-23 - Full content guide workspace instead of fragmented video forms
+
+Division: Operations Hub, AI Workforce
+Status: Ready for milestone planning
+
+Current finding:
+The canonical video and folder naming is now correct, and the linked Client Schedule deliverable selector is working. The actual content-guideline experience is still too fragmented and manual. Separate fields for objective, hook, script, shot-by-shot breakdown, CTA, props, visual notes and internal notes feel like a database form rather than a useful production guide. It is not yet an improvement on the real content guidelines CG currently sends to clients and production staff.
+
+Product direction:
+Replace the current one-video-at-a-time form experience with one cohesive full content guide workspace for a client and month. The guide must contain all scheduled video deliverables for that period in one readable document-style workspace, while preserving the correct schedule links, video numbers and canonical folder names.
+
+Required behaviour:
+
+- One master content guide per client and month containing every linked video deliverable for that period.
+- Each scheduled video appears as a clear section or block inside the full guide, in the correct schedule order.
+- Preserve canonical naming such as `2026_07_DULUX_VIDEO_01` and the linked Client Schedule deliverable identity.
+- Provide one primary flexible writing area per video where a complete script or existing content-guide text can be pasted and edited without splitting everything into mandatory small fields.
+- Optional structured production details may still exist, but they must support the guide instead of forcing duplicate manual entry.
+- The full guide should make concept, script/dialogue, filming direction, shot ideas, on-screen text/CTA, people/products/props and notes easy to understand in one continuous production document.
+- Staff must be able to move through and plan all videos without repeatedly opening separate forms.
+- The final output must be polished, readable and suitable for internal production use and client sharing, printing or export.
+- Copying a final script into the production workflow must be simple.
+- Future AI assistance may help structure pasted scripts, suggest missing production details and improve the guide, but it must not replace human review.
+- Before implementation, compare the interface against real CG content-guideline documents and design an obvious improvement on the current working format.
+
+Why it matters:
+The Content Workflow should reduce planning time and give the team one reliable production document for the entire client month. The current form creates extra typing, fragments the creative idea and does not match how CG actually prepares and uses content guides.
+
+Revisit:
+After the Meta reporting-truth and three-client parity milestone is complete. Use real current CG content guidelines as the product benchmark before coding the redesign.
+
 ### 2026-07-23 - Forward-looking report calendar suggestions
 
 Division: Client Intelligence, AI Workforce
