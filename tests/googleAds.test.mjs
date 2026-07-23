@@ -1,18 +1,39 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
 
+const LIB_SOURCE = readFileSync(new URL('../src/lib/googleAds.ts', import.meta.url), 'utf8')
+const PAGE_SOURCE = readFileSync(new URL('../src/pages/admin/GoogleAdsIntegrationPage.tsx', import.meta.url), 'utf8')
+const SQL_SOURCE = readFileSync(new URL('../supabase/phase-20b-google-ads-shared-accounts.sql', import.meta.url), 'utf8')
+const LIST_CAMPAIGNS_SOURCE = readFileSync(new URL('../supabase/functions/google-ads-list-campaigns/index.ts', import.meta.url), 'utf8')
+const LINK_SOURCE = readFileSync(new URL('../supabase/functions/google-ads-link-account/index.ts', import.meta.url), 'utf8')
+
 let server
 let calculateGoogleAdsReport
+let deriveGoogleAdsCampaignReview
 let googleAdsCampaignQuery
+let isGoogleAdsAccountReady
 let isGoogleAdsManagerRole
+let normalizeGoogleAdsName
 let normalizeCustomerId
+let suggestGoogleAdsClient
 let validGoogleAdsDate
+let validateGoogleAdsCampaignMappings
 let validateGoogleAdsDateRange
+let validateGoogleAdsModeCoexistence
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ calculateGoogleAdsReport } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
+  ;({
+    calculateGoogleAdsReport,
+    deriveGoogleAdsCampaignReview,
+    isGoogleAdsAccountReady,
+    normalizeGoogleAdsName,
+    suggestGoogleAdsClient,
+    validateGoogleAdsCampaignMappings,
+    validateGoogleAdsModeCoexistence,
+  } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
   ;({
     googleAdsCampaignQuery,
     isGoogleAdsManagerRole,
@@ -81,4 +102,159 @@ test('only admin and manager roles pass Google Ads setup permission policy', () 
   assert.equal(isGoogleAdsManagerRole('team'), false)
   assert.equal(isGoogleAdsManagerRole('client'), false)
   assert.equal(isGoogleAdsManagerRole(null), false)
+})
+
+test('name normalization ignores case, punctuation, whitespace, and harmless company suffixes', () => {
+  assert.equal(normalizeGoogleAdsName('  ACME---Creative   (Pty) Ltd  '), 'acme creative')
+  assert.equal(normalizeGoogleAdsName('Acme SA Group Marketing'), 'acme')
+  assert.equal(normalizeGoogleAdsName('Acme North'), 'acme north')
+})
+
+test('exact normalized suggestions are high confidence and only preselected locally', () => {
+  const clients = [{ id: 'dynamic-client', name: 'North Star Pty Ltd' }]
+  const suggestion = suggestGoogleAdsClient('north-star marketing', clients)
+  assert.deepEqual(
+    { clientId: suggestion.clientId, confidence: suggestion.confidence, preselected: suggestion.preselected },
+    { clientId: 'dynamic-client', confidence: 'high', preselected: true },
+  )
+  assert.match(PAGE_SOURCE, /suggestion\.preselected/)
+  assert.match(PAGE_SOURCE, /Confirm selected mappings/)
+})
+
+test('campaign review initializes high-confidence suggestions as prefilled and selected', () => {
+  const campaigns = [
+    { id: 'account:enabled', accountId: 'account', customerId: '123', campaignId: 'enabled', name: 'North Star Marketing', status: 'ENABLED', channelType: 'SEARCH' },
+    { id: 'account:paused', accountId: 'account', customerId: '123', campaignId: 'paused', name: 'North Star Pty Ltd', status: 'PAUSED', channelType: 'SEARCH' },
+    { id: 'account:medium', accountId: 'account', customerId: '123', campaignId: 'medium', name: 'North Star Search', status: 'REMOVED', channelType: 'DISPLAY' },
+  ]
+  const review = deriveGoogleAdsCampaignReview(campaigns, [{ id: 'client', name: 'North Star Group' }], [])
+  assert.equal(review.draftClientIds.enabled, 'client')
+  assert.equal(review.draftClientIds.paused, 'client')
+  assert.equal(review.draftClientIds.medium, '')
+  assert.deepEqual(review.selectedCampaignIds, ['enabled', 'paused'])
+})
+
+test('existing mappings initialize with the current client and remain available for explicit selection', () => {
+  const campaigns = [
+    { id: 'account:100', accountId: 'account', customerId: '123', campaignId: '100', name: 'North Star Marketing', status: 'REMOVED', channelType: 'SEARCH' },
+  ]
+  const links = [{ id: 'link', accountId: 'account', campaignId: '100', clientId: 'current-client', active: true }]
+  const review = deriveGoogleAdsCampaignReview(campaigns, [{ id: 'suggested-client', name: 'North Star' }], links)
+  assert.equal(review.draftClientIds['100'], 'current-client')
+  assert.deepEqual(review.selectedCampaignIds, [])
+  assert.doesNotMatch(PAGE_SOURCE, /disabled=\{Boolean\(link\)\}/)
+  assert.match(PAGE_SOURCE, /Current mapping:/)
+  assert.match(PAGE_SOURCE, /setSelected\(current => new Set\(current\)\.add\(campaign\.campaignId\)\)/)
+})
+
+test('medium, low, and ambiguous suggestions remain unselected', () => {
+  const medium = suggestGoogleAdsClient('North Star Search', [{ id: 'north', name: 'North Star' }])
+  const low = suggestGoogleAdsClient('North Launch Search', [{ id: 'north', name: 'North Star Studio' }])
+  const ambiguous = suggestGoogleAdsClient('North', [{ id: 'one', name: 'North One' }, { id: 'two', name: 'North Two' }])
+  assert.equal(medium.confidence, 'medium')
+  assert.equal(low.confidence, 'low')
+  assert.equal(ambiguous.confidence, 'ambiguous')
+  assert.equal(medium.preselected || low.preselected || ambiguous.preselected, false)
+  assert.equal(ambiguous.clientId, null)
+})
+
+test('duplicate campaign name variants may independently suggest the same client', () => {
+  const clients = [{ id: 'same-client', name: 'Dynamic Brand Pty Ltd' }]
+  const variants = ['DYNAMIC BRAND SA', 'Dynamic.Brand Marketing']
+  assert.deepEqual(variants.map(name => suggestGoogleAdsClient(name, clients).clientId), ['same-client', 'same-client'])
+})
+
+test('shared accounts support multiple clients and many campaigns for one client', () => {
+  const mappings = [
+    { accountId: 'shared-account', campaignId: '100', clientId: 'client-a' },
+    { accountId: 'shared-account', campaignId: '101', clientId: 'client-a' },
+    { accountId: 'shared-account', campaignId: '102', clientId: 'client-b' },
+  ]
+  assert.equal(validateGoogleAdsCampaignMappings(mappings), null)
+})
+
+test('campaign collision policy rejects two clients for the same raw account campaign identity', () => {
+  const collision = [
+    { accountId: 'account-a', campaignId: '100', clientId: 'client-a' },
+    { accountId: 'account-a', campaignId: '100', clientId: 'client-b' },
+  ]
+  assert.match(validateGoogleAdsCampaignMappings(collision), /cannot be mapped to more than one client/)
+  assert.equal(validateGoogleAdsCampaignMappings([
+    { accountId: 'account-a', campaignId: '100', clientId: 'client-a' },
+    { accountId: 'account-b', campaignId: '100', clientId: 'client-b' },
+  ]), null)
+})
+
+test('dedicated and campaign mappings cannot coexist', () => {
+  assert.match(validateGoogleAdsModeCoexistence('shared', [{ active: true }], []), /Deactivate the dedicated/)
+  assert.match(validateGoogleAdsModeCoexistence('dedicated', [], [{ active: true }]), /Deactivate campaign mappings/)
+  assert.equal(validateGoogleAdsModeCoexistence('dedicated', [{ active: true }], []), null)
+  assert.equal(validateGoogleAdsModeCoexistence('shared', [], [{ active: true }]), null)
+})
+
+test('sync readiness requires an active mapping appropriate to account mode', () => {
+  const dedicated = { id: 'dedicated', mode: 'dedicated' }
+  const shared = { id: 'shared', mode: 'shared' }
+  const unset = { id: 'unset', mode: null }
+  const accountLinks = [
+    { accountId: 'dedicated', active: true },
+    { accountId: 'other', active: true },
+  ]
+  const campaignLinks = [
+    { accountId: 'shared', active: true },
+    { accountId: 'shared-inactive', active: false },
+  ]
+  assert.equal(isGoogleAdsAccountReady(dedicated, accountLinks, campaignLinks), true)
+  assert.equal(isGoogleAdsAccountReady(shared, accountLinks, campaignLinks), true)
+  assert.equal(isGoogleAdsAccountReady({ id: 'shared-inactive', mode: 'shared' }, accountLinks, campaignLinks), false)
+  assert.equal(isGoogleAdsAccountReady({ id: 'other', mode: 'shared' }, accountLinks, campaignLinks), false)
+  assert.equal(isGoogleAdsAccountReady(unset, accountLinks, campaignLinks), false)
+})
+
+test('raw account campaign metrics have canonical uniqueness independent of client mappings', () => {
+  assert.match(SQL_SOURCE, /unique index[^;]+google_ads_campaign_daily_metrics[^;]+\(google_ads_account_id, campaign_id, metric_date\)/s)
+  assert.match(SQL_SOURCE, /google_ads_campaign_links_one_active_campaign_idx[\s\S]+\(customer_id, campaign_id\)[\s\S]+where is_active/)
+})
+
+test('campaign discovery supplies identity, status, and channel before any mappings exist', () => {
+  assert.match(LIST_CAMPAIGNS_SOURCE, /listAccountCampaigns/)
+  assert.match(LIST_CAMPAIGNS_SOURCE, /statusLabel/)
+  assert.match(LIST_CAMPAIGNS_SOURCE, /advertisingChannelTypeLabel/)
+  assert.doesNotMatch(LIST_CAMPAIGNS_SOURCE, /google_ads_campaign_links/)
+  assert.match(PAGE_SOURCE, /Discover campaigns/)
+  assert.match(PAGE_SOURCE, /All statuses/)
+  assert.match(PAGE_SOURCE, /All channels/)
+})
+
+test('resolved reporting isolates clients and excludes unmapped shared campaigns', () => {
+  assert.match(SQL_SOURCE, /get_google_ads_client_campaign_metrics/)
+  assert.match(SQL_SOURCE, /cl\.client_id = p_client_id/)
+  assert.match(SQL_SOURCE, /cl\.campaign_id = m\.campaign_id/)
+  assert.match(SQL_SOURCE, /cl\.is_active/)
+  assert.match(SQL_SOURCE, /al\.client_id = p_client_id/)
+  assert.match(LIB_SOURCE, /\.rpc\('get_google_ads_client_campaign_metrics'/)
+  assert.doesNotMatch(LIB_SOURCE, /\.from\('google_ads_campaign_daily_metrics'\)/)
+  assert.match(PAGE_SOURCE, /Source: Google Ads/)
+})
+
+test('frontend setup has no direct mutation endpoint or table mutation', () => {
+  assert.doesNotMatch(LIB_SOURCE, /\.(insert|update|upsert|delete)\s*\(/)
+  assert.doesNotMatch(PAGE_SOURCE, /from ['"]\.\.\/\.\.\/lib\/supabase['"]/)
+  assert.doesNotMatch(PAGE_SOURCE, /\.from\s*\(/)
+  assert.match(LIB_SOURCE, /action: 'set_mode'/)
+  assert.match(LIB_SOURCE, /action: 'save_dedicated'/)
+  assert.match(LIB_SOURCE, /action: 'save_campaigns'/)
+  assert.match(LIB_SOURCE, /action: 'deactivate_campaign'/)
+  assert.match(LIB_SOURCE, /action: 'deactivate_dedicated', googleAdsAccountId: accountId/)
+  assert.match(LIB_SOURCE, /action: 'deactivate_campaign', googleAdsAccountId: accountId/)
+  assert.match(PAGE_SOURCE, /window\.confirm/)
+})
+
+test('client and staff roles are denied Google Ads setup access in SQL and function source', () => {
+  assert.match(SQL_SOURCE, /google_ads_accounts: manager select/)
+  assert.match(SQL_SOURCE, /google_ads_campaign_links: manager select/)
+  assert.match(SQL_SOURCE, /revoke all on public\.google_ads_accounts from anon, authenticated/)
+  assert.match(SQL_SOURCE, /grant select on public\.google_ads_accounts to authenticated/)
+  assert.match(LINK_SOURCE, /requireAdminOrManager/)
+  assert.doesNotMatch(SQL_SOURCE, /google_ads_(accounts|campaign_links): client/)
 })

@@ -19,32 +19,50 @@ Deno.serve(async request => {
   try {
     const accessToken = await refreshGoogleAccessToken(config)
     const accounts = await listAccessibleAccounts(config, accessToken)
-    const { data: links } = await auth.value.supabase
-      .from('google_ads_account_links')
-      .select('id, customer_id, client_id')
-      .eq('is_active', true)
-    const linkIds = (links ?? []).map(link => link.id)
-    const { data: successfulRuns } = linkIds.length > 0
+    const discoverableAccounts = accounts.filter(account => !account.manager && account.status === 'ENABLED')
+    const discoveredAt = new Date().toISOString()
+    const { data: canonicalAccounts, error: upsertError } = discoverableAccounts.length > 0
+      ? await auth.value.supabase
+        .from('google_ads_accounts')
+        .upsert(discoverableAccounts.map(account => ({
+          customer_id: account.customerId,
+          account_name: account.name ?? `Google Ads ${account.customerId}`,
+          currency_code: account.currencyCode ?? 'XXX',
+          time_zone: account.timeZone ?? 'UTC',
+          last_discovered_at: discoveredAt,
+        })), { onConflict: 'customer_id' })
+        .select('id, customer_id, account_mode, is_active')
+      : { data: [], error: null }
+    if (upsertError || !canonicalAccounts) {
+      return jsonResponse({ ok: false, error: 'Could not store Google Ads account discovery metadata.' }, 500)
+    }
+
+    const accountIds = canonicalAccounts.map(account => account.id)
+    const { data: successfulRuns, error: runError } = accountIds.length > 0
       ? await auth.value.supabase
         .from('google_ads_sync_runs')
-        .select('account_link_id, finished_at')
-        .in('account_link_id', linkIds)
+        .select('google_ads_account_id, finished_at')
+        .in('google_ads_account_id', accountIds)
         .eq('status', 'succeeded')
         .order('finished_at', { ascending: false })
-      : { data: [] }
-    const linkByCustomer = new Map((links ?? []).map(link => [link.customer_id, link]))
-    const lastSyncByLink = new Map<string, string>()
+      : { data: [], error: null }
+    if (runError) return jsonResponse({ ok: false, error: 'Could not load Google Ads sync history.' }, 500)
+
+    const canonicalByCustomer = new Map(canonicalAccounts.map(account => [account.customer_id, account]))
+    const lastSyncByAccount = new Map<string, string>()
     for (const run of successfulRuns ?? []) {
-      if (run.finished_at && !lastSyncByLink.has(run.account_link_id)) {
-        lastSyncByLink.set(run.account_link_id, run.finished_at)
+      if (run.finished_at && !lastSyncByAccount.has(run.google_ads_account_id)) {
+        lastSyncByAccount.set(run.google_ads_account_id, run.finished_at)
       }
     }
-    const enrichedAccounts = accounts.map(account => {
-      const link = linkByCustomer.get(account.customerId)
+    const enrichedAccounts = discoverableAccounts.map(account => {
+      const canonical = canonicalByCustomer.get(account.customerId)
       return {
         ...account,
-        activeLink: link ? { id: link.id, clientId: link.client_id } : null,
-        lastSyncedAt: link ? (lastSyncByLink.get(link.id) ?? null) : null,
+        googleAdsAccountId: canonical?.id ?? null,
+        accountMode: canonical?.account_mode ?? null,
+        isActive: canonical?.is_active ?? true,
+        lastSyncedAt: canonical ? (lastSyncByAccount.get(canonical.id) ?? null) : null,
       }
     })
     return jsonResponse({ ok: true, accounts: enrichedAccounts, count: enrichedAccounts.length })
