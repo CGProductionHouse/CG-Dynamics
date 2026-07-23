@@ -140,12 +140,49 @@ This milestone is complete when:
 - the first relevant client and industry Skill Cards are active;
 - tests, migrations, Edge Functions, Vercel preview and production verification all pass.
 
-## Next milestone options
+## Committed next milestone priority
 
-After this milestone, choose one primary direction:
+After the Meta reporting-truth work and Codex three-client live parity pass are complete, the next primary milestone is **Client-facing completion and trust**.
 
-1. Scale the verified reporting and specialist strategy system to all active clients.
-2. Expand the Marketing Library and specialist-agent orchestration.
-3. Improve Operations Hub daily usability.
+Do not return to broad Operations Hub development until the full client experience is solid, truthful and production-ready.
 
-Do not start all three as equal priorities.
+This next milestone must complete, in order:
+
+1. **Unified client portal landing page**
+   - One premium front door for the client relationship.
+   - Clear routes into Performance Dashboard, Campaigns and Content Calendar.
+   - A reviewed Current strategy / Game plan connecting evidence to upcoming action.
+
+2. **Performance Dashboard completion**
+   - Organic and profile reporting for Facebook, Instagram, TikTok and Google Business Profile where connected and supported.
+   - Platform-specific truth, connector health, valid comparisons, top content and reviewed interpretation.
+   - No fake zeros, unsafe totals, stale claims or disconnected-source placeholders presented as live reporting.
+
+3. **Campaign reporting completion**
+   - Google Ads, Meta Ads and TikTok Ads where connected.
+   - Separate platform-attributed activity from confirmed leads, enquiries and sales.
+   - Show objectives, period results, lifecycle, CG review and next optimisation direction.
+
+4. **Content Calendar and content-guide integration**
+   - Embed the client-ready monthly calendar inside the client portal.
+   - Connect each scheduled deliverable to its content guideline, concept, script, approval status and production context.
+   - Replace fragmented one-video forms with the approved full monthly content-guide workspace.
+
+5. **Microsoft / Teams package and schedule parity**
+   - Treat the approved Microsoft Planner Client Socials plan as the transition source of truth.
+   - Audit every active client package, content type, task identity, number, date and completion state.
+   - Reconcile missing videos, reels, posters, photos and package-count mismatches through preview-first safe import.
+   - Verify Client Schedule, Content Calendar, Content Workflow selectors and client-visible package badges against Microsoft before Teams is retired.
+
+6. **Forward-looking strategy implementation**
+   - Reporting explains the completed month.
+   - The strategy and calendar show what CG will implement next.
+   - Report month + 1 is the primary action month and report month + 2 may support early planning.
+   - Performance findings must visibly connect to campaign and content decisions in the client portal.
+
+7. **Client-visible quality gate**
+   - Test every route, metric, package count, campaign result, calendar item, content guideline, strategy statement, permission boundary and mobile layout.
+   - Validate representative clients with different packages, platforms and connector states.
+   - Everything a client can see must be accurate, explainable, current, polished and safe to send without manual caveats.
+
+Only after this client-facing completion milestone passes should normal Operations Hub work resume as the next primary direction.
