@@ -1,6 +1,6 @@
 # CG Dynamics Master Goal Tracker
 
-Last updated: 2026-07-01
+Last updated: 2026-07-23
 Status: Source of truth for product direction
 
 ## Purpose
@@ -56,6 +56,16 @@ Rules:
 - Client specific content must come from active client records, approved client notes, interviews, campaign data or current system data.
 - The client dashboard should feel premium enough to send directly to a client.
 - Reports must not be generic AI summaries. They must explain what happened, why it matters and what to do next.
+- Automated platform metrics must preserve their source, definition, period, API version and completeness.
+- Missing, unsupported, partial or failed metrics may never be converted into numeric zero.
+- Month-on-month movement may render only when both periods use compatible metric definitions and source coverage.
+- Cross-platform unique audiences must not be summed when the same person may appear on more than one platform.
+- A connector failure is an internal integration incident, not a client performance result.
+- AI strategy must be withheld when the evidence package fails the data-quality or comparability gate.
+
+Detailed reporting truth strategy:
+
+- `docs/client-intelligence/META-REPORTING-TRUTH-STRATEGY.md`
 
 ### 2. Operations Hub
 
@@ -112,6 +122,9 @@ Rules:
 - AI must retrieve, reason and apply knowledge from the library, active client context and verified sources.
 - Generic AI wording must be flagged and rewritten.
 - AI generated work should be explainable. The system should be able to answer why a recommendation, headline, campaign or report was suggested.
+- AI may not repair missing data through assumptions.
+- Strategy agents must separate observed fact, interpretation, hypothesis, action, test and confidence.
+- Client-facing AI strategy requires human review.
 
 ## Separation principle
 
@@ -195,6 +208,25 @@ Client knowledge belongs in active client records, active client knowledge cards
 
 If a client is inactive, their knowledge should not pollute the default active workflow unless intentionally archived and searched.
 
+## Platform connector principle
+
+Every automated reporting connector must operate like a durable data product, not a one-off API script.
+
+It must support:
+
+- versioned API contracts;
+- source provenance;
+- safe token handling;
+- idempotent sync and re-sync;
+- delayed-data refresh windows;
+- permission and token health checks;
+- deprecation monitoring;
+- data-quality and comparability states;
+- safe failure without destroying the last verified dataset;
+- representative cross-client validation before global completion is claimed.
+
+Third-party connectors may be evaluated or used as parity benchmarks. They become permanent dependencies only after a deliberate decision on cost, control, data ownership, latency, metric parity and vendor lock-in.
+
 ## Development process
 
 Every major development session should start by checking:
@@ -203,8 +235,9 @@ Every major development session should start by checking:
 2. The current milestone file.
 3. The parking lot file.
 4. The relevant roadmap file.
+5. Any active detailed strategy referenced by the milestone.
 
-Every coding prompt should be focused on one task.
+Every coding prompt should be focused on one task or one tightly bounded end-to-end milestone.
 
 Every new idea should be handled in one of three ways:
 
@@ -220,22 +253,27 @@ Does this make CG Dynamics smarter, easier to use or more valuable to clients?
 
 If not, stop and reassess.
 
-## Build order
+For Client Intelligence, also ask:
+
+Can every client-facing claim be traced to verified evidence, and would we confidently defend the number or recommendation to the client?
+
+If not, do not publish it.
+
+## Current build order
 
 Recommended order from this point:
 
-1. Stabilise the vision and roadmap documents.
-2. Build the Knowledge Engine data model.
-3. Build the Marketing Library and Skill Card storage.
-4. Populate the first trusted Skill Cards.
-5. Build the AI Workforce interfaces.
-6. Plug AI agents into Client Intelligence.
-7. Plug AI agents into Operations Hub.
-8. Improve the client facing dashboard until it is sendable.
-9. Improve the operations workflow until staff can realistically use it daily.
+1. Repair Meta reporting truth and verify parity against Meta Business Suite.
+2. Add metric provenance, completeness, comparability and connector-health architecture.
+3. Correct the Client Overview and publication quality gate.
+4. Complete the Cape Lumber benchmark report with Meta and Google Ads.
+5. Activate the minimum trusted client and construction/timber Skill Cards required for the pilot.
+6. Generate the first reviewed evidence-based sales and campaign strategy.
+7. Scale the verified reporting and specialist-intelligence pattern to active clients.
+8. Continue improving Operations Hub daily usability without mixing the divisions.
 
 ## Long term outcome
 
 CG Dynamics should become a system that gets smarter with every client, campaign, task, report and lesson learned.
 
-The long term moat is not only the code. The moat is the structured knowledge, applied workflow and accumulated marketing intelligence inside the system.
+The long term moat is not only the code. The moat is the structured knowledge, applied workflow, trustworthy data and accumulated marketing intelligence inside the system.
