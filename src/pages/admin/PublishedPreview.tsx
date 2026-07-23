@@ -16,6 +16,11 @@ import {
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from '../client/ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
+import {
+  loadGoogleAdsDashboard,
+  type GoogleAdsDashboardData,
+  type GoogleAdsDashboardState,
+} from '../../lib/googleAdsDashboard'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -42,6 +47,7 @@ export default function PublishedPreview() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [initialReportId] = useState(searchParams.get('reportId') ?? '')
   const [initialClientId] = useState(searchParams.get('client') ?? '')
+  const [initialMonth] = useState(searchParams.get('month') ?? '')
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [selectedClientId, setSelectedClientId] = useState('')
@@ -50,6 +56,10 @@ export default function PublishedPreview() {
   const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [previousReport, setPreviousReport] = useState<ReportWithPosts | null>(null)
   const [previousManualMetrics, setPreviousManualMetrics] = useState<ManualPlatformMetric[]>([])
+  const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
+  const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
+  const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
+  const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
   const [mode, setMode] = useState<DashboardMode>('client')
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
@@ -92,12 +102,17 @@ export default function PublishedPreview() {
         const queryClientReports = queryClientId
           ? selectMonthlyReports(reportsRes.data.filter(report => report.client_id === queryClientId))
           : []
+        const exactMonthReport = queryClientId && initialMonth
+          ? reportsRes.data.find(report => report.client_id === queryClientId && getReportMonthFromPeriod(report) === initialMonth)
+          : undefined
         const selectedReport = initialReportId
           ? reportsRes.data.find(report => report.id === initialReportId)
           : queryClientId
-            ? queryClientReports.find(report => report.status === 'published')
-              ?? queryClientReports[0]
-              ?? reportsRes.data.find(report => report.client_id === queryClientId)
+            ? initialMonth
+              ? exactMonthReport
+              : queryClientReports.find(report => report.status === 'published')
+                ?? queryClientReports[0]
+                ?? reportsRes.data.find(report => report.client_id === queryClientId)
             : reportsRes.data.find(report => report.status === 'published') ?? reportsRes.data[0]
         const nextClientId = ((selectedReport?.client_id ?? queryClientId) || clientsRes.data[0]?.id) ?? ''
         const nextReportId = selectedReport?.id ?? ''
@@ -111,21 +126,29 @@ export default function PublishedPreview() {
     }
 
     void loadOptions()
-  }, [initialClientId, initialReportId])
+  }, [initialClientId, initialMonth, initialReportId])
 
   useEffect(() => {
+    let active = true
+
     if (!selectedReportId) {
-      setReport(null)
-      setPreviousReport(null)
-      setPreviousManualMetrics([])
-      return
+      return () => { active = false }
     }
 
     async function loadReport() {
+      setReport(null)
+      setManualMetrics([])
+      setPreviousReport(null)
+      setPreviousManualMetrics([])
+      setGoogleAds(null)
+      setPreviousGoogleAds(null)
+      setGoogleAdsState('no-activity')
+      setGoogleAdsError(null)
       setReportLoading(true)
       setError(null)
       try {
         const { data, error } = await getReportWithPosts(selectedReportId)
+        if (!active) return
         if (error) {
           setError(error.message)
           return
@@ -135,36 +158,37 @@ export default function PublishedPreview() {
         if (data) {
           const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
-          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, currentMonth)
-          setManualMetrics(metrics)
-          if (previousMonth) {
-            const previous = reports.find(report =>
-              report.client_id === data.client_id &&
-              getReportMonthFromPeriod(report) === previousMonth
-            )
-            const [previousReportResult, previousMetricsResult] = await Promise.all([
-              previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
-              listManualMetricsForClientMonth(data.client_id, previousMonth),
-            ])
-            setPreviousReport(previousReportResult.data)
-            setPreviousManualMetrics(previousMetricsResult.data)
-          } else {
-            setPreviousReport(null)
-            setPreviousManualMetrics([])
-          }
-        } else {
-          setManualMetrics([])
-          setPreviousReport(null)
-          setPreviousManualMetrics([])
+          const previous = previousMonth
+            ? reports.find(report => report.client_id === data.client_id && getReportMonthFromPeriod(report) === previousMonth)
+            : null
+          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult] = await Promise.all([
+            listManualMetricsForClientMonth(data.client_id, currentMonth),
+            previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
+            previousMonth ? listManualMetricsForClientMonth(data.client_id, previousMonth) : Promise.resolve({ data: [], error: null }),
+            loadGoogleAdsDashboard(data.id, currentMonth),
+            previousMonth
+              ? loadGoogleAdsDashboard(data.id, previousMonth)
+              : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
+          ])
+          if (!active) return
+          setManualMetrics(metricsResult.data)
+          setPreviousReport(previousReportResult.data)
+          setPreviousManualMetrics(previousMetricsResult.data)
+          setGoogleAds(googleAdsResult.data)
+          setPreviousGoogleAds(previousGoogleAdsResult.data)
+          setGoogleAdsState(googleAdsResult.state)
+          setGoogleAdsError(googleAdsResult.error ?? previousGoogleAdsResult.error)
         }
       } catch (error) {
+        if (!active) return
         setError(errorMessage(error, 'Could not load this report preview.'))
       } finally {
-        setReportLoading(false)
+        if (active) setReportLoading(false)
       }
     }
 
     void loadReport()
+    return () => { active = false }
   }, [reports, selectedReportId, setSearchParams])
 
   function handleClientChange(clientId: string) {
@@ -172,6 +196,16 @@ export default function PublishedPreview() {
     const eligible = selectMonthlyReports(reports.filter(report => report.client_id === clientId))
     const nextReport = eligible.find(report => report.status === 'published') ?? eligible[0]
     setSelectedReportId(nextReport?.id ?? '')
+    if (!nextReport) {
+      setReport(null)
+      setManualMetrics([])
+      setPreviousReport(null)
+      setPreviousManualMetrics([])
+      setGoogleAds(null)
+      setPreviousGoogleAds(null)
+      setGoogleAdsState('no-activity')
+      setGoogleAdsError(null)
+    }
   }
 
   async function handleStatusChange(status: Report['status']) {
@@ -290,6 +324,10 @@ export default function PublishedPreview() {
               manualMetrics={manualMetrics}
               previousReport={previousReport}
               previousManualMetrics={previousManualMetrics}
+              googleAds={googleAds}
+              previousGoogleAds={previousGoogleAds}
+              googleAdsState={googleAdsState}
+              googleAdsError={googleAdsError}
               showEmptyStrategy
               showAdminDiagnostics={isAdmin}
             />
@@ -300,8 +338,8 @@ export default function PublishedPreview() {
         </div>
       ) : (
         <EmptyReportState
-          title="No report selected"
-          message="Select a client and report period to review the dashboard workspace."
+          title={initialMonth ? 'No dashboard for this synced month' : 'No report selected'}
+          message={initialMonth ? 'Google Ads data was synced, but this client does not have a monthly dashboard for that period yet.' : 'Select a client and report period to review the dashboard workspace.'}
         />
       )}
       <div className="mt-5 text-right">

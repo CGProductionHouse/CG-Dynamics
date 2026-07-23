@@ -5,6 +5,7 @@ import { createServer } from 'vite'
 
 const LIB_SOURCE = readFileSync(new URL('../src/lib/googleAds.ts', import.meta.url), 'utf8')
 const PAGE_SOURCE = readFileSync(new URL('../src/pages/admin/GoogleAdsIntegrationPage.tsx', import.meta.url), 'utf8')
+const REPORT_VIEW_SOURCE = readFileSync(new URL('../src/pages/client/ClientReportView.tsx', import.meta.url), 'utf8')
 const SQL_SOURCE = readFileSync(new URL('../supabase/phase-20b-google-ads-shared-accounts.sql', import.meta.url), 'utf8')
 const LIST_CAMPAIGNS_SOURCE = readFileSync(new URL('../supabase/functions/google-ads-list-campaigns/index.ts', import.meta.url), 'utf8')
 const LINK_SOURCE = readFileSync(new URL('../supabase/functions/google-ads-link-account/index.ts', import.meta.url), 'utf8')
@@ -234,7 +235,7 @@ test('resolved reporting isolates clients and excludes unmapped shared campaigns
   assert.match(SQL_SOURCE, /al\.client_id = p_client_id/)
   assert.match(LIB_SOURCE, /\.rpc\('get_google_ads_client_campaign_metrics'/)
   assert.doesNotMatch(LIB_SOURCE, /\.from\('google_ads_campaign_daily_metrics'\)/)
-  assert.match(PAGE_SOURCE, /Source: Google Ads/)
+  assert.match(REPORT_VIEW_SOURCE, /Source: Google Ads Sync/)
 })
 
 test('frontend setup has no direct mutation endpoint or table mutation', () => {
