@@ -6,6 +6,7 @@ import { createServer } from 'vite'
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8')
 const SHARED_META = read('../supabase/functions/_shared/meta.ts')
 const META_SYNC = read('../supabase/functions/meta-sync/index.ts')
+const META_WORKER = read('../supabase/functions/meta-sync-worker/index.ts')
 const REPORT_STATS = read('../src/lib/reportStats.ts')
 const MIGRATION = read('../supabase/phase-20d-meta-reporting-truth.sql')
 
@@ -134,10 +135,46 @@ test('connector never coerces missing account metrics to zero', () => {
   assert.match(META_SYNC, /syncAccountFacts/)
 })
 
-test('reportStats no longer sums unique audiences across platforms', () => {
+test('reportStats never produces a cross-platform combined views/reach total', () => {
+  // No cross-platform sum, and no single-platform value promoted to a combined field.
   assert.doesNotMatch(REPORT_STATS, /sumOrNull\(withData\.map\(view => view\.reach\)\)/)
   assert.doesNotMatch(REPORT_STATS, /sumOrNull\(withData\.map\(view => view\.views\)\)/)
-  assert.match(REPORT_STATS, /never be summed across platforms/i)
+  assert.doesNotMatch(REPORT_STATS, /platformsWithReach\.length === 1/)
+  // The master total is unconditionally null — views/reach live only per-platform.
+  assert.match(REPORT_STATS, /totalReach:\s*null/)
+  assert.match(REPORT_STATS, /totalViews:\s*null/)
+})
+
+test('scheduled worker uses the shared connector, not a competing one', () => {
+  assert.match(META_WORKER, /from '\.\.\/_shared\/meta\.ts'/)
+  assert.match(META_WORKER, /syncAccountFacts/)
+  // Shares the network layer (no private retry loop competing with the shared one).
+  assert.match(META_WORKER, /sharedMetaFetch/)
+})
+
+test('no active Meta function hardcodes a legacy Graph API version', () => {
+  // The version is only ever the imported/resolved META_GRAPH_VERSION.
+  for (const src of [META_SYNC, META_WORKER]) {
+    assert.doesNotMatch(src, /const\s+META_GRAPH_VERSION\s*=\s*['"]v\d/)
+    assert.doesNotMatch(src, /graph\.facebook\.com\/v\d+\.\d+/)
+  }
+  // The shared resolver refuses unsupported versions and does not silently fall
+  // back to an obsolete one.
+  assert.match(SHARED_META, /resolveGraphVersion/)
+  assert.match(SHARED_META, /Refusing to run on an unverified version/)
+})
+
+test('buildMasterReport never emits a combined views/reach total', async () => {
+  const rs = await server.ssrLoadModule('/src/lib/reportStats.ts')
+  const posts = [
+    { id: 'p1', caption: null, permalink: null, publish_time: '2026-06-10T00:00:00Z', reach: 100, impressions: 200, engagements: 5, post_type: 'photo', platform: 'instagram', imageUrl: null },
+  ]
+  const master = rs.buildMasterReport(posts, [])
+  assert.equal(master.totalReach, null)
+  assert.equal(master.totalViews, null)
+  // Per-platform value is still present.
+  const ig = master.platforms.find(p => p.platform === 'instagram')
+  assert.equal(ig.reach, 100)
 })
 
 test('phase-20d migration defines the provenance-first truth tables', () => {

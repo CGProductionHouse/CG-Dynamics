@@ -335,20 +335,17 @@ export function buildMasterReport(
   })[0] ?? null
 
   // Views and reach are UNIQUE-audience style metrics with different per-platform
-  // definitions — they must never be summed across platforms (the same person can
-  // appear on both), and a single-platform value must never be presented as an
-  // all-channel total. So the combined master no longer carries a cross-platform
-  // views/reach headline; those are shown PER PLATFORM (platforms[] here, and the
-  // availability-aware Overview in overviewModel.ts). A combined figure is only
-  // ever surfaced when exactly one platform reported it AND the caller labels it
-  // with that platform. See docs/client-intelligence/META-REPORTING-TRUTH-STRATEGY.md.
-  const platformsWithReach = withData.filter(view => typeof view.reach === 'number')
-  const platformsWithViews = withData.filter(view => typeof view.views === 'number')
+  // definitions. They must NEVER produce a cross-platform master total — not even
+  // a single-platform value promoted to a combined field, because a combined
+  // Overview card must never carry Instagram-only (or Facebook-only) data. The
+  // cross-platform master therefore always reports null for these; views, viewers
+  // and reach are rendered ONLY in explicitly-labelled per-platform sections
+  // (platforms[] here, and the availability-aware Overview in overviewModel.ts).
+  // See docs/client-intelligence/META-REPORTING-TRUTH-STRATEGY.md.
   return {
     platforms,
-    // null unless a SINGLE platform reported it (never a cross-platform sum).
-    totalReach: platformsWithReach.length === 1 ? platformsWithReach[0].reach : null,
-    totalViews: platformsWithViews.length === 1 ? platformsWithViews[0].views : null,
+    totalReach: null,
+    totalViews: null,
     totalEngagements: withData.reduce((sum, view) => sum + view.engagements, 0),
     bestPlatform,
     bestPostOverall: posts.length > 0 ? calculateReportStats(posts).bestPost : null,

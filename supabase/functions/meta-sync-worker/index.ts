@@ -1,8 +1,11 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { syncAccountFacts, META_GRAPH_VERSION, metaFetch as sharedMetaFetch, redact } from '../_shared/meta.ts'
 
-const META_GRAPH_VERSION = 'v22.0'
-const SYNC_ENGINE_VERSION = 'meta-sync-worker-v1'
+// Scheduled/background syncing shares the SAME truth contract as manual syncing:
+// configurable Graph version, shared connector engine (syncAccountFacts) writing
+// normalized facts + provenance, shared retry/backoff and token handling.
+const SYNC_ENGINE_VERSION = 'meta-connector-v2'
 const BATCH_SIZE = 5
 
 function monthBounds(month: string): { periodStart: string; periodEnd: string } {
@@ -26,41 +29,10 @@ function currentMonthStr(): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
-const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504])
-const RETRY_DELAYS = [750, 1500]
-
+// Shared connector fetch (timeout + retry/backoff on transient failures). Both
+// manual and scheduled syncing use the same network behaviour.
 async function retryMetaFetch(url: string, timeoutMs = 30_000): Promise<Response> {
-  let lastError: Error | null = null
-
-  for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), timeoutMs)
-    try {
-      const res = await fetch(url, { signal: controller.signal })
-      clearTimeout(timer)
-      if (res.ok) return res
-      if (RETRYABLE_STATUSES.has(res.status)) {
-        lastError = new Error(`Meta API HTTP ${res.status} ${res.statusText}`)
-      } else {
-        return res
-      }
-    } catch (e) {
-      clearTimeout(timer)
-      if (e instanceof TypeError || (typeof DOMException !== 'undefined' && e instanceof DOMException && e.name === 'AbortError')) {
-        lastError = e instanceof Error ? e : new Error(String(e))
-      } else {
-        throw e
-      }
-    }
-    if (attempt < RETRY_DELAYS.length) {
-      await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]))
-    }
-  }
-
-  const msg = lastError?.name === 'AbortError'
-    ? `Meta API request timed out after ${timeoutMs}ms and ${RETRY_DELAYS.length + 1} attempt(s)`
-    : `Meta API request failed after retries: ${lastError?.message ?? 'unknown error'}`
-  throw new Error(msg)
+  return await sharedMetaFetch(url, timeoutMs)
 }
 
 async function parseMetaError(res: Response, context: string): Promise<string> {
@@ -480,6 +452,46 @@ Deno.serve(async (req) => {
             }
           } catch (e) {
             warnings.push(`Instagram sync error: ${String(e)}`)
+          }
+        }
+
+        // ── Account-level truth via the shared connector (normalized facts) ──
+        // Identical engine to the manual sync: per-metric availability states,
+        // provenance snapshots, preserve-verified-on-failure. Missing/unavailable
+        // account metrics are never stored as zero.
+        if (!pageTokenRateLimited && (facebookPageId || instagramAccountId)) {
+          const allTokens = [accessToken, ...pageTokenMap.values()]
+          if (facebookPageId) {
+            const fbPageToken = pageTokenMap.get(facebookPageId)
+            if (fbPageToken) {
+              try {
+                await syncAccountFacts(sb, {
+                  clientId: item.client_id, assetId: null, connectionId: connections[0].id,
+                  platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
+                  baseUrl, apiVersion: META_GRAPH_VERSION,
+                  periodMonth: item.month, periodStart, periodEnd,
+                  tokens: allTokens, tokenClass: 'page', reconstructInteractions: null,
+                })
+              } catch (e) {
+                warnings.push(redact(`Facebook account facts error: ${String(e)}`, allTokens))
+              }
+            }
+          }
+          if (instagramAccountId) {
+            const igToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
+            try {
+              await syncAccountFacts(sb, {
+                clientId: item.client_id, assetId: null, connectionId: connections[0].id,
+                platform: 'instagram', objectId: instagramAccountId, token: igToken,
+                baseUrl, apiVersion: META_GRAPH_VERSION,
+                periodMonth: item.month, periodStart, periodEnd,
+                tokens: allTokens,
+                tokenClass: facebookPageId && pageTokenMap.get(facebookPageId) ? 'page' : 'user',
+                reconstructInteractions: null,
+              })
+            } catch (e) {
+              warnings.push(redact(`Instagram account facts error: ${String(e)}`, allTokens))
+            }
           }
         }
 

@@ -11,9 +11,37 @@
 // ============================================================================
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// Configurable Graph API version — read from one controlled server-side env var,
-// never assumed. Falls back to v22.0 only if unset.
-export const META_GRAPH_VERSION = Deno.env.get('META_GRAPH_VERSION') || 'v22.0'
+// ── Graph API version resolution ─────────────────────────────────────────────
+// One controlled server-side source. The version is NEVER silently assumed:
+//  • an explicit META_GRAPH_VERSION override must be a supported version, else we
+//    fail fast with a clear configuration error (no obsolete silent fallback);
+//  • when unset we use DEFAULT_GRAPH_VERSION, and expose `configured: false` so
+//    connector health can flag that the production version is still the default
+//    pending confirmation.
+// The exact production version is confirmed against Meta Developers by Codex; the
+// code refuses to run on an unrecognised/typo'd version.
+export const SUPPORTED_GRAPH_VERSIONS = ['v21.0', 'v22.0', 'v23.0', 'v24.0'] as const
+// Last version verified working for this app's post + insight sync. Codex confirms
+// / bumps this against the live Meta app configuration and sets the secret.
+const DEFAULT_GRAPH_VERSION = 'v22.0'
+
+export function resolveGraphVersion(): { version: string; configured: boolean } {
+  const raw = (Deno.env.get('META_GRAPH_VERSION') ?? '').trim()
+  if (raw) {
+    if (!/^v\d+\.\d+$/.test(raw) || !SUPPORTED_GRAPH_VERSIONS.includes(raw as typeof SUPPORTED_GRAPH_VERSIONS[number])) {
+      throw new Error(
+        `META_GRAPH_VERSION "${raw}" is not a supported Meta Graph API version ` +
+        `(supported: ${SUPPORTED_GRAPH_VERSIONS.join(', ')}). Refusing to run on an unverified version.`,
+      )
+    }
+    return { version: raw, configured: true }
+  }
+  return { version: DEFAULT_GRAPH_VERSION, configured: false }
+}
+
+const RESOLVED_GRAPH = resolveGraphVersion()
+export const META_GRAPH_VERSION = RESOLVED_GRAPH.version
+export const META_GRAPH_VERSION_CONFIGURED = RESOLVED_GRAPH.configured
 export const META_CONNECTOR_VERSION = 'meta-connector-v2'
 
 export type Availability =
@@ -418,7 +446,12 @@ export async function syncAccountFacts(
   if (syncRunId) {
     await sb.from('platform_sync_runs').update({
       status, health_state: healthState, finished_at: new Date().toISOString(),
-      summary: { facts, connector: META_CONNECTOR_VERSION },
+      summary: {
+        facts,
+        connector: META_CONNECTOR_VERSION,
+        graph_version: args.apiVersion,
+        graph_version_configured: META_GRAPH_VERSION_CONFIGURED,
+      },
     }).eq('id', syncRunId)
   }
 
