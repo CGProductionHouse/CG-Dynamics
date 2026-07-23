@@ -47,8 +47,12 @@ export default function IntegrationsPage() {
       getGoogleAdsWorkspace()
         .then(workspace => {
           if (!active) return
-          setGoogleState(workspace.status.connected ? 'connected' : 'disconnected')
-          setGoogleLinkedClients(new Set(workspace.links.filter(link => link.active).map(link => link.clientId)).size)
+          setGoogleState(workspace.accounts.length > 0 ? 'connected' : 'disconnected')
+          const linkedClientIds = [
+            ...workspace.accountLinks.filter(link => link.active).map(link => link.clientId),
+            ...workspace.campaignLinks.filter(link => link.active).map(link => link.clientId),
+          ]
+          setGoogleLinkedClients(new Set(linkedClientIds).size)
         })
         .catch(() => {
           if (active) setGoogleState('disconnected')

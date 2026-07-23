@@ -15,22 +15,28 @@ Deno.serve(async request => {
   if (!auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status)
 
   const configured = googleAdsConfig() !== null
-  const { count, error } = await auth.value.supabase
-    .from('google_ads_account_links')
-    .select('id', { count: 'exact', head: true })
-    .eq('is_active', true)
-  const { data: latestRun } = await auth.value.supabase
-    .from('google_ads_sync_runs')
-    .select('finished_at')
-    .eq('status', 'succeeded')
-    .order('finished_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const [accountsResult, dedicatedResult, campaignsResult, runResult] = await Promise.all([
+    auth.value.supabase.from('google_ads_accounts')
+      .select('id, account_mode').eq('is_active', true).in('account_mode', ['dedicated', 'shared']),
+    auth.value.supabase.from('google_ads_account_links')
+      .select('google_ads_account_id').eq('is_active', true),
+    auth.value.supabase.from('google_ads_campaign_links')
+      .select('google_ads_account_id').eq('is_active', true),
+    auth.value.supabase.from('google_ads_sync_runs')
+      .select('finished_at').eq('status', 'succeeded')
+      .order('finished_at', { ascending: false }).limit(1).maybeSingle(),
+  ])
+  const dedicatedIds = new Set((dedicatedResult.data ?? []).map(link => link.google_ads_account_id))
+  const sharedIds = new Set((campaignsResult.data ?? []).map(link => link.google_ads_account_id))
+  const mappingError = accountsResult.error || dedicatedResult.error || campaignsResult.error
+  const linkedAccountsCount = mappingError ? null : (accountsResult.data ?? []).filter(account =>
+    account.account_mode === 'dedicated' ? dedicatedIds.has(account.id) : sharedIds.has(account.id)
+  ).length
 
   const baseStatus = {
     configured,
-    linkedAccountsCount: error ? null : (count ?? 0),
-    lastSyncedAt: latestRun?.finished_at ?? null,
+    linkedAccountsCount,
+    lastSyncedAt: runResult.data?.finished_at ?? null,
     lastCheckedAt: new Date().toISOString(),
   }
   const config = googleAdsConfig()

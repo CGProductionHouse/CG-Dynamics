@@ -43,6 +43,7 @@ export function googleAdsCampaignQuery(startDate: string, endDate: string): stri
       campaign.id,
       campaign.name,
       campaign.status,
+      campaign.advertising_channel_type,
       segments.date,
       metrics.impressions,
       metrics.clicks,

@@ -27,6 +27,17 @@ export interface GoogleAdsAccount {
   status: string | null
 }
 
+export interface GoogleAdsCampaign {
+  campaignId: string
+  name: string
+  status: 'ENABLED' | 'PAUSED' | 'REMOVED'
+  advertisingChannelType: string | null
+  customerId: string
+  customerName: string | null
+  currencyCode: string | null
+  timeZone: string | null
+}
+
 export class GoogleAdsError extends Error {
   status: number
   requestId: string | null
@@ -176,6 +187,60 @@ export async function listAccessibleAccounts(
     })
   }
   return [...accounts.values()]
+}
+
+export async function getAccessibleNonManagerAccount(
+  config: GoogleAdsConfig,
+  accessToken: string,
+  customerId: unknown,
+): Promise<GoogleAdsAccount | null> {
+  const normalizedId = normalizeCustomerId(customerId)
+  if (!normalizedId) return null
+  const account = (await listAccessibleAccounts(config, accessToken))
+    .find(item => item.customerId === normalizedId)
+  if (!account || account.manager || (account.status !== null && account.status !== 'ENABLED')) return null
+  return account
+}
+
+export async function listAccountCampaigns(
+  config: GoogleAdsConfig,
+  accessToken: string,
+  customerId: string,
+): Promise<GoogleAdsCampaign[]> {
+  const rows = await searchStream(config, accessToken, customerId, `
+    SELECT
+      campaign.id,
+      campaign.name,
+      campaign.status,
+      campaign.advertising_channel_type,
+      customer.id,
+      customer.descriptive_name,
+      customer.currency_code,
+      customer.time_zone
+    FROM campaign
+    ORDER BY campaign.name`)
+
+  return rows.flatMap(row => {
+    const campaign = row.campaign as Record<string, unknown> | undefined
+    const customer = row.customer as Record<string, unknown> | undefined
+    const campaignId = campaign?.id === undefined ? '' : String(campaign.id)
+    const normalizedCustomerId = normalizeCustomerId(customer?.id)
+    const status = campaign?.status
+    if (!/^\d+$/.test(campaignId) || !normalizedCustomerId ||
+      (status !== 'ENABLED' && status !== 'PAUSED' && status !== 'REMOVED')) return []
+    return [{
+      campaignId,
+      name: typeof campaign?.name === 'string' && campaign.name ? campaign.name : `Campaign ${campaignId}`,
+      status,
+      advertisingChannelType: typeof campaign?.advertisingChannelType === 'string'
+        ? campaign.advertisingChannelType
+        : null,
+      customerId: normalizedCustomerId,
+      customerName: typeof customer?.descriptiveName === 'string' ? customer.descriptiveName : null,
+      currencyCode: typeof customer?.currencyCode === 'string' ? customer.currencyCode : null,
+      timeZone: typeof customer?.timeZone === 'string' ? customer.timeZone : null,
+    }]
+  })
 }
 
 export function safeGoogleAdsError(error: unknown): { error: string; requestId?: string } {
