@@ -1,8 +1,8 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { syncAccountFacts, META_GRAPH_VERSION } from '../_shared/meta.ts'
 
-const META_GRAPH_VERSION = 'v22.0'
-const SYNC_ENGINE_VERSION = 'live-runtime-failure-fix'
+const SYNC_ENGINE_VERSION = 'meta-connector-v2'
 
 type ErrorPhase = 'auth' | 'env' | 'request_parse' | 'connection' | 'assets' | 'sync' | 'unknown'
 
@@ -30,6 +30,9 @@ interface SyncClientResult {
   warnings: string[]
   accountTotals: Record<string, Record<string, number | null>>
   unavailableMetrics: Array<{ platform: string; metrics: string[]; reason: string }>
+  // Per-metric availability + value from the generic discovery engine, used to
+  // build the cross-client parity matrix (Graph API runtime layer).
+  connectorFacts: Record<string, Record<string, { value: number | null; availability: string; sourceMetric: string }>>
 }
 
 interface DbErrorLike {
@@ -330,60 +333,13 @@ async function fetchPageTokens(baseUrl: string, userToken: string): Promise<Map<
   return map
 }
 
-interface SyncedMetric {
-  clientId: string
-  month: string
-  platform: string
-  views: number
-  reach: number
-  engagements: number
-  profileVisits: number
-  externalLinkTaps: number
-  followers: number
-  createdBy: string | null
-}
-
-// Upserts Meta-synced account totals into manual_platform_metrics using a VALID
-// source_type ('other' — the table CHECK constraint does not allow a custom
-// 'meta_business_sync'). Caller only invokes this when real data exists, so we
-// never write a fake all-zero row. Errors surface as warnings, never silently.
-async function upsertSyncedPlatformMetric(
-  sb: ReturnType<typeof createClient>,
-  m: SyncedMetric,
-  warnings: string[],
-  tokens: Array<string | null | undefined>,
-) {
-  const payload = {
-    client_id: m.clientId,
-    month: m.month,
-    platform: m.platform,
-    source_type: 'other',
-    views: m.views,
-    reach: m.reach,
-    engagements: m.engagements,
-    accounts_engaged: 0,
-    profile_visits: m.profileVisits,
-    external_link_taps: m.externalLinkTaps,
-    followers: m.followers,
-    top_content_notes: null,
-    content_type_split_notes: null,
-    general_notes: `Meta sync account totals (${new Date().toISOString().slice(0, 10)})`,
-    created_by: m.createdBy,
-  }
-  const { data: existing } = await sb
-    .from('manual_platform_metrics')
-    .select('id')
-    .eq('client_id', m.clientId)
-    .eq('month', m.month)
-    .eq('platform', m.platform)
-    .limit(1)
-  const res = existing && existing.length > 0
-    ? await sb.from('manual_platform_metrics').update(payload).eq('id', existing[0].id)
-    : await sb.from('manual_platform_metrics').insert(payload)
-  if (res.error) {
-    warnings.push(redact(`Could not store ${m.platform} account totals: ${describeDbError(res.error)}`, tokens))
-  }
-}
+// NOTE: Automated Meta account totals are NO LONGER written into
+// manual_platform_metrics (its NOT NULL integer columns cannot represent
+// "unavailable", which is exactly what forced missing metrics to be stored as
+// zero). Account-level truth now flows through the provenance-first model
+// (platform_metric_facts_monthly + platform_metric_snapshots + platform_sync_runs)
+// via syncAccountFacts() from ../_shared/meta.ts, which records an explicit
+// availability state per metric and never coerces missing to zero.
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -626,6 +582,7 @@ async function handleRequest(req: Request): Promise<Response> {
       warnings: [],
       accountTotals: {},
       unavailableMetrics: [],
+      connectorFacts: {},
     }
 
     // Page + IG Business endpoints generally need the Page access token. Fall
@@ -768,7 +725,10 @@ async function handleRequest(req: Request): Promise<Response> {
               })
             }
 
-            result.warnings.push('Facebook views and reach are not synced. Page Insights (page_impressions, page_impressions_unique) consistently return errors through the current API. Post-level content interactions and current follower count are synced instead.')
+            // Post-level FB views/reach are not exposed on the /posts edge; they
+            // stay null here. Account-level Facebook visibility (views/viewers/
+            // interactions/follows/followers) is discovered separately by
+            // syncAccountFacts with explicit availability states.
           } else {
             result.warnings.push(`Could not fetch Facebook posts: ${await readMetaError(fbRes, knownTokens)}`)
           }
@@ -1110,178 +1070,66 @@ async function handleRequest(req: Request): Promise<Response> {
         totalPostsSynced++
       }
 
-      // ── Fetch Facebook Page data (reliable fields only) ──
-      // Facebook Page-level insights (page_impressions, page_impressions_unique,
-      // page_engaged_users) are NOT requested because they consistently return
-      // "invalid" errors through the current API version and token permissions.
-      // Instead we rely on post-level data (reactions, comments, shares) for
-      // content interactions, and Page fields for current follower count. Views
-      // and reach are not available for Facebook through this API path.
+      // ── Account-level truth via the generic discovery engine ──────────────
+      // syncAccountFacts probes each candidate Facebook/Instagram metric in
+      // isolation and records complete / valid_zero / unavailable /
+      // permission_blocked / partial / error per metric into the provenance-first
+      // model. Missing/unsupported values are NEVER stored as zero, and one
+      // failing metric never affects another. Facebook content interactions fall
+      // back to a reconstructed post-engagement sum (labelled reconstructed).
+      const DEFINITIVE_OR_SHOWN = new Set(['complete', 'valid_zero', 'partial'])
+      const applyFacts = (platform: 'facebook' | 'instagram', facts: Record<string, { value: number | null; availability: string; sourceMetric: string }>) => {
+        result.connectorFacts[platform] = facts
+        result.accountTotals[platform] = Object.fromEntries(
+          Object.entries(facts).map(([k, v]) => [k, DEFINITIVE_OR_SHOWN.has(v.availability) ? v.value : null]),
+        )
+        const unavailable = Object.entries(facts)
+          .filter(([, v]) => v.availability === 'unavailable' || v.availability === 'permission_blocked' || v.availability === 'error')
+          .map(([k]) => k)
+        if (unavailable.length > 0) {
+          result.unavailableMetrics.push({
+            platform,
+            metrics: unavailable,
+            reason: `${platform} did not return these metrics for ${month}. Recorded with an explicit availability state — not stored as zero.`,
+          })
+        }
+      }
+
       if (client.facebookPageId && Date.now() < insightDeadline) {
         try {
-          const fbValues: Record<string, number> = {}
-
-          // Post-level content interaction sum
           const fbContentInteractions = fbPosts.reduce(
             (sum, post) => sum + post.reactions + post.comments + post.shares + (post.clicks ?? 0),
             0,
           )
-
-          // Current follower count from Page fields
-          let currentFollowers = 0
-          try {
-            const pageParams = new URLSearchParams({ access_token: pageToken, fields: 'fan_count,followers_count' })
-            const pageRes = await metaFetch(`${baseUrl}/${client.facebookPageId}?${pageParams.toString()}`)
-            if (pageRes.ok) {
-              const pageData = await pageRes.json()
-              currentFollowers =
-                typeof pageData.followers_count === 'number'
-                  ? pageData.followers_count
-                  : typeof pageData.fan_count === 'number'
-                    ? pageData.fan_count
-                    : 0
-            }
-          } catch {
-            // non-fatal
-          }
-
-          const anyPositive = fbContentInteractions > 0 || currentFollowers > 0
-
-          if (anyPositive) {
-            await upsertSyncedPlatformMetric(sb, {
-              clientId: client.clientId,
-              month,
-              platform: 'facebook',
-              views: 0,
-              reach: 0,
-              engagements: fbContentInteractions,
-              profileVisits: 0,
-              externalLinkTaps: 0,
-              followers: currentFollowers,
-              createdBy: user.id,
-            }, result.warnings, knownTokens)
-          }
-
-          result.accountTotals.facebook = {
-            views: null,
-            viewers: null,
-            content_interactions: fbContentInteractions,
-            visits: null,
-            current_followers: currentFollowers > 0 ? currentFollowers : null,
-          }
-
-          result.unavailableMetrics.push({
-            platform: 'facebook',
-            metrics: ['views', 'viewers'],
-            reason: 'Facebook Page Insights did not return page_impressions or page_impressions_unique through the current API version and token permissions. Post-level interactions and follower count are synced instead.',
+          const fb = await syncAccountFacts(sb, {
+            clientId: client.clientId, assetId: client.assetId, connectionId: connections[0].id,
+            platform: 'facebook', objectId: client.facebookPageId, token: pageToken,
+            baseUrl, apiVersion: META_GRAPH_VERSION,
+            periodMonth: month, periodStart, periodEnd,
+            tokens: knownTokens,
+            tokenClass: pageTokenMap.get(client.facebookPageId) ? 'page' : 'user',
+            reconstructInteractions: fbContentInteractions,
           })
+          applyFacts('facebook', fb.facts)
         } catch (err) {
-          result.warnings.push(redact(`Error fetching Facebook account data: ${String(err)}`, knownTokens))
+          result.warnings.push(redact(`Error syncing Facebook account facts: ${String(err)}`, knownTokens))
         }
       }
 
-      // ── Fetch Instagram account monthly totals (best-effort) ──
-      // Instagram insight metrics have different param requirements:
-      //   - reach works with period=day
-      //   - views, total_interactions, profile_views, website_clicks need metric_type=total_value
-      // We split into safe groups to avoid "should be specified with parameter" errors.
       if (client.instagramAccountId && Date.now() < insightDeadline) {
         try {
-          const igValues: Record<string, number> = {}
-          const igErrors: string[] = []
-
-          // Account-level insights for the PLATFORM cards. In v22 these are
-          // metric_type=total_value metrics returning a single aggregated figure
-          // over the period. Split per-metric so one unsupported metric can't drop
-          // the others (preserve every metric that succeeds).
-          const accountResult = await fetchInsights(
-            baseUrl,
-            client.instagramAccountId,
-            ['reach', 'views', 'total_interactions', 'profile_views', 'website_clicks'],
-            igToken,
-            { period: 'day', since: periodStart, until: periodEnd, metric_type: 'total_value' },
-            knownTokens,
-            { split: true },
-          )
-          if (accountResult.error) {
-            igErrors.push(accountResult.error)
-          }
-          Object.assign(igValues, accountResult.values)
-
-          // Reach fallback: when total_value reach is unavailable, fall back to the
-          // older period=day time series so reach still imports.
-          if (typeof igValues.reach !== 'number') {
-            const reachFallback = await fetchInsights(
-              baseUrl,
-              client.instagramAccountId,
-              ['reach'],
-              igToken,
-              { period: 'day', since: periodStart, until: periodEnd },
-              knownTokens,
-            )
-            Object.assign(igValues, reachFallback.values)
-            if (reachFallback.error && typeof igValues.reach !== 'number') {
-              igErrors.push(`reach (${reachFallback.error})`)
-            }
-          }
-
-          // followers_count is a lifetime metric fetched separately (best-effort).
-          let igFollowers = 0
-          try {
-            const fParams = new URLSearchParams({ access_token: igToken, fields: 'followers_count' })
-            const fRes = await metaFetch(`${baseUrl}/${client.instagramAccountId}?${fParams.toString()}`)
-            if (fRes.ok) {
-              const fData = await fRes.json()
-              if (typeof fData.followers_count === 'number') igFollowers = fData.followers_count
-            }
-          } catch {
-            // non-fatal
-          }
-
-          const combinedError = igErrors.length > 0 ? igErrors.join('; ') : null
-
-          if (combinedError && Object.keys(igValues).length === 0 && igFollowers === 0) {
-            result.warnings.push(`Instagram account insights unavailable (follower/profile totals may be missing): ${combinedError}`)
-          } else if (combinedError && (Object.keys(igValues).length > 0 || igFollowers > 0)) {
-            result.warnings.push(`Some Instagram account insights had errors: ${combinedError}`)
-          }
-
-          const anyPositive =
-            (['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks'].some(k => typeof igValues[k] === 'number' && igValues[k] > 0)) ||
-            igFollowers > 0
-          if (anyPositive) {
-            await upsertSyncedPlatformMetric(sb, {
-              clientId: client.clientId,
-              month,
-              platform: 'instagram',
-              views: igValues.views ?? 0,
-              reach: igValues.reach ?? 0,
-              engagements: igValues.total_interactions ?? 0,
-              profileVisits: igValues.profile_views ?? 0,
-              externalLinkTaps: igValues.website_clicks ?? 0,
-              followers: igFollowers,
-              createdBy: user.id,
-            }, result.warnings, knownTokens)
-          }
-          result.accountTotals.instagram = {
-            views: igValues.views ?? null,
-            reach: igValues.reach ?? null,
-            content_interactions: igValues.total_interactions ?? null,
-            visits: igValues.profile_views ?? null,
-            website_clicks: igValues.website_clicks ?? null,
-            current_followers: igFollowers > 0 ? igFollowers : null,
-          }
-          const missingIg = ['views', 'reach', 'total_interactions', 'profile_views', 'website_clicks']
-            .filter(metric => typeof igValues[metric] !== 'number')
-          if (missingIg.length > 0) {
-            result.unavailableMetrics.push({
-              platform: 'instagram',
-              metrics: missingIg,
-              reason: combinedError ?? 'Meta did not return this metric for the requested month.',
-            })
-          }
+          const ig = await syncAccountFacts(sb, {
+            clientId: client.clientId, assetId: client.assetId, connectionId: connections[0].id,
+            platform: 'instagram', objectId: client.instagramAccountId, token: igToken,
+            baseUrl, apiVersion: META_GRAPH_VERSION,
+            periodMonth: month, periodStart, periodEnd,
+            tokens: knownTokens,
+            tokenClass: client.facebookPageId && pageTokenMap.get(client.facebookPageId) ? 'page' : 'user',
+            reconstructInteractions: null,
+          })
+          applyFacts('instagram', ig.facts)
         } catch (err) {
-          result.warnings.push(redact(`Error fetching Instagram account insights: ${String(err)}`, knownTokens))
+          result.warnings.push(redact(`Error syncing Instagram account facts: ${String(err)}`, knownTokens))
         }
       }
 
