@@ -23,14 +23,19 @@ import {
   type VideoAction,
   type VideoProductionStatus,
 } from '../../lib/videoPipelineRules'
+import { GuidelineBrief } from './contentGuideline'
+import {
+  clientName,
+  deliverableLabelText,
+  videoStatusTone as statusTone,
+  INPUT_CLS,
+  LABEL_CLS,
+} from './contentGuidelineHelpers'
 
 // ── Video production pipeline workspace ───────────────────────────────────────
-// Board grouped by production status + a readable video brief with the guarded
-// workflow actions. All writes go through contentWorkflow.ts. The Client
-// Schedule deliverable label is shown read-only; nothing here mutates it.
-
-const INPUT_CLS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
-const LABEL_CLS = 'block text-[11px] font-black uppercase tracking-[0.12em] text-white/40'
+// Board grouped by production status + the shared readable guideline brief with
+// the guarded workflow actions. All writes go through contentWorkflow.ts. The
+// Client Schedule deliverable label is shown read-only; nothing here mutates it.
 
 const ACTION_LABELS: Record<VideoAction, string> = {
   mark_shot: 'Mark shot',
@@ -43,27 +48,6 @@ const ACTION_LABELS: Record<VideoAction, string> = {
   mark_sent_to_client: 'Mark sent to client',
   request_client_changes: 'Request client changes',
   mark_client_approved: 'Mark client approved',
-}
-
-function statusTone(status: VideoProductionStatus): 'teal' | 'amber' | 'neutral' {
-  if (status === 'client_approved' || status === 'ready_for_client') return 'teal'
-  if (status === 'internal_changes' || status === 'client_changes') return 'amber'
-  if (status === 'not_shot') return 'neutral'
-  return 'amber'
-}
-
-function copyToClipboard(text: string) {
-  if (typeof navigator !== 'undefined' && navigator.clipboard) void navigator.clipboard.writeText(text)
-}
-
-function deliverableLabelText(label: DeliverableLabel | undefined): string | null {
-  if (!label) return null
-  return `${label.code} ${label.instance_number} · ${label.title}`
-}
-
-function clientName(clients: ClientOption[], id: string | null): string {
-  if (!id) return 'No client'
-  return clients.find(client => client.id === id)?.name ?? 'Unknown client'
 }
 
 // ── Edit form ─────────────────────────────────────────────────────────────────
@@ -231,103 +215,38 @@ function VideoEditForm({
   )
 }
 
-// ── Readable brief + actions ──────────────────────────────────────────────────
+// ── Production actions (footer of the shared brief) ───────────────────────────
 
-function LinkRow({ label, url }: { label: string; url: string | null }) {
-  return (
-    <div className="flex items-center justify-between gap-3 text-sm">
-      <span className="text-white/40">{label}</span>
-      {url ? <a href={url} target="_blank" rel="noopener noreferrer" className="truncate text-brand-teal hover:text-white">Open</a> : <span className="text-white/30">Not set</span>}
-    </div>
-  )
-}
-
-function Section({ label, value }: { label: string; value: string | null }) {
-  if (!value) return null
-  return (
-    <div>
-      <p className={LABEL_CLS}>{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-white/80">{value}</p>
-    </div>
-  )
-}
-
-function VideoBrief({
-  idea, clients, deliverableLabel, busy, actionError, onEdit, onAction,
+// The guarded production-status transitions, rendered under the shared
+// GuidelineBrief. This is the only pipeline-specific brief content; the brief
+// itself (identity + full brief sections + links) is shared.
+function ProductionActions({
+  idea, busy, actionError, onAction,
 }: {
   idea: ContentGuideIdea
-  clients: ClientOption[]
-  deliverableLabel: string | null
   busy: boolean
   actionError: string | null
-  onEdit: () => void
   onAction: (action: VideoAction) => void
 }) {
-  const [copied, setCopied] = useState(false)
   const actions = availableVideoActions(idea.production_status)
   return (
-    <div className="space-y-5">
-      <div className="rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.12),transparent_45%)] p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className={LABEL_CLS}>Canonical name</p>
-            <p className="mt-1 break-all font-mono text-sm font-black text-white">{idea.canonical_name ?? '—'}</p>
-          </div>
-          {idea.canonical_name && (
-            <ActionButton size="sm" variant="secondary" onClick={() => { copyToClipboard(idea.canonical_name as string); setCopied(true); window.setTimeout(() => setCopied(false), 1500) }}>{copied ? 'Copied' : 'Copy folder name'}</ActionButton>
-          )}
+    <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+      <h3 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Production actions</h3>
+      {idea.production_status === 'client_approved' && (
+        <p className="rounded-lg border border-emerald-300/20 bg-emerald-300/[0.06] px-3 py-2 text-xs text-emerald-100">Client approved. The linked Client Schedule item now owns Scheduled / Posted — this pipeline does not change it.</p>
+      )}
+      {actionError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{actionError}</p>}
+      {actions.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {actions.map(action => (
+            <ActionButton key={action} size="sm" variant={action.startsWith('request') ? 'secondary' : 'primary'} loading={busy} disabled={busy} onClick={() => onAction(action)}>
+              {ACTION_LABELS[action]}
+            </ActionButton>
+          ))}
         </div>
-        <h2 className="mt-3 break-words text-xl font-black text-white">{idea.title}</h2>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Pill>{clientName(clients, idea.client_id)}</Pill>
-          {idea.month && <Pill>{idea.month.slice(0, 7)}</Pill>}
-          {deliverableLabel && <Pill tone="teal">{deliverableLabel}</Pill>}
-          <Pill tone={statusTone(idea.production_status)}>{VIDEO_STATUS_LABELS[idea.production_status]}</Pill>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Production brief</h3>
-        <ActionButton size="sm" variant="secondary" onClick={onEdit}>Edit video</ActionButton>
-      </div>
-      <div className="space-y-4">
-        <Section label="Objective" value={idea.objective} />
-        <Section label="Hook / opening" value={idea.hook} />
-        <Section label="Script / dialogue" value={idea.script} />
-        <Section label="Shot-by-shot breakdown" value={idea.shot_breakdown} />
-        <Section label="On-screen text / CTA" value={idea.cta} />
-        <Section label="People, products & props" value={idea.requirements} />
-        <Section label="Visual / filming notes" value={idea.visual_notes} />
-        <Section label="Internal notes" value={idea.notes} />
-      </div>
-
-      <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-        <h3 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Production</h3>
-        <div className="grid gap-2 text-sm text-white/70 sm:grid-cols-2">
-          <p><span className="text-white/40">Editor: </span>{idea.editor_name ?? 'Unassigned'}</p>
-          <p><span className="text-white/40">Status: </span>{VIDEO_STATUS_LABELS[idea.production_status]}</p>
-        </div>
-        {idea.production_note && <p className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/70">{idea.production_note}</p>}
-        <div className="grid gap-2 sm:grid-cols-2">
-          <LinkRow label="Footage folder" url={idea.onedrive_footage_url} />
-          <LinkRow label="Internal review" url={idea.onedrive_internal_review_url} />
-          <LinkRow label="Client approval" url={idea.onedrive_client_approval_url} />
-          <LinkRow label="Final export" url={idea.onedrive_final_url} />
-        </div>
-        {idea.production_status === 'client_approved' && (
-          <p className="rounded-lg border border-emerald-300/20 bg-emerald-300/[0.06] px-3 py-2 text-xs text-emerald-100">Client approved. The linked Client Schedule item now owns Scheduled / Posted — this pipeline does not change it.</p>
-        )}
-        {actionError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{actionError}</p>}
-        {actions.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
-            {actions.map(action => (
-              <ActionButton key={action} size="sm" variant={action.startsWith('request') ? 'secondary' : 'primary'} loading={busy} disabled={busy} onClick={() => onAction(action)}>
-                {ACTION_LABELS[action]}
-              </ActionButton>
-            ))}
-          </div>
-        )}
-      </div>
+      ) : (
+        <p className="text-xs text-white/40">No further production actions from this status.</p>
+      )}
     </div>
   )
 }
@@ -495,14 +414,12 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
                 onSave={saveVideo}
               />
             ) : (
-              <VideoBrief
+              <GuidelineBrief
                 idea={selected}
                 clients={clients}
                 deliverableLabel={deliverableLabelText(selectedDeliverable)}
-                busy={busy}
-                actionError={actionError}
                 onEdit={() => { setEditing(true); setActionError(null) }}
-                onAction={runAction}
+                footer={<ProductionActions idea={selected} busy={busy} actionError={actionError} onAction={runAction} />}
               />
             )}
           </section>
