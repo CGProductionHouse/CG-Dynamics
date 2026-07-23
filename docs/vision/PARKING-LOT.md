@@ -1,6 +1,6 @@
 # CG Dynamics Parking Lot
 
-Last updated: 2026-07-01
+Last updated: 2026-07-23
 Purpose: Capture valuable ideas without derailing the current milestone.
 
 ## How to use this file
@@ -25,6 +25,30 @@ Each item should include:
 - Completed.
 
 ## Parking lot items
+
+### 2026-07-23 - Forward-looking report calendar suggestions
+
+Division: Client Intelligence, AI Workforce
+Status: Ready for milestone planning
+
+Idea:
+Change report calendar suggestions so they plan the next campaign period instead of repeating opportunities from the month being reported.
+
+Required behaviour:
+
+- The report month must drive the planning window, not today's date.
+- Report month + 1 is the primary action month.
+- Report month + 2 may be included for early planning opportunities.
+- Example: a June 2026 report should recommend July 2026 opportunities first and may include selected August 2026 opportunities.
+- Do not present dates from the reported month as upcoming recommendations.
+- Deduplicate overlapping opportunities such as Mandela Month and Nelson Mandela Day unless they have clearly different campaign angles.
+- Keep the suggestions useful for strategy and production planning rather than filling the report with generic calendar events.
+
+Why it matters:
+A performance report should turn past results into the next practical content and campaign plan. Suggestions from the already completed report month are stale and cannot guide production effectively.
+
+Revisit:
+Immediately after the Meta reporting-truth and three-client parity milestone is complete.
 
 ### 2026-07-01 - AI generated poster workflow
 
