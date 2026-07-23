@@ -14,6 +14,11 @@ import {
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, EmptyReportState } from './ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
+import {
+  loadGoogleAdsDashboard,
+  type GoogleAdsDashboardData,
+  type GoogleAdsDashboardState,
+} from '../../lib/googleAdsDashboard'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -36,6 +41,10 @@ export default function Dashboard() {
   const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [previousReport, setPreviousReport] = useState<ReportWithPosts | null>(null)
   const [previousManualMetrics, setPreviousManualMetrics] = useState<ManualPlatformMetric[]>([])
+  const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
+  const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
+  const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
+  const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -75,18 +84,26 @@ export default function Dashboard() {
   }, [profile?.client_id])
 
   useEffect(() => {
+    let active = true
+
     if (!selectedReportId) {
-      setReport(null)
-      setPreviousReport(null)
-      setPreviousManualMetrics([])
-      return
+      return () => { active = false }
     }
 
     async function loadReport() {
+      setReport(null)
+      setManualMetrics([])
+      setPreviousReport(null)
+      setPreviousManualMetrics([])
+      setGoogleAds(null)
+      setPreviousGoogleAds(null)
+      setGoogleAdsState('no-activity')
+      setGoogleAdsError(null)
       setReportLoading(true)
       setError(null)
       try {
         const { data, error } = await getReportWithPosts(selectedReportId!)
+        if (!active) return
         if (error) {
           setError(error.message)
           return
@@ -95,33 +112,37 @@ export default function Dashboard() {
         if (data) {
           const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
-          const { data: metrics } = await listManualMetricsForClientMonth(data.client_id, currentMonth)
-          setManualMetrics(metrics)
-          if (previousMonth) {
-            const previous = reports.find(item => getReportMonthFromPeriod(item) === previousMonth)
-            const [previousReportResult, previousMetricsResult] = await Promise.all([
-              previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
-              listManualMetricsForClientMonth(data.client_id, previousMonth),
-            ])
-            setPreviousReport(previousReportResult.data)
-            setPreviousManualMetrics(previousMetricsResult.data)
-          } else {
-            setPreviousReport(null)
-            setPreviousManualMetrics([])
-          }
-        } else {
-          setManualMetrics([])
-          setPreviousReport(null)
-          setPreviousManualMetrics([])
+          const previous = previousMonth
+            ? reports.find(item => getReportMonthFromPeriod(item) === previousMonth)
+            : null
+          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult] = await Promise.all([
+            listManualMetricsForClientMonth(data.client_id, currentMonth),
+            previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
+            previousMonth ? listManualMetricsForClientMonth(data.client_id, previousMonth) : Promise.resolve({ data: [], error: null }),
+            loadGoogleAdsDashboard(data.id, currentMonth),
+            previousMonth
+              ? loadGoogleAdsDashboard(data.id, previousMonth)
+              : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
+          ])
+          if (!active) return
+          setManualMetrics(metricsResult.data)
+          setPreviousReport(previousReportResult.data)
+          setPreviousManualMetrics(previousMetricsResult.data)
+          setGoogleAds(googleAdsResult.data)
+          setPreviousGoogleAds(previousGoogleAdsResult.data)
+          setGoogleAdsState(googleAdsResult.state)
+          setGoogleAdsError(googleAdsResult.error ?? previousGoogleAdsResult.error)
         }
       } catch (error) {
+        if (!active) return
         setError(errorMessage(error, 'Could not load this report.'))
       } finally {
-        setReportLoading(false)
+        if (active) setReportLoading(false)
       }
     }
 
     void loadReport()
+    return () => { active = false }
   }, [reports, selectedReportId])
 
   const action = (
@@ -204,6 +225,10 @@ export default function Dashboard() {
           manualMetrics={manualMetrics}
           previousReport={previousReport}
           previousManualMetrics={previousManualMetrics}
+          googleAds={googleAds}
+          previousGoogleAds={previousGoogleAds}
+          googleAdsState={googleAdsState}
+          googleAdsError={googleAdsError}
         />
       ) : (
         <EmptyReportState

@@ -12,6 +12,7 @@
     "test:skill-card": "node --test tests/skillCardActivation.test.mjs tests/initialSkillCardBatch.mjs",
     "test:content-workflow": "node --test tests/contentWorkflow.test.mjs",
     "test:google-ads": "node --test tests/googleAds.test.mjs",
+    "test:google-ads-dashboard": "node --test tests/googleAdsDashboard.test.mjs",
     "preview": "vite preview",
     "test:video-pipeline": "node --test tests/videoPipeline.test.mjs"
   },

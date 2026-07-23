@@ -79,9 +79,9 @@ export default function IntegrationsPage() {
     ? 'Google Ads account setup and sync controls are available to managers and admins.'
     : googleConnected
     ? googleLinkedClients && googleLinkedClients > 0
-      ? `${googleLinkedClients} client${googleLinkedClients === 1 ? '' : 's'} linked for Google Ads reporting.`
-      : 'Google Ads is connected. Link a client account to begin reporting.'
-    : 'Connect and map Google Ads accounts for internal campaign reporting.'
+      ? `${googleLinkedClients} client${googleLinkedClients === 1 ? '' : 's'} linked for Google Ads data sync.`
+      : 'Google Ads is connected. Link a client account to begin monthly sync.'
+    : 'Connect and map Google Ads accounts for monthly data sync.'
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">

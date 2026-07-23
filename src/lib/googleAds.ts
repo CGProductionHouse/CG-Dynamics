@@ -192,16 +192,27 @@ function parseMode(value: unknown): GoogleAdsAccountMode | null {
   return value === 'shared' || value === 'dedicated' ? value : null
 }
 
+export function formatGoogleAdsCustomerId(value: string): string {
+  const digits = value.replace(/\D/g, '')
+  return digits.length === 10
+    ? `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
+    : value
+}
+
 function parseAccount(value: unknown): GoogleAdsAccount | null {
   const row = object(value)
   if (!row) return null
   const id = string(row.googleAdsAccountId ?? row.google_ads_account_id ?? row.id ?? row.accountId ?? row.account_id)
   const customerId = string(row.customerId ?? row.customer_id ?? row.customer)
   if (!id || !customerId) return null
+  const providerName = string(row.name ?? row.descriptiveName ?? row.descriptive_name)
+  const name = !providerName || providerName.toLowerCase() === 'unnamed account'
+    ? `Shared Google Ads account · ${formatGoogleAdsCustomerId(customerId)}`
+    : providerName
   return {
     id,
     customerId,
-    name: string(row.name ?? row.descriptiveName ?? row.descriptive_name, 'Unnamed account'),
+    name,
     currencyCode: currency(row.currencyCode ?? row.currency_code ?? row.currency),
     timeZone: nullableString(row.timeZone ?? row.time_zone ?? row.timezone),
     mode: parseMode(row.accountMode ?? row.account_mode ?? row.mode),

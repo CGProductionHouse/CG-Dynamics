@@ -1,22 +1,19 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useId, useState, type ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Pill } from '../../components/ui/Badges'
 import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
 import { EmptyState, LoadingState } from '../../components/ui/States'
 import { listClients, type Client } from '../../lib/db/clients'
 import {
-  calculateGoogleAdsReport,
   deactivateGoogleAdsCampaignLink,
   deactivateGoogleAdsDedicatedLink,
   deriveGoogleAdsCampaignReview,
-  formatGoogleAdsCurrencyValue,
-  formatGoogleAdsMoney,
+  formatGoogleAdsCustomerId,
   getGoogleAdsWorkspace,
   isGoogleAdsAccountReady,
   listGoogleAdsCampaigns,
   monthDateRange,
-  queryGoogleAdsReport,
   saveGoogleAdsCampaignMappings,
   saveGoogleAdsDedicatedLink,
   setGoogleAdsAccountMode,
@@ -47,6 +44,25 @@ function formatDateTime(value: string | null): string {
   return Number.isNaN(date.getTime()) ? 'Unavailable' : date.toLocaleString()
 }
 
+function formatMonth(value: string): string {
+  const [year, month] = value.split('-').map(Number)
+  return new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, 1)))
+}
+
+function readyAccountSelection(readyIds: Set<string>, current: Set<string>): Set<string> {
+  const valid = new Set([...current].filter(accountId => readyIds.has(accountId)))
+  if (valid.size === 0 && readyIds.size === 1) return new Set(readyIds)
+  return valid
+}
+
+function relevantClients(allClients: Client[], googleWorkspace: GoogleAdsWorkspace): Client[] {
+  const mappedClientIds = new Set([
+    ...googleWorkspace.accountLinks.filter(link => link.active).map(link => link.clientId),
+    ...googleWorkspace.campaignLinks.filter(link => link.active).map(link => link.clientId),
+  ])
+  return allClients.filter(client => client.active || mappedClientIds.has(client.id))
+}
+
 export default function GoogleAdsIntegrationPage() {
   const navigate = useNavigate()
   const [clients, setClients] = useState<Client[]>([])
@@ -57,23 +73,16 @@ export default function GoogleAdsIntegrationPage() {
   const [notice, setNotice] = useState<string | null>(null)
   const [syncMonth, setSyncMonth] = useState(currentMonth())
   const [syncAccountIds, setSyncAccountIds] = useState<Set<string>>(new Set())
-  const [syncResult, setSyncResult] = useState<GoogleAdsSyncResult | null>(null)
-  const [reportClientId, setReportClientId] = useState('')
-  const [reportMonth, setReportMonth] = useState(currentMonth())
-  const [reportState, setReportState] = useState<'idle' | 'loading' | 'empty' | 'data' | 'error'>('idle')
-  const [reportError, setReportError] = useState<string | null>(null)
-  const [reportRows, setReportRows] = useState<Awaited<ReturnType<typeof queryGoogleAdsReport>>>([])
-  const reportRequest = useRef(0)
+  const [syncResult, setSyncResult] = useState<{ data: GoogleAdsSyncResult; month: string } | null>(null)
 
   async function load(silent = false) {
     try {
-      const [clientResult, googleWorkspace] = await Promise.all([listClients('active'), getGoogleAdsWorkspace()])
+      const [clientResult, googleWorkspace] = await Promise.all([listClients('all'), getGoogleAdsWorkspace()])
       if (clientResult.error) throw new Error(clientResult.error.message)
-      setClients(clientResult.data)
+      setClients(relevantClients(clientResult.data, googleWorkspace))
       setWorkspace(googleWorkspace)
       const readyIds = new Set(googleWorkspace.accounts.filter(account => isGoogleAdsAccountReady(account, googleWorkspace.accountLinks, googleWorkspace.campaignLinks)).map(account => account.id))
-      setSyncAccountIds(current => new Set([...current].filter(accountId => readyIds.has(accountId))))
-      setReportClientId(current => current || clientResult.data[0]?.id || '')
+      setSyncAccountIds(current => readyAccountSelection(readyIds, current))
     } catch (loadError) {
       setError(messageFrom(loadError, 'Could not load Google Ads setup.'))
     } finally {
@@ -83,14 +92,14 @@ export default function GoogleAdsIntegrationPage() {
 
   useEffect(() => {
     let active = true
-    Promise.all([listClients('active'), getGoogleAdsWorkspace()])
+    Promise.all([listClients('all'), getGoogleAdsWorkspace()])
       .then(([clientResult, googleWorkspace]) => {
         if (!active) return
         if (clientResult.error) throw new Error(clientResult.error.message)
-        setClients(clientResult.data)
+        setClients(relevantClients(clientResult.data, googleWorkspace))
         setWorkspace(googleWorkspace)
-        setSyncAccountIds(new Set(googleWorkspace.accounts.filter(account => isGoogleAdsAccountReady(account, googleWorkspace.accountLinks, googleWorkspace.campaignLinks)).map(account => account.id)))
-        setReportClientId(clientResult.data[0]?.id || '')
+        const readyIds = new Set(googleWorkspace.accounts.filter(account => isGoogleAdsAccountReady(account, googleWorkspace.accountLinks, googleWorkspace.campaignLinks)).map(account => account.id))
+        setSyncAccountIds(readyAccountSelection(readyIds, new Set()))
       })
       .catch(loadError => {
         if (active) setError(messageFrom(loadError, 'Could not load Google Ads setup.'))
@@ -144,32 +153,14 @@ export default function GoogleAdsIntegrationPage() {
         startDate: range.startDate,
         endDate: range.endDate > today ? today : range.endDate,
       })
-      setSyncResult(result)
+      setSyncResult({ data: result, month: syncMonth })
       await load(true)
       return result.ok ? 'Google Ads sync completed.' : 'Sync completed with errors.'
     })
   }
 
-  async function loadReport() {
-    const requestId = ++reportRequest.current
-    setReportState('loading')
-    setReportError(null)
-    setReportRows([])
-    try {
-      const rows = await queryGoogleAdsReport(reportClientId, reportMonth)
-      if (requestId !== reportRequest.current) return
-      setReportRows(rows)
-      setReportState(rows.length ? 'data' : 'empty')
-    } catch (queryError) {
-      if (requestId !== reportRequest.current) return
-      setReportError(messageFrom(queryError, 'Could not load Google Ads reporting.'))
-      setReportState('error')
-    }
-  }
-
   if (loading) return <LoadingState message="Loading Google Ads integration..." className="min-h-[55vh]" />
 
-  const report = calculateGoogleAdsReport(reportRows)
   const clientNames = new Map(clients.map(client => [client.id, client.name]))
   const readyAccounts = workspace?.accounts.filter(account => isGoogleAdsAccountReady(account, workspace.accountLinks, workspace.campaignLinks)) ?? []
 
@@ -178,7 +169,7 @@ export default function GoogleAdsIntegrationPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Integrations</p>
-          <h1 className="mt-2 text-2xl font-semibold text-white">Google Ads accounts</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-white">Google Ads data sync</h1>
           <p className="mt-1 max-w-3xl text-sm text-brand-primary">Use dedicated mode for one client account, or shared mode to map individual campaigns. Suggestions never save automatically.</p>
         </div>
         <ActionButton variant="ghost" onClick={() => navigate('/admin/integrations')}>Back to integrations</ActionButton>
@@ -227,26 +218,15 @@ export default function GoogleAdsIntegrationPage() {
             </fieldset>
             <ActionButton loading={busy === 'sync'} disabled={syncAccountIds.size === 0} onClick={runSync}>Run sync</ActionButton>
           </div>
-          {syncResult && <div className="mt-5 space-y-2" aria-live="polite">{syncResult.results.map((item, index) => {
-            const account = workspace?.accounts.find(candidate => candidate.id === item.accountId)
-            return <div key={`${item.accountId ?? 'sync'}:${index}`} className="grid gap-1 rounded-lg border border-white/8 bg-black/20 px-4 py-3 text-sm sm:grid-cols-[1fr_auto_auto] sm:gap-5"><span className="font-medium text-white">{account?.name ?? 'Google Ads account'}</span><span className="text-brand-primary">{item.mappedCampaigns} mapped / {item.unmappedCampaigns} unmapped</span><span className={item.ok ? 'text-brand-teal' : 'text-red-300'}>{item.message} ({item.rowsWritten} rows)</span></div>
-          })}</div>}
-        </PremiumCard>
-
-        <PremiumCard>
-          <PremiumCardHeader eyebrow="Internal reporting" title="Monthly Google Ads performance" subtitle="Source: Google Ads. Only client-resolved rows returned by the reporting RPC are shown; unmapped campaigns are excluded server-side." />
-          <div className="grid gap-4 sm:grid-cols-[1fr_220px_auto] sm:items-end">
-            <Field label="Client"><ClientSearch clients={clients} value={reportClientId} onChange={value => { reportRequest.current += 1; setReportClientId(value); setReportState('idle') }} /></Field>
-            <Field label="Month"><input className={INPUT_CLASS} type="month" max={currentMonth()} value={reportMonth} onChange={event => { reportRequest.current += 1; setReportMonth(event.target.value); setReportState('idle') }} /></Field>
-            <ActionButton loading={reportState === 'loading'} disabled={!reportClientId || !reportMonth} onClick={() => void loadReport()}>Load report</ActionButton>
-          </div>
-          <div className="mt-6">
-            {reportState === 'idle' && <EmptyState title="Select a client and month" message="Load resolved Google Ads campaign metrics." />}
-            {reportState === 'loading' && <LoadingState message="Loading Google Ads metrics..." />}
-            {reportState === 'empty' && <EmptyState title="No resolved data" message="No mapped Google Ads campaign metrics were returned for this client and month." />}
-            {reportState === 'error' && <EmptyState title="Reporting could not load" message={reportError ?? 'The report request failed.'} />}
-            {reportState === 'data' && <Report report={report} />}
-          </div>
+          {syncResult && <div className="mt-5 space-y-2" aria-live="polite">{syncResult.data.results.map((item, index) => {
+             const account = workspace?.accounts.find(candidate => candidate.id === item.accountId)
+             const affectedClientIds = new Set([
+               ...(workspace?.accountLinks.filter(link => link.active && link.accountId === item.accountId).map(link => link.clientId) ?? []),
+               ...(workspace?.campaignLinks.filter(link => link.active && link.accountId === item.accountId).map(link => link.clientId) ?? []),
+             ])
+             const affectedClients = clients.filter(client => affectedClientIds.has(client.id))
+              return <div key={`${item.accountId ?? 'sync'}:${index}`} className="rounded-lg border border-white/8 bg-black/20 px-4 py-3 text-sm"><div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"><span className="font-medium text-white">{account?.name ?? 'Google Ads account'}</span><div className="flex flex-wrap gap-x-5 gap-y-1 text-brand-primary"><span>{affectedClientIds.size} mapped client{affectedClientIds.size === 1 ? '' : 's'}</span><span>{item.mappedCampaigns} mapped / {item.unmappedCampaigns} unmapped campaigns</span><span>{item.rowsWritten} rows imported</span></div><span className={item.ok ? 'text-brand-teal' : 'text-red-300'}>{item.message}</span></div>{affectedClients.length > 0 && <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/8 pt-3"><span className="text-xs uppercase tracking-wide text-brand-primary">{formatMonth(syncResult.month)} dashboards</span>{affectedClients.map(client => <Link key={client.id} to={`/admin/client-dashboard?client=${encodeURIComponent(client.id)}&month=${encodeURIComponent(syncResult.month)}`} className="rounded-md border border-brand-accent/25 bg-brand-accent/10 px-2.5 py-1.5 text-xs font-semibold text-brand-accent hover:bg-brand-accent/20">{client.name}</Link>)}</div>}</div>
+           })}</div>}
         </PremiumCard>
       </div>
     </div>
@@ -330,7 +310,7 @@ function AccountCard({ account, workspace, clients, busy, clientNames, onModeCha
   return (
     <section className="rounded-xl border border-white/10 bg-black/20 p-4 sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-white">{account.name}</h3><Pill tone="neutral">{account.currencyCode}</Pill>{account.mode && <Pill tone={account.mode === 'shared' ? 'accent' : 'teal'}>{account.mode}</Pill>}</div><p className="mt-1 text-xs text-brand-primary">{account.customerId} · {account.timeZone ?? 'Timezone unavailable'} · Last sync {formatDateTime(lastRun?.finishedAt ?? null)}</p></div>
+        <div><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-white">{account.name}</h3><Pill tone="neutral">{account.currencyCode}</Pill>{account.mode && <Pill tone={account.mode === 'shared' ? 'accent' : 'teal'}>{account.mode}</Pill>}</div><p className="mt-1 text-xs text-brand-primary">{formatGoogleAdsCustomerId(account.customerId)} · {account.timeZone ?? 'Timezone unavailable'} · Last sync {formatDateTime(lastRun?.finishedAt ?? null)}</p></div>
         <Field label="Account mode"><select className={`${INPUT_CLASS} min-w-52`} value={account.mode ?? ''} disabled={busy === `mode:${account.id}`} onChange={event => onModeChange(event.target.value as GoogleAdsAccountMode)}><option value="" disabled>Select mode</option><option value="dedicated">Dedicated client</option><option value="shared">Shared campaigns</option></select></Field>
       </div>
 
@@ -363,8 +343,13 @@ function ClientSearch({ clients, value, onChange }: { clients: Client[]; value: 
 function ClientSearchInput({ clients, value, onChange }: { clients: Client[]; value: string; onChange: (clientId: string) => void }) {
   const selected = clients.find(client => client.id === value)
   const [query, setQuery] = useState(selected?.name ?? '')
+  const [open, setOpen] = useState(false)
   const listId = useId()
-  return <><input className={INPUT_CLASS} list={listId} placeholder="Search active clients" value={query} onChange={event => { const next = event.target.value; setQuery(next); const match = clients.find(client => client.name.toLowerCase() === next.trim().toLowerCase()); if (match) onChange(match.id); else if (!next.trim()) onChange('') }} /><datalist id={listId}>{clients.map(client => <option key={client.id} value={client.name} />)}</datalist></>
+  const normalizedQuery = query.trim().toLowerCase()
+  const searchTerm = normalizedQuery === selected?.name.toLowerCase() ? '' : normalizedQuery
+  const options = clients.filter(client => !searchTerm || client.name.toLowerCase().includes(searchTerm))
+
+  return <div className="relative" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) { const exact = clients.find(client => client.name.toLowerCase() === query.trim().toLowerCase()); onChange(exact?.id ?? ''); setQuery(exact?.name ?? ''); setOpen(false) } }}><div className="relative"><input className={`${INPUT_CLASS} pr-16`} role="combobox" aria-autocomplete="list" aria-controls={listId} aria-expanded={open} placeholder="Search clients" value={query} onFocus={() => setOpen(true)} onChange={event => { setQuery(event.target.value); onChange(''); setOpen(true) }} />{(query || value) && <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs text-brand-primary hover:bg-white/5 hover:text-white" onClick={() => { setQuery(''); onChange(''); setOpen(true) }}>Clear</button>}</div>{open && <div id={listId} role="listbox" className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-white/10 bg-brand-surface p-1 shadow-2xl">{options.map(client => <button key={client.id} type="button" role="option" aria-selected={client.id === value} className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm hover:bg-white/5 ${client.id === value ? 'bg-brand-accent/10 text-brand-accent' : 'text-white'}`} onClick={() => { onChange(client.id); setQuery(client.name); setOpen(false) }}><span>{client.name}</span>{!client.active && <span className="ml-3 text-[11px] uppercase tracking-wide text-brand-primary">Mapped · archived</span>}</button>)}{options.length === 0 && <p className="px-3 py-2 text-sm text-brand-primary">No clients match this search.</p>}</div>}<p className="mt-1 text-xs text-brand-primary">{selected ? `Selected: ${selected.name}` : 'No client selected'}</p></div>
 }
 
 function Suggestion({ suggestion }: { suggestion: GoogleAdsNameSuggestion | undefined }) {
@@ -378,17 +363,8 @@ function CampaignStatus({ status }: { status: string }) {
   return <div><Pill tone={historical ? 'amber' : 'teal'}>{status}</Pill>{historical && <p className="mt-1 text-[11px] text-amber-300">Historical · selectable</p>}</div>
 }
 
-function Report({ report }: { report: ReturnType<typeof calculateGoogleAdsReport> }) {
-  const decimal = (value: number) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value)
-  return <>{report.hasMixedCurrencies && <Message tone="warning">Multiple currencies are present. Monetary totals are not combined.</Message>}<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Metric label="Spend" value={formatGoogleAdsMoney(report.spendMicros, report.currencyCode)} /><Metric label="Impressions" value={report.impressions.toLocaleString()} /><Metric label="Clicks" value={report.clicks.toLocaleString()} /><Metric label="CTR" value={report.ctr === null ? '-' : `${report.ctr.toFixed(2)}%`} /><Metric label="Avg CPC" value={formatGoogleAdsMoney(report.averageCpcMicros, report.currencyCode)} /><Metric label="Conversions" value={decimal(report.conversions)} /><Metric label="Conversion value" value={formatGoogleAdsCurrencyValue(report.conversionValue, report.currencyCode)} /><Metric label="Campaign count" value={report.campaignCount.toLocaleString()} /></div><div className="mt-5 overflow-x-auto rounded-lg border border-white/8"><table className="min-w-full divide-y divide-white/8 text-left text-sm"><thead className="bg-black/20 text-xs uppercase tracking-wide text-brand-primary"><tr><th className="px-4 py-3">Campaign</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Spend</th><th className="px-4 py-3 text-right">Impressions</th><th className="px-4 py-3 text-right">Clicks</th><th className="px-4 py-3 text-right">Conversions</th></tr></thead><tbody className="divide-y divide-white/8">{report.campaigns.map(campaign => <tr key={`${campaign.customerId}:${campaign.campaignId}:${campaign.currencyCode}`}><td className="px-4 py-3 font-medium text-white">{campaign.campaignName}</td><td className="px-4 py-3 text-brand-primary">{campaign.campaignStatus ?? 'Unknown'}</td><td className="px-4 py-3 text-right text-white">{formatGoogleAdsMoney(campaign.spendMicros, campaign.currencyCode)}</td><td className="px-4 py-3 text-right text-brand-primary">{campaign.impressions.toLocaleString()}</td><td className="px-4 py-3 text-right text-brand-primary">{campaign.clicks.toLocaleString()}</td><td className="px-4 py-3 text-right text-brand-primary">{decimal(campaign.conversions)}</td></tr>)}</tbody></table></div></>
-}
-
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return <label className="block"><span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-brand-primary">{label}</span>{children}</label>
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-lg border border-white/8 bg-black/20 p-4"><p className="text-xs uppercase tracking-wide text-brand-primary">{label}</p><p className="mt-2 text-xl font-semibold text-white">{value}</p></div>
 }
 
 function Message({ tone, children }: { tone: 'error' | 'success' | 'warning'; children: ReactNode }) {
