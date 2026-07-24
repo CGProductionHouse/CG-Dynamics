@@ -12,8 +12,9 @@ import {
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
-import { ClientDashboardShell, ClientReportView, EmptyReportState } from './ClientReportView'
+import { ClientReportView, EmptyReportState } from './ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
+import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import {
   loadGoogleAdsDashboard,
   type GoogleAdsDashboardData,
@@ -39,7 +40,7 @@ function monthLabel(report: Report) {
 }
 
 export default function Dashboard() {
-  const { profile, signOut } = useAuth()
+  const { profile } = useAuth()
   const [reports, setReports] = useState<Report[]>([])
   const [client, setClient] = useState<Client | null>(null)
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
@@ -169,55 +170,46 @@ export default function Dashboard() {
     return () => { active = false }
   }, [reports, selectedReportId])
 
-  const action = (
-    <button
-      onClick={signOut}
-      className="rounded-full px-3.5 py-1.5 text-sm text-report-muted transition-colors hover:bg-report-elevated hover:text-report-text"
-    >
-      Sign out
-    </button>
-  )
-
   if (!profile?.client_id) {
     return (
-      <ClientDashboardShell action={action} client={client}>
+      <ClientPortalShell client={client}>
         <EmptyReportState
           title="Your account is pending setup"
           message="Your client access has not been linked yet. Contact your account manager to get access."
         />
-      </ClientDashboardShell>
+      </ClientPortalShell>
     )
   }
 
   if (loading) {
     return (
-      <ClientDashboardShell action={action} client={client}>
+      <ClientPortalShell client={client}>
         <p className="text-sm text-report-muted">Loading your reports…</p>
-      </ClientDashboardShell>
+      </ClientPortalShell>
     )
   }
 
   if (error) {
     return (
-      <ClientDashboardShell action={action} client={client}>
+      <ClientPortalShell client={client}>
         <p className="rounded-2xl bg-report-surface px-4 py-3 text-sm text-[#d8a07a]">{error}</p>
-      </ClientDashboardShell>
+      </ClientPortalShell>
     )
   }
 
   if (months.length === 0) {
     return (
-      <ClientDashboardShell action={action} client={client}>
+      <ClientPortalShell client={client}>
         <EmptyReportState
           title="No published report yet"
           message="Your monthly reports will appear here as soon as they are published by CG Production House."
         />
-      </ClientDashboardShell>
+      </ClientPortalShell>
     )
   }
 
   return (
-    <ClientDashboardShell action={action} client={client}>
+    <ClientPortalShell client={client}>
       {months.length > 1 && (
         <div className="mb-8">
           <p className="mb-3 text-[0.7rem] uppercase tracking-[0.22em] text-report-faint">Choose a month</p>
@@ -268,6 +260,6 @@ export default function Dashboard() {
       {/* Forward-looking: this month's CG plan (client-safe; renders nothing
           until the client has visible schedule data). */}
       {profile.client_id && <ClientMonthAhead clientId={profile.client_id} />}
-    </ClientDashboardShell>
+    </ClientPortalShell>
   )
 }
