@@ -18,6 +18,7 @@ const REPORTING_TRUTH = read('../src/lib/db/reportingTruth.ts')
 const CLIENT_VIEW = read('../src/pages/client/ClientReportView.tsx')
 const CLIENT_DASHBOARD = read('../src/pages/client/Dashboard.tsx')
 const ADMIN_PREVIEW = read('../src/pages/admin/PublishedPreview.tsx')
+const META_INTEGRATION_PAGE = read('../src/pages/admin/MetaIntegrationPage.tsx')
 const META_OAUTH_START = read('../supabase/functions/meta-oauth-start/index.ts')
 const META_OAUTH_CALLBACK = read('../supabase/functions/meta-oauth-callback/index.ts')
 const META_CONNECTION_STATUS = read('../supabase/functions/meta-connection-status/index.ts')
@@ -375,6 +376,16 @@ test('Meta OAuth records actual reporting permissions and requires read_insights
   assert.match(META_CONNECTION_STATUS, /'read_insights'/)
   assert.match(META_CONNECTION_STATUS, /status: 'needs_reauth'/)
   assert.match(META_CONNECTION_STATUS, /missingScopes/)
+})
+
+test('Meta connection health uses live permissions, schema and verified insight state', () => {
+  assert.match(META_CONNECTION_STATUS, /meta_oauth_states/)
+  assert.match(META_CONNECTION_STATUS, /schemaReady/)
+  assert.match(META_CONNECTION_STATUS, /server_only_plaintext/)
+  assert.match(META_CONNECTION_STATUS, /lastVerifiedInsight/)
+  assert.match(META_INTEGRATION_PAGE, /OAuth permissions/)
+  assert.match(META_INTEGRATION_PAGE, /Last verified insight/)
+  assert.doesNotMatch(META_INTEGRATION_PAGE, /Confirm phase-4b SQL is applied/)
 })
 
 test('rendered report includes methodology and curation controls without CG-generated wording', () => {

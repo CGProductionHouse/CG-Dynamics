@@ -53,6 +53,20 @@ Deno.serve(async (req) => {
     .select('*', { head: true, count: 'exact' })
     .eq('is_active', true)
 
+  const [{ error: oauthStateSchemaError }, { error: tokenSchemaError }] = await Promise.all([
+    sb.from('meta_oauth_states').select('id', { head: true }).limit(1),
+    sb.from('meta_connection_tokens').select('id', { head: true }).limit(1),
+  ])
+  const schemaReady = !oauthStateSchemaError && !tokenSchemaError
+
+  const { data: verifiedRuns } = await sb
+    .from('platform_sync_runs')
+    .select('platform, period_month, health_state, finished_at')
+    .in('health_state', ['verified', 'verified_partial'])
+    .order('finished_at', { ascending: false, nullsFirst: false })
+    .limit(1)
+  const lastVerifiedInsight = verifiedRuns?.[0] ?? null
+
   // Read the latest connection ordered by last_connected_at desc nulls last.
   const { data: connections } = await sb
     .from('meta_connections')
@@ -92,6 +106,7 @@ Deno.serve(async (req) => {
       status: latest.status,
       message: latest.last_error || messages[latest.status] || 'Meta is not connected.',
       missingScopes,
+      schemaReady,
       linkedAssetsCount: linkedAssetsCount ?? 0,
     })
   }
@@ -103,6 +118,7 @@ Deno.serve(async (req) => {
       status: 'needs_reauth',
       message: `Meta needs to be reconnected with: ${missingScopes.join(', ')}.`,
       missingScopes,
+      schemaReady,
       linkedAssetsCount: linkedAssetsCount ?? 0,
     })
   }
@@ -130,11 +146,23 @@ Deno.serve(async (req) => {
     status: 'connected',
     message: 'Meta is connected.',
     missingScopes: [],
+    schemaReady,
+    tokenSecurity: {
+      encryptedAtRest: false,
+      state: 'server_only_plaintext',
+    },
     connection: {
       id: latest.id,
       metaBusinessId: latest.meta_business_id,
       metaBusinessName: latest.meta_business_name,
       lastConnectedAt: latest.last_connected_at,
+      grantedScopes,
+      lastVerifiedInsight: lastVerifiedInsight ? {
+        platform: lastVerifiedInsight.platform,
+        periodMonth: lastVerifiedInsight.period_month,
+        healthState: lastVerifiedInsight.health_state,
+        finishedAt: lastVerifiedInsight.finished_at,
+      } : null,
     },
     linkedAssetsCount: linkedAssetsCount ?? 0,
   })
