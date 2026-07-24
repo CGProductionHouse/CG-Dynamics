@@ -7,7 +7,7 @@ import type {
 } from './microsoftImport'
 import { summarizeMicrosoftReconciliation } from './microsoftImport'
 import type { MicrosoftSnapshot } from './microsoftSnapshot'
-import type { MicrosoftPreviewMappingContext } from './microsoftImportPreview'
+import type { MicrosoftPreviewMappingContext, UnlinkedSlotRow } from './microsoftImportPreview'
 import { deliverableSlotKey } from './microsoftImportPreview'
 import {
   buildMicrosoftApplyRpcArgs,
@@ -75,6 +75,9 @@ export interface MicrosoftExistingResult {
   targets: MicrosoftExistingTarget[]
   /** Occupied monthly_deliverables (package|template|instance|month) slots. */
   deliverableSlotKeys: Set<string>
+  /** Slot key → occupying rows that have NO Microsoft task id (legacy rows
+   *  eligible for deterministic link_existing). */
+  unlinkedSlotRows: Map<string, UnlinkedSlotRow[]>
   migrationNeeded: boolean
   error: string | null
 }
@@ -98,19 +101,19 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
       .not('microsoft_event_id', 'is', null),
     supabase
       .from('monthly_deliverables')
-      .select('package_id, template_id, instance_number, month'),
+      .select('id, updated_at, package_id, template_id, instance_number, month, microsoft_task_id'),
   ])
 
   const microsoftError = [plannerRows.error, deliverableRows.error, calendarRows.error].find(Boolean)
   if (microsoftError) {
     if (isMissingMicrosoftColumnError(microsoftError)) {
       const deliverableSlotKeys = collectSlotKeys(slotRows.data ?? [])
-      return { targets: [], deliverableSlotKeys, migrationNeeded: true, error: slotRows.error?.message ?? null }
+      return { targets: [], deliverableSlotKeys, unlinkedSlotRows: collectUnlinkedSlotRows(slotRows.data ?? []), migrationNeeded: true, error: slotRows.error?.message ?? null }
     }
-    return { targets: [], deliverableSlotKeys: new Set(), migrationNeeded: false, error: microsoftError.message }
+    return { targets: [], deliverableSlotKeys: new Set(), unlinkedSlotRows: new Map(), migrationNeeded: false, error: microsoftError.message }
   }
   if (slotRows.error) {
-    return { targets: [], deliverableSlotKeys: new Set(), migrationNeeded: false, error: slotRows.error.message }
+    return { targets: [], deliverableSlotKeys: new Set(), unlinkedSlotRows: new Map(), migrationNeeded: false, error: slotRows.error.message }
   }
 
   const targets: MicrosoftExistingTarget[] = []
@@ -204,7 +207,7 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
     })
   }
 
-  return { targets, deliverableSlotKeys: collectSlotKeys(slotRows.data ?? []), migrationNeeded: false, error: null }
+  return { targets, deliverableSlotKeys: collectSlotKeys(slotRows.data ?? []), unlinkedSlotRows: collectUnlinkedSlotRows(slotRows.data ?? []), migrationNeeded: false, error: null }
 }
 
 function collectSlotKeys(rows: Array<Record<string, unknown>>): Set<string> {
@@ -219,6 +222,25 @@ function collectSlotKeys(rows: Array<Record<string, unknown>>): Set<string> {
     if (key) keys.add(key)
   }
   return keys
+}
+
+// Slot key → rows on that slot that carry NO Microsoft task id (legacy rows the
+// reconciliation may deterministically link instead of duplicating).
+function collectUnlinkedSlotRows(rows: Array<Record<string, unknown>>): Map<string, UnlinkedSlotRow[]> {
+  const map = new Map<string, UnlinkedSlotRow[]>()
+  for (const row of rows) {
+    if (row.microsoft_task_id) continue // already linked to a Microsoft task
+    const key = deliverableSlotKey(
+      row.package_id as string | null,
+      row.template_id as string | null,
+      row.instance_number as number | null,
+      row.month as string | null,
+    )
+    const id = row.id as string | null
+    if (!key || !id) continue
+    map.set(key, [...(map.get(key) ?? []), { id, updatedAt: (row.updated_at as string | null) ?? '' }])
+  }
+  return map
 }
 
 export type MicrosoftTransitionStatus = 'active' | 'paused' | 'complete'

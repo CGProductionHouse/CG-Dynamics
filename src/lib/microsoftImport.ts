@@ -3,8 +3,8 @@ export type MicrosoftImportDestination = 'cg_calendar' | 'planner' | 'client_sch
 export type MicrosoftPreviewStatus = 'new' | 'existing' | 'changed' | 'conflict' | 'skipped'
 export type MicrosoftSkipCode = 'historical_completed' | 'completed_operational_not_imported' | 'private_event'
 export type MicrosoftReconciliationAction =
-  | 'create' | 'update' | 'unchanged' | 'complete' | 'reopen' | 'move'
-  | 'cancel' | 'archive' | 'conflict' | 'skipped' | 'failed'
+  | 'create' | 'link_existing' | 'update' | 'unchanged' | 'complete' | 'reopen' | 'move'
+  | 'cancel' | 'archive' | 'package_template_create' | 'conflict' | 'skipped' | 'failed'
 
 export type MicrosoftConflictCode =
   | 'unresolved_client'
@@ -219,11 +219,15 @@ export interface MicrosoftImportPreviewItem {
   sourceComplete?: boolean
   requiresRemovalApproval?: boolean
   resolvedAssignees?: MicrosoftAssigneeResolution[]
+  /** For package_template_create: the deterministic template a supported source
+   *  task proves the active package is missing. Applied before its deliverable. */
+  proposedTemplate?: { code: string; deliverable_type: 'dp' | 'photo' | 'video' | 'reel'; instance_number: number } | null
 }
 
 export interface MicrosoftReconciliationSummary {
   total: number
   create: number
+  link_existing: number
   update: number
   unchanged: number
   complete: number
@@ -231,6 +235,7 @@ export interface MicrosoftReconciliationSummary {
   move: number
   cancel: number
   archive: number
+  package_template_create: number
   conflict: number
   skipped: number
   failed: number
@@ -242,7 +247,7 @@ export function summarizeMicrosoftReconciliation(items: MicrosoftImportPreviewIt
     summary.total += 1
     summary[action] += 1
     return summary
-  }, { total: 0, create: 0, update: 0, unchanged: 0, complete: 0, reopen: 0, move: 0, cancel: 0, archive: 0, conflict: 0, skipped: 0, failed: 0 })
+  }, { total: 0, create: 0, link_existing: 0, update: 0, unchanged: 0, complete: 0, reopen: 0, move: 0, cancel: 0, archive: 0, package_template_create: 0, conflict: 0, skipped: 0, failed: 0 })
 }
 
 export interface MicrosoftPreviewSummary {

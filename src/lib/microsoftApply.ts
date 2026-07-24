@@ -1,8 +1,11 @@
 import type { MicrosoftImportPreviewItem } from './microsoftImport'
 import type { MicrosoftSnapshot } from './microsoftSnapshot'
 
-export const MICROSOFT_SYNC_APPLY_VERSION = 2
-export const MICROSOFT_SYNC_APPLY_MIGRATION_ERROR = 'Microsoft Sync Apply requires phase-19c-microsoft-sync-apply-reliability.sql. Run the migration in Supabase, refresh the page, and preview again.'
+// v3 adds legacy link_existing support: the client_schedule apply UPDATE branch
+// may attach microsoft_plan_id / microsoft_task_id / microsoft_source_type to an
+// existing row. Ships with phase-21a; the frontend and DB version must match.
+export const MICROSOFT_SYNC_APPLY_VERSION = 3
+export const MICROSOFT_SYNC_APPLY_MIGRATION_ERROR = 'Microsoft Sync Apply requires phase-21a-microsoft-link-existing.sql. Run the migration in Supabase, refresh the page, and preview again.'
 
 export interface MicrosoftApplyRpcArgs {
   p_run_id: string
@@ -72,6 +75,22 @@ function buildMicrosoftApplyPatch(
     patch = { ...patch, client_id: payload.client_id, package_id: payload.package_id, template_id: payload.template_id, board_id: payload.board_id, bucket_id: payload.bucket_id, month: payload.month, code: payload.code, instance_number: payload.instance_number, title: payload.title, deliverable_type: payload.deliverable_type, production_status: payload.production_status, priority: payload.priority, scheduled_date: payload.scheduled_date, microsoft_source_type: payload.microsoft_source_type, microsoft_plan_id: payload.microsoft_plan_id, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_task_id: payload.microsoft_task_id, microsoft_source_description: payload.microsoft_source_description, assigned_to_user_id: payload.assigned_to_user_id, assigned_to_name: payload.assigned_to_name, helper_names: payload.helper_names }
   } else if (action === 'create' && payload?.destination === 'cg_calendar') {
     patch = { ...patch, title: payload.title, event_type: payload.event_type, client_id: payload.client_id, client_name: payload.client_name, start_at: payload.start_at, end_at: payload.end_at, all_day: payload.all_day, location: payload.location, status: payload.status, microsoft_source_type: payload.microsoft_source_type, microsoft_calendar_id: payload.microsoft_calendar_id, microsoft_event_id: payload.microsoft_event_id, microsoft_source_description: payload.microsoft_source_description }
+  } else if (action === 'link_existing' && payload?.destination === 'client_schedule') {
+    // Attach Microsoft identity + source-owned fields to an existing legacy row.
+    // Deliberately omits client_id/package_id/template_id (the slot is already
+    // correct) and every CG-owned field (notes, assigned_to_*, helper_names) so
+    // the RPC's `case when p_patch ? 'field'` leaves local edits untouched.
+    patch = {
+      ...patch,
+      month: payload.month, code: payload.code, instance_number: payload.instance_number,
+      deliverable_type: payload.deliverable_type, title: payload.title,
+      production_status: payload.production_status, scheduled_date: payload.scheduled_date,
+      microsoft_source_type: payload.microsoft_source_type,
+      microsoft_plan_id: payload.microsoft_plan_id, microsoft_bucket_id: payload.microsoft_bucket_id,
+      microsoft_task_id: payload.microsoft_task_id,
+      microsoft_source_description: payload.microsoft_source_description,
+      archived_at: null,
+    }
   } else if (item.destination === 'planner') {
     if (removedAt) patch = { archived_at: removedAt, microsoft_source_removed_at: removedAt, microsoft_sync_run_id: runId }
     else if (payload?.destination === 'planner') patch = { ...patch, board_id: payload.board_id, bucket_id: payload.bucket_id, title: payload.title, status: payload.status, start_date: payload.start_date, due_date: payload.due_date, original_plan_name: payload.original_plan_name, original_bucket_name: payload.original_bucket_name, microsoft_bucket_id: payload.microsoft_bucket_id, microsoft_source_description: payload.microsoft_source_description, archived_at: null, assigned_to_name: payload.assigned_to_name, helper_names: payload.helper_names }
@@ -95,7 +114,10 @@ export function buildMicrosoftApplyRpcArgs(
   approveRemovals: boolean,
 ): MicrosoftApplyRpcArgs {
   const action = item.reconciliationAction ?? 'skipped'
-  const shouldApply = !['unchanged', 'conflict', 'skipped', 'failed'].includes(action)
+  // package_template_create is applied by a dedicated template-creation step
+  // (it inserts a package_deliverable_templates row before its deliverable), not
+  // by the generic monthly_deliverables apply RPC — so it is excluded here.
+  const shouldApply = !['unchanged', 'conflict', 'skipped', 'failed', 'package_template_create'].includes(action)
     && (!item.requiresRemovalApproval || approveRemovals)
   const identity = microsoftSourceIdentity(item)
 

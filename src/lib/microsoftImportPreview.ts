@@ -416,15 +416,38 @@ export function resolveUnnumberedClientScheduleDeliverables(
 
     const compatible = context.templates.filter(t =>
       t.packageId === p.package_id && t.active && t.deliverableType === p.deliverable_type)
-    if (compatible.length !== 1) return item
 
-    const instance = templateCodeInstance(compatible[0].code)
-    if (instance === null) return item
-
-    const resolved: MicrosoftClientSchedulePayload = {
-      ...p, code: compatible[0].code, instance_number: instance, template_id: compatible[0].id,
+    // Exactly one compatible template → link to it deterministically.
+    if (compatible.length === 1) {
+      const instance = templateCodeInstance(compatible[0].code)
+      if (instance === null) return item
+      const resolved: MicrosoftClientSchedulePayload = {
+        ...p, code: compatible[0].code, instance_number: instance, template_id: compatible[0].id,
+      }
+      return { ...item, proposedPayload: resolved, previewStatus: 'new', conflictCode: null, conflictReason: null }
     }
-    return { ...item, proposedPayload: resolved, previewStatus: 'new', conflictCode: null, conflictReason: null }
+
+    // No compatible template, but the package is unambiguous (single active
+    // package resolved upstream) and this is the only unnumbered task of its type
+    // → propose a reviewed package-template correction (canonical Video 1 / Reel 1).
+    // Only a real source task can trigger this; it is never inferred from totals.
+    if (compatible.length === 0 && (p.deliverable_type === 'video' || p.deliverable_type === 'reel')) {
+      const code = p.deliverable_type === 'video' ? 'Video 1' : 'Reel 1'
+      const resolved: MicrosoftClientSchedulePayload = { ...p, code, instance_number: 1 }
+      return {
+        ...item,
+        proposedPayload: resolved,
+        previewStatus: 'new',
+        conflictCode: null,
+        conflictReason: null,
+        reconciliationAction: 'package_template_create',
+        proposedTemplate: { code, deliverable_type: p.deliverable_type, instance_number: 1 },
+        warnings: [...item.warnings, `The active package has no ${p.deliverable_type} template; this source task proposes creating "${code}" before its deliverable.`],
+      }
+    }
+
+    // More than one compatible template — genuinely ambiguous, keep the conflict.
+    return item
   })
 }
 
@@ -616,18 +639,57 @@ export function deliverableSlotKey(
 // that lands on a slot already occupied in CG Dynamics (e.g. a deliverable
 // generated from the package template) must surface as a conflict, never as an
 // insert that would violate the constraint or duplicate work.
+//
+// `unlinkedSlotRows` maps a slot key to the existing monthly_deliverables rows
+// on that slot that carry NO Microsoft task id (legacy rows). When a source
+// card lands on a slot filled by exactly one such legacy row AND it is the only
+// card in the snapshot targeting that slot, it is reconciled as `link_existing`
+// (attach identity to the legacy row) rather than a duplicate conflict. Every
+// other occupied-slot case remains an explicit conflict — never a duplicate insert.
+export interface UnlinkedSlotRow { id: string; updatedAt: string }
+
 export function flagDeliverableSlotConflicts(
   items: MicrosoftImportPreviewItem[],
   existingSlotKeys: Set<string>,
+  unlinkedSlotRows: Map<string, UnlinkedSlotRow[]> = new Map(),
 ): MicrosoftImportPreviewItem[] {
+  // How many snapshot cards target each slot — a slot contested by >1 card can
+  // never be auto-linked ("no other source task targets the candidate").
+  const cardsPerSlot = new Map<string, number>()
+  for (const item of items) {
+    const p = item.proposedPayload
+    if (item.previewStatus !== 'new' || p?.destination !== 'client_schedule') continue
+    const key = deliverableSlotKey(p.package_id, p.template_id, p.instance_number, p.month)
+    if (key) cardsPerSlot.set(key, (cardsPerSlot.get(key) ?? 0) + 1)
+  }
+
+  const linkedInPreview = new Set<string>()
   const seenInPreview = new Set<string>()
   return items.map(item => {
     const payload = item.proposedPayload
     if (item.previewStatus !== 'new' || payload?.destination !== 'client_schedule') return item
     const key = deliverableSlotKey(payload.package_id, payload.template_id, payload.instance_number, payload.month)
     if (!key) return item
+
     if (existingSlotKeys.has(key)) {
-      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
+      const legacy = unlinkedSlotRows.get(key) ?? []
+      // Deterministic legacy link: exactly one unlinked legacy row on this slot,
+      // this is the only snapshot card for the slot, and we have not already
+      // consumed that row in this preview.
+      if (legacy.length === 1 && (cardsPerSlot.get(key) ?? 0) === 1 && !linkedInPreview.has(key)) {
+        linkedInPreview.add(key)
+        return {
+          ...item,
+          previewStatus: 'changed',
+          reconciliationAction: 'link_existing',
+          existingTargetId: legacy[0].id,
+          expectedTargetUpdatedAt: legacy[0].updatedAt,
+          conflictCode: null,
+          conflictReason: null,
+          warnings: [...item.warnings, 'Links to an existing CG Dynamics deliverable; local notes, assignments and approvals are preserved.'],
+        }
+      }
+      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: legacy.length > 1 ? 'existing_deliverable_slot' : 'existing_deliverable_slot', conflictReason: legacy.length > 1 ? 'More than one CG Dynamics deliverable occupies this slot; link the correct one manually.' : 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
     }
     if (seenInPreview.has(key)) {
       return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'Another card in this snapshot already fills this package/template/instance/month slot.' }
