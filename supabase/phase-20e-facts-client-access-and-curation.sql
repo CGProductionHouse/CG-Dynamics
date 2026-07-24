@@ -141,9 +141,11 @@ comment on table public.report_content_exclusions is
   'Staff curation of client-facing report highlights. Exclusions do not alter aggregate facts and are keyed by report, platform and stable provider object ID.';
 
 -- 2. Fact integrity and lookup uniqueness ------------------------------------
-create unique index if not exists uq_metric_facts_client_platform_month_metric
-  on public.platform_metric_facts_monthly
-    (client_id, platform, period_month, metric_key);
+-- Phase 20d already enforces this identity with the
+-- platform_metric_facts_monthly_client_id_platform_period_mon_key constraint.
+-- Remove the earlier draft index if present so production does not carry two
+-- identical unique indexes.
+drop index if exists public.uq_metric_facts_client_platform_month_metric;
 
 do $$
 begin
@@ -841,6 +843,8 @@ revoke all on function public.upsert_platform_metric_fact_preserving_verified(
   uuid, uuid, text, text, date, date, text, text, numeric, text, text, text,
   text, text, text, text, jsonb, uuid, timestamptz
 ) from public, anon, authenticated, service_role;
+revoke all on function public.enforce_report_truth_before_publish()
+  from public, anon, authenticated;
 
 grant execute on function public.get_report_metric_facts(uuid) to authenticated;
 grant execute on function public.get_report_metric_fact_status(uuid) to authenticated;
