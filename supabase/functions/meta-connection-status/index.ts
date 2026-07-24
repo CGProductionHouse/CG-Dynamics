@@ -1,6 +1,15 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const REQUIRED_SCOPES = [
+  'pages_show_list',
+  'pages_read_engagement',
+  'read_insights',
+  'instagram_basic',
+  'instagram_manage_insights',
+  'business_management',
+]
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -47,7 +56,7 @@ Deno.serve(async (req) => {
   // Read the latest connection ordered by last_connected_at desc nulls last.
   const { data: connections } = await sb
     .from('meta_connections')
-    .select('id, meta_business_id, meta_business_name, status, last_connected_at')
+    .select('id, meta_business_id, meta_business_name, status, scopes, last_error, last_connected_at')
     .order('last_connected_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(1)
@@ -63,6 +72,10 @@ Deno.serve(async (req) => {
   }
 
   const latest = connections[0]
+  const grantedScopes = Array.isArray(latest.scopes)
+    ? latest.scopes.filter((scope): scope is string => typeof scope === 'string')
+    : []
+  const missingScopes = REQUIRED_SCOPES.filter(scope => !grantedScopes.includes(scope))
 
   // Statuses that clearly indicate no valid connection.
   const terminalStatuses = ['not_connected', 'needs_reauth', 'revoked', 'error']
@@ -77,7 +90,19 @@ Deno.serve(async (req) => {
       ok: true,
       connected: false,
       status: latest.status,
-      message: messages[latest.status] ?? 'Meta is not connected.',
+      message: latest.last_error || messages[latest.status] || 'Meta is not connected.',
+      missingScopes,
+      linkedAssetsCount: linkedAssetsCount ?? 0,
+    })
+  }
+
+  if (missingScopes.length > 0) {
+    return jsonResponse({
+      ok: true,
+      connected: false,
+      status: 'needs_reauth',
+      message: `Meta needs to be reconnected with: ${missingScopes.join(', ')}.`,
+      missingScopes,
       linkedAssetsCount: linkedAssetsCount ?? 0,
     })
   }
@@ -104,6 +129,7 @@ Deno.serve(async (req) => {
     connected: true,
     status: 'connected',
     message: 'Meta is connected.',
+    missingScopes: [],
     connection: {
       id: latest.id,
       metaBusinessId: latest.meta_business_id,

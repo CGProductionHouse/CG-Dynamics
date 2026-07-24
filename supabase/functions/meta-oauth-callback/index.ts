@@ -38,6 +38,31 @@ async function safeMetaError(res: Response, tokens: Array<string | null | undefi
   ].filter(Boolean).join(', ')
 }
 
+async function fetchGrantedScopes(graphBaseUrl: string, accessToken: string): Promise<string[]> {
+  try {
+    const response = await metaFetch(
+      `${graphBaseUrl}/me/permissions?access_token=${encodeURIComponent(accessToken)}`,
+    )
+    if (!response.ok) {
+      console.error('Meta permission verification failed:', await safeMetaError(response, [accessToken]))
+      return []
+    }
+
+    const body = await response.json() as {
+      data?: Array<{ permission?: unknown; status?: unknown }>
+    }
+    return (body.data ?? [])
+      .filter(item => item.status === 'granted' && typeof item.permission === 'string')
+      .map(item => item.permission as string)
+  } catch (error) {
+    console.error(
+      'Meta permission verification network error:',
+      redact(error instanceof Error ? error.message : String(error), [accessToken]),
+    )
+    return []
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -145,6 +170,13 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
+  const grantedScopes = await fetchGrantedScopes(graphBaseUrl, accessToken)
+  const missingScopes = REQUESTED_SCOPES.filter(scope => !grantedScopes.includes(scope))
+  const connectionStatus = missingScopes.length === 0 ? 'connected' : 'needs_reauth'
+  const permissionError = missingScopes.length > 0
+    ? `Missing required Meta permissions: ${missingScopes.join(', ')}. Reconnect Meta and grant them.`
+    : null
+
   // ── Store connection metadata and token in database ──────────
   // Upsert: use the first existing connection, or create a new one.
   // For now, we always create/update a single global connection row.
@@ -161,9 +193,9 @@ Deno.serve(async (req) => {
       .from('meta_connections')
       .update({
         connected_by: consumedState.user_id,
-        status: 'connected',
-        scopes: REQUESTED_SCOPES,
-        last_error: null,
+        status: connectionStatus,
+        scopes: grantedScopes,
+        last_error: permissionError,
         last_connected_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -180,8 +212,9 @@ Deno.serve(async (req) => {
       .from('meta_connections')
       .insert({
         connected_by: consumedState.user_id,
-        status: 'connected',
-        scopes: REQUESTED_SCOPES,
+        status: connectionStatus,
+        scopes: grantedScopes,
+        last_error: permissionError,
         last_connected_at: new Date().toISOString(),
       })
       .select('id')
@@ -219,5 +252,5 @@ Deno.serve(async (req) => {
   }
 
   // Success — redirect back to the app.
-  return redirect(`${appUrl}/admin/integrations/meta?meta=connected`)
+  return redirect(`${appUrl}/admin/integrations/meta?meta=${missingScopes.length > 0 ? 'permissions_missing' : 'connected'}`)
 })

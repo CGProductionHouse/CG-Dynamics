@@ -5,6 +5,7 @@ import { resolveMetaGraphConfig } from '../_shared/meta.ts'
 // Scopes required for future Meta asset discovery and reporting:
 // - pages_show_list          - list Facebook Pages the connected user manages
 // - pages_read_engagement    - read Facebook Page posts, engagement and follower fields
+// - read_insights            - read historical Facebook Page insights
 // - instagram_basic          - discover Instagram Business accounts linked to Pages
 // - instagram_manage_insights - read Instagram media/account insights for reports
 // - business_management      - discover Business Manager-owned pages/ad accounts

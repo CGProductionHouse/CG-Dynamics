@@ -766,10 +766,12 @@ export default function MetaIntegrationPage() {
       } else {
         setConnectState('idle')
         setConnectionInfo(null)
+        setConnectMsg(data?.message ?? 'Meta needs to be connected before report data can sync.')
       }
     } catch {
       setConnectState('idle')
       setConnectionInfo(null)
+      setConnectMsg('Could not verify the Meta connection. Try again or ask an admin to check the Edge Function.')
     } finally {
       setConnectionLoading(false)
     }
@@ -793,6 +795,10 @@ export default function MetaIntegrationPage() {
       window.history.replaceState(null, '', window.location.pathname)
     } else if (meta === 'error') {
       setConnectMsg('Meta connection failed. Please try again.')
+      window.history.replaceState(null, '', window.location.pathname)
+    } else if (meta === 'permissions_missing') {
+      setConnectMsg('Meta connected, but one or more reporting permissions were not granted. Reconnect Meta and approve all requested permissions.')
+      checkConnection()
       window.history.replaceState(null, '', window.location.pathname)
     }
   }, [searchParams, checkConnection])

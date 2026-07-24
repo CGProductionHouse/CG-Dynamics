@@ -20,6 +20,7 @@ const CLIENT_DASHBOARD = read('../src/pages/client/Dashboard.tsx')
 const ADMIN_PREVIEW = read('../src/pages/admin/PublishedPreview.tsx')
 const META_OAUTH_START = read('../supabase/functions/meta-oauth-start/index.ts')
 const META_OAUTH_CALLBACK = read('../supabase/functions/meta-oauth-callback/index.ts')
+const META_CONNECTION_STATUS = read('../supabase/functions/meta-connection-status/index.ts')
 const META_LIST_ASSETS = read('../supabase/functions/meta-list-assets/index.ts')
 
 let server
@@ -359,6 +360,16 @@ test('Graph v25 contract uses media views, Pacific report bounds, and current fo
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions_unique'/)
   assert.match(PHASE_20F, /fb_media_views_v2/)
   assert.match(PHASE_20F, /ig_follows_gained_v2/)
+})
+
+test('Meta OAuth records actual reporting permissions and requires read_insights', () => {
+  assert.match(META_OAUTH_START, /'read_insights'/)
+  assert.match(META_OAUTH_CALLBACK, /\/me\/permissions/)
+  assert.match(META_OAUTH_CALLBACK, /scopes: grantedScopes/)
+  assert.match(META_OAUTH_CALLBACK, /status: connectionStatus/)
+  assert.match(META_CONNECTION_STATUS, /'read_insights'/)
+  assert.match(META_CONNECTION_STATUS, /status: 'needs_reauth'/)
+  assert.match(META_CONNECTION_STATUS, /missingScopes/)
 })
 
 test('rendered report includes methodology and curation controls without CG-generated wording', () => {
