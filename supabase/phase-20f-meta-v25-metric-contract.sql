@@ -17,8 +17,7 @@ set
   notes = 'Graph v25 replacement for deprecated page_impressions. Not comparable with legacy impression facts.',
   updated_at = now()
 where platform = 'facebook'
-  and metric_key = 'brand_views'
-  and source_metric = 'page_impressions';
+  and metric_key = 'brand_views';
 
 update public.metric_registry
 set
@@ -29,8 +28,7 @@ set
   notes = 'Graph v25 replacement for deprecated page_impressions_unique. Never sum daily unique values.',
   updated_at = now()
 where platform = 'facebook'
-  and metric_key in ('unique_viewers', 'reach')
-  and source_metric = 'page_impressions_unique';
+  and metric_key in ('unique_viewers', 'reach');
 
 update public.metric_registry
 set
@@ -41,8 +39,7 @@ set
   notes = 'Current Page Insights follow movement metric.',
   updated_at = now()
 where platform = 'facebook'
-  and metric_key = 'follows_gained'
-  and source_metric = 'page_daily_follows_unique';
+  and metric_key = 'follows_gained';
 
 update public.metric_registry
 set
@@ -53,7 +50,6 @@ set
   notes = 'Current Instagram account Insights metric; unfollows are not included in this fact.',
   updated_at = now()
 where platform = 'instagram'
-  and metric_key = 'follows_gained'
-  and source_metric = 'follower_count';
+  and metric_key = 'follows_gained';
 
 commit;
