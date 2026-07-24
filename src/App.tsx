@@ -38,6 +38,9 @@ import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
 import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
 import MyWorkPage from './pages/admin/MyWorkPage'
 import Dashboard from './pages/client/Dashboard'
+import ClientPortalHome from './pages/client/ClientPortalHome'
+import ClientCampaignsPage from './pages/client/ClientCampaignsPage'
+import ClientPortalCalendarPage from './pages/client/ClientContentCalendarPage'
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -57,7 +60,7 @@ function HomeRedirect() {
   if (user.invited_at && profile.role === 'client' && !profile.client_id) {
     return <Navigate to="/signup" replace />
   }
-  if (profile.role === 'client') return <Navigate to="/dashboard" replace />
+  if (profile.role === 'client') return <Navigate to="/client" replace />
   return <Navigate to="/admin/cg-hub" replace />
 }
 
@@ -130,7 +133,11 @@ export default function App() {
 
           {/* Client routes */}
           <Route element={<RequireClient />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/client" element={<ClientPortalHome />} />
+            <Route path="/client/performance" element={<Dashboard />} />
+            <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
+            <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
+            <Route path="/dashboard" element={<Navigate to="/client" replace />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
