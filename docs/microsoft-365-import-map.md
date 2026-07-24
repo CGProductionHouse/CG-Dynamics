@@ -302,3 +302,9 @@ separate admin-only design and security review.
   readable through the connected Microsoft account. The read-only Entra app,
   Supabase secrets, authenticated fetch, first dry preview and reviewed apply
   remain outstanding. No Microsoft writes are part of this architecture.
+
+## Deliverable reconciliation actions (phase-21a)
+
+- **link_existing** — a source card links to a single unlinked legacy `monthly_deliverables` row on its exact slot (client/month/canonical type + instance); attaches `microsoft_plan_id/bucket_id/task_id` + source-owned fields; never overwrites CG-owned notes/assignments/helpers. Requires phase-21a (apply version 3).
+- **package_template_create** — a unique unnumbered VIDEO/REEL against a single active package with no compatible template proposes a canonical `Video 1`/`Reel 1` template (only from a real source task; never inferred from totals).
+- Unnumbered `VIDEO`/`REEL` are recognised by type; `DP/F/PHOTO` must be numbered. Ambiguity (multiple unnumbered tasks or templates) always stays a visible conflict.

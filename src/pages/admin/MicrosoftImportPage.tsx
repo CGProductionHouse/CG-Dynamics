@@ -36,7 +36,8 @@ import { parseMicrosoftSnapshot, type MicrosoftSnapshot } from '../../lib/micros
 import { resolvePreviewAssignees } from '../../lib/microsoftAssigneeMapping'
 
 const ACTIONS: Array<{ value: MicrosoftReconciliationAction; label: string }> = [
-  { value: 'create', label: 'Create' }, { value: 'update', label: 'Update' },
+  { value: 'create', label: 'Create' }, { value: 'link_existing', label: 'Link existing' },
+  { value: 'package_template_create', label: 'Add template' }, { value: 'update', label: 'Update' },
   { value: 'complete', label: 'Complete' }, { value: 'reopen', label: 'Reopen' },
   { value: 'move', label: 'Moved' }, { value: 'cancel', label: 'Cancelled' },
   { value: 'archive', label: 'Source removed' }, { value: 'unchanged', label: 'Unchanged' },
@@ -46,6 +47,8 @@ const ACTIONS: Array<{ value: MicrosoftReconciliationAction; label: string }> = 
 
 const ACTION_TONES: Record<MicrosoftReconciliationAction, string> = {
   create: 'border-emerald-300/25 bg-emerald-300/10 text-emerald-200',
+  link_existing: 'border-sky-300/25 bg-sky-300/10 text-sky-200',
+  package_template_create: 'border-amber-300/25 bg-amber-300/10 text-amber-200',
   update: 'border-blue-300/25 bg-blue-300/10 text-blue-200',
   unchanged: 'border-white/15 bg-white/[0.05] text-white/60',
   complete: 'border-teal-300/25 bg-teal-300/10 text-teal-200',
@@ -205,6 +208,7 @@ export default function MicrosoftImportPage() {
         existingResult.targets,
         existingResult.deliverableSlotKeys,
         mapped => resolvePreviewAssignees(mapped, nextSnapshot.assigneeMap ?? {}, mappingsResult.data, profilesResult.data),
+        existingResult.unlinkedSlotRows,
       )
       setSnapshot(nextSnapshot)
       setItems(resolved)

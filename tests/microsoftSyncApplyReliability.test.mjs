@@ -178,10 +178,12 @@ test('Client Schedule create and update patches include user ID, owner name and 
   assert.deepEqual(updateArgs.p_patch.helper_names, [])
 })
 
-test('missing or outdated apply version blocks while version 2 passes', () => {
-  assert.match(microsoftApplyPreflightError(null, { message: 'missing' }), /phase-19c-microsoft-sync-apply-reliability\.sql/)
-  assert.match(microsoftApplyPreflightError(1, null), /phase-19c-microsoft-sync-apply-reliability\.sql/)
-  assert.equal(microsoftApplyPreflightError(2, null), null)
+test('missing or outdated apply version blocks while version 3 passes', () => {
+  // v3 ships link_existing support via phase-21a; the preflight now requires it.
+  assert.match(microsoftApplyPreflightError(null, { message: 'missing' }), /phase-21a-microsoft-link-existing\.sql/)
+  assert.match(microsoftApplyPreflightError(1, null), /phase-21a-microsoft-link-existing\.sql/)
+  assert.match(microsoftApplyPreflightError(2, null), /phase-21a-microsoft-link-existing\.sql/)
+  assert.equal(microsoftApplyPreflightError(3, null), null)
 })
 
 test('known failed runs finalize as failed and mixed outcomes finalize as partial', () => {
