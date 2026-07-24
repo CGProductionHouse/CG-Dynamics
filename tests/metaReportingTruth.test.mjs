@@ -190,7 +190,7 @@ test('scheduled worker uses the shared connector, not a competing one', () => {
 test('manual and scheduled sync share conservative post reconciliation', () => {
   for (const source of [META_SYNC, META_WORKER]) {
     assert.match(source, /upsertMetaReportPost/)
-    assert.match(source, /metaInsightsBounds\(periodStart, periodEnd\)/)
+    assert.match(source, /metaPostBounds\(periodStart, periodEnd\)/)
   }
   assert.match(META_POST_MERGE, /permalinkMatches\.length === 1/)
   assert.match(META_POST_MERGE, /captionMatches\.length === 1/)
@@ -362,6 +362,9 @@ test('Graph v25 contract uses media views, Pacific report bounds, and current fo
   assert.match(SHARED_META, /sourceMetric: 'page_daily_follows'/)
   assert.match(SHARED_META, /sourceMetric: 'follows_and_unfollows'/)
   assert.match(SHARED_META, /META_INSIGHTS_TIMEZONE = 'America\/Los_Angeles'/)
+  assert.match(SHARED_META, /metaInsightsBounds[\s\S]*zonedStartEpoch\(periodEnd, META_INSIGHTS_TIMEZONE\)/)
+  assert.match(SHARED_META, /metaPostBounds[\s\S]*addUtcDays\(periodEnd, 1\)/)
+  assert.match(SHARED_META, /spec\.aggregation !== 'unique'/)
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions'/)
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions_unique'/)
   assert.match(PHASE_20F, /fb_media_views_v2/)

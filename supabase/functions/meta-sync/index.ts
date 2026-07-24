@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   fetchPageTokens,
   META_CONNECTOR_VERSION,
-  metaInsightsBounds,
+  metaPostBounds,
   metaFetch,
   readMetaError as readSharedMetaError,
   redact,
@@ -649,7 +649,7 @@ async function handleRequest(req: Request): Promise<Response> {
         fullPicture: string | null
         rawPayload: Record<string, unknown>
       }> = []
-      const postBounds = metaInsightsBounds(periodStart, periodEnd)
+      const postBounds = metaPostBounds(periodStart, periodEnd)
 
       if (client.facebookPageId) {
         try {

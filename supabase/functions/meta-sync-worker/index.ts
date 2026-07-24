@@ -2,7 +2,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   META_CONNECTOR_VERSION,
-  metaInsightsBounds,
+  metaPostBounds,
   metaFetch,
   readMetaError,
   redact,
@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
       }
 
       const { periodStart, periodEnd } = monthBounds(item.month)
-      const postBounds = metaInsightsBounds(periodStart, periodEnd)
+      const postBounds = metaPostBounds(periodStart, periodEnd)
       let postsSynced = 0
       let reportsCreated = 0
       let reportsReused = 0

@@ -153,7 +153,11 @@ function classifyValue(value: number | null): Availability {
 // Parses an insight response array into a single summed/total number, or null
 // when the provider returned no numeric value. For unique metrics the caller
 // must use total_value (summing a daily-unique series over-counts people).
-function parseInsight(data: Array<Record<string, unknown>>, valueKey?: string): number | null {
+function parseInsight(
+  data: Array<Record<string, unknown>>,
+  valueKey?: string,
+  allowDailySum = true,
+): number | null {
   if (!Array.isArray(data) || data.length === 0) return null
   const d = data[0]
   const total = d.total_value as {
@@ -181,7 +185,7 @@ function parseInsight(data: Array<Record<string, unknown>>, valueKey?: string): 
     }
   }
   const values = d.values as Array<{ value?: unknown }> | undefined
-  if (values && values.length > 0) {
+  if (allowDailySum && values && values.length > 0) {
     let sum = 0, any = false
     for (const v of values) if (typeof v.value === 'number') { sum += v.value; any = true }
     return any ? sum : null
@@ -275,6 +279,17 @@ function zonedStartEpoch(date: string, timeZone: string): number {
 export function metaInsightsBounds(periodStart: string, periodEnd: string): { since: string; until: string } {
   return {
     since: String(zonedStartEpoch(periodStart, META_INSIGHTS_TIMEZONE)),
+    // Page/Instagram Insights treats `until` as an inclusive report date and
+    // returns the daily bucket ending on the following midnight. Adding another
+    // day here silently includes the first day of the next month.
+    until: String(zonedStartEpoch(periodEnd, META_INSIGHTS_TIMEZONE)),
+  }
+}
+
+export function metaPostBounds(periodStart: string, periodEnd: string): { since: string; until: string } {
+  return {
+    since: String(zonedStartEpoch(periodStart, META_INSIGHTS_TIMEZONE)),
+    // Post edges and local timestamp filtering use an exclusive upper bound.
     until: String(zonedStartEpoch(addUtcDays(periodEnd, 1), META_INSIGHTS_TIMEZONE)),
   }
 }
@@ -362,7 +377,11 @@ export async function probeMetric(
         continue
       }
       const body = await res.json()
-      const value = parseInsight(body.data as Array<Record<string, unknown>>, spec.valueKey)
+      const value = parseInsight(
+        body.data as Array<Record<string, unknown>>,
+        spec.valueKey,
+        spec.aggregation !== 'unique',
+      )
       if (value !== null) {
         return { ...base, value, availability: classifyValue(value), responseShape: attempt.metricType, metricType: attempt.metricType, rawSnapshot: tokenSafeSnapshot(body, tokens) }
       }
@@ -555,9 +574,12 @@ export async function syncAccountFacts(
       },
     }).eq('id', syncRunId)
     if (failureUpdateError) {
-      throw new Error(`${safeError}; failed to mark sync run failed: ${failureUpdateError.message} (${failureUpdateError.code ?? 'unknown'})`)
+      throw new Error(
+        `${safeError}; failed to mark sync run failed: ${failureUpdateError.message} (${failureUpdateError.code ?? 'unknown'})`,
+        { cause: error },
+      )
     }
-    throw new Error(safeError)
+    throw new Error(safeError, { cause: error })
   }
 
   // 4. Finalize run health.
