@@ -21,6 +21,7 @@ export type MicrosoftConflictCode =
   | 'missing_package'
   | 'ambiguous_package'
   | 'missing_template'
+  | 'ambiguous_unnumbered_deliverable'
   | 'existing_deliverable_slot'
   | 'restricted_content'
   | 'stale_snapshot'
