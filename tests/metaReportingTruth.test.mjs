@@ -12,6 +12,7 @@ const META_WORKER = read('../supabase/functions/meta-sync-worker/index.ts')
 const REPORT_STATS = read('../src/lib/reportStats.ts')
 const MIGRATION = read('../supabase/phase-20d-meta-reporting-truth.sql')
 const PHASE_20E = read('../supabase/phase-20e-facts-client-access-and-curation.sql')
+const PHASE_20F = read('../supabase/phase-20f-meta-v25-metric-contract.sql')
 const REPORTING_TRUTH = read('../src/lib/db/reportingTruth.ts')
 const CLIENT_VIEW = read('../src/pages/client/ClientReportView.tsx')
 const CLIENT_DASHBOARD = read('../src/pages/client/Dashboard.tsx')
@@ -332,6 +333,18 @@ test('Phase 20e is report-bound, client-isolated, and keeps health staff-only', 
   assert.match(PHASE_20E, /upsert_platform_metric_fact_preserving_verified/)
   assert.match(PHASE_20E, /f\.availability in \('complete', 'valid_zero'\)[\s\S]*excluded\.availability not in \('complete', 'valid_zero'\)/)
   assert.doesNotMatch(META_SYNC + META_WORKER, /report_content_exclusions/)
+})
+
+test('Graph v25 contract uses media views, Pacific report bounds, and current follow metrics', () => {
+  assert.match(SHARED_META, /sourceMetric: 'page_media_view'/)
+  assert.match(SHARED_META, /sourceMetric: 'page_total_media_view_unique'/)
+  assert.match(SHARED_META, /sourceMetric: 'page_daily_follows'/)
+  assert.match(SHARED_META, /sourceMetric: 'follows_and_unfollows'/)
+  assert.match(SHARED_META, /META_INSIGHTS_TIMEZONE = 'America\/Los_Angeles'/)
+  assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions'/)
+  assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions_unique'/)
+  assert.match(PHASE_20F, /fb_media_views_v2/)
+  assert.match(PHASE_20F, /ig_follows_gained_v2/)
 })
 
 test('rendered report includes methodology and curation controls without CG-generated wording', () => {

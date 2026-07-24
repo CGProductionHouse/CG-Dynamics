@@ -34,7 +34,8 @@ export function resolveMetaGraphConfig(): { version: string; baseUrl: string } {
   return { version: raw, baseUrl: `https://graph.facebook.com/${raw}` }
 }
 
-export const META_CONNECTOR_VERSION = 'meta-connector-v2'
+export const META_CONNECTOR_VERSION = 'meta-connector-v3'
+export const META_INSIGHTS_TIMEZONE = 'America/Los_Angeles'
 
 export type Availability =
   | 'complete'
@@ -127,7 +128,14 @@ export function classifyError(err: MetaErrorInfo): Availability {
   if (['190', '102', '463', '467'].includes(code)) return 'permission_blocked'
   if (['10', '200', '3', '278', '294'].includes(code)) return 'permission_blocked'
   // Nonexistent / deprecated / unsupported metric for this object or version.
-  if (code === '100' && (sub === '33' || msg.includes('nonexisting') || msg.includes('does not support') || msg.includes('unsupported') || msg.includes('deprecat'))) {
+  if (code === '100' && (
+    sub === '33'
+    || msg.includes('nonexisting')
+    || msg.includes('does not support')
+    || msg.includes('unsupported')
+    || msg.includes('deprecat')
+    || msg.includes('valid insights metric')
+  )) {
     return 'unavailable'
   }
   if (msg.includes('does not exist') || msg.includes('cannot be accessed')) return 'unavailable'
@@ -145,11 +153,33 @@ function classifyValue(value: number | null): Availability {
 // Parses an insight response array into a single summed/total number, or null
 // when the provider returned no numeric value. For unique metrics the caller
 // must use total_value (summing a daily-unique series over-counts people).
-function parseInsight(data: Array<Record<string, unknown>>): number | null {
+function parseInsight(data: Array<Record<string, unknown>>, valueKey?: string): number | null {
   if (!Array.isArray(data) || data.length === 0) return null
   const d = data[0]
-  const total = d.total_value as { value?: unknown } | undefined
+  const total = d.total_value as {
+    value?: unknown
+    breakdowns?: Array<{
+      results?: Array<{ dimension_values?: unknown[]; value?: unknown }>
+    }>
+  } | undefined
   if (total && typeof total.value === 'number') return total.value
+  if (total && valueKey && total.value && typeof total.value === 'object') {
+    const entries = Object.entries(total.value as Record<string, unknown>)
+    const match = entries.find(([key, value]) => key.toLowerCase() === valueKey.toLowerCase() && typeof value === 'number')
+    if (match && typeof match[1] === 'number') return match[1]
+  }
+  if (total && valueKey && Array.isArray(total.breakdowns)) {
+    const wanted = valueKey.toLowerCase()
+    for (const breakdown of total.breakdowns) {
+      for (const result of breakdown.results ?? []) {
+        const labels = (result.dimension_values ?? []).map(value => String(value).toLowerCase().replace(/[^a-z]/g, ''))
+        const positiveFollow = wanted === 'follows'
+          && labels.some(label => ['follow', 'follows', 'follower'].includes(label))
+          && labels.every(label => !label.includes('unfollow') && !label.includes('nonfollower'))
+        if ((labels.includes(wanted) || positiveFollow) && typeof result.value === 'number') return result.value
+      }
+    }
+  }
   const values = d.values as Array<{ value?: unknown }> | undefined
   if (values && values.length > 0) {
     let sum = 0, any = false
@@ -189,14 +219,16 @@ export interface MetricSpec {
   includesPaid: 'organic' | 'paid' | 'both' | 'unknown'
   aggregation: 'sum' | 'unique' | 'snapshot' | 'reconstructed'
   comparableGroup: string
+  breakdown?: string
+  valueKey?: string
 }
 
 // Facebook Page account-level candidates (Business-Suite-aligned).
 export const FB_ACCOUNT_METRICS: MetricSpec[] = [
-  { metricKey: 'brand_views', sourceMetric: 'page_impressions', mode: 'total_value', allowPeriodDayFallback: true, includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_views_v1' },
-  { metricKey: 'unique_viewers', sourceMetric: 'page_impressions_unique', mode: 'total_value', includesPaid: 'both', aggregation: 'unique', comparableGroup: 'fb_viewers_v1' },
+  { metricKey: 'brand_views', sourceMetric: 'page_media_view', mode: 'total_value', allowPeriodDayFallback: true, includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_media_views_v2' },
+  { metricKey: 'unique_viewers', sourceMetric: 'page_total_media_view_unique', mode: 'total_value', includesPaid: 'both', aggregation: 'unique', comparableGroup: 'fb_media_viewers_v2' },
   { metricKey: 'content_interactions', sourceMetric: 'page_post_engagements', mode: 'total_value', allowPeriodDayFallback: true, includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_interactions_v1' },
-  { metricKey: 'follows_gained', sourceMetric: 'page_daily_follows_unique', mode: 'period_day_sum', includesPaid: 'organic', aggregation: 'sum', comparableGroup: 'fb_follows_gained_v1' },
+  { metricKey: 'follows_gained', sourceMetric: 'page_daily_follows', mode: 'period_day_sum', includesPaid: 'organic', aggregation: 'sum', comparableGroup: 'fb_follows_gained_v2' },
   { metricKey: 'page_visits', sourceMetric: 'page_views_total', mode: 'period_day_sum', includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_page_visits_v1' },
   { metricKey: 'current_followers', sourceMetric: 'followers_count', fallbackField: 'fan_count', mode: 'page_field', includesPaid: 'organic', aggregation: 'snapshot', comparableGroup: 'fb_followers_snapshot_v1' },
 ]
@@ -208,9 +240,44 @@ export const IG_ACCOUNT_METRICS: MetricSpec[] = [
   { metricKey: 'content_interactions', sourceMetric: 'total_interactions', mode: 'total_value', includesPaid: 'both', aggregation: 'sum', comparableGroup: 'ig_interactions_v1' },
   { metricKey: 'profile_visits', sourceMetric: 'profile_views', mode: 'total_value', includesPaid: 'both', aggregation: 'sum', comparableGroup: 'ig_profile_visits_v1' },
   { metricKey: 'website_clicks', sourceMetric: 'website_clicks', mode: 'total_value', includesPaid: 'both', aggregation: 'sum', comparableGroup: 'ig_website_clicks_v1' },
-  { metricKey: 'follows_gained', sourceMetric: 'follower_count', mode: 'period_day_sum', includesPaid: 'organic', aggregation: 'sum', comparableGroup: 'ig_follows_gained_v1' },
+  { metricKey: 'follows_gained', sourceMetric: 'follows_and_unfollows', mode: 'total_value', includesPaid: 'organic', aggregation: 'sum', comparableGroup: 'ig_follows_gained_v2', breakdown: 'follow_type', valueKey: 'follows' },
   { metricKey: 'current_followers', sourceMetric: 'followers_count', mode: 'ig_field', includesPaid: 'organic', aggregation: 'snapshot', comparableGroup: 'ig_followers_snapshot_v1' },
 ]
+
+function addUtcDays(date: string, days: number): string {
+  const parsed = new Date(`${date}T12:00:00Z`)
+  parsed.setUTCDate(parsed.getUTCDate() + days)
+  return parsed.toISOString().slice(0, 10)
+}
+
+function zonedStartEpoch(date: string, timeZone: string): number {
+  const [year, month, day] = date.split('-').map(Number)
+  const utcGuess = Date.UTC(year, month - 1, day)
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  })
+  const parts = Object.fromEntries(
+    formatter.formatToParts(new Date(utcGuess))
+      .filter(part => part.type !== 'literal')
+      .map(part => [part.type, Number(part.value)]),
+  )
+  const representedAsUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second)
+  return Math.floor((utcGuess - (representedAsUtc - utcGuess)) / 1000)
+}
+
+export function metaInsightsBounds(periodStart: string, periodEnd: string): { since: string; until: string } {
+  return {
+    since: String(zonedStartEpoch(periodStart, META_INSIGHTS_TIMEZONE)),
+    until: String(zonedStartEpoch(addUtcDays(periodEnd, 1), META_INSIGHTS_TIMEZONE)),
+  }
+}
 
 export interface MetricProbe {
   metricKey: string
@@ -271,8 +338,9 @@ export async function probeMetric(
 
   // Insights metrics: try the primary shape, then (additive only) a period=day sum.
   const attempts: Array<{ metricType: string; qs: string }> = []
+  const breakdown = spec.breakdown ? `&breakdown=${encodeURIComponent(spec.breakdown)}` : ''
   if (spec.mode === 'total_value') {
-    attempts.push({ metricType: 'total_value', qs: `metric=${spec.sourceMetric}&metric_type=total_value&period=day&since=${since}&until=${until}` })
+    attempts.push({ metricType: 'total_value', qs: `metric=${spec.sourceMetric}&metric_type=total_value&period=day&since=${since}&until=${until}${breakdown}` })
     if (spec.allowPeriodDayFallback) attempts.push({ metricType: 'time_series', qs: `metric=${spec.sourceMetric}&period=day&since=${since}&until=${until}` })
   } else {
     // period_day_sum
@@ -294,7 +362,7 @@ export async function probeMetric(
         continue
       }
       const body = await res.json()
-      const value = parseInsight(body.data as Array<Record<string, unknown>>)
+      const value = parseInsight(body.data as Array<Record<string, unknown>>, spec.valueKey)
       if (value !== null) {
         return { ...base, value, availability: classifyValue(value), responseShape: attempt.metricType, metricType: attempt.metricType, rawSnapshot: tokenSafeSnapshot(body, tokens) }
       }
@@ -385,6 +453,7 @@ export async function syncAccountFacts(
   },
 ): Promise<AccountFactsResult> {
   const specs = args.platform === 'facebook' ? FB_ACCOUNT_METRICS : IG_ACCOUNT_METRICS
+  const insightBounds = metaInsightsBounds(args.periodStart, args.periodEnd)
 
   // 1. Open a sync run row.
   const { data: runRow, error: runInsertError } = await sb.from('platform_sync_runs').insert({
@@ -406,7 +475,7 @@ export async function syncAccountFacts(
 
   try {
     for (const spec of specs) {
-    let probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, args.periodStart, args.periodEnd, args.tokens)
+    let probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, insightBounds.since, insightBounds.until, args.tokens)
 
     // FB content interactions fallback: reconstruct from post engagement sums when
     // the Page metric is unavailable. Stored as reconstructed, never claimed as
@@ -461,7 +530,7 @@ export async function syncAccountFacts(
       periodMonth: args.periodMonth, periodStart: args.periodStart, periodEnd: args.periodEnd,
       metricKey: spec.metricKey, sourceMetric, value: probe.value, availability: probe.availability,
       includesPaid: spec.includesPaid, aggregation, comparableGroup: spec.comparableGroup,
-      apiVersion: args.apiVersion, sourceTimezone: null,
+      apiVersion: args.apiVersion, sourceTimezone: META_INSIGHTS_TIMEZONE,
       provenance: {
         endpoint: spec.mode, token_class: args.tokenClass, response_shape: probe.responseShape,
         snapshot_id: snapshotRow.id, sync_run_id: syncRunId, retrieved_at: retrievedAt,
