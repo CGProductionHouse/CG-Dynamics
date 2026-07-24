@@ -3,12 +3,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   fetchPageTokens,
   META_CONNECTOR_VERSION,
+  metaInsightsBounds,
   metaFetch,
   readMetaError as readSharedMetaError,
   redact,
   resolveMetaGraphConfig,
   syncAccountFacts,
 } from '../_shared/meta.ts'
+import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
 
 type ErrorPhase = 'auth' | 'env' | 'request_parse' | 'connection' | 'assets' | 'sync' | 'unknown'
 
@@ -230,7 +232,7 @@ interface InsightFetchResult {
 // deprecated `plays`/`impressions` and is valid across reels,
 // videos, images and carousels — previously non-reel media requested no views
 // metric at all, so post views never imported.
-function igInsightMetricsForType(_postType: string): string[] {
+function igInsightMetricsForType(): string[] {
   return ['reach', 'views', 'saved', 'shares', 'total_interactions']
 }
 
@@ -429,7 +431,7 @@ async function handleRequest(req: Request): Promise<Response> {
   let pageTokenMap = new Map<string, string>()
   try {
     pageTokenMap = await fetchPageTokens(baseUrl, accessToken)
-  } catch (_err) {
+  } catch {
     // Non-fatal — endpoints will fall back to the user token.
   }
   steps.push(`page tokens loaded (${pageTokenMap.size})`)
@@ -647,14 +649,15 @@ async function handleRequest(req: Request): Promise<Response> {
         fullPicture: string | null
         rawPayload: Record<string, unknown>
       }> = []
+      const postBounds = metaInsightsBounds(periodStart, periodEnd)
 
       if (client.facebookPageId) {
         try {
           const fbParams = new URLSearchParams({
             access_token: pageToken,
             fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true),attachments',
-            since: periodStart,
-            until: `${periodEnd}T23:59:59Z`,
+            since: postBounds.since,
+            until: postBounds.until,
             limit: '100',
           })
 
@@ -743,9 +746,9 @@ async function handleRequest(req: Request): Promise<Response> {
 
               // Filter to the period after retrieving (Meta IG uses 'before'/'after' cursors).
               const ts = new Date(timestamp)
-              const periodStartDt = new Date(periodStart + 'T00:00:00Z')
-              const periodEndDt = new Date(periodEnd + 'T23:59:59Z')
-              if (ts < periodStartDt || ts > periodEndDt) continue
+              const periodStartDt = new Date(Number(postBounds.since) * 1000)
+              const periodEndDt = new Date(Number(postBounds.until) * 1000)
+              if (ts < periodStartDt || ts >= periodEndDt) continue
 
               igPosts.push({
                 metaPostId: mediaId,
@@ -788,7 +791,7 @@ async function handleRequest(req: Request): Promise<Response> {
               let { values, error } = await fetchInsights(
                 baseUrl,
                 post.metaPostId,
-                igInsightMetricsForType(post.postType),
+                igInsightMetricsForType(),
                 igToken,
                 {},
                 knownTokens,
@@ -851,187 +854,52 @@ async function handleRequest(req: Request): Promise<Response> {
       ]
 
       for (const post of allPosts) {
-        // Check existing mapping for idempotency.
-        const { data: existingMapping } = await sb
-          .from('meta_content_mappings')
-          .select('id, post_id')
-          .eq('client_id', client.clientId)
-          .eq('platform', post.platform)
-          .eq('meta_object_id', post.metaPostId)
-          .limit(1)
-
-        if (existingMapping && existingMapping.length > 0 && existingMapping[0].post_id) {
-          // Update existing post.
-          const postId = existingMapping[0].post_id
-          const { error: updateError } = await sb
-            .from('posts')
-            .update({
-              report_id: reportId,
-              platform: post.platform,
-              publish_time: post.publishTime,
-              meta_post_type: post.postType,
-              caption: post.caption,
-              permalink: post.permalink,
-              views: post.viewsValue ?? 0,
-              reach: post.reachValue ?? 0,
-              reactions: post.reactions,
-              comments: post.comments,
-              shares: post.shares ?? 0,
-              total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
-              raw: {
-                source: 'meta_sync',
-                platform: post.platform,
-                content_type: normalizeContentType(post.postType),
-                synced_at: new Date().toISOString(),
-                // True availability: number when Meta returned it, null otherwise.
-                views: post.viewsValue,
-                reach: post.reachValue,
-                engagements: post.engagementsValue,
-                metric_availability: {
-                  views: typeof post.viewsValue === 'number',
-                  reach: typeof post.reachValue === 'number',
-                  content_interactions: true,
-                  source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
-                },
-                meta_payload: post.rawPayload,
-                ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
-                ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
-                ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
-              },
-            })
-            .eq('id', postId)
-
-          if (updateError) {
-            result.warnings.push(`Could not update ${post.platform} post ${post.metaPostId}: ${describeDbError(updateError)}`)
-            continue
-          }
-
-          // Update mapping last_synced_at.
-          await sb
-            .from('meta_content_mappings')
-            .update({ last_synced_at: new Date().toISOString(), report_id: reportId })
-            .eq('id', existingMapping[0].id)
-        } else if (existingMapping && existingMapping.length > 0 && !existingMapping[0].post_id) {
-          // Mapping exists but no post — create post and link.
-          const { data: newPost, error: insertError } = await sb
-            .from('posts')
-            .insert({
-              report_id: reportId,
-              platform: post.platform,
-              meta_post_id: post.metaPostId,
-              publish_time: post.publishTime,
-              meta_post_type: post.postType,
-              caption: post.caption,
-              permalink: post.permalink,
-              views: post.viewsValue ?? 0,
-              reach: post.reachValue ?? 0,
-              reactions: post.reactions,
-              comments: post.comments,
-              shares: post.shares ?? 0,
-              total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
-              raw: {
-                source: 'meta_sync',
-                platform: post.platform,
-                content_type: normalizeContentType(post.postType),
-                synced_at: new Date().toISOString(),
-                // True availability: number when Meta returned it, null otherwise.
-                views: post.viewsValue,
-                reach: post.reachValue,
-                engagements: post.engagementsValue,
-                metric_availability: {
-                  views: typeof post.viewsValue === 'number',
-                  reach: typeof post.reachValue === 'number',
-                  content_interactions: true,
-                  source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
-                },
-                meta_payload: post.rawPayload,
-                ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
-                ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
-                ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
-              },
-            })
-            .select('id')
-            .single()
-
-          if (insertError || !newPost) {
-            result.warnings.push(`Could not save ${post.platform} post ${post.metaPostId}: ${describeDbError(insertError)}`)
-            continue
-          }
-
-          await sb
-            .from('meta_content_mappings')
-            .update({
-              post_id: newPost.id,
-              report_id: reportId,
-              last_synced_at: new Date().toISOString(),
-            })
-            .eq('id', existingMapping[0].id)
-        } else {
-          // No mapping — create post and mapping.
-          const { data: newPost, error: insertError } = await sb
-            .from('posts')
-            .insert({
-              report_id: reportId,
-              platform: post.platform,
-              meta_post_id: post.metaPostId,
-              publish_time: post.publishTime,
-              meta_post_type: post.postType,
-              caption: post.caption,
-              permalink: post.permalink,
-              views: post.viewsValue ?? 0,
-              reach: post.reachValue ?? 0,
-              reactions: post.reactions,
-              comments: post.comments,
-              shares: post.shares ?? 0,
-              total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
-              raw: {
-                source: 'meta_sync',
-                platform: post.platform,
-                content_type: normalizeContentType(post.postType),
-                synced_at: new Date().toISOString(),
-                // True availability: number when Meta returned it, null otherwise.
-                views: post.viewsValue,
-                reach: post.reachValue,
-                engagements: post.engagementsValue,
-                metric_availability: {
-                  views: typeof post.viewsValue === 'number',
-                  reach: typeof post.reachValue === 'number',
-                  content_interactions: true,
-                  source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
-                },
-                meta_payload: post.rawPayload,
-                ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
-                ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
-                ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
-              },
-            })
-            .select('id')
-            .single()
-
-          if (insertError || !newPost) {
-            result.warnings.push(`Could not save ${post.platform} post ${post.metaPostId}: ${describeDbError(insertError)}`)
-            continue
-          }
-
-          const { error: mappingError } = await sb
-            .from('meta_content_mappings')
-            .insert({
-              client_id: client.clientId,
-              report_id: reportId,
-              post_id: newPost.id,
-              platform: post.platform,
-              meta_object_id: post.metaPostId,
-              meta_object_type: post.postType,
-              permalink: post.permalink,
-              last_synced_at: new Date().toISOString(),
-            })
-          if (mappingError) {
-            result.warnings.push(`Saved ${post.platform} post ${post.metaPostId} but could not record its mapping: ${describeDbError(mappingError)}`)
-          }
+        const postPayload = {
+          report_id: reportId,
+          platform: post.platform,
+          meta_post_id: post.metaPostId,
+          publish_time: post.publishTime,
+          meta_post_type: post.postType,
+          caption: post.caption,
+          permalink: post.permalink,
+          views: post.viewsValue,
+          reach: post.reachValue,
+          reactions: post.reactions,
+          comments: post.comments,
+          shares: post.shares ?? 0,
+          total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
+          raw: {
+            source: 'meta_sync',
+            platform: post.platform,
+            content_type: normalizeContentType(post.postType),
+            synced_at: new Date().toISOString(),
+            views: post.viewsValue,
+            reach: post.reachValue,
+            engagements: post.engagementsValue,
+            metric_availability: {
+              views: typeof post.viewsValue === 'number',
+              reach: typeof post.reachValue === 'number',
+              content_interactions: true,
+              source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
+            },
+            meta_payload: post.rawPayload,
+            ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),
+            ...('thumbnailUrl' in post && post.thumbnailUrl ? { thumbnail_url: post.thumbnailUrl } : {}),
+            ...('mediaUrl' in post && post.mediaUrl ? { media_url: post.mediaUrl } : {}),
+          },
         }
-
-        result.postsSynced++
-        totalPostsSynced++
+        try {
+          await upsertMetaReportPost(sb, {
+            clientId: client.clientId,
+            metaObjectId: post.metaPostId,
+            metaObjectType: post.postType,
+            payload: postPayload,
+          })
+          result.postsSynced++
+          totalPostsSynced++
+        } catch (error) {
+          result.warnings.push(`Could not save ${post.platform} post ${post.metaPostId}: ${describeDbError(error as DbErrorLike)}`)
+        }
       }
 
       // ── Account-level truth via the generic discovery engine ──────────────

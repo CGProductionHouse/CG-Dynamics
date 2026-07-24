@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8')
 const SHARED_META = read('../supabase/functions/_shared/meta.ts')
+const META_POST_MERGE = read('../supabase/functions/_shared/metaPostMerge.ts')
 const META_SYNC = read('../supabase/functions/meta-sync/index.ts')
 const META_WORKER = read('../supabase/functions/meta-sync-worker/index.ts')
 const REPORT_STATS = read('../src/lib/reportStats.ts')
@@ -182,6 +183,19 @@ test('scheduled worker uses the shared connector, not a competing one', () => {
   // Shares the network layer (no private retry loop competing with the shared one).
   assert.match(META_WORKER, /\bmetaFetch\b/)
   assert.match(META_WORKER, /runType: 'scheduled'/)
+})
+
+test('manual and scheduled sync share conservative post reconciliation', () => {
+  for (const source of [META_SYNC, META_WORKER]) {
+    assert.match(source, /upsertMetaReportPost/)
+    assert.match(source, /metaInsightsBounds\(periodStart, periodEnd\)/)
+  }
+  assert.match(META_POST_MERGE, /permalinkMatches\.length === 1/)
+  assert.match(META_POST_MERGE, /captionMatches\.length === 1/)
+  assert.match(META_POST_MERGE, /closePublishTime/)
+  assert.match(META_POST_MERGE, /meta_sync: payload\.raw/)
+  assert.doesNotMatch(META_SYNC, /views:\s*post\.viewsValue\s*\?\?\s*0/)
+  assert.doesNotMatch(META_SYNC, /reach:\s*post\.reachValue\s*\?\?\s*0/)
 })
 
 test('no active Meta function hardcodes a legacy Graph API version', () => {

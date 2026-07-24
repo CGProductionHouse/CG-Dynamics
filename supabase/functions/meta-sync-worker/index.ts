@@ -2,12 +2,14 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   META_CONNECTOR_VERSION,
+  metaInsightsBounds,
   metaFetch,
   readMetaError,
   redact,
   resolveMetaGraphConfig,
   syncAccountFacts,
 } from '../_shared/meta.ts'
+import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
 
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
@@ -112,7 +114,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: error instanceof Error ? error.message : 'Internal Meta configuration error.' }, 500)
   }
 
-  let body: { batchId?: string; maxItems?: number } = {}
+  let body: { batchId?: string; maxItems?: number }
   try {
     body = await req.json()
   } catch {
@@ -204,10 +206,11 @@ Deno.serve(async (req) => {
       }
 
       const { periodStart, periodEnd } = monthBounds(item.month)
+      const postBounds = metaInsightsBounds(periodStart, periodEnd)
       let postsSynced = 0
       let reportsCreated = 0
       let reportsReused = 0
-      let warnings: string[] = []
+      const warnings: string[] = []
       let itemError: string | null = null
       let itemStatus = 'completed'
 
@@ -282,8 +285,8 @@ Deno.serve(async (req) => {
                 const params = new URLSearchParams({
                   access_token: pageToken,
                   fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
-                  since: periodStart,
-                  until: `${periodEnd}T23:59:59Z`,
+                  since: postBounds.since,
+                  until: postBounds.until,
                   limit: '100',
                 })
                 const res = await metaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`, 30_000)
@@ -293,14 +296,6 @@ Deno.serve(async (req) => {
                   for (const raw of rawPosts) {
                     const metaPostId = String(raw.id ?? '')
                     if (!metaPostId) continue
-                    const { data: existing } = await sb
-                      .from('meta_content_mappings')
-                      .select('id, post_id')
-                      .eq('client_id', item.client_id)
-                      .eq('platform', 'facebook')
-                      .eq('meta_object_id', metaPostId)
-                      .limit(1)
-
                     const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
                     const caption = (raw.message as string | null) ?? null
                     const permalink = (raw.permalink_url as string | null) ?? null
@@ -339,20 +334,11 @@ Deno.serve(async (req) => {
                       },
                     }
 
-                    if (existing && existing.length > 0) {
-                      if (existing[0].post_id) {
-                        await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
-                      }
-                      await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
-                    } else {
-                      const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
-                      if (newPost) {
-                        await sb.from('meta_content_mappings').insert({
-                          client_id: item.client_id, report_id: reportId, post_id: newPost.id,
-                          platform: 'facebook', meta_object_id: metaPostId, last_synced_at: now,
-                        })
-                      }
-                    }
+                    await upsertMetaReportPost(sb, {
+                      clientId: item.client_id,
+                      metaObjectId: metaPostId,
+                      payload: postPayload as Parameters<typeof upsertMetaReportPost>[1]['payload'],
+                    })
                     postsSynced++
                   }
                 } else {
@@ -384,17 +370,9 @@ Deno.serve(async (req) => {
                 const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
                 if (!timestamp) continue
                 const ts = new Date(timestamp)
-                const pStart = new Date(periodStart + 'T00:00:00Z')
-                const pEnd = new Date(periodEnd + 'T23:59:59Z')
-                if (ts < pStart || ts > pEnd) continue
-
-                const { data: existing } = await sb
-                  .from('meta_content_mappings')
-                  .select('id, post_id')
-                  .eq('client_id', item.client_id)
-                  .eq('platform', 'instagram')
-                  .eq('meta_object_id', metaPostId)
-                  .limit(1)
+                const pStart = new Date(Number(postBounds.since) * 1000)
+                const pEnd = new Date(Number(postBounds.until) * 1000)
+                if (ts < pStart || ts >= pEnd) continue
 
                 const likes = (raw.like_count as number) ?? 0
                 const igComments = (raw.comments_count as number) ?? 0
@@ -438,20 +416,12 @@ Deno.serve(async (req) => {
                   },
                 }
 
-                if (existing && existing.length > 0) {
-                  if (existing[0].post_id) {
-                    await sb.from('posts').update(postPayload).eq('id', existing[0].post_id)
-                  }
-                  await sb.from('meta_content_mappings').update({ last_synced_at: now, report_id: reportId }).eq('id', existing[0].id)
-                } else {
-                  const { data: newPost } = await sb.from('posts').insert(postPayload).select('id').single()
-                  if (newPost) {
-                    await sb.from('meta_content_mappings').insert({
-                      client_id: item.client_id, report_id: reportId, post_id: newPost.id,
-                      platform: 'instagram', meta_object_id: metaPostId, last_synced_at: now,
-                    })
-                  }
-                }
+                await upsertMetaReportPost(sb, {
+                  clientId: item.client_id,
+                  metaObjectId: metaPostId,
+                  metaObjectType: postType,
+                  payload: postPayload as Parameters<typeof upsertMetaReportPost>[1]['payload'],
+                })
                 postsSynced++
               }
             } else {
