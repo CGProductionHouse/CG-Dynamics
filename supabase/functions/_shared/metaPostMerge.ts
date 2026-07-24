@@ -95,6 +95,49 @@ async function findImportedMatch(
   return captionMatches.length === 1 ? captionMatches[0] : null
 }
 
+async function findUnmappedLiveDuplicate(
+  sb: SupabaseClient,
+  payload: MetaPostPayload,
+  keepPostId: string,
+): Promise<PostRow | null> {
+  const { data, error } = await sb
+    .from('posts')
+    .select('id, publish_time, caption, permalink, raw')
+    .eq('report_id', payload.report_id)
+    .eq('platform', payload.platform)
+  if (error) throw new Error(`Could not inspect legacy ${payload.platform} report posts: ${error.message}`)
+
+  const liveRows = (data ?? []).filter((row): row is PostRow =>
+    Boolean(row?.id)
+    && row.id !== keepPostId
+    && !isImported(row as PostRow),
+  )
+  if (liveRows.length === 0) return null
+
+  const { data: mappings, error: mappingsError } = await sb
+    .from('meta_content_mappings')
+    .select('post_id')
+    .in('post_id', liveRows.map(row => row.id))
+  if (mappingsError) throw new Error(`Could not inspect legacy Meta post mappings: ${mappingsError.message}`)
+
+  const mappedIds = new Set((mappings ?? []).map(row => row.post_id).filter(Boolean))
+  const candidates = liveRows.filter(row => !mappedIds.has(row.id))
+  const permalink = normalizedPermalink(payload.permalink)
+  const permalinkMatches = permalink
+    ? candidates.filter(row => normalizedPermalink(row.permalink) === permalink)
+    : []
+  if (permalinkMatches.length === 1) return permalinkMatches[0]
+  if (permalinkMatches.length > 1) return null
+
+  const caption = normalizedCaption(payload.caption)
+  if (!caption) return null
+  const captionMatches = candidates.filter(row =>
+    normalizedCaption(row.caption) === caption
+    && closePublishTime(row.publish_time, payload.publish_time),
+  )
+  return captionMatches.length === 1 ? captionMatches[0] : null
+}
+
 function importedUpdate(row: PostRow, payload: MetaPostPayload): Record<string, unknown> {
   return {
     permalink: row.permalink || payload.permalink,
@@ -103,6 +146,29 @@ function importedUpdate(row: PostRow, payload: MetaPostPayload): Record<string, 
       meta_sync: payload.raw,
     },
   }
+}
+
+async function removeLegacyDuplicate(
+  sb: SupabaseClient,
+  duplicatePostId: string,
+  keepPostId: string,
+): Promise<void> {
+  for (const field of ['best_poster_post_id', 'best_video_post_id']) {
+    const { error } = await sb
+      .from('reports')
+      .update({ [field]: keepPostId })
+      .eq(field, duplicatePostId)
+    if (error) throw new Error(`Could not preserve report post reference: ${error.message}`)
+  }
+
+  const { error: exclusionError } = await sb
+    .from('report_content_exclusions')
+    .update({ post_id: keepPostId })
+    .eq('post_id', duplicatePostId)
+  if (exclusionError) throw new Error(`Could not preserve report curation reference: ${exclusionError.message}`)
+
+  const { error: deleteError } = await sb.from('posts').delete().eq('id', duplicatePostId)
+  if (deleteError) throw new Error(`Could not remove legacy duplicate Meta post: ${deleteError.message}`)
 }
 
 export async function upsertMetaReportPost(
@@ -136,7 +202,11 @@ export async function upsertMetaReportPost(
     if (error) throw new Error(`Could not inspect mapped ${payload.platform} post: ${error.message}`)
     existingPost = data as PostRow | null
   }
-  if (!existingPost) existingPost = await findImportedMatch(sb, payload)
+  if (existingPost && !isImported(existingPost)) {
+    existingPost = await findImportedMatch(sb, payload) ?? existingPost
+  } else if (!existingPost) {
+    existingPost = await findImportedMatch(sb, payload)
+  }
 
   let postId: string
   let inserted = false
@@ -169,6 +239,11 @@ export async function upsertMetaReportPost(
   } else {
     const { error } = await sb.from('meta_content_mappings').insert(mappingPayload)
     if (error) throw new Error(`Could not save ${payload.platform} content mapping: ${error.message}`)
+  }
+
+  if (reusedImported) {
+    const duplicate = await findUnmappedLiveDuplicate(sb, payload, postId)
+    if (duplicate) await removeLegacyDuplicate(sb, duplicate.id, postId)
   }
 
   return { postId, inserted, reusedImported }
