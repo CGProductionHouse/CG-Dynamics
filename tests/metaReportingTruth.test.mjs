@@ -14,6 +14,7 @@ const REPORT_STATS = read('../src/lib/reportStats.ts')
 const MIGRATION = read('../supabase/phase-20d-meta-reporting-truth.sql')
 const PHASE_20E = read('../supabase/phase-20e-facts-client-access-and-curation.sql')
 const PHASE_20F = read('../supabase/phase-20f-meta-v25-metric-contract.sql')
+const PHASE_20G = read('../supabase/phase-20g-meta-invalid-unique-viewer-repair.sql')
 const REPORTING_TRUTH = read('../src/lib/db/reportingTruth.ts')
 const CLIENT_VIEW = read('../src/pages/client/ClientReportView.tsx')
 const CLIENT_DASHBOARD = read('../src/pages/client/Dashboard.tsx')
@@ -145,6 +146,32 @@ test('valid_zero renders as 0 with a value; unavailable renders no line', () => 
   assert.equal(lines[0].isValidZero, true)
   assert.equal(lines[0].value, 0)
   assert.equal(lines[0].hasValue, true)
+})
+
+test('provider-specific metrics use labels that do not imply Business Suite parity', () => {
+  const current = [
+    {
+      platform: 'facebook',
+      metricKey: 'content_interactions',
+      value: 125,
+      availability: 'complete',
+      comparableGroup: 'fb_interactions_v1',
+      aggregation: 'sum',
+      sourceMetric: 'page_post_engagements',
+    },
+    {
+      platform: 'instagram',
+      metricKey: 'website_clicks',
+      value: 29,
+      availability: 'complete',
+      comparableGroup: 'ig_website_clicks_v1',
+      aggregation: 'sum',
+      sourceMetric: 'website_clicks',
+    },
+  ]
+  const lines = ov.buildOverviewSections(current, []).flatMap(section => section.lines)
+  assert.equal(lines.find(line => line.platform === 'facebook')?.label, 'Facebook post engagements')
+  assert.equal(lines.find(line => line.platform === 'instagram')?.label, 'Instagram website clicks')
 })
 
 test('current followers is a snapshot and never shows month-on-month growth', () => {
@@ -369,6 +396,15 @@ test('Graph v25 contract uses media views, Pacific report bounds, and current fo
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions_unique'/)
   assert.match(PHASE_20F, /fb_media_views_v2/)
   assert.match(PHASE_20F, /ig_follows_gained_v2/)
+})
+
+test('Phase 20g repairs only proven daily unique-viewer sums', () => {
+  assert.match(PHASE_20G, /metric_key = 'unique_viewers'/)
+  assert.match(PHASE_20G, /source_metric = 'page_total_media_view_unique'/)
+  assert.match(PHASE_20G, /jsonb_array_length/)
+  assert.match(PHASE_20G, /daily_unique_series_not_summable/)
+  assert.match(PHASE_20G, /availability = 'unavailable'/)
+  assert.match(PHASE_20G, /value = null/)
 })
 
 test('Meta OAuth records actual reporting permissions and requires read_insights', () => {

@@ -163,12 +163,26 @@ const SECTION_TITLES: Record<OverviewSection['key'], string> = {
 // Platform display order — Facebook first, then Instagram, for stable layout.
 const PLATFORM_ORDER = ['facebook', 'instagram']
 
+function metricLabel(fact: PlatformFact): string {
+  if (fact.platform === 'facebook'
+      && fact.metricKey === 'content_interactions'
+      && fact.sourceMetric === 'page_post_engagements') {
+    return 'Post engagements'
+  }
+  if (fact.platform === 'instagram'
+      && fact.metricKey === 'website_clicks'
+      && fact.sourceMetric === 'website_clicks') {
+    return 'Website clicks'
+  }
+  return METRIC_LABELS[fact.metricKey] ?? fact.metricKey
+}
+
 function lineFor(current: PlatformFact, previous: PlatformFact | null): OverviewLine {
   const isSnapshot = current.aggregation === 'snapshot'
   const cmp = isSnapshot
     ? { comparable: false, changePercent: null, reason: 'Snapshot metric — not shown as month-on-month growth.' }
     : compareFacts(current, previous)
-  const label = `${PLATFORM_TITLES[current.platform] ?? current.platform} ${(METRIC_LABELS[current.metricKey] ?? current.metricKey).toLowerCase()}`
+  const label = `${PLATFORM_TITLES[current.platform] ?? current.platform} ${metricLabel(current).toLowerCase()}`
   return {
     platform: current.platform,
     metricKey: current.metricKey,
