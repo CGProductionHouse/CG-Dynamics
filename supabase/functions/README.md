@@ -32,6 +32,7 @@ Before deploying, set these secrets:
 supabase secrets set META_APP_ID=<your-meta-app-id>
 supabase secrets set META_APP_SECRET=<your-meta-app-secret>
 supabase secrets set META_REDIRECT_URI=<full-edge-function-url>
+supabase secrets set META_GRAPH_VERSION=<version-verified-in-meta-developers>
 supabase secrets set APP_PUBLIC_URL=https://cg-dynamics.vercel.app
 supabase secrets set OPENROUTER_API_KEY=<your-openrouter-api-key>
 supabase secrets set OPENROUTER_MODEL=openrouter/free
@@ -44,6 +45,11 @@ supabase secrets set OPENAI_MODEL=gpt-4o-mini
 supabase secrets set AI_PROVIDER_ORDER=openrouter,gemini,groq,openai
 supabase secrets set AI_MAX_FALLBACKS=3
 ```
+
+`META_GRAPH_VERSION` has no code default. Verify the app's supported production
+version in Meta Developers before setting it; do not guess or copy an obsolete
+version. Meta OAuth, asset discovery and both sync paths fail closed when it is
+missing or malformed.
 
 `META_REDIRECT_URI` must match exactly what is registered in the Meta App
 settings, e.g.:
@@ -61,7 +67,9 @@ must not be added as `VITE_` browser environment variables.
 supabase functions deploy meta-oauth-start --no-verify-jwt
 supabase functions deploy meta-oauth-callback --no-verify-jwt
 supabase functions deploy meta-connection-status --no-verify-jwt
+supabase functions deploy meta-list-assets --no-verify-jwt
 supabase functions deploy meta-sync --no-verify-jwt
+supabase functions deploy meta-sync-worker --no-verify-jwt
 supabase functions deploy cg-assistant-chat --no-verify-jwt
 ```
 
@@ -249,7 +257,7 @@ Launch checklist:
 
 ## Deploy note (meta-list-assets)
 
-This function must be deployed after the code is merged:
+Deploy the sync functions only after `META_GRAPH_VERSION` is verified and set:
 
 ```bash
 npx supabase functions deploy meta-list-assets --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
@@ -275,6 +283,7 @@ This function must be deployed after the code is merged:
 
 ```bash
 npx supabase functions deploy meta-sync --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
+npx supabase functions deploy meta-sync-worker --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
 ```
 
 It verifies the caller's JWT internally and enforces staff-level access, so
@@ -284,14 +293,14 @@ It verifies the caller's JWT internally and enforces staff-level access, so
 - `previous_completed_month` — syncs all linked clients (or a single client if
   `clientId` is provided) for the previous completed calendar month. Pulls
   Facebook Page posts and insights, Instagram media and insights, creates or
-  updates internal draft reports, and upserts monthly platform totals into
-  `manual_platform_metrics`.
+  updates internal draft reports, and writes availability-aware normalized facts
+  into `platform_metric_facts_monthly` with provenance snapshots and sync health.
 
 It does **not**:
 - Publish reports automatically
 - Overwrite existing `strategy_data` or manual strategy notes
 - Expose Meta tokens
-- Fail the whole sync if one client or one metric fails
+- Overwrite a previously verified fact when a later probe is unavailable
 
 ## Future phases
 

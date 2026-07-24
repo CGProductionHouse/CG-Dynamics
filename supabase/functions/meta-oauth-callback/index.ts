@@ -1,4 +1,5 @@
 import { corsHeaders } from '../_shared/cors.ts'
+import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
 
 // Server-side Supabase client using the service_role key.
 // This bypasses RLS — only Edge Functions should ever use this.
@@ -7,6 +8,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const REQUESTED_SCOPES = [
   'pages_show_list',
   'pages_read_engagement',
+  'read_insights',
   'instagram_basic',
   'instagram_manage_insights',
   'business_management',
@@ -19,38 +21,46 @@ function redirect(to: string): Response {
   })
 }
 
-function redact(text: string): string {
-  return text
-    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
-    .replace(/client_secret=[^&\s"']+/gi, 'client_secret=[redacted]')
-    .replace(/code=[^&\s"']+/gi, 'code=[redacted]')
-    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
-    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
-}
-
 async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value)
   const digest = await crypto.subtle.digest('SHA-256', data)
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
-async function safeMetaError(res: Response): Promise<string> {
+async function safeMetaError(res: Response, tokens: Array<string | null | undefined>): Promise<string> {
+  const error = await readMetaError(res, tokens)
+  return [
+    error.message,
+    error.type ? `type ${error.type}` : null,
+    error.code ? `code ${error.code}` : null,
+    error.subcode ? `subcode ${error.subcode}` : null,
+    error.trace ? `trace ${error.trace}` : null,
+  ].filter(Boolean).join(', ')
+}
+
+async function fetchGrantedScopes(graphBaseUrl: string, accessToken: string): Promise<string[]> {
   try {
-    const body = await res.json()
-    const err = body?.error
-    if (err && typeof err === 'object') {
-      return redact([
-        err.message ? String(err.message) : null,
-        err.type ? `type ${err.type}` : null,
-        err.code !== undefined ? `code ${err.code}` : null,
-        err.error_subcode !== undefined ? `subcode ${err.error_subcode}` : null,
-        err.fbtrace_id ? `trace ${err.fbtrace_id}` : null,
-      ].filter(Boolean).join(', '))
+    const response = await metaFetch(
+      `${graphBaseUrl}/me/permissions?access_token=${encodeURIComponent(accessToken)}`,
+    )
+    if (!response.ok) {
+      console.error('Meta permission verification failed:', await safeMetaError(response, [accessToken]))
+      return []
     }
-  } catch {
-    // Keep HTTP status fallback.
+
+    const body = await response.json() as {
+      data?: Array<{ permission?: unknown; status?: unknown }>
+    }
+    return (body.data ?? [])
+      .filter(item => item.status === 'granted' && typeof item.permission === 'string')
+      .map(item => item.permission as string)
+  } catch (error) {
+    console.error(
+      'Meta permission verification network error:',
+      redact(error instanceof Error ? error.message : String(error), [accessToken]),
+    )
+    return []
   }
-  return `HTTP ${res.status}`
 }
 
 Deno.serve(async (req) => {
@@ -74,11 +84,19 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
+  let graphBaseUrl: string
+  try {
+    graphBaseUrl = resolveMetaGraphConfig().baseUrl
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : 'Internal Meta configuration error.')
+    return redirect(`${appUrl}/admin/integrations/meta?meta=config_error`)
+  }
+
   const sb = createClient(supabaseUrl, serviceRoleKey)
 
   // If Meta returned an error, redirect back to the app with ?meta=error.
   if (errorParam) {
-    console.error('Meta OAuth provider error:', redact(`${errorParam} ${errorDesc ?? ''}`))
+    console.error('Meta OAuth provider error:', redact(`${errorParam} ${errorDesc ?? ''}`, [code]))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
@@ -126,8 +144,8 @@ Deno.serve(async (req) => {
 
   let tokenResponse: Response
   try {
-    tokenResponse = await fetch(
-      'https://graph.facebook.com/v22.0/oauth/access_token',
+    tokenResponse = await metaFetch(
+      `${graphBaseUrl}/oauth/access_token`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -135,12 +153,12 @@ Deno.serve(async (req) => {
       },
     )
   } catch (err) {
-    console.error('Meta token exchange network error:', redact(err instanceof Error ? err.message : String(err)))
+    console.error('Meta token exchange network error:', redact(err instanceof Error ? err.message : String(err), [appSecret, code]))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
   if (!tokenResponse.ok) {
-    console.error('Meta token exchange error:', await safeMetaError(tokenResponse))
+    console.error('Meta token exchange error:', await safeMetaError(tokenResponse, [appSecret, code]))
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
@@ -151,6 +169,13 @@ Deno.serve(async (req) => {
     console.error('Meta token exchange missing access_token in response')
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
+
+  const grantedScopes = await fetchGrantedScopes(graphBaseUrl, accessToken)
+  const missingScopes = REQUESTED_SCOPES.filter(scope => !grantedScopes.includes(scope))
+  const connectionStatus = missingScopes.length === 0 ? 'connected' : 'needs_reauth'
+  const permissionError = missingScopes.length > 0
+    ? `Missing required Meta permissions: ${missingScopes.join(', ')}. Reconnect Meta and grant them.`
+    : null
 
   // ── Store connection metadata and token in database ──────────
   // Upsert: use the first existing connection, or create a new one.
@@ -168,9 +193,9 @@ Deno.serve(async (req) => {
       .from('meta_connections')
       .update({
         connected_by: consumedState.user_id,
-        status: 'connected',
-        scopes: REQUESTED_SCOPES,
-        last_error: null,
+        status: connectionStatus,
+        scopes: grantedScopes,
+        last_error: permissionError,
         last_connected_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -187,8 +212,9 @@ Deno.serve(async (req) => {
       .from('meta_connections')
       .insert({
         connected_by: consumedState.user_id,
-        status: 'connected',
-        scopes: REQUESTED_SCOPES,
+        status: connectionStatus,
+        scopes: grantedScopes,
+        last_error: permissionError,
         last_connected_at: new Date().toISOString(),
       })
       .select('id')
@@ -226,5 +252,5 @@ Deno.serve(async (req) => {
   }
 
   // Success — redirect back to the app.
-  return redirect(`${appUrl}/admin/integrations/meta?meta=connected`)
+  return redirect(`${appUrl}/admin/integrations/meta?meta=${missingScopes.length > 0 ? 'permissions_missing' : 'connected'}`)
 })

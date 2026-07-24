@@ -76,6 +76,15 @@ interface ClientAssetSuggestion {
 interface ConnectionInfo {
   lastConnectedAt: string | null
   metaBusinessName: string | null
+  grantedScopes: string[]
+  schemaReady: boolean
+  tokenEncryptedAtRest: boolean
+  lastVerifiedInsight: {
+    platform: string
+    periodMonth: string
+    healthState: string
+    finishedAt: string | null
+  } | null
 }
 
 type ReadinessFilter = 'none' | 'active' | 'linked' | 'missingFacebook' | 'missingInstagram' | 'missingAdAccount' | 'noInstagram'
@@ -761,15 +770,21 @@ export default function MetaIntegrationPage() {
         setConnectionInfo({
           lastConnectedAt: data.connection?.lastConnectedAt ?? null,
           metaBusinessName: data.connection?.metaBusinessName ?? null,
+          grantedScopes: Array.isArray(data.connection?.grantedScopes) ? data.connection.grantedScopes : [],
+          schemaReady: data.schemaReady === true,
+          tokenEncryptedAtRest: data.tokenSecurity?.encryptedAtRest === true,
+          lastVerifiedInsight: data.connection?.lastVerifiedInsight ?? null,
         })
         setConnectMsg(null)
       } else {
         setConnectState('idle')
         setConnectionInfo(null)
+        setConnectMsg(data?.message ?? 'Meta needs to be connected before report data can sync.')
       }
     } catch {
       setConnectState('idle')
       setConnectionInfo(null)
+      setConnectMsg('Could not verify the Meta connection. Try again or ask an admin to check the Edge Function.')
     } finally {
       setConnectionLoading(false)
     }
@@ -793,6 +808,10 @@ export default function MetaIntegrationPage() {
       window.history.replaceState(null, '', window.location.pathname)
     } else if (meta === 'error') {
       setConnectMsg('Meta connection failed. Please try again.')
+      window.history.replaceState(null, '', window.location.pathname)
+    } else if (meta === 'permissions_missing') {
+      setConnectMsg('Meta connected, but one or more reporting permissions were not granted. Reconnect Meta and approve all requested permissions.')
+      checkConnection()
       window.history.replaceState(null, '', window.location.pathname)
     }
   }, [searchParams, checkConnection])
@@ -1470,11 +1489,31 @@ export default function MetaIntegrationPage() {
             onClick={() => setReadinessFilter(readinessFilter === 'missingAdAccount' ? 'none' : 'missingAdAccount')}
           />
           <HealthTile label="Last connected" value={formatDateTime(connectionInfo?.lastConnectedAt)} />
-          <HealthTile label="OAuth state" value="Review: Confirm phase-4b SQL is applied in Supabase" tone={connectState === 'connected' ? 'neutral' : 'warn'} />
-          <HealthTile label="Token encryption" value="Not production-ready" tone="warn" />
+          <HealthTile
+            label="OAuth permissions"
+            value={connectionInfo?.grantedScopes.includes('read_insights') ? 'Reporting access granted' : 'Reauthorization required'}
+            tone={connectionInfo?.grantedScopes.includes('read_insights') ? 'ok' : 'warn'}
+          />
+          <HealthTile
+            label="OAuth schema"
+            value={connectionInfo?.schemaReady ? 'Ready' : 'Migration required'}
+            tone={connectionInfo?.schemaReady ? 'ok' : 'warn'}
+          />
+          <HealthTile
+            label="Token storage"
+            value={connectionInfo?.tokenEncryptedAtRest ? 'Encrypted at rest' : 'Server-only; encryption hardening required'}
+            tone={connectionInfo?.tokenEncryptedAtRest ? 'ok' : 'warn'}
+          />
+          <HealthTile
+            label="Last verified insight"
+            value={connectionInfo?.lastVerifiedInsight?.finishedAt
+              ? `${formatDateTime(connectionInfo.lastVerifiedInsight.finishedAt)} · ${connectionInfo.lastVerifiedInsight.platform}`
+              : 'No verified insight yet'}
+            tone={connectionInfo?.lastVerifiedInsight ? 'ok' : 'neutral'}
+          />
         </div>
         <p className="mt-3 text-xs leading-relaxed text-brand-primary/70">
-          OAuth state security is implemented in code. Confirm the prepared `phase-4b` SQL has been applied in the Supabase SQL editor. Tokens still live in a server-only table, but raw token storage remains a production-readiness risk until encryption is added.
+          Connection, permissions and schema readiness are checked server-side. Meta tokens never reach the browser. Token storage remains server-only but is not yet encrypted at rest, so encryption hardening is still required before broader production rollout.
         </p>
       </PremiumCard>
 

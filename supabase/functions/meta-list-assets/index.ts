@@ -1,7 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const META_GRAPH_VERSION = 'v22.0'
+import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
 
 interface InstagramBusinessAccount {
   id: string
@@ -32,13 +31,6 @@ interface AdAccountResponse {
   data: AdAccount[]
 }
 
-function redact(text: string): string {
-  return text
-    .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
-    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
-    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -46,6 +38,16 @@ Deno.serve(async (req) => {
 
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405)
+  }
+
+  let baseUrl: string
+  try {
+    baseUrl = resolveMetaGraphConfig().baseUrl
+  } catch (error) {
+    return jsonResponse({
+      ok: false,
+      error: error instanceof Error ? error.message : 'Internal Meta configuration error.',
+    }, 500)
   }
 
   // Verify the caller is authenticated and has staff-level access.
@@ -108,8 +110,6 @@ Deno.serve(async (req) => {
   }
 
   const accessToken = tokens[0].encrypted_access_token
-  const baseUrl = `https://graph.facebook.com/${META_GRAPH_VERSION}`
-
   // ── Fetch Facebook Pages ─────────────────────────────────
   let pages: FbPage[] = []
   let pagesDiagnostic: Record<string, unknown> = { available: false }
@@ -120,30 +120,18 @@ Deno.serve(async (req) => {
       fields: 'id,name,category,tasks,instagram_business_account{id,username,name,profile_picture_url}',
       limit: '100',
     })
-    const pageRes = await fetch(`${baseUrl}/me/accounts?${pageParams.toString()}`)
+    const pageRes = await metaFetch(`${baseUrl}/me/accounts?${pageParams.toString()}`)
     if (pageRes.ok) {
       const pageData: FbPageResponse = await pageRes.json()
       pages = pageData.data ?? []
       pagesDiagnostic = { available: true, count: pages.length }
     } else {
-      let safeMsg = `HTTP ${pageRes.status}`
-      try {
-        const errBody = await pageRes.json()
-        const err = errBody?.error
-        if (err && typeof err === 'object') {
-          safeMsg = redact([
-            err.message ? String(err.message) : null,
-            err.type ? `type ${err.type}` : null,
-            err.code !== undefined ? `code ${err.code}` : null,
-          ].filter(Boolean).join(', ')) || safeMsg
-        }
-      } catch {
-        // keep HTTP status fallback
-      }
+      const error = await readMetaError(pageRes, [accessToken])
+      const safeMsg = [error.message, error.type ? `type ${error.type}` : null, error.code ? `code ${error.code}` : null].filter(Boolean).join(', ')
       pagesDiagnostic = { available: false, status: safeMsg, hint: 'The connected Meta user may not have Pages management access. Verify the user has pages_show_list permission and manages the expected Facebook Pages.' }
     }
   } catch (err) {
-    console.error('Failed to fetch Facebook Pages:', redact(err instanceof Error ? err.message : String(err)))
+    console.error('Failed to fetch Facebook Pages:', redact(err instanceof Error ? err.message : String(err), [accessToken]))
     pagesDiagnostic = { available: false, networkError: true, hint: 'Network error fetching Facebook Pages. Check Edge Function logs for details.' }
   }
 
@@ -182,30 +170,18 @@ Deno.serve(async (req) => {
       fields: 'id,name,account_status',
       limit: '100',
     })
-    const adRes = await fetch(`${baseUrl}/me/adaccounts?${adParams.toString()}`)
+    const adRes = await metaFetch(`${baseUrl}/me/adaccounts?${adParams.toString()}`)
     if (adRes.ok) {
       const adData: AdAccountResponse = await adRes.json()
       adAccounts = adData.data ?? []
       adAccountsDiagnostic = { available: true, count: adAccounts.length }
     } else {
-      let safeMsg = `HTTP ${adRes.status}`
-      try {
-        const errBody = await adRes.json()
-        const err = errBody?.error
-        if (err && typeof err === 'object') {
-          safeMsg = redact([
-            err.message ? String(err.message) : null,
-            err.type ? `type ${err.type}` : null,
-            err.code !== undefined ? `code ${err.code}` : null,
-          ].filter(Boolean).join(', ')) || safeMsg
-        }
-      } catch {
-        // keep HTTP status fallback
-      }
+      const error = await readMetaError(adRes, [accessToken])
+      const safeMsg = [error.message, error.type ? `type ${error.type}` : null, error.code ? `code ${error.code}` : null].filter(Boolean).join(', ')
       adAccountsError = 'Ad account access is not available yet. The connected Meta user may lack Business Manager or ad account permissions.'
       adAccountsDiagnostic = { available: false, status: safeMsg, hint: 'Verify the connected Meta user has Business Manager access and ad account permissions. Additional Meta app review may also be required.' }
     }
-  } catch (e) {
+  } catch {
     adAccountsError = 'Ad account access is not available yet. The connected Meta user may lack Business Manager or ad account permissions.'
     adAccountsDiagnostic = { available: false, networkError: true, hint: 'Verify the connected Meta user has Business Manager access and ad account permissions. Additional Meta app review may also be required.' }
   }

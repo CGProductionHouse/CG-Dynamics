@@ -21,6 +21,17 @@ import {
   type GoogleAdsDashboardData,
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
+import {
+  loadReportContentExclusions,
+  loadReportFactHealth,
+  loadReportPlatformFacts,
+  setReportContentExclusion,
+  type ReportContentExclusion,
+  type ReportFactHealth,
+} from '../../lib/db/reportingTruth'
+import type { PlatformFact } from '../../lib/overviewModel'
+import type { ReportStatsPost } from '../../lib/reportStats'
+import { isStaffRole } from '../../lib/roles'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -44,6 +55,7 @@ export default function PublishedPreview() {
   const navigate = useNavigate()
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
+  const isStaff = isStaffRole(profile?.role)
   const [searchParams, setSearchParams] = useSearchParams()
   const [initialReportId] = useState(searchParams.get('reportId') ?? '')
   const [initialClientId] = useState(searchParams.get('client') ?? '')
@@ -60,6 +72,12 @@ export default function PublishedPreview() {
   const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
   const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
+  const [facts, setFacts] = useState<PlatformFact[]>([])
+  const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
+  const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
+  const [dataHealth, setDataHealth] = useState<ReportFactHealth[]>([])
+  const [contentExclusions, setContentExclusions] = useState<ReportContentExclusion[]>([])
+  const [curationBusyId, setCurationBusyId] = useState<string | null>(null)
   const [mode, setMode] = useState<DashboardMode>('client')
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
@@ -144,6 +162,11 @@ export default function PublishedPreview() {
       setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
+      setFacts([])
+      setPreviousFacts([])
+      setNormalizedFactsAttempted(false)
+      setDataHealth([])
+      setContentExclusions([])
       setReportLoading(true)
       setError(null)
       try {
@@ -161,7 +184,7 @@ export default function PublishedPreview() {
           const previous = previousMonth
             ? reports.find(report => report.client_id === data.client_id && getReportMonthFromPeriod(report) === previousMonth)
             : null
-          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult] = await Promise.all([
+          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult, factsResult, healthResult, exclusionsResult] = await Promise.all([
             listManualMetricsForClientMonth(data.client_id, currentMonth),
             previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
             previousMonth ? listManualMetricsForClientMonth(data.client_id, previousMonth) : Promise.resolve({ data: [], error: null }),
@@ -169,8 +192,15 @@ export default function PublishedPreview() {
             previousMonth
               ? loadGoogleAdsDashboard(data.id, previousMonth)
               : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
+            loadReportPlatformFacts(data.id, currentMonth, previousMonth),
+            loadReportFactHealth(data.id),
+            loadReportContentExclusions(data.id),
           ])
           if (!active) return
+          if (factsResult.error || healthResult.error || exclusionsResult.error) {
+            setError('Verified reporting data could not be loaded safely.')
+            return
+          }
           setManualMetrics(metricsResult.data)
           setPreviousReport(previousReportResult.data)
           setPreviousManualMetrics(previousMetricsResult.data)
@@ -178,6 +208,11 @@ export default function PublishedPreview() {
           setPreviousGoogleAds(previousGoogleAdsResult.data)
           setGoogleAdsState(googleAdsResult.state)
           setGoogleAdsError(googleAdsResult.error ?? previousGoogleAdsResult.error)
+          setFacts(factsResult.facts)
+          setPreviousFacts(factsResult.previousFacts)
+          setNormalizedFactsAttempted(factsResult.normalizedAttempted)
+          setDataHealth(healthResult.data)
+          setContentExclusions(exclusionsResult.data)
         }
       } catch (error) {
         if (!active) return
@@ -205,6 +240,42 @@ export default function PublishedPreview() {
       setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
+      setFacts([])
+      setPreviousFacts([])
+      setNormalizedFactsAttempted(false)
+      setDataHealth([])
+      setContentExclusions([])
+    }
+  }
+
+  async function handleContentExcluded(post: ReportStatsPost, excluded: boolean) {
+    if (!report || !post.metaObjectId || !post.platform || !isAdmin) return
+    setCurationBusyId(post.metaObjectId)
+    setError(null)
+    setSuccess(null)
+    try {
+      const result = await setReportContentExclusion({
+        reportId: report.id,
+        clientId: report.client_id,
+        postId: post.id,
+        platform: post.platform,
+        metaObjectId: post.metaObjectId,
+        excluded,
+        reason: excluded ? 'Skipped from client-facing report highlights' : null,
+      })
+      if (result.error || !result.data) {
+        setError(result.error?.message ?? 'Could not update report curation.')
+        return
+      }
+      setContentExclusions(current => [
+        ...current.filter(item => !(item.platform === result.data!.platform && item.meta_object_id === result.data!.meta_object_id)),
+        result.data!,
+      ])
+      setSuccess(excluded ? 'Post skipped from report highlights.' : 'Post restored to report highlights.')
+    } catch (error) {
+      setError(errorMessage(error, 'Could not update report curation.'))
+    } finally {
+      setCurationBusyId(null)
     }
   }
 
@@ -328,8 +399,15 @@ export default function PublishedPreview() {
               previousGoogleAds={previousGoogleAds}
               googleAdsState={googleAdsState}
               googleAdsError={googleAdsError}
+              facts={facts}
+              previousFacts={previousFacts}
+              normalizedFactsAttempted={normalizedFactsAttempted}
+              dataHealth={dataHealth}
+              contentExclusions={contentExclusions}
+              onSetContentExcluded={isAdmin ? handleContentExcluded : undefined}
+              curationBusyId={curationBusyId}
               showEmptyStrategy
-              showAdminDiagnostics={isAdmin}
+              showAdminDiagnostics={isStaff}
             />
             {/* Same client-safe month-ahead module the client portal renders.
                 Staff RLS can read the schedule, so this previews the real thing. */}
