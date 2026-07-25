@@ -189,6 +189,78 @@ test('Outlook content runs resolve reviewed one-to-one client aliases', () => {
   assert.deepEqual(resolveMicrosoftOutlookClientAliases('TOYOTA'), ['Toyota Bloemfontein'])
 })
 
+test('reconciliation enriches only an empty Calendar client from a deterministic Outlook match', () => {
+  const source = {
+    sourceType: 'outlook_event',
+    sourceCalendarId: 'calendar-1',
+    sourceEventId: 'event-client-enrichment',
+    title: 'CONTENT RUN - Acme',
+    safeSummary: null,
+    startDate: '2026-07-28T08:00:00+02:00',
+    endDate: '2026-07-28T10:00:00+02:00',
+    allDay: false,
+    location: 'Client premises',
+    private: false,
+    cancelled: false,
+    assigneeMicrosoftIds: [],
+    sourceModifiedAt: '2026-07-20T08:00:00Z',
+  }
+  const created = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())[0]
+  const target = {
+    destination: 'cg_calendar',
+    id: 'calendar-target',
+    updatedAt: '2026-07-18T08:30:00Z',
+    microsoftLastSyncedAt: '2026-07-18T08:00:00Z',
+    microsoftSourceHash: created.sourceHash,
+    microsoftSourceRemovedAt: null,
+    microsoftCalendarId: 'calendar-1',
+    microsoftEventId: 'event-client-enrichment',
+    payload: { ...created.proposedPayload, client_id: null, client_name: null },
+  }
+
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [target], new Set())
+
+  assert.equal(items[0].reconciliationAction, 'update')
+  assert.equal(items[0].calendarClientEnrichment, true)
+  assert.equal(items[0].proposedPayload.client_id, 'client-1')
+  assert.match(items[0].warnings.join(' '), /deterministic client link/i)
+})
+
+test('reconciliation preserves an existing manually linked Calendar client', () => {
+  const source = {
+    sourceType: 'outlook_event',
+    sourceCalendarId: 'calendar-1',
+    sourceEventId: 'event-manual-client',
+    title: 'CONTENT RUN - Acme',
+    safeSummary: null,
+    startDate: '2026-07-28T08:00:00+02:00',
+    endDate: '2026-07-28T10:00:00+02:00',
+    allDay: false,
+    location: 'Client premises',
+    private: false,
+    cancelled: false,
+    assigneeMicrosoftIds: [],
+    sourceModifiedAt: '2026-07-20T08:00:00Z',
+  }
+  const created = buildMicrosoftReconciliation(snapshot([source]), context, [], new Set())[0]
+  const target = {
+    destination: 'cg_calendar',
+    id: 'calendar-target',
+    updatedAt: '2026-07-18T08:30:00Z',
+    microsoftLastSyncedAt: '2026-07-18T08:00:00Z',
+    microsoftSourceHash: created.sourceHash,
+    microsoftSourceRemovedAt: null,
+    microsoftCalendarId: 'calendar-1',
+    microsoftEventId: 'event-manual-client',
+    payload: { ...created.proposedPayload, client_id: 'client-manual', client_name: 'Manual Client' },
+  }
+
+  const items = buildMicrosoftReconciliation(snapshot([source]), context, [target], new Set())
+
+  assert.equal(items[0].reconciliationAction, 'unchanged')
+  assert.equal(items[0].calendarClientEnrichment, undefined)
+})
+
 test('Outlook client labels support client-first content run titles', () => {
   assert.equal(outlookClientLabel('RED OAK - CONTENT RUN'), 'RED OAK')
   assert.equal(outlookClientLabel('NOVUST STEEL: CONTENT RUN'), 'NOVUST STEEL')

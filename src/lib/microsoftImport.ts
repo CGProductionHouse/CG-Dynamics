@@ -219,6 +219,9 @@ export interface MicrosoftImportPreviewItem {
   sourceComplete?: boolean
   requiresRemovalApproval?: boolean
   resolvedAssignees?: MicrosoftAssigneeResolution[]
+  /** True only when a reviewed Outlook label can safely fill an empty client link.
+   * Existing non-null client links remain CG-owned and are never overwritten. */
+  calendarClientEnrichment?: boolean
   /** For package_template_create: the deterministic template a supported source
    *  task proves the active package is missing. Applied before its deliverable. */
   proposedTemplate?: { code: string; deliverable_type: 'dp' | 'photo' | 'video' | 'reel'; instance_number: number } | null
