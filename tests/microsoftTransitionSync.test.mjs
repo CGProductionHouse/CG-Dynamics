@@ -5,6 +5,8 @@ import { createServer } from 'vite'
 let server
 let previewPlannerTask
 let previewOutlookEvent
+let outlookClientLabel
+let resolveMicrosoftOutlookClientAliases
 let resolveMicrosoftBucketMapping
 let buildMicrosoftReconciliation
 let buildMicrosoftConflictBreakdown
@@ -73,8 +75,8 @@ function snapshot(records, rangeStart = '2026-05-19T00:00:00+02:00') {
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ previewPlannerTask, previewOutlookEvent } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
-  ;({ resolveMicrosoftBucketMapping } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
+  ;({ previewPlannerTask, previewOutlookEvent, outlookClientLabel } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
+  ;({ resolveMicrosoftBucketMapping, resolveMicrosoftOutlookClientAliases } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
   ;({ buildMicrosoftReconciliation } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   ;({ buildMicrosoftConflictBreakdown, filterMicrosoftPreviewItems, microsoftIncomingStatus, summarizeMicrosoftCreateStatuses } = await server.ssrLoadModule('/src/lib/microsoftSyncPresentation.ts'))
   ;({ parseMicrosoftSnapshot } = await server.ssrLoadModule('/src/lib/microsoftSnapshot.ts'))
@@ -157,6 +159,44 @@ test('Outlook content runs stay unlinked with a clear warning when no exact clie
   assert.equal(item.mappedClientId, null)
   assert.equal(item.proposedPayload.client_id, null)
   assert.match(item.warnings.join(' '), /no active client exactly matches/i)
+})
+
+test('Outlook content runs resolve reviewed one-to-one client aliases', () => {
+  const aliasContext = {
+    ...context,
+    clients: [
+      { id: 'client-staffy', name: 'The Staffy' },
+      { id: 'client-toyota', name: 'Toyota Bloemfontein' },
+    ],
+  }
+  const item = previewOutlookEvent({
+    sourceType: 'outlook_event',
+    sourceCalendarId: 'calendar-1',
+    sourceEventId: 'event-staffy',
+    title: 'CONTENT RUN - STAFFY',
+    safeSummary: null,
+    startDate: '2026-07-28T08:00:00+02:00',
+    endDate: '2026-07-28T09:00:00+02:00',
+    allDay: false,
+    location: null,
+    private: false,
+    cancelled: false,
+    assigneeMicrosoftIds: [],
+    sourceModifiedAt: '2026-07-20T08:00:00Z',
+  }, aliasContext)
+  assert.equal(item.mappedClientId, 'client-staffy')
+  assert.equal(item.proposedPayload.client_name, 'The Staffy')
+  assert.deepEqual(resolveMicrosoftOutlookClientAliases('TOYOTA'), ['Toyota Bloemfontein'])
+})
+
+test('Outlook client labels support client-first content run titles', () => {
+  assert.equal(outlookClientLabel('RED OAK - CONTENT RUN'), 'RED OAK')
+  assert.equal(outlookClientLabel('NOVUST STEEL: CONTENT RUN'), 'NOVUST STEEL')
+})
+
+test('ambiguous Outlook labels have no guessed alias', () => {
+  assert.deepEqual(resolveMicrosoftOutlookClientAliases('SUPA QUICK'), [])
+  assert.deepEqual(resolveMicrosoftOutlookClientAliases('MIDAS'), [])
 })
 
 test('Outlook attendees remain informational and do not block calendar import', () => {

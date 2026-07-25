@@ -76,6 +76,27 @@ const CLIENT_SCHEDULE_ALIASES: Record<string, string[]> = {
   'the staffordhire pub': ['The Staffy'],
 }
 
+const OUTLOOK_CLIENT_ALIASES: Record<string, string[]> = {
+  'actio sports': ['Action Sport'],
+  'action sports': ['Action Sport'],
+  'bloem marble': ['Bloem Marble & Granite'],
+  'bouwer coetzee attorneys': ['Bouwer & Coetzee Attorneys'],
+  case: ['Case Bloemfontein'],
+  dulux: ['Dulux Bloemfontein'],
+  econofoods: ['Econo'],
+  madisons: ['Madison Wear'],
+  'novust steel': ['Novus Steel'],
+  'piek get together': ['Piek Group'],
+  secufriforce: ['Securiforce'],
+  staffy: ['The Staffy'],
+  toyota: ['Toyota Bloemfontein'],
+  'welkom human auto': ['Human Auto'],
+}
+
+export function resolveMicrosoftOutlookClientAliases(label: string): string[] {
+  return OUTLOOK_CLIENT_ALIASES[normalizeMicrosoftLabel(label)] ?? []
+}
+
 export function normalizeMicrosoftLabel(value: string): string {
   return value
     .normalize('NFKD')
