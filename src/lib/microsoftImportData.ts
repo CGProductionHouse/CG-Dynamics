@@ -331,16 +331,37 @@ export interface MicrosoftConnectionStatus {
   sources: Array<{ id: string; name: string; type: 'outlook_calendar' | 'planner_plan' }>
 }
 
+async function microsoftFunctionError(error: unknown, fallback: string): Promise<string> {
+  const context = (error as { context?: Response } | null)?.context
+  if (context) {
+    try {
+      const body = await context.clone().json() as { error?: unknown }
+      if (typeof body.error === 'string' && body.error.trim()) return body.error
+    } catch {
+      // The platform may return an HTML or empty timeout response.
+    }
+    if (context.status === 504) {
+      return 'Microsoft preview timed out before every source finished. Nothing was applied. Retry once; if it continues, ask an admin to check the Microsoft Sync function logs.'
+    }
+    if (context.status === 401 || context.status === 403) {
+      return 'Your session cannot run Microsoft Sync. Sign in again with an active CG Dynamics admin account.'
+    }
+  }
+
+  const message = (error as { message?: unknown } | null)?.message
+  return typeof message === 'string' && message.trim() ? message : fallback
+}
+
 export async function getMicrosoftConnectionStatus(): Promise<{ data: MicrosoftConnectionStatus | null; error: string | null }> {
   const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'status' } })
-  if (error) return { data: null, error: error.message }
+  if (error) return { data: null, error: await microsoftFunctionError(error, 'Microsoft connection status failed.') }
   if (!data?.ok) return { data: null, error: data?.error ?? 'Microsoft connection status failed.' }
   return { data: { connected: Boolean(data.connected), message: data.message as string, sources: data.sources ?? [] }, error: null }
 }
 
 export async function fetchLatestMicrosoftSnapshot(rangeStart: string, rangeEnd: string): Promise<{ snapshot: MicrosoftSnapshot | null; error: string | null }> {
   const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'fetch', rangeStart, rangeEnd } })
-  if (error) return { snapshot: null, error: error.message }
+  if (error) return { snapshot: null, error: await microsoftFunctionError(error, 'Microsoft preview failed.') }
   if (!data?.ok || !data.snapshot) return { snapshot: null, error: data?.error ?? 'Microsoft fetch failed.' }
   return { snapshot: data.snapshot as MicrosoftSnapshot, error: null }
 }
