@@ -154,6 +154,13 @@ export default function ClientPortalHome() {
                   : `${data.calendarCount} scheduled item${data.calendarCount === 1 ? '' : 's'} currently visible for the planning month.`
               }
             />
+            <PortalCard
+              to="/client/content-guides"
+              eyebrow="Production"
+              title="Content Guides"
+              description="Approved concepts, scripts, shot breakdowns and direction notes for published content guides."
+              detail="Published guides for the current month are displayed once approved and released by your team."
+            />
           </section>
 
           <section className="mt-12 border-t border-white/[0.07] pt-10">

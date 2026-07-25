@@ -36,11 +36,13 @@ import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
 import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
 import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
+import FullContentGuidePage from './pages/admin/FullContentGuidePage'
 import MyWorkPage from './pages/admin/MyWorkPage'
 import Dashboard from './pages/client/Dashboard'
 import ClientPortalHome from './pages/client/ClientPortalHome'
 import ClientCampaignsPage from './pages/client/ClientCampaignsPage'
 import ClientPortalCalendarPage from './pages/client/ClientContentCalendarPage'
+import ClientContentGuidesPage from './pages/client/ClientContentGuidesPage'
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -90,6 +92,7 @@ export default function App() {
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
               <Route path="/admin/content-workflow" element={<ContentWorkflowPage />} />
+              <Route path="/admin/full-content-guide" element={<FullContentGuidePage />} />
               <Route path="/admin/client-calendar" element={<ClientContentCalendarPage />} />
               <Route path="/admin/monthly-planner" element={<Navigate to="/admin/client-schedule?view=calendar" replace />} />
               <Route path="/admin/master-schedule" element={<Navigate to="/admin/client-schedule?view=year" replace />} />
@@ -137,6 +140,7 @@ export default function App() {
             <Route path="/client/performance" element={<Dashboard />} />
             <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
             <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
+            <Route path="/client/content-guides" element={<ClientContentGuidesPage />} />
             <Route path="/dashboard" element={<Navigate to="/client" replace />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
