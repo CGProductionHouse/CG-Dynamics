@@ -1,8 +1,8 @@
 # Current Milestone
 
 Last updated: 2026-07-25
-Current milestone: Client-facing completion and trust
-Status: All client-facing pages delivered and verified — 335 quality gate tests passing.
+Current milestone: Operations Hub — Teams / Planner replacement foundation
+Status: Active — building the unified staff workflow hub replacing Microsoft Teams/Planner for CG Production House daily operations.
 
 ## Completed and in production (merged to main)
 
@@ -28,26 +28,23 @@ Status: All client-facing pages delivered and verified — 335 quality gate test
   `strategyData` fields (campaign recommendation, client direction, client actions);
   dedicated client StrategyPage with action plan and strategic drivers. Live (PR #53, main `7123b06`).
 
-## Active milestone goal — client-facing completion and trust
+## Active milestone goal — Operations Hub foundation
 
-Move from controlled beta to a complete, trustworthy client-facing release: an
-enforced client-visible quality gate, Performance/Campaigns/Content-Calendar
-completion, the full monthly content-guide workspace, and reviewed forward-looking
-strategy — every client-visible claim accurate, evidence-backed, published and
-premium. See "Remaining client-facing work" below and `docs/vision/PARKING-LOT.md`.
+Build a unified, usable Operations Hub that replaces the scattered Teams/Planner
+workflow for CG staff daily work. The hub must feel faster, clearer and more
+enjoyable than Teams — not merely a copy.
 
-### Remaining client-facing work
+See `docs/cg-planner-replacement-architecture.md` for the canonical model.
 
-1. **Microsoft live dated fetch → apply → verify** (auth-gated; see PARKING-LOT).
-   Requires authenticated admin or service-role session to invoke
-   `microsoft-transition-sync`. The Edge Function is deployed at v12; the
-   reconciliation engine, `link_existing`, `package_template_create`,
-   phase-21a/21b apply paths are all live. What remains is the live Graph fetch
-   — blocked by lack of browser+session in automation.
-2. **Authenticated client portal end-to-end QA** — isolation, loading/empty/error
-   states, mobile layout, security boundaries are verified at the code/test level
-   (335 quality gate tests). Live visual QA with a real client account requires
-   a drivable browser.
+### Carry-over blockers (not blocking Operations Hub)
+
+1. **Microsoft live dated fetch → apply → verify** — authenticated admin session
+   required to invoke `microsoft-transition-sync` v12. Engine + apply paths are
+   live; the live Graph fetch step needs a human admin in the browser.
+   Microsoft Planner remains the source of truth until this is done.
+2. **Authenticated client portal end-to-end visual QA** — needs a drivable browser
+   with client login. Isolation is verified by 335 quality gate tests.
+   Client-facing systems remain healthy and separate from this milestone.
 
 ## Original data-truth goal (delivered)
 
@@ -80,125 +77,116 @@ The implementation must follow:
 
 The detailed Meta architecture, research sources, acceptance criteria and desktop-agent sequence live in the Meta Reporting Truth strategy document.
 
-## Sprint result (2026-07-25)
+## Delivered (previous milestone: client-facing completion and trust)
 
-All client-facing work for this milestone is complete in production:
+All client-facing work is complete in production (PRs #48–#53 merged, main `7123b06`):
+- Meta reporting truth, unified client portal, Google Ads reporting, Microsoft engine
+- Content Calendar, content-guide workspace, forward-looking strategy
+- 335 quality gate tests, build green
 
-1. **Microsoft live parity**: attempted every auth route; exact blocker documented in PARKING-LOT.
-2. **Client portal QA**: 335 quality gate tests covering isolation, states, mobile, security.
-3. **Performance Dashboard**: complete — platform separation, unavailable≠zero, comparability gate, Google Ads separation.
-4. **Campaigns**: complete — Google Ads lifecycle/spend/CTR/CPC, CG review + optimisation direction, honest disconnected states for Meta/TikTok.
-5. **Content Calendar**: complete — month nav, type labels, mobile/desktop views, summary cards, unscheduled posts, RPC safety.
-6. **Full monthly content-guide workspace**: new module — publication gating, admin workspace, client read-only view.
-7. **Forward-looking reviewed strategy**: new module — dedicated client page, all strategyData fields.
-8. **Quality gate**: 335 tests, all passing, build green.
-9. **Documentation**: CURRENT-MILESTONE, PARKING-LOT updated.
-10. **Release**: PRs #48–#53 merged; main at `7123b06`.
+See `docs/releases/2026-07-27-controlled-beta-launch.md` for the controlled beta scope.
 
-Items 6 and 7 were new modules; everything else was completion on shipped foundations.
+## Operations Hub scope for this milestone
 
-## Scope for this milestone
+### 1. Operations Hub shell and unified board
 
-### 1. Meta API truth and parity
+Create one primary `/admin/ops-hub` route that groups:
+- My Work (today, overdue, upcoming, in progress, waiting)
+- Operations Board (kanban with drag-and-drop, buckets, quick-add)
+- Client Work (package deliverables + requests)
+- Client Schedule link (existing, not duplicated)
+- CG Socials board context
+- Admin Board (database-protected, admin-only)
+- Calendar view
 
-- Compare Meta Business Suite, direct Graph API responses, Supabase records and CG Dynamics client output.
-- Use Cape Lumber June 2026 as the first exact parity benchmark.
-- Confirm current supported metrics, Graph API version, Page token type, permissions, parameters, date boundaries and response parsing.
-- Upgrade the connector from hardcoded assumptions to versioned, configurable metric definitions.
-- Never use manual monthly figures or CSV patching as the production solution.
+### 2. Quick task capture
 
-### 2. Canonical metric and provenance model
+Zero-friction Quick Add from any ops-hub view. Required: title only.
+Optional fields: client, bucket, assignee, due date, priority.
 
-- Distinguish valid zero, missing, unavailable, partial and error states.
-- Record metric source, endpoint, API version, period, aggregation method, timezone, completeness and retrieval time.
-- Preserve safe source snapshots or references.
-- Stop treating automated API truth as generic manual metrics.
-- Add compatibility rules for month-on-month comparisons.
+### 3. Task detail panel
 
-### 3. Re-sync and connector health
+Click a card → opens drawer/modal with:
+title, description, client, bucket, status, assignee, helpers, priority,
+due date, scheduled date, checklist, comments/activity, linked request,
+linked deliverable, source badge. Progressive disclosure — no overwhelming form.
 
-- Support safe idempotent historical re-sync.
-- Refresh recent reporting windows automatically because platform metrics may be revised.
-- Preserve the last verified dataset when a re-sync fails.
-- Detect deprecated metrics, missing permissions, stale data, unexpected all-zero results and abnormal drops.
-- Treat connector failures as internal incidents, not client performance results.
+### 4. Workflow and status model
 
-### 4. Client Overview correction
+Operational base states: to_do, in_progress, blocked, done.
+Package/content states add: ready_internal_review, internal_changes,
+ready_client_approval, waiting_client, client_changes, approved, scheduled, posted.
+Staff update progress; reviewers/CA/Amonique manage final states.
+Admin work is database-separated.
 
-- Remove unsafe all-channel claims.
-- Never sum overlapping unique audiences.
-- Keep organic social visibility, audience response, paid demand and commercial intent conceptually separate.
-- Show platform-specific metrics clearly when they are not safely additive.
-- Render movement only when current and previous periods use compatible definitions.
-- Update client narratives only after the data-quality gate passes.
+### 5. Client request / WhatsApp approval workflow
 
-### 5. Google Ads completion
+Capture: paste or type a WhatsApp request → record client, original text,
+category, urgency, source=whatsapp.
+Convert: link to ad-hoc task, monthly deliverable, or new approval action.
+Approval states: ready_to_send, sent_to_client, waiting, approved,
+changes_requested, closed. Copy-ready wording button — never fake a send.
 
-- Run the first authorized monthly Google Ads sync for mapped campaigns.
-- Verify campaign-to-client isolation.
-- Display Google Ads automatically in the existing premium Client Dashboard.
-- Keep Google Ads paid-media results separate from Meta organic totals.
+### 6. Calendar integration
 
-### 6. Cape Lumber benchmark report
+Unified view of task due dates, filming dates, review deadlines,
+scheduled posting dates, CG Socials. Colour-coded by client or type.
+Filter by person, client, board, work type. Clear label distinction:
+due date ≠ shoot date ≠ scheduled post date ≠ posted date.
 
-Complete a client-ready Cape Lumber report containing:
+### 7. Role safety and RLS
 
-- verified Meta figures;
-- synced Google Ads performance;
-- accurate platform and month comparisons;
-- curated CG-created or CG-managed featured content;
-- clear data provenance and client-safe methodology wording;
-- a reviewed sales and campaign strategy;
-- the proposed next campaign, platform choice, KPI and test plan.
+- Normal staff: see normal operational work, update own/assigned
+- Admin: manage all normal work
+- Admin board: database-protected, non-admins cannot read
+- Client users: no ops hub access
+- No service-role key in browser
+- Scheduled/posting controls restricted
 
-### 7. Marketing Library and AI Workforce dependency
+### 8. Migration strategy
 
-The Marketing Library foundation is retained, not abandoned.
-
-During this milestone:
-
-- create only the Skill Cards needed for verified platform interpretation, reporting methodology and the Cape Lumber/construction-timber pilot;
-- do not generate generic strategy from an unsourced model prompt;
-- prepare a structured evidence package for future agents;
-- require human review before strategy becomes client-visible.
+Additive only. No duplicate task tables. No destructive rewrites.
+`monthly_deliverables` remains canonical for package work.
+`command_centre_tasks` + `planner_tasks` keep their roles with a clear
+unification layer.
 
 ## Out of scope for this milestone
 
-- Broad autonomous agent rollout across every client.
-- Large unsourced industry libraries.
-- Automated poster generation.
-- Full Operations Hub task-manager rebuild.
-- CG Hours integration.
-- Payroll or confidential staff financial data.
-- Permanent dependency on a paid third-party reporting connector without an explicit architecture and cost decision.
+- Two-way Microsoft writes or Planner retirement before parity
+- CG Hours integration or payroll access
+- Broad AI Workforce expansion
+- Timer or time tracking
+- WhatsApp Business API integration
+- OneDrive deep integration
 
-## Representative-client validation
+## Delivery sequence
 
-Before the Meta connector is considered fixed globally, validate:
+1. `docs: activate Operations Hub milestone and canonical model`
+2. `feat: add Operations Hub shell and unified board`
+3. `feat: add quick task capture and task details`
+4. `feat: add My Work and role-safe assignments`
+5. `feat: add client request and WhatsApp approval workflow`
+6. `feat: integrate Operations Hub calendar`
+7. `test: complete Operations Hub security and workflow gate`
+8. `release: deploy Operations Hub controlled beta`
 
-- Cape Lumber;
-- one Facebook-heavy client;
-- one Instagram-heavy client;
-- one client with both platforms;
-- one client with genuine zero activity;
-- one disconnected or permission-blocked state.
+## Release gate
 
-For each, trace API response to database fact, admin preview and client-facing output.
+Release the Operations Hub controlled beta when:
 
-## Definition of done — achieved
-
-1. **Microsoft live parity**: attempted every auth route; exact blocker documented in PARKING-LOT.
-2. **Client portal QA**: 335 integration tests cover loading, empty, error, mobile, security boundaries.
-3. **Performance Dashboard**: platform separation verified; unavailable≠zero confirmed; comparability gate working; Google Ads separated.
-4. **Campaigns**: Google Ads lifecycle/spend/CTR/CPC/review/optimisation verified; Meta/TikTok Ads audited with honest disconnected states.
-5. **Content Calendar**: month nav, type labels, mobile/desktop views, summary cards, unscheduled posts, RPC safety.
-6. **Content-guide workspace**: publication gating, admin workspace, client read-only view — migration + RLS + UI + tests.
-7. **Forward-looking strategy**: dedicated client page, all strategyData fields (going forward, direction, campaign, client actions, action plan).
-8. **Quality gate**: 335 tests, all passing, build green.
-9. **Documentation**: CURRENT-MILESTONE, PARKING-LOT updated.
-10. **Release**: PRs #48–#53 merged; main at `7123b06`.
-
-Next primary milestone: **Operations Hub: Teams/Planner replacement**.
+- normal staff can capture and manage daily work
+- My Work shows overdue, today, upcoming sections
+- buckets work with drag-and-drop
+- assignments and due dates work
+- client requests link correctly
+- WhatsApp approval tracking is honest (no fake sends)
+- admin board is database-protected
+- monthly deliverables remain canonical
+- Client Schedule is not duplicated
+- client-facing systems remain intact
+- all tests pass (335 + new ops tests)
+- production build passes
+- rollback is documented
 
 ---
 

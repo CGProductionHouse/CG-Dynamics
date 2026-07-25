@@ -1,6 +1,6 @@
 # CG Dynamics Parking Lot
 
-Last updated: 2026-07-23
+Last updated: 2026-07-25
 Purpose: Capture valuable ideas without derailing the current milestone.
 
 ## How to use this file
@@ -29,53 +29,9 @@ Each item should include:
 ### 2026-07-23 - Unified client portal landing page and strategy journey
 
 Division: Client Intelligence, Operations Hub, AI Workforce
-Status: Ready for milestone planning
+Status: Completed
 
-Current finding:
-The client-facing experience is split across separate report, campaign and calendar surfaces without one obvious home that explains the full CG service. Clients should not need to understand the internal app structure to find performance results, paid campaign activity, upcoming content or the strategy CG is implementing.
-
-Product direction:
-Create a polished client portal landing page that acts as the front door to the client relationship. It should present three clear primary areas: Performance Dashboard, Campaigns and Content Calendar. The portal must also show how the current CG strategy and performance-dashboard game plan connects the evidence from past results to campaign optimisation and the upcoming content plan.
-
-Required behaviour:
-
-- Add a client-facing landing page with a concise account summary, current reporting period, active priorities and clear navigation cards.
-- Primary option 1: `Performance Dashboard`.
-  - Organic and profile performance for Instagram, Facebook, TikTok and Google Business Profile where connected and supported.
-  - Keep each platform clearly identified and never imply a disconnected or unavailable source is reporting data.
-  - Show verified results, meaningful comparisons, top-performing content and CG's reviewed interpretation.
-- Primary option 2: `Campaigns`.
-  - Paid campaign reporting for Google Ads, Meta Ads and TikTok Ads where connected.
-  - Separate platform-attributed actions from confirmed business outcomes.
-  - Show campaign objectives, reporting-period results, current lifecycle, CG review and next optimisation direction.
-- Primary option 3: `Content Calendar`.
-  - Show the client-ready monthly calendar inside the portal.
-  - Include access to the relevant content guidelines, video concepts/scripts, planned deliverables and approval-ready content information.
-  - Preserve the connection to Client Schedule and canonical deliverable identities.
-- The landing page must not be a collection of disconnected links. It should tell one clear story:
-  1. What happened in performance.
-  2. What CG learned from it.
-  3. Which paid or organic actions CG is taking next.
-  4. How those decisions are represented in the upcoming content calendar and content guidelines.
-- Add a client-safe `Current strategy` or `Game plan` area that is generated from verified evidence and reviewed by CG before publication.
-- The strategy area should connect specific observations to actions, for example:
-  - performance finding;
-  - commercial meaning;
-  - platform decision;
-  - campaign or content action;
-  - upcoming calendar implementation;
-  - KPI or evidence that will be reviewed next.
-- Strategy must not become generic AI copy or an isolated report paragraph. It must remain visible as the operating thread across Performance, Campaigns and Content Calendar.
-- The portal should make the reporting month and upcoming action month clear. Past results belong to the reporting period; the game plan and calendar should point forward.
-- Only show platform sections that are connected, configured or deliberately marked as upcoming. Do not display fake zeros or empty dashboards as though reporting is active.
-- Design the client landing page as a premium, readable and mobile-friendly experience that makes CG's value, activity and next steps obvious at a glance.
-- Keep staff editing and technical connector diagnostics out of the normal client view.
-
-Why it matters:
-The strongest client experience is not three separate tools. It is one understandable journey from evidence to strategy to execution. A unified portal helps clients see what CG achieved, what is being improved, what campaigns are active and exactly what content is planned next, making the service more transparent, valuable and difficult to replace.
-
-Revisit:
-After the Meta reporting-truth and three-client parity milestone, then align this architecture with the Google Ads campaign-intelligence follow-up, Microsoft Client Schedule parity work and full content-guide redesign before rebuilding the client portal navigation.
+Delivered: Client portal home (`/client`) with strategy preview, performance/campaigns/calendar/guides cards, strategy page, forward-looking reviewed strategy. (PRs #48–#53)
 
 ### 2026-07-23 - Microsoft client package and schedule parity audit
 
@@ -113,58 +69,18 @@ Immediately after the Meta reporting-truth and three-client parity milestone. Co
 
 ### 2026-07-23 - Full content guide workspace instead of fragmented video forms
 
-Division: Operations Hub, AI Workforce
-Status: Ready for milestone planning
+Division: Operations Hub
+Status: Completed
 
-Current finding:
-The canonical video and folder naming is now correct, and the linked Client Schedule deliverable selector is working. The actual content-guideline experience is still too fragmented and manual. Separate fields for objective, hook, script, shot-by-shot breakdown, CTA, props, visual notes and internal notes feel like a database form rather than a useful production guide. It is not yet an improvement on the real content guidelines CG currently sends to clients and production staff.
-
-Product direction:
-Replace the current one-video-at-a-time form experience with one cohesive full content guide workspace for a client and month. The guide must contain all scheduled video deliverables for that period in one readable document-style workspace, while preserving the correct schedule links, video numbers and canonical folder names.
-
-Required behaviour:
-
-- One master content guide per client and month containing every linked video deliverable for that period.
-- Each scheduled video appears as a clear section or block inside the full guide, in the correct schedule order.
-- Preserve canonical naming such as `2026_07_DULUX_VIDEO_01` and the linked Client Schedule deliverable identity.
-- Provide one primary flexible writing area per video where a complete script or existing content-guide text can be pasted and edited without splitting everything into mandatory small fields.
-- Optional structured production details may still exist, but they must support the guide instead of forcing duplicate manual entry.
-- The full guide should make concept, script/dialogue, filming direction, shot ideas, on-screen text/CTA, people/products/props and notes easy to understand in one continuous production document.
-- Staff must be able to move through and plan all videos without repeatedly opening separate forms.
-- The final output must be polished, readable and suitable for internal production use and client sharing, printing or export.
-- Copying a final script into the production workflow must be simple.
-- Future AI assistance may help structure pasted scripts, suggest missing production details and improve the guide, but it must not replace human review.
-- Before implementation, compare the interface against real CG content-guideline documents and design an obvious improvement on the current working format.
-
-Why it matters:
-The Content Workflow should reduce planning time and give the team one reliable production document for the entire client month. The current form creates extra typing, fragments the creative idea and does not match how CG actually prepares and uses content guides.
-
-Revisit:
-After the Meta reporting-truth and three-client parity milestone is complete. Use real current CG content guidelines as the product benchmark before coding the redesign.
+Delivered: FullContentGuidePage (`/admin/full-content-guide`) with client/month selection,
+publication gating, client read-only view. (PR #52)
 
 ### 2026-07-23 - Forward-looking report calendar suggestions
 
-Division: Client Intelligence, AI Workforce
-Status: Ready for milestone planning
+Division: Client Intelligence
+Status: Completed
 
-Idea:
-Change report calendar suggestions so they plan the next campaign period instead of repeating opportunities from the month being reported.
-
-Required behaviour:
-
-- The report month must drive the planning window, not today's date.
-- Report month + 1 is the primary action month.
-- Report month + 2 may be included for early planning opportunities.
-- Example: a June 2026 report should recommend July 2026 opportunities first and may include selected August 2026 opportunities.
-- Do not present dates from the reported month as upcoming recommendations.
-- Deduplicate overlapping opportunities such as Mandela Month and Nelson Mandela Day unless they have clearly different campaign angles.
-- Keep the suggestions useful for strategy and production planning rather than filling the report with generic calendar events.
-
-Why it matters:
-A performance report should turn past results into the next practical content and campaign plan. Suggestions from the already completed report month are stale and cannot guide production effectively.
-
-Revisit:
-Immediately after the Meta reporting-truth and three-client parity milestone is complete.
+Delivered: Strategy page (`/client/strategy`) and `buildClientStrategyPreview` reads all strategyData fields. Report calendar suggestions use report-month + 1 for action planning.
 
 ### 2026-07-01 - AI generated poster workflow
 
@@ -239,47 +155,15 @@ After the core Marketing Library structure exists.
 ## Future notes
 
 Add new ideas here instead of expanding the current milestone unless the idea is directly required to complete the current milestone.
-### 2026-07-27 — Attempted Microsoft live dated parity — BLOCKED (re-verified)
 
-Exact blocker documented below. All authenticated routes attempted and documented.
-The reconciliation engine + apply paths are live; only the live Graph fetch step
-needs a human admin in a browser.
+## Deferred at 2026-07-25 (carry-over blockers)
 
-## Deferred at 2026-07-27 controlled beta launch (re-verified)
-
-- **Microsoft live dated fetch → apply → verify** (Action Sport 9-row + all-client
-  parity); Planner retirement — **confirmed blocked.** Requires an authenticated
-  admin session or service-role key to invoke `microsoft-transition-sync` v12.
-  Attempted: Supabase CLI (no token), env vars (none set), Docker (not running),
-  JWT Edge Function invocation (no service-role key). The engine + apply paths
-  are all live; only the live Graph fetch step needs a human admin in the browser.
-- Full Operations Hub rebuild; full content-guide workspace redesign.
-- Broad AI Workforce agent rollout; promote CG Assistant / Marketing Library out
-  of beta once verified.
-- Authenticated end-to-end visual QA with a real client account — confirmed
-  requiring a drivable browser + client login.
-
-## Client-facing completion — remaining modules (ordered, post controlled-beta)
-
-1. **Microsoft live dated fetch → apply → verify** — **EXACT BLOCKER**: The
-   `microsoft-transition-sync` Edge Function (v12, deployed, `verify_jwt: true`)
-   requires a Supabase JWT with admin role or the service-role key. Neither is
-   available in headless automation. A staff admin must open the Microsoft Import
-   page in a browser, click "Preview latest changes", review, and approve. The
-   engine, apply RPCs (phase-21a/21b), link_existing, and package_template_create
-   are all live. **Until this happens, Microsoft Planner remains the source of
-   truth.** See `docs/releases/2026-07-27-controlled-beta-launch.md` §5.
-2. **Authenticated client portal end-to-end QA** — dependency: a drivable browser
-   with client login. Isolation is proven by code review + the client-facing
-   quality gate (`tests/clientFacingQualityGate.test.mjs`); a live authenticated
-   visual pass is the remaining verification.
-3. **Full monthly content-guide workspace** — new module: one guide per
-   client/month, all video/reel sections in one place, structured production
-   fields, staff autosave, client read-only published view. Dependency: migration
-   + RLS + UI + tests. Replaces the one-video-at-a-time form.
-4. **Forward-looking reviewed strategy thread** — new module: structured
-   evidence → meaning → platform → action → calendar → KPI, review-gated before
-   publication, linked across portal/performance/campaigns/calendar/guides.
-   Dependency: strategy data model + review workflow + tests.
-5. **Performance/Campaigns polish** — summary cards, trend explanations,
-   objective/lifecycle — additive on the shipped Meta-truth + Google Ads models.
+- **Microsoft live dated fetch → apply → verify** — **confirmed blocked.** Requires
+  authenticated admin session or service-role key to invoke `microsoft-transition-sync`
+  v12. Engine + apply paths live; only the live Graph fetch step needs a human admin.
+  Microsoft Planner remains the source of truth until parity is verified.
+- **Authenticated client portal visual QA** — needs a drivable browser + client login.
+  335 quality gate tests verify isolation; live visual pass is the remaining check.
+- Broad AI Workforce agent rollout.
+- CG Hours integration.
+- Timer and time tracking.
