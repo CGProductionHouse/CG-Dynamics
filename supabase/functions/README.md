@@ -114,8 +114,12 @@ npx supabase functions deploy microsoft-transition-sync --project-ref ehtjfntuki
 ```
 
 The function verifies the caller JWT and requires the `admin` role. The Entra
-application needs read-only Graph permissions for the configured calendar,
-Planner tasks/buckets/details and user context. Do not grant write permissions.
+application needs read-only Graph application permissions for the configured
+calendar, Planner tasks/buckets/details and user context. Teams staff assignment
+resolution specifically requires `User.Read.All` with tenant admin consent so
+`/users/{id}` can return display name and email metadata. Without it, task
+progress still imports but assignees remain unresolved and the admin preview
+shows a safe aggregate diagnostic. Do not grant Microsoft write permissions.
 At transition completion, set the app lifecycle status to `complete`, then
 remove or revoke the Microsoft secret/application access. Imported identities
 and audit history remain in CG Dynamics.

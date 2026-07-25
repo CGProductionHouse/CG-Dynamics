@@ -74,7 +74,8 @@ function itemKey(item: MicrosoftImportPreviewItem, index: number) {
 
 function SourceCompleteness({ snapshot }: { snapshot: MicrosoftSnapshot }) {
   return (
-    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+    <>
+      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
       {snapshot.sources.map(source => (
         <article key={`${source.sourceType}:${source.sourceId}`} className={`rounded-xl border p-3 ${source.complete ? 'border-emerald-300/15 bg-emerald-300/[0.045]' : 'border-amber-300/20 bg-amber-300/[0.055]'}`}>
           <div className="flex items-start justify-between gap-3">
@@ -85,7 +86,34 @@ function SourceCompleteness({ snapshot }: { snapshot: MicrosoftSnapshot }) {
           {source.safeError && <p className="mt-2 text-xs text-amber-100/80">{source.safeError}</p>}
         </article>
       ))}
-    </div>
+      </div>
+      <AssigneeLookupDiagnostic snapshot={snapshot} />
+    </>
+  )
+}
+
+function AssigneeLookupDiagnostic({ snapshot }: { snapshot: MicrosoftSnapshot }) {
+  const lookup = snapshot.assigneeLookup
+  if (!lookup || lookup.requested === 0) return null
+  const permissionBlocked = lookup.resolved === 0 && Boolean(lookup.statusCounts['401'] || lookup.statusCounts['403'])
+
+  return (
+    <article className={`mt-3 rounded-xl border p-3 ${lookup.unresolved === 0 ? 'border-emerald-300/15 bg-emerald-300/[0.045]' : 'border-amber-300/20 bg-amber-300/[0.055]'}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-black text-white">Teams staff assignments</p>
+        <p className="text-xs text-white/55">{lookup.resolved} resolved · {lookup.unresolved} unresolved · {lookup.requested} requested</p>
+      </div>
+      {permissionBlocked
+        ? <p className="mt-2 text-xs text-amber-100/80">Microsoft directory lookup is blocked. Grant the Entra application read-only <strong>User.Read.All</strong> application permission with admin consent, then run Preview again.</p>
+        : lookup.unresolved > 0
+          ? <p className="mt-2 text-xs text-amber-100/70">Some Teams assignees could not be resolved. They will remain unassigned until their Microsoft identity is mapped to a CG Dynamics staff profile.</p>
+          : <p className="mt-2 text-xs text-emerald-100/70">All Teams assignee identities were resolved for staff matching.</p>}
+      {Object.keys(lookup.statusCounts).length > 0 && (
+        <p className="mt-2 text-[10px] uppercase tracking-wider text-white/35">
+          Directory response: {Object.entries(lookup.statusCounts).map(([status, count]) => `${status}: ${count}`).join(' · ')}
+        </p>
+      )}
+    </article>
   )
 }
 

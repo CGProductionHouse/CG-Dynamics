@@ -296,6 +296,7 @@ Deno.serve(async request => {
   }
   const assigneeMap: Record<string, { displayName: string; mail: string | null; userPrincipalName: string | null }> = {}
   const unresolvedAssigneeIds = new Set<string>()
+  const assigneeStatusCounts: Record<string, number> = {}
   const idList = [...assigneeIds]
   for (let index = 0; index < idList.length; index += 20) {
     const batch = idList.slice(index, index + 20)
@@ -307,10 +308,16 @@ Deno.serve(async request => {
     })
     if (batchResult?.ok) {
       const batchBody = await batchResult.json() as { responses?: GraphAssigneeBatchItem[] }
-      const correlated = correlateAssigneeBatchResponses(batchBody.responses ?? [], sourceIdByRequestId)
+      const responses = batchBody.responses ?? []
+      for (const response of responses) {
+        assigneeStatusCounts[String(response.status)] = (assigneeStatusCounts[String(response.status)] ?? 0) + 1
+      }
+      const correlated = correlateAssigneeBatchResponses(responses, sourceIdByRequestId)
       Object.assign(assigneeMap, correlated.assignees)
       for (const sourceId of correlated.unresolvedSourceIds) unresolvedAssigneeIds.add(sourceId)
     } else {
+      const status = String(batchResult?.status ?? 'unavailable')
+      assigneeStatusCounts[status] = (assigneeStatusCounts[status] ?? 0) + batch.length
       for (const sourceId of batch) unresolvedAssigneeIds.add(sourceId)
     }
     if (index + 20 < idList.length) await sleep(250)
@@ -325,6 +332,10 @@ Deno.serve(async request => {
   })
   return jsonResponse({
     ok: true,
-    snapshot: { format: 'cg-dynamics-microsoft-snapshot', version: 3, exportedAt: new Date().toISOString(), exportedBy: 'CG Dynamics Microsoft transition sync', triggerType: 'admin', sources, records, assigneeMap },
+    snapshot: {
+      format: 'cg-dynamics-microsoft-snapshot', version: 3, exportedAt: new Date().toISOString(),
+      exportedBy: 'CG Dynamics Microsoft transition sync', triggerType: 'admin', sources, records, assigneeMap,
+      assigneeLookup: { requested: idList.length, resolved: Object.keys(assigneeMap).length, unresolved: unresolvedAssigneeIds.size, statusCounts: assigneeStatusCounts },
+    },
   })
 })
