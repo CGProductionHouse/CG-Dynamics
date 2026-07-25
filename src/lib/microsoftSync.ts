@@ -279,6 +279,24 @@ export function buildMicrosoftReconciliation(
     if (target.microsoftSourceRemovedAt) {
       return { ...item, existingTargetId: target.id, expectedTargetUpdatedAt: target.updatedAt, previewStatus: 'changed' as const, reconciliationAction: 'reopen' as const, sourceHash, sourceComplete }
     }
+    if (
+      target.destination === 'cg_calendar'
+      && item.proposedPayload?.destination === 'cg_calendar'
+      && target.payload.client_id === null
+      && item.proposedPayload.client_id !== null
+    ) {
+      return {
+        ...item,
+        existingTargetId: target.id,
+        expectedTargetUpdatedAt: target.updatedAt,
+        previewStatus: 'changed' as const,
+        reconciliationAction: 'update' as const,
+        calendarClientEnrichment: true,
+        sourceHash: stableHash(ownedPayload(item.proposedPayload)),
+        sourceComplete,
+        warnings: [...item.warnings, 'Adds a deterministic client link to this unlinked Outlook event.'],
+      }
+    }
     if (currentHash === sourceHash) {
       if (!target.microsoftSourceHash) {
         return { ...item, existingTargetId: target.id, expectedTargetUpdatedAt: target.updatedAt, previewStatus: 'changed' as const, reconciliationAction: 'update' as const, sourceHash, sourceComplete, warnings: [...item.warnings, 'Adopt the current matching fields as the initial Microsoft sync baseline.'] }

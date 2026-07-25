@@ -76,6 +76,36 @@ function schedulePayload(overrides = {}) {
   }
 }
 
+function calendarPayload(overrides = {}) {
+  return {
+    destination: 'cg_calendar',
+    title: 'CONTENT RUN - Acme',
+    event_type: 'content_run',
+    client_id: '33333333-3333-4333-8333-333333333333',
+    client_name: 'Acme',
+    start_at: '2026-07-28T08:00:00+02:00',
+    end_at: '2026-07-28T10:00:00+02:00',
+    all_day: false,
+    location: 'Client premises',
+    notes: null,
+    status: 'planned',
+    microsoft_source_type: 'outlook_event',
+    microsoft_calendar_id: 'calendar-1',
+    microsoft_event_id: 'event-1',
+    microsoft_source_description: null,
+    ...overrides,
+  }
+}
+
+function calendarPreviewItem(overrides = {}) {
+  const payload = calendarPayload()
+  return previewItem(payload, {
+    sourceType: 'outlook_event', sourcePlanId: null, sourceCalendarId: 'calendar-1',
+    sourceBucketId: null, sourceTaskId: null, sourceEventId: 'event-1',
+    sourceName: 'Operational Calendar', destination: 'cg_calendar', ...overrides,
+  })
+}
+
 function previewItem(payload, overrides = {}) {
   const planner = payload?.destination !== 'client_schedule'
   return {
@@ -176,6 +206,35 @@ test('Client Schedule create and update patches include user ID, owner name and 
   assert.equal(updateArgs.p_patch.assigned_to_user_id, null)
   assert.equal(updateArgs.p_patch.assigned_to_name, null)
   assert.deepEqual(updateArgs.p_patch.helper_names, [])
+})
+
+test('Calendar update sends client fields only for deterministic null-client enrichment', () => {
+  const enriched = buildMicrosoftApplyRpcArgs(calendarPreviewItem({
+    reconciliationAction: 'update',
+    existingTargetId: '77777777-7777-4777-8777-777777777777',
+    expectedTargetUpdatedAt: '2026-07-22T08:30:00Z',
+    calendarClientEnrichment: true,
+  }), snapshot, 'run-1', 'calendar-enrichment', false)
+  assert.equal(enriched.p_patch.client_id, '33333333-3333-4333-8333-333333333333')
+  assert.equal(enriched.p_patch.client_name, 'Acme')
+
+  const ordinaryUpdate = buildMicrosoftApplyRpcArgs(calendarPreviewItem({
+    reconciliationAction: 'update',
+    existingTargetId: '77777777-7777-4777-8777-777777777777',
+    expectedTargetUpdatedAt: '2026-07-22T08:30:00Z',
+  }), snapshot, 'run-1', 'calendar-update', false)
+  assert.equal(Object.hasOwn(ordinaryUpdate.p_patch, 'client_id'), false)
+  assert.equal(Object.hasOwn(ordinaryUpdate.p_patch, 'client_name'), false)
+})
+
+test('Calendar enrichment migration keeps admin authorization and optional client patching', () => {
+  const sql = readFileSync('supabase/migrations/20260725233500_microsoft_calendar_client_enrichment.sql', 'utf8')
+  assert.match(sql, /if not public\.is_admin\(\) then raise exception 'Admin access required'/)
+  const calendarUpdate = sql.slice(sql.indexOf("elsif p_destination = 'cg_calendar' then"))
+  assert.match(calendarUpdate, /client_id = case when p_patch \? 'client_id'/)
+  assert.match(calendarUpdate, /client_name = case when p_patch \? 'client_name'/)
+  assert.match(sql, /revoke all on function public\.apply_microsoft_sync_item[\s\S]*from public/)
+  assert.match(sql, /grant execute on function public\.apply_microsoft_sync_item[\s\S]*to authenticated/)
 })
 
 test('apply contract stays at version 2 during the transition; phase-21a is backward compatible', () => {

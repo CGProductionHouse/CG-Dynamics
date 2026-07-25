@@ -103,7 +103,18 @@ function buildMicrosoftApplyPatch(
   } else if (removedAt) {
     patch = { status: 'cancelled', microsoft_source_removed_at: removedAt, microsoft_sync_run_id: runId }
   } else if (payload?.destination === 'cg_calendar') {
-    patch = { ...patch, title: payload.title, event_type: payload.event_type, start_at: payload.start_at, end_at: payload.end_at, all_day: payload.all_day, location: payload.location, ...(action === 'cancel' ? { status: 'cancelled' } : action === 'reopen' ? { status: 'planned' } : {}), microsoft_source_description: payload.microsoft_source_description }
+    patch = {
+      ...patch,
+      title: payload.title,
+      event_type: payload.event_type,
+      ...(item.calendarClientEnrichment ? { client_id: payload.client_id, client_name: payload.client_name } : {}),
+      start_at: payload.start_at,
+      end_at: payload.end_at,
+      all_day: payload.all_day,
+      location: payload.location,
+      ...(action === 'cancel' ? { status: 'cancelled' } : action === 'reopen' ? { status: 'planned' } : {}),
+      microsoft_source_description: payload.microsoft_source_description,
+    }
   }
 
   return patch
