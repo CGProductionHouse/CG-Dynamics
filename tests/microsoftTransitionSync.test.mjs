@@ -159,6 +159,29 @@ test('Outlook content runs stay unlinked with a clear warning when no exact clie
   assert.match(item.warnings.join(' '), /no active client exactly matches/i)
 })
 
+test('Outlook attendees remain informational and do not block calendar import', () => {
+  const item = previewOutlookEvent({
+    sourceType: 'outlook_event',
+    sourceCalendarId: 'calendar-1',
+    sourceEventId: 'event-attendees',
+    title: 'MEETING - CG INTERNAL',
+    safeSummary: null,
+    startDate: '2026-07-28T08:00:00+02:00',
+    endDate: '2026-07-28T09:00:00+02:00',
+    allDay: false,
+    location: null,
+    private: false,
+    cancelled: false,
+    assigneeMicrosoftIds: ['outlook-attendee-id'],
+    sourceModifiedAt: '2026-07-20T08:00:00Z',
+  }, context)
+  const resolved = resolvePreviewAssignees([item], {}, new Map(), [])
+  assert.equal(resolved[0].previewStatus, 'new')
+  assert.equal(resolved[0].conflictCode, null)
+  assert.deepEqual(resolved[0].assigneeMicrosoftIds, [])
+  assert.match(resolved[0].warnings.join(' '), /attendee or assignee ids are not imported/i)
+})
+
 test('MASTER CLIENT TO DO resolves client aliases into the shared Client Requests bucket', () => {
   const item = previewPlannerTask(plannerTask({
     sourcePlanId: 'plan-master',
@@ -692,12 +715,25 @@ test('resolvePreviewAssignees populates assigned_to_name from email match', () =
   assert.equal(items[0].proposedPayload.assigned_to_name, 'Alice Smith')
 })
 
-test('resolvePreviewAssignees creates conflict for unresolved assignee', () => {
+test('resolvePreviewAssignees warns and leaves unresolved assignee unassigned', () => {
   const items = resolvePreviewAssignees([assignableItem(['user-unknown'])], assigneeMap, storedMappings, profiles)
-  assert.equal(items[0].previewStatus, 'conflict')
-  assert.equal(items[0].reconciliationAction, 'conflict')
-  assert.equal(items[0].conflictCode, 'unresolved_assignee')
-  assert.ok(items[0].conflictReason.includes('user-unknown'))
+  assert.equal(items[0].previewStatus, 'new')
+  assert.equal(items[0].conflictCode, null)
+  assert.equal(items[0].proposedPayload.assigned_to_name, null)
+  assert.match(items[0].warnings.join(' '), /user-unknown.*not matched/i)
+})
+
+test('resolvePreviewAssignees imports known staff and warns about unknown helpers', () => {
+  const items = resolvePreviewAssignees(
+    [assignableItem(['user-alice', 'user-unknown'])],
+    assigneeMap,
+    storedMappings,
+    profiles,
+  )
+  assert.equal(items[0].previewStatus, 'new')
+  assert.equal(items[0].conflictCode, null)
+  assert.equal(items[0].proposedPayload.assigned_to_name, 'Alice Smith')
+  assert.match(items[0].warnings.join(' '), /user-unknown.*not matched/i)
 })
 
 test('resolvePreviewAssignees creates helper_names for multiple resolved assignees', () => {

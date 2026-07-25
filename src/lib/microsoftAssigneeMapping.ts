@@ -79,16 +79,8 @@ export function resolvePreviewAssignees(
     if (unresolved.length > 0) {
       const names = unresolved.map(r => r.displayName).join(', ')
       warnings.push(`Microsoft assignee${unresolved.length > 1 ? 's' : ''} ${names} ${unresolved.length > 1 ? 'are' : 'is'} not matched to a CG Dynamics staff member.`)
-      return {
-        ...withResolutions,
-        warnings,
-        previewStatus: 'conflict' as const,
-        reconciliationAction: 'conflict' as const,
-        conflictCode: 'unresolved_assignee' as const,
-        conflictReason: `One or more Microsoft assignees (${names}) could not be matched to a CG Dynamics staff member. Resolve manually and update the mapping table before applying.`,
-      }
     }
 
-    return populateAssignmentPayload(withResolutions, resolved)
+    return populateAssignmentPayload({ ...withResolutions, warnings }, resolved)
   })
 }
