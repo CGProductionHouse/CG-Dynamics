@@ -70,6 +70,21 @@ Three product areas:
   app code out of the production bundle. Do not bump vite to 8 without
   verifying the built bundle actually contains app code.
 
+## Security requirements
+
+Before adding tables, RPCs, routes, Edge Functions or Storage:
+
+1. Read `docs/security/SECURITY_ARCHITECTURE.md` and `docs/security/ACCESS_CONTROL_MATRIX.md`.
+2. Document the access model for the new component.
+3. Enable RLS on every exposed table.
+4. Add explicit least-privilege policies (not just `is_staff()`).
+5. Distinguish authentication from authorisation — never treat `auth.uid()` alone as ownership.
+6. Use `USING` (read filter) and `WITH CHECK` (write constraint) both where appropriate.
+7. Never expose service-role or secret credentials.
+8. Do not trust editable user metadata for roles — read from `public.profiles.role`.
+9. Test horizontal access between users and clients.
+10. Stop and document security-model conflicts rather than guessing.
+
 ## Reporting (end of every task)
 
 Report back:
