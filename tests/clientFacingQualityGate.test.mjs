@@ -295,3 +295,26 @@ test('performance dashboard separates load states for report list and report det
   assert.match(PERFORMANCE, /No published report yet/)
   assert.match(PERFORMANCE, /Select a month/)
 })
+
+// ── 18. Campaigns page completeness ───────────────────────────────────────────
+test('campaigns page shows CG review and optimisation direction from report strategy data', () => {
+  assert.match(CAMPAIGNS, /CampaignStrategyDirection/)
+  assert.match(CAMPAIGNS, /readStrategyData/)
+  assert.match(CAMPAIGNS, /strategyGoingForward/)
+  assert.match(CAMPAIGNS, /campaign_recommendation/)
+  assert.match(CAMPAIGNS, /CG review.*optimisation direction/i)
+})
+
+test('campaigns page shows campaign objective, lifecycle status and per-campaign metrics', () => {
+  assert.match(CAMPAIGNS, /campaign\.(type|status|name)/)
+  assert.match(CAMPAIGNS, /impressions/)
+  assert.match(CAMPAIGNS, /clicks/)
+  assert.match(CAMPAIGNS, /ctr/)
+})
+
+test('campaigns page handles all Google Ads dashboard states with honest messaging', () => {
+  assert.match(CAMPAIGNS, /disconnected/)
+  assert.match(CAMPAIGNS, /unmapped/)
+  assert.match(CAMPAIGNS, /not-synced/)
+  assert.match(CAMPAIGNS, /no-activity/)
+})

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
@@ -9,6 +9,7 @@ import {
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
 import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { readStrategyData } from '../../lib/strategyEngine'
 
 type CampaignPageData = {
   client: Client | null
@@ -99,6 +100,8 @@ export default function ClientCampaignsPage() {
         <GoogleAdsEmptyState state={data.state} />
       )}
 
+      <CampaignStrategyDirection report={data.report} />
+
       <section className="mt-10 grid gap-4 md:grid-cols-2">
         <FutureCampaignCard platform="Meta Ads" />
         <FutureCampaignCard platform="TikTok Ads" />
@@ -173,6 +176,60 @@ function GoogleAdsEmptyState({ state }: { state: GoogleAdsDashboardState }) {
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-accent">Google Ads</p>
       <h2 className="mt-2 text-xl font-semibold text-white">Campaign reporting</h2>
       <p className="mt-3 text-sm leading-6 text-report-muted">{message}</p>
+    </section>
+  )
+}
+
+function CampaignStrategyDirection({ report }: { report: Report | null }) {
+  const strategy = useMemo(() => readStrategyData(report?.strategy_data), [report])
+  const hasContent = strategy.strategyGoingForward || strategy.clientDirection.length > 0 || strategy.actionPlan.campaign_recommendation.enabled
+  if (!hasContent) return null
+
+  return (
+    <section className="mt-10">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-accent">CG review &amp; optimisation direction</p>
+      <h2 className="mt-2 text-xl font-semibold text-white">Strategy for paid media</h2>
+      <div className="mt-4 space-y-4">
+        {strategy.strategyGoingForward && (
+          <div className="rounded-lg border border-report-accent/10 bg-report-accent/[0.04] p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-report-faint">Going forward</p>
+            <p className="mt-2 whitespace-pre-line text-sm leading-6 text-report-text">{strategy.strategyGoingForward}</p>
+          </div>
+        )}
+        {strategy.clientDirection.length > 0 && (
+          <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-report-faint">Campaign direction</p>
+            <ul className="mt-3 space-y-2">
+              {strategy.clientDirection.map((direction, index) => (
+                <li key={index} className="flex items-start gap-3 text-sm text-report-muted">
+                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-report-accent" />
+                  {direction}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {strategy.actionPlan.campaign_recommendation.enabled && (
+          <div className="rounded-lg border border-brand-teal/10 bg-brand-teal/[0.04] p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-report-faint">Next campaign recommendation</p>
+            {strategy.actionPlan.campaign_recommendation.items.length > 0 && (
+              <ul className="mt-3 space-y-2">
+                {strategy.actionPlan.campaign_recommendation.items.map((item, index) => (
+                  <li key={index} className="flex items-start gap-3 text-sm text-report-muted">
+                    <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-teal" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {strategy.actionPlan.campaign_recommendation.notes && (
+              <p className="mt-3 whitespace-pre-line text-sm leading-6 text-report-text">
+                {strategy.actionPlan.campaign_recommendation.notes}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   )
 }
