@@ -3,13 +3,18 @@ import type { FormEvent } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   buildAssistantLocalWorkContext,
+  fetchActiveClients,
   getAssistantDiagnostics,
   sendAssistantMessage,
+  SKILLED_AGENTS,
   testAssistantProvider,
+  type ActiveClientOption,
   type AssistantChatMessage,
+  type AssistantCitation,
   type AssistantDiagnostics,
   type AssistantLocalWorkContext,
   type AssistantProviderTestResponse,
+  type AssistantSourceUsed,
   type AssistantToolStatus,
 } from '../../lib/assistant'
 import { getMyDayContext } from '../../lib/workforceMyDay'
@@ -95,6 +100,11 @@ type LocalAssistantMessage = AssistantChatMessage & {
   createdAt: string
   restricted?: boolean
   setupRequired?: boolean
+  agentName?: string
+  citations?: AssistantCitation[]
+  sourcesUsed?: AssistantSourceUsed[]
+  reviewWarning?: string
+  insufficientEvidence?: boolean
 }
 
 function createId() {
@@ -132,7 +142,7 @@ function formatTime(value: string) {
 function makeMessage(
   role: AssistantChatMessage['role'],
   content: string,
-  options: Pick<LocalAssistantMessage, 'restricted' | 'setupRequired'> = {}
+  options: Pick<LocalAssistantMessage, 'restricted' | 'setupRequired' | 'agentName' | 'citations' | 'sourcesUsed' | 'reviewWarning' | 'insufficientEvidence'> = {}
 ): LocalAssistantMessage {
   return {
     id: createId(),
@@ -172,9 +182,14 @@ export default function AssistantPage() {
   const [showDiagnostics, setShowDiagnostics] = useState(false)
   const [showProtected, setShowProtected] = useState(false)
   const [localWorkContext, setLocalWorkContext] = useState<AssistantLocalWorkContext | null>(null)
+  const [selectedAgentKey, setSelectedAgentKey] = useState<string>('')
+  const [activeClientId, setActiveClientId] = useState<string>('')
+  const [researchMode, setResearchMode] = useState(false)
+  const [activeClients, setActiveClients] = useState<ActiveClientOption[]>([])
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const profileRole = profile?.role as string | undefined
   const isAdminDiagnosticsUser = profileRole === 'admin' || profileRole === 'owner'
+  const selectedAgent = SKILLED_AGENTS.find((agent) => agent.key === selectedAgentKey) ?? null
 
   const assistantHistory = useMemo<AssistantChatMessage[]>(
     () => messages.map(({ role, content, createdAt }) => ({ role, content, createdAt })),
@@ -201,6 +216,12 @@ export default function AssistantPage() {
     return () => { cancelled = true }
   }, [profile?.id])
 
+  useEffect(() => {
+    let cancelled = false
+    void fetchActiveClients().then((clients) => { if (!cancelled) setActiveClients(clients) })
+    return () => { cancelled = true }
+  }, [])
+
   async function sendMessage(messageText = input) {
     const cleanMessage = messageText.trim()
     if (!cleanMessage || isSending) return
@@ -213,7 +234,15 @@ export default function AssistantPage() {
     setError(null)
     setIsSending(true)
 
-    const response = await sendAssistantMessage(cleanMessage, historyBeforeSend, localWorkContext)
+    const skilled = selectedAgent
+      ? {
+          agentKey: selectedAgent.key,
+          activeClientId: selectedAgent.needsClient ? (activeClientId || null) : null,
+          mode: (researchMode && isAdminDiagnosticsUser ? 'admin_research' : 'production') as 'admin_research' | 'production',
+        }
+      : null
+
+    const response = await sendAssistantMessage(cleanMessage, historyBeforeSend, localWorkContext, skilled)
 
     setIsSending(false)
     if (response.tools?.length) setTools(response.tools)
@@ -228,6 +257,11 @@ export default function AssistantPage() {
       makeMessage('assistant', response.answer, {
         restricted: response.restricted,
         setupRequired: response.setupRequired,
+        agentName: response.agentName,
+        citations: response.citations,
+        sourcesUsed: response.sourcesUsed,
+        reviewWarning: response.reviewWarning,
+        insufficientEvidence: response.insufficientEvidence,
       }),
     ])
 
@@ -319,10 +353,63 @@ export default function AssistantPage() {
             </div>
           </div>
 
+          {/* Skilled-agent mode selector */}
+          <div className="border-b border-brand-muted/50 px-4 py-3 sm:px-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <label className="text-[10px] font-black uppercase tracking-[0.16em] text-white/40">Mode</label>
+              <select
+                value={selectedAgentKey}
+                onChange={(event) => setSelectedAgentKey(event.target.value)}
+                className="rounded-lg border border-brand-muted bg-brand-bg px-3 py-1.5 text-sm text-white outline-none focus:border-brand-accent"
+              >
+                <option value="">General Assistant</option>
+                {SKILLED_AGENTS.map((agent) => (
+                  <option key={agent.key} value={agent.key}>{agent.name}</option>
+                ))}
+              </select>
+
+              {selectedAgent?.needsClient && (
+                <select
+                  value={activeClientId}
+                  onChange={(event) => setActiveClientId(event.target.value)}
+                  className="rounded-lg border border-brand-muted bg-brand-bg px-3 py-1.5 text-sm text-white outline-none focus:border-brand-accent"
+                >
+                  <option value="">No active client</option>
+                  {activeClients.map((client) => (
+                    <option key={client.id} value={client.id}>{client.name}</option>
+                  ))}
+                </select>
+              )}
+
+              {selectedAgent && isAdminDiagnosticsUser && (
+                <label className="flex items-center gap-1.5 text-xs text-brand-primary/70">
+                  <input
+                    type="checkbox"
+                    checked={researchMode}
+                    onChange={(event) => setResearchMode(event.target.checked)}
+                    className="h-3.5 w-3.5 accent-brand-accent"
+                  />
+                  Admin research (see needs-review)
+                </label>
+              )}
+
+              {selectedAgent && (
+                <span className="text-xs text-brand-primary/55 sm:ml-auto">{selectedAgent.blurb}</span>
+              )}
+            </div>
+            {selectedAgent && (
+              <p className="mt-2 text-[11px] leading-relaxed text-brand-primary/45">
+                Skilled agents answer only from approved source material and always cite. If nothing is approved yet, they say so honestly. Drafts require human review before client-facing use.
+              </p>
+            )}
+          </div>
+
           <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
             {messages.length === 0 && (
               <div className="flex min-h-[18rem] items-center justify-center">
-                <p className="text-sm text-brand-primary/50">Start with a quick request.</p>
+                <p className="text-sm text-brand-primary/50">
+                  {selectedAgent ? `${selectedAgent.name}: ask a question grounded in approved sources.` : 'Start with a quick request.'}
+                </p>
               </div>
             )}
 
@@ -344,8 +431,52 @@ export default function AssistantPage() {
                     >
                       <p className="whitespace-pre-wrap">{message.content}</p>
                     </div>
+
+                    {!isUser && (message.citations?.length || message.sourcesUsed?.length || message.reviewWarning || message.insufficientEvidence) ? (
+                      <div className="mt-2 space-y-2">
+                        {message.insufficientEvidence && (
+                          <div className="rounded-lg border border-sky-300/25 bg-sky-300/[0.07] px-3 py-2 text-[11px] text-sky-100">
+                            No approved source material supports this yet — the agent is holding back rather than guessing.
+                          </div>
+                        )}
+                        {message.sourcesUsed && message.sourcesUsed.length > 0 && (
+                          <div className="rounded-lg border border-white/8 bg-black/20 px-3 py-2">
+                            <p className="mb-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/35">Sources used</p>
+                            <ul className="space-y-0.5">
+                              {message.sourcesUsed.map((source, index) => (
+                                <li key={index} className="text-[11px] text-brand-primary/75">
+                                  {source.url ? (
+                                    <a href={source.url} target="_blank" rel="noreferrer" className="underline decoration-white/20 hover:text-white">
+                                      {source.title ?? 'Source'}{source.author ? `, ${source.author}` : ''}{source.year ? ` (${source.year})` : ''}
+                                    </a>
+                                  ) : (
+                                    <>{source.title ?? 'Source'}{source.author ? `, ${source.author}` : ''}{source.year ? ` (${source.year})` : ''}</>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {message.citations && message.citations.length > 0 && (
+                          <div className="rounded-lg border border-white/8 bg-black/20 px-3 py-2">
+                            <p className="mb-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/35">Citations</p>
+                            <ul className="space-y-0.5">
+                              {message.citations.map((citation) => (
+                                <li key={citation.id} className="text-[11px] text-brand-primary/75">[{citation.id}] {citation.cite}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {message.reviewWarning && (
+                          <div className="rounded-lg border border-amber-300/25 bg-amber-300/[0.07] px-3 py-2 text-[11px] text-amber-100">
+                            {message.agentName ? `${message.agentName} · ` : ''}{message.reviewWarning}
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+
                     <p className={`mt-1 px-1 text-[11px] text-brand-primary/60 ${isUser ? 'text-right' : ''}`}>
-                      {isUser ? 'You' : 'CG Assistant'} {formatTime(message.createdAt)}
+                      {isUser ? 'You' : (message.agentName ?? 'CG Assistant')} {formatTime(message.createdAt)}
                     </p>
                   </div>
                 </div>

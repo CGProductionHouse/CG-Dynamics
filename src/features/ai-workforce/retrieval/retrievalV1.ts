@@ -48,6 +48,27 @@ const LAYER_PRIORITY: KnowledgeLayer[] = [
   'source_chunks',
 ]
 
+// The database `skill_cards.knowledge_layer` CHECK uses `universal_principle`
+// (and other legacy spellings); the agent contracts + priority use the canonical
+// KnowledgeLayer union. Normalise at READ time so a legacy/mislabelled layer can
+// never silently bypass an agent's allow-list. The DB keeps its stored value.
+const LAYER_ALIASES: Record<string, KnowledgeLayer> = {
+  universal_principle: 'universal',
+  universal: 'universal',
+  sa_market: 'south_african_market',
+  south_african_market: 'south_african_market',
+  industry_specific: 'industry_specific',
+  active_client_specific: 'active_client_specific',
+  client_specific: 'active_client_specific',
+  internal_learning: 'internal_learning',
+  source_chunks: 'source_chunks',
+}
+
+export function normaliseKnowledgeLayer(layer: string | null | undefined): KnowledgeLayer | null {
+  if (!layer) return null
+  return LAYER_ALIASES[layer] ?? null
+}
+
 const NON_AUTHORITATIVE_SOURCE_TYPES = new Set(['ai_generated', 'unsourced_blog'])
 
 // A source's full text may be returned only when rights + access mode permit it.
@@ -79,14 +100,16 @@ export function isCardRetrievable(card: SkillCardRecord, ctx: RetrievalContext):
   if (card.clientSpecific) {
     if (!ctx.activeClientId || card.activeClientId !== ctx.activeClientId) return false
   }
-  // The agent must be allowed to use this card's knowledge layer.
-  const layer = card.knowledgeLayer as KnowledgeLayer
-  if (!ctx.agent.allowedKnowledgeLayers.includes(layer)) return false
+  // The agent must be allowed to use this card's knowledge layer. Normalise the
+  // stored (possibly legacy) layer first so a mislabelled value cannot bypass the
+  // allow-list, and an unrecognised layer is excluded rather than trusted.
+  const layer = normaliseKnowledgeLayer(card.knowledgeLayer)
+  if (!layer || !ctx.agent.allowedKnowledgeLayers.includes(layer)) return false
   return true
 }
 
 function layerRank(layer: string): number {
-  const i = LAYER_PRIORITY.indexOf(layer as KnowledgeLayer)
+  const i = LAYER_PRIORITY.indexOf(normaliseKnowledgeLayer(layer) as KnowledgeLayer)
   return i === -1 ? LAYER_PRIORITY.length : i
 }
 
