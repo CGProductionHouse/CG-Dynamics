@@ -2,7 +2,7 @@ import type { Report } from './db/reports'
 import type { PlatformFact } from './overviewModel'
 import { hasRenderableFact } from './overviewModel'
 import { getReportMonthFromPeriod } from './reportPeriod'
-import { readStrategyData } from './strategyEngine'
+import { readStrategyData, type StrategyData } from './strategyEngine'
 
 export interface ClientStrategyPreview {
   label: string
@@ -38,16 +38,23 @@ export function activeOrganicPlatforms(facts: PlatformFact[]): string[] {
     .map(([, label]) => label)
 }
 
+function campaignRecValue(strategy: StrategyData): string | null {
+  const cr = strategy.actionPlan.campaign_recommendation
+  if (!cr.enabled) return null
+  const parts = [...cr.items, clean(cr.notes)].filter(Boolean)
+  return parts.length > 0 ? parts.join('\n') : null
+}
+
 export function buildClientStrategyPreview(report: Report | null): ClientStrategyPreview[] {
   if (!report || report.status !== 'published') return []
 
   const strategy = readStrategyData(report.strategy_data)
   const candidates: Array<ClientStrategyPreview | null> = [
-    clean(report.previous_month_reflection || report.performance_comments)
+    clean(strategy.strategyGoingForward || report.previous_month_reflection || report.performance_comments)
       ? {
-          label: 'What CG observed',
-          value: clean(report.previous_month_reflection || report.performance_comments)!,
-          phase: 'review',
+          label: 'Strategy going forward',
+          value: clean(strategy.strategyGoingForward || report.previous_month_reflection || report.performance_comments)!,
+          phase: 'action',
         }
       : null,
     clean(strategy.topContent.whatThisTellsUs)
@@ -57,10 +64,10 @@ export function buildClientStrategyPreview(report: Report | null): ClientStrateg
           phase: 'review',
         }
       : null,
-    clean(strategy.strategyGoingForward || report.strategy_next_month)
+    strategy.clientDirection.length > 0
       ? {
-          label: 'What we are focusing on next',
-          value: clean(strategy.strategyGoingForward || report.strategy_next_month)!,
+          label: 'Client direction',
+          value: strategy.clientDirection.map(d => `• ${d}`).join('\n'),
           phase: 'action',
         }
       : null,
@@ -71,14 +78,21 @@ export function buildClientStrategyPreview(report: Report | null): ClientStrateg
           phase: 'action',
         }
       : null,
-    clean(report.boost_recommendation)
+    campaignRecValue(strategy)
       ? {
           label: 'Campaign direction',
-          value: clean(report.boost_recommendation)!,
+          value: campaignRecValue(strategy)!,
+          phase: 'action',
+        }
+      : null,
+    strategy.clientActionsRequired.length > 0
+      ? {
+          label: 'What we need from you',
+          value: strategy.clientActionsRequired.map(a => `• ${a}`).join('\n'),
           phase: 'action',
         }
       : null,
   ]
 
-  return candidates.filter((item): item is ClientStrategyPreview => item !== null).slice(0, 4)
+  return candidates.filter((item): item is ClientStrategyPreview => item !== null).slice(0, 6)
 }

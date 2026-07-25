@@ -120,6 +120,17 @@ export default function ClientPortalHome() {
 
           <section className="mt-10 grid gap-4 lg:grid-cols-3">
             <PortalCard
+              to="/client/strategy"
+              eyebrow="Strategy & direction"
+              title="Strategy"
+              description="Reviewed forward-looking strategy, client direction, action plan and campaign recommendations."
+              detail={
+                data.report?.status === 'published'
+                  ? 'Strategy available from the latest published report.'
+                  : 'Strategy will appear when the current review is complete and published.'
+              }
+            />
+            <PortalCard
               to="/client/performance"
               eyebrow="Verified reporting"
               title="Performance Dashboard"
