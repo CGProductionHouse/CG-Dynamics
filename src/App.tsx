@@ -43,6 +43,7 @@ import ClientPortalHome from './pages/client/ClientPortalHome'
 import ClientCampaignsPage from './pages/client/ClientCampaignsPage'
 import ClientPortalCalendarPage from './pages/client/ClientContentCalendarPage'
 import ClientContentGuidesPage from './pages/client/ClientContentGuidesPage'
+import ClientStrategyPage from './pages/client/ClientStrategyPage'
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -141,6 +142,7 @@ export default function App() {
             <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
             <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
             <Route path="/client/content-guides" element={<ClientContentGuidesPage />} />
+            <Route path="/client/strategy" element={<ClientStrategyPage />} />
             <Route path="/dashboard" element={<Navigate to="/client" replace />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

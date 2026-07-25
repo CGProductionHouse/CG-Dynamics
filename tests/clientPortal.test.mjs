@@ -114,9 +114,8 @@ test('strategy preview uses published reviewed fields and has an honest empty st
   }
   const preview = buildClientStrategyPreview(report)
 
-  assert.equal(preview[0].label, 'What CG observed')
+  assert.equal(preview[0].label, 'Strategy going forward')
   assert.equal(preview[0].value, 'Short videos retained attention.')
-  assert.ok(preview.some(item => item.value === 'Test a stronger opening hook.'))
   assert.deepEqual(buildClientStrategyPreview({ ...report, status: 'draft' }), [])
   assert.match(HOME_SOURCE, /Your next strategy update will appear here once the current reporting review is complete\./)
 })

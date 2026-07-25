@@ -23,6 +23,8 @@ const GUIDES_PAGE = read('../src/pages/client/ClientContentGuidesPage.tsx')
 const GUIDES_LIB = read('../src/lib/clientContentGuides.ts')
 const GUIDE_SQL = read('../supabase/phase-22a-content-guide-publication-gate.sql')
 const FULL_GUIDE_PAGE = read('../src/pages/admin/FullContentGuidePage.tsx')
+const STRATEGY_PAGE = read('../src/pages/client/ClientStrategyPage.tsx')
+const PORTAL_LIB = read('../src/lib/clientPortal.ts')
 
 let server, ov, cp, ga
 before(async () => {
@@ -439,4 +441,56 @@ test('client content guides page has loading, empty and error states', () => {
 
 test('client content guides page is read-only', () => {
   assert.doesNotMatch(GUIDES_PAGE, /create|delete|update|insert|edit|form.*submit/i)
+})
+
+// ── Forward-looking Strategy (Phase 8) ────────────────────────────────────────
+
+test('buildClientStrategyPreview reads campaign_recommendation from strategyData', () => {
+  assert.match(PORTAL_LIB, /actionPlan\.campaign_recommendation/)
+  assert.match(PORTAL_LIB, /cr\.enabled/)
+  assert.match(PORTAL_LIB, /campaignRecValue/)
+})
+
+test('buildClientStrategyPreview includes clientActionsRequired', () => {
+  assert.match(PORTAL_LIB, /clientActionsRequired/)
+  assert.match(PORTAL_LIB, /What we need from you/)
+})
+
+test('buildClientStrategyPreview includes clientDirection', () => {
+  assert.match(PORTAL_LIB, /clientDirection/)
+})
+
+test('client strategy page has loading, empty and error states', () => {
+  assert.match(STRATEGY_PAGE, /Loading strategy/)
+  assert.match(STRATEGY_PAGE, /strategy update will appear/)
+  assert.match(STRATEGY_PAGE, /could not be loaded/)
+})
+
+test('client strategy page shows action plan when data available', () => {
+  assert.match(STRATEGY_PAGE, /Action plan/)
+  assert.match(STRATEGY_PAGE, /ACTION_PLAN_LABELS/)
+})
+
+test('client strategy page shows strategic drivers', () => {
+  assert.match(STRATEGY_PAGE, /Strategic drivers/)
+  assert.match(STRATEGY_PAGE, /strategyDrivers/)
+})
+
+test('client strategy page is read-only (no mutations)', () => {
+  assert.doesNotMatch(STRATEGY_PAGE, /\binsert\b|\bdelete\b|\.update\(|\.create\(|\.from\(.*\.insert|\.from\(.*\.delete/i)
+})
+
+test('client portal home links to strategy page', () => {
+  assert.match(HOME, /\/client\/strategy/)
+  assert.match(HOME, /Strategy/)
+})
+
+test('strategy page uses ClientPortalShell with client data', () => {
+  assert.match(STRATEGY_PAGE, /ClientPortalShell/)
+  assert.match(STRATEGY_PAGE, /getClient/)
+})
+
+test('strategy page shows review phase items as muted and action phase as accent', () => {
+  assert.match(STRATEGY_PAGE, /text-report-muted/)
+  assert.match(STRATEGY_PAGE, /text-report-accent/)
 })
