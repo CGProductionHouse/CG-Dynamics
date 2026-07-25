@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { runBoundedWorkers } from '../supabase/functions/microsoft-transition-sync/bounded-workers.ts'
 
@@ -23,4 +24,13 @@ test('bounded workers handle empty input without invoking the worker', async () 
   let called = false
   await runBoundedWorkers([], 4, async () => { called = true })
   assert.equal(called, false)
+})
+
+test('Microsoft fetch processes Planner plans with bounded concurrency', () => {
+  const source = readFileSync(
+    new URL('../supabase/functions/microsoft-transition-sync/index.ts', import.meta.url),
+    'utf8',
+  )
+  assert.match(source, /const GRAPH_PLAN_CONCURRENCY = 2/)
+  assert.match(source, /runBoundedWorkers\(manifest\.plans, GRAPH_PLAN_CONCURRENCY/)
 })

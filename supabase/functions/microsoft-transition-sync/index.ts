@@ -26,6 +26,7 @@ const GRAPH_MAX_ATTEMPTS = 5
 const GRAPH_BATCH_MAX_ATTEMPTS = 8
 const GRAPH_RETRY_CAP_MS = 10_000
 const GRAPH_DETAIL_CONCURRENCY = 4
+const GRAPH_PLAN_CONCURRENCY = 2
 
 function sleep(milliseconds: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -251,7 +252,7 @@ Deno.serve(async request => {
     sources.push({ sourceType: 'outlook_calendar', sourceId: manifest.calendar.id, sourceName: manifest.calendar.name, complete: result.complete, rangeStart: body.rangeStart, rangeEnd: body.rangeEnd, recordCount: result.values.length, safeError: result.safeError })
   }
 
-  for (const plan of manifest.plans) {
+  await runBoundedWorkers(manifest.plans, GRAPH_PLAN_CONCURRENCY, async plan => {
     const [taskResult, bucketResult] = await Promise.all([
       graphPages(`/planner/plans/${encodeURIComponent(plan.id)}/tasks`, graphToken),
       graphPages(`/planner/plans/${encodeURIComponent(plan.id)}/buckets`, graphToken),
@@ -274,7 +275,7 @@ Deno.serve(async request => {
     }
     const complete = taskResult.complete && bucketResult.complete && detailResult.complete
     sources.push({ sourceType: 'planner_plan', sourceId: plan.id, sourceName: plan.name, complete, rangeStart: null, rangeEnd: null, recordCount: taskResult.values.length, safeError: taskResult.safeError ?? bucketResult.safeError ?? (detailResult.complete ? null : 'Some Planner task details could not be fetched.') })
-  }
+  })
 
   const assigneeIds = new Set<string>()
   for (const record of records) {
