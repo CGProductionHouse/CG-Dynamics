@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedQuery'
 import type {
   MicrosoftExistingTarget,
   MicrosoftImportPreviewItem,
@@ -84,24 +85,28 @@ export interface MicrosoftExistingResult {
 
 export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingResult> {
   const [plannerRows, deliverableRows, calendarRows, slotRows] = await Promise.all([
-    supabase
-      .from('planner_tasks')
-      .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, board_id, bucket_id, title, client_id, client_name, status, priority, start_date, due_date, notes, source, original_plan_name, original_bucket_name, assigned_to_name, helper_names')
-      .not('microsoft_plan_id', 'is', null)
-      .not('microsoft_task_id', 'is', null),
-    supabase
-      .from('monthly_deliverables')
-      .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, client_id, package_id, template_id, board_id, bucket_id, month, code, instance_number, title, deliverable_type, production_status, priority, scheduled_date, notes, assigned_to_user_id, assigned_to_name, helper_names')
-      .not('microsoft_plan_id', 'is', null)
-      .not('microsoft_task_id', 'is', null),
-    supabase
-      .from('company_calendar_events')
-      .select('id, updated_at, microsoft_calendar_id, microsoft_event_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, title, event_type, client_id, client_name, start_at, end_at, all_day, location, notes, status')
-      .not('microsoft_calendar_id', 'is', null)
-      .not('microsoft_event_id', 'is', null),
-    supabase
-      .from('monthly_deliverables')
-      .select('id, updated_at, package_id, template_id, instance_number, month, microsoft_task_id'),
+    fetchAllPages((from, to) => supabase
+        .from('planner_tasks')
+        .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, board_id, bucket_id, title, client_id, client_name, status, priority, start_date, due_date, notes, source, original_plan_name, original_bucket_name, assigned_to_name, helper_names')
+        .not('microsoft_plan_id', 'is', null)
+        .not('microsoft_task_id', 'is', null)
+        .range(from, to)),
+    fetchAllPages((from, to) => supabase
+        .from('monthly_deliverables')
+        .select('id, updated_at, microsoft_plan_id, microsoft_task_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, client_id, package_id, template_id, board_id, bucket_id, month, code, instance_number, title, deliverable_type, production_status, priority, scheduled_date, notes, assigned_to_user_id, assigned_to_name, helper_names')
+        .not('microsoft_plan_id', 'is', null)
+        .not('microsoft_task_id', 'is', null)
+        .range(from, to)),
+    fetchAllPages((from, to) => supabase
+        .from('company_calendar_events')
+        .select('id, updated_at, microsoft_calendar_id, microsoft_event_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, title, event_type, client_id, client_name, start_at, end_at, all_day, location, notes, status')
+        .not('microsoft_calendar_id', 'is', null)
+        .not('microsoft_event_id', 'is', null)
+        .range(from, to)),
+    fetchAllPages((from, to) => supabase
+        .from('monthly_deliverables')
+        .select('id, updated_at, package_id, template_id, instance_number, month, microsoft_task_id')
+        .range(from, to)),
   ])
 
   const microsoftError = [plannerRows.error, deliverableRows.error, calendarRows.error].find(Boolean)
@@ -277,7 +282,12 @@ export interface MicrosoftSyncRunItem {
 }
 
 export async function loadMicrosoftSyncRunItems(runId: string): Promise<{ data: MicrosoftSyncRunItem[]; error: string | null }> {
-  const { data, error } = await supabase.from('microsoft_sync_run_items').select('id, source_name, destination, destination_id, action, result_status, source_complete, details, safe_error').eq('run_id', runId).order('created_at')
+  const { data, error } = await fetchAllPages((from, to) => supabase
+    .from('microsoft_sync_run_items')
+    .select('id, source_name, destination, destination_id, action, result_status, source_complete, details, safe_error')
+    .eq('run_id', runId)
+    .order('created_at')
+    .range(from, to))
   if (error) return { data: [], error: error.message }
   return { data: (data ?? []).map(row => ({
     id: row.id as string,
