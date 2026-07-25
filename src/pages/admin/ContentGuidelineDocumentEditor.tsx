@@ -10,6 +10,7 @@ import {
   type ContentGuidelineVideo,
   type ContentRun,
 } from '../../lib/contentWorkflow'
+import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../lib/planner'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { humanizeStatus, INPUT_CLS, LABEL_CLS } from './contentGuidelineHelpers'
 
@@ -24,6 +25,7 @@ interface Props {
 interface VideoDraft {
   title: string
   script: string
+  deliverableId: string
 }
 
 export default function ContentGuidelineDocumentEditor({
@@ -37,8 +39,11 @@ export default function ContentGuidelineDocumentEditor({
   const [drafts, setDrafts] = useState<Record<string, VideoDraft>>({})
   const [newTitle, setNewTitle] = useState('')
   const [newScript, setNewScript] = useState('')
+  const [newDeliverableId, setNewDeliverableId] = useState('')
+  const [scheduleDeliverables, setScheduleDeliverables] = useState<MonthlyDeliverable[]>([])
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [scheduleError, setScheduleError] = useState<string | null>(null)
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -46,10 +51,49 @@ export default function ContentGuidelineDocumentEditor({
       setDrafts(Object.fromEntries(videos.map(video => [video.id, {
         title: video.title,
         script: video.script ?? '',
+        deliverableId: video.deliverable_id ?? '',
       }])))
     }, 0)
     return () => window.clearTimeout(timer)
   }, [guideline.id, guideline.title, videos])
+
+  useEffect(() => {
+    let current = true
+    const month = guideline.month?.slice(0, 7) ?? ''
+    if (!guideline.client_id || !month) {
+      const timer = window.setTimeout(() => {
+        setScheduleDeliverables([])
+        setScheduleError(null)
+      }, 0)
+      return () => { current = false; window.clearTimeout(timer) }
+    }
+
+    void listMonthlyDeliverablesByMonth(month, { clientId: guideline.client_id }).then(({ data, error: loadError }) => {
+      if (!current) return
+      if (loadError) {
+        setScheduleDeliverables([])
+        setScheduleError(loadError.message)
+        return
+      }
+
+      setScheduleError(null)
+      setScheduleDeliverables(
+        ((data ?? []) as MonthlyDeliverable[]).filter(item =>
+          item.deliverable_type === 'video' || item.deliverable_type === 'reel',
+        ),
+      )
+    })
+
+    return () => { current = false }
+  }, [guideline.client_id, guideline.month])
+
+  function deliverableLabel(deliverable: MonthlyDeliverable) {
+    const date = deliverable.scheduled_date ?? deliverable.due_date ?? 'Unscheduled'
+    const code = deliverable.code.endsWith(String(deliverable.instance_number))
+      ? deliverable.code
+      : `${deliverable.code} ${deliverable.instance_number}`
+    return `${code} | ${deliverable.title} | ${date}`
+  }
 
   async function saveDocumentTitle() {
     const title = documentTitle.trim()
@@ -76,11 +120,13 @@ export default function ContentGuidelineDocumentEditor({
       script,
       position: videos.length + 1,
       created_by: currentUserId ?? null,
+      deliverable_id: newDeliverableId || null,
     })
     setBusy(null)
     if (result.error) { setError(result.error); return }
     setNewTitle('')
     setNewScript('')
+    setNewDeliverableId('')
     await onChanged()
   }
 
@@ -95,6 +141,7 @@ export default function ContentGuidelineDocumentEditor({
     const result = await updateGuidelineVideo(video.id, {
       title: draft.title.trim(),
       script: draft.script.trim(),
+      deliverable_id: draft.deliverableId || null,
     })
     setBusy(null)
     if (result.error) { setError(result.error); return }
@@ -169,8 +216,14 @@ export default function ContentGuidelineDocumentEditor({
         ) : (
           <ol className="space-y-4">
             {videos.map((video, index) => {
-              const draft = drafts[video.id] ?? { title: video.title, script: video.script ?? '' }
-              const changed = draft.title !== video.title || draft.script !== (video.script ?? '')
+              const draft = drafts[video.id] ?? {
+                title: video.title,
+                script: video.script ?? '',
+                deliverableId: video.deliverable_id ?? '',
+              }
+              const changed = draft.title !== video.title
+                || draft.script !== (video.script ?? '')
+                || draft.deliverableId !== (video.deliverable_id ?? '')
               return (
                 <li key={video.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -198,6 +251,31 @@ export default function ContentGuidelineDocumentEditor({
                       placeholder="Enter the complete spoken and on-screen script..."
                     />
                   </label>
+                  <label className="mt-3 block space-y-1.5">
+                    <span className={LABEL_CLS}>Client Schedule video</span>
+                    <select
+                      className={INPUT_CLS}
+                      value={draft.deliverableId}
+                      onChange={event => setDrafts(current => ({
+                        ...current,
+                        [video.id]: { ...draft, deliverableId: event.target.value },
+                      }))}
+                    >
+                      <option value="">Not linked yet</option>
+                      {scheduleDeliverables.map(deliverable => (
+                        <option
+                          key={deliverable.id}
+                          value={deliverable.id}
+                          disabled={videos.some(item => item.id !== video.id && item.deliverable_id === deliverable.id)}
+                        >
+                          {deliverableLabel(deliverable)}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="block text-[11px] text-white/40">
+                      Links this script to the matching video or reel in Client Schedule.
+                    </span>
+                  </label>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-white/35">Production: {humanizeStatus(video.production_status)}</span>
                     <ActionButton size="sm" variant="secondary" disabled={!changed} loading={busy === video.id} onClick={() => void saveVideo(video)}>Save video</ActionButton>
@@ -217,6 +295,23 @@ export default function ContentGuidelineDocumentEditor({
           <label className="mt-3 block space-y-1.5">
             <span className={LABEL_CLS}>Complete script</span>
             <textarea className={`${INPUT_CLS} min-h-40 resize-y leading-relaxed`} value={newScript} onChange={event => setNewScript(event.target.value)} placeholder="Enter the complete script before adding this video..." />
+          </label>
+          <label className="mt-3 block space-y-1.5">
+            <span className={LABEL_CLS}>Client Schedule video</span>
+            <select className={INPUT_CLS} value={newDeliverableId} onChange={event => setNewDeliverableId(event.target.value)}>
+              <option value="">Not linked yet</option>
+              {scheduleDeliverables.map(deliverable => (
+                <option key={deliverable.id} value={deliverable.id} disabled={videos.some(video => video.deliverable_id === deliverable.id)}>
+                  {deliverableLabel(deliverable)}
+                </option>
+              ))}
+            </select>
+            {scheduleDeliverables.length === 0 && !scheduleError && (
+              <span className="block text-[11px] text-amber-200/70">
+                No video or reel deliverables are available for this client and month.
+              </span>
+            )}
+            {scheduleError && <span className="block text-[11px] text-red-300">{scheduleError}</span>}
           </label>
           <div className="mt-3 flex justify-end">
             <ActionButton size="sm" loading={busy === 'add'} onClick={() => void addVideo()}>Add Video {videos.length + 1}</ActionButton>

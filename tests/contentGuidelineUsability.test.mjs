@@ -4,9 +4,11 @@ import { readFileSync } from 'node:fs'
 
 const read = name => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const MIGRATION = read('supabase/migrations/20260725172531_content_guideline_document_model.sql')
+const LINKAGE_MIGRATION = read('supabase/migrations/20260725211500_content_run_schedule_linkage.sql')
 const WORKFLOW = read('src/pages/admin/ContentWorkflowPage.tsx')
 const EDITOR = read('src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const ADMIN_PAGE = read('src/pages/admin/FullContentGuidePage.tsx')
+const SCHEDULE = read('src/pages/admin/ClientSchedulePage.tsx')
 const CLIENT_PAGE = read('src/pages/client/ClientContentGuidesPage.tsx')
 const CLIENT_DATA = read('src/lib/clientContentGuides.ts')
 const CALENDAR = read('src/pages/admin/CompanyCalendarPage.tsx')
@@ -80,6 +82,33 @@ test('staff workflow and calendar resolve the same run document', () => {
   assert.match(WORKFLOW, /searchParams\.get\('run'\)/)
   assert.match(CALENDAR, /\/admin\/content-workflow\?tab=runs&event=\$\{event\.id\}/)
   assert.match(ADMIN_PAGE, /ContentGuidelineDocumentEditor/)
+})
+
+test('Microsoft Outlook content runs become canonical Content Runs without duplicating CG-created runs', () => {
+  assert.match(LINKAGE_MIGRATION, /new\.microsoft_event_id is null/)
+  assert.match(LINKAGE_MIGRATION, /new\.event_type <> 'content_run'/)
+  assert.match(LINKAGE_MIGRATION, /where calendar_event_id = new\.id/)
+  assert.match(LINKAGE_MIGRATION, /insert into public\.content_runs/)
+  assert.match(LINKAGE_MIGRATION, /Africa\/Johannesburg/)
+  assert.match(LINKAGE_MIGRATION, /not exists \([\s\S]*run\.calendar_event_id = event\.id/)
+  assert.doesNotMatch(LINKAGE_MIGRATION, /insert into public\.monthly_deliverables/i)
+})
+
+test('guideline videos link to one canonical Client Schedule deliverable', () => {
+  assert.match(EDITOR, /listMonthlyDeliverablesByMonth/)
+  assert.match(EDITOR, /Client Schedule video/)
+  assert.match(EDITOR, /deliverable_id: newDeliverableId \|\| null/)
+  assert.match(EDITOR, /deliverable_id: draft\.deliverableId \|\| null/)
+  assert.match(LINKAGE_MIGRATION, /already linked to another active Content Guideline video/)
+  assert.match(LINKAGE_MIGRATION, /other\.status <> 'archived'/)
+})
+
+test('internal Client Schedule details expose the linked script and shoot brief on demand', () => {
+  assert.match(SCHEDULE, /View script and shoot details/)
+  assert.match(SCHEDULE, /linkedVideo\.script/)
+  assert.match(SCHEDULE, /linkedVideo\.shot_breakdown/)
+  assert.match(SCHEDULE, /linkedVideo\.requirements/)
+  assert.match(SCHEDULE, /linkedVideo\.visual_notes/)
 })
 
 test('parent table is staff-only and clients use the narrow RPC', () => {

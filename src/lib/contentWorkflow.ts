@@ -502,7 +502,7 @@ export async function updateContentGuideline(
 
 export async function addGuidelineVideo(
   guideline: ContentGuideline,
-  input: { title: string; script: string; position: number; created_by?: string | null },
+  input: { title: string; script: string; position: number; deliverable_id?: string | null; created_by?: string | null },
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
   const { data, error } = await supabase
     .from('content_guide_ideas')
@@ -515,6 +515,7 @@ export async function addGuidelineVideo(
       position: input.position,
       video_number: input.position,
       status: 'idea',
+      deliverable_id: input.deliverable_id ?? null,
       created_by: input.created_by ?? null,
     })
     .select('*')

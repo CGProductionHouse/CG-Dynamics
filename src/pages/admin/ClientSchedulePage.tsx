@@ -767,6 +767,24 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
               {linkedVideo.canonical_name && <p className="mt-1.5 break-all font-mono text-[11px] text-white/60">{linkedVideo.canonical_name}</p>}
               <p className="mt-1 text-sm font-bold text-white">{linkedVideo.title}</p>
               <p className="mt-1 text-[11px] text-white/50">Production: {VIDEO_STATUS_LABELS[linkedVideo.production_status]}</p>
+              <details className="mt-3 rounded-lg border border-white/10 bg-black/20">
+                <summary className="cursor-pointer px-3 py-2 text-xs font-bold text-white/75 hover:text-white">
+                  View script and shoot details
+                </summary>
+                <div className="space-y-3 border-t border-white/10 px-3 py-3">
+                  {linkedVideo.script && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">Complete script</p>
+                      <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-white/80">{linkedVideo.script}</p>
+                    </div>
+                  )}
+                  {linkedVideo.hook && <DetailLine label="Hook" value={linkedVideo.hook} />}
+                  {linkedVideo.shot_breakdown && <DetailLine label="Shot breakdown" value={linkedVideo.shot_breakdown} />}
+                  {linkedVideo.requirements && <DetailLine label="Requirements" value={linkedVideo.requirements} />}
+                  {linkedVideo.visual_notes && <DetailLine label="Visual notes" value={linkedVideo.visual_notes} />}
+                  {linkedVideo.cta && <DetailLine label="Call to action" value={linkedVideo.cta} />}
+                </div>
+              </details>
             </div>
           )}
           <div>
@@ -789,6 +807,15 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
         </div>
       </div>
     </>
+  )
+}
+
+function DetailLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">{label}</p>
+      <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-white/75">{value}</p>
+    </div>
   )
 }
 

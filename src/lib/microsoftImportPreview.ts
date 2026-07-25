@@ -76,6 +76,14 @@ export function resolveMicrosoftClient(name: string, clients: MicrosoftPreviewCl
   return { status: 'unresolved', client: null }
 }
 
+export function outlookClientLabel(subject: string): string | null {
+  const match = subject.trim().match(
+    /^(?:content\s+run|shoot|meeting|client\s+event|deadline)\s*[-:]\s*(.+)$/i,
+  )
+  const label = match?.[1]?.trim() ?? ''
+  return label || null
+}
+
 function validDateOnly(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
   const date = new Date(`${value}T00:00:00Z`)
@@ -334,7 +342,19 @@ export function previewPlannerTask(
   }
 }
 
-export function previewOutlookEvent(source: MicrosoftOutlookEventSource): MicrosoftImportPreviewItem {
+export function previewOutlookEvent(
+  source: MicrosoftOutlookEventSource,
+  context: MicrosoftPreviewMappingContext,
+): MicrosoftImportPreviewItem {
+  const eventType = inferMicrosoftEventType(source.title)
+  const clientLabel = outlookClientLabel(source.title)
+  const client = clientLabel ? resolveMicrosoftClient(clientLabel, context.clients) : null
+  const warnings = source.assigneeMicrosoftIds.length > 0
+    ? ['Outlook attendee or assignee IDs are not imported.']
+    : []
+  if (clientLabel && client?.status === 'unresolved') {
+    warnings.push(`No active client exactly matches "${clientLabel}". Link the event to a client in CG Dynamics.`)
+  }
   const base: Omit<MicrosoftImportPreviewItem, 'previewStatus' | 'conflictCode' | 'conflictReason'> = {
     sourceType: 'outlook_event',
     sourcePlanId: null,
@@ -350,14 +370,13 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
     dueDate: null,
     assigneeMicrosoftIds: [...source.assigneeMicrosoftIds],
     destination: 'cg_calendar',
-    mappedClientId: null,
-    mappedClientName: null,
+    mappedClientId: client?.status === 'matched' ? client.client.id : null,
+    mappedClientName: client?.status === 'matched' ? client.client.name : null,
     existingTargetId: null,
-    warnings: source.assigneeMicrosoftIds.length > 0
-      ? ['Outlook attendee or assignee IDs are not imported.']
-      : [],
+    warnings,
     proposedPayload: null,
   }
+  if (client?.status === 'ambiguous') return conflict(base, 'ambiguous_client_match', `More than one active client exactly matches "${clientLabel}".`)
   if (!microsoftOutlookSourceKey(source.sourceCalendarId, source.sourceEventId)) {
     return conflict(base, 'missing_source_id', 'Immutable Outlook event and calendar IDs are required for exact deduplication.')
   }
@@ -372,9 +391,9 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
   const payload = {
     destination: 'cg_calendar' as const,
     title: source.title.trim(),
-    event_type: inferMicrosoftEventType(source.title),
-    client_id: null,
-    client_name: null,
+    event_type: eventType,
+    client_id: client?.status === 'matched' ? client.client.id : null,
+    client_name: client?.status === 'matched' ? client.client.name : null,
     start_at: source.startDate,
     end_at: source.endDate,
     all_day: source.allDay,
@@ -456,7 +475,7 @@ export function buildMicrosoftImportPreview(
   context: MicrosoftPreviewMappingContext,
 ): MicrosoftImportPreviewItem[] {
   const initial = sources.map(source => source.sourceType === 'outlook_event'
-    ? previewOutlookEvent(source)
+    ? previewOutlookEvent(source, context)
     : previewPlannerTask(source, context))
   const items = resolveUnnumberedClientScheduleDeliverables(initial, context)
   const counts = new Map<string, number>()
