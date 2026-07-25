@@ -1,6 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { runBoundedWorkers } from './bounded-workers.ts'
+import { shouldFetchPlannerTaskDetails } from './planner-details.ts'
 
 interface SourceManifest {
   userId: string
@@ -258,7 +259,11 @@ Deno.serve(async request => {
       graphPages(`/planner/plans/${encodeURIComponent(plan.id)}/buckets`, graphToken),
     ])
     const buckets = new Map(bucketResult.values.map(bucket => [String(bucket.id ?? ''), String(bucket.name ?? '')]))
-    const detailResult = await graphTaskDescriptions(taskResult.values.map(task => String(task.id ?? '')).filter(Boolean), graphToken)
+    const detailTaskIds = taskResult.values
+      .filter(task => shouldFetchPlannerTaskDetails(plan.name, task.percentComplete))
+      .map(task => String(task.id ?? ''))
+      .filter(Boolean)
+    const detailResult = await graphTaskDescriptions(detailTaskIds, graphToken)
     for (const task of taskResult.values) {
       const taskId = String(task.id ?? '')
       const bucketId = String(task.bucketId ?? '')

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { runBoundedWorkers } from '../supabase/functions/microsoft-transition-sync/bounded-workers.ts'
+import { shouldFetchPlannerTaskDetails } from '../supabase/functions/microsoft-transition-sync/planner-details.ts'
 
 test('Planner detail batches never exceed the configured concurrency', async () => {
   let active = 0
@@ -33,4 +34,20 @@ test('Microsoft fetch processes Planner plans with bounded concurrency', () => {
   )
   assert.match(source, /const GRAPH_PLAN_CONCURRENCY = 2/)
   assert.match(source, /runBoundedWorkers\(manifest\.plans, GRAPH_PLAN_CONCURRENCY/)
+})
+
+test('active operational tasks keep their Planner descriptions', () => {
+  assert.equal(shouldFetchPlannerTaskDetails('To Do', 0), true)
+  assert.equal(shouldFetchPlannerTaskDetails('To Do', 50), true)
+  assert.equal(shouldFetchPlannerTaskDetails('MASTER CLIENT TO DO', null), true)
+})
+
+test('completed operational history skips unused Planner detail calls', () => {
+  assert.equal(shouldFetchPlannerTaskDetails('To Do', 100), false)
+  assert.equal(shouldFetchPlannerTaskDetails('CG Socials', 100), false)
+})
+
+test('Client Socials always keeps descriptions and scripts, including scheduled cards', () => {
+  assert.equal(shouldFetchPlannerTaskDetails('Client Socials - July 2026', 100), true)
+  assert.equal(shouldFetchPlannerTaskDetails('2025 CLIENTS SCHEDULE', 100), true)
 })
