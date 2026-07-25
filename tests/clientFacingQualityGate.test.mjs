@@ -318,3 +318,60 @@ test('campaigns page handles all Google Ads dashboard states with honest messagi
   assert.match(CAMPAIGNS, /not-synced/)
   assert.match(CAMPAIGNS, /no-activity/)
 })
+
+// ── 19. Content Calendar completeness ─────────────────────────────────────────
+test('calendar page shows month navigation with Previous/Next buttons and URL-based month param', () => {
+  assert.match(CALENDAR, /Previous/)
+  assert.match(CALENDAR, /Next/)
+  assert.match(CALENDAR, /searchParams.*month/)
+  assert.match(CALENDAR, /shiftMonth/)
+})
+
+test('calendar page shows deliverable type labels and client-safe status labels', () => {
+  assert.match(CALENDAR, /PACKAGE_DELIVERABLE_LABELS/)
+  assert.match(CALENDAR, /CLIENT_SAFE_STATUS_LABELS/)
+  assert.doesNotMatch(CALENDAR, /production_status/)
+})
+
+test('calendar page has desktop MonthGrid and mobile Agenda views', () => {
+  assert.match(CALENDAR, /MonthGrid/)
+  assert.match(CALENDAR, /Agenda/)
+  assert.match(CALENDAR, /hidden lg:block/)
+  assert.match(CALENDAR, /lg:hidden/)
+})
+
+test('calendar page shows summary cards for item counts', () => {
+  assert.match(CALENDAR, /CalendarSummary/)
+  assert.match(CALENDAR, /SummaryCard/)
+  assert.match(CALENDAR, /Visible items/)
+  assert.match(CALENDAR, /Scheduled/)
+})
+
+test('calendar page shows unscheduled posts in a separate section', () => {
+  assert.match(CALENDAR, /unscheduledPosts/)
+  assert.match(CALENDAR, /Unscheduled/)
+  assert.match(CALENDAR, /Date being finalised/i)
+})
+
+test('calendar page uses SECURITY-DEFINER RPC keyed to profile.client_id, never direct table queries', () => {
+  assert.match(CALENDAR, /fetchClientMonthAhead\(profile\.client_id/)
+  assert.doesNotMatch(CALENDAR, /monthly_deliverables/)
+  assert.doesNotMatch(CALENDAR, /company_calendar_events/)
+  assert.doesNotMatch(CALENDAR, /assigned_to|internal_notes|helper_names|priority/)
+})
+
+test('calendar page has loading, error and empty states', () => {
+  assert.match(CALENDAR, /loading.*calendar/i)
+  assert.match(CALENDAR, /could not be loaded/i)
+  assert.match(CALENDAR, /No.*schedule items.*available/i)
+})
+
+test('calendar page shows type breakdown below summary cards', () => {
+  assert.match(CALENDAR, /typeCounts/)
+  assert.match(CALENDAR, /PACKAGE_DELIVERABLE_LABELS\[post\.type\]/)
+})
+
+test('calendar page renders event types with client-safe labels', () => {
+  assert.match(CALENDAR, /EVENT_TYPE_LABELS/)
+  assert.match(CALENDAR, /EventChip/)
+})
