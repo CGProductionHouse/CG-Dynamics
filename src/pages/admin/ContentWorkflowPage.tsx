@@ -8,7 +8,6 @@ import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 import {
   CONTENT_GUIDE_STATUSES,
   CONTENT_RUN_STATUSES,
-  canAddGuideToRun,
   canRunGuideAction,
   deliverableHasActiveGuideline,
   isBlankExtraShot,
@@ -18,11 +17,13 @@ import {
   type ContentRunStatus,
 } from '../../lib/contentWorkflowRules'
 import {
-  addApprovedIdeaToRun,
   addRunItem,
   createGuideIdea,
   createRunWithCalendarEvent,
+  ensureGuidelineForRun,
+  getGuidelineForRun,
   listDeliverableLabels,
+  listGuidelineVideos,
   listGuideIdeas,
   listRunItems,
   listRuns,
@@ -30,12 +31,13 @@ import {
   removeRunItem,
   runGuideAction,
   transitionVideo,
-  unlinkGuidelineFromRun,
   updateGuideIdea,
   updateRunLinked,
   updateRunItem,
   type ContentGuideIdea,
   type ContentGuideInput,
+  type ContentGuideline,
+  type ContentGuidelineVideo,
   type ContentRun,
   type ContentRunInput,
   type ContentRunItem,
@@ -45,7 +47,6 @@ import {
 import { listCompanyEventsByIds, type CompanyCalendarEvent } from '../../lib/companyCalendar'
 import {
   GuidelineBrief,
-  GuidelineCard,
   GuidelineForm,
   ShootMode,
 } from './contentGuideline'
@@ -58,6 +59,7 @@ import {
   LABEL_CLS,
 } from './contentGuidelineHelpers'
 import VideoPipelineTab from './VideoPipelineTab'
+import ContentGuidelineDocumentEditor from './ContentGuidelineDocumentEditor'
 
 // ── Content Workflow — Content Guidelines · Video Pipeline · Content Runs ──────
 // One content_guide_ideas row is one real Content Guideline: it powers planning,
@@ -151,7 +153,7 @@ function RunForm({
     <form className="space-y-4" onSubmit={event => { event.preventDefault(); if (form.name.trim() && !dateMissing) onSubmit({ ...formToRunInput(form), client_name: resolvedClientName }) }}>
       {lockCalendarFields && (
         <p className="rounded-lg border border-blue-300/20 bg-blue-300/[0.07] px-3 py-2 text-xs text-blue-100">
-          Name, client, date, time and location for this run are managed in Microsoft/Outlook and are read-only here. Crew, guides and the shot list stay editable.
+          Name, client, date, time and location for this run are managed in Microsoft/Outlook and are read-only here. Crew, the Content Guideline and extra shots stay editable.
         </p>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -202,7 +204,6 @@ export default function ContentWorkflowPage() {
   const [guideMode, setGuideMode] = useState<'view' | 'edit' | 'create'>('view')
   const [guideSaving, setGuideSaving] = useState(false)
   const [guideError, setGuideError] = useState<string | null>(null)
-  const [addToRunId, setAddToRunId] = useState('')
 
   const [runSearch, setRunSearch] = useState('')
   const [runStatusFilter, setRunStatusFilter] = useState<ContentRunStatus | 'all'>('all')
@@ -211,12 +212,12 @@ export default function ContentWorkflowPage() {
   const [runSaving, setRunSaving] = useState(false)
   const [runError, setRunError] = useState<string | null>(null)
   const [runItems, setRunItems] = useState<ContentRunItem[]>([])
+  const [runGuideline, setRunGuideline] = useState<ContentGuideline | null>(null)
+  const [runGuidelineVideos, setRunGuidelineVideos] = useState<ContentGuidelineVideo[]>([])
+  const [guidelineBusy, setGuidelineBusy] = useState(false)
   // Run-detail interaction state.
   const [cardBusyId, setCardBusyId] = useState<string | null>(null)
   const [cardError, setCardError] = useState<string | null>(null)
-  const [pendingUnlink, setPendingUnlink] = useState<ContentRunItem | null>(null)
-  const [addGuideOpen, setAddGuideOpen] = useState(false)
-  const [addGuideSearch, setAddGuideSearch] = useState('')
   const [shootMode, setShootMode] = useState(false)
 
   async function loadAll() {
@@ -269,6 +270,18 @@ export default function ContentWorkflowPage() {
     return () => window.clearTimeout(timer)
   }, [searchParams, runs])
 
+  // Direct Content Run deep link: ?tab=runs&run=<run-id>.
+  const openFromRunParam = useEffectEvent((runId: string) => {
+    const match = runs.find(run => run.id === runId)
+    if (match) { setTab('runs'); setSelectedRunId(match.id); setRunMode('view') }
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('run'); return next }, { replace: true })
+  })
+  useEffect(() => {
+    const runId = searchParams.get('run')
+    if (!runId || runs.length === 0) return
+    const timer = window.setTimeout(() => openFromRunParam(runId), 0)
+    return () => window.clearTimeout(timer)
+  }, [searchParams, runs])
   // Direct guideline deep link: ?tab=guides&guide=<guide-id>.
   const openFromGuideParam = useEffectEvent((guideId: string) => {
     const match = guides.find(guide => guide.id === guideId)
@@ -286,12 +299,33 @@ export default function ContentWorkflowPage() {
     const result = await listRunItems(runId)
     if (!result.error) setRunItems(result.data)
   }
+
+  async function loadRunGuideline(runId: string) {
+    const result = await getGuidelineForRun(runId)
+    if (result.error || result.migrationNeeded || !result.data) {
+      setRunGuideline(null)
+      setRunGuidelineVideos([])
+      if (result.error) setCardError(result.error)
+      return
+    }
+    setRunGuideline(result.data)
+    const videosResult = await listGuidelineVideos(result.data.id)
+    if (videosResult.error) setCardError(videosResult.error)
+    else setRunGuidelineVideos(videosResult.data)
+  }
   const loadRunItemsEvent = useEffectEvent(loadRunItems)
+  const loadRunGuidelineEvent = useEffectEvent(loadRunGuideline)
   useEffect(() => {
     // Deferred so state updates don't run synchronously in the effect body.
     const timer = window.setTimeout(() => {
-      if (selectedRunId) void loadRunItemsEvent(selectedRunId)
-      else setRunItems([])
+      if (selectedRunId) {
+        void loadRunItemsEvent(selectedRunId)
+        void loadRunGuidelineEvent(selectedRunId)
+      } else {
+        setRunItems([])
+        setRunGuideline(null)
+        setRunGuidelineVideos([])
+      }
     }, 0)
     return () => window.clearTimeout(timer)
   }, [selectedRunId])
@@ -300,7 +334,6 @@ export default function ContentWorkflowPage() {
   const selectedRun = runs.find(run => run.id === selectedRunId) ?? null
   const selectedRunEvent = selectedRun?.calendar_event_id ? (linkedEvents[selectedRun.calendar_event_id] ?? null) : null
   const selectedRunMicrosoftOwned = isMicrosoftOwnedEvent(selectedRunEvent)
-  const openRuns = useMemo(() => runs.filter(run => run.status !== 'completed' && run.status !== 'cancelled'), [runs])
 
   function guideLabel(guide: ContentGuideIdea | null): string | null {
     if (!guide?.deliverable_id) return null
@@ -325,33 +358,7 @@ export default function ContentWorkflowPage() {
     })
   }, [runs, runSearch, runStatusFilter, clients])
 
-  // Split the selected run's items into linked guidelines (primary) and extra
-  // standalone shots (secondary). Linked items resolve to the guideline record.
-  const { linked: linkedItems, extra: extraItems } = useMemo(() => splitRunItems(runItems), [runItems])
-  const linkedGuidelines = useMemo(
-    () => linkedItems
-      .map(item => ({ item, guide: guides.find(guide => guide.id === item.guide_idea_id) ?? null }))
-      .filter((entry): entry is { item: ContentRunItem; guide: ContentGuideIdea } => entry.guide !== null),
-    [linkedItems, guides],
-  )
-
-  // Approved guidelines that can be added to the selected run: not already linked,
-  // matching the run's client when it has one, searchable, month-preferred.
-  const eligibleToAdd = useMemo(() => {
-    if (!selectedRun) return []
-    const runMonth = (selectedRun.run_date ?? '').slice(0, 7)
-    const query = addGuideSearch.trim().toLowerCase()
-    return guides
-      .filter(guide => canAddGuideToRun(guide.status))
-      .filter(guide => !linkedItems.some(item => item.guide_idea_id === guide.id))
-      .filter(guide => !selectedRun.client_id || guide.client_id === selectedRun.client_id)
-      .filter(guide => !query || [guide.title, guide.canonical_name ?? ''].some(field => field.toLowerCase().includes(query)))
-      .sort((a, b) => {
-        const am = (a.month ?? '').slice(0, 7) === runMonth ? 0 : 1
-        const bm = (b.month ?? '').slice(0, 7) === runMonth ? 0 : 1
-        return am - bm
-      })
-  }, [selectedRun, guides, linkedItems, addGuideSearch])
+  const { extra: extraItems } = useMemo(() => splitRunItems(runItems), [runItems])
 
   async function submitGuide(input: ContentGuideInput) {
     // One active guideline per Client Schedule deliverable.
@@ -378,41 +385,8 @@ export default function ContentWorkflowPage() {
     await loadAll()
   }
 
-  async function addSelectedGuideToRun() {
-    if (!selectedGuide || !addToRunId) return
-    const run = runs.find(candidate => candidate.id === addToRunId)
-    if (!run) return
-    setGuideError(null)
-    const existing = await listRunItems(run.id)
-    const response = await addApprovedIdeaToRun(run, selectedGuide, existing.data.length)
-    if (response.error) { setGuideError(response.error); return }
-    setAddToRunId('')
-    await loadAll()
-  }
 
-  // Add an approved guideline to the currently-selected run (from the run screen).
-  async function addGuideFromRun(guide: ContentGuideIdea) {
-    if (!selectedRun) return
-    setCardError(null)
-    const response = await addApprovedIdeaToRun(selectedRun, guide, runItems.length)
-    if (response.error) { setCardError(response.error); return }
-    setAddGuideSearch('')
-    await loadRunItems(selectedRun.id)
-    await loadAll()
-  }
-
-  async function confirmUnlink() {
-    if (!pendingUnlink || !selectedRunId) return
-    const item = pendingUnlink
-    setPendingUnlink(null)
-    setCardError(null)
-    const response = await unlinkGuidelineFromRun(item)
-    if (response.error) { setCardError(response.error); return }
-    await loadRunItems(selectedRunId)
-    await loadAll()
-  }
-
-  // Mark a linked guideline's video as shot through the guarded transition.
+  // Mark a Content Guideline video as shot through the guarded transition.
   async function markGuideShot(guide: ContentGuideIdea) {
     setCardBusyId(guide.id); setCardError(null)
     const response = await transitionVideo(guide, 'mark_shot', {
@@ -426,9 +400,6 @@ export default function ContentWorkflowPage() {
     await loadAll()
   }
 
-  function openGuideline(guide: ContentGuideIdea, mode: 'view' | 'edit') {
-    setTab('guides'); setSelectedGuideId(guide.id); setGuideMode(mode); setGuideError(null)
-  }
 
   async function submitRun(input: ContentRunInput) {
     setRunSaving(true); setRunError(null)
@@ -443,6 +414,23 @@ export default function ContentWorkflowPage() {
     setRunMode('view')
   }
 
+  async function createRunGuideline() {
+    if (!selectedRun) return
+    if (!selectedRun.client_id) {
+      setCardError('Assign a real client to this Content Run before creating its Content Guideline.')
+      return
+    }
+    setGuidelineBusy(true)
+    setCardError(null)
+    const result = await ensureGuidelineForRun(selectedRun.id)
+    setGuidelineBusy(false)
+    if (result.error) { setCardError(result.error); return }
+    await loadRunGuideline(selectedRun.id)
+  }
+
+  async function refreshRunGuideline() {
+    if (selectedRunId) await loadRunGuideline(selectedRunId)
+  }
   async function setRunStatus(status: ContentRunStatus) {
     if (!selectedRun) return
     // Cancelling/completing keeps the linked calendar event aligned (no hard delete).
@@ -489,7 +477,7 @@ export default function ContentWorkflowPage() {
           runName={selectedRun.name}
           runDate={selectedRun.run_date}
           runLocation={selectedRun.location}
-          guidelines={linkedGuidelines.map(entry => entry.guide)}
+          guidelines={runGuidelineVideos}
           clients={clients}
           marking={cardBusyId !== null}
           onClose={() => setShootMode(false)}
@@ -505,7 +493,7 @@ export default function ContentWorkflowPage() {
         </p>
       </header>
 
-      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2">{tabButton('guides', 'Content Guidelines', guides.length)}{tabButton('pipeline', 'Video Pipeline', 0)}{tabButton('runs', 'Content Runs', runs.length)}</div>}
+      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2">{tabButton('guides', 'Video Library', guides.length)}{tabButton('pipeline', 'Video Pipeline', 0)}{tabButton('runs', 'Content Runs', runs.length)}</div>}
 
       {migrationNeeded ? (
         <div className="mt-6 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5 sm:p-6">
@@ -523,20 +511,20 @@ export default function ContentWorkflowPage() {
         <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <section className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <input className={`${INPUT_CLS} flex-1`} placeholder="Search guidelines" value={guideSearch} onChange={event => setGuideSearch(event.target.value)} />
-              <ActionButton size="sm" onClick={() => { setGuideMode('create'); setSelectedGuideId(null); setGuideError(null) }}>New guideline</ActionButton>
+              <input className={`${INPUT_CLS} flex-1`} placeholder="Search legacy videos" value={guideSearch} onChange={event => setGuideSearch(event.target.value)} />
+              <span className="text-xs text-white/45">Add videos inside a Content Run.</span>
             </div>
             <select className={`${INPUT_CLS} w-auto`} value={guideStatusFilter} onChange={event => setGuideStatusFilter(event.target.value as ContentGuideStatus | 'all')}>
               <option value="all">All statuses</option>
               {CONTENT_GUIDE_STATUSES.map(status => <option key={status} value={status}>{humanizeStatus(status)}</option>)}
             </select>
             {filteredGuides.length === 0 ? (
-              <EmptyState title={guides.length === 0 ? 'No content guidelines yet' : 'No guidelines match'} message={guides.length === 0 ? 'Create the first content guideline.' : 'Adjust search or status.'} />
+              <EmptyState title={guides.length === 0 ? 'No videos yet' : 'No videos match'} message={guides.length === 0 ? 'Open a Content Run and create its Content Guideline, then add videos there.' : 'Adjust search or status.'} />
             ) : (
               <ul className="space-y-2">
                 {filteredGuides.map(guide => (
                   <li key={guide.id}>
-                    <button type="button" onClick={() => { setSelectedGuideId(guide.id); setGuideMode('view'); setAddToRunId('') }} className={`w-full rounded-xl border p-3 text-left transition-colors ${selectedGuideId === guide.id && guideMode !== 'create' ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}>
+                    <button type="button" onClick={() => { setSelectedGuideId(guide.id); setGuideMode('view');  }} className={`w-full rounded-xl border p-3 text-left transition-colors ${selectedGuideId === guide.id && guideMode !== 'create' ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}>
                       <p className="break-all font-mono text-[11px] text-white/45">{guide.canonical_name ?? '(no canonical name)'}</p>
                       <div className="mt-1 flex items-start justify-between gap-2">
                         <p className="min-w-0 break-words text-sm font-black text-white">{guide.title}</p>
@@ -570,16 +558,6 @@ export default function ContentWorkflowPage() {
                       {canRunGuideAction(selectedGuide.status, 'return_to_review') && <ActionButton size="sm" variant="secondary" onClick={() => void guideAction('return_to_review')}>Return to review</ActionButton>}
                       {canRunGuideAction(selectedGuide.status, 'archive') && <ActionButton size="sm" variant="ghost" onClick={() => void guideAction('archive')}>Archive</ActionButton>}
                     </div>
-                    {canAddGuideToRun(selectedGuide.status) && (
-                      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-black/20 p-3">
-                        <span className="text-xs font-bold text-white/60">Add to run:</span>
-                        <select className={`${INPUT_CLS} w-auto flex-1`} value={addToRunId} onChange={event => setAddToRunId(event.target.value)}>
-                          <option value="">Choose a run…</option>
-                          {openRuns.map(run => <option key={run.id} value={run.id}>{run.name}{run.run_date ? ` (${run.run_date})` : ''}</option>)}
-                        </select>
-                        <ActionButton size="sm" disabled={!addToRunId} onClick={() => void addSelectedGuideToRun()}>Add</ActionButton>
-                      </div>
-                    )}
                   </div>
                 }
               />
@@ -607,7 +585,7 @@ export default function ContentWorkflowPage() {
               <ul className="space-y-2">
                 {filteredRuns.map(run => (
                   <li key={run.id}>
-                    <button type="button" onClick={() => { setSelectedRunId(run.id); setRunMode('view'); setAddGuideOpen(false); setCardError(null) }} className={`w-full rounded-xl border p-3 text-left transition-colors ${selectedRunId === run.id && runMode !== 'create' ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}>
+                    <button type="button" onClick={() => { setSelectedRunId(run.id); setRunMode('view'); setCardError(null) }} className={`w-full rounded-xl border p-3 text-left transition-colors ${selectedRunId === run.id && runMode !== 'create' ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}>
                       <div className="flex items-start justify-between gap-2">
                         <p className="min-w-0 break-words text-sm font-black text-white">{run.name}</p>
                         <Pill tone={runStatusTone(run.status)}>{humanizeStatus(run.status)}</Pill>
@@ -635,7 +613,7 @@ export default function ContentWorkflowPage() {
                     <p className="mt-1 text-xs text-white/45">{selectedRun.run_date ?? 'No date'}{selectedRun.start_time ? ` · ${selectedRun.start_time.slice(0, 5)}` : ''}{selectedRun.location ? ` · ${selectedRun.location}` : ''}</p>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    {linkedGuidelines.length > 0 && <ActionButton size="sm" onClick={() => setShootMode(true)}>Open shoot mode</ActionButton>}
+                    {runGuidelineVideos.length > 0 && <ActionButton size="sm" onClick={() => setShootMode(true)}>Open shoot mode</ActionButton>}
                     <ActionButton size="sm" variant="secondary" onClick={() => { setRunMode('edit'); setRunError(null) }}>Edit</ActionButton>
                   </div>
                 </div>
@@ -648,7 +626,7 @@ export default function ContentWorkflowPage() {
                 </div>
                 {selectedRunMicrosoftOwned && (
                   <p className="rounded-lg border border-blue-300/20 bg-blue-300/[0.07] px-3 py-2 text-xs text-blue-100">
-                    Date, name and location come from Microsoft/Outlook and are read-only here. Crew, guides and the shot list stay editable.
+                    Date, name and location come from Microsoft/Outlook and are read-only here. Crew, the Content Guideline and extra shots stay editable.
                   </p>
                 )}
                 <div className="flex flex-wrap items-center gap-2">
@@ -657,64 +635,30 @@ export default function ContentWorkflowPage() {
                     <button key={status} type="button" onClick={() => void setRunStatus(status)} className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition-colors ${selectedRun.status === status ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/50 hover:text-white/80'}`}>{humanizeStatus(status)}</button>
                   ))}
                 </div>
-
-                {/* Videos & Content Guidelines — the primary shoot content */}
+                {/* One canonical Content Guideline document per Content Run */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-black uppercase tracking-[0.12em] text-brand-teal">Videos & Content Guidelines ({linkedGuidelines.length})</h3>
-                    <ActionButton size="sm" variant="secondary" onClick={() => { setAddGuideOpen(prev => !prev); setAddGuideSearch('') }}>{addGuideOpen ? 'Close' : 'Add guideline to run'}</ActionButton>
-                  </div>
                   {cardError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{cardError}</p>}
-
-                  {addGuideOpen && (
-                    <div className="space-y-2 rounded-xl border border-white/10 bg-black/20 p-3">
-                      <input className={`${INPUT_CLS}`} placeholder="Search approved guidelines" value={addGuideSearch} onChange={event => setAddGuideSearch(event.target.value)} />
-                      {eligibleToAdd.length === 0 ? (
-                        <p className="px-1 py-2 text-xs text-white/45">No approved guidelines available{selectedRun.client_id ? ' for this client' : ''}. Approve a guideline first.</p>
-                      ) : (
-                        <ul className="max-h-64 space-y-1.5 overflow-y-auto">
-                          {eligibleToAdd.map(guide => (
-                            <li key={guide.id} className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2">
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-bold text-white">{guide.title}</p>
-                                <p className="truncate font-mono text-[11px] text-white/45">{guide.canonical_name ?? '—'}{guide.month ? ` · ${guide.month.slice(0, 7)}` : ''}</p>
-                              </div>
-                              <ActionButton size="sm" onClick={() => void addGuideFromRun(guide)}>Add</ActionButton>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
-
-                  {pendingUnlink && (
-                    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-amber-300/25 bg-amber-300/[0.07] px-3 py-2 text-xs text-amber-100">
-                      <span>Unlink “{pendingUnlink.title ?? 'this guideline'}” from the run? The guideline itself is kept.</span>
-                      <div className="ml-auto flex gap-2">
-                        <button type="button" onClick={() => void confirmUnlink()} className="font-bold text-red-300 hover:text-red-200">Yes, unlink</button>
-                        <button type="button" onClick={() => setPendingUnlink(null)} className="text-white/60 hover:text-white">Cancel</button>
-                      </div>
-                    </div>
-                  )}
-
-                  {linkedGuidelines.length === 0 ? (
-                    <p className="rounded-lg border border-dashed border-white/10 px-3 py-4 text-center text-xs text-white/40">No content guidelines linked yet. Use “Add guideline to run”.</p>
+                  {runGuideline ? (
+                    <ContentGuidelineDocumentEditor
+                      guideline={runGuideline}
+                      run={selectedRun}
+                      videos={runGuidelineVideos}
+                      currentUserId={profile?.id}
+                      onChanged={refreshRunGuideline}
+                    />
                   ) : (
-                    <div className="space-y-2">
-                      {linkedGuidelines.map(({ item, guide }) => (
-                        <GuidelineCard
-                          key={item.id}
-                          idea={guide}
-                          clients={clients}
-                          deliverableLabel={guideLabel(guide)}
-                          marking={cardBusyId === guide.id}
-                          actionError={null}
-                          onOpen={() => openGuideline(guide, 'view')}
-                          onEdit={() => openGuideline(guide, 'edit')}
-                          onMarkShot={() => void markGuideShot(guide)}
-                          onUnlink={() => setPendingUnlink(item)}
-                        />
-                      ))}
+                    <div className="rounded-xl border border-dashed border-brand-teal/25 bg-brand-teal/[0.035] p-5 text-center">
+                      <p className="text-sm font-black text-white">This run does not have a Content Guideline yet.</p>
+                      <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-white/50">
+                        One Content Run uses one Content Guideline document containing all ordered videos, names and complete scripts.
+                      </p>
+                      {selectedRun.client_id ? (
+                        <div className="mt-4">
+                          <ActionButton size="sm" loading={guidelineBusy} onClick={() => void createRunGuideline()}>Create Content Guideline</ActionButton>
+                        </div>
+                      ) : (
+                        <p className="mt-4 text-xs font-bold text-amber-200">Assign a real client to this run first. Client ownership is never guessed.</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -726,7 +670,7 @@ export default function ContentWorkflowPage() {
                     <ActionButton size="sm" variant="ghost" onClick={() => void addExtraShot()}>Add extra shot</ActionButton>
                   </div>
                   {extraItems.length === 0 ? (
-                    <p className="rounded-lg border border-dashed border-white/10 px-3 py-3 text-center text-xs text-white/35">No extra shots. Linked guidelines above are the main content.</p>
+                    <p className="rounded-lg border border-dashed border-white/10 px-3 py-3 text-center text-xs text-white/35">No extra shots. The Content Guideline above is the official client document.</p>
                   ) : (
                     <ol className="space-y-2">
                       {extraItems.map((item, index) => (

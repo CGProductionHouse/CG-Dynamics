@@ -22,12 +22,12 @@ import {
   type VideoTransitionContext,
 } from './videoPipelineRules'
 
-// ── Content Workflow data access ──────────────────────────────────────────────
+// â”€â”€ Content Workflow data access â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //
 // Supabase reads/writes for the Content Guide / Content Run MVP. All access
 // goes through here (never from the page), respects RLS (staff read/write;
 // clients no access), and degrades to migrationNeeded before phase-19d is
-// applied. No hard deletes of ideas/runs — they retire via archived/cancelled.
+// applied. No hard deletes of ideas/runs â€” they retire via archived/cancelled.
 
 export interface ContentGuideIdea {
   id: string
@@ -48,7 +48,10 @@ export interface ContentGuideIdea {
   status: ContentGuideStatus
   notes: string | null
   client_published_at: string | null
-  // ── Video production pipeline (phase-19e, additive) ──
+  content_guideline_id: string | null
+  position: number | null
+  migration_review_reason: string | null
+  // â”€â”€ Video production pipeline (phase-19e, additive) â”€â”€
   video_number: number | null
   folder_client_code: string | null
   canonical_name: string | null
@@ -128,7 +131,7 @@ function wrap<T>(data: T, error: { code?: string; message?: string } | null, fal
   return { data, error: null, migrationNeeded: false }
 }
 
-// ── Guide ideas ───────────────────────────────────────────────────────────────
+// â”€â”€ Guide ideas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function listGuideIdeas(): Promise<QueryResult<ContentGuideIdea[]>> {
   const { data, error } = await supabase
@@ -153,7 +156,7 @@ export async function runGuideAction(id: string, action: ContentGuideAction): Pr
   return updateGuideIdea(id, { status: guideActionTarget(action) })
 }
 
-// ── Runs ──────────────────────────────────────────────────────────────────────
+// â”€â”€ Runs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function listRuns(): Promise<QueryResult<ContentRun[]>> {
   const { data, error } = await supabase
@@ -173,7 +176,7 @@ export async function updateRun(id: string, patch: ContentRunInput | Partial<Con
   return wrap((data as ContentRun) ?? null, error, null)
 }
 
-// ── Unified Content Run ⇄ CG Calendar identity (phase-19f) ────────────────────
+// â”€â”€ Unified Content Run â‡„ CG Calendar identity (phase-19f) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //
 // A CG-created Content Run and its CG Calendar event are ONE thing. Creating a
 // run in Content Workflow also creates the linked company_calendar_events row
@@ -227,7 +230,7 @@ export async function createRunWithCalendarEvent(input: ContentRunInput): Promis
     status: mapRunStatusToCalendar(input.status ?? 'planning'),
   })
   if (eventResult.tableMissing) {
-    // Calendar layer not present yet — fall back to a standalone run.
+    // Calendar layer not present yet â€” fall back to a standalone run.
     return createRun(input)
   }
   if (eventResult.error || !eventResult.data) {
@@ -243,7 +246,7 @@ export async function createRunWithCalendarEvent(input: ContentRunInput): Promis
 
 // Update a run and keep its linked calendar event aligned. Calendar-owned fields
 // (name/client/date/time/location/status) mirror to the event, EXCEPT when the
-// event is Microsoft-owned (its fields are source-controlled — nothing is
+// event is Microsoft-owned (its fields are source-controlled â€” nothing is
 // written back). Operational fields never touch the calendar. No hard deletes.
 export async function updateRunLinked(run: ContentRun, patch: ContentRunInput | Partial<ContentRun>): Promise<QueryResult<ContentRun | null>> {
   const runResult = await updateRun(run.id, patch)
@@ -256,7 +259,7 @@ export async function updateRunLinked(run: ContentRun, patch: ContentRunInput | 
   return runResult
 }
 
-// ── Run items (shot list) ─────────────────────────────────────────────────────
+// â”€â”€ Run items (shot list) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function listRunItems(runId: string): Promise<QueryResult<ContentRunItem[]>> {
   const { data, error } = await supabase
@@ -342,7 +345,7 @@ export async function unlinkGuidelineFromRun(
   return removed
 }
 
-// Guide ideas linked to a set of deliverable ids — used by Client Schedule to
+// Guide ideas linked to a set of deliverable ids â€” used by Client Schedule to
 // show a small "linked" indicator without rebuilding the page.
 export async function listGuideIdeasForDeliverables(deliverableIds: string[]): Promise<QueryResult<ContentGuideIdea[]>> {
   if (deliverableIds.length === 0) return { data: [], error: null, migrationNeeded: false }
@@ -353,7 +356,7 @@ export async function listGuideIdeasForDeliverables(deliverableIds: string[]): P
   return wrap((data ?? []) as ContentGuideIdea[], error, [])
 }
 
-// ── Video production pipeline ─────────────────────────────────────────────────
+// â”€â”€ Video production pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface StaffProfileOption {
   id: string
@@ -409,7 +412,7 @@ export interface DeliverableLabel {
   title: string
 }
 
-// Read-only labels for linked Client Schedule deliverables (display only —
+// Read-only labels for linked Client Schedule deliverables (display only â€”
 // never mutates monthly_deliverables).
 export async function listDeliverableLabels(ids: string[]): Promise<QueryResult<DeliverableLabel[]>> {
   if (ids.length === 0) return { data: [], error: null, migrationNeeded: false }
@@ -418,4 +421,157 @@ export async function listDeliverableLabels(ids: string[]): Promise<QueryResult<
     .select('id, code, instance_number, title')
     .in('id', ids)
   return wrap((data ?? []) as DeliverableLabel[], error, [])
+}
+
+
+// -- Content Guideline document model -----------------------------------------
+
+export type ContentGuidelineStatus = 'draft' | 'ready' | 'published' | 'archived'
+
+export interface ContentGuideline {
+  id: string
+  content_run_id: string
+  client_id: string
+  title: string
+  month: string | null
+  status: ContentGuidelineStatus
+  client_published_at: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type ContentGuidelineVideo = ContentGuideIdea
+
+export interface ContentGuidelineDocument {
+  guideline: ContentGuideline
+  run: ContentRun
+  videos: ContentGuidelineVideo[]
+}
+
+export async function listContentGuidelines(filters: {
+  clientId?: string | null
+  month?: string | null
+  runId?: string | null
+} = {}): Promise<QueryResult<ContentGuideline[]>> {
+  let query = supabase.from('content_guidelines').select('*').order('updated_at', { ascending: false })
+  if (filters.clientId) query = query.eq('client_id', filters.clientId)
+  if (filters.month) query = query.eq('month', filters.month)
+  if (filters.runId) query = query.eq('content_run_id', filters.runId)
+  const { data, error } = await query
+  return wrap((data ?? []) as ContentGuideline[], error, [])
+}
+
+export async function listGuidelineVideos(guidelineId: string): Promise<QueryResult<ContentGuidelineVideo[]>> {
+  const { data, error } = await supabase
+    .from('content_guide_ideas')
+    .select('*')
+    .eq('content_guideline_id', guidelineId)
+    .neq('status', 'archived')
+    .order('position', { ascending: true })
+    .order('created_at', { ascending: true })
+  return wrap((data ?? []) as ContentGuidelineVideo[], error, [])
+}
+
+export async function getGuidelineForRun(runId: string): Promise<QueryResult<ContentGuideline | null>> {
+  const { data, error } = await supabase
+    .from('content_guidelines')
+    .select('*')
+    .eq('content_run_id', runId)
+    .maybeSingle()
+  return wrap((data as ContentGuideline | null) ?? null, error, null)
+}
+
+export async function ensureGuidelineForRun(runId: string): Promise<QueryResult<ContentGuideline | null>> {
+  const { data, error } = await supabase.rpc('get_or_create_content_guideline', { p_run_id: runId })
+  return wrap((data as ContentGuideline | null) ?? null, error, null)
+}
+
+export async function updateContentGuideline(
+  id: string,
+  patch: Pick<Partial<ContentGuideline>, 'title' | 'month' | 'status'>,
+): Promise<QueryResult<ContentGuideline | null>> {
+  const { data, error } = await supabase
+    .from('content_guidelines')
+    .update(patch)
+    .eq('id', id)
+    .select('*')
+    .single()
+  return wrap((data as ContentGuideline | null) ?? null, error, null)
+}
+
+export async function addGuidelineVideo(
+  guideline: ContentGuideline,
+  input: { title: string; script: string; position: number; created_by?: string | null },
+): Promise<QueryResult<ContentGuidelineVideo | null>> {
+  const { data, error } = await supabase
+    .from('content_guide_ideas')
+    .insert({
+      content_guideline_id: guideline.id,
+      client_id: guideline.client_id,
+      month: guideline.month,
+      title: input.title,
+      script: input.script,
+      position: input.position,
+      video_number: input.position,
+      status: 'idea',
+      created_by: input.created_by ?? null,
+    })
+    .select('*')
+    .single()
+  return wrap((data as ContentGuidelineVideo | null) ?? null, error, null)
+}
+
+export async function updateGuidelineVideo(
+  id: string,
+  patch: Partial<ContentGuidelineVideo>,
+): Promise<QueryResult<ContentGuidelineVideo | null>> {
+  return updateGuideIdea(id, patch)
+}
+
+export async function reorderGuidelineVideos(
+  guidelineId: string,
+  videoIds: string[],
+): Promise<QueryResult<boolean>> {
+  const { error } = await supabase.rpc('reorder_content_guideline_videos', {
+    p_guideline_id: guidelineId,
+    p_video_ids: videoIds,
+  })
+  return wrap(!error, error, false)
+}
+
+export async function setGuidelinePublication(
+  guidelineId: string,
+  publish: boolean,
+): Promise<QueryResult<ContentGuideline | null>> {
+  const { data, error } = await supabase.rpc('set_content_guideline_publication', {
+    p_guideline_id: guidelineId,
+    p_publish: publish,
+  })
+  return wrap((data as ContentGuideline | null) ?? null, error, null)
+}
+
+export async function listContentGuidelineDocuments(filters: {
+  clientId?: string | null
+  month?: string | null
+} = {}): Promise<QueryResult<ContentGuidelineDocument[]>> {
+  const [guidelinesResult, runsResult] = await Promise.all([
+    listContentGuidelines(filters),
+    listRuns(),
+  ])
+  if (guidelinesResult.migrationNeeded) return { data: [], error: null, migrationNeeded: true }
+  if (guidelinesResult.error || runsResult.error) {
+    return { data: [], error: guidelinesResult.error ?? runsResult.error, migrationNeeded: false }
+  }
+  const videoResults = await Promise.all(
+    guidelinesResult.data.map(guideline => listGuidelineVideos(guideline.id)),
+  )
+  const videoError = videoResults.find(result => result.error)?.error ?? null
+  if (videoError) return { data: [], error: videoError, migrationNeeded: false }
+  const runMap = new Map(runsResult.data.map(run => [run.id, run]))
+  const documents = guidelinesResult.data.flatMap((guideline, index) => {
+    const run = runMap.get(guideline.content_run_id)
+    return run ? [{ guideline, run, videos: videoResults[index].data }] : []
+  })
+  return { data: documents, error: null, migrationNeeded: false }
 }

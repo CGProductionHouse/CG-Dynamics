@@ -315,10 +315,10 @@ This must be added as a core goal, not a forgotten side note.
 |---|---|---|
 | Hub OneDrive panel with CG, Client, Once-Off links | DONE/PARTIAL | Panel exists, some links may still be placeholders. |
 | External links must be clear | PARTIAL | Improved, but verify live. |
-| Integrate content guideline with videos/reels and OneDrive naming | OUTSTANDING | Important future module. |
-| Track what videos were shot | OUTSTANDING | Not built. |
+| Canonical Content Guideline document with ordered videos/scripts | DONE IN CODE | One document per Content Run; production migration and client-safe published projection included. |
+| Track what videos were shot | PARTIAL | Existing per-video production pipeline remains connected to videos inside the canonical guideline. |
 | Track what was not shot and can be shot later | OUTSTANDING | Not built. |
-| Track ready-to-edit videos/reels | OUTSTANDING | Not built. |
+| Track ready-to-edit videos/reels | PARTIAL | Existing production statuses remain; live workflow verification is required after release. |
 | Link tasks/deliverables to correct OneDrive folders | OUTSTANDING | Not built. |
 | Help allocate external/temporary editors | OUTSTANDING | Not built. |
 
