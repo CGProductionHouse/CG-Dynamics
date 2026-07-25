@@ -23,6 +23,13 @@ export interface MicrosoftSnapshotSource {
   safeError: string | null
 }
 
+export interface MicrosoftAssigneeLookupStatus {
+  requested: number
+  resolved: number
+  unresolved: number
+  statusCounts: Record<string, number>
+}
+
 export interface MicrosoftSnapshot {
   format: typeof MICROSOFT_SNAPSHOT_FORMAT
   version: 1 | 2 | 3
@@ -37,6 +44,8 @@ export interface MicrosoftSnapshot {
   records: MicrosoftImportSourceRecord[]
   /** Microsoft user identity metadata keyed by user ID (v3+). */
   assigneeMap: Record<string, MicrosoftAssigneeMapEntry>
+  /** Aggregate directory lookup health. Contains no identities or secrets. */
+  assigneeLookup: MicrosoftAssigneeLookupStatus | null
 }
 
 export interface MicrosoftSnapshotParseResult {
@@ -121,6 +130,19 @@ function sourceError(value: unknown): string | null {
     if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return 'Outlook range is invalid'
     if (end - start > 370 * 24 * 60 * 60 * 1000) return 'Outlook range cannot exceed 370 days'
   } else if (value.rangeStart !== null || value.rangeEnd !== null) return 'Planner sources cannot declare calendar ranges'
+  return null
+}
+
+function assigneeLookupError(value: unknown): string | null {
+  if (!isRecord(value)) return 'must be an object'
+  for (const field of ['requested', 'resolved', 'unresolved'] as const) {
+    if (!Number.isInteger(value[field]) || (value[field] as number) < 0) return `${field} must be a non-negative integer`
+  }
+  if ((value.resolved as number) + (value.unresolved as number) !== value.requested) return 'resolved plus unresolved must equal requested'
+  if (!isRecord(value.statusCounts)) return 'statusCounts must be an object'
+  for (const count of Object.values(value.statusCounts)) {
+    if (!Number.isInteger(count) || (count as number) < 0) return 'statusCounts values must be non-negative integers'
+  }
   return null
 }
 
@@ -239,6 +261,10 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
         if (e.userPrincipalName !== undefined && e.userPrincipalName !== null && typeof e.userPrincipalName !== 'string') errors.push(`Assignee entry "${userId}" "userPrincipalName" must be a string or null.`)
       }
     }
+    if (parsed.assigneeLookup !== undefined) {
+      const problem = assigneeLookupError(parsed.assigneeLookup)
+      if (problem) errors.push(`"assigneeLookup" ${problem}.`)
+    }
   }
 
   if (errors.length > 0) return { snapshot: null, errors }
@@ -255,6 +281,9 @@ export function parseMicrosoftSnapshot(rawText: string): MicrosoftSnapshotParseR
       assigneeMap: parsed.version === 3 && typeof parsed.assigneeMap === 'object' && parsed.assigneeMap !== null && !Array.isArray(parsed.assigneeMap)
         ? parsed.assigneeMap as Record<string, MicrosoftAssigneeMapEntry>
         : {},
+      assigneeLookup: parsed.version === 3 && parsed.assigneeLookup !== undefined
+        ? parsed.assigneeLookup as unknown as MicrosoftAssigneeLookupStatus
+        : null,
     },
     errors: [],
   }
