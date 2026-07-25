@@ -11,6 +11,9 @@ import {
   type TaskBucket,
   type TaskStatus,
   type ClientOption,
+  type RequestState,
+  requestStateFromTask,
+  requestStateLabel,
 } from '../../lib/commandCentre'
 import { listStaffProfiles } from '../../lib/contentWorkflow'
 import {
@@ -18,7 +21,7 @@ import {
   type MonthlyDeliverable,
 } from '../../lib/planner'
 import { businessDateKey } from '../../lib/businessTime'
-import { TaskCard, OpsQuickAdd, TaskDetailDrawer } from '../../components/operations'
+import { TaskCard, OpsQuickAdd, TaskDetailDrawer, RequestIntake } from '../../components/operations'
 
 type OpsTab = 'my-work' | 'board' | 'client-work' | 'calendar' | 'admin'
 
@@ -30,6 +33,7 @@ export default function OpsHubPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
+  const [showRequestIntake, setShowRequestIntake] = useState(false)
   const [selectedTask, setSelectedTask] = useState<CommandCentreTask | null>(null)
   const [clients, setClients] = useState<ClientOption[]>([])
   const [staffProfiles, setStaffProfiles] = useState<{ id: string; full_name: string | null }[]>([])
@@ -74,6 +78,12 @@ export default function OpsHubPage() {
     setShowQuickAdd(false)
   }
 
+  async function handleRequestCreated(task: CommandCentreTask) {
+    setTasks(prev => [task, ...prev])
+    setShowRequestIntake(false)
+    setSelectedTask(task)
+  }
+
   function handleTaskUpdated(updated: CommandCentreTask) {
     setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
     setSelectedTask(null)
@@ -110,7 +120,15 @@ export default function OpsHubPage() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          {!showQuickAdd ? (
+          {activeTab === 'client-work' && !showRequestIntake ? (
+            <button
+              onClick={() => setShowRequestIntake(true)}
+              className="rounded-lg bg-amber-400/20 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-amber-200 transition-colors hover:brightness-110"
+            >
+              + Capture Request
+            </button>
+          ) : null}
+          {!showQuickAdd && activeTab !== 'client-work' ? (
             <button
               onClick={() => setShowQuickAdd(true)}
               className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black transition-colors hover:brightness-110"
@@ -128,6 +146,18 @@ export default function OpsHubPage() {
             clients={clients}
             staffProfiles={staffProfiles}
             onClose={() => setShowQuickAdd(false)}
+          />
+        </div>
+      )}
+
+      {showRequestIntake && (
+        <div className="mb-5 rounded-xl border border-amber-400/20 bg-amber-400/[0.02] p-4">
+          <RequestIntake
+            onCreated={handleRequestCreated}
+            clients={clients}
+            tasks={tasks}
+            staffProfiles={staffProfiles}
+            onClose={() => setShowRequestIntake(false)}
           />
         </div>
       )}
@@ -169,7 +199,11 @@ export default function OpsHubPage() {
           onOpenTask={setSelectedTask}
         />
       ) : activeTab === 'client-work' ? (
-        <ClientWorkView deliverables={deliverables} tasks={tasks} onOpenTask={setSelectedTask} />
+        <ClientWorkView
+          deliverables={deliverables}
+          tasks={tasks}
+          onOpenTask={setSelectedTask}
+        />
       ) : activeTab === 'calendar' ? (
         <CalendarView tasks={tasks} deliverables={deliverables} onOpenTask={setSelectedTask} />
       ) : activeTab === 'admin' && isAdmin ? (
@@ -182,6 +216,15 @@ export default function OpsHubPage() {
         onSaved={handleTaskUpdated}
         clients={clients}
         staffProfiles={staffProfiles}
+        isAdmin={isAdmin}
+        deliverables={deliverables.map(d => ({
+          id: d.id,
+          client_id: d.client_id,
+          code: d.code,
+          instance_number: d.instance_number,
+          title: d.title,
+          month: d.month,
+        }))}
       />
     </div>
   )
@@ -302,27 +345,132 @@ function ClientWorkView({
   tasks: CommandCentreTask[]
   onOpenTask: (task: CommandCentreTask) => void
 }) {
+  const [clientFilter, setClientFilter] = useState('')
+  const [stateFilter, setStateFilter] = useState<RequestState | 'all'>('all')
+  const [packageFilter, setPackageFilter] = useState('all')
+
   const clientRequests = useMemo(() =>
     tasks.filter(t => t.priority === 'client_request' || t.source === 'whatsapp_paste'),
     [tasks],
   )
 
+  const requestStates = useMemo(() => {
+    const set = new Set<RequestState>()
+    for (const t of clientRequests) {
+      set.add(requestStateFromTask(t))
+    }
+    return ['all' as const, ...Array.from(set)] as const
+  }, [clientRequests])
+
+  const filtered = useMemo(() => {
+    let result = clientRequests
+    if (clientFilter) {
+      result = result.filter(t => t.client_id === clientFilter)
+    }
+    if (stateFilter !== 'all') {
+      result = result.filter(t => requestStateFromTask(t) === stateFilter)
+    }
+    if (packageFilter === 'classified') {
+      result = result.filter(t => t.package_action)
+    } else if (packageFilter === 'unclassified') {
+      result = result.filter(t => !t.package_action)
+    } else if (packageFilter === 'use_slot') {
+      result = result.filter(t => t.package_action === 'use_slot')
+    } else if (packageFilter === 'addon') {
+      result = result.filter(t => t.package_action === 'addon')
+    }
+    return result
+  }, [clientRequests, clientFilter, stateFilter, packageFilter])
+
+  const unclassified = useMemo(() => clientRequests.filter(t => !t.package_action), [clientRequests])
+  const urgentRequests = useMemo(() => clientRequests.filter(t => t.priority === 'urgent'), [clientRequests])
+
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <section>
-        <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/60">Client Requests ({clientRequests.length})</h2>
-        <div className="mt-2 space-y-1.5">
-          {clientRequests.slice(0, 15).map(task => (
-            <TaskCard key={task.id} task={task} onStatusChange={() => {}} onOpen={onOpenTask} />
+    <div className="space-y-5">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+        <select
+          value={clientFilter}
+          onChange={e => setClientFilter(e.target.value)}
+          className="rounded border border-white/10 bg-[#111] px-2 py-1.5 text-[10px] text-white outline-none focus:border-brand-teal/50"
+        >
+          <option value="">All clients</option>
+          {Array.from(new Set(clientRequests.filter(t => t.client_id).map(t => t.client_id!))).map(id => {
+            const task = clientRequests.find(t => t.client_id === id)
+            return <option key={id} value={id}>{task?.client_name ?? id}</option>
+          })}
+        </select>
+        <select
+          value={stateFilter}
+          onChange={e => setStateFilter(e.target.value as RequestState | 'all')}
+          className="rounded border border-white/10 bg-[#111] px-2 py-1.5 text-[10px] text-white outline-none focus:border-brand-teal/50"
+        >
+          <option value="all">All states</option>
+          {requestStates.filter(s => s !== 'all').map(s => (
+            <option key={s} value={s}>{requestStateLabel(s)}</option>
           ))}
-          {clientRequests.length === 0 && <p className="text-sm text-white/30">No pending client requests.</p>}
-        </div>
-      </section>
+        </select>
+        <select
+          value={packageFilter}
+          onChange={e => setPackageFilter(e.target.value)}
+          className="rounded border border-white/10 bg-[#111] px-2 py-1.5 text-[10px] text-white outline-none focus:border-brand-teal/50"
+        >
+          <option value="all">All classification</option>
+          <option value="unclassified">Unclassified</option>
+          <option value="classified">Classified</option>
+          <option value="use_slot">Use package slot</option>
+          <option value="addon">Add-on</option>
+        </select>
+        <span className="self-center text-[10px] text-white/40">{filtered.length} request{filtered.length !== 1 ? 's' : ''}</span>
+      </div>
+
+      {/* Urgent banner */}
+      {urgentRequests.length > 0 && (
+        <section>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-red-300">Urgent ({urgentRequests.length})</h2>
+          <div className="mt-2 space-y-1.5">
+            {urgentRequests.map(task => (
+              <TaskCard key={task.id} task={task} onStatusChange={() => {}} onOpen={onOpenTask} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Unclassified banner */}
+      {unclassified.length > 0 && stateFilter === 'all' && !clientFilter && (
+        <section>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/60">
+            Unclassified — awaiting admin review ({unclassified.length})
+          </h2>
+          <div className="mt-2 space-y-1.5">
+            {unclassified.slice(0, 10).map(task => (
+              <TaskCard key={task.id} task={task} onStatusChange={() => {}} onOpen={onOpenTask} />
+            ))}
+            {unclassified.length > 10 && (
+              <p className="text-[10px] text-white/30">+{unclassified.length - 10} more — use filters to narrow</p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Filtered results */}
+      {filtered.length > 0 && (stateFilter !== 'all' || clientFilter || packageFilter !== 'all') && (
+        <section>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">Filtered requests ({filtered.length})</h2>
+          <div className="mt-2 space-y-1.5">
+            {filtered.map(task => (
+              <TaskCard key={task.id} task={task} onStatusChange={() => {}} onOpen={onOpenTask} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Package deliverables summary */}
       <section>
         <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-teal/70">
           Monthly Deliverables ({deliverables.length})
         </h2>
-        <div className="mt-2 space-y-2">
+        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
           {deliverables.slice(0, 30).map(d => (
             <div key={d.id} className="rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2">
               <div className="flex items-center gap-2">
@@ -335,11 +483,25 @@ function ClientWorkView({
                 </span>
                 <p className="truncate text-xs text-white/70">{d.title}</p>
               </div>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {d.scheduled_date && (
+                  <span className="text-[9px] text-white/30">Schedule: {d.scheduled_date}</span>
+                )}
+                {d.due_date && (
+                  <span className="text-[9px] text-white/30">Due: {d.due_date}</span>
+                )}
+              </div>
             </div>
           ))}
           {deliverables.length === 0 && <p className="text-sm text-white/30">No deliverables for this month.</p>}
         </div>
       </section>
+
+      {filtered.length === 0 && !urgentRequests.length && !unclassified.length && (
+        <p className="rounded-xl border border-white/10 bg-white/[0.02] p-6 text-center text-sm text-white/40">
+          No client requests matching the current filters. Use + Capture Request to add one.
+        </p>
+      )}
     </div>
   )
 }

@@ -1,3 +1,5 @@
 export { TaskCard } from './TaskCard'
 export { OpsQuickAdd } from './OpsQuickAdd'
 export { TaskDetailDrawer } from './TaskDetailDrawer'
+export { RequestIntake } from './RequestIntake'
+export { RequestApproval } from './RequestApproval'
