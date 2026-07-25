@@ -1,6 +1,7 @@
 # CG Dynamics — Planner Replacement Architecture
 
 > Replace Microsoft Teams Planner with a purpose-built CG Dynamics module that beats Planner at its own game for CG Production House.
+> Status: LIVE — Operations Hub controlled beta released 2026-07-25.
 
 ---
 

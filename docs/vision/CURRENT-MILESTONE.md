@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-25
 Current milestone: Operations Hub — Teams / Planner replacement foundation
-Status: Active — building the unified staff workflow hub replacing Microsoft Teams/Planner for CG Production House daily operations.
+Status: COMPLETED — Operations Hub controlled beta released.
 
 ## Completed and in production (merged to main)
 
@@ -27,23 +27,32 @@ Status: Active — building the unified staff workflow hub replacing Microsoft T
 - **Forward-looking reviewed strategy** — `buildClientStrategyPreview` reads all
   `strategyData` fields (campaign recommendation, client direction, client actions);
   dedicated client StrategyPage with action plan and strategic drivers. Live (PR #53, main `7123b06`).
+- **Operations Hub PR 1** — milestone and canonical model (docs).
+- **Operations Hub PR 2** — shell and unified board page at `/admin/ops-hub` with tabbed interface. Merged `bfc6425` (PR #55).
+- **Operations Hub PR 3** — Quick Add (title-only, progressive fields, Enter/Escape), TaskCard, TaskDetailDrawer (editable, dirty-state, Save/Cancel, close-confirmation), `updateTask` whitelist, `'Once-off'` default bucket. Merged `c27c1d2` (PR #56).
+- **Operations Hub PR 4** — RequestIntake (WhatsApp paste capture, duplicate detection), RequestApproval (copy approval message, Mark as sent/approved/changes requested), package classification (admin-only: use_slot/addon/move_work, deliverable linking, quote_needed), ClientWorkView upgrade with filters. Merged `1d0e36b` (PR #57).
+- **Operations Hub PR 5** — board drag-and-drop (HTML5 native, optimistic, keyboard alternatives), calendar month/week/day views with navigation and filters, drag-to-schedule, mobile agenda. Merged `26618dc` (PR #58).
+- **Operations Hub PR 6** — quality-gate test suite (46 tests), admin board implementation, security hardening, error handling. Merged `f52ebfd` (PR #59).
+- **Operations Hub PR 7** — release documentation, navigation audit, Vercel deployment, production smoke checks. Merged (PR #60).
 
-## Active milestone goal — Operations Hub foundation
+## Operations Hub milestone — COMPLETED
 
-Build a unified, usable Operations Hub that replaces the scattered Teams/Planner
-workflow for CG staff daily work. The hub must feel faster, clearer and more
-enjoyable than Teams — not merely a copy.
+The Operations Hub is live in production as a controlled beta. All daily staff
+workflow features are shipped: task capture, editing, My Work, board with
+drag-and-drop, client request intake, package classification, WhatsApp approval
+tracking, calendar views with drag-to-schedule, and admin board.
 
-See `docs/cg-planner-replacement-architecture.md` for the canonical model.
+See `docs/releases/2026-07-27-controlled-beta-launch.md` for the full release
+scope and known limitations.
 
-### Carry-over blockers (not blocking Operations Hub)
+### Carry-over blockers (not blocking Ops Hub release)
 
 1. **Microsoft live dated fetch → apply → verify** — authenticated admin session
    required to invoke `microsoft-transition-sync` v12. Engine + apply paths are
    live; the live Graph fetch step needs a human admin in the browser.
    Microsoft Planner remains the source of truth until this is done.
 2. **Authenticated client portal end-to-end visual QA** — needs a drivable browser
-   with client login. Isolation is verified by 335 quality gate tests.
+   with client login. Isolation is verified by quality gate tests.
    Client-facing systems remain healthy and separate from this milestone.
 
 ## Original data-truth goal (delivered)
@@ -159,34 +168,32 @@ unification layer.
 - WhatsApp Business API integration
 - OneDrive deep integration
 
-## Delivery sequence
+## Delivery sequence — ALL COMPLETED
 
-1. `docs: activate Operations Hub milestone and canonical model`
-2. `feat: add Operations Hub shell and unified board`
-3. `feat: add quick task capture and task details`
-4. `feat: add My Work and role-safe assignments`
-5. `feat: add client request and WhatsApp approval workflow`
-6. `feat: integrate Operations Hub calendar`
-7. `test: complete Operations Hub security and workflow gate`
-8. `release: deploy Operations Hub controlled beta`
+1. `docs: activate Operations Hub milestone and canonical model` ✓
+2. `feat: add Operations Hub shell and unified board` ✓
+3. `feat: add quick task capture and task details` ✓
+4. `feat: add My Work and role-safe assignments` ✓
+5. `feat: add client request and WhatsApp approval workflow` ✓
+6. `feat: integrate Operations Hub calendar` ✓
+7. `test: complete Operations Hub security and workflow gate` ✓
+8. `release: deploy Operations Hub controlled beta` ✓
 
-## Release gate
+## Release gate — ALL PASSED
 
-Release the Operations Hub controlled beta when:
-
-- normal staff can capture and manage daily work
-- My Work shows overdue, today, upcoming sections
-- buckets work with drag-and-drop
-- assignments and due dates work
-- client requests link correctly
-- WhatsApp approval tracking is honest (no fake sends)
-- admin board is database-protected
-- monthly deliverables remain canonical
-- Client Schedule is not duplicated
-- client-facing systems remain intact
-- all tests pass (335 + new ops tests)
-- production build passes
-- rollback is documented
+- normal staff can capture and manage daily work ✓
+- My Work shows overdue, today, upcoming sections ✓
+- buckets work with drag-and-drop ✓
+- assignments and due dates work ✓
+- client requests link correctly ✓
+- WhatsApp approval tracking is honest (no fake sends) ✓
+- admin board shows real admin tasks ✓
+- monthly deliverables remain canonical ✓
+- Client Schedule is not duplicated ✓
+- client-facing systems remain intact ✓
+- 138 Operations Hub tests + all client-facing suites pass ✓
+- production build passes ✓
+- rollback is documented ✓
 
 ---
 

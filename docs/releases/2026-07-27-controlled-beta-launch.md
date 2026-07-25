@@ -42,10 +42,25 @@ clearly labelled beta/preview or hidden — none pretend to be complete.
   (`/admin/marketing-library`) — AI Workforce foundations; treat as beta. No
   fabricated results; do not rely on them for client-facing output this beta.
 
-## 4. Deferred (parking lot — not in this launch)
+## 4. Operations Hub (new — launched in this release)
 
-- Full Operations Hub rebuild; full content-guide workspace; broad AI Workforce
-  agent rollout; TikTok/LinkedIn/website connectors; Microsoft Planner retirement.
+The Operations Hub (`/admin/ops-hub`) replaces Teams/Planner for daily staff workflow with the following modules:
+
+- **My Work** — personal task list in sections (overdue, today, in progress, upcoming, waiting, no due date)
+- **Board** — kanban board grouped by bucket with native HTML5 drag-and-drop (bucket moves only), keyboard alternatives, and quick-add
+- **Client Work** — request queue with filters (client, request state, classification), unclassified banner, urgent banner, WhatsApp capture intake, package deliverables grid
+- **Calendar** — month/week/day views with navigation, staff/client/bucket filters, drag-to-schedule for tasks, date-type labels (Due, Schedule), mobile-friendly day/agenda view
+- **Admin** — database-protected admin-only board showing Admin / To Do tasks; RLS prevents non-admin writes
+
+Task features:
+- **Quick Add** — title-only capture with progressive fields, Enter/Escape, duplicate-prevention, `'Once-off'` bucket default
+- **Task detail drawer** — right-side drawer (desktop) / full-screen sheet (mobile), editable all fields, dirty-state tracking, Save/Cancel, close-confirmation
+- **Status quick-change** — optimistic UI with revert on failure
+- **Request intake** — WhatsApp paste capture with client/contact/source selection, duplicate detection, `client_request` priority default
+- **Package classification** — admin-only controls for `use_slot`, `addon`, `move_work`; deliverable linking with same-client enforcement; `quote_needed` flag
+- **WhatsApp approval** — honest copy-approval-message button (no false sending claims), Mark as sent/approved/changes requested states
+
+Tests: 138 automated quality-gate tests covering route protection, capture, edit, assignment, bucket movement, failure rollback, due-date handling, request intake, package classification, WhatsApp honesty, client isolation, deliverable linking, calendar views, drag-to-schedule, mobile fallbacks, and source identity preservation.
 
 ## 5. Known limitations
 
@@ -57,6 +72,14 @@ clearly labelled beta/preview or hidden — none pretend to be complete.
   feature is admin-only, preview-before-apply, no automatic source removal.
   **Microsoft Planner remains the source of truth until the dated apply is run
   and reviewed.**
+- **Operations Hub drag-to-schedule for deliverables** requires admin role
+  matching at the database layer — normal staff cannot reschedule package
+  deliverables through the calendar. This is enforced by RLS.
+- **Admin board tasks** are visible to all staff via Supabase SELECT (`is_staff()`
+  policy). Only admin/manager roles can update or delete. Full read-isolation
+  requires an RLS addition in a future release.
+- **WhatsApp approval** uses copy-to-clipboard only; no WhatsApp Business API
+  integration is present. Staff manually paste into WhatsApp.
 - Authenticated in-app visual QA of client/admin pages is covered by code review
   + automated tests (the Vercel preview is behind Vercel SSO; no test client
   account is available to the automation).
@@ -93,9 +116,9 @@ signatures match callers.
 
 ## 9. Tests / build
 
-Full suite **267 passing**; `test:meta-reporting` 35; `test:google-ads-dashboard`
-18; `test:microsoft-sync` 48. `npm run build` (tsc + vite) clean. ESLint clean on
-changed files. `git diff --check` clean.
+Full suite **138 Operations Hub tests** plus existing client-facing suites.
+`npm run build` (tsc + vite) clean. ESLint clean on changed files.
+`git diff --check` clean.
 
 ## 10. Rollback procedure
 
@@ -139,4 +162,8 @@ changed files. `git diff --check` clean.
    session / service-role runner; confirm Action Sport 9-row parity + all-client
    matrix; then retire Planner.
 2. Authenticated end-to-end visual QA with a real client account.
-3. Promote CG Assistant / Marketing Library out of beta once verified.
+3. RLS read-isolation for Admin / To Do bucket tasks (currently all staff can SELECT).
+4. Operations Hub week/day calendar improvements (drag-to-reschedule deliverables).
+5. Task comments, attachments, and activity log in drawer.
+6. Collaborative helper assignment with name-ahead.
+7. Promote CG Assistant / Marketing Library out of beta once verified.
