@@ -1,5 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { runBoundedWorkers } from './bounded-workers.ts'
 
 interface SourceManifest {
   userId: string
@@ -24,6 +25,7 @@ const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
 const GRAPH_MAX_ATTEMPTS = 5
 const GRAPH_BATCH_MAX_ATTEMPTS = 8
 const GRAPH_RETRY_CAP_MS = 10_000
+const GRAPH_DETAIL_CONCURRENCY = 4
 
 function sleep(milliseconds: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -81,8 +83,13 @@ async function fetchGraph(url: string, token: string, prefer?: string, init: Req
 async function graphTaskDescriptions(taskIds: string[], token: string): Promise<{ descriptions: Map<string, string | null>; complete: boolean }> {
   const descriptions = new Map<string, string | null>()
   let complete = true
+  const batches: string[][] = []
   for (let index = 0; index < taskIds.length; index += 20) {
-    let pending = taskIds.slice(index, index + 20)
+    batches.push(taskIds.slice(index, index + 20))
+  }
+
+  await runBoundedWorkers(batches, GRAPH_DETAIL_CONCURRENCY, async batch => {
+    let pending = batch
     for (let attempt = 0; pending.length > 0 && attempt < GRAPH_BATCH_MAX_ATTEMPTS; attempt += 1) {
       const response = await fetchGraph(`${GRAPH_ROOT}/$batch`, token, undefined, {
         method: 'POST',
@@ -111,8 +118,8 @@ async function graphTaskDescriptions(taskIds: string[], token: string): Promise<
       if (pending.length > 0 && attempt < GRAPH_BATCH_MAX_ATTEMPTS - 1) await sleep(batchRetryDelay(throttled, attempt))
     }
     if (pending.length > 0) complete = false
-    if (index + 20 < taskIds.length) await sleep(250)
-  }
+  })
+
   return { descriptions, complete }
 }
 
@@ -221,6 +228,7 @@ Deno.serve(async request => {
 
   const graphToken = await accessToken(tenantId, clientId, clientSecret)
   if (!graphToken) return jsonResponse({ ok: false, error: 'Microsoft connection could not be authenticated.' }, 503)
+  const fetchStartedAt = Date.now()
   const records: Array<Record<string, unknown>> = []
   const sources: Array<Record<string, unknown>> = []
 
@@ -296,6 +304,12 @@ Deno.serve(async request => {
     if (index + 20 < idList.length) await sleep(250)
   }
 
+  console.log('Microsoft transition fetch completed.', {
+    durationMs: Date.now() - fetchStartedAt,
+    sourceCount: sources.length,
+    recordCount: records.length,
+    assigneeCount: Object.keys(assigneeMap).length,
+  })
   return jsonResponse({
     ok: true,
     snapshot: { format: 'cg-dynamics-microsoft-snapshot', version: 3, exportedAt: new Date().toISOString(), exportedBy: 'CG Dynamics Microsoft transition sync', triggerType: 'admin', sources, records, assigneeMap },
