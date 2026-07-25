@@ -1,13 +1,13 @@
 # Current Milestone
 
-Last updated: 2026-07-25
+Last updated: 2026-07-27
 Current milestone: Client-facing completion and trust
-Status: Active
+Status: Active — all branches merged into main; implementation proceeding in parallel.
 
-## Completed and in production (controlled beta launched 2026-07-27)
+## Completed and in production (merged to main)
 
 - **Meta reporting truth** — availability-aware facts (unavailable ≠ zero), FB/IG
-  separated, no cross-platform unique-audience sums, comparability gate. Live.
+  separated, no cross-platform unique-audience sums, comparability gate. Live (PR #43).
 - **Unified client portal foundation** — `/client`, `/client/performance`,
   `/client/campaigns`, `/client/content-calendar`; report-bound RPCs; published
   reports only; own-client isolation. Live (PR #44).
@@ -16,8 +16,9 @@ Status: Active
 - **Microsoft deterministic reconciliation engine** — tolerant parser,
   `link_existing`, `package_template_create`, phase-21a/21b live (apply contract
   v2, backward compatible). Admin-only, beta-labelled (PR #45).
-- **Controlled beta** — released via PR #46; see
-  `docs/releases/2026-07-27-controlled-beta-launch.md`.
+- **Controlled beta** — released via PR #46; main at `1bfa8e1`.
+- **Client-facing trust quality gate** — enforced invariants for client isolation,
+  published-only content, unavailable≠zero, cross-client safety. Live (PR #47, main `c80eb35`).
 
 ## Active milestone goal — client-facing completion and trust
 
@@ -27,18 +28,30 @@ completion, the full monthly content-guide workspace, and reviewed forward-looki
 strategy — every client-visible claim accurate, evidence-backed, published and
 premium. See "Remaining client-facing work" below and `docs/vision/PARKING-LOT.md`.
 
-### Remaining client-facing work (ordered)
+### Remaining client-facing work
 
-1. Microsoft live dated fetch → apply → verify (auth-gated; see PARKING-LOT).
-2. Authenticated client portal end-to-end QA with a real client account.
-3. Performance Dashboard polish (summary cards, trend explanations from verified
-   facts) on top of the shipped Meta-truth model.
-4. Campaigns polish (objective/lifecycle/CG-review) on the shipped honest states.
-5. Full monthly content-guide workspace (one guide per client/month) — new module.
-6. Forward-looking reviewed strategy thread across the portal — new module.
-
-Items 5 and 6 are genuine new modules (migration + RLS + UI + tests) and are
-tracked in the parking lot with dependencies; items 1–2 are auth-gated.
+1. **Microsoft live dated fetch → apply → verify** (auth-gated; see PARKING-LOT).
+   Requires authenticated admin or service-role session to invoke
+   `microsoft-transition-sync`. The Edge Function is deployed at v12; the
+   reconciliation engine, `link_existing`, `package_template_create`,
+   phase-21a/21b apply paths are all live. What remains is the live Graph fetch
+   — blocked by lack of browser+session in automation.
+2. **Authenticated client portal end-to-end QA** — isolation, loading/empty/error
+   states, mobile layout, security boundaries are verified at the code/test level.
+   Live visual QA with a real client account requires a drivable browser.
+3. **Performance Dashboard completion** — summary cards, platform separation,
+   unavailable≠zero rendering, comparability gate, Google Ads separate from
+   organic — all shipped. Needs visual polish on the existing Meta-truth model.
+4. **Campaigns completion** — Google Ads foundation (objective, lifecycle, spend,
+   impressions, clicks, CTR, CPC) is shipped. Needs completion of CG review,
+   next-optimisation display, Meta Ads and TikTok Ads audit.
+5. **Content Calendar completion** — client calendar shipped. Needs package-count
+   reconciliation with Client Schedule, canonical deliverable identity
+   enforcement, content-guide link integration, mobile agenda.
+6. **Full monthly content-guide workspace** — new module (migration + RLS + UI +
+   tests). Not started. Tracked in PARKING-LOT.
+7. **Forward-looking reviewed strategy thread** — new module. Not started.
+   Tracked in PARKING-LOT.
 
 ## Original data-truth goal (delivered)
 
@@ -70,6 +83,33 @@ The implementation must follow:
 - `docs/marketing-library/README.md`
 
 The detailed Meta architecture, research sources, acceptance criteria and desktop-agent sequence live in the Meta Reporting Truth strategy document.
+
+## Scope for the remaining delivery sprint (2026-07-27)
+
+The Meta truth, Google Ads, unified portal, Microsoft engine, controlled-beta
+launch, and quality gate are complete in production. The sprint now completes
+every remaining item:
+
+1. **Microsoft live dated parity** — attempt every authenticated route; if
+   blocked, document the exact blocker and continue.
+2. **Client portal completion** — add comprehensive integration tests for
+   loading, empty, error, expired-session, mobile, back/forward navigation and
+   security boundary scenarios.
+3. **Performance Dashboard polish** — verify platform separation, USA/IG
+   unavailable rendering, comparability gate, Google Ads organic separation,
+   mobile layout, honest no-data states.
+4. **Campaigns completion** — verify Google Ads objective/lifecycle/review/
+   optimisation; audit Meta Ads and TikTok Ads with honest disconnected states.
+5. **Content Calendar completion** — reconcile package counts, enforce canonical
+   deliverable identity, add mobile agenda, add tests.
+6. **Full monthly content-guide workspace** — new module.
+7. **Forward-looking reviewed strategy** — new module.
+8. **Final quality gate** — audit every client-visible route, metric, label,
+   comparison, empty state, error state, permission boundary and responsive layout.
+9. **Documentation** — update every status file to reflect production reality.
+10. **Release** — merge, deploy, verify.
+
+Items 6 and 7 are new modules; everything else is completion on shipped foundations.
 
 ## Scope for this milestone
 
@@ -159,67 +199,31 @@ Before the Meta connector is considered fixed globally, validate:
 
 For each, trace API response to database fact, admin preview and client-facing output.
 
-## Definition of done
+## Definition of done for this sprint
 
-This milestone is complete when:
+1. **Microsoft live parity**: attempted every auth route; exact blocker documented.
+   If blocked, cannot be claimed done — deferred to PARKING-LOT.
+2. **Client portal QA**: integration tests cover loading, empty, error,
+   expired-session, mobile, back/forward nav, security boundaries.
+3. **Performance Dashboard**: platform separation verified; unavailable≠zero
+   confirmed; comparability gate working; Google Ads separated; mobile layout
+   polished; no-data/honest states in place.
+4. **Campaigns**: Google Ads objective/lifecycle/spend/impressions/clicks/CTR/CPC
+   verified; Meta Ads / TikTok Ads audited with honest disconnected states.
+5. **Content Calendar**: package counts correct; canonical deliverable identity
+   enforced; mobile agenda present; test coverage for navigation/types/dates/dupes.
+6. **Content-guide workspace**: new module — migration + RLS + UI + tests.
+   Demonstrably better than current one-video-at-a-time form.
+7. **Forward-looking strategy**: structured evidence→meaning→platform→action→
+   calendar→KPI module; review-gated; tested.
+8. **Final quality gate**: every client-visible route audited; every metric,
+   label, comparison, empty state, error state, permission boundary verified.
+9. **Documentation**: CURRENT-MILESTONE, PARKING-LOT, MASTER-GOAL-TRACKER,
+   client-intelligence-roadmap, microsoft-365-import-map all reflect reality.
+10. **Release**: all achievable PRs merged; build passes; tests pass; production
+    deployment verified.
 
-- no automated connector stores unavailable metrics as zero;
-- every client-facing metric has provenance;
-- invalid comparisons are blocked by the data model;
-- Meta parity is verified against Business Suite for Cape Lumber and representative clients;
-- the Overview reflects only verified and compatible data;
-- historical re-sync and recent-window refresh work automatically;
-- Google Ads is synced and visible for Cape Lumber;
-- Cape Lumber has a client-ready benchmark report and reviewed next-campaign strategy;
-- the first relevant client and industry Skill Cards are active;
-- tests, migrations, Edge Functions, Vercel preview and production verification all pass.
-
-## Committed next milestone priority
-
-After the Meta reporting-truth work and Codex three-client live parity pass are complete, the next primary milestone is **Client-facing completion and trust**.
-
-Do not return to broad Operations Hub development until the full client experience is solid, truthful and production-ready.
-
-This next milestone must complete, in order:
-
-1. **Unified client portal landing page**
-   - One premium front door for the client relationship.
-   - Clear routes into Performance Dashboard, Campaigns and Content Calendar.
-   - A reviewed Current strategy / Game plan connecting evidence to upcoming action.
-
-2. **Performance Dashboard completion**
-   - Organic and profile reporting for Facebook, Instagram, TikTok and Google Business Profile where connected and supported.
-   - Platform-specific truth, connector health, valid comparisons, top content and reviewed interpretation.
-   - No fake zeros, unsafe totals, stale claims or disconnected-source placeholders presented as live reporting.
-
-3. **Campaign reporting completion**
-   - Google Ads, Meta Ads and TikTok Ads where connected.
-   - Separate platform-attributed activity from confirmed leads, enquiries and sales.
-   - Show objectives, period results, lifecycle, CG review and next optimisation direction.
-
-4. **Content Calendar and content-guide integration**
-   - Embed the client-ready monthly calendar inside the client portal.
-   - Connect each scheduled deliverable to its content guideline, concept, script, approval status and production context.
-   - Replace fragmented one-video forms with the approved full monthly content-guide workspace.
-
-5. **Microsoft / Teams package and schedule parity**
-   - Treat the approved Microsoft Planner Client Socials plan as the transition source of truth.
-   - Audit every active client package, content type, task identity, number, date and completion state.
-   - Reconcile missing videos, reels, posters, photos and package-count mismatches through preview-first safe import.
-   - Verify Client Schedule, Content Calendar, Content Workflow selectors and client-visible package badges against Microsoft before Teams is retired.
-
-6. **Forward-looking strategy implementation**
-   - Reporting explains the completed month.
-   - The strategy and calendar show what CG will implement next.
-   - Report month + 1 is the primary action month and report month + 2 may support early planning.
-   - Performance findings must visibly connect to campaign and content decisions in the client portal.
-
-7. **Client-visible quality gate**
-   - Test every route, metric, package count, campaign result, calendar item, content guideline, strategy statement, permission boundary and mobile layout.
-   - Validate representative clients with different packages, platforms and connector states.
-   - Everything a client can see must be accurate, explainable, current, polished and safe to send without manual caveats.
-
-Only after this client-facing completion milestone passes should normal Operations Hub work resume as the next primary direction.
+After this sprint, the next primary milestone is **Operations Hub: Teams/Planner replacement**.
 
 ---
 
