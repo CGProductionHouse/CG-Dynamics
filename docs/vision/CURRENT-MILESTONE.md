@@ -186,3 +186,15 @@ This next milestone must complete, in order:
    - Everything a client can see must be accurate, explainable, current, polished and safe to send without manual caveats.
 
 Only after this client-facing completion milestone passes should normal Operations Hub work resume as the next primary direction.
+
+---
+
+## 2026-07-27 Controlled Beta Launch
+
+CG Dynamics ships a controlled production beta for CG staff and selected clients.
+Launch-critical: stable deploy, auth, role/client isolation, client portal, Meta
+reporting truth, Google Ads where configured, honest empty/disconnected states.
+Microsoft transition reconciliation ships **admin-only, preview-before-apply,
+beta-labelled**; live dated package-parity verification remains pending and
+Microsoft Planner stays the source of truth until it is reviewed. See
+`docs/releases/2026-07-27-controlled-beta-launch.md`.
