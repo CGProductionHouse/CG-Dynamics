@@ -302,3 +302,15 @@ separate admin-only design and security review.
   readable through the connected Microsoft account. The read-only Entra app,
   Supabase secrets, authenticated fetch, first dry preview and reviewed apply
   remain outstanding. No Microsoft writes are part of this architecture.
+
+## Deliverable reconciliation actions (phase-21a)
+
+- **link_existing** — a source card links to a single unlinked legacy `monthly_deliverables` row on its exact slot (client/month/canonical type + instance); attaches `microsoft_plan_id/bucket_id/task_id` + source-owned fields; never overwrites CG-owned notes/assignments/helpers. Requires phase-21a (apply version 3).
+- **package_template_create** — a unique unnumbered VIDEO/REEL against a single active package with no compatible template proposes a canonical `Video 1`/`Reel 1` template (only from a real source task; never inferred from totals).
+- Unnumbered `VIDEO`/`REEL` are recognised by type; `DP/F/PHOTO` must be numbered. Ambiguity (multiple unnumbered tasks or templates) always stays a visible conflict.
+
+## Server-side apply (phase-21a / phase-21b)
+
+- **phase-21a** extends `apply_microsoft_sync_item` to attach the Microsoft identity on the client_schedule UPDATE branch **without changing the signature or contract version (stays 2)** — backward compatible, applied to production ahead of the frontend merge with no mixed-deployment deadlock.
+- **phase-21b** adds `apply_microsoft_package_template_correction` (admin-only, idempotent): verifies the active client/package, returns an existing compatible template unchanged, rejects a second compatible template, and inserts exactly one (`count_per_month = 1`).
+- Apply order is deterministic: package-template corrections → legacy links → creates → safe updates.

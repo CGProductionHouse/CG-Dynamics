@@ -9,6 +9,7 @@ import {
   deliverableSlotKey,
   flagDeliverableSlotConflicts,
   type MicrosoftPreviewMappingContext,
+  type UnlinkedSlotRow,
 } from './microsoftImportPreview'
 import { microsoftOutlookSourceKey, microsoftPlannerSourceKey } from './microsoftImportMap'
 import type { MicrosoftSnapshot, MicrosoftSnapshotSource } from './microsoftSnapshot'
@@ -233,6 +234,7 @@ export function buildMicrosoftReconciliation(
   existingTargets: MicrosoftExistingTarget[],
   deliverableSlotKeys: Set<string>,
   prepareItems: (items: MicrosoftImportPreviewItem[]) => MicrosoftImportPreviewItem[] = items => items,
+  unlinkedSlotRows: Map<string, UnlinkedSlotRow[]> = new Map(),
 ): MicrosoftImportPreviewItem[] {
   const mapped = prepareItems(buildMicrosoftImportPreview(snapshot.records, context))
   const targetsByKey = new Map<string, MicrosoftExistingTarget[]>()
@@ -248,6 +250,9 @@ export function buildMicrosoftReconciliation(
     const sourceComplete = sourceActuallyComplete(source, mapped)
     const key = itemKey(item)
     if (key) seen.add(key)
+    // A proposed package-template correction is a reviewed action of its own; it
+    // is applied by a dedicated template-creation step, never the generic apply.
+    if (item.reconciliationAction === 'package_template_create') return { ...item, sourceComplete }
     if (item.previewStatus === 'conflict') return { ...item, reconciliationAction: 'conflict' as const, sourceComplete }
     if (item.previewStatus === 'skipped') return { ...item, reconciliationAction: 'skipped' as const, sourceComplete }
     if (!key) return { ...item, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, sourceComplete }
@@ -302,5 +307,5 @@ export function buildMicrosoftReconciliation(
     const source = snapshot.sources.find(candidate => sourceCoversTarget(candidate, target))
     if (source && sourceActuallyComplete(source, mapped)) reconciled.push(removedItem(target, source))
   }
-  return flagDeliverableSlotConflicts(reconciled, deliverableSlotKeys)
+  return flagDeliverableSlotConflicts(reconciled, deliverableSlotKeys, unlinkedSlotRows)
 }

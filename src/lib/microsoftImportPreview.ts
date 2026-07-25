@@ -131,15 +131,48 @@ function planMonth(planName: string): string | null {
   return month ? `${match[2]}-${month}` : null
 }
 
-function deliverableIdentity(title: string): Pick<MicrosoftClientSchedulePayload, 'code' | 'deliverable_type' | 'instance_number'> {
-  const match = /^\s*(DP|F|PHOTO|VIDEO|REEL)\s*[-#]?\s*(\d+)\b/i.exec(title)
-  if (!match) return { code: null, deliverable_type: null, instance_number: null }
-  const code = match[1].toUpperCase()
-  const instance_number = Number(match[2])
-  if (code === 'DP') return { code: `DP${instance_number}`, deliverable_type: 'dp', instance_number }
-  if (code === 'F' || code === 'PHOTO') return { code: `F${instance_number}`, deliverable_type: 'photo', instance_number }
-  if (code === 'VIDEO') return { code: `Video ${instance_number}`, deliverable_type: 'video', instance_number }
-  return { code: `Reel ${instance_number}`, deliverable_type: 'reel', instance_number }
+export type MicrosoftDeliverableIdentity =
+  Pick<MicrosoftClientSchedulePayload, 'code' | 'deliverable_type' | 'instance_number'>
+  & { unnumbered: boolean }
+
+// Parses a Microsoft task title into a canonical deliverable identity.
+//
+// Numbered codes (DP/F/PHOTO/VIDEO/REEL + a number) are matched first and
+// tolerate readable spacing/punctuation and trailing client-name suffixes:
+//   "DP 1 - ACTION" → DP1, "F1 ACTION" → F1, "VIDEO 1 - ACTION" → Video 1,
+//   "REEL 2 ACTION" → Reel 2, "DP #3" → DP3, "DP4 - ACTION" → DP4.
+//
+// Only VIDEO and REEL may be unnumbered ("VIDEO - ACTION", "REEL - CLIENT",
+// "VIDEO CLIENT"): the type is recognised but the instance is left null and
+// `unnumbered` is set, so the caller resolves it against the active package's
+// unique compatible template (or surfaces an ambiguity conflict). DP/F/PHOTO
+// must be numbered — an unnumbered one is not a recognised deliverable.
+export function deliverableIdentity(title: string): MicrosoftDeliverableIdentity {
+  const numbered = /^\s*(DP|F|PHOTO|VIDEO|REEL)\s*[-#]?\s*(\d+)\b/i.exec(title)
+  if (numbered) {
+    const code = numbered[1].toUpperCase()
+    const instance_number = Number(numbered[2])
+    if (code === 'DP') return { code: `DP${instance_number}`, deliverable_type: 'dp', instance_number, unnumbered: false }
+    if (code === 'F' || code === 'PHOTO') return { code: `F${instance_number}`, deliverable_type: 'photo', instance_number, unnumbered: false }
+    if (code === 'VIDEO') return { code: `Video ${instance_number}`, deliverable_type: 'video', instance_number, unnumbered: false }
+    return { code: `Reel ${instance_number}`, deliverable_type: 'reel', instance_number, unnumbered: false }
+  }
+  // Unnumbered VIDEO / REEL only. Require a word boundary so "Videographer" etc.
+  // never match, and reject a stray trailing digit that the numbered branch
+  // would have already caught.
+  const unnumbered = /^\s*(VIDEO|REEL)\b(?!\s*[-#]?\s*\d)/i.exec(title)
+  if (unnumbered) {
+    const type = unnumbered[1].toUpperCase() === 'VIDEO' ? 'video' as const : 'reel' as const
+    return { code: null, deliverable_type: type, instance_number: null, unnumbered: true }
+  }
+  return { code: null, deliverable_type: null, instance_number: null, unnumbered: false }
+}
+
+// Extracts the trailing instance number from a template code, e.g. "Video 1" → 1,
+// "Reel 2" → 2, "DP3" → 3. Returns null when the code carries no number.
+export function templateCodeInstance(code: string): number | null {
+  const match = /(\d+)\s*$/.exec(code.trim())
+  return match ? Number(match[1]) : null
 }
 
 function plannerBase(source: MicrosoftPlannerTaskSource): Omit<MicrosoftImportPreviewItem, 'previewStatus' | 'conflictCode' | 'conflictReason'> {
@@ -242,9 +275,18 @@ export function previewPlannerTask(
     if (!month) return conflict(mapped, 'invalid_date', 'The monthly plan name must include a valid month and year.')
     if (client.status === 'ambiguous') return conflict(mapped, 'ambiguous_client_match', `More than one active client exactly matches "${source.sourceBucketName}".`)
     if (client.status === 'unresolved') return conflict(mapped, 'unresolved_client', `No active client exactly matches "${source.sourceBucketName}".`)
-    if (!identity.deliverable_type || !identity.instance_number) return conflict(mapped, 'unsupported_deliverable', 'The card title must include a numbered DP, F, Photo, Video, or Reel code.')
+    if (!identity.deliverable_type) return conflict(mapped, 'unsupported_deliverable', 'The card title must start with a recognised DP, F, Photo, Video, or Reel code.')
     if (packages.length === 0) return conflict(mapped, 'missing_package', `Client "${client.client?.name ?? source.sourceBucketName}" has no active package.`)
     if (packages.length > 1) return conflict(mapped, 'ambiguous_package', `Client "${client.client?.name ?? source.sourceBucketName}" has more than one active package.`)
+    // Unnumbered VIDEO/REEL: recognised type but no explicit instance. Default to
+    // an ambiguity conflict; resolveUnnumberedClientScheduleDeliverables() promotes
+    // it to `new` only when the package has exactly one compatible active template
+    // AND this is the only unnumbered task of that type for the client/month.
+    if (identity.unnumbered) {
+      return conflict(mapped, 'ambiguous_unnumbered_deliverable',
+        `"${source.title.trim()}" has no explicit number. It can map only when the active package has exactly one compatible ${identity.deliverable_type} template and this is the only unnumbered ${identity.deliverable_type} task for the month.`)
+    }
+    if (!identity.instance_number) return conflict(mapped, 'unsupported_deliverable', 'The card title must include a numbered DP, F, Photo, Video, or Reel code.')
     if (!template) return conflict(mapped, 'missing_template', `No active package template exactly matches "${identity.code}".`)
     return { ...mapped, previewStatus: 'new', conflictCode: null, conflictReason: null }
   }
@@ -347,13 +389,76 @@ export function previewOutlookEvent(source: MicrosoftOutlookEventSource): Micros
   return { ...base, proposedPayload: payload, previewStatus: 'new', conflictCode: null, conflictReason: null }
 }
 
+// Post-pass that safely resolves unnumbered VIDEO/REEL client-schedule cards.
+// An unnumbered card is promoted from `ambiguous_unnumbered_deliverable` to a
+// concrete `new` deliverable ONLY when, for its client + month + type, there is
+// exactly one unnumbered source task AND the active package has exactly one
+// compatible active template whose code carries a canonical instance number.
+// Anything else stays a conflict — never guessed by array order or package total.
+export function resolveUnnumberedClientScheduleDeliverables(
+  items: MicrosoftImportPreviewItem[],
+  context: MicrosoftPreviewMappingContext,
+): MicrosoftImportPreviewItem[] {
+  const groupKey = (p: MicrosoftClientSchedulePayload) => `${p.client_id}|${p.month}|${p.deliverable_type}`
+  const unnumberedCounts = new Map<string, number>()
+  for (const item of items) {
+    if (item.conflictCode !== 'ambiguous_unnumbered_deliverable') continue
+    const p = item.proposedPayload
+    if (p?.destination !== 'client_schedule' || !p.client_id || !p.month || !p.deliverable_type) continue
+    unnumberedCounts.set(groupKey(p), (unnumberedCounts.get(groupKey(p)) ?? 0) + 1)
+  }
+
+  return items.map(item => {
+    if (item.conflictCode !== 'ambiguous_unnumbered_deliverable') return item
+    const p = item.proposedPayload
+    if (p?.destination !== 'client_schedule' || !p.client_id || !p.month || !p.deliverable_type || !p.package_id) return item
+    if ((unnumberedCounts.get(groupKey(p)) ?? 0) !== 1) return item
+
+    const compatible = context.templates.filter(t =>
+      t.packageId === p.package_id && t.active && t.deliverableType === p.deliverable_type)
+
+    // Exactly one compatible template → link to it deterministically.
+    if (compatible.length === 1) {
+      const instance = templateCodeInstance(compatible[0].code)
+      if (instance === null) return item
+      const resolved: MicrosoftClientSchedulePayload = {
+        ...p, code: compatible[0].code, instance_number: instance, template_id: compatible[0].id,
+      }
+      return { ...item, proposedPayload: resolved, previewStatus: 'new', conflictCode: null, conflictReason: null }
+    }
+
+    // No compatible template, but the package is unambiguous (single active
+    // package resolved upstream) and this is the only unnumbered task of its type
+    // → propose a reviewed package-template correction (canonical Video 1 / Reel 1).
+    // Only a real source task can trigger this; it is never inferred from totals.
+    if (compatible.length === 0 && (p.deliverable_type === 'video' || p.deliverable_type === 'reel')) {
+      const code = p.deliverable_type === 'video' ? 'Video 1' : 'Reel 1'
+      const resolved: MicrosoftClientSchedulePayload = { ...p, code, instance_number: 1 }
+      return {
+        ...item,
+        proposedPayload: resolved,
+        previewStatus: 'new',
+        conflictCode: null,
+        conflictReason: null,
+        reconciliationAction: 'package_template_create',
+        proposedTemplate: { code, deliverable_type: p.deliverable_type, instance_number: 1 },
+        warnings: [...item.warnings, `The active package has no ${p.deliverable_type} template; this source task proposes creating "${code}" before its deliverable.`],
+      }
+    }
+
+    // More than one compatible template — genuinely ambiguous, keep the conflict.
+    return item
+  })
+}
+
 export function buildMicrosoftImportPreview(
   sources: MicrosoftImportSourceRecord[],
   context: MicrosoftPreviewMappingContext,
 ): MicrosoftImportPreviewItem[] {
-  const items = sources.map(source => source.sourceType === 'outlook_event'
+  const initial = sources.map(source => source.sourceType === 'outlook_event'
     ? previewOutlookEvent(source)
     : previewPlannerTask(source, context))
+  const items = resolveUnnumberedClientScheduleDeliverables(initial, context)
   const counts = new Map<string, number>()
 
   for (const item of items) {
@@ -534,18 +639,57 @@ export function deliverableSlotKey(
 // that lands on a slot already occupied in CG Dynamics (e.g. a deliverable
 // generated from the package template) must surface as a conflict, never as an
 // insert that would violate the constraint or duplicate work.
+//
+// `unlinkedSlotRows` maps a slot key to the existing monthly_deliverables rows
+// on that slot that carry NO Microsoft task id (legacy rows). When a source
+// card lands on a slot filled by exactly one such legacy row AND it is the only
+// card in the snapshot targeting that slot, it is reconciled as `link_existing`
+// (attach identity to the legacy row) rather than a duplicate conflict. Every
+// other occupied-slot case remains an explicit conflict — never a duplicate insert.
+export interface UnlinkedSlotRow { id: string; updatedAt: string }
+
 export function flagDeliverableSlotConflicts(
   items: MicrosoftImportPreviewItem[],
   existingSlotKeys: Set<string>,
+  unlinkedSlotRows: Map<string, UnlinkedSlotRow[]> = new Map(),
 ): MicrosoftImportPreviewItem[] {
+  // How many snapshot cards target each slot — a slot contested by >1 card can
+  // never be auto-linked ("no other source task targets the candidate").
+  const cardsPerSlot = new Map<string, number>()
+  for (const item of items) {
+    const p = item.proposedPayload
+    if (item.previewStatus !== 'new' || p?.destination !== 'client_schedule') continue
+    const key = deliverableSlotKey(p.package_id, p.template_id, p.instance_number, p.month)
+    if (key) cardsPerSlot.set(key, (cardsPerSlot.get(key) ?? 0) + 1)
+  }
+
+  const linkedInPreview = new Set<string>()
   const seenInPreview = new Set<string>()
   return items.map(item => {
     const payload = item.proposedPayload
     if (item.previewStatus !== 'new' || payload?.destination !== 'client_schedule') return item
     const key = deliverableSlotKey(payload.package_id, payload.template_id, payload.instance_number, payload.month)
     if (!key) return item
+
     if (existingSlotKeys.has(key)) {
-      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
+      const legacy = unlinkedSlotRows.get(key) ?? []
+      // Deterministic legacy link: exactly one unlinked legacy row on this slot,
+      // this is the only snapshot card for the slot, and we have not already
+      // consumed that row in this preview.
+      if (legacy.length === 1 && (cardsPerSlot.get(key) ?? 0) === 1 && !linkedInPreview.has(key)) {
+        linkedInPreview.add(key)
+        return {
+          ...item,
+          previewStatus: 'changed',
+          reconciliationAction: 'link_existing',
+          existingTargetId: legacy[0].id,
+          expectedTargetUpdatedAt: legacy[0].updatedAt,
+          conflictCode: null,
+          conflictReason: null,
+          warnings: [...item.warnings, 'Links to an existing CG Dynamics deliverable; local notes, assignments and approvals are preserved.'],
+        }
+      }
+      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: legacy.length > 1 ? 'existing_deliverable_slot' : 'existing_deliverable_slot', conflictReason: legacy.length > 1 ? 'More than one CG Dynamics deliverable occupies this slot; link the correct one manually.' : 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
     }
     if (seenInPreview.has(key)) {
       return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'Another card in this snapshot already fills this package/template/instance/month slot.' }

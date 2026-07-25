@@ -36,7 +36,8 @@ import { parseMicrosoftSnapshot, type MicrosoftSnapshot } from '../../lib/micros
 import { resolvePreviewAssignees } from '../../lib/microsoftAssigneeMapping'
 
 const ACTIONS: Array<{ value: MicrosoftReconciliationAction; label: string }> = [
-  { value: 'create', label: 'Create' }, { value: 'update', label: 'Update' },
+  { value: 'create', label: 'Create' }, { value: 'link_existing', label: 'Link existing' },
+  { value: 'package_template_create', label: 'Add template' }, { value: 'update', label: 'Update' },
   { value: 'complete', label: 'Complete' }, { value: 'reopen', label: 'Reopen' },
   { value: 'move', label: 'Moved' }, { value: 'cancel', label: 'Cancelled' },
   { value: 'archive', label: 'Source removed' }, { value: 'unchanged', label: 'Unchanged' },
@@ -46,6 +47,8 @@ const ACTIONS: Array<{ value: MicrosoftReconciliationAction; label: string }> = 
 
 const ACTION_TONES: Record<MicrosoftReconciliationAction, string> = {
   create: 'border-emerald-300/25 bg-emerald-300/10 text-emerald-200',
+  link_existing: 'border-sky-300/25 bg-sky-300/10 text-sky-200',
+  package_template_create: 'border-amber-300/25 bg-amber-300/10 text-amber-200',
   update: 'border-blue-300/25 bg-blue-300/10 text-blue-200',
   unchanged: 'border-white/15 bg-white/[0.05] text-white/60',
   complete: 'border-teal-300/25 bg-teal-300/10 text-teal-200',
@@ -205,6 +208,7 @@ export default function MicrosoftImportPage() {
         existingResult.targets,
         existingResult.deliverableSlotKeys,
         mapped => resolvePreviewAssignees(mapped, nextSnapshot.assigneeMap ?? {}, mappingsResult.data, profilesResult.data),
+        existingResult.unlinkedSlotRows,
       )
       setSnapshot(nextSnapshot)
       setItems(resolved)
@@ -292,6 +296,15 @@ export default function MicrosoftImportPage() {
           <div className="shrink-0 rounded-2xl border border-white/10 bg-black/25 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Transition mode</p><select value={transitionStatus} onChange={event => void changeTransitionStatus(event.target.value as MicrosoftTransitionStatus)} className="mt-2 rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm font-black text-white"><option value="active">Active</option><option value="paused">Paused</option><option value="complete">Complete</option></select></div>
         </div>
       </header>
+
+      <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/80">Transition status · beta</p>
+        <p className="mt-2 text-sm leading-relaxed text-amber-50/90">
+          Microsoft transition reconciliation is available for reviewed preview and apply. Final live package
+          parity verification is still pending. Do not retire Microsoft Planner until the full dated reconciliation
+          has been reviewed.
+        </p>
+      </section>
 
       <section className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
