@@ -47,6 +47,7 @@ export interface ContentGuideIdea {
   deliverable_id: string | null
   status: ContentGuideStatus
   notes: string | null
+  client_published_at: string | null
   // ── Video production pipeline (phase-19e, additive) ──
   video_number: number | null
   folder_client_code: string | null
