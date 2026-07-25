@@ -3,6 +3,7 @@ import {
   microsoftOutlookSourceKey,
   microsoftPlannerSourceKey,
   resolveMicrosoftBucketMapping,
+  resolveMicrosoftOutlookClientAliases,
   resolveMicrosoftPlanMapping,
 } from './microsoftImportMap'
 import type {
@@ -77,10 +78,14 @@ export function resolveMicrosoftClient(name: string, clients: MicrosoftPreviewCl
 }
 
 export function outlookClientLabel(subject: string): string | null {
-  const match = subject.trim().match(
+  const trimmed = subject.trim()
+  const prefix = trimmed.match(
     /^(?:content\s+run|shoot|meeting|client\s+event|deadline)\s*[-:]\s*(.+)$/i,
   )
-  const label = match?.[1]?.trim() ?? ''
+  const suffix = trimmed.match(
+    /^(.+?)\s*[-:]\s*(?:content\s+run|shoot|meeting|client\s+event|deadline)$/i,
+  )
+  const label = prefix?.[1]?.trim() ?? suffix?.[1]?.trim() ?? ''
   return label || null
 }
 
@@ -348,7 +353,9 @@ export function previewOutlookEvent(
 ): MicrosoftImportPreviewItem {
   const eventType = inferMicrosoftEventType(source.title)
   const clientLabel = outlookClientLabel(source.title)
-  const client = clientLabel ? resolveMicrosoftClient(clientLabel, context.clients) : null
+  const client = clientLabel
+    ? resolveMicrosoftClient(clientLabel, context.clients, resolveMicrosoftOutlookClientAliases(clientLabel))
+    : null
   const warnings = source.assigneeMicrosoftIds.length > 0
     ? ['Outlook attendee or assignee IDs are not imported.']
     : []
