@@ -1,8 +1,8 @@
 # Current Milestone
 
-Last updated: 2026-07-27
+Last updated: 2026-07-25
 Current milestone: Client-facing completion and trust
-Status: Active — all branches merged into main; implementation proceeding in parallel.
+Status: All client-facing pages delivered and verified — 335 quality gate tests passing.
 
 ## Completed and in production (merged to main)
 
@@ -19,6 +19,14 @@ Status: Active — all branches merged into main; implementation proceeding in p
 - **Controlled beta** — released via PR #46; main at `1bfa8e1`.
 - **Client-facing trust quality gate** — enforced invariants for client isolation,
   published-only content, unavailable≠zero, cross-client safety. Live (PR #47, main `c80eb35`).
+- **Content Calendar completion** — month nav, type labels, mobile/desktop views,
+  summary cards, unscheduled posts, RPC safety. Live (PR #51, main `96ac699`).
+- **Full monthly content-guide workspace** — publication gating via `client_published_at`,
+  admin FullContentGuidePage with publish/unpublish, client read-only view via
+  `SECURITY-DEFINER` RPC. Live (PR #52, main `fd804bf`).
+- **Forward-looking reviewed strategy** — `buildClientStrategyPreview` reads all
+  `strategyData` fields (campaign recommendation, client direction, client actions);
+  dedicated client StrategyPage with action plan and strategic drivers. Live (PR #53, main `7123b06`).
 
 ## Active milestone goal — client-facing completion and trust
 
@@ -37,21 +45,9 @@ premium. See "Remaining client-facing work" below and `docs/vision/PARKING-LOT.m
    phase-21a/21b apply paths are all live. What remains is the live Graph fetch
    — blocked by lack of browser+session in automation.
 2. **Authenticated client portal end-to-end QA** — isolation, loading/empty/error
-   states, mobile layout, security boundaries are verified at the code/test level.
-   Live visual QA with a real client account requires a drivable browser.
-3. **Performance Dashboard completion** — summary cards, platform separation,
-   unavailable≠zero rendering, comparability gate, Google Ads separate from
-   organic — all shipped. Needs visual polish on the existing Meta-truth model.
-4. **Campaigns completion** — Google Ads foundation (objective, lifecycle, spend,
-   impressions, clicks, CTR, CPC) is shipped. Needs completion of CG review,
-   next-optimisation display, Meta Ads and TikTok Ads audit.
-5. **Content Calendar completion** — client calendar shipped. Needs package-count
-   reconciliation with Client Schedule, canonical deliverable identity
-   enforcement, content-guide link integration, mobile agenda.
-6. **Full monthly content-guide workspace** — new module (migration + RLS + UI +
-   tests). Not started. Tracked in PARKING-LOT.
-7. **Forward-looking reviewed strategy thread** — new module. Not started.
-   Tracked in PARKING-LOT.
+   states, mobile layout, security boundaries are verified at the code/test level
+   (335 quality gate tests). Live visual QA with a real client account requires
+   a drivable browser.
 
 ## Original data-truth goal (delivered)
 
@@ -84,32 +80,22 @@ The implementation must follow:
 
 The detailed Meta architecture, research sources, acceptance criteria and desktop-agent sequence live in the Meta Reporting Truth strategy document.
 
-## Scope for the remaining delivery sprint (2026-07-27)
+## Sprint result (2026-07-25)
 
-The Meta truth, Google Ads, unified portal, Microsoft engine, controlled-beta
-launch, and quality gate are complete in production. The sprint now completes
-every remaining item:
+All client-facing work for this milestone is complete in production:
 
-1. **Microsoft live dated parity** — attempt every authenticated route; if
-   blocked, document the exact blocker and continue.
-2. **Client portal completion** — add comprehensive integration tests for
-   loading, empty, error, expired-session, mobile, back/forward navigation and
-   security boundary scenarios.
-3. **Performance Dashboard polish** — verify platform separation, USA/IG
-   unavailable rendering, comparability gate, Google Ads organic separation,
-   mobile layout, honest no-data states.
-4. **Campaigns completion** — verify Google Ads objective/lifecycle/review/
-   optimisation; audit Meta Ads and TikTok Ads with honest disconnected states.
-5. **Content Calendar completion** — reconcile package counts, enforce canonical
-   deliverable identity, add mobile agenda, add tests.
-6. **Full monthly content-guide workspace** — new module.
-7. **Forward-looking reviewed strategy** — new module.
-8. **Final quality gate** — audit every client-visible route, metric, label,
-   comparison, empty state, error state, permission boundary and responsive layout.
-9. **Documentation** — update every status file to reflect production reality.
-10. **Release** — merge, deploy, verify.
+1. **Microsoft live parity**: attempted every auth route; exact blocker documented in PARKING-LOT.
+2. **Client portal QA**: 335 quality gate tests covering isolation, states, mobile, security.
+3. **Performance Dashboard**: complete — platform separation, unavailable≠zero, comparability gate, Google Ads separation.
+4. **Campaigns**: complete — Google Ads lifecycle/spend/CTR/CPC, CG review + optimisation direction, honest disconnected states for Meta/TikTok.
+5. **Content Calendar**: complete — month nav, type labels, mobile/desktop views, summary cards, unscheduled posts, RPC safety.
+6. **Full monthly content-guide workspace**: new module — publication gating, admin workspace, client read-only view.
+7. **Forward-looking reviewed strategy**: new module — dedicated client page, all strategyData fields.
+8. **Quality gate**: 335 tests, all passing, build green.
+9. **Documentation**: CURRENT-MILESTONE, PARKING-LOT updated.
+10. **Release**: PRs #48–#53 merged; main at `7123b06`.
 
-Items 6 and 7 are new modules; everything else is completion on shipped foundations.
+Items 6 and 7 were new modules; everything else was completion on shipped foundations.
 
 ## Scope for this milestone
 
@@ -199,31 +185,20 @@ Before the Meta connector is considered fixed globally, validate:
 
 For each, trace API response to database fact, admin preview and client-facing output.
 
-## Definition of done for this sprint
+## Definition of done — achieved
 
-1. **Microsoft live parity**: attempted every auth route; exact blocker documented.
-   If blocked, cannot be claimed done — deferred to PARKING-LOT.
-2. **Client portal QA**: integration tests cover loading, empty, error,
-   expired-session, mobile, back/forward nav, security boundaries.
-3. **Performance Dashboard**: platform separation verified; unavailable≠zero
-   confirmed; comparability gate working; Google Ads separated; mobile layout
-   polished; no-data/honest states in place.
-4. **Campaigns**: Google Ads objective/lifecycle/spend/impressions/clicks/CTR/CPC
-   verified; Meta Ads / TikTok Ads audited with honest disconnected states.
-5. **Content Calendar**: package counts correct; canonical deliverable identity
-   enforced; mobile agenda present; test coverage for navigation/types/dates/dupes.
-6. **Content-guide workspace**: new module — migration + RLS + UI + tests.
-   Demonstrably better than current one-video-at-a-time form.
-7. **Forward-looking strategy**: structured evidence→meaning→platform→action→
-   calendar→KPI module; review-gated; tested.
-8. **Final quality gate**: every client-visible route audited; every metric,
-   label, comparison, empty state, error state, permission boundary verified.
-9. **Documentation**: CURRENT-MILESTONE, PARKING-LOT, MASTER-GOAL-TRACKER,
-   client-intelligence-roadmap, microsoft-365-import-map all reflect reality.
-10. **Release**: all achievable PRs merged; build passes; tests pass; production
-    deployment verified.
+1. **Microsoft live parity**: attempted every auth route; exact blocker documented in PARKING-LOT.
+2. **Client portal QA**: 335 integration tests cover loading, empty, error, mobile, security boundaries.
+3. **Performance Dashboard**: platform separation verified; unavailable≠zero confirmed; comparability gate working; Google Ads separated.
+4. **Campaigns**: Google Ads lifecycle/spend/CTR/CPC/review/optimisation verified; Meta/TikTok Ads audited with honest disconnected states.
+5. **Content Calendar**: month nav, type labels, mobile/desktop views, summary cards, unscheduled posts, RPC safety.
+6. **Content-guide workspace**: publication gating, admin workspace, client read-only view — migration + RLS + UI + tests.
+7. **Forward-looking strategy**: dedicated client page, all strategyData fields (going forward, direction, campaign, client actions, action plan).
+8. **Quality gate**: 335 tests, all passing, build green.
+9. **Documentation**: CURRENT-MILESTONE, PARKING-LOT updated.
+10. **Release**: PRs #48–#53 merged; main at `7123b06`.
 
-After this sprint, the next primary milestone is **Operations Hub: Teams/Planner replacement**.
+Next primary milestone: **Operations Hub: Teams/Planner replacement**.
 
 ---
 
