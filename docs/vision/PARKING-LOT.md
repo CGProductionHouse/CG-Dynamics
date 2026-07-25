@@ -239,28 +239,40 @@ After the core Marketing Library structure exists.
 ## Future notes
 
 Add new ideas here instead of expanding the current milestone unless the idea is directly required to complete the current milestone.
-## Deferred at 2026-07-27 controlled beta launch
+### 2026-07-27 — Attempted Microsoft live dated parity — BLOCKED (re-verified)
 
-- Microsoft live dated fetch → apply → verify (Action Sport 9-row + all-client
-  parity); Planner retirement — requires an authenticated admin/service-role run.
+Exact blocker documented below. All authenticated routes attempted and documented.
+The reconciliation engine + apply paths are live; only the live Graph fetch step
+needs a human admin in a browser.
+
+## Deferred at 2026-07-27 controlled beta launch (re-verified)
+
+- **Microsoft live dated fetch → apply → verify** (Action Sport 9-row + all-client
+  parity); Planner retirement — **confirmed blocked.** Requires an authenticated
+  admin session or service-role key to invoke `microsoft-transition-sync` v12.
+  Attempted: Supabase CLI (no token), env vars (none set), Docker (not running),
+  JWT Edge Function invocation (no service-role key). The engine + apply paths
+  are all live; only the live Graph fetch step needs a human admin in the browser.
 - Full Operations Hub rebuild; full content-guide workspace redesign.
 - Broad AI Workforce agent rollout; promote CG Assistant / Marketing Library out
   of beta once verified.
-- Authenticated end-to-end visual QA with a real client account.
+- Authenticated end-to-end visual QA with a real client account — confirmed
+  requiring a drivable browser + client login.
 
 ## Client-facing completion — remaining modules (ordered, post controlled-beta)
 
-These are genuine new modules with real dependencies, not quick fixes. Tracked
-here so the milestone document does not describe them as active implementation:
-
-1. **Microsoft live dated fetch → apply → verify** — dependency: an authenticated
-   admin session or service-role runner to invoke `microsoft-transition-sync`
-   (the deterministic engine + phase-21a/21b apply paths are already live). Next
-   milestone: run Action Sport + all-client dated parity, then retire Planner.
-2. **Authenticated client portal end-to-end QA** — dependency: a real/QA client
-   login. Isolation is currently proven by code review + the client-facing
+1. **Microsoft live dated fetch → apply → verify** — **EXACT BLOCKER**: The
+   `microsoft-transition-sync` Edge Function (v12, deployed, `verify_jwt: true`)
+   requires a Supabase JWT with admin role or the service-role key. Neither is
+   available in headless automation. A staff admin must open the Microsoft Import
+   page in a browser, click "Preview latest changes", review, and approve. The
+   engine, apply RPCs (phase-21a/21b), link_existing, and package_template_create
+   are all live. **Until this happens, Microsoft Planner remains the source of
+   truth.** See `docs/releases/2026-07-27-controlled-beta-launch.md` §5.
+2. **Authenticated client portal end-to-end QA** — dependency: a drivable browser
+   with client login. Isolation is proven by code review + the client-facing
    quality gate (`tests/clientFacingQualityGate.test.mjs`); a live authenticated
-   pass is the remaining verification.
+   visual pass is the remaining verification.
 3. **Full monthly content-guide workspace** — new module: one guide per
    client/month, all video/reel sections in one place, structured production
    fields, staff autosave, client read-only published view. Dependency: migration
