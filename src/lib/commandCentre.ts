@@ -61,18 +61,38 @@ export interface CommandCentreTask {
   helper_names?: string[]
 }
 
+export type TaskUpdateFields = Pick<CommandCentreTask,
+  | 'title'
+  | 'notes'
+  | 'client_id'
+  | 'client_name'
+  | 'bucket'
+  | 'assigned_to_user_id'
+  | 'assigned_to_name'
+  | 'helper_names'
+  | 'priority'
+  | 'due_date'
+  | 'status'
+>
+
+const ALLOWED_UPDATE_FIELDS: (keyof TaskUpdateFields)[] = [
+  'title', 'notes', 'client_id', 'client_name', 'bucket',
+  'assigned_to_user_id', 'assigned_to_name', 'helper_names',
+  'priority', 'due_date', 'status',
+]
+
 export interface TaskInput {
   title: string
   client_id?: string | null
   client_name?: string | null
   assigned_to_user_id?: string | null
   assigned_to_name?: string | null
-  bucket: TaskBucket
-  priority: TaskPriority
-  status: TaskStatus
-  due_date: string
+  bucket?: TaskBucket
+  priority?: TaskPriority
+  status?: TaskStatus
+  due_date?: string | null
   notes?: string | null
-  source: TaskSource
+  source?: TaskSource
   whatsapp_source_text?: string | null
 }
 
@@ -241,6 +261,7 @@ export async function listTasks() {
 }
 
 export async function createTask(input: TaskInput) {
+  const today = new Date().toISOString().slice(0, 10)
   return supabase
     .from(TABLE)
     .insert({
@@ -249,12 +270,12 @@ export async function createTask(input: TaskInput) {
       client_name: input.client_name ?? null,
       assigned_to_user_id: input.assigned_to_user_id ?? null,
       assigned_to_name: input.assigned_to_name ?? null,
-      bucket: input.bucket,
-      priority: input.priority,
-      status: input.status,
-      due_date: input.due_date,
+      bucket: input.bucket ?? 'Once-off',
+      priority: input.priority ?? 'normal',
+      status: input.status ?? 'to_do',
+      due_date: input.due_date ?? today,
       notes: input.notes ?? null,
-      source: input.source,
+      source: input.source ?? 'manual',
       whatsapp_source_text: input.whatsapp_source_text ?? null,
     })
     .select()
@@ -293,20 +314,23 @@ export async function updateTaskStatus(id: string, status: TaskStatus) {
 
 export async function updateTask(
   id: string,
-  updates: Partial<Omit<CommandCentreTask, 'id' | 'created_at' | 'created_by'>>
+  updates: Partial<TaskUpdateFields>
 ) {
+  const patch: Record<string, unknown> = {}
+  for (const field of ALLOWED_UPDATE_FIELDS) {
+    if (field in updates && updates[field] !== undefined) {
+      patch[field] = updates[field]
+    }
+  }
+
   if (isPlannerTaskId(id)) {
-    const patch: Record<string, unknown> = {}
-    if (updates.title !== undefined) patch.title = updates.title
-    if (updates.client_id !== undefined) patch.client_id = updates.client_id
-    if (updates.client_name !== undefined) patch.client_name = updates.client_name
-    if (updates.assigned_to_name !== undefined) patch.assigned_to_name = updates.assigned_to_name
-    if (updates.status !== undefined) patch.status = plannerStatusFromTask(updates.status)
-    if (updates.priority !== undefined) patch.priority = updates.priority
-    if (updates.due_date !== undefined) patch.due_date = updates.due_date
-    if (updates.notes !== undefined) patch.notes = updates.notes
-    if (updates.bucket !== undefined) patch.original_bucket_name = updates.bucket
-    if (updates.helper_names !== undefined) patch.helper_names = updates.helper_names
+    if (patch.bucket !== undefined) {
+      patch.original_bucket_name = patch.bucket
+      delete patch.bucket
+    }
+    if (patch.status !== undefined) {
+      patch.status = plannerStatusFromTask(patch.status as TaskStatus)
+    }
 
     return supabase
       .from(PLANNER_TASKS_TABLE)
@@ -318,7 +342,7 @@ export async function updateTask(
 
   return supabase
     .from(TABLE)
-    .update(updates)
+    .update(patch)
     .eq('id', id)
     .select()
     .single()
@@ -334,11 +358,11 @@ function isColumnMissingError(error: unknown): boolean {
 
 export async function updateTaskSafe(
   id: string,
-  updates: Partial<Omit<CommandCentreTask, 'id' | 'created_at' | 'created_by'>>,
+  updates: Partial<TaskUpdateFields & { package_action?: PackageAction | null; quote_needed?: boolean; admin_package_note?: string | null }>,
 ): Promise<{ data: unknown; error: unknown; packageFieldsSkipped: boolean }> {
   const result = await updateTask(id, updates)
   if (result.error && isColumnMissingError(result.error) && !isPlannerTaskId(id)) {
-    const safeUpdates: Partial<Omit<CommandCentreTask, 'id' | 'created_at' | 'created_by'>> = { ...updates }
+    const safeUpdates: Partial<TaskUpdateFields> = { ...updates }
     for (const field of MIGRATION_FIELDS_7A) {
       delete (safeUpdates as Record<string, unknown>)[field]
     }

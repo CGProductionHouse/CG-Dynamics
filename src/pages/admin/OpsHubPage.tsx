@@ -1,23 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { ActionButton } from '../../components/ui/Buttons'
 import { LoadingState } from '../../components/ui/States'
 import { useAuth } from '../../contexts/AuthContext'
 import { isManagerRole } from '../../lib/roles'
 import {
   listTasks,
-  createTask,
   updateTaskStatus,
+  listActiveClients,
   type CommandCentreTask,
-  type TaskInput,
   type TaskBucket,
   type TaskStatus,
+  type ClientOption,
 } from '../../lib/commandCentre'
+import { listStaffProfiles } from '../../lib/contentWorkflow'
 import {
   listMonthlyDeliverablesByMonth,
   type MonthlyDeliverable,
 } from '../../lib/planner'
 import { businessDateKey } from '../../lib/businessTime'
+import { TaskCard, OpsQuickAdd, TaskDetailDrawer } from '../../components/operations'
 
 type OpsTab = 'my-work' | 'board' | 'client-work' | 'calendar' | 'admin'
 
@@ -29,8 +30,9 @@ export default function OpsHubPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
-  const [quickTitle, setQuickTitle] = useState('')
-  const [adding, setAdding] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<CommandCentreTask | null>(null)
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [staffProfiles, setStaffProfiles] = useState<{ id: string; full_name: string | null }[]>([])
 
   const activeTab: OpsTab = (searchParams.get('tab') as OpsTab) || 'my-work'
   const isAdmin = profile?.role ? isManagerRole(profile.role) : false
@@ -39,47 +41,52 @@ export default function OpsHubPage() {
     setSearchParams(tab === 'my-work' ? {} : { tab })
   }
 
+  async function loadData() {
+    setLoading(true)
+    setError(null)
+    const now = new Date()
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const [tasksResult, deliverableResult, clientsResult, staffResult] = await Promise.all([
+      listTasks(),
+      listMonthlyDeliverablesByMonth(month),
+      listActiveClients(),
+      listStaffProfiles(),
+    ])
+    if (tasksResult.error) { setError(tasksResult.error.message); setLoading(false); return }
+    setTasks(tasksResult.data ?? [])
+    setDeliverables(deliverableResult.data ?? [])
+    setClients(clientsResult.data ?? [])
+    setStaffProfiles(staffResult.data ?? [])
+    setLoading(false)
+  }
+
   useEffect(() => {
     let active = true
-    async function load() {
-      setLoading(true)
-      setError(null)
-      const now = new Date()
-      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-      const [tasksResult, deliverableResult] = await Promise.all([
-        listTasks(),
-        listMonthlyDeliverablesByMonth(month),
-      ])
+    void (async () => {
+      await loadData()
       if (!active) return
-      if (tasksResult.error) { setError(tasksResult.error.message); setLoading(false); return }
-      setTasks(tasksResult.data ?? [])
-      setDeliverables(deliverableResult.data ?? [])
-      setLoading(false)
-    }
-    void load()
+    })()
     return () => { active = false }
   }, [])
 
-  async function handleQuickAdd() {
-    const title = quickTitle.trim()
-    if (!title || adding) return
-    setAdding(true)
-    const today = businessDateKey(new Date())
-    const input: TaskInput = {
-      title,
-      bucket: 'Admin / To Do',
-      priority: 'normal',
-      status: 'to_do',
-      source: 'manual',
-      due_date: today,
-    }
-    const result = await createTask(input)
-    if (!result.error) {
-      setTasks(prev => result.data ? [...prev, result.data] : prev)
-    }
-    setQuickTitle('')
+  async function handleQuickAddCreated(task: CommandCentreTask) {
+    setTasks(prev => [task, ...prev])
     setShowQuickAdd(false)
-    setAdding(false)
+  }
+
+  function handleTaskUpdated(updated: CommandCentreTask) {
+    setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
+    setSelectedTask(null)
+  }
+
+  async function handleStatusChange(task: CommandCentreTask, newStatus: TaskStatus) {
+    const prev = tasks.find(t => t.id === task.id)
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t))
+
+    const result = await updateTaskStatus(task.id, newStatus)
+    if (result.error) {
+      if (prev) setTasks(p => p.map(t => t.id === task.id ? prev : t))
+    }
   }
 
   const todayKey = businessDateKey(new Date())
@@ -88,13 +95,6 @@ export default function OpsHubPage() {
     tasks.filter(t => t.assigned_to_name === profile?.full_name),
     [tasks, profile],
   )
-
-  async function handleStatusChange(task: CommandCentreTask, newStatus: TaskStatus) {
-    const result = await updateTaskStatus(task.id, newStatus)
-    if (!result.error) {
-      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t))
-    }
-  }
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 sm:px-6 sm:pt-6">
@@ -111,26 +111,26 @@ export default function OpsHubPage() {
         </div>
         <div className="flex items-center gap-2">
           {!showQuickAdd ? (
-            <ActionButton size="sm" onClick={() => setShowQuickAdd(true)}>+ Quick Add</ActionButton>
+            <button
+              onClick={() => setShowQuickAdd(true)}
+              className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black transition-colors hover:brightness-110"
+            >
+              + Quick Add
+            </button>
           ) : null}
-          {showQuickAdd && (
-            <div className="flex items-center gap-2">
-              <input
-                autoFocus
-                value={quickTitle}
-                onChange={e => setQuickTitle(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') void handleQuickAdd(); if (e.key === 'Escape') { setShowQuickAdd(false); setQuickTitle('') } }}
-                placeholder="Task title..."
-                className="w-64 rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50"
-              />
-              <ActionButton size="sm" onClick={() => void handleQuickAdd()} disabled={adding || !quickTitle.trim()}>
-                {adding ? '...' : 'Add'}
-              </ActionButton>
-              <button onClick={() => { setShowQuickAdd(false); setQuickTitle('') }} className="text-xs text-white/40 hover:text-white">Cancel</button>
-            </div>
-          )}
         </div>
       </header>
+
+      {showQuickAdd && (
+        <div className="mb-5 rounded-xl border border-white/10 bg-white/[0.025] p-4">
+          <OpsQuickAdd
+            onCreated={handleQuickAddCreated}
+            clients={clients}
+            staffProfiles={staffProfiles}
+            onClose={() => setShowQuickAdd(false)}
+          />
+        </div>
+      )}
 
       <nav className="mb-6 flex gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
         {(['my-work', 'board', 'client-work', 'calendar'] as OpsTab[]).concat(isAdmin ? ['admin'] as OpsTab[] : []).map(tab => (
@@ -161,16 +161,28 @@ export default function OpsHubPage() {
           myTasks={myTasks}
           todayKey={todayKey}
           onStatusChange={handleStatusChange}
+          onOpenTask={setSelectedTask}
         />
       ) : activeTab === 'board' ? (
-        <BoardView tasks={tasks} />
+        <BoardView
+          tasks={tasks}
+          onOpenTask={setSelectedTask}
+        />
       ) : activeTab === 'client-work' ? (
-        <ClientWorkView deliverables={deliverables} tasks={tasks} />
+        <ClientWorkView deliverables={deliverables} tasks={tasks} onOpenTask={setSelectedTask} />
       ) : activeTab === 'calendar' ? (
-        <CalendarView tasks={tasks} deliverables={deliverables} />
+        <CalendarView tasks={tasks} deliverables={deliverables} onOpenTask={setSelectedTask} />
       ) : activeTab === 'admin' && isAdmin ? (
         <AdminBoardView />
       ) : null}
+
+      <TaskDetailDrawer
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+        onSaved={handleTaskUpdated}
+        clients={clients}
+        staffProfiles={staffProfiles}
+      />
     </div>
   )
 }
@@ -179,10 +191,12 @@ function MyWorkView({
   myTasks,
   todayKey,
   onStatusChange,
+  onOpenTask,
 }: {
   myTasks: CommandCentreTask[]
   todayKey: string
   onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
+  onOpenTask: (task: CommandCentreTask) => void
 }) {
   const overdue = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
   const today = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date === todayKey), [myTasks, todayKey])
@@ -194,12 +208,24 @@ function MyWorkView({
   return (
     <div className="space-y-5">
       <p className="text-sm text-white/60">Showing {myTasks.length} tasks assigned to you.</p>
-      <TaskSection title={`Overdue (${overdue.length})`} tasks={overdue} color="text-red-300" onStatusChange={onStatusChange} />
-      <TaskSection title={`Today (${today.length})`} tasks={today} color="text-amber-200" onStatusChange={onStatusChange} />
-      <TaskSection title={`In Progress (${inProgress.length})`} tasks={inProgress} color="text-brand-teal" onStatusChange={onStatusChange} />
-      <TaskSection title={`Upcoming (${upcoming.length})`} tasks={upcoming} color="text-white/60" onStatusChange={onStatusChange} />
-      <TaskSection title={`Waiting / Review (${waiting.length})`} tasks={waiting} color="text-sky-200" onStatusChange={onStatusChange} />
-      <TaskSection title={`No Due Date (${noDate.length})`} tasks={noDate} color="text-white/40" onStatusChange={onStatusChange} />
+      {overdue.length > 0 && (
+        <TaskSection title={`Overdue (${overdue.length})`} tasks={overdue} color="text-red-300" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
+      )}
+      {today.length > 0 && (
+        <TaskSection title={`Today (${today.length})`} tasks={today} color="text-amber-200" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
+      )}
+      {inProgress.length > 0 && (
+        <TaskSection title={`In Progress (${inProgress.length})`} tasks={inProgress} color="text-brand-teal" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
+      )}
+      {upcoming.length > 0 && (
+        <TaskSection title={`Upcoming (${upcoming.length})`} tasks={upcoming} color="text-white/60" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
+      )}
+      {waiting.length > 0 && (
+        <TaskSection title={`Waiting / Review (${waiting.length})`} tasks={waiting} color="text-sky-200" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
+      )}
+      {noDate.length > 0 && (
+        <TaskSection title={`No Due Date (${noDate.length})`} tasks={noDate} color="text-white/40" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
+      )}
     </div>
   )
 }
@@ -209,75 +235,31 @@ function TaskSection({
   tasks,
   color,
   onStatusChange,
+  onOpenTask,
 }: {
   title: string
   tasks: CommandCentreTask[]
   color: string
   onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
+  onOpenTask: (task: CommandCentreTask) => void
 }) {
-  if (tasks.length === 0) return null
   return (
     <section>
       <h2 className={`text-[10px] font-black uppercase tracking-[0.18em] ${color}`}>{title}</h2>
       <div className="mt-2 space-y-1.5">
         {tasks.map(task => (
-          <TaskRow key={task.id} task={task} onStatusChange={onStatusChange} />
+          <TaskCard key={task.id} task={task} onStatusChange={onStatusChange} onOpen={onOpenTask} />
         ))}
       </div>
     </section>
   )
 }
 
-function TaskRow({
-  task,
-  onStatusChange,
-}: {
-  task: CommandCentreTask
-  onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2.5 transition-colors hover:border-white/20">
-      <input
-        type="checkbox"
-        checked={task.status === 'done'}
-        onChange={() => onStatusChange(task, task.status === 'done' ? 'to_do' : 'done')}
-        className="h-4 w-4 rounded border-white/20 bg-transparent accent-brand-teal"
-      />
-      <div className="min-w-0 flex-1">
-        <p className={`text-sm ${task.status === 'done' ? 'text-white/30 line-through' : 'text-white'}`}>{task.title}</p>
-        <div className="mt-0.5 flex flex-wrap gap-2">
-          {task.client_name && <span className="text-[10px] font-bold uppercase tracking-wider text-brand-teal/60">{task.client_name}</span>}
-          {task.bucket && <span className="text-[10px] uppercase tracking-wider text-white/35">{task.bucket}</span>}
-          {task.due_date && (
-            <span className={`text-[10px] uppercase tracking-wider ${task.due_date < businessDateKey(new Date()) && task.status !== 'done' ? 'text-red-300' : 'text-white/35'}`}>
-              Due {task.due_date}
-            </span>
-          )}
-          {task.source && task.source !== 'manual' && (
-            <span className="text-[10px] uppercase tracking-wider text-amber-200/50">{task.source}</span>
-          )}
-        </div>
-      </div>
-      <select
-        value={task.status}
-        onChange={e => onStatusChange(task, e.target.value as TaskStatus)}
-        className="w-28 rounded border border-white/10 bg-[#111] px-2 py-1 text-[10px] text-white/70 outline-none focus:border-brand-teal/50"
-      >
-        <option value="to_do">To do</option>
-        <option value="in_progress">In progress</option>
-        <option value="waiting_client">Waiting</option>
-        <option value="blocked">Blocked</option>
-        <option value="done">Done</option>
-      </select>
-    </div>
-  )
-}
-
-function BoardView({ tasks }: { tasks: CommandCentreTask[] }) {
+function BoardView({ tasks, onOpenTask }: { tasks: CommandCentreTask[]; onOpenTask: (task: CommandCentreTask) => void }) {
   const buckets = useMemo(() => {
     const map = new Map<TaskBucket, CommandCentreTask[]>()
     for (const task of tasks) {
-      const bucket = (task.bucket || 'Admin / To Do') as TaskBucket
+      const bucket = (task.bucket || 'Once-off') as TaskBucket
       if (!map.has(bucket)) map.set(bucket, [])
       map.get(bucket)!.push(task)
     }
@@ -295,24 +277,7 @@ function BoardView({ tasks }: { tasks: CommandCentreTask[] }) {
             </div>
             <div className="space-y-1.5 rounded-xl border border-white/10 bg-white/[0.02] p-2">
               {items.slice(0, 20).map(task => (
-                <div key={task.id} className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 transition-colors hover:border-white/20">
-                  <p className="text-xs text-white">{task.title}</p>
-                  <div className="mt-1 flex flex-wrap gap-1.5">
-                    {task.priority === 'urgent' && (
-                      <span className="rounded bg-red-400/15 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-red-300">Urgent</span>
-                    )}
-                    {task.priority === 'client_request' && (
-                      <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-amber-200">Request</span>
-                    )}
-                    {task.client_name && (
-                      <span className="rounded bg-brand-teal/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-brand-teal/70">{task.client_name}</span>
-                    )}
-                  </div>
-                  <div className="mt-1.5 flex items-center justify-between text-[9px] text-white/35">
-                    {task.assigned_to_name && <span>{task.assigned_to_name}</span>}
-                    {task.due_date && <span>{task.due_date}</span>}
-                  </div>
-                </div>
+                <TaskCard key={task.id} task={task} onStatusChange={() => {}} onOpen={onOpenTask} compact />
               ))}
               {items.length > 20 && (
                 <p className="py-1 text-center text-[10px] text-white/30">+{items.length - 20} more</p>
@@ -331,9 +296,11 @@ function BoardView({ tasks }: { tasks: CommandCentreTask[] }) {
 function ClientWorkView({
   deliverables,
   tasks,
+  onOpenTask,
 }: {
   deliverables: MonthlyDeliverable[]
   tasks: CommandCentreTask[]
+  onOpenTask: (task: CommandCentreTask) => void
 }) {
   const clientRequests = useMemo(() =>
     tasks.filter(t => t.priority === 'client_request' || t.source === 'whatsapp_paste'),
@@ -346,11 +313,7 @@ function ClientWorkView({
         <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/60">Client Requests ({clientRequests.length})</h2>
         <div className="mt-2 space-y-1.5">
           {clientRequests.slice(0, 15).map(task => (
-            <div key={task.id} className="rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2">
-              <p className="text-sm text-white">{task.title}</p>
-              {task.client_name && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-teal/60">{task.client_name}</p>}
-              {task.notes && <p className="mt-1 text-xs text-white/50 line-clamp-2">{task.notes}</p>}
-            </div>
+            <TaskCard key={task.id} task={task} onStatusChange={() => {}} onOpen={onOpenTask} />
           ))}
           {clientRequests.length === 0 && <p className="text-sm text-white/30">No pending client requests.</p>}
         </div>
@@ -370,7 +333,7 @@ function ClientWorkView({
                 }`}>
                   {d.code}{d.instance_number}
                 </span>
-                <p className="text-xs text-white/70 truncate">{d.title}</p>
+                <p className="truncate text-xs text-white/70">{d.title}</p>
               </div>
             </div>
           ))}
@@ -384,9 +347,11 @@ function ClientWorkView({
 function CalendarView({
   tasks,
   deliverables,
+  onOpenTask,
 }: {
   tasks: CommandCentreTask[]
   deliverables: MonthlyDeliverable[]
+  onOpenTask: (task: CommandCentreTask) => void
 }) {
   const today = new Date()
   const year = today.getFullYear()
@@ -401,11 +366,11 @@ function CalendarView({
   }
 
   const itemsByDate = useMemo(() => {
-    const map = new Map<string, Array<{ title: string; type: string }>>()
+    const map = new Map<string, Array<{ task?: CommandCentreTask; title: string; type: string }>>()
     for (const t of tasks) {
       if (t.due_date) {
         if (!map.has(t.due_date)) map.set(t.due_date, [])
-        map.get(t.due_date)!.push({ title: t.title, type: 'task' })
+        map.get(t.due_date)!.push({ task: t, title: t.title, type: 'task' })
       }
     }
     for (const d of deliverables) {
@@ -424,12 +389,12 @@ function CalendarView({
   return (
     <div>
       <p className="mb-3 text-sm text-white/60">{monthName}</p>
-      <div className="grid grid-cols-7 gap-px rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-white/10 bg-white/5">
         {weekDays.map(d => (
-          <div key={d} className="bg-[#0a0a0a] px-2 py-2 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">{d}</div>
+          <div key={d} className="bg-[#0a0a0a] px-2 py-2 text-center text-[9px] font-black uppercase tracking-wider text-white/40">{d}</div>
         ))}
         {Array.from({ length: firstDay }, (_, i) => (
-          <div key={`empty-${i}`} className="bg-[#0a0a0a] min-h-[60px]" />
+          <div key={`empty-${i}`} className="min-h-[60px] bg-[#0a0a0a]" />
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => {
           const day = i + 1
@@ -440,13 +405,24 @@ function CalendarView({
           return (
             <div key={day} className={`min-h-[60px] bg-[#0a0a0a] px-1.5 py-1 ${isToday ? 'ring-1 ring-inset ring-brand-teal/40' : ''}`}>
               <p className={`text-[10px] font-bold ${isToday ? 'text-brand-teal' : 'text-white/40'}`}>{day}</p>
-              {items.slice(0, 3).map((item, idx) => (
-                <p key={idx} className={`mt-0.5 truncate rounded px-1 py-0.5 text-[8px] font-bold ${
-                  item.type === 'deliverable' ? 'bg-brand-teal/15 text-brand-teal/80' : 'bg-white/5 text-white/60'
-                }`}>
-                  {item.title}
-                </p>
-              ))}
+              {items.slice(0, 3).map((item, idx) => {
+                if (item.task && item.type === 'task') {
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => onOpenTask(item.task!)}
+                      className="mt-0.5 block w-full truncate rounded px-1 py-0.5 text-left text-[8px] font-bold bg-white/5 text-white/60 hover:bg-white/10"
+                    >
+                      {item.title}
+                    </button>
+                  )
+                }
+                return (
+                  <p key={idx} className="mt-0.5 truncate rounded px-1 py-0.5 text-[8px] font-bold bg-brand-teal/15 text-brand-teal/80">
+                    {item.title}
+                  </p>
+                )
+              })}
               {items.length > 3 && <p className="text-[7px] text-white/30">+{items.length - 3}</p>}
             </div>
           )
