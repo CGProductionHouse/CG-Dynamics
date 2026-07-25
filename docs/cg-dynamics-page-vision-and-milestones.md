@@ -19,6 +19,11 @@ feature.
   not the content posting schedule.
 - Planner Board (`planner_tasks`) is operational task management. It is separate
   from Client Schedule and must not be merged into `monthly_deliverables`.
+- A Content Run has exactly one canonical Content Guideline document. The
+  document contains multiple ordered videos; each video keeps its name and
+  complete script. Staff, Calendar deep links, Full Content Guide, and the
+  client portal must resolve this same document. Publication is document-level,
+  and clients see only their own published projection without internal fields.
 - Client-facing pages must be client-safe: no internal assignee clutter,
   private notes, helper names, raw IDs, admin diagnostics, or sensitive setup.
 - AI/assistant features must use current app data and role-specific context.

@@ -49,6 +49,10 @@ Staff area under `/admin` (guarded), client area at `/dashboard`.
   Preview mirrors the client report view. Needs a cleanup pass.
 - **Meta / Integrations** — connection status and asset counts via Edge
   Functions (`meta-connection-status`, `meta-*`). Needs a diagnostics pass.
+- **Content Guidelines** - `content_guidelines` is the canonical
+  one-document-per-Content-Run parent; ordered video/script rows remain in
+  `content_guide_ideas`. Staff edit the same document from Content Runs or Full
+  Content Guide, and clients receive only its published client-safe projection.
 - **CG Assistant** — talks to the `cg-assistant-chat` Edge Function with
   role-aware guardrails; not yet wired to real planner/deliverable data for
   useful summaries.

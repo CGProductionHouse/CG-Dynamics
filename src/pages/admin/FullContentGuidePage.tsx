@@ -1,251 +1,142 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ActionButton } from '../../components/ui/Buttons'
 import { LoadingState } from '../../components/ui/States'
+import { useAuth } from '../../contexts/AuthContext'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
-import { monthDisplayLabel } from '../../lib/reportPeriod'
 import {
-  listGuideIdeas,
-  updateGuideIdea,
-  type ContentGuideIdea,
-  type ContentGuideInput,
+  listContentGuidelineDocuments,
+  type ContentGuidelineDocument,
 } from '../../lib/contentWorkflow'
-import {
-  guideStatusTone,
-  humanizeStatus,
-} from './contentGuidelineHelpers'
-
-type PublishAction = 'publish' | 'unpublish'
+import { monthDisplayLabel } from '../../lib/reportPeriod'
+import ContentGuidelineDocumentEditor from './ContentGuidelineDocumentEditor'
 
 export default function FullContentGuidePage() {
+  const { profile } = useAuth()
   const [clients, setClients] = useState<ClientOption[]>([])
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   })
-  const [guides, setGuides] = useState<ContentGuideIdea[]>([])
+  const [documents, setDocuments] = useState<ContentGuidelineDocument[]>([])
+  const [selectedGuidelineId, setSelectedGuidelineId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [publishingId, setPublishingId] = useState<string | null>(null)
 
   useEffect(() => {
-    listActiveClients().then(result => {
+    void listActiveClients().then(result => {
       if (result.data) setClients(result.data)
     })
   }, [])
 
-  function loadGuides() {
-    if (!selectedClientId) { setGuides([]); return }
+  async function loadDocuments() {
+    if (!selectedClientId) {
+      setDocuments([])
+      setSelectedGuidelineId(null)
+      return
+    }
     setLoading(true)
     setError(null)
-    listGuideIdeas()
-      .then(result => {
-        if (result.error) { setError(result.error); setGuides([]); return }
-        setGuides(
-          result.data.filter(
-            g => g.client_id === selectedClientId && g.month === selectedMonth,
-          ),
-        )
-      })
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { loadGuides() }, [selectedClientId, selectedMonth])
-
-  async function togglePublish(guide: ContentGuideIdea) {
-    if (publishingId) return
-    setPublishingId(guide.id)
-    const action: PublishAction = guide.client_published_at ? 'unpublish' : 'publish'
-    const patch: Partial<ContentGuideIdea> = {
-      client_published_at: action === 'publish' ? new Date().toISOString() : null,
+    const result = await listContentGuidelineDocuments({
+      clientId: selectedClientId,
+      month: `${selectedMonth}-01`,
+    })
+    setLoading(false)
+    if (result.migrationNeeded) {
+      setError('The Content Guideline document migration has not been applied yet.')
+      setDocuments([])
+      return
     }
-    const result = await updateGuideIdea(guide.id, patch as ContentGuideInput)
-    if (!result.error) loadGuides()
-    setPublishingId(null)
+    if (result.error) {
+      setError(result.error)
+      setDocuments([])
+      return
+    }
+    setDocuments(result.data)
+    setSelectedGuidelineId(current =>
+      current && result.data.some(document => document.guideline.id === current)
+        ? current
+        : (result.data[0]?.guideline.id ?? null),
+    )
   }
 
-  const sortedGuides = useMemo(
-    () => [...guides].sort((a, b) => (a.video_number ?? 999) - (b.video_number ?? 999)),
-    [guides],
-  )
+  const loadDocumentsEvent = useEffectEvent(loadDocuments)
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadDocumentsEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [selectedClientId, selectedMonth])
 
-  const publishedGuides = sortedGuides.filter(g => g.client_published_at)
-  const draftGuides = sortedGuides.filter(g => !g.client_published_at)
-  const client = clients.find(c => c.id === selectedClientId)
+  const selectedDocument = useMemo(
+    () => documents.find(document => document.guideline.id === selectedGuidelineId) ?? null,
+    [documents, selectedGuidelineId],
+  )
+  const client = clients.find(candidate => candidate.id === selectedClientId)
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
       <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.18),transparent_38%),linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-5 sm:p-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Content production</p>
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-5xl">Full Content Guide</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-primary/70 sm:text-base">
-              One complete guide per client and month. Every scheduled video, concept, script and production detail in one document-style workspace.
-            </p>
-          </div>
-        </div>
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Content production</p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-5xl">Content Guideline</h1>
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-primary/70 sm:text-base">
+          One document per Content Run, containing every video in filming order with its name and complete script.
+        </p>
       </header>
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className="text-xs text-white/45">
           Client
-          <select
-            value={selectedClientId ?? ''}
-            onChange={e => setSelectedClientId(e.target.value || null)}
-            className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white"
-          >
+          <select value={selectedClientId ?? ''} onChange={event => setSelectedClientId(event.target.value || null)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white">
             <option value="">Select a client</option>
-            {clients.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
+            {clients.map(option => <option key={option.id} value={option.id}>{option.name}</option>)}
           </select>
         </label>
         <label className="text-xs text-white/45">
           Month
-          <select
-            value={selectedMonth}
-            onChange={e => setSelectedMonth(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white"
-          >
-            {Array.from({ length: 12 }, (_, i) => {
-              const d = new Date()
-              d.setMonth(d.getMonth() + i)
-              const v = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-              return <option key={v} value={v}>{monthDisplayLabel(v)}</option>
-            })}
-          </select>
+          <input type="month" value={selectedMonth} onChange={event => setSelectedMonth(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" />
         </label>
       </section>
 
-      {error && (
-        <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</div>
-      )}
+      {error && <p className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</p>}
 
       {!selectedClientId ? (
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center">
-          <p className="text-sm text-white/50">Select a client and month to view the full content guide.</p>
-        </div>
+        <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center text-sm text-white/50">Select a client and month.</div>
       ) : loading ? (
-        <LoadingState message="Loading content guides..." />
-      ) : guides.length === 0 ? (
+        <LoadingState message="Loading Content Guidelines..." />
+      ) : documents.length === 0 ? (
         <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center">
-          <p className="text-sm text-white/50">No content guides exist for {client?.name ?? 'this client'} in {monthDisplayLabel(selectedMonth)}.</p>
-          <p className="mt-3 text-xs text-white/35">
-            Create individual guides from the{' '}
-            <Link to="/admin/content-workflow" className="text-brand-teal hover:text-white">Content Workflow</Link> page, then return here to see them in the full workspace.
-          </p>
+          <p className="text-sm text-white/50">No Content Guideline exists for {client?.name ?? 'this client'} in {monthDisplayLabel(selectedMonth)}.</p>
+          <p className="mt-3 text-xs text-white/35">Open the relevant Content Run and create its one guideline document there.</p>
+          <Link to="/admin/content-workflow?tab=runs" className="mt-4 inline-flex rounded-lg border border-brand-teal/30 px-3 py-2 text-xs font-bold text-brand-teal hover:text-white">Open Content Runs</Link>
         </section>
       ) : (
-        <>
-          <section className="mt-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">
-                  {client?.name} · {monthDisplayLabel(selectedMonth)}
-                </p>
-                <h2 className="mt-1 text-xl font-black text-white">
-                  {guides.length} guide{guides.length === 1 ? '' : 's'}
-                  {publishedGuides.length > 0 && (
-                    <span className="ml-2 text-sm font-normal text-white/40">
-                      · {publishedGuides.length} published
-                    </span>
-                  )}
-                </h2>
+        <div className="mt-6 grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="space-y-2">
+            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/40">{client?.name} | {monthDisplayLabel(selectedMonth)}</p>
+            {documents.map(document => (
+              <button key={document.guideline.id} type="button" onClick={() => setSelectedGuidelineId(document.guideline.id)} className={`w-full rounded-xl border p-3 text-left ${selectedGuidelineId === document.guideline.id ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025]'}`}>
+                <p className="text-sm font-black text-white">{document.run.name}</p>
+                <p className="mt-1 text-xs text-white/45">{document.run.run_date ?? 'Filming date not set'} | {document.videos.length} video{document.videos.length === 1 ? '' : 's'}</p>
+                <p className={`mt-2 text-[10px] font-black uppercase tracking-wider ${document.guideline.client_published_at ? 'text-emerald-200' : 'text-white/35'}`}>{document.guideline.client_published_at ? 'Published' : 'Draft'}</p>
+              </button>
+            ))}
+          </aside>
+
+          {selectedDocument && (
+            <div className="space-y-3">
+              <div className="flex justify-end">
+                <Link to={selectedDocument.run.calendar_event_id ? `/admin/content-workflow?tab=runs&event=${selectedDocument.run.calendar_event_id}` : `/admin/content-workflow?tab=runs&run=${selectedDocument.run.id}`} className="rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-white/60 hover:text-white">Open Content Run</Link>
               </div>
+              <ContentGuidelineDocumentEditor
+                guideline={selectedDocument.guideline}
+                run={selectedDocument.run}
+                videos={selectedDocument.videos}
+                currentUserId={profile?.id}
+                onChanged={loadDocuments}
+              />
             </div>
-          </section>
-
-          {draftGuides.length > 0 && (
-            <section className="mt-8">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/60">Draft guides — not client-visible</p>
-              <div className="mt-3 space-y-4">
-                {draftGuides.map(guide => (
-                  <GuideBlock key={guide.id} guide={guide} onPublish={() => void togglePublish(guide)} publishing={publishingId === guide.id} />
-                ))}
-              </div>
-            </section>
           )}
-
-          {publishedGuides.length > 0 && (
-            <section className="mt-8">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-200/60">Published guides — client-visible</p>
-              <div className="mt-3 space-y-4">
-                {publishedGuides.map(guide => (
-                  <GuideBlock key={guide.id} guide={guide} onPublish={() => void togglePublish(guide)} publishing={publishingId === guide.id} isPublished />
-                ))}
-              </div>
-            </section>
-          )}
-        </>
+        </div>
       )}
-    </div>
-  )
-}
-
-function GuideBlock({
-  guide,
-  onPublish,
-  publishing,
-  isPublished = false,
-}: {
-  guide: ContentGuideIdea
-  onPublish: () => void
-  publishing: boolean
-  isPublished?: boolean
-}) {
-  return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.025] p-5 sm:p-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-brand-teal/75">
-            {guide.canonical_name ?? `Video ${guide.video_number ?? '—'}`}
-          </p>
-          <h3 className="mt-1 text-lg font-black text-white">{guide.title}</h3>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className={`rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${guideStatusTone(guide.status)}`}>
-              {humanizeStatus(guide.status)}
-            </span>
-            {guide.platform && (
-              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[9px] font-black text-white/50">{guide.platform}</span>
-            )}
-            {guide.format && (
-              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[9px] font-black text-white/50">{guide.format}</span>
-            )}
-          </div>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Link
-            to={`/admin/content-workflow?guide=${guide.id}`}
-            className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/60 hover:text-white"
-          >
-            Edit
-          </Link>
-          <ActionButton size="sm" variant={isPublished ? 'secondary' : 'primary'} onClick={onPublish} disabled={publishing}>
-            {publishing ? '...' : isPublished ? 'Unpublish' : 'Publish to client'}
-          </ActionButton>
-        </div>
-      </div>
-
-      <div className="mt-5 grid gap-5 sm:grid-cols-2">
-        {guide.objective && <GuideSection label="Objective" value={guide.objective} />}
-        {guide.hook && <GuideSection label="Hook" value={guide.hook} />}
-        {guide.script && <GuideSection label="Script / Dialogue" value={guide.script} />}
-        {guide.shot_breakdown && <GuideSection label="Shot breakdown" value={guide.shot_breakdown} />}
-        {guide.cta && <GuideSection label="Call to action" value={guide.cta} />}
-        {guide.visual_notes && <GuideSection label="Visual notes" value={guide.visual_notes} />}
-        {guide.notes && <GuideSection label="Production notes" value={guide.notes} />}
-      </div>
-    </article>
-  )
-}
-
-function GuideSection({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/35">{label}</p>
-      <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-white/80">{value}</p>
     </div>
   )
 }

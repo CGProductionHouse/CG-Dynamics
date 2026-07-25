@@ -1,292 +1,92 @@
 import assert from 'node:assert/strict'
-import { after, before, test } from 'node:test'
+import { test } from 'node:test'
 import { readFileSync } from 'node:fs'
-import { createServer } from 'vite'
-
-// Content Guideline usability: the guideline is the centre of the staff
-// workflow. Pure rules load through a Vite SSR server (no Supabase import);
-// wording, brief fields, run linkage and deep links are validated by parsing
-// the source. No database is touched.
-
-let server
-let rules
-let video
-let guideHelpers
-
-before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
-  rules = await server.ssrLoadModule('/src/lib/contentWorkflowRules.ts')
-  video = await server.ssrLoadModule('/src/lib/videoPipelineRules.ts')
-  guideHelpers = await server.ssrLoadModule('/src/pages/admin/contentGuidelineHelpers.ts')
-})
-after(async () => { await server?.close() })
 
 const read = name => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
-const PAGE = read('src/pages/admin/ContentWorkflowPage.tsx')
-const GUIDE = read('src/pages/admin/contentGuideline.tsx')
-const DATA = read('src/lib/contentWorkflow.ts')
-const CAL = read('src/pages/admin/CompanyCalendarPage.tsx')
+const MIGRATION = read('supabase/migrations/20260725172531_content_guideline_document_model.sql')
+const WORKFLOW = read('src/pages/admin/ContentWorkflowPage.tsx')
+const EDITOR = read('src/pages/admin/ContentGuidelineDocumentEditor.tsx')
+const ADMIN_PAGE = read('src/pages/admin/FullContentGuidePage.tsx')
+const CLIENT_PAGE = read('src/pages/client/ClientContentGuidesPage.tsx')
+const CLIENT_DATA = read('src/lib/clientContentGuides.ts')
+const CALENDAR = read('src/pages/admin/CompanyCalendarPage.tsx')
 
-// ── 1. Visible wording uses Content Guidelines, not generic "idea" ───────────
-
-test('visible wording uses guideline language, not generic idea wording', () => {
-  assert.match(PAGE, /Content Guidelines/)
-  assert.match(PAGE, /New guideline/)
-  assert.match(PAGE, /No content guidelines yet/)
-  assert.match(PAGE, /Select a content guideline/)
-  assert.match(GUIDE, /Save guideline/)
-  // The old generic wording is gone from the visible strings.
-  assert.doesNotMatch(PAGE, />New idea</)
-  assert.doesNotMatch(PAGE, /No ideas yet/)
-  assert.doesNotMatch(PAGE, /Select an idea/)
-  assert.doesNotMatch(GUIDE, /Save idea/)
+test('one canonical Content Guideline is enforced per Content Run', () => {
+  assert.match(MIGRATION, /content_run_id uuid not null references public\.content_runs\(id\)/)
+  assert.match(MIGRATION, /constraint content_guidelines_one_per_run unique \(content_run_id\)/)
+  assert.match(MIGRATION, /on conflict \(content_run_id\) do nothing/)
+  assert.match(MIGRATION, /get_or_create_content_guideline/)
 })
 
-test('the header explains plan → shoot → track', () => {
-  assert.match(PAGE, /Plan the video, use the guideline during the shoot, then track editing and approvals\./)
+test('guideline and run ownership must resolve to the same explicit client', () => {
+  assert.match(MIGRATION, /Content Guideline and Content Run must belong to the same client/)
+  assert.match(MIGRATION, /Content Run client cannot change while its Content Guideline belongs to another client/)
+  assert.match(MIGRATION, /Video and Content Guideline must belong to the same client/)
+  assert.match(MIGRATION, /Video deliverable and Content Guideline must belong to the same client/)
+  assert.doesNotMatch(MIGRATION, /insert into public\.clients/i)
 })
 
-// ── 2/3/4. The create form exposes and saves the full video brief ────────────
+test('videos remain ordered children and keep their complete scripts', () => {
+  assert.match(MIGRATION, /add column if not exists content_guideline_id uuid references public\.content_guidelines\(id\)/)
+  assert.match(MIGRATION, /add column if not exists position integer/)
+  assert.match(MIGRATION, /uniq_content_guideline_video_position/)
+  assert.match(MIGRATION, /Every video needs a name and complete script before publishing/)
+  assert.match(EDITOR, /Video \{index \+ 1\}/g)
+  assert.match(EDITOR, /Complete script/)
+  assert.match(EDITOR, /reorderGuidelineVideos/)
+  assert.match(EDITOR, /updateGuidelineVideo/)
+})
 
-test('the guideline form exposes all full-brief fields', () => {
-  for (const label of [
-    'Linked Client Schedule deliverable', 'Concept title', 'Folder client code', 'Video number',
-    'Objective', 'Hook / opening', 'Script / dialogue', 'Shot-by-shot breakdown',
-    'On-screen text / CTA', 'People, products & props', 'Visual / filming notes', 'Internal notes',
-    'Guide owner', 'Assigned editor', 'Proposed posting date',
-    'Footage folder', 'Internal review', 'Client approval', 'Final export',
-  ]) {
-    assert.ok(GUIDE.includes(label), `form must expose "${label}"`)
+test('legacy grouping is deterministic, reviewable and non-destructive', () => {
+  assert.match(MIGRATION, /count\(\*\)[\s\S]*?where links\.guide_idea_id = g\.id[\s\S]*?= 1/)
+  assert.match(MIGRATION, /r\.client_id is not null/)
+  assert.match(MIGRATION, /g\.client_id = r\.client_id/)
+  assert.match(MIGRATION, /multiple_run_links/)
+  assert.match(MIGRATION, /run_client_missing/)
+  assert.match(MIGRATION, /client_mismatch_or_missing/)
+  assert.doesNotMatch(MIGRATION, /delete from public\./i)
+})
+
+test('publication is document-level and guarded by complete video content', () => {
+  assert.match(MIGRATION, /set_content_guideline_publication/)
+  assert.match(MIGRATION, /client_published_at = case when p_publish then now\(\) else null end/)
+  assert.match(MIGRATION, /status = case when p_publish then 'published' else 'ready' end/)
+  assert.match(MIGRATION, /Published Content Guideline videos require a name and complete script/)
+  assert.match(EDITOR, /Publish full guideline/)
+  assert.match(EDITOR, /Unpublish document/)
+  assert.doesNotMatch(EDITOR, /client_published_at.*video/)
+})
+
+test('client projection returns only own published documents and ordered safe videos', () => {
+  const rpc = MIGRATION.slice(MIGRATION.indexOf('create or replace function public.client_portal_published_content_guidelines'))
+  assert.match(rpc, /v_client_id := public\.my_client_id\(\)/)
+  assert.match(rpc, /guideline\.client_id = v_client_id/)
+  assert.match(rpc, /guideline\.client_published_at is not null/)
+  assert.match(rpc, /guideline\.status = 'published'/)
+  assert.match(rpc, /order by video\.position, video\.created_at/)
+  for (const internal of ['internal_notes', 'assigned_to', 'editor_user_id', 'production_status', 'deliverable_id']) {
+    assert.ok(!rpc.includes(`'${internal}'`), `client projection must omit ${internal}`)
   }
+  assert.match(CLIENT_DATA, /client_portal_published_content_guidelines/)
+  assert.match(CLIENT_PAGE, /Complete script/)
+  assert.match(CLIENT_PAGE, /Video \{index \+ 1\}/g)
 })
 
-test('the guideline form saves canonical name and video fields', () => {
-  assert.match(GUIDE, /canonical_name: canonical/)
-  assert.match(GUIDE, /video_number:/)
-  assert.match(GUIDE, /folder_client_code:/)
-  assert.match(GUIDE, /script:/)
-  assert.match(GUIDE, /shot_breakdown:/)
-  assert.match(GUIDE, /requirements:/)
-  // Canonical name uses the tested helper.
-  assert.match(GUIDE, /buildCanonicalName\(/)
+test('staff workflow and calendar resolve the same run document', () => {
+  assert.match(WORKFLOW, /getGuidelineForRun\(runId\)/)
+  assert.match(WORKFLOW, /ensureGuidelineForRun\(selectedRun\.id\)/)
+  assert.match(WORKFLOW, /<ContentGuidelineDocumentEditor/)
+  assert.match(WORKFLOW, /searchParams\.get\('event'\)/)
+  assert.match(WORKFLOW, /searchParams\.get\('run'\)/)
+  assert.match(CALENDAR, /\/admin\/content-workflow\?tab=runs&event=\$\{event\.id\}/)
+  assert.match(ADMIN_PAGE, /ContentGuidelineDocumentEditor/)
 })
 
-test('a linked deliverable supplies the video number (read-only)', () => {
-  assert.match(GUIDE, /videoNumberFromInstance\(/)
-  assert.match(GUIDE, /disabled=\{deliverableLinked\}/)
-})
-
-// ── Linked monthly video selector ────────────────────────────────────────────
-
-function deliverable(id, instanceNumber, overrides = {}) {
-  return {
-    id,
-    client_id: 'client-1',
-    month: '2026-07-01',
-    deliverable_type: 'video',
-    code: 'Video',
-    instance_number: instanceNumber,
-    title: `VIDEO ${instanceNumber} - DULUX`,
-    ...overrides,
-  }
-}
-
-test('Video 1 selector label never renders as Video 11 or exposes the internal code', () => {
-  const label = guideHelpers.contentGuidelineDeliverableLabel(deliverable('video-1', 1, { code: 'Video 1' }))
-  assert.equal(label, 'Video 1 — VIDEO 1 - DULUX')
-  assert.doesNotMatch(label, /Video 11/)
-})
-
-test('Content Guideline choices exclude DP, F, photo, other clients and other months', () => {
-  const choices = guideHelpers.contentGuidelineVideoChoices([
-    deliverable('video', 1),
-    deliverable('dp', 1, { deliverable_type: 'dp', code: 'DP' }),
-    deliverable('photo', 1, { deliverable_type: 'photo', code: 'F' }),
-    deliverable('other-client', 2, { client_id: 'client-2' }),
-    deliverable('other-month', 2, { month: '2026-08-01' }),
-  ], 'client-1', '2026-07')
-  assert.deepEqual(choices.map(choice => choice.id), ['video'])
-})
-
-test('different months may each contain their own Video 1', () => {
-  const rows = [
-    deliverable('july-video-1', 1, { month: '2026-07-01' }),
-    deliverable('august-video-1', 1, { month: '2026-08-01' }),
-  ]
-  const july = guideHelpers.contentGuidelineVideoChoices(rows, 'client-1', '2026-07')
-  const august = guideHelpers.contentGuidelineVideoChoices(rows, 'client-1', '2026-08')
-  assert.equal(july[0].instance_number, 1)
-  assert.equal(august[0].instance_number, 1)
-  assert.equal(july[0].id, 'july-video-1')
-  assert.equal(august[0].id, 'august-video-1')
-})
-
-test('video choices sort numerically by monthly instance number', () => {
-  const choices = guideHelpers.contentGuidelineVideoChoices([
-    deliverable('four', 4), deliverable('two', 2), deliverable('one', 1), deliverable('three', 3),
-  ], 'client-1', '2026-07')
-  assert.deepEqual(choices.map(choice => choice.instance_number), [1, 2, 3, 4])
-})
-
-test('canonical naming uses the selected monthly instance number', () => {
-  const selected = deliverable('august-video-1', 1, { month: '2026-08-01' })
-  const number = video.videoNumberFromInstance(selected.instance_number)
-  assert.equal(number, 1)
-  assert.equal(video.buildCanonicalName({ month: selected.month, clientCode: 'DULUX', videoNumber: number, conceptTitle: 'Summer colour' }), '2026_08_DULUX_VIDEO_01_SUMMER_COLOUR')
-})
-
-test('client and month changes clear linked deliverable and stale video number', () => {
-  assert.match(GUIDE, /client_id: event\.target\.value, deliverable_id: '', video_number: ''/)
-  assert.match(GUIDE, /month: event\.target\.value, deliverable_id: '', video_number: ''/)
-  assert.match(GUIDE, /deliverableType: 'video'/)
-})
-
-// ── 5. One active guideline per deliverable ──────────────────────────────────
-
-test('one active guideline per deliverable is enforced', () => {
-  const guides = [{ id: 'g1', deliverable_id: 'd1', status: 'approved' }]
-  assert.equal(rules.deliverableHasActiveGuideline(guides, 'd1'), true)
-  assert.equal(rules.deliverableHasActiveGuideline(guides, 'd1', 'g1'), false) // editing the same one
-  assert.equal(rules.deliverableHasActiveGuideline(guides, 'd2'), false)
-  assert.equal(rules.deliverableHasActiveGuideline([{ id: 'g1', deliverable_id: 'd1', status: 'archived' }], 'd1'), false)
-  // The page enforces it before saving.
-  assert.match(PAGE, /deliverableHasActiveGuideline\(guides, input\.deliverable_id/)
-})
-
-// ── 6. Guideline detail renders the full brief ───────────────────────────────
-
-test('the guideline brief renders all brief sections', () => {
-  for (const label of ['Objective', 'Hook / opening', 'Script / dialogue', 'Shot-by-shot breakdown', 'On-screen text / CTA', 'People, products & props', 'Visual / filming notes', 'Internal notes']) {
-    assert.ok(GUIDE.includes(`label="${label}"`), `brief must render "${label}"`)
-  }
-  assert.match(GUIDE, /Production links/)
-})
-
-// ── 7/8/9. Linked guidelines inside Content Runs ─────────────────────────────
-
-test('the run detail loads linked guidelines and separates them from extra shots', () => {
-  assert.match(PAGE, /splitRunItems\(runItems\)/)
-  assert.match(PAGE, /Videos & Content Guidelines/)
-  assert.match(PAGE, /Extra shots \/ run notes/)
-  assert.match(PAGE, /<GuidelineCard/)
-})
-
-test('a linked guideline card shows canonical name, production status and expands to the brief', () => {
-  assert.match(GUIDE, /idea\.canonical_name/)
-  assert.match(GUIDE, /VIDEO_STATUS_LABELS\[idea\.production_status\]/)
-  assert.match(GUIDE, /expanded \? 'Hide brief' : 'Show brief'/)
-})
-
-test('linked guidelines are split from extra shots', () => {
-  const { linked, extra } = rules.splitRunItems([
-    { guide_idea_id: 'g1' },
-    { guide_idea_id: null },
-    { guide_idea_id: 'g2' },
-  ])
-  assert.equal(linked.length, 2)
-  assert.equal(extra.length, 1)
-})
-
-// ── 10/13/24. Add guideline from the run ─────────────────────────────────────
-
-test('adding a guideline from the run creates one linked run item and no calendar event', () => {
-  assert.match(PAGE, /async function addGuideFromRun/)
-  assert.match(PAGE, /addApprovedIdeaToRun\(selectedRun, guide, runItems\.length\)/)
-  // addApprovedIdeaToRun creates exactly one run item and never a calendar event.
-  const fn = DATA.slice(DATA.indexOf('export async function addApprovedIdeaToRun'), DATA.indexOf('export async function listRunItemsForGuide'))
-  assert.match(fn, /addRunItem\(/)
-  assert.doesNotMatch(fn, /createCompanyEvent/)
-})
-
-test('a guideline already linked to the run cannot be added again', () => {
-  assert.match(PAGE, /!linkedItems\.some\(item => item\.guide_idea_id === guide\.id\)/)
-})
-
-// ── 11/12. Correct shot-list mapping with fallback ───────────────────────────
-
-test('run-item mapping uses shot_breakdown and requirements', () => {
-  const out = rules.runItemFieldsFromGuide({ shot_breakdown: 'SB', requirements: 'RQ', hook: 'H', visual_notes: 'V' })
-  assert.deepEqual(out, { shot_notes: 'SB', requirements: 'RQ' })
-})
-
-test('run-item mapping falls back to hook / visual_notes only when the newer field is empty', () => {
-  assert.deepEqual(rules.runItemFieldsFromGuide({ shot_breakdown: '', requirements: '', hook: 'H', visual_notes: 'V' }), { shot_notes: 'H', requirements: 'V' })
-  assert.deepEqual(rules.runItemFieldsFromGuide({ hook: 'H', visual_notes: 'V' }), { shot_notes: 'H', requirements: 'V' })
-  assert.deepEqual(rules.runItemFieldsFromGuide({}), { shot_notes: null, requirements: null })
-  // The data layer uses the mapping helper (no longer the old hook→shot_notes copy).
-  assert.match(DATA, /runItemFieldsFromGuide\(idea\)/)
-})
-
-// ── 14/15. Unlink preserves the guideline and resets status ──────────────────
-
-test('unlinking removes only the run item and preserves the guideline', () => {
-  const fn = DATA.slice(DATA.indexOf('export async function unlinkGuidelineFromRun'))
-  assert.match(fn, /removeRunItem\(item\.id\)/)
-  assert.doesNotMatch(fn.slice(0, fn.indexOf('}\n\n')), /archive|delete.*guide|deleteCompanyEvent/)
-})
-
-test('unlinking resets the guideline to approved when no other run references it', () => {
-  const fn = DATA.slice(DATA.indexOf('export async function unlinkGuidelineFromRun'))
-  assert.match(fn, /listRunItemsForGuide\(guideId\)/)
-  assert.match(fn, /remaining\.data\.length === 0/)
-  assert.match(fn, /updateGuideIdea\(guideId, \{ status: 'approved' \}\)/)
-  // The run screen confirms before unlinking.
-  assert.match(PAGE, /Yes, unlink/)
-})
-
-// ── 16/17. Extra shots de-emphasised; blank legacy shot labelled ─────────────
-
-test('a blank legacy extra shot is detected and labelled clearly', () => {
-  assert.equal(rules.isBlankExtraShot({ guide_idea_id: null, title: '', shot_notes: '', requirements: '' }), true)
-  assert.equal(rules.isBlankExtraShot({ guide_idea_id: null, title: 'X' }), false)
-  assert.equal(rules.isBlankExtraShot({ guide_idea_id: 'g1' }), false)
-  assert.match(PAGE, /Extra shot — details not added/)
-  assert.match(PAGE, /Add extra shot/)
-  assert.doesNotMatch(PAGE, /Untitled shot/)
-})
-
-// ── 18. Shoot mode ───────────────────────────────────────────────────────────
-
-test('shoot mode shows the required filming fields and prev/next controls', () => {
-  const fn = GUIDE.slice(GUIDE.indexOf('export function ShootMode'))
-  assert.match(fn, /label="People, products & props"/)
-  assert.match(fn, /label="Script \/ dialogue"/)
-  assert.match(fn, /label="Shot-by-shot breakdown"/)
-  assert.match(fn, /← Previous/)
-  assert.match(fn, /Next →/)
-  assert.match(PAGE, /Open shoot mode/)
-})
-
-// ── 19. Mark video shot uses the existing guarded transition ─────────────────
-
-test('mark video shot uses the guarded video transition', () => {
-  const t = video.applyVideoTransition('not_shot', 'mark_shot')
-  assert.equal(t.ok, true)
-  assert.equal(t.next, 'shot')
-  assert.equal(video.applyVideoTransition('shot', 'mark_shot').ok, false)
-  assert.match(PAGE, /transitionVideo\(guide, 'mark_shot'/)
-})
-
-// ── 20/21/22. Deep links ─────────────────────────────────────────────────────
-
-test('the guideline deep link (?tab=guides&guide=) works', () => {
-  assert.match(PAGE, /searchParams\.get\('guide'\)/)
-  assert.match(PAGE, /openFromGuideParam/)
-})
-
-test('the run deep link (?tab=runs&event=) still works', () => {
-  assert.match(PAGE, /searchParams\.get\('event'\)/)
-  assert.match(PAGE, /openFromCalendarEvent/)
-})
-
-test('the CG Calendar Open Content Run link remains intact', () => {
-  assert.match(CAL, /\/admin\/content-workflow\?tab=runs&event=\$\{event\.id\}/)
-})
-
-// ── 23. Client Schedule is not mutated ───────────────────────────────────────
-
-test('the guideline form never mutates the Client Schedule deliverable', () => {
-  assert.match(GUIDE, /Nothing here mutates the Client\s*\n?\s*\/\/ Schedule deliverable/)
-  // No writes to monthly_deliverables anywhere in the guideline UI or data helpers we changed.
-  assert.doesNotMatch(GUIDE, /from\('monthly_deliverables'\)/)
+test('parent table is staff-only and clients use the narrow RPC', () => {
+  assert.match(MIGRATION, /alter table public\.content_guidelines enable row level security/)
+  assert.match(MIGRATION, /content_guidelines: staff select/)
+  assert.match(MIGRATION, /content_guidelines: staff insert/)
+  assert.match(MIGRATION, /content_guidelines: staff update/)
+  assert.doesNotMatch(MIGRATION, /content_guidelines: client/)
+  assert.match(MIGRATION, /revoke all on table public\.content_guidelines from anon/)
 })

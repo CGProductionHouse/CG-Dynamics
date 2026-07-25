@@ -21,8 +21,9 @@ const CAMPAIGNS_DB_LOADER = read('../src/lib/googleAdsDashboard.ts')
 const CALENDAR_RPC = read('../supabase/phase-11a-client-portal-read-access.sql')
 const GUIDES_PAGE = read('../src/pages/client/ClientContentGuidesPage.tsx')
 const GUIDES_LIB = read('../src/lib/clientContentGuides.ts')
-const GUIDE_SQL = read('../supabase/phase-22a-content-guide-publication-gate.sql')
+const GUIDE_SQL = read('../supabase/migrations/20260725172531_content_guideline_document_model.sql')
 const FULL_GUIDE_PAGE = read('../src/pages/admin/FullContentGuidePage.tsx')
+const GUIDE_EDITOR = read('../src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const STRATEGY_PAGE = read('../src/pages/client/ClientStrategyPage.tsx')
 const PORTAL_LIB = read('../src/lib/clientPortal.ts')
 
@@ -384,32 +385,39 @@ test('calendar page renders event types with client-safe labels', () => {
 
 // ── Content Guides (Phase 7) ──────────────────────────────────────────────────
 
-test('content guide migration adds client_published_at column', () => {
-  assert.match(GUIDE_SQL, /add column if not exists.*client_published_at timestamptz/)
+test('content guideline migration creates one publishable document per run', () => {
+  assert.match(GUIDE_SQL, /create table if not exists public\.content_guidelines/)
+  assert.match(GUIDE_SQL, /unique \(content_run_id\)/)
+  assert.match(GUIDE_SQL, /client_published_at timestamptz/)
 })
 
-test('content guide RPC returns only published guides', () => {
-  assert.match(GUIDE_SQL, /client_published_at is not null/)
-  assert.match(GUIDE_SQL, /status in.*approved.*completed/)
+test('content guideline RPC returns only the signed-in client published documents', () => {
+  assert.match(GUIDE_SQL, /v_client_id := public\.my_client_id\(\)/)
+  assert.match(GUIDE_SQL, /guideline\.client_id = v_client_id/)
+  assert.match(GUIDE_SQL, /guideline\.client_published_at is not null/)
+  assert.match(GUIDE_SQL, /guideline\.status = 'published'/)
 })
 
-test('content guide RPC is client-safe (no write)', () => {
-  assert.match(GUIDE_SQL, /language sql/)
+test('content guideline RPC is client-safe and read-only', () => {
+  assert.match(GUIDE_SQL, /security definer/)
   assert.match(GUIDE_SQL, /stable/)
-  const funcBody = GUIDE_SQL.split('as $$')[1]?.split('$$;')[0] ?? ''
-  assert.doesNotMatch(funcBody, /\binsert\b|\bupdate\b|\bdelete\b/i)
+  const start = GUIDE_SQL.indexOf('create or replace function public.client_portal_published_content_guidelines')
+  const funcBody = GUIDE_SQL.slice(start)
+  assert.doesNotMatch(funcBody, /internal_notes|editor_user_id|production_status/)
   assert.doesNotMatch(GUIDE_SQL, /service_role/)
 })
 
-test('admin full content guide page has publish/unpublish buttons', () => {
-  assert.match(FULL_GUIDE_PAGE, /Publish to client/)
-  assert.match(FULL_GUIDE_PAGE, /Unpublish/)
-  assert.match(FULL_GUIDE_PAGE, /togglePublish/)
+test('admin full content guide page publishes and unpublishes the whole document', () => {
+  assert.match(FULL_GUIDE_PAGE, /ContentGuidelineDocumentEditor/)
+  assert.match(GUIDE_EDITOR, /Publish full guideline/)
+  assert.match(GUIDE_EDITOR, /Unpublish document/)
+  assert.match(GUIDE_EDITOR, /setGuidelinePublication/)
 })
 
-test('admin full content guide page separates drafts from published', () => {
-  assert.match(FULL_GUIDE_PAGE, /Draft guides.*not client-visible/i)
-  assert.match(FULL_GUIDE_PAGE, /Published guides.*client-visible/i)
+test('admin full content guide page shows document publication state', () => {
+  assert.match(FULL_GUIDE_PAGE, /client_published_at/)
+  assert.match(FULL_GUIDE_PAGE, /Published/)
+  assert.match(FULL_GUIDE_PAGE, /Draft/)
 })
 
 test('admin full content guide page has month and client selectors', () => {
@@ -418,27 +426,23 @@ test('admin full content guide page has month and client selectors', () => {
   assert.match(FULL_GUIDE_PAGE, /selectedClientId/)
 })
 
-test('admin full content guide page renders guide fields', () => {
-  assert.match(FULL_GUIDE_PAGE, /Objective/)
-  assert.match(FULL_GUIDE_PAGE, /Hook/)
-  assert.match(FULL_GUIDE_PAGE, /Script/)
-  assert.match(FULL_GUIDE_PAGE, /Shot breakdown/)
-  assert.match(FULL_GUIDE_PAGE, /Call to action/)
-  assert.match(FULL_GUIDE_PAGE, /Visual notes/)
+test('admin full content guide editor renders ordered video names and scripts', () => {
+  assert.match(GUIDE_EDITOR, /Video name/)
+  assert.match(GUIDE_EDITOR, /Complete script/)
+  assert.match(GUIDE_EDITOR, /reorderGuidelineVideos/)
 })
 
-test('client content guides page fetches via RPC', () => {
-  assert.match(GUIDES_LIB, /rpc.*client_portal_published_guides/)
+test('client content guidelines page fetches the client-safe document RPC', () => {
+  assert.match(GUIDES_LIB, /rpc\('client_portal_published_content_guidelines'/)
   assert.match(GUIDES_LIB, /p_client_id/)
   assert.match(GUIDES_LIB, /p_month/)
 })
 
-test('client content guides page has loading, empty and error states', () => {
-  assert.match(GUIDES_PAGE, /Loading published guides/)
-  assert.match(GUIDES_PAGE, /No published content guides/)
+test('client content guidelines page has loading, empty and error states', () => {
+  assert.match(GUIDES_PAGE, /Loading published Content Guidelines/)
+  assert.match(GUIDES_PAGE, /No published Content Guidelines/)
   assert.match(GUIDES_PAGE, /error/)
 })
-
 test('client content guides page is read-only', () => {
   assert.doesNotMatch(GUIDES_PAGE, /create|delete|update|insert|edit|form.*submit/i)
 })
