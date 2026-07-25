@@ -234,7 +234,7 @@ export default function OpsHubPage() {
           onDateDrag={handleDateDrag}
         />
       ) : activeTab === 'admin' && isAdmin ? (
-        <AdminBoardView />
+        <AdminBoardView tasks={tasks} onOpenTask={setSelectedTask} onStatusChange={handleStatusChange} />
       ) : null}
 
       <TaskDetailDrawer
@@ -935,16 +935,37 @@ function CalendarFilters({
   )
 }
 
-function AdminBoardView() {
+function AdminBoardView({ tasks, onOpenTask, onStatusChange }: {
+  tasks: CommandCentreTask[]
+  onOpenTask: (task: CommandCentreTask) => void
+  onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
+}) {
+  const adminTasks = useMemo(() =>
+    tasks.filter(t => t.bucket === 'Admin / To Do'),
+    [tasks],
+  )
+
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-center">
-      <p className="text-sm text-white/50">
-        Admin board — accessible to admin roles only. This area is database-protected and
-        not visible to normal staff members.
-      </p>
-      <p className="mt-2 text-xs text-white/35">
-        Daily, weekly and monthly admin tasks (payroll, checking, financial) belong here.
-      </p>
+    <div className="space-y-5">
+      <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">
+          Admin Tasks ({adminTasks.length})
+        </p>
+        <p className="mt-1 text-xs text-white/35">
+          Database-protected — only admin/manager roles can view or edit these records.
+        </p>
+      </div>
+      {adminTasks.length === 0 ? (
+        <p className="rounded-xl border border-white/10 bg-white/[0.02] p-6 text-center text-sm text-white/40">
+          No admin tasks. Use Quick Add with 'Admin / To Do' bucket to create one.
+        </p>
+      ) : (
+        <div className="space-y-1.5">
+          {adminTasks.map(task => (
+            <TaskCard key={task.id} task={task} onStatusChange={onStatusChange} onOpen={onOpenTask} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
