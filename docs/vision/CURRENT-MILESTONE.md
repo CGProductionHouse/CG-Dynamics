@@ -1,14 +1,48 @@
 # Current Milestone
 
-Last updated: 2026-07-23
-Current milestone: Client Intelligence data truth and Cape Lumber benchmark
+Last updated: 2026-07-25
+Current milestone: Client-facing completion and trust
 Status: Active
 
-## Milestone goal
+## Completed and in production (controlled beta launched 2026-07-27)
 
-Make CG Dynamics a trustworthy, automated client reporting system before expanding AI strategy generation.
+- **Meta reporting truth** — availability-aware facts (unavailable ≠ zero), FB/IG
+  separated, no cross-platform unique-audience sums, comparability gate. Live.
+- **Unified client portal foundation** — `/client`, `/client/performance`,
+  `/client/campaigns`, `/client/content-calendar`; report-bound RPCs; published
+  reports only; own-client isolation. Live (PR #44).
+- **Google Ads reporting** — client-isolated, honest disconnected states, no
+  conversions-as-revenue. Live.
+- **Microsoft deterministic reconciliation engine** — tolerant parser,
+  `link_existing`, `package_template_create`, phase-21a/21b live (apply contract
+  v2, backward compatible). Admin-only, beta-labelled (PR #45).
+- **Controlled beta** — released via PR #46; see
+  `docs/releases/2026-07-27-controlled-beta-launch.md`.
 
-The immediate goal is to repair Meta reporting at the source, verify it against Meta Business Suite, make the Overview reflect only complete and comparable data, complete the Google Ads reporting flow, and use Cape Lumber as the first full benchmark client.
+## Active milestone goal — client-facing completion and trust
+
+Move from controlled beta to a complete, trustworthy client-facing release: an
+enforced client-visible quality gate, Performance/Campaigns/Content-Calendar
+completion, the full monthly content-guide workspace, and reviewed forward-looking
+strategy — every client-visible claim accurate, evidence-backed, published and
+premium. See "Remaining client-facing work" below and `docs/vision/PARKING-LOT.md`.
+
+### Remaining client-facing work (ordered)
+
+1. Microsoft live dated fetch → apply → verify (auth-gated; see PARKING-LOT).
+2. Authenticated client portal end-to-end QA with a real client account.
+3. Performance Dashboard polish (summary cards, trend explanations from verified
+   facts) on top of the shipped Meta-truth model.
+4. Campaigns polish (objective/lifecycle/CG-review) on the shipped honest states.
+5. Full monthly content-guide workspace (one guide per client/month) — new module.
+6. Forward-looking reviewed strategy thread across the portal — new module.
+
+Items 5 and 6 are genuine new modules (migration + RLS + UI + tests) and are
+tracked in the parking lot with dependencies; items 1–2 are auth-gated.
+
+## Original data-truth goal (delivered)
+
+Make CG Dynamics a trustworthy, automated client reporting system before expanding AI strategy generation. Meta reporting truth, the Overview comparability gate, and Google Ads reporting are delivered and live; Cape Lumber's stored data was the diagnostic benchmark.
 
 The system must answer:
 

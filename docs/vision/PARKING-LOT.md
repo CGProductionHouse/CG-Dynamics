@@ -247,3 +247,27 @@ Add new ideas here instead of expanding the current milestone unless the idea is
 - Broad AI Workforce agent rollout; promote CG Assistant / Marketing Library out
   of beta once verified.
 - Authenticated end-to-end visual QA with a real client account.
+
+## Client-facing completion — remaining modules (ordered, post controlled-beta)
+
+These are genuine new modules with real dependencies, not quick fixes. Tracked
+here so the milestone document does not describe them as active implementation:
+
+1. **Microsoft live dated fetch → apply → verify** — dependency: an authenticated
+   admin session or service-role runner to invoke `microsoft-transition-sync`
+   (the deterministic engine + phase-21a/21b apply paths are already live). Next
+   milestone: run Action Sport + all-client dated parity, then retire Planner.
+2. **Authenticated client portal end-to-end QA** — dependency: a real/QA client
+   login. Isolation is currently proven by code review + the client-facing
+   quality gate (`tests/clientFacingQualityGate.test.mjs`); a live authenticated
+   pass is the remaining verification.
+3. **Full monthly content-guide workspace** — new module: one guide per
+   client/month, all video/reel sections in one place, structured production
+   fields, staff autosave, client read-only published view. Dependency: migration
+   + RLS + UI + tests. Replaces the one-video-at-a-time form.
+4. **Forward-looking reviewed strategy thread** — new module: structured
+   evidence → meaning → platform → action → calendar → KPI, review-gated before
+   publication, linked across portal/performance/campaigns/calendar/guides.
+   Dependency: strategy data model + review workflow + tests.
+5. **Performance/Campaigns polish** — summary cards, trend explanations,
+   objective/lifecycle — additive on the shipped Meta-truth + Google Ads models.
