@@ -91,6 +91,7 @@ export interface MonthlyDeliverable {
   microsoft_bucket_id?: string | null
   microsoft_task_id?: string | null
   microsoft_last_synced_at?: string | null
+  microsoft_source_description?: string | null
   created_by: string | null
   created_at: string
   updated_at: string
