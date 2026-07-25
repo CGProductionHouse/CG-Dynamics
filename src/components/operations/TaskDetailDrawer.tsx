@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
-import type { CommandCentreTask, ClientOption, TaskBucket, TaskPriority, TaskStatus, TaskUpdateFields } from '../../lib/commandCentre'
-import { BUCKETS, PRIORITIES, STATUSES, updateTask } from '../../lib/commandCentre'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { CommandCentreTask, ClientOption, PackageAction, TaskBucket, TaskPriority, TaskStatus, TaskUpdateFields } from '../../lib/commandCentre'
+import { BUCKETS, PRIORITIES, STATUSES, updateTask, requestStateLabel, PACKAGE_ACTIONS } from '../../lib/commandCentre'
 import { ActionButton } from '../ui/Buttons'
+import { RequestApproval } from './RequestApproval'
 
 interface TaskDetailDrawerProps {
   task: CommandCentreTask | null
@@ -9,6 +10,8 @@ interface TaskDetailDrawerProps {
   onSaved: (updated: CommandCentreTask) => void
   clients?: ClientOption[]
   staffProfiles?: { id: string; full_name: string | null }[]
+  isAdmin?: boolean
+  deliverables?: Array<{ id: string; client_id: string; code: string; instance_number: number; title: string; month: string }>
 }
 
 interface DraftState {
@@ -22,12 +25,18 @@ interface DraftState {
   assigneeId: string
   assigneeName: string
   dueDate: string
+  packageAction: PackageAction | ''
+  deliverableId: string
+  quoteNeeded: boolean
+  adminPackageNote: string
 }
 
 const EMPTY_DRAFT: DraftState = {
   title: '', notes: '', status: 'to_do', priority: 'normal',
   bucket: 'Once-off', clientId: '', clientName: '',
   assigneeId: '', assigneeName: '', dueDate: '',
+  packageAction: '', deliverableId: '', quoteNeeded: false,
+  adminPackageNote: '',
 }
 
 function taskToDraft(task: CommandCentreTask): DraftState {
@@ -42,6 +51,10 @@ function taskToDraft(task: CommandCentreTask): DraftState {
     assigneeId: task.assigned_to_user_id ?? '',
     assigneeName: task.assigned_to_name ?? '',
     dueDate: task.due_date || '',
+    packageAction: task.package_action ?? '',
+    deliverableId: task.deliverable_id ?? '',
+    quoteNeeded: task.quote_needed ?? false,
+    adminPackageNote: task.admin_package_note ?? '',
   }
 }
 
@@ -56,11 +69,15 @@ function isDirtyAgainstTask(draft: DraftState, task: CommandCentreTask): boolean
     (draft.clientName || null) !== task.client_name ||
     (draft.assigneeId || null) !== task.assigned_to_user_id ||
     (draft.assigneeName || null) !== task.assigned_to_name ||
-    (draft.dueDate || '') !== (task.due_date || '')
+    (draft.dueDate || '') !== (task.due_date || '') ||
+    (draft.packageAction || null) !== (task.package_action ?? null) ||
+    (draft.deliverableId || null) !== (task.deliverable_id ?? null) ||
+    draft.quoteNeeded !== (task.quote_needed ?? false) ||
+    (draft.adminPackageNote || '') !== (task.admin_package_note ?? '')
   )
 }
 
-export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfiles }: TaskDetailDrawerProps) {
+export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfiles, isAdmin, deliverables }: TaskDetailDrawerProps) {
   const [draft, setDraft] = useState<DraftState>(EMPTY_DRAFT)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -78,6 +95,13 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
   }, [taskId])
 
   const dirty = task ? isDirtyAgainstTask(draft, task) : false
+
+  const isRequest = task?.priority === 'client_request'
+
+  const clientDeliverables = useMemo(() => {
+    if (!draft.clientId || !deliverables) return []
+    return deliverables.filter(d => d.client_id === draft.clientId)
+  }, [draft.clientId, deliverables])
 
   function updateField<K extends keyof DraftState>(field: K, value: DraftState[K]) {
     setDraft(prev => ({ ...prev, [field]: value }))
@@ -135,6 +159,16 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
       patch.due_date = draft.dueDate || undefined
     }
 
+    if (isAdmin && isRequest) {
+      const pa = draft.packageAction || null
+      if (pa !== (task.package_action ?? null)) patch.package_action = pa as PackageAction | null
+      const di = draft.deliverableId || null
+      if (di !== (task.deliverable_id ?? null)) patch.deliverable_id = di
+      if (draft.quoteNeeded !== (task.quote_needed ?? false)) patch.quote_needed = draft.quoteNeeded
+      const an = draft.adminPackageNote || null
+      if (an !== (task.admin_package_note ?? null)) patch.admin_package_note = an
+    }
+
     if (Object.keys(patch).length === 0) {
       setSaving(false)
       return
@@ -151,7 +185,7 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
     if (result.data) {
       onSaved(result.data as CommandCentreTask)
     }
-  }, [draft, task, saving, onSaved])
+  }, [draft, task, saving, onSaved, isAdmin, isRequest])
 
   function handleCancel() {
     if (task) {
@@ -189,6 +223,8 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
 
   const statusOptions = STATUSES.filter(s => s !== 'moved_to_tomorrow')
 
+  const selectedDeliverable = clientDeliverables.find(d => d.id === draft.deliverableId)
+
   return (
     <>
       <div
@@ -204,7 +240,9 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
         }`}
       >
         <header className="flex items-center justify-between border-b border-white/10 px-5 py-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-teal">Task Detail</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-teal">
+            {isRequest ? 'Client Request' : 'Task Detail'}
+          </p>
           <div className="flex items-center gap-2">
             {showCloseConfirm ? null : (
               <button
@@ -230,6 +268,17 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="space-y-4">
+            {isRequest && task && (
+              <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 px-3 py-2">
+                <p className="text-[10px] font-black uppercase tracking-wider text-amber-200/60">
+                  Request state: {requestStateLabel(task.priority === 'client_request' ? 'captured' : 'closed')}
+                </p>
+                {task.source && (
+                  <p className="mt-1 text-[10px] text-white/40">Source: {task.source.replace(/_/g, ' ')}</p>
+                )}
+              </div>
+            )}
+
             <div>
               <label className="mb-0.5 block text-[10px] font-bold uppercase tracking-wider text-white/40">Title</label>
               <input
@@ -317,6 +366,82 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
                 className="w-full rounded border border-white/10 bg-[#111] px-2 py-1.5 text-xs text-white outline-none focus:border-brand-teal/50"
               />
             </div>
+
+            {/* Package classification — admin only for client requests */}
+            {isRequest && isAdmin && (
+              <>
+                <hr className="border-white/10" />
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-200/60">Package Classification</p>
+
+                <div>
+                  <label className="mb-0.5 block text-[10px] font-bold uppercase tracking-wider text-white/40">Package action</label>
+                  <select
+                    value={draft.packageAction}
+                    onChange={e => updateField('packageAction', e.target.value as PackageAction | '')}
+                    className="w-full rounded border border-white/10 bg-[#111] px-2 py-1.5 text-xs text-white outline-none focus:border-brand-teal/50"
+                  >
+                    {PACKAGE_ACTIONS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                  </select>
+                </div>
+
+                {draft.packageAction === 'use_slot' && (
+                  <div>
+                    <label className="mb-0.5 block text-[10px] font-bold uppercase tracking-wider text-white/40">Link deliverable</label>
+                    <select
+                      value={draft.deliverableId}
+                      onChange={e => updateField('deliverableId', e.target.value)}
+                      className="w-full rounded border border-white/10 bg-[#111] px-2 py-1.5 text-xs text-white outline-none focus:border-brand-teal/50"
+                    >
+                      <option value="">Select deliverable…</option>
+                      {clientDeliverables.map(d => (
+                        <option key={d.id} value={d.id}>
+                          {d.code}{d.instance_number} — {d.title} ({d.month})
+                        </option>
+                      ))}
+                    </select>
+                    {selectedDeliverable && (
+                      <p className="mt-1 text-[10px] text-brand-teal/60">
+                        Linked: {selectedDeliverable.code}{selectedDeliverable.instance_number} — {selectedDeliverable.title}
+                      </p>
+                    )}
+                    {draft.deliverableId && !selectedDeliverable && (
+                      <p className="mt-1 text-[10px] text-red-300/60">Warning: deliverable not found for this client</p>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="quote-needed"
+                    checked={draft.quoteNeeded}
+                    onChange={e => updateField('quoteNeeded', e.target.checked)}
+                    className="h-4 w-4 rounded border-white/20 bg-transparent accent-brand-teal"
+                  />
+                  <label htmlFor="quote-needed" className="text-xs text-white/70">Quote needed</label>
+                </div>
+
+                <div>
+                  <label className="mb-0.5 block text-[10px] font-bold uppercase tracking-wider text-white/40">Admin note</label>
+                  <input
+                    value={draft.adminPackageNote}
+                    onChange={e => updateField('adminPackageNote', e.target.value)}
+                    placeholder="Short admin note or link reason…"
+                    className="w-full rounded border border-white/10 bg-[#111] px-2 py-1.5 text-xs text-white outline-none placeholder:text-white/30 focus:border-brand-teal/50"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* WhatsApp approval for client requests */}
+            {isRequest && task && (
+              <RequestApproval
+                task={task}
+                onStatusChange={(status) => {
+                  updateField('status', status as TaskStatus)
+                }}
+              />
+            )}
 
             <hr className="border-white/10" />
 

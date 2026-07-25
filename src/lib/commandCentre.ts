@@ -61,6 +61,19 @@ export interface CommandCentreTask {
   helper_names?: string[]
 }
 
+// Client request workflow states — mapped onto task status + request metadata
+export type RequestState =
+  | 'captured'
+  | 'assigned'
+  | 'in_progress'
+  | 'ready_to_send'
+  | 'sent_to_client'
+  | 'waiting_client'
+  | 'approved'
+  | 'changes_requested'
+  | 'scheduled'
+  | 'closed'
+
 export type TaskUpdateFields = Pick<CommandCentreTask,
   | 'title'
   | 'notes'
@@ -73,12 +86,17 @@ export type TaskUpdateFields = Pick<CommandCentreTask,
   | 'priority'
   | 'due_date'
   | 'status'
+  | 'deliverable_id'
+  | 'package_action'
+  | 'quote_needed'
+  | 'admin_package_note'
 >
 
 const ALLOWED_UPDATE_FIELDS: (keyof TaskUpdateFields)[] = [
   'title', 'notes', 'client_id', 'client_name', 'bucket',
   'assigned_to_user_id', 'assigned_to_name', 'helper_names',
   'priority', 'due_date', 'status',
+  'deliverable_id', 'package_action', 'quote_needed', 'admin_package_note',
 ]
 
 export interface TaskInput {
@@ -698,3 +716,97 @@ export function morningEditToInput(edit: MorningTaskEdit): TaskInput {
 }
 
 export const KNOWN_STAFF = ['Sydney', 'Ger-Marie', 'Franco', 'KG', 'Amonique', 'CA']
+
+// ── Duplicate detection ──────────────────────────────────────────────────────
+
+function normaliseRequestText(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
+}
+
+export function findDuplicateRequests(
+  tasks: CommandCentreTask[],
+  clientId: string | null,
+  notes: string,
+  withinHours = 48,
+): CommandCentreTask[] {
+  if (!clientId) return []
+  const normalised = normaliseRequestText(notes)
+  if (!normalised) return []
+  const cutoff = Date.now() - withinHours * 60 * 60 * 1000
+  return tasks.filter(t => {
+    if (t.client_id !== clientId) return false
+    if (new Date(t.created_at).getTime() < cutoff) return false
+    const tn = normaliseRequestText(t.notes ?? '')
+    if (!tn) return false
+    const longer = normalised.length >= tn.length ? normalised : tn
+    const shorter = normalised.length >= tn.length ? tn : normalised
+    return longer.includes(shorter) || shorter.length > 10 && longer.includes(shorter.slice(0, 40))
+  })
+}
+
+// ── Approval message formatting ──────────────────────────────────────────────
+
+export function formatApprovalMessage(task: CommandCentreTask): string {
+  const lines = [
+    `*Request:* ${task.title}`,
+  ]
+  if (task.client_name) lines.push(`*Client:* ${task.client_name}`)
+  if (task.notes) lines.push(`*Details:* ${task.notes.slice(0, 500)}`)
+  if (task.due_date) lines.push(`*Due:* ${task.due_date}`)
+  if (task.package_action) {
+    const label = task.package_action === 'use_slot' ? 'Use existing package slot' :
+      task.package_action === 'addon' ? 'Add-on (outside package)' : 'Move work'
+    lines.push(`*Package action:* ${label}`)
+  }
+  lines.push('', 'Please review and approve. — CG Dynamics')
+  return lines.join('\n')
+}
+
+export function formatApprovedMessage(task: CommandCentreTask): string {
+  return `✅ Approved: ${task.title}${task.client_name ? ` (${task.client_name})` : ''}`
+}
+
+export function formatChangesRequestedMessage(task: CommandCentreTask, note?: string): string {
+  const lines = ['✏️ Changes requested']
+  if (note) lines.push(`*Note:* ${note}`)
+  lines.push(`*Request:* ${task.title}${task.client_name ? ` (${task.client_name})` : ''}`)
+  return lines.join('\n')
+}
+
+// ── Request display helpers ──────────────────────────────────────────────────
+
+export function requestStateFromTask(task: CommandCentreTask): RequestState {
+  if (task.status === 'done' || task.status === 'blocked') return 'closed'
+  if (task.status === 'waiting_client') {
+    if (task.package_action) return 'waiting_client'
+    return 'sent_to_client'
+  }
+  if (task.status === 'in_progress') return 'in_progress'
+  if (task.assigned_to_user_id || task.assigned_to_name) return 'assigned'
+  if (task.package_action && task.deliverable_id) return 'scheduled'
+  if (task.package_action) return 'approved'
+  return 'captured'
+}
+
+export function requestStateLabel(state: RequestState): string {
+  const labels: Record<RequestState, string> = {
+    captured: 'Captured',
+    assigned: 'Assigned',
+    in_progress: 'In Progress',
+    ready_to_send: 'Ready to Send',
+    sent_to_client: 'Sent to Client',
+    waiting_client: 'Waiting for Client',
+    approved: 'Approved',
+    changes_requested: 'Changes Requested',
+    scheduled: 'Scheduled',
+    closed: 'Closed',
+  }
+  return labels[state]
+}
+
+export const PACKAGE_ACTIONS: Array<{ value: PackageAction | ''; label: string }> = [
+  { value: '', label: 'Unclassified' },
+  { value: 'use_slot', label: 'Use package slot' },
+  { value: 'addon', label: 'Add-on (outside package)' },
+  { value: 'move_work', label: 'Move work' },
+]
