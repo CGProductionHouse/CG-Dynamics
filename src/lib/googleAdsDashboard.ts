@@ -43,6 +43,27 @@ export interface GoogleAdsReportSummary {
 
 export type GoogleAdsDashboardData = GoogleAdsReportSummary
 
+export const GOOGLE_ADS_DASHBOARD_STATES: GoogleAdsDashboardState[] = [
+  'disconnected', 'unmapped', 'not-synced', 'no-activity', 'data', 'error',
+]
+
+export function formatGoogleAdsSpend(
+  dashboard: GoogleAdsDashboardData,
+): string {
+  if (dashboard.spendMicros === null || !dashboard.currencyCode || dashboard.hasMixedCurrencies) {
+    return 'Unavailable'
+  }
+  return new Intl.NumberFormat('en-ZA', {
+    style: 'currency',
+    currency: dashboard.currencyCode,
+    maximumFractionDigits: 2,
+  }).format(dashboard.spendMicros / 1_000_000)
+}
+
+export function formatGoogleAdsCTR(ctr: number | null): string {
+  return ctr === null ? 'Unavailable' : `${ctr.toFixed(2)}%`
+}
+
 export interface GoogleAdsDashboardResult {
   data: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
