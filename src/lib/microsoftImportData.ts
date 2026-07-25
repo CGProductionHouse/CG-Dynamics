@@ -373,6 +373,33 @@ export interface MicrosoftReconciliationApplyResult {
 }
 
 async function applyReconciliationItem(item: MicrosoftImportPreviewItem, snapshot: MicrosoftSnapshot, runId: string, itemAuditKey: string, approveRemovals: boolean): Promise<{ status: 'applied' | 'skipped' | 'failed'; destinationId: string | null; error: string | null }> {
+  // package_template_create: insert the missing template first (idempotent,
+  // admin-only RPC), then create the dependent deliverable against it as a normal
+  // create. A repeat apply returns the existing template + existing run item, so
+  // no second template and no duplicate deliverable are produced.
+  if (item.reconciliationAction === 'package_template_create'
+      && item.proposedPayload?.destination === 'client_schedule'
+      && item.proposedTemplate) {
+    const payload = item.proposedPayload
+    const { data: templateId, error: templateError } = await supabase.rpc('apply_microsoft_package_template_correction', {
+      p_run_id: runId,
+      p_package_id: payload.package_id,
+      p_client_id: payload.client_id,
+      p_code: item.proposedTemplate.code,
+      p_deliverable_type: item.proposedTemplate.deliverable_type,
+      p_instance_number: item.proposedTemplate.instance_number,
+    })
+    if (templateError || !templateId) {
+      return { status: 'failed', destinationId: null, error: templateError?.message ?? 'Package template correction failed.' }
+    }
+    const createItem: MicrosoftImportPreviewItem = {
+      ...item,
+      reconciliationAction: 'create',
+      proposedPayload: { ...payload, template_id: templateId as string },
+    }
+    return applyReconciliationItem(createItem, snapshot, runId, itemAuditKey, approveRemovals)
+  }
+
   const args = buildMicrosoftApplyRpcArgs(item, snapshot, runId, itemAuditKey, approveRemovals)
   const { data, error } = await supabase.rpc('apply_microsoft_sync_item', args)
   if (error) {
@@ -415,9 +442,17 @@ export async function applyMicrosoftReconciliation(
   let failed = 0
   let uncertain = 0
   const errors: string[] = []
+  // Deterministic dependency order: package-template corrections first (a
+  // dependent create needs its template), then legacy links, then creates, then
+  // safe updates. Everything else keeps its relative order.
+  const APPLY_ORDER: Record<string, number> = { package_template_create: 0, link_existing: 1, create: 2, update: 3 }
+  const ordered = items
+    .map((item, i) => ({ item, i }))
+    .sort((a, b) => (APPLY_ORDER[a.item.reconciliationAction ?? ''] ?? 8) - (APPLY_ORDER[b.item.reconciliationAction ?? ''] ?? 8) || a.i - b.i)
+    .map(entry => entry.item)
   try {
-    for (let index = 0; index < items.length; index += 1) {
-      const item = items[index]
+    for (let index = 0; index < ordered.length; index += 1) {
+      const item = ordered[index]
       const identity = microsoftSourceIdentity(item)
       const itemAuditKey = `${identity.source_type}:${identity.source_container_id || 'missing'}:${identity.source_item_id || 'missing'}:${index}`
       let result: Awaited<ReturnType<typeof applyReconciliationItem>>

@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
+
+const readRel = p => readFileSync(new URL(p, import.meta.url), 'utf8')
+const PHASE_21A = readRel('../supabase/phase-21a-microsoft-link-existing.sql')
+const PHASE_21B = readRel('../supabase/phase-21b-microsoft-package-template-correction.sql')
+const IMPORT_DATA = readRel('../src/lib/microsoftImportData.ts')
 
 let server
 let deliverableIdentity, templateCodeInstance, buildMicrosoftImportPreview, resolveUnnumberedClientScheduleDeliverables
@@ -195,4 +201,34 @@ test('two unnumbered videos never propose a template correction (stay conflicts)
     assert.notEqual(item.reconciliationAction, 'package_template_create')
     assert.equal(item.previewStatus, 'conflict')
   }
+})
+
+// ── Server-side apply path (migrations + orchestration) ─────────────────────
+test('phase-21a is backward compatible: additive link fields, no version bump', () => {
+  // Attaches identity in the client_schedule UPDATE branch...
+  assert.match(PHASE_21A, /microsoft_task_id = case when p_patch \? 'microsoft_task_id'/)
+  assert.match(PHASE_21A, /microsoft_plan_id = case when p_patch \? 'microsoft_plan_id'/)
+  // ...without changing the version function (stays 2, defined in phase-19c).
+  assert.doesNotMatch(PHASE_21A, /microsoft_sync_apply_version/)
+  assert.doesNotMatch(PHASE_21A, /return 3;/)
+})
+
+test('phase-21b template-correction RPC is admin-only and idempotent with guards', () => {
+  assert.match(PHASE_21B, /create or replace function public\.apply_microsoft_package_template_correction/)
+  assert.match(PHASE_21B, /is_admin\(\)/)
+  assert.match(PHASE_21B, /Microsoft sync run is not applying/)
+  assert.match(PHASE_21B, /Active package not found for client/)
+  // Idempotent (returns existing) + rejects a second compatible template.
+  assert.match(PHASE_21B, /if found then return v_template_id; end if;/)
+  assert.match(PHASE_21B, /template correction not applicable/)
+  // Never adds package quantity.
+  assert.match(PHASE_21B, /count_per_month.*\n?.*, 1, true\)/s)
+  // Restricted grants.
+  assert.match(PHASE_21B, /revoke all on function public\.apply_microsoft_package_template_correction[\s\S]*from anon/)
+})
+
+test('apply path calls the template RPC then a create, in dependency order', () => {
+  assert.match(IMPORT_DATA, /apply_microsoft_package_template_correction/)
+  // package_template_create runs before link_existing before create before update.
+  assert.match(IMPORT_DATA, /package_template_create:\s*0,\s*link_existing:\s*1,\s*create:\s*2,\s*update:\s*3/)
 })

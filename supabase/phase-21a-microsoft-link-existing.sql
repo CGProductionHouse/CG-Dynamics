@@ -9,32 +9,18 @@
 -- existing create/update flow is unchanged — a legacy link only sets what the
 -- link patch sends, preserving all CG-owned fields (notes, assignments, helpers).
 --
--- Bumps the apply version 2 -> 3. The frontend (MICROSOFT_SYNC_APPLY_VERSION) is
--- bumped to 3 in the same release. RELEASE ORDERING: apply this migration only
--- together with the v3 frontend deploy — applying it while a v2 frontend is live
--- would fail the apply preflight version check.
+-- BACKWARD COMPATIBLE: the apply contract VERSION IS UNCHANGED (stays 2) and the
+-- function SIGNATURE is unchanged. The only change is three additional optional
+-- patch fields the client_schedule UPDATE branch will honour when present. A v2
+-- production frontend never sends them, so its behaviour is identical after this
+-- migration — there is no mixed-deployment deadlock, and this may be applied to
+-- production before the feature branch merges. A future version bump happens only
+-- once no mixed frontend/DB deployment exists.
 --
--- Additive and idempotent (create or replace). No data is modified. No RLS or
--- unrelated migration is changed. Depends on phase-17a and phase-19c.
+-- Additive and idempotent (create or replace). No data is modified. No RLS,
+-- version function or unrelated migration is changed. Depends on phase-17a and
+-- phase-19c.
 -- ============================================================================
-
-create or replace function public.microsoft_sync_apply_version()
-returns integer
-language plpgsql
-security definer set search_path = public
-as $$
-begin
-  if not public.is_admin() then
-    raise exception 'Admin access required';
-  end if;
-  return 3;
-end;
-$$;
-
-revoke all on function public.microsoft_sync_apply_version() from public;
-revoke all on function public.microsoft_sync_apply_version() from anon;
-revoke all on function public.microsoft_sync_apply_version() from authenticated;
-grant execute on function public.microsoft_sync_apply_version() to authenticated;
 
 create or replace function public.apply_microsoft_sync_item(
   p_run_id uuid,

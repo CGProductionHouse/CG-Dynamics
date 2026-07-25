@@ -1,11 +1,14 @@
 import type { MicrosoftImportPreviewItem } from './microsoftImport'
 import type { MicrosoftSnapshot } from './microsoftSnapshot'
 
-// v3 adds legacy link_existing support: the client_schedule apply UPDATE branch
-// may attach microsoft_plan_id / microsoft_task_id / microsoft_source_type to an
-// existing row. Ships with phase-21a; the frontend and DB version must match.
-export const MICROSOFT_SYNC_APPLY_VERSION = 3
-export const MICROSOFT_SYNC_APPLY_MIGRATION_ERROR = 'Microsoft Sync Apply requires phase-21a-microsoft-link-existing.sql. Run the migration in Supabase, refresh the page, and preview again.'
+// Contract version stays 2 across the transition. phase-21a extends the apply
+// RPC with legacy link_existing support (attaching microsoft_plan_id /
+// microsoft_task_id / microsoft_source_type on the client_schedule UPDATE branch)
+// WITHOUT changing the signature or version, so a v2 production frontend keeps
+// working after the migration and there is no mixed-deployment deadlock. A future
+// version bump happens only once no mixed frontend/DB deployment exists.
+export const MICROSOFT_SYNC_APPLY_VERSION = 2
+export const MICROSOFT_SYNC_APPLY_MIGRATION_ERROR = 'Microsoft Sync Apply requires phase-19c-microsoft-sync-apply-reliability.sql. Run the migration in Supabase, refresh the page, and preview again.'
 
 export interface MicrosoftApplyRpcArgs {
   p_run_id: string
