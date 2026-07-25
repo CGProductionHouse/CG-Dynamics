@@ -38,6 +38,7 @@ import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
 import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
 import FullContentGuidePage from './pages/admin/FullContentGuidePage'
 import MyWorkPage from './pages/admin/MyWorkPage'
+import OpsHubPage from './pages/admin/OpsHubPage'
 import Dashboard from './pages/client/Dashboard'
 import ClientPortalHome from './pages/client/ClientPortalHome'
 import ClientCampaignsPage from './pages/client/ClientCampaignsPage'
@@ -86,6 +87,7 @@ export default function App() {
               <Route path="/admin" element={<Navigate to="/admin/cg-hub" replace />} />
               <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
+              <Route path="/admin/ops-hub" element={<OpsHubPage />} />
               <Route path="/admin/my-work" element={<MyWorkPage />} />
               <Route path="/admin/my-day" element={<Navigate to="/admin/my-work?tab=my-day" replace />} />
               <Route path="/admin/command-centre" element={<Navigate to="/admin/my-work?tab=daily-tasks" replace />} />
