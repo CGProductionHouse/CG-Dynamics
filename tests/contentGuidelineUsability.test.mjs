@@ -6,6 +6,7 @@ const read = name => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8'
 const MIGRATION = read('supabase/migrations/20260725172531_content_guideline_document_model.sql')
 const LINKAGE_MIGRATION = read('supabase/migrations/20260725211500_content_run_schedule_linkage.sql')
 const WORKFLOW = read('src/pages/admin/ContentWorkflowPage.tsx')
+const WORKFLOW_DATA = read('src/lib/contentWorkflow.ts')
 const EDITOR = read('src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const ADMIN_PAGE = read('src/pages/admin/FullContentGuidePage.tsx')
 const SCHEDULE = read('src/pages/admin/ClientSchedulePage.tsx')
@@ -101,6 +102,16 @@ test('guideline videos link to one canonical Client Schedule deliverable', () =>
   assert.match(EDITOR, /deliverable_id: draft\.deliverableId \|\| null/)
   assert.match(LINKAGE_MIGRATION, /already linked to another active Content Guideline video/)
   assert.match(LINKAGE_MIGRATION, /other\.status <> 'archived'/)
+})
+
+test('staff can explicitly bootstrap same-client schedule videos and imported scripts', () => {
+  assert.match(EDITOR, /Import \{scheduleCandidates\.length\} from Client Schedule/)
+  assert.match(EDITOR, /guidelineScheduleCandidates/)
+  assert.match(EDITOR, /importGuidelineVideosFromSchedule/)
+  assert.match(WORKFLOW_DATA, /deliverable\.client_id === guideline\.client_id/)
+  assert.match(WORKFLOW_DATA, /deliverable\.month === guideline\.month/)
+  assert.match(WORKFLOW_DATA, /microsoft_source_description\?\.trim\(\)/)
+  assert.match(WORKFLOW_DATA, /deliverable_id: deliverable\.id/)
 })
 
 test('internal Client Schedule details expose the linked script and shoot brief on demand', () => {

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { ActionButton } from '../../components/ui/Buttons'
 import {
   addGuidelineVideo,
+  guidelineScheduleCandidates,
+  importGuidelineVideosFromSchedule,
   reorderGuidelineVideos,
   setGuidelinePublication,
   updateContentGuideline,
@@ -44,6 +46,7 @@ export default function ContentGuidelineDocumentEditor({
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [scheduleError, setScheduleError] = useState<string | null>(null)
+  const [importMessage, setImportMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -93,6 +96,36 @@ export default function ContentGuidelineDocumentEditor({
       ? deliverable.code
       : `${deliverable.code} ${deliverable.instance_number}`
     return `${code} | ${deliverable.title} | ${date}`
+  }
+
+  const scheduleCandidates = guidelineScheduleCandidates(guideline, scheduleDeliverables, videos)
+  const candidatesWithScript = scheduleCandidates.filter(candidate => Boolean(candidate.script)).length
+  const candidatesMissingScript = scheduleCandidates.length - candidatesWithScript
+
+  async function importScheduleVideos() {
+    if (scheduleCandidates.length === 0) return
+    setBusy('import')
+    setError(null)
+    setImportMessage(null)
+    const result = await importGuidelineVideosFromSchedule(
+      guideline,
+      scheduleDeliverables,
+      videos,
+      currentUserId ?? null,
+    )
+    setBusy(null)
+    if (result.error) {
+      setError(result.error)
+      return
+    }
+    const importedWithScript = result.data.filter(video => Boolean(video.script?.trim())).length
+    const importedWithoutScript = result.data.length - importedWithScript
+    setImportMessage(
+      importedWithoutScript > 0
+        ? `Imported ${result.data.length} schedule video${result.data.length === 1 ? '' : 's'}. ${importedWithoutScript} still need${importedWithoutScript === 1 ? 's' : ''} a complete script.`
+        : `Imported ${result.data.length} schedule video${result.data.length === 1 ? '' : 's'} with ${importedWithScript} script${importedWithScript === 1 ? '' : 's'}.`,
+    )
+    await onChanged()
   }
 
   async function saveDocumentTitle() {
@@ -208,6 +241,23 @@ export default function ContentGuidelineDocumentEditor({
 
       <div className="space-y-4 p-4 sm:p-5">
         {error && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
+        {importMessage && <p className="rounded-lg border border-emerald-300/25 bg-emerald-300/[0.07] px-3 py-2 text-sm text-emerald-100">{importMessage}</p>}
+
+        {scheduleCandidates.length > 0 && (
+          <div className="flex flex-col gap-3 rounded-xl border border-brand-teal/25 bg-brand-teal/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-black text-white">Client Schedule videos are ready to import</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/50">
+                {scheduleCandidates.length} unlinked video{scheduleCandidates.length === 1 ? '' : 's'} for this client and month.
+                {' '}{candidatesWithScript} include{candidatesWithScript === 1 ? 's' : ''} a Teams script
+                {candidatesMissingScript > 0 ? `; ${candidatesMissingScript} will need a script before publishing.` : '.'}
+              </p>
+            </div>
+            <ActionButton size="sm" loading={busy === 'import'} onClick={() => void importScheduleVideos()}>
+              Import {scheduleCandidates.length} from Client Schedule
+            </ActionButton>
+          </div>
+        )}
 
         {videos.length === 0 ? (
           <p className="rounded-lg border border-dashed border-white/10 px-4 py-5 text-center text-sm text-white/45">

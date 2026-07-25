@@ -21,6 +21,7 @@ import {
   type VideoProductionStatus,
   type VideoTransitionContext,
 } from './videoPipelineRules'
+import type { MonthlyDeliverable } from './planner'
 
 // â”€â”€ Content Workflow data access â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //
@@ -521,6 +522,72 @@ export async function addGuidelineVideo(
     .select('*')
     .single()
   return wrap((data as ContentGuidelineVideo | null) ?? null, error, null)
+}
+
+export interface GuidelineScheduleCandidate {
+  deliverable: MonthlyDeliverable
+  script: string
+}
+
+export function guidelineScriptFromDeliverable(deliverable: MonthlyDeliverable): string {
+  return deliverable.microsoft_source_description?.trim()
+    || deliverable.notes?.trim()
+    || ''
+}
+
+export function guidelineScheduleCandidates(
+  guideline: ContentGuideline,
+  deliverables: MonthlyDeliverable[],
+  existingVideos: ContentGuidelineVideo[],
+): GuidelineScheduleCandidate[] {
+  const linkedIds = new Set(existingVideos.map(video => video.deliverable_id).filter(Boolean))
+  return deliverables
+    .filter(deliverable =>
+      deliverable.client_id === guideline.client_id
+      && deliverable.month === guideline.month
+      && (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel')
+      && !linkedIds.has(deliverable.id),
+    )
+    .sort((left, right) =>
+      left.instance_number - right.instance_number
+      || left.code.localeCompare(right.code),
+    )
+    .map(deliverable => ({
+      deliverable,
+      script: guidelineScriptFromDeliverable(deliverable),
+    }))
+}
+
+export async function importGuidelineVideosFromSchedule(
+  guideline: ContentGuideline,
+  deliverables: MonthlyDeliverable[],
+  existingVideos: ContentGuidelineVideo[],
+  createdBy: string | null,
+): Promise<QueryResult<ContentGuidelineVideo[]>> {
+  const candidates = guidelineScheduleCandidates(guideline, deliverables, existingVideos)
+  if (candidates.length === 0) return { data: [], error: null, migrationNeeded: false }
+
+  const startPosition = existingVideos.reduce(
+    (highest, video) => Math.max(highest, video.position ?? 0),
+    0,
+  )
+  const rows = candidates.map(({ deliverable, script }, index) => ({
+    content_guideline_id: guideline.id,
+    client_id: guideline.client_id,
+    month: guideline.month,
+    title: deliverable.title.trim() || deliverable.code,
+    script,
+    position: startPosition + index + 1,
+    video_number: deliverable.instance_number,
+    status: 'idea',
+    deliverable_id: deliverable.id,
+    created_by: createdBy,
+  }))
+  const { data, error } = await supabase
+    .from('content_guide_ideas')
+    .insert(rows)
+    .select('*')
+  return wrap((data ?? []) as ContentGuidelineVideo[], error, [])
 }
 
 export async function updateGuidelineVideo(
