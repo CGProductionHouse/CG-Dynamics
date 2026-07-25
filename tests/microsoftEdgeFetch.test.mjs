@@ -3,6 +3,10 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { runBoundedWorkers } from '../supabase/functions/microsoft-transition-sync/bounded-workers.ts'
 import { shouldFetchPlannerTaskDetails } from '../supabase/functions/microsoft-transition-sync/planner-details.ts'
+import {
+  buildAssigneeBatchRequests,
+  correlateAssigneeBatchResponses,
+} from '../supabase/functions/microsoft-transition-sync/assignee-lookup.ts'
 
 test('Planner detail batches never exceed the configured concurrency', async () => {
   let active = 0
@@ -50,4 +54,38 @@ test('completed operational history skips unused Planner detail calls', () => {
 test('Client Socials always keeps descriptions and scripts, including scheduled cards', () => {
   assert.equal(shouldFetchPlannerTaskDetails('Client Socials - July 2026', 100), true)
   assert.equal(shouldFetchPlannerTaskDetails('2025 CLIENTS SCHEDULE', 100), true)
+})
+
+test('assignee Graph batch requests use safe request IDs and retain source identity', () => {
+  const sourceIds = ['4e769c9d-user-id', 'opaque_Planner-user/id']
+  const batch = buildAssigneeBatchRequests(sourceIds)
+
+  assert.deepEqual(batch.requests.map(request => request.id), ['assignee-1', 'assignee-2'])
+  assert.equal(batch.requests[1].url, '/users/opaque_Planner-user%2Fid?$select=displayName,mail,userPrincipalName')
+  assert.equal(batch.sourceIdByRequestId.get('assignee-1'), sourceIds[0])
+  assert.equal(batch.sourceIdByRequestId.get('assignee-2'), sourceIds[1])
+})
+
+test('assignee Graph responses map metadata back to the original Planner user ID', () => {
+  const batch = buildAssigneeBatchRequests(['planner-user-a', 'planner-user-b'])
+  const result = correlateAssigneeBatchResponses([
+    {
+      id: 'assignee-1',
+      status: 200,
+      body: {
+        displayName: 'Alana Example',
+        mail: 'alana@example.com',
+        userPrincipalName: 'alana@example.onmicrosoft.com',
+      },
+    },
+    { id: 'assignee-2', status: 403 },
+  ], batch.sourceIdByRequestId)
+
+  assert.deepEqual(result.assignees['planner-user-a'], {
+    displayName: 'Alana Example',
+    mail: 'alana@example.com',
+    userPrincipalName: 'alana@example.onmicrosoft.com',
+  })
+  assert.equal(result.assignees['planner-user-b'], undefined)
+  assert.deepEqual(result.unresolvedSourceIds, ['planner-user-b'])
 })
