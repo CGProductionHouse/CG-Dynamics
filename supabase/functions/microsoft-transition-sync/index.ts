@@ -2,6 +2,11 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { runBoundedWorkers } from './bounded-workers.ts'
 import { shouldFetchPlannerTaskDetails } from './planner-details.ts'
+import {
+  buildAssigneeBatchRequests,
+  correlateAssigneeBatchResponses,
+  type GraphAssigneeBatchItem,
+} from './assignee-lookup.ts'
 
 interface SourceManifest {
   userId: string
@@ -290,22 +295,23 @@ Deno.serve(async request => {
     }
   }
   const assigneeMap: Record<string, { displayName: string; mail: string | null; userPrincipalName: string | null }> = {}
+  const unresolvedAssigneeIds = new Set<string>()
   const idList = [...assigneeIds]
   for (let index = 0; index < idList.length; index += 20) {
     const batch = idList.slice(index, index + 20)
+    const { requests, sourceIdByRequestId } = buildAssigneeBatchRequests(batch)
     const batchResult = await fetchGraph(`${GRAPH_ROOT}/$batch`, graphToken, undefined, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: batch.map(id => ({ id, method: 'GET', url: `/users/${encodeURIComponent(id)}?$select=id,displayName,mail,userPrincipalName` })) }),
+      body: JSON.stringify({ requests }),
     })
     if (batchResult?.ok) {
-      const batchBody = await batchResult.json() as { responses?: Array<{ id: string; status: number; body?: { id?: string; displayName?: string; mail?: string; userPrincipalName?: string } }> }
-      for (const item of batchBody.responses ?? []) {
-        if (item.status === 200 && item.body) {
-          const user = item.body
-          assigneeMap[user.id ?? item.id] = { displayName: user.displayName ?? 'Unknown', mail: user.mail ?? null, userPrincipalName: user.userPrincipalName ?? null }
-        }
-      }
+      const batchBody = await batchResult.json() as { responses?: GraphAssigneeBatchItem[] }
+      const correlated = correlateAssigneeBatchResponses(batchBody.responses ?? [], sourceIdByRequestId)
+      Object.assign(assigneeMap, correlated.assignees)
+      for (const sourceId of correlated.unresolvedSourceIds) unresolvedAssigneeIds.add(sourceId)
+    } else {
+      for (const sourceId of batch) unresolvedAssigneeIds.add(sourceId)
     }
     if (index + 20 < idList.length) await sleep(250)
   }
@@ -315,6 +321,7 @@ Deno.serve(async request => {
     sourceCount: sources.length,
     recordCount: records.length,
     assigneeCount: Object.keys(assigneeMap).length,
+    unresolvedAssigneeCount: unresolvedAssigneeIds.size,
   })
   return jsonResponse({
     ok: true,
