@@ -4,6 +4,7 @@ import { createServer } from 'vite'
 
 let server
 let previewPlannerTask
+let previewOutlookEvent
 let resolveMicrosoftBucketMapping
 let buildMicrosoftReconciliation
 let buildMicrosoftConflictBreakdown
@@ -72,7 +73,7 @@ function snapshot(records, rangeStart = '2026-05-19T00:00:00+02:00') {
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ previewPlannerTask } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
+  ;({ previewPlannerTask, previewOutlookEvent } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
   ;({ resolveMicrosoftBucketMapping } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
   ;({ buildMicrosoftReconciliation } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   ;({ buildMicrosoftConflictBreakdown, filterMicrosoftPreviewItems, microsoftIncomingStatus, summarizeMicrosoftCreateStatuses } = await server.ssrLoadModule('/src/lib/microsoftSyncPresentation.ts'))
@@ -112,6 +113,50 @@ test('unknown To Do buckets fail closed as unsupported', () => {
   assert.equal(item.previewStatus, 'conflict')
   assert.equal(item.conflictCode, 'unsupported_bucket')
   assert.match(item.conflictReason, /no approved deterministic mapping/i)
+})
+
+test('Outlook content runs link only an exact active client name', () => {
+  const item = previewOutlookEvent({
+    sourceType: 'outlook_event',
+    sourceCalendarId: 'calendar-1',
+    sourceEventId: 'event-1',
+    title: 'CONTENT RUN - Acme',
+    safeSummary: null,
+    startDate: '2026-07-28T08:00:00+02:00',
+    endDate: '2026-07-28T10:00:00+02:00',
+    allDay: false,
+    location: 'Client premises',
+    private: false,
+    cancelled: false,
+    assigneeMicrosoftIds: [],
+    sourceModifiedAt: '2026-07-20T08:00:00Z',
+  }, context)
+  assert.equal(item.previewStatus, 'new')
+  assert.equal(item.mappedClientId, 'client-1')
+  assert.equal(item.proposedPayload.client_id, 'client-1')
+  assert.equal(item.proposedPayload.event_type, 'content_run')
+})
+
+test('Outlook content runs stay unlinked with a clear warning when no exact client exists', () => {
+  const item = previewOutlookEvent({
+    sourceType: 'outlook_event',
+    sourceCalendarId: 'calendar-1',
+    sourceEventId: 'event-2',
+    title: 'CONTENT RUN - Unknown Client',
+    safeSummary: null,
+    startDate: '2026-07-28T08:00:00+02:00',
+    endDate: '2026-07-28T10:00:00+02:00',
+    allDay: false,
+    location: null,
+    private: false,
+    cancelled: false,
+    assigneeMicrosoftIds: [],
+    sourceModifiedAt: '2026-07-20T08:00:00Z',
+  }, context)
+  assert.equal(item.previewStatus, 'new')
+  assert.equal(item.mappedClientId, null)
+  assert.equal(item.proposedPayload.client_id, null)
+  assert.match(item.warnings.join(' '), /no active client exactly matches/i)
 })
 
 test('MASTER CLIENT TO DO resolves client aliases into the shared Client Requests bucket', () => {
