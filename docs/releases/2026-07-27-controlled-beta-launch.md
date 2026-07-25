@@ -50,7 +50,7 @@ The Operations Hub (`/admin/ops-hub`) replaces Teams/Planner for daily staff wor
 - **Board** — kanban board grouped by bucket with native HTML5 drag-and-drop (bucket moves only), keyboard alternatives, and quick-add
 - **Client Work** — request queue with filters (client, request state, classification), unclassified banner, urgent banner, WhatsApp capture intake, package deliverables grid
 - **Calendar** — month/week/day views with navigation, staff/client/bucket filters, drag-to-schedule for tasks, date-type labels (Due, Schedule), mobile-friendly day/agenda view
-- **Admin** — database-protected admin-only board showing Admin / To Do tasks; RLS prevents non-admin writes
+- **Admin** — database-isolated admin-only board with RLS preventing non-manager reads and writes; Admin / To Do tasks invisible to staff/team roles
 
 Task features:
 - **Quick Add** — title-only capture with progressive fields, Enter/Escape, duplicate-prevention, `'Once-off'` bucket default
@@ -75,9 +75,10 @@ Tests: 138 automated quality-gate tests covering route protection, capture, edit
 - **Operations Hub drag-to-schedule for deliverables** requires admin role
   matching at the database layer — normal staff cannot reschedule package
   deliverables through the calendar. This is enforced by RLS.
-- **Admin board tasks** are visible to all staff via Supabase SELECT (`is_staff()`
-  policy). Only admin/manager roles can update or delete. Full read-isolation
-  requires an RLS addition in a future release.
+- **Admin board tasks** now have database-level SELECT isolation: only
+  admin/manager roles can read Admin / To Do tasks. Staff/team roles see
+  operational tasks only. The isolation migration (`phase-security-admin-isolation`)
+  applies separate SELECT, INSERT, and UPDATE policies.
 - **WhatsApp approval** uses copy-to-clipboard only; no WhatsApp Business API
   integration is present. Staff manually paste into WhatsApp.
 - Authenticated in-app visual QA of client/admin pages is covered by code review
@@ -162,7 +163,7 @@ Full suite **138 Operations Hub tests** plus existing client-facing suites.
    session / service-role runner; confirm Action Sport 9-row parity + all-client
    matrix; then retire Planner.
 2. Authenticated end-to-end visual QA with a real client account.
-3. RLS read-isolation for Admin / To Do bucket tasks (currently all staff can SELECT).
+3. ~~RLS read-isolation for Admin / To Do bucket tasks (currently all staff can SELECT).~~ COMPLETED.
 4. Operations Hub week/day calendar improvements (drag-to-reschedule deliverables).
 5. Task comments, attachments, and activity log in drawer.
 6. Collaborative helper assignment with name-ahead.

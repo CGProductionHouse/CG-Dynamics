@@ -188,6 +188,10 @@ unification layer.
 - client requests link correctly ✓
 - WhatsApp approval tracking is honest (no fake sends) ✓
 - admin board shows real admin tasks ✓
+- Admin tasks are database-isolated from non-manager reads ✓
+- My Work uses stable user ID (assigned_to_user_id) as primary match ✓
+- Package classification enforced server-side via admin-only RPC ✓
+- staff cannot insert or move tasks into Admin / To Do bucket ✓
 - monthly deliverables remain canonical ✓
 - Client Schedule is not duplicated ✓
 - client-facing systems remain intact ✓
