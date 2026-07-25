@@ -239,3 +239,11 @@ After the core Marketing Library structure exists.
 ## Future notes
 
 Add new ideas here instead of expanding the current milestone unless the idea is directly required to complete the current milestone.
+## Deferred at 2026-07-27 controlled beta launch
+
+- Microsoft live dated fetch → apply → verify (Action Sport 9-row + all-client
+  parity); Planner retirement — requires an authenticated admin/service-role run.
+- Full Operations Hub rebuild; full content-guide workspace redesign.
+- Broad AI Workforce agent rollout; promote CG Assistant / Marketing Library out
+  of beta once verified.
+- Authenticated end-to-end visual QA with a real client account.
