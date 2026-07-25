@@ -368,7 +368,7 @@ export function previewOutlookEvent(
     startDate: source.startDate,
     endDate: source.endDate,
     dueDate: null,
-    assigneeMicrosoftIds: [...source.assigneeMicrosoftIds],
+    assigneeMicrosoftIds: [],
     destination: 'cg_calendar',
     mappedClientId: client?.status === 'matched' ? client.client.id : null,
     mappedClientName: client?.status === 'matched' ? client.client.name : null,
