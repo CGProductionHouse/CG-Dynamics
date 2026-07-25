@@ -297,6 +297,15 @@ export default function MicrosoftImportPage() {
         </div>
       </header>
 
+      <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/80">Transition status · beta</p>
+        <p className="mt-2 text-sm leading-relaxed text-amber-50/90">
+          Microsoft transition reconciliation is available for reviewed preview and apply. Final live package
+          parity verification is still pending. Do not retire Microsoft Planner until the full dated reconciliation
+          has been reviewed.
+        </p>
+      </section>
+
       <section className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Connection</p><h2 className="mt-1 text-xl font-black text-white">{connection?.connected ? 'Microsoft available' : 'Microsoft setup required'}</h2><p className="mt-1 text-sm text-white/50">{connection?.message ?? connectionError ?? 'Checking server-side connection...'}</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-xs font-black ${connection?.connected ? 'bg-emerald-300/10 text-emerald-200' : 'bg-amber-300/10 text-amber-100'}`}>{connection?.connected ? 'Connected' : 'Unavailable'}</span></div>

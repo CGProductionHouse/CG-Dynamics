@@ -232,3 +232,13 @@ test('apply path calls the template RPC then a create, in dependency order', () 
   // package_template_create runs before link_existing before create before update.
   assert.match(IMPORT_DATA, /package_template_create:\s*0,\s*link_existing:\s*1,\s*create:\s*2,\s*update:\s*3/)
 })
+
+// ── Launch: honest Microsoft transition state ───────────────────────────────
+test('Microsoft admin page shows the transition/pending banner and gates apply behind preview', () => {
+  const page = readRel('../src/pages/admin/MicrosoftImportPage.tsx')
+  assert.match(page, /Final live package\s+parity verification is still pending/)
+  assert.match(page, /Do not retire Microsoft Planner until the full dated reconciliation/)
+  // Apply must require a reviewed preview snapshot first (no blind apply).
+  assert.match(page, /const canApply = Boolean\(snapshot\)[\s\S]*reviewed[\s\S]*applicableCount > 0/)
+  assert.match(page, /disabled=\{!canApply\}/)
+})
