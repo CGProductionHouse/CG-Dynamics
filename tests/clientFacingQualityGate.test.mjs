@@ -252,3 +252,46 @@ test('Google Ads campaign state covers all documented states', () => {
   assert.ok(states.includes('data'))
   assert.ok(states.includes('error'))
 })
+
+// ── 17. Performance dashboard truth invariants ─────────────────────────────────
+test('report view uses verified, per-platform availability-aware Overview when normalized facts exist', () => {
+  assert.match(REPORT_VIEW, /buildOverviewSections/)
+  assert.match(REPORT_VIEW, /verifiedSections/)
+  assert.match(REPORT_VIEW, /VerifiedOverview/)
+  assert.match(REPORT_VIEW, /VerifiedFactsUnavailable/)
+})
+
+test('report view platform tabs are generated from per-platform facts and master report data', () => {
+  assert.match(REPORT_VIEW, /reportPlatforms/)
+  assert.match(REPORT_VIEW, /PLATFORM_LABELS\[platform\]/)
+})
+
+test('Google Ads tab is gated on hasGoogleAds being true (not shown for disconnected only)', () => {
+  assert.match(REPORT_VIEW, /hasGoogleAdsSource/)
+  assert.match(REPORT_VIEW, /hasGoogleAds/)
+  assert.match(REPORT_VIEW, /google_ads/)
+})
+
+test('report view includes a methodology and disclaimer section', () => {
+  assert.match(REPORT_VIEW, /MethodologyDisclaimer/)
+  assert.match(REPORT_VIEW, /methodology|disclaimer/)
+})
+
+test('report view uses Google Ads metrics with safe MoM comparison and formatting', () => {
+  assert.match(REPORT_VIEW, /GoogleAdsMetricCard/)
+  assert.match(REPORT_VIEW, /compareNullable/)
+  assert.match(REPORT_VIEW, /formatGoogleAdsMoney/)
+  assert.match(REPORT_VIEW, /formatGoogleAdsCurrencyValue/)
+})
+
+test('the report view explains that reach and viewers are never added across platforms', () => {
+  assert.match(REPORT_VIEW, /never added together across/)
+  assert.match(REPORT_VIEW, /not added together across/)
+})
+
+test('performance dashboard separates load states for report list and report detail', () => {
+  assert.match(PERFORMANCE, /loading/)
+  assert.match(PERFORMANCE, /reportLoading/)
+  assert.match(PERFORMANCE, /No published report yet/)
+  assert.match(PERFORMANCE, /Select a month/)
+})
