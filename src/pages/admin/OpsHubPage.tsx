@@ -122,10 +122,16 @@ export default function OpsHubPage() {
 
   const todayKey = businessDateKey(new Date())
 
-  const myTasks = useMemo(() =>
-    tasks.filter(t => t.assigned_to_name === profile?.full_name),
-    [tasks, profile],
-  )
+  const myTasks = useMemo(() => {
+    const profileId = profile?.id
+    const profileName = profile?.full_name
+    return tasks.filter(t => {
+      if (t.assigned_to_user_id && profileId) {
+        return t.assigned_to_user_id === profileId
+      }
+      return t.assigned_to_name != null && t.assigned_to_name === profileName
+    })
+  }, [tasks, profile])
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 sm:px-6 sm:pt-6">
