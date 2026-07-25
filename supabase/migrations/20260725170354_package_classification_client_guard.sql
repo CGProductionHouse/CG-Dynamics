@@ -1,4 +1,4 @@
-﻿-- Access model:
+-- Access model:
 -- - authenticated callers may invoke this RPC
 -- - public.is_manager() remains the authoritative manager/admin gate
 -- - monthly_deliverables is canonical and is only read/locked here
