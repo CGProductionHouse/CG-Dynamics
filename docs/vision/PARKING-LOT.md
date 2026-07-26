@@ -1,6 +1,6 @@
 # CG Dynamics Parking Lot
 
-Last updated: 2026-07-25
+Last updated: 2026-07-26
 Purpose: Capture valuable ideas without derailing the current milestone.
 
 ## How to use this file
@@ -25,6 +25,130 @@ Each item should include:
 - Completed.
 
 ## Parking lot items
+
+### 2026-07-26 - Client Website Intelligence and ads-to-website attribution
+
+Division: Client Intelligence, AI Workforce
+Status: Ready for milestone planning
+
+Idea:
+Add a dedicated Website area to every client dashboard. The core reporting layer should be website-platform independent and connect through Google Analytics 4, Google Search Console and the correct Google Ads account rather than building separate analytics logic for WordPress, Wix, custom Next.js and every other CMS. Optional CMS, hosting and website-management integrations can follow later.
+
+Required direction:
+
+- Register each active client's website/domain and connection state.
+- Connect the correct GA4 property, Search Console property and Google Ads account.
+- Show monthly users, new users, sessions, page views, engaged sessions, engagement rate, average engagement time, conversions, top pages, device mix, location and traffic-source breakdown.
+- Show paid, organic search, social, direct, referral, email and other campaign traffic separately.
+- Connect Google Ads to website outcomes using verified campaign identifiers, UTMs and conversion events.
+- Show paid website visits, landing pages, engagement quality, conversions, cost per website visit and cost per verified lead/conversion where available.
+- Never claim that ads caused traffic growth merely because both happened in the same month.
+- Add Search Console visibility: impressions, clicks, click-through rate, average position, queries and landing pages.
+- Later add website health: page speed, uptime, SSL/domain state, broken pages, mobile usability, tracking health and form-submission monitoring.
+- Clients without valid connections must see Setup required or Service available, not fake zero graphs.
+- AI Workforce may read only verified website facts when generating strategy and recommendations.
+
+Why it matters:
+CG manages many client websites. Connecting ads, search, website behaviour and conversions turns isolated channel reports into a credible marketing journey and makes the client dashboard more valuable.
+
+Revisit:
+After the current client-production release is stable. Build this as the next dedicated Client Intelligence integration milestone.
+
+### 2026-07-26 - Unified Leads Hub and lead-quality reporting
+
+Division: Client Intelligence, Operations Hub, AI Workforce
+Status: Ready for milestone planning
+
+Idea:
+Create one client-isolated Leads Hub that combines lead submissions from all authorised sources instead of requiring staff to export separate platform reports into Excel or Google Sheets and send them manually.
+
+Initial sources:
+
+- Meta instant lead forms.
+- Google Ads lead form assets.
+- Website forms.
+- Manual CSV/Excel imports.
+
+Later sources:
+
+- WhatsApp enquiries.
+- Google Business Profile interactions.
+- TikTok lead generation.
+- LinkedIn lead forms.
+- CRM integrations.
+
+Required direction:
+
+- One canonical lead record per client with source identity, campaign, ad/form, landing page and received date.
+- Store name, phone, email, company, enquiry, consent/source details, status, notes, assignee and follow-up date where supplied.
+- Support New, Contacted, Qualified, Converted, Lost and Invalid states.
+- Deduplicate exact source identities and strong phone/email matches; never auto-merge uncertain people.
+- Show total leads, source mix, status mix, trend, cost per submitted lead, cost per qualified lead and conversion rate only when the required spend and status data exist.
+- Keep submitted leads, qualified leads, customers and revenue as separate concepts.
+- Do not label leads as customers or conversions without client feedback or verified downstream data.
+- Allow filtered CSV/Excel export and optional Google Sheets sync.
+- Let authorised client users update lead status and notes while keeping staff-only diagnostics internal.
+- Feed verified lead quality back into campaign reporting and AI recommendations without crossing client boundaries.
+
+Why it matters:
+The business needs to prove lead quality and business outcomes, not only clicks and reach. A live Leads Hub reduces manual reporting and creates a much stronger paid CG Dynamics service.
+
+Revisit:
+Plan together with Website Intelligence so the complete journey can be measured as Campaign → Click → Website visit or lead form → Lead → Qualified lead → Conversion.
+
+### 2026-07-26 - Client dashboard service catalogue and module upsells
+
+Division: Client Intelligence, Commercial
+Status: Ready for milestone planning
+
+Idea:
+Use disconnected or unavailable client-dashboard modules as clean service-discovery opportunities rather than dead empty states. Each client should see what is active, what is being configured and which additional CG Dynamics services can be requested.
+
+Module states:
+
+- Active.
+- Setup in progress.
+- Connection required.
+- Service available.
+- Not included in current package.
+
+Candidate paid modules:
+
+- Website Analytics.
+- Google Ads.
+- Meta Reporting.
+- Leads Hub.
+- Search Performance.
+- Website Health.
+- Advanced Reporting.
+- AI Strategy.
+- Competitor Intelligence.
+
+Required direction:
+
+- Keep the experience useful and premium rather than aggressively sales-driven.
+- Show a clear explanation of the service, its outcomes and a Request this CG Dynamics service action.
+- Keep actual data hidden when the service is not active; never fill unavailable modules with fake demo values.
+- Connect requests into the existing Operations Hub/client-request workflow instead of creating a separate task truth.
+- Allow package and service entitlement to control client navigation and module state.
+
+Target client-dashboard structure:
+
+- Overview.
+- Performance.
+- Campaigns.
+- Website.
+- Leads.
+- Content Calendar.
+- Content Guidelines.
+- Strategy.
+- Services.
+
+Why it matters:
+The dashboard can become both the client's working intelligence layer and a natural expansion channel for higher-value recurring CG Dynamics services.
+
+Revisit:
+Design during the Website Intelligence and Leads Hub milestone, after the current production release is stable.
 
 ### 2026-07-23 - Unified client portal landing page and strategy journey
 
