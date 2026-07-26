@@ -92,6 +92,45 @@ Covers:
 - incrementality versus attribution;
 - website and campaign diagnostics.
 
+### Advertising research evidence library
+
+- `ADVERTISING-EVIDENCE-LIBRARY.md`
+
+Contains actual source-by-source research records with:
+
+- study design and sample;
+- finding and limitation;
+- rights/access state;
+- safe candidate knowledge;
+- prohibited overclaims;
+- cross-study Skill Card synthesis.
+
+Initial evidence coverage:
+
+- repetition and mere exposure;
+- attention and awareness;
+- recall versus persuasion;
+- source-memory risk;
+- novelty plus relevance;
+- creativity and intermediate brand outcomes;
+- B2B creativity;
+- lagged B2B advertising effects;
+- CTR versus CVR;
+- crisis-context creative;
+- originality, credibility and irritation in social ads.
+
+### Verified open-source ingestion manifest
+
+- `VERIFIED-OPEN-SOURCE-INGESTION-MANIFEST.md`
+
+Contains source-level rights and technical handoff for:
+
+- Walter Dill Scott’s machine-readable Project Gutenberg edition;
+- Claude Hopkins Library of Congress page-image editions;
+- open-access psychology and advertising studies;
+- metadata-only sources where full-text rights remain unresolved;
+- exact ingestion controls, hashes, citation granularity and review gates.
+
 ## Recommended implementation order
 
 1. Finish review tooling and expose freshness/evidence fields already stored for social knowledge.
@@ -104,20 +143,22 @@ Covers:
 8. Define canonical CRM stage, consent, suppression and channel-event models.
 9. Register landing-page, Core Web Vitals and experimentation sources.
 10. Add review-state conversion and experiment-design knowledge.
-11. Prepare OCR/ingestion for the two Library of Congress Hopkins books.
-12. Verify a lawful machine-readable Walter Dill Scott edition or document the blocker.
-13. Capture POPIA, CPA and ARB references and add client-industry compliance coverage.
-14. Activate knowledge only after human review and regression tests.
+11. Ingest the verified machine-readable Walter Dill Scott source through the rights-gated pipeline.
+12. Prepare OCR/ingestion for the two Library of Congress Hopkins books.
+13. Ingest the approved open-access advertising evidence sources with article-level licence capture.
+14. Convert the evidence-library synthesis into review-state Skill Cards with explicit limitations.
+15. Capture POPIA, CPA and ARB references and add client-industry compliance coverage.
+16. Activate knowledge only after human review and regression tests.
 
 ## Agent impact map
 
-- Marketing Strategist: all packs.
+- Marketing Strategist: all packs and evidence synthesis.
 - Social Media Strategist: social, website/lead attribution, local marketing and lifecycle context.
 - Paid Ads Agent: Google Ads, Meta leads, attribution, landing pages, conversion quality and experiments.
-- Copywriting Agent: Hopkins/public-domain craft, claims, lifecycle messages and substantiation.
-- Creative Director: creative principles, landing-page message match and format adaptation.
+- Copywriting Agent: Hopkins/public-domain craft, claims, lifecycle messages, evidence and substantiation.
+- Creative Director: creative principles, novelty/relevance, landing-page message match and format adaptation.
 - Brand Guardian: claims, compliance, reputation, disclosure and channel eligibility.
-- Client Report Agent: metric definitions, availability, comparison, attribution, lead stages and experiment states.
+- Client Report Agent: metric definitions, availability, comparison, attribution, lead stages, evidence strength and experiment states.
 - Content Planner: social, local, seasonal, lifecycle and website journey context.
 
 ## Non-negotiable boundaries
@@ -132,4 +173,7 @@ Covers:
 - No local ranking guarantee.
 - No fake or incentivised review strategy.
 - No experiment winner when the result is insufficient, undecided or confounded.
+- No association presented as causation.
+- No intention measure presented as observed purchasing behaviour.
+- No public-domain historical claim presented as current without modern verification.
 - No legal advice; provide sourced risk flags and route to professional review.
