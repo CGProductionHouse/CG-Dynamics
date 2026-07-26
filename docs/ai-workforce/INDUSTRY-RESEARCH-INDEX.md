@@ -92,17 +92,45 @@ Candidate active-client research prompts, not classifications:
 - Supa Quick Centurion;
 - Germoparts.
 
+### Legal and professional services
+
+File:
+
+- `INDUSTRY-LEGAL-PROFESSIONAL-SERVICES.md`
+
+Actual source coverage:
+
+- Legal Practice Act 28 of 2014;
+- Legal Practice Council and Code of Conduct source;
+- Financial Intelligence Centre guidance for legal practitioners;
+- Department of Justice legislation and explanatory sources;
+- POPIA/privacy risk family;
+- professional-status, confidentiality, intake and lead-stage controls.
+
+Segments covered:
+
+- litigation and dispute resolution;
+- commercial/corporate work;
+- family and matrimonial work;
+- estates, wills and trusts;
+- property, conveyancing and bonds;
+- labour/employment work;
+- criminal defence;
+- claims work;
+- compliance/advisory;
+- notarial and advocacy services.
+
+Candidate active-client research prompts, not classifications:
+
+- Bouwer & Coetzee Attorneys;
+- HMH Attorneys;
+- Peyper Bonds.
+
 ## Next research order
 
 The order below follows repeated client-group prompts already recorded in `CLIENT-INDUSTRY-MATRIX.md`, then expands to common CG-managed SME sectors.
 
-1. Legal and professional services
-   - attorneys;
-   - conveyancing/bonds;
-   - professional practices;
-   - regulated claims, confidentiality and lead quality.
-
-2. Building materials, construction supply and home improvement
+1. Building materials, construction supply and home improvement
    - timber;
    - steel;
    - stone/marble/granite;
@@ -110,64 +138,64 @@ The order below follows repeated client-group prompts already recorded in `CLIEN
    - trade versus consumer journeys;
    - specification and safety claims.
 
-3. Hospitality, restaurants, bars and events
+2. Hospitality, restaurants, bars and events
    - bookings, foot traffic and local discovery;
    - menu/product communication;
    - responsible alcohol marketing;
    - promotions, events, reviews and customer experience.
 
-4. Property, architecture and construction services
+3. Property, architecture and construction services
    - long purchase cycles;
    - trust, portfolio and qualification;
    - planning/professional-registration claims;
    - lead stages and project economics.
 
-5. Healthcare, wellness and personal care
+4. Healthcare, wellness and personal care
    - regulated health claims;
    - professional credentials;
    - privacy and sensitive lead data;
    - appointment and retention journeys.
 
-6. Retail and ecommerce
+5. Retail and ecommerce
    - product feeds;
    - catalogue and stock truth;
    - promotions;
    - conversion, fulfilment and returns;
    - repeat purchase.
 
-7. Education and training
+6. Education and training
    - accreditation;
    - enrolment journey;
    - qualification and employment claims;
    - student privacy and consent.
 
-8. Financial, insurance and credit-related services
+7. Financial, insurance and credit-related services
    - regulated advertising;
    - advice versus information;
    - affordability and disclosure;
    - high-risk lead handling.
 
-9. Security and risk services
+8. Security and risk services
    - capability claims;
    - licensing/accreditation;
    - fear-based marketing boundaries;
    - emergency versus sales communication.
 
-10. Tourism, accommodation and destination businesses
-    - seasonality;
-    - booking platforms;
-    - location content;
-    - reviews;
-    - availability and pricing truth.
+9. Tourism, accommodation and destination businesses
+   - seasonality;
+   - booking platforms;
+   - location content;
+   - reviews;
+   - availability and pricing truth.
 
-11. B2B manufacturing, engineering and industrial supply
+10. B2B manufacturing, engineering and industrial supply
     - technical buying groups;
     - specifications;
     - tender and procurement cycles;
     - long-lag lead attribution;
     - after-sales support.
 
-12. Community, sport and entertainment
+11. Community, sport and entertainment
     - attendance;
     - memberships;
     - sponsorship;
