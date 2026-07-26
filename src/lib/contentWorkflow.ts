@@ -365,7 +365,12 @@ export interface StaffProfileOption {
 }
 
 export async function listStaffProfiles(): Promise<QueryResult<StaffProfileOption[]>> {
-  const { data, error } = await supabase.from('profiles').select('id, full_name').order('full_name')
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .in('role', ['admin', 'manager', 'staff', 'team'])
+    .not('full_name', 'is', null)
+    .order('full_name')
   return wrap((data ?? []) as StaffProfileOption[], error, [])
 }
 

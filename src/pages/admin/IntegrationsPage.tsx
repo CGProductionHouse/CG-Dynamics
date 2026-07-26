@@ -6,7 +6,8 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { StatusBadge, Pill } from '../../components/ui/Badges'
 import { getGoogleAdsWorkspace } from '../../lib/googleAds'
 import { useAuth } from '../../contexts/AuthContext'
-import { isManagerRole } from '../../lib/roles'
+import { isAdminRole, isManagerRole } from '../../lib/roles'
+import { getMicrosoftConnectionStatus } from '../../lib/microsoftImportData'
 
 type MetaState = 'loading' | 'connected' | 'disconnected'
 
@@ -14,10 +15,13 @@ export default function IntegrationsPage() {
   const navigate = useNavigate()
   const { profile } = useAuth()
   const canManageGoogleAds = isManagerRole(profile?.role)
+  const canManageMicrosoft = isAdminRole(profile?.role)
   const [metaState, setMetaState] = useState<MetaState>('loading')
   const [linkedClients, setLinkedClients] = useState<number | null>(null)
   const [googleState, setGoogleState] = useState<MetaState>('loading')
   const [googleLinkedClients, setGoogleLinkedClients] = useState<number | null>(null)
+  const [microsoftState, setMicrosoftState] = useState<MetaState>('loading')
+  const [microsoftSourceCount, setMicrosoftSourceCount] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -58,15 +62,26 @@ export default function IntegrationsPage() {
           if (active) setGoogleState('disconnected')
         })
     }
+    if (canManageMicrosoft) {
+      getMicrosoftConnectionStatus()
+        .then(result => {
+          if (!active) return
+          setMicrosoftState(result.data?.connected ? 'connected' : 'disconnected')
+          setMicrosoftSourceCount(result.data?.sources.length ?? 0)
+        })
+        .catch(() => {
+          if (active) setMicrosoftState('disconnected')
+        })
+    }
 
     return () => {
       active = false
     }
-  }, [canManageGoogleAds])
+  }, [canManageGoogleAds, canManageMicrosoft])
 
   const metaConnected = metaState === 'connected'
   const metaStatus =
-    metaState === 'loading' ? 'Checking…' : metaConnected ? 'Connected' : 'Not connected'
+    metaState === 'loading' ? 'Checking...' : metaConnected ? 'Connected' : 'Not connected'
   const metaDescription = metaConnected
     ? linkedClients && linkedClients > 0
       ? `Facebook and Instagram are connected. ${linkedClients} client${linkedClients === 1 ? '' : 's'} linked for monthly sync.`
@@ -89,7 +104,7 @@ export default function IntegrationsPage() {
         <p className="text-xs uppercase tracking-[0.22em] text-brand-primary">Integrations</p>
         <h1 className="mt-2 text-2xl font-semibold text-white">Integrations</h1>
         <p className="mt-1 text-sm text-brand-primary">
-          Sync platforms to build monthly reports without manual CSV exports.
+          Manage reporting and operational sync connections in one place.
         </p>
       </div>
 
@@ -184,6 +199,28 @@ export default function IntegrationsPage() {
             </div>
           </div>
         </PremiumCard>
+        {canManageMicrosoft && (
+          <PremiumCard padding="md" className="relative">
+            <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-sky-400 to-brand-teal" />
+            <div className="flex flex-col">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-400/15 text-sm font-bold text-sky-200">MS</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-base font-semibold text-white">Microsoft 365</h2>
+                    <StatusBadge label={microsoftState === 'loading' ? 'Checking...' : microsoftState === 'connected' ? 'Connected' : 'Not connected'} variant={microsoftState === 'connected' ? 'published' : microsoftState === 'loading' ? 'default' : 'internal-draft'} size="sm" />
+                  </div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
+                    {microsoftState === 'connected' ? `${microsoftSourceCount} Planner and Outlook source${microsoftSourceCount === 1 ? '' : 's'} available for controlled reconciliation.` : 'Connect Planner and Outlook for reviewed operations imports.'}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-auto pt-5">
+                <ActionButton variant="outline" onClick={() => navigate('/admin/microsoft-import')} fullWidth>Manage Microsoft Sync</ActionButton>
+              </div>
+            </div>
+          </PremiumCard>
+        )}
       </div>
     </div>
   )

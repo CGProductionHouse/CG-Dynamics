@@ -370,25 +370,17 @@ export default function CompanyCalendarPage() {
         </div>
       </div>
 
-      {/* Layer toggles: the calendar shows the whole operational picture —
-          company events by default, with Planner dated tasks as an optional operational overlay. */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Show</span>
-        {([
-          ['events', `Events (${monthEvents.length})`, 'border-sky-400/30 text-sky-300'],
-          ['tasks', `Planner tasks (${monthTasks.length})`, 'border-amber-300/30 text-amber-200'],
-        ] as const).map(([key, label, tone]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setLayers(prev => ({ ...prev, [key]: !prev[key] }))}
-            className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
-              layers[key] ? `${tone} bg-white/[0.05]` : 'border-white/10 text-brand-primary/35 hover:text-brand-primary/60'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Events are the default calendar. Planner tasks are an optional operational overlay. */}
+      <div className="mb-4 flex flex-wrap items-center gap-4 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2">
+        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Layers</span>
+        <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-sky-200">
+          <input type="checkbox" checked={layers.events} onChange={event => setLayers(prev => ({ ...prev, events: event.target.checked }))} className="h-3.5 w-3.5 accent-teal-400" />
+          Events ({monthEvents.length})
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-amber-200">
+          <input type="checkbox" checked={layers.tasks} onChange={event => setLayers(prev => ({ ...prev, tasks: event.target.checked }))} className="h-3.5 w-3.5 accent-amber-400" />
+          Planner tasks ({monthTasks.length})
+        </label>
       </div>
 
       {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (allMonthEvents.length + monthTasks.length === 0)) && (
@@ -404,30 +396,16 @@ export default function CompanyCalendarPage() {
         />
       )}
 
-      {/* Filter tabs */}
-      <div className="mb-6 flex flex-wrap gap-1.5">
-        {filterTabs.map(tab => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setFilter(tab.value)}
-            className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-all ${
-              filter === tab.value
-                ? 'bg-[#2dd4bf] text-black shadow-sm'
-                : 'border border-white/10 text-brand-primary/65 hover:text-white hover:border-white/20'
-            }`}
-          >
-            {tab.label}
-            {tab.count > 0 && (
-              <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${
-                filter === tab.value ? 'bg-black/20 text-black' : 'bg-white/10 text-brand-primary/60'
-              }`}>
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      <label className="mb-6 block max-w-xs space-y-1.5">
+        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Event type</span>
+        <select
+          value={filter}
+          onChange={event => setFilter(event.target.value as EventFilter)}
+          className="w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-teal/50"
+        >
+          {filterTabs.map(tab => <option key={tab.value} value={tab.value}>{tab.label} ({tab.count})</option>)}
+        </select>
+      </label>
 
       {viewMode === 'calendar' ? (
         <CgCalendarGrid
@@ -642,27 +620,33 @@ function CgCalendarGrid({
           )
         })}
       </div>
-      <div className="space-y-5 sm:hidden">
-        {groups.length === 0 ? (
-          <EmptyState title={`Nothing in ${formatMonthHeading(month)}`} message="No company events or dated Planner tasks this month. See the diagnostics above." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} centered={false} />
-        ) : groups.map(group => (
-          <div key={group.day}>
-            <button
-              type="button"
-              onClick={() => onOpenDay({ date: group.day, events: group.events, tasks: group.tasks })}
-              className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-left"
-            >
-              <span className="text-xs font-black uppercase tracking-[0.16em] text-white">{formatShortDate(group.day)}</span>
-              <span className="text-[10px] font-bold text-brand-primary/55">
-                {group.events.length + group.tasks.length} item{group.events.length + group.tasks.length === 1 ? '' : 's'}
-              </span>
-            </button>
-            <div className="space-y-1.5">
-              {group.events.map(event => <EventCard key={event.id} event={event} onClick={() => onOpen(event)} />)}
-              {group.tasks.map(task => <TaskRowLink key={task.id} task={task} />)}
-            </div>
-          </div>
-        ))}
+      <div className="sm:hidden">
+        <div className="mb-1 grid grid-cols-7 gap-1">
+          {DAY_NAMES.map(day => <div key={day} className="py-1 text-center text-[9px] font-bold uppercase text-white/30">{day.slice(0, 1)}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-1 rounded-xl border border-white/[0.08] bg-white/[0.02] p-1.5">
+          {cells.map((day, index) => {
+            if (day === null) return <div key={`mobile-empty-${index}`} className="aspect-square" />
+            const date = `${month}-${String(day).padStart(2, '0')}`
+            const dayEvents = byDate.get(date) ?? []
+            const dayTasks = tasksByDate.get(date) ?? []
+            const count = dayEvents.length + dayTasks.length
+            return (
+              <button
+                key={date}
+                type="button"
+                onClick={() => onOpenDay({ date, events: dayEvents, tasks: dayTasks })}
+                className={`relative aspect-square rounded-lg border text-xs font-black transition-colors ${date === today ? 'border-brand-teal/60 bg-brand-teal/15 text-brand-teal' : count > 0 ? 'border-white/15 bg-white/[0.06] text-white' : 'border-transparent text-white/35'}`}
+                aria-label={`${formatShortDate(date)}, ${count} item${count === 1 ? '' : 's'}`}
+              >
+                {day}
+                {count > 0 && <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-brand-accent" />}
+              </button>
+            )
+          })}
+        </div>
+        <p className="mt-3 text-center text-xs text-brand-primary/50">Tap a date to view its events{tasksByDate.size > 0 ? ' and Planner tasks' : ''}.</p>
+        {groups.length === 0 && <EmptyState className="mt-4" title={`Nothing in ${formatMonthHeading(month)}`} message="No company events or dated Planner tasks this month. See the diagnostics above." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} centered={false} />}
       </div>
     </div>
   )

@@ -47,9 +47,10 @@ import {
   type PlatformFact,
 } from '../../lib/overviewModel'
 import type { ReportContentExclusion, ReportFactHealth } from '../../lib/db/reportingTruth'
-import type {
-  GoogleAdsDashboardData,
-  GoogleAdsDashboardState,
+import {
+  googleAdsCampaignPeriodLabel,
+  type GoogleAdsDashboardData,
+  type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
 
 type TabKey = 'overview' | Platform | 'google_ads'
@@ -1318,6 +1319,7 @@ function GoogleAdsTab({
 
       <section className="mb-12">
         <SectionHeading eyebrow="Campaign performance" title="Campaign results" />
+        <p className="-mt-2 mb-5 text-sm leading-relaxed text-slate-400">Activity labels reflect the report month. A campaign&apos;s current Google Ads status may have changed after month end.</p>
         {googleAds.campaigns.length > 0 ? (
           <div className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#071311] shadow-[0_30px_80px_-48px_rgba(0,0,0,0.95)]">
             <div className="overflow-x-auto">
@@ -1325,7 +1327,7 @@ function GoogleAdsTab({
                 <thead className="border-b border-white/10 bg-white/[0.04] text-[0.65rem] font-black uppercase tracking-[0.16em] text-slate-500">
                   <tr>
                     <th className="px-5 py-4">Campaign</th>
-                    <th className="px-4 py-4">Status</th>
+                    <th className="px-4 py-4">Report period</th>
                     <th className="px-4 py-4 text-right">Spend</th>
                     <th className="px-4 py-4 text-right">Impressions</th>
                     <th className="px-4 py-4 text-right">Clicks</th>
@@ -1339,9 +1341,10 @@ function GoogleAdsTab({
                     <tr key={`${campaign.name}-${index}`} className="transition hover:bg-white/[0.025]">
                       <td className="max-w-xs px-5 py-4 font-bold text-white">{campaign.name}</td>
                       <td className="px-4 py-4">
-                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-xs font-bold text-slate-300">
-                          {formatCampaignStatus(campaign.status)}
+                        <span className="rounded-full border border-emerald-300/15 bg-emerald-300/[0.06] px-2.5 py-1 text-xs font-bold text-emerald-100">
+                          {googleAdsCampaignPeriodLabel(campaign, googleAds.month)}
                         </span>
+                        {campaign.status && <p className="mt-2 text-[11px] text-slate-500">Current status: {formatCampaignStatus(campaign.status)}</p>}
                       </td>
                       <td className="px-4 py-4 text-right font-semibold text-slate-200">{formatGoogleAdsMoney(campaign.spendMicros, campaign.currencyCode)}</td>
                       <td className="px-4 py-4 text-right text-slate-300">{formatNumber(campaign.impressions)}</td>

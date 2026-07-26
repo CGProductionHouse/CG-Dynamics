@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, type ReactNode, type FormEvent, type WheelEvent } from 'react'
 import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/States'
 import { ActionButton } from '../../components/ui/Buttons'
 import { ClientPicker } from '../../components/ClientPicker'
@@ -9,38 +9,25 @@ import {
   listPlannerBoards,
   listPlannerBuckets,
   listPlannerTasks,
-  listClientScheduleDeliverablesForYear,
   createPlannerTask,
   updatePlannerTask,
   updatePlannerTaskStatus,
   archivePlannerTask,
-  updateMonthlyDeliverableCore,
-  updateMonthlyDeliverableSchedule,
-  updateMonthlyDeliverableStatus,
-  SIMPLIFIED_STATUS_LABELS,
-  SIMPLIFIED_STATUS_OPTIONS,
-  SIMPLIFIED_TO_BACKEND_STATUS,
   PRIORITIES,
   PLANNER_TASK_STATUSES,
   PLANNER_TASK_STATUS_LABELS,
-  monthKey,
-  simplifyProductionStatus,
   type PlannerBoard,
   type PlannerBucket,
   type PlannerTask,
   type PlannerTaskStatus,
-  type MonthlyDeliverable,
-  type SimplifiedProductionStatus,
   type TaskPriority,
 } from '../../lib/planner'
-import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 import { isManagerRole } from '../../lib/roles'
 
 const BOARD_LABELS: Record<string, string> = {
   'operations-todo': 'Operations',
   'client-websites': 'Websites',
   'admin-check-list': 'Admin',
-  'client-schedule': 'Client Schedule Board',
   'cg-socials': 'CG Socials',
 }
 
@@ -60,11 +47,6 @@ const BOARD_ICONS: Record<string, ReactNode> = {
       <path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
     </svg>
   ),
-  'client-schedule': (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-    </svg>
-  ),
   'cg-socials': (
     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -73,14 +55,6 @@ const BOARD_ICONS: Record<string, ReactNode> = {
   ),
 }
 
-const MONTHLY_STATUS_TONES: Record<string, string> = {
-  not_started: 'text-white/50 border-white/10',
-  in_progress: 'text-brand-accent border-brand-accent/25',
-  ready_review: 'text-amber-300 border-amber-400/25',
-  awaiting_client: 'text-sky-300 border-sky-300/25',
-  meta_drafts: 'text-brand-teal border-brand-teal/25',
-  scheduled_posted: 'text-white/25 border-white/5',
-}
 
 type PlannerWorkView = 'active' | 'history'
 
@@ -115,26 +89,12 @@ function plannerStatusTone(status: PlannerTaskStatus) {
   return 'text-white/35 border-white/10'
 }
 
-function displayDeliverableCode(deliverable: MonthlyDeliverable) {
-  const instance = String(deliverable.instance_number)
-  if (deliverable.code.trim().endsWith(instance)) return deliverable.code
-  if (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel') {
-    return `${deliverable.code} ${instance}`
-  }
-  return `${deliverable.code}${instance}`
-}
-
-function formatDeliverableDate(value: string | null) {
-  if (!value) return 'Unscheduled'
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })
-}
 
 export default function PlannerPage() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
   const canManage = isManagerRole(profile?.role)
   const myName = profile?.full_name ?? null
-  const navigate = useNavigate()
 
   const [boards, setBoards] = useState<PlannerBoard[]>([])
   const [buckets, setBuckets] = useState<PlannerBucket[]>([])
@@ -147,14 +107,6 @@ export default function PlannerPage() {
   const [workView, setWorkView] = useState<PlannerWorkView>('active')
   const [taskSearch, setTaskSearch] = useState('')
   const [taskStatusFilter, setTaskStatusFilter] = useState<'all' | PlannerTaskStatus>('all')
-  const [scheduleMonthKey, setScheduleMonthKey] = useState(monthKey(new Date()))
-  const [scheduleDeliverables, setScheduleDeliverables] = useState<MonthlyDeliverable[]>([])
-  const [scheduleLoading, setScheduleLoading] = useState(false)
-  const [clients, setClients] = useState<ClientOption[]>([])
-  const [drawerDeliverable, setDrawerDeliverable] = useState<MonthlyDeliverable | null>(null)
-  const [scheduleError, setScheduleError] = useState<string | null>(null)
-  const [scheduleSearch, setScheduleSearch] = useState('')
-  const [scheduleStatusFilter, setScheduleStatusFilter] = useState<'all' | SimplifiedProductionStatus>('all')
   const topScrollRef = useRef<HTMLDivElement>(null)
   const topScrollSpacerRef = useRef<HTMLDivElement>(null)
   const boardScrollRef = useRef<HTMLDivElement>(null)
@@ -223,65 +175,30 @@ export default function PlannerPage() {
     return () => { active = false; window.clearTimeout(timer) }
   }, [activeBoard, boards, canManage])
 
-  useEffect(() => {
-    let active = true
-    listActiveClients().then(({ data }) => {
-      if (active) setClients(data ?? [])
-    })
-    return () => { active = false }
-  }, [])
 
-  useEffect(() => {
-    if (activeBoard !== 'client-schedule') return
-    let active = true
-    const year = parseInt(scheduleMonthKey.split('-')[0], 10)
-    const timer = window.setTimeout(() => {
-      setScheduleLoading(true)
-      setScheduleError(null)
-      listClientScheduleDeliverablesForYear(year).then(({ data, error }) => {
-        if (!active) return
-        setScheduleLoading(false)
-        if (error) {
-          setScheduleError(error.message ?? 'Could not load client schedule.')
-          setScheduleDeliverables([])
-          return
-        }
-        setScheduleDeliverables(data ?? [])
-      }).catch(() => {
-        if (!active) return
-        setScheduleLoading(false)
-        setScheduleError('Could not load client schedule.')
-        setScheduleDeliverables([])
-      })
-    }, 0)
-    return () => { active = false; window.clearTimeout(timer) }
-  }, [activeBoard, scheduleMonthKey])
 
   // Escape to close drawer
   useEffect(() => {
-    if (!drawerTask && !drawerDeliverable) return
+    if (!drawerTask) return
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         setDrawerTask(null)
-        setDrawerDeliverable(null)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [drawerTask, drawerDeliverable])
+  }, [drawerTask])
 
-  // Admin board always last
+  // Client Schedule is its own canonical workspace; Planner only shows task boards.
   const sortedBoards = useMemo(() => {
-    return [...boards].sort((a, b) => {
-      const rank = (board: PlannerBoard) => {
-        if (board.board_type === 'admin' || board.slug === 'admin-check-list') return 2
-        if (board.slug === 'client-schedule') return 1
-        return 0
-      }
-      const ra = rank(a), rb = rank(b)
-      if (ra !== rb) return ra - rb
-      return a.sort_order - b.sort_order
-    })
+    return boards
+      .filter(board => board.slug !== 'client-schedule')
+      .sort((a, b) => {
+        const aAdmin = a.board_type === 'admin' || a.slug === 'admin-check-list'
+        const bAdmin = b.board_type === 'admin' || b.slug === 'admin-check-list'
+        if (aAdmin !== bAdmin) return aAdmin ? 1 : -1
+        return a.sort_order - b.sort_order
+      })
   }, [boards])
 
   const activeBoardId = useMemo(
@@ -338,44 +255,6 @@ export default function PlannerPage() {
     [visibleTasks],
   )
 
-  const clientNameById = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
-
-  const scheduleMonthDeliverables = useMemo(() => {
-    const search = scheduleSearch.trim().toLowerCase()
-    return scheduleDeliverables.filter(d => {
-      const date = d.scheduled_date ?? d.due_date
-      if (!date || !date.startsWith(scheduleMonthKey)) return false
-      if (scheduleStatusFilter !== 'all' && simplifyProductionStatus(d.production_status) !== scheduleStatusFilter) return false
-      if (search) {
-        const code = displayDeliverableCode(d).toLowerCase()
-        const title = (d.title ?? '').toLowerCase()
-        const client = (clientNameById.get(d.client_id) ?? '').toLowerCase()
-        if (!code.includes(search) && !title.includes(search) && !client.includes(search)) return false
-      }
-      return true
-    })
-  }, [clientNameById, scheduleDeliverables, scheduleMonthKey, scheduleSearch, scheduleStatusFilter])
-
-  const deliverablesByClient = useMemo(() => {
-    const groups = new Map<string, MonthlyDeliverable[]>()
-    for (const deliverable of scheduleMonthDeliverables) {
-      const key = deliverable.client_id
-      if (!groups.has(key)) groups.set(key, [])
-      groups.get(key)!.push(deliverable)
-    }
-    return Array.from(groups.entries())
-      .map(([clientId, items]) => ({
-        clientId,
-        clientName: clientNameById.get(clientId) ?? 'Unknown client',
-        items: items.sort((a, b) => {
-          const aDate = a.scheduled_date ?? a.due_date ?? '9999-12-31'
-          const bDate = b.scheduled_date ?? b.due_date ?? '9999-12-31'
-          if (aDate !== bDate) return aDate.localeCompare(bDate)
-          return a.code.localeCompare(b.code) || a.instance_number - b.instance_number
-        }),
-      }))
-      .sort((a, b) => a.clientName.localeCompare(b.clientName))
-  }, [clientNameById, scheduleMonthDeliverables])
 
   useEffect(() => {
     const board = boardScrollRef.current
@@ -411,10 +290,6 @@ export default function PlannerPage() {
     setDrawerTask(updated)
   }
 
-  function handleDeliverableSaved(updated: MonthlyDeliverable) {
-    setScheduleDeliverables(prev => prev.map(item => item.id === updated.id ? updated : item))
-    setDrawerDeliverable(updated)
-  }
 
   if (loading) {
     return (
@@ -459,8 +334,6 @@ export default function PlannerPage() {
     )
   }
 
-  const activeIsScheduleBoard = activeBoard === 'client-schedule'
-
   return (
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
 
@@ -488,50 +361,16 @@ export default function PlannerPage() {
         )}
       </div>
 
-      {/* Client Schedule entry point */}
-      <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.035] p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal/70">Client schedule</p>
-            <h2 className="mt-1 text-lg font-black text-white">Client Schedule</h2>
-            <p className="mt-0.5 text-xs text-brand-primary/60">Current month deliverables, statuses and client work.</p>
-          </div>
-          <Link
-            to="/admin/client-schedule?view=calendar"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-[#2dd4bf] transition-all hover:border-brand-teal/60 hover:bg-brand-teal/[0.14] hover:text-white"
-          >
-            Open Client Schedule
-            <svg className="h-4 w-4 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          </Link>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {SIMPLIFIED_STATUS_OPTIONS.map(s => (
-            <span
-              key={s}
-              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${MONTHLY_STATUS_TONES[s] ?? 'text-white/40 border-white/10'}`}
-            >
-              {SIMPLIFIED_STATUS_LABELS[s]}
-            </span>
-          ))}
-        </div>
-      </div>
-
       {/* Board tabs */}
       <div className="mb-4 flex flex-wrap gap-1">
         {sortedBoards.map(board => {
           const isActive = activeBoard === board.slug
-          const isScheduleBoard = board.slug === 'client-schedule'
           const isAdminOnly = board.visibility === 'admin_only'
           return (
             <button
               key={board.slug}
               type="button"
-              // The Client Schedule board is a SEPARATE system — this tab is only
-              // a shortcut into /admin/client-schedule, never an in-Planner
-              // duplicate of package scheduling logic.
-              onClick={() => isScheduleBoard ? navigate('/admin/client-schedule?view=board') : setActiveBoard(board.slug)}
+              onClick={() => setActiveBoard(board.slug)}
               className={`flex flex-col items-start rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 isActive
                   ? 'bg-white/[0.08] text-white shadow-[inset_0_-2px_0_rgba(45,212,191,0.6)]'
@@ -547,86 +386,11 @@ export default function PlannerPage() {
                   </svg>
                 )}
               </span>
-              {isScheduleBoard && (
-                <span className="mt-0.5 pl-[1.375rem] text-[9px] font-bold uppercase tracking-[0.12em] text-brand-primary/35">
-                  Shortcut · opens Client Schedule
-                </span>
-              )}
             </button>
           )
         })}
       </div>
 
-      {activeIsScheduleBoard && (
-        <div className="mb-3 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-xs text-brand-primary/55">
-          Master schedule — full client content plan across all months.
-        </div>
-      )}
-
-      {activeIsScheduleBoard ? (
-        <>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const [y, m] = scheduleMonthKey.split('-').map(Number)
-                const d = new Date(y, m - 2, 1)
-                setScheduleMonthKey(monthKey(d))
-              }}
-              className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
-            >
-              Prev
-            </button>
-            <span className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-black text-white">
-              {new Date(scheduleMonthKey + '-01').toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                const [y, m] = scheduleMonthKey.split('-').map(Number)
-                const d = new Date(y, m, 1)
-                setScheduleMonthKey(monthKey(d))
-              }}
-              className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white"
-            >
-              Next
-            </button>
-            <Link to="/admin/client-schedule?view=calendar" className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">
-              Open Client Schedule
-            </Link>
-            <Link to="/admin/client-schedule?view=year" className="rounded-md border border-white/[0.08] px-3 py-2 text-xs font-bold text-brand-primary/60 hover:text-white">
-              Year / Master
-            </Link>
-          </div>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <input
-              type="text"
-              placeholder="Search client, code or title…"
-              value={scheduleSearch}
-              onChange={e => setScheduleSearch(e.target.value)}
-              className="w-48 rounded-lg border border-white/10 bg-[#111111] px-3 py-1.5 text-xs text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            />
-            <select
-              value={scheduleStatusFilter}
-              onChange={e => setScheduleStatusFilter(e.target.value as 'all' | SimplifiedProductionStatus)}
-              className="rounded-lg border border-white/10 bg-[#111111] px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
-            >
-              <option value="all">All statuses</option>
-              {SIMPLIFIED_STATUS_OPTIONS.map(s => (
-                <option key={s} value={s}>{SIMPLIFIED_STATUS_LABELS[s]}</option>
-              ))}
-            </select>
-            <span className="text-[10px] font-semibold text-white/30">
-              {scheduleMonthDeliverables.length} deliverable{scheduleMonthDeliverables.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          {scheduleError && (
-            <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{scheduleError}</div>
-          )}
-          <ClientScheduleBoard groups={deliverablesByClient} loading={scheduleLoading} onOpen={setDrawerDeliverable} />
-        </>
-      ) : (
-        <>
       <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
         <button
           type="button"
@@ -701,8 +465,6 @@ export default function PlannerPage() {
           </div>
         </>
       )}
-        </>
-      )}
 
       {drawerTask && (
         <PlannerTaskDrawer
@@ -719,208 +481,7 @@ export default function PlannerPage() {
           }}
         />
       )}
-      {drawerDeliverable && (
-        <ScheduleDeliverableDrawer
-          deliverable={drawerDeliverable}
-          clientName={clientNameById.get(drawerDeliverable.client_id) ?? 'Unknown client'}
-          onClose={() => setDrawerDeliverable(null)}
-          onSaved={handleDeliverableSaved}
-        />
-      )}
     </div>
-  )
-}
-
-function ClientScheduleBoard({
-  groups,
-  loading,
-  onOpen,
-}: {
-  groups: Array<{ clientId: string; clientName: string; items: MonthlyDeliverable[] }>
-  loading: boolean
-  onOpen: (deliverable: MonthlyDeliverable) => void
-}) {
-  if (loading) {
-    return (
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {[1, 2, 3, 4, 5, 6].map(item => <div key={item} className="h-48 animate-pulse rounded-xl bg-white/[0.04]" />)}
-      </div>
-    )
-  }
-
-  if (groups.length === 0) {
-    return (
-      <EmptyState
-        title="No schedule deliverables found"
-        message="Client Schedule Board reads monthly deliverables. Generate or import monthly deliverables to populate this board."
-        centered={false}
-      />
-    )
-  }
-
-  return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {groups.map(group => (
-        <section key={group.clientId} className="rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.055] to-white/[0.018] p-3">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="truncate text-sm font-black text-white">{group.clientName}</h2>
-            <span className="rounded-full bg-brand-teal/[0.08] px-2 py-0.5 text-xs font-bold text-[#2dd4bf]">{group.items.length}</span>
-          </div>
-          <div className="max-h-[34rem] space-y-2 overflow-y-auto pr-1">
-            {group.items.map(deliverable => {
-              const simplified = simplifyProductionStatus(deliverable.production_status)
-              return (
-                <button
-                  key={deliverable.id}
-                  type="button"
-                  onClick={() => onOpen(deliverable)}
-                  className="w-full rounded-lg border border-white/[0.07] bg-black/25 p-3 text-left transition-colors hover:border-brand-accent/25 hover:bg-white/[0.04]"
-                >
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold text-white">
-                        {displayDeliverableCode(deliverable)}
-                      </span>
-                      <p className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white">{deliverable.title}</p>
-                    </div>
-                    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${MONTHLY_STATUS_TONES[simplified]}`}>
-                      {SIMPLIFIED_STATUS_LABELS[simplified]}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 text-[10px] font-semibold">
-                    <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-white/55">
-                      {formatDeliverableDate(deliverable.scheduled_date ?? deliverable.due_date)}
-                    </span>
-                    {deliverable.assigned_to_name && (
-                      <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-white/55">
-                        {deliverable.assigned_to_name}
-                      </span>
-                    )}
-                    {(deliverable.helper_names ?? []).map(name => (
-                      <span key={name} className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2 py-0.5 text-[#2dd4bf]">
-                        {name}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        </section>
-      ))}
-    </div>
-  )
-}
-
-function ScheduleDeliverableDrawer({
-  deliverable,
-  clientName,
-  onClose,
-  onSaved,
-}: {
-  deliverable: MonthlyDeliverable
-  clientName: string
-  onClose: () => void
-  onSaved: (updated: MonthlyDeliverable) => void
-}) {
-  const [status, setStatus] = useState<SimplifiedProductionStatus>(simplifyProductionStatus(deliverable.production_status))
-  const [scheduledDate, setScheduledDate] = useState(deliverable.scheduled_date ?? '')
-  const [assignedTo, setAssignedTo] = useState(deliverable.assigned_to_name ?? '')
-  const [clientId, setClientId] = useState(deliverable.client_id)
-  const [saving, setSaving] = useState(false)
-  const [saveMsg, setSaveMsg] = useState<string | null>(null)
-  const [saveError, setSaveError] = useState<string | null>(null)
-
-  async function handleSave() {
-    if (saving) return
-    setSaving(true)
-    setSaveMsg(null)
-    setSaveError(null)
-    try {
-      let next: MonthlyDeliverable = deliverable
-      const statusResult = await updateMonthlyDeliverableStatus(deliverable.id, SIMPLIFIED_TO_BACKEND_STATUS[status])
-      if (statusResult.error) { setSaveError(statusResult.error.message); return }
-      if (statusResult.data) next = statusResult.data
-
-      const scheduleResult = await updateMonthlyDeliverableSchedule(deliverable.id, scheduledDate || null)
-      if (scheduleResult.error) { setSaveError(scheduleResult.error.message); return }
-      if (scheduleResult.data) next = scheduleResult.data
-
-      const coreResult = await updateMonthlyDeliverableCore(deliverable.id, {
-        assigned_to_name: assignedTo.trim() || null,
-        client_id: clientId,
-      })
-      if (coreResult.error) { setSaveError(coreResult.error.message); return }
-      if (coreResult.data) next = coreResult.data
-
-      onSaved(next)
-      setSaveMsg('Saved')
-      setTimeout(() => setSaveMsg(null), 2000)
-    } catch {
-      setSaveError('Could not save deliverable.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
-
-  return (
-    <>
-      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[460px]">
-        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-accent">Schedule deliverable</p>
-            <h2 className="mt-1 text-base font-bold leading-snug text-white">{displayDeliverableCode(deliverable)} · {deliverable.title}</h2>
-            <p className="mt-0.5 text-xs text-brand-primary/60">{clientName}</p>
-          </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-brand-primary hover:text-white">X</button>
-        </div>
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
-            <ClientPicker
-              value={clientId}
-              label={clientName}
-              onChange={client => setClientId(client?.id ?? '')}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
-            <select value={status} onChange={event => setStatus(event.target.value as SimplifiedProductionStatus)} className={inputCls}>
-              {SIMPLIFIED_STATUS_OPTIONS.map(option => <option key={option} value={option}>{SIMPLIFIED_STATUS_LABELS[option]}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Schedule date</label>
-            <input type="date" value={scheduledDate} onChange={event => setScheduledDate(event.target.value)} className={inputCls} />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label>
-            <input value={assignedTo} onChange={event => setAssignedTo(event.target.value)} className={inputCls} />
-          </div>
-          {(deliverable.helper_names ?? []).length > 0 && (
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p>
-              <div className="flex flex-wrap gap-1.5">
-                {(deliverable.helper_names ?? []).map(name => (
-                  <span key={name} className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2.5 py-0.5 text-[11px] text-[#2dd4bf]">{name}</span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="border-t border-white/[0.08] px-5 py-4">
-          {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
-          {saveMsg && <p className="mb-2 text-xs text-[#2dd4bf]">{saveMsg}</p>}
-          <div className="flex gap-3">
-            <ActionButton variant="primary" onClick={handleSave} loading={saving}>Save</ActionButton>
-            <button type="button" onClick={onClose} className="rounded-lg border border-white/10 px-4 py-2 text-sm text-brand-primary hover:text-white">Close</button>
-          </div>
-        </div>
-      </div>
-    </>
   )
 }
 

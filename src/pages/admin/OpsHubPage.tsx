@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { LoadingState } from '../../components/ui/States'
 import { useAuth } from '../../contexts/AuthContext'
 import { isManagerRole } from '../../lib/roles'
@@ -28,7 +28,7 @@ type OpsTab = 'my-work' | 'board' | 'client-work' | 'calendar' | 'admin'
 
 export default function OpsHubPage() {
   const { profile } = useAuth()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,9 +42,6 @@ export default function OpsHubPage() {
   const activeTab: OpsTab = (searchParams.get('tab') as OpsTab) || 'my-work'
   const isAdmin = profile?.role ? isManagerRole(profile.role) : false
 
-  function setTab(tab: OpsTab) {
-    setSearchParams(tab === 'my-work' ? {} : { tab })
-  }
 
   async function loadData() {
     setLoading(true)
@@ -189,26 +186,10 @@ export default function OpsHubPage() {
         </div>
       )}
 
-      <nav className="mb-6 flex gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
-        {(['my-work', 'board', 'client-work', 'calendar'] as OpsTab[]).concat(isAdmin ? ['admin'] as OpsTab[] : []).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setTab(tab)}
-            className={`flex-1 rounded-md px-3 py-2 text-xs font-black uppercase tracking-[0.08em] transition-colors ${
-              activeTab === tab
-                ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-                : 'text-brand-primary/60 hover:text-brand-primary'
-            }`}
-          >
-            {tab === 'my-work' && 'My Work'}
-            {tab === 'board' && 'Board'}
-            {tab === 'client-work' && 'Client Work'}
-            {tab === 'calendar' && 'Calendar'}
-            {tab === 'admin' && 'Admin'}
-          </button>
-        ))}
-      </nav>
-
+      <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2">
+        <p className="text-xs text-brand-primary/60">Focused operations workspace</p>
+        <Link to="/admin/my-work" className="text-xs font-black text-brand-teal hover:text-white">Back to My Work</Link>
+      </div>
       {loading ? (
         <LoadingState message="Loading operations data..." />
       ) : error ? (
@@ -618,8 +599,6 @@ function CalendarView({
   const [bucketFilter, setBucketFilter] = useState('')
   const dragTaskRef = useRef<CommandCentreTask | null>(null)
 
-  const onDateDragRef = useRef(onDateDrag)
-  onDateDragRef.current = onDateDrag
 
   const year = viewDate.getFullYear()
   const month = viewDate.getMonth()
@@ -713,7 +692,7 @@ function CalendarView({
     const task = dragTaskRef.current
     dragTaskRef.current = null
     if (!task || task.due_date === dateStr) return
-    onDateDragRef.current(task, dateStr)
+    onDateDrag(task, dateStr)
   }
 
   const viewLabel = useMemo(() => {

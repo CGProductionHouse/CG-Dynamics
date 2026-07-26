@@ -13,15 +13,16 @@ import {
   type StaffProfileOption,
 } from '../../lib/contentWorkflow'
 import {
-  VIDEO_PRODUCTION_STATUSES,
+  VIDEO_PRODUCTION_PHASES,
   VIDEO_STATUS_LABELS,
   availableVideoActions,
   buildCanonicalName,
   deriveClientCode,
   isSafeHttpUrl,
   videoNumberFromInstance,
+  videoPhaseForStatus,
   type VideoAction,
-  type VideoProductionStatus,
+  type VideoProductionPhase,
 } from '../../lib/videoPipelineRules'
 import { GuidelineBrief } from './contentGuideline'
 import {
@@ -190,7 +191,7 @@ function VideoEditForm({
           <span className={LABEL_CLS}>Editor</span>
           <select className={INPUT_CLS} value={form.editor_user_id} onChange={event => set('editor_user_id', event.target.value)}>
             <option value="">Unassigned</option>
-            {staff.map(person => <option key={person.id} value={person.id}>{person.full_name ?? person.id}</option>)}
+            {staff.filter(person => person.full_name).map(person => <option key={person.id} value={person.id}>{person.full_name}</option>)}
           </select>
         </label>
         <label className="block space-y-1.5"><span className={LABEL_CLS}>Latest production note</span><input className={INPUT_CLS} value={form.production_note} onChange={event => set('production_note', event.target.value)} /></label>
@@ -281,7 +282,7 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
   const [clientFilter, setClientFilter] = useState('')
   const [monthFilter, setMonthFilter] = useState('')
   const [editorFilter, setEditorFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState<VideoProductionStatus | 'all'>('all')
+  const [phaseFilter, setPhaseFilter] = useState<VideoProductionPhase | 'all'>('all')
   const [search, setSearch] = useState('')
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -319,16 +320,16 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
       if (clientFilter && video.client_id !== clientFilter) return false
       if (monthFilter && (video.month ?? '').slice(0, 7) !== monthFilter) return false
       if (editorFilter && video.editor_user_id !== editorFilter) return false
-      if (statusFilter !== 'all' && video.production_status !== statusFilter) return false
+      if (phaseFilter !== 'all' && videoPhaseForStatus(video.production_status) !== phaseFilter) return false
       if (!query) return true
       return [video.title, video.canonical_name ?? '', clientName(clients, video.client_id)].some(field => field.toLowerCase().includes(query))
     })
-  }, [videos, clientFilter, monthFilter, editorFilter, statusFilter, search, clients])
+  }, [videos, clientFilter, monthFilter, editorFilter, phaseFilter, search, clients])
 
   const grouped = useMemo(() => {
-    const map = new Map<VideoProductionStatus, ContentGuideIdea[]>()
-    for (const status of VIDEO_PRODUCTION_STATUSES) map.set(status, [])
-    for (const video of filtered) map.get(video.production_status)?.push(video)
+    const map = new Map<VideoProductionPhase, ContentGuideIdea[]>()
+    for (const phase of VIDEO_PRODUCTION_PHASES) map.set(phase.value, [])
+    for (const video of filtered) map.get(videoPhaseForStatus(video.production_status))?.push(video)
     return map
   }, [filtered])
 
@@ -384,11 +385,11 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
         </select>
         <select className={`${INPUT_CLS} w-auto`} value={editorFilter} onChange={event => setEditorFilter(event.target.value)}>
           <option value="">All editors</option>
-          {staff.map(person => <option key={person.id} value={person.id}>{person.full_name ?? person.id}</option>)}
+          {staff.filter(person => person.full_name).map(person => <option key={person.id} value={person.id}>{person.full_name}</option>)}
         </select>
-        <select className={`${INPUT_CLS} w-auto`} value={statusFilter} onChange={event => setStatusFilter(event.target.value as VideoProductionStatus | 'all')}>
-          <option value="all">All statuses</option>
-          {VIDEO_PRODUCTION_STATUSES.map(status => <option key={status} value={status}>{VIDEO_STATUS_LABELS[status]}</option>)}
+        <select className={`${INPUT_CLS} w-auto`} value={phaseFilter} onChange={event => setPhaseFilter(event.target.value as VideoProductionPhase | 'all')}>
+          <option value="all">All progress phases</option>
+          {VIDEO_PRODUCTION_PHASES.map(phase => <option key={phase.value} value={phase.value}>{phase.label}</option>)}
         </select>
       </div>
 
@@ -428,12 +429,12 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
         <EmptyState title={videos.length === 0 ? 'No videos yet' : 'No videos match your filters'} message={videos.length === 0 ? 'Create a content idea linked to a Client Schedule deliverable in the Content Guides tab — it becomes a tracked video here.' : 'Adjust the filters above.'} />
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-3">
-          {VIDEO_PRODUCTION_STATUSES.map(status => {
-            const items = grouped.get(status) ?? []
+          {VIDEO_PRODUCTION_PHASES.map(phase => {
+            const items = grouped.get(phase.value) ?? []
             return (
-              <div key={status} className="w-64 shrink-0">
+              <div key={phase.value} className="w-64 shrink-0">
                 <div className="mb-2 flex items-center justify-between gap-2 px-1">
-                  <p className="text-[11px] font-black uppercase tracking-[0.1em] text-white/45">{VIDEO_STATUS_LABELS[status]}</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.1em] text-white/45">{phase.label}</p>
                   <span className="text-[11px] text-white/35">{items.length}</span>
                 </div>
                 <div className="space-y-2">

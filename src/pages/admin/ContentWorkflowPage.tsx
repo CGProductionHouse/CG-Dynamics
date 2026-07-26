@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
@@ -157,7 +157,7 @@ function RunForm({
         </p>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Run name *"><input className={INPUT_CLS} value={form.name} disabled={lockCalendarFields} onChange={event => set('name', event.target.value)} /></Field>
+        <Field label="Run name *"><input autoFocus={isNew} className={INPUT_CLS} value={form.name} disabled={lockCalendarFields} onChange={event => set('name', event.target.value)} /></Field>
         <Field label="Client"><ClientSelect value={form.client_id} clients={clients} disabled={lockCalendarFields} onChange={id => set('client_id', id)} /></Field>
         <Field label={isNew ? 'Date *' : 'Date'}><input type="date" className={INPUT_CLS} value={form.run_date} disabled={lockCalendarFields} onChange={event => set('run_date', event.target.value)} /></Field>
         <Field label="Start time"><input type="time" className={INPUT_CLS} value={form.start_time} disabled={lockCalendarFields} onChange={event => set('start_time', event.target.value)} /></Field>
@@ -211,6 +211,7 @@ export default function ContentWorkflowPage() {
   const [runMode, setRunMode] = useState<'view' | 'edit' | 'create'>('view')
   const [runSaving, setRunSaving] = useState(false)
   const [runError, setRunError] = useState<string | null>(null)
+  const runEditorRef = useRef<HTMLElement>(null)
   const [runItems, setRunItems] = useState<ContentRunItem[]>([])
   const [runGuideline, setRunGuideline] = useState<ContentGuideline | null>(null)
   const [runGuidelineVideos, setRunGuidelineVideos] = useState<ContentGuidelineVideo[]>([])
@@ -219,6 +220,14 @@ export default function ContentWorkflowPage() {
   const [cardBusyId, setCardBusyId] = useState<string | null>(null)
   const [cardError, setCardError] = useState<string | null>(null)
   const [shootMode, setShootMode] = useState(false)
+
+  useEffect(() => {
+    if (runMode !== 'create') return
+    const frame = window.requestAnimationFrame(() => {
+      runEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [runMode])
 
   async function loadAll() {
     setLoading(true)
@@ -598,7 +607,7 @@ export default function ContentWorkflowPage() {
             )}
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+          <section ref={runEditorRef} className="scroll-mt-20 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
             {runMode === 'create' ? (
               <><h2 className="mb-4 text-lg font-black text-white">New content run</h2><RunForm initial={null} clients={clients} saving={runSaving} error={runError} onCancel={() => setRunMode('view')} onSubmit={submitRun} /></>
             ) : runMode === 'edit' && selectedRun ? (

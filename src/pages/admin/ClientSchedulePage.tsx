@@ -35,7 +35,7 @@ const VIEW_LABELS: Record<ScheduleView, string> = {
   board: 'Board',
   calendar: 'Calendar',
   charts: 'Charts',
-  year: 'Year / Master',
+  year: 'Year overview',
 }
 
 const TYPE_LABELS: Record<DeliverableType, string> = {
@@ -229,7 +229,11 @@ export default function ClientSchedulePage() {
     setDeliverables(scheduleResult.data ?? [])
   }
 
-  useEffect(() => { void load() }, [clientId, selectedMonth, selectedYear, typeFilter, view])
+  const loadEvent = useEffectEvent(load)
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [clientId, selectedMonth, selectedYear, typeFilter, view])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -276,6 +280,21 @@ export default function ClientSchedulePage() {
         a.instance_number - b.instance_number
     })
   }, [clientDisplay, clientNameById, deliverables, search, statusFilter])
+
+  const yearItems = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return deliverables.filter(deliverable => {
+      if (!PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)) return false
+      const status = scheduleStatusOf(deliverable)
+      if (!matchesScheduleStatusFilter(status, statusFilter)) return false
+      if (q) {
+        const clientName = clientDisplay(deliverable).label
+        const haystack = `${clientName} ${deliverable.title} ${deliverable.code}`.toLowerCase()
+        if (!haystack.includes(q)) return false
+      }
+      return true
+    })
+  }, [clientDisplay, deliverables, search, statusFilter])
 
   const counts = useMemo(() => ({
     all: deliverables.filter(deliverable => PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)).length,
@@ -349,24 +368,34 @@ export default function ClientSchedulePage() {
         <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search schedule" className="rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder:text-white/35 outline-none focus:border-brand-accent/50" />
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
-        {([
-          ['needs-action', `Needs Action ${counts.needsAction}`],
-          ['all', `All Schedule ${counts.all}`],
-          ['unscheduled', `Unscheduled ${counts.unscheduled}`],
-          ['posted-history', `Posted / History ${counts.history}`],
-        ] as const).map(([value, label]) => (
-          <button key={value} type="button" onClick={() => setMode(value)} className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${mode === value ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>
-            {label}
-          </button>
-        ))}
-      </div>
+      {view === 'calendar' || view === 'year' ? (
+        <div className="mb-4 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-xs text-brand-primary/55">
+          {view === 'calendar'
+            ? `Calendar shows all ${calendarItems.length} dated posts for ${formatMonthHeading(selectedMonth)}. Use the filters above to narrow the view.`
+            : `Year overview shows all ${yearItems.length} matching package posts across ${selectedYear}, grouped by report month.`}
+        </div>
+      ) : (
+        <>
+          <div className="mb-4 flex flex-wrap gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+            {([
+              ['needs-action', `Needs Action ${counts.needsAction}`],
+              ['all', `All Schedule ${counts.all}`],
+              ['unscheduled', `Unscheduled ${counts.unscheduled}`],
+              ['posted-history', `Posted / History ${counts.history}`],
+            ] as const).map(([value, label]) => (
+              <button key={value} type="button" onClick={() => setMode(value)} className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${mode === value ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
 
-      <p className="mb-1 text-xs text-brand-primary/55">
-        {mode === 'unscheduled'
-          ? 'Unscheduled means package items with no schedule date and no legacy date. Status (work progress) is separate.'
-          : 'Schedule date is when a post is planned. Status is the work progress. A dated post can still be Not started.'}
-      </p>
+          <p className="mb-1 text-xs text-brand-primary/55">
+            {mode === 'unscheduled'
+              ? 'Unscheduled means package items with no schedule date and no legacy date. Status (work progress) is separate.'
+              : 'Schedule date is when a post is planned. Status is the work progress. A dated post can still be Not started.'}
+          </p>
+        </>
+      )}
       {hasLegacyDates && (
         <p className="mb-4 text-[11px] text-amber-300/70">
           Some dates are shown from legacy Teams import data during the July shadow-run. They stay labelled as Schedule date until reconciled.
@@ -377,7 +406,7 @@ export default function ClientSchedulePage() {
       {error && <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</div>}
       {loading ? (
         <div className="grid gap-3 md:grid-cols-3">{[1, 2, 3, 4, 5, 6].map(item => <div key={item} className="h-32 animate-pulse rounded-xl bg-white/[0.04]" />)}</div>
-      ) : filtered.length === 0 ? (
+      ) : (view === 'calendar' ? calendarItems.length === 0 : view === 'year' ? yearItems.length === 0 : filtered.length === 0) ? (
         <EmptyState title="No package posts match" message="Adjust the filters or change the month." centered={false} />
       ) : view === 'grid' ? (
         <StickyHScroll><GridView items={filtered} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} /></StickyHScroll>
@@ -386,7 +415,7 @@ export default function ClientSchedulePage() {
       ) : view === 'charts' ? (
         <ChartsView items={filtered} clientDisplay={clientDisplay} />
       ) : view === 'year' ? (
-        <YearView items={filtered} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} />
+        <YearView items={yearItems} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} />
       ) : (
         <CalendarView month={selectedMonth} items={calendarItems} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} onMore={setDayDrawer} />
       )}
@@ -598,6 +627,7 @@ function CalendarView({ month, items, clientDisplay, onOpen, onMore }: { month: 
     byDate.get(date)!.push(item)
   }
   const today = new Date().toISOString().slice(0, 10)
+  const mobileGroups = [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b))
 
   return (
     <div>
@@ -624,8 +654,24 @@ function CalendarView({ month, items, clientDisplay, onOpen, onMore }: { month: 
           })}
         </div>
       </div>
-      <div className="space-y-2 sm:hidden">
-        {items.map(item => <ScheduleCard key={item.id} item={item} display={clientDisplay(item)} onOpen={() => onOpen(item)} />)}
+      <div className="space-y-5 sm:hidden">
+        {mobileGroups.map(([date, dayItems]) => (
+          <section key={date}>
+            <button
+              type="button"
+              onClick={() => onMore({ date, items: dayItems })}
+              className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-left"
+            >
+              <span className="text-xs font-black uppercase tracking-[0.14em] text-white">
+                {new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' })}
+              </span>
+              <span className="text-[10px] font-bold text-brand-primary/55">{dayItems.length} post{dayItems.length === 1 ? '' : 's'}</span>
+            </button>
+            <div className="space-y-2">
+              {dayItems.map(item => <ScheduleCard key={item.id} item={item} display={clientDisplay(item)} onOpen={() => onOpen(item)} />)}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   )
