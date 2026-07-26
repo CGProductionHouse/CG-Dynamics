@@ -126,81 +126,166 @@ Candidate active-client research prompts, not classifications:
 - HMH Attorneys;
 - Peyper Bonds.
 
+### Building materials, construction supply and home improvement
+
+File:
+
+- `INDUSTRY-BUILDING-MATERIALS-CONSTRUCTION-SUPPLY.md`
+
+Actual source coverage:
+
+- National Building Regulations and Building Standards Act;
+- NHBRC registration, inspection and consumer-protection framework;
+- SABS standards ecosystem and rights limits;
+- Statistics South Africa Construction Materials Price Indices;
+- Statistics South Africa hardware, paint and glass retail category;
+- NRCS cement compulsory specification;
+- SAISC technical-reference and copyright boundaries;
+- Forestry South Africa;
+- Consumer Protection Act and safety-data requirements.
+
+Segments covered:
+
+- timber and boards;
+- steel and structural products;
+- cement, concrete and masonry;
+- stone, marble, granite and engineered surfaces;
+- paint, coatings and waterproofing;
+- hardware, roofing, plumbing and trade supply;
+- consumer, contractor, architect/specifier and project procurement journeys.
+
+### Hospitality, restaurants, bars and events
+
+Files:
+
+- `INDUSTRY-HOSPITALITY-RESTAURANTS-BARS-EVENTS.md`
+- `TIKTOK-HOSPITALITY-ENTERTAINMENT-RISK-PLAYBOOK.md`
+
+Actual source coverage:
+
+- Statistics South Africa P6420 Food and Beverages;
+- National Department of Health Food Control;
+- R638 food-premises hygiene requirements;
+- official foodborne-disease prevention and response guidance;
+- Liquor Act and licensing context;
+- Liquor Amendment Bill B21-2025 status;
+- Advertising Regulatory Board Code;
+- Aware.org responsible-alcohol source;
+- Consumer Protection Act;
+- Google Business Profile/local-discovery truth;
+- TikTok regulated-goods, commercial music, account-enforcement and originality rules.
+
+Segments covered:
+
+- restaurants, coffee shops and takeaways;
+- bars, pubs and nightlife;
+- group bookings and celebrations;
+- venue hire and corporate functions;
+- catering;
+- events, tickets and deposits;
+- food safety;
+- responsible alcohol communication;
+- local discovery, reviews and booking-stage truth.
+
+### Property, architecture and construction services
+
+File:
+
+- `INDUSTRY-PROPERTY-ARCHITECTURE-CONSTRUCTION-SERVICES.md`
+
+Actual source coverage:
+
+- Architectural Profession Act and SACAP registration requirements;
+- Council for the Built Environment mandate;
+- SACPCMP professional registration;
+- Spatial Planning and Land Use Management Act;
+- National Building Regulations and Building Standards Act;
+- NHBRC home-builder and enrolment framework;
+- cidb contractor grading and classes of work;
+- Statistics South Africa P5041.1 building plans and completions;
+- Consumer Protection Act;
+- project-role and professional-scope separation.
+
+Segments covered:
+
+- architectural practices;
+- property development;
+- residential construction and renovation;
+- construction contractors;
+- project and construction management;
+- planning and land-use applications;
+- property sales/leasing journeys;
+- public and private procurement;
+- professional-registration, project-stage and portfolio truth.
+
+## Cross-platform rights foundation
+
+File:
+
+- `MUSIC-COPYRIGHT-PLATFORM-RIGHTS-SYSTEM.md`
+
+Coverage:
+
+- Meta licensed music and Sound Collection;
+- TikTok Commercial Music Library;
+- YouTube Content ID, Audio Library and Creator Music;
+- LinkedIn copyright enforcement;
+- Envato Elements project registration, certificates and Claim Clear;
+- exact-use approval states and evidence records.
+
 ## Next research order
 
-The order below follows repeated client-group prompts already recorded in `CLIENT-INDUSTRY-MATRIX.md`, then expands to common CG-managed SME sectors.
-
-1. Building materials, construction supply and home improvement
-   - timber;
-   - steel;
-   - stone/marble/granite;
-   - coatings/paint;
-   - trade versus consumer journeys;
-   - specification and safety claims.
-
-2. Hospitality, restaurants, bars and events
-   - bookings, foot traffic and local discovery;
-   - menu/product communication;
-   - responsible alcohol marketing;
-   - promotions, events, reviews and customer experience.
-
-3. Property, architecture and construction services
-   - long purchase cycles;
-   - trust, portfolio and qualification;
-   - planning/professional-registration claims;
-   - lead stages and project economics.
-
-4. Healthcare, wellness and personal care
+1. Healthcare, wellness and personal care
    - regulated health claims;
    - professional credentials;
    - privacy and sensitive lead data;
    - appointment and retention journeys.
 
-5. Retail and ecommerce
+2. Retail and ecommerce
    - product feeds;
    - catalogue and stock truth;
    - promotions;
    - conversion, fulfilment and returns;
    - repeat purchase.
 
-6. Education and training
+3. Education and training
    - accreditation;
    - enrolment journey;
    - qualification and employment claims;
    - student privacy and consent.
 
-7. Financial, insurance and credit-related services
+4. Financial, insurance and credit-related services
    - regulated advertising;
    - advice versus information;
    - affordability and disclosure;
    - high-risk lead handling.
 
-8. Security and risk services
+5. Security and risk services
    - capability claims;
    - licensing/accreditation;
    - fear-based marketing boundaries;
    - emergency versus sales communication.
 
-9. Tourism, accommodation and destination businesses
+6. Tourism, accommodation and destination businesses
    - seasonality;
    - booking platforms;
    - location content;
    - reviews;
    - availability and pricing truth.
 
-10. B2B manufacturing, engineering and industrial supply
-    - technical buying groups;
-    - specifications;
-    - tender and procurement cycles;
-    - long-lag lead attribution;
-    - after-sales support.
+7. B2B manufacturing, engineering and industrial supply
+   - technical buying groups;
+   - specifications;
+   - tender and procurement cycles;
+   - long-lag lead attribution;
+   - after-sales support.
 
-11. Community, sport and entertainment
-    - attendance;
-    - memberships;
-    - sponsorship;
-    - event safety;
-    - alcohol/gambling/age restrictions where relevant.
+8. Community, sport and entertainment
+   - attendance;
+   - memberships;
+   - sponsorship;
+   - event safety;
+   - alcohol/gambling/age restrictions where relevant.
 
 ## Per-industry completion rule
 
