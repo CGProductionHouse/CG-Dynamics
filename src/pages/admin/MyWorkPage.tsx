@@ -114,7 +114,9 @@ export default function MyWorkPage() {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal">Daily workflow</p>
               <h1 className="mt-1 text-2xl font-black text-white">My Work</h1>
             </div>
-            <div className="grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/20 p-1 sm:min-w-80">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Link to="/admin/ops-hub?tab=client-work" className="rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-center text-xs font-black text-brand-teal hover:text-white">Capture client request</Link>
+              <div className="grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/20 p-1 sm:min-w-80">
               {([
                 ['my-day', 'My Day'],
                 ['daily-tasks', 'Daily Tasks'],
@@ -123,6 +125,7 @@ export default function MyWorkPage() {
                   {label}
                 </button>
               ))}
+              </div>
             </div>
           </div>
         </div>

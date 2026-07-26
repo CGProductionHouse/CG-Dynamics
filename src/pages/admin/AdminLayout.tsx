@@ -21,12 +21,11 @@ const dynamicsNav: NavItem[] = [
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/client-dashboard', label: 'Client Dashboard' },
   { to: '/admin/client-calendar', label: 'Content Calendar' },
-  { to: '/admin/integrations', label: 'Meta / Integrations', access: 'manager' },
+  { to: '/admin/integrations', label: 'Integrations', access: 'manager' },
 ]
 
 const hubNav: NavItem[] = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
-  { to: '/admin/ops-hub', label: 'Ops Hub', end: true },
   { to: '/admin/my-work', label: 'My Work' },
   { to: '/admin/planner', label: 'Planner' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
@@ -36,7 +35,6 @@ const hubNav: NavItem[] = [
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/assistant', label: 'Assistant' },
   { to: '/admin/team', label: 'Team', access: 'admin' },
-  { to: '/admin/microsoft-import', label: 'Microsoft Sync', access: 'admin' },
 ]
 
 // Small AI Workforce group inside the Hub navigation. Kept separate from the
@@ -178,10 +176,10 @@ export default function AdminLayout() {
     { to: '/admin/clients', label: 'Clients' },
     { to: '/admin/client-dashboard', label: 'Dash' },
     { to: '/admin/client-calendar', label: 'Calendar' },
-    { to: '/admin/integrations', label: 'Meta', access: 'manager' },
+    { to: '/admin/integrations', label: 'Sync', access: 'manager' },
   ]
   const hubMobileItems: NavItem[] = [
-    { to: '/admin/ops-hub', label: 'Ops Hub' },
+    { to: '/admin/cg-hub', label: 'Hub' },
     { to: '/admin/my-work', label: 'My Work' },
     { to: '/admin/cg-calendar', label: 'Calendar' },
     { to: '/admin/client-schedule', label: 'Schedule' },

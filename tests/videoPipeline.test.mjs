@@ -140,6 +140,14 @@ test('21. URL validation rejects non-http/https schemes', () => {
 
 // ── 7–8, 22 migration contract ────────────────────────────────────────────────
 
+test('video statuses are grouped into five clear production phases', () => {
+  assert.equal(r.videoPhaseForStatus('not_shot'), 'to_shoot')
+  assert.equal(r.videoPhaseForStatus('ready_to_edit'), 'editing')
+  assert.equal(r.videoPhaseForStatus('internal_changes'), 'internal_review')
+  assert.equal(r.videoPhaseForStatus('sent_to_client'), 'client_review')
+  assert.equal(r.videoPhaseForStatus('client_approved'), 'approved')
+  assert.equal(r.VIDEO_PRODUCTION_PHASES.length, 5)
+})
 const MIG = readFileSync(new URL('../supabase/phase-19e-video-production-pipeline.sql', import.meta.url), 'utf8')
 
 test('7–8. one active guide per deliverable; archived does not block a replacement', () => {

@@ -64,6 +64,15 @@ export function formatGoogleAdsCTR(ctr: number | null): string {
   return ctr === null ? 'Unavailable' : `${ctr.toFixed(2)}%`
 }
 
+export function googleAdsCampaignPeriodLabel(campaign: GoogleAdsReportCampaign, month: string): string {
+  const [year, monthNumber] = month.split('-').map(Number)
+  const period = Number.isFinite(year) && Number.isFinite(monthNumber)
+    ? new Date(year, monthNumber - 1, 1).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
+    : 'reporting period'
+  const hadActivity = campaign.spendMicros > 0 || campaign.impressions > 0 || campaign.clicks > 0 || campaign.conversions > 0
+  return hadActivity ? `Active during ${period}` : `No activity in ${period}`
+}
+
 export interface GoogleAdsDashboardResult {
   data: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState

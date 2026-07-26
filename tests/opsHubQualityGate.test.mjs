@@ -34,8 +34,9 @@ test('admin tab is hidden from non-admin users', () => {
   assert.match(OPS_HUB_PAGE, /isAdmin/, 'Admin tab is gated by isAdmin')
 })
 
-test('admin tab navigation only shows for admin roles', () => {
-  assert.match(OPS_HUB_PAGE, /isAdmin.*\?.*\[?.*'admin/, 'Admin tab conditional in nav')
+test('admin workspace remains role-gated without the old visible tab bar', () => {
+  assert.match(OPS_HUB_PAGE, /activeTab === 'admin' && isAdmin/, 'Admin workspace remains gated')
+  assert.doesNotMatch(OPS_HUB_PAGE, /<nav className="mb-6 flex gap-1/, 'No noisy Ops Hub tab bar')
 })
 
 // ── 2. Quick Add defaults ────────────────────────────────────────────────────

@@ -34,6 +34,20 @@ export const VIDEO_STATUS_LABELS: Record<VideoProductionStatus, string> = {
   client_approved: 'Client approved',
 }
 
+export type VideoProductionPhase = 'to_shoot' | 'editing' | 'internal_review' | 'client_review' | 'approved'
+
+export const VIDEO_PRODUCTION_PHASES: Array<{ value: VideoProductionPhase; label: string; statuses: VideoProductionStatus[] }> = [
+  { value: 'to_shoot', label: 'To shoot', statuses: ['not_shot'] },
+  { value: 'editing', label: 'Editing', statuses: ['shot', 'ready_to_edit', 'editing'] },
+  { value: 'internal_review', label: 'Internal review', statuses: ['internal_review', 'internal_changes'] },
+  { value: 'client_review', label: 'Client review', statuses: ['ready_for_client', 'sent_to_client', 'client_changes'] },
+  { value: 'approved', label: 'Approved', statuses: ['client_approved'] },
+]
+
+export function videoPhaseForStatus(status: VideoProductionStatus): VideoProductionPhase {
+  return VIDEO_PRODUCTION_PHASES.find(phase => phase.statuses.includes(status))?.value ?? 'to_shoot'
+}
+
 // ── Canonical name ────────────────────────────────────────────────────────────
 
 // Uppercase, replace every run of non-alphanumerics with a single underscore,

@@ -23,13 +23,14 @@ const USER_FACING_SOURCES = [
 
 let server
 let loadGoogleAdsDashboard
+let googleAdsCampaignPeriodLabel
 let formatGoogleAdsCustomerId
 let supabase
 let originalRpc
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ loadGoogleAdsDashboard } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
+  ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
   ;({ formatGoogleAdsCustomerId } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
   ;({ supabase } = await server.ssrLoadModule('/src/lib/supabase.ts'))
   originalRpc = supabase.rpc
@@ -93,6 +94,11 @@ test('dashboard loader consumes the SQL RPC row contract and keeps weighted Goog
   assert.equal(result.data.campaignCount, 1)
 })
 
+test('campaign status copy reflects report-month activity and not only current provider status', () => {
+  const campaign = { spendMicros: 1_000_000, impressions: 100, clicks: 5, conversions: 0 }
+  assert.equal(googleAdsCampaignPeriodLabel(campaign, '2026-06'), 'Active during June 2026')
+  assert.equal(googleAdsCampaignPeriodLabel({ ...campaign, spendMicros: 0, impressions: 0, clicks: 0 }, '2026-06'), 'No activity in June 2026')
+})
 test('dashboard loader returns distinct, client-safe setup, empty, and failure states', async () => {
   const cases = [
     [{ connected: false, has_mapping: false, has_successful_sync: false }, 'disconnected'],
