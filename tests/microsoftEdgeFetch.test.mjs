@@ -31,13 +31,19 @@ test('bounded workers handle empty input without invoking the worker', async () 
   assert.equal(called, false)
 })
 
-test('Microsoft fetch processes Planner plans with bounded concurrency', () => {
+test('Microsoft preview is a durable per-source job, not a single monolithic fetch', () => {
   const source = readFileSync(
     new URL('../supabase/functions/microsoft-transition-sync/index.ts', import.meta.url),
     'utf8',
   )
-  assert.match(source, /const GRAPH_PLAN_CONCURRENCY = 2/)
-  assert.match(source, /runBoundedWorkers\(manifest\.plans, GRAPH_PLAN_CONCURRENCY/)
+  // The monolithic "fetch all plans at once" loop that timed out is gone.
+  assert.doesNotMatch(source, /runBoundedWorkers\(manifest\.plans/)
+  assert.match(source, /action === 'fetch'[\s\S]*?410/) // one-shot fetch retired
+  // Each invocation claims one source and does one bounded unit (tasks, or a
+  // single detail batch), then returns for the admin page to poll again.
+  assert.match(source, /pickNextSource\(jobRows\)/)
+  assert.match(source, /nextDetailBatch\(pending\)/)
+  assert.match(source, /'job_start', 'job_process', 'job_status', 'job_result', 'job_retry', 'job_latest'/)
 })
 
 test('active operational tasks keep their Planner descriptions', () => {

@@ -369,10 +369,94 @@ export async function getMicrosoftConnectionStatus(): Promise<{ data: MicrosoftC
   return { data: { connected: Boolean(data.connected), message: data.message as string, sources: data.sources ?? [] }, error: null }
 }
 
-export async function fetchLatestMicrosoftSnapshot(rangeStart: string, rangeEnd: string): Promise<{ snapshot: MicrosoftSnapshot | null; error: string | null }> {
-  const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'fetch', rangeStart, rangeEnd } })
-  if (error) return { snapshot: null, error: await microsoftFunctionError(error, 'Microsoft preview failed.') }
-  if (!data?.ok || !data.snapshot) return { snapshot: null, error: data?.error ?? 'Microsoft fetch failed.' }
+// ── Durable preview job ───────────────────────────────────────────────────────
+// Replaces the single long-running fetch. The heavy Planner sources are fetched
+// in bounded batches by microsoft-transition-sync; the admin page starts a job,
+// polls status, drives processing, resumes and retries. Apply stays blocked
+// until every required source completes.
+
+export interface MicrosoftJobSourceStatus {
+  id: string
+  position: number
+  sourceType: 'outlook_calendar' | 'planner_plan'
+  sourceId: string
+  sourceName: string
+  required: boolean
+  stage: 'queued' | 'fetching_tasks' | 'fetching_details' | 'complete' | 'failed'
+  recordCount: number
+  complete: boolean
+  safeError: string | null
+  detailsRemaining: number
+}
+
+export interface MicrosoftJobProgress {
+  total: number
+  complete: number
+  failed: number
+  fetching: number
+  queued: number
+  detailsRemaining: number
+  allRequiredComplete: boolean
+  anyFailed: boolean
+  finished: boolean
+}
+
+export interface MicrosoftJobState {
+  jobId: string
+  status: string
+  sources: MicrosoftJobSourceStatus[]
+  progress: MicrosoftJobProgress
+}
+
+function toJobState(data: Record<string, unknown>): MicrosoftJobState {
+  return {
+    jobId: String(data.jobId ?? ''),
+    status: String(data.status ?? 'running'),
+    sources: (data.sources as MicrosoftJobSourceStatus[]) ?? [],
+    progress: (data.progress as MicrosoftJobProgress) ?? { total: 0, complete: 0, failed: 0, fetching: 0, queued: 0, detailsRemaining: 0, allRequiredComplete: false, anyFailed: false, finished: false },
+  }
+}
+
+async function invokeMicrosoftJob(body: Record<string, unknown>, fallback: string): Promise<{ data: Record<string, unknown> | null; error: string | null }> {
+  const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body })
+  if (error) return { data: null, error: await microsoftFunctionError(error, fallback) }
+  if (!data?.ok) return { data: null, error: (data?.error as string) ?? fallback }
+  return { data: data as Record<string, unknown>, error: null }
+}
+
+export async function startMicrosoftPreviewJob(rangeStart: string, rangeEnd: string): Promise<{ job: MicrosoftJobState | null; error: string | null }> {
+  const { data, error } = await invokeMicrosoftJob({ action: 'job_start', rangeStart, rangeEnd }, 'Could not start the Microsoft preview job.')
+  return { job: data ? toJobState(data) : null, error }
+}
+
+export async function processMicrosoftPreviewJob(jobId: string): Promise<{ job: MicrosoftJobState | null; finished: boolean; error: string | null }> {
+  const { data, error } = await invokeMicrosoftJob({ action: 'job_process', jobId }, 'A Microsoft preview source could not be fetched.')
+  if (!data) return { job: null, finished: false, error }
+  return { job: toJobState({ ...data, jobId }), finished: Boolean(data.finished), error: null }
+}
+
+export async function getMicrosoftJobStatus(jobId: string): Promise<{ job: MicrosoftJobState | null; error: string | null }> {
+  const { data, error } = await invokeMicrosoftJob({ action: 'job_status', jobId }, 'Could not read the Microsoft preview status.')
+  return { job: data ? toJobState({ ...data, jobId }) : null, error }
+}
+
+export async function retryMicrosoftJobFailedSources(jobId: string): Promise<{ job: MicrosoftJobState | null; error: string | null }> {
+  const { data, error } = await invokeMicrosoftJob({ action: 'job_retry', jobId }, 'Could not retry the failed Microsoft sources.')
+  return { job: data ? toJobState({ ...data, jobId }) : null, error }
+}
+
+export async function getMicrosoftLatestJob(): Promise<{ job: MicrosoftJobState | null; error: string | null }> {
+  const { data, error } = await invokeMicrosoftJob({ action: 'job_latest' }, 'Could not resume the Microsoft preview job.')
+  if (!data) return { job: null, error }
+  const job = data.job as { jobId?: string; status?: string } | null
+  if (!job?.jobId) return { job: null, error: null }
+  return { job: toJobState({ jobId: job.jobId, status: job.status, sources: data.sources, progress: data.progress }), error: null }
+}
+
+export async function getMicrosoftPreviewResult(jobId: string): Promise<{ snapshot: MicrosoftSnapshot | null; error: string | null }> {
+  const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'job_result', jobId } })
+  if (error) return { snapshot: null, error: await microsoftFunctionError(error, 'Microsoft preview assembly failed.') }
+  if (!data?.ok || !data.snapshot) return { snapshot: null, error: (data?.error as string) ?? 'The preview is not complete yet.' }
   return { snapshot: data.snapshot as MicrosoftSnapshot, error: null }
 }
 

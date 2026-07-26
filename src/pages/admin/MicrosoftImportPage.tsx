@@ -8,7 +8,12 @@ import {
 } from '../../lib/microsoftImport'
 import {
   applyMicrosoftReconciliation,
-  fetchLatestMicrosoftSnapshot,
+  startMicrosoftPreviewJob,
+  processMicrosoftPreviewJob,
+  retryMicrosoftJobFailedSources,
+  getMicrosoftLatestJob,
+  getMicrosoftPreviewResult,
+  type MicrosoftJobState,
   getMicrosoftConnectionStatus,
   loadMicrosoftExistingTargets,
   loadMicrosoftMappingContext,
@@ -188,6 +193,8 @@ export default function MicrosoftImportPage() {
   const [error, setError] = useState<string | null>(null)
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [applyResult, setApplyResult] = useState<MicrosoftReconciliationApplyResult | null>(null)
+  const [job, setJob] = useState<MicrosoftJobState | null>(null)
+  const jobCancelledRef = useRef(false)
 
   const summary = summarizeMicrosoftReconciliation(items)
   const visibleItems = filterMicrosoftPreviewItems(items, { source: sourceFilter, action: actionFilter, status: statusFilter, conflict: conflictFilter })
@@ -215,6 +222,17 @@ export default function MicrosoftImportPage() {
   useEffect(() => {
     const timer = window.setTimeout(() => { void loadStatusEvent() }, 0)
     return () => window.clearTimeout(timer)
+  }, [])
+
+  // Resume any in-flight preview job after a refresh or navigation. The job lives
+  // server-side, so its per-source progress is restored; the admin resumes/retries.
+  const resumeJobEvent = useEffectEvent(async () => {
+    const latest = await getMicrosoftLatestJob()
+    if (latest.job && !latest.job.progress.allRequiredComplete && latest.job.status === 'running') setJob(latest.job)
+  })
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void resumeJobEvent() }, 0)
+    return () => { window.clearTimeout(timer); jobCancelledRef.current = true }
   }, [])
 
   async function prepareSnapshot(nextSnapshot: MicrosoftSnapshot) {
@@ -252,14 +270,53 @@ export default function MicrosoftImportPage() {
     }
   }
 
-  async function previewLatest() {
-    if (loading || transitionStatus !== 'active') return
+  // Drive a durable job: process one bounded source-unit at a time, updating the
+  // per-source progress UI, until every source is finished. Assemble + reconcile
+  // only when all required sources complete; surface failed sources for retry.
+  async function driveJob(jobId: string) {
+    jobCancelledRef.current = false
     setLoading(true)
     setError(null)
-    const fetched = await fetchLatestMicrosoftSnapshot(`${rangeStart}T00:00:00+02:00`, `${rangeEnd}T00:00:00+02:00`)
-    setLoading(false)
-    if (!fetched.snapshot) { setError(fetched.error ?? 'Microsoft fetch failed.'); return }
-    await prepareSnapshot(fetched.snapshot)
+    let guard = 0
+    let last: MicrosoftJobState | null = null
+    // Generous ceiling: even a 4,000-task plan is ~16 detail batches + a handful
+    // of other sources. This only guards against an unexpected non-terminating loop.
+    while (guard < 400 && !jobCancelledRef.current) {
+      guard += 1
+      const step = await processMicrosoftPreviewJob(jobId)
+      if (step.error) { setLoading(false); setError(step.error); return }
+      if (step.job) { last = step.job; setJob(step.job) }
+      if (step.finished || step.job?.progress.finished) break
+    }
+    if (jobCancelledRef.current) { setLoading(false); return }
+    const progress = last?.progress
+    if (!progress || !progress.allRequiredComplete) {
+      setLoading(false)
+      setError(progress?.anyFailed ? 'Some sources failed. Retry the failed sources to complete the preview.' : 'The preview did not finish. Retry the failed sources.')
+      return
+    }
+    const result = await getMicrosoftPreviewResult(jobId)
+    if (!result.snapshot) { setLoading(false); setError(result.error ?? 'The preview is not complete yet.'); return }
+    await prepareSnapshot(result.snapshot)
+  }
+
+  async function previewLatest() {
+    if (loading || transitionStatus !== 'active') return
+    setSnapshot(null)
+    setItems([])
+    setError(null)
+    const started = await startMicrosoftPreviewJob(`${rangeStart}T00:00:00+02:00`, `${rangeEnd}T00:00:00+02:00`)
+    if (!started.job) { setError(started.error ?? 'Could not start the Microsoft preview job.'); return }
+    setJob(started.job)
+    await driveJob(started.job.jobId)
+  }
+
+  async function retryFailedSources() {
+    if (!job || loading) return
+    const retried = await retryMicrosoftJobFailedSources(job.jobId)
+    if (!retried.job) { setError(retried.error ?? 'Could not retry the failed sources.'); return }
+    setJob(retried.job)
+    await driveJob(retried.job.jobId)
   }
 
   async function onSnapshotFile(files: FileList | null) {
@@ -349,6 +406,40 @@ export default function MicrosoftImportPage() {
         {parseErrors.length > 0 && <div className="mt-3 rounded-xl border border-red-300/20 bg-red-300/[0.06] p-3 text-xs text-red-100">{parseErrors.join(' ')}</div>}
       </section>
 
+      {job && (
+        <section className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview job</p>
+              <h2 className="mt-1 text-lg font-black text-white">
+                {job.progress.complete}/{job.progress.total} sources complete
+                {job.progress.detailsRemaining > 0 ? ` · ${job.progress.detailsRemaining} task details remaining` : ''}
+              </h2>
+              <p className="mt-1 text-xs text-white/45">{loading ? 'Fetching sources in batches — safe to leave this page and return.' : job.progress.allRequiredComplete ? 'All required sources complete.' : job.progress.anyFailed ? 'Some sources failed.' : 'Paused.'}</p>
+            </div>
+            <div className="flex gap-2">
+              {!loading && job.progress.anyFailed && <button type="button" onClick={() => void retryFailedSources()} className="rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-200">Retry failed sources</button>}
+              {!loading && job.status === 'running' && !job.progress.allRequiredComplete && !job.progress.anyFailed && <button type="button" onClick={() => void driveJob(job.jobId)} className="rounded-lg border border-brand-teal/40 bg-brand-teal/10 px-4 py-2 text-xs font-black text-brand-teal">Resume</button>}
+            </div>
+          </div>
+          <div className="mt-4 space-y-1.5">
+            {job.sources.map(source => {
+              const tone = source.stage === 'complete' ? 'border-brand-teal/30 bg-brand-teal/[0.06]' : source.stage === 'failed' ? 'border-red-400/30 bg-red-400/[0.06]' : source.stage === 'queued' ? 'border-white/10 bg-white/[0.02]' : 'border-sky-300/30 bg-sky-300/[0.06]'
+              return (
+                <div key={source.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 ${tone}`}>
+                  <div className="min-w-0"><p className="truncate text-sm font-bold text-white">{source.sourceName}</p><p className="text-[11px] text-white/45">{source.sourceType === 'planner_plan' ? 'Planner plan' : 'Outlook calendar'}{source.required ? ' · required' : ''}</p></div>
+                  <div className="flex items-center gap-3 text-right">
+                    {source.recordCount > 0 && <span className="text-[11px] text-white/55">{source.recordCount} records</span>}
+                    {source.detailsRemaining > 0 && <span className="text-[11px] text-sky-200/80">{source.detailsRemaining} details left</span>}
+                    {source.safeError && <span className="max-w-[16rem] truncate text-[11px] text-amber-200/80" title={source.safeError}>{source.safeError}</span>}
+                    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${source.stage === 'complete' ? 'border-brand-teal/40 text-brand-teal' : source.stage === 'failed' ? 'border-red-400/40 text-red-300' : source.stage === 'queued' ? 'border-white/20 text-white/50' : 'border-sky-300/40 text-sky-200'}`}>{source.stage.replace('_', ' ')}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
       {migrationNeeded && <section className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5"><h2 className="text-lg font-black text-white">Phase 17a review is required</h2><p className="mt-2 text-sm text-white/60">Preview is available after the transition-sync schema is reviewed and applied. Apply remains blocked; no migration is run from this page.</p></section>}
       {error && <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</div>}
       {applyResult && <section className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-4"><p className="font-black text-white">Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied, {applyResult.failed} failed.</p><p className="mt-1 text-xs text-white/50">No Microsoft writes were made.</p></section>}
