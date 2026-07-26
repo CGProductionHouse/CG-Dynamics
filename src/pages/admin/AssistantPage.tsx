@@ -33,6 +33,17 @@ const STARTER_PROMPTS = [
   'What is connected?',
 ]
 
+// Practical rights & risk quick-answers. These route through Brand Guardian
+// (claim safety), which retrieves the approved Music-Copyright and TikTok-Risk
+// cards and answers with citations + limitations. Until a reviewer approves those
+// cards, production honestly returns "insufficient approved evidence"; admins can
+// preview via "Admin research" mode.
+const RIGHTS_PROMPTS = [
+  'Can we use this song on a boosted Instagram Reel for a client business? What proof do we need first?',
+  'Why might this venue TikTok have been muted or restricted, and how do we diagnose it safely?',
+  'A YouTube video got a Content ID claim — is that a strike, and what should we do?',
+]
+
 const DIAGNOSTIC_PROMPTS = [
   {
     label: 'Staff payroll block',
@@ -448,6 +459,22 @@ export default function AssistantPage() {
                 Skilled agents answer only from approved source material and always cite. If nothing is approved yet, they say so honestly. Drafts require human review before client-facing use.
               </p>
             )}
+            <div className="mt-3">
+              <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white/35">Rights &amp; risk quick answers</p>
+              <div className="flex flex-wrap gap-2">
+                {RIGHTS_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    disabled={isSending}
+                    onClick={() => { setSelectedAgentKey('brand_guardian'); setInput(prompt); window.setTimeout(() => inputRef.current?.focus(), 0) }}
+                    className="rounded-full border border-brand-teal/30 bg-brand-teal/[0.06] px-3 py-1.5 text-[11px] font-semibold text-brand-teal transition-colors hover:border-brand-teal/60 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {prompt.length > 52 ? `${prompt.slice(0, 52)}…` : prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">

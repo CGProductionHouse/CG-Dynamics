@@ -76,6 +76,14 @@ export interface SkillCardRecord {
   notes: string | null
   owner: string | null
   last_reviewed: string | null
+  // Readiness governance fields (phase-24c / phase-26a). Optional: older cards
+  // and pre-migration rows may not carry them.
+  source_reference?: string | null
+  reference_state?: string | null
+  safe_claim?: string | null
+  prohibited_overclaim?: string | null
+  jurisdiction?: string | null
+  review_expires_at?: string | null
   created_at: string
   updated_at: string
 }

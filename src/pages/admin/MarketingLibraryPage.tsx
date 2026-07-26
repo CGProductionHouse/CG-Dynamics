@@ -374,6 +374,28 @@ function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sou
         <p className={LABEL_CLS}>Summary</p>
         <p className="mt-1 text-sm leading-relaxed text-white/75">{card.summary}</p>
       </div>
+      {(card.safe_claim || card.prohibited_overclaim || card.jurisdiction || card.review_expires_at) && (
+        <div className="space-y-2 rounded-xl border border-brand-teal/20 bg-brand-teal/[0.04] p-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-teal">Rights &amp; governance</p>
+          {card.safe_claim && (
+            <p className="text-sm text-white/80"><span className="font-bold text-emerald-300">Safe to say:</span> {card.safe_claim}</p>
+          )}
+          {card.prohibited_overclaim && (
+            <p className="text-sm text-white/80"><span className="font-bold text-red-300">Never claim:</span> {card.prohibited_overclaim}</p>
+          )}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/55">
+            {card.jurisdiction && <span><span className="text-white/35">Jurisdiction:</span> {card.jurisdiction}</span>}
+            {card.review_expires_at && (
+              <span>
+                <span className="text-white/35">Re-verify by:</span>{' '}
+                <span className={card.review_expires_at < new Date().toISOString().slice(0, 10) ? 'text-amber-300' : ''}>
+                  {card.review_expires_at}{card.review_expires_at < new Date().toISOString().slice(0, 10) ? ' (overdue)' : ''}
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       {card.why_it_matters && (
         <div>
           <p className={LABEL_CLS}>Why it matters</p>
