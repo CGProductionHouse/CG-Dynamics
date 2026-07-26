@@ -183,6 +183,21 @@ export const AI_WORKFORCE_AGENTS: AgentProfile[] = [
     clientIsolation: 'no_client_data',
     canActivateCards: false,
   },
+  {
+    key: 'social_media_strategist',
+    name: 'Social Media Strategist',
+    purpose: 'Own social strategy end to end: platform selection, objective, audience, campaign idea, content pillars, format mix, platform-native adaptation, the organic/paid relationship, testing plan and measurement plan — grounded in current platform knowledge and verified evidence.',
+    allowedKnowledgeLayers: ['active_client_specific', 'industry_specific', 'south_african_market', 'universal', 'internal_learning', 'source_chunks'],
+    allowedSourceTrustTiers: ['tier_1_primary', 'tier_2_professional', 'tier_3_internal'],
+    excludedSourceTypes: BASE_EXCLUDED,
+    relevantIndustries: [],
+    outputContract: ['objective', 'platform_selection', 'audience', 'campaign_idea', 'content_pillars', 'format_mix', 'platform_native_adaptation', 'organic_paid_split', 'testing_plan', 'measurement_plan', 'evidence_ids', 'confidence'],
+    mustCite: true,
+    uncertaintyBehaviour: 'Keep organic and paid distinct; never present a platform mechanic as current unless it is verified; state when platform knowledge is stale or missing; separate a timeless principle from a current platform fact from an experiment.',
+    requiresHumanReview: true,
+    clientIsolation: 'active_client_only',
+    canActivateCards: false,
+  },
 ]
 
 export function getAgentProfile(key: string): AgentProfile | null {

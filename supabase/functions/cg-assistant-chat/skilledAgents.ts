@@ -94,10 +94,50 @@ export const AGENT_CONTRACTS: Record<string, AgentContract> = {
     outputContract: ['persuasion_structure', 'timeless_principle', 'obsolete_practice', 'ethical_flag', 'evidence_ids', 'confidence'],
     system: 'You are the Historical Advertising Analyst. Separate a timeless principle from an obsolete media practice and from an unethical/non-compliant claim. Historical examples are evidence of structure, not templates.',
   },
+  social_media_strategist: {
+    key: 'social_media_strategist', name: 'Social Media Strategist',
+    allowedLayers: ALL_LAYERS,
+    clientIsolation: 'active_client_only',
+    outputContract: ['objective', 'platform_selection', 'audience', 'campaign_idea', 'content_pillars', 'format_mix', 'platform_native_adaptation', 'organic_paid_split', 'testing_plan', 'measurement_plan', 'evidence_ids', 'confidence'],
+    system: 'You are the Social Media Strategist. Own platform selection, objective, audience, campaign idea, content pillars, format mix, platform-native adaptation, the organic/paid relationship, testing and measurement. Keep organic and paid distinct. Never present a platform mechanic or metric as current unless the provided platform knowledge marks it verified; if platform knowledge is stale or missing, say so. Do not copy one caption across every platform — adapt natively per surface.',
+  },
 }
 
 export const NO_SOURCE_MESSAGE =
   'I do not have enough approved source material to answer this as a skilled agent yet.'
+
+// Agents that should also retrieve current platform knowledge for a chosen
+// platform/surface. Historical analyst and research librarian stay platform-free.
+export const SOCIAL_AWARE_AGENTS = new Set([
+  'social_media_strategist', 'marketing_strategist', 'copywriting_agent',
+  'creative_director', 'brand_guardian', 'paid_ads_agent', 'content_planner',
+  'client_report_agent',
+])
+
+export interface PlatformKnowledgeRow {
+  id: string
+  title: string
+  principle: string
+  application: string | null
+  limitations: string | null
+  knowledge_state: string
+  channel: string
+  evidence_strength: string
+  last_verified_at: string | null
+  expires_at: string | null
+  platform_slug: string
+  surface_key: string | null
+  source_url: string | null
+}
+
+// A platform knowledge item may reach a production answer ONLY if it is current:
+// verified_current/observed_current and not past its expiry. Admin research mode
+// may additionally preview experimental/disputed items.
+export function isPlatformKnowledgeCurrent(row: PlatformKnowledgeRow, mode: 'production' | 'admin_research', today: string): boolean {
+  if (row.expires_at && row.expires_at < today) return false
+  if (mode === 'production') return row.knowledge_state === 'verified_current' || row.knowledge_state === 'observed_current'
+  return !['retired', 'stale'].includes(row.knowledge_state)
+}
 
 const LAYER_ALIASES: Record<string, KnowledgeLayer> = {
   universal_principle: 'universal', universal: 'universal',

@@ -7,8 +7,10 @@ import {
   getAssistantDiagnostics,
   sendAssistantMessage,
   SKILLED_AGENTS,
+  SOCIAL_PLATFORMS,
   testAssistantProvider,
   type ActiveClientOption,
+  type AssistantPlatformKnowledgeUsed,
   type AssistantChatMessage,
   type AssistantCitation,
   type AssistantDiagnostics,
@@ -105,6 +107,7 @@ type LocalAssistantMessage = AssistantChatMessage & {
   sourcesUsed?: AssistantSourceUsed[]
   reviewWarning?: string
   insufficientEvidence?: boolean
+  platformKnowledgeUsed?: AssistantPlatformKnowledgeUsed[]
 }
 
 function createId() {
@@ -142,7 +145,7 @@ function formatTime(value: string) {
 function makeMessage(
   role: AssistantChatMessage['role'],
   content: string,
-  options: Pick<LocalAssistantMessage, 'restricted' | 'setupRequired' | 'agentName' | 'citations' | 'sourcesUsed' | 'reviewWarning' | 'insufficientEvidence'> = {}
+  options: Pick<LocalAssistantMessage, 'restricted' | 'setupRequired' | 'agentName' | 'citations' | 'sourcesUsed' | 'reviewWarning' | 'insufficientEvidence' | 'platformKnowledgeUsed'> = {}
 ): LocalAssistantMessage {
   return {
     id: createId(),
@@ -186,6 +189,9 @@ export default function AssistantPage() {
   const [activeClientId, setActiveClientId] = useState<string>('')
   const [researchMode, setResearchMode] = useState(false)
   const [activeClients, setActiveClients] = useState<ActiveClientOption[]>([])
+  const [platformSlug, setPlatformSlug] = useState('')
+  const [surfaceKey, setSurfaceKey] = useState('')
+  const [channel, setChannel] = useState<'organic' | 'paid' | 'both'>('both')
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const profileRole = profile?.role as string | undefined
   const isAdminDiagnosticsUser = profileRole === 'admin' || profileRole === 'owner'
@@ -239,6 +245,9 @@ export default function AssistantPage() {
           agentKey: selectedAgent.key,
           activeClientId: selectedAgent.needsClient ? (activeClientId || null) : null,
           mode: (researchMode && isAdminDiagnosticsUser ? 'admin_research' : 'production') as 'admin_research' | 'production',
+          platformSlug: platformSlug || null,
+          surfaceKey: surfaceKey || null,
+          channel,
         }
       : null
 
@@ -262,6 +271,7 @@ export default function AssistantPage() {
         sourcesUsed: response.sourcesUsed,
         reviewWarning: response.reviewWarning,
         insufficientEvidence: response.insufficientEvidence,
+        platformKnowledgeUsed: response.platformKnowledgeUsed,
       }),
     ])
 
@@ -394,6 +404,42 @@ export default function AssistantPage() {
               )}
 
               {selectedAgent && (
+                <>
+                  <select
+                    value={platformSlug}
+                    onChange={(event) => { setPlatformSlug(event.target.value); setSurfaceKey('') }}
+                    className="rounded-lg border border-brand-muted bg-brand-bg px-3 py-1.5 text-sm text-white outline-none focus:border-brand-accent"
+                  >
+                    <option value="">No platform</option>
+                    {SOCIAL_PLATFORMS.map((p) => <option key={p.slug} value={p.slug}>{p.name}</option>)}
+                  </select>
+                  {platformSlug && (
+                    <select
+                      value={surfaceKey}
+                      onChange={(event) => setSurfaceKey(event.target.value)}
+                      className="rounded-lg border border-brand-muted bg-brand-bg px-3 py-1.5 text-sm text-white outline-none focus:border-brand-accent"
+                    >
+                      <option value="">Any surface</option>
+                      {(SOCIAL_PLATFORMS.find((p) => p.slug === platformSlug)?.surfaces ?? []).map((s) => (
+                        <option key={s.key} value={s.key}>{s.name}</option>
+                      ))}
+                    </select>
+                  )}
+                  {platformSlug && (
+                    <select
+                      value={channel}
+                      onChange={(event) => setChannel(event.target.value as 'organic' | 'paid' | 'both')}
+                      className="rounded-lg border border-brand-muted bg-brand-bg px-3 py-1.5 text-sm text-white outline-none focus:border-brand-accent"
+                    >
+                      <option value="both">Organic + paid</option>
+                      <option value="organic">Organic</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                  )}
+                </>
+              )}
+
+              {selectedAgent && (
                 <span className="text-xs text-brand-primary/55 sm:ml-auto">{selectedAgent.blurb}</span>
               )}
             </div>
@@ -432,7 +478,7 @@ export default function AssistantPage() {
                       <p className="whitespace-pre-wrap">{message.content}</p>
                     </div>
 
-                    {!isUser && (message.citations?.length || message.sourcesUsed?.length || message.reviewWarning || message.insufficientEvidence) ? (
+                    {!isUser && (message.citations?.length || message.sourcesUsed?.length || message.platformKnowledgeUsed?.length || message.reviewWarning || message.insufficientEvidence) ? (
                       <div className="mt-2 space-y-2">
                         {message.insufficientEvidence && (
                           <div className="rounded-lg border border-sky-300/25 bg-sky-300/[0.07] px-3 py-2 text-[11px] text-sky-100">
@@ -463,6 +509,18 @@ export default function AssistantPage() {
                             <ul className="space-y-0.5">
                               {message.citations.map((citation) => (
                                 <li key={citation.id} className="text-[11px] text-brand-primary/75">[{citation.id}] {citation.cite}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {message.platformKnowledgeUsed && message.platformKnowledgeUsed.length > 0 && (
+                          <div className="rounded-lg border border-white/8 bg-black/20 px-3 py-2">
+                            <p className="mb-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/35">Platform knowledge used</p>
+                            <ul className="space-y-0.5">
+                              {message.platformKnowledgeUsed.map((k, index) => (
+                                <li key={index} className="text-[11px] text-brand-primary/75">
+                                  {k.platform}{k.surface ? `/${k.surface}` : ''} · {k.title} <span className="text-white/40">[{k.state} · {k.channel} · verified {k.lastVerified ?? 'n/a'}]</span>
+                                </li>
                               ))}
                             </ul>
                           </div>
