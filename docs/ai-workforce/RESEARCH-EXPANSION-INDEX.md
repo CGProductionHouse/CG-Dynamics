@@ -131,6 +131,43 @@ Contains source-level rights and technical handoff for:
 - metadata-only sources where full-text rights remain unresolved;
 - exact ingestion controls, hashes, citation granularity and review gates.
 
+### Industry research programme
+
+- `INDUSTRY-RESEARCH-INDEX.md`
+- `INDUSTRY-AUTOMOTIVE-DEALERSHIP-AFTERMARKET.md`
+
+The industry programme builds actual sector libraries from regulators, official statistics, industry bodies and primary research before any client classification.
+
+Current coverage:
+
+- agriculture: irrigation/farm water and agricultural machinery;
+- automotive: new/used dealerships, workshops, service, parts, tyres, fitment, fleet and commercial vehicles.
+
+Automotive source coverage includes:
+
+- naamsa Automotive Trade Manual 2026;
+- Statistics South Africa Motor Trade Sales;
+- Competition Commission Automotive Aftermarket Guidelines;
+- Consumer Protection Act and prescribed automotive code;
+- MIOSA dispute framework;
+- NRCS tyre compulsory specifications;
+- RMI/MIWA supporting consumer guidance.
+
+Next industry sequence:
+
+1. legal and professional services;
+2. building materials and home improvement;
+3. hospitality, restaurants, bars and events;
+4. property, architecture and construction services;
+5. healthcare, wellness and personal care;
+6. retail and ecommerce;
+7. education and training;
+8. financial, insurance and credit-related services;
+9. security and risk services;
+10. tourism and accommodation;
+11. B2B manufacturing and industrial supply;
+12. community, sport and entertainment.
+
 ## Recommended implementation order
 
 1. Finish review tooling and expose freshness/evidence fields already stored for social knowledge.
@@ -147,19 +184,21 @@ Contains source-level rights and technical handoff for:
 12. Prepare OCR/ingestion for the two Library of Congress Hopkins books.
 13. Ingest the approved open-access advertising evidence sources with article-level licence capture.
 14. Convert the evidence-library synthesis into review-state Skill Cards with explicit limitations.
-15. Capture POPIA, CPA and ARB references and add client-industry compliance coverage.
-16. Activate knowledge only after human review and regression tests.
+15. Convert completed industry packs into review-state industry sources/cards without activating client records.
+16. Research client classifications only from official client evidence and internal confirmation.
+17. Capture POPIA, CPA and ARB references and add client-industry compliance coverage.
+18. Activate knowledge only after human review and regression tests.
 
 ## Agent impact map
 
-- Marketing Strategist: all packs and evidence synthesis.
-- Social Media Strategist: social, website/lead attribution, local marketing and lifecycle context.
-- Paid Ads Agent: Google Ads, Meta leads, attribution, landing pages, conversion quality and experiments.
-- Copywriting Agent: Hopkins/public-domain craft, claims, lifecycle messages, evidence and substantiation.
-- Creative Director: creative principles, novelty/relevance, landing-page message match and format adaptation.
-- Brand Guardian: claims, compliance, reputation, disclosure and channel eligibility.
-- Client Report Agent: metric definitions, availability, comparison, attribution, lead stages, evidence strength and experiment states.
-- Content Planner: social, local, seasonal, lifecycle and website journey context.
+- Marketing Strategist: all packs, evidence synthesis and industry libraries.
+- Social Media Strategist: social, website/lead attribution, local marketing, lifecycle and industry context.
+- Paid Ads Agent: Google Ads, Meta leads, attribution, landing pages, conversion quality, experiments and industry lead types.
+- Copywriting Agent: Hopkins/public-domain craft, claims, lifecycle messages, evidence, industry terminology and substantiation.
+- Creative Director: creative principles, novelty/relevance, landing-page message match and industry-native formats.
+- Brand Guardian: claims, compliance, reputation, disclosure, channel eligibility and industry risk.
+- Client Report Agent: metric definitions, availability, comparison, attribution, lead stages, evidence strength, experiments and industry outcomes.
+- Content Planner: social, local, seasonal, lifecycle, website journey and industry context.
 
 ## Non-negotiable boundaries
 
@@ -167,6 +206,7 @@ Contains source-level rights and technical handoff for:
 - No copyrighted text ingestion without explicit permission.
 - No OpenStax ingestion because the source currently prohibits LLM ingestion without permission.
 - No client data promoted to universal knowledge.
+- No name-only client-industry classification.
 - No platform conversion renamed as revenue or customer outcome.
 - No delivered/opened message renamed as a lead or sale.
 - No inferred consent or bypassed suppression state.
@@ -176,4 +216,5 @@ Contains source-level rights and technical handoff for:
 - No association presented as causation.
 - No intention measure presented as observed purchasing behaviour.
 - No public-domain historical claim presented as current without modern verification.
+- No national industry trend presented as proof of one client's performance.
 - No legal advice; provide sourced risk flags and route to professional review.
