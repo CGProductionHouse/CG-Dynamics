@@ -7,6 +7,11 @@ Before changing page behavior, navigation, permissions or product scope, read
 `docs/cg-dynamics-page-vision-and-milestones.md`. The page contracts in that
 document override generic product ideas and agent assumptions.
 
+Before planning or implementing current product work, also read
+`docs/current-product-game-plan.md`. It is the canonical business-workflow and
+continuation handoff, including Content Guidelines, OneDrive, WhatsApp,
+Microsoft/package sync, CG Assistant and release-verification requirements.
+
 ## Product direction
 
 CG Dynamics is the internal operating system for CG Production House. It is
