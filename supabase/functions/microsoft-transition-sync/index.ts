@@ -211,6 +211,31 @@ Deno.serve(async request => {
   } catch {
     manifest = null
   }
+  // Merge admin-managed plan sources (public.microsoft_sync_plan_sources) into
+  // the env manifest so a Planner plan (e.g. "2025 CLIENTS SCHEDULE") can be
+  // added as a fetched source WITHOUT editing the MICROSOFT_SYNC_SOURCES_JSON
+  // secret. Dedup by plan id; env entries win. Read-only toward Microsoft.
+  if (manifest && Array.isArray(manifest.plans)) {
+    try {
+      const { data: registryPlans } = await sb
+        .from('microsoft_sync_plan_sources')
+        .select('plan_id, plan_name')
+        .eq('active', true)
+      if (Array.isArray(registryPlans)) {
+        const seen = new Set(manifest.plans.map((plan) => String(plan.id)))
+        for (const row of registryPlans) {
+          const id = String((row as { plan_id?: unknown }).plan_id ?? '').trim()
+          const name = String((row as { plan_name?: unknown }).plan_name ?? '').trim()
+          if (id && name && !seen.has(id)) {
+            manifest.plans.push({ id, name })
+            seen.add(id)
+          }
+        }
+      }
+    } catch {
+      // The registry is optional; fall back to the env manifest alone.
+    }
+  }
   const configured = Boolean(tenantId && clientId && clientSecret && manifest?.userId && Array.isArray(manifest?.plans))
   const { data: setting, error: settingError } = await sb.from('microsoft_sync_settings').select('transition_status').eq('id', true).maybeSingle()
   const transitionStatus = setting?.transition_status ?? 'paused'
