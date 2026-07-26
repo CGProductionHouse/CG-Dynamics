@@ -1,11 +1,14 @@
 # AI Workforce — Social Media Master
 
-Last updated: 2026-07-25
+Last updated: 2026-07-26
 Status: Foundation delivered; knowledge in review (nothing staff/agent-visible yet).
 
 Extends the AI Workforce (`AI-WORKFORCE-MASTER-ROADMAP.md`) to make the skilled
 agents genuinely platform-native for organic and paid social — source-backed,
 current, South-African-aware, client-isolated and honest about uncertainty.
+
+The current authoritative research queue and review-ready source packet lives in
+[`SOCIAL-SOURCE-EXPANSION-PACK.md`](./SOCIAL-SOURCE-EXPANSION-PACK.md).
 
 ## Retrieval hierarchy (social)
 
@@ -44,6 +47,9 @@ from Skill Cards, and is retrieved by social-aware agents alongside cards.
   "platform knowledge used" with state + freshness.
 - **Historical references** (phase-25e): 3 widely-documented pre-AI campaigns as
   `needs_review` research references; interpretation clearly labelled.
+- **Research expansion packet**: exact official metric, creative, policy and
+  South African compliance sources; public-domain source candidates; and a
+  review sequence for the next structured-ingestion batch.
 
 ## Honest current behaviour
 
@@ -75,8 +81,12 @@ knowledge does not reach production.
 
 - **No knowledge promoted yet** — all 16 items await admin verification; until
   then agents return insufficient-evidence for social queries.
-- **Metric-definition depth** — only 3 YouTube metrics seeded; Meta/TikTok/
-  LinkedIn metric definitions need per-page capture from official docs.
+- **Structured ingestion of the expansion packet** — Meta, TikTok and LinkedIn
+  metric claims have authoritative source targets but still need additive seed
+  migrations, exact admin review and selective promotion.
+- **Public-domain text ingestion** — three lawful candidates are documented;
+  rights and source identity must pass the existing ingestion pipeline before
+  any text or quotations are activated.
 - **Performance-learning loop** — controls are documented (isolation, comparable
   evidence, observation≠causation) but the automated learning pass is not built.
 - **Ad-library captures** — specific competitor/creative references require
