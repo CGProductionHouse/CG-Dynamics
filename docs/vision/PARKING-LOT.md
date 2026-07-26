@@ -26,6 +26,51 @@ Each item should include:
 
 ## Parking lot items
 
+### 2026-07-26 - Retrofit marketing activation layer across completed industry libraries
+
+Division: AI Workforce, Client Intelligence
+Status: Ready for milestone planning
+
+Idea:
+Circle back across every industry library completed before the marketing-led B2B manufacturing pack and add the same practical campaign layer now required for all new industry research.
+
+Required additions per industry:
+
+- buyer segments, buying committee and decision roles;
+- real customer pains, triggers, objections and decision criteria;
+- evidence-backed ad angles, hooks and message territories;
+- proof assets and trust signals that should appear in creative;
+- offer structures, lead magnets and calls to action;
+- organic content pillars and platform-specific content formats;
+- video concepts, scripts and visual demonstration opportunities;
+- paid-media channel fit, targeting constraints and retargeting stages;
+- landing-page structure and conversion-friction checks;
+- enquiry, lead, booking, quote, purchase or appointment funnel stages;
+- campaign metrics that show movement toward a business outcome;
+- examples that remain generic until exact active-client facts are retrieved;
+- compliance and claim boundaries attached to each marketing recommendation.
+
+Industry packs to retrofit:
+
+- Agriculture.
+- Automotive, dealerships and aftermarket.
+- Legal and professional services.
+- Building materials, construction supply and home improvement.
+- Hospitality, restaurants, bars and events.
+- Property, architecture and construction services.
+- Healthcare, wellness and personal care.
+- Retail and ecommerce.
+- Education and training.
+- Financial, insurance and credit-related services.
+- Security and risk services.
+- Tourism, accommodation and destinations.
+
+Why it matters:
+The original research established industry truth, terminology and compliance guardrails, but the AI Workforce must also help CG create stronger ads, content, offers, landing pages and measurable funnels. Every industry library should ultimately support practical campaign work rather than functioning only as a compliance reference.
+
+Revisit:
+After the first full industry-research pass is complete. Run one structured retrofit programme from the top of the industry index to the bottom and update each pack to the stronger marketing-activation standard introduced in `INDUSTRY-B2B-MANUFACTURING-ENGINEERING-INDUSTRIAL-SUPPLY.md`.
+
 ### 2026-07-26 - Client Website Intelligence and ads-to-website attribution
 
 Division: Client Intelligence, AI Workforce
