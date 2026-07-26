@@ -87,15 +87,13 @@ export interface JobProgress {
 
 export function jobProgress(sources: JobSourceRow[]): JobProgress {
   let complete = 0, failed = 0, fetching = 0, queued = 0, detailsRemaining = 0
-  let requiredIncomplete = 0
   for (const s of sources) {
     if (s.stage === 'complete') complete++
-    else if (s.stage === 'failed') { failed++; if (s.required) requiredIncomplete++ }
-    else if (s.stage === 'queued') { queued++; if (s.required) requiredIncomplete++ }
-    else { fetching++; if (s.required) requiredIncomplete++ }
+    else if (s.stage === 'failed') failed++
+    else if (s.stage === 'queued') queued++
+    else fetching++
     detailsRemaining += (s.pending_detail_ids?.length ?? 0)
   }
-  void requiredIncomplete
   return {
     total: sources.length,
     complete, failed, fetching, queued, detailsRemaining,
