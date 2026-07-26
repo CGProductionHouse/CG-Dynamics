@@ -22,9 +22,9 @@ const ctx = o => ({ agent: sa.AGENT_CONTRACTS.marketing_strategist, activeClient
 // ── Agent contracts ───────────────────────────────────────────────────────────
 test('nine skilled agents exist with distinct system contracts', () => {
   const keys = Object.keys(sa.AGENT_CONTRACTS)
-  assert.equal(keys.length, 9)
+  assert.equal(keys.length, 10)
   const systems = keys.map(k => sa.AGENT_CONTRACTS[k].system)
-  assert.equal(new Set(systems).size, 9)
+  assert.equal(new Set(systems).size, 10)
 })
 
 test('research librarian and historical analyst take no client data', () => {

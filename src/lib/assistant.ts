@@ -54,6 +54,9 @@ export interface AssistantChatResponse {
   insufficientEvidence?: boolean
   providerUnavailable?: boolean
   reviewWarning?: string
+  platformSlug?: string | null
+  surfaceKey?: string | null
+  platformKnowledgeUsed?: AssistantPlatformKnowledgeUsed[]
 }
 
 // The nine skilled AI Workforce agents, plus which need an active client.
@@ -66,6 +69,7 @@ export interface SkilledAgentOption {
 }
 
 export const SKILLED_AGENTS: SkilledAgentOption[] = [
+  { key: 'social_media_strategist', name: 'Social Media Strategist', needsClient: true, blurb: 'Platform-native social strategy: objective, audience, pillars, format mix, organic/paid, testing, measurement.' },
   { key: 'research_librarian', name: 'Research Librarian', needsClient: false, blurb: 'Find, classify and assess sources. Never activates cards.' },
   { key: 'marketing_strategist', name: 'Marketing Strategist', needsClient: true, blurb: 'Connect verified evidence to campaign direction.' },
   { key: 'copywriting_agent', name: 'Copywriting Agent', needsClient: true, blurb: 'Draft copy grounded in cited principles.' },
@@ -96,7 +100,41 @@ export interface SkilledChatOptions {
   agentKey: string
   activeClientId?: string | null
   mode?: 'production' | 'admin_research'
+  platformSlug?: string | null
+  surfaceKey?: string | null
+  channel?: 'organic' | 'paid' | 'both' | null
 }
+
+export interface AssistantPlatformKnowledgeUsed {
+  platform: string
+  surface: string | null
+  title: string
+  state: string
+  channel: string
+  evidenceStrength: string
+  lastVerified: string | null
+  sourceUrl: string | null
+}
+
+// The priority social platforms + their surfaces for the assistant selector.
+// Mirrors phase-25c seed; surfaces are structural facts.
+export const SOCIAL_PLATFORMS: { slug: string; name: string; surfaces: { key: string; name: string }[] }[] = [
+  { slug: 'instagram', name: 'Instagram', surfaces: [
+    { key: 'feed', name: 'Feed' }, { key: 'reels', name: 'Reels' }, { key: 'stories', name: 'Stories' },
+    { key: 'explore-search', name: 'Explore & Search' }, { key: 'profile', name: 'Profile' } ] },
+  { slug: 'facebook', name: 'Facebook', surfaces: [
+    { key: 'feed', name: 'Feed' }, { key: 'reels', name: 'Reels' }, { key: 'stories', name: 'Stories' },
+    { key: 'groups', name: 'Groups' }, { key: 'video', name: 'Video / Watch' }, { key: 'page', name: 'Page' } ] },
+  { slug: 'tiktok', name: 'TikTok', surfaces: [
+    { key: 'for-you', name: 'For You feed' }, { key: 'search', name: 'Search' },
+    { key: 'profile', name: 'Profile' }, { key: 'live', name: 'LIVE' } ] },
+  { slug: 'youtube', name: 'YouTube', surfaces: [
+    { key: 'shorts', name: 'Shorts' }, { key: 'watch-long', name: 'Long-form' }, { key: 'search', name: 'Search' },
+    { key: 'home', name: 'Home & Recommendations' }, { key: 'community', name: 'Community' } ] },
+  { slug: 'linkedin', name: 'LinkedIn', surfaces: [
+    { key: 'feed', name: 'Feed' }, { key: 'company-page', name: 'Company Page' },
+    { key: 'documents-carousels', name: 'Documents / Carousels' }, { key: 'video', name: 'Video' }, { key: 'newsletter', name: 'Newsletter' } ] },
+]
 
 export interface AssistantProviderDiagnostic {
   provider: string
@@ -198,7 +236,14 @@ export async function sendAssistantMessage(
       history: history.slice(-8),
       localWorkContext,
       ...(skilled?.agentKey
-        ? { agentKey: skilled.agentKey, activeClientId: skilled.activeClientId ?? null, mode: skilled.mode ?? 'production' }
+        ? {
+            agentKey: skilled.agentKey,
+            activeClientId: skilled.activeClientId ?? null,
+            mode: skilled.mode ?? 'production',
+            platformSlug: skilled.platformSlug ?? null,
+            surfaceKey: skilled.surfaceKey ?? null,
+            channel: skilled.channel ?? null,
+          }
         : {}),
     },
   })

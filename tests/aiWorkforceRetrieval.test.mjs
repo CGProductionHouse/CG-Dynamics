@@ -16,9 +16,9 @@ after(async () => { await server?.close() })
 
 // ── Agent registry ───────────────────────────────────────────────────────────
 test('nine distinct agents exist, each with its own output contract, none can activate cards', () => {
-  assert.equal(reg.AI_WORKFORCE_AGENTS.length, 9)
+  assert.equal(reg.AI_WORKFORCE_AGENTS.length, 10)
   const contracts = reg.AI_WORKFORCE_AGENTS.map(a => a.outputContract.join('|'))
-  assert.equal(new Set(contracts).size, 9, 'each agent has a distinct output contract')
+  assert.equal(new Set(contracts).size, 10, 'each agent has a distinct output contract')
   for (const a of reg.AI_WORKFORCE_AGENTS) {
     assert.equal(a.canActivateCards, false)
     assert.equal(a.mustCite, true)
