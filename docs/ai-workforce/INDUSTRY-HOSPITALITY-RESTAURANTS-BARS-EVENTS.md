@@ -573,6 +573,151 @@ For each confirmed client, verify:
 - How should no-show and cancellation patterns inform marketing without unfair profiling?
 - Which ARB alcohol and food appendix clauses should become active Skill Cards after exact review?
 
+## Marketing activation layer (research_only / needs_review)
+
+Added from the marketing-activation retrofit (July 2026). Not approved production
+knowledge. Candidate Skill Cards derived from this layer must default to
+`needs_review`, link supporting sources, and respect client isolation.
+
+### Market reality
+
+Hospitality purchases are occasion-driven. Customers choose based on the
+combination of food, drink, atmosphere, convenience, social proof, event
+relevance, price, availability and expected experience.
+
+The same venue may serve several distinct audiences: everyday local diners;
+families; couples; business lunches; sports viewers; nightlife audiences;
+private-event organisers; tourists; regulars; corporate groups. Marketing should
+not treat all audiences as one generic "people looking for a good time" group.
+
+### Buyer pains
+
+- Not knowing what the venue feels like before arriving
+- Unclear menu, pricing or availability
+- Difficulty booking
+- Slow responses to enquiries
+- Fear that the venue will not suit the occasion
+- Uncertainty about parking, safety, accessibility or family suitability
+- Poor consistency between advertised and real experience
+- Limited proof for private events
+- Confusion about specials and conditions
+- Concern about service quality during busy periods
+- Lack of dietary or practical information
+- Event information being scattered across social posts
+- Customers forgetting to return after one visit
+
+### Buying triggers
+
+- Birthday, anniversary or celebration
+- Weekend planning
+- Public holiday or long weekend
+- Sporting event or live entertainment
+- Office function or corporate event
+- Special occasion menu or promotion
+- Weather-related change of plans
+- App or social discovery
+- Recommendation from someone trusted
+- Travel or accommodation planning
+- Private-event enquiry
+- Delivery or takeaway moment
+
+### Audience roles
+
+- Everyday local diner
+- Couple or date-night guest
+- Family with children
+- Business or corporate guest
+- Group organiser
+- Tourist or visitor
+- Event booker or organiser
+- Delivery or takeaway customer
+- Regular or loyalty guest
+- Online-order customer
+
+### Campaign and ad angles
+
+**Experience before booking** — Show atmosphere, menu, service style and practical
+information through photos, video and real operational detail. Avoid stock imagery
+that does not match the actual venue.
+
+**Occasion targeting** — Create content and offers that fit how people actually
+choose the venue. Sunday lunch, date night, birthday booking and business meeting
+need different creative approaches.
+
+**Ease and confidence** — Make the booking process, special requests, dietary
+needs and event enquiry steps visible and simple. Address common worries around
+parking, accessibility, minimum spend and cancellation.
+
+**Social proof and discovery** — Use genuine reviews, ratings and user-generated
+content. Ensure the venue can be found and assessed without a phone call.
+
+**Return and frequency** — Build loyalty programmes, reminders and reasons to
+return beyond a one-off promotion. Treat a regular differently from a first-timer.
+
+### Hook directions
+
+- "What Friday night feels like here."
+- "How to book a private event without guessing."
+- "This is what Sunday lunch includes that the menu does not say."
+- "One visit is never enough. Here is why."
+- "What to expect before you walk in."
+- "Three things guests always ask before booking."
+- "The difference between a table and an experience."
+
+### Proof assets
+
+- Real venue photography and video
+- Menu and drink list
+- Booking process demonstration
+- Verified reviews and ratings
+- Event gallery and testimonials with permission
+- Safety, accessibility and family information
+- Dietary and allergen process
+- Staff expertise
+- Service standards and consistency evidence
+- Private event package details
+- Hygiene and certification status where applicable
+
+### Offers and lead magnets
+
+- Special-occasion booking package
+- Loyalty or frequency programme
+- Pre-order or pre-pay for events
+- First-visit guide
+- Event enquiry form
+- Group booking quote
+- Birthday or celebration offer
+- Seasonal tasting menu preview
+- Early-bird event tickets
+- Takeaway or delivery subscription
+- Newsletter with exclusive previews
+
+### Landing-page structure
+
+1. Communicate the experience and occasion fit.
+2. Show practical information: location, hours, parking, menu style, price range.
+3. Provide social proof: ratings, reviews, real photos and coverage.
+4. Explain the booking or enquiry process.
+5. Answer common concerns: dietary, safety, kids, payment and cancellation.
+6. Offer one clear action: book, enquire, view menu or make a reservation.
+7. Present the reason to return: loyalty, events, new menu, seasonal offering.
+
+### Meaningful metrics
+
+- Bookings and covers (where available)
+- Enquiry-to-booking conversion
+- Event enquiries won
+- Repeat visit rate
+- Average spend per head
+- Booking no-show rate
+- Lead source by occasion type
+- Review and rating generation
+- Private event revenue contribution
+- Takeaway or delivery order value
+- Cost per qualified booking enquiry
+
+Do not present reach, impressions or video views as actual diners.
+
 ## Safety boundaries
 
 - No legal, health or food-safety advice.

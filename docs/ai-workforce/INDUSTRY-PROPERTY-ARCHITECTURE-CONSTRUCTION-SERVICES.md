@@ -611,6 +611,162 @@ Refresh at least:
 - verified local buyer-behaviour research;
 - exact active-client classification from official client evidence.
 
+## Marketing activation layer (research_only / needs_review)
+
+Added from the marketing-activation retrofit (July 2026). Not approved production
+knowledge. Candidate Skill Cards derived from this layer must default to
+`needs_review`, link supporting sources, and respect client isolation.
+
+### Market reality
+
+Property, architecture and construction purchases are infrequent, high-value and
+often stressful. Buyers seek trust, proof, process clarity and risk reduction
+before engaging.
+
+The AI must separate these journeys: architectural professional services;
+property development; residential construction and renovation; contractor
+procurement; property sales and leasing; building-material procurement for
+projects; facilities and maintenance management.
+
+### Buyer roles
+
+- Homeowner or property owner
+- Property developer
+- Architect or design professional
+- Quantity surveyor or cost consultant
+- Main contractor or subcontractor
+- Project manager
+- Facilities or property manager
+- Property investor
+- Tenant or leaseholder
+- Property practitioner or agent
+- Municipal or approvals authority
+
+### Buyer pains
+
+- Uncertainty about feasibility, budget and timeline
+- Fear of cost overruns and hidden extras
+- Difficulty comparing professional proposals
+- Concern about contractor reliability and quality
+- Confusion about approvals, compliance and legal requirements
+- Lack of visible process and progress communication
+- Risk of structural or design defects
+- Financing and cash-flow uncertainty
+- Poor coordination between professionals
+- Delays caused by approvals, weather, materials or labour
+- Stress and disruption during construction
+- Underinsurance or liability gaps
+
+### Buying triggers
+
+- Land or property acquisition
+- Planning approval or rezoning
+- Building defect or structural concern
+- Renovation or extension need
+- Lease expiry or relocation
+- Property damage or insurance claim
+- Change in family or business size
+- Finance approval or investment decision
+- Energy, water or sustainability upgrade
+- Compliance or safety requirement
+- Property sale or valuation preparation
+- Portfolio expansion or diversification
+
+### Audience roles
+
+- First-time renovator
+- Experienced developer
+- Professional specifier
+- Trade or subcontractor
+- Private client
+- Corporate or institutional client
+- Public-sector client
+- Investor or funder
+
+### Campaign and ad angles
+
+**Process before project** — Show how the practice or firm works from first
+contact to completion. Make the process visible, predictable and reassuring.
+
+**Proof through completed work** — Present real completed projects with scope,
+team role, challenges, solutions and outcomes. Do not present concept images as
+completed work.
+
+**Trust and credentials** — Use verified professional registrations, insurance,
+industry association memberships and relevant completed projects. Avoid implying
+unique capability without evidence.
+
+**Risk reduction** — Explain how the firm manages budget, programme, quality,
+safety, variations, defects and dispute resolution. Show transparent fee or
+pricing structures where applicable.
+
+**Local knowledge** — Emphasise familiarity with local authorities, bylaws,
+municipal processes, subcontractor networks and site conditions. Do not claim
+exclusive relationships.
+
+### Hook directions
+
+- "Before you build, understand what the process really involves."
+- "What a proper feasibility study includes."
+- "The difference between a quote and a realistic budget."
+- "Three questions to ask before appointing a contractor."
+- "How we managed this project from concept to handover."
+- "What happens when the budget meets reality."
+- "Why local knowledge matters more than a generic design."
+
+### Proof assets
+
+- Completed project portfolio
+- Professional registration and insurance
+- Client testimonial with permission
+- Project timeline and budget case study
+- Process documentation
+- Quality-control and safety record
+- Industry award or recognition
+- Technical publication or presentation
+- Before-and-after project evidence
+- Supplier and subcontractor relationships
+- Sustainability or innovation credentials
+
+### Offers and lead magnets
+
+- Initial feasibility consultation
+- Project budget estimate
+- Site assessment or inspection
+- Design concept proposal
+- Compliance and approvals checklist
+- Renovation feasibility guide
+- Contractor procurement guide
+- Maintenance and facilities audit
+- Energy or sustainability assessment
+- Property condition report
+- "What to ask your architect or builder" guide
+
+### Landing-page structure
+
+1. Identify the project type or client need.
+2. Explain the service relevant to that need.
+3. Show proof through process and completed work.
+4. Answer objections about cost, timeline, quality and risk.
+5. Present professional credentials and insurances.
+6. Explain the engagement process and fee structure.
+7. Use one clear action: consultation, site visit, feasibility study or proposal request.
+
+### Meaningful metrics
+
+- Qualified project enquiries
+- Consultation-to-proposal conversion
+- Proposal-to-appointment conversion
+- Average project value
+- Referral rate
+- Project completion on budget and programme
+- Repeat client rate
+- Cost per qualified enquiry by project type
+- Lead source by professional or trade category
+- Client satisfaction indicators (where ethically collected)
+
+Do not present website visits, brochure downloads or concept views as project wins.
+
 ## Non-negotiable boundaries
 
 - No professional title without current verification.
@@ -619,5 +775,5 @@ Refresh at least:
 - No unverified contractor grade or class claim.
 - No project stage inferred from appearance.
 - No tender, budget, drawing or client data leaked across clients.
-- No national construction trend presented as one client’s result.
+- No national construction trend presented as one client's result.
 - No unreviewed industry knowledge in production answers.

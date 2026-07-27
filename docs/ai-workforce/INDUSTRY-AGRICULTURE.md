@@ -61,6 +61,151 @@ machinery and Husqvarna outdoor power, plus a **parts division and workshop /
 after-sales**. Marketing must support sales + parts + service + technical
 expertise + retention — not product posters alone.
 
+## Marketing activation layer (research_only / needs_review)
+
+Added from the marketing-activation retrofit (July 2026). Not approved production
+knowledge. Candidate Skill Cards derived from this layer must default to
+`needs_review`, link supporting sources, and respect client isolation.
+
+### Market reality
+
+Agricultural buyers do not buy only on visual appeal or generic brand awareness.
+Their decisions are shaped by production risk, seasonality, input costs, water
+availability, machinery uptime, labour, finance, technical support, delivery
+timing and expected return over a production cycle.
+
+Campaigns must connect the product or service to a real farming decision and a
+measurable operational outcome. A client claim such as percentage savings, yield
+improvement or payback period requires a calculation basis, test conditions and
+client approval before use as evidence.
+
+### Buyer roles
+
+- Farm owner or principal decision-maker
+- Farm manager or production manager
+- Irrigation manager
+- Mechanisation or workshop manager
+- Agronomist, crop adviser or technical consultant
+- Procurement or finance decision-maker
+- Cooperative, distributor or reseller
+- Emerging farmer or smallholder
+
+### Buyer pains
+
+- Rising and volatile input costs
+- Water loss, pressure problems and inefficient irrigation
+- Machinery downtime during narrow planting or harvesting windows
+- Uncertain product suitability for local soil, crop, terrain or climate
+- Poor access to parts, repairs or technical support
+- Capital expenditure without a clear payback case
+- Delivery delays during seasonal demand peaks
+- Lack of installation guidance or after-sales support
+- Fear of unproven claims and supplier failure
+- Difficulty comparing total lifecycle cost rather than purchase price
+
+### Buying triggers
+
+- Pre-planting preparation
+- Irrigation expansion or redesign
+- Breakdown or repeated maintenance failure
+- Rising fuel, labour, electricity or input cost
+- New land, crop or production expansion
+- Drought, water restriction or pressure constraints
+- Finance approval or annual capital budget
+- Dealer demonstration day, field day or agricultural show
+- Replacement cycle for equipment, pumps, pipes, tyres or implements
+- Evidence from a comparable local farm
+
+### Campaign and ad angles
+
+**Operational proof** — Show the exact farming problem before discussing the
+product. Demonstrate installation, operation, repairability and maintenance. Use
+local conditions and practical constraints rather than stock imagery. Explain
+what changes in the farmer's day, cost base or production risk.
+
+**Lifecycle value** — Compare expected useful life, maintenance burden, downtime
+and support. Avoid reducing the message to "cheapest". Present a transparent
+calculation framework where the evidence exists.
+
+**Local support** — Emphasise parts access, installation support, response time
+and technical knowledge only where the client can fulfil the promise. Use staff
+expertise, workshop capability and real service processes as proof.
+
+**Seasonal urgency** — Tie campaigns to genuine planning windows. Do not
+manufacture false scarcity. Use deadlines such as ordering, installation or
+servicing lead time only when operationally true.
+
+### Hook directions
+
+- "Before planting starts, check this first."
+- "The purchase price is not the full cost."
+- "What downtime during your busiest week really costs."
+- "Three questions to ask before changing your irrigation setup."
+- "Built for this terrain — here is the proof."
+- "Why this component fails early on some farms."
+- "A practical field test, not a brochure claim."
+
+These are reusable directions, not approved copy.
+
+### Proof assets
+
+- Real installation or field demonstration
+- Before-and-after operational evidence
+- Technical specification and compatibility data
+- Service records or maintenance comparison
+- Delivery and installation process
+- Local customer testimony with permission
+- Named expert or technician explanation
+- Warranty, support and parts-availability detail
+- Transparent cost or payback worksheet
+- Measured results with methodology and limitations
+
+### Offers and lead magnets
+
+- Farm or site assessment
+- Irrigation-layout review
+- Machinery or workshop health check
+- Seasonal service booking
+- Compatibility or sizing consultation
+- Cost-of-downtime calculator
+- Total-cost comparison worksheet
+- Field demonstration or open day
+- Parts-readiness checklist
+- Quote built around the actual application rather than a generic price request
+
+### Landing-page structure
+
+1. State the specific production or operational problem.
+2. Identify the applicable farm type, crop, terrain, machine or use case.
+3. Explain the proposed solution without unsupported superiority language.
+4. Present proof: specifications, demonstration, support, case evidence and limitations.
+5. Show the process from enquiry to assessment, quote, delivery and support.
+6. Answer practical objections: suitability, availability, maintenance, warranty, finance and lead time.
+7. Use one clear action: assessment, quote, demonstration or technical call.
+
+### Retargeting stages
+
+- Education: problem recognition and practical guidance
+- Evaluation: comparison, suitability and technical proof
+- Risk reduction: warranty, support, installation and local evidence
+- Conversion: assessment, demonstration, quote or service booking
+- After-sale: onboarding, maintenance, parts and referral content
+
+### Meaningful metrics
+
+- Qualified technical enquiries
+- Assessments or demonstrations booked
+- Quote requests with adequate project information
+- Quote-to-sale conversion
+- Sales cycle length
+- Cost per qualified lead
+- Lead quality by farm type or application
+- Repeat parts or service revenue
+- Seasonal campaign contribution
+- Website actions tied to real sales steps
+
+Do not relabel reach, clicks or video views as sales.
+
 ## Not done / next
 
 - Reviewer verification of all candidate cards against the cited sources.

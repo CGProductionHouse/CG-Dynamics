@@ -53,6 +53,10 @@ const EVIDENCE_LABELS: EvidenceLabel[] = [
 const TRUST_TIERS: SourceTrustTier[] = [
   'tier_1_primary', 'tier_2_trusted_professional', 'tier_3_internal_learning', 'tier_4_low_trust', 'needs_review',
 ]
+const INDUSTRIES: IndustryTag[] = [
+  'real_estate', 'restaurants_hospitality', 'automotive', 'construction', 'architecture',
+  'retail', 'medical', 'legal', 'agriculture', 'education', 'tourism', 'general',
+]
 
 const INPUT_CLS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
 const LABEL_CLS = 'block text-[11px] font-black uppercase tracking-[0.12em] text-white/40'
@@ -71,6 +75,33 @@ function linesToArray(value: string): string[] {
 
 function csvToArray(value: string): string[] {
   return value.split(',').map(part => part.trim()).filter(Boolean)
+}
+
+function statusCardReason(card: SkillCardRecord): string | null {
+  if (card.status === 'active') return null
+  switch (card.status) {
+    case 'draft': return 'Draft — not yet submitted for review'
+    case 'needs_review': return 'Awaiting review'
+    case 'reviewed': {
+      const needs: string[] = []
+      if (!card.source_id) needs.push('no linked source')
+      if (!card.last_reviewed) needs.push('no last-reviewed date')
+      return needs.length > 0 ? `Needs: ${needs.join(', ')}` : 'Ready but not activated'
+    }
+    case 'deprecated': return 'Deprecated — no longer active'
+    default: return null
+  }
+}
+
+function governanceWarnings(card: SkillCardRecord): string[] {
+  const warnings: string[] = []
+  if (!card.safe_claim) warnings.push('Missing "safe to say" claim')
+  if (!card.prohibited_overclaim) warnings.push('Missing "never claim" boundary')
+  if (!card.jurisdiction) warnings.push('Missing jurisdiction')
+  if (card.review_expires_at && card.review_expires_at < new Date().toISOString().slice(0, 10)) {
+    warnings.push('Review has expired — needs re-verification')
+  }
+  return warnings
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -374,7 +405,7 @@ function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sou
         <p className={LABEL_CLS}>Summary</p>
         <p className="mt-1 text-sm leading-relaxed text-white/75">{card.summary}</p>
       </div>
-      {(card.safe_claim || card.prohibited_overclaim || card.jurisdiction || card.review_expires_at) && (
+      {(card.safe_claim || card.prohibited_overclaim || card.jurisdiction || card.review_expires_at) ? (
         <div className="space-y-2 rounded-xl border border-brand-teal/20 bg-brand-teal/[0.04] p-3">
           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-teal">Rights &amp; governance</p>
           {card.safe_claim && (
@@ -395,7 +426,24 @@ function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sou
             )}
           </div>
         </div>
+      ) : (
+        <div className="rounded-xl border border-amber-300/20 bg-amber-300/[0.05] p-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-200/70">Rights &amp; governance</p>
+          <p className="mt-1 text-xs text-amber-200/60">Complete the safe-claim, prohibited-overclaim, jurisdiction and re-verify-by fields to establish governance boundaries for this card.</p>
+        </div>
       )}
+      {(() => {
+        const warnings = governanceWarnings(card)
+        if (warnings.length === 0) return null
+        return (
+          <div className="space-y-1.5 rounded-xl border border-amber-300/20 bg-amber-300/[0.05] p-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-200/70">Governance warnings</p>
+            <ul className="list-disc space-y-1 pl-4 text-xs text-amber-200/70">
+              {warnings.map(w => <li key={w}>{w}</li>)}
+            </ul>
+          </div>
+        )
+      })()}
       {card.why_it_matters && (
         <div>
           <p className={LABEL_CLS}>Why it matters</p>
@@ -539,6 +587,10 @@ export default function MarketingLibraryPage() {
   const [cardSearch, setCardSearch] = useState('')
   const [cardStatusFilter, setCardStatusFilter] = useState<SkillCardStatus | 'all'>('all')
   const [cardLayerFilter, setCardLayerFilter] = useState<KnowledgeLayer | 'all'>('all')
+  const [cardIndustryFilter, setCardIndustryFilter] = useState<IndustryTag | 'all'>('all')
+  const [cardConfidenceFilter, setCardConfidenceFilter] = useState<ConfidenceLevel | 'all'>('all')
+  const [cardSourceTypeFilter, setCardSourceTypeFilter] = useState<SourceType | 'all'>('all')
+  const [cardEvidenceFilter, setCardEvidenceFilter] = useState<EvidenceLabel | 'all'>('all')
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [cardMode, setCardMode] = useState<PaneMode>('view')
   const [cardSaving, setCardSaving] = useState(false)
@@ -578,15 +630,27 @@ export default function MarketingLibraryPage() {
     return () => window.clearTimeout(timer)
   }, [])
 
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const card of cards) {
+      counts[card.status] = (counts[card.status] ?? 0) + 1
+    }
+    return counts
+  }, [cards])
+
   const filteredCards = useMemo(() => {
     const query = cardSearch.trim().toLowerCase()
     return cards.filter(card => {
       if (cardStatusFilter !== 'all' && card.status !== cardStatusFilter) return false
       if (cardLayerFilter !== 'all' && card.knowledge_layer !== cardLayerFilter) return false
+      if (cardIndustryFilter !== 'all' && !card.relevant_industries.includes(cardIndustryFilter)) return false
+      if (cardConfidenceFilter !== 'all' && card.confidence_level !== cardConfidenceFilter) return false
+      if (cardSourceTypeFilter !== 'all' && card.source_type !== cardSourceTypeFilter) return false
+      if (cardEvidenceFilter !== 'all' && card.evidence_label !== cardEvidenceFilter) return false
       if (!query) return true
       return [card.title, card.slug, card.category, card.principle].some(field => field.toLowerCase().includes(query))
     })
-  }, [cards, cardSearch, cardStatusFilter, cardLayerFilter])
+  }, [cards, cardSearch, cardStatusFilter, cardLayerFilter, cardIndustryFilter, cardConfidenceFilter, cardSourceTypeFilter, cardEvidenceFilter])
 
   const filteredSources = useMemo(() => {
     const query = sourceSearch.trim().toLowerCase()
@@ -598,6 +662,10 @@ export default function MarketingLibraryPage() {
 
   const selectedCard = cards.find(card => card.id === selectedCardId) ?? null
   const selectedSource = sources.find(source => source.id === selectedSourceId) ?? null
+  const sourceLinkedCards = useMemo(() => {
+    if (!selectedSource) return []
+    return cards.filter(card => card.source_id === selectedSource.id)
+  }, [cards, selectedSource])
 
   async function submitCard(input: SkillCardInput) {
     setCardSaving(true)
@@ -703,7 +771,38 @@ export default function MarketingLibraryPage() {
                 <option value="all">All layers</option>
                 {KNOWLEDGE_LAYERS.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
               </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardIndustryFilter} onChange={event => setCardIndustryFilter(event.target.value as IndustryTag | 'all')}>
+                <option value="all">All industries</option>
+                {INDUSTRIES.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+              </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardConfidenceFilter} onChange={event => setCardConfidenceFilter(event.target.value as ConfidenceLevel | 'all')}>
+                <option value="all">All confidence</option>
+                {CONFIDENCE_LEVELS.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+              </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardSourceTypeFilter} onChange={event => setCardSourceTypeFilter(event.target.value as SourceType | 'all')}>
+                <option value="all">All source types</option>
+                {SOURCE_TYPES.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+              </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardEvidenceFilter} onChange={event => setCardEvidenceFilter(event.target.value as EvidenceLabel | 'all')}>
+                <option value="all">All evidence types</option>
+                {EVIDENCE_LABELS.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+              </select>
             </div>
+
+            {/* Status counts summary bar */}
+            {cards.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {STATUS_OPTIONS.map(status => {
+                  const count = statusCounts[status] ?? 0
+                  if (count === 0) return null
+                  return (
+                    <Pill key={status} tone={status === 'active' ? 'teal' : 'neutral'}>
+                      {humanize(status)} <span className="opacity-60">{count}</span>
+                    </Pill>
+                  )
+                })}
+              </div>
+            )}
 
             {filteredCards.length === 0 ? (
               <EmptyState
@@ -724,6 +823,10 @@ export default function MarketingLibraryPage() {
                         <Pill tone={card.status === 'active' ? 'teal' : 'neutral'}>{humanize(card.status)}</Pill>
                       </div>
                       <p className="mt-1 text-xs text-white/45">{card.category} · {humanize(card.knowledge_layer)}</p>
+                      {(() => {
+                        const reason = statusCardReason(card)
+                        return reason ? <p className="mt-1 text-[11px] text-white/40">{reason}</p> : null
+                      })()}
                     </button>
                   </li>
                 ))}
@@ -826,6 +929,32 @@ export default function MarketingLibraryPage() {
                   {selectedSource.page_or_url && <p className="break-words"><span className="text-white/35">Page / URL:</span> {selectedSource.page_or_url}</p>}
                 </div>
                 {selectedSource.notes && <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/60">{selectedSource.notes}</p>}
+                {sourceLinkedCards.length > 0 && (
+                  <div className="space-y-2 rounded-xl border border-brand-teal/20 bg-brand-teal/[0.04] p-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-teal">Linked Skill Cards ({sourceLinkedCards.length})</p>
+                    <ul className="space-y-1.5">
+                      {sourceLinkedCards.map(linked => (
+                        <li key={linked.id}>
+                          <button
+                            type="button"
+                            onClick={() => { setTab('cards'); setSelectedCardId(linked.id); setCardMode('view') }}
+                            className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-left text-sm text-white/75 transition-colors hover:border-white/20 hover:text-white"
+                          >
+                            <span className="font-medium text-white">{linked.title}</span>
+                            <span className="ml-2 text-[11px] text-white/40">{humanize(linked.status)} · {humanize(linked.confidence_level)}</span>
+                            {linked.safe_claim ? null : <span className="ml-2 text-[11px] text-amber-300/60">No safe-claim</span>}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {selectedSource && sourceLinkedCards.length === 0 && (
+                  <div className="rounded-xl border border-amber-300/20 bg-amber-300/[0.05] p-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-200/70">No linked Skill Cards</p>
+                    <p className="mt-1 text-xs text-amber-200/60">This source is not referenced by any Skill Card yet. Link it in a card\'s "Linked source" field.</p>
+                  </div>
+                )}
               </div>
             ) : (
               <EmptyState title="Select a source" message="Choose a source from the list to see its detail, or add a new one." />
