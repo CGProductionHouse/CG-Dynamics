@@ -14,6 +14,7 @@ import type {
 import {
   createMarketingLibrarySource,
   createSkillCard,
+  listAllSkillCardReviews,
   listMarketingLibrarySources,
   listSkillCards,
   updateMarketingLibrarySource,
@@ -22,8 +23,19 @@ import {
   type MarketingLibrarySourceInput,
   type SkillCardInput,
   type SkillCardRecord,
+  type SkillCardReferenceState,
+  type SkillCardReviewRecord,
+  type SkillCardReviewStatus,
   type SourceTrustTier,
 } from '../../lib/marketing-library/skillCardsData'
+import {
+  getSkillCardFreshness,
+  getSkillCardGovernanceWarnings,
+  getSkillCardStatusReason,
+  matchesSkillCardFilters,
+  type SkillCardFilters,
+  type SkillCardFreshness,
+} from '../../lib/marketing-library/skillCardGovernance'
 import MarketingLibraryPlatformsTab from './MarketingLibraryPlatformsTab'
 import SkillCardReviewSection from './MarketingLibraryReviewSection'
 
@@ -57,6 +69,12 @@ const INDUSTRIES: IndustryTag[] = [
   'real_estate', 'restaurants_hospitality', 'automotive', 'construction', 'architecture',
   'retail', 'medical', 'legal', 'agriculture', 'education', 'tourism', 'general',
 ]
+const REFERENCE_STATES: SkillCardReferenceState[] = [
+  'unverified', 'pending_source_ingestion', 'candidate_unverified', 'human_verified',
+]
+const REVIEW_STATES: SkillCardReviewStatus[] = [
+  'needs_review', 'approved', 'changes_requested', 'rejected', 'deprecated',
+]
 
 const INPUT_CLS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
 const LABEL_CLS = 'block text-[11px] font-black uppercase tracking-[0.12em] text-white/40'
@@ -75,33 +93,6 @@ function linesToArray(value: string): string[] {
 
 function csvToArray(value: string): string[] {
   return value.split(',').map(part => part.trim()).filter(Boolean)
-}
-
-function statusCardReason(card: SkillCardRecord): string | null {
-  if (card.status === 'active') return null
-  switch (card.status) {
-    case 'draft': return 'Draft — not yet submitted for review'
-    case 'needs_review': return 'Awaiting review'
-    case 'reviewed': {
-      const needs: string[] = []
-      if (!card.source_id) needs.push('no linked source')
-      if (!card.last_reviewed) needs.push('no last-reviewed date')
-      return needs.length > 0 ? `Needs: ${needs.join(', ')}` : 'Ready but not activated'
-    }
-    case 'deprecated': return 'Deprecated — no longer active'
-    default: return null
-  }
-}
-
-function governanceWarnings(card: SkillCardRecord): string[] {
-  const warnings: string[] = []
-  if (!card.safe_claim) warnings.push('Missing "safe to say" claim')
-  if (!card.prohibited_overclaim) warnings.push('Missing "never claim" boundary')
-  if (!card.jurisdiction) warnings.push('Missing jurisdiction')
-  if (card.review_expires_at && card.review_expires_at < new Date().toISOString().slice(0, 10)) {
-    warnings.push('Review has expired — needs re-verification')
-  }
-  return warnings
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -142,6 +133,12 @@ interface CardFormState {
   notes: string
   owner: string
   last_reviewed: string
+  source_reference: string
+  reference_state: SkillCardReferenceState | ''
+  safe_claim: string
+  prohibited_overclaim: string
+  jurisdiction: string
+  review_expires_at: string
 }
 
 function emptyCardForm(): CardFormState {
@@ -152,6 +149,7 @@ function emptyCardForm(): CardFormState {
     how_to_apply: '', examples: '', mistakes_to_avoid: '', agent_instructions: '',
     relevant_industries: '', relevant_agents: '', related_card_ids: '',
     client_specific: false, active_client_id: '', notes: '', owner: '', last_reviewed: '',
+    source_reference: '', reference_state: '', safe_claim: '', prohibited_overclaim: '', jurisdiction: '', review_expires_at: '',
   }
 }
 
@@ -168,6 +166,9 @@ function cardToForm(card: SkillCardRecord): CardFormState {
     related_card_ids: card.related_card_ids.join(', '),
     client_specific: card.client_specific, active_client_id: card.active_client_id ?? '',
     notes: card.notes ?? '', owner: card.owner ?? '', last_reviewed: card.last_reviewed ?? '',
+    source_reference: card.source_reference ?? '', reference_state: card.reference_state ?? '',
+    safe_claim: card.safe_claim ?? '', prohibited_overclaim: card.prohibited_overclaim ?? '',
+    jurisdiction: card.jurisdiction ?? '', review_expires_at: card.review_expires_at ?? '',
   }
 }
 
@@ -198,6 +199,12 @@ function formToCardInput(form: CardFormState): SkillCardInput {
     notes: form.notes.trim() || null,
     owner: form.owner.trim() || null,
     last_reviewed: form.last_reviewed || null,
+    source_reference: form.source_reference.trim() || null,
+    reference_state: form.reference_state || null,
+    safe_claim: form.safe_claim.trim() || null,
+    prohibited_overclaim: form.prohibited_overclaim.trim() || null,
+    jurisdiction: form.jurisdiction.trim() || null,
+    review_expires_at: form.review_expires_at || null,
   }
 }
 
@@ -302,6 +309,36 @@ function SkillCardForm({
         <textarea className={`${INPUT_CLS} min-h-[56px]`} value={form.why_it_matters} onChange={event => set('why_it_matters', event.target.value)} />
       </Field>
 
+      <div className="space-y-4 rounded-xl border border-brand-teal/20 bg-brand-teal/[0.04] p-4">
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-teal">Evidence governance</p>
+        <Field label="Verified source reference">
+          <textarea className={`${INPUT_CLS} min-h-[64px]`} value={form.source_reference} onChange={event => set('source_reference', event.target.value)} placeholder="Exact chapter, section, page, URL or internal evidence reference" />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Reference rights state">
+            <select className={INPUT_CLS} value={form.reference_state} onChange={event => set('reference_state', event.target.value as SkillCardReferenceState | '')}>
+              <option value="">Not set</option>
+              {REFERENCE_STATES.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+            </select>
+          </Field>
+          <Field label="Jurisdiction / territory">
+            <input className={INPUT_CLS} value={form.jurisdiction} onChange={event => set('jurisdiction', event.target.value)} placeholder="e.g. ZA; platform international" />
+          </Field>
+          <Field label="Last reviewed">
+            <input type="date" className={INPUT_CLS} value={form.last_reviewed} onChange={event => set('last_reviewed', event.target.value)} />
+          </Field>
+          <Field label="Re-verify by">
+            <input type="date" className={INPUT_CLS} value={form.review_expires_at} onChange={event => set('review_expires_at', event.target.value)} />
+          </Field>
+        </div>
+        <Field label="Safe candidate claim">
+          <textarea className={`${INPUT_CLS} min-h-[64px]`} value={form.safe_claim} onChange={event => set('safe_claim', event.target.value)} placeholder="What staff and agents may safely state from this evidence" />
+        </Field>
+        <Field label="Limitations / prohibited overclaim">
+          <textarea className={`${INPUT_CLS} min-h-[64px]`} value={form.prohibited_overclaim} onChange={event => set('prohibited_overclaim', event.target.value)} placeholder="Limits that must be retained and claims that must never be made" />
+        </Field>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="How to apply (one per line)">
           <textarea className={`${INPUT_CLS} min-h-[88px]`} value={form.how_to_apply} onChange={event => set('how_to_apply', event.target.value)} />
@@ -329,12 +366,9 @@ function SkillCardForm({
         </Field>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Owner">
           <input className={INPUT_CLS} value={form.owner} onChange={event => set('owner', event.target.value)} />
-        </Field>
-        <Field label="Last reviewed">
-          <input type="date" className={INPUT_CLS} value={form.last_reviewed} onChange={event => set('last_reviewed', event.target.value)} />
         </Field>
         <div className="space-y-1.5">
           <span className={LABEL_CLS}>Client-specific</span>
@@ -351,7 +385,7 @@ function SkillCardForm({
         </Field>
       )}
 
-      <Field label="Notes">
+      <Field label="Notes / additional limitations">
         <textarea className={`${INPUT_CLS} min-h-[56px]`} value={form.notes} onChange={event => set('notes', event.target.value)} />
       </Field>
 
@@ -372,6 +406,8 @@ function SkillCardForm({
 
 function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sources: MarketingLibrarySource[]; onEdit: () => void }) {
   const linkedSource = sources.find(source => source.id === card.source_id) ?? null
+  const today = new Date().toISOString().slice(0, 10)
+  const warnings = getSkillCardGovernanceWarnings(card, today)
   const list = (label: string, values: string[]) => values.length > 0 && (
     <div>
       <p className={LABEL_CLS}>{label}</p>
@@ -405,9 +441,12 @@ function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sou
         <p className={LABEL_CLS}>Summary</p>
         <p className="mt-1 text-sm leading-relaxed text-white/75">{card.summary}</p>
       </div>
-      {(card.safe_claim || card.prohibited_overclaim || card.jurisdiction || card.review_expires_at) ? (
+      {(card.source_reference || card.reference_state || card.safe_claim || card.prohibited_overclaim || card.jurisdiction || card.review_expires_at) ? (
         <div className="space-y-2 rounded-xl border border-brand-teal/20 bg-brand-teal/[0.04] p-3">
           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-teal">Rights &amp; governance</p>
+          {card.source_reference && (
+            <p className="text-sm text-white/80"><span className="font-bold text-white">Verified source reference:</span> {card.source_reference}</p>
+          )}
           {card.safe_claim && (
             <p className="text-sm text-white/80"><span className="font-bold text-emerald-300">Safe to say:</span> {card.safe_claim}</p>
           )}
@@ -415,12 +454,13 @@ function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sou
             <p className="text-sm text-white/80"><span className="font-bold text-red-300">Never claim:</span> {card.prohibited_overclaim}</p>
           )}
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/55">
+            {card.reference_state && <span><span className="text-white/35">Reference rights:</span> {humanize(card.reference_state)}</span>}
             {card.jurisdiction && <span><span className="text-white/35">Jurisdiction:</span> {card.jurisdiction}</span>}
             {card.review_expires_at && (
               <span>
                 <span className="text-white/35">Re-verify by:</span>{' '}
-                <span className={card.review_expires_at < new Date().toISOString().slice(0, 10) ? 'text-amber-300' : ''}>
-                  {card.review_expires_at}{card.review_expires_at < new Date().toISOString().slice(0, 10) ? ' (overdue)' : ''}
+                <span className={card.review_expires_at < today ? 'text-amber-300' : ''}>
+                  {card.review_expires_at}{card.review_expires_at < today ? ' (overdue)' : ''}
                 </span>
               </span>
             )}
@@ -432,18 +472,14 @@ function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sou
           <p className="mt-1 text-xs text-amber-200/60">Complete the safe-claim, prohibited-overclaim, jurisdiction and re-verify-by fields to establish governance boundaries for this card.</p>
         </div>
       )}
-      {(() => {
-        const warnings = governanceWarnings(card)
-        if (warnings.length === 0) return null
-        return (
-          <div className="space-y-1.5 rounded-xl border border-amber-300/20 bg-amber-300/[0.05] p-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-200/70">Governance warnings</p>
-            <ul className="list-disc space-y-1 pl-4 text-xs text-amber-200/70">
-              {warnings.map(w => <li key={w}>{w}</li>)}
-            </ul>
-          </div>
-        )
-      })()}
+      {warnings.length > 0 && (
+        <div className="space-y-1.5 rounded-xl border border-amber-300/20 bg-amber-300/[0.05] p-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-200/70">Governance warnings</p>
+          <ul className="list-disc space-y-1 pl-4 text-xs text-amber-200/70">
+            {warnings.map(warning => <li key={warning}>{warning}</li>)}
+          </ul>
+        </div>
+      )}
       {card.why_it_matters && (
         <div>
           <p className={LABEL_CLS}>Why it matters</p>
@@ -463,7 +499,7 @@ function SkillCardDetail({ card, sources, onEdit }: { card: SkillCardRecord; sou
         {card.owner && <p><span className="text-white/35">Owner:</span> {card.owner}</p>}
         {card.last_reviewed && <p><span className="text-white/35">Last reviewed:</span> {card.last_reviewed}</p>}
       </div>
-      {card.notes && <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/60">{card.notes}</p>}
+      {card.notes && <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/60"><span className="font-bold text-white/45">Notes / limitations:</span> {card.notes}</p>}
     </div>
   )
 }
@@ -582,6 +618,7 @@ export default function MarketingLibraryPage() {
 
   const [cards, setCards] = useState<SkillCardRecord[]>([])
   const [sources, setSources] = useState<MarketingLibrarySource[]>([])
+  const [reviews, setReviews] = useState<SkillCardReviewRecord[]>([])
 
   // Skill Cards tab state
   const [cardSearch, setCardSearch] = useState('')
@@ -591,6 +628,11 @@ export default function MarketingLibraryPage() {
   const [cardConfidenceFilter, setCardConfidenceFilter] = useState<ConfidenceLevel | 'all'>('all')
   const [cardSourceTypeFilter, setCardSourceTypeFilter] = useState<SourceType | 'all'>('all')
   const [cardEvidenceFilter, setCardEvidenceFilter] = useState<EvidenceLabel | 'all'>('all')
+  const [cardCategoryFilter, setCardCategoryFilter] = useState<string>('all')
+  const [cardSourceFilter, setCardSourceFilter] = useState<string>('all')
+  const [cardReferenceFilter, setCardReferenceFilter] = useState<SkillCardReferenceState | 'missing' | 'all'>('all')
+  const [cardFreshnessFilter, setCardFreshnessFilter] = useState<SkillCardFreshness | 'all'>('all')
+  const [cardReviewFilter, setCardReviewFilter] = useState<SkillCardReviewStatus | 'none' | 'all'>('all')
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [cardMode, setCardMode] = useState<PaneMode>('view')
   const [cardSaving, setCardSaving] = useState(false)
@@ -606,19 +648,24 @@ export default function MarketingLibraryPage() {
   async function loadAll() {
     setLoading(true)
     setLoadError(null)
-    const [cardResult, sourceResult] = await Promise.all([listSkillCards(), listMarketingLibrarySources()])
-    if (cardResult.migrationNeeded || sourceResult.migrationNeeded) {
+    const [cardResult, sourceResult, reviewResult] = await Promise.all([
+      listSkillCards(), listMarketingLibrarySources(), listAllSkillCardReviews(),
+    ])
+    if (cardResult.migrationNeeded || sourceResult.migrationNeeded || reviewResult.migrationNeeded) {
       setMigrationNeeded(true)
       setCards([])
       setSources([])
+      setReviews([])
       setLoading(false)
       return
     }
     setMigrationNeeded(false)
     if (cardResult.error) setLoadError(cardResult.error)
     else if (sourceResult.error) setLoadError(sourceResult.error)
+    else if (reviewResult.error) setLoadError(reviewResult.error)
     setCards(cardResult.data)
     setSources(sourceResult.data)
+    setReviews(reviewResult.data)
     setLoading(false)
   }
 
@@ -638,19 +685,45 @@ export default function MarketingLibraryPage() {
     return counts
   }, [cards])
 
+  const categories = useMemo(
+    () => [...new Set(cards.map(card => card.category).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [cards],
+  )
+
+  const latestReviewByCard = useMemo(() => {
+    const latest = new Map<string, SkillCardReviewRecord>()
+    for (const review of reviews) {
+      if (!latest.has(review.skill_card_id)) latest.set(review.skill_card_id, review)
+    }
+    return latest
+  }, [reviews])
+
+  const today = new Date().toISOString().slice(0, 10)
+  const expiredCount = cards.filter(card => getSkillCardFreshness(card, today) === 'expired').length
+  const rejectedCount = cards.filter(card => latestReviewByCard.get(card.id)?.review_status === 'rejected').length
+
   const filteredCards = useMemo(() => {
-    const query = cardSearch.trim().toLowerCase()
-    return cards.filter(card => {
-      if (cardStatusFilter !== 'all' && card.status !== cardStatusFilter) return false
-      if (cardLayerFilter !== 'all' && card.knowledge_layer !== cardLayerFilter) return false
-      if (cardIndustryFilter !== 'all' && !card.relevant_industries.includes(cardIndustryFilter)) return false
-      if (cardConfidenceFilter !== 'all' && card.confidence_level !== cardConfidenceFilter) return false
-      if (cardSourceTypeFilter !== 'all' && card.source_type !== cardSourceTypeFilter) return false
-      if (cardEvidenceFilter !== 'all' && card.evidence_label !== cardEvidenceFilter) return false
-      if (!query) return true
-      return [card.title, card.slug, card.category, card.principle].some(field => field.toLowerCase().includes(query))
-    })
-  }, [cards, cardSearch, cardStatusFilter, cardLayerFilter, cardIndustryFilter, cardConfidenceFilter, cardSourceTypeFilter, cardEvidenceFilter])
+    const filters: SkillCardFilters = {
+      search: cardSearch,
+      status: cardStatusFilter,
+      layer: cardLayerFilter,
+      industry: cardIndustryFilter,
+      confidence: cardConfidenceFilter,
+      sourceType: cardSourceTypeFilter,
+      evidence: cardEvidenceFilter,
+      category: cardCategoryFilter,
+      source: cardSourceFilter,
+      reference: cardReferenceFilter,
+      freshness: cardFreshnessFilter,
+      review: cardReviewFilter,
+    }
+    return cards.filter(card => matchesSkillCardFilters(
+      card,
+      filters,
+      latestReviewByCard.get(card.id)?.review_status ?? null,
+      today,
+    ))
+  }, [cards, cardSearch, cardStatusFilter, cardLayerFilter, cardIndustryFilter, cardConfidenceFilter, cardSourceTypeFilter, cardEvidenceFilter, cardCategoryFilter, cardSourceFilter, cardReferenceFilter, cardFreshnessFilter, cardReviewFilter, latestReviewByCard, today])
 
   const filteredSources = useMemo(() => {
     const query = sourceSearch.trim().toLowerCase()
@@ -771,13 +844,22 @@ export default function MarketingLibraryPage() {
                 <option value="all">All layers</option>
                 {KNOWLEDGE_LAYERS.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
               </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardCategoryFilter} onChange={event => setCardCategoryFilter(event.target.value)}>
+                <option value="all">All disciplines</option>
+                {categories.map(category => <option key={category} value={category}>{category}</option>)}
+              </select>
               <select className={`${INPUT_CLS} w-auto`} value={cardIndustryFilter} onChange={event => setCardIndustryFilter(event.target.value as IndustryTag | 'all')}>
                 <option value="all">All industries</option>
                 {INDUSTRIES.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
               </select>
               <select className={`${INPUT_CLS} w-auto`} value={cardConfidenceFilter} onChange={event => setCardConfidenceFilter(event.target.value as ConfidenceLevel | 'all')}>
-                <option value="all">All confidence</option>
+                <option value="all">All evidence strengths</option>
                 {CONFIDENCE_LEVELS.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+              </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardSourceFilter} onChange={event => setCardSourceFilter(event.target.value)}>
+                <option value="all">All supporting sources</option>
+                <option value="none">No linked source</option>
+                {sources.map(source => <option key={source.id} value={source.id}>{source.source_name}</option>)}
               </select>
               <select className={`${INPUT_CLS} w-auto`} value={cardSourceTypeFilter} onChange={event => setCardSourceTypeFilter(event.target.value as SourceType | 'all')}>
                 <option value="all">All source types</option>
@@ -787,6 +869,22 @@ export default function MarketingLibraryPage() {
                 <option value="all">All evidence types</option>
                 {EVIDENCE_LABELS.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
               </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardReferenceFilter} onChange={event => setCardReferenceFilter(event.target.value as SkillCardReferenceState | 'missing' | 'all')}>
+                <option value="all">All rights states</option>
+                <option value="missing">Rights state missing</option>
+                {REFERENCE_STATES.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+              </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardFreshnessFilter} onChange={event => setCardFreshnessFilter(event.target.value as SkillCardFreshness | 'all')}>
+                <option value="all">All freshness states</option>
+                <option value="current">Current</option>
+                <option value="expired">Expired</option>
+                <option value="no_expiry">No expiry date</option>
+              </select>
+              <select className={`${INPUT_CLS} w-auto`} value={cardReviewFilter} onChange={event => setCardReviewFilter(event.target.value as SkillCardReviewStatus | 'none' | 'all')}>
+                <option value="all">All review states</option>
+                <option value="none">No review</option>
+                {REVIEW_STATES.map(option => <option key={option} value={option}>{humanize(option)}</option>)}
+              </select>
             </div>
 
             {/* Status counts summary bar */}
@@ -794,13 +892,14 @@ export default function MarketingLibraryPage() {
               <div className="flex flex-wrap gap-1.5">
                 {STATUS_OPTIONS.map(status => {
                   const count = statusCounts[status] ?? 0
-                  if (count === 0) return null
                   return (
                     <Pill key={status} tone={status === 'active' ? 'teal' : 'neutral'}>
                       {humanize(status)} <span className="opacity-60">{count}</span>
                     </Pill>
                   )
                 })}
+                <Pill tone="amber">Expired <span className="opacity-60">{expiredCount}</span></Pill>
+                <Pill tone="amber">Latest review rejected <span className="opacity-60">{rejectedCount}</span></Pill>
               </div>
             )}
 
@@ -824,7 +923,7 @@ export default function MarketingLibraryPage() {
                       </div>
                       <p className="mt-1 text-xs text-white/45">{card.category} · {humanize(card.knowledge_layer)}</p>
                       {(() => {
-                        const reason = statusCardReason(card)
+                        const reason = getSkillCardStatusReason(card)
                         return reason ? <p className="mt-1 text-[11px] text-white/40">{reason}</p> : null
                       })()}
                     </button>
@@ -938,11 +1037,22 @@ export default function MarketingLibraryPage() {
                           <button
                             type="button"
                             onClick={() => { setTab('cards'); setSelectedCardId(linked.id); setCardMode('view') }}
-                            className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-left text-sm text-white/75 transition-colors hover:border-white/20 hover:text-white"
+                            className="w-full space-y-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-left text-sm text-white/75 transition-colors hover:border-white/20 hover:text-white"
                           >
-                            <span className="font-medium text-white">{linked.title}</span>
-                            <span className="ml-2 text-[11px] text-white/40">{humanize(linked.status)} · {humanize(linked.confidence_level)}</span>
-                            {linked.safe_claim ? null : <span className="ml-2 text-[11px] text-amber-300/60">No safe-claim</span>}
+                            <span className="block font-medium text-white">{linked.title}</span>
+                            <span className="block text-xs"><span className="text-white/35">Exact finding:</span> {linked.principle}</span>
+                            <span className="block text-xs"><span className="text-white/35">Verified source reference:</span> {linked.source_reference || 'Not recorded'}</span>
+                            <span className="block text-xs"><span className="text-white/35">Safe candidate claim:</span> {linked.safe_claim || 'Not recorded'}</span>
+                            <span className="block text-xs"><span className="text-white/35">Limitations / prohibited overclaim:</span> {linked.prohibited_overclaim || linked.notes || 'Not recorded'}</span>
+                            <span className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-white/45">
+                              <span>Review: {humanize(linked.status)}</span>
+                              <span>Rights: {linked.reference_state ? humanize(linked.reference_state) : 'Missing'}</span>
+                              <span>Evidence: {humanize(linked.confidence_level)}</span>
+                              <span>Jurisdiction: {linked.jurisdiction || 'Missing'}</span>
+                              <span>Last reviewed: {linked.last_reviewed || 'Never'}</span>
+                              <span>Freshness: {humanize(getSkillCardFreshness(linked, today))}</span>
+                              {linked.review_expires_at && <span>Expires: {linked.review_expires_at}</span>}
+                            </span>
                           </button>
                         </li>
                       ))}
