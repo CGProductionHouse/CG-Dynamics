@@ -198,41 +198,98 @@ Content Guideline.
 ## 9. CG Assistant product contract
 
 The CG Assistant is not primarily a separate destination page or menu item. It is
-part of the application and should be available throughout staff workflows.
+part of CG Dynamics itself and should be available throughout every authorised
+staff workflow.
 
-Preferred interaction:
+### Core product direction
 
-- A small persistent assistant control, similar to a website chat control, placed
-  unobtrusively in the app shell.
-- Opening it reveals a compact composer supporting typed input, voice notes,
-  files where safe and a send action.
-- It can also be surfaced inside the AI Library where appropriate, but should not
-  require a dedicated navigation tab for normal use.
-- It uses the current page, selected client, selected Content Run, current task,
-  signed-in profile, role, assignments and authorised app data as context.
-- It gradually builds useful staff-specific context from real work history, while
-  respecting role and privacy boundaries.
+- The Assistant should run across the whole staff application rather than live as
+  one isolated page.
+- Normal staff use should not require opening a dedicated Assistant menu item.
+- A full Assistant workspace may remain inside the AI/Marketing Library area for
+  long-form work, specialist research, diagnostics and deeper conversations.
+- The Assistant must feel like part of `My Work`, Planner, Clients, Content Runs,
+  Content Guidelines, scheduling, reports and the wider app — not an external bot
+  bolted onto CG Dynamics.
+- Over time it should build useful employee-specific context from each staff
+  member's authorised work history, responsibilities, assignments and recurring
+  patterns, without crossing role or privacy boundaries.
 
-Examples of confirmed-action workflows:
+### Persistent app-shell interaction
 
-- “Add a task under Wiseman Group to design a vector billboard, due tomorrow,
-  assigned to Ger-Marie.”
-- Summarise the current staff member's day and blockers.
+- Add a small, unobtrusive Assistant icon in the bottom-right corner of the app,
+  similar to a modern website chat control.
+- The control must be available while any authorised staff page is open on both
+  desktop and mobile.
+- Selecting the icon opens a compact chat/composer surface without forcing the
+  user to leave the current page.
+- The composer should support:
+  - typed messages;
+  - voice notes through a microphone control;
+  - safe file attachments where the current role and workflow allow them;
+  - a clear send action;
+  - follow-up messages within the same contextual conversation.
+- The shell should be compact by default, expandable when needed, and must not
+  cover critical mobile navigation or page actions.
+
+### Context awareness
+
+The Assistant should receive safe, role-authorised context from:
+
+- the current page and route;
+- the signed-in user and role;
+- the selected client;
+- the current work item or task;
+- the selected Content Run and canonical Content Guideline;
+- the selected calendar or Client Schedule item;
+- the selected report or performance view;
+- assignments, due dates, statuses and visible operational history;
+- approved Marketing Library, platform and industry knowledge;
+- relevant active-client intelligence and performance data once connected.
+
+It must never assume that a page label, client name or partial context is enough
+for a write. Ambiguous entities must be resolved against canonical data.
+
+### Example confirmed-action workflow
+
+A staff member should be able to voice or type:
+
+> “Quickly add a task under Wiseman Group to design a vector billboard, due
+> tomorrow, assigned to Ger-Marie.”
+
+The Assistant should:
+
+1. Resolve the active client, user and destination work area.
+2. Interpret the due date in the signed-in user's timezone.
+3. Show a concise proposed action.
+4. Ask for confirmation where required.
+5. Create the task in CG Dynamics after confirmation.
+6. Return the created task and a direct navigation action.
+7. Record an audit trail.
+
+Other expected workflows:
+
+- Summarise the current staff member's day, priorities and blockers.
 - Explain the selected Content Run or guideline.
-- Start the post-run voice report flow.
-- Find relevant historical content concepts and possible repetition.
+- Start the post-run voice report flow from the current Content Run.
+- Find relevant historical concepts and warn about likely repetition.
+- Draft a client update from real visible progress.
+- Navigate directly to the relevant record or filtered view.
 
-Action rules:
+### Action and safety rules
 
-- Read-only summaries and navigation may happen immediately.
-- Data writes require a clear preview and user confirmation.
+- Read-only summaries, explanations and navigation may happen immediately.
+- Data writes require a clear preview and user confirmation unless an explicitly
+  approved low-risk shortcut is later defined.
 - Destructive, security, role, permission and raw-file-sharing actions are not
-  available through the assistant.
-- Never invent clients, users, tasks, due dates, statuses or scripts.
+  available through the Assistant.
+- Never invent clients, users, tasks, due dates, statuses, scripts or performance.
 - Resolve names against current canonical data and ask for confirmation when
   ambiguous.
 - Every confirmed write must be auditable with actor, timestamp, proposed action,
-  final action and affected record IDs.
+  confirmation, final action and affected record IDs.
+- Client isolation and staff permissions apply equally to Assistant retrieval and
+  Assistant actions.
 
 ## 10. Microsoft and package sync hardening
 
@@ -341,25 +398,25 @@ navigation and shell work.
 The current sidebar is too fragmented. Do not keep separate top-level links for
 every screen when several screens belong to one daily workflow.
 
-Target staff navigation structure:
+Confirmed structure and boundaries:
 
-- `Hub`
-- `Work`
-  - combines the current `My Work` and `Planner` experiences into one coherent
-    work area;
-  - preserve existing data and routes internally where useful, but do not force
-    staff to choose between overlapping task destinations;
-- `Calendar`
-  - groups `CG Calendar` and `Client Schedule` under one scheduling area;
-  - preserve their distinct source-of-truth responsibilities;
-- `Content`
-  - combines `Content Workflow` and `Full Content Guide` into one connected
-    content-production area;
-  - users should move naturally between Content Runs, canonical guidelines,
+- `Hub` remains the main operational overview.
+- `Work` should combine the current `My Work` and `Planner` experiences into one
+  coherent daily work area.
+  - Preserve existing data and routes internally where useful.
+  - Do not force staff to choose between overlapping task destinations.
+- `CG Calendar` remains its own operational calendar destination.
+- `Client Schedule` must remain a separate top-level product area.
+  - Do not combine it with CG Calendar.
+  - Client Schedule is expected to develop into a broader, dedicated scheduling
+    system over time.
+  - Preserve `monthly_deliverables` as its canonical source of truth.
+- `Content` should combine `Content Workflow` and `Full Content Guide` into one
+  connected content-production area.
+  - Users should move naturally between Content Runs, canonical guidelines,
     scripts, statuses and production progress without treating them as unrelated
-    products;
-- `Clients`
-  - remains a core staff destination.
+    products.
+- `Clients` remains a core staff destination.
 
 Do not collapse canonical data models merely because navigation is consolidated.
 `monthly_deliverables`, Content Runs, Content Guidelines and Planner tasks keep
@@ -378,16 +435,13 @@ their existing source-of-truth boundaries.
 
 ### Assistant belongs to the whole application
 
-- The Assistant must not remain only as an isolated sidebar destination.
-- Implement it as a persistent app-shell capability available across the whole
-  authorised staff app.
-- The shell Assistant should receive safe context from the current page, selected
-  client, work item, Content Run, guideline, calendar item or report.
-- A full Assistant workspace may remain for long-form work, diagnostics or deep
-  research, but normal use should not require leaving the current workflow.
+- Remove the expectation that normal staff must use an `Assistant` sidebar tab.
+- Implement the Assistant as the persistent app-shell capability described in
+  Section 9.
+- It may also live inside the AI/Marketing Library area as a deeper AI workspace,
+  but normal use must happen from anywhere in the authorised staff app.
 - Navigation cleanup and Assistant-shell work must be designed together so the
-  Assistant feels like part of CG Dynamics rather than another disconnected
-  module.
+  Assistant feels like CG Dynamics itself rather than another disconnected module.
 
 ### External product handling
 
@@ -397,5 +451,6 @@ their existing source-of-truth boundaries.
 ### Required design outcome
 
 The resulting sidebar must be shorter, clearer and mobile-friendly. It should
-prioritise the main daily journeys of work, scheduling, content and clients, while
-keeping administration and AI governance appropriately separated.
+prioritise the main daily journeys of Hub, Work, CG Calendar, Client Schedule,
+Content and Clients, while keeping administration and AI governance appropriately
+separated.
