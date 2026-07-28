@@ -180,7 +180,7 @@ export function PlannerPeoplePicker({
               <button
                 type="button"
                 onClick={() => remove(person.id)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none text-brand-primary/60 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full text-lg leading-none text-brand-primary/60 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-accent sm:h-8 sm:w-8"
                 aria-label={`Remove ${person.full_name}`}
                 title={`Remove ${person.full_name}`}
               >

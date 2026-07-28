@@ -73,7 +73,7 @@ test('provides disabled and read-only modes with mobile touch targets', () => {
   assert.match(source, /!readOnly/)
   assert.match(source, /min-h-11/)
   assert.match(source, /min-h-12/)
-  assert.match(source, /h-8 w-8/)
+  assert.match(source, /h-11 w-11[\s\S]*sm:h-8 sm:w-8/)
 })
 
 test('compact avatars expose names, unassigned state, and labelled +N overflow', () => {
