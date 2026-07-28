@@ -211,7 +211,10 @@ async function fetchPlannerTasksUnit(token: string, source: JobSourceRow) {
   })
   const detailIds = records.filter(r => r._needsDetail).map(r => r.sourceTaskId).filter(Boolean)
   return {
-    records: records.map(({ _needsDetail: _drop, ...record }) => record),
+    records: records.map(({ _needsDetail, ...record }) => {
+      void _needsDetail
+      return record
+    }),
     detailIds,
     complete: taskResult.complete && bucketResult.complete,
     safeError: taskResult.safeError ?? bucketResult.safeError,
@@ -320,7 +323,11 @@ Deno.serve(async request => {
 
   const jobId = typeof body.jobId === 'string' ? body.jobId : ''
   if (!jobId) return jsonResponse({ ok: false, error: 'jobId is required.' }, 400)
-  const { data: job } = await sb.from('microsoft_sync_jobs').select('id, status, assignee_map, range_start, range_end').eq('id', jobId).eq('created_by', user.id).maybeSingle()
+  let jobQuery = sb.from('microsoft_sync_jobs').select('id, status, assignee_map, range_start, range_end, exported_at').eq('id', jobId)
+  // Any admin may restore an admin-visible completed preview for reconciliation
+  // recovery. Mutating fetch/retry/process actions remain creator-scoped.
+  if (action !== 'job_result') jobQuery = jobQuery.eq('created_by', user.id)
+  const { data: job } = await jobQuery.maybeSingle()
   if (!job) return jsonResponse({ ok: false, error: 'Preview job not found.' }, 404)
 
   // ── job_status ───────────────────────────────────────────────────────────────
@@ -342,9 +349,11 @@ Deno.serve(async request => {
     const { data: rows } = await sb.from('microsoft_sync_job_sources').select('position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, records, range_start, range_end').eq('job_id', jobId)
     const jobRows = (rows ?? []).map(r => ({ ...asJobRows([r])[0], records: Array.isArray(r.records) ? (r.records as Array<Record<string, unknown>>) : [] }))
     if (!requiredSourcesComplete(jobRows)) return jsonResponse({ ok: false, error: 'Preview is not complete yet.', progress: jobProgress(jobRows) }, 409)
-    const exportedAt = new Date().toISOString()
+    const exportedAt = (job.exported_at as string | null) ?? new Date().toISOString()
     const snapshot = assembleSnapshot(jobRows, (job.assignee_map as Record<string, unknown>) ?? {}, exportedAt)
-    await sb.from('microsoft_sync_jobs').update({ status: 'complete', exported_at: exportedAt, updated_at: exportedAt }).eq('id', jobId)
+    if (!job.exported_at) {
+      await sb.from('microsoft_sync_jobs').update({ status: 'complete', exported_at: exportedAt, updated_at: exportedAt }).eq('id', jobId)
+    }
     return jsonResponse({ ok: true, jobId, snapshot })
   }
 
@@ -401,7 +410,7 @@ Deno.serve(async request => {
         await sb.from('microsoft_sync_job_sources').update({ records, pending_detail_ids: rest, safe_error: complete ? (full?.safe_error ?? null) : 'Some Planner task details could not be fetched.', updated_at: now() }).eq('id', dbId)
       }
     }
-  } catch (_error) {
+  } catch {
     await sb.from('microsoft_sync_job_sources').update({ stage: 'failed', safe_error: 'The source could not be fetched. Retry the failed source.', updated_at: now() }).eq('id', dbId)
   }
 
