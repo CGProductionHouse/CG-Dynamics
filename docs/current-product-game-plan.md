@@ -1,6 +1,6 @@
 # CG Dynamics Current Product Game Plan
 
-Last updated: 26 July 2026
+Last updated: 28 July 2026
 
 This is the canonical handoff for any new ChatGPT, Codex, Claude Code or other
 agent continuing CG Dynamics. Read `AGENTS.md`, this file, and
@@ -330,3 +330,72 @@ A feature is not done because code compiles. Report:
 When this document conflicts with an implementation assumption, preserve the
 real workflow described here and stop for clarification rather than redesigning
 it.
+
+## 14. Navigation and app-shell consolidation decisions
+
+These decisions were confirmed by CA on 28 July 2026 and must guide future
+navigation and shell work.
+
+### Daily staff navigation should reflect workflows, not every route
+
+The current sidebar is too fragmented. Do not keep separate top-level links for
+every screen when several screens belong to one daily workflow.
+
+Target staff navigation structure:
+
+- `Hub`
+- `Work`
+  - combines the current `My Work` and `Planner` experiences into one coherent
+    work area;
+  - preserve existing data and routes internally where useful, but do not force
+    staff to choose between overlapping task destinations;
+- `Calendar`
+  - groups `CG Calendar` and `Client Schedule` under one scheduling area;
+  - preserve their distinct source-of-truth responsibilities;
+- `Content`
+  - combines `Content Workflow` and `Full Content Guide` into one connected
+    content-production area;
+  - users should move naturally between Content Runs, canonical guidelines,
+    scripts, statuses and production progress without treating them as unrelated
+    products;
+- `Clients`
+  - remains a core staff destination.
+
+Do not collapse canonical data models merely because navigation is consolidated.
+`monthly_deliverables`, Content Runs, Content Guidelines and Planner tasks keep
+their existing source-of-truth boundaries.
+
+### Users and administration
+
+- Rename the current `Team` concept to `Users`.
+- `Users` belongs inside a clearly separated admin area, not in the normal daily
+  staff workflow navigation.
+- User accounts, roles, permissions, access controls and other administrative
+  settings must be grouped under an admin panel visible only to authorised roles.
+- Marketing Library, integrations, diagnostics and other technical controls should
+  also be visually separated from ordinary operational navigation where
+  appropriate.
+
+### Assistant belongs to the whole application
+
+- The Assistant must not remain only as an isolated sidebar destination.
+- Implement it as a persistent app-shell capability available across the whole
+  authorised staff app.
+- The shell Assistant should receive safe context from the current page, selected
+  client, work item, Content Run, guideline, calendar item or report.
+- A full Assistant workspace may remain for long-form work, diagnostics or deep
+  research, but normal use should not require leaving the current workflow.
+- Navigation cleanup and Assistant-shell work must be designed together so the
+  Assistant feels like part of CG Dynamics rather than another disconnected
+  module.
+
+### External product handling
+
+- `CG Hours` may remain visibly marked as external until it is genuinely integrated
+  into the CG Dynamics shell.
+
+### Required design outcome
+
+The resulting sidebar must be shorter, clearer and mobile-friendly. It should
+prioritise the main daily journeys of work, scheduling, content and clients, while
+keeping administration and AI governance appropriately separated.
