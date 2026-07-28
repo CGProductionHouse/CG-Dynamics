@@ -7,13 +7,7 @@ const app = read('../src/App.tsx')
 const layout = read('../src/pages/admin/AdminLayout.tsx')
 const work = read('../src/pages/admin/MyWorkPage.tsx')
 
-function arraySource(name) {
-  const start = layout.indexOf(`const ${name}`)
-  assert.notEqual(start, -1, `${name} exists`)
-  const source = layout.slice(start).match(/^const [\s\S]*?\n\s*\]/)?.[0]
-  assert.ok(source, `${name} array body exists`)
-  return source
-}
+const adminNav = read('../src/pages/admin/adminNavigation.ts')
 
 test('canonical and compatibility work routes preserve every former destination', () => {
   assert.match(app, /path="\/admin\/work" element=\{<MyWorkPage \/>\}/)
@@ -24,21 +18,17 @@ test('canonical and compatibility work routes preserve every former destination'
 })
 
 test('desktop and mobile primary navigation each expose one Work and no My Work or Planner', () => {
-  for (const name of ['hubNav', 'hubMobileItems']) {
-    const source = arraySource(name)
-    assert.equal((source.match(/label: 'Work'/g) ?? []).length, 1)
-    assert.doesNotMatch(source, /label: 'My Work'|label: 'Planner'/)
-    assert.match(source, /to: '\/admin\/work'/)
-  }
+  assert.equal((adminNav.match(/label: 'Work'/g) ?? []).length, 1)
+  assert.doesNotMatch(adminNav, /label: 'My Work'|label: 'Planner'/)
+  assert.match(adminNav, /to: '\/admin\/work'/)
 })
 
-test('calendar and schedule remain separate while Content and Assistant navigation is unchanged', () => {
-  const desktop = arraySource('hubNav')
-  assert.match(desktop, /to: '\/admin\/cg-calendar', label: 'CG Calendar'/)
-  assert.match(desktop, /to: '\/admin\/client-schedule', label: 'Client Schedule'/)
-  assert.match(desktop, /to: '\/admin\/content-workflow', label: 'Content Workflow'/)
-  assert.match(desktop, /to: '\/admin\/full-content-guide', label: 'Full Content Guide'/)
-  assert.match(desktop, /to: '\/admin\/assistant', label: 'Assistant'/)
+test('calendar and schedule remain separate while Content navigates to unified path', () => {
+  assert.match(adminNav, /to: '\/admin\/cg-calendar', label: 'CG Calendar'/)
+  assert.match(adminNav, /to: '\/admin\/client-schedule', label: 'Client Schedule'/)
+  assert.match(adminNav, /to: '\/admin\/content', label: 'Content'/)
+  assert.match(adminNav, /\/admin\/content-workflow/)
+  assert.match(adminNav, /\/admin\/full-content-guide/)
 })
 
 test('Work defaults staff to My Day and gates workload and unassigned controls to managers', () => {

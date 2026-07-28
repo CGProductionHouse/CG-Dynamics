@@ -36,12 +36,12 @@ function MyVideoQueue() {
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
           <h2 className="text-[11px] font-black uppercase tracking-[0.14em] text-white/45">My Video Queue</h2>
-          <Link to="/admin/content-workflow" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
+          <Link to="/admin/content?tab=pipeline" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
         </div>
         <ul className="grid gap-2 sm:grid-cols-2">
           {videos.map(video => (
             <li key={video.id}>
-              <Link to="/admin/content-workflow" className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
+              <Link to="/admin/content?tab=pipeline" className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-white">{video.title}</p>
                   <p className="truncate font-mono text-[11px] text-white/45">{video.canonical_name ?? '—'}</p>
@@ -83,12 +83,12 @@ function MyContentRuns() {
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
           <h2 className="text-[11px] font-black uppercase tracking-[0.14em] text-white/45">My Content Runs</h2>
-          <Link to="/admin/content-workflow" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
+          <Link to="/admin/content?tab=runs" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
         </div>
         <ul className="grid gap-2 sm:grid-cols-2">
           {runs.map(run => (
             <li key={run.id}>
-              <Link to="/admin/content-workflow" className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
+              <Link to={`/admin/content?tab=runs&run=${run.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-white">{run.name}</p>
                   <p className="truncate text-xs text-white/45">{run.run_date ?? 'No date'}{run.client_name ? ` · ${run.client_name}` : ''}{run.lead_name ? ` · lead ${run.lead_name}` : ''}</p>

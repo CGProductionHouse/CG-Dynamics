@@ -35,7 +35,6 @@ import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
 import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
 import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
-import FullContentGuidePage from './pages/admin/FullContentGuidePage'
 import MyWorkPage from './pages/admin/MyWorkPage'
 import OpsHubPage from './pages/admin/OpsHubPage'
 import Dashboard from './pages/client/Dashboard'
@@ -94,8 +93,9 @@ export default function App() {
               <Route path="/admin/planner" element={<Navigate to="/admin/work?tab=board" replace />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
-              <Route path="/admin/content-workflow" element={<ContentWorkflowPage />} />
-              <Route path="/admin/full-content-guide" element={<FullContentGuidePage />} />
+              <Route path="/admin/content" element={<ContentWorkflowPage defaultTab="overview" />} />
+              <Route path="/admin/content-workflow" element={<ContentWorkflowPage defaultTab="library" />} />
+              <Route path="/admin/full-content-guide" element={<ContentWorkflowPage defaultTab="guidelines" />} />
               <Route path="/admin/client-calendar" element={<ClientContentCalendarPage />} />
               <Route path="/admin/monthly-planner" element={<Navigate to="/admin/client-schedule?view=calendar" replace />} />
               <Route path="/admin/master-schedule" element={<Navigate to="/admin/client-schedule?view=year" replace />} />
@@ -104,8 +104,6 @@ export default function App() {
               <Route path="/admin/assistant" element={<AssistantPage />} />
               <Route path="/admin/client-dashboard" element={<PublishedPreview />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
-              <Route path="/admin/integrations" element={<IntegrationsPage />} />
-              <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
               <Route path="/admin/cg-calendar" element={<CompanyCalendarPage />} />
               <Route path="/admin/company-calendar" element={<Navigate to="/admin/cg-calendar" replace />} />
 
@@ -118,6 +116,8 @@ export default function App() {
 
               {/* Manager/admin operational write routes nested inside AdminLayout */}
               <Route element={<RequireManager />}>
+                <Route path="/admin/integrations" element={<IntegrationsPage />} />
+                <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
                 <Route path="/admin/integrations/google-ads" element={<GoogleAdsIntegrationPage />} />
                 <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
@@ -129,7 +129,7 @@ export default function App() {
               <Route element={<RequireAdmin />}>
                 <Route path="/admin/users" element={<UsersHub />} />
                 <Route path="/admin/team" element={<UsersHub />} />
-                <Route path="/admin/invites" element={<Navigate to="/admin/team?tab=invites" replace />} />
+                <Route path="/admin/invites" element={<Navigate to="/admin/users?tab=invites" replace />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
                 <Route path="/admin/microsoft-import" element={<MicrosoftImportPage />} />
                 <Route path="/admin/marketing-library" element={<MarketingLibraryPage />} />

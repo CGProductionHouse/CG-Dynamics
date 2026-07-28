@@ -23,6 +23,7 @@ import {
   ensureGuidelineForRun,
   getGuidelineForRun,
   listDeliverableLabels,
+  listContentGuidelineDocuments,
   listGuidelineVideos,
   listGuideIdeas,
   listRunItems,
@@ -37,6 +38,7 @@ import {
   type ContentGuideIdea,
   type ContentGuideInput,
   type ContentGuideline,
+  type ContentGuidelineDocument,
   type ContentGuidelineVideo,
   type ContentRun,
   type ContentRunInput,
@@ -60,14 +62,9 @@ import {
 } from './contentGuidelineHelpers'
 import VideoPipelineTab from './VideoPipelineTab'
 import ContentGuidelineDocumentEditor from './ContentGuidelineDocumentEditor'
-
-// ── Content Workflow — Content Guidelines · Video Pipeline · Content Runs ──────
-// One content_guide_ideas row is one real Content Guideline: it powers planning,
-// the filming brief, the Content Run shoot workflow and the editing pipeline.
-// The full guideline is visible where staff work — including inside a run — so
-// nobody jumps between disconnected tabs. All data goes through contentWorkflow.ts.
-
-type Tab = 'guides' | 'pipeline' | 'runs'
+import ContentOverview from './ContentOverview'
+import FullContentGuidePage from './FullContentGuidePage'
+import { type ContentTab, resolveContentTab } from './contentTabTypes'
 
 function runStatusTone(status: ContentRunStatus): 'teal' | 'amber' | 'neutral' {
   if (status === 'completed' || status === 'ready') return 'teal'
@@ -178,13 +175,10 @@ function RunForm({
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function ContentWorkflowPage() {
+export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defaultTab?: ContentTab }) {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [tab, setTab] = useState<Tab>(() => {
-    const initial = searchParams.get('tab')
-    return initial === 'pipeline' || initial === 'runs' ? initial : 'guides'
-  })
+  const tab = resolveContentTab(searchParams.get('tab'), defaultTab)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [migrationNeeded, setMigrationNeeded] = useState(false)
@@ -193,6 +187,7 @@ export default function ContentWorkflowPage() {
   const [staff, setStaff] = useState<StaffProfileOption[]>([])
   const [guides, setGuides] = useState<ContentGuideIdea[]>([])
   const [runs, setRuns] = useState<ContentRun[]>([])
+  const [documents, setDocuments] = useState<ContentGuidelineDocument[]>([])
   const [labels, setLabels] = useState<Map<string, DeliverableLabel>>(new Map())
   // Linked CG Calendar events for the loaded runs, keyed by event id — used to
   // detect Microsoft-owned (source-controlled) runs in the UI.
@@ -232,16 +227,17 @@ export default function ContentWorkflowPage() {
   async function loadAll() {
     setLoading(true)
     setLoadError(null)
-    const [clientResult, staffResult, guideResult, runResult] = await Promise.all([listActiveClients(), listStaffProfiles(), listGuideIdeas(), listRuns()])
-    if (guideResult.migrationNeeded || runResult.migrationNeeded) {
+    const [clientResult, staffResult, guideResult, runResult, documentResult] = await Promise.all([listActiveClients(), listStaffProfiles(), listGuideIdeas(), listRuns(), listContentGuidelineDocuments()])
+    if (guideResult.migrationNeeded || runResult.migrationNeeded || documentResult.migrationNeeded) {
       setMigrationNeeded(true); setLoading(false); return
     }
     setMigrationNeeded(false)
-    setLoadError(guideResult.error ?? runResult.error ?? clientResult.error?.message ?? null)
+    setLoadError(guideResult.error ?? runResult.error ?? documentResult.error ?? clientResult.error?.message ?? null)
     setClients((clientResult.data ?? []) as ClientOption[])
     setStaff(staffResult.migrationNeeded ? [] : staffResult.data)
     setGuides(guideResult.data)
     setRuns(runResult.data)
+    setDocuments(documentResult.data)
     // Read-only Client Schedule labels for linked guidelines (display only).
     const deliverableIds = [...new Set(guideResult.data.map(guide => guide.deliverable_id).filter((id): id is string => Boolean(id)))]
     const labelResult = await listDeliverableLabels(deliverableIds)
@@ -269,8 +265,8 @@ export default function ContentWorkflowPage() {
   // matching run. Runs once the runs are loaded, then clears the param.
   const openFromCalendarEvent = useEffectEvent((eventId: string) => {
     const match = runs.find(run => run.calendar_event_id === eventId)
-    if (match) { setTab('runs'); setSelectedRunId(match.id); setRunMode('view') }
-    setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('event'); return next }, { replace: true })
+    if (match) { setSelectedRunId(match.id); setRunMode('view') }
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'runs'); next.delete('event'); return next }, { replace: true })
   })
   useEffect(() => {
     const eventId = searchParams.get('event')
@@ -282,8 +278,8 @@ export default function ContentWorkflowPage() {
   // Direct Content Run deep link: ?tab=runs&run=<run-id>.
   const openFromRunParam = useEffectEvent((runId: string) => {
     const match = runs.find(run => run.id === runId)
-    if (match) { setTab('runs'); setSelectedRunId(match.id); setRunMode('view') }
-    setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('run'); return next }, { replace: true })
+    if (match) { setSelectedRunId(match.id); setRunMode('view') }
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'runs'); next.delete('run'); return next }, { replace: true })
   })
   useEffect(() => {
     const runId = searchParams.get('run')
@@ -294,8 +290,8 @@ export default function ContentWorkflowPage() {
   // Direct guideline deep link: ?tab=guides&guide=<guide-id>.
   const openFromGuideParam = useEffectEvent((guideId: string) => {
     const match = guides.find(guide => guide.id === guideId)
-    if (match) { setTab('guides'); setSelectedGuideId(match.id); setGuideMode('view') }
-    setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('guide'); return next }, { replace: true })
+    if (match) { setSelectedGuideId(match.id); setGuideMode('view') }
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'library'); next.delete('guide'); return next }, { replace: true })
   })
   useEffect(() => {
     const guideId = searchParams.get('guide')
@@ -469,10 +465,40 @@ export default function ContentWorkflowPage() {
     if (selectedRunId) await loadRunItems(selectedRunId)
   }
 
-  const tabButton = (value: Tab, label: string, count: number) => (
+  function switchTab(value: ContentTab) {
+    setSearchParams(current => {
+      const next = new URLSearchParams(current)
+      next.set('tab', value)
+      next.delete('event')
+      next.delete('run')
+      next.delete('guide')
+      if (value !== 'guidelines') next.delete('guideline')
+      return next
+    })
+  }
+
+  function openOverviewRun(runId: string) {
+    setSearchParams(current => {
+      const next = new URLSearchParams(current)
+      next.set('tab', 'runs')
+      next.set('run', runId)
+      return next
+    })
+  }
+
+  function openOverviewGuideline(guidelineId: string) {
+    setSearchParams(current => {
+      const next = new URLSearchParams(current)
+      next.set('tab', 'guidelines')
+      next.set('guideline', guidelineId)
+      return next
+    })
+  }
+
+  const tabButton = (value: ContentTab, label: string, count: number) => (
     <button
       type="button"
-      onClick={() => setTab(value)}
+      onClick={() => switchTab(value)}
       className={`rounded-full border px-4 py-2 text-sm font-black transition-colors ${tab === value ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/45 hover:text-white/70'}`}
     >
       {label} {count > 0 && <span className="opacity-60">{count}</span>}
@@ -495,14 +521,14 @@ export default function ContentWorkflowPage() {
       )}
 
       <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.14),transparent_40%),linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 sm:p-8">
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Operations</p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Content Workflow</h1>
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Content production</p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Content</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
-          Plan the video, use the guideline during the shoot, then track editing and approvals.
+          Plan Content Runs, use each canonical guideline during the shoot, and track ordered videos through production.
         </p>
       </header>
 
-      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2">{tabButton('guides', 'Video Library', guides.length)}{tabButton('pipeline', 'Video Pipeline', 0)}{tabButton('runs', 'Content Runs', runs.length)}</div>}
+      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2" aria-label="Content sections">{tabButton('overview', 'Overview', 0)}{tabButton('runs', 'Content Runs', runs.length)}{tabButton('guidelines', 'Guidelines', documents.length)}{tabButton('pipeline', 'Video Pipeline', 0)}{tabButton('library', 'Video Library', guides.length)}</div>}
 
       {migrationNeeded ? (
         <div className="mt-6 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5 sm:p-6">
@@ -516,7 +542,11 @@ export default function ContentWorkflowPage() {
         <LoadingState className="mt-8" message="Loading Content Workflow…" />
       ) : loadError ? (
         <EmptyState className="mt-8" title="Could not load Content Workflow" message={loadError} action={<ActionButton variant="secondary" onClick={() => void loadAll()}>Try again</ActionButton>} />
-      ) : tab === 'guides' ? (
+      ) : tab === 'overview' ? (
+        <ContentOverview clients={clients} staff={staff} runs={runs} documents={documents} onOpenRun={openOverviewRun} onOpenGuideline={openOverviewGuideline} onOpenPipeline={() => switchTab('pipeline')} />
+      ) : tab === 'guidelines' ? (
+        <FullContentGuidePage embedded />
+      ) : tab === 'library' ? (
         <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <section className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">

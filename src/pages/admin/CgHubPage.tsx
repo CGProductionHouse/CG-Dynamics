@@ -431,7 +431,7 @@ export default function CgHubPage() {
             <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Video Pipeline</h2>
-                <Link to="/admin/content-workflow" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
+                <Link to="/admin/content?tab=pipeline" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[['Ready to edit', videoCounts.ready_to_edit], ['In internal review', videoCounts.internal_review], ['Ready for client', videoCounts.ready_for_client]].map(([label, count]) => (
@@ -449,12 +449,12 @@ export default function CgHubPage() {
             <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Upcoming Content Runs</h2>
-                <Link to="/admin/content-workflow" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
+                <Link to="/admin/content?tab=runs" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
               </div>
               <ul className="space-y-2">
                 {upcomingRuns.map(run => (
                   <li key={run.id}>
-                    <Link to="/admin/content-workflow" className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
+                    <Link to={`/admin/content?tab=runs&run=${run.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-bold text-white">{run.name}</p>
                         <p className="truncate text-xs text-white/45">{run.run_date ?? 'No date'}{run.client_name ? ` · ${run.client_name}` : ''}{run.lead_name ? ` · ${run.lead_name}` : ''}</p>
