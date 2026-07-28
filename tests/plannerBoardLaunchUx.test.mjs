@@ -58,6 +58,13 @@ test('preserves board context and reloads canonical task data after saves', () =
   assert.match(page, /export default function PlannerPage\(\{ embedded = false \}/)
 })
 
+test('archive removes the incomplete RPC row before canonical history reload', () => {
+  const archived = page.slice(page.indexOf('onArchived={archived =>'), page.indexOf('}}', page.indexOf('onArchived={archived =>')))
+  assert.match(archived, /current\.filter\(task => task\.id !== archived\.id\)/)
+  assert.match(archived, /setWorkView\('history'\)/)
+  assert.doesNotMatch(archived, /current\.map/)
+})
+
 test('consumes direct Work workload and quick-filter navigation', () => {
   assert.match(page, /useSearchParams/)
   assert.match(page, /const routeAssignee = routeParams\.get\('assignee'\)/)

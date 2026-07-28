@@ -581,7 +581,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
           onClose={closeTask}
           onReload={() => reloadTask(drawerTask.id)}
           onArchived={archived => {
-            setTasks(current => current.map(task => task.id === archived.id ? archived : task))
+            setTasks(current => current.filter(task => task.id !== archived.id))
             setWorkView('history')
             closeTask()
           }}
