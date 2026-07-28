@@ -88,12 +88,46 @@ stored result is read again. Microsoft remains read-only throughout.
 
 ## Production recovery verification
 
-To be completed after migration, Edge Function and frontend deployment:
+Migration `20260728123000` and Edge Function version 20 were deployed before
+the recovery. The frontend was exercised through the protected Vercel preview
+for commit `2698390` with an authenticated production admin session.
 
-- recovery run ID;
-- applied now / previously applied / still failed counts;
-- duplicate checks across Planner, Client Schedule and CG Calendar;
-- Content Run/calendar linkage checks;
-- authenticated desktop/mobile browser checks.
+At 13:40 SAST, the failed run reconstructed the exact reviewed plan before any
+write:
+
+- 27 previously applied;
+- 5 retryable now;
+- 0 not attempted;
+- 1,775 conflicts untouched.
+
+Recovery run `cc435d92-26bb-46d2-9620-e8575219422d` then completed with:
+
+- 5 applied now;
+- 27 previously applied;
+- 0 still failed;
+- 1,775 conflicts untouched;
+- retry link to failed run `40fde14d-1a04-40ff-a08b-678562aa5712`;
+- preview link to job `4d1a57b5-2cb1-43f5-b07a-ce2de9a27a0a` and its original
+  `2026-07-27T18:17:16.665Z` export timestamp.
+
+An authenticated read through production RLS confirmed five reviewed audit
+rows, all `complete`, all `applied`, all targeting Planner, with no safe errors.
+The five canonical Planner tasks now have status `done`. The run contained no
+create, update, Client Schedule, CG Calendar or Content Run action, so recovery
+could not duplicate or modify those previously successful destinations.
+
+Authenticated browser checks confirmed:
+
+- the failed and partial history counts rendered correctly;
+- the recovery panel listed only the exact five failed titles;
+- the successful result rendered the recovery run ID and final counts;
+- all five tasks appeared as `Done` in their Planner history boards;
+- Planner loaded at desktop and mobile widths without page-level horizontal
+  overflow;
+- the recovery apply produced no failed HTTP responses.
+
+The database and Edge Function are deployed. Merge and production frontend
+deployment of commit `2698390` remain required to expose the recovery controls
+outside the protected preview.
 
 No reconciliation history is deleted.
