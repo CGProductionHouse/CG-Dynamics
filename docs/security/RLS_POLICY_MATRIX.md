@@ -40,7 +40,7 @@
 
 | Policy | Type | Effect |
 |--------|------|--------|
-| staff select public | SELECT | `is_staff() AND (visibility IN ('public_internal','staff') OR (visibility = 'admin_only' AND is_admin()))` |
+| staff select visible | SELECT | `is_staff() AND (visibility IN ('public_internal','staff') OR (visibility = 'admin_only' AND is_admin()))` |
 | admin insert | INSERT | `is_admin()` |
 | admin update | UPDATE | `is_admin()` |
 | admin delete | DELETE | `is_admin()` |
@@ -49,7 +49,7 @@
 
 | Policy | Type | Effect |
 |--------|------|--------|
-| staff select | SELECT | EXISTS (board visibility check) |
+| staff select visible | SELECT | EXISTS (board visibility check; `admin_only` requires `is_admin()`) |
 | admin insert | INSERT | `is_admin()` |
 | admin update | UPDATE | `is_admin()` |
 | admin delete | DELETE | `is_admin()` |
@@ -58,8 +58,8 @@
 
 | Policy | Type | Effect |
 |--------|------|--------|
-| staff select | SELECT | `is_staff()` |
-| staff insert | INSERT | `is_staff()` |
+| visible Planner task select | SELECT | Planner activity follows board visibility; `admin_only` requires `is_admin()`. Managers/admins retain non-Planner operational audit visibility |
+| direct write | INSERT/UPDATE/DELETE | No authenticated grant or policy; assignment/status RPCs write audit rows |
 
 ## profiles
 
@@ -103,10 +103,47 @@
 
 | Policy | Type | Effect |
 |--------|------|--------|
-| staff select | SELECT | `is_staff()` |
-| manager insert | INSERT | `is_manager()` |
-| manager update | UPDATE | `is_manager()` (USING + WITH CHECK) |
-| manager delete | DELETE | `is_manager()` |
+| staff select visible boards | SELECT | `is_staff()` + board visibility; `admin_only` requires `is_admin()` |
+| active manager visible-board insert | INSERT | `is_active_planner_manager()` + target board visibility; `admin_only` requires `is_admin()` |
+| active manager visible-board update | UPDATE | USING checks the old board and WITH CHECK checks the proposed board; `admin_only` requires `is_admin()` |
+| direct hard delete | DELETE | No authenticated policy. Operational removal is archival; only explicitly privileged server functions may hard-delete |
+
+## planner_task_assignees
+
+| Policy | Type | Effect |
+|--------|------|--------|
+| staff select visible boards | SELECT | `is_staff()` + parent task board visibility; `admin_only` requires `is_admin()` |
+| direct write | INSERT/UPDATE/DELETE | No authenticated grant or policy; manager-only RPCs validate active workforce profiles and write transactionally |
+
+`list_planner_assignment_directory` exposes only active workforce `id`,
+non-blank `full_name`, `role`, and `avatar_url`. `list_planner_board_assignments` exposes
+the same safe profile fields plus position and `is_active` for historical
+assignments on visible boards. Clients cannot execute either RPC. The
+active-manager/admin workload summary and detail RPCs exclude archived tasks, recurring templates,
+completed/history statuses, the client-schedule board, and boards not visible to
+the caller. A task with multiple active assignees counts once for each active
+assignee. Tasks with no active canonical assignee, including inactive-only
+assignments, contribute to the reported unassigned total.
+
+New `source = 'recurring'` Planner instances with a `recurrence_parent_id`
+inherit the parent's canonical assignment positions, legacy name projections,
+and unresolved imported identities through a fixed-path server-side trigger.
+The recurrence trigger function has no API execute grant and writes no
+user-facing activity event. It requires an active manager/admin caller, a real
+recurrence template on the same board, and caller visibility to that board;
+`admin_only` requires admin.
+
+All unguarded non-recurring Planner inserts and legacy assignment-name changes,
+including Microsoft inbound writes, run through a server-side canonicalization
+trigger. Only unique case-insensitive exact matches to active, named workforce
+profiles become canonical assignment rows; unmatched/ambiguous names remain in
+`unresolved_assignee_names`. A separate guarded audit trigger records `created`
+for direct inserts and `task_updated` for actual direct core changes using neutral
+`direct_write` provenance. Canonical create/reassign/drawer-save/status RPCs set
+transaction-local guards and write their own audit events, preventing duplicates.
+Direct unresolved projection edits remain blocked. Ordered assignment no-ops
+preserve `assigned_at`. The status RPC rejects inactive callers and ambiguous
+legacy-name fallback.
 
 ## Storage
 

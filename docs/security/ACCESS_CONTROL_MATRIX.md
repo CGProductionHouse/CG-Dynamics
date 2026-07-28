@@ -47,8 +47,71 @@
 
 Visibility follows `planner_boards.visibility`:
 - `public_internal` / `staff`: all staff can read
-- `admin_only`: managers only
+- `admin_only`: admins only; managers cannot read these boards or their tasks,
+  assignments, workload, or Planner activity
 - INSERT/UPDATE/DELETE: managers only
+
+### planner_tasks, planner_task_assignees
+
+| Operation | Admin | Manager | Staff/Team | Client |
+|-----------|-------|---------|------------|--------|
+| Read tasks/assignments on visible boards | ✓ | ✓ | ✓ | ✗ |
+| Create task with canonical assignees | ✓ | ✓ | ✗ | ✗ |
+| Replace canonical assignees | ✓ | ✓ | ✗ | ✗ |
+| Update status (any visible task) | ✓ | ✓ | ✗ | ✗ |
+| Update status (canonically assigned task) | ✓ | ✓ | ✓ | ✗ |
+| Direct hard delete task | ✗ | ✗ | ✗ | ✗ |
+| Direct assignment-row INSERT/UPDATE/DELETE | ✗ | ✗ | ✗ | ✗ |
+| Workload summary/details | ✓ | ✓ | ✗ | ✗ |
+
+Task creation, drawer save, reassignment, and workload RPCs require an active
+manager/admin profile and are limited to boards visible to the caller. Inactive
+manager/admin profiles cannot use direct Planner task write policies. Staff
+status changes use canonical `planner_task_assignees.profile_id = auth.uid()`.
+The legacy exact-name fallback applies only to tasks with no canonical rows and
+requires an active caller with a non-empty name that maps uniquely to their own
+active workforce profile. Duplicate active profile names deny fallback. Position
+`0` is primary; every assignment row is an assignee, and multi-assigned workload
+counts once for each active assigned person.
+
+Canonical RPCs update assignment rows and projections in one transaction and
+audit only actual changes. Existing active-manager direct writes remain
+compatible: every non-recurring direct insert logs `created` and resolves legacy
+names into ordered canonical/unresolved assignments; every actual direct core
+update logs `task_updated`. Direct legacy-name changes are synchronized and
+audited with neutral `legacy_projection_sync` provenance, while direct unresolved
+projection edits are blocked. Microsoft assignment names use that same inbound
+normalization path; CG Dynamics never writes to Microsoft.
+
+Direct task INSERT/UPDATE policies enforce board visibility on the target row.
+Managers can write `public_internal`/`staff` boards but cannot insert into or
+move tasks into `admin_only`; active admins may. UPDATE checks both the existing
+row through `USING` and the proposed row through `WITH CHECK`. No authenticated
+role has direct Planner task DELETE access. Operational removal is archival;
+hard deletion is reserved for explicitly privileged server-side maintenance.
+
+Workload summary and detail RPCs use the same visible, active-task scope. They
+exclude Client Schedule, archived/history/completed work, and recurring
+templates. Detail rows return safe task/board/bucket fields and ordered active
+assignee IDs. Inactive-only assignments return no active IDs and count as
+unassigned.
+
+### Planner assignment directory
+
+Admin, manager, staff and team roles may call the safe directory RPC. It returns
+only active workforce `id`, `full_name`, `role` and `avatar_url`. Inactive
+profiles and profiles without a real non-blank name are not selectable, but existing assignment rows can be read through
+the visible-board assignment RPC with `is_active` so historical tasks still
+render. This does not broaden `profiles` table RLS. Clients have no access.
+
+### planner_activity_log
+
+Managers/admins retain operational audit visibility on boards visible to their
+role; only admins see `admin_only` Planner activity. Staff/team can read only
+`planner_task` activity whose task is on a board visible to them. Authenticated
+users have no direct activity-log INSERT/UPDATE/DELETE grant; guarded Planner
+RPCs and server-side direct-write triggers own audit writes. Clients have no
+access.
 
 ### profiles
 

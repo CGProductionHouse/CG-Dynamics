@@ -122,10 +122,12 @@ function helperMatches(values: string[] | undefined, userName: string | null) {
 
 function userMatches(
   assignedUserId: string | null | undefined,
+  assigneeUserIds: string[] | undefined,
   assignedName: string | null | undefined,
   helperNames: string[] | undefined,
   profile: Profile | null,
 ) {
+  if (assigneeUserIds?.length && profile?.id) return assigneeUserIds.includes(profile.id)
   if (assignedUserId && profile?.id && assignedUserId === profile.id) return true
   const userName = profile?.full_name?.trim() || null
   return nameMatches(assignedName, userName) || helperMatches(helperNames, userName)
@@ -187,7 +189,7 @@ function toTaskItem(task: CommandCentreTask, today: string): MyDayItem {
     priority: task.priority,
     assignedTo: task.assigned_to_name,
     helperNames: task.helper_names ?? [],
-    href: task.data_origin === 'planner_tasks' ? '/admin/planner' : '/admin/command-centre',
+    href: task.data_origin === 'planner_tasks' ? '/admin/work?tab=board' : '/admin/command-centre',
     sortRank: taskSortRank(task, today),
   }
 }
@@ -420,7 +422,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
 
   const tasks = ((tasksResult.data ?? []) as CommandCentreTask[])
     .filter(task => ACTIVE_TASK_STATUSES.has(task.status))
-    .filter(task => userMatches(task.assigned_to_user_id, task.assigned_to_name, task.helper_names, profile))
+    .filter(task => userMatches(task.assigned_to_user_id, task.assignee_user_ids, task.assigned_to_name, task.helper_names, profile))
     .filter(task => !task.due_date || task.due_date <= weekEnd)
     .map(task => toTaskItem(task, today))
 
@@ -431,7 +433,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
       const status = normalizeScheduleStatus(deliverable.production_status)
       return status !== 'scheduled_posted' && status !== 'meta_drafts' && deliverable.production_status !== 'moved'
     })
-    .filter(deliverable => userMatches(deliverable.assigned_to_user_id, deliverable.assigned_to_name, deliverable.helper_names, profile))
+    .filter(deliverable => userMatches(deliverable.assigned_to_user_id, undefined, deliverable.assigned_to_name, deliverable.helper_names, profile))
     .filter(deliverable => {
       const rawDate = getEffectiveScheduleDate(deliverable)
       const date = rawDate && !isMonthKey(rawDate) ? rawDate : null

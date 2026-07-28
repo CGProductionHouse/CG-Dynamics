@@ -3,12 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import MyDayPage from './MyDayPage'
 import CommandCentrePage from './CommandCentrePage'
+import PlannerPage from './PlannerPage'
 import { listPipelineVideos, listRuns, type ContentGuideIdea, type ContentRun } from '../../lib/contentWorkflow'
 import { runInvolvesUser } from '../../lib/contentWorkflowRules'
 import { editorQueueMatch, internalReviewMatch, VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
 import { isManagerRole } from '../../lib/roles'
+import { listPlannerWorkloadSummary, listPlannerWorkloadTasks, type PlannerWorkloadSummary, type PlannerWorkloadTask } from '../../lib/planner'
 
-type MyWorkTab = 'my-day' | 'daily-tasks'
+type WorkTab = 'my-day' | 'board' | 'daily-tasks' | 'workload'
 
 // Videos the signed-in editor is actively working, plus internal reviews the
 // signed-in manager/admin owns. Compact; silent before phase-19e.
@@ -101,9 +103,145 @@ function MyContentRuns() {
   )
 }
 
+const workloadMetrics: Array<[keyof PlannerWorkloadSummary, string]> = [
+  ['active_task_count', 'Active'],
+  ['overdue_count', 'Overdue'],
+  ['blocked_count', 'Blocked'],
+  ['due_today_count', 'Due today'],
+  ['due_next_7_days_count', 'Next 7 days'],
+]
+
+function WorkloadView({ selectedPerson }: { selectedPerson: string | null }) {
+  const [people, setPeople] = useState<PlannerWorkloadSummary[]>([])
+  const [tasks, setTasks] = useState<PlannerWorkloadTask[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    void Promise.all([listPlannerWorkloadSummary(), listPlannerWorkloadTasks()]).then(([summaryResult, tasksResult]) => {
+      if (!active) return
+      setLoading(false)
+      if (summaryResult.error || tasksResult.error) {
+        setError(summaryResult.error && tasksResult.error
+          ? 'Could not load the workload summary or task details. Try again shortly.'
+          : summaryResult.error
+            ? 'Could not load the workload summary. Try again shortly.'
+            : 'Could not load workload task details. Try again shortly.')
+        return
+      }
+      setPeople((summaryResult.data ?? []).sort((left, right) => left.full_name.localeCompare(right.full_name)))
+      setTasks(tasksResult.data ?? [])
+    })
+    return () => { active = false }
+  }, [])
+
+  if (loading) return <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10"><div className="h-48 animate-pulse rounded-2xl bg-white/[0.04]" /></div>
+  if (error) return <div role="alert" className="mx-auto mt-5 max-w-7xl rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-200">{error}</div>
+  if (people.length === 0 && tasks.length === 0) return <div className="mx-auto mt-5 max-w-7xl px-4 sm:px-6 lg:px-10"><div className="rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-sm text-white/55">No active team members or Planner tasks are available for workload reporting.</div></div>
+
+  const canonicalUnassignedTasks = tasks.filter(task => task.assignee_profile_ids.length === 0)
+  const unassignedTotal = people[0]?.unassigned_total ?? canonicalUnassignedTasks.length
+  const selectedSummary = people.find(person => person.profile_id === selectedPerson)
+  const selectedTasks = selectedPerson === 'unassigned'
+    ? canonicalUnassignedTasks
+    : selectedPerson
+      ? tasks.filter(task => task.assignee_profile_ids.includes(selectedPerson))
+      : null
+  const selectedLabel = selectedPerson === 'unassigned' ? 'Unassigned' : selectedSummary?.full_name ?? 'Selected team member'
+  const boardLink = selectedPerson === 'unassigned'
+    ? '?tab=board&scope=unassigned'
+    : `?tab=board&assignee=${encodeURIComponent(selectedPerson ?? '')}`
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-10">
+      {selectedTasks && (
+        <section className="mb-4 rounded-2xl border border-brand-teal/25 bg-brand-teal/[0.04] p-4" aria-labelledby="selected-workload-heading">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-teal">Active Planner work across visible boards</p>
+              <h2 id="selected-workload-heading" className="mt-1 text-xl font-black text-white">{selectedLabel}</h2>
+            </div>
+            <Link to={boardLink} className="rounded-lg border border-brand-teal/30 px-3 py-2 text-xs font-black text-brand-teal hover:bg-brand-teal/10 hover:text-white">Open filtered Team Board</Link>
+          </div>
+          {selectedTasks.length === 0 ? (
+            <p className="rounded-lg bg-black/20 px-3 py-4 text-sm text-white/50">No matching active Planner tasks are visible.</p>
+          ) : (
+            <ul className="grid gap-2">
+              {selectedTasks.map(task => (
+                <li key={task.task_id} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-white">{task.title}</h3>
+                      <p className="mt-1 text-xs text-white/45">{task.client_name ?? 'No client'} · {task.board_name} · {task.bucket_name ?? 'No bucket'}</p>
+                    </div>
+                    <span className="rounded-full border border-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-brand-primary">{task.status.replace(/_/g, ' ')}</span>
+                  </div>
+                  <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs">
+                    <div><dt className="text-white/35">Due</dt><dd className="font-bold text-white/75">{task.due_date || 'No due date'}</dd></div>
+                    <div><dt className="text-white/35">Priority</dt><dd className="font-bold capitalize text-white/75">{task.priority.replace(/_/g, ' ')}</dd></div>
+                  </dl>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+      <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-teal">Unassigned</p>
+            <p className="mt-1 text-2xl font-black text-white">{unassignedTotal} active tasks</p>
+          </div>
+          <Link to="?tab=workload&person=unassigned" className="rounded-lg border border-brand-teal/30 px-3 py-2 text-xs font-black text-brand-teal hover:bg-brand-teal/10 hover:text-white">View unassigned work</Link>
+        </div>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-2">
+        {people.map(person => (
+          <Link key={person.profile_id} to={`?tab=workload&person=${encodeURIComponent(person.profile_id)}`} className="rounded-2xl border border-white/10 bg-white/[0.025] p-4 transition-colors hover:border-brand-teal/35 hover:bg-white/[0.04]">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="truncate text-base font-black text-white">{person.full_name}</h2>
+                <p className="text-xs capitalize text-white/40">{person.role}</p>
+              </div>
+              <span className="text-xs font-bold text-brand-teal">View tasks</span>
+            </div>
+            <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {workloadMetrics.map(([key, label]) => (
+                <div key={key} className="rounded-lg bg-black/20 px-2 py-2 text-center">
+                  <dt className="text-[10px] font-bold uppercase tracking-wide text-white/40">{label}</dt>
+                  <dd className="mt-1 text-lg font-black text-white">{person[key]}</dd>
+                </div>
+              ))}
+            </dl>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function MyWorkPage() {
+  const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab: MyWorkTab = searchParams.get('tab') === 'daily-tasks' ? 'daily-tasks' : 'my-day'
+  const canViewWorkload = isManagerRole(profile?.role)
+  const requestedTab = searchParams.get('tab')
+  const tab: WorkTab = requestedTab === 'board' || requestedTab === 'daily-tasks' || (requestedTab === 'workload' && canViewWorkload)
+    ? requestedTab
+    : 'my-day'
+
+  function switchTab(nextTab: WorkTab) {
+    const next = new URLSearchParams({ tab: nextTab })
+    if (nextTab === 'board') {
+      const scope = searchParams.get('scope')
+      const assignee = searchParams.get('assignee')
+      if (scope === 'overdue' || scope === 'blocked' || (scope === 'unassigned' && canViewWorkload)) next.set('scope', scope)
+      if (assignee) next.set('assignee', assignee)
+    }
+    if (nextTab === 'workload' && searchParams.get('person')) next.set('person', searchParams.get('person') ?? '')
+    setSearchParams(next)
+  }
+
 
   return (
     <div>
@@ -112,27 +250,41 @@ export default function MyWorkPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal">Daily workflow</p>
-              <h1 className="mt-1 text-2xl font-black text-white">My Work</h1>
+              <h1 className="mt-1 text-2xl font-black text-white">Work</h1>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Link to="/admin/ops-hub?tab=client-work" className="rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-center text-xs font-black text-brand-teal hover:text-white">Capture client request</Link>
-              <div className="grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/20 p-1 sm:min-w-80">
+            <div className="flex flex-col gap-2 sm:items-end">
+              <div className={`grid gap-1 rounded-xl border border-white/10 bg-black/20 p-1 ${canViewWorkload ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-3'}`}>
               {([
                 ['my-day', 'My Day'],
+                ['board', 'Team Board'],
                 ['daily-tasks', 'Daily Tasks'],
-              ] as const).map(([value, label]) => (
-                <button key={value} type="button" onClick={() => setSearchParams({ tab: value })} className={`rounded-lg px-4 py-3 text-sm font-black transition-colors ${tab === value ? 'bg-brand-teal text-black' : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'}`}>
+                ...(canViewWorkload ? [['workload', 'Workload'] as const] : []),
+              ] as Array<[WorkTab, string]>).map(([value, label]) => (
+                <button key={value} type="button" onClick={() => switchTab(value)} className={`rounded-lg px-3 py-3 text-sm font-black transition-colors ${tab === value ? 'bg-brand-teal text-black' : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'}`}>
                   {label}
                 </button>
               ))}
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs font-bold">
+                <Link to="?tab=board&scope=overdue" className="text-amber-300 hover:text-white">Overdue work</Link>
+                <Link to="?tab=board&scope=blocked" className="text-red-300 hover:text-white">Blocked work</Link>
+                {canViewWorkload && <Link to="?tab=board&scope=unassigned" className="text-brand-teal hover:text-white">Unassigned work</Link>}
               </div>
             </div>
           </div>
         </div>
       </div>
-      <MyVideoQueue />
-      <MyContentRuns />
-      {tab === 'my-day' ? <MyDayPage embedded /> : <CommandCentrePage embedded />}
+      {tab === 'my-day' && <><MyVideoQueue /><MyContentRuns /><MyDayPage embedded /></>}
+      {tab === 'board' && <PlannerPage embedded />}
+      {tab === 'daily-tasks' && (
+        <>
+          <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-10">
+            <Link to="/admin/ops-hub?tab=client-work" className="inline-flex rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-xs font-black text-brand-teal hover:text-white">Capture client request</Link>
+          </div>
+          <CommandCentrePage embedded />
+        </>
+      )}
+      {tab === 'workload' && canViewWorkload && <WorkloadView selectedPerson={searchParams.get('person')} />}
     </div>
   )
 }

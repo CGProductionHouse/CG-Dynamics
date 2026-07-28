@@ -1,28 +1,41 @@
-import { useState, useEffect, useMemo, useRef, type ReactNode, type FormEvent, type WheelEvent } from 'react'
-import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
-import { Link } from 'react-router-dom'
-import { EmptyState } from '../../components/ui/States'
-import { ActionButton } from '../../components/ui/Buttons'
+import { useEffect, useMemo, useRef, useState, type FormEvent, type WheelEvent } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ClientPicker } from '../../components/ClientPicker'
+import {
+  PlannerAssigneeAvatars,
+  PlannerPeoplePicker,
+  type PlannerPerson,
+} from '../../components/PlannerPeoplePicker'
+import { ActionButton } from '../../components/ui/Buttons'
+import { EmptyState } from '../../components/ui/States'
 import { useAuth } from '../../contexts/AuthContext'
 import {
+  archivePlannerTask,
+  createPlannerTask,
+  isMissingPlannerAssignmentRpcError,
+  listPlannerActivity,
+  listPlannerAssignmentDirectory,
   listPlannerBoards,
   listPlannerBuckets,
   listPlannerTasks,
-  createPlannerTask,
-  updatePlannerTask,
-  updatePlannerTaskStatus,
-  archivePlannerTask,
-  PRIORITIES,
   PLANNER_TASK_STATUSES,
   PLANNER_TASK_STATUS_LABELS,
+  PRIORITIES,
+  updatePlannerTaskWithAssignees,
+  updatePlannerTaskStatus,
+  type PlannerActivityLog,
   type PlannerBoard,
   type PlannerBucket,
   type PlannerTask,
   type PlannerTaskStatus,
   type TaskPriority,
 } from '../../lib/planner'
+import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
 import { isManagerRole } from '../../lib/roles'
+
+type PlannerWorkView = 'active' | 'history'
+type QuickScope = 'all' | 'overdue' | 'blocked' | 'unassigned'
+const NO_BUCKET_ID = '__none__'
 
 const BOARD_LABELS: Record<string, string> = {
   'operations-todo': 'Operations',
@@ -31,248 +44,405 @@ const BOARD_LABELS: Record<string, string> = {
   'cg-socials': 'CG Socials',
 }
 
-const BOARD_ICONS: Record<string, ReactNode> = {
-  'operations-todo': (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192" />
-    </svg>
-  ),
-  'client-websites': (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-    </svg>
-  ),
-  'admin-check-list': (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-    </svg>
-  ),
-  'cg-socials': (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-      <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-  ),
+function dateKey(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
-
-type PlannerWorkView = 'active' | 'history'
-
-function formatPlannerDate(dateStr: string) {
-  const d = new Date(`${dateStr}T00:00:00`)
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+function formatPlannerDate(value: string) {
+  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
 function isPlannerHistoryTask(task: PlannerTask) {
-  return Boolean(task.archived_at) || task.status === 'approved' || task.status === 'scheduled' || task.status === 'done'
+  return Boolean(task.archived_at) || ['approved', 'scheduled', 'done'].includes(task.status)
 }
 
-function plannerTaskSortRank(task: PlannerTask) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayKey = today.toISOString().slice(0, 10)
-  const due = task.due_date ? new Date(`${task.due_date}T00:00:00`) : null
+function isOverdue(task: PlannerTask) {
+  return Boolean(task.due_date && task.due_date < dateKey() && !isPlannerHistoryTask(task))
+}
+
+function taskSortRank(task: PlannerTask) {
   if (task.priority === 'client_request') return 0
   if (task.priority === 'urgent') return 1
-  if (due && due < today) return 2
-  if (task.due_date === todayKey) return 3
-  if (task.status === 'in_progress') return 4
-  if (task.status === 'ready_internal_review') return 5
-  if (due) return 6
-  return 7
+  if (isOverdue(task)) return 2
+  if (task.due_date === dateKey()) return 3
+  if (task.status === 'blocked') return 4
+  if (task.status === 'in_progress') return 5
+  return task.due_date ? 6 : 7
 }
 
-function plannerStatusTone(status: PlannerTaskStatus) {
-  if (status === 'in_progress') return 'text-brand-accent border-brand-accent/20'
-  if (status === 'ready_internal_review') return 'text-amber-300 border-amber-400/20'
-  if (status === 'approved' || status === 'scheduled' || status === 'done') return 'text-[#2dd4bf] border-[#2dd4bf]/20'
-  return 'text-white/35 border-white/10'
+function statusTone(status: PlannerTaskStatus) {
+  if (status === 'blocked') return 'border-red-400/25 text-red-300'
+  if (status === 'in_progress') return 'border-brand-accent/25 text-brand-accent'
+  if (status === 'ready_internal_review') return 'border-amber-400/25 text-amber-300'
+  if (['approved', 'scheduled', 'done'].includes(status)) return 'border-brand-teal/25 text-brand-teal'
+  return 'border-white/10 text-white/45'
 }
 
+function taskPeople(task: PlannerTask): PlannerPerson[] {
+  return task.assignees.map(person => ({
+    id: person.profile_id,
+    full_name: person.full_name,
+    role: person.role,
+    avatar_url: person.avatar_url,
+    is_active: person.is_active,
+  }))
+}
 
-export default function PlannerPage() {
+type ChecklistRow = {
+  key: string
+  text: string
+  done: boolean
+  raw: unknown
+  recognized: boolean
+}
+
+function checklistRows(value: unknown): ChecklistRow[] {
+  if (!Array.isArray(value)) return []
+  return value.map((raw, index) => {
+    if (typeof raw === 'string') {
+      return { key: `item-${index}`, text: raw, done: false, raw, recognized: true }
+    }
+    if (raw && typeof raw === 'object') {
+      const item = raw as Record<string, unknown>
+      const textValue = item.text ?? item.title ?? item.name
+      if (typeof textValue === 'string') {
+        const doneValue = item.done ?? item.completed ?? item.is_checked
+        return { key: `item-${index}`, text: textValue, done: doneValue === true, raw, recognized: true }
+      }
+    }
+    return { key: `item-${index}`, text: 'Imported checklist value', done: false, raw, recognized: false }
+  })
+}
+
+function checklistProgress(task: PlannerTask) {
+  const rows = checklistRows(task.checklist)
+  return { complete: rows.filter(row => row.recognized && row.done).length, total: rows.filter(row => row.recognized).length }
+}
+
+async function fetchBoardTasks(board: PlannerBoard, shouldMaterialize: boolean) {
+  if (shouldMaterialize) {
+    const materialized = await materializeRecurringTasks()
+    if (materialized.error) return { data: null, error: { message: materialized.error } }
+    if (materialized.migrationNeeded) {
+      return { data: null, error: { message: 'Recurring task migration is required before Planner can load safely.' } }
+    }
+  }
+  const { data, error } = await listPlannerTasks(board.id)
+  if (error) return { data: null, error }
+  return { data: (data ?? []).filter(task => !isRecurringTemplate(task)), error: null }
+}
+
+export default function PlannerPage({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
-  const isAdmin = profile?.role === 'admin'
+  const [routeParams, setSearchParams] = useSearchParams()
   const canManage = isManagerRole(profile?.role)
-  const myName = profile?.full_name ?? null
-
+  const isAdmin = profile?.role === 'admin'
   const [boards, setBoards] = useState<PlannerBoard[]>([])
   const [buckets, setBuckets] = useState<PlannerBucket[]>([])
   const [tasks, setTasks] = useState<PlannerTask[]>([])
+  const [directory, setDirectory] = useState<PlannerPerson[]>([])
+  const [assignmentError, setAssignmentError] = useState<string | null>(null)
   const [activeBoard, setActiveBoard] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [boardError, setBoardError] = useState<string | null>(null)
+  const [boardRetry, setBoardRetry] = useState(0)
+  const [bucketsLoading, setBucketsLoading] = useState(true)
   const [tasksLoading, setTasksLoading] = useState(false)
+  const [bucketError, setBucketError] = useState<string | null>(null)
+  const [taskError, setTaskError] = useState<string | null>(null)
+  const [bucketRetry, setBucketRetry] = useState(0)
+  const [taskRetry, setTaskRetry] = useState(0)
   const [tableMissing, setTableMissing] = useState(false)
   const [drawerTask, setDrawerTask] = useState<PlannerTask | null>(null)
   const [workView, setWorkView] = useState<PlannerWorkView>('active')
-  const [taskSearch, setTaskSearch] = useState('')
-  const [taskStatusFilter, setTaskStatusFilter] = useState<'all' | PlannerTaskStatus>('all')
-  const topScrollRef = useRef<HTMLDivElement>(null)
-  const topScrollSpacerRef = useRef<HTMLDivElement>(null)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | PlannerTaskStatus>('all')
+  const [priorityFilter, setPriorityFilter] = useState<'all' | TaskPriority>('all')
+  const [assigneeFilter, setAssigneeFilter] = useState('all')
+  const [clientFilter, setClientFilter] = useState('')
+  const [quickScope, setQuickScope] = useState<QuickScope>('all')
+  const [bucketsBoardId, setBucketsBoardId] = useState<string | null>(null)
+  const [tasksBoardId, setTasksBoardId] = useState<string | null>(null)
   const boardScrollRef = useRef<HTMLDivElement>(null)
+  const bucketScrollRefs = useRef(new Map<string, HTMLDivElement>())
+  const savedScroll = useRef({ board: 0, buckets: new Map<string, number>() })
+  const taskRequestRef = useRef(0)
 
-  // Load boards
+  useEffect(() => {
+    let active = true
+    void listPlannerAssignmentDirectory().then(({ data, error }) => {
+      if (!active) return
+      if (error) {
+        setAssignmentError(isMissingPlannerAssignmentRpcError(error)
+          ? 'Planner assignment migration required. Assignment changes are disabled until it is applied.'
+          : `Could not load the assignment directory. Assignment changes are disabled. ${error.message ?? ''}`.trim())
+        return
+      }
+      setDirectory((data ?? []).map(person => ({ ...person })))
+    })
+    return () => { active = false }
+  }, [])
+
   useEffect(() => {
     let active = true
     const timer = window.setTimeout(() => {
       setLoading(true)
-      setTableMissing(false)
       listPlannerBoards().then(({ data, error }) => {
         if (!active) return
         setLoading(false)
         if (error) {
-          if (error.message?.includes('does not exist') || error.code === '42P01') setTableMissing(true)
+          if (error.code === '42P01' || error.message?.includes('does not exist')) {
+            setTableMissing(true)
+            setBoardError(null)
+          } else {
+            setTableMissing(false)
+            setBoardError(error.message ?? 'Could not load Planner boards.')
+          }
           return
         }
+        setBoardError(null)
+        setTableMissing(false)
         const result = data ?? []
         setBoards(result)
-        if (result.length > 0) {
-          const firstOperational = result.find(b => b.slug !== 'client-schedule')
-          setActiveBoard(current => current ?? firstOperational?.slug ?? null)
-        }
+        setActiveBoard(current => current ?? result.find(board => board.slug !== 'client-schedule')?.slug ?? null)
       })
     }, 0)
-
     return () => { active = false; window.clearTimeout(timer) }
-  }, [])
+  }, [boardRetry])
 
-  // Load buckets when board changes
+  const activeBoardRecord = useMemo(
+    () => boards.find(board => board.slug === activeBoard) ?? null,
+    [activeBoard, boards],
+  )
+
   useEffect(() => {
-    if (!activeBoard) return
-    const board = boards.find(b => b.slug === activeBoard)
-    if (!board) return
-
+    if (!activeBoardRecord) return
     let active = true
-    listPlannerBuckets(board.id).then(({ data }) => {
+    void listPlannerBuckets(activeBoardRecord.id).then(({ data, error }) => {
       if (!active) return
+      setBucketsLoading(false)
+      if (error) {
+        setBucketError(error.message ?? 'Could not load Planner buckets.')
+        return
+      }
+      setBucketError(null)
       setBuckets(data ?? [])
+      setBucketsBoardId(activeBoardRecord.id)
     })
-
     return () => { active = false }
-  }, [activeBoard, boards])
+  }, [activeBoardRecord, bucketRetry])
 
-  // Load tasks when board changes
   useEffect(() => {
-    if (!activeBoard || boards.length === 0) return
-    const board = boards.find(b => b.slug === activeBoard)
-    if (!board) return
-    const boardId = board.id
-
+    if (!activeBoardRecord) return
     let active = true
+    const requestId = ++taskRequestRef.current
     const timer = window.setTimeout(() => {
-      setTasks([])
       setTasksLoading(true)
-      void loadBoardTasks().catch(() => { if (active) setTasksLoading(false) })
+      void fetchBoardTasks(activeBoardRecord, canManage).then(result => {
+        if (!active || requestId !== taskRequestRef.current) return
+        if (result.error) {
+          setTaskError(result.error.message ?? 'Could not load Planner tasks.')
+          return
+        }
+        setTaskError(null)
+        setTasks(result.data)
+        setTasksBoardId(activeBoardRecord.id)
+      }).finally(() => {
+        if (active && requestId === taskRequestRef.current) setTasksLoading(false)
+      })
     }, 0)
-    async function loadBoardTasks() {
-      if (canManage) await materializeRecurringTasks()
-      const { data } = await listPlannerTasks(boardId)
-      if (!active) return
-      setTasks((data ?? []).filter(task => !isRecurringTemplate(task)))
-      setTasksLoading(false)
-    }
+    return () => { active = false; taskRequestRef.current += 1; window.clearTimeout(timer) }
+  }, [activeBoardRecord, canManage, taskRetry])
 
-    return () => { active = false; window.clearTimeout(timer) }
-  }, [activeBoard, boards, canManage])
+  const displayedBuckets = useMemo(
+    () => bucketsBoardId === activeBoardRecord?.id ? buckets : [],
+    [activeBoardRecord?.id, buckets, bucketsBoardId],
+  )
+  const displayedTasks = useMemo(
+    () => tasksBoardId === activeBoardRecord?.id ? tasks : [],
+    [activeBoardRecord?.id, tasks, tasksBoardId],
+  )
+  const routeAssignee = routeParams.get('assignee')
+  const effectiveAssigneeFilter = routeAssignee ? `person:${routeAssignee}` : assigneeFilter
+  const routeScope = routeParams.get('scope')
+  const effectiveQuickScope: QuickScope = routeScope === 'all' || routeScope === 'overdue' || routeScope === 'blocked' || (routeScope === 'unassigned' && canManage)
+    ? routeScope
+    : quickScope
 
-
-
-  // Escape to close drawer
-  useEffect(() => {
-    if (!drawerTask) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        setDrawerTask(null)
+  const people = useMemo(() => {
+    const result = new Map(directory.map(person => [person.id, person]))
+    for (const task of displayedTasks) {
+      for (const person of taskPeople(task)) {
+        if (!result.has(person.id)) result.set(person.id, { ...person, is_active: false })
       }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [drawerTask])
+    return [...result.values()].sort((a, b) => a.full_name.localeCompare(b.full_name))
+  }, [directory, displayedTasks])
 
-  // Client Schedule is its own canonical workspace; Planner only shows task boards.
-  const sortedBoards = useMemo(() => {
-    return boards
-      .filter(board => board.slug !== 'client-schedule')
-      .sort((a, b) => {
-        const aAdmin = a.board_type === 'admin' || a.slug === 'admin-check-list'
-        const bAdmin = b.board_type === 'admin' || b.slug === 'admin-check-list'
-        if (aAdmin !== bAdmin) return aAdmin ? 1 : -1
-        return a.sort_order - b.sort_order
-      })
-  }, [boards])
+  const assigneeOptions = useMemo(() => {
+    const canonical = people.map(person => ({ value: `person:${person.id}`, label: `${person.full_name}${person.is_active ? '' : ' (inactive)'}` }))
+    const legacyNames = [...new Set(displayedTasks.flatMap(task => task.unresolved_assignee_names))]
+      .sort((a, b) => a.localeCompare(b))
+      .map(name => ({ value: `legacy:${name}`, label: `${name} (imported)` }))
+    return [...canonical, ...legacyNames]
+  }, [displayedTasks, people])
 
-  const activeBoardId = useMemo(
-    () => boards.find(b => b.slug === activeBoard)?.id ?? null,
-    [boards, activeBoard],
-  )
+  const sortedBoards = useMemo(() => boards
+    .filter(board => board.slug !== 'client-schedule')
+    .sort((a, b) => {
+      const aAdmin = a.board_type === 'admin' || a.slug === 'admin-check-list'
+      const bAdmin = b.board_type === 'admin' || b.slug === 'admin-check-list'
+      return aAdmin === bAdmin ? a.sort_order - b.sort_order : aAdmin ? 1 : -1
+    }), [boards])
 
-  const bucketNameById = useMemo(
-    () => new Map(buckets.map(bucket => [bucket.id, bucket.name])),
-    [buckets],
-  )
+  const activeTaskCount = useMemo(() => displayedTasks.filter(task => !isPlannerHistoryTask(task)).length, [displayedTasks])
+  const historyTaskCount = useMemo(() => displayedTasks.filter(isPlannerHistoryTask).length, [displayedTasks])
 
-  const activeTaskCount = useMemo(() => tasks.filter(task => !isPlannerHistoryTask(task)).length, [tasks])
-  const historyTaskCount = useMemo(() => tasks.filter(isPlannerHistoryTask).length, [tasks])
+  const visibleTasks = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    const client = clientFilter.trim().toLowerCase()
+    return displayedTasks.filter(task => {
+      if (workView === 'history' ? !isPlannerHistoryTask(task) : isPlannerHistoryTask(task)) return false
+      if (statusFilter !== 'all' && task.status !== statusFilter) return false
+      if (priorityFilter !== 'all' && task.priority !== priorityFilter) return false
+      if (client && !task.client_name?.toLowerCase().includes(client)) return false
+      const names = [...task.assignees.map(person => person.full_name), ...task.unresolved_assignee_names]
+      if (term && ![task.title, task.client_name, ...names].some(value => value?.toLowerCase().includes(term))) return false
+      if (effectiveAssigneeFilter.startsWith('person:') && !task.assignees.some(person => person.profile_id === effectiveAssigneeFilter.slice(7))) return false
+      if (effectiveAssigneeFilter.startsWith('legacy:') && !task.unresolved_assignee_names.includes(effectiveAssigneeFilter.slice(7))) return false
+      if (effectiveQuickScope === 'overdue' && !isOverdue(task)) return false
+      if (effectiveQuickScope === 'blocked' && task.status !== 'blocked') return false
+      if (effectiveQuickScope === 'unassigned' && task.assignees.length > 0) return false
+      return true
+    })
+  }, [clientFilter, displayedTasks, effectiveAssigneeFilter, effectiveQuickScope, priorityFilter, search, statusFilter, workView])
 
-  const visibleTasks = useMemo(
-    () => {
-      const search = taskSearch.trim().toLowerCase()
-      return tasks.filter(task => {
-        if (workView === 'history' ? !isPlannerHistoryTask(task) : isPlannerHistoryTask(task)) return false
-        if (taskStatusFilter !== 'all' && task.status !== taskStatusFilter) return false
-        if (search && ![task.title, task.client_name, task.assigned_to_name].some(value => value?.toLowerCase().includes(search))) return false
-        return true
-      })
-    },
-    [taskSearch, taskStatusFilter, tasks, workView],
-  )
-
-  // Group tasks by bucket for O(1) column lookup
   const tasksByBucket = useMemo(() => {
-    const map = new Map<string, PlannerTask[]>()
-    for (const t of visibleTasks) {
-      const key = t.bucket_id ?? '__none__'
-      if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(t)
+    const result = new Map<string, PlannerTask[]>()
+    for (const task of visibleTasks) {
+      const key = task.bucket_id ?? '__none__'
+      result.set(key, [...(result.get(key) ?? []), task])
     }
-    for (const bucketTasks of map.values()) {
-      bucketTasks.sort((a, b) => plannerTaskSortRank(a) - plannerTaskSortRank(b)
-        || (a.due_date ?? '9999-12-31').localeCompare(b.due_date ?? '9999-12-31')
+    for (const bucketTasks of result.values()) {
+      bucketTasks.sort((a, b) => taskSortRank(a) - taskSortRank(b)
+        || (a.due_date ?? '9999').localeCompare(b.due_date ?? '9999')
         || a.title.localeCompare(b.title))
     }
-    return map
+    return result
   }, [visibleTasks])
+  const bucketlessTasks = tasksByBucket.get(NO_BUCKET_ID) ?? []
 
-  const mobileTasks = useMemo(
-    () => [...visibleTasks].sort((a, b) => {
-      const rank = plannerTaskSortRank(a) - plannerTaskSortRank(b)
-      if (rank !== 0) return rank
-      const aDue = a.due_date ?? '9999-12-31'
-      const bDue = b.due_date ?? '9999-12-31'
-      if (aDue !== bDue) return aDue.localeCompare(bDue)
-      return a.title.localeCompare(b.title)
-    }),
-    [visibleTasks],
-  )
+  function captureScroll() {
+    savedScroll.current.board = boardScrollRef.current?.scrollLeft ?? 0
+    savedScroll.current.buckets = new Map([...bucketScrollRefs.current].map(([id, node]) => [id, node.scrollTop]))
+  }
 
+  function restoreScroll() {
+    window.requestAnimationFrame(() => {
+      if (boardScrollRef.current) boardScrollRef.current.scrollLeft = savedScroll.current.board
+      for (const [id, top] of savedScroll.current.buckets) {
+        const node = bucketScrollRefs.current.get(id)
+        if (node) node.scrollTop = top
+      }
+    })
+  }
 
-  useEffect(() => {
-    const board = boardScrollRef.current
-    const spacer = topScrollSpacerRef.current
-    if (!board || !spacer) return
-    const updateWidth = () => { spacer.style.width = `${board.scrollWidth}px` }
-    const frame = window.requestAnimationFrame(updateWidth)
-    const observer = new ResizeObserver(updateWidth)
-    observer.observe(board)
-    return () => { window.cancelAnimationFrame(frame); observer.disconnect() }
-  }, [buckets.length, tasksLoading, visibleTasks.length])
+  function openTask(task: PlannerTask) {
+    captureScroll()
+    setDrawerTask(task)
+    restoreScroll()
+  }
 
-  function syncHorizontalScroll(source: HTMLDivElement, target: HTMLDivElement | null) {
-    if (!target) return
-    const sourceMax = source.scrollWidth - source.clientWidth
-    const targetMax = target.scrollWidth - target.clientWidth
-    const next = sourceMax > 0 ? (source.scrollLeft / sourceMax) * targetMax : 0
-    if (Math.abs(target.scrollLeft - next) > 1) target.scrollLeft = next
+  function closeTask() {
+    setDrawerTask(null)
+    restoreScroll()
+  }
+
+  async function reloadTask(taskId: string) {
+    if (!activeBoardRecord) return null
+    captureScroll()
+    const board = activeBoardRecord
+    const requestId = ++taskRequestRef.current
+    const result = await fetchBoardTasks(board, false)
+    if (requestId !== taskRequestRef.current) return null
+    if (result.error) {
+      setTaskError(result.error.message ?? 'Could not reload Planner tasks.')
+      return null
+    }
+    const next = result.data
+    setTaskError(null)
+    setTasks(next)
+    setTasksBoardId(board.id)
+    const refreshed = next.find(task => task.id === taskId) ?? null
+    setDrawerTask(refreshed)
+    restoreScroll()
+    return refreshed
+  }
+
+  function selectBoard(slug: string) {
+    taskRequestRef.current += 1
+    setActiveBoard(slug)
+    setDrawerTask(null)
+    setBucketError(null)
+    setTaskError(null)
+    setBucketsLoading(true)
+    setTasksLoading(true)
+  }
+
+  function refreshActiveBoardTasks() {
+    if (!activeBoardRecord) return
+    const board = activeBoardRecord
+    const requestId = ++taskRequestRef.current
+    setTasksLoading(true)
+    void fetchBoardTasks(board, false).then(result => {
+      if (requestId !== taskRequestRef.current) return
+      if (result.error) {
+        setTaskError(result.error.message ?? 'Could not reload Planner tasks.')
+        return
+      }
+      setTaskError(null)
+      setTasks(result.data)
+      setTasksBoardId(board.id)
+    }).finally(() => {
+      if (requestId === taskRequestRef.current) setTasksLoading(false)
+    })
+  }
+
+  function changeAssigneeFilter(value: string) {
+    setAssigneeFilter(value)
+    const next = new URLSearchParams(routeParams)
+    if (value.startsWith('person:')) next.set('assignee', value.slice(7))
+    else next.delete('assignee')
+    setSearchParams(next, { replace: true })
+  }
+
+  function changeQuickScope(scope: QuickScope) {
+    setQuickScope(scope)
+    const next = new URLSearchParams(routeParams)
+    if (scope === 'all') next.delete('scope')
+    else next.set('scope', scope)
+    setSearchParams(next, { replace: true })
+  }
+
+  function retryBuckets() {
+    setBucketError(null)
+    setBucketsLoading(true)
+    setBucketRetry(current => current + 1)
+  }
+
+  function retryTasks() {
+    setTaskError(null)
+    setTasksLoading(true)
+    setTaskRetry(current => current + 1)
+  }
+
+  function retryBoards() {
+    setBoardError(null)
+    setLoading(true)
+    setBoardRetry(current => current + 1)
   }
 
   function handleBoardWheel(event: WheelEvent<HTMLDivElement>) {
@@ -281,203 +451,139 @@ export default function PlannerPage() {
     event.preventDefault()
   }
 
-  function handleTaskCreated(task: PlannerTask) {
-    setTasks(prev => [...prev, task])
+  if (loading) return <div className="mx-auto max-w-7xl px-4 py-5"><div className="h-72 animate-pulse rounded-xl bg-white/[0.04]" /></div>
+
+  if (boardError) {
+    return <div className={`mx-auto max-w-7xl px-4 ${embedded ? 'py-2' : 'py-8'}`}><LoadError title="Planner boards could not be loaded" message={boardError} onRetry={retryBoards} /></div>
   }
 
-  function handleTaskSaved(updated: PlannerTask) {
-    setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
-    setDrawerTask(updated)
-  }
-
-
-  if (loading) {
+  if (tableMissing || boards.length === 0) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="mb-4 h-6 w-40 animate-pulse rounded bg-white/10" />
-        <div className="mb-4 h-24 w-full animate-pulse rounded-xl bg-white/[0.04]" />
-        <div className="mb-4 flex gap-1.5">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-7 w-20 animate-pulse rounded-md bg-white/10" />
-          ))}
-        </div>
-        <div className="flex gap-3 overflow-x-auto pb-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-48 w-64 shrink-0 animate-pulse rounded-lg bg-white/[0.04]" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (tableMissing) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-6 text-xl font-black tracking-tight text-white">Planner</h1>
+      <div className={`mx-auto max-w-7xl px-4 ${embedded ? 'py-2' : 'py-8'}`}>
+        {!embedded && <h1 className="mb-6 text-xl font-black text-white">Planner</h1>}
         <EmptyState
-          title="Planner tables not set up yet"
-          message="Run phase-6 and phase-6b migrations."
-        />
-      </div>
-    )
-  }
-
-  if (boards.length === 0) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-6 text-xl font-black tracking-tight text-white">Planner</h1>
-        <EmptyState
-          title="No boards found"
-          message="Run the phase-6b seed migration to create boards."
+          title={tableMissing ? 'Planner tables not set up yet' : 'No boards found'}
+          message={tableMissing ? 'Run the Planner migrations.' : 'Create or seed a Planner board to begin.'}
         />
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-
-      {/* Header */}
-      <div className="mb-5 flex items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Schedule</p>
-          <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Planner</h1>
+    <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${embedded ? 'py-1' : 'py-5'}`}>
+      {!embedded && (
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Work</p>
+            <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Planner</h1>
+          </div>
+          {isAdmin && <div className="flex gap-3 text-xs font-semibold text-brand-primary/60"><Link to="/admin/import-health">Health</Link><Link to="/admin/planner-import">Import</Link></div>}
         </div>
-        {isAdmin && (
-          <div className="flex items-center gap-3">
-            <Link
-              to="/admin/import-health"
-              className="text-xs font-semibold text-brand-primary/60 hover:text-brand-primary transition-colors"
-            >
-              Health
-            </Link>
-            <Link
-              to="/admin/planner-import"
-              className="text-xs font-semibold text-brand-primary/60 hover:text-brand-primary transition-colors"
-            >
-              Import
-            </Link>
-          </div>
-        )}
+      )}
+
+      {assignmentError && <div role="alert" className="mb-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.06] px-3 py-2 text-xs text-amber-100">{assignmentError}</div>}
+
+      <div className="mb-3 flex flex-wrap gap-1">
+        {sortedBoards.map(board => (
+          <button key={board.id} type="button" onClick={() => selectBoard(board.slug)} className={`rounded-md px-3 py-1.5 text-xs font-semibold ${activeBoard === board.slug ? 'bg-white/[0.09] text-white ring-1 ring-brand-accent/40' : 'text-white/45 hover:bg-white/[0.04] hover:text-white'}`}>
+            {BOARD_LABELS[board.slug] ?? board.name}
+          </button>
+        ))}
       </div>
 
-      {/* Board tabs */}
-      <div className="mb-4 flex flex-wrap gap-1">
-        {sortedBoards.map(board => {
-          const isActive = activeBoard === board.slug
-          const isAdminOnly = board.visibility === 'admin_only'
-          return (
-            <button
-              key={board.slug}
-              type="button"
-              onClick={() => setActiveBoard(board.slug)}
-              className={`flex flex-col items-start rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
-                isActive
-                  ? 'bg-white/[0.08] text-white shadow-[inset_0_-2px_0_rgba(45,212,191,0.6)]'
-                  : 'text-white/45 hover:text-white hover:bg-white/[0.04]'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <span className="shrink-0">{BOARD_ICONS[board.slug]}</span>
-                <span>{BOARD_LABELS[board.slug] ?? board.name}</span>
-                {isAdminOnly && (
-                  <svg className="h-2.5 w-2.5 text-amber-400/60" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                  </svg>
-                )}
-              </span>
-            </button>
-          )
-        })}
+      <div className="mb-3 flex w-fit rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+        <button type="button" onClick={() => setWorkView('active')} className={`rounded-md px-3 py-1.5 text-xs font-bold ${workView === 'active' ? 'bg-brand-accent text-black' : 'text-brand-primary/60'}`}>Active {activeTaskCount}</button>
+        <button type="button" onClick={() => setWorkView('history')} className={`rounded-md px-3 py-1.5 text-xs font-bold ${workView === 'history' ? 'bg-white/[0.09] text-white' : 'text-brand-primary/60'}`}>History {historyTaskCount}</button>
       </div>
 
-      <div className="mb-4 flex w-fit items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
-        <button
-          type="button"
-          onClick={() => setWorkView('active')}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-            workView === 'active'
-              ? 'bg-brand-accent text-black'
-              : 'text-brand-primary/60 hover:text-brand-primary'
-          }`}
-        >
-          Active {activeTaskCount}
-        </button>
-        <button
-          type="button"
-          onClick={() => setWorkView('history')}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-            workView === 'history'
-              ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-              : 'text-brand-primary/60 hover:text-brand-primary'
-          }`}
-        >
-          History {historyTaskCount}
-        </button>
+      <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search tasks or people" className="rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white placeholder:text-white/30" />
+        <select value={statusFilter} onChange={event => setStatusFilter(event.target.value as 'all' | PlannerTaskStatus)} className="rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white"><option value="all">All statuses</option>{PLANNER_TASK_STATUSES.map(status => <option key={status} value={status}>{PLANNER_TASK_STATUS_LABELS[status]}</option>)}</select>
+        <select value={priorityFilter} onChange={event => setPriorityFilter(event.target.value as 'all' | TaskPriority)} className="rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white"><option value="all">All priorities</option>{PRIORITIES.map(priority => <option key={priority} value={priority}>{priority === 'client_request' ? 'Client request' : priority[0].toUpperCase() + priority.slice(1)}</option>)}</select>
+        <select value={effectiveAssigneeFilter} onChange={event => changeAssigneeFilter(event.target.value)} className="rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white"><option value="all">All assignees</option>{assigneeOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
+        <input type="search" value={clientFilter} onChange={event => setClientFilter(event.target.value)} placeholder="Filter client" className="rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white placeholder:text-white/30" />
       </div>
 
-      <div className="mb-4 grid gap-2 sm:grid-cols-2">
-        <input type="search" value={taskSearch} onChange={event => setTaskSearch(event.target.value)} placeholder="Search title, client or assignee" className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-xs text-white placeholder:text-white/30" />
-        <select value={taskStatusFilter} onChange={event => setTaskStatusFilter(event.target.value as 'all' | PlannerTaskStatus)} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-xs text-white">
-          <option value="all">All statuses</option>
-          {PLANNER_TASK_STATUSES.map(status => <option key={status} value={status}>{PLANNER_TASK_STATUS_LABELS[status]}</option>)}
-        </select>
+      <div className="mb-3 flex flex-wrap gap-1.5" aria-label="Quick filters">
+        {(['all', 'overdue', 'blocked'] as QuickScope[]).map(scope => <button key={scope} type="button" onClick={() => changeQuickScope(scope)} className={`rounded-full border px-3 py-1 text-[11px] font-semibold capitalize ${effectiveQuickScope === scope ? 'border-brand-accent/40 bg-brand-accent/10 text-brand-accent' : 'border-white/10 text-white/45'}`}>{scope}</button>)}
+        {canManage && <button type="button" onClick={() => changeQuickScope('unassigned')} className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${effectiveQuickScope === 'unassigned' ? 'border-brand-accent/40 bg-brand-accent/10 text-brand-accent' : 'border-white/10 text-white/45'}`}>Unassigned</button>}
       </div>
 
-      {/* Bucket columns */}
-      {buckets.length === 0 ? (
-        <EmptyState
-          title="No columns configured"
-          message="This board has no columns yet."
-          centered={false}
-        />
-      ) : (
+      {bucketError ? (
+        <LoadError title="Planner columns could not be loaded" message={bucketError} onRetry={retryBuckets} />
+      ) : bucketsLoading ? (
+        <div className="h-48 animate-pulse rounded-xl bg-white/[0.04]" aria-label="Loading Planner columns" />
+      ) : taskError && displayedBuckets.length === 0 ? (
+        <LoadError title="Planner tasks could not be loaded" message={taskError} onRetry={retryTasks} />
+      ) : displayedBuckets.length === 0 && tasksLoading ? (
+        <div className="h-48 animate-pulse rounded-xl bg-white/[0.04]" aria-label="Loading Planner tasks" />
+      ) : displayedBuckets.length === 0 && bucketlessTasks.length === 0 ? <EmptyState title="No columns configured" message="This board has no columns yet." centered={false} /> : (
         <>
-          <PlannerMobileTaskList
-            tasks={mobileTasks}
-            tasksLoading={tasksLoading}
-            bucketNameById={bucketNameById}
-            workView={workView}
-            onOpenTask={setDrawerTask}
-          />
-          {canManage && activeBoardId && (
-            <MobileTaskCreator boardId={activeBoardId} buckets={buckets} myName={myName} onTaskCreated={handleTaskCreated} />
+        {taskError && <LoadError title="Planner tasks could not be loaded" message={taskError} onRetry={retryTasks} />}
+        <div ref={boardScrollRef} data-testid="planner-board-scroller" onWheel={handleBoardWheel} className="flex h-[min(68vh,46rem)] min-h-[30rem] gap-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/[0.06] bg-black/10 p-3 pb-4">
+          {displayedBuckets.map(bucket => (
+            <BucketColumn
+              key={bucket.id}
+              bucket={bucket}
+              boardId={activeBoardRecord?.id ?? ''}
+              tasks={tasksByBucket.get(bucket.id) ?? []}
+              tasksLoading={tasksLoading}
+              tasksError={taskError}
+              allowAdd
+              people={people}
+              defaultAssigneeIds={profile?.id && directory.some(person => person.id === profile.id) ? [profile.id] : []}
+              assignmentDisabled={Boolean(assignmentError)}
+              canManage={canManage}
+              workView={workView}
+              onOpenTask={openTask}
+              onTaskCreated={refreshActiveBoardTasks}
+              setScrollRef={node => {
+                if (node) bucketScrollRefs.current.set(bucket.id, node)
+                else bucketScrollRefs.current.delete(bucket.id)
+              }}
+            />
+          ))}
+          {bucketlessTasks.length > 0 && (
+            <BucketColumn
+              bucket={{ id: NO_BUCKET_ID, name: 'No bucket' }}
+              boardId={activeBoardRecord?.id ?? ''}
+              tasks={bucketlessTasks}
+              tasksLoading={tasksLoading}
+              tasksError={taskError}
+              allowAdd={false}
+              people={people}
+              defaultAssigneeIds={[]}
+              assignmentDisabled
+              canManage={canManage}
+              workView={workView}
+              onOpenTask={openTask}
+              onTaskCreated={refreshActiveBoardTasks}
+              setScrollRef={node => {
+                if (node) bucketScrollRefs.current.set(NO_BUCKET_ID, node)
+                else bucketScrollRefs.current.delete(NO_BUCKET_ID)
+              }}
+            />
           )}
-          <div className="sticky top-0 z-20 mb-2 hidden rounded-lg border border-white/10 bg-[#0b0b0b]/95 px-2 pt-1 backdrop-blur md:block" aria-label="Planner horizontal navigation">
-            <div ref={topScrollRef} onScroll={event => syncHorizontalScroll(event.currentTarget, boardScrollRef.current)} className="h-4 overflow-x-auto overflow-y-hidden">
-              <div ref={topScrollSpacerRef} className="h-px" />
-            </div>
-          </div>
-          <div ref={boardScrollRef} onScroll={event => syncHorizontalScroll(event.currentTarget, topScrollRef.current)} onWheel={handleBoardWheel} className="hidden gap-3 overflow-x-auto overscroll-x-contain pb-6 md:flex">
-            {buckets.map(bucket => (
-              <BucketColumn
-                key={bucket.id}
-                bucket={bucket}
-                boardId={activeBoardId ?? ''}
-                tasks={tasksByBucket.get(bucket.id) ?? []}
-                tasksLoading={tasksLoading}
-                myName={myName}
-                canManage={canManage}
-                onOpenTask={setDrawerTask}
-                onTaskCreated={handleTaskCreated}
-              />
-            ))}
-          </div>
+        </div>
         </>
       )}
 
       {drawerTask && (
         <PlannerTaskDrawer
+          key={drawerTask.id}
           task={drawerTask}
-          buckets={buckets}
-          actorName={myName}
+          buckets={displayedBuckets}
+          people={people}
+          currentProfileId={profile?.id ?? null}
+          actorName={profile?.full_name ?? null}
           canManage={canManage}
-          onClose={() => setDrawerTask(null)}
-          onSaved={handleTaskSaved}
+          assignmentDisabled={Boolean(assignmentError)}
+          onClose={closeTask}
+          onReload={() => reloadTask(drawerTask.id)}
           onArchived={archived => {
-            setTasks(prev => prev.map(task => task.id === archived.id ? archived : task))
-            setDrawerTask(null)
+            setTasks(current => current.filter(task => task.id !== archived.id))
             setWorkView('history')
+            closeTask()
           }}
         />
       )}
@@ -485,327 +591,213 @@ export default function PlannerPage() {
   )
 }
 
-function PlannerMobileTaskList({
-  tasks,
-  tasksLoading,
-  bucketNameById,
-  workView,
-  onOpenTask,
-}: {
-  tasks: PlannerTask[]
-  tasksLoading: boolean
-  bucketNameById: Map<string, string>
-  workView: PlannerWorkView
-  onOpenTask: (task: PlannerTask) => void
-}) {
-  if (tasksLoading) {
-    return (
-      <div className="space-y-2 md:hidden">
-        {[1, 2, 3].map(i => <div key={i} className="h-24 animate-pulse rounded-xl bg-white/[0.04]" />)}
-      </div>
-    )
-  }
-
-  if (tasks.length === 0) {
-    return (
-      <div className="md:hidden">
-        <EmptyState
-          title={workView === 'active' ? 'No active planner tasks' : 'No completed planner history'}
-          message={workView === 'active' ? 'Approved and scheduled import history is hidden here.' : 'Completed planner work will appear here.'}
-          centered={false}
-        />
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-2 md:hidden">
-      {tasks.map(task => (
-        <button
-          key={task.id}
-          type="button"
-          onClick={() => onOpenTask(task)}
-          className="w-full rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.055] to-white/[0.02] p-3 text-left shadow-[0_18px_40px_rgba(0,0,0,0.18)] transition-colors hover:border-brand-accent/25"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">{task.title}</p>
-              <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                {task.client_name && (
-                  <span className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2 py-0.5 text-[10px] font-semibold text-[#2dd4bf]">
-                    {task.client_name}
-                  </span>
-                )}
-                <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold text-white/45">
-                  {task.bucket_id ? bucketNameById.get(task.bucket_id) ?? 'Planner' : 'Planner'}
-                </span>
-                {task.assigned_to_name && (
-                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold text-white/45">
-                    {task.assigned_to_name}
-                  </span>
-                )}
-                {task.due_date && (
-                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold text-white/45">
-                    {formatPlannerDate(task.due_date)}
-                  </span>
-                )}
-              </div>
-            </div>
-            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${plannerStatusTone(task.status)}`}>
-              {PLANNER_TASK_STATUS_LABELS[task.status]}
-            </span>
-          </div>
-        </button>
-      ))}
-    </div>
-  )
+function LoadError({ title, message, onRetry }: { title: string; message: string; onRetry: () => void }) {
+  return <div role="alert" className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-400/25 bg-red-400/[0.06] px-3 py-2"><div><p className="text-xs font-bold text-red-200">{title}</p><p className="mt-0.5 text-xs text-red-100/65">{message}</p></div><button type="button" onClick={onRetry} className="rounded-md border border-red-300/25 px-3 py-1.5 text-xs font-bold text-red-100">Retry</button></div>
 }
 
-function MobileTaskCreator({ boardId, buckets, myName, onTaskCreated }: {
+function BucketColumn({ bucket, boardId, tasks, tasksLoading, tasksError, allowAdd, people, defaultAssigneeIds, assignmentDisabled, canManage, workView, onOpenTask, onTaskCreated, setScrollRef }: {
+  bucket: Pick<PlannerBucket, 'id' | 'name'>
   boardId: string
-  buckets: PlannerBucket[]
-  myName: string | null
+  tasks: PlannerTask[]
+  tasksLoading: boolean
+  tasksError: string | null
+  allowAdd: boolean
+  people: PlannerPerson[]
+  defaultAssigneeIds: string[]
+  assignmentDisabled: boolean
+  canManage: boolean
+  workView: PlannerWorkView
+  onOpenTask: (task: PlannerTask) => void
   onTaskCreated: (task: PlannerTask) => void
+  setScrollRef: (node: HTMLDivElement | null) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState('')
-  const [bucketId, setBucketId] = useState(buckets[0]?.id ?? '')
+  const [assigneeIds, setAssigneeIds] = useState(defaultAssigneeIds)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function submit(event: FormEvent) {
     event.preventDefault()
-    if (!title.trim() || !bucketId || saving) return
+    if (!allowAdd || !title.trim() || saving || !boardId) return
     setSaving(true)
     setError(null)
-    const result = await createPlannerTask({ board_id: boardId, bucket_id: bucketId, title: title.trim(), assigned_to_name: myName })
-    setSaving(false)
-    if (result.error) {
-      setError(result.error.message)
-      return
-    }
-    if (result.data) onTaskCreated(result.data)
-    setTitle('')
-    setOpen(false)
-  }
-
-  return (
-    <div className="mb-4 md:hidden">
-      {!open ? (
-        <button type="button" onClick={() => setOpen(true)} className="w-full rounded-xl border border-brand-teal/25 bg-brand-teal/[0.07] px-4 py-3 text-sm font-black text-brand-teal">+ New Planner task</button>
-      ) : (
-        <form onSubmit={submit} className="space-y-3 rounded-xl border border-white/10 bg-white/[0.035] p-3">
-          <input autoFocus value={title} onChange={event => setTitle(event.target.value)} placeholder="Task title" className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white" />
-          <select value={bucketId} onChange={event => setBucketId(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 text-sm text-white">
-            {buckets.map(bucket => <option key={bucket.id} value={bucket.id}>{bucket.name}</option>)}
-          </select>
-          {error && <p className="text-xs text-red-300">{error}</p>}
-          <div className="flex gap-2">
-            <button type="submit" disabled={saving || !title.trim() || !bucketId} className="rounded-lg bg-brand-accent px-4 py-2 text-xs font-black text-black disabled:opacity-50">{saving ? 'Saving...' : 'Create'}</button>
-            <button type="button" onClick={() => setOpen(false)} className="rounded-lg border border-white/10 px-4 py-2 text-xs text-brand-primary">Cancel</button>
-          </div>
-        </form>
-      )}
-    </div>
-  )
-}
-
-function BucketColumn({ bucket, boardId, tasks, tasksLoading, myName, canManage, onOpenTask, onTaskCreated }: {
-  bucket: PlannerBucket
-  boardId: string
-  tasks: PlannerTask[]
-  tasksLoading: boolean
-  myName: string | null
-  canManage: boolean
-  onOpenTask: (task: PlannerTask) => void
-  onTaskCreated: (task: PlannerTask) => void
-}) {
-  const [showAdd, setShowAdd] = useState(false)
-  const [addTitle, setAddTitle] = useState('')
-  const [addBusy, setAddBusy] = useState(false)
-  const [addError, setAddError] = useState<string | null>(null)
-
-  async function handleAdd(e: FormEvent) {
-    e.preventDefault()
-    if (!addTitle.trim() || addBusy || !boardId) return
-    setAddBusy(true)
-    setAddError(null)
     try {
-      const { data, error } = await createPlannerTask({
+      const { data, error: createError } = await createPlannerTask({
         board_id: boardId,
         bucket_id: bucket.id,
-        title: addTitle.trim(),
-        assigned_to_name: myName ?? null,
+        title: title.trim(),
+        assignee_profile_ids: assignmentDisabled ? [] : assigneeIds,
       })
-      if (error) {
-        setAddError(error.code === '42501' ? 'Admin permission needed.' : error.message)
+      if (createError) {
+        setError(createError.message ?? 'Could not create task.')
         return
       }
-      if (data) {
-        onTaskCreated(data)
-        setAddTitle('')
-        setShowAdd(false)
-      }
-    } catch {
-      setAddError('Could not create task.')
+      if (data) onTaskCreated(data as PlannerTask)
+      setTitle('')
+      setAssigneeIds(defaultAssigneeIds)
+      setAdding(false)
     } finally {
-      setAddBusy(false)
+      setSaving(false)
     }
   }
 
-  function cancelAdd() {
-    setShowAdd(false)
-    setAddTitle('')
-    setAddError(null)
-  }
-
   return (
-    <div className="w-56 shrink-0 sm:w-60">
-      <div className="mb-2 flex items-center justify-between gap-2 px-1">
-        <h3 className="truncate text-[11px] font-semibold uppercase tracking-wider text-white/45">
-          {bucket.name}
-        </h3>
-        {tasks.length > 0 && (
-          <span className="shrink-0 text-[11px] text-white/25">{tasks.length}</span>
-        )}
+    <section className="flex w-[18rem] shrink-0 flex-col rounded-lg border border-white/[0.07] bg-white/[0.025] p-2" aria-labelledby={`bucket-${bucket.id}`}>
+      <div className="flex items-center justify-between gap-2 px-1 pb-2">
+        <h2 id={`bucket-${bucket.id}`} className="truncate text-xs font-black uppercase tracking-wider text-white/65">{bucket.name}</h2>
+        <span className="text-[11px] text-white/35">{tasks.length}</span>
       </div>
 
-      <div className="min-h-[7rem] rounded-lg border border-white/[0.06] bg-white/[0.018] p-2">
-        {tasksLoading ? (
-          <div className="flex h-16 items-center justify-center">
-            <div className="h-1.5 w-12 animate-pulse rounded-full bg-white/10" />
-          </div>
-        ) : (
-          <div className="space-y-1.5">
-            {tasks.map(task => (
-              <PlannerTaskCard key={task.id} task={task} onClick={() => onOpenTask(task)} />
-            ))}
+      {allowAdd && canManage && workView === 'active' && (
+        <div className="mb-2" data-testid="bucket-add-task">
+          {!adding ? (
+            <button type="button" onClick={() => setAdding(true)} className="w-full rounded-md border border-dashed border-brand-teal/20 bg-brand-teal/[0.04] py-2 text-xs font-semibold text-brand-teal/75 hover:border-brand-teal/40">+ Add task</button>
+          ) : (
+            <form onSubmit={submit} className="space-y-2 rounded-md border border-white/10 bg-black/25 p-2">
+              <input autoFocus value={title} onChange={event => setTitle(event.target.value)} placeholder="Task title" className="w-full rounded-md border border-white/10 bg-[#111] px-2.5 py-2 text-sm text-white" />
+              <PlannerPeoplePicker people={people} value={assigneeIds} onChange={setAssigneeIds} label="Assign people" disabled={assignmentDisabled} />
+              {error && <p className="text-xs text-red-300">{error}</p>}
+              <div className="flex gap-2"><button type="submit" disabled={saving || !title.trim()} className="rounded-md bg-brand-accent px-3 py-1.5 text-xs font-black text-black disabled:opacity-50">{saving ? 'Creating...' : 'Create'}</button><button type="button" onClick={() => setAdding(false)} className="text-xs text-white/50">Cancel</button></div>
+            </form>
+          )}
+        </div>
+      )}
 
-            {tasks.length === 0 && !showAdd && (
-              <div className="flex flex-col items-center gap-1.5 py-4">
-                <p className="text-[11px] text-white/20">No tasks</p>
-                {canManage && <button type="button" onClick={() => setShowAdd(true)} className="text-[11px] text-brand-primary/40 hover:text-brand-primary transition-colors">+ Add task</button>}
-              </div>
-            )}
-
-            {canManage && showAdd ? (
-              <form onSubmit={handleAdd} className="pt-0.5">
-                <input
-                  autoFocus
-                  value={addTitle}
-                  onChange={e => setAddTitle(e.target.value)}
-                  placeholder="Task title..."
-                  className="w-full rounded-md border border-white/10 bg-black/40 px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-brand-accent"
-                />
-                {addError && <p className="mt-1 text-[11px] text-red-400">{addError}</p>}
-                <div className="mt-1.5 flex gap-1.5">
-                  <button
-                    type="submit"
-                    disabled={addBusy || !addTitle.trim()}
-                    className="rounded-md bg-brand-accent/90 px-2.5 py-1 text-[11px] font-semibold text-brand-bg disabled:opacity-50"
-                  >
-                    {addBusy ? '…' : 'Save'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cancelAdd}
-                    className="rounded-md border border-white/10 px-2.5 py-1 text-[11px] text-white/50 hover:text-white"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            ) : canManage && tasks.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowAdd(true)}
-                className="mt-1 w-full rounded-md border border-dashed border-white/[0.07] py-1.5 text-[11px] text-white/25 hover:border-white/15 hover:text-white/50 transition-colors"
-              >
-                + Add task
-              </button>
-            )}
-          </div>
-        )}
+      <div ref={setScrollRef} data-testid="planner-bucket-scroll" className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1">
+        {tasksLoading ? <div className="h-20 animate-pulse rounded-lg bg-white/[0.04]" /> : tasksError ? <p className="py-8 text-center text-xs text-red-200/65">Tasks unavailable</p> : tasks.map(task => <PlannerTaskCard key={task.id} task={task} onClick={() => onOpenTask(task)} />)}
+        {!tasksLoading && !tasksError && tasks.length === 0 && <p className="py-8 text-center text-xs text-white/25">No matching tasks</p>}
       </div>
-    </div>
+    </section>
   )
 }
 
 function PlannerTaskCard({ task, onClick }: { task: PlannerTask; onClick: () => void }) {
-  const dotColor = task.priority === 'urgent'
-    ? 'bg-amber-400/60'
-    : task.priority === 'client_request'
-    ? 'bg-brand-accent/60'
-    : 'bg-white/15'
-
+  const progress = checklistProgress(task)
+  const overdue = isOverdue(task)
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full rounded-md border border-white/[0.06] bg-white/[0.03] p-2.5 text-left transition-all hover:border-white/[0.1] hover:bg-white/[0.06]"
-    >
-      <div className="flex items-start gap-1.5">
-        <div className={`mt-[4px] h-1.5 w-1.5 shrink-0 rounded-full ${dotColor}`} />
-        <p className="text-[12px] font-medium leading-snug text-white">{task.title}</p>
+    <button type="button" onClick={onClick} className={`w-full rounded-lg border bg-[#151515] p-3 text-left transition-colors hover:bg-white/[0.055] ${task.status === 'blocked' ? 'border-red-400/25' : overdue ? 'border-amber-400/25' : 'border-white/[0.07]'}`}>
+      <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">{task.title}</p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {task.client_name && <span className="rounded-full border border-brand-teal/15 px-2 py-0.5 text-[10px] text-brand-teal">{task.client_name}</span>}
+        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(task.status)}`}>{PLANNER_TASK_STATUS_LABELS[task.status]}</span>
+        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] capitalize text-white/45">{task.priority.replace('_', ' ')}</span>
+        {task.due_date && <span className={`rounded-full border px-2 py-0.5 text-[10px] ${overdue ? 'border-amber-400/30 bg-amber-400/10 font-bold text-amber-200' : 'border-white/10 text-white/45'}`}>{overdue ? 'Overdue ' : ''}{formatPlannerDate(task.due_date)}</span>}
+        {task.status === 'blocked' && <span className="rounded-full bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-300">Blocked</span>}
       </div>
-      {(task.client_name || task.assigned_to_name || task.due_date) && (
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-3">
-          {task.client_name && (
-            <span className="text-[10px] text-brand-primary/60">{task.client_name}</span>
-          )}
-          {task.assigned_to_name && (
-            <span className="text-[10px] text-white/30">{task.assigned_to_name}</span>
-          )}
-          {task.due_date && (
-            <span className="text-[10px] text-white/30">{formatPlannerDate(task.due_date)}</span>
-          )}
-        </div>
-      )}
-      {task.status !== 'to_do' && (
-        <div className="mt-1.5 pl-3">
-          <span className={`inline-block rounded-full border px-1.5 py-px text-[9px] font-semibold ${plannerStatusTone(task.status)}`}>
-            {PLANNER_TASK_STATUS_LABELS[task.status]}
-          </span>
-        </div>
-      )}
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <PlannerAssigneeAvatars people={taskPeople(task)} maxVisible={3} />
+        {progress.total > 0 && <span className="text-[10px] text-white/40" aria-label={`${progress.complete} of ${progress.total} checklist items complete`}>{progress.complete}/{progress.total} checklist</span>}
+      </div>
+      {task.unresolved_assignee_names.length > 0 && <p className="mt-2 truncate text-[10px] text-amber-200/75" title={`Imported identities: ${task.unresolved_assignee_names.join(', ')}`}>Imported identity: {task.unresolved_assignee_names.join(', ')}</p>}
     </button>
   )
 }
 
-function PlannerTaskDrawer({ task, buckets, actorName, canManage, onClose, onSaved, onArchived }: {
+function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName, canManage, assignmentDisabled, onClose, onReload, onArchived }: {
   task: PlannerTask
   buckets: PlannerBucket[]
+  people: PlannerPerson[]
+  currentProfileId: string | null
   actorName: string | null
   canManage: boolean
+  assignmentDisabled: boolean
   onClose: () => void
-  onSaved: (updated: PlannerTask) => void
+  onReload: () => Promise<PlannerTask | null>
   onArchived: (task: PlannerTask) => void
 }) {
   const [title, setTitle] = useState(task.title)
   const [clientId, setClientId] = useState(task.client_id ?? '')
   const [clientName, setClientName] = useState(task.client_name ?? '')
-  const [assignedTo, setAssignedTo] = useState(task.assigned_to_name ?? '')
   const [status, setStatus] = useState<PlannerTaskStatus>(task.status)
   const [priority, setPriority] = useState<TaskPriority>(task.priority)
   const [startDate, setStartDate] = useState(task.start_date ?? '')
   const [dueDate, setDueDate] = useState(task.due_date ?? '')
   const [notes, setNotes] = useState(task.notes ?? '')
-  const [helperNames, setHelperNames] = useState((task.helper_names ?? []).join(', '))
   const [bucketId, setBucketId] = useState(task.bucket_id ?? '')
+  const [assigneeIds, setAssigneeIds] = useState(task.assignees.map(person => person.profile_id))
+  const [checklist, setChecklist] = useState(() => checklistRows(task.checklist))
+  const [newChecklistText, setNewChecklistText] = useState('')
+  const [activity, setActivity] = useState<PlannerActivityLog[]>([])
+  const [activityError, setActivityError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [saveMsg, setSaveMsg] = useState<string | null>(null)
+  const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [removing, setRemoving] = useState(false)
-  const [confirmRemove, setConfirmRemove] = useState(false)
+  const [confirmArchive, setConfirmArchive] = useState(false)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const canonicalAssignment = task.assignees.length > 0
   const normalizedActor = actorName?.trim().toLowerCase() ?? ''
-  const canUpdateStatus = canManage || task.assigned_to_name?.trim().toLowerCase() === normalizedActor
-    || task.helper_names?.some(name => name.trim().toLowerCase() === normalizedActor)
+  const legacyAssigned = !canonicalAssignment && Boolean(normalizedActor && [task.assigned_to_name, ...(task.helper_names ?? [])].some(name => name?.trim().toLowerCase() === normalizedActor))
+  const canUpdateStatus = canManage || (canonicalAssignment ? Boolean(currentProfileId && task.assignees.some(person => person.profile_id === currentProfileId)) : legacyAssigned)
+  const inputClass = 'min-h-11 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-55'
+  const initialChecklist = checklistRows(task.checklist).map(row => {
+    if (!row.recognized) return row.raw
+    if (typeof row.raw === 'string' && !row.done && row.text === row.raw) return row.raw
+    if (row.raw && typeof row.raw === 'object') {
+      const raw = row.raw as Record<string, unknown>
+      if ('completed' in raw) return { ...raw, text: row.text, completed: row.done }
+      if ('is_checked' in raw) return { ...raw, text: row.text, is_checked: row.done }
+      return { ...raw, text: row.text, done: row.done }
+    }
+    return { text: row.text, done: row.done }
+  })
+  const isDirty = title !== task.title
+    || clientId !== (task.client_id ?? '')
+    || clientName !== (task.client_name ?? '')
+    || bucketId !== (task.bucket_id ?? '')
+    || status !== task.status
+    || priority !== task.priority
+    || startDate !== (task.start_date ?? '')
+    || dueDate !== (task.due_date ?? '')
+    || notes !== (task.notes ?? '')
+    || assigneeIds.join('|') !== task.assignees.map(person => person.profile_id).join('|')
+    || JSON.stringify(serializedChecklist()) !== JSON.stringify(initialChecklist)
+    || newChecklistText.trim().length > 0
 
-  async function handleSave() {
+  function requestClose() {
+    if (isDirty) setConfirmDiscard(true)
+    else onClose()
+  }
+
+  useEffect(() => {
+    let active = true
+    void listPlannerActivity(task.id).then(({ data, error }) => {
+      if (!active) return
+      if (error) setActivityError('Activity history is unavailable.')
+      else setActivity(data ?? [])
+    })
+    return () => { active = false }
+  }, [task.id])
+
+  useEffect(() => {
+    function handleKey(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      if (isDirty) setConfirmDiscard(true)
+      else onClose()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [isDirty, onClose])
+
+  function serializedChecklist() {
+    return checklist.map(row => {
+      if (!row.recognized) return row.raw
+      if (typeof row.raw === 'string' && !row.done && row.text === row.raw) return row.raw
+      if (row.raw && typeof row.raw === 'object') {
+        const raw = row.raw as Record<string, unknown>
+        if ('completed' in raw) return { ...raw, text: row.text, completed: row.done }
+        if ('is_checked' in raw) return { ...raw, text: row.text, is_checked: row.done }
+        return { ...raw, text: row.text, done: row.done }
+      }
+      return { text: row.text, done: row.done }
+    })
+  }
+
+  async function save() {
     if (saving || !title.trim()) return
     setSaving(true)
-    setSaveMsg(null)
     setSaveError(null)
+    setSaveMessage(null)
     try {
       if (!canManage) {
         if (!canUpdateStatus) {
@@ -814,261 +806,97 @@ function PlannerTaskDrawer({ task, buckets, actorName, canManage, onClose, onSav
         }
         const result = await updatePlannerTaskStatus(task.id, status)
         if (result.error) { setSaveError(result.error.message); return }
-        if (result.data) onSaved(result.data as PlannerTask)
-        setSaveMsg('Status saved')
+      } else {
+        if (startDate && dueDate && startDate > dueDate) {
+          setSaveError('Start date cannot be after the due date.')
+          return
+        }
+        const result = await updatePlannerTaskWithAssignees(task.id, {
+          title: title.trim(),
+          bucket_id: bucketId || null,
+          assignee_profile_ids: assigneeIds,
+          client_id: clientId || null,
+          client_name: clientName.trim() || null,
+          status,
+          priority,
+          start_date: startDate || null,
+          due_date: dueDate || null,
+          notes: notes.trim() || null,
+          checklist: serializedChecklist(),
+        })
+        if (result.error) { setSaveError(`Task was not saved. ${result.error.message}`); return }
+      }
+      const refreshed = await onReload()
+      if (!refreshed) {
+        setSaveError('The task was saved, but current Planner data could not be reloaded.')
         return
       }
-      if (startDate && dueDate && startDate > dueDate) {
-        setSaveError('Start date cannot be after the due date.')
-        return
-      }
-      const { data, error } = await updatePlannerTask(task.id, {
-        title: title.trim(),
-        client_id: clientId || null,
-        client_name: clientName.trim() || null,
-        assigned_to_name: assignedTo.trim() || null,
-        status,
-        priority,
-        start_date: startDate || null,
-        due_date: dueDate || null,
-        notes: notes.trim() || null,
-        bucket_id: bucketId || null,
-        helper_names: helperNames.split(',').map(name => name.trim()).filter(Boolean),
-      })
-      if (error) {
-        setSaveError(error.code === '42501' ? 'Manager permission needed.' : error.message)
-        return
-      }
-      if (data) {
-        onSaved(data)
-        setSaveMsg('Saved')
-        setTimeout(() => setSaveMsg(null), 2000)
-      }
+      onClose()
     } catch {
-      setSaveError('Could not save.')
+      setSaveError('Could not save this task.')
     } finally {
       setSaving(false)
     }
   }
 
-  async function handleRemoveFromActive() {
-    if (removing) return
-    setRemoving(true)
-    setSaveError(null)
+  async function archive() {
     const { data, error } = await archivePlannerTask(task.id, actorName)
-    if (error) {
-      setSaveError(error.code === '42703'
-        ? 'Archive migration is not applied yet. Run phase-9a-planner-task-archive.sql in Supabase.'
-        : error.message ?? 'Could not remove task from active.')
-      setRemoving(false)
-      return
-    }
+    if (error) { setSaveError(error.message ?? 'Could not remove task from active work.'); return }
     if (data) onArchived(data as PlannerTask)
   }
 
-  const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
+  function addChecklistItem(event: FormEvent) {
+    event.preventDefault()
+    const text = newChecklistText.trim()
+    if (!text || !canManage) return
+    setChecklist(current => [...current, { key: `new-${Date.now()}`, text, done: false, raw: { text, done: false }, recognized: true }])
+    setNewChecklistText('')
+  }
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[440px]">
-        <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
-          <div>
-            <h2 className="text-sm font-semibold text-white">Task details</h2>
-            {task.original_plan_name && (
-              <p className="mt-0.5 text-[10px] text-white/30">{task.original_plan_name}</p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-brand-primary hover:text-white transition-colors"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-          {task.priority !== 'normal' && (
-            <div>
-              <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${
-                task.priority === 'urgent'
-                  ? 'text-amber-400 border-amber-400/25'
-                  : 'text-brand-accent border-brand-accent/25'
-              }`}>
-                {task.priority === 'urgent' ? 'Urgent' : 'Client request'}
-              </span>
-            </div>
-          )}
-
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Title</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} disabled={!canManage} className={inputCls} />
-          </div>
-
+      <div className="fixed inset-0 z-40 bg-black/65" onClick={requestClose} />
+      <aside className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/10 bg-[#101010] sm:w-[32rem]" aria-label="Task details">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><h2 className="font-bold text-white">Task details</h2>{task.original_plan_name && <p className="text-[10px] text-white/35">Imported from {task.original_plan_name}</p>}</div><button type="button" onClick={requestClose} className="min-h-11 min-w-11 rounded-lg text-xl text-white/60" aria-label="Close task details">&times;</button></div>
+        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
+          <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Title</label><input value={title} onChange={event => setTitle(event.target.value)} disabled={!canManage} className={inputClass} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
-              <select value={status} onChange={e => setStatus(e.target.value as PlannerTaskStatus)} disabled={!canUpdateStatus} className={inputCls}>
-                {PLANNER_TASK_STATUSES.map(s => (
-                  <option key={s} value={s}>{PLANNER_TASK_STATUS_LABELS[s]}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Priority</label>
-              <select value={priority} onChange={e => setPriority(e.target.value as TaskPriority)} disabled={!canManage} className={inputCls}>
-                {PRIORITIES.map(p => (
-                  <option key={p} value={p}>
-                    {p === 'client_request' ? 'Client request' : p.charAt(0).toUpperCase() + p.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Status</label><select value={status} onChange={event => setStatus(event.target.value as PlannerTaskStatus)} disabled={!canUpdateStatus} className={inputClass}>{PLANNER_TASK_STATUSES.map(value => <option key={value} value={value}>{PLANNER_TASK_STATUS_LABELS[value]}</option>)}</select></div>
+            <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Priority</label><select value={priority} onChange={event => setPriority(event.target.value as TaskPriority)} disabled={!canManage} className={inputClass}>{PRIORITIES.map(value => <option key={value} value={value}>{value.replace('_', ' ')}</option>)}</select></div>
           </div>
+          <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Client</label>{canManage ? <ClientPicker value={clientId} label={clientName} onChange={client => { setClientId(client?.id ?? ''); setClientName(client?.name ?? '') }} /> : <div className={`${inputClass} opacity-70`}>{clientName || 'No client'}</div>}</div>
+          <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Bucket</label><select value={bucketId} onChange={event => setBucketId(event.target.value)} disabled={!canManage} className={inputClass}><option value="">No bucket</option>{buckets.map(bucket => <option key={bucket.id} value={bucket.id}>{bucket.name}</option>)}</select></div>
+          <div className="grid grid-cols-2 gap-3"><div><label className="mb-1 block text-xs font-semibold text-brand-primary">Start date</label><input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} disabled={!canManage} className={inputClass} /></div><div><label className="mb-1 block text-xs font-semibold text-brand-primary">Due date</label><input type="date" value={dueDate} onChange={event => setDueDate(event.target.value)} disabled={!canManage} className={inputClass} /></div></div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
-              <ClientPicker
-                value={clientId}
-                label={clientName}
-                onChange={client => {
-                  setClientId(client?.id ?? '')
-                  setClientName(client?.name ?? '')
-                }}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label>
-              <input
-                value={assignedTo}
-                onChange={e => setAssignedTo(e.target.value)}
-                placeholder="Name"
-                disabled={!canManage}
-                className={inputCls}
-              />
-            </div>
-          </div>
+          <PlannerPeoplePicker people={people} value={assigneeIds} onChange={setAssigneeIds} disabled={!canManage || assignmentDisabled} readOnly={!canManage} />
+          {task.unresolved_assignee_names.length > 0 && <div className="rounded-lg border border-amber-400/20 bg-amber-400/[0.06] p-3"><p className="text-xs font-bold text-amber-100">Imported identities need manager resolution</p><p className="mt-1 text-xs text-amber-100/70">{task.unresolved_assignee_names.join(', ')}</p><p className="mt-1 text-[10px] text-amber-100/50">Choose canonical people above. Imported names remain visible separately for audit context.</p></div>}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Start date</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={e => setStartDate(e.target.value)}
-                disabled={!canManage}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-brand-primary">Due date</label>
-              <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} disabled={!canManage} className={inputCls} />
-            </div>
-          </div>
+          <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Notes</label><textarea value={notes} onChange={event => setNotes(event.target.value)} rows={4} disabled={!canManage} className={`${inputClass} resize-y`} /></div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Column</label>
-            <select value={bucketId} onChange={e => setBucketId(e.target.value)} disabled={!canManage} className={inputCls}>
-              <option value="">— None —</option>
-              {buckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-          </div>
+          <section aria-labelledby="checklist-heading"><div className="mb-2 flex items-center justify-between"><h3 id="checklist-heading" className="text-xs font-black uppercase tracking-wider text-white/50">Checklist</h3><span className="text-xs text-white/35">{checklist.filter(row => row.recognized && row.done).length}/{checklist.filter(row => row.recognized).length}</span></div><div className="space-y-2">{checklist.map((row, index) => <div key={row.key} className="flex items-center gap-2 rounded-lg border border-white/[0.07] p-2">{row.recognized ? <input type="checkbox" checked={row.done} disabled={!canManage} onChange={() => setChecklist(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, done: !item.done } : item))} className="h-4 w-4 accent-teal-400" /> : <span className="text-amber-300">!</span>}<span className={`min-w-0 flex-1 text-sm ${row.done ? 'text-white/35 line-through' : 'text-white/75'}`}>{row.text}</span>{canManage && <button type="button" onClick={() => setChecklist(current => current.filter((_, itemIndex) => itemIndex !== index))} className="min-h-11 min-w-11 text-white/35 sm:min-h-8 sm:min-w-8" aria-label={`Remove checklist item ${row.text}`}>&times;</button>}</div>)}</div>{canManage && <form onSubmit={addChecklistItem} className="mt-2 flex gap-2"><input value={newChecklistText} onChange={event => setNewChecklistText(event.target.value)} placeholder="Add checklist item" className={inputClass} /><button type="submit" disabled={!newChecklistText.trim()} className="min-h-11 rounded-lg border border-brand-teal/25 px-3 text-xs font-bold text-brand-teal disabled:opacity-40">Add</button></form>}</section>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-brand-primary">Notes</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              rows={4}
-              disabled={!canManage}
-              className={`resize-none ${inputCls}`}
-            />
-          </div>
-
-          <div>
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p>
-            {canManage ? (
-              <input value={helperNames} onChange={event => setHelperNames(event.target.value)} placeholder="Names separated by commas" className={inputCls} />
-            ) : task.helper_names !== undefined ? (
-              task.helper_names.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {task.helper_names.map(name => (
-                    <span key={name} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[11px] text-white/70">
-                      {name}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-[11px] text-white/40">No helpers yet</p>
-              )
-            ) : (
-              <p className="text-[11px] text-white/30">After migration phase-7b</p>
-            )}
-          </div>
-
-          <div>
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Timer</p>
-            <div className="flex items-center gap-2">
-              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/[0.08] px-3 py-1.5 text-xs text-white/25">Start</button>
-              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/[0.08] px-3 py-1.5 text-xs text-white/25">Pause</button>
-              <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/[0.08] px-3 py-1.5 text-xs text-white/25">Stop</button>
-            </div>
-            <p className="mt-1.5 text-[10px] text-white/20">After migration</p>
-          </div>
+          <section aria-labelledby="activity-heading"><h3 id="activity-heading" className="mb-2 text-xs font-black uppercase tracking-wider text-white/50">Activity</h3>{activityError && <p className="text-xs text-amber-200">{activityError}</p>}{!activityError && activity.length === 0 && <p className="text-xs text-white/35">No activity recorded yet.</p>}<div className="space-y-2">{activity.map(item => <ActivityRow key={item.id} item={item} people={people} />)}</div></section>
         </div>
-
-        <div className="border-t border-white/[0.08] px-5 py-4">
-          {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
-          {saveMsg && <p className="mb-2 text-xs text-[#2dd4bf]">{saveMsg}</p>}
-          <div className="flex items-center gap-3">
-            <ActionButton
-              variant="primary"
-              onClick={handleSave}
-              disabled={saving || !title.trim()}
-              loading={saving}
-            >
-              Save
-            </ActionButton>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-brand-primary hover:text-white transition-colors"
-            >
-              Close
-            </button>
-            {canManage && (!confirmRemove ? (
-              <button
-                type="button"
-                onClick={() => setConfirmRemove(true)}
-                className="ml-auto text-xs text-amber-300/75 hover:text-amber-200 transition-colors"
-              >
-                Remove from active
-              </button>
-            ) : (
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs text-brand-primary">Remove?</span>
-                <button
-                  type="button"
-                  onClick={handleRemoveFromActive}
-                  disabled={removing}
-                  className="text-xs text-amber-300 hover:text-amber-200 disabled:opacity-60"
-                >
-                  {removing ? 'Removing...' : 'Yes'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmRemove(false)}
-                  className="text-xs text-brand-primary hover:text-white"
-                >
-                  Cancel
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+        <div className="border-t border-white/10 px-5 py-4">{saveError && <p className="mb-2 text-xs text-red-300">{saveError}</p>}{saveMessage && <p className="mb-2 text-xs text-brand-teal">{saveMessage}</p>}<div className="flex items-center gap-3"><ActionButton variant="primary" className="min-h-11" onClick={save} disabled={saving || !title.trim() || (!canManage && !canUpdateStatus) || (canManage && assignmentDisabled)} loading={saving}>Save</ActionButton><button type="button" onClick={requestClose} className="min-h-11 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/60">Close</button>{canManage && (!confirmArchive ? <button type="button" onClick={() => setConfirmArchive(true)} className="ml-auto min-h-11 px-2 text-xs text-amber-300/70">Remove from active</button> : <div className="ml-auto flex gap-1 text-xs"><button type="button" onClick={archive} className="min-h-11 px-2 text-amber-200">Confirm remove</button><button type="button" onClick={() => setConfirmArchive(false)} className="min-h-11 px-2 text-white/45">Cancel</button></div>)}</div></div>
+      </aside>
+      {confirmDiscard && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4" role="alertdialog" aria-modal="true" aria-labelledby="discard-title"><div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#181818] p-5 shadow-2xl"><h3 id="discard-title" className="font-bold text-white">Discard unsaved changes?</h3><p className="mt-2 text-sm text-white/55">Your changes to this task have not been saved.</p><div className="mt-5 flex justify-end gap-2"><button type="button" onClick={() => setConfirmDiscard(false)} className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white/70">Stay</button><button type="button" onClick={onClose} className="rounded-lg bg-red-400 px-4 py-2 text-sm font-bold text-black">Discard changes</button></div></div></div>}
     </>
   )
+}
+
+function ActivityRow({ item, people }: { item: PlannerActivityLog; people: PlannerPerson[] }) {
+  const metadata = item.metadata ?? {}
+  const oldStatus = typeof metadata.old_status === 'string' ? metadata.old_status : typeof metadata.from_status === 'string' ? metadata.from_status : null
+  const newStatus = typeof metadata.new_status === 'string' ? metadata.new_status : typeof metadata.to_status === 'string' ? metadata.to_status : null
+  const idsToNames = (value: unknown) => Array.isArray(value)
+    ? value.flatMap(id => typeof id === 'string' ? [people.find(person => person.id === id)?.full_name ?? 'Unknown person'] : [])
+    : []
+  const oldPeople = idsToNames(metadata.old_assignee_profile_ids ?? metadata.old_profile_ids)
+  const newPeople = idsToNames(metadata.new_assignee_profile_ids ?? metadata.new_profile_ids)
+  const context = oldStatus || newStatus
+    ? `${oldStatus ? PLANNER_TASK_STATUS_LABELS[oldStatus as PlannerTaskStatus] ?? oldStatus : 'Unspecified'} to ${newStatus ? PLANNER_TASK_STATUS_LABELS[newStatus as PlannerTaskStatus] ?? newStatus : 'Unspecified'}`
+    : oldPeople.length || newPeople.length
+      ? `${oldPeople.join(', ') || 'Unassigned'} to ${newPeople.join(', ') || 'Unassigned'}`
+      : null
+  return <div className="rounded-lg border border-white/[0.06] p-2.5"><p className="text-xs text-white/70"><span className="font-semibold text-white">{item.actor_name || 'System'}</span> {item.action.replaceAll('_', ' ')}</p>{context && <p className="mt-1 text-[11px] text-brand-teal/70">{context}</p>}<time className="mt-1 block text-[10px] text-white/30" dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}</time></div>
 }

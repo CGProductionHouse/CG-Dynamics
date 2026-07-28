@@ -26,8 +26,7 @@ const dynamicsNav: NavItem[] = [
 
 const hubNav: NavItem[] = [
   { to: '/admin/cg-hub', label: 'Hub', end: true },
-  { to: '/admin/my-work', label: 'My Work' },
-  { to: '/admin/planner', label: 'Planner' },
+  { to: '/admin/work', label: 'Work' },
   { to: '/admin/cg-calendar', label: 'CG Calendar' },
   { to: '/admin/client-schedule', label: 'Client Schedule' },
   { to: '/admin/content-workflow', label: 'Content Workflow' },
@@ -180,10 +179,10 @@ export default function AdminLayout() {
   ]
   const hubMobileItems: NavItem[] = [
     { to: '/admin/cg-hub', label: 'Hub' },
-    { to: '/admin/my-work', label: 'My Work' },
+    { to: '/admin/work', label: 'Work' },
     { to: '/admin/cg-calendar', label: 'Calendar' },
     { to: '/admin/client-schedule', label: 'Schedule' },
-    { to: '/admin/planner', label: 'Planner' },
+    { to: '/admin/clients', label: 'Clients' },
   ]
   const mobileItems = (zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems).filter(canShow)
   const displayRole = roleLabel(profile?.role)
