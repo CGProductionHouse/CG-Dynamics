@@ -16,6 +16,14 @@ import {
   microsoftRunFinalStatus,
   microsoftSourceIdentity,
 } from './microsoftApply'
+import {
+  getMicrosoftExecutableItems,
+  getMicrosoftReviewedItems,
+  microsoftSafeApplyError,
+  microsoftStableItemKey,
+  type MicrosoftRecoveryAuditItem,
+  type MicrosoftReviewedItem,
+} from './microsoftRecovery'
 
 // ── Supabase data layer for the Microsoft snapshot import (Option A) ─────────
 //
@@ -23,9 +31,9 @@ import {
 // templates), the rows already carrying Microsoft source keys, and the
 // occupied monthly_deliverables natural-key slots.
 //
-// Write side: applyMicrosoftImport inserts ONLY items the preview classified
-// as `new`. Changed/conflict/existing rows are never written — updating a
-// changed row is a deliberate manual action, not an import side effect.
+// Write side: reviewed executable actions use the admin-only per-item RPC.
+// Conflicts and unchanged/skipped rows never write. Each successful destination
+// action and audit row share one database transaction.
 //
 // Before supabase/phase-15a-microsoft-source-tracking.sql is applied the
 // microsoft_* columns do not exist. Reads degrade to migrationNeeded and the
@@ -255,11 +263,22 @@ export interface MicrosoftSyncRunSummary {
   status: 'previewed' | 'applying' | 'completed' | 'partial' | 'failed'
   triggerType: 'admin' | 'agent'
   snapshotExportedAt: string
-  summary: Partial<MicrosoftReconciliationSummary>
+  summary: Partial<MicrosoftReconciliationSummary> & {
+    reviewed?: number
+    applied?: number
+    previouslyApplied?: number
+    failed?: number
+    notAttempted?: number
+    conflictsUntouched?: number
+    uncertain?: number
+  }
   sourceCompleteness: Array<{ sourceName: string; complete: boolean; safeError: string | null }>
   safeError: string | null
   createdAt: string
   finishedAt: string | null
+  previewJobId: string | null
+  retryOfRunId: string | null
+  reviewedItems: MicrosoftReviewedItem[]
 }
 
 export interface MicrosoftSyncStateResult {
@@ -279,12 +298,16 @@ export interface MicrosoftSyncRunItem {
   sourceComplete: boolean
   details: { title?: string; warnings?: string[] }
   safeError: string | null
+  itemKey: string
+  sourceType: MicrosoftImportPreviewItem['sourceType']
+  sourceContainerId: string
+  sourceItemId: string
 }
 
 export async function loadMicrosoftSyncRunItems(runId: string): Promise<{ data: MicrosoftSyncRunItem[]; error: string | null }> {
   const { data, error } = await fetchAllPages((from, to) => supabase
     .from('microsoft_sync_run_items')
-    .select('id, source_name, destination, destination_id, action, result_status, source_complete, details, safe_error')
+    .select('id, item_key, source_type, source_container_id, source_item_id, source_name, destination, destination_id, action, result_status, source_complete, details, safe_error')
     .eq('run_id', runId)
     .order('created_at')
     .range(from, to))
@@ -298,14 +321,18 @@ export async function loadMicrosoftSyncRunItems(runId: string): Promise<{ data: 
     resultStatus: row.result_status as MicrosoftSyncRunItem['resultStatus'],
     sourceComplete: Boolean(row.source_complete),
     details: (row.details ?? {}) as MicrosoftSyncRunItem['details'],
-    safeError: row.safe_error as string | null,
+    safeError: microsoftSafeApplyError(row.safe_error as string | null),
+    itemKey: row.item_key as string,
+    sourceType: row.source_type as MicrosoftImportPreviewItem['sourceType'],
+    sourceContainerId: row.source_container_id as string,
+    sourceItemId: row.source_item_id as string,
   })), error: null }
 }
 
 export async function loadMicrosoftSyncState(): Promise<MicrosoftSyncStateResult> {
   const [settings, runs] = await Promise.all([
     supabase.from('microsoft_sync_settings').select('transition_status').eq('id', true).maybeSingle(),
-    supabase.from('microsoft_sync_runs').select('id, status, trigger_type, snapshot_exported_at, summary, source_completeness, safe_error, created_at, finished_at').order('created_at', { ascending: false }).limit(12),
+    supabase.from('microsoft_sync_runs').select('id, status, trigger_type, snapshot_exported_at, summary, source_completeness, safe_error, created_at, finished_at, preview_job_id, retry_of_run_id, reviewed_items').order('created_at', { ascending: false }).limit(12),
   ])
   const missing = [settings.error, runs.error].some(error => error?.code === '42P01' || error?.code === '42703')
   if (missing) return { transitionStatus: 'active', runs: [], migrationNeeded: true, error: null }
@@ -320,9 +347,12 @@ export async function loadMicrosoftSyncState(): Promise<MicrosoftSyncStateResult
       snapshotExportedAt: row.snapshot_exported_at as string,
       summary: (row.summary ?? {}) as Partial<MicrosoftReconciliationSummary>,
       sourceCompleteness: (row.source_completeness ?? []) as MicrosoftSyncRunSummary['sourceCompleteness'],
-      safeError: row.safe_error as string | null,
+      safeError: microsoftSafeApplyError(row.safe_error as string | null),
       createdAt: row.created_at as string,
       finishedAt: row.finished_at as string | null,
+      previewJobId: row.preview_job_id as string | null,
+      retryOfRunId: row.retry_of_run_id as string | null,
+      reviewedItems: (row.reviewed_items ?? []) as unknown as MicrosoftReviewedItem[],
     })),
     migrationNeeded: false,
     error: null,
@@ -460,6 +490,86 @@ export async function getMicrosoftPreviewResult(jobId: string): Promise<{ snapsh
   return { snapshot: data.snapshot as MicrosoftSnapshot, error: null }
 }
 
+export interface MicrosoftRecoveryContext {
+  sourceRun: MicrosoftSyncRunSummary
+  snapshot: MicrosoftSnapshot
+  auditItems: MicrosoftRecoveryAuditItem[]
+  previewJobId: string
+}
+
+export async function loadMicrosoftRecoveryContext(runId: string): Promise<{
+  data: MicrosoftRecoveryContext | null
+  error: string | null
+}> {
+  const { data: row, error: runError } = await supabase
+    .from('microsoft_sync_runs')
+    .select('id, status, trigger_type, snapshot_exported_at, summary, source_completeness, safe_error, created_at, finished_at, preview_job_id, retry_of_run_id, reviewed_items')
+    .eq('id', runId)
+    .single()
+  if (runError || !row) return { data: null, error: runError?.message ?? 'Recovery run could not be loaded.' }
+
+  const itemResult = await loadMicrosoftSyncRunItems(runId)
+  if (itemResult.error) return { data: null, error: itemResult.error }
+
+  let previewJobId = row.preview_job_id as string | null
+  if (!previewJobId) {
+    const { data: matchedJob, error: jobError } = await supabase
+      .from('microsoft_sync_jobs')
+      .select('id')
+      .eq('exported_at', row.snapshot_exported_at)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (jobError) return { data: null, error: jobError.message }
+    previewJobId = (matchedJob?.id as string | undefined) ?? null
+  }
+  if (!previewJobId) {
+    return { data: null, error: 'The preserved preview job for this run could not be found. No Microsoft refetch was started.' }
+  }
+
+  const snapshotResult = await getMicrosoftPreviewResult(previewJobId)
+  if (!snapshotResult.snapshot) return { data: null, error: snapshotResult.error ?? 'The preserved preview could not be restored.' }
+
+  let reviewedItems = (row.reviewed_items ?? []) as unknown as MicrosoftReviewedItem[]
+  if (reviewedItems.length === 0) {
+    reviewedItems = itemResult.data
+      .filter(item => item.resultStatus !== 'skipped' && !['unchanged', 'conflict', 'skipped', 'failed', 'package_template_create'].includes(item.action))
+      .map(item => ({
+        key: `${item.sourceType}:${item.sourceContainerId || 'missing'}:${item.sourceItemId || 'missing'}`,
+        sourceType: item.sourceType,
+        sourceContainerId: item.sourceContainerId,
+        sourceItemId: item.sourceItemId,
+        sourceName: item.sourceName,
+        title: item.details.title ?? 'Microsoft item',
+        action: item.action,
+        // Legacy runs did not persist the separate removal checkbox. A failed
+        // removal is not proof of approval, so recovery fails closed.
+        removalApproved: item.resultStatus === 'applied' && (item.action === 'cancel' || item.action === 'archive'),
+      }))
+  }
+
+  const sourceRun: MicrosoftSyncRunSummary = {
+    id: row.id as string,
+    status: row.status as MicrosoftSyncRunSummary['status'],
+    triggerType: row.trigger_type as MicrosoftSyncRunSummary['triggerType'],
+    snapshotExportedAt: row.snapshot_exported_at as string,
+    summary: (row.summary ?? {}) as MicrosoftSyncRunSummary['summary'],
+    sourceCompleteness: (row.source_completeness ?? []) as MicrosoftSyncRunSummary['sourceCompleteness'],
+    safeError: microsoftSafeApplyError(row.safe_error as string | null),
+    createdAt: row.created_at as string,
+    finishedAt: row.finished_at as string | null,
+    previewJobId,
+    retryOfRunId: row.retry_of_run_id as string | null,
+    reviewedItems,
+  }
+  const auditItems: MicrosoftRecoveryAuditItem[] = itemResult.data.map(item => ({
+    key: `${item.sourceType}:${item.sourceContainerId || 'missing'}:${item.sourceItemId || 'missing'}`,
+    resultStatus: item.resultStatus,
+    safeError: item.safeError,
+  }))
+  return { data: { sourceRun, snapshot: snapshotResult.snapshot, auditItems, previewJobId }, error: null }
+}
+
 export async function loadMicrosoftProfiles(): Promise<{ data: Array<{ id: string; email: string | null; full_name: string | null }>; error: string | null }> {
   const { data, error } = await supabase.from('profiles').select('id, email, full_name')
   if (error) return { data: [], error: error.message }
@@ -484,7 +594,18 @@ export interface MicrosoftReconciliationApplyResult {
   summary: MicrosoftReconciliationSummary
   applied: number
   failed: number
+  previouslyApplied: number
+  notAttempted: number
+  conflictsUntouched: number
   errors: string[]
+}
+
+export interface MicrosoftApplyOptions {
+  previewJobId?: string | null
+  retryOfRunId?: string | null
+  reviewedItems?: MicrosoftReviewedItem[]
+  previouslyApplied?: number
+  conflictsUntouched?: number
 }
 
 async function applyReconciliationItem(item: MicrosoftImportPreviewItem, snapshot: MicrosoftSnapshot, runId: string, itemAuditKey: string, approveRemovals: boolean): Promise<{ status: 'applied' | 'skipped' | 'failed'; destinationId: string | null; error: string | null }> {
@@ -528,8 +649,16 @@ async function applyReconciliationItem(item: MicrosoftImportPreviewItem, snapsho
 }
 
 export async function checkMicrosoftApplyVersion(): Promise<string | null> {
-  const { data, error } = await supabase.rpc('microsoft_sync_apply_version')
-  return microsoftApplyPreflightError(data, error)
+  const [apply, recovery] = await Promise.all([
+    supabase.rpc('microsoft_sync_apply_version'),
+    supabase.rpc('microsoft_sync_recovery_version'),
+  ])
+  const applyError = microsoftApplyPreflightError(apply.data, apply.error)
+  if (applyError) return applyError
+  if (recovery.error || recovery.data !== 1) {
+    return 'Microsoft Sync recovery requires migration 20260728123000_microsoft_apply_recovery.sql.'
+  }
+  return null
 }
 
 export async function applyMicrosoftReconciliation(
@@ -537,10 +666,16 @@ export async function applyMicrosoftReconciliation(
   snapshot: MicrosoftSnapshot,
   approveRemovals: boolean,
   onProgress?: (completed: number, total: number) => void,
+  options: MicrosoftApplyOptions = {},
 ): Promise<MicrosoftReconciliationApplyResult> {
   const summary = summarizeMicrosoftReconciliation(items)
   const preflightError = await checkMicrosoftApplyVersion()
-  if (preflightError) return { runId: null, summary, applied: 0, failed: 1, errors: [preflightError] }
+  if (preflightError) return { runId: null, summary, applied: 0, failed: 1, previouslyApplied: options.previouslyApplied ?? 0, notAttempted: 0, conflictsUntouched: options.conflictsUntouched ?? summary.conflict, errors: [preflightError] }
+
+  const executableItems = getMicrosoftExecutableItems(items, approveRemovals)
+  const reviewedItems = options.reviewedItems ?? getMicrosoftReviewedItems(items, approveRemovals)
+  const previouslyApplied = options.previouslyApplied ?? 0
+  const conflictsUntouched = options.conflictsUntouched ?? summary.conflict
 
   const { data: { user } } = await supabase.auth.getUser()
   const rangeStarts = snapshot.sources.map(source => source.rangeStart).filter((value): value is string => Boolean(value))
@@ -549,9 +684,13 @@ export async function applyMicrosoftReconciliation(
     trigger_type: snapshot.triggerType, status: 'applying', snapshot_exported_at: snapshot.exportedAt,
     snapshot_exported_by: snapshot.exportedBy, range_start: rangeStarts.sort()[0] ?? null,
     range_end: rangeEnds.sort()[rangeEnds.length - 1] ?? null, source_completeness: snapshot.sources,
-    summary, requested_by: user?.id ?? null,
+    summary: { ...summary, reviewed: reviewedItems.length, previouslyApplied, conflictsUntouched },
+    requested_by: user?.id ?? null,
+    preview_job_id: options.previewJobId ?? null,
+    retry_of_run_id: options.retryOfRunId ?? null,
+    reviewed_items: reviewedItems,
   }).select('id').single()
-  if (runError || !run) return { runId: null, summary, applied: 0, failed: 1, errors: [runError?.message ?? 'Could not create sync run.'] }
+  if (runError || !run) return { runId: null, summary, applied: 0, failed: 1, previouslyApplied, notAttempted: reviewedItems.length, conflictsUntouched, errors: [runError?.message ?? 'Could not create sync run.'] }
 
   let applied = 0
   let failed = 0
@@ -561,7 +700,7 @@ export async function applyMicrosoftReconciliation(
   // dependent create needs its template), then legacy links, then creates, then
   // safe updates. Everything else keeps its relative order.
   const APPLY_ORDER: Record<string, number> = { package_template_create: 0, link_existing: 1, create: 2, update: 3 }
-  const ordered = items
+  const ordered = executableItems
     .map((item, i) => ({ item, i }))
     .sort((a, b) => (APPLY_ORDER[a.item.reconciliationAction ?? ''] ?? 8) - (APPLY_ORDER[b.item.reconciliationAction ?? ''] ?? 8) || a.i - b.i)
     .map(entry => entry.item)
@@ -569,7 +708,7 @@ export async function applyMicrosoftReconciliation(
     for (let index = 0; index < ordered.length; index += 1) {
       const item = ordered[index]
       const identity = microsoftSourceIdentity(item)
-      const itemAuditKey = `${identity.source_type}:${identity.source_container_id || 'missing'}:${identity.source_item_id || 'missing'}:${index}`
+      const itemAuditKey = microsoftStableItemKey(item)
       let result: Awaited<ReturnType<typeof applyReconciliationItem>>
       try {
         result = await applyReconciliationItem(item, snapshot, run.id, itemAuditKey, approveRemovals)
@@ -582,7 +721,7 @@ export async function applyMicrosoftReconciliation(
           destination_id: item.existingTargetId, action: item.reconciliationAction ?? 'failed',
           result_status: 'failed', source_complete: Boolean(item.sourceComplete),
           details: { title: item.title, warnings: item.warnings }, safe_error: result.error,
-        }, { onConflict: 'run_id,item_key', ignoreDuplicates: true })
+        }, { onConflict: 'run_id,item_key' })
         const confirmed = await supabase.from('microsoft_sync_run_items').select('destination_id, result_status, safe_error').eq('run_id', run.id).eq('item_key', itemAuditKey).maybeSingle()
         if (confirmed.data?.result_status === 'applied') {
           result = { status: 'applied', destinationId: confirmed.data.destination_id as string | null, error: null }
@@ -598,14 +737,22 @@ export async function applyMicrosoftReconciliation(
         }
       }
       if (result.status === 'applied') applied += 1
-      onProgress?.(index + 1, items.length)
+      onProgress?.(index + 1, ordered.length)
     }
   } catch {
     failed += 1
-    errors.push('Microsoft reconciliation stopped unexpectedly. Applied item history was retained; preview again before retrying.')
+    errors.push('Microsoft reconciliation stopped unexpectedly. Applied item history and reviewed identities were retained; use failed-change recovery before retrying.')
   }
   const status = microsoftRunFinalStatus(applied, failed, uncertain)
-  const { error: finishError } = await supabase.from('microsoft_sync_runs').update({ status, summary: { ...summary, applied, failed, uncertain }, safe_error: errors[0] ?? null, applied_at: new Date().toISOString(), finished_at: new Date().toISOString() }).eq('id', run.id)
-  if (finishError) errors.push(`Run finalization: ${finishError.message}`)
-  return { runId: run.id, summary, applied, failed, errors }
+  const notAttempted = Math.max(0, reviewedItems.length - applied - failed)
+  const safeErrors = errors.map(error => microsoftSafeApplyError(error) ?? error)
+  const { error: finishError } = await supabase.from('microsoft_sync_runs').update({
+    status,
+    summary: { ...summary, reviewed: reviewedItems.length, applied, previouslyApplied, failed, notAttempted, conflictsUntouched, uncertain },
+    safe_error: safeErrors[0] ?? null,
+    applied_at: new Date().toISOString(),
+    finished_at: new Date().toISOString(),
+  }).eq('id', run.id)
+  if (finishError) safeErrors.push(`Run finalization: ${microsoftSafeApplyError(finishError.message) ?? finishError.message}`)
+  return { runId: run.id, summary, applied, failed, previouslyApplied, notAttempted, conflictsUntouched, errors: safeErrors }
 }

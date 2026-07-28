@@ -18,6 +18,7 @@ import {
   loadMicrosoftExistingTargets,
   loadMicrosoftMappingContext,
   loadMicrosoftProfiles,
+  loadMicrosoftRecoveryContext,
   loadMicrosoftUserMappings,
   loadMicrosoftSyncRunItems,
   loadMicrosoftSyncState,
@@ -28,6 +29,12 @@ import {
   type MicrosoftSyncRunItem,
   type MicrosoftTransitionStatus,
 } from '../../lib/microsoftImportData'
+import {
+  buildMicrosoftRecoveryPlan,
+  getMicrosoftExecutableItems,
+  getMicrosoftReviewedItems,
+  type MicrosoftRecoveryPlan,
+} from '../../lib/microsoftRecovery'
 import { buildMicrosoftReconciliation } from '../../lib/microsoftSync'
 import {
   buildMicrosoftConflictBreakdown,
@@ -161,8 +168,8 @@ function RunHistory({ runs, onSelect }: { runs: MicrosoftSyncRunSummary[]; onSel
   if (runs.length === 0) return <p className="text-sm text-white/40">No transition sync runs have been recorded yet.</p>
   return <div className="space-y-2">{runs.map(run => (
     <button type="button" onClick={() => onSelect(run.id)} key={run.id} className="flex w-full flex-col gap-2 rounded-xl border border-white/10 bg-black/20 p-3 text-left transition-colors hover:bg-white/[0.04] sm:flex-row sm:items-center sm:justify-between">
-      <div><p className="text-sm font-black text-white">{new Date(run.createdAt).toLocaleString('en-ZA')} · {run.triggerType}</p><p className="mt-1 text-xs text-white/45">Source {new Date(run.snapshotExportedAt).toLocaleString('en-ZA')} · {run.sourceCompleteness.filter(source => source.complete).length}/{run.sourceCompleteness.length} complete</p></div>
-      <div className="text-left sm:text-right"><p className="text-xs font-black uppercase text-brand-teal">{run.status}</p><p className="mt-1 text-xs text-white/45">{run.summary.create ?? 0} create · {run.summary.update ?? 0} update · {run.summary.conflict ?? 0} conflict</p></div>
+      <div className="min-w-0"><p className="text-sm font-black text-white">{new Date(run.createdAt).toLocaleString('en-ZA')} · {run.triggerType}</p><p className="mt-1 text-xs text-white/45">Source {new Date(run.snapshotExportedAt).toLocaleString('en-ZA')} · {run.sourceCompleteness.filter(source => source.complete).length}/{run.sourceCompleteness.length} complete</p>{run.safeError && <p className="mt-1 truncate text-xs text-red-200" title={run.safeError}>{run.safeError}</p>}</div>
+      <div className="text-left sm:text-right"><p className={`text-xs font-black uppercase ${run.status === 'failed' ? 'text-red-300' : run.status === 'partial' ? 'text-amber-200' : 'text-brand-teal'}`}>{run.status}</p><p className="mt-1 text-xs text-white/45">{run.summary.applied ?? 0} applied · {run.summary.previouslyApplied ?? 0} previous · {run.summary.failed ?? 0} failed · {(run.summary.conflict ?? 0) || (run.summary.conflictsUntouched ?? 0)} conflicts</p></div>
     </button>
   ))}</div>
 }
@@ -194,6 +201,11 @@ export default function MicrosoftImportPage() {
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [applyResult, setApplyResult] = useState<MicrosoftReconciliationApplyResult | null>(null)
   const [job, setJob] = useState<MicrosoftJobState | null>(null)
+  const [recovery, setRecovery] = useState<{
+    sourceRun: MicrosoftSyncRunSummary
+    previewJobId: string
+    plan: MicrosoftRecoveryPlan
+  } | null>(null)
   const jobCancelledRef = useRef(false)
 
   const summary = summarizeMicrosoftReconciliation(items)
@@ -205,9 +217,11 @@ export default function MicrosoftImportPage() {
   const createStatusCounts = summarizeMicrosoftCreateStatuses(items)
   const completedOperationalSkipped = items.filter(item => item.skipCode === 'completed_operational_not_imported' && item.reconciliationAction === 'skipped').length
   const removalCount = items.filter(item => item.requiresRemovalApproval).length
-  const lastSuccess = runs.find(run => run.status === 'completed')
-  const writableCount = summary.create + summary.update + summary.complete + summary.reopen + summary.move + summary.cancel + summary.archive
-  const applicableCount = writableCount - (approveRemovals ? 0 : removalCount)
+  const lastSuccess = runs.find(run => run.status === 'completed' || (run.summary.applied ?? 0) > 0)
+  const applicableCount = getMicrosoftExecutableItems(items, approveRemovals).length
+  const selectedRun = runs.find(run => run.id === selectedRunId) ?? null
+  const meaningfulRunItems = runItems.filter(item => item.resultStatus !== 'skipped')
+  const failedRunItems = runItems.filter(item => item.resultStatus === 'failed')
 
   async function loadStatus() {
     const [syncState, connectionState] = await Promise.all([loadMicrosoftSyncState(), getMicrosoftConnectionStatus()])
@@ -235,13 +249,14 @@ export default function MicrosoftImportPage() {
     return () => { window.clearTimeout(timer); jobCancelledRef.current = true }
   }, [])
 
-  async function prepareSnapshot(nextSnapshot: MicrosoftSnapshot) {
+  async function prepareSnapshot(nextSnapshot: MicrosoftSnapshot, clearRecovery = true): Promise<MicrosoftImportPreviewItem[] | null> {
     setLoading(true)
     setError(null)
     setItems([])
     setReviewed(false)
     setApproveRemovals(false)
     setApplyResult(null)
+    if (clearRecovery) setRecovery(null)
     try {
       const [contextResult, existingResult, profilesResult, mappingsResult] = await Promise.all([loadMicrosoftMappingContext(), loadMicrosoftExistingTargets(), loadMicrosoftProfiles(), loadMicrosoftUserMappings()])
       if (contextResult.error || !contextResult.context) throw new Error(contextResult.error ?? 'Could not load mapping context.')
@@ -263,8 +278,10 @@ export default function MicrosoftImportPage() {
       setActionFilter(first?.value ?? 'all')
       setStatusFilter('all')
       setConflictFilter('all')
+      return resolved
     } catch (previewError) {
       setError(previewError instanceof Error ? previewError.message : 'Reconciliation preview failed.')
+      return null
     } finally {
       setLoading(false)
     }
@@ -323,6 +340,7 @@ export default function MicrosoftImportPage() {
     const file = files?.[0]
     if (!file) return
     setParseErrors([])
+    setJob(null)
     const parsed = parseMicrosoftSnapshot(await file.text())
     if (!parsed.snapshot) { setParseErrors(parsed.errors); return }
     await prepareSnapshot(parsed.snapshot)
@@ -338,16 +356,19 @@ export default function MicrosoftImportPage() {
     }
     setApplying(true)
     setError(null)
-    setProgress({ completed: 0, total: items.length })
+    setProgress({ completed: 0, total: applicableCount })
     try {
-      const result = await applyMicrosoftReconciliation(items, snapshot, approveRemovals, (completed, total) => setProgress({ completed, total }))
-      setApplyResult(result)
+      const result = await applyMicrosoftReconciliation(
+        items,
+        snapshot,
+        approveRemovals,
+        (completed, total) => setProgress({ completed, total }),
+        { previewJobId: job?.jobId ?? null },
+      )
       await loadStatus()
+      await prepareSnapshot(snapshot)
+      setApplyResult(result)
       if (result.errors.length > 0) setError(result.errors[0])
-      else {
-        await prepareSnapshot(snapshot)
-        setApplyResult(result)
-      }
     } catch {
       setError('Microsoft reconciliation apply stopped unexpectedly. Check sync history before retrying.')
     } finally {
@@ -365,13 +386,72 @@ export default function MicrosoftImportPage() {
 
   async function selectRun(runId: string) {
     setSelectedRunId(runId)
+    setRunItems([])
     const result = await loadMicrosoftSyncRunItems(runId)
     if (result.error) { setError(result.error); return }
     setRunItems(result.data)
   }
 
+  async function prepareRunRecovery(runId: string) {
+    if (loading || applying) return
+    setLoading(true)
+    setError(null)
+    const context = await loadMicrosoftRecoveryContext(runId)
+    if (!context.data) {
+      setLoading(false)
+      setError(context.error ?? 'The reviewed run could not be recovered.')
+      return
+    }
+    const resolved = await prepareSnapshot(context.data.snapshot, false)
+    if (!resolved) return
+    const plan = buildMicrosoftRecoveryPlan(
+      context.data.sourceRun.reviewedItems,
+      resolved,
+      context.data.auditItems,
+    )
+    setRecovery({ sourceRun: context.data.sourceRun, previewJobId: context.data.previewJobId, plan })
+    setActionFilter('complete')
+    setLoading(false)
+  }
+
+  async function retryRecovered() {
+    if (!snapshot || !recovery || applying || recovery.plan.retryItems.length === 0) return
+    const currentState = await loadMicrosoftSyncState()
+    if (currentState.error || currentState.migrationNeeded || currentState.transitionStatus !== 'active') {
+      setError(currentState.error ?? 'Microsoft transition sync is not active. Recovery was not applied.')
+      return
+    }
+    setApplying(true)
+    setError(null)
+    setProgress({ completed: 0, total: recovery.plan.retryItems.length })
+    try {
+      const approveRecoveredRemovals = recovery.plan.retryItems.some(item => item.requiresRemovalApproval)
+      const result = await applyMicrosoftReconciliation(
+        recovery.plan.retryItems,
+        snapshot,
+        approveRecoveredRemovals,
+        (completed, total) => setProgress({ completed, total }),
+        {
+          previewJobId: recovery.previewJobId,
+          retryOfRunId: recovery.sourceRun.id,
+          reviewedItems: getMicrosoftReviewedItems(recovery.plan.retryItems, approveRecoveredRemovals),
+          previouslyApplied: recovery.plan.previouslyApplied.length,
+          conflictsUntouched: recovery.sourceRun.summary.conflict ?? recovery.sourceRun.summary.conflictsUntouched ?? 0,
+        },
+      )
+      await loadStatus()
+      await prepareSnapshot(snapshot)
+      setApplyResult(result)
+      if (result.errors.length > 0) setError(result.errors[0])
+    } catch {
+      setError('Microsoft recovery stopped unexpectedly. Applied item history was retained; inspect the run before retrying.')
+    } finally {
+      setApplying(false)
+    }
+  }
+
   const actionCounts = useMemo(() => new Map(ACTIONS.map(action => [action.value, summary[action.value]])), [summary])
-  const canApply = Boolean(snapshot) && transitionStatus === 'active' && reviewed && !migrationNeeded && !applying && applicableCount > 0
+  const canApply = Boolean(snapshot) && !recovery && transitionStatus === 'active' && reviewed && !migrationNeeded && !applying && applicableCount > 0
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
@@ -442,9 +522,35 @@ export default function MicrosoftImportPage() {
       )}
       {migrationNeeded && <section className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5"><h2 className="text-lg font-black text-white">Phase 17a review is required</h2><p className="mt-2 text-sm text-white/60">Preview is available after the transition-sync schema is reviewed and applied. Apply remains blocked; no migration is run from this page.</p></section>}
       {error && <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</div>}
-      {applyResult && <section className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-4"><p className="font-black text-white">Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied, {applyResult.failed} failed.</p><p className="mt-1 text-xs text-white/50">No Microsoft writes were made.</p></section>}
+      {applyResult && <section className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-4"><p className="font-black text-white">Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied now · {applyResult.previouslyApplied} previously applied · {applyResult.failed} still failed · {applyResult.conflictsUntouched} conflicts untouched.</p><p className="mt-1 text-xs text-white/50">CG Dynamics only. No Microsoft writes were made.</p></section>}
+
+      {recovery && (
+        <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/75">Recovered reviewed snapshot</p>
+          <h2 className="mt-2 text-xl font-black text-white">Retry only unapplied reviewed changes</h2>
+          <p className="mt-2 text-sm text-white/65">The preserved preview was restored without fetching Microsoft again. Prior approvals remain valid for these exact source identities.</p>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <div className="rounded-lg border border-white/10 bg-black/20 p-3"><p className="text-[10px] uppercase text-white/40">Previously applied</p><p className="mt-1 text-xl font-black text-emerald-200">{recovery.plan.previouslyApplied.length}</p></div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-3"><p className="text-[10px] uppercase text-white/40">Failed</p><p className="mt-1 text-xl font-black text-red-200">{recovery.plan.failedBeforeRetry}</p></div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-3"><p className="text-[10px] uppercase text-white/40">Not attempted</p><p className="mt-1 text-xl font-black text-amber-100">{recovery.plan.notAttemptedBeforeRetry}</p></div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-3"><p className="text-[10px] uppercase text-white/40">Retryable now</p><p className="mt-1 text-xl font-black text-brand-teal">{recovery.plan.retryItems.length}</p></div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-3"><p className="text-[10px] uppercase text-white/40">Conflicts untouched</p><p className="mt-1 text-xl font-black text-white">{recovery.sourceRun.summary.conflict ?? recovery.sourceRun.summary.conflictsUntouched ?? 0}</p></div>
+          </div>
+          {recovery.plan.retryItems.length > 0 && <div className="mt-4 space-y-2">{recovery.plan.retryItems.map(item => <div key={`${item.sourceType}:${item.sourceTaskId ?? item.sourceEventId}`} className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"><p className="text-sm font-bold text-white">{item.title}</p><p className="text-xs text-white/45">{item.mappedClientName ?? item.sourceName} · {item.destination} · {item.reconciliationAction}</p></div>)}</div>}
+          {recovery.plan.blocked.length > 0 && <div className="mt-4 rounded-lg border border-red-300/20 bg-red-300/[0.05] p-3"><p className="text-xs font-black uppercase text-red-200">Still blocked ({recovery.plan.blocked.length})</p>{recovery.plan.blocked.map(item => <p key={item.reviewed.key} className="mt-1 text-xs text-red-100/75">{item.reviewed.title}: {item.reason}</p>)}</div>}
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-white/45">No new approval checkbox is required; these are the original reviewed actions only.</p><button type="button" disabled={applying || recovery.plan.retryItems.length === 0} onClick={() => void retryRecovered()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Retrying...' : `Retry failed changes (${recovery.plan.retryItems.length})`}</button></div>
+        </section>
+      )}
 
       {snapshot && <section className="mt-6"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Source completeness</p><h2 className="mt-1 text-xl font-black text-white">{snapshot.records.length} records · {new Date(snapshot.exportedAt).toLocaleString('en-ZA')}</h2><p className="mt-1 text-xs text-white/45">Newly completed operational tasks (Planner status "done") are automatically skipped — they represent finished history. Existing linked tasks can still complete. Client Socials items are never skipped and map 100% to "scheduled" in the Client Schedule.</p></div><SourceCompleteness snapshot={snapshot} /></section>}
+
+      {selectedRun?.status === 'applying' && (
+        <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-4">
+          <p className="text-sm font-black text-white">This apply run did not finish.</p>
+          <p className="mt-1 text-xs text-white/55">Reviewed identities and completed audit rows are preserved. Recovery will retry only actions with no successful audit result.</p>
+          <button type="button" disabled={loading || applying} onClick={() => void prepareRunRecovery(selectedRun.id)} className="mt-3 rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-200 disabled:opacity-35">Prepare interrupted-run recovery</button>
+        </section>
+      )}
 
       {items.length > 0 && <>
         <section className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-6">{ACTIONS.map(action => <button key={action.value} type="button" onClick={() => { setSourceFilter('all'); setActionFilter(action.value); setStatusFilter('all'); setConflictFilter('all') }} className={`rounded-xl border p-3 text-left ${actionFilter === action.value ? 'border-brand-teal/50 bg-brand-teal/[0.08]' : 'border-white/10 bg-white/[0.025]'}`}><p className="text-[9px] font-black uppercase text-white/40">{action.label}</p><p className="mt-1 text-2xl font-black text-white">{actionCounts.get(action.value) ?? 0}</p></button>)}</section>
@@ -475,10 +581,10 @@ export default function MicrosoftImportPage() {
 
         <section className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{visibleItems.map((item, index) => <PreviewItem key={itemKey(item, index)} item={item} />)}</section>
         {visibleItems.length === 0 && <p className="mt-3 rounded-xl border border-dashed border-white/10 py-8 text-center text-sm text-white/35">No items match these filters.</p>}
-        <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><p className="mb-3 rounded-lg border border-brand-teal/20 bg-brand-teal/[0.06] px-3 py-2 text-xs text-brand-teal">Sync continues while this Microsoft Sync tab remains open. You may use CG Dynamics in another tab.</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>
+        {!recovery && <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><p className="mb-3 rounded-lg border border-brand-teal/20 bg-brand-teal/[0.06] px-3 py-2 text-xs text-brand-teal">Only the reviewed executable actions are processed. Per-item audit history is retained if this tab closes.</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>}
       </>}
 
-      <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Sync history</p><h2 className="mb-4 mt-1 text-xl font-black text-white">Recent reconciliation runs</h2><RunHistory runs={runs} onSelect={runId => void selectRun(runId)} />{selectedRunId && <div className="mt-5 border-t border-white/10 pt-4"><p className="mb-3 text-xs font-black uppercase tracking-wider text-white/40">Per-item results</p><div className="max-h-96 space-y-2 overflow-y-auto">{runItems.map(item => <article key={item.id} className="rounded-lg border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold text-white">{item.details.title ?? 'Microsoft item'}</p><p className="mt-1 text-xs text-white/40">{item.sourceName} · {item.destination}</p></div><span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase ${ACTION_TONES[item.action]}`}>{item.action} · {item.resultStatus}</span></div>{item.safeError && <p className="mt-2 text-xs text-red-200">{item.safeError}</p>}</article>)}{runItems.length === 0 && <p className="text-sm text-white/35">No per-item results are available for this run.</p>}</div></div>}</section>
+      <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Sync history</p><h2 className="mb-4 mt-1 text-xl font-black text-white">Recent reconciliation runs</h2><RunHistory runs={runs} onSelect={runId => void selectRun(runId)} />{selectedRunId && <div className="mt-5 border-t border-white/10 pt-4">{selectedRun && (selectedRun.status === 'failed' || selectedRun.status === 'partial') && <div className="mb-4 rounded-xl border border-red-300/20 bg-red-300/[0.05] p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase text-red-200">{failedRunItems.length} failed reviewed actions</p><p className="mt-1 text-sm text-red-100/80">{selectedRun.safeError ?? 'Inspect the failed items below.'}</p></div><button type="button" disabled={loading || applying} onClick={() => void prepareRunRecovery(selectedRun.id)} className="rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-200 disabled:opacity-35">Prepare failed-change recovery</button></div></div>}<p className="mb-3 text-xs font-black uppercase tracking-wider text-white/40">Applied, failed and not-attempted results</p><div className="max-h-96 space-y-2 overflow-y-auto">{meaningfulRunItems.map(item => <article key={item.id} className="rounded-lg border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold text-white">{item.details.title ?? 'Microsoft item'}</p><p className="mt-1 text-xs text-white/40">{item.sourceName} · {item.destination}</p></div><span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase ${ACTION_TONES[item.action]}`}>{item.action} · {item.resultStatus === 'previewed' ? 'not attempted' : item.resultStatus}</span></div>{item.safeError && <p className="mt-2 text-xs text-red-200">{item.safeError}</p>}</article>)}{meaningfulRunItems.length === 0 && <p className="text-sm text-white/35">No applied, failed or not-attempted items are available for this run.</p>}</div><p className="mt-3 text-xs text-white/35">{runItems.length - meaningfulRunItems.length} unchanged, skipped or conflict items remain untouched.</p></div>}</section>
     </div>
   )
 }
