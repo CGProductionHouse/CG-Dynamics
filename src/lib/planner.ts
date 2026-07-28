@@ -98,6 +98,8 @@ export interface MonthlyDeliverable {
   archived_at: string | null
 }
 
+export type PlannerActivityMetadata = Record<string, unknown>
+
 export interface PlannerActivityLog {
   id: string
   entity_type: string
@@ -105,8 +107,55 @@ export interface PlannerActivityLog {
   action: string
   actor_user_id: string | null
   actor_name: string | null
-  metadata: Record<string, unknown> | null
+  metadata: PlannerActivityMetadata | null
   created_at: string
+}
+
+export interface PlannerAssignmentDirectoryEntry {
+  id: string
+  full_name: string
+  role: string
+  avatar_url: string | null
+  is_active: true
+}
+
+export interface PlannerAssignee {
+  task_id: string
+  profile_id: string
+  full_name: string
+  role: string
+  avatar_url: string | null
+  position: number
+  is_active: boolean
+}
+
+export interface PlannerWorkloadSummary {
+  profile_id: string
+  full_name: string
+  role: string
+  avatar_url: string | null
+  active_task_count: number
+  overdue_count: number
+  blocked_count: number
+  due_today_count: number
+  due_next_7_days_count: number
+  unassigned_total: number
+}
+
+export interface PlannerWorkloadTask {
+  task_id: string
+  title: string
+  status: string
+  priority: string
+  start_date: string | null
+  due_date: string | null
+  client_name: string | null
+  board_id: string
+  board_name: string
+  bucket_id: string | null
+  bucket_name: string | null
+  assignee_profile_ids: string[]
+  is_unassigned: boolean
 }
 
 // ── Unions ────────────────────────────────────────────────────
@@ -922,6 +971,8 @@ export interface PlannerTask {
   client_id: string | null
   client_name: string | null
   assigned_to_name: string | null
+  assignees: PlannerAssignee[]
+  unresolved_assignee_names: string[]
   status: PlannerTaskStatus
   priority: TaskPriority
   start_date: string | null
@@ -976,12 +1027,150 @@ function activeCalendarTasks(data: unknown[] | null): CalendarTaskRow[] {
     .filter(task => !task.recurrence_rule)
 }
 
+type PlannerRpcError = { code?: string; message: string }
+
+export function isMissingPlannerAssignmentRpcError(error: PlannerRpcError | null | undefined): boolean {
+  return error?.code === 'PGRST202' || error?.code === '42883'
+}
+
+function stringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((name): name is string => typeof name === 'string' && name.trim().length > 0)
+}
+
+function legacyUnresolvedAssigneeNames(task: Partial<PlannerTask>): string[] {
+  const names = [
+    ...stringArray(task.unresolved_assignee_names),
+    task.assigned_to_name,
+    ...stringArray(task.helper_names),
+  ]
+  const seen = new Set<string>()
+  return names.filter((name): name is string => {
+    if (typeof name !== 'string' || !name.trim()) return false
+    const key = name.trim().toLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+export async function listPlannerAssignmentDirectory() {
+  const result = await supabase.rpc('list_planner_assignment_directory')
+  if (result.error) return { data: null, error: result.error }
+
+  const data = ((result.data ?? []) as Array<Omit<PlannerAssignmentDirectoryEntry, 'is_active'>>)
+    .filter(person => typeof person.full_name === 'string' && person.full_name.trim().length > 0)
+    .map(person => ({ ...person, full_name: person.full_name.trim(), is_active: true as const }))
+  return { data, error: null }
+}
+
+const PLANNER_READ_PAGE_SIZE = 1000
+
+export async function listPlannerBoardAssignments(boardId?: string) {
+  const data: PlannerAssignee[] = []
+  let from = 0
+
+  while (true) {
+    const result = await supabase
+      .rpc('list_planner_board_assignments', { p_board_id: boardId ?? null })
+      .range(from, from + PLANNER_READ_PAGE_SIZE - 1)
+    if (result.error) return { data: null, error: result.error as PlannerRpcError }
+
+    const page = (result.data ?? []) as PlannerAssignee[]
+    data.push(...page)
+    if (page.length < PLANNER_READ_PAGE_SIZE) return { data, error: null }
+    from += PLANNER_READ_PAGE_SIZE
+  }
+}
+
+export async function listPlannerWorkloadSummary() {
+  const result = await supabase.rpc('list_planner_workload_summary')
+  return result as { data: PlannerWorkloadSummary[] | null; error: PlannerRpcError | null }
+}
+
+const WORKLOAD_TASK_PAGE_SIZE = 1000
+
+export async function listPlannerWorkloadTasks() {
+  const data: PlannerWorkloadTask[] = []
+  let from = 0
+
+  while (true) {
+    const result = await supabase
+      .rpc('list_planner_workload_tasks')
+      .range(from, from + WORKLOAD_TASK_PAGE_SIZE - 1)
+    if (result.error) return { data: null, error: result.error as PlannerRpcError }
+
+    const page = (result.data ?? []) as PlannerWorkloadTask[]
+    data.push(...page)
+    if (page.length < WORKLOAD_TASK_PAGE_SIZE) return { data, error: null }
+    from += WORKLOAD_TASK_PAGE_SIZE
+  }
+}
+
+export interface PlannerTaskReadOptions {
+  boardId?: string
+  order?: 'created' | 'due'
+}
+
+export async function listPlannerTaskRows(options: PlannerTaskReadOptions = {}) {
+  const data: unknown[] = []
+  let from = 0
+
+  while (true) {
+    let query = supabase.from(PLANNER_TASKS_TABLE).select('*')
+    if (options.boardId) query = query.eq('board_id', options.boardId)
+
+    query = options.order === 'due'
+      ? query
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: true })
+      : query
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true })
+
+    const result = await query.range(from, from + PLANNER_READ_PAGE_SIZE - 1)
+    if (result.error) return { data: null, error: result.error }
+
+    const page = result.data ?? []
+    data.push(...page)
+    if (page.length < PLANNER_READ_PAGE_SIZE) return { data, error: null }
+    from += PLANNER_READ_PAGE_SIZE
+  }
+}
+
 export async function listPlannerTasks(boardId: string) {
-  return supabase
-    .from(PLANNER_TASKS_TABLE)
-    .select('*')
-    .eq('board_id', boardId)
-    .order('created_at')
+  const [tasksResult, assignmentsResult] = await Promise.all([
+    listPlannerTaskRows({ boardId, order: 'created' }),
+    listPlannerBoardAssignments(boardId),
+  ])
+
+  if (tasksResult.error) return { data: null, error: tasksResult.error }
+  const assignmentRpcMissing = isMissingPlannerAssignmentRpcError(assignmentsResult.error)
+  if (assignmentsResult.error && !assignmentRpcMissing) {
+    return { data: null, error: assignmentsResult.error }
+  }
+
+  const assignmentsByTask = new Map<string, PlannerAssignee[]>()
+  for (const assignee of assignmentsResult.data ?? []) {
+    const current = assignmentsByTask.get(assignee.task_id) ?? []
+    current.push(assignee)
+    assignmentsByTask.set(assignee.task_id, current)
+  }
+  for (const assignees of assignmentsByTask.values()) {
+    assignees.sort((left, right) => left.position - right.position)
+  }
+
+  const data = ((tasksResult.data ?? []) as Array<Omit<PlannerTask, 'assignees' | 'unresolved_assignee_names'> & {
+    unresolved_assignee_names?: string[]
+  }>).map(task => ({
+    ...task,
+    assignees: assignmentRpcMissing ? [] : assignmentsByTask.get(task.id) ?? [],
+    unresolved_assignee_names: assignmentRpcMissing
+      ? legacyUnresolvedAssigneeNames(task)
+      : stringArray(task.unresolved_assignee_names),
+  }))
+  return { data, error: null }
 }
 
 // Dated, non-archived planner tasks inside a date window — used by the CG
@@ -1036,7 +1225,7 @@ export interface CreatePlannerTaskInput {
   board_id: string
   bucket_id: string
   title: string
-  assigned_to_name?: string | null
+  assignee_profile_ids: string[]
   client_id?: string | null
   client_name?: string | null
   status?: PlannerTaskStatus
@@ -1044,44 +1233,40 @@ export interface CreatePlannerTaskInput {
   start_date?: string | null
   due_date?: string | null
   notes?: string | null
+  checklist?: unknown[]
 }
 
-export async function createPlannerTask(input: CreatePlannerTaskInput) {
-  const importHash = `manual-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-  return supabase
-    .from(PLANNER_TASKS_TABLE)
-    .insert({
-      board_id: input.board_id,
-      bucket_id: input.bucket_id,
-      title: input.title.trim(),
-      client_id: input.client_id ?? null,
-      client_name: input.client_name ?? null,
-      assigned_to_name: input.assigned_to_name ?? null,
-      status: input.status ?? 'to_do',
-      priority: input.priority ?? 'normal',
-      start_date: input.start_date ?? null,
-      due_date: input.due_date ?? null,
-      notes: input.notes ?? null,
-      source: 'manual',
-      import_hash: importHash,
-    })
-    .select()
-    .single()
+export async function createPlannerTaskWithAssignees(input: CreatePlannerTaskInput) {
+  return supabase.rpc('create_planner_task_with_assignees', {
+    p_title: input.title.trim(),
+    p_board_id: input.board_id,
+    p_bucket_id: input.bucket_id,
+    p_assignee_profile_ids: input.assignee_profile_ids,
+    p_status: input.status ?? 'to_do',
+    p_priority: input.priority ?? 'normal',
+    p_start_date: input.start_date ?? null,
+    p_due_date: input.due_date ?? null,
+    p_client_id: input.client_id ?? null,
+    p_client_name: input.client_name ?? null,
+    p_notes: input.notes ?? null,
+    p_checklist: input.checklist ?? [],
+    p_unresolved_assignee_names: [],
+  })
 }
+
+export const createPlannerTask = createPlannerTaskWithAssignees
 
 export interface UpdatePlannerTaskInput {
   title?: string
   client_id?: string | null
   client_name?: string | null
-  assigned_to_name?: string | null
   status?: PlannerTaskStatus
   priority?: TaskPriority
   start_date?: string | null
   due_date?: string | null
   notes?: string | null
   bucket_id?: string | null
-  // phase-7b
-  helper_names?: string[]
+  checklist?: unknown[]
 }
 
 export async function updatePlannerTask(id: string, updates: UpdatePlannerTaskInput) {
@@ -1093,10 +1278,60 @@ export async function updatePlannerTask(id: string, updates: UpdatePlannerTaskIn
     .single()
 }
 
+export interface UpdatePlannerTaskWithAssigneesInput {
+  title: string
+  bucket_id: string | null
+  assignee_profile_ids: string[]
+  client_id: string | null
+  client_name: string | null
+  status: PlannerTaskStatus
+  priority: TaskPriority
+  start_date: string | null
+  due_date: string | null
+  notes: string | null
+  checklist: unknown[]
+}
+
+export async function updatePlannerTaskWithAssignees(
+  taskId: string,
+  input: UpdatePlannerTaskWithAssigneesInput,
+) {
+  return supabase.rpc('update_planner_task_with_assignees', {
+    p_task_id: taskId,
+    p_title: input.title.trim(),
+    p_bucket_id: input.bucket_id,
+    p_profile_ids: input.assignee_profile_ids,
+    p_client_id: input.client_id,
+    p_client_name: input.client_name,
+    p_status: input.status,
+    p_priority: input.priority,
+    p_start_date: input.start_date,
+    p_due_date: input.due_date,
+    p_notes: input.notes,
+    p_checklist: input.checklist,
+  })
+}
+
 export async function updatePlannerTaskStatus(id: string, status: PlannerTaskStatus) {
-  const rpcResult = await supabase.rpc('update_planner_task_status', { p_task_id: id, p_status: status })
-  if (!rpcResult.error || rpcResult.error.code !== 'PGRST202') return rpcResult
-  return updatePlannerTask(id, { status })
+  return supabase.rpc('update_planner_task_status', { p_task_id: id, p_status: status })
+}
+
+export async function setPlannerTaskAssignees(taskId: string, profileIds: string[]) {
+  return supabase.rpc('set_planner_task_assignees', {
+    p_task_id: taskId,
+    p_profile_ids: profileIds,
+  })
+}
+
+export async function listPlannerActivity(taskId?: string) {
+  let query = supabase
+    .from(ACTIVITY_LOG_TABLE)
+    .select('*')
+    .eq('entity_type', 'planner_task')
+    .order('created_at', { ascending: false })
+
+  if (taskId) query = query.eq('entity_id', taskId)
+  return query as unknown as Promise<{ data: PlannerActivityLog[] | null; error: PlannerRpcError | null }>
 }
 
 export async function archivePlannerTask(id: string, actorName: string | null, reason = 'Removed from active work') {
@@ -1110,19 +1345,6 @@ export async function archivePlannerTask(id: string, actorName: string | null, r
     .eq('id', id)
     .select()
     .single()
-}
-
-// ── Helper / collaborator mutations (ready after phase-7b migration) ──
-
-export async function addPlannerHelperName(id: string, currentHelpers: string[], name: string) {
-  const trimmed = name.trim()
-  if (!trimmed) return { data: null, error: null }
-  const names = currentHelpers.includes(trimmed) ? currentHelpers : [...currentHelpers, trimmed]
-  return updatePlannerTask(id, { helper_names: names })
-}
-
-export async function removePlannerHelperName(id: string, currentHelpers: string[], name: string) {
-  return updatePlannerTask(id, { helper_names: currentHelpers.filter(n => n !== name) })
 }
 
 export async function addDeliverableHelperName(id: string, currentHelpers: string[], name: string) {

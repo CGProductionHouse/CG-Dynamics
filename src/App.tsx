@@ -26,7 +26,6 @@ import IntegrationsPage from './pages/admin/IntegrationsPage'
 import MetaIntegrationPage from './pages/admin/MetaIntegrationPage'
 import GoogleAdsIntegrationPage from './pages/admin/GoogleAdsIntegrationPage'
 import AssistantPage from './pages/admin/AssistantPage'
-import PlannerPage from './pages/admin/PlannerPage'
 import PackageMasterPage from './pages/admin/PackageMasterPage'
 import ClientSchedulePage from './pages/admin/ClientSchedulePage'
 import ClientContentCalendarPage from './pages/admin/ClientContentCalendarPage'
@@ -88,10 +87,11 @@ export default function App() {
               <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
               <Route path="/admin/ops-hub" element={<OpsHubPage />} />
+              <Route path="/admin/work" element={<MyWorkPage />} />
               <Route path="/admin/my-work" element={<MyWorkPage />} />
-              <Route path="/admin/my-day" element={<Navigate to="/admin/my-work?tab=my-day" replace />} />
-              <Route path="/admin/command-centre" element={<Navigate to="/admin/my-work?tab=daily-tasks" replace />} />
-              <Route path="/admin/planner" element={<PlannerPage />} />
+              <Route path="/admin/my-day" element={<Navigate to="/admin/work?tab=my-day" replace />} />
+              <Route path="/admin/command-centre" element={<Navigate to="/admin/work?tab=daily-tasks" replace />} />
+              <Route path="/admin/planner" element={<Navigate to="/admin/work?tab=board" replace />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
               <Route path="/admin/content-workflow" element={<ContentWorkflowPage />} />

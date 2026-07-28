@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { isMissingPlannerAssignmentRpcError, listPlannerBoardAssignments, listPlannerTaskRows } from './planner'
 
 export type TaskBucket =
   | 'Client Requests'
@@ -37,6 +38,7 @@ export interface CommandCentreTask {
   client_id: string | null
   client_name: string | null
   assigned_to_user_id: string | null
+  assignee_user_ids?: string[]
   assigned_to_name: string | null
   bucket: TaskBucket
   priority: TaskPriority
@@ -59,6 +61,7 @@ export interface CommandCentreTask {
   // Collaborative assignments — added in phase-7b.
   // Optional until migration is applied.
   helper_names?: string[]
+  unresolved_assignee_names?: string[]
 }
 
 // Client request workflow states — mapped onto task status + request metadata
@@ -137,6 +140,7 @@ type PlannerTaskRow = {
   created_at: string
   updated_at: string
   helper_names?: string[]
+  unresolved_assignee_names?: string[]
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
@@ -202,7 +206,11 @@ function plannerStatusFromTask(status: TaskStatus): string {
   return 'to_do'
 }
 
-function plannerTaskToCommandTask(row: PlannerTaskRow, bucketName: string | undefined): CommandCentreTask {
+function plannerTaskToCommandTask(
+  row: PlannerTaskRow,
+  bucketName: string | undefined,
+  assigneeUserIds: string[],
+): CommandCentreTask {
   const bucket = cleanBucketName(bucketName || row.original_bucket_name)
   return {
     id: `${PLANNER_TASK_PREFIX}${row.id}`,
@@ -211,7 +219,8 @@ function plannerTaskToCommandTask(row: PlannerTaskRow, bucketName: string | unde
     title: row.title,
     client_id: row.client_id,
     client_name: row.client_name,
-    assigned_to_user_id: null,
+    assigned_to_user_id: assigneeUserIds[0] ?? null,
+    assignee_user_ids: assigneeUserIds,
     assigned_to_name: row.assigned_to_name,
     bucket: bucket as TaskBucket,
     priority: row.priority ?? 'normal',
@@ -225,20 +234,18 @@ function plannerTaskToCommandTask(row: PlannerTaskRow, bucketName: string | unde
     updated_at: row.updated_at,
     completed_at: row.status === 'scheduled' || row.status === 'approved' ? row.updated_at : null,
     helper_names: row.helper_names,
+    unresolved_assignee_names: row.unresolved_assignee_names ?? [],
   }
 }
 
 export async function listTasks() {
-  const [nativeResult, plannerResult] = await Promise.all([
+  const [nativeResult, plannerResult, assignmentResult] = await Promise.all([
     supabase
     .from(TABLE)
     .select('*')
       .order('created_at', { ascending: false }),
-    supabase
-      .from(PLANNER_TASKS_TABLE)
-      .select('*')
-      .order('due_date', { ascending: true, nullsFirst: false })
-      .order('created_at', { ascending: false }),
+    listPlannerTaskRows({ order: 'due' }),
+    listPlannerBoardAssignments(),
   ])
 
   if (nativeResult.error) return nativeResult
@@ -248,11 +255,23 @@ export async function listTasks() {
     }
     return { data: nativeResult.data ?? [], error: plannerResult.error }
   }
+  if (assignmentResult.error && !isMissingPlannerAssignmentRpcError(assignmentResult.error)) {
+    return { data: nativeResult.data ?? [], error: assignmentResult.error }
+  }
 
   const plannerRows = ((plannerResult.data ?? []) as PlannerTaskRow[])
     .filter(row => !row.archived_at && !row.recurrence_rule)
   const bucketIds = unique(plannerRows.map(row => row.bucket_id))
   const bucketNames = new Map<string, string>()
+  const assigneeIdsByTask = new Map<string, string[]>()
+
+  if (!assignmentResult.error) {
+    for (const assignment of assignmentResult.data ?? []) {
+      const current = assigneeIdsByTask.get(assignment.task_id) ?? []
+      current.push(assignment.profile_id)
+      assigneeIdsByTask.set(assignment.task_id, current)
+    }
+  }
 
   if (bucketIds.length > 0) {
     const { data: buckets } = await supabase
@@ -273,6 +292,7 @@ export async function listTasks() {
   const importedTasks = plannerRows.map(row => plannerTaskToCommandTask(
     row,
     row.bucket_id ? bucketNames.get(row.bucket_id) : undefined,
+    assigneeIdsByTask.get(row.id) ?? [],
   ))
 
   return { data: [...importedTasks, ...nativeTasks], error: null }
@@ -342,6 +362,9 @@ export async function updateTask(
   }
 
   if (isPlannerTaskId(id)) {
+    delete patch.assigned_to_user_id
+    delete patch.assigned_to_name
+    delete patch.helper_names
     if (patch.bucket !== undefined) {
       patch.original_bucket_name = patch.bucket
       delete patch.bucket
