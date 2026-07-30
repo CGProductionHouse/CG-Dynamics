@@ -4,6 +4,7 @@ import { test } from 'node:test'
 
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8')
 const INDEX = read('../supabase/functions/suggest-content-videos/index.ts')
+const ROUTER = read('../supabase/functions/cg-assistant-chat/ai-router.ts')
 
 // ── Architecture: uses existing AI provider stack ───────────────────────────
 
@@ -266,6 +267,19 @@ test('extracts JSON from code-fenced provider output', () => {
 
 test('caps suggestions at MAX_SUGGESTIONS after parsing', () => {
   assert.match(INDEX, /\.slice\(0,\s*MAX_SUGGESTIONS\)/)
+})
+
+test('requests enough output tokens for complete structured video scripts', () => {
+  assert.match(INDEX, /SUGGESTION_MAX_OUTPUT_TOKENS\s*=\s*4000/)
+  assert.match(INDEX, /routeAiChat\(messages,\s*\{\s*maxOutputTokens:\s*SUGGESTION_MAX_OUTPUT_TOKENS/s)
+  assert.match(ROUTER, /options\.maxOutputTokens\s*\?\?\s*500/)
+  assert.match(ROUTER, /max_tokens:\s*maxOutputTokens/)
+  assert.match(ROUTER, /maxOutputTokens,\s*\n\s*\}/)
+})
+
+test('does not silently report success for incomplete provider JSON', () => {
+  assert.match(INDEX, /suggestions\.length\s*===\s*0/)
+  assert.match(INDEX, /AI provider returned an incomplete response/)
 })
 
 // ── Cross-client prompt safety ──────────────────────────────────────────────

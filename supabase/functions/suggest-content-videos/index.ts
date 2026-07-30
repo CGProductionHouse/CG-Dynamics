@@ -38,6 +38,7 @@ type StaffRole = typeof STAFF_ROLES[number]
 
 const MAX_COVERAGE_MONTHS = 12
 const MAX_SUGGESTIONS = 20
+const SUGGESTION_MAX_OUTPUT_TOKENS = 4000
 const EXPECTED_SUGGESTION_KEYS = [
   'targetMonth', 'title', 'objective', 'hook', 'script',
   'sceneDirection', 'onScreenText', 'propsProductsPeople',
@@ -532,7 +533,9 @@ Deno.serve(async (req) => {
   let rawContent = ''
 
   try {
-    const result = await routeAiChat(messages)
+    const result = await routeAiChat(messages, {
+      maxOutputTokens: SUGGESTION_MAX_OUTPUT_TOKENS,
+    })
     providerName = result.provider
     providerModel = result.model
     rawContent = result.content
@@ -596,6 +599,28 @@ Deno.serve(async (req) => {
   }
 
   suggestions = extractSuggestions(rawContent)
+
+  if (suggestions.length === 0) {
+    return jsonResponse({
+      suggestions: [],
+      error: 'The AI provider returned an incomplete response. Please try again.',
+      context: {
+        clientName: client.name,
+        clientTier: client.tier,
+        primaryIndustry: industryProfile?.primary_industry ?? null,
+        secondaryIndustry: industryProfile?.secondary_industry ?? null,
+        coverageMonths,
+        totalDeliverableSlots,
+        existingVideoCount: existingVideos.length,
+      },
+      sources: {
+        canonicalInternal,
+        marketingLibraryKnowledge,
+        saCalendarContext,
+        liveExternalResearch,
+      },
+    })
+  }
 
   // ── Return ──────────────────────────────────────────────────────────────
 
