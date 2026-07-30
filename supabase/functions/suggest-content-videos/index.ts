@@ -39,12 +39,6 @@ type StaffRole = typeof STAFF_ROLES[number]
 const MAX_COVERAGE_MONTHS = 12
 const MAX_SUGGESTIONS = 20
 const SUGGESTION_MAX_OUTPUT_TOKENS = 4000
-const EXPECTED_SUGGESTION_KEYS = [
-  'targetMonth', 'title', 'objective', 'hook', 'script',
-  'sceneDirection', 'onScreenText', 'propsProductsPeople',
-  'locationSuggestion', 'cta', 'reasoning', 'sourcesUsed', 'duplicationRisk',
-] as const
-
 // ── Stable SA calendar context (canonical, NOT live research) ────────────────
 // These are public-holiday and seasonal anchor dates that shift yearly. The
 // LLM should use them as stable calendar anchors, never as "research-backed".
@@ -202,7 +196,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Staff access required.' }, 403)
   }
 
-  const callerRole = profile.role as StaffRole
 
   // Client-access policy: all staff roles (admin, manager, staff, team, owner)
   // may access any active client. This matches the RLS policy
@@ -356,7 +349,6 @@ Deno.serve(async (req) => {
   const relevantCalendar = SA_CALENDAR.filter((e) => coverageMonthNums.has(e.month))
 
   // 7. Build source manifest
-  const industryCardCount = (skillCards ?? []).filter((c) => c.knowledge_layer === 'industry_specific').length
   const industryLabel = industryProfile?.primary_industry
     ? `${industryProfile.primary_industry}${industryProfile?.secondary_industry ? ' / ' + industryProfile.secondary_industry : ''} (confidence: ${industryProfile?.confidence ?? 'unknown'})`
     : 'not yet researched'
@@ -528,17 +520,12 @@ Deno.serve(async (req) => {
     })
   }
 
-  let providerName = 'ai-router'
-  let providerModel = 'ai-router'
-  let rawContent = ''
+  let aiResult: Awaited<ReturnType<typeof routeAiChat>>
 
   try {
-    const result = await routeAiChat(messages, {
+    aiResult = await routeAiChat(messages, {
       maxOutputTokens: SUGGESTION_MAX_OUTPUT_TOKENS,
     })
-    providerName = result.provider
-    providerModel = result.model
-    rawContent = result.content
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown AI provider error.'
     return jsonResponse({
@@ -566,7 +553,7 @@ Deno.serve(async (req) => {
 
   // ── Parse and validate JSON from response ───────────────────────────────
 
-  let suggestions: VideoSuggestion[] = []
+  const { provider: providerName, model: providerModel, content: rawContent } = aiResult
 
   function extractSuggestions(raw: string): VideoSuggestion[] {
     // Try direct parse
@@ -598,7 +585,7 @@ Deno.serve(async (req) => {
     return []
   }
 
-  suggestions = extractSuggestions(rawContent)
+  const suggestions = extractSuggestions(rawContent)
 
   if (suggestions.length === 0) {
     return jsonResponse({
