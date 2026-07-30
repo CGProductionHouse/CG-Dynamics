@@ -9,6 +9,7 @@ process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||= 'test-public-key'
 let server
 let guidelineScheduleCandidates
 let guidelineScriptFromDeliverable
+let normalizeGuidelineVideoMonth
 
 const guideline = {
   id: 'guideline-1',
@@ -42,10 +43,16 @@ function deliverable(overrides = {}) {
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ guidelineScheduleCandidates, guidelineScriptFromDeliverable } = await server.ssrLoadModule('/src/lib/contentWorkflow.ts'))
+  ;({ guidelineScheduleCandidates, guidelineScriptFromDeliverable, normalizeGuidelineVideoMonth } = await server.ssrLoadModule('/src/lib/contentWorkflow.ts'))
 })
 
 after(async () => { await server.close() })
+
+test('target months are normalized to PostgreSQL date values', () => {
+  assert.equal(normalizeGuidelineVideoMonth('2026-08'), '2026-08-01')
+  assert.equal(normalizeGuidelineVideoMonth('2026-08-01'), '2026-08-01')
+  assert.equal(normalizeGuidelineVideoMonth(null), null)
+})
 
 test('schedule candidates are restricted to the guideline client and coverage window', () => {
   const candidates = guidelineScheduleCandidates(guideline, [

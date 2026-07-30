@@ -512,6 +512,11 @@ export async function updateContentGuideline(
   return wrap((data as ContentGuideline | null) ?? null, error, null)
 }
 
+export function normalizeGuidelineVideoMonth(value: string | null | undefined): string | null {
+  if (!value) return null
+  return value.slice(0, 7) + '-01'
+}
+
 export async function addGuidelineVideo(
   guideline: ContentGuideline,
   input: { title: string; script: string; position: number; month?: string | null; deliverable_id?: string | null; created_by?: string | null },
@@ -521,7 +526,7 @@ export async function addGuidelineVideo(
     .insert({
       content_guideline_id: guideline.id,
       client_id: guideline.client_id,
-      month: input.month ?? null,
+      month: normalizeGuidelineVideoMonth(input.month),
       title: input.title,
       script: input.script,
       position: input.position,
@@ -608,7 +613,10 @@ export async function updateGuidelineVideo(
   id: string,
   patch: Partial<ContentGuidelineVideo>,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
-  return updateGuideIdea(id, patch)
+  const normalizedPatch = patch.month === undefined
+    ? patch
+    : { ...patch, month: normalizeGuidelineVideoMonth(patch.month) }
+  return updateGuideIdea(id, normalizedPatch)
 }
 
 export async function reorderGuidelineVideos(
