@@ -7,7 +7,6 @@ import {
   listContentGuidelineDocuments,
   type ContentGuidelineDocument,
 } from '../../lib/contentWorkflow'
-import { monthDisplayLabel } from '../../lib/reportPeriod'
 import ContentGuidelineDocumentEditor from './ContentGuidelineDocumentEditor'
 
 export default function FullContentGuidePage({ embedded = false }: { embedded?: boolean }) {
@@ -16,12 +15,6 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
   const requestedGuidelineId = searchParams.get('guideline')
   const [clients, setClients] = useState<ClientOption[]>([])
   const [selectedClientId, setSelectedClientId] = useState<string | null>(() => searchParams.get('client'))
-  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
-    const requested = searchParams.get('month')
-    if (requested && /^\d{4}-\d{2}/.test(requested)) return requested.slice(0, 7)
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  })
   const [documents, setDocuments] = useState<ContentGuidelineDocument[]>([])
   const [selectedGuidelineId, setSelectedGuidelineId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -55,10 +48,8 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
         setDocuments([])
         return
       }
-      const targetMonth = target.guideline.month?.slice(0, 7) ?? selectedMonth
       setSelectedClientId(target.guideline.client_id)
-      setSelectedMonth(targetMonth)
-      setDocuments(result.data.filter(document => document.guideline.client_id === target.guideline.client_id && document.guideline.month?.slice(0, 7) === targetMonth))
+      setDocuments(result.data.filter(document => document.guideline.client_id === target.guideline.client_id))
       setSelectedGuidelineId(target.guideline.id)
       return
     }
@@ -71,7 +62,6 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
     setError(null)
     const result = await listContentGuidelineDocuments({
       clientId: selectedClientId,
-      month: `${selectedMonth}-01`,
     })
     setLoading(false)
     if (result.migrationNeeded) {
@@ -96,7 +86,7 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
   useEffect(() => {
     const timer = window.setTimeout(() => { void loadDocumentsEvent() }, 0)
     return () => window.clearTimeout(timer)
-  }, [selectedClientId, selectedMonth, requestedGuidelineId])
+  }, [selectedClientId, requestedGuidelineId])
 
   const selectedDocument = useMemo(
     () => documents.find(document => document.guideline.id === selectedGuidelineId) ?? null,
@@ -115,23 +105,12 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
     }, { replace: true })
   }
 
-  function changeMonth(value: string) {
-    setSelectedMonth(value)
-    setSearchParams(current => {
-      const next = new URLSearchParams(current)
-      next.set('month', value)
-      next.delete('guideline')
-      return next
-    }, { replace: true })
-  }
-
   function selectGuideline(id: string) {
     setSelectedGuidelineId(id)
     setSearchParams(current => {
       const next = new URLSearchParams(current)
       next.set('guideline', id)
       if (selectedClientId) next.set('client', selectedClientId)
-      next.set('month', selectedMonth)
       return next
     }, { replace: true })
   }
@@ -146,17 +125,13 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
         </p>
       </header>}
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2">
+      <section className="mt-6">
         <label className="text-xs text-white/45">
           Client
           <select value={selectedClientId ?? ''} onChange={event => changeClient(event.target.value || null)} className="mt-1 block min-h-11 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white">
             <option value="">Select a client</option>
             {clients.map(option => <option key={option.id} value={option.id}>{option.name}</option>)}
           </select>
-        </label>
-        <label className="text-xs text-white/45">
-          Month
-          <input type="month" value={selectedMonth} onChange={event => changeMonth(event.target.value)} className="mt-1 block min-h-11 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" />
         </label>
       </section>
 
@@ -168,14 +143,14 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
         <LoadingState message="Loading Content Guidelines..." />
       ) : documents.length === 0 ? (
         <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center">
-          <p className="text-sm text-white/50">No Content Guideline exists for {client?.name ?? 'this client'} in {monthDisplayLabel(selectedMonth)}.</p>
+          <p className="text-sm text-white/50">No Content Guideline exists for {client?.name ?? 'this client'}.</p>
           <p className="mt-3 text-xs text-white/35">Open the relevant Content Run and create its one guideline document there.</p>
           <Link to="/admin/content?tab=runs" className="mt-4 inline-flex rounded-lg border border-brand-teal/30 px-3 py-2 text-xs font-bold text-brand-teal hover:text-white">Open Content Runs</Link>
         </section>
       ) : (
         <div className="mt-6 grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="space-y-2">
-            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/40">{client?.name} | {monthDisplayLabel(selectedMonth)}</p>
+            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/40">{client?.name} guidelines</p>
             {documents.map(document => (
               <button key={document.guideline.id} type="button" onClick={() => selectGuideline(document.guideline.id)} className={`w-full rounded-xl border p-3 text-left ${selectedGuidelineId === document.guideline.id ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025]'}`}>
                 <p className="text-sm font-black text-white">{document.run.name}</p>
