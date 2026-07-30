@@ -81,7 +81,7 @@ export default function ContentGuidelineDocumentEditor({
   const [scheduleError, setScheduleError] = useState<string | null>(null)
   const [importMessage, setImportMessage] = useState<string | null>(null)
   // AI suggestions
-  const [suggestions, setSuggestions] = useState<ContentVideoSuggestion[]>([])
+  const [suggestions, setSuggestions] = useState<Array<ContentVideoSuggestion & { _localId: string }>>([])
   const [suggestionsLoading, setSuggestionsLoading] = useState(false)
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null)
   const [suggestionsContext, setSuggestionsContext] = useState<string | null>(null)
@@ -288,19 +288,20 @@ export default function ContentGuidelineDocumentEditor({
       guideline.client_id,
       `${coverageStart}-01`,
       `${coverageEnd}-01`,
-      videos.length,
+      { guidelineId: guideline.id },
     )
     setSuggestionsLoading(false)
     if (result.error) { setSuggestionsError(result.error); return }
-    setSuggestions(result.data.suggestions)
+    const withIds = result.data.suggestions.map((s, i) => ({ ...s, _localId: `suggest-${i}` }))
+    setSuggestions(withIds)
     setSuggestionsContext(
       `${result.data.context.clientName} · ${result.data.context.coverageMonths.length} month${result.data.context.coverageMonths.length === 1 ? '' : 's'} · ${result.data.context.totalDeliverableSlots} available deliverable${result.data.context.totalDeliverableSlots === 1 ? '' : 's'}`,
     )
     setShowSuggestions(true)
   }
 
-  async function acceptSuggestion(suggestion: ContentVideoSuggestion) {
-    setBusy(`accept-${suggestion.id}`)
+  async function acceptSuggestion(suggestion: ContentVideoSuggestion & { _localId: string }) {
+    setBusy(`accept-${suggestion._localId}`)
     setError(null)
     const input = suggestionToVideoInput(suggestion, videos.length + 1, currentUserId ?? null)
     const result = await addGuidelineVideo(guideline, {
@@ -309,12 +310,12 @@ export default function ContentGuidelineDocumentEditor({
     })
     setBusy(null)
     if (result.error) { setError(result.error); return }
-    setSuggestions(current => current.filter(s => s.id !== suggestion.id))
+    setSuggestions(current => current.filter(s => s._localId !== suggestion._localId))
     await onChanged()
   }
 
-  function rejectSuggestion(id: string) {
-    setSuggestions(current => current.filter(s => s.id !== id))
+  function rejectSuggestion(localId: string) {
+    setSuggestions(current => current.filter(s => s._localId !== localId))
   }
 
   const coverageChanged = coverageStart !== toMonthOption(guideline.coverage_start ?? guideline.month)
@@ -429,24 +430,35 @@ export default function ContentGuidelineDocumentEditor({
           {suggestions.length > 0 && (
             <ul className="mt-3 space-y-2">
               {suggestions.map(suggestion => (
-                <li key={suggestion.id} className="rounded-lg border border-violet-300/15 bg-black/30 p-3">
+                <li key={suggestion._localId} className="rounded-lg border border-violet-300/15 bg-black/30 p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-black text-white">{suggestion.title}</p>
                       <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-200/60">
-                        {monthLabel(suggestion.targetMonth)}
+                        {suggestion.targetMonth ? monthLabel(suggestion.targetMonth) : 'Unallocated'}
                       </p>
                       <p className="mt-1 text-xs text-white/55">{suggestion.reasoning}</p>
                       <p className="mt-1 text-xs italic text-white/40">{suggestion.objective}</p>
-                      {suggestion.suggestedScriptPreview && (
-                        <pre className="mt-2 whitespace-pre-wrap rounded bg-black/40 px-2 py-1.5 text-[11px] leading-relaxed text-white/50">
-                          {suggestion.suggestedScriptPreview}
-                        </pre>
+                      {suggestion.hook && <p className="mt-1 text-xs text-violet-200/60">Hook: {suggestion.hook}</p>}
+                      {suggestion.cta && <p className="mt-1 text-xs text-teal-200/60">CTA: {suggestion.cta}</p>}
+                      {suggestion.script && (
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-white/40">Script & direction</summary>
+                          <pre className="mt-1 whitespace-pre-wrap rounded bg-black/40 px-2 py-1.5 text-[11px] leading-relaxed text-white/50">
+                            {suggestion.script}
+                          </pre>
+                          {suggestion.sceneDirection && (
+                            <p className="mt-1 text-[11px] text-white/35">Direction: {suggestion.sceneDirection}</p>
+                          )}
+                          {suggestion.duplicationRisk && (
+                            <p className="mt-1 text-[11px] text-amber-300/60">Duplication: {suggestion.duplicationRisk}</p>
+                          )}
+                        </details>
                       )}
                     </div>
                     <div className="flex shrink-0 flex-col gap-1">
-                      <ActionButton size="sm" loading={busy === `accept-${suggestion.id}`} onClick={() => void acceptSuggestion(suggestion)}>Accept</ActionButton>
-                      <ActionButton size="sm" variant="ghost" onClick={() => rejectSuggestion(suggestion.id)}>Skip</ActionButton>
+                      <ActionButton size="sm" loading={busy === `accept-${suggestion._localId}`} onClick={() => void acceptSuggestion(suggestion)}>Accept</ActionButton>
+                      <ActionButton size="sm" variant="ghost" onClick={() => rejectSuggestion(suggestion._localId)}>Skip</ActionButton>
                     </div>
                   </div>
                 </li>

@@ -656,22 +656,37 @@ export async function listContentGuidelineDocuments(filters: {
 
 // AI-assisted content video suggestions
 export interface ContentVideoSuggestion {
-  id: string
-  targetMonth: string
+  targetMonth: string | null
   title: string
   objective: string
   hook: string
+  script: string
+  sceneDirection: string
+  onScreenText: string
+  propsProductsPeople: string
+  locationSuggestion: string
+  cta: string
   reasoning: string
-  suggestedScriptPreview: string
+  sourcesUsed: string[]
+  duplicationRisk: string | null
 }
 
 export interface SuggestContentVideosResult {
   suggestions: ContentVideoSuggestion[]
   context: {
     clientName: string
-    industry: string | null
+    clientTier: string
+    primaryIndustry: string | null
+    secondaryIndustry: string | null
     coverageMonths: string[]
     totalDeliverableSlots: number
+    existingVideoCount: number
+  }
+  sources: {
+    canonicalInternal: string[]
+    marketingLibraryKnowledge: string[]
+    saCalendarContext: string[]
+    liveExternalResearch: string[]
   }
 }
 
@@ -679,7 +694,7 @@ export async function suggestContentVideos(
   clientId: string,
   coverageStart: string,
   coverageEnd: string,
-  existingVideoCount: number,
+  options?: { guidelineId?: string },
 ): Promise<QueryResult<SuggestContentVideosResult>> {
   const sessionResult = await supabase.auth.getSession()
   const token = sessionResult.data.session?.access_token
@@ -690,7 +705,7 @@ export async function suggestContentVideos(
     const response = await fetch(functionUrl, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId, coverageStart, coverageEnd, existingVideoCount }),
+      body: JSON.stringify({ clientId, coverageStart, coverageEnd, guidelineId: options?.guidelineId }),
     })
     if (!response.ok) {
       const body = await response.json().catch(() => ({}))
@@ -710,7 +725,10 @@ export function suggestionToVideoInput(
 ) {
   return {
     title: suggestion.title,
-    script: suggestion.suggestedScriptPreview,
+    script: suggestion.script,
+    hook: suggestion.hook,
+    objective: suggestion.objective,
+    cta: suggestion.cta,
     month: suggestion.targetMonth,
     position,
     created_by: createdBy,

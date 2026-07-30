@@ -1,167 +1,547 @@
 // Suggest Content Videos — AI-assisted Content Guideline planning
 //
-// Staff select a client and coverage window; the function returns research-backed
-// video suggestions grouped by target month, campaign or evergreen bucket.
+// Staff select a client and coverage window; the function assembles canonical
+// internal context and asks the AI provider to return structured video
+// suggestions. Suggestions are drafts — never silently written into a guideline.
+//
+// Context sources used (each clearly labelled):
+//   - canonical internal: client profile, industry profile, schedule slots,
+//     existing guideline videos, historical concepts
+//   - approved Marketing Library: active skill cards (industry + universal)
+//   - stable SA calendar context: public holidays, seasons, campaign moments
+//   - live external research: NOT PERFORMED — the LLM may use its training data
+//     for general marketing knowledge but must not label it as research
 //
 // POST /suggest-content-videos
-// { clientId, coverageStart, coverageEnd, existingVideoCount }
+// { clientId, coverageStart, coverageEnd, guidelineId? }
 
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import {
+  routeAiChat,
+  type AiChatMessage,
+  hasAnyConfiguredProvider,
+} from '../cg-assistant-chat/ai-router.ts'
+
+const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
+const MAX_COVERAGE_MONTHS = 12
+const MAX_SUGGESTIONS = 20
+
+// ── Stable SA calendar context (canonical, NOT live research) ────────────────
+// These are public-holiday and seasonal anchor dates that shift yearly. The
+// LLM should use them as stable calendar anchors, never as "research-backed".
+const SA_CALENDAR: Array<{ month: number; label: string; type: string }> = [
+  { month: 1, label: 'New Year (1 Jan)', type: 'public_holiday' },
+  { month: 3, label: 'Human Rights Day (21 Mar)', type: 'public_holiday' },
+  { month: 3, label: 'Autumn equinox / harvest season', type: 'seasonal' },
+  { month: 4, label: 'Good Friday (varies)', type: 'public_holiday' },
+  { month: 4, label: 'Family Day (varies)', type: 'public_holiday' },
+  { month: 4, label: 'Freedom Day (27 Apr)', type: 'public_holiday' },
+  { month: 5, label: 'Workers Day (1 May)', type: 'public_holiday' },
+  { month: 5, label: 'Mother\'s Day (varies)', type: 'observance' },
+  { month: 6, label: 'Youth Day (16 Jun)', type: 'public_holiday' },
+  { month: 6, label: 'Father\'s Day (varies)', type: 'observance' },
+  { month: 6, label: 'Winter solstice', type: 'seasonal' },
+  { month: 7, label: 'Mandela Day (18 Jul)', type: 'observance' },
+  { month: 8, label: 'Women\'s Day (9 Aug)', type: 'public_holiday' },
+  { month: 9, label: 'Heritage Day (24 Sep)', type: 'public_holiday' },
+  { month: 9, label: 'Spring equinox', type: 'seasonal' },
+  { month: 10, label: 'Halloween (31 Oct)', type: 'observance' },
+  { month: 11, label: 'Black Friday (varies)', type: 'retail_event' },
+  { month: 12, label: 'Day of Reconciliation (16 Dec)', type: 'public_holiday' },
+  { month: 12, label: 'Christmas Day (25 Dec)', type: 'public_holiday' },
+  { month: 12, label: 'Day of Goodwill (26 Dec)', type: 'public_holiday' },
+  { month: 12, label: 'December holiday / summer peak', type: 'seasonal' },
+]
+
+// ── Types ────────────────────────────────────────────────────────────────────
 
 interface SuggestRequest {
   clientId: string
   coverageStart: string
   coverageEnd: string
-  existingVideoCount: number
+  guidelineId?: string
 }
 
-interface ContentSuggestion {
-  id: string
-  targetMonth: string
+interface VideoSuggestion {
+  targetMonth: string | null
   title: string
   objective: string
   hook: string
+  script: string
+  sceneDirection: string
+  onScreenText: string
+  propsProductsPeople: string
+  locationSuggestion: string
+  cta: string
   reasoning: string
-  suggestedScriptPreview: string
+  sourcesUsed: string[]
+  duplicationRisk: string | null
 }
 
 interface SuggestResponse {
-  suggestions: ContentSuggestion[]
+  suggestions: VideoSuggestion[]
   context: {
     clientName: string
-    industry: string | null
+    clientTier: string
+    primaryIndustry: string | null
+    secondaryIndustry: string | null
     coverageMonths: string[]
     totalDeliverableSlots: number
+    existingVideoCount: number
+  }
+  sources: {
+    canonicalInternal: string[]
+    marketingLibraryKnowledge: string[]
+    saCalendarContext: string[]
+    liveExternalResearch: string[]
   }
 }
 
-Deno.serve(async (request: Request) => {
-  if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders, status: 204 })
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
+function generateCoverageMonths(start: string, end: string): string[] {
+  const months: string[] = []
+  const s = new Date(start + 'T00:00:00Z')
+  const e = new Date(end + 'T00:00:00Z')
+  const cursor = new Date(s.getUTCFullYear(), s.getUTCMonth(), 1)
+  while (cursor <= e && months.length < MAX_COVERAGE_MONTHS) {
+    months.push(cursor.getUTCFullYear() + '-' + String(cursor.getUTCMonth() + 1).padStart(2, '0'))
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1)
+  }
+  return months
+}
+
+function isStaffRole(role: unknown): role is string {
+  return typeof role === 'string' && STAFF_ROLES.includes(role)
+}
+
+function safeError(message: string): string {
+  return message.length > 500 ? message.slice(0, 500) + '...' : message
+}
+
+// ── Main handler ─────────────────────────────────────────────────────────────
+
+Deno.serve(async (req) => {
+  const startTime = Date.now()
+
+  // ── CORS ──
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders, status: 204 })
+  }
+  if (req.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed.' }, 405)
+  }
+
+  // ── Environment ──
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!supabaseUrl || !serviceRoleKey) {
+    return jsonResponse({ error: 'Server configuration error.' }, 500)
+  }
+
+  const sb = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+
+  // ── Auth ──
+  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
+  if (!token) {
+    return jsonResponse({ error: 'Authentication required.' }, 401)
+  }
+
+  const { data: { user }, error: authError } = await sb.auth.getUser(token)
+  if (authError || !user) {
+    return jsonResponse({ error: 'Authentication required.' }, 401)
+  }
+
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (!profile || !isStaffRole(profile.role)) {
+    return jsonResponse({ error: 'Staff access required.' }, 403)
+  }
+
+  // ── Parse body ──
+  let body: SuggestRequest
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    if (!supabaseUrl || !serviceRoleKey) return jsonResponse({ error: 'Server configuration error.' }, 500)
+    body = await req.json()
+  } catch {
+    return jsonResponse({ error: 'Invalid request body.' }, 400)
+  }
 
-    const authHeader = request.headers.get('Authorization')
-    const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } })
-    if (authHeader) {
-      const token = authHeader.replace(/^Bearer\s+/i, '')
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-      if (authError || !user) return jsonResponse({ error: 'Authentication required.' }, 401)
-    }
+  const { clientId, coverageStart, coverageEnd, guidelineId } = body
+  if (!clientId || !coverageStart || !coverageEnd) {
+    return jsonResponse({ error: 'clientId, coverageStart and coverageEnd are required.' }, 400)
+  }
 
-    const body: SuggestRequest = await request.json()
-    const { clientId, coverageStart, coverageEnd, existingVideoCount } = body
-    if (!clientId || !coverageStart || !coverageEnd) {
-      return jsonResponse({ error: 'clientId, coverageStart and coverageEnd are required.' }, 400)
-    }
+  // Validate UUID format
+  const uuidRE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRE.test(clientId)) {
+    return jsonResponse({ error: 'clientId must be a valid UUID.' }, 400)
+  }
+  if (guidelineId && !uuidRE.test(guidelineId)) {
+    return jsonResponse({ error: 'guidelineId must be a valid UUID.' }, 400)
+  }
 
-    // Load client context
-    const { data: client } = await supabase.from('clients').select('name, industry').eq('id', clientId).single()
-    if (!client) return jsonResponse({ error: 'Client not found.' }, 404)
+  // Validate date range
+  const startDate = new Date(coverageStart + 'T00:00:00Z')
+  const endDate = new Date(coverageEnd + 'T00:00:00Z')
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return jsonResponse({ error: 'coverageStart and coverageEnd must be valid dates (YYYY-MM-DD).' }, 400)
+  }
+  if (endDate < startDate) {
+    return jsonResponse({ error: 'coverageEnd must be on or after coverageStart.' }, 400)
+  }
+  const coverageMonths = generateCoverageMonths(coverageStart, coverageEnd)
+  if (coverageMonths.length === 0) {
+    return jsonResponse({ error: 'Coverage window must include at least one month.' }, 400)
+  }
 
-    // Compute coverage months from start/end
-    const startDate = new Date(`${coverageStart}T00:00:00Z`)
-    const endDate = new Date(`${coverageEnd}T00:00:00Z`)
-    const coverageMonths: string[] = []
-    let cursor = new Date(startDate)
-    while (cursor <= endDate) {
-      coverageMonths.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`)
-      cursor.setMonth(cursor.getMonth() + 1)
-    }
+  // ── Client access verification ──
+  const { data: client } = await sb
+    .from('clients')
+    .select('id, name, tier, active')
+    .eq('id', clientId)
+    .maybeSingle()
 
-    // Count available future deliverables for this client in the coverage window
-    const { count: deliverableCount } = await supabase
-      .from('monthly_deliverables')
-      .select('*', { count: 'exact', head: true })
-      .eq('client_id', clientId)
-      .in('deliverable_type', ['video', 'reel'])
-      .gte('month', coverageStart)
-      .lte('month', coverageEnd)
-      .is('production_status', null)
+  if (!client || client.active !== true) {
+    return jsonResponse({ error: 'Client not found or inactive.' }, 404)
+  }
 
-    // Load existing approved concepts to avoid duplication
-    const { data: existingConcepts } = await supabase
+  // Fetch industry profile (may be null if not yet researched)
+  const { data: industryProfile } = await sb
+    .from('client_industry_profiles')
+    .select('primary_industry, secondary_industry, confidence, review_state')
+    .eq('client_id', clientId)
+    .maybeSingle()
+
+  // ── Context assembly ──────────────────────────────────────────────────────────
+
+  // 1. Schedule deliverable slots in coverage window
+  const { data: deliverableSlots } = await sb
+    .from('monthly_deliverables')
+    .select('id, month, title, deliverable_type, code')
+    .eq('client_id', clientId)
+    .in('deliverable_type', ['video', 'reel'])
+    .gte('month', coverageStart)
+    .lte('month', coverageEnd)
+
+  const totalDeliverableSlots = deliverableSlots?.length ?? 0
+
+  // 2. Existing videos in current guideline (if guidelineId provided)
+  let existingVideos: Array<{ title: string; targetMonth: string | null; status: string }> = []
+  if (guidelineId) {
+    const { data: guideVideos } = await sb
       .from('content_guide_ideas')
-      .select('title, month, client_id')
-      .eq('client_id', clientId)
-      .in('status', ['approved', 'in_production', 'completed'])
+      .select('title, month, status')
+      .eq('content_guideline_id', guidelineId)
+    existingVideos = (guideVideos ?? []).map((v) => ({
+      title: v.title,
+      targetMonth: v.month as string | null,
+      status: v.status,
+    }))
+  }
 
-    const existingTitles = new Set((existingConcepts ?? []).map(concept => concept.title.trim().toLowerCase()))
+  // 3. Historical approved/completed concepts for this client
+  const { data: historicalConcepts } = await sb
+    .from('content_guide_ideas')
+    .select('title, month, status, created_at')
+    .eq('client_id', clientId)
+    .in('status', ['approved', 'in_production', 'completed'])
+    .order('created_at', { ascending: false })
+    .limit(50)
 
-    // Generate month-aware suggestions using built-in logic
-    // (AI provider integration can replace the static generator later)
-    const suggestions: ContentSuggestion[] = []
+  // 4. Cross-client duplicate detection (same title across clients)
+  const existingTitles = new Set(
+    (historicalConcepts ?? []).map((c) => c.title.trim().toLowerCase()),
+  )
+  let crossClientDuplicateCount = 0
+  let crossClientTitles: string[] = []
+  if (existingTitles.size > 0) {
+    const titleList = [...existingTitles]
+    // Sample up to 5 titles to check cross-client
+    const sampleTitles = titleList.slice(0, 5)
+    const { count: dupCount, data: dupData } = await sb
+      .from('content_guide_ideas')
+      .select('title', { count: 'exact', head: false })
+      .neq('client_id', clientId)
+      .in('title', sampleTitles)
+      .limit(5)
+    crossClientDuplicateCount = dupCount ?? 0
+    crossClientTitles = (dupData as Array<{ title: string }> | null)
+      ?.map((r) => r.title) ?? []
+  }
 
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December']
+  // 5. Marketing Library: active skill cards (industry_specific + universal_principle)
+  const { data: skillCards } = await sb
+    .from('skill_cards')
+    .select('title, principle, summary, knowledge_layer')
+    .eq('status', 'active')
+    .in('knowledge_layer', ['universal_principle', 'south_african_market'])
+    .limit(20)
 
-    const knownCampaignMoments: Record<string, string[]> = {
-      '08': ['Back to School', 'Womens Month', 'Summer campaign launch'],
-      '09': ['Spring campaign', 'Heritage Month (SA)'],
-      '10': ['Halloween', 'OKTOBERFEST', 'Summer prep'],
-      '11': ['Black Friday', 'Summer holidays begin', 'School year-end'],
-      '12': ['Christmas/December holidays', 'Year-end review', 'New Year planning'],
-      '01': ['New Year campaign', 'January back-to-work', 'Summer peak'],
-      '02': ['Valentines Day', 'Back to School (SA)'],
-      '03': ['Human Rights Day (SA)', 'Autumn campaign', 'Financial year-end prep'],
-      '04': ['Easter', 'Freedom Day (SA)', 'Winter campaign prep'],
-      '05': ['Workers Day (SA)', 'Mothers Day', 'Winter campaign'],
-      '06': ['Youth Day (SA)', 'Mid-year review', 'Winter peak'],
-      '07': ['Mandela Day', 'Sports events', 'Spring preview'],
-    }
+  // 6. SA calendar context for coverage months
+  const coverageMonthNums = new Set(coverageMonths.map((m) => parseInt(m.slice(5, 7), 10)))
+  const relevantCalendar = SA_CALENDAR.filter((e) => coverageMonthNums.has(e.month))
 
-    for (let index = 0; index < Math.min(coverageMonths.length, 8); index++) {
-      const monthKey = coverageMonths[index].slice(5, 7)
-      const monthLabel = monthNames[parseInt(monthKey, 10) - 1] ?? `Month ${monthKey}`
-      const moments = knownCampaignMoments[monthKey] ?? []
+  // 7. Build source manifest
+  const canonicalInternal = [
+    `Client: ${client.name} (tier: ${client.tier})`,
+    industryProfile?.primary_industry
+      ? `Industry: ${industryProfile.primary_industry}${industryProfile?.secondary_industry ? ' / ' + industryProfile.secondary_industry : ''} (confidence: ${industryProfile?.confidence ?? 'unknown'})`
+      : 'Industry: not yet researched',
+    `${totalDeliverableSlots} schedule deliverable slots (video/reel) in coverage window`,
+    `${existingVideos.length} existing videos in current guideline`,
+    `${historicalConcepts?.length ?? 0} historical approved/completed concepts`,
+  ]
 
-      const seasonalIdeas = [
-        { base: `Seasonal highlight for ${monthLabel}`, obj: `Showcase ${client.name} relevance in ${monthLabel.toLowerCase()}`, hook: `This ${monthLabel}, ${client.name} has what you need` },
-        { base: `${client.name} ${monthLabel} promotion`, obj: `Drive awareness for ${monthLabel.toLowerCase()} offer`, hook: `Make ${monthLabel.toLowerCase()} count with ${client.name}` },
-      ]
+  const marketingLibraryKnowledge = (skillCards ?? []).map(
+    (c) => `[${c.knowledge_layer}] ${c.title}: ${c.principle}`,
+  )
 
-      if (moments.length > 0) {
-        for (const moment of moments.slice(0, 2)) {
-          const title = `${client.name} | ${moment}`
-          if (existingTitles.has(title.trim().toLowerCase())) continue
-          suggestions.push({
-            id: `suggest-${index}-${moment.slice(0, 10).replace(/\s+/g, '-').toLowerCase()}`,
-            targetMonth: coverageMonths[index],
-            title,
-            objective: `Connect ${client.name} with ${moment.toLowerCase()} and drive customer engagement.`,
-            hook: `${moment} is coming — ${client.name} is ready.`,
-            reasoning: `${moment} is a relevant marketing moment for ${monthLabel}${client.industry ? ` in the ${client.industry} industry` : ''}.`,
-            suggestedScriptPreview: `[Open with ${moment} context]\n[Introduce ${client.name} product/service]\n[Showcase value proposition]\n[Call to action]`,
-          })
-        }
-      } else {
-        const idea = seasonalIdeas[index % seasonalIdeas.length]
-        if (existingTitles.has(idea.base.trim().toLowerCase())) continue
-        suggestions.push({
-          id: `suggest-${index}-seasonal`,
-          targetMonth: coverageMonths[index],
-          title: idea.base,
-          objective: idea.obj,
-          hook: idea.hook,
-          reasoning: `Seasonal relevance for ${monthLabel}${client.industry ? ` in the ${client.industry} sector` : ''}. Aligns with client priorities.`,
-          suggestedScriptPreview: `[Open with seasonal context for ${monthLabel}]\n[Present ${client.name} solution]\n[Highlight key benefits]\n[Call to action]`,
-        })
-      }
-    }
+  const saCalendarContext = relevantCalendar.map(
+    (e) => `[${e.type}] ${e.label}`,
+  )
 
+  const liveExternalResearch: string[] = [
+    'Live web research was not performed for this session.',
+    'The AI provider may draw on its training data for general marketing knowledge, but that is not labelled as research.',
+  ]
+
+  // ── Build system prompt ──────────────────────────────────────────────────────
+
+  const systemPrompt = [
+    'You are a Content Planning Assistant inside CG Dynamics, a CG Production House operating system.',
+    'Your task is to suggest video content ideas for a specific client based on the context provided below.',
+    '',
+    'RULES:',
+    '- Return ONLY a JSON object. No markdown, no code fences, no explanation outside the JSON.',
+    '- The JSON must have a single key "suggestions" containing an array of suggestion objects.',
+    '- Each suggestion object must have these exact keys:',
+    '  targetMonth, title, objective, hook, script, sceneDirection, onScreenText,',
+    '  propsProductsPeople, locationSuggestion, cta, reasoning, sourcesUsed, duplicationRisk',
+    '- targetMonth must be one of the coverage months provided (YYYY-MM format) or null for evergreen.',
+    '- title: clear video title.',
+    '- objective: what this video achieves for the client.',
+    '- hook: the opening hook that grabs attention.',
+    '- script: COMPLETE draft script (60-90 seconds of spoken word, not placeholders).',
+    '- sceneDirection: scene-by-scene filming direction (camera angle, cuts, B-roll).',
+    '- onScreenText: what text/text overlay appears on screen.',
+    '- propsProductsPeople: specific props, products, and people needed.',
+    '- locationSuggestion: suggested filming location.',
+    '- cta: call to action.',
+    '- reasoning: why this suggestion fits the client, referencing specific context.',
+    '- sourcesUsed: list of source labels from the context that informed this suggestion.',
+    '- duplicationRisk: null if no conflict, or a string describing similarity to an existing concept.',
+    '',
+    'CONSTRAINTS:',
+    '- Do NOT invent client facts, performance data, trends, or events not provided in the context.',
+    '- If you do not know something, say so via the reasoning field rather than guessing.',
+    '- Do NOT use any content that would expose another client\'s confidential details.',
+    '- Generate 1-8 suggestions depending on the coverage window size.',
+    '- If the coverage window is 1 month, generate 2-3 suggestions.',
+    '- Vary the formats: some educational, some promotional, some entertaining.',
+    '- Suggestions are drafts and must NEVER be silently written into the guideline.',
+    '',
+    'CONTEXT SOURCES (label each source clearly):',
+    '- canonical_internal: client profile, industry profile, schedule slots, existing guideline videos',
+    '- marketing_library: approved Marketing Library knowledge cards',
+    '- sa_calendar: stable South African public holidays, seasons and observances',
+    '- live_research: NOT PERFORMED — the AI provider\'s training knowledge is not research',
+    '',
+    'Keep responses practical, production-ready, and specific to the client.',
+  ].join('\n')
+
+  // ── Build user message with assembled context ──────────────────────────────
+
+  const industryContext = industryProfile
+    ? `Primary industry: ${industryProfile.primary_industry ?? 'not set'}\nSecondary industry: ${industryProfile.secondary_industry ?? 'not set'}\nConfidence: ${industryProfile.confidence}\nReview state: ${industryProfile.review_state}`
+    : 'Industry profile: not yet researched (no industry data available).'
+
+  const deliverableContext = deliverableSlots && deliverableSlots.length > 0
+    ? deliverableSlots.map((d) => `  - ${d.code ?? d.title} (${d.deliverable_type}, month: ${d.month})`).join('\n')
+    : '  No video/reel schedule slots found in the coverage window.'
+
+  const existingVideosContext = existingVideos.length > 0
+    ? existingVideos.map((v) => `  - "${v.title}" (month: ${v.targetMonth ?? 'unallocated'}, status: ${v.status})`).join('\n')
+    : '  No existing videos in the current guideline.'
+
+  const historicalContext = historicalConcepts && historicalConcepts.length > 0
+    ? historicalConcepts.slice(0, 20).map((c) => `  - "${c.title}" (month: ${c.month ?? 'unknown'}, status: ${c.status})`).join('\n')
+    : '  No historical approved concepts found for this client.'
+
+  const crossClientContext = crossClientDuplicateCount > 0
+    ? `WARNING: ${crossClientDuplicateCount} cross-client concept(s) found with similar titles. Titles: ${crossClientTitles.join(', ')}. Avoid reusing these concepts verbatim.`
+    : 'No cross-client duplication detected.'
+
+  const marketingLibraryContext = (skillCards ?? []).length > 0
+    ? skillCards.map((c) => `  - [${c.knowledge_layer}] ${c.title}: ${c.summary ?? c.principle}`).join('\n')
+    : '  No active Marketing Library skill cards found for the relevant layers.'
+
+  const calendarContext = relevantCalendar.length > 0
+    ? relevantCalendar.map((e) => `  - [${e.type}] ${e.label}`).join('\n')
+    : '  No specific SA calendar events in the coverage months.'
+
+  const userMessage = [
+    '# CONTEXT FOR VIDEO SUGGESTIONS',
+    '',
+    `## Client: ${client.name}`,
+    `Tier: ${client.tier}`,
+    '',
+    industryContext,
+    '',
+    `## Coverage window: ${coverageStart} to ${coverageEnd} (${coverageMonths.length} months: ${coverageMonths.join(', ')})`,
+    '',
+    `## Schedule deliverable slots (${totalDeliverableSlots} total)`,
+    deliverableContext,
+    '',
+    `## Existing guideline videos (${existingVideos.length})`,
+    existingVideosContext,
+    '',
+    `## Historical approved concepts (${historicalConcepts?.length ?? 0})`,
+    historicalContext,
+    '',
+    '## Cross-client duplication',
+    crossClientContext,
+    '',
+    '## Marketing Library knowledge',
+    marketingLibraryContext,
+    '',
+    '## SA calendar context',
+    calendarContext,
+    '',
+    '## Live external research',
+    '  - NOT PERFORMED. Do not label any suggestion as "research-backed".',
+    '  - The AI provider may use general training knowledge but must not present it as research.',
+    '',
+    'Generate structured video suggestions as JSON.',
+  ].join('\n')
+
+  const messages: AiChatMessage[] = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userMessage },
+  ]
+
+  // ── Call AI provider ─────────────────────────────────────────────────────
+
+  if (!hasAnyConfiguredProvider()) {
     return jsonResponse({
-      suggestions,
+      suggestions: [],
+      error: 'No AI provider key is configured. Add an OpenRouter, Gemini, Groq or OpenAI key in Supabase Edge Function secrets.',
       context: {
         clientName: client.name,
-        industry: client.industry,
+        clientTier: client.tier,
+        primaryIndustry: industryProfile?.primary_industry ?? null,
+        secondaryIndustry: industryProfile?.secondary_industry ?? null,
         coverageMonths,
-        totalDeliverableSlots: deliverableCount ?? 0,
+        totalDeliverableSlots,
+        existingVideoCount: existingVideos.length,
+      },
+      sources: {
+        canonicalInternal,
+        marketingLibraryKnowledge,
+        saCalendarContext,
+        liveExternalResearch,
       },
     })
-  } catch (error) {
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected error.' }, 500)
   }
+
+  let providerName = 'ai-router'
+  let providerModel = 'ai-router'
+  let rawContent = ''
+
+  try {
+    const result = await routeAiChat(messages)
+    providerName = result.provider
+    providerModel = result.model
+    rawContent = result.content
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown AI provider error.'
+    return jsonResponse({
+      suggestions: [],
+      error: errorMessage === 'NO_AI_PROVIDER_KEYS'
+        ? 'No AI provider key is configured.'
+        : 'AI provider is currently unavailable.',
+      context: {
+        clientName: client.name,
+        clientTier: client.tier,
+        primaryIndustry: industryProfile?.primary_industry ?? null,
+        secondaryIndustry: industryProfile?.secondary_industry ?? null,
+        coverageMonths,
+        totalDeliverableSlots,
+        existingVideoCount: existingVideos.length,
+      },
+      sources: {
+        canonicalInternal,
+        marketingLibraryKnowledge,
+        saCalendarContext,
+        liveExternalResearch,
+      },
+    })
+  }
+
+  // ── Parse JSON from response ────────────────────────────────────────────
+
+  let suggestions: VideoSuggestion[] = []
+
+  // Try direct JSON parse first
+  try {
+    const parsed = JSON.parse(rawContent)
+    if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+      suggestions = parsed.suggestions.slice(0, MAX_SUGGESTIONS)
+    } else if (Array.isArray(parsed)) {
+      suggestions = parsed.slice(0, MAX_SUGGESTIONS)
+    }
+  } catch {
+    // Try extracting JSON from markdown code fence
+    const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/)
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[1])
+        if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+          suggestions = parsed.suggestions.slice(0, MAX_SUGGESTIONS)
+        } else if (Array.isArray(parsed)) {
+          suggestions = parsed.slice(0, MAX_SUGGESTIONS)
+        }
+      } catch {
+        // Fall through to empty
+      }
+    }
+  }
+
+  // ── Return ──────────────────────────────────────────────────────────────
+
+  const response: SuggestResponse = {
+    suggestions,
+    context: {
+      clientName: client.name,
+      clientTier: client.tier,
+      primaryIndustry: industryProfile?.primary_industry ?? null,
+      secondaryIndustry: industryProfile?.secondary_industry ?? null,
+      coverageMonths,
+      totalDeliverableSlots,
+      existingVideoCount: existingVideos.length,
+    },
+    sources: {
+      canonicalInternal,
+      marketingLibraryKnowledge,
+      saCalendarContext,
+      liveExternalResearch,
+    },
+  }
+
+  // Safe operational log (no prompts, scripts, credentials or secrets)
+  const elapsed = Date.now() - startTime
+  console.info(
+    `[suggest-content-videos] user=${user.id} client=${clientId} ` +
+    `months=${coverageMonths.length} slots=${totalDeliverableSlots} ` +
+    `existing=${existingVideos.length} suggestions=${suggestions.length} ` +
+    `provider=${providerName} model=${providerModel} elapsed=${elapsed}ms`,
+  )
+
+  return jsonResponse(response)
 })
