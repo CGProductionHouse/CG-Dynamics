@@ -122,7 +122,7 @@ test('CG Calendar still counts and filters content_run events unchanged', () => 
 
 test('the Open Content Run link deep-links to the runs tab by calendar event id', () => {
   assert.match(CAL_PAGE, /event\.event_type === 'content_run'/)
-  assert.match(CAL_PAGE, /\/admin\/content-workflow\?tab=runs&event=\$\{event\.id\}/)
+  assert.match(CAL_PAGE, /\/admin\/content\?tab=runs&event=\$\{event\.id\}/)
 })
 
 // ── Status mapping round-trips ────────────────────────────────────────────────

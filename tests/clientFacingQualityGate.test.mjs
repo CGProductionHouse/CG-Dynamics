@@ -420,10 +420,11 @@ test('admin full content guide page shows document publication state', () => {
   assert.match(FULL_GUIDE_PAGE, /Draft/)
 })
 
-test('admin full content guide page has month and client selectors', () => {
+test('admin full content guide page has a client selector and delegates coverage to the editor', () => {
   assert.match(FULL_GUIDE_PAGE, /Select a client/)
-  assert.match(FULL_GUIDE_PAGE, /selectedMonth/)
   assert.match(FULL_GUIDE_PAGE, /selectedClientId/)
+  assert.match(GUIDE_EDITOR, /coverageStart/)
+  assert.match(GUIDE_EDITOR, /coverageEnd/)
 })
 
 test('admin full content guide editor renders ordered video names and scripts', () => {

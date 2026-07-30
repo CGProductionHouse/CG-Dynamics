@@ -16,6 +16,8 @@ const guideline = {
   client_id: 'client-1',
   title: 'July guide',
   month: '2026-07-01',
+  coverage_start: '2026-07-01',
+  coverage_end: '2026-08-01',
   status: 'draft',
   client_published_at: null,
   created_by: null,
@@ -45,16 +47,17 @@ before(async () => {
 
 after(async () => { await server.close() })
 
-test('schedule candidates are restricted to the guideline client and month', () => {
+test('schedule candidates are restricted to the guideline client and coverage window', () => {
   const candidates = guidelineScheduleCandidates(guideline, [
     deliverable(),
     deliverable({ id: 'other-client', client_id: 'client-2' }),
-    deliverable({ id: 'other-month', month: '2026-08-01' }),
+    deliverable({ id: 'second-month', month: '2026-08-01', instance_number: 2 }),
+    deliverable({ id: 'outside-coverage', month: '2026-09-01', instance_number: 3 }),
     deliverable({ id: 'dp-1', deliverable_type: 'dp' }),
-    deliverable({ id: 'reel-1', code: 'Reel 1', deliverable_type: 'reel', instance_number: 2 }),
+    deliverable({ id: 'reel-1', code: 'Reel 1', deliverable_type: 'reel', instance_number: 4 }),
   ], [])
 
-  assert.deepEqual(candidates.map(candidate => candidate.deliverable.id), ['deliverable-1', 'reel-1'])
+  assert.deepEqual(candidates.map(candidate => candidate.deliverable.id), ['deliverable-1', 'second-month', 'reel-1'])
 })
 
 test('already linked schedule videos are excluded instead of duplicated', () => {

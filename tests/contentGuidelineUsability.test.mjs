@@ -82,7 +82,7 @@ test('staff workflow and calendar resolve the same run document', () => {
   assert.match(WORKFLOW, /<ContentGuidelineDocumentEditor/)
   assert.match(WORKFLOW, /searchParams\.get\('event'\)/)
   assert.match(WORKFLOW, /searchParams\.get\('run'\)/)
-  assert.match(CALENDAR, /\/admin\/content-workflow\?tab=runs&event=\$\{event\.id\}/)
+  assert.match(CALENDAR, /\/admin\/content\?tab=runs&event=\$\{event\.id\}/)
   assert.match(ADMIN_PAGE, /ContentGuidelineDocumentEditor/)
 })
 
@@ -110,7 +110,8 @@ test('staff can explicitly bootstrap same-client schedule videos and imported sc
   assert.match(EDITOR, /guidelineScheduleCandidates/)
   assert.match(EDITOR, /importGuidelineVideosFromSchedule/)
   assert.match(WORKFLOW_DATA, /deliverable\.client_id === guideline\.client_id/)
-  assert.match(WORKFLOW_DATA, /deliverable\.month === guideline\.month/)
+  assert.match(WORKFLOW_DATA, /deliverable\.month >= coverageStart/)
+  assert.match(WORKFLOW_DATA, /deliverable\.month <= coverageEnd/)
   assert.match(WORKFLOW_DATA, /microsoft_source_description\?\.trim\(\)/)
   assert.match(WORKFLOW_DATA, /deliverable_id: deliverable\.id/)
 })

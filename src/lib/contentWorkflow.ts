@@ -552,9 +552,13 @@ export function guidelineScheduleCandidates(
   existingVideos: ContentGuidelineVideo[],
 ): GuidelineScheduleCandidate[] {
   const linkedIds = new Set(existingVideos.map(video => video.deliverable_id).filter(Boolean))
+  const coverageStart = guideline.coverage_start ?? guideline.month
+  const coverageEnd = guideline.coverage_end ?? coverageStart
   return deliverables
     .filter(deliverable =>
       deliverable.client_id === guideline.client_id
+      && (!coverageStart || deliverable.month >= coverageStart)
+      && (!coverageEnd || deliverable.month <= coverageEnd)
       && (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel')
       && !linkedIds.has(deliverable.id),
     )
