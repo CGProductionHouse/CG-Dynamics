@@ -85,6 +85,20 @@ test('Integrations routes are manager-gated under RequireManager', () => {
   assert.match(app, /path="\/admin\/integrations\/google-ads" element=\{<GoogleAdsIntegrationPage \/>\}/)
 })
 
+test('Hub renders core work before optional content counters finish', () => {
+  assert.match(hub, /listTasks\(\{ activeOnly: true \}\)/)
+  assert.match(hub, /setMyDayContext\(myDay\)\s+setLoadingData\(false\)/)
+  assert.match(hub, /Promise\.all\(\[listRuns\(\), listPipelineVideos\(\)\]\)/)
+})
+
+test('Hub client attention combines tasks and canonical schedule work', () => {
+  assert.match(hub, /listActiveClients\(\)/)
+  assert.match(hub, /item\.waitingDeliverables\+\+/)
+  assert.match(hub, /item\.unscheduledItems\+\+/)
+  assert.match(hub, /client-schedule\?client=\$\{encodeURIComponent\(client\.clientId\)\}&mode=needs-action/)
+  assert.match(hub, /\{client\.waitingDeliverables\} awaiting review/)
+  assert.match(hub, /\{client\.unscheduledItems\} unscheduled/)
+})
 test('Admin-only routes are gated under RequireAdmin', () => {
   assert.match(app, /<Route element=\{<RequireAdmin \/>\}>/)
   assert.match(app, /path="\/admin\/users" element=\{<UsersHub \/>\}/)
