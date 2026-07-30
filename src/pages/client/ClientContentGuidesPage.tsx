@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/clientContentGuides'
@@ -7,13 +8,17 @@ import { monthDisplayLabel } from '../../lib/reportPeriod'
 
 export default function ClientContentGuidesPage() {
   const { profile } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [client, setClient] = useState<Client | null>(null)
   const [guidelines, setGuidelines] = useState<PublishedContentGuideline[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const now = new Date()
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const fallbackMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const requestedMonth = searchParams.get('month')
+  const currentMonth = requestedMonth && /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : fallbackMonth
+  const selectedGuideKey = searchParams.get('guide')
 
   useEffect(() => {
     let active = true
@@ -44,6 +49,22 @@ export default function ClientContentGuidesPage() {
         <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">
           Published filming documents for {monthDisplayLabel(currentMonth)}, with every video name and complete script in order.
         </p>
+        <div className="mt-5 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSearchParams({ month: shiftMonth(currentMonth, -1) })}
+            className="rounded-full border border-white/10 px-4 py-2 text-sm text-report-muted transition hover:border-report-accent/35 hover:text-white"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchParams({ month: shiftMonth(currentMonth, 1) })}
+            className="rounded-full border border-white/10 px-4 py-2 text-sm text-report-muted transition hover:border-report-accent/35 hover:text-white"
+          >
+            Next
+          </button>
+        </div>
       </section>
 
       {loading ? (
@@ -55,7 +76,20 @@ export default function ClientContentGuidesPage() {
       ) : (
         <div className="mt-8 space-y-8">
           {guidelines.map(guideline => (
-            <article key={guideline.row_key} className="overflow-hidden rounded-lg border border-white/[0.08] bg-white/[0.035] shadow-[0_18px_55px_rgba(0,0,0,0.2)]">
+            <article
+              key={guideline.row_key}
+              id={`guide-${guideline.row_key}`}
+              ref={element => {
+                if (element && selectedGuideKey === guideline.row_key) {
+                  window.requestAnimationFrame(() => element.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+                }
+              }}
+              className={`scroll-mt-6 overflow-hidden rounded-lg border bg-white/[0.035] shadow-[0_18px_55px_rgba(0,0,0,0.2)] ${
+                selectedGuideKey === guideline.row_key
+                  ? 'border-report-accent/45 ring-1 ring-report-accent/20'
+                  : 'border-white/[0.08]'
+              }`}
+            >
               <header className="border-b border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.12),transparent_42%)] p-5 sm:p-7">
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-report-accent">Content Guideline</p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-normal text-white">{guideline.title}</h2>
@@ -91,6 +125,11 @@ export default function ClientContentGuidesPage() {
       )}
     </ClientPortalShell>
   )
+}
+
+function shiftMonth(month: string, amount: number): string {
+  const [year, monthNumber] = month.split('-').map(Number)
+  return new Date(Date.UTC(year, monthNumber - 1 + amount, 1)).toISOString().slice(0, 7)
 }
 
 function Message({ children, error = false }: { children: React.ReactNode; error?: boolean }) {

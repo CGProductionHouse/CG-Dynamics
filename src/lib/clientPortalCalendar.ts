@@ -31,6 +31,8 @@ export interface ClientCalendarEvent {
   title: string
   type: CompanyEventType
   location: string | null
+  /** Opaque key for this event's published, same-client Content Guideline. */
+  guidelineKey: string | null
 }
 
 export interface ClientMonthAhead {
@@ -58,6 +60,7 @@ type ClientPortalEventRow = {
   end_time: string | null
   all_day: boolean
   location: string | null
+  guideline_row_key: string | null
 }
 
 export async function fetchClientMonthAhead(clientId: string, month: string): Promise<ClientMonthAhead> {
@@ -84,6 +87,7 @@ export async function fetchClientMonthAhead(clientId: string, month: string): Pr
     title: row.title,
     type: row.event_type as CompanyEventType,
     location: row.location,
+    guidelineKey: row.guideline_row_key,
   }))
 
   return {
