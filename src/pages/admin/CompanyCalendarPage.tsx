@@ -989,7 +989,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
         <div className="border-t border-white/[0.08] px-5 py-4">
           {!isNew && event.event_type === 'content_run' && (
             <Link
-              to={`/admin/content-workflow?tab=runs&event=${event.id}`}
+              to={`/admin/content?tab=runs&event=${event.id}`}
               className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/25 bg-emerald-400/[0.08] px-3 py-1.5 text-xs font-bold text-emerald-200 transition-colors hover:border-emerald-400/50"
             >
               Open Content Run →

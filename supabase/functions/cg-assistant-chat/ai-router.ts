@@ -11,6 +11,10 @@ export interface AiRouterResult {
   model: string
 }
 
+export interface AiRouterOptions {
+  maxOutputTokens?: number
+}
+
 export interface AiProviderDiagnostic {
   provider: AiProviderName
   model: string
@@ -153,7 +157,8 @@ async function callOpenAiCompatibleProvider(
   config: ProviderConfig,
   messages: AiChatMessage[],
   endpoint: string,
-  extraHeaders: Record<string, string> = {}
+  extraHeaders: Record<string, string> = {},
+  maxOutputTokens = 500,
 ): Promise<string> {
   if (!config.apiKey) throw new Error(`${config.name} API key is missing.`)
 
@@ -167,7 +172,7 @@ async function callOpenAiCompatibleProvider(
     body: JSON.stringify({
       model: config.model,
       temperature: 0.2,
-      max_tokens: 500,
+      max_tokens: maxOutputTokens,
       messages,
     }),
   })
@@ -180,7 +185,11 @@ async function callOpenAiCompatibleProvider(
   return parseOpenAiCompatibleAnswer(await response.json())
 }
 
-async function callGemini(config: ProviderConfig, messages: AiChatMessage[]): Promise<string> {
+async function callGemini(
+  config: ProviderConfig,
+  messages: AiChatMessage[],
+  maxOutputTokens = 500,
+): Promise<string> {
   if (!config.apiKey) throw new Error('Gemini API key is missing.')
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent?key=${encodeURIComponent(config.apiKey)}`
@@ -196,7 +205,7 @@ async function callGemini(config: ProviderConfig, messages: AiChatMessage[]): Pr
       contents: geminiContents(messages),
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 500,
+        maxOutputTokens,
       },
     }),
   })
@@ -209,7 +218,11 @@ async function callGemini(config: ProviderConfig, messages: AiChatMessage[]): Pr
   return parseGeminiAnswer(await response.json())
 }
 
-async function callProvider(config: ProviderConfig, messages: AiChatMessage[]): Promise<string> {
+async function callProvider(
+  config: ProviderConfig,
+  messages: AiChatMessage[],
+  maxOutputTokens: number,
+): Promise<string> {
   if (config.name === 'openrouter') {
     return callOpenAiCompatibleProvider(
       config,
@@ -218,28 +231,46 @@ async function callProvider(config: ProviderConfig, messages: AiChatMessage[]): 
       {
         'HTTP-Referer': 'https://cg-dynamics.vercel.app',
         'X-Title': 'CG Dynamics',
-      }
+      },
+      maxOutputTokens,
     )
   }
 
   if (config.name === 'groq') {
-    return callOpenAiCompatibleProvider(config, messages, 'https://api.groq.com/openai/v1/chat/completions')
+    return callOpenAiCompatibleProvider(
+      config,
+      messages,
+      'https://api.groq.com/openai/v1/chat/completions',
+      {},
+      maxOutputTokens,
+    )
   }
 
   if (config.name === 'openai') {
-    return callOpenAiCompatibleProvider(config, messages, 'https://api.openai.com/v1/chat/completions')
+    return callOpenAiCompatibleProvider(
+      config,
+      messages,
+      'https://api.openai.com/v1/chat/completions',
+      {},
+      maxOutputTokens,
+    )
   }
 
-  return callGemini(config, messages)
+  return callGemini(config, messages, maxOutputTokens)
 }
 
 export function hasAnyConfiguredProvider(): boolean {
   return DEFAULT_PROVIDER_ORDER.some((name) => Boolean(providerConfig(name).apiKey))
 }
 
-export async function routeAiChat(messages: AiChatMessage[]): Promise<AiRouterResult> {
+export async function routeAiChat(
+  messages: AiChatMessage[],
+  options: AiRouterOptions = {},
+): Promise<AiRouterResult> {
   const order = providerOrder()
   const attemptsAllowed = maxAttempts()
+  const requestedMaxTokens = options.maxOutputTokens ?? 500
+  const maxOutputTokens = Math.min(Math.max(Math.floor(requestedMaxTokens), 128), 4000)
   let attempts = 0
   const errors: string[] = []
 
@@ -254,7 +285,7 @@ export async function routeAiChat(messages: AiChatMessage[]): Promise<AiRouterRe
     attempts += 1
 
     try {
-      const content = await callProvider(config, messages)
+      const content = await callProvider(config, messages, maxOutputTokens)
       console.info(`[cg-assistant] AI provider used: ${config.name}/${config.model}`)
       return {
         content,

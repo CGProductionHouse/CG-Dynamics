@@ -180,6 +180,6 @@ test('23. Client Schedule keeps its deliverable label rendering', () => {
   // The drawer/calendar label is still the schedule code + title, not the concept title.
   assert.match(CS, /\{displayCode\(deliverable\)\} · \{deliverable\.title\}/)
   // The linked-video section is read-only (an Open link, no writes to the schedule).
-  assert.match(CS, /Open in Content Workflow/)
+  assert.match(CS, /Open in Content/)
   assert.doesNotMatch(CS, /updateMonthlyDeliverable\w*\([^)]*canonical_name/)
 })

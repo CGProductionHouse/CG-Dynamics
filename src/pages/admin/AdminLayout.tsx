@@ -1,204 +1,99 @@
 import { useState } from 'react'
-import { NavLink, Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
-import { isAdminRole, isManagerRole, roleLabel } from '../../lib/roles'
-
-type Zone = 'dynamics' | 'hub'
-type NavAccess = 'staff' | 'manager' | 'admin'
-type NavItem = { to: string; label: string; end?: boolean; access?: NavAccess }
+import { roleLabel } from '../../lib/roles'
+import { primaryNavItems, adminNavItems, canShowNavItem, isNavItemActive, type NavItem } from './adminNavigation'
 
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 
-const DYNAMICS_PATHS = ['/admin/client-performance', '/admin/clients', '/admin/client-dashboard', '/admin/client-calendar', '/admin/integrations']
-
-function zoneForPath(pathname: string): Zone {
-  return DYNAMICS_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`)) ? 'dynamics' : 'hub'
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  return `${parts[0]?.[0] ?? ''}${parts.length > 1 ? parts.at(-1)?.[0] ?? '' : ''}`.toUpperCase()
 }
 
-const dynamicsNav: NavItem[] = [
-  { to: '/admin/client-performance', label: 'Performance Dashboard' },
-  { to: '/admin/clients', label: 'Clients' },
-  { to: '/admin/client-dashboard', label: 'Client Dashboard' },
-  { to: '/admin/client-calendar', label: 'Content Calendar' },
-  { to: '/admin/integrations', label: 'Integrations', access: 'manager' },
-]
-
-const hubNav: NavItem[] = [
-  { to: '/admin/cg-hub', label: 'Hub', end: true },
-  { to: '/admin/work', label: 'Work' },
-  { to: '/admin/cg-calendar', label: 'CG Calendar' },
-  { to: '/admin/client-schedule', label: 'Client Schedule' },
-  { to: '/admin/content-workflow', label: 'Content Workflow' },
-  { to: '/admin/full-content-guide', label: 'Full Content Guide' },
-  { to: '/admin/clients', label: 'Clients' },
-  { to: '/admin/assistant', label: 'Assistant' },
-  { to: '/admin/team', label: 'Team', access: 'admin' },
-]
-
-// Small AI Workforce group inside the Hub navigation. Kept separate from the
-// operational Hub items but NOT a third app zone yet.
-const aiWorkforceNav: NavItem[] = [
-  { to: '/admin/marketing-library', label: 'Marketing Library', access: 'admin' },
-]
-
-function navClass({ isActive }: { isActive: boolean }) {
-  return `group relative flex items-center justify-between rounded-md px-3 py-2 md:py-1.5 text-sm font-bold transition-colors ${
-    isActive
-      ? 'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]'
-      : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'
-  }`
+function NavSection({ label, collapsed = false }: { label: string; collapsed?: boolean }) {
+  return (
+    <p className={`${collapsed ? 'sr-only' : 'mb-1 mt-3 px-3'} text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40`}>
+      {label}
+    </p>
+  )
 }
 
-function ExternalHoursLink({ onClick }: { onClick?: () => void }) {
+function NavigationLink({ item, active, collapsed = false, onClick }: { item: NavItem; active: boolean; collapsed?: boolean; onClick?: () => void }) {
+  return (
+    <Link
+      to={item.to}
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      aria-label={collapsed ? item.label : undefined}
+      title={collapsed ? item.label : undefined}
+      className={`group relative flex min-h-10 items-center rounded-md px-3 text-sm font-bold transition-colors ${collapsed ? 'justify-center' : 'justify-between'} ${
+        active
+          ? 'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]'
+          : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'
+      }`}
+    >
+      {collapsed ? <span className="text-[11px] font-black tracking-tight">{item.marker}</span> : <span>{item.label}</span>}
+    </Link>
+  )
+}
+
+function ExternalHoursLink({ collapsed = false, onClick }: { collapsed?: boolean; onClick?: () => void }) {
   return (
     <a
       href={CG_HOURS_URL}
       target="_blank"
       rel="noopener noreferrer"
       onClick={onClick}
-      className="group flex items-center justify-between rounded-md px-3 py-2 md:py-1.5 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white"
+      aria-label={collapsed ? 'CG Hours, external' : undefined}
+      title={collapsed ? 'CG Hours, external' : undefined}
+      className={`group flex min-h-10 items-center rounded-md px-3 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white ${collapsed ? 'justify-center' : 'justify-between'}`}
     >
-      <span>CG Hours</span>
-      <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">
-        Ext
-      </span>
+      <span>{collapsed ? 'CH' : 'CG Hours'}</span>
+      {!collapsed && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">Ext</span>}
     </a>
-  )
-}
-
-function ZoneSwitcher({ zone, onChange }: { zone: Zone; onChange: (z: Zone) => void }) {
-  return (
-    <div className="flex rounded-lg border border-white/10 bg-white/[0.03] p-1">
-      <button
-        type="button"
-        onClick={() => onChange('dynamics')}
-        className={`flex-1 rounded-md px-2 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-colors ${
-          zone === 'dynamics'
-            ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-            : 'text-brand-primary/60 hover:text-brand-primary'
-        }`}
-      >
-        Performance
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange('hub')}
-        className={`flex-1 rounded-md px-2 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-colors ${
-          zone === 'hub'
-            ? 'bg-white/[0.09] text-white shadow-[0_0_0_1px_rgba(45,212,191,0.35)]'
-            : 'text-brand-primary/60 hover:text-brand-primary'
-        }`}
-      >
-        Hub
-      </button>
-    </div>
-  )
-}
-
-function NavSection({ label }: { label: string }) {
-  return (
-    <p className="mb-1 mt-3 md:mt-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40">
-      {label}
-    </p>
   )
 }
 
 export default function AdminLayout() {
   const { profile, signOut } = useAuth()
   const location = useLocation()
-  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const zone = zoneForPath(location.pathname)
-
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false)
   const currentRole = profile?.role ?? 'team'
-  const close = () => setMobileMenuOpen(false)
+  const displayRole = roleLabel(profile?.role)
+  const primaryItems = primaryNavItems.filter(item => canShowNavItem(item, currentRole))
+  const adminItems = adminNavItems.filter(item => canShowNavItem(item, currentRole))
+  const closeMobile = () => setMobileMenuOpen(false)
 
-  function switchZone(z: Zone) {
-    navigate(z === 'hub' ? '/admin/cg-hub' : '/admin/client-performance')
-    close()
-  }
-
-  function canShow(item: NavItem) {
-    if (item.access === 'admin') return isAdminRole(currentRole)
-    if (item.access === 'manager') return isManagerRole(currentRole)
-    return true
-  }
-
-  function renderNav() {
-    if (zone === 'dynamics') {
-      return (
-        <>
-          <NavSection label="Performance" />
-          {dynamicsNav.filter(canShow).map(item => (
-            <NavLink key={item.to} to={item.to} className={navClass} onClick={close}>
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-          <Link
-            to="/admin/cg-hub"
-            onClick={() => { switchZone('hub'); close() }}
-            className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-brand-primary/50 transition-colors hover:bg-white/[0.05] hover:text-white"
-          >
-            <span>Back to Hub</span>
-          </Link>
-        </>
-      )
-    }
-
-    const aiWorkforceItems = aiWorkforceNav.filter(canShow)
+  function renderNav(collapsed = false, onClick?: () => void) {
     return (
       <>
-        <NavSection label="CG Hub" />
-        {hubNav.filter(canShow).map(item => (
-          <NavLink key={item.to} to={item.to} end={item.end} className={navClass} onClick={close}>
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-        {aiWorkforceItems.length > 0 && (
-          <>
-            <NavSection label="AI Workforce" />
-            {aiWorkforceItems.map(item => (
-              <NavLink key={item.to} to={item.to} className={navClass} onClick={close}>
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
-          </>
+        <NavSection label="Daily work" collapsed={collapsed} />
+        {primaryItems.map(item => <NavigationLink key={item.to} item={item} active={isNavItemActive(location.pathname, item)} collapsed={collapsed} onClick={onClick} />)}
+        <div className={`${collapsed ? 'my-2' : 'mt-2'} border-t border-white/10 pt-2`}>
+          <ExternalHoursLink collapsed={collapsed} onClick={onClick} />
+        </div>
+        {adminItems.length > 0 && (
+          <div className="mt-3 border-t border-white/10 pt-1" data-testid="admin-navigation">
+            <NavSection label="Admin" collapsed={collapsed} />
+            {adminItems.map(item => <NavigationLink key={item.to} item={item} active={isNavItemActive(location.pathname, item)} collapsed={collapsed} onClick={onClick} />)}
+          </div>
         )}
-        <ExternalHoursLink onClick={close} />
       </>
     )
   }
 
-  const dynamicsMobileItems: NavItem[] = [
-    { to: '/admin/client-performance', label: 'Perf' },
-    { to: '/admin/clients', label: 'Clients' },
-    { to: '/admin/client-dashboard', label: 'Dash' },
-    { to: '/admin/client-calendar', label: 'Calendar' },
-    { to: '/admin/integrations', label: 'Sync', access: 'manager' },
-  ]
-  const hubMobileItems: NavItem[] = [
-    { to: '/admin/cg-hub', label: 'Hub' },
-    { to: '/admin/work', label: 'Work' },
-    { to: '/admin/cg-calendar', label: 'Calendar' },
-    { to: '/admin/client-schedule', label: 'Schedule' },
-    { to: '/admin/clients', label: 'Clients' },
-  ]
-  const mobileItems = (zone === 'dynamics' ? dynamicsMobileItems : hubMobileItems).filter(canShow)
-  const displayRole = roleLabel(profile?.role)
-
   return (
     <div className="min-h-screen bg-brand-bg md:flex md:h-screen md:overflow-hidden">
-      <div className="fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-brand-teal/70 to-transparent pointer-events-none" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-brand-teal/70 to-transparent" />
 
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <BrandMark subtitle={displayRole} compact />
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="rounded-md border border-white/12 bg-white/[0.04] px-3 py-2 text-sm font-bold text-white"
-          >
+          <button type="button" onClick={() => setMobileMenuOpen(true)} className="min-h-11 rounded-md border border-white/12 bg-white/[0.04] px-3 text-sm font-bold text-white" aria-expanded={mobileMenuOpen} aria-controls="staff-mobile-navigation">
             Menu
           </button>
         </div>
@@ -206,44 +101,30 @@ export default function AdminLayout() {
 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            type="button"
-            aria-label="Close menu"
-            className="absolute inset-0 bg-black/70"
-            onClick={close}
-          />
-          <aside className="absolute right-0 top-0 flex h-full w-[min(20rem,86vw)] flex-col border-l border-white/10 bg-brand-surface shadow-2xl">
+          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/70" onClick={closeMobile} />
+          <aside id="staff-mobile-navigation" className="absolute right-0 top-0 flex h-full w-[min(21rem,88vw)] max-w-full flex-col border-l border-white/10 bg-brand-surface shadow-2xl" aria-label="Staff navigation">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
               <BrandMark subtitle={displayRole} compact />
-              <button
-                type="button"
-                onClick={close}
-                className="rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-brand-primary hover:text-white"
-              >
-                Close
-              </button>
+              <button type="button" onClick={closeMobile} className="min-h-11 rounded-md border border-white/10 px-3 text-sm font-semibold text-brand-primary hover:text-white">Close</button>
             </div>
-            <div className="border-b border-white/10 p-3 md:p-2.5">
-              <ZoneSwitcher zone={zone} onChange={switchZone} />
-            </div>
-            <nav className="flex-1 space-y-1 overflow-y-auto p-3 md:space-y-0.5 md:p-2.5">{renderNav()}</nav>
-            <div className="border-t border-white/10 p-3 md:p-2.5">
+            <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-3">{renderNav(false, closeMobile)}</nav>
+            <div className="border-t border-white/10 p-3">
               <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
             </div>
           </aside>
         </div>
       )}
 
-      <aside className="hidden w-60 shrink-0 border-r border-white/10 bg-black/72 md:flex md:h-screen md:flex-col">
-        <div className="border-b border-white/10 px-5 py-4">
-          <BrandMark subtitle={displayRole} compact />
+      <aside className={`${desktopCollapsed ? 'w-20' : 'w-60'} hidden shrink-0 border-r border-white/10 bg-black/72 transition-[width] md:flex md:h-screen md:flex-col`} aria-label="Staff navigation">
+        <div className={`flex items-center border-b border-white/10 py-4 ${desktopCollapsed ? 'flex-col justify-center gap-2 px-2' : 'justify-between gap-2 px-4'}`}>
+          {desktopCollapsed ? <div className="w-9 overflow-hidden" title="CG Dynamics"><BrandMark subtitle="" compact /></div> : <BrandMark subtitle={displayRole} compact />}
+          <button type="button" onClick={() => setDesktopCollapsed(value => !value)} className="min-h-9 min-w-9 rounded-md border border-white/10 px-2 text-xs font-black text-brand-primary hover:text-white" aria-label={desktopCollapsed ? 'Expand navigation' : 'Collapse navigation'} title={desktopCollapsed ? 'Expand navigation' : 'Collapse navigation'}>
+            {desktopCollapsed ? '>' : '<'}
+          </button>
         </div>
-        <div className="border-b border-white/10 p-3 md:p-2.5">
-          <ZoneSwitcher zone={zone} onChange={switchZone} />
-        </div>
-        <nav className="flex-1 space-y-0.5 p-2.5">{renderNav()}</nav>
-        <div className="border-t border-white/10 p-3 md:p-2.5">
-          <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
+        <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain p-2.5">{renderNav(desktopCollapsed)}</nav>
+        <div className="border-t border-white/10 p-2.5">
+          <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} collapsed={desktopCollapsed} />
         </div>
       </aside>
 
@@ -251,45 +132,43 @@ export default function AdminLayout() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden">
-        <div className="grid grid-cols-5 gap-1 px-2 py-1.5">
-          {mobileItems.map(item => (
-            <MobileNavItem key={item.to} to={item.to} label={item.label} />
-          ))}
+      <nav className="fixed inset-x-0 bottom-0 z-40 overflow-x-auto overscroll-x-contain border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
+        <div className="flex min-w-max gap-1 px-2 py-1.5">
+          {primaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
         </div>
       </nav>
     </div>
   )
 }
 
-function UserBlock({ name, role, onSignOut }: { name: string; role: string; onSignOut: () => void }) {
+function UserBlock({ name, role, onSignOut, collapsed = false }: { name: string; role: string; onSignOut: () => void; collapsed?: boolean }) {
+  if (collapsed) {
+    return (
+      <div className="space-y-1.5 text-center" title={`${name}, ${role}`}>
+        <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-brand-teal/10 text-xs font-black text-brand-teal" aria-label={`${name}, ${role}`}>{initials(name)}</div>
+        <button onClick={onSignOut} className="min-h-9 w-full rounded-md text-xs font-black text-brand-primary hover:bg-white/[0.06] hover:text-white" aria-label="Sign out" title="Sign out">X</button>
+      </div>
+    )
+  }
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2 rounded-lg bg-white/[0.035] px-3 py-2">
         <p className="min-w-0 truncate text-sm font-bold text-white">{name}</p>
         <p className="shrink-0 text-xs text-brand-primary/65">{role}</p>
       </div>
-      <button
-        onClick={onSignOut}
-        className="w-full rounded-md px-3 py-2 md:py-1.5 text-left text-sm font-semibold text-brand-primary transition-colors hover:bg-white/[0.06] hover:text-white"
-      >
-        Sign out
-      </button>
+      <button onClick={onSignOut} className="min-h-10 w-full rounded-md px-3 text-left text-sm font-semibold text-brand-primary transition-colors hover:bg-white/[0.06] hover:text-white">Sign out</button>
     </div>
   )
 }
 
-function MobileNavItem({ to, label }: { to: string; label: string }) {
+function MobileNavItem({ item, active }: { item: NavItem; active: boolean }) {
   return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        `rounded-md px-2 py-2.5 text-center text-[11px] font-bold transition-colors ${
-          isActive ? 'bg-white/[0.08] text-white shadow-[inset_0_2px_0_rgba(45,212,191,0.85)]' : 'text-brand-primary hover:text-white'
-        }`
-      }
+    <Link
+      to={item.to}
+      aria-current={active ? 'page' : undefined}
+      className={`min-w-[4.5rem] rounded-md px-2 py-2.5 text-center text-[11px] font-bold transition-colors ${active ? 'bg-white/[0.08] text-white shadow-[inset_0_2px_0_rgba(45,212,191,0.85)]' : 'text-brand-primary hover:text-white'}`}
     >
-      {label}
-    </NavLink>
+      {item.shortLabel}
+    </Link>
   )
 }

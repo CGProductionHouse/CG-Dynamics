@@ -808,7 +808,7 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
             <div className="rounded-lg border border-brand-teal/20 bg-brand-teal/[0.05] p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-teal/80">Linked video</p>
-                <Link to="/admin/content-workflow" className="text-[11px] font-bold text-brand-teal hover:text-white">Open in Content Workflow</Link>
+                <Link to={linkedVideo.content_guideline_id ? `/admin/content?tab=guidelines&guideline=${linkedVideo.content_guideline_id}` : `/admin/content?tab=library&guide=${linkedVideo.id}`} className="text-[11px] font-bold text-brand-teal hover:text-white">Open in Content</Link>
               </div>
               {linkedVideo.canonical_name && <p className="mt-1.5 break-all font-mono text-[11px] text-white/60">{linkedVideo.canonical_name}</p>}
               <p className="mt-1 text-sm font-bold text-white">{linkedVideo.title}</p>

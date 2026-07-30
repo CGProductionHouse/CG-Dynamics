@@ -440,6 +440,8 @@ export interface ContentGuideline {
   client_id: string
   title: string
   month: string | null
+  coverage_start: string | null
+  coverage_end: string | null
   status: ContentGuidelineStatus
   client_published_at: string | null
   created_by: string | null
@@ -459,11 +461,15 @@ export async function listContentGuidelines(filters: {
   clientId?: string | null
   month?: string | null
   runId?: string | null
+  coverageStart?: string | null
+  coverageEnd?: string | null
 } = {}): Promise<QueryResult<ContentGuideline[]>> {
   let query = supabase.from('content_guidelines').select('*').order('updated_at', { ascending: false })
   if (filters.clientId) query = query.eq('client_id', filters.clientId)
   if (filters.month) query = query.eq('month', filters.month)
   if (filters.runId) query = query.eq('content_run_id', filters.runId)
+  if (filters.coverageStart) query = query.gte('coverage_start', filters.coverageStart)
+  if (filters.coverageEnd) query = query.lte('coverage_end', filters.coverageEnd)
   const { data, error } = await query
   return wrap((data ?? []) as ContentGuideline[], error, [])
 }
@@ -495,7 +501,7 @@ export async function ensureGuidelineForRun(runId: string): Promise<QueryResult<
 
 export async function updateContentGuideline(
   id: string,
-  patch: Pick<Partial<ContentGuideline>, 'title' | 'month' | 'status'>,
+  patch: Pick<Partial<ContentGuideline>, 'title' | 'month' | 'status' | 'coverage_start' | 'coverage_end'>,
 ): Promise<QueryResult<ContentGuideline | null>> {
   const { data, error } = await supabase
     .from('content_guidelines')
@@ -506,16 +512,21 @@ export async function updateContentGuideline(
   return wrap((data as ContentGuideline | null) ?? null, error, null)
 }
 
+export function normalizeGuidelineVideoMonth(value: string | null | undefined): string | null {
+  if (!value) return null
+  return value.slice(0, 7) + '-01'
+}
+
 export async function addGuidelineVideo(
   guideline: ContentGuideline,
-  input: { title: string; script: string; position: number; deliverable_id?: string | null; created_by?: string | null },
+  input: { title: string; script: string; position: number; month?: string | null; deliverable_id?: string | null; created_by?: string | null },
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
   const { data, error } = await supabase
     .from('content_guide_ideas')
     .insert({
       content_guideline_id: guideline.id,
       client_id: guideline.client_id,
-      month: guideline.month,
+      month: normalizeGuidelineVideoMonth(input.month),
       title: input.title,
       script: input.script,
       position: input.position,
@@ -546,10 +557,13 @@ export function guidelineScheduleCandidates(
   existingVideos: ContentGuidelineVideo[],
 ): GuidelineScheduleCandidate[] {
   const linkedIds = new Set(existingVideos.map(video => video.deliverable_id).filter(Boolean))
+  const coverageStart = guideline.coverage_start ?? guideline.month
+  const coverageEnd = guideline.coverage_end ?? coverageStart
   return deliverables
     .filter(deliverable =>
       deliverable.client_id === guideline.client_id
-      && deliverable.month === guideline.month
+      && (!coverageStart || deliverable.month >= coverageStart)
+      && (!coverageEnd || deliverable.month <= coverageEnd)
       && (deliverable.deliverable_type === 'video' || deliverable.deliverable_type === 'reel')
       && !linkedIds.has(deliverable.id),
     )
@@ -579,7 +593,7 @@ export async function importGuidelineVideosFromSchedule(
   const rows = candidates.map(({ deliverable, script }, index) => ({
     content_guideline_id: guideline.id,
     client_id: guideline.client_id,
-    month: guideline.month,
+    month: deliverable.month,
     title: deliverable.title.trim() || deliverable.code,
     script,
     position: startPosition + index + 1,
@@ -599,7 +613,10 @@ export async function updateGuidelineVideo(
   id: string,
   patch: Partial<ContentGuidelineVideo>,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
-  return updateGuideIdea(id, patch)
+  const normalizedPatch = patch.month === undefined
+    ? patch
+    : { ...patch, month: normalizeGuidelineVideoMonth(patch.month) }
+  return updateGuideIdea(id, normalizedPatch)
 }
 
 export async function reorderGuidelineVideos(
@@ -647,4 +664,85 @@ export async function listContentGuidelineDocuments(filters: {
     return run ? [{ guideline, run, videos: videoResults[index].data }] : []
   })
   return { data: documents, error: null, migrationNeeded: false }
+}
+
+// AI-assisted content video suggestions
+export interface ContentVideoSuggestion {
+  targetMonth: string | null
+  title: string
+  objective: string
+  hook: string
+  script: string
+  sceneDirection: string
+  onScreenText: string
+  propsProductsPeople: string
+  locationSuggestion: string
+  cta: string
+  reasoning: string
+  sourcesUsed: string[]
+  duplicationRisk: string | null
+}
+
+export interface SuggestContentVideosResult {
+  suggestions: ContentVideoSuggestion[]
+  context: {
+    clientName: string
+    clientTier: string
+    primaryIndustry: string | null
+    secondaryIndustry: string | null
+    coverageMonths: string[]
+    totalDeliverableSlots: number
+    existingVideoCount: number
+  }
+  sources: {
+    canonicalInternal: string[]
+    marketingLibraryKnowledge: string[]
+    saCalendarContext: string[]
+    liveExternalResearch: string[]
+  }
+}
+
+export async function suggestContentVideos(
+  clientId: string,
+  coverageStart: string,
+  coverageEnd: string,
+  options?: { guidelineId?: string },
+): Promise<QueryResult<SuggestContentVideosResult>> {
+  const sessionResult = await supabase.auth.getSession()
+  const token = sessionResult.data.session?.access_token
+  if (!token) return { data: null as never, error: 'Authentication required.', migrationNeeded: false }
+
+  const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/suggest-content-videos`
+  try {
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId, coverageStart, coverageEnd, guidelineId: options?.guidelineId }),
+    })
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}))
+      return { data: null as never, error: body.error ?? `Server responded ${response.status}.`, migrationNeeded: false }
+    }
+    const data: SuggestContentVideosResult = await response.json()
+    return { data, error: null, migrationNeeded: false }
+  } catch (error) {
+    return { data: null as never, error: error instanceof Error ? error.message : 'Could not reach suggestion service.', migrationNeeded: false }
+  }
+}
+
+export function suggestionToVideoInput(
+  suggestion: ContentVideoSuggestion,
+  position: number,
+  createdBy: string | null,
+) {
+  return {
+    title: suggestion.title,
+    script: suggestion.script,
+    hook: suggestion.hook,
+    objective: suggestion.objective,
+    cta: suggestion.cta,
+    month: suggestion.targetMonth,
+    position,
+    created_by: createdBy,
+  }
 }

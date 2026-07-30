@@ -21,7 +21,7 @@ export default function UsersHub() {
     <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
       <div className="mb-5 rounded-2xl border border-white/10 bg-brand-surface/60 p-4 sm:p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Administration</p>
-        <h1 className="mt-2 text-3xl font-black text-white">Team</h1>
+          <h1 className="mt-2 text-3xl font-black text-white">Users</h1>
         <p className="mt-1 text-sm text-brand-primary/65">Manage workforce access, client users and invitations.</p>
         <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-black/20 p-1">
           {tabs.map(item => (
