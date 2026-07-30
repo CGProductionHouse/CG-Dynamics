@@ -413,7 +413,7 @@ export default function ContentGuidelineDocumentEditor({
             <div>
               <p className="text-sm font-black text-white">AI content suggestions</p>
               <p className="mt-1 text-xs text-white/50">
-                Get contextual research-driven video ideas for the coverage window.
+                AI-assisted video ideas grounded in the client profile, schedule, approved Marketing Library and SA calendar context.
               </p>
             </div>
             <ActionButton size="sm" variant="secondary" loading={suggestionsLoading} onClick={() => void loadSuggestions()}>

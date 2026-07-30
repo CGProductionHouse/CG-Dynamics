@@ -218,3 +218,90 @@ test('returns structured error when provider call fails', () => {
   assert.match(INDEX, /AI provider is currently unavailable/)
   assert.match(INDEX, /NO_AI_PROVIDER_KEYS/)
 })
+
+// ── guidelineId binding ──────────────────────────────────────────────────────
+
+test('verifies guidelineId belongs to the requested client', () => {
+  assert.match(INDEX, /content_guidelines/)
+  assert.match(INDEX, /guideline\.client_id\s*!==\s*clientId/)
+})
+
+test('rejects guidelineId mismatch with 403', () => {
+  assert.match(INDEX, /Guideline does not belong to this client/)
+})
+
+test('rejects unknown guidelineId with 404', () => {
+  assert.match(INDEX, /Guideline not found/)
+})
+
+// ── Industry-specific Marketing Library cards ────────────────────────────────
+
+test('loads industry_specific knowledge-layer cards matching client industry', () => {
+  assert.match(INDEX, /industry_specific/)
+  assert.match(INDEX, /kbLayers/)
+})
+
+test('skill card query includes all relevant knowledge layers', () => {
+  assert.match(INDEX, /universal_principle/)
+  assert.match(INDEX, /south_african_market/)
+  assert.match(INDEX, /knowledge_layer/)
+})
+
+// ── Schema validation ────────────────────────────────────────────────────────
+
+test('isValidSuggestion validates all required fields with correct types', () => {
+  assert.match(INDEX, /isValidSuggestion/)
+  assert.match(INDEX, /typeof\s+\w+\.(title|script|objective)\s*!==\s*['"]string['"]/)
+})
+
+test('rejects malformed provider JSON gracefully', () => {
+  assert.match(INDEX, /extractSuggestions/)
+  assert.match(INDEX, /JSON\.parse/)
+})
+
+test('extracts JSON from code-fenced provider output', () => {
+  assert.match(INDEX, /```(?:json)?/)
+  assert.match(INDEX, /jsonMatch/)
+})
+
+test('caps suggestions at MAX_SUGGESTIONS after parsing', () => {
+  assert.match(INDEX, /\.slice\(0,\s*MAX_SUGGESTIONS\)/)
+})
+
+// ── Cross-client prompt safety ──────────────────────────────────────────────
+
+test('never includes other client titles or scripts in prompt', () => {
+  assert.doesNotMatch(INDEX, /crossClientTitles/, 'no crossClientTitles variable')
+  assert.doesNotMatch(INDEX, /otherClient/, 'no otherClient reference in prompt')
+  const promptStart = INDEX.indexOf('RULES:')
+  const promptEnd = INDEX.indexOf('CONTEXT SOURCES')
+  const promptSection = promptStart >= 0 && promptEnd > promptStart
+    ? INDEX.slice(promptStart, promptEnd)
+    : ''
+  assert.doesNotMatch(promptSection, /cross.?client/i, 'prompt section does not discuss other clients')
+})
+
+test('cross-client duplicate signal is count-only, no titles', () => {
+  assert.match(INDEX, /crossClientDuplicateCount/)
+  // crossClientTitles variable must NOT exist (was removed as part of CLC-3)
+  assert.doesNotMatch(INDEX, /crossClientTitles/, 'no title-carrying variable')
+  // The cross-client data embedded in the prompt uses only count + category,
+  // not raw titles/scripts from other clients
+  const userMsgSection = INDEX.slice(
+    INDEX.indexOf('const userMessage = ['),
+    INDEX.indexOf('Generate structured video suggestions'),
+  )
+  assert.ok(userMsgSection.length > 0, 'userMessage section found')
+  assert.match(userMsgSection, /crossClientContext/, 'dedup signal referenced in prompt')
+  assert.doesNotMatch(userMsgSection, /\.select\(/, 'no DB queries in user message')
+  assert.doesNotMatch(userMsgSection, /from\s+['"]\w+['"]/, 'no raw data queries in prompt')
+})
+
+// ── No fallback fake suggestions ─────────────────────────────────────────────
+
+test('no static/fallback suggestion generation when provider unavailable', () => {
+  // The function returns an empty suggestions array + error info rather than
+  // generating fake suggestions
+  assert.match(INDEX, /suggestions:\s*\[\]\s*,/)
+  assert.doesNotMatch(INDEX, /fakeSuggestion|generateSuggestion|mockSuggestion|hardcodedSuggestion/)
+})

@@ -6,11 +6,18 @@
 //
 // Context sources used (each clearly labelled):
 //   - canonical internal: client profile, industry profile, schedule slots,
-//     existing guideline videos, historical concepts
-//   - approved Marketing Library: active skill cards (industry + universal)
+//     existing guideline videos, historical concepts (current client only)
+//   - approved Marketing Library: active skill cards (industry-specific,
+//     universal, South African market layers)
 //   - stable SA calendar context: public holidays, seasons, campaign moments
 //   - live external research: NOT PERFORMED — the LLM may use its training data
 //     for general marketing knowledge but must not label it as research
+//
+// Client-access policy (matches RLS "clients: staff reads all"):
+//   - Admin/owner: permitted per global policy
+//   - Manager/Staff/Team: permitted (all staff may access all active clients)
+//   - Client role: always denied
+//   - Inactive/deleted profile: denied
 //
 // POST /suggest-content-videos
 // { clientId, coverageStart, coverageEnd, guidelineId? }
@@ -23,9 +30,19 @@ import {
   hasAnyConfiguredProvider,
 } from '../cg-assistant-chat/ai-router.ts'
 
-const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
+// Canonical staff roles (matches STAFF_ROLES in src/lib/roles.ts and
+// cg-assistant-chat). The DB CHECK constraint allows 'admin','team','client';
+// the expanded set also covers future migrations that may add 'manager','staff','owner'.
+const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team'] as const
+type StaffRole = typeof STAFF_ROLES[number]
+
 const MAX_COVERAGE_MONTHS = 12
 const MAX_SUGGESTIONS = 20
+const EXPECTED_SUGGESTION_KEYS = [
+  'targetMonth', 'title', 'objective', 'hook', 'script',
+  'sceneDirection', 'onScreenText', 'propsProductsPeople',
+  'locationSuggestion', 'cta', 'reasoning', 'sourcesUsed', 'duplicationRisk',
+] as const
 
 // ── Stable SA calendar context (canonical, NOT live research) ────────────────
 // These are public-holiday and seasonal anchor dates that shift yearly. The
@@ -38,12 +55,12 @@ const SA_CALENDAR: Array<{ month: number; label: string; type: string }> = [
   { month: 4, label: 'Family Day (varies)', type: 'public_holiday' },
   { month: 4, label: 'Freedom Day (27 Apr)', type: 'public_holiday' },
   { month: 5, label: 'Workers Day (1 May)', type: 'public_holiday' },
-  { month: 5, label: 'Mother\'s Day (varies)', type: 'observance' },
+  { month: 5, label: "Mother's Day (varies)", type: 'observance' },
   { month: 6, label: 'Youth Day (16 Jun)', type: 'public_holiday' },
-  { month: 6, label: 'Father\'s Day (varies)', type: 'observance' },
+  { month: 6, label: "Father's Day (varies)", type: 'observance' },
   { month: 6, label: 'Winter solstice', type: 'seasonal' },
   { month: 7, label: 'Mandela Day (18 Jul)', type: 'observance' },
-  { month: 8, label: 'Women\'s Day (9 Aug)', type: 'public_holiday' },
+  { month: 8, label: "Women's Day (9 Aug)", type: 'public_holiday' },
   { month: 9, label: 'Heritage Day (24 Sep)', type: 'public_holiday' },
   { month: 9, label: 'Spring equinox', type: 'seasonal' },
   { month: 10, label: 'Halloween (31 Oct)', type: 'observance' },
@@ -112,12 +129,28 @@ function generateCoverageMonths(start: string, end: string): string[] {
   return months
 }
 
-function isStaffRole(role: unknown): role is string {
-  return typeof role === 'string' && STAFF_ROLES.includes(role)
+function isStaffRole(role: unknown): role is StaffRole {
+  return typeof role === 'string' && (STAFF_ROLES as ReadonlyArray<string>).includes(role)
 }
 
-function safeError(message: string): string {
-  return message.length > 500 ? message.slice(0, 500) + '...' : message
+// Validate that a parsed suggestion has all required fields with correct types.
+function isValidSuggestion(value: unknown): value is VideoSuggestion {
+  if (!value || typeof value !== 'object') return false
+  const s = value as Record<string, unknown>
+  if (typeof s.title !== 'string' || s.title.trim().length === 0) return false
+  if (typeof s.script !== 'string' || s.script.trim().length === 0) return false
+  if (s.targetMonth !== null && s.targetMonth !== undefined && typeof s.targetMonth !== 'string') return false
+  if (typeof s.objective !== 'string') return false
+  if (typeof s.hook !== 'string') return false
+  if (typeof s.sceneDirection !== 'string') return false
+  if (typeof s.onScreenText !== 'string') return false
+  if (typeof s.propsProductsPeople !== 'string') return false
+  if (typeof s.locationSuggestion !== 'string') return false
+  if (typeof s.cta !== 'string') return false
+  if (typeof s.reasoning !== 'string') return false
+  if (!Array.isArray(s.sourcesUsed)) return false
+  if (s.duplicationRisk !== null && s.duplicationRisk !== undefined && typeof s.duplicationRisk !== 'string') return false
+  return true
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -144,7 +177,9 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  // ── Auth ──
+  // ── Auth and caller authorisation ──────────────────────────────────────────
+  // Uses service-role client (bypasses RLS), so we manually enforce access.
+
   const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
   if (!token) {
     return jsonResponse({ error: 'Authentication required.' }, 401)
@@ -161,9 +196,18 @@ Deno.serve(async (req) => {
     .eq('id', user.id)
     .maybeSingle()
 
+  // Fail closed: no profile, inactive profile, or non-staff role → deny.
   if (!profile || !isStaffRole(profile.role)) {
     return jsonResponse({ error: 'Staff access required.' }, 403)
   }
+
+  const callerRole = profile.role as StaffRole
+
+  // Client-access policy: all staff roles (admin, manager, staff, team, owner)
+  // may access any active client. This matches the RLS policy
+  // "clients: staff reads all" which grants is_staff() full read access.
+  // Client-role users are already rejected above.
+  // No per-client scoping exists in the current model — staff are global.
 
   // ── Parse body ──
   let body: SuggestRequest
@@ -178,7 +222,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'clientId, coverageStart and coverageEnd are required.' }, 400)
   }
 
-  // Validate UUID format
   const uuidRE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if (!uuidRE.test(clientId)) {
     return jsonResponse({ error: 'clientId must be a valid UUID.' }, 400)
@@ -187,7 +230,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'guidelineId must be a valid UUID.' }, 400)
   }
 
-  // Validate date range
   const startDate = new Date(coverageStart + 'T00:00:00Z')
   const endDate = new Date(coverageEnd + 'T00:00:00Z')
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -219,7 +261,24 @@ Deno.serve(async (req) => {
     .eq('client_id', clientId)
     .maybeSingle()
 
-  // ── Context assembly ──────────────────────────────────────────────────────────
+  // ── Validate guidelineId belongs to this client ──────────────────────────
+  if (guidelineId) {
+    const { data: guideline } = await sb
+      .from('content_guidelines')
+      .select('id, client_id')
+      .eq('id', guidelineId)
+      .maybeSingle()
+
+    if (!guideline) {
+      return jsonResponse({ error: 'Guideline not found.' }, 404)
+    }
+    if (guideline.client_id !== clientId) {
+      return jsonResponse({ error: 'Guideline does not belong to this client.' }, 403)
+    }
+  }
+
+  // ── Context assembly ────────────────────────────────────────────────────────
+  // All data queries are scoped to the authorised clientId.
 
   // 1. Schedule deliverable slots in coverage window
   const { data: deliverableSlots } = await sb
@@ -233,6 +292,7 @@ Deno.serve(async (req) => {
   const totalDeliverableSlots = deliverableSlots?.length ?? 0
 
   // 2. Existing videos in current guideline (if guidelineId provided)
+  //    Safe: guidelineId already verified against clientId above.
   let existingVideos: Array<{ title: string; targetMonth: string | null; status: string }> = []
   if (guidelineId) {
     const { data: guideVideos } = await sb
@@ -255,53 +315,67 @@ Deno.serve(async (req) => {
     .order('created_at', { ascending: false })
     .limit(50)
 
-  // 4. Cross-client duplicate detection (same title across clients)
+  // 4. Cross-client duplicate detection — safe signals only.
+  //    We count matches but NEVER send another client's titles, scripts or
+  //    campaign details to the AI provider.
+  let crossClientDuplicateCount = 0
+  let crossClientSimilarityCategory: 'none' | 'low' | 'medium' | 'high' = 'none'
   const existingTitles = new Set(
     (historicalConcepts ?? []).map((c) => c.title.trim().toLowerCase()),
   )
-  let crossClientDuplicateCount = 0
-  let crossClientTitles: string[] = []
   if (existingTitles.size > 0) {
-    const titleList = [...existingTitles]
-    // Sample up to 5 titles to check cross-client
-    const sampleTitles = titleList.slice(0, 5)
-    const { count: dupCount, data: dupData } = await sb
+    const sampleTitles = [...existingTitles].slice(0, 5)
+    const { count: dupCount } = await sb
       .from('content_guide_ideas')
-      .select('title', { count: 'exact', head: false })
+      .select('title', { count: 'exact', head: true })
       .neq('client_id', clientId)
       .in('title', sampleTitles)
-      .limit(5)
     crossClientDuplicateCount = dupCount ?? 0
-    crossClientTitles = (dupData as Array<{ title: string }> | null)
-      ?.map((r) => r.title) ?? []
+    crossClientSimilarityCategory = crossClientDuplicateCount === 0 ? 'none'
+      : crossClientDuplicateCount <= 2 ? 'low'
+      : crossClientDuplicateCount <= 4 ? 'medium'
+      : 'high'
   }
 
-  // 5. Marketing Library: active skill cards (industry_specific + universal_principle)
+  // 5. Marketing Library: active skill cards — industry-specific (matching
+  //    the client's industry), universal principles, and SA market knowledge.
+  const kbLayers: string[] = ['universal_principle', 'south_african_market']
+  if (industryProfile?.primary_industry) {
+    kbLayers.push('industry_specific')
+  }
   const { data: skillCards } = await sb
     .from('skill_cards')
     .select('title, principle, summary, knowledge_layer')
     .eq('status', 'active')
-    .in('knowledge_layer', ['universal_principle', 'south_african_market'])
-    .limit(20)
+    .in('knowledge_layer', kbLayers)
+    .limit(30)
 
   // 6. SA calendar context for coverage months
   const coverageMonthNums = new Set(coverageMonths.map((m) => parseInt(m.slice(5, 7), 10)))
   const relevantCalendar = SA_CALENDAR.filter((e) => coverageMonthNums.has(e.month))
 
   // 7. Build source manifest
+  const industryCardCount = (skillCards ?? []).filter((c) => c.knowledge_layer === 'industry_specific').length
+  const industryLabel = industryProfile?.primary_industry
+    ? `${industryProfile.primary_industry}${industryProfile?.secondary_industry ? ' / ' + industryProfile.secondary_industry : ''} (confidence: ${industryProfile?.confidence ?? 'unknown'})`
+    : 'not yet researched'
+
   const canonicalInternal = [
     `Client: ${client.name} (tier: ${client.tier})`,
-    industryProfile?.primary_industry
-      ? `Industry: ${industryProfile.primary_industry}${industryProfile?.secondary_industry ? ' / ' + industryProfile.secondary_industry : ''} (confidence: ${industryProfile?.confidence ?? 'unknown'})`
-      : 'Industry: not yet researched',
+    `Industry: ${industryLabel}`,
+    `Coverage: ${coverageMonths.length} month(s) (${coverageMonths.join(', ')})`,
     `${totalDeliverableSlots} schedule deliverable slots (video/reel) in coverage window`,
     `${existingVideos.length} existing videos in current guideline`,
-    `${historicalConcepts?.length ?? 0} historical approved/completed concepts`,
+    `${historicalConcepts?.length ?? 0} historical approved/completed concepts for this client`,
   ]
 
   const marketingLibraryKnowledge = (skillCards ?? []).map(
     (c) => `[${c.knowledge_layer}] ${c.title}: ${c.principle}`,
   )
+
+  // Record which knowledge layers were actually used.
+  const usedLayers = new Set((skillCards ?? []).map((c) => c.knowledge_layer))
+  const knowledgeLayersRecorded = Array.from(usedLayers)
 
   const saCalendarContext = relevantCalendar.map(
     (e) => `[${e.type}] ${e.label}`,
@@ -324,39 +398,41 @@ Deno.serve(async (req) => {
     '- Each suggestion object must have these exact keys:',
     '  targetMonth, title, objective, hook, script, sceneDirection, onScreenText,',
     '  propsProductsPeople, locationSuggestion, cta, reasoning, sourcesUsed, duplicationRisk',
-    '- targetMonth must be one of the coverage months provided (YYYY-MM format) or null for evergreen.',
+    '- targetMonth: one of the coverage months (YYYY-MM) or null for evergreen.',
     '- title: clear video title.',
     '- objective: what this video achieves for the client.',
     '- hook: the opening hook that grabs attention.',
-    '- script: COMPLETE draft script (60-90 seconds of spoken word, not placeholders).',
+    '- script: COMPLETE draft script (60-90 seconds spoken word, not placeholders).',
     '- sceneDirection: scene-by-scene filming direction (camera angle, cuts, B-roll).',
-    '- onScreenText: what text/text overlay appears on screen.',
+    '- onScreenText: text/text overlay appearing on screen.',
     '- propsProductsPeople: specific props, products, and people needed.',
     '- locationSuggestion: suggested filming location.',
     '- cta: call to action.',
-    '- reasoning: why this suggestion fits the client, referencing specific context.',
-    '- sourcesUsed: list of source labels from the context that informed this suggestion.',
-    '- duplicationRisk: null if no conflict, or a string describing similarity to an existing concept.',
+    '- reasoning: why this suggestion fits, referencing specific context.',
+    '- sourcesUsed: list of source labels that informed this suggestion.',
+    '- duplicationRisk: null if no conflict, or string describing similarity.',
     '',
     'CONSTRAINTS:',
-    '- Do NOT invent client facts, performance data, trends, or events not provided in the context.',
-    '- If you do not know something, say so via the reasoning field rather than guessing.',
-    '- Do NOT use any content that would expose another client\'s confidential details.',
-    '- Generate 1-8 suggestions depending on the coverage window size.',
-    '- If the coverage window is 1 month, generate 2-3 suggestions.',
-    '- Vary the formats: some educational, some promotional, some entertaining.',
+    '- Do NOT invent client facts, performance data, trends, or events not provided.',
+    '- If you do not know something, say so via reasoning rather than guessing.',
+    '- Do NOT expose or reference another client\'s confidential information.',
+    '- Generate 1-8 suggestions depending on coverage window size.',
+    '- For 1-month windows generate 2-3 suggestions.',
+    '- Vary formats: some educational, some promotional, some entertaining.',
     '- Suggestions are drafts and must NEVER be silently written into the guideline.',
     '',
     'CONTEXT SOURCES (label each source clearly):',
-    '- canonical_internal: client profile, industry profile, schedule slots, existing guideline videos',
+    '- canonical_internal: client profile, industry profile, schedule, existing guideline',
     '- marketing_library: approved Marketing Library knowledge cards',
-    '- sa_calendar: stable South African public holidays, seasons and observances',
-    '- live_research: NOT PERFORMED — the AI provider\'s training knowledge is not research',
+    '- sa_calendar: stable SA public holidays, seasons and observances',
+    '- live_research: NOT PERFORMED — training knowledge is not research',
     '',
     'Keep responses practical, production-ready, and specific to the client.',
   ].join('\n')
 
   // ── Build user message with assembled context ──────────────────────────────
+  // NOTE: cross-client information is limited to a count and category label.
+  // No other client's titles, scripts, or campaign details are included.
 
   const industryContext = industryProfile
     ? `Primary industry: ${industryProfile.primary_industry ?? 'not set'}\nSecondary industry: ${industryProfile.secondary_industry ?? 'not set'}\nConfidence: ${industryProfile.confidence}\nReview state: ${industryProfile.review_state}`
@@ -374,8 +450,9 @@ Deno.serve(async (req) => {
     ? historicalConcepts.slice(0, 20).map((c) => `  - "${c.title}" (month: ${c.month ?? 'unknown'}, status: ${c.status})`).join('\n')
     : '  No historical approved concepts found for this client.'
 
+  // Safe cross-client signal: count + category only. Never titles or scripts.
   const crossClientContext = crossClientDuplicateCount > 0
-    ? `WARNING: ${crossClientDuplicateCount} cross-client concept(s) found with similar titles. Titles: ${crossClientTitles.join(', ')}. Avoid reusing these concepts verbatim.`
+    ? `NOTE: ${crossClientDuplicateCount} similar concept(s) found across other clients (similarity: ${crossClientSimilarityCategory}). Avoid reusing concepts verbatim.`
     : 'No cross-client duplication detected.'
 
   const marketingLibraryContext = (skillCards ?? []).length > 0
@@ -405,10 +482,10 @@ Deno.serve(async (req) => {
     `## Historical approved concepts (${historicalConcepts?.length ?? 0})`,
     historicalContext,
     '',
-    '## Cross-client duplication',
+    '## Cross-client duplication (safe signal)',
     crossClientContext,
     '',
-    '## Marketing Library knowledge',
+    `## Marketing Library knowledge (layers: ${knowledgeLayersRecorded.join(', ')})`,
     marketingLibraryContext,
     '',
     '## SA calendar context',
@@ -484,34 +561,41 @@ Deno.serve(async (req) => {
     })
   }
 
-  // ── Parse JSON from response ────────────────────────────────────────────
+  // ── Parse and validate JSON from response ───────────────────────────────
 
   let suggestions: VideoSuggestion[] = []
 
-  // Try direct JSON parse first
-  try {
-    const parsed = JSON.parse(rawContent)
-    if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-      suggestions = parsed.suggestions.slice(0, MAX_SUGGESTIONS)
-    } else if (Array.isArray(parsed)) {
-      suggestions = parsed.slice(0, MAX_SUGGESTIONS)
-    }
-  } catch {
-    // Try extracting JSON from markdown code fence
-    const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/)
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[1])
-        if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-          suggestions = parsed.suggestions.slice(0, MAX_SUGGESTIONS)
-        } else if (Array.isArray(parsed)) {
-          suggestions = parsed.slice(0, MAX_SUGGESTIONS)
+  function extractSuggestions(raw: string): VideoSuggestion[] {
+    // Try direct parse
+    try {
+      const parsed = JSON.parse(raw)
+      if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+        return parsed.suggestions.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+      }
+      if (Array.isArray(parsed)) {
+        return parsed.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+      }
+    } catch {
+      // Try code fence extraction
+      const jsonMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[1])
+          if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+            return parsed.suggestions.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+          }
+          if (Array.isArray(parsed)) {
+            return parsed.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+          }
+        } catch {
+          return []
         }
-      } catch {
-        // Fall through to empty
       }
     }
+    return []
   }
+
+  suggestions = extractSuggestions(rawContent)
 
   // ── Return ──────────────────────────────────────────────────────────────
 
