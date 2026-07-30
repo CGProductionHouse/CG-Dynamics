@@ -1110,6 +1110,7 @@ export async function listPlannerWorkloadTasks() {
 export interface PlannerTaskReadOptions {
   boardId?: string
   order?: 'created' | 'due'
+  activeOnly?: boolean
 }
 
 export async function listPlannerTaskRows(options: PlannerTaskReadOptions = {}) {
@@ -1119,6 +1120,12 @@ export async function listPlannerTaskRows(options: PlannerTaskReadOptions = {}) 
   while (true) {
     let query = supabase.from(PLANNER_TASKS_TABLE).select('*')
     if (options.boardId) query = query.eq('board_id', options.boardId)
+    if (options.activeOnly) {
+      query = query
+        .is('archived_at', null)
+        .is('recurrence_rule', null)
+        .not('status', 'in', '(approved,scheduled,done,completed,moved_to_tomorrow)')
+    }
 
     query = options.order === 'due'
       ? query

@@ -412,7 +412,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
   const currentYear = Number(currentMonth.slice(0, 4))
 
   const [tasksResult, clientsResult, deliverablesResult] = await Promise.all([
-    listTasks(),
+    listTasks({ activeOnly: true }),
     listActiveClients(),
     listMonthlyDeliverablesByYear(currentYear),
   ])

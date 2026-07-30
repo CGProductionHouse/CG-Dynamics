@@ -238,13 +238,23 @@ function plannerTaskToCommandTask(
   }
 }
 
-export async function listTasks() {
-  const [nativeResult, plannerResult, assignmentResult] = await Promise.all([
-    supabase
+export interface ListTaskOptions {
+  activeOnly?: boolean
+}
+
+export async function listTasks(options: ListTaskOptions = {}) {
+  let nativeQuery = supabase
     .from(TABLE)
     .select('*')
-      .order('created_at', { ascending: false }),
-    listPlannerTaskRows({ order: 'due' }),
+    .order('created_at', { ascending: false })
+
+  if (options.activeOnly) {
+    nativeQuery = nativeQuery.not('status', 'in', '(done,moved_to_tomorrow)')
+  }
+
+  const [nativeResult, plannerResult, assignmentResult] = await Promise.all([
+    nativeQuery,
+    listPlannerTaskRows({ order: 'due', activeOnly: options.activeOnly }),
     listPlannerBoardAssignments(),
   ])
 

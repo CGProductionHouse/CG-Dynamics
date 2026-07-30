@@ -105,10 +105,17 @@ test('Command Centre carries every canonical assignee while retaining legacy fie
   assert.match(commandCentre, /helper_names: row\.helper_names/)
   assert.match(commandCentre, /unresolved_assignee_names: row\.unresolved_assignee_names \?\? \[\]/)
   assert.match(commandCentre, /isMissingPlannerAssignmentRpcError\(assignmentResult\.error\)/)
-  assert.match(commandCentre, /listPlannerTaskRows\(\{ order: 'due' \}\)/)
+  assert.match(commandCentre, /listPlannerTaskRows\(\{ order: 'due', activeOnly: options\.activeOnly \}\)/)
   assert.match(commandCentre, /listPlannerBoardAssignments\(\)/)
   assert.match(commandCentre, /current\.push\(assignment\.profile_id\)/)
   assert.doesNotMatch(commandCentre, /from\(PLANNER_TASKS_TABLE\)[\s\S]{0,160}select\('\*'\)/)
+})
+
+test('Hub and My Day exclude completed history at the query boundary', () => {
+  assert.match(planner, /activeOnly\?: boolean/)
+  assert.match(planner, /\.not\('status', 'in', '\(approved,scheduled,done,completed,moved_to_tomorrow\)'\)/)
+  assert.match(commandCentre, /nativeQuery = nativeQuery\.not\('status', 'in', '\(done,moved_to_tomorrow\)'\)/)
+  assert.match(myDay, /listTasks\(\{ activeOnly: true \}\)/)
 })
 
 test('My Day matches every canonical assignee before legacy fallback and uses Work links', () => {

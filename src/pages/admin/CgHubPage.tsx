@@ -125,7 +125,7 @@ export default function CgHubPage() {
     setLoadErrors([])
     try {
       const [tasksRes, delRes, companyRes, myDay] = await Promise.all([
-        listTasks(),
+        listTasks({ activeOnly: true }),
         listMonthlyDeliverablesByMonth(currentMonth),
         listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 31)),
         getMyDayContext(profile),
@@ -136,10 +136,10 @@ export default function CgHubPage() {
       setCompanyEventsMissing(companyRes.tableMissing)
       setCompanyEvents((companyRes.data ?? []) as CompanyCalendarEvent[])
       setMyDayContext(myDay)
+      setLoadingData(false)
       // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block the Hub.
-      const runsRes = await listRuns()
+      const [runsRes, videosRes] = await Promise.all([listRuns(), listPipelineVideos()])
       setContentRuns(runsRes.migrationNeeded ? [] : runsRes.data)
-      const videosRes = await listPipelineVideos()
       setContentVideos(videosRes.migrationNeeded ? [] : videosRes.data)
     } catch (error) {
       setLoadErrors([error instanceof Error ? error.message : 'Could not load Hub data.'])
