@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -291,13 +291,28 @@ function PostChip({ post }: { post: ClientCalendarPost }) {
 }
 
 function EventChip({ event }: { event: ClientCalendarEvent }) {
-  return (
-    <div className="rounded-md border border-[#c17a49]/20 bg-[#c17a49]/[0.07] px-2.5 py-2">
+  const content = (
+    <>
       <p className="line-clamp-2 text-xs font-medium leading-4 text-white">{event.title}</p>
       <p className="mt-1 text-[0.68rem] leading-4 text-report-muted">
         {EVENT_TYPE_LABELS[event.type] ?? event.type}{event.location ? ` / ${event.location}` : ''}
       </p>
-    </div>
+      {event.guidelineKey && (
+        <p className="mt-1.5 text-[0.68rem] font-semibold text-report-accent">Open filming guideline</p>
+      )}
+    </>
+  )
+  const className = "block rounded-md border border-[#c17a49]/20 bg-[#c17a49]/[0.07] px-2.5 py-2 text-left transition hover:border-report-accent/35"
+  return event.guidelineKey ? (
+    <Link
+      className={className}
+      to={`/client/content-guides?month=${localDateKey(event.startAt).slice(0, 7)}&guide=${encodeURIComponent(event.guidelineKey)}`}
+      aria-label={`Open Content Guideline for ${event.title}`}
+    >
+      {content}
+    </Link>
+  ) : (
+    <div className={className}>{content}</div>
   )
 }
 

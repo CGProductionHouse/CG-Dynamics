@@ -65,6 +65,7 @@ import ContentGuidelineDocumentEditor from './ContentGuidelineDocumentEditor'
 import ContentOverview from './ContentOverview'
 import FullContentGuidePage from './FullContentGuidePage'
 import { type ContentTab, resolveContentTab } from './contentTabTypes'
+import { ContentRunVoiceDebrief } from '../../components/content/ContentRunVoiceDebrief'
 
 function runStatusTone(status: ContentRunStatus): 'teal' | 'amber' | 'neutral' {
   if (status === 'completed' || status === 'ready') return 'teal'
@@ -678,13 +679,24 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
                 <div className="space-y-3">
                   {cardError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{cardError}</p>}
                   {runGuideline ? (
-                    <ContentGuidelineDocumentEditor
-                      guideline={runGuideline}
-                      run={selectedRun}
-                      videos={runGuidelineVideos}
-                      currentUserId={profile?.id}
-                      onChanged={refreshRunGuideline}
-                    />
+                    <>
+                      <ContentGuidelineDocumentEditor
+                        guideline={runGuideline}
+                        run={selectedRun}
+                        videos={runGuidelineVideos}
+                        currentUserId={profile?.id}
+                        onChanged={refreshRunGuideline}
+                      />
+                      <ContentRunVoiceDebrief
+                        run={selectedRun}
+                        guideline={runGuideline}
+                        videos={runGuidelineVideos}
+                        onApplied={async () => {
+                          await refreshRunGuideline()
+                          await loadAll()
+                        }}
+                      />
+                    </>
                   ) : (
                     <div className="rounded-xl border border-dashed border-brand-teal/25 bg-brand-teal/[0.035] p-5 text-center">
                       <p className="text-sm font-black text-white">This run does not have a Content Guideline yet.</p>
