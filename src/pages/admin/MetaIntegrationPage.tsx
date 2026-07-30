@@ -642,15 +642,21 @@ export default function MetaIntegrationPage() {
           .single(),
         supabase
           .from('meta_sync_batch_items')
-          .select('status')
+          .select('status, started_at')
           .eq('batch_id', batchIdValue),
       ])
 
-      const rows = (itemRows ?? []) as Array<{ status: string }>
+      const rows = (itemRows ?? []) as Array<{ status: string; started_at: string | null }>
       const doneCount = rows.filter(r => r.status === 'completed' || r.status === 'warning' || r.status === 'skipped').length
       const failedCount = rows.filter(r => r.status === 'failed').length
       const runningCount = rows.filter(r => r.status === 'running').length
       const queuedCount = rows.filter(r => r.status === 'queued').length
+      const staleBefore = Date.now() - 5 * 60 * 1000
+      const staleRunningCount = rows.filter(row =>
+        row.status === 'running'
+        && !!row.started_at
+        && new Date(row.started_at).getTime() < staleBefore
+      ).length
       const totalCount = rows.length > 0 ? rows.length : Number(batchData?.total_items ?? 0)
 
       setBatch({
@@ -673,7 +679,10 @@ export default function MetaIntegrationPage() {
         setBatchStalled(false)
       } else if (batchData?.status === 'queued' || batchData?.status === 'running') {
         stallRef.current++
-        if (stallRef.current >= 10 && runningCount === 0) setBatchStalled(true)
+        if (
+          stallRef.current >= 10
+          && (runningCount === 0 || staleRunningCount === runningCount)
+        ) setBatchStalled(true)
       }
 
       const parentFinished = batchData?.status === 'completed' || batchData?.status === 'failed'
@@ -1979,12 +1988,13 @@ export default function MetaIntegrationPage() {
                 <span>Queued: {batch.queued_items ?? 0}</span>
                 <span className="ml-auto">{batch.total_items > 0 ? Math.round((((batch.completed_items ?? 0) + (batch.failed_items ?? 0)) / batch.total_items) * 100) : 0}%</span>
               </div>
-              {/* Retry only when nothing has moved for ~25s AND nothing is running —
-                  never while child items are actively processing. */}
-              {batchStalled && (batch.running_items ?? 0) === 0 && (
+              {/* A restart is safe when nothing is running or every running item
+                  has exceeded the worker lease. The claim RPC requeues stale rows
+                  atomically before locking the next item. */}
+              {batchStalled && (
                 <div className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
                   <p className="text-xs font-medium text-amber-200">
-                    No queued items have started for a while. The meta-sync-worker Edge Function may not be deployed or its trigger was lost.
+                    No items have completed for a while. Restarting safely retries expired worker leases without creating another batch.
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <ActionButton variant="secondary" size="sm" onClick={handleRetryWorker}>
