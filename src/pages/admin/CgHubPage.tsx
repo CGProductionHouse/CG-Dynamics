@@ -5,7 +5,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import {
   listTasks,
   createTask,
+  listActiveClients,
   type CommandCentreTask,
+  type ClientOption,
   type TaskInput,
   type TaskStatus,
 } from '../../lib/commandCentre'
@@ -108,6 +110,7 @@ export default function CgHubPage() {
   const todayNice = useMemo(() => todayLabel(), [])
 
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
+  const [clients, setClients] = useState<ClientOption[]>([])
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [companyEvents, setCompanyEvents] = useState<CompanyCalendarEvent[]>([])
   const [contentRuns, setContentRuns] = useState<ContentRun[]>([])
@@ -124,14 +127,16 @@ export default function CgHubPage() {
     setLoadingData(true)
     setLoadErrors([])
     try {
-      const [tasksRes, delRes, companyRes, myDay] = await Promise.all([
+      const [tasksRes, clientsRes, delRes, companyRes, myDay] = await Promise.all([
         listTasks({ activeOnly: true }),
+        listActiveClients(),
         listMonthlyDeliverablesByMonth(currentMonth),
         listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 31)),
         getMyDayContext(profile),
       ])
-      setLoadErrors([tasksRes.error?.message, delRes.error?.message, companyRes.error?.message].filter(Boolean) as string[])
+      setLoadErrors([tasksRes.error?.message, clientsRes.error?.message, delRes.error?.message, companyRes.error?.message].filter(Boolean) as string[])
       setTasks((tasksRes.data ?? []) as CommandCentreTask[])
+      setClients((clientsRes.data ?? []) as ClientOption[])
       setDeliverables((delRes.data ?? []) as MonthlyDeliverable[])
       setCompanyEventsMissing(companyRes.tableMissing)
       setCompanyEvents((companyRes.data ?? []) as CompanyCalendarEvent[])
@@ -250,7 +255,8 @@ export default function CgHubPage() {
 
   // Clients needing attention
   const clientsNeedingAttention = useMemo(() => {
-    const clientMap = new Map<string, {
+    const clientNames = new Map(clients.map(client => [client.id, client.name]))
+    const attention = new Map<string, {
       name: string
       clientId: string
       openRequests: number
@@ -259,56 +265,42 @@ export default function CgHubPage() {
       unscheduledItems: number
     }>()
 
-    for (const t of clientRequests) {
-      const name = t.client_name ?? 'Unknown'
-      if (!clientMap.has(name)) clientMap.set(name, { name, clientId: t.client_id ?? '', openRequests: 0, overdueTasks: 0, waitingDeliverables: 0, unscheduledItems: 0 })
-      clientMap.get(name)!.openRequests++
-    }
-
-    for (const t of overdue) {
-      const name = t.client_name ?? 'Unknown'
-      if (!clientMap.has(name)) clientMap.set(name, { name, clientId: t.client_id ?? '', openRequests: 0, overdueTasks: 0, waitingDeliverables: 0, unscheduledItems: 0 })
-      clientMap.get(name)!.overdueTasks++
-    }
-
-    for (const d of waitingDeliverables) {
-      const name = deliverables.find(dd => dd.id === d.id)?.title ?? 'Unknown'
-      if (!clientMap.has(name)) {
-        const clientName = deliverables.find(dd => dd.id === d.id)?.client_id ?? ''
-        if (clientName) {
-          if (!clientMap.has(clientName)) {
-            const clientObj = tasks.find(t => t.client_id === clientName)
-            clientMap.set(clientName, { name: clientObj?.client_name ?? 'Unknown', clientId: clientName, openRequests: 0, overdueTasks: 0, waitingDeliverables: 0, unscheduledItems: 0 })
-          }
-        }
+    function entry(clientId: string | null, fallbackName?: string | null) {
+      if (!clientId) return null
+      if (!attention.has(clientId)) {
+        attention.set(clientId, {
+          name: clientNames.get(clientId) ?? fallbackName ?? 'Unknown client',
+          clientId,
+          openRequests: 0,
+          overdueTasks: 0,
+          waitingDeliverables: 0,
+          unscheduledItems: 0,
+        })
       }
+      return attention.get(clientId)!
     }
 
-    const clientTaskMap = new Map<string, { openRequests: number; overdueTasks: number }>()
-    for (const t of clientRequests) {
-      const id = t.client_id ?? '__unknown__'
-      if (!clientTaskMap.has(id)) clientTaskMap.set(id, { openRequests: 0, overdueTasks: 0 })
-      const entry = clientTaskMap.get(id)!
-      entry.openRequests++
+    for (const task of clientRequests) {
+      const item = entry(task.client_id, task.client_name)
+      if (item) item.openRequests++
     }
-    for (const t of overdue) {
-      const id = t.client_id ?? '__unknown__'
-      if (!clientTaskMap.has(id)) clientTaskMap.set(id, { openRequests: 0, overdueTasks: 0 })
-      const entry = clientTaskMap.get(id)!
-      entry.overdueTasks++
+    for (const task of overdue) {
+      const item = entry(task.client_id, task.client_name)
+      if (item) item.overdueTasks++
     }
-
-    const result: Array<{ name: string; clientId: string; openRequests: number; overdueTasks: number; waitingDeliverables: number; unscheduledItems: number }> = []
-
-    for (const [id, counts] of clientTaskMap) {
-      if (id === '__unknown__') continue
-      const name = tasks.find(t => t.client_id === id)?.client_name ?? id
-      result.push({ name, clientId: id, ...counts, waitingDeliverables: 0, unscheduledItems: 0 })
+    for (const deliverable of waitingDeliverables) {
+      const item = entry(deliverable.client_id)
+      if (item) item.waitingDeliverables++
+    }
+    for (const deliverable of unscheduledDeliverables) {
+      const item = entry(deliverable.client_id)
+      if (item) item.unscheduledItems++
     }
 
-    return result.sort((a, b) => (b.openRequests + b.overdueTasks) - (a.openRequests + a.overdueTasks))
-  }, [clientRequests, overdue, waitingDeliverables, deliverables, tasks])
-
+    return [...attention.values()].sort((a, b) =>
+      (b.openRequests + b.overdueTasks + b.waitingDeliverables + b.unscheduledItems)
+      - (a.openRequests + a.overdueTasks + a.waitingDeliverables + a.unscheduledItems))
+  }, [clients, clientRequests, overdue, unscheduledDeliverables, waitingDeliverables])
   const stats = useMemo(() => ({
     focus: priorityQueue.length,
     clientRequests: clientRequests.length,
@@ -845,7 +837,7 @@ function ClientsAttentionSection({ clients }: {
         {clients.slice(0, 6).map(client => (
           <Link
             key={client.clientId}
-            to="/admin/clients"
+            to={`/admin/client-schedule?client=${encodeURIComponent(client.clientId)}&mode=needs-action`}
             className="rounded-xl border border-white/8 bg-brand-surface/90 p-4 transition-all hover:border-white/20"
           >
             <p className="text-sm font-semibold text-white">{client.name}</p>
@@ -858,6 +850,16 @@ function ClientsAttentionSection({ clients }: {
               {client.overdueTasks > 0 && (
                 <span className="rounded-full border border-red-400/25 bg-red-400/10 px-2 py-0.5 text-[10px] font-semibold text-red-300">
                   {client.overdueTasks} overdue
+                </span>
+              )}
+              {client.waitingDeliverables > 0 && (
+                <span className="rounded-full border border-brand-teal/25 bg-brand-teal/10 px-2 py-0.5 text-[10px] font-semibold text-[#2dd4bf]">
+                  {client.waitingDeliverables} awaiting review
+                </span>
+              )}
+              {client.unscheduledItems > 0 && (
+                <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold text-amber-200">
+                  {client.unscheduledItems} unscheduled
                 </span>
               )}
             </div>
