@@ -21,6 +21,26 @@ export const primaryNavItems: NavItem[] = [
   { to: '/admin/clients', label: 'Clients', shortLabel: 'Clients', marker: 'CL', activePaths: ['/admin/clients', '/admin/client-performance', '/admin/client-dashboard', '/admin/client-calendar'] },
 ]
 
+// Client Performance zone — the client-intelligence surfaces, kept prominent and
+// reachable via the Hub/Performance switcher without hiding daily Hub navigation.
+export const performanceNavItems: NavItem[] = [
+  { to: '/admin/client-performance', label: 'Performance Dashboard', shortLabel: 'Performance', marker: 'PD', activePaths: ['/admin/client-performance'] },
+  { to: '/admin/clients', label: 'Clients', shortLabel: 'Clients', marker: 'CL', activePaths: ['/admin/clients', '/admin/client-dashboard'] },
+  { to: '/admin/reports', label: 'Reports', shortLabel: 'Reports', marker: 'R', activePaths: ['/admin/reports', '/admin/reports/new'] },
+  { to: '/admin/published', label: 'Client Preview', shortLabel: 'Preview', marker: 'CP', activePaths: ['/admin/published', '/admin/client-preview'] },
+  { to: '/admin/integrations', label: 'Integrations', shortLabel: 'Integrations', marker: 'IN', access: 'manager', activePaths: ['/admin/integrations'] },
+]
+
+export type NavZone = 'hub' | 'performance'
+
+// Routes that belong ONLY to the Performance zone. Landing on one auto-selects
+// Performance; shared surfaces (e.g. Clients) never force a zone switch.
+const PERFORMANCE_ONLY_PATHS = ['/admin/client-performance', '/admin/reports', '/admin/published', '/admin/integrations']
+
+export function resolveNavZone(pathname: string): NavZone {
+  return PERFORMANCE_ONLY_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`)) ? 'performance' : 'hub'
+}
+
 export const adminNavItems: NavItem[] = [
   { to: '/admin/integrations', label: 'Integrations', shortLabel: 'Integrations', marker: 'IN', access: 'manager', activePaths: ['/admin/integrations'] },
   { to: '/admin/planner-import', label: 'Planner Import', shortLabel: 'Planner', marker: 'PI', access: 'manager' },
