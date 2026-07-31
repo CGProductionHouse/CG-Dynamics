@@ -39,12 +39,21 @@ test('all portal routes sit behind the existing client-only guard and legacy das
   assert.ok(clientRoutes.includes('path="/client/performance"'))
   assert.ok(clientRoutes.includes('path="/client/campaigns"'))
   assert.ok(clientRoutes.includes('path="/client/content-calendar"'))
+  assert.ok(clientRoutes.includes('path="/client/content-guides"'))
+  assert.ok(clientRoutes.includes('path="/client/strategy"'))
   assert.ok(clientRoutes.includes('path="/dashboard" element={<Navigate to="/client" replace />}'))
   assert.ok(APP_SOURCE.includes(`profile.role === 'client') return <Navigate to="/client" replace />`))
 })
 
 test('shared portal navigation links every client area and keeps sign out available', () => {
-  for (const route of ['/client', '/client/performance', '/client/campaigns', '/client/content-calendar']) {
+  for (const route of [
+    '/client',
+    '/client/strategy',
+    '/client/performance',
+    '/client/campaigns',
+    '/client/content-calendar',
+    '/client/content-guides',
+  ]) {
     assert.ok(SHELL_SOURCE.includes(`to: '${route}'`))
   }
   assert.match(SHELL_SOURCE, /onClick=\{\(\) => void signOut\(\)\}/)
