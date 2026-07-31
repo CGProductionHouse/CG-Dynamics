@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 import { roleLabel } from '../../lib/roles'
 import { primaryNavItems, adminNavItems, canShowNavItem, isNavItemActive, type NavItem } from './adminNavigation'
+import { GlobalAssistantComposer } from '../../components/assistant/GlobalAssistantComposer'
 
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 
@@ -128,7 +129,9 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 overflow-auto pb-16 md:h-screen md:pb-0">
+      {/* Extra bottom padding clears the fixed mobile nav AND the docked
+          assistant composer so page content is never hidden behind them. */}
+      <main className="min-w-0 flex-1 overflow-auto pb-36 md:h-screen md:pb-24">
         <Outlet />
       </main>
 
@@ -137,6 +140,8 @@ export default function AdminLayout() {
           {primaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
         </div>
       </nav>
+
+      <GlobalAssistantComposer />
     </div>
   )
 }
