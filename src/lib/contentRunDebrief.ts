@@ -29,6 +29,13 @@ export interface ApprovedDebriefAction extends ContentRunDebriefProposal {
   approved: boolean
 }
 
+export interface ContentRunDebriefDiagnostics {
+  transcriptionConfigured: boolean
+  interpretationConfigured: boolean
+  transcriptionProviders: string[]
+  interpretationProviders: string[]
+}
+
 function functionError(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) return error.message
   return fallback
@@ -95,5 +102,19 @@ export async function applyContentRunDebrief(
     return { data: data.result as { applied: number; skipped: number }, error: null }
   } catch (error) {
     return { data: null, error: functionError(error, 'The approved debrief changes could not be applied.') }
+  }
+}
+
+export async function getContentRunDebriefDiagnostics(): Promise<ContentRunDebriefDiagnostics> {
+  const { data, error } = await supabase.functions.invoke('content-run-voice-debrief', {
+    body: { action: 'diagnostics' },
+  })
+  if (error) throw new Error(error.message || 'Voice debrief diagnostics are unavailable.')
+  if (!data?.ok) throw new Error(data?.error || 'Voice debrief diagnostics are unavailable.')
+  return {
+    transcriptionConfigured: data.transcriptionConfigured === true,
+    interpretationConfigured: data.interpretationConfigured === true,
+    transcriptionProviders: Array.isArray(data.transcriptionProviders) ? data.transcriptionProviders : [],
+    interpretationProviders: Array.isArray(data.interpretationProviders) ? data.interpretationProviders : [],
   }
 }

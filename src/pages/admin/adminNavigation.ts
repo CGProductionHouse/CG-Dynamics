@@ -26,7 +26,7 @@ export const adminNavItems: NavItem[] = [
   { to: '/admin/planner-import', label: 'Planner Import', shortLabel: 'Planner', marker: 'PI', access: 'manager' },
   { to: '/admin/users', label: 'Users', shortLabel: 'Users', marker: 'U', access: 'admin', activePaths: ['/admin/users', '/admin/team', '/admin/invites'] },
   { to: '/admin/microsoft-import', label: 'Microsoft Sync', shortLabel: 'Microsoft', marker: 'MS', access: 'admin' },
-  { to: '/admin/import-health', label: 'Import Health', shortLabel: 'Health', marker: 'IH', access: 'admin' },
+  { to: '/admin/import-health', label: 'System Health', shortLabel: 'Health', marker: 'IH', access: 'admin' },
   { to: '/admin/marketing-library', label: 'Marketing Library', shortLabel: 'Library', marker: 'ML', access: 'admin' },
 ]
 
