@@ -1,10 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 import { roleLabel } from '../../lib/roles'
-import { primaryNavItems, adminNavItems, canShowNavItem, isNavItemActive, type NavItem } from './adminNavigation'
+import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'
 import { GlobalAssistantComposer } from '../../components/assistant/GlobalAssistantComposer'
+
+const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
+
+function ZoneSwitcher({ zone, onChange, className = '' }: { zone: NavZone; onChange: (zone: NavZone) => void; className?: string }) {
+  const base = 'flex-1 rounded-md px-2 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-colors'
+  return (
+    <div className={`flex gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 ${className}`} role="tablist" aria-label="Workspace zone">
+      <button type="button" role="tab" aria-selected={zone === 'hub'} onClick={() => onChange('hub')} className={`${base} ${zone === 'hub' ? 'bg-brand-teal/15 text-brand-teal' : 'text-brand-primary/60 hover:text-white'}`}>Hub</button>
+      <button type="button" role="tab" aria-selected={zone === 'performance'} onClick={() => onChange('performance')} className={`${base} ${zone === 'performance' ? 'bg-brand-teal/15 text-brand-teal' : 'text-brand-primary/60 hover:text-white'}`}>Performance</button>
+    </div>
+  )
+}
 
 const CG_HOURS_URL = 'https://cg-hours.vercel.app'
 
@@ -63,21 +75,41 @@ export default function AdminLayout() {
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [desktopCollapsed, setDesktopCollapsed] = useState(false)
+  const [zone, setZone] = useState<NavZone>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem(ZONE_STORAGE_KEY)
+      if (stored === 'hub' || stored === 'performance') return stored
+    }
+    return resolveNavZone(location.pathname)
+  })
   const currentRole = profile?.role ?? 'team'
   const displayRole = roleLabel(profile?.role)
   const primaryItems = primaryNavItems.filter(item => canShowNavItem(item, currentRole))
+  const performanceItems = performanceNavItems.filter(item => canShowNavItem(item, currentRole))
   const adminItems = adminNavItems.filter(item => canShowNavItem(item, currentRole))
+  const zoneItems = zone === 'performance' ? performanceItems : primaryItems
   const closeMobile = () => setMobileMenuOpen(false)
+
+  // Landing on a Performance-only route selects the Performance zone; shared
+  // surfaces (e.g. Clients) never force a switch, so daily Hub nav stays put.
+  useEffect(() => {
+    if (resolveNavZone(location.pathname) === 'performance') setZone('performance')
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') window.localStorage.setItem(ZONE_STORAGE_KEY, zone)
+  }, [zone])
 
   function renderNav(collapsed = false, onClick?: () => void) {
     return (
       <>
-        <NavSection label="Daily work" collapsed={collapsed} />
-        {primaryItems.map(item => <NavigationLink key={item.to} item={item} active={isNavItemActive(location.pathname, item)} collapsed={collapsed} onClick={onClick} />)}
+        {!collapsed && <ZoneSwitcher zone={zone} onChange={setZone} className="mb-2" />}
+        <NavSection label={zone === 'performance' ? 'Client performance' : 'Daily work'} collapsed={collapsed} />
+        {zoneItems.map(item => <NavigationLink key={item.to} item={item} active={isNavItemActive(location.pathname, item)} collapsed={collapsed} onClick={onClick} />)}
         <div className={`${collapsed ? 'my-2' : 'mt-2'} border-t border-white/10 pt-2`}>
           <ExternalHoursLink collapsed={collapsed} onClick={onClick} />
         </div>
-        {adminItems.length > 0 && (
+        {zone === 'hub' && adminItems.length > 0 && (
           <div className="mt-3 border-t border-white/10 pt-1" data-testid="admin-navigation">
             <NavSection label="Admin" collapsed={collapsed} />
             {adminItems.map(item => <NavigationLink key={item.to} item={item} active={isNavItemActive(location.pathname, item)} collapsed={collapsed} onClick={onClick} />)}
@@ -92,9 +124,10 @@ export default function AdminLayout() {
       <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-brand-teal/70 to-transparent" />
 
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur md:hidden">
-        <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <div className="flex items-center gap-2 px-3 py-2.5">
           <BrandMark subtitle={displayRole} compact />
-          <button type="button" onClick={() => setMobileMenuOpen(true)} className="min-h-11 rounded-md border border-white/12 bg-white/[0.04] px-3 text-sm font-bold text-white" aria-expanded={mobileMenuOpen} aria-controls="staff-mobile-navigation">
+          <ZoneSwitcher zone={zone} onChange={setZone} className="ml-auto max-w-[12.5rem] shrink" />
+          <button type="button" onClick={() => setMobileMenuOpen(true)} className="min-h-11 shrink-0 rounded-md border border-white/12 bg-white/[0.04] px-3 text-sm font-bold text-white" aria-expanded={mobileMenuOpen} aria-controls="staff-mobile-navigation">
             Menu
           </button>
         </div>
@@ -137,7 +170,7 @@ export default function AdminLayout() {
 
       <nav className="fixed inset-x-0 bottom-0 z-40 overflow-x-auto overscroll-x-contain border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
         <div className="flex min-w-max gap-1 px-2 py-1.5">
-          {primaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
+          {zoneItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
         </div>
       </nav>
 
