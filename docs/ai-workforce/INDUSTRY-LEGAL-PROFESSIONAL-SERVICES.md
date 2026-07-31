@@ -447,6 +447,143 @@ For each, capture:
 - Sector-specific retention and privacy duties.
 - ARB rules applicable to professional-service claims.
 
+## Marketing activation layer (research_only / needs_review)
+
+Added from the marketing-activation retrofit (July 2026). Not approved production
+knowledge. This is marketing guidance, not legal advice. Current rules and the
+firm's own compliance review must govern every campaign.
+
+### Market reality
+
+Legal-service buyers are often under pressure, uncertain about process, worried
+about cost and unable to judge technical quality before engagement. The strongest
+marketing does not promise outcomes. It helps the prospective client understand
+the problem, the next lawful step, who is qualified to assist, what information
+is required and how the engagement process works.
+
+### Buyer roles
+
+- Individual consumer with an urgent legal problem
+- Family decision-maker
+- Business owner or director
+- In-house decision-maker
+- Property buyer or seller
+- Executor, beneficiary or estate-planning client
+- Employer or employee
+- Creditor, debtor or contract party
+- Referring professional
+
+### Buyer pains
+
+- Not understanding rights, obligations or procedure
+- Fear of cost and open-ended billing
+- Urgency and emotional pressure
+- Uncertainty about whether the matter is suitable for the firm
+- Concern about confidentiality
+- Fear of being judged or dismissed
+- Difficulty gathering the correct documents
+- Poor communication from previous advisers
+- Unrealistic expectations about time or outcome
+- Inability to distinguish qualified practitioners from generic online advice
+
+### Buying triggers
+
+- Summons, notice, demand or deadline
+- Contract dispute
+- Property transaction
+- Divorce, maintenance or family change
+- Death and estate administration
+- Business formation, transaction or compliance event
+- Employment dispute
+- Debt or insolvency concern
+- Accident or loss
+- Regulatory or disciplinary issue
+- Need for preventive contract or estate planning
+
+### Campaign and ad angles
+
+**Process clarity** — Explain what happens first, what documents are needed and
+how the firm assesses fit. Separate general information from advice on an
+individual matter.
+
+**Scope clarity** — State the service category and jurisdiction. Avoid suggesting
+that one service page covers every legal problem.
+
+**Trust and qualification** — Use verified practitioner identity, enrolment,
+experience, process and client-service standards. Do not imply specialist status,
+accreditation or guaranteed competence unless factually and lawfully supportable.
+
+**Cost transparency** — Explain consultation fees, billing approach or the
+quotation process where the firm allows disclosure. Do not use "free" unless the
+conditions are explicit and true.
+
+**Preventive value** — Show how timely advice, proper contracts or structured
+planning can reduce avoidable uncertainty. Do not promise that a legal service
+will prevent all disputes or losses.
+
+### Hook directions
+
+- "Received a legal notice? Start with these three steps."
+- "Before signing, understand what this clause changes."
+- "What to bring to your first consultation."
+- "The difference between general information and advice on your matter."
+- "Why waiting can change your available options."
+- "How our consultation and quotation process works."
+- "Questions to ask before appointing a legal practitioner."
+
+### Proof assets
+
+- Verified practitioner profiles and enrolment status
+- Clear service scope and jurisdiction
+- Client-service process
+- Secure document and confidentiality practices
+- Approved testimonials that do not imply guaranteed outcomes
+- Educational explanations reviewed by a practitioner
+- Transparent consultation and engagement process
+- Published articles, seminars or professional participation
+- Practice-area experience stated carefully and factually
+
+Never publish confidential facts, identifiable matter details or outcome claims
+without proper authority.
+
+### Offers and lead magnets
+
+- Paid or clearly defined initial consultation
+- Matter-fit enquiry form
+- Document checklist
+- Contract review intake
+- Estate-planning preparation checklist
+- Property-transfer process guide
+- Business legal-health checklist
+- Deadline or notice response checklist
+- Educational webinar or Q&A with clear disclaimer
+
+### Landing-page structure
+
+1. Identify the legal problem or service clearly.
+2. State who the page is for and the relevant jurisdiction or scope.
+3. Explain what the firm can and cannot assist with.
+4. Set out the first-step process and documents required.
+5. Show practitioner and firm trust evidence.
+6. Explain consultation, fees or quotation procedure where permitted.
+7. Include an information-not-advice disclaimer where appropriate.
+8. Use one action: request consultation, submit a fit enquiry or call for urgent procedural guidance.
+
+### Meaningful metrics
+
+- Suitable consultation requests
+- Consultation attendance
+- Matter-fit rate
+- Consultation-to-engagement conversion
+- Cost per suitable enquiry
+- Time to first response
+- Enquiry source by service category
+- Required-document completion
+- Existing-client cross-service enquiries where lawful and appropriate
+- Content-assisted enquiries
+
+Do not report impressions or clicks as retained matters.
+
 ## Safety
 
 - No legal advice.

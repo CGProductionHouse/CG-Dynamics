@@ -34,6 +34,12 @@ export type SkillCardReviewStatus =
   | 'rejected'
   | 'deprecated'
 
+export type SkillCardReferenceState =
+  | 'unverified'
+  | 'pending_source_ingestion'
+  | 'candidate_unverified'
+  | 'human_verified'
+
 export interface MarketingLibrarySource {
   id: string
   source_type: SourceType
@@ -79,7 +85,7 @@ export interface SkillCardRecord {
   // Readiness governance fields (phase-24c / phase-26a). Optional: older cards
   // and pre-migration rows may not carry them.
   source_reference?: string | null
-  reference_state?: string | null
+  reference_state?: SkillCardReferenceState | null
   safe_claim?: string | null
   prohibited_overclaim?: string | null
   jurisdiction?: string | null
@@ -137,6 +143,12 @@ export interface SkillCardInput {
   notes?: string | null
   owner?: string | null
   last_reviewed?: string | null
+  source_reference?: string | null
+  reference_state?: SkillCardReferenceState | null
+  safe_claim?: string | null
+  prohibited_overclaim?: string | null
+  jurisdiction?: string | null
+  review_expires_at?: string | null
 }
 
 export interface SkillCardReviewInput {
@@ -262,6 +274,14 @@ export async function listSkillCardReviews(skillCardId: string): Promise<QueryRe
     .from('skill_card_reviews')
     .select('*')
     .eq('skill_card_id', skillCardId)
+    .order('reviewed_at', { ascending: false })
+  return result((data ?? []) as SkillCardReviewRecord[], error, [])
+}
+
+export async function listAllSkillCardReviews(): Promise<QueryResult<SkillCardReviewRecord[]>> {
+  const { data, error } = await supabase
+    .from('skill_card_reviews')
+    .select('*')
     .order('reviewed_at', { ascending: false })
   return result((data ?? []) as SkillCardReviewRecord[], error, [])
 }

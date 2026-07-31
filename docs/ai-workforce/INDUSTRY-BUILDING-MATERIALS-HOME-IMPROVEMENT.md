@@ -558,11 +558,173 @@ Required evidence:
 - Trade-credit and contractor-procurement behaviour evidence.
 - Exact municipality-specific building-plan and signage requirements.
 
+## Marketing activation layer (research_only / needs_review)
+
+Added from the marketing-activation retrofit (July 2026). Not approved production
+knowledge. Candidate Skill Cards derived from this layer must default to
+`needs_review`, link supporting sources, and respect client isolation.
+
+### Market reality
+
+The buying journey is often split across several people: homeowner or property
+owner; contractor or installer; architect, designer or specifier; quantity
+surveyor or procurement person; developer or project manager; store buyer or
+trade customer; do-it-yourself consumer.
+
+Marketing must distinguish retail convenience from specification-led project
+sales. A homeowner may be choosing by look, confidence and budget. A contractor
+may care more about stock, lead time, compatibility, technical support and
+margin. A professional specifier may require standards, documentation and proven
+performance.
+
+### Buyer pains
+
+- Uncertainty about product suitability
+- Wrong quantities and costly wastage
+- Products being out of stock at the wrong time
+- Delayed deliveries affecting contractors and project programmes
+- Poor colour, finish or material selection
+- Confusion between product grades and specifications
+- Unclear installation requirements
+- Hidden accessories or additional materials needed
+- Fear of premature failure
+- Lack of trustworthy technical advice
+- Difficulty comparing whole-project cost rather than unit price
+- Poor coordination between homeowner, contractor and supplier
+- Inconsistent quality between batches or suppliers
+- Returns and warranty disputes
+
+### Buying triggers
+
+- New build or renovation start
+- Contractor appointment
+- Approved plans or finalised specification
+- Seasonal maintenance
+- Water damage, roof failure, cracking or wear
+- Property sale preparation
+- Store promotion or trade day
+- Product failure or replacement
+- New colour scheme or design change
+- Project-budget approval
+- Stock availability becoming urgent
+- Need to comply with a technical or municipal requirement
+
+### Audience roles
+
+- Homeowner planning a once-off project
+- DIY buyer needing simple guidance
+- Contractor needing repeat supply
+- Architect or designer specifying a product
+- Quantity surveyor comparing cost and availability
+- Developer managing multiple units
+- Trade reseller
+- Facilities or maintenance manager
+- Property investor improving resale or rental value
+
+### Campaign and ad angles
+
+**Confidence before purchase** — Explain how to choose the right product for the
+use case. Show differences between grades, finishes, sizes and systems. Avoid
+oversimplified claims such as "best" or "maintenance-free" without evidence.
+
+**Project planning** — Help buyers calculate quantity, accessories, lead time and
+delivery. Use checklists and planning tools that reduce waste and rework.
+
+**Proof through use** — Show real installations, product application and
+completed projects. Include surface preparation, installation method and
+limitations where relevant.
+
+**Trade reliability** — Emphasise stock visibility, delivery, account service,
+technical help and repeat supply where true. Separate trade offers from retail
+promotions.
+
+**Design inspiration linked to action** — Use visual inspiration, but connect it
+to product names, finish, quantity, preparation and availability. Do not leave
+the buyer with attractive content but no practical next step.
+
+### Hook directions
+
+- "Before you buy, check whether it is made for this surface."
+- "The hidden items most renovation budgets forget."
+- "How much do you actually need?"
+- "Cheap per unit can become expensive per project."
+- "Three mistakes that cause this finish to fail early."
+- "What your contractor needs from the supplier before work starts."
+- "This is the difference between looking good today and lasting."
+- "What to ask before accepting a substitute product."
+
+### Proof assets
+
+- Product data sheets
+- Installation guidance
+- Standards or certification references where applicable
+- Batch, warranty and return information
+- Real project photography
+- Before-and-after evidence
+- Contractor or professional testimony with permission
+- Stock and delivery process
+- Colour, finish or material samples
+- Quantity calculator or project worksheet
+- Staff technical expertise
+- Demonstration videos
+- Long-term maintenance instructions
+
+### Offers and lead magnets
+
+- Project quantity estimate
+- Trade account application
+- Product compatibility consultation
+- Colour or finish consultation
+- Sample request
+- Contractor supply quote
+- Delivery planning call
+- Renovation checklist
+- Material comparison guide
+- Product-system bundle
+- Seasonal maintenance guide
+- Technical demonstration day
+
+### Landing-page structure
+
+1. Name the project type or problem.
+2. Identify the buyer and use case.
+3. Explain suitable product options.
+4. Show proof, specifications and limitations.
+5. Add quantity, preparation, delivery and installation information.
+6. Answer stock, return, warranty and lead-time questions.
+7. Use one clear action: quote, sample, consultation, trade account or order enquiry.
+
+### Objection handling
+
+- "It is too expensive" → compare lifecycle, waste, failure risk and total installed cost.
+- "The cheaper product looks the same" → explain grade, suitability, warranty and use-case difference.
+- "I do not know how much I need" → provide quantity support.
+- "My contractor will decide" → give contractor-ready documentation and shared consultation.
+- "I need it immediately" → show honest stock and delivery options.
+- "I am worried about the colour or finish" → offer samples and real-project references.
+
+### Meaningful metrics
+
+- Qualified quote requests
+- Sample requests
+- Trade account applications
+- Store visits linked to campaign activity
+- Quote-to-sale conversion
+- Average order value
+- Repeat trade purchases
+- Product-category revenue contribution
+- Delivery enquiries converted
+- Cost per qualified project lead
+- Lead quality by homeowner, contractor or professional
+- Landing-page completion actions
+
+Do not present reach, clicks or video views as project sales.
+
 ## Safety
 
 - No engineering, architecture or building-control advice.
 - No structural suitability claim without competent evidence.
 - No client classification from name.
 - No protected standards or handbook text copied without permission.
-- No national price or retail trend presented as one client’s result.
+- No national price or retail trend presented as one client's result.
 - No unreviewed industry knowledge in production answers.

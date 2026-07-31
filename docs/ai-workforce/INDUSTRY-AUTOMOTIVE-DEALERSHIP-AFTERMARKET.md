@@ -621,6 +621,142 @@ Do not activate client-specific knowledge from industry research alone.
 - Road-safety evidence from RTMC and Department of Transport.
 - Local consumer search and lead behaviour using verified CG data.
 
+## Marketing activation layer (research_only / needs_review)
+
+Added from the marketing-activation retrofit (July 2026). Not approved production
+knowledge. Candidate Skill Cards derived from this layer must default to
+`needs_review`, link supporting sources, and respect client isolation.
+
+### Market reality
+
+Automotive marketing has several distinct purchase journeys: vehicle purchase;
+workshop diagnosis and repair; scheduled maintenance; tyres, batteries, parts and
+fitment; fleet or business procurement; emergency breakdown or safety concern.
+
+The buyer's main risks are financial loss, unsafe work, repeat failure, hidden
+charges, poor diagnosis, counterfeit or unsuitable parts, downtime and lack of
+trust. Marketing should reduce uncertainty and make the service process visible.
+
+### Buyer roles
+
+- Private vehicle owner
+- Family or household decision-maker
+- Enthusiast or performance buyer
+- Used-vehicle buyer
+- Fleet manager
+- Business owner with work vehicles
+- Insurance or warranty-linked customer
+- Workshop owner, technician or parts buyer
+- Dealer principal or sales manager
+
+### Buyer pains
+
+- Not knowing what is actually wrong with the vehicle
+- Fear of overcharging or unnecessary work
+- Repeat repairs and unresolved faults
+- Safety concerns before travel
+- Vehicle downtime and lost income
+- Difficulty evaluating a used vehicle
+- Uncertainty about part quality and compatibility
+- Delayed parts or repair completion
+- Poor communication during the job
+- Unclear warranty or comeback process
+- Pressure to choose on price without understanding total value
+
+### Buying triggers
+
+- Warning light, noise, leak or performance change
+- Upcoming service interval
+- Long-distance trip or holiday
+- Roadworthy, licence or insurance requirement
+- Used-car purchase
+- Tyre wear, puncture or seasonal road conditions
+- Fleet downtime or maintenance schedule
+- Failed inspection or diagnostic result
+- Warranty expiration
+- Safety campaign, recall or manufacturer guidance
+
+### Campaign and ad angles
+
+**Diagnosis before selling** — Explain the symptom-to-diagnosis process. Show how
+the workshop confirms the problem before recommending work. Avoid diagnosing
+individual vehicles through marketing content.
+
+**Trust through process visibility** — Booking, inspection, quotation, approval,
+repair, quality check and handover. Show who works on the vehicle and what
+standards or equipment are used.
+
+**Safety and prevention** — Use checklists and seasonal checks that help
+customers act before failure. Avoid fearmongering or implying guaranteed
+accident prevention.
+
+**Ownership cost** — Explain maintenance, tyre life, fuel efficiency, downtime
+and resale implications where supportable. Never promise savings without a
+defensible comparison.
+
+**Independent expertise** — Demonstrate training, accreditation, specialist
+capability and access to quality parts. Do not imply association or
+certification that the client does not hold.
+
+### Hook directions
+
+- "A warning light is a symptom, not a diagnosis."
+- "What a proper vehicle inspection should include."
+- "Before you buy that used vehicle, check these items."
+- "The cheapest repair can become the most expensive one."
+- "What happens after you hand us the keys."
+- "Three signs your tyres need more than a visual glance."
+- "Why this fault keeps coming back."
+
+### Proof assets
+
+- Diagnostic equipment and process
+- Qualified or accredited staff evidence
+- Workshop walkthrough
+- Inspection report example with private data removed
+- Before-and-after component evidence
+- Approved customer review or case study
+- Parts brand, provenance and warranty information
+- Job-card and approval process
+- Quality-control checklist
+- Fleet service process and turnaround reporting
+
+### Offers and lead magnets
+
+- Pre-trip inspection
+- Used-vehicle inspection
+- Diagnostic booking
+- Tyre or battery health check
+- Fleet maintenance review
+- Service reminder registration
+- Repair estimate after inspection
+- Seasonal safety checklist
+- "What to ask your workshop" guide
+- Workshop open day or technician Q&A
+
+### Landing-page structure
+
+1. Match the page to the actual service or vehicle problem.
+2. Explain who the service is for and what is included.
+3. Show the diagnostic or inspection process.
+4. Present trust evidence: staff, accreditation, equipment, parts, warranty and reviews.
+5. Explain quotation and approval before work begins.
+6. Answer turnaround, parts, warranty, price-range and transport questions honestly.
+7. Offer one action: book, request inspection, call or submit vehicle details.
+
+### Meaningful metrics
+
+- Bookings completed
+- Qualified calls or WhatsApp enquiries
+- Diagnostic-to-approved-work conversion
+- Average repair order value where available
+- Repeat service rate
+- No-show rate
+- Fleet leads and fleet accounts opened
+- Cost per booked job
+- Lead source by service category
+- Customer-review generation after completed work
+
 ## Safety and retrieval boundaries
 
 - No legal advice.
