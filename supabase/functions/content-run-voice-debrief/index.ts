@@ -377,8 +377,8 @@ Deno.serve(async request => {
   if (!STAFF_ROLES.includes(role)) return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
 
   const contentType = request.headers.get('content-type') ?? ''
-  let action = ''
-  let runId = ''
+  let action: string
+  let runId: string
   let transcript = ''
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}
@@ -398,6 +398,26 @@ Deno.serve(async request => {
     }
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid debrief request.' }, 400)
+  }
+
+  if (action === 'diagnostics') {
+    if (role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
+    const transcriptionProviders = [
+      env('GROQ_API_KEY') ? 'groq' : null,
+      env('GEMINI_API_KEY') ? 'gemini' : null,
+      env('OPENAI_API_KEY') ? 'openai' : null,
+    ].filter((provider): provider is string => provider !== null)
+    const interpretationProviders = [
+      env('OPENROUTER_API_KEY') ? 'openrouter' : null,
+      ...transcriptionProviders,
+    ].filter((provider): provider is string => provider !== null)
+    return jsonResponse({
+      ok: true,
+      transcriptionConfigured: transcriptionProviders.length > 0,
+      interpretationConfigured: interpretationProviders.length > 0,
+      transcriptionProviders,
+      interpretationProviders,
+    })
   }
 
   if (action === 'apply') {

@@ -129,3 +129,15 @@ test('client event opens the matching month and highlights only the returned gui
   assert.match(CLIENT_GUIDES, /selectedGuideKey === guideline\.row_key/)
   assert.match(CLIENT_GUIDES, /scrollIntoView/)
 })
+
+test('voice setup diagnostics are masked and admin-only', () => {
+  const diagnosticsIndex = EDGE.indexOf("action === 'diagnostics'")
+  const applyIndex = EDGE.indexOf("action === 'apply'")
+  assert.ok(diagnosticsIndex > EDGE.indexOf('STAFF_ROLES.includes(role)'))
+  assert.ok(applyIndex > diagnosticsIndex)
+  assert.match(EDGE.slice(diagnosticsIndex, applyIndex), /role !== 'admin'/)
+  assert.match(EDGE.slice(diagnosticsIndex, applyIndex), /transcriptionConfigured/)
+  assert.match(EDGE.slice(diagnosticsIndex, applyIndex), /interpretationConfigured/)
+  assert.doesNotMatch(EDGE.slice(diagnosticsIndex, applyIndex), /apiKey\s*:/)
+  assert.match(CLIENT, /getContentRunDebriefDiagnostics/)
+})

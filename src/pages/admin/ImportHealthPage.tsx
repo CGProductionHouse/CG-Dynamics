@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { supabase } from '../../lib/supabase'
+import LaunchReadinessPanel from './LaunchReadinessPanel'
 
 type Counts = {
   plannerTasks: number
@@ -86,6 +87,7 @@ export default function ImportHealthPage() {
   const [error, setError] = useState<string | null>(null)
 
   async function load() {
+    await Promise.resolve()
     setLoading(true)
     setError(null)
 
@@ -138,7 +140,10 @@ export default function ImportHealthPage() {
     }
   }
 
-  useEffect(() => { void load() }, [])
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   const bucketNameById = useMemo(() => new Map(buckets.map(bucket => [bucket.id, bucket.name])), [buckets])
   const clientNameById = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
@@ -213,8 +218,8 @@ export default function ImportHealthPage() {
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-accent">Admin</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-white">Import Health</h1>
-          <p className="mt-1 text-sm text-brand-primary/60">Teams Planner import sanity checks.</p>
+          <h1 className="mt-1 text-3xl font-black tracking-tight text-white">System Health</h1>
+          <p className="mt-1 text-sm text-brand-primary/60">Launch readiness, integration reconciliation and imported-data checks.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <ActionButton variant="outline" size="sm" onClick={load} loading={loading}>
@@ -225,6 +230,8 @@ export default function ImportHealthPage() {
           </Link>
         </div>
       </div>
+
+      <LaunchReadinessPanel />
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">
