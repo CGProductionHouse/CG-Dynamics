@@ -1,14 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   buildAssistantLocalWorkContext,
+  fetchActiveClients,
   sendAssistantMessage,
+  type ActiveClientOption,
   type AssistantChatMessage,
   type AssistantLocalWorkContext,
 } from '../../lib/assistant'
 import { getMyDayContext } from '../../lib/workforceMyDay'
+import { parseAssistantAction, type ActionProposal } from '../../lib/assistantActions'
+import { listStaffProfiles } from '../../lib/contentWorkflow'
+import { createCompanyEvent } from '../../lib/companyCalendar'
+import { logPlannerActivity } from '../../lib/planner'
+import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Global CG Assistant composer.
@@ -111,13 +118,32 @@ export function GlobalAssistantComposer() {
   // higher-fidelity path for true mixed speech.
   const [micLang, setMicLang] = useState<'en-ZA' | 'af-ZA'>('en-ZA')
 
+  // Action-agent state: a parsed proposal is shown as a confirm/edit/cancel
+  // preview before ANY write. Nothing mutates until the user confirms.
+  const [proposal, setProposal] = useState<ActionProposal | null>(null)
+  const [applying, setApplying] = useState(false)
+  const navigate = useNavigate()
+
   const workContextRef = useRef<AssistantLocalWorkContext | null>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const attachRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
+  const clientsRef = useRef<ActiveClientOption[]>([])
+  const staffRef = useRef<string[]>([])
 
   const speechSupported = useMemo(() => Boolean(getSpeechRecognition()), [])
+
+  // Load the authorised client + staff lists once, for name resolution. These
+  // come through RLS, so a user only ever sees clients/staff they may see.
+  useEffect(() => {
+    let active = true
+    fetchActiveClients().then(list => { if (active) clientsRef.current = list }).catch(() => {})
+    listStaffProfiles().then(res => {
+      if (active && !res.migrationNeeded) staffRef.current = res.data.map(s => s.full_name).filter((n): n is string => Boolean(n))
+    }).catch(() => {})
+    return () => { active = false }
+  }, [])
 
   // Load the signed-in user's live work context once (best-effort; the assistant
   // still works without it).
@@ -166,9 +192,99 @@ export function GlobalAssistantComposer() {
     return parts.join(', ')
   }
 
+  function pushAssistant(text: string) {
+    setMessages(current => [...current, { id: nextId(), role: 'assistant', text }])
+  }
+
+  // Confirmed action → execute through an existing RLS-protected path, then
+  // audit. Nothing here runs until the user confirms the preview.
+  async function applyProposal() {
+    if (!proposal || applying) return
+    const p = proposal
+    setApplying(true)
+    setError(null)
+    try {
+      if (p.type === 'calendar.create') {
+        const date = String(p.fields.date)
+        const time = p.fields.time ? String(p.fields.time) : null
+        const startAt = `${date}T${time ?? '09:00'}:00`
+        const res = await createCompanyEvent({
+          title: String(p.fields.title ?? 'Meeting'),
+          event_type: String(p.fields.event_type) === 'client_event' ? 'client_event' : 'meeting',
+          client_id: p.clientId,
+          client_name: p.clientName,
+          start_at: startAt,
+        })
+        if (res.error) throw new Error(res.error.message)
+        if (res.tableMissing) throw new Error('CG Calendar is not enabled in this database yet.')
+        if (res.data) {
+          await logPlannerActivity({
+            entity_type: 'company_calendar_event', entity_id: res.data.id, action: 'assistant_created',
+            actor_user_id: profile?.id ?? null, actor_name: profile?.full_name ?? null,
+            metadata: { via: 'cg_assistant', title: res.data.title, start_at: startAt },
+          })
+        }
+        setProposal(null)
+        pushAssistant(`Done — created "${p.fields.title}" on ${date}${time ? ` at ${time}` : ''} in CG Calendar.`)
+      } else if (p.type === 'schedule.propose') {
+        if (!recordId) { setError('Open the Client Schedule post first so I know which item to change.'); return }
+        const res = await proposeScheduleChange({
+          deliverableId: recordId,
+          change: { scheduled_date: String(p.fields.new_date) },
+          reason: p.fields.note ? String(p.fields.note) : null,
+          requestedBy: profile?.id ?? null,
+          requestedByName: profile?.full_name ?? null,
+        })
+        if (res.error) throw new Error(res.error.message)
+        setProposal(null)
+        pushAssistant('Submitted. This Client Schedule change stays pending until an Admin approves it.')
+      } else {
+        // Task / video / cancel: hand off to the right page with context rather
+        // than a blind write (assigning "this task", marking shots and cancelling
+        // need the on-page record).
+        const dest = p.type.startsWith('video') ? '/admin/content?tab=runs' : p.type.startsWith('task') ? '/admin/work' : '/admin/cg-calendar'
+        const where = dest.includes('content') ? 'Content Runs' : dest.includes('work') ? 'Work' : 'CG Calendar'
+        setProposal(null)
+        pushAssistant(`Opening ${where} so you can finish this on the record.`)
+        navigate(dest)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not complete that action.')
+    } finally {
+      setApplying(false)
+    }
+  }
+
   async function send(text: string) {
     const clean = text.trim()
-    if (!clean || sending) return
+    if (!clean || sending || applying) return
+
+    // Action agent first: understand the instruction as a concrete app action.
+    // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
+    // plain question falls through to chat.
+    const parsed = parseAssistantAction(clean, {
+      today: new Date().toISOString().slice(0, 10),
+      clients: clientsRef.current,
+      staffNames: staffRef.current,
+      role: profile?.role ?? 'team',
+      currentClientId: clientId || null,
+      currentClientName: clientsRef.current.find(c => c.id === clientId)?.name ?? null,
+    })
+    if (parsed && 'type' in parsed) {
+      setInput('')
+      setError(null)
+      setProposal(parsed)
+      setOpen(true)
+      return
+    }
+    if (parsed && 'clarify' in parsed) {
+      setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+      setInput('')
+      setOpen(true)
+      pushAssistant(parsed.clarify)
+      return
+    }
+
     const history: AssistantChatMessage[] = messages.map(m => ({ role: m.role, content: m.text }))
     setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
     setInput('')
@@ -317,6 +433,40 @@ export function GlobalAssistantComposer() {
                 </div>
               )}
               {error && <p className="px-1 text-xs text-red-300">{error}</p>}
+            </div>
+          </div>
+        )}
+
+        {/* Action preview — confirm/edit/cancel before any write */}
+        {proposal && (
+          <div className="mb-2 rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="min-w-0 truncate text-sm font-black text-white">{proposal.title}</p>
+              <span className="shrink-0 rounded-full border border-brand-teal/30 bg-brand-teal/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-teal">Preview</span>
+            </div>
+            {proposal.requiresApproval && proposal.approvalNote && (
+              <p className="mb-2 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] px-2 py-1 text-[11px] text-amber-200">{proposal.approvalNote}</p>
+            )}
+            <div className="space-y-1.5">
+              {Object.entries(proposal.fields)
+                .filter(([, value]) => value !== null && value !== undefined && String(value) !== '')
+                .map(([key, value]) => (
+                  <label key={key} className="flex items-center gap-2">
+                    <span className="w-20 shrink-0 text-[10px] font-black uppercase tracking-wide text-brand-primary/55">{key.replace(/_/g, ' ')}</span>
+                    <input
+                      value={String(value)}
+                      onChange={event => setProposal(current => current ? { ...current, fields: { ...current.fields, [key]: event.target.value } } : current)}
+                      className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    />
+                  </label>
+                ))}
+            </div>
+            {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
+            <div className="mt-3 flex gap-2">
+              <button type="button" onClick={() => void applyProposal()} disabled={applying} className="flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
+                {applying ? 'Working…' : proposal.requiresApproval ? 'Submit for approval' : 'Confirm'}
+              </button>
+              <button type="button" onClick={() => { setProposal(null); setError(null); inputRef.current?.focus() }} className="rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Cancel</button>
             </div>
           </div>
         )}
