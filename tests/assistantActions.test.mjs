@@ -105,6 +105,24 @@ test('schedule move is a PROPOSAL requiring admin approval, never a direct chang
   assert.match(r.approvalNote, /pending until an Admin/i)
 })
 
+test('"Mark this task as done" → task.update status done', () => {
+  const r = parseAssistantAction('Mark this task as done', CTX)
+  assert.equal(r.type, 'task.update')
+  assert.equal(r.fields.status, 'done')
+})
+
+test('AF: "Merk hierdie taak as klaar" → task.update done', () => {
+  const r = parseAssistantAction('Merk hierdie taak as klaar', CTX)
+  assert.equal(r.type, 'task.update')
+  assert.equal(r.fields.status, 'done')
+})
+
+test('"This task is blocked" → task.update blocked', () => {
+  const r = parseAssistantAction('This task is blocked', CTX)
+  assert.equal(r.type, 'task.update')
+  assert.equal(r.fields.status, 'blocked')
+})
+
 test('plain question / non-action returns null (falls through to chat)', () => {
   assert.equal(parseAssistantAction('What should I focus on today?', CTX), null)
   assert.equal(parseAssistantAction('', CTX), null)
