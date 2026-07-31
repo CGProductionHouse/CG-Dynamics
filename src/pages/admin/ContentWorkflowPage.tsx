@@ -609,150 +609,177 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
       ) : tab === 'pipeline' ? (
         <VideoPipelineTab clients={clients} staff={staff} />
       ) : (
-        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
-          <section className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <input className={`${INPUT_CLS} flex-1`} placeholder="Search runs" value={runSearch} onChange={event => setRunSearch(event.target.value)} />
-              <ActionButton size="sm" onClick={() => { setRunMode('create'); setSelectedRunId(null); setRunError(null) }}>New run</ActionButton>
-            </div>
+        <div className="mx-auto mt-6 w-full max-w-3xl space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <input className={`${INPUT_CLS} min-w-0 flex-1`} placeholder="Search runs" value={runSearch} onChange={event => setRunSearch(event.target.value)} />
             <select className={`${INPUT_CLS} w-auto`} value={runStatusFilter} onChange={event => setRunStatusFilter(event.target.value as ContentRunStatus | 'all')}>
               <option value="all">All statuses</option>
               {CONTENT_RUN_STATUSES.map(status => <option key={status} value={status}>{humanizeStatus(status)}</option>)}
             </select>
-            {filteredRuns.length === 0 ? (
-              <EmptyState title={runs.length === 0 ? 'No runs yet' : 'No runs match'} message={runs.length === 0 ? 'Create the first content run.' : 'Adjust search or status.'} />
-            ) : (
-              <ul className="space-y-2">
-                {filteredRuns.map(run => (
-                  <li key={run.id}>
-                    <button type="button" onClick={() => { setSelectedRunId(run.id); setRunMode('view'); setCardError(null) }} className={`w-full rounded-xl border p-3 text-left transition-colors ${selectedRunId === run.id && runMode !== 'create' ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="min-w-0 break-words text-sm font-black text-white">{run.name}</p>
-                        <Pill tone={runStatusTone(run.status)}>{humanizeStatus(run.status)}</Pill>
-                      </div>
-                      <p className="mt-1 text-xs text-white/45">{clientName(clients, run.client_id)}{run.run_date ? ` · ${run.run_date}` : ''}{run.lead_name ? ` · ${run.lead_name}` : ''}</p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+            <ActionButton size="sm" onClick={() => { setRunMode('create'); setSelectedRunId(null); setRunError(null) }}>New run</ActionButton>
+          </div>
 
-          <section ref={runEditorRef} className="scroll-mt-20 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-            {runMode === 'create' ? (
-              <><h2 className="mb-4 text-lg font-black text-white">New content run</h2><RunForm initial={null} clients={clients} saving={runSaving} error={runError} onCancel={() => setRunMode('view')} onSubmit={submitRun} /></>
-            ) : runMode === 'edit' && selectedRun ? (
-              <><h2 className="mb-4 text-lg font-black text-white">Edit run</h2><RunForm initial={selectedRun} clients={clients} saving={runSaving} error={runError} microsoftOwned={selectedRunMicrosoftOwned} onCancel={() => setRunMode('view')} onSubmit={submitRun} /></>
-            ) : selectedRun ? (
-              <div className="space-y-5">
-                {/* Run overview */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-teal/80">{clientName(clients, selectedRun.client_id)}</p>
-                    <h2 className="mt-1 break-words text-xl font-black text-white">{selectedRun.name}</h2>
-                    <p className="mt-1 text-xs text-white/45">{selectedRun.run_date ?? 'No date'}{selectedRun.start_time ? ` · ${selectedRun.start_time.slice(0, 5)}` : ''}{selectedRun.location ? ` · ${selectedRun.location}` : ''}</p>
-                  </div>
-                  <div className="flex shrink-0 gap-2">
-                    {runGuidelineVideos.length > 0 && <ActionButton size="sm" onClick={() => setShootMode(true)}>Open shoot mode</ActionButton>}
-                    <ActionButton size="sm" variant="secondary" onClick={() => { setRunMode('edit'); setRunError(null) }}>Edit</ActionButton>
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Pill tone={runStatusTone(selectedRun.status)}>{humanizeStatus(selectedRun.status)}</Pill>
-                  {selectedRun.lead_name && <Pill tone="teal">Lead: {selectedRun.lead_name}</Pill>}
-                  {selectedRun.helper_names.map(helper => <Pill key={helper}>{helper}</Pill>)}
-                  {selectedRun.calendar_event_id && <Pill tone="teal">On CG Calendar</Pill>}
-                  {selectedRunMicrosoftOwned && <Pill>Outlook-managed</Pill>}
-                </div>
-                {selectedRunMicrosoftOwned && (
-                  <p className="rounded-lg border border-blue-300/20 bg-blue-300/[0.07] px-3 py-2 text-xs text-blue-100">
-                    Date, name and location come from Microsoft/Outlook and are read-only here. Crew, the Content Guideline and extra shots stay editable.
-                  </p>
-                )}
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[11px] font-black uppercase tracking-[0.12em] text-white/40">Set status:</span>
-                  {CONTENT_RUN_STATUSES.map(status => (
-                    <button key={status} type="button" onClick={() => void setRunStatus(status)} className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition-colors ${selectedRun.status === status ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/50 hover:text-white/80'}`}>{humanizeStatus(status)}</button>
-                  ))}
-                </div>
-                {/* One canonical Content Guideline document per Content Run */}
-                <div className="space-y-3">
-                  {cardError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{cardError}</p>}
-                  {runGuideline ? (
-                    <>
-                      <ContentGuidelineDocumentEditor
-                        guideline={runGuideline}
-                        run={selectedRun}
-                        videos={runGuidelineVideos}
-                        currentUserId={profile?.id}
-                        onChanged={refreshRunGuideline}
-                      />
-                      <ContentRunVoiceDebrief
-                        run={selectedRun}
-                        guideline={runGuideline}
-                        videos={runGuidelineVideos}
-                        onApplied={async () => {
-                          await refreshRunGuideline()
-                          await loadAll()
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <div className="rounded-xl border border-dashed border-brand-teal/25 bg-brand-teal/[0.035] p-5 text-center">
-                      <p className="text-sm font-black text-white">This run does not have a Content Guideline yet.</p>
-                      <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-white/50">
-                        One Content Run uses one Content Guideline document containing all ordered videos, names and complete scripts.
-                      </p>
-                      {selectedRun.client_id ? (
-                        <div className="mt-4">
-                          <ActionButton size="sm" loading={guidelineBusy} onClick={() => void createRunGuideline()}>Create Content Guideline</ActionButton>
+          {runMode === 'create' && (
+            <section ref={runEditorRef} className="scroll-mt-20 rounded-2xl border border-brand-teal/30 bg-brand-teal/[0.05] p-4 sm:p-5">
+              <h2 className="mb-4 text-lg font-black text-white">New content run</h2>
+              <RunForm initial={null} clients={clients} saving={runSaving} error={runError} onCancel={() => setRunMode('view')} onSubmit={submitRun} />
+            </section>
+          )}
+
+          {filteredRuns.length === 0 ? (
+            <EmptyState title={runs.length === 0 ? 'No runs yet' : 'No runs match'} message={runs.length === 0 ? 'Create the first content run.' : 'Adjust search or status.'} />
+          ) : (
+            <ul className="space-y-2">
+              {filteredRuns.map(run => {
+                // Inline accordion: tapping a run expands its editable detail
+                // directly underneath, one open at a time — no separate page and
+                // no scrolling past the list to reach the controls.
+                const isOpen = selectedRunId === run.id && runMode !== 'create'
+                return (
+                  <li key={run.id} className={`overflow-hidden rounded-xl border transition-colors ${isOpen ? 'border-brand-teal/45 bg-brand-teal/[0.06]' : 'border-white/10 bg-white/[0.025]'}`}>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      onClick={() => {
+                        if (isOpen) { setSelectedRunId(null); setRunMode('view') }
+                        else { setSelectedRunId(run.id); setRunMode('view'); setCardError(null) }
+                      }}
+                      className="flex w-full items-start justify-between gap-3 p-3.5 text-left transition-colors hover:bg-white/[0.02]"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="min-w-0 break-words text-sm font-black text-white">{run.name}</span>
+                          <Pill tone={runStatusTone(run.status)}>{humanizeStatus(run.status)}</Pill>
                         </div>
-                      ) : (
-                        <p className="mt-4 text-xs font-bold text-amber-200">Assign a real client to this run first. Client ownership is never guessed.</p>
-                      )}
-                    </div>
-                  )}
-                </div>
+                        <p className="mt-1 text-xs text-white/45">{clientName(clients, run.client_id)}{run.run_date ? ` · ${run.run_date}` : ''}{run.lead_name ? ` · ${run.lead_name}` : ''}</p>
+                      </div>
+                      <span className={`mt-1 shrink-0 text-xs text-white/40 transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden>▾</span>
+                    </button>
 
-                {/* Extra shots / run notes — secondary standalone items */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Extra shots / run notes ({extraItems.length})</h3>
-                    <ActionButton size="sm" variant="ghost" onClick={() => void addExtraShot()}>Add extra shot</ActionButton>
-                  </div>
-                  {extraItems.length === 0 ? (
-                    <p className="rounded-lg border border-dashed border-white/10 px-3 py-3 text-center text-xs text-white/35">No extra shots. The Content Guideline above is the official client document.</p>
-                  ) : (
-                    <ol className="space-y-2">
-                      {extraItems.map((item, index) => (
-                        <li key={item.id} className={`rounded-lg border p-3 ${item.completed ? 'border-emerald-300/25 bg-emerald-300/[0.05]' : 'border-white/10 bg-white/[0.025]'}`}>
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-white">{index + 1}. {isBlankExtraShot(item) ? <span className="text-white/50">Extra shot — details not added</span> : (item.title ?? 'Extra shot')}</p>
-                              {item.shot_notes && <p className="mt-1 text-xs text-white/55">{item.shot_notes}</p>}
-                              {item.requirements && <p className="mt-1 text-xs text-amber-100/70">Needs: {item.requirements}</p>}
+                    {isOpen && (
+                      <div className="border-t border-white/10 p-4 sm:p-5">
+                        {runMode === 'edit' && selectedRun ? (
+                          <>
+                            <div className="mb-4 flex items-center justify-between gap-2">
+                              <h3 className="text-base font-black text-white">Edit run</h3>
+                              <ActionButton size="sm" variant="ghost" onClick={() => setRunMode('view')}>Close editor</ActionButton>
                             </div>
-                            <div className="flex shrink-0 items-center gap-1">
-                              <button type="button" onClick={() => void moveShot(item, -1)} disabled={index === 0} className="rounded px-1.5 text-white/50 hover:text-white disabled:opacity-30">↑</button>
-                              <button type="button" onClick={() => void moveShot(item, 1)} disabled={index === extraItems.length - 1} className="rounded px-1.5 text-white/50 hover:text-white disabled:opacity-30">↓</button>
+                            <RunForm initial={selectedRun} clients={clients} saving={runSaving} error={runError} microsoftOwned={selectedRunMicrosoftOwned} onCancel={() => setRunMode('view')} onSubmit={submitRun} />
+                          </>
+                        ) : selectedRun ? (
+                          <div className="space-y-5">
+                            {/* Run overview + primary actions */}
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-teal/80">{clientName(clients, selectedRun.client_id)}</p>
+                                <p className="mt-1 text-xs text-white/45">{selectedRun.run_date ?? 'No date'}{selectedRun.start_time ? ` · ${selectedRun.start_time.slice(0, 5)}` : ''}{selectedRun.location ? ` · ${selectedRun.location}` : ''}</p>
+                              </div>
+                              <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                                {runGuidelineVideos.length > 0 && <ActionButton size="sm" onClick={() => setShootMode(true)}>Shoot mode</ActionButton>}
+                                <ActionButton size="sm" variant="secondary" onClick={() => { setRunMode('edit'); setRunError(null) }}>Edit</ActionButton>
+                                <ActionButton size="sm" variant="ghost" onClick={() => { setSelectedRunId(null); setRunMode('view') }}>Close</ActionButton>
+                              </div>
                             </div>
-                          </div>
-                          <div className="mt-2 flex items-center gap-3">
-                            <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={item.completed} onChange={() => void toggleShotComplete(item)} />Done</label>
-                            <button type="button" onClick={() => void removeExtraShot(item)} className="text-xs text-red-300/80 hover:text-red-200">Remove</button>
-                          </div>
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-                </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Pill tone={runStatusTone(selectedRun.status)}>{humanizeStatus(selectedRun.status)}</Pill>
+                              {selectedRun.lead_name && <Pill tone="teal">Lead: {selectedRun.lead_name}</Pill>}
+                              {selectedRun.helper_names.map(helper => <Pill key={helper}>{helper}</Pill>)}
+                              {selectedRun.calendar_event_id && <Pill tone="teal">On CG Calendar</Pill>}
+                              {selectedRunMicrosoftOwned && <Pill>Outlook-managed</Pill>}
+                            </div>
+                            {selectedRunMicrosoftOwned && (
+                              <p className="rounded-lg border border-blue-300/20 bg-blue-300/[0.07] px-3 py-2 text-xs text-blue-100">
+                                Date, name and location come from Microsoft/Outlook and are read-only here. Crew, the Content Guideline and extra shots stay editable.
+                              </p>
+                            )}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-[11px] font-black uppercase tracking-[0.12em] text-white/40">Set status:</span>
+                              {CONTENT_RUN_STATUSES.map(status => (
+                                <button key={status} type="button" onClick={() => void setRunStatus(status)} className={`min-h-8 rounded-full border px-3 py-1 text-[11px] font-bold transition-colors ${selectedRun.status === status ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/50 hover:text-white/80'}`}>{humanizeStatus(status)}</button>
+                              ))}
+                            </div>
+                            {/* One canonical Content Guideline document per Content Run */}
+                            <div className="space-y-3">
+                              {cardError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{cardError}</p>}
+                              {runGuideline ? (
+                                <>
+                                  <ContentGuidelineDocumentEditor
+                                    guideline={runGuideline}
+                                    run={selectedRun}
+                                    videos={runGuidelineVideos}
+                                    currentUserId={profile?.id}
+                                    onChanged={refreshRunGuideline}
+                                  />
+                                  <ContentRunVoiceDebrief
+                                    run={selectedRun}
+                                    guideline={runGuideline}
+                                    videos={runGuidelineVideos}
+                                    onApplied={async () => {
+                                      await refreshRunGuideline()
+                                      await loadAll()
+                                    }}
+                                  />
+                                </>
+                              ) : (
+                                <div className="rounded-xl border border-dashed border-brand-teal/25 bg-brand-teal/[0.035] p-5 text-center">
+                                  <p className="text-sm font-black text-white">This run does not have a Content Guideline yet.</p>
+                                  <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-white/50">
+                                    One Content Run uses one Content Guideline document containing all ordered videos, names and complete scripts.
+                                  </p>
+                                  {selectedRun.client_id ? (
+                                    <div className="mt-4">
+                                      <ActionButton size="sm" loading={guidelineBusy} onClick={() => void createRunGuideline()}>Create Content Guideline</ActionButton>
+                                    </div>
+                                  ) : (
+                                    <p className="mt-4 text-xs font-bold text-amber-200">Assign a real client to this run first. Client ownership is never guessed.</p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
 
-                {selectedRun.internal_notes && <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/60">{selectedRun.internal_notes}</p>}
-              </div>
-            ) : (
-              <EmptyState title="Select a run" message="Choose a run to manage its linked guidelines and shoot workflow, or create a new one." />
-            )}
-          </section>
+                            {/* Extra shots / run notes — secondary standalone items */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <h3 className="text-sm font-black uppercase tracking-[0.12em] text-white/45">Extra shots / run notes ({extraItems.length})</h3>
+                                <ActionButton size="sm" variant="ghost" onClick={() => void addExtraShot()}>Add extra shot</ActionButton>
+                              </div>
+                              {extraItems.length === 0 ? (
+                                <p className="rounded-lg border border-dashed border-white/10 px-3 py-3 text-center text-xs text-white/35">No extra shots. The Content Guideline above is the official client document.</p>
+                              ) : (
+                                <ol className="space-y-2">
+                                  {extraItems.map((item, index) => (
+                                    <li key={item.id} className={`rounded-lg border p-3 ${item.completed ? 'border-emerald-300/25 bg-emerald-300/[0.05]' : 'border-white/10 bg-white/[0.025]'}`}>
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="min-w-0">
+                                          <p className="text-sm font-bold text-white">{index + 1}. {isBlankExtraShot(item) ? <span className="text-white/50">Extra shot — details not added</span> : (item.title ?? 'Extra shot')}</p>
+                                          {item.shot_notes && <p className="mt-1 text-xs text-white/55">{item.shot_notes}</p>}
+                                          {item.requirements && <p className="mt-1 text-xs text-amber-100/70">Needs: {item.requirements}</p>}
+                                        </div>
+                                        <div className="flex shrink-0 items-center gap-1">
+                                          <button type="button" onClick={() => void moveShot(item, -1)} disabled={index === 0} className="min-h-8 rounded px-2 text-white/50 hover:text-white disabled:opacity-30">↑</button>
+                                          <button type="button" onClick={() => void moveShot(item, 1)} disabled={index === extraItems.length - 1} className="min-h-8 rounded px-2 text-white/50 hover:text-white disabled:opacity-30">↓</button>
+                                        </div>
+                                      </div>
+                                      <div className="mt-2 flex items-center gap-3">
+                                        <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-4 w-4 accent-teal-400" checked={item.completed} onChange={() => void toggleShotComplete(item)} />Done</label>
+                                        <button type="button" onClick={() => void removeExtraShot(item)} className="text-xs text-red-300/80 hover:text-red-200">Remove</button>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ol>
+                              )}
+                            </div>
+
+                            {selectedRun.internal_notes && <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/60">{selectedRun.internal_notes}</p>}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </div>
       )}
     </div>
