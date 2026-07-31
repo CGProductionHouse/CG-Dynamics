@@ -16,6 +16,7 @@ export type AssistantActionType =
   | 'calendar.cancel'
   | 'task.create'
   | 'task.assign'
+  | 'task.update'
   | 'schedule.propose'
   | 'video.move'
   | 'video.mark_shot'
@@ -84,6 +85,9 @@ const CANCEL = /\b(cancel|kanselleer|delete|remove|verwyder|skrap)\b/
 const ASSIGN = /\b(assign|toewys|wys .* toe|gee (?:die|hierdie)?\s*taak|gee vir)\b/
 const TASK_NOUN = /\b(task|taak|to-?do|item)\b/
 const MOVE = /\b(move|skuif|shift|verskuif|reschedule|herskeduleer)\b/
+const THIS_TASK = /\b(this|hierdie|die)\s+(task|taak|item)\b/
+const COMPLETE = /\b(complete|completed|done|klaar|voltooi|finish|afgehandel)\b/
+const BLOCKED = /\b(block|blocked|geblokkeer|vasgevang|stuck|wag(?:tend)?)\b/
 const VIDEO_NOUN = /\b(video|videos|clip)\b/
 const MARK_SHOT = /\b(mark|merk)\b.*\b(shot|geskiet|geneem|filmed|opgeneem)\b/
 
@@ -227,6 +231,28 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
       clientId: context.currentClientId ?? null,
       clientName: context.currentClientName ?? null,
       requiresApproval: false,
+    }
+  }
+
+  // 2b. Task status / completion / blocker (on "this task" / a task in context).
+  if ((THIS_TASK.test(lower) || TASK_NOUN.test(lower)) && !ASSIGN.test(lower)) {
+    if (COMPLETE.test(lower)) {
+      return {
+        type: 'task.update',
+        title: 'Mark task complete',
+        fields: { status: 'done' },
+        clientId: context.currentClientId ?? null,
+        clientName: context.currentClientName ?? null,
+      }
+    }
+    if (BLOCKED.test(lower)) {
+      return {
+        type: 'task.update',
+        title: 'Mark task blocked',
+        fields: { status: 'blocked' },
+        clientId: context.currentClientId ?? null,
+        clientName: context.currentClientName ?? null,
+      }
     }
   }
 
