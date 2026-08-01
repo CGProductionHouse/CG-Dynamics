@@ -106,3 +106,31 @@ test('skilled mode never disables the financial restriction guard', () => {
   const skilledIdx = INDEX.indexOf('if (agentKey && AGENT_CONTRACTS[agentKey])')
   assert.ok(restrictedIdx > -1 && skilledIdx > -1 && restrictedIdx < skilledIdx)
 })
+
+// ── Meta connection honesty (live diagnostics, not model guesses) ────────────
+test('chat reads real Meta integration state from the status tables', () => {
+  assert.match(INDEX, /metaState = isMetaMention\(message\) \? await getMetaIntegrationState\(sb\) : null/)
+  assert.match(INDEX, /from\('meta_connections'\)/)
+  assert.match(INDEX, /from\('meta_connection_tokens'\)/)
+  assert.match(INDEX, /from\('meta_client_assets'\)/)
+  assert.match(INDEX, /META_REQUIRED_SCOPES/)
+})
+
+test('system prompt never claims Meta is disconnected when live state says connected', () => {
+  // The blanket "Meta ... not connected yet" claim is removed from the default
+  // instruction, and the model is bound to the live state instead.
+  assert.match(INDEX, /Live Meta Business integration state \(from diagnostics, do not contradict it\)/)
+  assert.doesNotMatch(INDEX, /client task details, approvals, Meta, or CG Hours data, say the integration is not connected yet/)
+  assert.match(INDEX, /When asked whether Meta is connected, reply based ONLY on the live Meta integration state above/)
+})
+
+test('capabilities response reflects the real Meta state line', () => {
+  assert.match(INDEX, /buildMetaStatusLine\(metaState\)/)
+  assert.match(INDEX, /Meta Business: connected \(\$\{metaState\.linkedAssetsCount\}/)
+  assert.match(INDEX, /Meta Business: not connected\. \$\{metaState\.message\}/)
+})
+
+test('Meta state is fetched lazily only when the message mentions Meta', () => {
+  assert.match(INDEX, /isMetaMention\(message\)/)
+  assert.match(INDEX, /META_MENTION_PATTERNS/)
+})

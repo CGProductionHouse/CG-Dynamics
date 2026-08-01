@@ -130,6 +130,34 @@ test('"Run Meta sync with baseline" → job.enqueue meta_sync + baseline', () =>
   assert.equal(r.fields.baseline, 'yes')
 })
 
+test('"sync all connected meta clients" → job.enqueue meta_sync (was falling through to chat)', () => {
+  const r = parseAssistantAction('sync all connected meta clients', CTX)
+  assert.equal(r.type, 'job.enqueue')
+  assert.equal(r.fields.job, 'meta_sync')
+})
+
+test('Meta sync natural variations → job.enqueue meta_sync', () => {
+  for (const phrase of [
+    'sync all Meta clients',
+    'run the Meta sync',
+    'refresh Meta data',
+    'update all client Meta reports',
+    'sync connected clients',
+    'sinkroniseer al die Meta kliënte',
+    'verfris Meta data',
+    'update die Meta verslae',
+  ]) {
+    const r = parseAssistantAction(phrase, CTX)
+    assert.equal(r.type, 'job.enqueue', `expected job.enqueue for: ${phrase}`)
+    assert.equal(r.fields.job, 'meta_sync', `expected meta_sync for: ${phrase}`)
+  }
+})
+
+test('Meta-related phrases WITHOUT sync intent stay null (fall through to chat)', () => {
+  assert.equal(parseAssistantAction('Where can I find the Meta reports?', CTX), null)
+  assert.equal(parseAssistantAction('When is the next client sync call?', CTX), null)
+})
+
 test('"Prepare the reports" → job.enqueue report_prep', () => {
   const r = parseAssistantAction('Prepare the reports', CTX)
   assert.equal(r.type, 'job.enqueue')
