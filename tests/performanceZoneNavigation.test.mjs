@@ -33,9 +33,22 @@ test('Layout renders a Hub/Performance switcher and both zones stay reachable', 
   assert.match(layout, /function ZoneSwitcher/)
   assert.match(layout, />Hub<\/button>/)
   assert.match(layout, />Performance<\/button>/)
-  // The active zone drives both the sidebar list and the mobile bottom nav.
+  // The selected zone drives both the sidebar list and the mobile bottom nav.
   assert.match(layout, /const zoneItems = zone === 'performance' \? performanceItems : primaryItems/)
-  assert.match(layout, /\{zoneItems\.map\(item => <MobileNavItem/)
+  assert.match(layout, /const \[zone, setZone\] = useState<NavZone>/)
+  assert.match(layout, /mobilePrimaryItems\.map\(item => <MobileNavItem/)
+})
+
+test('Zone switch navigates to the selected zone landing route', () => {
+  assert.match(layout, /navigate\(nextZone === 'performance' \? '\/admin\/client-performance' : '\/admin\/cg-hub'\)/)
+  assert.match(layout, /<ZoneSwitcher zone=\{zone\} onChange=\{changeZone\}/)
+})
+
+test('shared Clients routes preserve the selected zone while exclusive routes select their zone', () => {
+  assert.match(nav, /SHARED_ZONE_PATHS = \['\/admin\/clients', '\/admin\/client-dashboard'\]/)
+  assert.match(layout, /if \(!isSharedNavZonePath\(location\.pathname\)\) setZone\(resolveNavZone\(location\.pathname\)\)/)
+  assert.match(layout, /window\.localStorage\.setItem\(ZONE_STORAGE_KEY, zone\)/)
+  assert.match(layout, /setZone\(nextZone\)[\s\S]*navigate\(nextZone === 'performance'/)
 })
 
 test('Daily Hub navigation is never hidden — Work stays in the Hub zone', () => {
@@ -43,5 +56,5 @@ test('Daily Hub navigation is never hidden — Work stays in the Hub zone', () =
   // never removes daily navigation.
   assert.match(nav, /export const primaryNavItems/)
   assert.match(nav, /to: '\/admin\/work', label: 'Work'/)
-  assert.match(layout, /zone === 'performance' \? performanceItems : primaryItems/)
+  assert.match(layout, />\s*More\s*<\/button>/)
 })

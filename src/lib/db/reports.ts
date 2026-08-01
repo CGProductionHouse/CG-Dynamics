@@ -55,6 +55,40 @@ export interface ReportWithPosts extends Report {
   posts: ReportPost[]
 }
 
+export type ClientReport = Pick<Report,
+  | 'id'
+  | 'platform'
+  | 'period_start'
+  | 'period_end'
+  | 'status'
+  | 'report_title'
+  | 'previous_month_strategy'
+  | 'previous_month_reflection'
+  | 'performance_comments'
+  | 'strategy_next_month'
+  | 'content_direction_next_month'
+  | 'boost_recommendation'
+  | 'strategy_data'
+  | 'published_at'
+>
+
+export interface ClientReportPost {
+  id: string
+  platform: Platform | null
+  publish_time: string | null
+  post_type: string | null
+  caption: string | null
+  permalink: string | null
+  impressions: number | null
+  reach: number | null
+  engagements: number
+  excluded: boolean
+}
+
+export interface ClientReportWithPosts extends ClientReport {
+  posts: ClientReportPost[]
+}
+
 export interface ReportInput {
   id?: string
   client_id: string
@@ -307,39 +341,18 @@ export async function deleteReport(reportId: string) {
   return { error }
 }
 
-export async function listPublishedReportsForClient(clientId: string) {
-  const { data, error } = await supabase
-    .from('reports')
-    .select('*')
-    .eq('client_id', clientId)
-    .eq('status', 'published')
-    .order('period_start', { ascending: false })
-    .order('created_at', { ascending: false })
-
-  return { data: (data ?? []) as Report[], error }
+export async function listClientPublishedReports() {
+  const { data, error } = await supabase.rpc('client_published_reports')
+  return { data: (data ?? []) as ClientReport[], error }
 }
 
-export async function getLatestPublishedReportForClient(clientId: string) {
-  const reportResult = await supabase
-    .from('reports')
-    .select('*')
-    .eq('client_id', clientId)
-    .eq('status', 'published')
-    .order('period_end', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  if (reportResult.error || !reportResult.data) {
-    return { data: null, error: reportResult.error }
-  }
-
-  const report = reportResult.data as Report
+export async function getClientPublishedReportWithPosts(reportId: string) {
+  const reportResult = await listClientPublishedReports()
+  if (reportResult.error) return { data: null, error: reportResult.error }
+  const report = reportResult.data.find(item => item.id === reportId)
+  if (!report) return { data: null, error: { message: 'Report not found.' } }
   const postsResult = await supabase
-    .from('posts')
-    .select('*')
-    .eq('report_id', report.id)
-    .order('publish_time', { ascending: true, nullsFirst: false })
+    .rpc('client_published_report_posts', { p_report_id: reportId })
 
   if (postsResult.error) {
     return { data: null, error: postsResult.error }
@@ -348,7 +361,10 @@ export async function getLatestPublishedReportForClient(clientId: string) {
   return {
     data: {
       ...report,
-      posts: (postsResult.data ?? []) as ReportPost[],
+      posts: ((postsResult.data ?? []) as Array<Omit<ClientReportPost, 'id'>>).map((post, index) => ({
+        ...post,
+        id: `client-post-${index}`,
+      })) as ClientReportPost[],
     },
     error: null,
   }

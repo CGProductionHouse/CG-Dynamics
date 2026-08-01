@@ -36,9 +36,14 @@ export type NavZone = 'hub' | 'performance'
 // Routes that belong ONLY to the Performance zone. Landing on one auto-selects
 // Performance; shared surfaces (e.g. Clients) never force a zone switch.
 const PERFORMANCE_ONLY_PATHS = ['/admin/client-performance', '/admin/reports', '/admin/published', '/admin/integrations']
+const SHARED_ZONE_PATHS = ['/admin/clients', '/admin/client-dashboard']
 
 export function resolveNavZone(pathname: string): NavZone {
   return PERFORMANCE_ONLY_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`)) ? 'performance' : 'hub'
+}
+
+export function isSharedNavZonePath(pathname: string): boolean {
+  return SHARED_ZONE_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`))
 }
 
 export const adminNavItems: NavItem[] = [

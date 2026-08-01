@@ -24,7 +24,7 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { Pill } from '../../components/ui/Badges'
 
-const SESSION_KEY = 'cg-assistant-chat-session-v1'
+const SESSION_KEY_PREFIX = 'cg-assistant-chat-session-v1'
 
 const STARTER_PROMPTS = [
   'What should I focus on today?',
@@ -125,9 +125,14 @@ function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
-function loadSessionMessages(): LocalAssistantMessage[] {
+function sessionKey(userId: string) {
+  return `${SESSION_KEY_PREFIX}:${userId}`
+}
+
+function loadSessionMessages(userId: string | null): LocalAssistantMessage[] {
+  if (!userId) return []
   try {
-    const raw = window.sessionStorage.getItem(SESSION_KEY)
+    const raw = window.sessionStorage.getItem(sessionKey(userId))
     if (!raw) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
@@ -182,7 +187,7 @@ function roleLabel(role: string | undefined) {
 
 export default function AssistantPage() {
   const { profile } = useAuth()
-  const [messages, setMessages] = useState<LocalAssistantMessage[]>(loadSessionMessages)
+  const [messages, setMessages] = useState<LocalAssistantMessage[]>(() => loadSessionMessages(profile?.id ?? null))
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -204,6 +209,21 @@ export default function AssistantPage() {
   const [surfaceKey, setSurfaceKey] = useState('')
   const [channel, setChannel] = useState<'organic' | 'paid' | 'both'>('both')
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
+  const profileIdRef = useRef<string | null>(profile?.id ?? null)
+  const profileId = profile?.id ?? null
+
+  if (profileIdRef.current !== profileId) {
+    profileIdRef.current = profileId
+    setMessages(loadSessionMessages(profileId))
+    setInput('')
+    setIsSending(false)
+    setError(null)
+    setSetupRequired(false)
+    setLocalWorkContext(null)
+    setActiveClients([])
+    setActiveClientId('')
+    setSelectedAgentKey('')
+  }
   const profileRole = profile?.role as string | undefined
   const isAdminDiagnosticsUser = profileRole === 'admin' || profileRole === 'owner'
   const selectedAgent = SKILLED_AGENTS.find((agent) => agent.key === selectedAgentKey) ?? null
@@ -214,34 +234,38 @@ export default function AssistantPage() {
   )
 
   useEffect(() => {
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(messages.slice(-30)))
-  }, [messages])
+    if (!profileId) return
+    window.sessionStorage.setItem(sessionKey(profileId), JSON.stringify(messages.slice(-30)))
+  }, [messages, profileId])
 
   useEffect(() => {
     let cancelled = false
+    const requestedProfileId = profileId
 
     async function loadLocalWork() {
       try {
         const context = await getMyDayContext(profile)
-        if (!cancelled) setLocalWorkContext(buildAssistantLocalWorkContext(context))
+        if (!cancelled && profileIdRef.current === requestedProfileId) setLocalWorkContext(buildAssistantLocalWorkContext(context))
       } catch {
-        if (!cancelled) setLocalWorkContext(null)
+        if (!cancelled && profileIdRef.current === requestedProfileId) setLocalWorkContext(null)
       }
     }
 
     void loadLocalWork()
     return () => { cancelled = true }
-  }, [profile?.id])
+  }, [profile, profileId])
 
   useEffect(() => {
     let cancelled = false
-    void fetchActiveClients().then((clients) => { if (!cancelled) setActiveClients(clients) })
+    const requestedProfileId = profileId
+    void fetchActiveClients().then((clients) => { if (!cancelled && profileIdRef.current === requestedProfileId) setActiveClients(clients) })
     return () => { cancelled = true }
-  }, [])
+  }, [profileId])
 
   async function sendMessage(messageText = input) {
     const cleanMessage = messageText.trim()
-    if (!cleanMessage || isSending) return
+    const sendingProfileId = profileIdRef.current
+    if (!cleanMessage || isSending || !sendingProfileId) return
 
     const historyBeforeSend = assistantHistory
     const userMessage = makeMessage('user', cleanMessage)
@@ -262,31 +286,32 @@ export default function AssistantPage() {
         }
       : null
 
-    const response = await sendAssistantMessage(cleanMessage, historyBeforeSend, localWorkContext, skilled)
+    try {
+      const response = await sendAssistantMessage(cleanMessage, historyBeforeSend, localWorkContext, skilled)
+      if (profileIdRef.current !== sendingProfileId) return
+      if (response.tools?.length) setTools(response.tools)
+      if (response.setupRequired) setSetupRequired(true)
+      if (!response.ok) setError(response.error ?? 'Assistant unavailable. Check setup.')
 
-    setIsSending(false)
-    if (response.tools?.length) setTools(response.tools)
-    if (response.setupRequired) setSetupRequired(true)
-
-    if (!response.ok) {
-      setError(response.error ?? 'Assistant unavailable. Check setup.')
+      setMessages((current) => [
+        ...current,
+        makeMessage('assistant', response.answer, {
+          restricted: response.restricted,
+          setupRequired: response.setupRequired,
+          agentName: response.agentName,
+          citations: response.citations,
+          sourcesUsed: response.sourcesUsed,
+          reviewWarning: response.reviewWarning,
+          insufficientEvidence: response.insufficientEvidence,
+          platformKnowledgeUsed: response.platformKnowledgeUsed,
+        }),
+      ])
+      window.setTimeout(() => inputRef.current?.focus(), 0)
+    } catch {
+      if (profileIdRef.current === sendingProfileId) setError('Assistant unavailable. Check setup.')
+    } finally {
+      if (profileIdRef.current === sendingProfileId) setIsSending(false)
     }
-
-    setMessages((current) => [
-      ...current,
-      makeMessage('assistant', response.answer, {
-        restricted: response.restricted,
-        setupRequired: response.setupRequired,
-        agentName: response.agentName,
-        citations: response.citations,
-        sourcesUsed: response.sourcesUsed,
-        reviewWarning: response.reviewWarning,
-        insufficientEvidence: response.insufficientEvidence,
-        platformKnowledgeUsed: response.platformKnowledgeUsed,
-      }),
-    ])
-
-    window.setTimeout(() => inputRef.current?.focus(), 0)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -298,7 +323,7 @@ export default function AssistantPage() {
     setMessages([])
     setError(null)
     setSetupRequired(false)
-    window.sessionStorage.removeItem(SESSION_KEY)
+    if (profileId) window.sessionStorage.removeItem(sessionKey(profileId))
     window.setTimeout(() => inputRef.current?.focus(), 0)
   }
 

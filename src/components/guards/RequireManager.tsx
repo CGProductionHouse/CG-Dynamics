@@ -11,7 +11,7 @@ export function RequireManager() {
   if (!user) return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}${location.hash}` }} />
   if (profileError) return <ProfileError message={profileError} />
   if (!profile) return <RouteLoading label="Loading your staff profile..." />
-  if (profile.role === 'client') return <Navigate to="/dashboard" replace />
+  if (profile.role === 'client') return <Navigate to="/client" replace />
   if (!isManagerRole(profile.role)) return <AccessDenied />
 
   return <Outlet />

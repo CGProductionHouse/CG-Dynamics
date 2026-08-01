@@ -41,10 +41,11 @@ export default function Login() {
       setError('Could not load your profile after sign in.')
     } else {
       const requestedPath = (location.state as { from?: string } | null)?.from
+      const clientRequestedPath = requestedPath && /^\/client(?:[/?#]|$)/.test(requestedPath) ? requestedPath : null
       const destination = pendingInviteSetup
         ? '/signup'
         : role === 'client'
-          ? '/dashboard'
+          ? clientRequestedPath ?? '/client'
           : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
       navigate(destination, { replace: true })
     }

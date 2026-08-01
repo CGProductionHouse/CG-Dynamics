@@ -12,6 +12,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import {
   archivePlannerTask,
   createPlannerTask,
+  getPlannerTaskBoardId,
   isMissingPlannerAssignmentRpcError,
   listPlannerActivity,
   listPlannerAssignmentDirectory,
@@ -170,6 +171,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
   const bucketScrollRefs = useRef(new Map<string, HTMLDivElement>())
   const savedScroll = useRef({ board: 0, buckets: new Map<string, number>() })
   const taskRequestRef = useRef(0)
+  const deepLinkRequestRef = useRef(0)
 
   useEffect(() => {
     let active = true
@@ -265,6 +267,44 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     () => tasksBoardId === activeBoardRecord?.id ? tasks : [],
     [activeBoardRecord?.id, tasks, tasksBoardId],
   )
+  const routeTaskId = routeParams.get('id')
+
+  useEffect(() => {
+    if (!routeTaskId || boards.length === 0) return
+    const requestId = ++deepLinkRequestRef.current
+    void getPlannerTaskBoardId(routeTaskId).then(({ boardId, error }) => {
+      if (requestId !== deepLinkRequestRef.current) return
+      if (error || !boardId) {
+        setTaskError('The linked Planner task is unavailable or you no longer have access to it.')
+        return
+      }
+      const targetBoard = boards.find(board => board.id === boardId && board.slug !== 'client-schedule')
+      if (!targetBoard) {
+        setTaskError('The linked Planner task is not on an available operational board.')
+        return
+      }
+      if (activeBoard !== targetBoard.slug) {
+        taskRequestRef.current += 1
+        setActiveBoard(targetBoard.slug)
+        setBucketsLoading(true)
+        setTasksLoading(true)
+      }
+    })
+    return () => { deepLinkRequestRef.current += 1 }
+  }, [activeBoard, boards, routeTaskId])
+
+  useEffect(() => {
+    if (!routeTaskId || tasksBoardId !== activeBoardRecord?.id) return
+    const linkedTask = displayedTasks.find(task => task.id === routeTaskId)
+    if (!linkedTask) return
+    setDrawerTask(linkedTask)
+    if (isPlannerHistoryTask(linkedTask)) setWorkView('history')
+    if (routeParams.get('task') !== linkedTask.title) {
+      const next = new URLSearchParams(routeParams)
+      next.set('task', linkedTask.title)
+      setSearchParams(next, { replace: true })
+    }
+  }, [activeBoardRecord?.id, displayedTasks, routeParams, routeTaskId, setSearchParams, tasksBoardId])
   const routeAssignee = routeParams.get('assignee')
   const effectiveAssigneeFilter = routeAssignee ? `person:${routeAssignee}` : assigneeFilter
   const routeScope = routeParams.get('scope')
@@ -358,6 +398,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     // in place (task.update / complete / block), without a full-page nav.
     const next = new URLSearchParams(routeParams)
     next.set('id', task.id)
+    next.set('task', task.title)
     setSearchParams(next, { replace: true })
   }
 
@@ -366,6 +407,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     restoreScroll()
     const next = new URLSearchParams(routeParams)
     next.delete('id')
+    next.delete('task')
     setSearchParams(next, { replace: true })
   }
 
@@ -398,6 +440,10 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     setTaskError(null)
     setBucketsLoading(true)
     setTasksLoading(true)
+    const next = new URLSearchParams(routeParams)
+    next.delete('id')
+    next.delete('task')
+    setSearchParams(next, { replace: true })
   }
 
   function refreshActiveBoardTasks() {

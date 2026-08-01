@@ -14,6 +14,10 @@ const CALENDAR_PAGE_SOURCE = readSource('../src/pages/client/ClientContentCalend
 const CALENDAR_LIB_SOURCE = readSource('../src/lib/clientPortalCalendar.ts')
 const REPORTS_SOURCE = readSource('../src/lib/db/reports.ts')
 const CLIENT_RPC_SOURCE = readSource('../supabase/phase-11a-client-portal-read-access.sql')
+const LOGIN_SOURCE = readSource('../src/pages/Login.tsx')
+const STAFF_GUARD_SOURCE = readSource('../src/components/guards/RequireStaff.tsx')
+const MANAGER_GUARD_SOURCE = readSource('../src/components/guards/RequireManager.tsx')
+const ADMIN_GUARD_SOURCE = readSource('../src/components/guards/RequireAdmin.tsx')
 
 let server
 let activeOrganicPlatforms
@@ -59,12 +63,31 @@ test('shared portal navigation links every client area and keeps sign out availa
   assert.match(SHELL_SOURCE, /onClick=\{\(\) => void signOut\(\)\}/)
 })
 
+test('client mobile navigation exposes every destination without horizontal-scroll discovery', () => {
+  assert.match(SHELL_SOURCE, />\s*Portal menu\s*/)
+  assert.match(SHELL_SOURCE, /id="client-mobile-navigation"/)
+  assert.match(SHELL_SOURCE, /className="mt-2 grid grid-cols-2 gap-2/)
+  assert.match(SHELL_SOURCE, /min-h-11/)
+  assert.match(SHELL_SOURCE, /pb-\[env\(safe-area-inset-bottom\)\]/)
+})
+
+test('login preserves role-valid client deep links and staff guards avoid the dashboard hop', () => {
+  assert.match(LOGIN_SOURCE, /\^\\\/client\(\?:\[\/\?#\]\|\$\)/)
+  assert.match(LOGIN_SOURCE, /role === 'client'[\s\S]*clientRequestedPath \?\? '\/client'/)
+  assert.match(LOGIN_SOURCE, /requestedPath\?\.startsWith\('\/admin\/'\) \? requestedPath : '\/admin\/cg-hub'/)
+  for (const guard of [STAFF_GUARD_SOURCE, MANAGER_GUARD_SOURCE, ADMIN_GUARD_SOURCE]) {
+    assert.match(guard, /profile\.role === 'client'\) return <Navigate to="\/client" replace \/>/)
+    assert.doesNotMatch(guard, /Navigate to="\/dashboard"/)
+  }
+})
+
 test('portal pages use the signed-in client and only published monthly reports', () => {
   assert.match(HOME_SOURCE, /profile\.client_id/)
-  assert.match(HOME_SOURCE, /listPublishedReportsForClient\(profile\.client_id\)/)
-  assert.match(PERFORMANCE_SOURCE, /listPublishedReportsForClient\(profile\.client_id\)/)
-  assert.match(CAMPAIGNS_SOURCE, /listPublishedReportsForClient\(profile\.client_id\)/)
-  assert.match(REPORTS_SOURCE, /\.eq\('client_id', clientId\)[\s\S]*\.eq\('status', 'published'\)/)
+  assert.match(HOME_SOURCE, /listClientPublishedReports\(\)/)
+  assert.match(PERFORMANCE_SOURCE, /listClientPublishedReports\(\)/)
+  assert.match(CAMPAIGNS_SOURCE, /listClientPublishedReports\(\)/)
+  assert.match(REPORTS_SOURCE, /supabase\.rpc\('client_published_reports'\)/)
+  assert.doesNotMatch(REPORTS_SOURCE, /listPublishedReportsForClient/)
 })
 
 test('client calendar uses only safe RPC projections and database ownership enforcement', () => {
@@ -131,7 +154,8 @@ test('strategy preview uses published reviewed fields and has an honest empty st
 
 test('verified performance reporting loaders and availability model remain in place', () => {
   assert.match(PERFORMANCE_SOURCE, /loadReportPlatformFacts/)
-  assert.match(PERFORMANCE_SOURCE, /loadReportContentExclusions/)
+  assert.match(PERFORMANCE_SOURCE, /getClientPublishedReportWithPosts/)
+  assert.doesNotMatch(PERFORMANCE_SOURCE, /loadReportContentExclusions/)
   assert.match(PERFORMANCE_SOURCE, /loadGoogleAdsDashboard/)
   assert.match(PERFORMANCE_SOURCE, /previousReportMonth/)
   assert.doesNotMatch(HOME_SOURCE, /facts\.reduce|totalReach|totalViews/)

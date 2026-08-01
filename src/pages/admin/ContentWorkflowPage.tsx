@@ -267,7 +267,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
   const openFromCalendarEvent = useEffectEvent((eventId: string) => {
     const match = runs.find(run => run.calendar_event_id === eventId)
     if (match) { setSelectedRunId(match.id); setRunMode('view') }
-    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'runs'); next.delete('event'); return next }, { replace: true })
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'runs'); if (match) next.set('runId', match.id); next.delete('event'); return next }, { replace: true })
   })
   useEffect(() => {
     const eventId = searchParams.get('event')
@@ -276,16 +276,19 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
     return () => window.clearTimeout(timer)
   }, [searchParams, runs])
 
-  // Direct Content Run deep link: ?tab=runs&run=<run-id>.
-  const openFromRunParam = useEffectEvent((runId: string) => {
+  // Direct Content Run deep link. `runId` remains while the run is selected so
+  // the global Assistant always receives the exact visible write target.
+  const openFromRunParam = useEffectEvent((runId: string, canonicalize: boolean) => {
     const match = runs.find(run => run.id === runId)
-    if (match) { setSelectedRunId(match.id); setRunMode('view') }
-    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'runs'); next.delete('run'); return next }, { replace: true })
+    setSelectedRunId(match?.id ?? null)
+    if (match) setRunMode('view')
+    if (canonicalize) setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'runs'); next.set('runId', runId); next.delete('run'); return next }, { replace: true })
   })
   useEffect(() => {
-    const runId = searchParams.get('run')
+    const legacyRunId = searchParams.get('run')
+    const runId = searchParams.get('runId') ?? legacyRunId
     if (!runId || runs.length === 0) return
-    const timer = window.setTimeout(() => openFromRunParam(runId), 0)
+    const timer = window.setTimeout(() => openFromRunParam(runId, Boolean(legacyRunId)), 0)
     return () => window.clearTimeout(timer)
   }, [searchParams, runs])
   // Direct guideline deep link: ?tab=guides&guide=<guide-id>.
@@ -416,7 +419,11 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
     if (response.error) { setRunError(response.error); return }
     if (response.migrationNeeded) { setMigrationNeeded(true); return }
     await loadAll()
-    if (response.data) setSelectedRunId(response.data.id)
+    if (response.data) {
+      const savedRunId = response.data.id
+      setSelectedRunId(savedRunId)
+      setSearchParams(current => { const next = new URLSearchParams(current); next.set('tab', 'runs'); next.set('runId', savedRunId); return next }, { replace: true })
+    }
     setRunMode('view')
   }
 
@@ -478,6 +485,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
       next.set('tab', value)
       next.delete('event')
       next.delete('run')
+      if (value !== 'runs') next.delete('runId')
       next.delete('guide')
       if (value !== 'guidelines') next.delete('guideline')
       return next
@@ -488,7 +496,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
     setSearchParams(current => {
       const next = new URLSearchParams(current)
       next.set('tab', 'runs')
-      next.set('run', runId)
+      next.set('runId', runId)
       return next
     })
   }
@@ -623,7 +631,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
               <option value="all">All statuses</option>
               {CONTENT_RUN_STATUSES.map(status => <option key={status} value={status}>{humanizeStatus(status)}</option>)}
             </select>
-            <ActionButton size="sm" onClick={() => { setRunMode('create'); setSelectedRunId(null); setRunError(null) }}>New run</ActionButton>
+            <ActionButton size="sm" onClick={() => { setRunMode('create'); setSelectedRunId(null); setRunError(null); setSearchParams(current => { const next = new URLSearchParams(current); next.delete('runId'); return next }, { replace: true }) }}>New run</ActionButton>
           </div>
 
           {runMode === 'create' && (
@@ -648,8 +656,13 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
                       type="button"
                       aria-expanded={isOpen}
                       onClick={() => {
-                        if (isOpen) { setSelectedRunId(null); setRunMode('view') }
-                        else { setSelectedRunId(run.id); setRunMode('view'); setCardError(null) }
+                        if (isOpen) {
+                          setSelectedRunId(null); setRunMode('view')
+                          setSearchParams(current => { const next = new URLSearchParams(current); next.delete('runId'); return next }, { replace: true })
+                        } else {
+                          setSelectedRunId(run.id); setRunMode('view'); setCardError(null)
+                          setSearchParams(current => { const next = new URLSearchParams(current); next.set('tab', 'runs'); next.set('runId', run.id); return next }, { replace: true })
+                        }
                       }}
                       className="flex w-full items-start justify-between gap-3 p-3.5 text-left transition-colors hover:bg-white/[0.02]"
                     >
@@ -684,7 +697,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
                               <div className="flex shrink-0 flex-wrap justify-end gap-2">
                                 {runGuidelineVideos.length > 0 && <ActionButton size="sm" onClick={() => setShootMode(true)}>Shoot mode</ActionButton>}
                                 <ActionButton size="sm" variant="secondary" onClick={() => { setRunMode('edit'); setRunError(null) }}>Edit</ActionButton>
-                                <ActionButton size="sm" variant="ghost" onClick={() => { setSelectedRunId(null); setRunMode('view') }}>Close</ActionButton>
+                                <ActionButton size="sm" variant="ghost" onClick={() => { setSelectedRunId(null); setRunMode('view'); setSearchParams(current => { const next = new URLSearchParams(current); next.delete('runId'); return next }, { replace: true }) }}>Close</ActionButton>
                               </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">

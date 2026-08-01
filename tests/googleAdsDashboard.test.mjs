@@ -141,7 +141,8 @@ test('admin preview and client dashboard automatically load current and previous
 })
 
 test('client route uses only its published report list and passes Google Ads to the report view', () => {
-  assert.match(CLIENT_DASHBOARD_SOURCE, /listPublishedReportsForClient\(profile\.client_id\)/)
+  assert.match(CLIENT_DASHBOARD_SOURCE, /listClientPublishedReports\(\)/)
+  assert.match(CLIENT_DASHBOARD_SOURCE, /getClientPublishedReportWithPosts\(reportId\)/)
   assert.doesNotMatch(CLIENT_DASHBOARD_SOURCE, /\blistReports\s*\(/)
   assert.match(CLIENT_DASHBOARD_SOURCE, /googleAds=\{googleAds\}/)
   assert.match(CLIENT_DASHBOARD_SOURCE, /googleAdsState=\{googleAdsState\}/)

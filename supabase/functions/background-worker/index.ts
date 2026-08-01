@@ -17,6 +17,11 @@ interface JobRow {
   requested_by_name: string | null
 }
 
+interface JobResult extends Record<string, unknown> {
+  waiting?: boolean
+  progress?: number
+}
+
 Deno.serve(async () => {
   const url = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -37,11 +42,35 @@ Deno.serve(async () => {
     // missing id as "nothing to do".
     if (!job || !job.id) break
     try {
-      const result = await runJob(supabase, job as JobRow, url)
-      await supabase.rpc('complete_background_job', { p_id: job.id, p_result: result })
+      const result = await runJob(supabase, job as JobRow, url, worker)
+      if (result.waiting === true) {
+        const { error: deferError } = await supabase.rpc('defer_background_job', {
+          p_id: job.id,
+          p_locked_by: worker,
+          p_progress: typeof result.progress === 'number' ? result.progress : 70,
+          p_delay_seconds: 30,
+        })
+        if (deferError) throw new Error(`Could not defer background job: ${deferError.message}`)
+        processed.push({ id: job.id, job_type: job.job_type, ok: true })
+        continue
+      }
+      const { error: completeError } = await supabase.rpc('complete_background_job', {
+        p_id: job.id,
+        p_locked_by: worker,
+        p_result: result,
+      })
+      if (completeError) throw new Error(`Could not complete background job: ${completeError.message}`)
       processed.push({ id: job.id, job_type: job.job_type, ok: true })
     } catch (err) {
-      await supabase.rpc('fail_background_job', { p_id: job.id, p_error: String(err instanceof Error ? err.message : err).slice(0, 500) })
+      const failure = String(err instanceof Error ? err.message : err).slice(0, 500)
+      const { error: failError } = await supabase.rpc('fail_background_job', {
+        p_id: job.id,
+        p_locked_by: worker,
+        p_error: failure,
+      })
+      if (failError) {
+        return new Response(JSON.stringify({ ok: false, error: `Could not fail background job: ${failError.message}`, processed }), { status: 500, headers: { 'Content-Type': 'application/json' } })
+      }
       processed.push({ id: job.id, job_type: job.job_type, ok: false })
     }
   }
@@ -55,8 +84,9 @@ async function runJob(
   supabase: ReturnType<typeof createClient>,
   job: JobRow,
   url: string,
-): Promise<Record<string, unknown>> {
-  await supabase.rpc('update_background_job_progress', { p_id: job.id, p_progress: 10 })
+  worker: string,
+): Promise<JobResult> {
+  await updateJobProgress(supabase, job.id, worker, 10)
   const payload = (job.payload ?? {}) as Record<string, unknown>
 
   switch (job.job_type) {
@@ -67,24 +97,38 @@ async function runJob(
       // the shared META_SYNC_WORKER_SECRET project secret (the same secret the
       // engine already uses to self-continue). The durable job stays truthful:
       // it only succeeds once the batch finishes with at least one completed
-      // item, throws (-> retry with backoff) while items are still processing,
+      // item, defers without consuming attempts while items are still running,
       // and fails when the whole batch failed.
-      return await runMetaSyncBatch(supabase, job, url, payload)
+      return await runMetaSyncBatch(supabase, job, url, payload, worker)
     }
     case 'report_prep': {
       // Real report preparation: idempotent find-or-create of the previous-month
       // master draft report per active client via a SECURITY DEFINER RPC. Running
       // it twice creates nothing the second time (reused count rises instead).
-      await supabase.rpc('update_background_job_progress', { p_id: job.id, p_progress: 40 })
+      await updateJobProgress(supabase, job.id, worker, 40)
       const args = typeof payload.month === 'string' ? { p_month: payload.month } : {}
       const { data, error } = await supabase.rpc('prepare_monthly_reports', args)
       if (error) throw new Error(error.message)
-      await supabase.rpc('update_background_job_progress', { p_id: job.id, p_progress: 90 })
+      await updateJobProgress(supabase, job.id, worker, 90)
       return { ok: true, ...(data as Record<string, unknown>) }
     }
     default:
-      return { ok: true, skipped: `unknown job_type ${job.job_type}` }
+      throw new Error(`Unsupported background job type: ${job.job_type}`)
   }
+}
+
+async function updateJobProgress(
+  supabase: ReturnType<typeof createClient>,
+  jobId: string,
+  worker: string,
+  progress: number,
+): Promise<void> {
+  const { error } = await supabase.rpc('update_background_job_progress', {
+    p_id: jobId,
+    p_locked_by: worker,
+    p_progress: progress,
+  })
+  if (error) throw new Error(`Could not update background job progress: ${error.message}`)
 }
 
 function previousMonthStr(offset = 1): string {
@@ -98,7 +142,8 @@ async function runMetaSyncBatch(
   job: JobRow,
   url: string,
   payload: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
+  worker: string,
+): Promise<JobResult> {
   // Months to sync: an explicit completed month, else the previous completed
   // month; a baseline request adds the month before that for comparison.
   const months: string[] = []
@@ -158,23 +203,29 @@ async function runMetaSyncBatch(
     if (itemsError) throw new Error(`Could not create sync batch items: ${itemsError.message}`)
   }
 
-  await supabase.rpc('update_background_job_progress', { p_id: job.id, p_progress: 30 })
+  await updateJobProgress(supabase, job.id, worker, 30)
 
   // Drive the engine: invoke meta-sync-worker for this batch and wait for the
   // synchronous part. The worker self-continues for large batches.
   const workerSecret = (Deno.env.get('META_SYNC_WORKER_SECRET') ?? '').trim()
   if (!workerSecret) throw new Error('META_SYNC_WORKER_SECRET is not configured; headless Meta sync cannot authorise.')
-  const res = await fetch(`${url}/functions/v1/meta-sync-worker`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-worker-secret': workerSecret },
-    body: JSON.stringify({ batchId }),
-  })
-  if (!res.ok) {
+  let res: Response | null = null
+  try {
+    res = await fetch(`${url}/functions/v1/meta-sync-worker`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-worker-secret': workerSecret },
+      body: JSON.stringify({ batchId }),
+      signal: AbortSignal.timeout(15_000),
+    })
+  } catch (error) {
+    if (!(error instanceof DOMException && ['TimeoutError', 'AbortError'].includes(error.name))) throw error
+  }
+  if (res && !res.ok) {
     const text = await res.text().catch(() => '')
     throw new Error(`meta-sync-worker HTTP ${res.status}: ${text.slice(0, 200)}`)
   }
-  await res.json().catch(() => null)
-  await supabase.rpc('update_background_job_progress', { p_id: job.id, p_progress: 70 })
+  if (res) await res.json().catch(() => null)
+  await updateJobProgress(supabase, job.id, worker, 70)
 
   // Truthful terminal check from the batch itself.
   const { data: batchRow, error: batchReadError } = await supabase
@@ -191,9 +242,9 @@ async function runMetaSyncBatch(
     .in('status', ['queued', 'running'])
 
   if ((pending ?? 0) > 0) {
-    // Still processing — fail the attempt so the durable queue retries with
-    // backoff and this handler resumes the SAME batch (idempotent above).
-    throw new Error(`Meta sync batch is still processing (${pending} item(s) remaining). Retrying.`)
+    // Waiting for the durable batch is not a job failure. The caller releases
+    // this lease without consuming an attempt and resumes the same batch later.
+    return { waiting: true, progress: 70, batchId, itemsRemaining: pending }
   }
 
   const completed = batchRow.completed_items ?? 0
@@ -209,7 +260,7 @@ async function runMetaSyncBatch(
     throw new Error(`Meta sync failed for all items. ${detail}`.slice(0, 480))
   }
 
-  await supabase.rpc('update_background_job_progress', { p_id: job.id, p_progress: 95 })
+  await updateJobProgress(supabase, job.id, worker, 95)
   return {
     ok: true,
     batchId,

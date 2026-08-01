@@ -62,10 +62,41 @@ export function redact(text: string, tokens: Array<string | null | undefined>): 
 const RETRYABLE = new Set([429, 500, 502, 503, 504])
 const BACKOFF = [500, 1200]
 
+export interface MetaSyncControl {
+  deadline?: number
+  shouldCancel?: () => boolean
+}
+
+export class MetaSyncDeadlineError extends Error {
+  readonly resumable = true
+
+  constructor(stage: string) {
+    super(`Meta sync paused during ${stage} because its resumable deadline was reached.`)
+    this.name = 'MetaSyncDeadlineError'
+  }
+}
+
+function assertMetaSyncActive(control: MetaSyncControl | undefined, stage: string): void {
+  if (control?.shouldCancel?.() || (control?.deadline !== undefined && Date.now() >= control.deadline)) {
+    throw new MetaSyncDeadlineError(stage)
+  }
+}
+
+function requestTimeoutWithinDeadline(
+  requestedTimeoutMs: number,
+  control: MetaSyncControl | undefined,
+  stage: string,
+): number {
+  assertMetaSyncActive(control, stage)
+  if (control?.deadline === undefined) return requestedTimeoutMs
+  return Math.max(1, Math.min(requestedTimeoutMs, control.deadline - Date.now()))
+}
+
 export async function metaFetch(
   url: string,
   initOrTimeout: RequestInit | number = {},
   requestedTimeoutMs = 12_000,
+  control?: MetaSyncControl,
 ): Promise<Response> {
   const init = typeof initOrTimeout === 'number' ? {} : initOrTimeout
   const timeoutMs = typeof initOrTimeout === 'number' ? initOrTimeout : requestedTimeoutMs
@@ -73,18 +104,31 @@ export async function metaFetch(
   const backoff = canRetry ? BACKOFF : []
   let lastErr: unknown = null
   for (let attempt = 0; attempt <= backoff.length; attempt++) {
+    assertMetaSyncActive(control, `request attempt ${attempt + 1}`)
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    const boundedTimeoutMs = requestTimeoutWithinDeadline(timeoutMs, control, `request attempt ${attempt + 1}`)
+    const timer = setTimeout(() => controller.abort(), boundedTimeoutMs)
     try {
       const res = await fetch(url, { ...init, signal: controller.signal })
       clearTimeout(timer)
+      assertMetaSyncActive(control, `request attempt ${attempt + 1}`)
       if (res.ok || !RETRYABLE.has(res.status)) return res
       lastErr = new Error(`HTTP ${res.status}`)
     } catch (e) {
       clearTimeout(timer)
+      if (e instanceof MetaSyncDeadlineError) throw e
       lastErr = e
     }
-    if (attempt < backoff.length) await new Promise(r => setTimeout(r, backoff[attempt]))
+    assertMetaSyncActive(control, `request attempt ${attempt + 1} completion`)
+    if (attempt < backoff.length) {
+      assertMetaSyncActive(control, `retry backoff ${attempt + 1}`)
+      const delayMs = backoff[attempt]
+      if (control?.deadline !== undefined && Date.now() + delayMs >= control.deadline) {
+        throw new MetaSyncDeadlineError(`retry backoff ${attempt + 1}`)
+      }
+      await new Promise(r => setTimeout(r, delayMs))
+      assertMetaSyncActive(control, `retry ${attempt + 2}`)
+    }
   }
   throw lastErr instanceof Error ? lastErr : new Error(String(lastErr))
 }
@@ -324,19 +368,24 @@ export async function probeMetric(
   since: string,
   until: string,
   tokens: Array<string | null | undefined>,
+  control?: MetaSyncControl,
 ): Promise<MetricProbe> {
   const base = { metricKey: spec.metricKey, sourceMetric: spec.sourceMetric, platform }
+  assertMetaSyncActive(control, `${platform}/${spec.metricKey} probe`)
 
   // Field-mode metrics (snapshots) read an object field, not the insights edge.
   if (spec.mode === 'page_field' || spec.mode === 'ig_field') {
     const fields = spec.fallbackField ? `${spec.sourceMetric},${spec.fallbackField}` : spec.sourceMetric
     try {
-      const res = await metaFetch(`${baseUrl}/${objectId}?fields=${fields}&access_token=${encodeURIComponent(token)}`)
+      const res = await metaFetch(`${baseUrl}/${objectId}?fields=${fields}&access_token=${encodeURIComponent(token)}`, {}, 12_000, control)
+      assertMetaSyncActive(control, `${platform}/${spec.metricKey} field response`)
       if (!res.ok) {
         const err = await readMetaError(res, tokens)
+        assertMetaSyncActive(control, `${platform}/${spec.metricKey} field error`)
         return { ...base, value: null, availability: classifyError(err), responseShape: 'error', metricType: 'field', error: err }
       }
       const body = await res.json()
+      assertMetaSyncActive(control, `${platform}/${spec.metricKey} field parse`)
       const primaryValue = body[spec.sourceMetric]
       const fallbackValue = spec.fallbackField ? body[spec.fallbackField] : undefined
       const v = typeof primaryValue === 'number'
@@ -347,6 +396,7 @@ export async function probeMetric(
         : (typeof fallbackValue === 'number' && spec.fallbackField ? spec.fallbackField : spec.sourceMetric)
       return { ...base, sourceMetric, value: v, availability: classifyValue(v), responseShape: 'field', metricType: 'field', rawSnapshot: tokenSafeSnapshot(body, tokens) }
     } catch (e) {
+      if (e instanceof MetaSyncDeadlineError) throw e
       return { ...base, value: null, availability: 'error', responseShape: 'error', metricType: 'field', error: { code: null, subcode: null, message: redact(String(e), tokens), type: null, trace: null } }
     }
   }
@@ -365,10 +415,13 @@ export async function probeMetric(
 
   let lastErr: MetaErrorInfo | undefined
   for (const attempt of attempts) {
+    assertMetaSyncActive(control, `${platform}/${spec.metricKey} ${attempt.metricType} probe`)
     try {
-      const res = await metaFetch(`${baseUrl}/${objectId}/insights?${attempt.qs}&access_token=${encodeURIComponent(token)}`)
+      const res = await metaFetch(`${baseUrl}/${objectId}/insights?${attempt.qs}&access_token=${encodeURIComponent(token)}`, {}, 12_000, control)
+      assertMetaSyncActive(control, `${platform}/${spec.metricKey} ${attempt.metricType} response`)
       if (!res.ok) {
         lastErr = await readMetaError(res, tokens)
+        assertMetaSyncActive(control, `${platform}/${spec.metricKey} ${attempt.metricType} error`)
         const cls = classifyError(lastErr)
         // Unsupported/permission are definitive for this attempt shape — but try
         // the next shape before giving up (a metric may only work one way).
@@ -377,6 +430,7 @@ export async function probeMetric(
         continue
       }
       const body = await res.json()
+      assertMetaSyncActive(control, `${platform}/${spec.metricKey} ${attempt.metricType} parse`)
       const value = parseInsight(
         body.data as Array<Record<string, unknown>>,
         spec.valueKey,
@@ -387,6 +441,7 @@ export async function probeMetric(
       }
       // ok but empty → try next shape
     } catch (e) {
+      if (e instanceof MetaSyncDeadlineError) throw e
       lastErr = { code: null, subcode: null, message: redact(String(e), tokens), type: null, trace: null }
     }
   }
@@ -469,12 +524,16 @@ export async function syncAccountFacts(
     tokenClass: 'page' | 'user' | 'system_user'
     runType: 'manual' | 'scheduled' | 'historical_resync'
     reconstructInteractions?: number | null // fallback FB content interactions from post sums
+    deadline?: number
+    shouldCancel?: () => boolean
   },
 ): Promise<AccountFactsResult> {
   const specs = args.platform === 'facebook' ? FB_ACCOUNT_METRICS : IG_ACCOUNT_METRICS
   const insightBounds = metaInsightsBounds(args.periodStart, args.periodEnd)
+  const control: MetaSyncControl = { deadline: args.deadline, shouldCancel: args.shouldCancel }
 
   // 1. Open a sync run row.
+  assertMetaSyncActive(control, `${args.platform} sync-run creation`)
   const { data: runRow, error: runInsertError } = await sb.from('platform_sync_runs').insert({
     client_id: args.clientId, asset_id: args.assetId, connection_id: args.connectionId,
     platform: args.platform, run_type: args.runType, period_month: args.periodMonth,
@@ -493,8 +552,11 @@ export async function syncAccountFacts(
   const facts: AccountFactsResult['facts'] = {}
 
   try {
+    assertMetaSyncActive(control, `${args.platform} sync-run creation`)
     for (const spec of specs) {
-    let probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, insightBounds.since, insightBounds.until, args.tokens)
+    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} metric`)
+    let probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, insightBounds.since, insightBounds.until, args.tokens, control)
+    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} probe completion`)
 
     // FB content interactions fallback: reconstruct from post engagement sums when
     // the Page metric is unavailable. Stored as reconstructed, never claimed as
@@ -528,6 +590,7 @@ export async function syncAccountFacts(
       } : null,
       source_response: probe.rawSnapshot ?? null,
     }
+    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} snapshot persistence`)
     const { data: snapshotRow, error: snapshotError } = await sb.from('platform_metric_snapshots').insert({
       sync_run_id: syncRunId, client_id: args.clientId, asset_id: args.assetId, platform: args.platform,
       source_endpoint: spec.mode === 'page_field' || spec.mode === 'ig_field' ? `/${args.platform}-object` : `/${args.platform}-object/insights`,
@@ -542,8 +605,10 @@ export async function syncAccountFacts(
     if (snapshotError || !snapshotRow?.id) {
       throw new Error(`Failed to persist ${args.platform}/${spec.metricKey} snapshot: ${snapshotError?.message ?? 'missing snapshot id'} (${snapshotError?.code ?? 'unknown'})`)
     }
+    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} snapshot persistence`)
 
     // 3. Normalized fact (preserve-verified on failure).
+    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} fact persistence`)
     await upsertMonthlyFact(sb, {
       clientId: args.clientId, assetId: args.assetId, platform: args.platform,
       periodMonth: args.periodMonth, periodStart: args.periodStart, periodEnd: args.periodEnd,
@@ -557,6 +622,7 @@ export async function syncAccountFacts(
       },
       syncRunId,
     })
+    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} fact persistence`)
 
       facts[spec.metricKey] = { value: probe.value, availability: probe.availability, sourceMetric }
     }
@@ -573,12 +639,13 @@ export async function syncAccountFacts(
         persistence_error: safeError,
       },
     }).eq('id', syncRunId)
-    if (failureUpdateError) {
+    if (failureUpdateError && !(error instanceof MetaSyncDeadlineError)) {
       throw new Error(
         `${safeError}; failed to mark sync run failed: ${failureUpdateError.message} (${failureUpdateError.code ?? 'unknown'})`,
         { cause: error },
       )
     }
+    if (error instanceof MetaSyncDeadlineError) throw error
     throw new Error(safeError, { cause: error })
   }
 
@@ -610,6 +677,5 @@ export async function syncAccountFacts(
   if (runUpdateError) {
     throw new Error(`Failed to finalize ${args.platform} sync run: ${runUpdateError.message} (${runUpdateError.code ?? 'unknown'})`)
   }
-
   return { platform: args.platform, syncRunId, healthState, probes, facts }
 }

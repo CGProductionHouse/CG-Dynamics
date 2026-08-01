@@ -30,18 +30,14 @@ export interface RecentContentRun {
   run_date: string | null
 }
 
-// Resolve which Content Run "video five" refers to when the user is not on a
-// run record: the current client's most recent run, else the single most recent
-// run overall. Ambiguity (no runs) returns null so the caller asks instead of
-// guessing.
-export async function resolveContentRun(clientId: string | null): Promise<RecentContentRun | null> {
-  let query = supabase
+// Validate an explicitly selected Content Run before a write preview. The
+// assistant never substitutes a newer run when the selected target is absent.
+export async function resolveContentRun(runId: string): Promise<RecentContentRun | null> {
+  const { data, error } = await supabase
     .from('content_runs')
     .select('id, name, client_id, run_date')
-    .order('run_date', { ascending: false, nullsFirst: false })
-    .limit(1)
-  if (clientId) query = query.eq('client_id', clientId)
-  const { data, error } = await query
-  if (error || !data || data.length === 0) return null
-  return data[0] as RecentContentRun
+    .eq('id', runId)
+    .maybeSingle()
+  if (error || !data) return null
+  return data as RecentContentRun
 }

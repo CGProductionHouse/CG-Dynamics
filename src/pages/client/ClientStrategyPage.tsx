@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
-import { listPublishedReportsForClient, type Report } from '../../lib/db/reports'
+import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 import { buildClientStrategyPreview } from '../../lib/clientPortal'
 import { readStrategyData, ACTION_PLAN_LABELS, type StrategyData } from '../../lib/strategyEngine'
@@ -10,7 +10,7 @@ import { readStrategyData, ACTION_PLAN_LABELS, type StrategyData } from '../../l
 export default function ClientStrategyPage() {
   const { profile } = useAuth()
   const [client, setClient] = useState<Client | null>(null)
-  const [report, setReport] = useState<Report | null>(null)
+  const [report, setReport] = useState<ClientReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -23,7 +23,7 @@ export default function ClientStrategyPage() {
       try {
         const [clientResult, reportsResult] = await Promise.all([
           getClient(profile.client_id),
-          listPublishedReportsForClient(profile.client_id),
+          listClientPublishedReports(),
         ])
         if (!active) return
         if (clientResult.error || reportsResult.error) throw new Error('Data unavailable')

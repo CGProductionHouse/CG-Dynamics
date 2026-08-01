@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import {
-  getReportWithPosts,
-  listPublishedReportsForClient,
-  type Report,
-  type ReportWithPosts,
+  getClientPublishedReportWithPosts,
+  listClientPublishedReports,
+  type ClientReport,
+  type ClientReportWithPosts,
 } from '../../lib/db/reports'
 import {
-  listManualMetricsForClientMonth,
-  type ManualPlatformMetric,
+  listClientReportManualMetrics,
+  type ReportManualMetric,
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientReportView, EmptyReportState } from './ClientReportView'
@@ -21,9 +21,7 @@ import {
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
 import {
-  loadReportContentExclusions,
   loadReportPlatformFacts,
-  type ReportContentExclusion,
 } from '../../lib/db/reportingTruth'
 import type { PlatformFact } from '../../lib/overviewModel'
 
@@ -35,19 +33,17 @@ function errorMessage(error: unknown, fallback: string) {
   return fallback
 }
 
-function monthLabel(report: Report) {
+function monthLabel(report: ClientReport) {
   return monthDisplayLabel(getReportMonthFromPeriod(report))
 }
 
 export default function Dashboard() {
   const { profile } = useAuth()
-  const [reports, setReports] = useState<Report[]>([])
+  const [reports, setReports] = useState<ClientReport[]>([])
   const [client, setClient] = useState<Client | null>(null)
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
-  const [report, setReport] = useState<ReportWithPosts | null>(null)
-  const [manualMetrics, setManualMetrics] = useState<ManualPlatformMetric[]>([])
-  const [previousReport, setPreviousReport] = useState<ReportWithPosts | null>(null)
-  const [previousManualMetrics, setPreviousManualMetrics] = useState<ManualPlatformMetric[]>([])
+  const [report, setReport] = useState<ClientReportWithPosts | null>(null)
+  const [manualMetrics, setManualMetrics] = useState<ReportManualMetric[]>([])
   const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
@@ -55,16 +51,32 @@ export default function Dashboard() {
   const [facts, setFacts] = useState<PlatformFact[]>([])
   const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
   const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
-  const [contentExclusions, setContentExclusions] = useState<ReportContentExclusion[]>([])
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const reportsRequestRef = useRef(0)
+  const reportRequestRef = useRef(0)
 
   const months = useMemo(() => selectMonthlyReports(reports), [reports])
 
   useEffect(() => {
+    const requestId = ++reportsRequestRef.current
+    const requestedProfileId = profile?.id ?? null
+    const requestedClientId = profile?.client_id ?? null
+    const requestIsCurrent = () => requestId === reportsRequestRef.current
+      && profile?.id === requestedProfileId
+      && profile?.client_id === requestedClientId
+
     async function loadReports() {
-      if (!profile?.client_id) {
+      setReports([])
+      setSelectedReportId(null)
+      setClient(null)
+      setReport(null)
+      setManualMetrics([])
+      setFacts([])
+      setPreviousFacts([])
+      reportRequestRef.current += 1
+      if (!requestedClientId) {
         setLoading(false)
         return
       }
@@ -73,39 +85,49 @@ export default function Dashboard() {
       setError(null)
       try {
         const [reportsRes, clientRes] = await Promise.all([
-          listPublishedReportsForClient(profile.client_id),
-          getClient(profile.client_id),
+          listClientPublishedReports(),
+          getClient(requestedClientId),
         ])
+        if (!requestIsCurrent()) return
         const { data, error } = reportsRes
-        if (error) {
-          setError(error.message)
+        if (error || clientRes.error || !clientRes.data) {
+          setError(error?.message ?? clientRes.error?.message ?? 'Your client profile could not be loaded safely.')
         } else {
           setReports(data)
           setSelectedReportId(selectMonthlyReports(data)[0]?.id ?? null)
           setClient(clientRes.data)
         }
       } catch (error) {
-        setError(errorMessage(error, 'Could not load your reports.'))
+        if (requestIsCurrent()) setError(errorMessage(error, 'Could not load your reports.'))
       } finally {
-        setLoading(false)
+        if (requestIsCurrent()) setLoading(false)
       }
     }
 
     void loadReports()
-  }, [profile?.client_id])
+    return () => { reportsRequestRef.current += 1 }
+  }, [profile?.client_id, profile?.id])
 
   useEffect(() => {
-    let active = true
+    const requestId = ++reportRequestRef.current
+    const requestedProfileId = profile?.id ?? null
+    const requestedClientId = profile?.client_id ?? null
+    const requestedReportId = selectedReportId
+    const requestIsCurrent = () => requestId === reportRequestRef.current
+      && profile?.id === requestedProfileId
+      && profile?.client_id === requestedClientId
+      && selectedReportId === requestedReportId
 
-    if (!selectedReportId) {
-      return () => { active = false }
+    if (!requestedReportId || !requestedClientId || !requestedProfileId) {
+      setReport(null)
+      setReportLoading(false)
+      return () => { reportRequestRef.current += 1 }
     }
+    const reportId = requestedReportId
 
     async function loadReport() {
       setReport(null)
       setManualMetrics([])
-      setPreviousReport(null)
-      setPreviousManualMetrics([])
       setGoogleAds(null)
       setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
@@ -113,12 +135,11 @@ export default function Dashboard() {
       setFacts([])
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
-      setContentExclusions([])
       setReportLoading(true)
       setError(null)
       try {
-        const { data, error } = await getReportWithPosts(selectedReportId!)
-        if (!active) return
+        const { data, error } = await getClientPublishedReportWithPosts(reportId)
+        if (!requestIsCurrent()) return
         if (error) {
           setError(error.message)
           return
@@ -127,28 +148,24 @@ export default function Dashboard() {
         if (data) {
           const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
-          const previous = previousMonth
-            ? reports.find(item => getReportMonthFromPeriod(item) === previousMonth)
-            : null
-          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult, factsResult, exclusionsResult] = await Promise.all([
-            listManualMetricsForClientMonth(data.client_id, currentMonth),
-            previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
-            previousMonth ? listManualMetricsForClientMonth(data.client_id, previousMonth) : Promise.resolve({ data: [], error: null }),
+          const [metricsResult, googleAdsResult, previousGoogleAdsResult, factsResult] = await Promise.all([
+            listClientReportManualMetrics(data.id),
             loadGoogleAdsDashboard(data.id, currentMonth),
             previousMonth
               ? loadGoogleAdsDashboard(data.id, previousMonth)
               : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
             loadReportPlatformFacts(data.id, currentMonth, previousMonth),
-            loadReportContentExclusions(data.id),
           ])
-          if (!active) return
-          if (factsResult.error || exclusionsResult.error) {
+          if (!requestIsCurrent()) return
+          if (factsResult.error || metricsResult.error) {
+            setReport(null)
+            setManualMetrics([])
+            setFacts([])
+            setPreviousFacts([])
             setError('Verified reporting data could not be loaded safely. Please try again later.')
             return
           }
           setManualMetrics(metricsResult.data)
-          setPreviousReport(previousReportResult.data)
-          setPreviousManualMetrics(previousMetricsResult.data)
           setGoogleAds(googleAdsResult.data)
           setPreviousGoogleAds(previousGoogleAdsResult.data)
           setGoogleAdsState(googleAdsResult.state)
@@ -156,19 +173,19 @@ export default function Dashboard() {
           setFacts(factsResult.facts)
           setPreviousFacts(factsResult.previousFacts)
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
-          setContentExclusions(exclusionsResult.data)
         }
       } catch (error) {
-        if (!active) return
+        if (!requestIsCurrent()) return
+        setReport(null)
         setError(errorMessage(error, 'Could not load this report.'))
       } finally {
-        if (active) setReportLoading(false)
+        if (requestIsCurrent()) setReportLoading(false)
       }
     }
 
     void loadReport()
-    return () => { active = false }
-  }, [reports, selectedReportId])
+    return () => { reportRequestRef.current += 1 }
+  }, [profile?.client_id, profile?.id, selectedReportId])
 
   if (!profile?.client_id) {
     return (
@@ -239,8 +256,6 @@ export default function Dashboard() {
           report={report}
           client={client}
           manualMetrics={manualMetrics}
-          previousReport={previousReport}
-          previousManualMetrics={previousManualMetrics}
           googleAds={googleAds}
           previousGoogleAds={previousGoogleAds}
           googleAdsState={googleAdsState}
@@ -248,7 +263,6 @@ export default function Dashboard() {
           facts={facts}
           previousFacts={previousFacts}
           normalizedFactsAttempted={normalizedFactsAttempted}
-          contentExclusions={contentExclusions}
         />
       ) : (
         <EmptyReportState

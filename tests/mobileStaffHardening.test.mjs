@@ -141,21 +141,22 @@ test('ShootMode accepts + renders an error prop and Content Workflow wires it', 
 
 // ── Frontend: composer recordId + idempotency + debrief guard ─────────────────
 
-test('composer reads recordId from URL (?id=) so in-place task.update works', () => {
-  assert.match(composer, /const recordId = searchParams\.get\('reportId'\) \?\? searchParams\.get\('runId'\) \?\? searchParams\.get\('id'\) \?\? ''/)
-  assert.match(composer, /if \(recordId\) parts\.push\(`recordId: \$\{recordId\}`\)/)
-  assert.match(composer, /updateAssistantTask\(\{ taskId: recordId, action \}\)/)
+test('composer uses typed Planner task context for in-place task updates', () => {
+  assert.match(composer, /const onPlannerBoard = \(location\.pathname === '\/admin\/work' \|\| location\.pathname === '\/admin\/my-work'\) && searchParams\.get\('tab'\) === 'board'/)
+  assert.match(composer, /const plannerTaskId = onPlannerBoard \? \(searchParams\.get\('id'\) \?\? ''\) : ''/)
+  assert.match(composer, /if \(plannerTaskId\) parts\.push\(`plannerTaskId: \$\{plannerTaskId\}`\)/)
+  assert.match(composer, /updateAssistantTask\(\{ taskId: p\.target\.id, action \}\)/)
 })
 
 test('composer enqueue idempotency key is user-scoped', () => {
-  assert.match(composer, /idempotencyKey: `\$\{profile\?\.id \?\? 'anon'\}:\$\{jobType\}-\$\{today\}/)
+  assert.match(composer, /idempotencyKey: `\$\{applyingProfileId\}:\$\{jobType\}-\$\{today\}/)
 })
 
-test('composer debrief close clears the active guard so stale analysis never surfaces', () => {
-  assert.match(composer, /if \(!debriefActiveRef\.current\) return/)
-  assert.match(composer, /if \(blob\.size > 0 && debriefActiveRef\.current\) void analyseDebrief/)
-  // Close resets candidates + guard.
-  assert.match(composer, /debriefActiveRef\.current = false; setDebriefOpen\(false\); setDebrief\(null\); setDebriefText\(''\); setDebriefCandidates\(\[\]\)/)
+test('composer debrief requests are profile-bound and invalidated on close', () => {
+  assert.match(composer, /const token = \{ id: \+\+debriefRequestSeqRef\.current, profileId: requestedProfileId \}/)
+  assert.match(composer, /return current === token && profileIdRef\.current === token\.profileId/)
+  assert.match(composer, /if \(blob\.size > 0 && debriefRequestIsCurrent\('analysis', requestToken\)\) void analyseDebrief/)
+  assert.match(composer, /function closeDebrief\(\) \{\s*invalidateDebriefRequests\(\)/)
 })
 
 test('composer keeps the widest debrief candidate set so the meeting select never collapses', () => {

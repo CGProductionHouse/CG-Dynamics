@@ -1,8 +1,7 @@
 import { supabase } from './supabase'
 
-// In-app notifications for staff (clients are outside CG Assistant). Users read
-// and mark-read only their own via RLS; creation is server-side only through the
-// create_notification SECURITY DEFINER RPC, which refuses client targets.
+// In-app notifications are created by trusted database/worker workflows. The
+// browser can only read and mark the signed-in recipient's notifications read.
 
 export interface AppNotification {
   id: string
@@ -20,9 +19,9 @@ export interface AppNotification {
 export async function listMyNotifications(limit = 30) {
   return supabase
     .from('notifications')
-    .select('*')
+    .select('id,user_id,type,title,body,entity_type,entity_id,link,read_at,created_at')
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .limit(Math.max(1, Math.min(50, Math.floor(limit))))
 }
 
 export async function unreadNotificationCount() {
@@ -34,32 +33,38 @@ export async function unreadNotificationCount() {
 }
 
 export async function markNotificationRead(id: string) {
-  return supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id).select().single()
+  return supabase.rpc('mark_notification_read', { p_notification_id: id })
 }
 
 export async function markAllNotificationsRead() {
-  return supabase.from('notifications').update({ read_at: new Date().toISOString() }).is('read_at', null)
+  return supabase.rpc('mark_all_notifications_read')
 }
 
-export interface CreateNotificationInput {
-  userId: string
-  type: string
-  title: string
-  body?: string | null
-  entityType?: string | null
-  entityId?: string | null
-  link?: string | null
-}
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const ALLOWED_NOTIFICATION_PATHS = new Set([
+  '/admin/cg-hub',
+  '/admin/work',
+  '/admin/cg-calendar',
+  '/admin/client-schedule',
+  '/admin/content',
+  '/admin/clients',
+  '/admin/client-performance',
+  '/admin/reports',
+  '/admin/integrations/meta',
+])
 
-// Notify a staff member (no-op for client targets, enforced server-side).
-export async function createNotification(input: CreateNotificationInput) {
-  return supabase.rpc('create_notification', {
-    p_user_id: input.userId,
-    p_type: input.type,
-    p_title: input.title,
-    p_body: input.body ?? null,
-    p_entity_type: input.entityType ?? null,
-    p_entity_id: input.entityId ?? null,
-    p_link: input.link ?? null,
-  })
+export function safeNotificationLink(notification: AppNotification) {
+  if (notification.entity_type === 'planner_task' && notification.entity_id && UUID_PATTERN.test(notification.entity_id)) {
+    return `/admin/work?tab=board&id=${encodeURIComponent(notification.entity_id)}`
+  }
+  if (notification.entity_type === 'client_schedule_change_request') return '/admin/client-schedule'
+  if (!notification.link || !notification.link.startsWith('/') || notification.link.startsWith('//')) return null
+
+  try {
+    const parsed = new URL(notification.link, 'https://cg-dynamics.internal')
+    if (parsed.origin !== 'https://cg-dynamics.internal' || !ALLOWED_NOTIFICATION_PATHS.has(parsed.pathname)) return null
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`
+  } catch {
+    return null
+  }
 }

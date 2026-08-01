@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { CSSProperties, FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -27,6 +27,7 @@ import {
   type MeetingDebriefAnalysis,
 } from '../../lib/meetingDebrief'
 import { isManagerRole } from '../../lib/roles'
+import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Global CG Assistant composer.
@@ -51,16 +52,26 @@ interface ComposerMessage {
   setupRequired?: boolean
 }
 
-const SESSION_KEY = 'cg-global-assistant-v1'
+interface DebriefRequestToken {
+  id: number
+  profileId: string
+}
+
+const SESSION_KEY_PREFIX = 'cg-global-assistant-v1'
 let messageSeq = 0
 function nextId() {
   messageSeq += 1
   return `gac-${messageSeq}-${messageSeq * 7}`
 }
 
-function loadSession(): ComposerMessage[] {
+function sessionKey(userId: string) {
+  return `${SESSION_KEY_PREFIX}:${userId}`
+}
+
+function loadSession(userId: string | null): ComposerMessage[] {
+  if (!userId) return []
   try {
-    const raw = window.sessionStorage.getItem(SESSION_KEY)
+    const raw = window.sessionStorage.getItem(sessionKey(userId))
     if (!raw) return []
     const parsed = JSON.parse(raw) as ComposerMessage[]
     return Array.isArray(parsed) ? parsed.slice(-40) : []
@@ -118,10 +129,12 @@ export function GlobalAssistantComposer() {
   const { profile } = useAuth()
 
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState<ComposerMessage[]>(loadSession)
+  const [messages, setMessages] = useState<ComposerMessage[]>(() => loadSession(profile?.id ?? null))
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [chatError, setChatError] = useState<string | null>(null)
+  const [proposalError, setProposalError] = useState<string | null>(null)
+  const [debriefError, setDebriefError] = useState<string | null>(null)
   const [plusOpen, setPlusOpen] = useState(false)
   const [listening, setListening] = useState(false)
   // Afrikaans + English + code-switched speech. Web Speech is single-locale, so
@@ -143,9 +156,6 @@ export function GlobalAssistantComposer() {
   const [debriefBusy, setDebriefBusy] = useState(false)
   const [debriefRecording, setDebriefRecording] = useState(false)
   const [debrief, setDebrief] = useState<MeetingDebriefAnalysis | null>(null)
-  // Guard against stale results: closing the panel while a debrief is still
-  // recording/analysing must not surface that analysis later.
-  const debriefActiveRef = useRef(false)
   // Keep the full candidate list across re-analysis: re-matching after a manual
   // meeting pick returns only the chosen meeting, which would collapse the
   // select. Preserve the richer list so the reviewer can switch again.
@@ -164,23 +174,100 @@ export function GlobalAssistantComposer() {
   const staffRef = useRef<string[]>([])
   const managementRef = useRef<string | null>(null)
   const memoryRef = useRef<string[]>([])
+  const profileIdRef = useRef<string | null>(profile?.id ?? null)
+  const actionRequestRef = useRef(0)
+  const debriefRequestSeqRef = useRef(0)
+  const debriefAnalysisRequestRef = useRef<DebriefRequestToken | null>(null)
+  const debriefConfirmationRequestRef = useRef<DebriefRequestToken | null>(null)
+  const viewportBottomInset = useVisualViewportBottomInset()
+
+  function invalidateDebriefRequests() {
+    debriefRequestSeqRef.current += 1
+    debriefAnalysisRequestRef.current = null
+    debriefConfirmationRequestRef.current = null
+  }
+
+  function beginDebriefRequest(kind: 'analysis' | 'confirmation'): DebriefRequestToken | null {
+    const requestedProfileId = profileIdRef.current
+    if (!requestedProfileId) return null
+    const token = { id: ++debriefRequestSeqRef.current, profileId: requestedProfileId }
+    if (kind === 'analysis') {
+      debriefAnalysisRequestRef.current = token
+      debriefConfirmationRequestRef.current = null
+    } else {
+      debriefConfirmationRequestRef.current = token
+      debriefAnalysisRequestRef.current = null
+    }
+    return token
+  }
+
+  function debriefRequestIsCurrent(kind: 'analysis' | 'confirmation', token: DebriefRequestToken) {
+    const current = kind === 'analysis' ? debriefAnalysisRequestRef.current : debriefConfirmationRequestRef.current
+    return current === token && profileIdRef.current === token.profileId
+  }
+
+  function stopActiveDebriefMedia() {
+    const recorder = mediaRecorderRef.current
+    mediaRecorderRef.current = null
+    if (!recorder) return
+    if (recorder.state !== 'inactive') recorder.stop()
+    recorder.stream.getTracks().forEach(track => track.stop())
+  }
+
+  const profileId = profile?.id ?? null
+  if (profileIdRef.current !== profileId) {
+    invalidateDebriefRequests()
+    stopActiveDebriefMedia()
+    profileIdRef.current = profileId
+    workContextRef.current = null
+    clientsRef.current = []
+    staffRef.current = []
+    managementRef.current = null
+    memoryRef.current = []
+    recognitionRef.current = null
+    audioChunksRef.current = []
+    actionRequestRef.current += 1
+    setMessages(loadSession(profileId))
+    setProposal(null)
+    setDebrief(null)
+    setDebriefCandidates([])
+    setDebriefOpen(false)
+    setDebriefText('')
+    setInput('')
+    setSending(false)
+    setApplying(false)
+    setDebriefBusy(false)
+    setDebriefRecording(false)
+    setJobs([])
+    setShowJobs(false)
+    setListening(false)
+    setChatError(null)
+    setProposalError(null)
+    setDebriefError(null)
+  }
 
   const speechSupported = useMemo(() => Boolean(getSpeechRecognition()), [])
+
+  useEffect(() => () => {
+    invalidateDebriefRequests()
+    stopActiveDebriefMedia()
+  }, [])
 
   // Load the authorised client + staff lists once, for name resolution. These
   // come through RLS, so a user only ever sees clients/staff they may see.
   useEffect(() => {
     let active = true
-    fetchActiveClients().then(list => { if (active) clientsRef.current = list }).catch(() => {})
+    const requestedProfileId = profileId
+    fetchActiveClients().then(list => { if (active && profileIdRef.current === requestedProfileId) clientsRef.current = list }).catch(() => {})
     listStaffProfiles().then(res => {
-      if (active && !res.migrationNeeded) staffRef.current = res.data.map(s => s.full_name).filter((n): n is string => Boolean(n))
+      if (active && profileIdRef.current === requestedProfileId && !res.migrationNeeded) staffRef.current = res.data.map(s => s.full_name).filter((n): n is string => Boolean(n))
     }).catch(() => {})
     // Management grounding: only authorised admin/manager get a cross-team
     // workload summary the master assistant can reason over. RLS on the RPC also
     // enforces this server-side — normal staff never receive it.
     if (isManager) {
       listPlannerWorkloadSummary().then(res => {
-        if (!active || res.error || !res.data) return
+        if (!active || profileIdRef.current !== requestedProfileId || res.error || !res.data) return
         const rows = res.data
         const overdue = rows.reduce((sum, r) => sum + (r.overdue_count ?? 0), 0)
         const blocked = rows.reduce((sum, r) => sum + (r.blocked_count ?? 0), 0)
@@ -191,44 +278,47 @@ export function GlobalAssistantComposer() {
       }).catch(() => {})
     }
     return () => { active = false }
-  }, [isManager])
+  }, [isManager, profileId])
 
   // Durable per-user memory (own-only via RLS). Loaded once so the personal
   // assistant is grounded in what this user has asked it to remember. Strictly
   // isolated — no other user's or client's memory is ever visible.
   useEffect(() => {
     let active = true
+    const requestedProfileId = profileId
     listMyAssistantMemory(12)
       .then(res => {
-        if (active && !res.error && res.data) {
+        if (active && profileIdRef.current === requestedProfileId && !res.error && res.data) {
           memoryRef.current = res.data.map(m => m.content).filter(Boolean)
         }
       })
       .catch(() => {})
     return () => { active = false }
-  }, [profile])
+  }, [profileId])
 
   // Load the signed-in user's live work context once (best-effort; the assistant
   // still works without it).
   useEffect(() => {
     let active = true
+    const requestedProfileId = profileId
     getMyDayContext(profile ?? null)
       .then(ctx => {
-        if (active) workContextRef.current = buildAssistantLocalWorkContext(ctx)
+        if (active && profileIdRef.current === requestedProfileId) workContextRef.current = buildAssistantLocalWorkContext(ctx)
       })
       .catch(() => {})
     return () => {
       active = false
     }
-  }, [profile])
+  }, [profile, profileId])
 
   useEffect(() => {
+    if (!profileId) return
     try {
-      window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(messages.slice(-40)))
+      window.sessionStorage.setItem(sessionKey(profileId), JSON.stringify(messages.slice(-40)))
     } catch {
       /* ignore quota */
     }
-  }, [messages])
+  }, [messages, profileId])
 
   useEffect(() => {
     if (open && scrollRef.current) {
@@ -248,19 +338,24 @@ export function GlobalAssistantComposer() {
     void loadJobs()
     const interval = window.setInterval(() => { void loadJobs() }, 5000)
     return () => window.clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, showJobs])
 
   const pageLabel = pageLabelFromPath(location.pathname)
   // The full Assistant page has its own composer — don't stack a second one.
   const onAssistantPage = location.pathname.startsWith('/admin/assistant')
   const clientId = searchParams.get('client') ?? searchParams.get('clientId') ?? ''
-  const recordId = searchParams.get('reportId') ?? searchParams.get('runId') ?? searchParams.get('id') ?? ''
+  const recordId = searchParams.get('reportId') ?? searchParams.get('id') ?? ''
+  const onPlannerBoard = (location.pathname === '/admin/work' || location.pathname === '/admin/my-work') && searchParams.get('tab') === 'board'
+  const plannerTaskId = onPlannerBoard ? (searchParams.get('id') ?? '') : ''
+  const plannerTaskName = plannerTaskId ? (searchParams.get('task') ?? '') : ''
+  const selectedRunId = location.pathname.includes('/admin/content') ? (searchParams.get('runId') ?? '') : ''
 
   function currentContextLine(): string {
     const parts = [`page: ${pageLabel}`, `role: ${profile?.role ?? 'team'}`]
     if (clientId) parts.push(`clientId: ${clientId}`)
     if (recordId) parts.push(`recordId: ${recordId}`)
+    if (plannerTaskId) parts.push(`plannerTaskId: ${plannerTaskId}`)
+    if (selectedRunId) parts.push(`contentRunId: ${selectedRunId}`)
     // Management grounding is only ever added for authorised admin/manager.
     if (isManager && managementRef.current) parts.push(managementRef.current)
     // Durable per-user memory (own-only) grounds the personal assistant.
@@ -268,8 +363,11 @@ export function GlobalAssistantComposer() {
     return parts.join(', ')
   }
 
-  async function loadJobs() {
+  async function loadJobs(actionIsCurrent?: () => boolean) {
+    const requestedProfileId = profileIdRef.current
+    if (!requestedProfileId || (actionIsCurrent && !actionIsCurrent())) return
     const res = await listMyBackgroundJobs(10)
+    if (profileIdRef.current !== requestedProfileId || (actionIsCurrent && !actionIsCurrent())) return
     if (!res.error) setJobs((res.data ?? []) as BackgroundJob[])
   }
 
@@ -282,26 +380,34 @@ export function GlobalAssistantComposer() {
   async function applyProposal() {
     if (!proposal || applying) return
     const p = proposal
+    const applyingProfileId = profileIdRef.current
+    if (!applyingProfileId) return
+    const applyingProfileName = profile?.id === applyingProfileId ? profile.full_name : null
+    const actionRequestId = ++actionRequestRef.current
+    const actionIsCurrent = () => Boolean(applyingProfileId) && profileIdRef.current === applyingProfileId && actionRequestRef.current === actionRequestId
+    if (!actionIsCurrent()) return
     setApplying(true)
-    setError(null)
+    setProposalError(null)
     try {
       if (p.type === 'job.enqueue') {
         const jobType = String(p.fields.job)
-        const baseline = p.fields.baseline === 'yes'
+        const syncPreviousMonth = p.fields.sync_previous_month === 'yes'
         const today = new Date().toISOString().slice(0, 10)
         const res = await enqueueBackgroundJob({
           jobType,
-          payload: jobType === 'meta_sync' ? { baseline } : {},
-          // Idempotent per user per type per day (+baseline) so double-asking
+          payload: jobType === 'meta_sync' ? { baseline: syncPreviousMonth } : {},
+          // Idempotent per user, type, day and requested month range.
           // does not duplicate work — scoped to the user so one staff member's
           // job is never silently hidden by another's idempotency key.
-          idempotencyKey: `${profile?.id ?? 'anon'}:${jobType}-${today}${baseline ? '-baseline' : ''}`,
+          idempotencyKey: `${applyingProfileId}:${jobType}-${today}${syncPreviousMonth ? '-previous-month' : ''}`,
         })
+        if (!actionIsCurrent()) return
         if (res.error) throw new Error(res.error.message)
-        void nudgeBackgroundWorker()
+        await nudgeBackgroundWorker()
+        if (!actionIsCurrent()) return
         setProposal(null)
         setShowJobs(true)
-        void loadJobs()
+        void loadJobs(actionIsCurrent)
         pushAssistant(`Queued ${jobType === 'meta_sync' ? 'Meta sync' : 'report preparation'} as a background job. It runs on the server and continues even if you close the app — I'll notify you when it finishes. Progress is under "Background jobs".`)
         return
       }
@@ -316,40 +422,43 @@ export function GlobalAssistantComposer() {
           client_name: p.clientName,
           start_at: startAt,
         })
+        if (!actionIsCurrent()) return
         if (res.error) throw new Error(res.error.message)
         if (res.tableMissing) throw new Error('CG Calendar is not enabled in this database yet.')
         if (res.data) {
           await logPlannerActivity({
             entity_type: 'company_calendar_event', entity_id: res.data.id, action: 'assistant_created',
-            actor_user_id: profile?.id ?? null, actor_name: profile?.full_name ?? null,
+            actor_user_id: applyingProfileId, actor_name: applyingProfileName,
             metadata: { via: 'cg_assistant', title: res.data.title, start_at: startAt },
           })
+          if (!actionIsCurrent()) return
         }
         setProposal(null)
         pushAssistant(`Done — created "${p.fields.title}" on ${date}${time ? ` at ${time}` : ''} in CG Calendar.`)
       } else if (p.type === 'schedule.propose') {
-        if (!recordId) { setError('Open the Client Schedule post first so I know which item to change.'); return }
+        if (!recordId) { setProposalError('Open the Client Schedule post first so I know which item to change.'); return }
         const res = await proposeScheduleChange({
           deliverableId: recordId,
           change: { scheduled_date: String(p.fields.new_date) },
           reason: p.fields.note ? String(p.fields.note) : null,
-          requestedBy: profile?.id ?? null,
-          requestedByName: profile?.full_name ?? null,
+          requestedBy: applyingProfileId,
+          requestedByName: applyingProfileName,
         })
+        if (!actionIsCurrent()) return
         if (res.error) throw new Error(res.error.message)
         setProposal(null)
-        pushAssistant('Submitted. This Client Schedule change stays pending until an Admin approves it.')
+        pushAssistant('Submitted. This Client Schedule change stays pending until a manager or admin approves it.')
       } else if (p.type === 'memory.add') {
         // Durable per-user memory. RLS constrains the row to this user only.
-        if (!profile?.id) throw new Error('Sign in to save assistant memory.')
         const note = String(p.fields.note ?? '').trim()
-        if (!note) { setError('Nothing to remember.'); return }
-        const res = await addAssistantMemory(profile.id, note)
+        if (!note) { setProposalError('Nothing to remember.'); return }
+        const res = await addAssistantMemory(applyingProfileId, note)
+        if (!actionIsCurrent()) return
         if (res.error) throw new Error(res.error.message)
         memoryRef.current = [note, ...memoryRef.current].slice(0, 12)
         setProposal(null)
         pushAssistant(`Got it — I'll remember that: "${note}".`)
-      } else if (p.type === 'task.create' || p.type === 'task.assign') {
+      } else if (p.type === 'task.create') {
         // Direct canonical task write through the audited SECURITY DEFINER RPC.
         // The task lands on the real operations board, is audited, and the
         // assignee is notified — no routing, no hidden store.
@@ -360,6 +469,7 @@ export function GlobalAssistantComposer() {
           clientId: p.clientId,
           clientName: p.clientName,
         })
+        if (!actionIsCurrent()) return
         if (res.error) throw new Error(res.error.message)
         const assignee = p.fields.assignee ? String(p.fields.assignee) : ''
         const due = p.fields.due_date ? ` (due ${p.fields.due_date})` : ''
@@ -369,53 +479,65 @@ export function GlobalAssistantComposer() {
         const notified = assignee && assigneeResolved ? ' and they have been notified' : assignee ? ' — check the assignee name, it did not match a staff profile' : ''
         setProposal(null)
         pushAssistant(`Done — created the task${assignee ? ` for ${assignee}` : ''}${due}. It's on the board${notified}.`)
+      } else if (p.type === 'task.assign') {
+        if (p.target?.type !== 'planner_task') {
+          setProposalError('Open the Planner task first so I know exactly which existing task to assign.')
+          return
+        }
+        const assignee = p.fields.assignee ? String(p.fields.assignee) : null
+        if (!assignee) { setProposalError('Choose an assignee.'); return }
+        const res = await updateAssistantTask({ taskId: p.target.id, action: 'assign', assigneeName: assignee })
+        if (!actionIsCurrent()) return
+        if (res.error) throw new Error(res.error.message)
+        const dueDate = p.fields.due_date ? String(p.fields.due_date) : null
+        setProposal(null)
+        pushAssistant(`Done — assigned "${p.target.label}" to ${assignee}.${dueDate ? ' The due date was not changed; update it separately on the task so assignment cannot partially succeed.' : ''}`)
       } else if (p.type === 'task.update') {
         // Complete / block an existing task. Needs the task in context (opened
         // from a task record); otherwise ask rather than guess which task.
-        if (!recordId) {
-          setError('Open the task first (or tell me which task), then I can update it.')
+        if (p.target?.type !== 'planner_task') {
+          setProposalError('Open the Planner task first so I know exactly which task to update.')
           return
         }
         const action = p.fields.status === 'done' ? 'complete' : 'block'
-        const res = await updateAssistantTask({ taskId: recordId, action })
+        const res = await updateAssistantTask({ taskId: p.target.id, action })
+        if (!actionIsCurrent()) return
         if (res.error) throw new Error(res.error.message)
         setProposal(null)
         pushAssistant(action === 'complete' ? 'Done — task marked complete.' : 'Done — task flagged as blocked.')
       } else if (p.type === 'video.mark_shot' || p.type === 'video.move') {
-        // Direct Content Run video actions through the audited RPC. The run is
-        // the one on the current page when open, else resolved deterministically
-        // (current client's most recent run / most recent run). No routing.
-        const onContent = location.pathname.includes('/admin/content')
-        let runId = onContent && recordId ? recordId : null
-        let runName: string | null = null
-        if (!runId) {
-          const run = await resolveContentRun(p.clientId ?? (clientId || null))
-          if (!run) { setError('I could not find a Content Run to act on. Tell me the client or open the run.'); return }
-          runId = run.id
-          runName = run.name
+        if (p.target?.type !== 'content_run') {
+          setProposalError('Open a Content Run first so I know exactly which run to update.')
+          return
         }
+        const runId = p.target.id
+        const runName = p.target.label
         if (p.type === 'video.mark_shot') {
           const numbers = String(p.fields.videos ?? '')
             .split(/[\s,]+/)
             .map(Number)
             .filter(n => Number.isInteger(n) && n > 0)
-          if (numbers.length === 0) { setError('Which video number should I mark as shot?'); return }
+          if (numbers.length === 0) { setProposalError('Which video number should I mark as shot?'); return }
           for (const n of numbers) {
+            if (!actionIsCurrent()) return
             const res = await assistantUpdateVideo({ runId, videoNumber: n, action: 'shot' })
+            if (!actionIsCurrent()) return
             if (res.error) throw new Error(`Video ${n}: ${res.error.message}`)
           }
           setProposal(null)
           pushAssistant(`Done — marked video${numbers.length > 1 ? 's' : ''} ${numbers.join(', ')} as shot${runName ? ` on "${runName}"` : ''}.`)
         } else {
           const n = Number(p.fields.video)
-          if (!Number.isInteger(n) || n <= 0) { setError('Which video number should I move?'); return }
+          if (!Number.isInteger(n) || n <= 0) { setProposalError('Which video number should I move?'); return }
           const month = String(p.fields.scheduled_date ?? '')
+          if (!actionIsCurrent()) return
           const res = await assistantUpdateVideo({
             runId,
             videoNumber: n,
             action: /^\d{4}-\d{2}-\d{2}$/.test(month) ? 'move_to_month' : 'move_next_month',
             scheduledMonth: /^\d{4}-\d{2}-\d{2}$/.test(month) ? month : null,
           })
+          if (!actionIsCurrent()) return
           if (res.error) throw new Error(res.error.message)
           const moved = res.data as { month?: string | null } | null
           setProposal(null)
@@ -423,34 +545,47 @@ export function GlobalAssistantComposer() {
         }
       } else {
         // calendar.cancel still needs the on-record calendar entry to act on.
+        if (!actionIsCurrent()) return
         setProposal(null)
         pushAssistant('Opening CG Calendar so you can finish this on the record.')
         navigate('/admin/cg-calendar')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not complete that action.')
+      if (actionIsCurrent()) setProposalError(err instanceof Error ? err.message : 'Could not complete that action.')
     } finally {
-      setApplying(false)
+      if (actionIsCurrent()) setApplying(false)
     }
   }
 
   // ── Meeting debrief flow ────────────────────────────────────────────────
   async function startDebriefRecording() {
+    const requestToken = beginDebriefRequest('analysis')
+    if (!requestToken || !debriefRequestIsCurrent('analysis', requestToken)) return
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      if (!debriefRequestIsCurrent('analysis', requestToken)) {
+        stream.getTracks().forEach(track => track.stop())
+        return
+      }
       const recorder = new MediaRecorder(stream)
       audioChunksRef.current = []
-      recorder.ondataavailable = event => { if (event.data.size > 0) audioChunksRef.current.push(event.data) }
+      recorder.ondataavailable = event => {
+        if (event.data.size > 0 && debriefRequestIsCurrent('analysis', requestToken)) audioChunksRef.current.push(event.data)
+      }
       recorder.onstop = () => {
         stream.getTracks().forEach(track => track.stop())
         const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' })
-        if (blob.size > 0 && debriefActiveRef.current) void analyseDebrief({ audio: blob })
+        if (blob.size > 0 && debriefRequestIsCurrent('analysis', requestToken)) void analyseDebrief({ audio: blob })
       }
       mediaRecorderRef.current = recorder
       recorder.start()
+      if (!debriefRequestIsCurrent('analysis', requestToken)) {
+        stopActiveDebriefMedia()
+        return
+      }
       setDebriefRecording(true)
     } catch {
-      setError('Microphone access was blocked. Type the debrief instead.')
+      if (debriefRequestIsCurrent('analysis', requestToken)) setDebriefError('Microphone access was blocked. Type the debrief instead.')
     }
   }
 
@@ -460,45 +595,56 @@ export function GlobalAssistantComposer() {
   }
 
   async function analyseDebrief(input: { audio?: Blob; eventId?: string }) {
+    const requestToken = beginDebriefRequest('analysis')
+    if (!requestToken || !debriefRequestIsCurrent('analysis', requestToken)) return
     setDebriefBusy(true)
-    setError(null)
+    setDebriefError(null)
     try {
       const opts = { eventId: input.eventId, clientId: clientId || undefined }
+      const transcript = input.eventId && debrief ? debrief.transcript : debriefText
       const res = input.audio
         ? await analyseMeetingAudio(input.audio, opts)
-        : await analyseMeetingText(input.eventId && debrief ? debrief.transcript : debriefText, opts)
-      if (!debriefActiveRef.current) return
-      if (res.error || !res.data) { setError(res.error ?? 'The debrief could not be analysed.'); return }
+        : await analyseMeetingText(transcript, opts)
+      if (!debriefRequestIsCurrent('analysis', requestToken)) return
+      if (res.error || !res.data) { setDebriefError(res.error ?? 'The debrief could not be analysed.'); return }
       // Keep the widest candidate set seen so a manual meeting pick never
       // collapses the select to a single option.
       if (res.data.candidates.length > 0 && !input.eventId) setDebriefCandidates(res.data.candidates)
       setDebrief(res.data)
+    } catch {
+      if (debriefRequestIsCurrent('analysis', requestToken)) setDebriefError('The debrief could not be analysed.')
     } finally {
-      if (debriefActiveRef.current) setDebriefBusy(false)
+      if (debriefRequestIsCurrent('analysis', requestToken)) {
+        debriefAnalysisRequestRef.current = null
+        setDebriefBusy(false)
+      }
     }
   }
 
   async function confirmDebrief() {
     if (!debrief || debriefBusy) return
+    const draft = debrief
+    const requestToken = beginDebriefRequest('confirmation')
+    if (!requestToken || !debriefRequestIsCurrent('confirmation', requestToken)) return
     setDebriefBusy(true)
-    setError(null)
+    setDebriefError(null)
     try {
       const res = await applyMeetingDebrief({
-        debriefId: debrief.debriefId,
-        summary: debrief.summary,
-        decisions: debrief.decisions,
-        unresolved: debrief.unresolved,
-        tasks: debrief.tasks
+        debriefId: draft.debriefId,
+        summary: draft.summary,
+        decisions: draft.decisions,
+        unresolved: draft.unresolved,
+        tasks: draft.tasks
           .filter(t => t.title.trim())
           .map(t => ({ title: t.title, assignee_name: t.assignee_name, client_id: t.client_id, client_name: t.client_name, due_date: t.due_date })),
       })
-      if (res.error || !res.data) { setError(res.error ?? 'The debrief could not be applied.'); return }
-      const namedAssignees = debrief.tasks.filter(t => t.title.trim() && t.assignee_name?.trim())
+      if (!debriefRequestIsCurrent('confirmation', requestToken)) return
+      if (res.error || !res.data) { setDebriefError(res.error ?? 'The debrief could not be applied.'); return }
+      const namedAssignees = draft.tasks.filter(t => t.title.trim() && t.assignee_name?.trim())
       const allAssigneesResolved = namedAssignees.every(t => t.resolved_assignee)
       const notificationNote = namedAssignees.length > 0
         ? allAssigneesResolved ? ' (assignees notified)' : ' — some assignee names could not be matched'
         : ''
-      debriefActiveRef.current = false
       setDebrief(null)
       setDebriefCandidates([])
       setDebriefOpen(false)
@@ -508,14 +654,54 @@ export function GlobalAssistantComposer() {
         `Debrief saved${res.data.notes_saved ? ' — notes are on the meeting' : ''}` +
         `${res.data.tasks_created > 0 ? ` and ${res.data.tasks_created} task${res.data.tasks_created > 1 ? 's were' : ' was'} created on the board${notificationNote}` : ''}.`,
       )
+    } catch {
+      if (debriefRequestIsCurrent('confirmation', requestToken)) setDebriefError('The debrief could not be applied.')
     } finally {
-      setDebriefBusy(false)
+      if (debriefRequestIsCurrent('confirmation', requestToken)) {
+        debriefConfirmationRequestRef.current = null
+        setDebriefBusy(false)
+      }
     }
+  }
+
+  function closeDebrief() {
+    invalidateDebriefRequests()
+    stopActiveDebriefMedia()
+    setDebriefOpen(false)
+    setDebrief(null)
+    setDebriefText('')
+    setDebriefCandidates([])
+    setDebriefError(null)
+    setDebriefBusy(false)
+    setDebriefRecording(false)
+  }
+
+  function startNewDebrief() {
+    invalidateDebriefRequests()
+    stopActiveDebriefMedia()
+    audioChunksRef.current = []
+    setDebrief(null)
+    setDebriefText('')
+    setDebriefCandidates([])
+    setDebriefError(null)
+    setDebriefBusy(false)
+    setDebriefRecording(false)
+    setDebriefOpen(true)
+    setPlusOpen(false)
+  }
+
+  function restartDebriefDraft() {
+    invalidateDebriefRequests()
+    setDebrief(null)
+    setDebriefCandidates([])
+    setDebriefError(null)
+    setDebriefBusy(false)
   }
 
   async function send(text: string) {
     const clean = text.trim()
-    if (!clean || sending || applying) return
+    const sendingProfileId = profileIdRef.current
+    if (!clean || sending || applying || !sendingProfileId) return
 
     // Action agent first: understand the instruction as a concrete app action.
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
@@ -527,17 +713,59 @@ export function GlobalAssistantComposer() {
       role: profile?.role ?? 'team',
       currentClientId: clientId || null,
       currentClientName: clientsRef.current.find(c => c.id === clientId)?.name ?? null,
+      currentTaskId: plannerTaskId || null,
+      currentTaskName: plannerTaskName || null,
     })
     if (parsed && 'type' in parsed) {
+      let nextProposal = parsed
+      if (parsed.type === 'schedule.propose' && (!location.pathname.startsWith('/admin/client-schedule') || !recordId)) {
+        setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+        setInput('')
+        setChatError(null)
+        setOpen(true)
+        pushAssistant('Open the Client Schedule post first so I know exactly which item to change.')
+        return
+      }
+      if (parsed.type === 'video.mark_shot' || parsed.type === 'video.move') {
+        setSending(true)
+        setChatError(null)
+        try {
+          if (!selectedRunId) {
+            setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+            setInput('')
+            setOpen(true)
+            pushAssistant('Open the Content Run first so I know exactly which run to update.')
+            return
+          }
+          const run = await resolveContentRun(selectedRunId)
+          if (profileIdRef.current !== sendingProfileId) return
+          if (!run) {
+            setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+            setInput('')
+            setOpen(true)
+            pushAssistant('That selected Content Run is no longer available. Open the run again before making a change.')
+            return
+          }
+          nextProposal = { ...parsed, target: { type: 'content_run', id: run.id, label: run.name } }
+        } catch {
+          if (profileIdRef.current === sendingProfileId) setChatError('I could not verify the selected Content Run. Try again.')
+          return
+        } finally {
+          if (profileIdRef.current === sendingProfileId) setSending(false)
+        }
+      }
+      if (profileIdRef.current !== sendingProfileId) return
       setInput('')
-      setError(null)
-      setProposal(parsed)
+      setChatError(null)
+      setProposalError(null)
+      setProposal(nextProposal)
       setOpen(true)
       return
     }
     if (parsed && 'clarify' in parsed) {
       setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
       setInput('')
+      setChatError(null)
       setOpen(true)
       pushAssistant(parsed.clarify)
       return
@@ -546,27 +774,34 @@ export function GlobalAssistantComposer() {
     const history: AssistantChatMessage[] = messages.map(m => ({ role: m.role, content: m.text }))
     setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
     setInput('')
-    setError(null)
+    setChatError(null)
     setSending(true)
     setOpen(true)
 
     // The assistant receives the current page/client/record as context; the user
     // only ever sees their own typed message.
     const contextual = `[Context — ${currentContextLine()}]\n${clean}`
-    const response = await sendAssistantMessage(contextual, history, workContextRef.current, null)
-    setSending(false)
-    if (!response.ok) setError(response.error ?? 'CG Assistant is unavailable right now.')
-    setMessages(current => [
-      ...current,
-      {
-        id: nextId(),
-        role: 'assistant',
-        text: response.answer,
-        restricted: response.restricted,
-        setupRequired: response.setupRequired,
-      },
-    ])
-    window.setTimeout(() => inputRef.current?.focus(), 0)
+    const workContext = workContextRef.current
+    try {
+      const response = await sendAssistantMessage(contextual, history, workContext, null)
+      if (profileIdRef.current !== sendingProfileId) return
+      if (!response.ok) setChatError(response.error ?? 'CG Assistant is unavailable right now.')
+      setMessages(current => [
+        ...current,
+        {
+          id: nextId(),
+          role: 'assistant',
+          text: response.answer,
+          restricted: response.restricted,
+          setupRequired: response.setupRequired,
+        },
+      ])
+      window.setTimeout(() => inputRef.current?.focus(), 0)
+    } catch {
+      if (profileIdRef.current === sendingProfileId) setChatError('CG Assistant is unavailable right now.')
+    } finally {
+      if (profileIdRef.current === sendingProfileId) setSending(false)
+    }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -577,6 +812,7 @@ export function GlobalAssistantComposer() {
   function startListening() {
     const recognition = getSpeechRecognition()
     if (!recognition) return
+    const listeningProfileId = profileIdRef.current
     recognition.lang = micLang
     recognition.continuous = false
     recognition.interimResults = true
@@ -585,10 +821,10 @@ export function GlobalAssistantComposer() {
       for (let i = 0; i < event.results.length; i += 1) {
         transcript += event.results[i][0].transcript
       }
-      setInput(transcript)
+      if (profileIdRef.current === listeningProfileId) setInput(transcript)
     }
-    recognition.onerror = () => setListening(false)
-    recognition.onend = () => setListening(false)
+    recognition.onerror = () => { if (profileIdRef.current === listeningProfileId) setListening(false) }
+    recognition.onend = () => { if (profileIdRef.current === listeningProfileId) setListening(false) }
     recognitionRef.current = recognition
     setOpen(true)
     setListening(true)
@@ -623,10 +859,12 @@ export function GlobalAssistantComposer() {
 
   function newChat() {
     setMessages([])
-    setError(null)
+    setChatError(null)
+    setProposalError(null)
+    setDebriefError(null)
     setPlusOpen(false)
     try {
-      window.sessionStorage.removeItem(SESSION_KEY)
+      if (profileId) window.sessionStorage.removeItem(sessionKey(profileId))
     } catch {
       /* ignore */
     }
@@ -641,7 +879,10 @@ export function GlobalAssistantComposer() {
   if (onAssistantPage) return null
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-40 px-2 md:inset-x-auto md:right-5 md:bottom-5 md:px-0">
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--assistant-viewport-inset))] z-40 px-2 md:inset-x-auto md:right-5 md:bottom-[calc(1.25rem+var(--assistant-viewport-inset))] md:px-0"
+      style={{ '--assistant-viewport-inset': `${viewportBottomInset}px` } as CSSProperties}
+    >
       <div className="pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-[26rem]">
         {open && (
           <div className="mb-2 overflow-hidden rounded-2xl border border-white/12 bg-[#0c0f0e]/98 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl">
@@ -654,8 +895,8 @@ export function GlobalAssistantComposer() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <Link to="/admin/assistant" onClick={() => setOpen(false)} className="rounded-md px-2 py-1 text-[11px] font-bold text-brand-primary/70 hover:text-white" title="Open full assistant">Expand</Link>
-                <button type="button" onClick={() => setOpen(false)} className="rounded-md px-2 py-1 text-sm font-bold text-brand-primary/70 hover:text-white" aria-label="Minimise assistant">–</button>
+                <Link to="/admin/assistant" onClick={() => setOpen(false)} className="flex min-h-11 items-center rounded-md px-2 text-[11px] font-bold text-brand-primary/70 hover:text-white" title="Open full assistant">Expand</Link>
+                <button type="button" onClick={() => setOpen(false)} className="min-h-11 min-w-11 rounded-md px-2 text-sm font-bold text-brand-primary/70 hover:text-white" aria-label="Minimise assistant">–</button>
               </div>
             </div>
 
@@ -697,7 +938,7 @@ export function GlobalAssistantComposer() {
                   <p className="px-1 text-xs text-brand-primary/60">Ask anything about your work, clients or this page.</p>
                   <div className="flex flex-wrap gap-1.5">
                     {STARTERS.map(s => (
-                      <button key={s} type="button" onClick={() => void send(s)} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-brand-primary/80 hover:border-brand-teal/40 hover:text-white">
+                      <button key={s} type="button" onClick={() => void send(s)} className="min-h-11 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-brand-primary/80 hover:border-brand-teal/40 hover:text-white">
                         {s}
                       </button>
                     ))}
@@ -722,7 +963,7 @@ export function GlobalAssistantComposer() {
                   <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-brand-primary/60">CG Assistant is thinking…</div>
                 </div>
               )}
-              {error && <p className="px-1 text-xs text-red-300">{error}</p>}
+              {chatError && <p className="px-1 text-xs text-red-300">{chatError}</p>}
             </div>
           </div>
         )}
@@ -732,7 +973,7 @@ export function GlobalAssistantComposer() {
           <div className="mb-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="text-sm font-black text-white">Meeting debrief</p>
-              <button type="button" onClick={() => { debriefActiveRef.current = false; setDebriefOpen(false); setDebrief(null); setDebriefText(''); setDebriefCandidates([]); if (debriefRecording) stopDebriefRecording() }} className="rounded-md px-2 py-1 text-sm font-bold text-brand-primary/70 hover:text-white">✕</button>
+              <button type="button" onClick={closeDebrief} className="min-h-11 min-w-11 rounded-md px-2 text-sm font-bold text-brand-primary/70 hover:text-white">✕</button>
             </div>
 
             {!debrief ? (
@@ -750,7 +991,7 @@ export function GlobalAssistantComposer() {
                     type="button"
                     onClick={() => (debriefRecording ? stopDebriefRecording() : void startDebriefRecording())}
                     disabled={debriefBusy}
-                    className={`flex-1 rounded-full border px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-40 ${debriefRecording ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 text-brand-primary hover:text-white'}`}
+                    className={`min-h-11 flex-1 rounded-full border px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-40 ${debriefRecording ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 text-brand-primary hover:text-white'}`}
                   >
                     {debriefRecording ? 'Stop recording' : 'Record voice note'}
                   </button>
@@ -758,7 +999,7 @@ export function GlobalAssistantComposer() {
                     type="button"
                     onClick={() => void analyseDebrief({})}
                     disabled={debriefBusy || !debriefText.trim()}
-                    className="flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40"
+                    className="min-h-11 flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40"
                   >
                     {debriefBusy ? 'Analysing…' : 'Analyse text'}
                   </button>
@@ -846,16 +1087,16 @@ export function GlobalAssistantComposer() {
                     {debrief.tasks.length === 0 && <p className="text-xs text-brand-primary/45">No tasks were mentioned.</p>}
                   </div>
                 </div>
-                {error && <p className="text-xs text-red-300">{error}</p>}
+                {debriefError && <p className="text-xs text-red-300">{debriefError}</p>}
                 <div className="flex gap-2 pt-1">
-                  <button type="button" onClick={() => void confirmDebrief()} disabled={debriefBusy} className="flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
+                  <button type="button" onClick={() => void confirmDebrief()} disabled={debriefBusy} className="min-h-11 flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
                     {debriefBusy ? 'Saving…' : `Save notes${debrief.tasks.filter(t => t.title.trim()).length > 0 ? ` + create ${debrief.tasks.filter(t => t.title.trim()).length} task${debrief.tasks.filter(t => t.title.trim()).length > 1 ? 's' : ''}` : ''}`}
                   </button>
-                  <button type="button" onClick={() => setDebrief(null)} className="rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Back</button>
+                  <button type="button" onClick={restartDebriefDraft} className="min-h-11 rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Back</button>
                 </div>
               </div>
             )}
-            {error && !debrief && <p className="mt-2 text-xs text-red-300">{error}</p>}
+            {debriefError && !debrief && <p className="mt-2 text-xs text-red-300">{debriefError}</p>}
           </div>
         )}
 
@@ -866,29 +1107,55 @@ export function GlobalAssistantComposer() {
               <p className="min-w-0 truncate text-sm font-black text-white">{proposal.title}</p>
               <span className="shrink-0 rounded-full border border-brand-teal/30 bg-brand-teal/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-teal">Preview</span>
             </div>
-            {proposal.requiresApproval && proposal.approvalNote && (
+            {proposal.approvalNote && (
               <p className="mb-2 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] px-2 py-1 text-[11px] text-amber-200">{proposal.approvalNote}</p>
             )}
+            {proposal.type === 'task.assign' && proposal.fields.due_date && !proposal.approvalNote && (
+              <p className="mb-2 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] px-2 py-1 text-[11px] text-amber-200">Assignment will be saved now. Change the due date separately on the task because both changes cannot be applied atomically.</p>
+            )}
+            {proposal.target && (
+              <p className="mb-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-xs text-brand-primary">
+                <span className="font-black text-white">{proposal.target.type === 'planner_task' ? 'Task' : 'Content Run'}:</span> {proposal.target.label}
+              </p>
+            )}
             <div className="space-y-1.5">
+              {proposal.type === 'job.enqueue' && proposal.fields.job === 'meta_sync' && (
+                <label className="flex min-h-11 items-center gap-2 text-sm text-brand-primary">
+                  <input
+                    type="checkbox"
+                    checked={proposal.fields.sync_previous_month === 'yes'}
+                    onChange={event => setProposal(current => current ? { ...current, fields: { ...current.fields, sync_previous_month: event.target.checked ? 'yes' : 'no' } } : current)}
+                    className="h-5 w-5 accent-brand-teal"
+                  />
+                  Also sync the previous month
+                </label>
+              )}
               {Object.entries(proposal.fields)
-                .filter(([, value]) => value !== null && value !== undefined && String(value) !== '')
+                .filter(([key, value]) => {
+                  if (key === 'job' || key === 'sync_previous_month' || key === 'status') return false
+                  if (proposal.type === 'task.assign' && key === 'task') return false
+                  if ((proposal.type === 'task.assign' || proposal.type === 'task.create') && (key === 'assignee' || key === 'due_date')) return true
+                  return value !== null && value !== undefined && String(value) !== ''
+                })
                 .map(([key, value]) => (
                   <label key={key} className="flex items-center gap-2">
                     <span className="w-20 shrink-0 text-[10px] font-black uppercase tracking-wide text-brand-primary/55">{key.replace(/_/g, ' ')}</span>
                     <input
-                      value={String(value)}
+                      type={key === 'due_date' || key === 'date' || key === 'new_date' || key === 'scheduled_date' ? 'date' : 'text'}
+                      value={value === null || value === undefined ? '' : String(value)}
+                      placeholder={key === 'assignee' || key === 'due_date' ? 'Optional' : undefined}
                       onChange={event => setProposal(current => current ? { ...current, fields: { ...current.fields, [key]: event.target.value } } : current)}
-                      className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                      className="min-h-11 min-w-0 flex-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
                     />
                   </label>
                 ))}
             </div>
-            {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
+            {proposalError && <p className="mt-2 text-xs text-red-300">{proposalError}</p>}
             <div className="mt-3 flex gap-2">
-              <button type="button" onClick={() => void applyProposal()} disabled={applying} className="flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
+              <button type="button" onClick={() => void applyProposal()} disabled={applying} className="min-h-11 flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
                 {applying ? 'Working…' : proposal.requiresApproval ? 'Submit for approval' : 'Confirm'}
               </button>
-              <button type="button" onClick={() => { setProposal(null); setError(null); inputRef.current?.focus() }} className="rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Cancel</button>
+              <button type="button" onClick={() => { setProposal(null); setProposalError(null); inputRef.current?.focus() }} className="min-h-11 rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Cancel</button>
             </div>
           </div>
         )}
@@ -897,11 +1164,11 @@ export function GlobalAssistantComposer() {
         <form onSubmit={handleSubmit} className="relative flex items-end gap-1.5 rounded-2xl border border-white/12 bg-[#0c0f0e]/98 px-2 py-1.5 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
           {plusOpen && (
             <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
-              <button type="button" onClick={newChat} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
-              <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
-              <button type="button" onClick={() => { debriefActiveRef.current = true; setDebriefOpen(true); setPlusOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
-              <button type="button" onClick={() => { attachRef.current?.click() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
-              <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
+              <button type="button" onClick={newChat} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
+              <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
+              <button type="button" onClick={startNewDebrief} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
+              <button type="button" onClick={() => { attachRef.current?.click() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
+              <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
             </div>
           )}
           <input ref={attachRef} type="file" className="hidden" onChange={event => onAttach(event.target.files)} />
@@ -910,7 +1177,7 @@ export function GlobalAssistantComposer() {
             type="button"
             onClick={() => setPlusOpen(value => !value)}
             aria-label="More actions"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white"
           >
             +
           </button>
@@ -929,7 +1196,7 @@ export function GlobalAssistantComposer() {
             rows={1}
             placeholder="Ask CG Assistant"
             aria-label="Ask CG Assistant"
-            className="max-h-28 min-h-9 flex-1 resize-none bg-transparent px-1 py-1.5 text-sm text-white placeholder:text-brand-primary/45 focus:outline-none"
+            className="max-h-28 min-h-11 flex-1 resize-none bg-transparent px-1 py-2.5 text-sm text-white placeholder:text-brand-primary/45 focus:outline-none"
           />
 
           {speechSupported && (
@@ -937,7 +1204,7 @@ export function GlobalAssistantComposer() {
               <button
                 type="button"
                 onClick={() => setMicLang(l => (l === 'en-ZA' ? 'af-ZA' : 'en-ZA'))}
-                className="rounded-md px-1 text-[10px] font-black uppercase tracking-wide text-brand-primary/60 hover:text-white"
+                className="min-h-11 min-w-11 rounded-md px-1 text-[10px] font-black uppercase tracking-wide text-brand-primary/60 hover:text-white"
                 title="Dictation language"
                 aria-label={`Dictation language: ${micLang === 'en-ZA' ? 'English' : 'Afrikaans'}`}
               >
@@ -948,7 +1215,7 @@ export function GlobalAssistantComposer() {
                 onClick={toggleMic}
                 aria-label={listening ? 'Stop dictation' : 'Start dictation'}
                 aria-pressed={listening}
-                className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition-colors ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-colors ${
                   listening ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 bg-white/[0.04] text-brand-primary hover:text-white'
                 }`}
               >
@@ -961,7 +1228,7 @@ export function GlobalAssistantComposer() {
             type="submit"
             disabled={sending || !input.trim()}
             aria-label="Send to CG Assistant"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-teal text-base font-black text-black transition-opacity disabled:opacity-35"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal text-base font-black text-black transition-opacity disabled:opacity-35"
           >
             ↑
           </button>
