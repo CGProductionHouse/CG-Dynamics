@@ -19,6 +19,13 @@ import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
 import { enqueueBackgroundJob, nudgeBackgroundWorker, listMyBackgroundJobs, type BackgroundJob } from '../../lib/backgroundJobs'
 import { createAssistantTask, updateAssistantTask } from '../../lib/assistantTasks'
 import { listMyAssistantMemory, addAssistantMemory } from '../../lib/assistantMemory'
+import { assistantUpdateVideo, resolveContentRun } from '../../lib/assistantVideos'
+import {
+  analyseMeetingAudio,
+  analyseMeetingText,
+  applyMeetingDebrief,
+  type MeetingDebriefAnalysis,
+} from '../../lib/meetingDebrief'
 import { isManagerRole } from '../../lib/roles'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -128,6 +135,16 @@ export function GlobalAssistantComposer() {
   const [applying, setApplying] = useState(false)
   const [showJobs, setShowJobs] = useState(false)
   const [jobs, setJobs] = useState<BackgroundJob[]>([])
+
+  // Post-meeting debrief flow: record/type → analyse → ONE editable confirmation
+  // (meeting match, background, decisions, unresolved, tasks) → apply.
+  const [debriefOpen, setDebriefOpen] = useState(false)
+  const [debriefText, setDebriefText] = useState('')
+  const [debriefBusy, setDebriefBusy] = useState(false)
+  const [debriefRecording, setDebriefRecording] = useState(false)
+  const [debrief, setDebrief] = useState<MeetingDebriefAnalysis | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
   const navigate = useNavigate()
   const isManager = isManagerRole(profile?.role)
 
@@ -352,18 +369,124 @@ export function GlobalAssistantComposer() {
         if (res.error) throw new Error(res.error.message)
         setProposal(null)
         pushAssistant(action === 'complete' ? 'Done — task marked complete.' : 'Done — task flagged as blocked.')
+      } else if (p.type === 'video.mark_shot' || p.type === 'video.move') {
+        // Direct Content Run video actions through the audited RPC. The run is
+        // the one on the current page when open, else resolved deterministically
+        // (current client's most recent run / most recent run). No routing.
+        const onContent = location.pathname.includes('/admin/content')
+        let runId = onContent && recordId ? recordId : null
+        let runName: string | null = null
+        if (!runId) {
+          const run = await resolveContentRun(p.clientId ?? (clientId || null))
+          if (!run) { setError('I could not find a Content Run to act on. Tell me the client or open the run.'); return }
+          runId = run.id
+          runName = run.name
+        }
+        if (p.type === 'video.mark_shot') {
+          const numbers = String(p.fields.videos ?? '')
+            .split(/[\s,]+/)
+            .map(Number)
+            .filter(n => Number.isInteger(n) && n > 0)
+          if (numbers.length === 0) { setError('Which video number should I mark as shot?'); return }
+          for (const n of numbers) {
+            const res = await assistantUpdateVideo({ runId, videoNumber: n, action: 'shot' })
+            if (res.error) throw new Error(`Video ${n}: ${res.error.message}`)
+          }
+          setProposal(null)
+          pushAssistant(`Done — marked video${numbers.length > 1 ? 's' : ''} ${numbers.join(', ')} as shot${runName ? ` on "${runName}"` : ''}.`)
+        } else {
+          const n = Number(p.fields.video)
+          if (!Number.isInteger(n) || n <= 0) { setError('Which video number should I move?'); return }
+          const month = String(p.fields.scheduled_date ?? '')
+          const res = await assistantUpdateVideo({
+            runId,
+            videoNumber: n,
+            action: /^\d{4}-\d{2}-\d{2}$/.test(month) ? 'move_to_month' : 'move_next_month',
+            scheduledMonth: /^\d{4}-\d{2}-\d{2}$/.test(month) ? month : null,
+          })
+          if (res.error) throw new Error(res.error.message)
+          const moved = res.data as { month?: string | null } | null
+          setProposal(null)
+          pushAssistant(`Done — moved video ${n} to ${moved?.month ? moved.month.slice(0, 7) : 'next month'}${runName ? ` on "${runName}"` : ''}. The Client Schedule link needs confirmation before it appears on the schedule.`)
+        }
       } else {
-        // Video / calendar.cancel still need the on-page record to act on.
-        const dest = p.type.startsWith('video') ? '/admin/content?tab=runs' : '/admin/cg-calendar'
-        const where = dest.includes('content') ? 'Content Runs' : 'CG Calendar'
+        // calendar.cancel still needs the on-record calendar entry to act on.
         setProposal(null)
-        pushAssistant(`Opening ${where} so you can finish this on the record.`)
-        navigate(dest)
+        pushAssistant('Opening CG Calendar so you can finish this on the record.')
+        navigate('/admin/cg-calendar')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not complete that action.')
     } finally {
       setApplying(false)
+    }
+  }
+
+  // ── Meeting debrief flow ────────────────────────────────────────────────
+  async function startDebriefRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      audioChunksRef.current = []
+      recorder.ondataavailable = event => { if (event.data.size > 0) audioChunksRef.current.push(event.data) }
+      recorder.onstop = () => {
+        stream.getTracks().forEach(track => track.stop())
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' })
+        if (blob.size > 0) void analyseDebrief({ audio: blob })
+      }
+      mediaRecorderRef.current = recorder
+      recorder.start()
+      setDebriefRecording(true)
+    } catch {
+      setError('Microphone access was blocked. Type the debrief instead.')
+    }
+  }
+
+  function stopDebriefRecording() {
+    mediaRecorderRef.current?.stop()
+    setDebriefRecording(false)
+  }
+
+  async function analyseDebrief(input: { audio?: Blob; eventId?: string }) {
+    setDebriefBusy(true)
+    setError(null)
+    try {
+      const opts = { eventId: input.eventId, clientId: clientId || undefined }
+      const res = input.audio
+        ? await analyseMeetingAudio(input.audio, opts)
+        : await analyseMeetingText(input.eventId && debrief ? debrief.transcript : debriefText, opts)
+      if (res.error || !res.data) { setError(res.error ?? 'The debrief could not be analysed.'); return }
+      setDebrief(res.data)
+    } finally {
+      setDebriefBusy(false)
+    }
+  }
+
+  async function confirmDebrief() {
+    if (!debrief || debriefBusy) return
+    setDebriefBusy(true)
+    setError(null)
+    try {
+      const res = await applyMeetingDebrief({
+        debriefId: debrief.debriefId,
+        summary: debrief.summary,
+        decisions: debrief.decisions,
+        unresolved: debrief.unresolved,
+        tasks: debrief.tasks
+          .filter(t => t.title.trim())
+          .map(t => ({ title: t.title, assignee_name: t.assignee_name, client_id: t.client_id, client_name: t.client_name, due_date: t.due_date })),
+      })
+      if (res.error || !res.data) { setError(res.error ?? 'The debrief could not be applied.'); return }
+      setDebrief(null)
+      setDebriefOpen(false)
+      setDebriefText('')
+      setOpen(true)
+      pushAssistant(
+        `Debrief saved${res.data.notes_saved ? ' — notes are on the meeting' : ''}` +
+        `${res.data.tasks_created > 0 ? ` and ${res.data.tasks_created} task${res.data.tasks_created > 1 ? 's were' : ' was'} created on the board (assignees notified)` : ''}.`,
+      )
+    } finally {
+      setDebriefBusy(false)
     }
   }
 
@@ -581,6 +704,138 @@ export function GlobalAssistantComposer() {
           </div>
         )}
 
+        {/* Meeting debrief — record/type → ONE editable confirmation → apply */}
+        {debriefOpen && (
+          <div className="mb-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-sm font-black text-white">Meeting debrief</p>
+              <button type="button" onClick={() => { setDebriefOpen(false); setDebrief(null); setDebriefText(''); if (debriefRecording) stopDebriefRecording() }} className="rounded-md px-2 py-1 text-sm font-bold text-brand-primary/70 hover:text-white">✕</button>
+            </div>
+
+            {!debrief ? (
+              <div className="space-y-2">
+                <p className="text-xs text-brand-primary/60">Speak or type what happened in the meeting — English, Afrikaans or mixed. Nothing is saved until you confirm the preview.</p>
+                <textarea
+                  value={debriefText}
+                  onChange={event => setDebriefText(event.target.value)}
+                  rows={4}
+                  placeholder="Type the debrief here, or record it…"
+                  className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-sm text-white placeholder:text-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => (debriefRecording ? stopDebriefRecording() : void startDebriefRecording())}
+                    disabled={debriefBusy}
+                    className={`flex-1 rounded-full border px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-40 ${debriefRecording ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 text-brand-primary hover:text-white'}`}
+                  >
+                    {debriefRecording ? 'Stop recording' : 'Record voice note'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void analyseDebrief({})}
+                    disabled={debriefBusy || !debriefText.trim()}
+                    className="flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40"
+                  >
+                    {debriefBusy ? 'Analysing…' : 'Analyse text'}
+                  </button>
+                </div>
+                {debriefBusy && !debriefRecording && <p className="text-xs text-brand-primary/60">Transcribing and structuring the debrief…</p>}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <label className="block">
+                  <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Meeting</span>
+                  <select
+                    value={debrief.meeting?.id ?? ''}
+                    onChange={event => { const id = event.target.value; if (id && id !== debrief.meeting?.id) void analyseDebrief({ eventId: id }) }}
+                    className="mt-0.5 w-full rounded-md border border-white/10 bg-[#121614] px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  >
+                    {debrief.candidates.length === 0 && <option value="">No recent meeting found</option>}
+                    {debrief.candidates.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.title} — {c.startAt.slice(0, 10)}{c.clientName ? ` (${c.clientName})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Background notes</span>
+                  <textarea
+                    value={debrief.summary}
+                    onChange={event => setDebrief(current => current ? { ...current, summary: event.target.value } : current)}
+                    rows={3}
+                    className="mt-0.5 w-full resize-y rounded-md border border-white/10 bg-white/[0.04] px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Decisions (one per line)</span>
+                  <textarea
+                    value={debrief.decisions.join('\n')}
+                    onChange={event => setDebrief(current => current ? { ...current, decisions: event.target.value.split('\n').map(v => v.trim()).filter(Boolean) } : current)}
+                    rows={2}
+                    className="mt-0.5 w-full resize-y rounded-md border border-white/10 bg-white/[0.04] px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Unresolved (one per line)</span>
+                  <textarea
+                    value={debrief.unresolved.join('\n')}
+                    onChange={event => setDebrief(current => current ? { ...current, unresolved: event.target.value.split('\n').map(v => v.trim()).filter(Boolean) } : current)}
+                    rows={2}
+                    className="mt-0.5 w-full resize-y rounded-md border border-white/10 bg-white/[0.04] px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  />
+                </label>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Tasks ({debrief.tasks.length})</span>
+                  <div className="mt-1 space-y-1.5">
+                    {debrief.tasks.map((task, index) => (
+                      <div key={index} className="rounded-lg border border-white/10 bg-white/[0.03] p-2">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            value={task.title}
+                            onChange={event => setDebrief(current => current ? { ...current, tasks: current.tasks.map((t, i) => i === index ? { ...t, title: event.target.value } : t) } : current)}
+                            placeholder="Task title"
+                            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                          />
+                          <button type="button" aria-label="Remove task" onClick={() => setDebrief(current => current ? { ...current, tasks: current.tasks.filter((_, i) => i !== index) } : current)} className="shrink-0 rounded-md px-1.5 text-sm font-bold text-brand-primary/60 hover:text-red-300">✕</button>
+                        </div>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <input
+                            value={task.assignee_name ?? ''}
+                            onChange={event => setDebrief(current => current ? { ...current, tasks: current.tasks.map((t, i) => i === index ? { ...t, assignee_name: event.target.value || null } : t) } : current)}
+                            placeholder="Assignee"
+                            className={`w-32 rounded-md border px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-teal ${task.assignee_name && !task.resolved_assignee ? 'border-amber-400/40 bg-amber-400/[0.06]' : 'border-white/10 bg-white/[0.04]'}`}
+                            title={task.assignee_name && !task.resolved_assignee ? 'Not matched to a staff member — check the name' : undefined}
+                          />
+                          <input
+                            type="date"
+                            value={task.due_date ?? ''}
+                            onChange={event => setDebrief(current => current ? { ...current, tasks: current.tasks.map((t, i) => i === index ? { ...t, due_date: event.target.value || null } : t) } : current)}
+                            className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                            title="Leave empty to keep no due date"
+                          />
+                          {task.client_name && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-bold text-brand-primary/70">{task.client_name}</span>}
+                          {!task.due_date && <span className="text-[10px] text-brand-primary/45">no due date</span>}
+                        </div>
+                      </div>
+                    ))}
+                    {debrief.tasks.length === 0 && <p className="text-xs text-brand-primary/45">No tasks were mentioned.</p>}
+                  </div>
+                </div>
+                {error && <p className="text-xs text-red-300">{error}</p>}
+                <div className="flex gap-2 pt-1">
+                  <button type="button" onClick={() => void confirmDebrief()} disabled={debriefBusy} className="flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
+                    {debriefBusy ? 'Saving…' : `Save notes${debrief.tasks.filter(t => t.title.trim()).length > 0 ? ` + create ${debrief.tasks.filter(t => t.title.trim()).length} task${debrief.tasks.filter(t => t.title.trim()).length > 1 ? 's' : ''}` : ''}`}
+                  </button>
+                  <button type="button" onClick={() => setDebrief(null)} className="rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Back</button>
+                </div>
+              </div>
+            )}
+            {error && !debrief && <p className="mt-2 text-xs text-red-300">{error}</p>}
+          </div>
+        )}
+
         {/* Action preview — confirm/edit/cancel before any write */}
         {proposal && (
           <div className="mb-2 rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
@@ -621,6 +876,7 @@ export function GlobalAssistantComposer() {
             <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
               <button type="button" onClick={newChat} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
               <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
+              <button type="button" onClick={() => { setDebriefOpen(true); setPlusOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
               <button type="button" onClick={() => { attachRef.current?.click() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
               <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
             </div>
