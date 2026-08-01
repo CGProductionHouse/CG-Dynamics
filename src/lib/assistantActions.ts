@@ -198,6 +198,30 @@ function collectNumbers(text: string): number[] {
   return [...new Set(found)]
 }
 
+// ── Meta Business sync intent ────────────────────────────────────────────────
+// Lexical detector (EN + AF + mixed) for the meta_sync background job. Picks up
+// natural phrasing that is not the tight "meta sync" / "sync meta" adjacency:
+//   "sync all connected meta clients", "sync all Meta clients",
+//   "refresh Meta data", "update all client Meta reports", "sync connected clients"
+// plus Afrikaans/mixed equivalents. The brand word may even be absent when the
+// sentence is explicitly "sync connected clients". This never guesses — it is a
+// deterministic keyword match, and the result is a confirmable preview.
+function isMetaSyncIntent(lower: string): boolean {
+  // Explicit adjacency forms stay the fastest, most precise match.
+  if (/\b(meta[\s-]?(?:sync|sinkronisering)|(?:sync|sinkroniseer)[\s-]?meta)\b/.test(lower)) return true
+
+  // Sync/refresh/update verb + Meta brand + a sync-ish context word.
+  const verb = /\b(?:sync(?:hroniz?e|hronise)?|sinkroniseer|synchroniseer|refresh|verfris|update|opdateer|run|voer uit)\b/.test(lower)
+  const brand = /\b(?:meta|facebook|instagram)\b/.test(lower)
+  const context = /\b(?:client|clients|kliënt|kliënte|connected|gekoppeld|report|reports|verslag|verslae|data|sinkronisering)\b/.test(lower)
+  if (verb && brand && context) return true
+
+  // Meta-less form: "sync connected clients" / "sinkroniseer gekoppelde kliënte".
+  return /\b(?:sync|sinkroniseer|synchroniseer)\b/.test(lower) &&
+    /\b(?:connected|gekoppeld)\b/.test(lower) &&
+    /\b(?:client|clients|kliënt|kliënte)\b/.test(lower)
+}
+
 // ── Main parser ──────────────────────────────────────────────────────────────
 
 export function parseAssistantAction(input: string, context: ActionContext): ParseResult {
@@ -218,7 +242,7 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   }
 
   // 0. Durable background jobs (Meta sync, report preparation).
-  if (/\b(meta[\s-]?sync|sync meta)\b/.test(lower)) {
+  if (isMetaSyncIntent(lower)) {
     const baseline = /\bbaseline|previous month|vorige maand\b/.test(lower)
     return {
       type: 'job.enqueue',

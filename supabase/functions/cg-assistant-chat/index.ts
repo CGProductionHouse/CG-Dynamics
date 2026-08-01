@@ -102,6 +102,94 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
   },
 ]
 
+interface MetaIntegrationState {
+  connected: boolean
+  status: string
+  message: string
+  linkedAssetsCount: number
+}
+
+const META_REQUIRED_SCOPES = [
+  'pages_show_list',
+  'pages_read_engagement',
+  'read_insights',
+  'instagram_basic',
+  'instagram_manage_insights',
+  'business_management',
+]
+
+// Real Meta Business integration state from the same tables the Meta status
+// endpoint reads (meta_connections, meta_connection_tokens, meta_client_assets).
+// Used so the assistant answers Meta capability questions from live diagnostics
+// instead of a static model guess. Returns null only when the schema is missing.
+async function getMetaIntegrationState(sb: ReturnType<typeof createClient>): Promise<MetaIntegrationState | null> {
+  try {
+    const { count: linkedAssetsCount } = await sb
+      .from('meta_client_assets')
+      .select('*', { head: true, count: 'exact' })
+      .eq('is_active', true)
+
+    const { data: connections } = await sb
+      .from('meta_connections')
+      .select('id, status, scopes, last_error, last_connected_at')
+      .order('last_connected_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    const assets = linkedAssetsCount ?? 0
+
+    if (!connections || connections.length === 0) {
+      return { connected: false, status: 'not_connected', message: 'Meta is not connected yet.', linkedAssetsCount: assets }
+    }
+
+    const latest = connections[0]
+    const grantedScopes = Array.isArray(latest.scopes)
+      ? latest.scopes.filter((scope): scope is string => typeof scope === 'string')
+      : []
+    const missingScopes = META_REQUIRED_SCOPES.filter(scope => !grantedScopes.includes(scope))
+    const terminalStatuses = ['not_connected', 'needs_reauth', 'revoked', 'error']
+
+    if (terminalStatuses.includes(latest.status)) {
+      const messages: Record<string, string> = {
+        not_connected: 'Meta is not connected yet.',
+        needs_reauth: 'Meta needs to be reconnected.',
+        revoked: 'Meta access was revoked.',
+        error: 'Meta connection has an error.',
+      }
+      return {
+        connected: false,
+        status: latest.status,
+        message: latest.last_error || messages[latest.status] || 'Meta is not connected.',
+        linkedAssetsCount: assets,
+      }
+    }
+
+    if (missingScopes.length > 0) {
+      return {
+        connected: false,
+        status: 'needs_reauth',
+        message: `Meta needs to be reconnected with: ${missingScopes.join(', ')}.`,
+        linkedAssetsCount: assets,
+      }
+    }
+
+    const { data: tokenRows } = await sb
+      .from('meta_connection_tokens')
+      .select('id')
+      .eq('connection_id', latest.id)
+      .limit(1)
+
+    if (!tokenRows || tokenRows.length === 0) {
+      return { connected: false, status: 'needs_reauth', message: 'Meta needs to be reconnected.', linkedAssetsCount: assets }
+    }
+
+    return { connected: true, status: 'connected', message: 'Meta is connected.', linkedAssetsCount: assets }
+  } catch {
+    // Meta schema not present yet — unknown rather than a guess.
+    return null
+  }
+}
+
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
 
 const RESTRICTED_PATTERNS = [
@@ -162,6 +250,16 @@ const SETUP_QUESTION_PATTERNS = [
   /\bfuture\b/i,
   /\bguardrails?\b/i,
   /\bpermissions?\b/i,
+]
+
+const META_MENTION_PATTERNS = [
+  /\bmeta\b/i,
+  /\bfacebook\b/i,
+  /\binstagram\b/i,
+  /\bmeta[\s-]?sync\b/i,
+  /\bsync(?:hronis(?:e|ing|ation))?\b/i,
+  /\brefresh meta\b/i,
+  /\bconnected\b/i,
 ]
 
 type AssistantAction = 'chat' | 'diagnostics' | 'test_provider'
@@ -257,6 +355,10 @@ function isCapabilitiesQuestion(message: string): boolean {
   return CAPABILITIES_PATTERNS.some((pattern) => pattern.test(message))
 }
 
+function isMetaMention(message: string): boolean {
+  return META_MENTION_PATTERNS.some((pattern) => pattern.test(message))
+}
+
 function isTaskLookupRequest(message: string): boolean {
   return TASK_LOOKUP_PATTERNS.some((pattern) => pattern.test(message))
 }
@@ -287,7 +389,17 @@ function getTaskLookupPlaceholder() {
   }
 }
 
-function buildCapabilitiesResponse(role: string): string {
+function buildMetaStatusLine(metaState: MetaIntegrationState | null): string {
+  if (!metaState) {
+    return '- Meta Business: status could not be verified from diagnostics right now.'
+  }
+  if (metaState.connected) {
+    return `- Meta Business: connected (${metaState.linkedAssetsCount} linked client asset${metaState.linkedAssetsCount === 1 ? '' : 's'}). Sync and reporting can run.`
+  }
+  return `- Meta Business: not connected. ${metaState.message}${metaState.linkedAssetsCount > 0 ? ` ${metaState.linkedAssetsCount} linked client asset${metaState.linkedAssetsCount === 1 ? '' : 's'} still exist.` : ''}`
+}
+
+function buildCapabilitiesResponse(role: string, metaState: MetaIntegrationState | null): string {
   const connected = TOOL_REGISTRY
     .filter((tool) => tool.status === 'available')
     .map((tool) => `- ${tool.name}: ${tool.description}`)
@@ -311,6 +423,8 @@ function buildCapabilitiesResponse(role: string): string {
     '',
     'Not connected yet:',
     notConnected,
+    '',
+    buildMetaStatusLine(metaState),
     '',
     `Your access tier: ${accessSummary(role)}`,
   ].join('\n')
@@ -390,15 +504,20 @@ function accessSummary(role: string): string {
   return 'Staff: own tasks, public schedule items, already-visible client/project task info, and general operational help when those tools are connected.'
 }
 
-function buildSystemPrompt(role: string): string {
+function buildSystemPrompt(role: string, metaState: MetaIntegrationState | null): string {
   const tools = TOOL_REGISTRY.map((tool) => `${tool.name}: ${tool.status}`).join(', ')
+  const metaFacts = metaState
+    ? `Live Meta Business integration state (from diagnostics, do not contradict it): ${metaState.connected ? 'CONNECTED' : 'NOT_CONNECTED'} (status: ${metaState.status}, linked client assets: ${metaState.linkedAssetsCount}).`
+    : 'Live Meta Business integration state is currently unverifiable in this function.'
 
   return [
     'You are CG Assistant inside CG Dynamics.',
     'Be practical, short, operational, and clear.',
     `User role: ${role}. ${accessSummary(role)}`,
     `Tool registry: ${tools}. Only sanitized My Day context may be supplied with the request; other live operational tools are not connected yet.`,
-    'If asked for live tasks beyond the supplied My Day context, calendar lookups, client task details, approvals, Meta, or CG Hours data, say the integration is not connected yet and offer a useful checklist, draft, or workflow.',
+    metaFacts,
+    'If asked for live tasks beyond the supplied My Day context, calendar lookups, client task details, approvals, or CG Hours data, say the integration is not connected yet and offer a useful checklist, draft, or workflow.',
+    `When asked whether Meta is connected, reply based ONLY on the live Meta integration state above: ${metaState?.connected ? 'it is connected, so say it is connected and available for sync.' : 'it is not connected, so say it is not connected and never claim otherwise.'}`,
     'Never reveal, infer, summarise, or guess salaries, payroll, bank details, Xero/accounting values, profit/loss, revenue, invoice totals, tax, owner notes, ID numbers, confidential finance, or private HR/payroll fields.',
     'Do not hallucinate data. If no data was provided or connected, say so.',
     'Answer as CG Assistant.',
@@ -759,6 +878,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Message is required.' }, 400)
   }
 
+  // Real Meta integration state — fetched lazily (only when Meta is relevant to
+  // the message) so ordinary chat does not pay an extra DB round trip.
+  const metaState = isMetaMention(message) ? await getMetaIntegrationState(sb) : null
+
   if (isRestrictedRequest(message)) {
     const setupAllowed = isPrivilegedRole(role) && isSetupQuestion(message)
     const answer = buildRestrictedResponse(role, setupAllowed)
@@ -783,7 +906,7 @@ Deno.serve(async (req) => {
   }
 
   if (isCapabilitiesQuestion(message)) {
-    const answer = buildCapabilitiesResponse(role)
+    const answer = buildCapabilitiesResponse(role, metaState)
 
     await auditAssistantRequest(sb, {
       userId: user.id,
@@ -846,7 +969,7 @@ Deno.serve(async (req) => {
   }
 
   const messages: AiChatMessage[] = [
-    { role: 'system', content: buildSystemPrompt(role) },
+    { role: 'system', content: buildSystemPrompt(role, metaState) },
     ...history,
     { role: 'user', content: message },
   ]
