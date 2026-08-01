@@ -123,6 +123,19 @@ test('"This task is blocked" → task.update blocked', () => {
   assert.equal(r.fields.status, 'blocked')
 })
 
+test('"Run Meta sync with baseline" → job.enqueue meta_sync + baseline', () => {
+  const r = parseAssistantAction('Run Meta sync with baseline', CTX)
+  assert.equal(r.type, 'job.enqueue')
+  assert.equal(r.fields.job, 'meta_sync')
+  assert.equal(r.fields.baseline, 'yes')
+})
+
+test('"Prepare the reports" → job.enqueue report_prep', () => {
+  const r = parseAssistantAction('Prepare the reports', CTX)
+  assert.equal(r.type, 'job.enqueue')
+  assert.equal(r.fields.job, 'report_prep')
+})
+
 test('plain question / non-action returns null (falls through to chat)', () => {
   assert.equal(parseAssistantAction('What should I focus on today?', CTX), null)
   assert.equal(parseAssistantAction('', CTX), null)

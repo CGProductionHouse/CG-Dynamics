@@ -14,8 +14,10 @@ import { getMyDayContext } from '../../lib/workforceMyDay'
 import { parseAssistantAction, type ActionProposal } from '../../lib/assistantActions'
 import { listStaffProfiles } from '../../lib/contentWorkflow'
 import { createCompanyEvent } from '../../lib/companyCalendar'
-import { logPlannerActivity } from '../../lib/planner'
+import { logPlannerActivity, listPlannerWorkloadSummary } from '../../lib/planner'
 import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
+import { enqueueBackgroundJob, nudgeBackgroundWorker, listMyBackgroundJobs, type BackgroundJob } from '../../lib/backgroundJobs'
+import { isManagerRole } from '../../lib/roles'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Global CG Assistant composer.
@@ -122,7 +124,10 @@ export function GlobalAssistantComposer() {
   // preview before ANY write. Nothing mutates until the user confirms.
   const [proposal, setProposal] = useState<ActionProposal | null>(null)
   const [applying, setApplying] = useState(false)
+  const [showJobs, setShowJobs] = useState(false)
+  const [jobs, setJobs] = useState<BackgroundJob[]>([])
   const navigate = useNavigate()
+  const isManager = isManagerRole(profile?.role)
 
   const workContextRef = useRef<AssistantLocalWorkContext | null>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
@@ -131,6 +136,7 @@ export function GlobalAssistantComposer() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const clientsRef = useRef<ActiveClientOption[]>([])
   const staffRef = useRef<string[]>([])
+  const managementRef = useRef<string | null>(null)
 
   const speechSupported = useMemo(() => Boolean(getSpeechRecognition()), [])
 
@@ -142,8 +148,23 @@ export function GlobalAssistantComposer() {
     listStaffProfiles().then(res => {
       if (active && !res.migrationNeeded) staffRef.current = res.data.map(s => s.full_name).filter((n): n is string => Boolean(n))
     }).catch(() => {})
+    // Management grounding: only authorised admin/manager get a cross-team
+    // workload summary the master assistant can reason over. RLS on the RPC also
+    // enforces this server-side — normal staff never receive it.
+    if (isManager) {
+      listPlannerWorkloadSummary().then(res => {
+        if (!active || res.error || !res.data) return
+        const rows = res.data
+        const overdue = rows.reduce((sum, r) => sum + (r.overdue_count ?? 0), 0)
+        const blocked = rows.reduce((sum, r) => sum + (r.blocked_count ?? 0), 0)
+        const unassigned = rows[0]?.unassigned_total ?? 0
+        const busiest = [...rows].sort((a, b) => (b.active_task_count ?? 0) - (a.active_task_count ?? 0))[0]
+        managementRef.current = `cross-team: ${overdue} overdue, ${blocked} blocked, ${unassigned} unassigned` +
+          (busiest ? `, busiest ${busiest.full_name} (${busiest.active_task_count} active)` : '')
+      }).catch(() => {})
+    }
     return () => { active = false }
-  }, [])
+  }, [isManager])
 
   // Load the signed-in user's live work context once (best-effort; the assistant
   // still works without it).
@@ -179,6 +200,15 @@ export function GlobalAssistantComposer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  // Live background-job states while the jobs panel is open.
+  useEffect(() => {
+    if (!open || !showJobs) return
+    void loadJobs()
+    const interval = window.setInterval(() => { void loadJobs() }, 5000)
+    return () => window.clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, showJobs])
+
   const pageLabel = pageLabelFromPath(location.pathname)
   // The full Assistant page has its own composer — don't stack a second one.
   const onAssistantPage = location.pathname.startsWith('/admin/assistant')
@@ -186,10 +216,17 @@ export function GlobalAssistantComposer() {
   const recordId = searchParams.get('reportId') ?? searchParams.get('runId') ?? searchParams.get('id') ?? ''
 
   function currentContextLine(): string {
-    const parts = [`page: ${pageLabel}`]
+    const parts = [`page: ${pageLabel}`, `role: ${profile?.role ?? 'team'}`]
     if (clientId) parts.push(`clientId: ${clientId}`)
     if (recordId) parts.push(`recordId: ${recordId}`)
+    // Management grounding is only ever added for authorised admin/manager.
+    if (isManager && managementRef.current) parts.push(managementRef.current)
     return parts.join(', ')
+  }
+
+  async function loadJobs() {
+    const res = await listMyBackgroundJobs(10)
+    if (!res.error) setJobs((res.data ?? []) as BackgroundJob[])
   }
 
   function pushAssistant(text: string) {
@@ -204,6 +241,25 @@ export function GlobalAssistantComposer() {
     setApplying(true)
     setError(null)
     try {
+      if (p.type === 'job.enqueue') {
+        const jobType = String(p.fields.job)
+        const baseline = p.fields.baseline === 'yes'
+        const today = new Date().toISOString().slice(0, 10)
+        const res = await enqueueBackgroundJob({
+          jobType,
+          payload: jobType === 'meta_sync' ? { baseline } : {},
+          // Idempotent per type per day (+baseline) so double-asking does not
+          // duplicate work.
+          idempotencyKey: `${jobType}-${today}${baseline ? '-baseline' : ''}`,
+        })
+        if (res.error) throw new Error(res.error.message)
+        void nudgeBackgroundWorker()
+        setProposal(null)
+        setShowJobs(true)
+        void loadJobs()
+        pushAssistant(`Queued ${jobType === 'meta_sync' ? 'Meta sync' : 'report preparation'} as a background job. It runs on the server and continues even if you close the app — I'll notify you when it finishes. Progress is under "Background jobs".`)
+        return
+      }
       if (p.type === 'calendar.create') {
         const date = String(p.fields.date)
         const time = p.fields.time ? String(p.fields.time) : null
@@ -401,6 +457,38 @@ export function GlobalAssistantComposer() {
               </div>
             </div>
 
+            {showJobs && (
+              <div className="border-b border-white/10 px-3 py-2.5">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-brand-primary/60">Background jobs</p>
+                  <button type="button" onClick={() => setShowJobs(false)} className="text-[11px] font-bold text-brand-primary/60 hover:text-white">Hide</button>
+                </div>
+                {jobs.length === 0 ? (
+                  <p className="text-xs text-brand-primary/45">No background jobs yet.</p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {jobs.map(job => {
+                      const tone = job.status === 'succeeded' ? 'text-[#2dd4bf]' : job.status === 'failed' ? 'text-red-300' : job.status === 'running' ? 'text-amber-300' : 'text-brand-primary/60'
+                      return (
+                        <li key={job.id} className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="min-w-0 truncate text-xs font-semibold text-white">{job.job_type.replace(/_/g, ' ')}</span>
+                            <span className={`shrink-0 text-[10px] font-black uppercase ${tone}`}>{job.status}</span>
+                          </div>
+                          {(job.status === 'running' || job.status === 'queued') && (
+                            <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
+                              <div className="h-full rounded-full bg-brand-teal transition-all" style={{ width: `${job.progress}%` }} />
+                            </div>
+                          )}
+                          {job.status === 'failed' && job.error && <p className="mt-1 truncate text-[10px] text-red-300/80">{job.error}</p>}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
+
             <div ref={scrollRef} className="max-h-[min(60vh,26rem)] min-h-[8rem] space-y-2.5 overflow-y-auto overscroll-contain px-3 py-3">
               {messages.length === 0 && !sending && (
                 <div className="space-y-2 py-2">
@@ -476,6 +564,7 @@ export function GlobalAssistantComposer() {
           {plusOpen && (
             <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
               <button type="button" onClick={newChat} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
+              <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
               <button type="button" onClick={() => { attachRef.current?.click() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
               <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
             </div>
