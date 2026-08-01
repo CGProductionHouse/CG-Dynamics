@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import {
   analyseContentRunAudio,
   analyseContentRunText,
@@ -8,6 +9,7 @@ import {
   type ContentRunDebriefAction,
 } from '../../lib/contentRunDebrief'
 import type { ContentGuideline, ContentGuidelineVideo, ContentRun } from '../../lib/contentWorkflow'
+import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
 import { ActionButton } from '../ui/Buttons'
 
 const ACTION_LABELS: Record<ContentRunDebriefAction, string> = {
@@ -51,12 +53,15 @@ export function ContentRunVoiceDebrief({
   videos: ContentGuidelineVideo[]
   onApplied: () => void | Promise<void>
 }) {
+  const { user } = useAuth()
   const recorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const chunksRef = useRef<Blob[]>([])
+  const recordingStartedAtRef = useRef(0)
   const [recording, setRecording] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [audio, setAudio] = useState<Blob | null>(null)
+  const [audioDurationSeconds, setAudioDurationSeconds] = useState(0)
   const [typedDebrief, setTypedDebrief] = useState('')
   const [analysis, setAnalysis] = useState<ContentRunDebriefAnalysis | null>(null)
   const [actions, setActions] = useState<ApprovedDebriefAction[]>([])
@@ -66,8 +71,17 @@ export function ContentRunVoiceDebrief({
 
   useEffect(() => {
     if (!recording) return
-    const timer = window.setInterval(() => setSeconds(value => value + 1), 1000)
-    return () => window.clearInterval(timer)
+    const timer = window.setInterval(() => {
+      setSeconds(Math.min(MAX_VOICE_SECONDS, Math.floor((Date.now() - recordingStartedAtRef.current) / 1000)))
+    }, 250)
+    const autoStop = window.setTimeout(() => {
+      stopRecording()
+      setError('Recording stopped automatically at the 5-minute limit.')
+    }, Math.max(0, MAX_VOICE_SECONDS * 1000 - (Date.now() - recordingStartedAtRef.current)))
+    return () => {
+      window.clearInterval(timer)
+      window.clearTimeout(autoStop)
+    }
   }, [recording])
 
   useEffect(() => () => {
@@ -86,6 +100,7 @@ export function ContentRunVoiceDebrief({
     setAnalysis(null)
     setActions([])
     setAudio(null)
+    setAudioDurationSeconds(0)
     setSeconds(0)
 
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -105,11 +120,14 @@ export function ContentRunVoiceDebrief({
       }
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' })
+        const measuredSeconds = Math.min(MAX_VOICE_SECONDS, (Date.now() - recordingStartedAtRef.current) / 1000)
         setAudio(blob.size > 0 ? blob : null)
+        setAudioDurationSeconds(measuredSeconds)
         stream.getTracks().forEach(track => track.stop())
         streamRef.current = null
       }
       recorder.start(500)
+      recordingStartedAtRef.current = Date.now()
       setRecording(true)
     } catch {
       setError('Microphone access was not available. Allow microphone access or type the debrief below.')
@@ -129,9 +147,14 @@ export function ContentRunVoiceDebrief({
     setBusy('analyse')
     setError(null)
     setSuccess(null)
+    if (!user) {
+      setBusy(null)
+      setError('Sign in again before submitting this debrief.')
+      return
+    }
     const result = audio
-      ? await analyseContentRunAudio(run.id, audio)
-      : await analyseContentRunText(run.id, typedDebrief.trim())
+      ? await analyseContentRunAudio(user.id, run.id, audio, audioDurationSeconds)
+      : await analyseContentRunText(user.id, run.id, typedDebrief.trim())
     setBusy(null)
     if (result.error || !result.data) {
       setError(result.error ?? 'The debrief could not be analysed.')
@@ -196,10 +219,11 @@ export function ContentRunVoiceDebrief({
             <button
               type="button"
               onClick={stopRecording}
+              aria-live="polite"
               className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-red-300/30 bg-red-300/10 px-4 text-sm font-bold text-red-100"
             >
               <span aria-hidden="true" className="h-2.5 w-2.5 animate-pulse rounded-full bg-red-300" />
-              Stop {formatDuration(seconds)}
+              Stop · {formatDuration(MAX_VOICE_SECONDS - seconds)} remaining
             </button>
           )}
         </div>
@@ -214,6 +238,7 @@ export function ContentRunVoiceDebrief({
       {audio && !analysis && (
         <div className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3">
           <p className="text-xs font-bold text-white">Voice note ready</p>
+          <p className="mt-1 text-[11px] text-white/45">{formatDuration(Math.ceil(audioDurationSeconds))} recorded · 5:00 maximum</p>
           <audio className="mt-2 w-full" controls src={audioUrl ?? undefined} />
         </div>
       )}
@@ -295,8 +320,8 @@ export function ContentRunVoiceDebrief({
         </div>
       )}
 
-      {error && <p className="mt-4 rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
-      {success && <p className="mt-4 rounded-lg border border-emerald-300/25 bg-emerald-300/[0.07] px-3 py-2 text-sm text-emerald-100">{success}</p>}
+      {error && <p className="mt-4 rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200" role="alert">{error}</p>}
+      {success && <p className="mt-4 rounded-lg border border-emerald-300/25 bg-emerald-300/[0.07] px-3 py-2 text-sm text-emerald-100" role="status" aria-live="polite">{success}</p>}
     </section>
   )
 }

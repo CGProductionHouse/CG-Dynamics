@@ -228,6 +228,9 @@ export default function ImportHealthPage() {
           <Link to="/admin/planner">
             <ActionButton variant="ghost" size="sm">Planner</ActionButton>
           </Link>
+          <Link to="/admin/ai-health">
+            <ActionButton variant="outline" size="sm">AI usage & provider health</ActionButton>
+          </Link>
         </div>
       </div>
 

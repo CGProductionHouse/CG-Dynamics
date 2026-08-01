@@ -8,14 +8,25 @@
 // apply_meeting_debrief. The transcript is untrusted evidence, never commands.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { routeAiChat, type AiChatMessage } from '../cg-assistant-chat/ai-router.ts'
+import { AiDuplicateRequestError, routeAiChat, type AiChatMessage } from '../cg-assistant-chat/ai-router.ts'
 import { transcribeAudio } from '../_shared/voiceTranscribe.ts'
+import { deleteAiUsageReplay, fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
 
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024
 
 function env(name: string, fallback = ''): string {
   return (Deno.env.get(name) ?? fallback).trim()
+}
+
+async function sha256(value: string | ArrayBuffer): Promise<string> {
+  const bytes = typeof value === 'string' ? new TextEncoder().encode(value) : value
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
+function validRequestId(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
 }
 
 interface MeetingRow {
@@ -130,11 +141,27 @@ function normaliseAnalysis(
   }
 }
 
+function validateAnalysisContent(
+  content: string,
+  meeting: MeetingRow | null,
+  staff: Array<{ id: string; full_name: string }>,
+  clients: Array<{ id: string; name: string }>,
+): boolean {
+  const raw = extractJson(content) as Record<string, unknown>
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false
+  if (typeof raw.summary !== 'string' || !Array.isArray(raw.decisions) || !Array.isArray(raw.unresolved) || !Array.isArray(raw.tasks)) return false
+  const analysis = normaliseAnalysis(raw, meeting, staff, clients)
+  return Boolean(analysis.summary || analysis.decisions.length || analysis.unresolved.length || analysis.tasks.length)
+}
+
 async function analyseTranscript(
   transcript: string,
   meeting: MeetingRow | null,
   staff: Array<{ id: string; full_name: string }>,
   clients: Array<{ id: string; name: string }>,
+  usageClient: AiUsageClient,
+  actorId: string,
+  requestId: string,
 ): Promise<{ analysis: Analysis; provider: string }> {
   const messages: AiChatMessage[] = [
     {
@@ -159,8 +186,35 @@ async function analyseTranscript(
       }),
     },
   ]
-  const result = await routeAiChat(messages, { maxOutputTokens: 2500 })
-  return { analysis: normaliseAnalysis(extractJson(result.content), meeting, staff, clients), provider: `${result.provider}:${result.model}` }
+  const fingerprint = await sha256(`${meeting?.id ?? 'none'}\n${transcript}`)
+  try {
+    const result = await routeAiChat(messages, {
+      feature: 'meeting_debrief',
+      action: 'interpret',
+      actorId,
+      idempotencyKey: `${requestId}:interpret`,
+      fingerprint,
+      complexity: 'complex',
+      maxOutputTokens: 2500,
+      usageClient,
+      validateContent: content => validateAnalysisContent(content, meeting, staff, clients),
+      replayKind: 'meeting_debrief_draft',
+      buildReplayPayload: routed => ({
+        analysis: normaliseAnalysis(extractJson(routed.content), meeting, staff, clients),
+        provider: `${routed.provider}:${routed.model}`,
+      }),
+    })
+    return { analysis: normaliseAnalysis(extractJson(result.content), meeting, staff, clients), provider: `${result.provider}:${result.model}` }
+  } catch (error) {
+    if (!(error instanceof AiDuplicateRequestError)) throw error
+    const replay = await fetchAiUsageReplay<{ analysis?: unknown; provider?: unknown }>(
+      usageClient, error.requestId, fingerprint, 'meeting_debrief_draft', actorId,
+    )
+    if (!replay || typeof replay.provider !== 'string') throw new Error('AI_DUPLICATE_REPLAY_UNAVAILABLE', { cause: error })
+    const analysis = normaliseAnalysis(replay.analysis, meeting, staff, clients)
+    if (!validateAnalysisContent(JSON.stringify(analysis), meeting, staff, clients)) throw new Error('AI_DUPLICATE_REPLAY_INVALID', { cause: error })
+    return { analysis, provider: replay.provider }
+  }
 }
 
 // Choose the meeting this debrief is about. An explicit eventId always wins.
@@ -214,6 +268,8 @@ Deno.serve(async request => {
   let transcript = ''
   let eventId: string
   let clientId: string
+  let requestId: string
+  let durationSeconds = 0
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}
 
@@ -223,6 +279,8 @@ Deno.serve(async request => {
       action = String(form.get('action') ?? '')
       eventId = String(form.get('eventId') ?? '')
       clientId = String(form.get('clientId') ?? '')
+      requestId = String(form.get('requestId') ?? '')
+      durationSeconds = Number(form.get('durationSeconds'))
       const file = form.get('audio')
       audio = file instanceof File ? file : null
     } else {
@@ -231,6 +289,7 @@ Deno.serve(async request => {
       transcript = typeof jsonBody.transcript === 'string' ? jsonBody.transcript.trim() : ''
       eventId = typeof jsonBody.eventId === 'string' ? jsonBody.eventId : ''
       clientId = typeof jsonBody.clientId === 'string' ? jsonBody.clientId : ''
+      requestId = typeof jsonBody.requestId === 'string' ? jsonBody.requestId : ''
     }
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid debrief request.' }, 400)
@@ -267,15 +326,53 @@ Deno.serve(async request => {
   if (action !== 'analyse_audio' && action !== 'analyse_text') {
     return jsonResponse({ ok: false, error: 'Unknown debrief action.' }, 400)
   }
+  if (!validRequestId(requestId)) return jsonResponse({ ok: false, error: 'A valid debrief request ID is required.' }, 400)
 
   try {
+    const { data: existing } = await service
+      .from('meeting_debriefs')
+      .select('id, calendar_event_id, client_id, client_name, meeting_title, created_by, transcript, detected_language, summary, decisions, unresolved, tasks')
+      .eq('id', requestId)
+      .maybeSingle()
+    if (existing) {
+      if (existing.created_by !== user.id) {
+        return jsonResponse({ ok: false, error: 'This debrief request ID is already in use.' }, 409)
+      }
+      const matched = await matchMeeting(service, { eventId: existing.calendar_event_id ?? undefined, clientId: existing.client_id ?? undefined })
+      return jsonResponse({
+        ok: true,
+        deduplicated: true,
+        analysis: {
+          debriefId: existing.id,
+          transcript: existing.transcript,
+          detectedLanguage: existing.detected_language,
+          summary: existing.summary,
+          decisions: existing.decisions,
+          unresolved: existing.unresolved,
+          tasks: existing.tasks,
+          meeting: matched.meeting ? { id: matched.meeting.id, title: matched.meeting.title, startAt: matched.meeting.start_at, clientName: matched.meeting.client_name } : null,
+          candidates: matched.candidates.map(c => ({ id: c.id, title: c.title, startAt: c.start_at, clientName: c.client_name })),
+        },
+      })
+    }
+
     let transcriptionProvider = 'typed'
+    let audioFingerprint: string | null = null
     if (action === 'analyse_audio') {
       if (!audio || audio.size === 0) return jsonResponse({ ok: false, error: 'A voice recording is required.' }, 400)
       if (audio.size > MAX_AUDIO_BYTES) return jsonResponse({ ok: false, error: 'The voice note is too large. Keep it under 15 MB.' }, 413)
-      const transcription = await transcribeAudio(audio)
+      audioFingerprint = await sha256(await audio.arrayBuffer())
+      const transcription = await transcribeAudio(service as unknown as AiUsageClient, audio, {
+        feature: 'meeting_debrief',
+        action: 'transcribe',
+        actorId: user.id,
+        idempotencyKey: `${requestId}:transcribe`,
+        fingerprint: audioFingerprint,
+        audioDurationSeconds: durationSeconds,
+        audioBytes: audio.size,
+      })
       transcript = transcription.transcript
-      transcriptionProvider = transcription.provider
+      transcriptionProvider = `${transcription.provider}:${transcription.model}`
     }
     if (!transcript) return jsonResponse({ ok: false, error: 'The debrief transcript is empty.' }, 400)
     if (transcript.length > 20_000) return jsonResponse({ ok: false, error: 'The debrief is too long. Keep it under 20,000 characters.' }, 413)
@@ -291,11 +388,20 @@ Deno.serve(async request => {
     const staff = (staffRows ?? []).filter(s => s.full_name) as Array<{ id: string; full_name: string }>
     const clients = (clientRows ?? []) as Array<{ id: string; name: string }>
 
-    const interpreted = await analyseTranscript(transcript, meeting, staff, clients)
+    const interpreted = await analyseTranscript(
+      transcript,
+      meeting,
+      staff,
+      clients,
+      service as unknown as AiUsageClient,
+      user.id,
+      requestId,
+    )
 
     const { data: debrief, error: insertError } = await service
       .from('meeting_debriefs')
       .insert({
+        id: requestId,
         calendar_event_id: meeting?.id ?? null,
         client_id: meeting?.client_id ?? (clientId || null),
         client_name: meeting?.client_name ?? null,
@@ -310,7 +416,34 @@ Deno.serve(async request => {
       })
       .select('id')
       .single()
+    if (insertError?.code === '23505') {
+      const { data: concurrent } = await service
+        .from('meeting_debriefs')
+        .select('id, created_by, transcript, detected_language, summary, decisions, unresolved, tasks')
+        .eq('id', requestId)
+        .maybeSingle()
+      if (concurrent?.created_by === user.id) {
+        return jsonResponse({
+          ok: true,
+          deduplicated: true,
+          analysis: {
+            debriefId: concurrent.id,
+            transcript: concurrent.transcript,
+            meeting: meeting ? { id: meeting.id, title: meeting.title, startAt: meeting.start_at, clientName: meeting.client_name } : null,
+            candidates: candidates.map(c => ({ id: c.id, title: c.title, startAt: c.start_at, clientName: c.client_name })),
+            detectedLanguage: concurrent.detected_language,
+            summary: concurrent.summary,
+            decisions: concurrent.decisions,
+            unresolved: concurrent.unresolved,
+            tasks: concurrent.tasks,
+          },
+        })
+      }
+    }
     if (insertError || !debrief) throw new Error('The debrief audit record could not be saved.')
+    if (audioFingerprint) {
+      await deleteAiUsageReplay(service as unknown as AiUsageClient, audioFingerprint, 'debrief_transcript', user.id)
+    }
 
     console.info(`[meeting-debrief] analysed actor=${user.id} meeting=${meeting?.id ?? 'none'} tasks=${interpreted.analysis.tasks.length} transcription=${transcriptionProvider} interpretation=${interpreted.provider}`)
     return jsonResponse({
@@ -324,6 +457,12 @@ Deno.serve(async request => {
       },
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'VOICE_DURATION_LIMIT') {
+      return jsonResponse({ ok: false, error: 'Voice notes cannot be longer than 5 minutes.' }, 400)
+    }
+    if (error instanceof Error && (error.message === 'VOICE_FORMAT_UNSUPPORTED' || error.message === 'VOICE_METADATA_INVALID')) {
+      return jsonResponse({ ok: false, error: 'The voice note format or duration metadata could not be verified. Record a new WebM, MP4, or M4A voice note.' }, 400)
+    }
     if (error instanceof Error && error.message === 'NO_TRANSCRIPTION_PROVIDER_KEYS') {
       return jsonResponse({ ok: false, error: 'No voice transcription provider is configured. Type the debrief instead or ask an admin to configure Groq, Gemini, or OpenAI.' }, 503)
     }
@@ -332,6 +471,35 @@ Deno.serve(async request => {
     }
     if (error instanceof Error && error.message === 'NO_AI_PROVIDER_KEYS') {
       return jsonResponse({ ok: false, error: 'No AI provider key is configured for debrief analysis.' }, 503)
+    }
+    if (error instanceof Error && error.message === 'AI_DUPLICATE_REQUEST') {
+      const { data: existing } = await service
+        .from('meeting_debriefs')
+        .select('id, calendar_event_id, client_id, created_by, transcript, detected_language, summary, decisions, unresolved, tasks')
+        .eq('id', requestId)
+        .maybeSingle()
+      if (existing?.created_by === user.id) {
+        const matched = await matchMeeting(service, { eventId: existing.calendar_event_id ?? undefined, clientId: existing.client_id ?? undefined })
+        return jsonResponse({
+          ok: true,
+          deduplicated: true,
+          analysis: {
+            debriefId: existing.id,
+            transcript: existing.transcript,
+            detectedLanguage: existing.detected_language,
+            summary: existing.summary,
+            decisions: existing.decisions,
+            unresolved: existing.unresolved,
+            tasks: existing.tasks,
+            meeting: matched.meeting ? { id: matched.meeting.id, title: matched.meeting.title, startAt: matched.meeting.start_at, clientName: matched.meeting.client_name } : null,
+            candidates: matched.candidates.map(c => ({ id: c.id, title: c.title, startAt: c.start_at, clientName: c.client_name })),
+          },
+        })
+      }
+      return jsonResponse({ ok: false, error: 'This debrief is already being processed. Retry shortly to load the existing draft.' }, 409)
+    }
+    if (error instanceof Error && error.message === 'AI_HARD_BUDGET') {
+      return jsonResponse({ ok: false, error: 'AI usage is temporarily unavailable because the monthly limit was reached.' }, 503)
     }
     return jsonResponse({ ok: false, error: error instanceof Error ? error.message : 'The debrief could not be analysed.' }, 400)
   }

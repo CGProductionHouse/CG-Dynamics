@@ -31,6 +31,7 @@ import ClientSchedulePage from './pages/admin/ClientSchedulePage'
 import ClientContentCalendarPage from './pages/admin/ClientContentCalendarPage'
 import PlannerImportPage from './pages/admin/PlannerImportPage'
 import ImportHealthPage from './pages/admin/ImportHealthPage'
+import AiUsageHealthPage from './pages/admin/AiUsageHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
 import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
@@ -131,6 +132,7 @@ export default function App() {
                 <Route path="/admin/team" element={<UsersHub />} />
                 <Route path="/admin/invites" element={<Navigate to="/admin/users?tab=invites" replace />} />
                 <Route path="/admin/import-health" element={<ImportHealthPage />} />
+                <Route path="/admin/ai-health" element={<AiUsageHealthPage />} />
                 <Route path="/admin/microsoft-import" element={<MicrosoftImportPage />} />
                 <Route path="/admin/marketing-library" element={<MarketingLibraryPage />} />
               </Route>

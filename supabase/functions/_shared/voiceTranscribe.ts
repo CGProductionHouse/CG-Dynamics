@@ -1,13 +1,74 @@
-// Shared voice transcription for CG debriefs (content-run and meeting).
-// Provider order is configurable (VOICE_TRANSCRIPTION_ORDER); Groq Whisper is
-// the default first provider. Audio is never stored — it is streamed to the
-// provider and discarded. The transcript is treated as untrusted evidence by
-// callers, never as instructions.
+import {
+  estimateRouteCost,
+  fetchAiUsageReplay,
+  finalizeAiUsage,
+  finalizeAiUsageWithReplay,
+  loadAiProviderRoutes,
+  loadRecentlyDegradedRouteIds,
+  recordAiAttempt,
+  recordProviderHealth,
+  reserveAiUsage,
+  type AiProviderRoute,
+  type AiUsageClient,
+} from './aiUsage.ts'
+import { deriveAudioDurationSeconds } from './audioDuration.ts'
 
+export const MAX_VOICE_SECONDS = 300
 const TRANSCRIPTION_TIMEOUT_MS = 45_000
+const MAX_AI_PROVIDER_ATTEMPTS = 4
 
-function env(name: string, fallback = ''): string {
-  return (Deno.env.get(name) ?? fallback).trim()
+export interface VoiceUsageContext {
+  feature: string
+  action: 'transcribe'
+  actorId: string
+  idempotencyKey: string
+  fingerprint: string
+  audioDurationSeconds: number
+  audioBytes: number
+}
+
+interface TranscriptionResult {
+  transcript: string
+  provider: string
+  model: string
+  audioSeconds: number
+}
+
+interface ProviderResult {
+  transcript: string
+  actualModel: string | null
+  inputTokens: number | null
+  outputTokens: number | null
+  audioSeconds: number | null
+  httpStatus: number
+}
+
+class TranscriptionProviderError extends Error {
+  constructor(
+    readonly safeCode: string,
+    readonly outcome: 'http_error' | 'timeout' | 'invalid_response' | 'network_error' | 'provider_error',
+    readonly httpStatus: number | null = null,
+  ) {
+    super(safeCode)
+  }
+}
+
+function env(name: string): string {
+  return (Deno.env.get(name) ?? '').trim()
+}
+
+function secretForProvider(provider: string): string | null {
+  if (provider === 'groq') return env('GROQ_API_KEY') || null
+  if (provider === 'gemini') return env('GEMINI_API_KEY') || null
+  if (provider === 'openai') return env('OPENAI_API_KEY') || null
+  return null
+}
+
+function safeHttpCode(status: number): string {
+  if (status === 401 || status === 403) return 'PROVIDER_AUTH'
+  if (status === 429) return 'PROVIDER_RATE_LIMIT'
+  if (status >= 500) return 'PROVIDER_UPSTREAM'
+  return 'PROVIDER_HTTP_ERROR'
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
@@ -15,26 +76,60 @@ async function fetchWithTimeout(url: string, init: RequestInit): Promise<Respons
   const timer = setTimeout(() => controller.abort(), TRANSCRIPTION_TIMEOUT_MS)
   try {
     return await fetch(url, { ...init, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new TranscriptionProviderError('PROVIDER_TIMEOUT', 'timeout')
+    }
+    throw new TranscriptionProviderError('PROVIDER_NETWORK_ERROR', 'network_error')
   } finally {
     clearTimeout(timer)
   }
 }
 
-async function transcribeOpenAiCompatible(audio: File, endpoint: string, apiKey: string, model: string): Promise<string> {
+function nonNegativeNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null
+}
+
+function nonNegativeInteger(value: unknown): number | null {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : null
+}
+
+async function transcribeOpenAiCompatible(audio: File, route: AiProviderRoute, apiKey: string): Promise<ProviderResult> {
+  const endpoint = route.provider === 'groq'
+    ? 'https://api.groq.com/openai/v1/audio/transcriptions'
+    : 'https://api.openai.com/v1/audio/transcriptions'
   const form = new FormData()
   form.append('file', audio, audio.name || 'debrief.webm')
-  form.append('model', model)
-  form.append('response_format', 'json')
+  form.append('model', route.model)
+  form.append('response_format', 'verbose_json')
   form.append('temperature', '0')
   const response = await fetchWithTimeout(endpoint, {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}` },
     body: form,
   })
-  if (!response.ok) throw new Error(`Transcription provider returned ${response.status}.`)
-  const data = await response.json() as { text?: unknown }
-  if (typeof data.text !== 'string' || !data.text.trim()) throw new Error('Transcription provider returned no text.')
-  return data.text.trim()
+  if (!response.ok) throw new TranscriptionProviderError(safeHttpCode(response.status), 'http_error', response.status)
+  let data: unknown
+  try { data = await response.json() } catch {
+    throw new TranscriptionProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response', response.status)
+  }
+  const body = data as {
+    text?: unknown
+    model?: unknown
+    duration?: unknown
+    usage?: { input_tokens?: unknown; output_tokens?: unknown; prompt_tokens?: unknown; completion_tokens?: unknown }
+  }
+  if (typeof body.text !== 'string' || !body.text.trim()) {
+    throw new TranscriptionProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response', response.status)
+  }
+  return {
+    transcript: body.text.trim(),
+    actualModel: typeof body.model === 'string' ? body.model.slice(0, 200) : null,
+    inputTokens: nonNegativeInteger(body.usage?.input_tokens ?? body.usage?.prompt_tokens),
+    outputTokens: nonNegativeInteger(body.usage?.output_tokens ?? body.usage?.completion_tokens),
+    audioSeconds: nonNegativeNumber(body.duration),
+    httpStatus: response.status,
+  }
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -46,11 +141,10 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary)
 }
 
-async function transcribeGemini(audio: File, apiKey: string): Promise<string> {
-  const model = env('GEMINI_MODEL', 'gemini-2.5-flash-lite')
+async function transcribeGemini(audio: File, route: AiProviderRoute, apiKey: string): Promise<ProviderResult> {
   const data = bytesToBase64(new Uint8Array(await audio.arrayBuffer()))
   const response = await fetchWithTimeout(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(route.model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -66,35 +160,180 @@ async function transcribeGemini(audio: File, apiKey: string): Promise<string> {
       }),
     },
   )
-  if (!response.ok) throw new Error(`Gemini transcription returned ${response.status}.`)
-  const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: unknown }> } }> }
-  const transcript = payload.candidates?.[0]?.content?.parts?.map(p => typeof p.text === 'string' ? p.text : '').join('').trim()
-  if (!transcript) throw new Error('Gemini transcription returned no text.')
-  return transcript
+  if (!response.ok) throw new TranscriptionProviderError(safeHttpCode(response.status), 'http_error', response.status)
+  let payload: unknown
+  try { payload = await response.json() } catch {
+    throw new TranscriptionProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response', response.status)
+  }
+  const body = payload as {
+    modelVersion?: unknown
+    candidates?: Array<{ content?: { parts?: Array<{ text?: unknown }> } }>
+    usageMetadata?: { promptTokenCount?: unknown; candidatesTokenCount?: unknown }
+  }
+  const transcript = body.candidates?.[0]?.content?.parts?.map(part => typeof part.text === 'string' ? part.text : '').join('').trim()
+  if (!transcript) throw new TranscriptionProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response', response.status)
+  return {
+    transcript,
+    actualModel: typeof body.modelVersion === 'string' ? body.modelVersion.slice(0, 200) : route.model,
+    inputTokens: nonNegativeInteger(body.usageMetadata?.promptTokenCount),
+    outputTokens: nonNegativeInteger(body.usageMetadata?.candidatesTokenCount),
+    audioSeconds: null,
+    httpStatus: response.status,
+  }
 }
 
-export async function transcribeAudio(audio: File): Promise<{ transcript: string; provider: string }> {
-  const order = env('VOICE_TRANSCRIPTION_ORDER', 'groq,gemini,openai').split(',').map(v => v.trim().toLowerCase())
-  const errors: string[] = []
-  let configured = false
-  for (const provider of order) {
-    try {
-      if (provider === 'groq') {
-        const key = env('GROQ_API_KEY'); if (!key) continue; configured = true
-        return { transcript: await transcribeOpenAiCompatible(audio, 'https://api.groq.com/openai/v1/audio/transcriptions', key, env('GROQ_TRANSCRIPTION_MODEL', 'whisper-large-v3-turbo')), provider: 'groq' }
-      }
-      if (provider === 'gemini') {
-        const key = env('GEMINI_API_KEY'); if (!key) continue; configured = true
-        return { transcript: await transcribeGemini(audio, key), provider: 'gemini' }
-      }
-      if (provider === 'openai') {
-        const key = env('OPENAI_API_KEY'); if (!key) continue; configured = true
-        return { transcript: await transcribeOpenAiCompatible(audio, 'https://api.openai.com/v1/audio/transcriptions', key, env('OPENAI_TRANSCRIPTION_MODEL', 'gpt-4o-mini-transcribe')), provider: 'openai' }
-      }
-    } catch (error) {
-      errors.push(`${provider}:${error instanceof Error ? error.message : 'unavailable'}`)
-    }
+async function callProvider(audio: File, route: AiProviderRoute, apiKey: string): Promise<ProviderResult> {
+  if (route.provider === 'gemini') return transcribeGemini(audio, route, apiKey)
+  if (route.provider === 'groq' || route.provider === 'openai') return transcribeOpenAiCompatible(audio, route, apiKey)
+  throw new TranscriptionProviderError('PROVIDER_UNSUPPORTED', 'provider_error')
+}
+
+async function observeProviderHealth(
+  client: AiUsageClient,
+  route: AiProviderRoute,
+  requestId: string,
+  observation: 'configured' | 'missing_secret' | 'success' | 'failure' | 'degraded_skip',
+  safeErrorCode?: string | null,
+  httpStatus?: number | null,
+  latencyMs?: number | null,
+): Promise<void> {
+  try {
+    await recordProviderHealth(client, route, requestId, observation, safeErrorCode, httpStatus, latencyMs)
+  } catch {
+    // Provider fallback must continue if health telemetry itself is unavailable.
   }
-  if (!configured) throw new Error('NO_TRANSCRIPTION_PROVIDER_KEYS')
-  throw new Error(`NO_TRANSCRIPTION_PROVIDER_AVAILABLE:${errors.join('|')}`)
+}
+
+export async function transcribeAudio(
+  client: AiUsageClient,
+  audio: File,
+  context: VoiceUsageContext,
+): Promise<TranscriptionResult> {
+  if (context.audioBytes !== audio.size || context.audioBytes <= 0) throw new Error('VOICE_SIZE_INVALID')
+  const audioDurationSeconds = await deriveAudioDurationSeconds(audio)
+  if (audioDurationSeconds > MAX_VOICE_SECONDS) throw new Error('VOICE_DURATION_LIMIT')
+
+  const startedAt = Date.now()
+  const routes = await loadAiProviderRoutes(client, 'transcription')
+  const reservation = await reserveAiUsage(client, {
+    idempotencyKey: context.idempotencyKey,
+    fingerprint: context.fingerprint,
+    feature: context.feature,
+    action: context.action,
+    actorId: context.actorId,
+    capability: 'transcription',
+    complexity: 'simple',
+    maxAudioSeconds: Math.ceil(audioDurationSeconds),
+  })
+  if (!reservation.allowed) {
+    if (reservation.duplicate) {
+      const replay = await fetchAiUsageReplay<TranscriptionResult>(
+        client, reservation.request_id, context.fingerprint, 'debrief_transcript', context.actorId,
+      )
+      if (replay && typeof replay.transcript === 'string' && typeof replay.provider === 'string' &&
+        typeof replay.model === 'string' && typeof replay.audioSeconds === 'number') return replay
+      throw new Error('AI_DUPLICATE_REQUEST')
+    }
+    throw new Error('AI_HARD_BUDGET')
+  }
+
+  let finalStatus: 'succeeded' | 'failed' = 'failed'
+  let finalErrorCode: string | null = 'NO_TRANSCRIPTION_PROVIDER_AVAILABLE'
+  let attemptNumber = 0
+  let providerAttempts = 0
+  let unrecordedProviderAttempts = 0
+  let hasConfiguredProvider = false
+  try {
+    const degraded = await loadRecentlyDegradedRouteIds(client)
+    for (const route of routes) {
+      attemptNumber += 1
+      const apiKey = secretForProvider(route.provider)
+      if (!apiKey) {
+        await recordAiAttempt(client, {
+          requestId: reservation.request_id, attemptNumber, route, status: 'skipped', outcome: 'missing_secret',
+          retryNumber: 0, fallback: false, safeErrorCode: 'PROVIDER_SECRET_MISSING',
+        })
+        await observeProviderHealth(client, route, reservation.request_id, 'missing_secret', 'PROVIDER_SECRET_MISSING')
+        continue
+      }
+      hasConfiguredProvider = true
+      if (degraded.has(route.id)) {
+        await recordAiAttempt(client, {
+          requestId: reservation.request_id, attemptNumber, route, status: 'skipped', outcome: 'degraded',
+          retryNumber: 0, fallback: false, safeErrorCode: 'PROVIDER_RECENTLY_DEGRADED',
+        })
+        await observeProviderHealth(client, route, reservation.request_id, 'degraded_skip', 'PROVIDER_RECENTLY_DEGRADED')
+        continue
+      }
+      if (providerAttempts >= MAX_AI_PROVIDER_ATTEMPTS) break
+
+      const callStartedAt = Date.now()
+      providerAttempts += 1
+      unrecordedProviderAttempts += 1
+      let result: ProviderResult
+      try {
+        result = await callProvider(audio, route, apiKey)
+      } catch (error) {
+        const providerError = error instanceof TranscriptionProviderError
+          ? error
+          : new TranscriptionProviderError('PROVIDER_ERROR', 'provider_error')
+        const latencyMs = Date.now() - callStartedAt
+        await recordAiAttempt(client, {
+          requestId: reservation.request_id, attemptNumber, route,
+          status: 'failed', outcome: providerError.outcome, retryNumber: providerAttempts - 1,
+          fallback: providerAttempts > 1, latencyMs, httpStatus: providerError.httpStatus,
+          safeErrorCode: providerError.safeCode,
+        })
+        unrecordedProviderAttempts -= 1
+        await observeProviderHealth(client, route, reservation.request_id, 'failure', providerError.safeCode, providerError.httpStatus, latencyMs)
+        finalErrorCode = providerError.safeCode
+        continue
+      }
+
+      const latencyMs = Date.now() - callStartedAt
+      const cost = estimateRouteCost(route, result.inputTokens, result.outputTokens, result.audioSeconds ?? audioDurationSeconds)
+      await recordAiAttempt(client, {
+        requestId: reservation.request_id, attemptNumber, route, actualModel: result.actualModel,
+        inputTokens: result.inputTokens, outputTokens: result.outputTokens,
+        audioSeconds: result.audioSeconds ?? audioDurationSeconds,
+        estimatedProviderCostMicros: cost.providerMicros, estimatedZarCostMicros: cost.zarMicros,
+        status: 'succeeded', outcome: 'success', retryNumber: providerAttempts - 1,
+        fallback: providerAttempts > 1, latencyMs, httpStatus: result.httpStatus,
+      })
+      unrecordedProviderAttempts -= 1
+      await observeProviderHealth(client, route, reservation.request_id, 'success', null, result.httpStatus, latencyMs)
+      const replay = {
+        transcript: result.transcript,
+        provider: route.provider,
+        model: result.actualModel ?? route.model,
+        audioSeconds: audioDurationSeconds,
+      }
+      await finalizeAiUsageWithReplay(client, {
+        requestId: reservation.request_id,
+        status: 'succeeded',
+        latencyMs: Date.now() - startedAt,
+        safeErrorCode: null,
+        replay: {
+          fingerprint: context.fingerprint,
+          kind: 'debrief_transcript',
+          actorId: context.actorId,
+          payload: replay,
+        },
+      })
+      finalStatus = 'succeeded'
+      finalErrorCode = null
+      return replay
+    }
+    if (!hasConfiguredProvider) throw new Error('NO_TRANSCRIPTION_PROVIDER_KEYS')
+    throw new Error('NO_TRANSCRIPTION_PROVIDER_AVAILABLE')
+  } catch (error) {
+    if (error instanceof Error && error.message === 'AI_USAGE_FINALIZATION_FAILED') throw error
+    if (finalStatus !== 'succeeded') {
+      await finalizeAiUsage(
+        client, reservation.request_id, 'failed', Date.now() - startedAt, finalErrorCode,
+        unrecordedProviderAttempts > 0,
+      )
+    }
+    throw error
+  }
 }

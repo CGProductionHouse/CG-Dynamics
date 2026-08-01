@@ -20,15 +20,16 @@
 //   - Inactive/deleted profile: denied
 //
 // POST /suggest-content-videos
-// { clientId, coverageStart, coverageEnd, guidelineId? }
+// { requestId, clientId, coverageStart, coverageEnd, guidelineId? }
 
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
+  AiDuplicateRequestError,
   routeAiChat,
   type AiChatMessage,
-  hasAnyConfiguredProvider,
 } from '../cg-assistant-chat/ai-router.ts'
+import { fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
 
 // Canonical staff roles (matches STAFF_ROLES in src/lib/roles.ts and
 // cg-assistant-chat). The DB CHECK constraint allows 'admin','team','client';
@@ -69,6 +70,7 @@ const SA_CALENDAR: Array<{ month: number; label: string; type: string }> = [
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface SuggestRequest {
+  requestId: string
   clientId: string
   coverageStart: string
   coverageEnd: string
@@ -128,6 +130,11 @@ function isStaffRole(role: unknown): role is StaffRole {
   return typeof role === 'string' && (STAFF_ROLES as ReadonlyArray<string>).includes(role)
 }
 
+async function sha256(value: string): Promise<string> {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
 // Validate that a parsed suggestion has all required fields with correct types.
 function isValidSuggestion(value: unknown): value is VideoSuggestion {
   if (!value || typeof value !== 'object') return false
@@ -146,6 +153,34 @@ function isValidSuggestion(value: unknown): value is VideoSuggestion {
   if (!Array.isArray(s.sourcesUsed)) return false
   if (s.duplicationRisk !== null && s.duplicationRisk !== undefined && typeof s.duplicationRisk !== 'string') return false
   return true
+}
+
+function extractSuggestions(raw: string): VideoSuggestion[] {
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+      return parsed.suggestions.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+    }
+    if (Array.isArray(parsed)) {
+      return parsed.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+    }
+  } catch {
+    const jsonMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[1])
+        if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+          return parsed.suggestions.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+        }
+        if (Array.isArray(parsed)) {
+          return parsed.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
+        }
+      } catch {
+        return []
+      }
+    }
+  }
+  return []
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -187,12 +222,12 @@ Deno.serve(async (req) => {
 
   const { data: profile } = await sb
     .from('profiles')
-    .select('role')
+    .select('role, is_active')
     .eq('id', user.id)
     .maybeSingle()
 
   // Fail closed: no profile, inactive profile, or non-staff role → deny.
-  if (!profile || !isStaffRole(profile.role)) {
+  if (!profile || profile.is_active !== true || !isStaffRole(profile.role)) {
     return jsonResponse({ error: 'Staff access required.' }, 403)
   }
 
@@ -211,9 +246,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Invalid request body.' }, 400)
   }
 
-  const { clientId, coverageStart, coverageEnd, guidelineId } = body
-  if (!clientId || !coverageStart || !coverageEnd) {
-    return jsonResponse({ error: 'clientId, coverageStart and coverageEnd are required.' }, 400)
+  const { requestId, clientId, coverageStart, coverageEnd, guidelineId } = body
+  if (!requestId || !clientId || !coverageStart || !coverageEnd) {
+    return jsonResponse({ error: 'requestId, clientId, coverageStart and coverageEnd are required.' }, 400)
+  }
+  if (!/^[a-zA-Z0-9:_-]{8,200}$/.test(requestId)) {
+    return jsonResponse({ error: 'requestId must be a valid client-generated identifier.' }, 400)
   }
 
   const uuidRE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -498,39 +536,71 @@ Deno.serve(async (req) => {
 
   // ── Call AI provider ─────────────────────────────────────────────────────
 
-  if (!hasAnyConfiguredProvider()) {
-    return jsonResponse({
-      suggestions: [],
-      error: 'No AI provider key is configured. Add an OpenRouter, Gemini, Groq or OpenAI key in Supabase Edge Function secrets.',
-      context: {
-        clientName: client.name,
-        clientTier: client.tier,
-        primaryIndustry: industryProfile?.primary_industry ?? null,
-        secondaryIndustry: industryProfile?.secondary_industry ?? null,
-        coverageMonths,
-        totalDeliverableSlots,
-        existingVideoCount: existingVideos.length,
-      },
-      sources: {
-        canonicalInternal,
-        marketingLibraryKnowledge,
-        saCalendarContext,
-        liveExternalResearch,
-      },
-    })
-  }
-
   let aiResult: Awaited<ReturnType<typeof routeAiChat>>
+  const fingerprint = await sha256(JSON.stringify({
+    actorId: user.id,
+    clientId,
+    coverageStart,
+    coverageEnd,
+    guidelineId: guidelineId ?? null,
+  }))
+  const responseFor = (suggestions: VideoSuggestion[]): SuggestResponse => ({
+    suggestions: suggestions.slice(0, MAX_SUGGESTIONS),
+    context: {
+      clientName: client.name,
+      clientTier: client.tier,
+      primaryIndustry: industryProfile?.primary_industry ?? null,
+      secondaryIndustry: industryProfile?.secondary_industry ?? null,
+      coverageMonths,
+      totalDeliverableSlots,
+      existingVideoCount: existingVideos.length,
+    },
+    sources: {
+      canonicalInternal,
+      marketingLibraryKnowledge,
+      saCalendarContext,
+      liveExternalResearch,
+    },
+  })
 
   try {
     aiResult = await routeAiChat(messages, {
+      usageClient: sb as unknown as AiUsageClient,
+      feature: 'content_video_suggestions',
+      action: 'generate',
+      actorId: user.id,
+      idempotencyKey: requestId,
+      fingerprint,
+      complexity: 'complex',
       maxOutputTokens: SUGGESTION_MAX_OUTPUT_TOKENS,
+      validateContent: content => extractSuggestions(content).length > 0,
+      replayKind: 'suggestion_response',
+      buildReplayPayload: routed => responseFor(extractSuggestions(routed.content)) as unknown as Record<string, unknown>,
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown AI provider error.'
+    const duplicate = errorMessage === 'AI_DUPLICATE_REQUEST'
+    const budgetDenied = errorMessage === 'AI_HARD_BUDGET'
+    if (duplicate && error instanceof AiDuplicateRequestError) {
+      const replay = await fetchAiUsageReplay<SuggestResponse>(
+        sb as unknown as AiUsageClient,
+        error.requestId,
+        fingerprint,
+        'suggestion_response',
+        user.id,
+      )
+      if (replay && Array.isArray(replay.suggestions) && replay.suggestions.length > 0 &&
+        replay.suggestions.every(isValidSuggestion) && replay.context && replay.sources) {
+        return jsonResponse({ ...replay, suggestions: replay.suggestions.slice(0, MAX_SUGGESTIONS), deduplicated: true })
+      }
+    }
     return jsonResponse({
       suggestions: [],
-      error: errorMessage === 'NO_AI_PROVIDER_KEYS'
+      error: duplicate
+        ? 'This suggestion request was already submitted. No duplicate provider request was sent.'
+        : budgetDenied
+        ? 'The monthly AI budget has been reached. No provider request was sent.'
+        : errorMessage === 'NO_AI_PROVIDER_KEYS'
         ? 'No AI provider key is configured.'
         : 'AI provider is currently unavailable.',
       context: {
@@ -548,42 +618,12 @@ Deno.serve(async (req) => {
         saCalendarContext,
         liveExternalResearch,
       },
-    })
+    }, duplicate ? 425 : budgetDenied ? 429 : 503)
   }
 
   // ── Parse and validate JSON from response ───────────────────────────────
 
   const { provider: providerName, model: providerModel, content: rawContent } = aiResult
-
-  function extractSuggestions(raw: string): VideoSuggestion[] {
-    // Try direct parse
-    try {
-      const parsed = JSON.parse(raw)
-      if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-        return parsed.suggestions.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
-      }
-      if (Array.isArray(parsed)) {
-        return parsed.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
-      }
-    } catch {
-      // Try code fence extraction
-      const jsonMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[1])
-          if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-            return parsed.suggestions.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
-          }
-          if (Array.isArray(parsed)) {
-            return parsed.filter(isValidSuggestion).slice(0, MAX_SUGGESTIONS)
-          }
-        } catch {
-          return []
-        }
-      }
-    }
-    return []
-  }
 
   const suggestions = extractSuggestions(rawContent)
 
@@ -606,29 +646,13 @@ Deno.serve(async (req) => {
         saCalendarContext,
         liveExternalResearch,
       },
-    })
+    }, 502)
   }
 
   // ── Return ──────────────────────────────────────────────────────────────
 
-  const response: SuggestResponse = {
-    suggestions,
-    context: {
-      clientName: client.name,
-      clientTier: client.tier,
-      primaryIndustry: industryProfile?.primary_industry ?? null,
-      secondaryIndustry: industryProfile?.secondary_industry ?? null,
-      coverageMonths,
-      totalDeliverableSlots,
-      existingVideoCount: existingVideos.length,
-    },
-    sources: {
-      canonicalInternal,
-      marketingLibraryKnowledge,
-      saCalendarContext,
-      liveExternalResearch,
-    },
-  }
+  const response = responseFor(suggestions)
+  if (!aiResult.usageRequestId) throw new Error('AI usage request identity was not returned.')
 
   // Safe operational log (no prompts, scripts, credentials or secrets)
   const elapsed = Date.now() - startTime

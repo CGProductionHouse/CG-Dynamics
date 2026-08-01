@@ -2,10 +2,10 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   getProviderDiagnostics,
-  getProviderOrder,
   routeAiChat,
   type AiChatMessage,
 } from './ai-router.ts'
+import { loadAiProviderRoutes, type AiComplexity, type AiProviderRoute, type AiUsageClient } from '../_shared/aiUsage.ts'
 import {
   AGENT_CONTRACTS,
   buildPlan,
@@ -371,6 +371,10 @@ function isPrivilegedRole(role: string): boolean {
   return role === 'owner' || role === 'admin'
 }
 
+function isAdminRole(role: string): boolean {
+  return role === 'admin'
+}
+
 function normalizeAction(value: unknown): AssistantAction {
   if (value === 'diagnostics') return 'diagnostics'
   if (value === 'test_provider') return 'test_provider'
@@ -378,8 +382,45 @@ function normalizeAction(value: unknown): AssistantAction {
 }
 
 function auditMessage(message: string, redactPrompt: boolean): string {
-  if (redactPrompt) return '[restricted prompt redacted]'
-  return message.slice(0, MAX_MESSAGE_CHARS)
+  void message
+  return redactPrompt ? '[restricted prompt omitted]' : '[prompt omitted]'
+}
+
+async function sha256(value: string): Promise<string> {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
+function requestId(value: unknown): string {
+  if (typeof value === 'string' && /^[a-zA-Z0-9:_-]{8,200}$/.test(value)) return value
+  return crypto.randomUUID()
+}
+
+async function aiRequestContext(
+  sb: ReturnType<typeof createClient>,
+  actorId: string,
+  idempotencyKey: string,
+  action: string,
+  message: string,
+  complexity: AiComplexity,
+  maxOutputTokens: number,
+) {
+  return {
+    usageClient: sb as unknown as AiUsageClient,
+    feature: 'cg_assistant',
+    action,
+    actorId,
+    idempotencyKey,
+    fingerprint: await sha256(`cg_assistant\n${action}\n${actorId}\n${message.trim().toLowerCase()}`),
+    complexity,
+    maxOutputTokens,
+  }
+}
+
+function classifyChatComplexity(message: string): AiComplexity {
+  return /\b(summari[sz]e|summary|rewrite|shorten|extract|parse|format|list)\b/i.test(message)
+    ? 'simple'
+    : 'complex'
 }
 
 function getTaskLookupPlaceholder() {
@@ -559,7 +600,15 @@ async function auditStatus(sb: ReturnType<typeof createClient>): Promise<'availa
 }
 
 async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
-  const providers = getProviderDiagnostics()
+  let routes: AiProviderRoute[] | null = null
+  try {
+    const textRoutes = await loadAiProviderRoutes(sb as unknown as AiUsageClient, 'text')
+    const transcriptionRoutes = await loadAiProviderRoutes(sb as unknown as AiUsageClient, 'transcription')
+    routes = [...textRoutes, ...transcriptionRoutes]
+  } catch {
+    // A masked setup response remains available before the migration is applied.
+  }
+  const providers = getProviderDiagnostics(routes ?? undefined)
   const configuredProviders = providers.filter((provider) => provider.configured).length
   const auditLogging = await auditStatus(sb)
 
@@ -577,14 +626,19 @@ async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
         configured: provider.configured,
         keyStatus: provider.configured ? 'configured (masked)' : 'missing',
       })),
-      providerOrder: getProviderOrder(),
+      providerOrder: providers.map(provider => ({ provider: provider.provider, model: provider.model })),
       auditLogging,
       functionStatus: 'cg-assistant-chat reachable',
     },
   })
 }
 
-async function handleProviderTest(sb: ReturnType<typeof createClient>, userId: string, role: string) {
+async function handleProviderTest(
+  sb: ReturnType<typeof createClient>,
+  userId: string,
+  role: string,
+  idempotencyKey: string,
+) {
   const messages: AiChatMessage[] = [
     {
       role: 'system',
@@ -595,7 +649,9 @@ async function handleProviderTest(sb: ReturnType<typeof createClient>, userId: s
   ]
 
   try {
-    const result = await routeAiChat(messages)
+    const result = await routeAiChat(messages, await aiRequestContext(
+      sb, userId, idempotencyKey, 'provider_test', '[masked provider test]', 'complex', 128,
+    ))
     await auditAssistantRequest(sb, {
       userId,
       role,
@@ -612,7 +668,7 @@ async function handleProviderTest(sb: ReturnType<typeof createClient>, userId: s
         success: true,
         provider: result.provider,
         model: result.model,
-        message: result.content,
+        message: 'Health check completed.',
       },
     })
   } catch (error) {
@@ -648,6 +704,8 @@ async function handleProviderTest(sb: ReturnType<typeof createClient>, userId: s
 // still returns the citations it gathered.
 async function handleSkilledChat(
   sb: ReturnType<typeof createClient>,
+  actorId: string,
+  idempotencyKey: string,
   role: string,
   agentKey: string,
   message: string,
@@ -788,7 +846,9 @@ async function handleSkilledChat(
   ]
 
   try {
-    const result = await routeAiChat(messages)
+    const result = await routeAiChat(messages, await aiRequestContext(
+      sb, actorId, idempotencyKey, `skilled_${agentKey}`, message, 'complex', 1600,
+    ))
     return {
       answer: result.content,
       agent: agent.key, agentName: agent.name, mode, platformSlug, surfaceKey,
@@ -855,9 +915,10 @@ Deno.serve(async (req) => {
   }
 
   const action = normalizeAction(body.action)
+  const idempotencyKey = requestId(body.requestId)
 
   if (action !== 'chat') {
-    if (!isPrivilegedRole(role)) {
+    if (!isAdminRole(role)) {
       return jsonResponse({ ok: false, error: 'Admin diagnostics access required.' }, 403)
     }
 
@@ -866,7 +927,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'test_provider') {
-      return await handleProviderTest(sb, user.id, role)
+      return await handleProviderTest(sb, user.id, role, idempotencyKey)
     }
   }
 
@@ -955,7 +1016,7 @@ Deno.serve(async (req) => {
     const platformSlug = typeof body.platformSlug === 'string' ? body.platformSlug : null
     const surfaceKey = typeof body.surfaceKey === 'string' ? body.surfaceKey : null
     const channel = typeof body.channel === 'string' ? body.channel : null
-    const skilled = await handleSkilledChat(sb, role, agentKey, message, activeClientId, requestedMode, platformSlug, surfaceKey, channel)
+    const skilled = await handleSkilledChat(sb, user.id, idempotencyKey, role, agentKey, message, activeClientId, requestedMode, platformSlug, surfaceKey, channel)
     await auditAssistantRequest(sb, {
       userId: user.id,
       role,
@@ -975,7 +1036,9 @@ Deno.serve(async (req) => {
   ]
 
   try {
-    const result = await routeAiChat(messages)
+    const result = await routeAiChat(messages, await aiRequestContext(
+      sb, user.id, idempotencyKey, 'chat', message, classifyChatComplexity(message), 500,
+    ))
     await auditAssistantRequest(sb, {
       userId: user.id,
       role,
@@ -994,7 +1057,13 @@ Deno.serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown AI provider error.'
     const noKeys = errorMessage === 'NO_AI_PROVIDER_KEYS'
-    const answer = noKeys
+    const budgetDenied = errorMessage === 'AI_HARD_BUDGET'
+    const duplicate = errorMessage === 'AI_DUPLICATE_REQUEST'
+    const answer = budgetDenied
+      ? 'CG Assistant has reached the admin-set monthly AI budget. No provider request was sent.'
+      : duplicate
+      ? 'This request was already submitted. No duplicate provider request was sent.'
+      : noKeys
       ? 'CG Assistant is installed, but no AI provider key is configured yet. Add OpenRouter, Gemini, Groq, or OpenAI server-side keys to enable operational answers. The protected-data guardrails are already active.'
       : 'CG Assistant is online, but no AI provider is currently available. Please ask admin to check provider keys or limits.'
 
@@ -1002,7 +1071,7 @@ Deno.serve(async (req) => {
       userId: user.id,
       role,
       message,
-      responseStatus: noKeys ? 'setup_required' : 'provider_unavailable',
+      responseStatus: budgetDenied ? 'budget_denied' : duplicate ? 'duplicate' : noKeys ? 'setup_required' : 'provider_unavailable',
       restricted: false,
       promptCategory: 'chat',
       model: 'ai-router',

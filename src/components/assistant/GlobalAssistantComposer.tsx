@@ -28,6 +28,7 @@ import {
 } from '../../lib/meetingDebrief'
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
+import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Global CG Assistant composer.
@@ -155,6 +156,7 @@ export function GlobalAssistantComposer() {
   const [debriefText, setDebriefText] = useState('')
   const [debriefBusy, setDebriefBusy] = useState(false)
   const [debriefRecording, setDebriefRecording] = useState(false)
+  const [debriefRecordingSeconds, setDebriefRecordingSeconds] = useState(0)
   const [debrief, setDebrief] = useState<MeetingDebriefAnalysis | null>(null)
   // Keep the full candidate list across re-analysis: re-matching after a manual
   // meeting pick returns only the chosen meeting, which would collapse the
@@ -162,6 +164,8 @@ export function GlobalAssistantComposer() {
   const [debriefCandidates, setDebriefCandidates] = useState<MeetingDebriefAnalysis['candidates']>([])
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
+  const debriefRecordingStartedAtRef = useRef(0)
+  const debriefAutoStoppedRef = useRef(false)
   const navigate = useNavigate()
   const isManager = isManagerRole(profile?.role)
 
@@ -238,6 +242,7 @@ export function GlobalAssistantComposer() {
     setApplying(false)
     setDebriefBusy(false)
     setDebriefRecording(false)
+    setDebriefRecordingSeconds(0)
     setJobs([])
     setShowJobs(false)
     setListening(false)
@@ -252,6 +257,22 @@ export function GlobalAssistantComposer() {
     invalidateDebriefRequests()
     stopActiveDebriefMedia()
   }, [])
+
+  useEffect(() => {
+    if (!debriefRecording) return
+    const timer = window.setInterval(() => {
+      setDebriefRecordingSeconds(Math.min(MAX_VOICE_SECONDS, Math.floor((Date.now() - debriefRecordingStartedAtRef.current) / 1000)))
+    }, 250)
+    const autoStop = window.setTimeout(() => {
+      debriefAutoStoppedRef.current = true
+      stopDebriefRecording()
+      setDebriefError('Recording stopped automatically at the 5-minute limit.')
+    }, Math.max(0, MAX_VOICE_SECONDS * 1000 - (Date.now() - debriefRecordingStartedAtRef.current)))
+    return () => {
+      window.clearInterval(timer)
+      window.clearTimeout(autoStop)
+    }
+  }, [debriefRecording])
 
   // Load the authorised client + staff lists once, for name resolution. These
   // come through RLS, so a user only ever sees clients/staff they may see.
@@ -569,13 +590,19 @@ export function GlobalAssistantComposer() {
       }
       const recorder = new MediaRecorder(stream)
       audioChunksRef.current = []
+      debriefAutoStoppedRef.current = false
+      debriefRecordingStartedAtRef.current = Date.now()
+      setDebriefRecordingSeconds(0)
       recorder.ondataavailable = event => {
         if (event.data.size > 0 && debriefRequestIsCurrent('analysis', requestToken)) audioChunksRef.current.push(event.data)
       }
       recorder.onstop = () => {
         stream.getTracks().forEach(track => track.stop())
         const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' })
-        if (blob.size > 0 && debriefRequestIsCurrent('analysis', requestToken)) void analyseDebrief({ audio: blob })
+        const durationSeconds = Math.min(MAX_VOICE_SECONDS, (Date.now() - debriefRecordingStartedAtRef.current) / 1000)
+        if (blob.size > 0 && debriefRequestIsCurrent('analysis', requestToken)) {
+          void analyseDebrief({ audio: blob, durationSeconds, limitReached: debriefAutoStoppedRef.current })
+        }
       }
       mediaRecorderRef.current = recorder
       recorder.start()
@@ -594,17 +621,17 @@ export function GlobalAssistantComposer() {
     setDebriefRecording(false)
   }
 
-  async function analyseDebrief(input: { audio?: Blob; eventId?: string }) {
+  async function analyseDebrief(input: { audio?: Blob; durationSeconds?: number; eventId?: string; limitReached?: boolean }) {
     const requestToken = beginDebriefRequest('analysis')
     if (!requestToken || !debriefRequestIsCurrent('analysis', requestToken)) return
     setDebriefBusy(true)
-    setDebriefError(null)
+    if (!input.limitReached) setDebriefError(null)
     try {
       const opts = { eventId: input.eventId, clientId: clientId || undefined }
       const transcript = input.eventId && debrief ? debrief.transcript : debriefText
       const res = input.audio
-        ? await analyseMeetingAudio(input.audio, opts)
-        : await analyseMeetingText(transcript, opts)
+        ? await analyseMeetingAudio(requestToken.profileId, input.audio, input.durationSeconds ?? 0, opts)
+        : await analyseMeetingText(requestToken.profileId, transcript, opts)
       if (!debriefRequestIsCurrent('analysis', requestToken)) return
       if (res.error || !res.data) { setDebriefError(res.error ?? 'The debrief could not be analysed.'); return }
       // Keep the widest candidate set seen so a manual meeting pick never
@@ -674,6 +701,7 @@ export function GlobalAssistantComposer() {
     setDebriefError(null)
     setDebriefBusy(false)
     setDebriefRecording(false)
+    setDebriefRecordingSeconds(0)
   }
 
   function startNewDebrief() {
@@ -686,6 +714,7 @@ export function GlobalAssistantComposer() {
     setDebriefError(null)
     setDebriefBusy(false)
     setDebriefRecording(false)
+    setDebriefRecordingSeconds(0)
     setDebriefOpen(true)
     setPlusOpen(false)
   }
@@ -991,9 +1020,10 @@ export function GlobalAssistantComposer() {
                     type="button"
                     onClick={() => (debriefRecording ? stopDebriefRecording() : void startDebriefRecording())}
                     disabled={debriefBusy}
+                    aria-live="polite"
                     className={`min-h-11 flex-1 rounded-full border px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-40 ${debriefRecording ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 text-brand-primary hover:text-white'}`}
                   >
-                    {debriefRecording ? 'Stop recording' : 'Record voice note'}
+                    {debriefRecording ? `Stop · ${Math.floor((MAX_VOICE_SECONDS - debriefRecordingSeconds) / 60)}:${String((MAX_VOICE_SECONDS - debriefRecordingSeconds) % 60).padStart(2, '0')} left` : 'Record voice note (5:00 max)'}
                   </button>
                   <button
                     type="button"
@@ -1004,7 +1034,7 @@ export function GlobalAssistantComposer() {
                     {debriefBusy ? 'Analysing…' : 'Analyse text'}
                   </button>
                 </div>
-                {debriefBusy && !debriefRecording && <p className="text-xs text-brand-primary/60">Transcribing and structuring the debrief…</p>}
+                {debriefBusy && !debriefRecording && <p className="text-xs text-brand-primary/60" role="status" aria-live="polite">Transcribing and structuring the debrief…</p>}
               </div>
             ) : (
               <div className="space-y-2.5">
@@ -1087,7 +1117,7 @@ export function GlobalAssistantComposer() {
                     {debrief.tasks.length === 0 && <p className="text-xs text-brand-primary/45">No tasks were mentioned.</p>}
                   </div>
                 </div>
-                {debriefError && <p className="text-xs text-red-300">{debriefError}</p>}
+                {debriefError && <p className="text-xs text-red-300" role="alert">{debriefError}</p>}
                 <div className="flex gap-2 pt-1">
                   <button type="button" onClick={() => void confirmDebrief()} disabled={debriefBusy} className="min-h-11 flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
                     {debriefBusy ? 'Saving…' : `Save notes${debrief.tasks.filter(t => t.title.trim()).length > 0 ? ` + create ${debrief.tasks.filter(t => t.title.trim()).length} task${debrief.tasks.filter(t => t.title.trim()).length > 1 ? 's' : ''}` : ''}`}
@@ -1096,7 +1126,7 @@ export function GlobalAssistantComposer() {
                 </div>
               </div>
             )}
-            {debriefError && !debrief && <p className="mt-2 text-xs text-red-300">{debriefError}</p>}
+            {debriefError && !debrief && <p className="mt-2 text-xs text-red-300" role="alert">{debriefError}</p>}
           </div>
         )}
 

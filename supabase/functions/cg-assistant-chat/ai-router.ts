@@ -1,3 +1,18 @@
+import {
+  estimateRouteCost,
+  finalizeAiUsage,
+  finalizeAiUsageWithReplay,
+  loadAiProviderRoutes,
+  loadRecentlyDegradedRouteIds,
+  recordAiAttempt,
+  recordProviderHealth,
+  reserveAiUsage,
+  type AiComplexity,
+  type AiProviderRoute,
+  type AiReplayKind,
+  type AiUsageClient,
+} from '../_shared/aiUsage.ts'
+
 export type AiProviderName = 'openrouter' | 'gemini' | 'groq' | 'openai'
 
 export interface AiChatMessage {
@@ -9,9 +24,24 @@ export interface AiRouterResult {
   content: string
   provider: AiProviderName
   model: string
+  usageRequestId?: string
 }
 
 export interface AiRouterOptions {
+  feature: string
+  action: string
+  actorId: string
+  idempotencyKey: string
+  fingerprint: string
+  complexity: AiComplexity
+  maxOutputTokens: number
+  usageClient: AiUsageClient
+  validateContent?: (content: string) => boolean | Promise<boolean>
+  replayKind?: AiReplayKind
+  buildReplayPayload?: (result: { content: string; provider: AiProviderName; model: string }) => Record<string, unknown>
+}
+
+interface LegacyAiRouterOptions {
   maxOutputTokens?: number
 }
 
@@ -28,50 +58,72 @@ interface ProviderConfig {
   model: string
 }
 
+interface ProviderCallResult {
+  content: string
+  actualModel: string | null
+  inputTokens: number | null
+  outputTokens: number | null
+  httpStatus: number
+}
+
+class ProviderError extends Error {
+  constructor(
+    readonly safeCode: string,
+    readonly outcome: 'http_error' | 'timeout' | 'invalid_response' | 'network_error' | 'provider_error',
+    readonly httpStatus: number | null = null,
+  ) {
+    super(safeCode)
+  }
+}
+
+export class AiDuplicateRequestError extends Error {
+  constructor(readonly requestId: string) {
+    super('AI_DUPLICATE_REQUEST')
+  }
+}
+
 const DEFAULT_PROVIDER_ORDER: AiProviderName[] = ['openrouter', 'gemini', 'groq', 'openai']
 const PROVIDER_TIMEOUT_MS = 12000
-const DEFAULT_MAX_FALLBACKS = 3
+const MAX_AI_PROVIDER_ATTEMPTS = 4
 
 function envValue(name: string, fallback = ''): string {
   return (Deno.env.get(name) ?? fallback).trim()
 }
 
-function providerConfig(name: AiProviderName): ProviderConfig {
-  const config: Record<AiProviderName, ProviderConfig> = {
-    openrouter: {
-      name: 'openrouter',
-      apiKey: envValue('OPENROUTER_API_KEY') || null,
-      model: envValue('OPENROUTER_MODEL', 'openrouter/free'),
-    },
-    gemini: {
-      name: 'gemini',
-      apiKey: envValue('GEMINI_API_KEY') || null,
-      model: envValue('GEMINI_MODEL', 'gemini-2.5-flash-lite'),
-    },
-    groq: {
-      name: 'groq',
-      apiKey: envValue('GROQ_API_KEY') || null,
-      model: envValue('GROQ_MODEL', 'llama-3.1-8b-instant'),
-    },
-    openai: {
-      name: 'openai',
-      apiKey: envValue('OPENAI_API_KEY') || null,
-      model: envValue('OPENAI_MODEL', 'gpt-4o-mini'),
-    },
-  }
+function isKnownProvider(value: string): value is AiProviderName {
+  return value === 'openrouter' || value === 'gemini' || value === 'groq' || value === 'openai'
+}
 
-  return config[name]
+function secretForProvider(name: AiProviderName): string | null {
+  const names: Record<AiProviderName, string> = {
+    openrouter: 'OPENROUTER_API_KEY',
+    gemini: 'GEMINI_API_KEY',
+    groq: 'GROQ_API_KEY',
+    openai: 'OPENAI_API_KEY',
+  }
+  return envValue(names[name]) || null
+}
+
+function providerConfig(route: AiProviderRoute): ProviderConfig | null {
+  if (!isKnownProvider(route.provider)) return null
+  return { name: route.provider, apiKey: secretForProvider(route.provider), model: route.model }
+}
+
+function legacyProviderConfig(name: AiProviderName): ProviderConfig {
+  const defaults: Record<AiProviderName, { env: string; model: string }> = {
+    openrouter: { env: 'OPENROUTER_MODEL', model: 'openrouter/free' },
+    gemini: { env: 'GEMINI_MODEL', model: 'gemini-2.5-flash-lite' },
+    groq: { env: 'GROQ_MODEL', model: 'llama-3.1-8b-instant' },
+    openai: { env: 'OPENAI_MODEL', model: 'gpt-4o-mini' },
+  }
+  return { name, apiKey: secretForProvider(name), model: envValue(defaults[name].env, defaults[name].model) }
 }
 
 function providerOrder(): AiProviderName[] {
-  const raw = envValue('AI_PROVIDER_ORDER', DEFAULT_PROVIDER_ORDER.join(','))
-  const requested = raw
+  const requested = envValue('AI_PROVIDER_ORDER', DEFAULT_PROVIDER_ORDER.join(','))
     .split(',')
-    .map((item) => item.trim().toLowerCase())
-    .filter((item): item is AiProviderName => {
-      return item === 'openrouter' || item === 'gemini' || item === 'groq' || item === 'openai'
-    })
-
+    .map(item => item.trim().toLowerCase())
+    .filter(isKnownProvider)
   return requested.length > 0 ? requested : DEFAULT_PROVIDER_ORDER
 }
 
@@ -79,229 +131,330 @@ export function getProviderOrder(): AiProviderName[] {
   return providerOrder()
 }
 
-export function getProviderDiagnostics(): AiProviderDiagnostic[] {
-  return DEFAULT_PROVIDER_ORDER.map((name) => {
-    const config = providerConfig(name)
-    const configured = Boolean(config.apiKey)
+export function getProviderDiagnostics(routes?: AiProviderRoute[]): AiProviderDiagnostic[] {
+  const configuredRoutes = routes ?? DEFAULT_PROVIDER_ORDER.map((provider, priority) => ({
+    id: provider,
+    capability: 'text' as const,
+    provider,
+    model: legacyProviderConfig(provider).model,
+    tier: 'cheap' as const,
+    priority,
+    enabled: true,
+    pricing_currency: 'ZAR' as const,
+    input_per_million_micros: 0,
+    output_per_million_micros: 0,
+    audio_per_minute_micros: null,
+    request_cost_micros: 0,
+    fx_zar_micros: 1_000_000,
+  }))
+  return configuredRoutes.filter(route => isKnownProvider(route.provider)).map(route => {
+    const configured = Boolean(secretForProvider(route.provider as AiProviderName))
     return {
-      provider: name,
-      model: config.model,
+      provider: route.provider as AiProviderName,
+      model: route.model,
       configured,
       keyStatus: configured ? 'configured' : 'missing',
     }
   })
 }
 
-function maxAttempts(): number {
-  const raw = Number(envValue('AI_MAX_FALLBACKS', String(DEFAULT_MAX_FALLBACKS)))
-  const fallbackCount = Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : DEFAULT_MAX_FALLBACKS
-  return fallbackCount + 1
+export function selectRoutes(routes: AiProviderRoute[], complexity: AiComplexity): AiProviderRoute[] {
+  const enabled = routes.filter(route => route.enabled && isKnownProvider(route.provider))
+  if (complexity === 'simple') return enabled.filter(route => route.tier === 'cheap').sort((a, b) => a.priority - b.priority)
+  return enabled.sort((a, b) => {
+    if (a.tier !== b.tier) return a.tier === 'strong' ? -1 : 1
+    return a.priority - b.priority
+  })
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS)
-
   try {
-    return await fetch(url, {
-      ...init,
-      signal: controller.signal,
-    })
+    return await fetch(url, { ...init, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw new ProviderError('PROVIDER_TIMEOUT', 'timeout')
+    throw new ProviderError('PROVIDER_NETWORK_ERROR', 'network_error')
   } finally {
     clearTimeout(timeout)
   }
 }
 
-function parseOpenAiCompatibleAnswer(data: unknown): string {
-  const content = (data as { choices?: Array<{ message?: { content?: unknown } }> })?.choices?.[0]?.message?.content
-  if (typeof content !== 'string' || !content.trim()) {
-    throw new Error('Provider returned an empty response.')
+function nonNegativeInteger(value: unknown): number | null {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : null
+}
+
+function parseOpenAiCompatible(data: unknown): Omit<ProviderCallResult, 'httpStatus'> {
+  const body = data as {
+    model?: unknown
+    choices?: Array<{ message?: { content?: unknown } }>
+    usage?: { prompt_tokens?: unknown; completion_tokens?: unknown; input_tokens?: unknown; output_tokens?: unknown }
   }
-  return content.trim()
+  const content = body?.choices?.[0]?.message?.content
+  if (typeof content !== 'string' || !content.trim()) throw new ProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response')
+  return {
+    content: content.trim(),
+    actualModel: typeof body.model === 'string' ? body.model.slice(0, 200) : null,
+    inputTokens: nonNegativeInteger(body.usage?.prompt_tokens ?? body.usage?.input_tokens),
+    outputTokens: nonNegativeInteger(body.usage?.completion_tokens ?? body.usage?.output_tokens),
+  }
 }
 
 function geminiContents(messages: AiChatMessage[]) {
-  return messages
-    .filter((message) => message.role !== 'system')
-    .map((message) => ({
-      role: message.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: message.content }],
-    }))
+  return messages.filter(message => message.role !== 'system').map(message => ({
+    role: message.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: message.content }],
+  }))
 }
 
 function systemText(messages: AiChatMessage[]): string {
-  return messages
-    .filter((message) => message.role === 'system')
-    .map((message) => message.content)
-    .join('\n')
+  return messages.filter(message => message.role === 'system').map(message => message.content).join('\n')
 }
 
-function parseGeminiAnswer(data: unknown): string {
-  const parts = (data as {
+function parseGemini(data: unknown, requestedModel: string): Omit<ProviderCallResult, 'httpStatus'> {
+  const body = data as {
+    modelVersion?: unknown
     candidates?: Array<{ content?: { parts?: Array<{ text?: unknown }> } }>
-  })?.candidates?.[0]?.content?.parts
-
-  const content = parts
-    ?.map((part) => (typeof part.text === 'string' ? part.text : ''))
-    .join('')
-    .trim()
-
-  if (!content) {
-    throw new Error('Gemini returned an empty response.')
+    usageMetadata?: { promptTokenCount?: unknown; candidatesTokenCount?: unknown; totalTokenCount?: unknown }
   }
-
-  return content
+  const content = body?.candidates?.[0]?.content?.parts?.map(part => typeof part.text === 'string' ? part.text : '').join('').trim()
+  if (!content) throw new ProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response')
+  return {
+    content,
+    actualModel: typeof body.modelVersion === 'string' ? body.modelVersion.slice(0, 200) : requestedModel,
+    inputTokens: nonNegativeInteger(body.usageMetadata?.promptTokenCount),
+    outputTokens: nonNegativeInteger(body.usageMetadata?.candidatesTokenCount),
+  }
 }
 
-async function callOpenAiCompatibleProvider(
+function safeHttpCode(status: number): string {
+  if (status === 401 || status === 403) return 'PROVIDER_AUTH'
+  if (status === 429) return 'PROVIDER_RATE_LIMIT'
+  if (status >= 500) return 'PROVIDER_UPSTREAM'
+  return 'PROVIDER_HTTP_ERROR'
+}
+
+async function callOpenAiCompatible(
   config: ProviderConfig,
   messages: AiChatMessage[],
   endpoint: string,
-  extraHeaders: Record<string, string> = {},
-  maxOutputTokens = 500,
-): Promise<string> {
-  if (!config.apiKey) throw new Error(`${config.name} API key is missing.`)
-
+  extraHeaders: Record<string, string>,
+  maxOutputTokens: number,
+): Promise<ProviderCallResult> {
+  if (!config.apiKey) throw new ProviderError('PROVIDER_SECRET_MISSING', 'provider_error')
   const response = await fetchWithTimeout(endpoint, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json',
-      ...extraHeaders,
-    },
-    body: JSON.stringify({
-      model: config.model,
-      temperature: 0.2,
-      max_tokens: maxOutputTokens,
-      messages,
-    }),
+    headers: { Authorization: `Bearer ${config.apiKey}`, 'Content-Type': 'application/json', ...extraHeaders },
+    body: JSON.stringify({ model: config.model, temperature: 0.2, max_tokens: maxOutputTokens, messages }),
   })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`${config.name} failed with ${response.status}: ${errorText.slice(0, 300)}`)
-  }
-
-  return parseOpenAiCompatibleAnswer(await response.json())
+  if (!response.ok) throw new ProviderError(safeHttpCode(response.status), 'http_error', response.status)
+  let data: unknown
+  try { data = await response.json() } catch { throw new ProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response', response.status) }
+  return { ...parseOpenAiCompatible(data), httpStatus: response.status }
 }
 
-async function callGemini(
-  config: ProviderConfig,
-  messages: AiChatMessage[],
-  maxOutputTokens = 500,
-): Promise<string> {
-  if (!config.apiKey) throw new Error('Gemini API key is missing.')
-
+async function callGemini(config: ProviderConfig, messages: AiChatMessage[], maxOutputTokens: number): Promise<ProviderCallResult> {
+  if (!config.apiKey) throw new ProviderError('PROVIDER_SECRET_MISSING', 'provider_error')
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent?key=${encodeURIComponent(config.apiKey)}`
   const response = await fetchWithTimeout(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      systemInstruction: {
-        parts: [{ text: systemText(messages) }],
-      },
+      systemInstruction: { parts: [{ text: systemText(messages) }] },
       contents: geminiContents(messages),
-      generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens,
-      },
+      generationConfig: { temperature: 0.2, maxOutputTokens },
     }),
   })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`gemini failed with ${response.status}: ${errorText.slice(0, 300)}`)
-  }
-
-  return parseGeminiAnswer(await response.json())
+  if (!response.ok) throw new ProviderError(safeHttpCode(response.status), 'http_error', response.status)
+  let data: unknown
+  try { data = await response.json() } catch { throw new ProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response', response.status) }
+  return { ...parseGemini(data, config.model), httpStatus: response.status }
 }
 
-async function callProvider(
-  config: ProviderConfig,
-  messages: AiChatMessage[],
-  maxOutputTokens: number,
-): Promise<string> {
-  if (config.name === 'openrouter') {
-    return callOpenAiCompatibleProvider(
-      config,
-      messages,
-      'https://openrouter.ai/api/v1/chat/completions',
-      {
-        'HTTP-Referer': 'https://cg-dynamics.vercel.app',
-        'X-Title': 'CG Dynamics',
-      },
-      maxOutputTokens,
-    )
-  }
-
-  if (config.name === 'groq') {
-    return callOpenAiCompatibleProvider(
-      config,
-      messages,
-      'https://api.groq.com/openai/v1/chat/completions',
-      {},
-      maxOutputTokens,
-    )
-  }
-
-  if (config.name === 'openai') {
-    return callOpenAiCompatibleProvider(
-      config,
-      messages,
-      'https://api.openai.com/v1/chat/completions',
-      {},
-      maxOutputTokens,
-    )
-  }
-
+async function callProvider(config: ProviderConfig, messages: AiChatMessage[], maxOutputTokens: number): Promise<ProviderCallResult> {
+  if (config.name === 'openrouter') return callOpenAiCompatible(config, messages, 'https://openrouter.ai/api/v1/chat/completions', {
+    'HTTP-Referer': 'https://cg-dynamics.vercel.app', 'X-Title': 'CG Dynamics',
+  }, maxOutputTokens)
+  if (config.name === 'groq') return callOpenAiCompatible(config, messages, 'https://api.groq.com/openai/v1/chat/completions', {}, maxOutputTokens)
+  if (config.name === 'openai') return callOpenAiCompatible(config, messages, 'https://api.openai.com/v1/chat/completions', {}, maxOutputTokens)
   return callGemini(config, messages, maxOutputTokens)
 }
 
-export function hasAnyConfiguredProvider(): boolean {
-  return DEFAULT_PROVIDER_ORDER.some((name) => Boolean(providerConfig(name).apiKey))
+async function observeProviderHealth(
+  client: AiUsageClient,
+  route: AiProviderRoute,
+  requestId: string,
+  observation: 'configured' | 'missing_secret' | 'success' | 'failure' | 'degraded_skip',
+  safeErrorCode?: string | null,
+  httpStatus?: number | null,
+  latencyMs?: number | null,
+): Promise<void> {
+  try {
+    await recordProviderHealth(client, route, requestId, observation, safeErrorCode, httpStatus, latencyMs)
+  } catch {
+    // Health telemetry must not suppress a recorded attempt or provider fallback.
+  }
 }
 
+export function hasAnyConfiguredProvider(): boolean {
+  return DEFAULT_PROVIDER_ORDER.some(name => Boolean(secretForProvider(name)))
+}
+
+async function routeLegacy(messages: AiChatMessage[], options: LegacyAiRouterOptions): Promise<AiRouterResult> {
+  const maxOutputTokens = Math.min(Math.max(Math.floor(options.maxOutputTokens ?? 500), 128), 4000)
+  let attempted = 0
+  for (const name of providerOrder()) {
+    const config = legacyProviderConfig(name)
+    if (!config.apiKey || attempted >= MAX_AI_PROVIDER_ATTEMPTS) continue
+    attempted += 1
+    try {
+      const result = await callProvider(config, messages, maxOutputTokens)
+      return { content: result.content, provider: config.name, model: result.actualModel ?? config.model }
+    } catch {
+      // Compatibility only for callers not yet migrated to canonical accounting.
+    }
+  }
+  if (!hasAnyConfiguredProvider()) throw new Error('NO_AI_PROVIDER_KEYS')
+  throw new Error('NO_AI_PROVIDER_AVAILABLE')
+}
+
+export async function routeAiChat(messages: AiChatMessage[], options: AiRouterOptions): Promise<AiRouterResult>
+export async function routeAiChat(messages: AiChatMessage[], options?: LegacyAiRouterOptions): Promise<AiRouterResult>
 export async function routeAiChat(
   messages: AiChatMessage[],
-  options: AiRouterOptions = {},
+  options: AiRouterOptions | LegacyAiRouterOptions = {},
 ): Promise<AiRouterResult> {
-  const order = providerOrder()
-  const attemptsAllowed = maxAttempts()
-  const requestedMaxTokens = options.maxOutputTokens ?? 500
-  const maxOutputTokens = Math.min(Math.max(Math.floor(requestedMaxTokens), 128), 4000)
-  let attempts = 0
-  const errors: string[] = []
+  if (!('usageClient' in options)) return routeLegacy(messages, options)
 
-  for (const providerName of order) {
-    const config = providerConfig(providerName)
-    if (!config.apiKey) {
-      console.info(`[cg-assistant] Skipping ${providerName}: API key not configured.`)
-      continue
-    }
+  const startedAt = Date.now()
+  const maxOutputTokens = Math.min(Math.max(Math.floor(options.maxOutputTokens), 128), 4000)
+  const maxInputTokens = Math.min(128000, Math.max(512, Math.ceil(messages.reduce((sum, message) => sum + message.content.length, 0) / 2)))
+  const routes = selectRoutes(await loadAiProviderRoutes(options.usageClient, 'text'), options.complexity)
+  const reservation = await reserveAiUsage(options.usageClient, {
+    idempotencyKey: options.idempotencyKey,
+    fingerprint: options.fingerprint,
+    feature: options.feature,
+    action: options.action,
+    actorId: options.actorId,
+    capability: 'text',
+    complexity: options.complexity,
+    maxInputTokens,
+    maxOutputTokens,
+  })
+  if (!reservation.allowed) {
+    if (reservation.duplicate) throw new AiDuplicateRequestError(reservation.request_id)
+    throw new Error('AI_HARD_BUDGET')
+  }
 
-    if (attempts >= attemptsAllowed) break
-    attempts += 1
+  let finalStatus: 'succeeded' | 'failed' = 'failed'
+  let finalErrorCode: string | null = 'NO_AI_PROVIDER_AVAILABLE'
+  let attemptNumber = 0
+  let providerAttempts = 0
+  let unrecordedProviderAttempts = 0
 
-    try {
-      const content = await callProvider(config, messages, maxOutputTokens)
-      console.info(`[cg-assistant] AI provider used: ${config.name}/${config.model}`)
-      return {
-        content,
-        provider: config.name,
-        model: config.model,
+  try {
+    const degraded = await loadRecentlyDegradedRouteIds(options.usageClient)
+    for (const route of routes) {
+      attemptNumber += 1
+      const config = providerConfig(route)
+      if (!config?.apiKey) {
+        await recordAiAttempt(options.usageClient, {
+          requestId: reservation.request_id, attemptNumber, route, status: 'skipped', outcome: 'missing_secret',
+          retryNumber: 0, fallback: false, safeErrorCode: 'PROVIDER_SECRET_MISSING',
+        })
+        await observeProviderHealth(options.usageClient, route, reservation.request_id, 'missing_secret', 'PROVIDER_SECRET_MISSING')
+        continue
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown provider error.'
-      console.warn(`[cg-assistant] ${config.name}/${config.model} unavailable: ${message}`)
-      errors.push(`${config.name}: ${message}`)
+      if (degraded.has(route.id)) {
+        await recordAiAttempt(options.usageClient, {
+          requestId: reservation.request_id, attemptNumber, route, status: 'skipped', outcome: 'degraded',
+          retryNumber: 0, fallback: false, safeErrorCode: 'PROVIDER_RECENTLY_DEGRADED',
+        })
+        await observeProviderHealth(options.usageClient, route, reservation.request_id, 'degraded_skip', 'PROVIDER_RECENTLY_DEGRADED')
+        continue
+      }
+      if (providerAttempts >= MAX_AI_PROVIDER_ATTEMPTS) break
+      const callStarted = Date.now()
+      providerAttempts += 1
+      unrecordedProviderAttempts += 1
+      let result: ProviderCallResult
+      try {
+        result = await callProvider(config, messages, maxOutputTokens)
+      } catch (error) {
+        const providerError = error instanceof ProviderError ? error : new ProviderError('PROVIDER_ERROR', 'provider_error')
+        const latencyMs = Date.now() - callStarted
+        finalErrorCode = providerError.safeCode
+        await recordAiAttempt(options.usageClient, {
+          requestId: reservation.request_id, attemptNumber, route, status: 'failed', outcome: providerError.outcome,
+          retryNumber: providerAttempts - 1, fallback: providerAttempts > 1, latencyMs,
+          httpStatus: providerError.httpStatus, safeErrorCode: providerError.safeCode,
+        })
+        unrecordedProviderAttempts -= 1
+        await observeProviderHealth(options.usageClient, route, reservation.request_id, 'failure', providerError.safeCode, providerError.httpStatus, latencyMs)
+        continue
+      }
+
+      const latencyMs = Date.now() - callStarted
+      const cost = estimateRouteCost(route, result.inputTokens, result.outputTokens, null)
+      let validContent = true
+      if (options.validateContent) {
+        try {
+          validContent = await options.validateContent(result.content)
+        } catch {
+          validContent = false
+        }
+      }
+      if (!validContent) {
+        finalErrorCode = 'PROVIDER_INVALID_RESPONSE'
+        await recordAiAttempt(options.usageClient, {
+          requestId: reservation.request_id, attemptNumber, route, actualModel: result.actualModel,
+          inputTokens: result.inputTokens, outputTokens: result.outputTokens,
+          estimatedProviderCostMicros: cost.providerMicros, estimatedZarCostMicros: cost.zarMicros,
+          status: 'failed', outcome: 'invalid_response', retryNumber: providerAttempts - 1,
+          fallback: providerAttempts > 1, latencyMs, httpStatus: result.httpStatus,
+          safeErrorCode: 'PROVIDER_INVALID_RESPONSE',
+        })
+        unrecordedProviderAttempts -= 1
+        await observeProviderHealth(options.usageClient, route, reservation.request_id, 'failure', 'PROVIDER_INVALID_RESPONSE', result.httpStatus, latencyMs)
+        continue
+      }
+      await recordAiAttempt(options.usageClient, {
+        requestId: reservation.request_id, attemptNumber, route, actualModel: result.actualModel,
+        inputTokens: result.inputTokens, outputTokens: result.outputTokens,
+        estimatedProviderCostMicros: cost.providerMicros, estimatedZarCostMicros: cost.zarMicros,
+        status: 'succeeded', outcome: 'success', retryNumber: providerAttempts - 1,
+        fallback: providerAttempts > 1, latencyMs, httpStatus: result.httpStatus,
+      })
+      unrecordedProviderAttempts -= 1
+      await observeProviderHealth(options.usageClient, route, reservation.request_id, 'success', null, result.httpStatus, latencyMs)
+      const routed = { content: result.content, provider: config.name, model: result.actualModel ?? config.model }
+      const replayPayload = options.buildReplayPayload?.(routed) ?? routed
+      await finalizeAiUsageWithReplay(options.usageClient, {
+        requestId: reservation.request_id,
+        status: 'succeeded',
+        latencyMs: Date.now() - startedAt,
+        safeErrorCode: null,
+        replay: {
+          fingerprint: options.fingerprint,
+          kind: options.replayKind ?? 'text_response',
+          actorId: options.actorId,
+          payload: replayPayload,
+        },
+      })
+      finalStatus = 'succeeded'
+      finalErrorCode = null
+      return { ...routed, usageRequestId: reservation.request_id }
     }
+    if (!hasAnyConfiguredProvider()) throw new Error('NO_AI_PROVIDER_KEYS')
+    throw new Error('NO_AI_PROVIDER_AVAILABLE')
+  } catch (error) {
+    if (error instanceof Error && error.message === 'AI_USAGE_FINALIZATION_FAILED') throw error
+    if (finalStatus !== 'succeeded') {
+      await finalizeAiUsage(
+        options.usageClient, reservation.request_id, 'failed', Date.now() - startedAt, finalErrorCode,
+        unrecordedProviderAttempts > 0,
+      )
+    }
+    throw error
   }
-
-  if (!hasAnyConfiguredProvider()) {
-    throw new Error('NO_AI_PROVIDER_KEYS')
-  }
-
-  throw new Error(`NO_AI_PROVIDER_AVAILABLE: ${errors.join(' | ') || 'No providers attempted.'}`)
 }
