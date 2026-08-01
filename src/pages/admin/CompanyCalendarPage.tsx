@@ -26,6 +26,7 @@ import {
 import { materializeRecurringTasks } from '../../lib/recurrence'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
 import { isManagerRole } from '../../lib/roles'
+import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 
 type EventFilter = 'all' | 'cancelled' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
@@ -781,6 +782,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
   const [status, setStatus] = useState<CompanyEventStatus>(event.status)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const keyboardInset = useVisualViewportBottomInset()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -986,7 +988,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
           </div>
         </fieldset>
 
-        <div className="border-t border-white/[0.08] px-5 py-4">
+        <div className="border-t border-white/[0.08] px-5 py-4" style={{ paddingBottom: keyboardInset > 0 ? `calc(1rem + ${keyboardInset}px)` : undefined }}>
           {!isNew && event.event_type === 'content_run' && (
             <Link
               to={`/admin/content?tab=runs&event=${event.id}`}

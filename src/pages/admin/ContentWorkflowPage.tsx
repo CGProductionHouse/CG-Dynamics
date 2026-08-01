@@ -437,11 +437,17 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
   async function refreshRunGuideline() {
     if (selectedRunId) await loadRunGuideline(selectedRunId)
   }
+  // Lightweight runs-only refresh — status changes must not flash the full-page
+  // loading skeleton (jarring on mobile) when only the runs list changed.
+  async function refreshRunsOnly() {
+    const result = await listRuns()
+    if (!result.error && !result.migrationNeeded) setRuns(result.data)
+  }
   async function setRunStatus(status: ContentRunStatus) {
     if (!selectedRun) return
     // Cancelling/completing keeps the linked calendar event aligned (no hard delete).
     await updateRunLinked(selectedRun, { status })
-    await loadAll()
+    await refreshRunsOnly()
   }
 
   async function addExtraShot() {
@@ -516,7 +522,8 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
           guidelines={runGuidelineVideos}
           clients={clients}
           marking={cardBusyId !== null}
-          onClose={() => setShootMode(false)}
+          error={cardError}
+          onClose={() => { setShootMode(false); setCardError(null) }}
           onMarkShot={markGuideShot}
         />
       )}

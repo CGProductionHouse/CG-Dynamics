@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CommandCentreTask, ClientOption, PackageAction, TaskBucket, TaskPriority, TaskStatus, TaskUpdateFields } from '../../lib/commandCentre'
-import { BUCKETS, PRIORITIES, STATUSES, updateTask, requestStateLabel, PACKAGE_ACTIONS } from '../../lib/commandCentre'
+import { BUCKETS, PRIORITIES, STATUSES, updateTask, requestStateFromTask, requestStateLabel, PACKAGE_ACTIONS } from '../../lib/commandCentre'
 import { ActionButton } from '../ui/Buttons'
 import { RequestApproval } from './RequestApproval'
+import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 
 interface TaskDetailDrawerProps {
   task: CommandCentreTask | null
@@ -83,6 +84,7 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
   const [error, setError] = useState<string | null>(null)
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
   const [showMobile, setShowMobile] = useState(true)
+  const keyboardInset = useVisualViewportBottomInset()
 
   const taskId = task?.id ?? null
   useEffect(() => {
@@ -271,7 +273,7 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
             {isRequest && task && (
               <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 px-3 py-2">
                 <p className="text-[10px] font-black uppercase tracking-wider text-amber-200/60">
-                  Request state: {requestStateLabel(task.priority === 'client_request' ? 'captured' : 'closed')}
+                  Request state: {requestStateLabel(requestStateFromTask(task))}
                 </p>
                 {task.source && (
                   <p className="mt-1 text-[10px] text-white/40">Source: {task.source.replace(/_/g, ' ')}</p>
@@ -457,7 +459,7 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
           </div>
         </div>
 
-        <div className="border-t border-white/10 px-5 py-3">
+        <div className="border-t border-white/10 px-5 py-3" style={{ paddingBottom: keyboardInset > 0 ? `calc(0.75rem + ${keyboardInset}px)` : undefined }}>
           {error && (
             <p className="mb-2 text-xs text-red-300">{error}</p>
           )}

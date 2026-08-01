@@ -354,11 +354,19 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     captureScroll()
     setDrawerTask(task)
     restoreScroll()
+    // Expose the open task as the record the global CG Assistant should act on
+    // in place (task.update / complete / block), without a full-page nav.
+    const next = new URLSearchParams(routeParams)
+    next.set('id', task.id)
+    setSearchParams(next, { replace: true })
   }
 
   function closeTask() {
     setDrawerTask(null)
     restoreScroll()
+    const next = new URLSearchParams(routeParams)
+    next.delete('id')
+    setSearchParams(next, { replace: true })
   }
 
   async function reloadTask(taskId: string) {

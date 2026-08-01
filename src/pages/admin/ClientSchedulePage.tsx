@@ -7,6 +7,7 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { ClientPicker } from '../../components/ClientPicker'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
+import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import {
   PACKAGE_DELIVERABLE_TYPES,
   SIMPLIFIED_STATUS_LABELS,
@@ -202,6 +203,22 @@ export default function ClientSchedulePage() {
     const params = new URLSearchParams(searchParams)
     params.set('mode', next)
     setSearchParams(params)
+  }
+
+  function openDeliverable(item: MonthlyDeliverable) {
+    setDrawerDeliverable(item)
+    // Expose the open deliverable as the record the global CG Assistant should
+    // act on in place (schedule.propose / task actions), without a full-page nav.
+    const params = new URLSearchParams(searchParams)
+    params.set('id', item.id)
+    setSearchParams(params, { replace: true })
+  }
+
+  function closeDeliverable() {
+    setDrawerDeliverable(null)
+    const params = new URLSearchParams(searchParams)
+    params.delete('id')
+    setSearchParams(params, { replace: true })
   }
 
   async function load() {
@@ -409,15 +426,15 @@ export default function ClientSchedulePage() {
       ) : (view === 'calendar' ? calendarItems.length === 0 : view === 'year' ? yearItems.length === 0 : filtered.length === 0) ? (
         <EmptyState title="No package posts match" message="Adjust the filters or change the month." centered={false} />
       ) : view === 'grid' ? (
-        <StickyHScroll><GridView items={filtered} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} /></StickyHScroll>
+        <StickyHScroll><GridView items={filtered} clientDisplay={clientDisplay} onOpen={openDeliverable} /></StickyHScroll>
       ) : view === 'board' ? (
-        <StickyHScroll><BoardView items={filtered} clientDisplay={clientDisplay} selectedClientId={clientId} onOpen={setDrawerDeliverable} /></StickyHScroll>
+        <StickyHScroll><BoardView items={filtered} clientDisplay={clientDisplay} selectedClientId={clientId} onOpen={openDeliverable} /></StickyHScroll>
       ) : view === 'charts' ? (
         <ChartsView items={filtered} clientDisplay={clientDisplay} />
       ) : view === 'year' ? (
-        <YearView items={yearItems} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} />
+        <YearView items={yearItems} clientDisplay={clientDisplay} onOpen={openDeliverable} />
       ) : (
-        <CalendarView month={selectedMonth} items={calendarItems} clientDisplay={clientDisplay} onOpen={setDrawerDeliverable} onMore={setDayDrawer} />
+        <CalendarView month={selectedMonth} items={calendarItems} clientDisplay={clientDisplay} onOpen={openDeliverable} onMore={setDayDrawer} />
       )}
 
       {drawerDeliverable && (
@@ -428,7 +445,7 @@ export default function ClientSchedulePage() {
           key={drawerDeliverable.id}
           deliverable={drawerDeliverable}
           clientDisplay={clientDisplay(drawerDeliverable)}
-          onClose={() => setDrawerDeliverable(null)}
+          onClose={closeDeliverable}
           onSaved={saveUpdated}
         />
       )}
@@ -440,7 +457,7 @@ export default function ClientSchedulePage() {
           onClose={() => setDayDrawer(null)}
           onOpen={item => {
             setDayDrawer(null)
-            setDrawerDeliverable(item)
+            openDeliverable(item)
           }}
         />
       )}
@@ -756,6 +773,7 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const keyboardInset = useVisualViewportBottomInset()
   // Best-effort read-only link to the Content Workflow video for this
   // deliverable. Never mutates the schedule; silent if phase-19d/19e is absent.
   const [linkedVideo, setLinkedVideo] = useState<ContentGuideIdea | null>(null)
@@ -847,7 +865,7 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
           <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label><input value={assigned} onChange={event => setAssigned(event.target.value)} className={inputCls} /></div>
           {(deliverable.helper_names ?? []).length > 0 && <div><p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p><div className="flex flex-wrap gap-1.5">{(deliverable.helper_names ?? []).map(name => <span key={name} className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2.5 py-0.5 text-[11px] text-[#2dd4bf]">{name}</span>)}</div></div>}
         </div>
-        <div className="border-t border-white/[0.08] px-5 py-4">
+        <div className="border-t border-white/[0.08] px-5 py-4" style={{ paddingBottom: keyboardInset > 0 ? `calc(1rem + ${keyboardInset}px)` : undefined }}>
           {error && <p className="mb-2 text-xs text-red-400">{error}</p>}
           <div className="flex gap-3"><ActionButton variant="primary" onClick={save} loading={saving}>Save</ActionButton><button type="button" onClick={onClose} className="rounded-lg border border-white/10 px-4 py-2 text-sm text-brand-primary hover:text-white">Close</button></div>
         </div>

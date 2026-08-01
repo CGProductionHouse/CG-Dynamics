@@ -142,10 +142,15 @@ export default function CgHubPage() {
       setCompanyEvents((companyRes.data ?? []) as CompanyCalendarEvent[])
       setMyDayContext(myDay)
       setLoadingData(false)
-      // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block the Hub.
+      // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block
+      // the Hub — but surface their errors instead of dropping them silently.
       const [runsRes, videosRes] = await Promise.all([listRuns(), listPipelineVideos()])
       setContentRuns(runsRes.migrationNeeded ? [] : runsRes.data)
       setContentVideos(videosRes.migrationNeeded ? [] : videosRes.data)
+      const bestEffortErrors = [runsRes.error, videosRes.error].filter((e): e is string => Boolean(e))
+      if (bestEffortErrors.length > 0) {
+        setLoadErrors(current => [...current, ...bestEffortErrors])
+      }
     } catch (error) {
       setLoadErrors([error instanceof Error ? error.message : 'Could not load Hub data.'])
       setTasks([])
@@ -335,6 +340,7 @@ export default function CgHubPage() {
       }
       setQuickTitle('')
       setQuickMessage('Task added to Daily Tasks.')
+      window.setTimeout(() => setQuickMessage(null), 4000)
       await loadAll()
     } catch (error) {
       setQuickMessage(error instanceof Error ? error.message : 'Could not add task.')

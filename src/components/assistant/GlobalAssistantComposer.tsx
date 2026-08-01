@@ -143,6 +143,13 @@ export function GlobalAssistantComposer() {
   const [debriefBusy, setDebriefBusy] = useState(false)
   const [debriefRecording, setDebriefRecording] = useState(false)
   const [debrief, setDebrief] = useState<MeetingDebriefAnalysis | null>(null)
+  // Guard against stale results: closing the panel while a debrief is still
+  // recording/analysing must not surface that analysis later.
+  const debriefActiveRef = useRef(false)
+  // Keep the full candidate list across re-analysis: re-matching after a manual
+  // meeting pick returns only the chosen meeting, which would collapse the
+  // select. Preserve the richer list so the reviewer can switch again.
+  const [debriefCandidates, setDebriefCandidates] = useState<MeetingDebriefAnalysis['candidates']>([])
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const navigate = useNavigate()
@@ -285,9 +292,10 @@ export function GlobalAssistantComposer() {
         const res = await enqueueBackgroundJob({
           jobType,
           payload: jobType === 'meta_sync' ? { baseline } : {},
-          // Idempotent per type per day (+baseline) so double-asking does not
-          // duplicate work.
-          idempotencyKey: `${jobType}-${today}${baseline ? '-baseline' : ''}`,
+          // Idempotent per user per type per day (+baseline) so double-asking
+          // does not duplicate work — scoped to the user so one staff member's
+          // job is never silently hidden by another's idempotency key.
+          idempotencyKey: `${profile?.id ?? 'anon'}:${jobType}-${today}${baseline ? '-baseline' : ''}`,
         })
         if (res.error) throw new Error(res.error.message)
         void nudgeBackgroundWorker()
@@ -353,10 +361,14 @@ export function GlobalAssistantComposer() {
           clientName: p.clientName,
         })
         if (res.error) throw new Error(res.error.message)
-        const assignee = p.fields.assignee ? ` for ${p.fields.assignee}` : ''
+        const assignee = p.fields.assignee ? String(p.fields.assignee) : ''
         const due = p.fields.due_date ? ` (due ${p.fields.due_date})` : ''
+        // Only claim a notification when the assignee name matches a real staff
+        // profile — the server notifies only on a resolved profile.
+        const assigneeResolved = assignee ? staffRef.current.some(name => name.toLowerCase() === assignee.toLowerCase()) : false
+        const notified = assignee && assigneeResolved ? ' and they have been notified' : assignee ? ' — check the assignee name, it did not match a staff profile' : ''
         setProposal(null)
-        pushAssistant(`Done — created the task${assignee}${due}. It's on the board${assignee ? ' and they have been notified' : ''}.`)
+        pushAssistant(`Done — created the task${assignee ? ` for ${assignee}` : ''}${due}. It's on the board${notified}.`)
       } else if (p.type === 'task.update') {
         // Complete / block an existing task. Needs the task in context (opened
         // from a task record); otherwise ask rather than guess which task.
@@ -432,7 +444,7 @@ export function GlobalAssistantComposer() {
       recorder.onstop = () => {
         stream.getTracks().forEach(track => track.stop())
         const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' })
-        if (blob.size > 0) void analyseDebrief({ audio: blob })
+        if (blob.size > 0 && debriefActiveRef.current) void analyseDebrief({ audio: blob })
       }
       mediaRecorderRef.current = recorder
       recorder.start()
@@ -455,10 +467,14 @@ export function GlobalAssistantComposer() {
       const res = input.audio
         ? await analyseMeetingAudio(input.audio, opts)
         : await analyseMeetingText(input.eventId && debrief ? debrief.transcript : debriefText, opts)
+      if (!debriefActiveRef.current) return
       if (res.error || !res.data) { setError(res.error ?? 'The debrief could not be analysed.'); return }
+      // Keep the widest candidate set seen so a manual meeting pick never
+      // collapses the select to a single option.
+      if (res.data.candidates.length > 0 && !input.eventId) setDebriefCandidates(res.data.candidates)
       setDebrief(res.data)
     } finally {
-      setDebriefBusy(false)
+      if (debriefActiveRef.current) setDebriefBusy(false)
     }
   }
 
@@ -477,13 +493,20 @@ export function GlobalAssistantComposer() {
           .map(t => ({ title: t.title, assignee_name: t.assignee_name, client_id: t.client_id, client_name: t.client_name, due_date: t.due_date })),
       })
       if (res.error || !res.data) { setError(res.error ?? 'The debrief could not be applied.'); return }
+      const namedAssignees = debrief.tasks.filter(t => t.title.trim() && t.assignee_name?.trim())
+      const allAssigneesResolved = namedAssignees.every(t => t.resolved_assignee)
+      const notificationNote = namedAssignees.length > 0
+        ? allAssigneesResolved ? ' (assignees notified)' : ' — some assignee names could not be matched'
+        : ''
+      debriefActiveRef.current = false
       setDebrief(null)
+      setDebriefCandidates([])
       setDebriefOpen(false)
       setDebriefText('')
       setOpen(true)
       pushAssistant(
         `Debrief saved${res.data.notes_saved ? ' — notes are on the meeting' : ''}` +
-        `${res.data.tasks_created > 0 ? ` and ${res.data.tasks_created} task${res.data.tasks_created > 1 ? 's were' : ' was'} created on the board (assignees notified)` : ''}.`,
+        `${res.data.tasks_created > 0 ? ` and ${res.data.tasks_created} task${res.data.tasks_created > 1 ? 's were' : ' was'} created on the board${notificationNote}` : ''}.`,
       )
     } finally {
       setDebriefBusy(false)
@@ -709,7 +732,7 @@ export function GlobalAssistantComposer() {
           <div className="mb-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="text-sm font-black text-white">Meeting debrief</p>
-              <button type="button" onClick={() => { setDebriefOpen(false); setDebrief(null); setDebriefText(''); if (debriefRecording) stopDebriefRecording() }} className="rounded-md px-2 py-1 text-sm font-bold text-brand-primary/70 hover:text-white">✕</button>
+              <button type="button" onClick={() => { debriefActiveRef.current = false; setDebriefOpen(false); setDebrief(null); setDebriefText(''); setDebriefCandidates([]); if (debriefRecording) stopDebriefRecording() }} className="rounded-md px-2 py-1 text-sm font-bold text-brand-primary/70 hover:text-white">✕</button>
             </div>
 
             {!debrief ? (
@@ -751,8 +774,8 @@ export function GlobalAssistantComposer() {
                     onChange={event => { const id = event.target.value; if (id && id !== debrief.meeting?.id) void analyseDebrief({ eventId: id }) }}
                     className="mt-0.5 w-full rounded-md border border-white/10 bg-[#121614] px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   >
-                    {debrief.candidates.length === 0 && <option value="">No recent meeting found</option>}
-                    {debrief.candidates.map(c => (
+                    {debriefCandidates.length === 0 && <option value="">No recent meeting found</option>}
+                    {debriefCandidates.map(c => (
                       <option key={c.id} value={c.id}>
                         {c.title} — {c.startAt.slice(0, 10)}{c.clientName ? ` (${c.clientName})` : ''}
                       </option>
@@ -876,7 +899,7 @@ export function GlobalAssistantComposer() {
             <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
               <button type="button" onClick={newChat} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
               <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
-              <button type="button" onClick={() => { setDebriefOpen(true); setPlusOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
+              <button type="button" onClick={() => { debriefActiveRef.current = true; setDebriefOpen(true); setPlusOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
               <button type="button" onClick={() => { attachRef.current?.click() }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
               <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
             </div>

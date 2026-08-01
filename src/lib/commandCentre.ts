@@ -815,9 +815,11 @@ export function requestStateFromTask(task: CommandCentreTask): RequestState {
     return 'sent_to_client'
   }
   if (task.status === 'in_progress') return 'in_progress'
-  if (task.assigned_to_user_id || task.assigned_to_name) return 'assigned'
+  // A task that is already approved or scheduled keeps that state even after it
+  // is assigned — assignment is a step within approval, not a step past it.
   if (task.package_action && task.deliverable_id) return 'scheduled'
   if (task.package_action) return 'approved'
+  if (task.assigned_to_user_id || task.assigned_to_name) return 'assigned'
   return 'captured'
 }
 

@@ -17,10 +17,13 @@ type WorkTab = 'my-day' | 'board' | 'daily-tasks' | 'workload'
 function MyVideoQueue() {
   const { profile } = useAuth()
   const [videos, setVideos] = useState<ContentGuideIdea[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const load = useEffectEvent(async () => {
+    setLoadError(null)
     const result = await listPipelineVideos()
-    if (result.error || result.migrationNeeded) { setVideos([]); return }
+    if (result.error) { setLoadError(result.error); setVideos([]); return }
+    if (result.migrationNeeded) { setVideos([]); return }
     const isManager = isManagerRole(profile?.role)
     const mine = result.data.filter(video => editorQueueMatch(video, profile?.id) || internalReviewMatch(video, isManager))
     setVideos(mine.slice(0, 8))
@@ -30,7 +33,7 @@ function MyVideoQueue() {
     return () => window.clearTimeout(timer)
   }, [profile?.id])
 
-  if (videos.length === 0) return null
+  if (videos.length === 0 && !loadError) return null
   return (
     <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-10">
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
@@ -38,6 +41,9 @@ function MyVideoQueue() {
           <h2 className="text-[11px] font-black uppercase tracking-[0.14em] text-white/45">My Video Queue</h2>
           <Link to="/admin/content?tab=pipeline" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
         </div>
+        {loadError ? (
+          <p className="text-xs text-red-300">Could not load your video queue: {loadError}</p>
+        ) : (
         <ul className="grid gap-2 sm:grid-cols-2">
           {videos.map(video => (
             <li key={video.id}>
@@ -51,6 +57,7 @@ function MyVideoQueue() {
             </li>
           ))}
         </ul>
+        )}
       </div>
     </div>
   )
@@ -62,10 +69,13 @@ function MyVideoQueue() {
 function MyContentRuns() {
   const { profile } = useAuth()
   const [runs, setRuns] = useState<ContentRun[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const load = useEffectEvent(async () => {
+    setLoadError(null)
     const result = await listRuns()
-    if (result.error || result.migrationNeeded) { setRuns([]); return }
+    if (result.error) { setLoadError(result.error); setRuns([]); return }
+    if (result.migrationNeeded) { setRuns([]); return }
     const mine = result.data
       .filter(run => run.status !== 'completed' && run.status !== 'cancelled')
       .filter(run => runInvolvesUser(run, { id: profile?.id, full_name: profile?.full_name }))
@@ -77,7 +87,7 @@ function MyContentRuns() {
     return () => window.clearTimeout(timer)
   }, [profile?.id])
 
-  if (runs.length === 0) return null
+  if (runs.length === 0 && !loadError) return null
   return (
     <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-10">
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
@@ -85,6 +95,9 @@ function MyContentRuns() {
           <h2 className="text-[11px] font-black uppercase tracking-[0.14em] text-white/45">My Content Runs</h2>
           <Link to="/admin/content?tab=runs" className="text-xs font-bold text-brand-teal hover:text-white">Open</Link>
         </div>
+        {loadError ? (
+          <p className="text-xs text-red-300">Could not load your content runs: {loadError}</p>
+        ) : (
         <ul className="grid gap-2 sm:grid-cols-2">
           {runs.map(run => (
             <li key={run.id}>
@@ -98,6 +111,7 @@ function MyContentRuns() {
             </li>
           ))}
         </ul>
+        )}
       </div>
     </div>
   )
