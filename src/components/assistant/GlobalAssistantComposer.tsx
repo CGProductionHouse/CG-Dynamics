@@ -17,6 +17,8 @@ import { createCompanyEvent } from '../../lib/companyCalendar'
 import { logPlannerActivity, listPlannerWorkloadSummary } from '../../lib/planner'
 import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
 import { enqueueBackgroundJob, nudgeBackgroundWorker, listMyBackgroundJobs, type BackgroundJob } from '../../lib/backgroundJobs'
+import { createAssistantTask, updateAssistantTask } from '../../lib/assistantTasks'
+import { listMyAssistantMemory, addAssistantMemory } from '../../lib/assistantMemory'
 import { isManagerRole } from '../../lib/roles'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -137,6 +139,7 @@ export function GlobalAssistantComposer() {
   const clientsRef = useRef<ActiveClientOption[]>([])
   const staffRef = useRef<string[]>([])
   const managementRef = useRef<string | null>(null)
+  const memoryRef = useRef<string[]>([])
 
   const speechSupported = useMemo(() => Boolean(getSpeechRecognition()), [])
 
@@ -165,6 +168,21 @@ export function GlobalAssistantComposer() {
     }
     return () => { active = false }
   }, [isManager])
+
+  // Durable per-user memory (own-only via RLS). Loaded once so the personal
+  // assistant is grounded in what this user has asked it to remember. Strictly
+  // isolated — no other user's or client's memory is ever visible.
+  useEffect(() => {
+    let active = true
+    listMyAssistantMemory(12)
+      .then(res => {
+        if (active && !res.error && res.data) {
+          memoryRef.current = res.data.map(m => m.content).filter(Boolean)
+        }
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [profile])
 
   // Load the signed-in user's live work context once (best-effort; the assistant
   // still works without it).
@@ -221,6 +239,8 @@ export function GlobalAssistantComposer() {
     if (recordId) parts.push(`recordId: ${recordId}`)
     // Management grounding is only ever added for authorised admin/manager.
     if (isManager && managementRef.current) parts.push(managementRef.current)
+    // Durable per-user memory (own-only) grounds the personal assistant.
+    if (memoryRef.current.length > 0) parts.push(`remembered: ${memoryRef.current.slice(0, 6).join('; ')}`)
     return parts.join(', ')
   }
 
@@ -294,12 +314,48 @@ export function GlobalAssistantComposer() {
         if (res.error) throw new Error(res.error.message)
         setProposal(null)
         pushAssistant('Submitted. This Client Schedule change stays pending until an Admin approves it.')
+      } else if (p.type === 'memory.add') {
+        // Durable per-user memory. RLS constrains the row to this user only.
+        if (!profile?.id) throw new Error('Sign in to save assistant memory.')
+        const note = String(p.fields.note ?? '').trim()
+        if (!note) { setError('Nothing to remember.'); return }
+        const res = await addAssistantMemory(profile.id, note)
+        if (res.error) throw new Error(res.error.message)
+        memoryRef.current = [note, ...memoryRef.current].slice(0, 12)
+        setProposal(null)
+        pushAssistant(`Got it — I'll remember that: "${note}".`)
+      } else if (p.type === 'task.create' || p.type === 'task.assign') {
+        // Direct canonical task write through the audited SECURITY DEFINER RPC.
+        // The task lands on the real operations board, is audited, and the
+        // assignee is notified — no routing, no hidden store.
+        const res = await createAssistantTask({
+          title: String(p.fields.task ?? 'New task'),
+          assigneeName: p.fields.assignee ? String(p.fields.assignee) : null,
+          dueDate: p.fields.due_date ? String(p.fields.due_date) : null,
+          clientId: p.clientId,
+          clientName: p.clientName,
+        })
+        if (res.error) throw new Error(res.error.message)
+        const assignee = p.fields.assignee ? ` for ${p.fields.assignee}` : ''
+        const due = p.fields.due_date ? ` (due ${p.fields.due_date})` : ''
+        setProposal(null)
+        pushAssistant(`Done — created the task${assignee}${due}. It's on the board${assignee ? ' and they have been notified' : ''}.`)
+      } else if (p.type === 'task.update') {
+        // Complete / block an existing task. Needs the task in context (opened
+        // from a task record); otherwise ask rather than guess which task.
+        if (!recordId) {
+          setError('Open the task first (or tell me which task), then I can update it.')
+          return
+        }
+        const action = p.fields.status === 'done' ? 'complete' : 'block'
+        const res = await updateAssistantTask({ taskId: recordId, action })
+        if (res.error) throw new Error(res.error.message)
+        setProposal(null)
+        pushAssistant(action === 'complete' ? 'Done — task marked complete.' : 'Done — task flagged as blocked.')
       } else {
-        // Task / video / cancel: hand off to the right page with context rather
-        // than a blind write (assigning "this task", marking shots and cancelling
-        // need the on-page record).
-        const dest = p.type.startsWith('video') ? '/admin/content?tab=runs' : p.type.startsWith('task') ? '/admin/work' : '/admin/cg-calendar'
-        const where = dest.includes('content') ? 'Content Runs' : dest.includes('work') ? 'Work' : 'CG Calendar'
+        // Video / calendar.cancel still need the on-page record to act on.
+        const dest = p.type.startsWith('video') ? '/admin/content?tab=runs' : '/admin/cg-calendar'
+        const where = dest.includes('content') ? 'Content Runs' : 'CG Calendar'
         setProposal(null)
         pushAssistant(`Opening ${where} so you can finish this on the record.`)
         navigate(dest)
