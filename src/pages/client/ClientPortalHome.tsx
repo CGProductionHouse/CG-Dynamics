@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { activeOrganicPlatforms, actionMonthForReport, buildClientStrategyPreview } from '../../lib/clientPortal'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
 import { getClient, type Client } from '../../lib/db/clients'
-import { listPublishedReportsForClient, type Report } from '../../lib/db/reports'
+import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import { loadReportPlatformFacts } from '../../lib/db/reportingTruth'
 import { loadGoogleAdsDashboard, type GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
 import type { PlatformFact } from '../../lib/overviewModel'
@@ -13,7 +13,7 @@ import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } fro
 
 type PortalData = {
   client: Client | null
-  report: Report | null
+  report: ClientReport | null
   facts: PlatformFact[]
   googleAdsState: GoogleAdsDashboardState
   calendarCount: number | null
@@ -47,7 +47,7 @@ export default function ClientPortalHome() {
       try {
         const [clientResult, reportsResult] = await Promise.all([
           getClient(profile.client_id),
-          listPublishedReportsForClient(profile.client_id),
+          listClientPublishedReports(),
         ])
         if (!active) return
         if (clientResult.error || reportsResult.error) throw new Error('Portal data unavailable')

@@ -35,6 +35,14 @@ export interface ActionContext {
   role: string // 'admin' | 'manager' | 'team' | ...
   currentClientId?: string | null
   currentClientName?: string | null
+  currentTaskId?: string | null
+  currentTaskName?: string | null
+}
+
+export interface ActionTarget {
+  type: 'planner_task' | 'content_run'
+  id: string
+  label: string
 }
 
 export interface ActionProposal {
@@ -44,6 +52,7 @@ export interface ActionProposal {
   fields: Record<string, string | number | null>
   clientId: string | null
   clientName: string | null
+  target?: ActionTarget
   // Set when the signed-in role may not directly perform this — e.g. a schedule
   // change becomes a pending proposal needing admin approval.
   requiresApproval?: boolean
@@ -243,11 +252,11 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
 
   // 0. Durable background jobs (Meta sync, report preparation).
   if (isMetaSyncIntent(lower)) {
-    const baseline = /\bbaseline|previous month|vorige maand\b/.test(lower)
+    const syncPreviousMonth = /\bbaseline|previous month|vorige maand\b/.test(lower)
     return {
       type: 'job.enqueue',
-      title: baseline ? 'Run Meta sync (+ previous-month baseline)' : 'Run Meta sync',
-      fields: { job: 'meta_sync', baseline: baseline ? 'yes' : 'no' },
+      title: syncPreviousMonth ? 'Run Meta sync and also sync the previous month' : 'Run Meta sync',
+      fields: { job: 'meta_sync', sync_previous_month: syncPreviousMonth ? 'yes' : 'no' },
       clientId: context.currentClientId ?? null,
       clientName: context.currentClientName ?? null,
     }
@@ -296,21 +305,25 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   // 2b. Task status / completion / blocker (on "this task" / a task in context).
   if ((THIS_TASK.test(lower) || TASK_NOUN.test(lower)) && !ASSIGN.test(lower)) {
     if (COMPLETE.test(lower)) {
+      if (!context.currentTaskId) return { clarify: 'Open the Planner task first so I know exactly which task to complete.' }
       return {
         type: 'task.update',
         title: 'Mark task complete',
         fields: { status: 'done' },
         clientId: context.currentClientId ?? null,
         clientName: context.currentClientName ?? null,
+        target: { type: 'planner_task', id: context.currentTaskId, label: context.currentTaskName ?? 'Current Planner task' },
       }
     }
     if (BLOCKED.test(lower)) {
+      if (!context.currentTaskId) return { clarify: 'Open the Planner task first so I know exactly which task to block.' }
       return {
         type: 'task.update',
         title: 'Mark task blocked',
         fields: { status: 'blocked' },
         clientId: context.currentClientId ?? null,
         clientName: context.currentClientName ?? null,
+        target: { type: 'planner_task', id: context.currentTaskId, label: context.currentTaskName ?? 'Current Planner task' },
       }
     }
   }
@@ -323,6 +336,7 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
     if (staff.matches.length > 1) return { clarify: `Did you mean ${staff.matches.join(' or ')}?` }
     const due = resolveRelativeDate(lower, context.today) // may be null → no due date, which is allowed
     const assignee = staff.matches[0] ?? null
+    if (isAssign && !context.currentTaskId) return { clarify: 'Open the Planner task first so I know exactly which existing task to assign.' }
     // Task title: strip the command words for a readable default.
     const title = raw
     return {
@@ -335,6 +349,12 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
       },
       clientId: context.currentClientId ?? null,
       clientName: context.currentClientName ?? null,
+      target: isAssign && context.currentTaskId
+        ? { type: 'planner_task', id: context.currentTaskId, label: context.currentTaskName ?? 'Current Planner task' }
+        : undefined,
+      approvalNote: isAssign && due
+        ? 'Assignment will be saved now. Change the due date separately on the task because the current backend cannot apply both atomically.'
+        : undefined,
     }
   }
 
@@ -388,7 +408,7 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
       clientId: context.currentClientId ?? null,
       clientName: context.currentClientName ?? null,
       requiresApproval: true,
-      approvalNote: 'Client Schedule changes stay pending until an Admin approves them.',
+      approvalNote: 'Client Schedule changes stay pending until a manager or admin approves them.',
     }
   }
 

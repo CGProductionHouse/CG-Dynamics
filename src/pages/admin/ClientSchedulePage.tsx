@@ -8,6 +8,17 @@ import { EmptyState } from '../../components/ui/States'
 import { ClientPicker } from '../../components/ClientPicker'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
+import { useAuth } from '../../contexts/AuthContext'
+import { isManagerRole } from '../../lib/roles'
+import {
+  approveScheduleChange,
+  listMyScheduleChangeRequests,
+  listPendingScheduleChanges,
+  rejectScheduleChange,
+  saveScheduleDeliverable,
+  updateAssignedScheduleStatus,
+  type ScheduleChangeRequest,
+} from '../../lib/scheduleChangeRequests'
 import {
   PACKAGE_DELIVERABLE_TYPES,
   SIMPLIFIED_STATUS_LABELS,
@@ -20,9 +31,6 @@ import {
   matchesScheduleStatusFilter,
   monthKey,
   normalizeScheduleStatus,
-  updateMonthlyDeliverableCore,
-  updateMonthlyDeliverableSchedule,
-  updateMonthlyDeliverableStatus,
   type DeliverableType,
   type MonthlyDeliverable,
   type SimplifiedProductionStatus,
@@ -170,6 +178,7 @@ function compareForBoard(a: MonthlyDeliverable, b: MonthlyDeliverable) {
 }
 
 export default function ClientSchedulePage() {
+  const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const view = (searchParams.get('view') as ScheduleView) || 'calendar'
   const mode = (searchParams.get('mode') as ScheduleMode) || 'needs-action'
@@ -420,6 +429,8 @@ export default function ClientSchedulePage() {
       )}
       {!hasLegacyDates && <div className="mb-4" />}
 
+      <ScheduleReviewSection canReview={isManagerRole(profile?.role)} onApplied={load} />
+
       {error && <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</div>}
       {loading ? (
         <div className="grid gap-3 md:grid-cols-3">{[1, 2, 3, 4, 5, 6].map(item => <div key={item} className="h-32 animate-pulse rounded-xl bg-white/[0.04]" />)}</div>
@@ -445,6 +456,7 @@ export default function ClientSchedulePage() {
           key={drawerDeliverable.id}
           deliverable={drawerDeliverable}
           clientDisplay={clientDisplay(drawerDeliverable)}
+          canManage={isManagerRole(profile?.role)}
           onClose={closeDeliverable}
           onSaved={saveUpdated}
         />
@@ -462,6 +474,139 @@ export default function ClientSchedulePage() {
         />
       )}
     </div>
+  )
+}
+
+const CHANGE_FIELD_LABELS: Record<string, string> = {
+  scheduled_date: 'Schedule date',
+  due_date: 'Legacy schedule date',
+  production_status: 'Status',
+  assigned_to_name: 'Assigned to',
+  notes: 'Notes',
+}
+
+function changeValue(field: string, value: unknown) {
+  if (value === null || value === undefined || value === '') return 'None'
+  if (field === 'production_status') return SIMPLIFIED_STATUS_LABELS[normalizeScheduleStatus(String(value))]
+  if (field === 'scheduled_date' || field === 'due_date') return formatScheduleDate(String(value))
+  return String(value)
+}
+
+function requestTargetName(request: ScheduleChangeRequest) {
+  const target = request.deliverable
+  return target ? `${target.code}${target.instance_number} - ${target.title}` : 'Schedule item unavailable'
+}
+
+function ScheduleReviewSection({ canReview, onApplied }: { canReview: boolean; onApplied: () => Promise<void> }) {
+  const [pending, setPending] = useState<ScheduleChangeRequest[]>([])
+  const [mine, setMine] = useState<ScheduleChangeRequest[]>([])
+  const [notes, setNotes] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
+  const [acting, setActing] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  async function loadRequests() {
+    setLoading(true)
+    setError(null)
+    const [pendingResult, mineResult] = await Promise.all([
+      canReview ? listPendingScheduleChanges() : Promise.resolve({ data: [] as ScheduleChangeRequest[], error: null }),
+      listMyScheduleChangeRequests(),
+    ])
+    setLoading(false)
+    if (pendingResult.error || mineResult.error) {
+      setError(pendingResult.error?.message ?? mineResult.error?.message ?? 'Could not load schedule requests.')
+      return
+    }
+    setPending((pendingResult.data ?? []) as ScheduleChangeRequest[])
+    setMine((mineResult.data ?? []) as ScheduleChangeRequest[])
+  }
+
+  const loadRequestsEvent = useEffectEvent(loadRequests)
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadRequestsEvent() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [canReview])
+
+  async function review(request: ScheduleChangeRequest, action: 'approve' | 'reject') {
+    if (acting) return
+    setActing(request.id)
+    setError(null)
+    setSuccess(null)
+    const result = action === 'approve'
+      ? await approveScheduleChange(request.id, notes[request.id])
+      : await rejectScheduleChange(request.id, notes[request.id])
+    if (result.error) {
+      setError(result.error.message)
+      setActing(null)
+      return
+    }
+    setSuccess(action === 'approve' ? 'Request approved and schedule updated.' : 'Request rejected.')
+    await Promise.all([loadRequests(), action === 'approve' ? onApplied() : Promise.resolve()])
+    setActing(null)
+  }
+
+  return (
+    <section className="mb-5 rounded-xl border border-white/[0.08] bg-white/[0.025] p-3 sm:p-4" aria-labelledby="schedule-review-heading">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 id="schedule-review-heading" className="text-sm font-black text-white">Schedule change review</h2>
+          <p className="mt-0.5 text-xs text-brand-primary/55">Review proposed changes and track your requests.</p>
+        </div>
+        <button type="button" onClick={() => void loadRequests()} disabled={loading} className="min-h-11 rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-white/70 hover:text-white disabled:opacity-50">Refresh requests</button>
+      </div>
+      {error && <p role="alert" className="mt-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
+      {success && <p role="status" className="mt-3 rounded-lg bg-brand-teal/10 px-3 py-2 text-sm text-brand-teal">{success}</p>}
+      {loading ? <p className="mt-3 text-sm text-white/50">Loading schedule requests...</p> : (
+        <div className={`mt-4 grid gap-4 ${canReview ? 'lg:grid-cols-2' : ''}`}>
+          {canReview && (
+            <div>
+              <h3 className="text-xs font-bold text-white">Pending review ({pending.length})</h3>
+              {pending.length === 0 ? <p className="mt-2 text-sm text-white/45">No requests are waiting for review.</p> : (
+                <div className="mt-2 space-y-2">
+                  {pending.map(request => (
+                    <article key={request.id} className="rounded-lg border border-white/[0.08] bg-black/20 p-3">
+                      <p className="text-sm font-bold text-white">{requestTargetName(request)}</p>
+                      <p className="mt-1 text-xs text-white/55">Requested by: {request.requested_by_name || 'Unknown requester'}</p>
+                      <p className="mt-1 text-xs text-white/55">Reason: {request.reason || 'No reason provided'}</p>
+                      <div className="mt-3 space-y-2">
+                        {Object.entries(request.change).map(([field, proposed]) => (
+                          <div key={field} className="grid gap-1 rounded-md bg-white/[0.03] p-2 text-xs sm:grid-cols-2">
+                            <p className="text-white/50"><span className="font-bold text-white/70">{CHANGE_FIELD_LABELS[field] ?? field}</span><br />Current: {changeValue(field, request.deliverable?.[field as keyof NonNullable<ScheduleChangeRequest['deliverable']>])}</p>
+                            <p className="text-white/70">Proposed: {changeValue(field, proposed)}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <label className="mt-3 block text-xs font-medium text-white/65">Review note</label>
+                      <textarea value={notes[request.id] ?? ''} onChange={event => setNotes(current => ({ ...current, [request.id]: event.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white outline-none focus:border-brand-accent/50" />
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button type="button" onClick={() => void review(request, 'approve')} disabled={!!acting} className="min-h-11 rounded-lg bg-brand-accent px-4 py-2 text-sm font-bold text-black disabled:opacity-50">Approve</button>
+                        <button type="button" onClick={() => void review(request, 'reject')} disabled={!!acting} className="min-h-11 rounded-lg border border-red-300/25 px-4 py-2 text-sm font-bold text-red-200 disabled:opacity-50">Reject</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <div>
+            <h3 className="text-xs font-bold text-white">My requests ({mine.length})</h3>
+            {mine.length === 0 ? <p className="mt-2 text-sm text-white/45">You have not requested any schedule changes.</p> : (
+              <div className="mt-2 space-y-2">
+                {mine.map(request => (
+                  <article key={request.id} className="rounded-lg border border-white/[0.08] bg-black/20 p-3 text-xs text-white/60">
+                    <div className="flex items-start justify-between gap-2"><p className="font-bold text-white">{requestTargetName(request)}</p><span className="rounded-full border border-white/10 px-2 py-1 font-bold capitalize text-white/70">{request.status === 'applied' ? 'Approved' : request.status}</span></div>
+                    <p className="mt-2">Reason: {request.reason || 'No reason provided'}</p>
+                    {request.reviewed_by_name && <p className="mt-1">Reviewed by: {request.reviewed_by_name}</p>}
+                    {request.review_notes && <p className="mt-1">Review outcome: {request.review_notes}</p>}
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
   )
 }
 
@@ -762,7 +907,7 @@ function BarPanel({ title, rows }: { title: string; rows: Array<{ label: string;
   )
 }
 
-function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { deliverable: MonthlyDeliverable; clientDisplay: ClientDisplay; onClose: () => void; onSaved: (updated: MonthlyDeliverable) => void }) {
+function DeliverableDrawer({ deliverable, clientDisplay, canManage, onClose, onSaved }: { deliverable: MonthlyDeliverable; clientDisplay: ClientDisplay; canManage: boolean; onClose: () => void; onSaved: (updated: MonthlyDeliverable) => void }) {
   const [status, setStatus] = useState<SimplifiedProductionStatus>(normalizeScheduleStatus(deliverable.production_status))
   const [date, setDate] = useState(getEffectiveScheduleDate(deliverable) ?? '')
   const [assigned, setAssigned] = useState(deliverable.assigned_to_name ?? '')
@@ -791,23 +936,22 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
     if (saving) return
     setSaving(true)
     setError(null)
-    let next = deliverable
-    const statusResult = await updateMonthlyDeliverableStatus(deliverable.id, SIMPLIFIED_TO_BACKEND_STATUS[status])
-    if (statusResult.error) { setError(statusResult.error.message); setSaving(false); return }
-    if (statusResult.data) next = statusResult.data
-    const scheduleResult = await updateMonthlyDeliverableSchedule(deliverable.id, date || null)
-    if (scheduleResult.error) { setError(scheduleResult.error.message); setSaving(false); return }
-    if (scheduleResult.data) next = scheduleResult.data
-    // Explicit client link/unlink — '' is coerced to null so we never send an
-    // invalid UUID. This is the only place client_id is written, and only on an
-    // explicit user save.
-    const coreResult = await updateMonthlyDeliverableCore(deliverable.id, {
-      assigned_to_name: assigned.trim() || null,
-      client_id: clientId || null,
-    })
-    if (coreResult.error) { setError(coreResult.error.message); setSaving(false); return }
-    if (coreResult.data) next = coreResult.data
-    onSaved(next)
+    const result = canManage
+      ? await saveScheduleDeliverable({
+          deliverableId: deliverable.id,
+          expectedUpdatedAt: deliverable.updated_at,
+          productionStatus: SIMPLIFIED_TO_BACKEND_STATUS[status],
+          scheduledDate: date || null,
+          clientId: clientId || null,
+          assignedToName: assigned.trim() || null,
+        })
+      : await updateAssignedScheduleStatus({
+          deliverableId: deliverable.id,
+          expectedUpdatedAt: deliverable.updated_at,
+          productionStatus: SIMPLIFIED_TO_BACKEND_STATUS[status],
+        })
+    if (result.error) { setError(result.error.message); setSaving(false); return }
+    if (result.data) onSaved(result.data as MonthlyDeliverable)
     setSaving(false)
     onClose()
   }
@@ -851,7 +995,7 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
               </details>
             </div>
           )}
-          <div>
+          {canManage && <div>
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Client</label>
             <ClientPicker value={clientId} label={clientDisplay.state === 'known' ? clientDisplay.label : ''} onChange={client => setClientId(client?.id ?? null)} />
             {clientDisplay.state !== 'known' && (
@@ -859,10 +1003,10 @@ function DeliverableDrawer({ deliverable, clientDisplay, onClose, onSaved }: { d
                 Not linked to a client yet{clientDisplay.state === 'inferred' ? ` — ${clientDisplay.label}` : ''}. Select the real client and Save to link it.
               </p>
             )}
-          </div>
-          <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Schedule date</label><input type="date" value={date} onChange={event => setDate(event.target.value)} className={inputCls} /></div>
-          <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label><select value={status} onChange={event => setStatus(event.target.value as SimplifiedProductionStatus)} className={inputCls}>{SIMPLIFIED_STATUS_OPTIONS.map(option => <option key={option} value={option}>{SIMPLIFIED_STATUS_LABELS[option]}</option>)}</select></div>
-          <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label><input value={assigned} onChange={event => setAssigned(event.target.value)} className={inputCls} /></div>
+          </div>}
+          {canManage && <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Schedule date</label><input type="date" value={date} onChange={event => setDate(event.target.value)} className={inputCls} /></div>}
+          <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Production status</label><select value={status} onChange={event => setStatus(event.target.value as SimplifiedProductionStatus)} className={inputCls}>{(canManage ? SIMPLIFIED_STATUS_OPTIONS : SIMPLIFIED_STATUS_OPTIONS.slice(0, 4)).map(option => <option key={option} value={option}>{SIMPLIFIED_STATUS_LABELS[option]}</option>)}</select></div>
+          {canManage ? <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label><input value={assigned} onChange={event => setAssigned(event.target.value)} className={inputCls} /></div> : <p className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-white/55">Staff can update production status only. Schedule date, client and assignment changes require a manager.</p>}
           {(deliverable.helper_names ?? []).length > 0 && <div><p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p><div className="flex flex-wrap gap-1.5">{(deliverable.helper_names ?? []).map(name => <span key={name} className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2.5 py-0.5 text-[11px] text-[#2dd4bf]">{name}</span>)}</div></div>}
         </div>
         <div className="border-t border-white/[0.08] px-5 py-4" style={{ paddingBottom: keyboardInset > 0 ? `calc(1rem + ${keyboardInset}px)` : undefined }}>

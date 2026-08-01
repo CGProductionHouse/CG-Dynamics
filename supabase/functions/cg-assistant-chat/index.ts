@@ -837,13 +837,13 @@ Deno.serve(async (req) => {
 
   const { data: profile } = await sb
     .from('profiles')
-    .select('role')
+    .select('role, is_active')
     .eq('id', user.id)
     .single()
 
   const role = typeof profile?.role === 'string' ? profile.role : 'staff'
 
-  if (!STAFF_ROLES.includes(role)) {
+  if (!STAFF_ROLES.includes(role) || profile?.is_active !== true) {
     return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
   }
 

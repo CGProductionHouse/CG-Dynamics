@@ -32,6 +32,23 @@ export interface ManualPlatformMetric {
   updated_at: string | null
 }
 
+export type ReportManualMetric = Pick<ManualPlatformMetric,
+  | 'month'
+  | 'platform'
+  | 'source_type'
+  | 'views'
+  | 'reach'
+  | 'engagements'
+  | 'accounts_engaged'
+  | 'profile_visits'
+  | 'external_link_taps'
+  | 'followers'
+> & { general_notes?: string | null }
+  & {
+    top_content_notes?: string | null
+    content_type_split_notes?: string | null
+  }
+
 export interface ManualMetricInput {
   id?: string
   client_id: string
@@ -92,6 +109,13 @@ export async function listManualMetricsForClientMonth(clientId: string, month: s
     .eq('month', month)
 
   return { data: (data ?? []) as ManualPlatformMetric[], error }
+}
+
+export async function listClientReportManualMetrics(reportId: string) {
+  const { data, error } = await supabase.rpc('client_published_report_manual_metrics', {
+    p_report_id: reportId,
+  })
+  return { data: (data ?? []) as ReportManualMetric[], error }
 }
 
 // All manual metrics for a client across every month — used by the report

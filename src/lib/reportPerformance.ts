@@ -1,4 +1,4 @@
-import type { ManualPlatformMetric } from './db/manualMetrics'
+import type { ReportManualMetric } from './db/manualMetrics'
 import type { MasterReportData, Platform, PlatformView, ReportStatsPost } from './reportStats'
 import {
   PLATFORM_LABELS,
@@ -147,8 +147,8 @@ export interface ReportPerformance {
 interface BuildInput {
   master: MasterReportData
   previousMaster: MasterReportData | null
-  currentManual: ManualPlatformMetric[]
-  previousManual: ManualPlatformMetric[]
+  currentManual: ReportManualMetric[]
+  previousManual: ReportManualMetric[]
   monthLabel: string
   previousMonthLabel: string | null
 }
@@ -552,7 +552,7 @@ export interface PlatformPerformance {
   followerGrowthSkippedReason: string | null
 }
 
-function manualValueAvailable(manual: ManualPlatformMetric | null, key: ManualMetricKey): boolean {
+function manualValueAvailable(manual: ReportManualMetric | null, key: ManualMetricKey): boolean {
   if (!manual) return false
   // For Meta-synced totals a 0 means "could not fetch" → unavailable.
   if (!isMetaSyncedManualMetric(manual)) return true
@@ -636,7 +636,7 @@ function buildPlatformRecommendations(input: {
 export function buildPlatformPerformance(input: {
   view: PlatformView
   previousView: PlatformView | null
-  previousManual: ManualPlatformMetric | null
+  previousManual: ReportManualMetric | null
   monthLabel: string
   previousMonthLabel: string | null
 }): PlatformPerformance {

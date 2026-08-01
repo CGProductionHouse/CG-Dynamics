@@ -336,6 +336,17 @@ test('rendered exclusions promote the next eligible post and expose admin contro
   assert.match(html, /Review skipped posts/)
 })
 
+test('client-safe exclusion flags use stable evidence identity after report-month filtering', () => {
+  const posts = [
+    { id: 'outside', platform: 'instagram', publish_time: '2026-05-20T00:00:00Z', post_type: 'Photo', caption: 'Outside month', permalink: null, impressions: 900, reach: 300, engagements: 30, excluded: false },
+    { id: 'excluded-in-month', platform: 'instagram', publish_time: '2026-06-10T00:00:00Z', post_type: 'Photo', caption: 'Excluded in month', permalink: null, impressions: 500, reach: 100, engagements: 20, excluded: true },
+    { id: 'eligible-in-month', platform: 'instagram', publish_time: '2026-06-11T00:00:00Z', post_type: 'Photo', caption: 'Eligible in month', permalink: null, impressions: 300, reach: 80, engagements: 10, excluded: false },
+  ]
+  const html = renderReport({ report: { ...baseReport, posts } })
+  assert.match(html, /Eligible in month/)
+  assert.doesNotMatch(html, /Excluded in month/)
+})
+
 test('legacy fallback renders no ungated prior-month percentage', () => {
   const manual = [{ platform: 'instagram', views: 100, reach: 50, engagements: 5, profile_visits: 2, followers: 10, source_type: 'manual', general_notes: null }]
   const previous = [{ ...manual[0], views: 50, reach: 25 }]
@@ -366,8 +377,10 @@ test('real admin and client loaders use report-bound current and previous facts'
     assert.match(source, /loadReportPlatformFacts\(data\.id, currentMonth, previousMonth\)/)
     assert.match(source, /facts=\{facts\}/)
     assert.match(source, /previousFacts=\{previousFacts\}/)
-    assert.match(source, /loadReportContentExclusions\(data\.id\)/)
   }
+  assert.doesNotMatch(CLIENT_DASHBOARD, /loadReportContentExclusions/)
+  assert.match(CLIENT_DASHBOARD, /getClientPublishedReportWithPosts/)
+  assert.match(ADMIN_PREVIEW, /loadReportContentExclusions\(data\.id\)/)
   assert.doesNotMatch(CLIENT_DASHBOARD, /loadReportFactHealth/)
   assert.match(ADMIN_PREVIEW, /loadReportFactHealth\(data\.id\)/)
 })

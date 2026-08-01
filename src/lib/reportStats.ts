@@ -1,6 +1,6 @@
 import type { ImportedMetaPost } from './db/importedMetaPosts'
-import type { ReportPost } from './db/reports'
-import type { ManualPlatformMetric } from './db/manualMetrics'
+import type { ClientReportPost, ReportPost } from './db/reports'
+import type { ReportManualMetric } from './db/manualMetrics'
 
 export type Platform = 'facebook' | 'instagram' | 'tiktok'
 
@@ -64,7 +64,22 @@ export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
   }
 }
 
-export function reportPostToStatsPost(post: ReportPost): ReportStatsPost {
+export function reportPostToStatsPost(post: ReportPost | ClientReportPost): ReportStatsPost {
+  if ('impressions' in post) {
+    return {
+      id: post.id,
+      caption: post.caption,
+      permalink: post.permalink,
+      publish_time: post.publish_time,
+      reach: post.reach,
+      impressions: post.impressions,
+      engagements: post.engagements,
+      post_type: post.post_type,
+      platform: post.platform,
+      imageUrl: null,
+      metaObjectId: post.id,
+    }
+  }
   const raw = (post.raw ?? {}) as {
     impressions?: number | null
     views?: number | null
@@ -215,7 +230,7 @@ export interface PlatformView {
   bestPost: ReportStatsPost | null
   topPosts: ReportStatsPost[]
   // Populated when source === 'manual'
-  manual: ManualPlatformMetric | null
+  manual: ReportManualMetric | null
 }
 
 export interface MasterReportData {
@@ -227,11 +242,11 @@ export interface MasterReportData {
   bestPostOverall: ReportStatsPost | null
 }
 
-export function isMetaSyncedManualMetric(metric: ManualPlatformMetric | null): boolean {
+export function isMetaSyncedManualMetric(metric: ReportManualMetric | null): boolean {
   return metric?.source_type === 'other' && metric.general_notes?.startsWith('Meta sync account totals') === true
 }
 
-function metaMetricAvailable(metric: ManualPlatformMetric | null, key: 'views' | 'reach' | 'engagements' | 'profile_visits' | 'followers'): boolean {
+function metaMetricAvailable(metric: ReportManualMetric | null, key: 'views' | 'reach' | 'engagements' | 'profile_visits' | 'followers'): boolean {
   if (!metric) return false
   if (!isMetaSyncedManualMetric(metric)) return true
   // For Meta synced metrics, 0 means "unavailable" (we couldn't fetch it).
@@ -269,7 +284,7 @@ export interface PerformanceMovement {
 // double counted.
 export function buildMasterReport(
   posts: ReportStatsPost[],
-  manualMetrics: ManualPlatformMetric[],
+  manualMetrics: ReportManualMetric[],
   excludedContentKeys: ReadonlySet<string> = new Set(),
 ): MasterReportData {
   const platforms: PlatformView[] = PLATFORMS.map(platform => {
@@ -363,14 +378,14 @@ export function contentEvidenceKey(post: Pick<ReportStatsPost, 'platform' | 'met
   return `${post.platform ?? 'unknown'}:${post.metaObjectId ?? ''}`
 }
 
-export function totalManualProfileVisits(manualMetrics: ManualPlatformMetric[]): number | null {
+export function totalManualProfileVisits(manualMetrics: ReportManualMetric[]): number | null {
   if (manualMetrics.length === 0) return null
   const available = manualMetrics.filter(metric => metaMetricAvailable(metric, 'profile_visits'))
   if (available.length === 0) return null
   return available.reduce((sum, metric) => sum + metric.profile_visits, 0)
 }
 
-export function totalManualFollowers(manualMetrics: ManualPlatformMetric[]) {
+export function totalManualFollowers(manualMetrics: ReportManualMetric[]) {
   if (manualMetrics.length === 0) return null
   const available = manualMetrics.filter(metric => metaMetricAvailable(metric, 'followers'))
   if (available.length === 0) return null
@@ -418,8 +433,8 @@ export function formatMetric(value: number | null | undefined): string | null {
 export function buildPerformanceMovement(
   current: MasterReportData,
   previous: MasterReportData | null,
-  currentManualMetrics: ManualPlatformMetric[],
-  previousManualMetrics: ManualPlatformMetric[]
+  currentManualMetrics: ReportManualMetric[],
+  previousManualMetrics: ReportManualMetric[]
 ): PerformanceMovement {
   const currentFollowers = totalManualFollowers(currentManualMetrics)
   const previousFollowers = totalManualFollowers(previousManualMetrics)

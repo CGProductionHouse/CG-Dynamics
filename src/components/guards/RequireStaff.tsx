@@ -12,7 +12,7 @@ export function RequireStaff() {
   if (profileError) return <ProfileError message={profileError} />
   // Profile still loading after sign-in
   if (!profile) return <RouteLoading label="Loading your staff profile..." />
-  if (profile.role === 'client') return <Navigate to="/dashboard" replace />
+  if (profile.role === 'client') return <Navigate to="/client" replace />
   if (!isStaffRole(profile.role)) return <AccessDenied />
 
   return <Outlet />

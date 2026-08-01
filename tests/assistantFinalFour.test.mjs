@@ -102,8 +102,10 @@ test('worker meta_sync is idempotent per job (retry resumes the same batch)', ()
   assert.match(worker, /contains\('summary', \{ background_job_id: job\.id \}\)/)
 })
 
-test('worker meta_sync returns truthful outcomes: pending → retry, all-failed → error', () => {
-  assert.match(worker, /still processing[\s\S]*Retrying/)
+test('worker meta_sync defers pending batches without consuming failure attempts', () => {
+  assert.match(worker, /waiting: true/)
+  assert.match(worker, /defer_background_job/)
+  assert.match(worker, /p_locked_by: worker/)
   assert.match(worker, /completed === 0/)
   assert.match(worker, /Meta sync failed for all items/)
   assert.match(worker, /itemsCompleted: completed/)

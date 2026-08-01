@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { ReportWithPosts } from '../../lib/db/reports'
+import type { ClientReportWithPosts, ReportWithPosts } from '../../lib/db/reports'
 import type { Client } from '../../lib/db/clients'
-import type { ManualPlatformMetric } from '../../lib/db/manualMetrics'
+import type { ReportManualMetric } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { readStrategyData } from '../../lib/strategyEngine'
@@ -57,7 +57,9 @@ type TabKey = 'overview' | Platform | 'google_ads'
 
 const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]'
 
-function postsForReportMonth(report: ReportWithPosts): ReportStatsPost[] {
+type RenderableReport = ReportWithPosts | ClientReportWithPosts
+
+function postsForReportMonth(report: RenderableReport): ReportStatsPost[] {
   const { start, end } = normalizeReportToCalendarMonth(report)
   const startTime = new Date(`${start}T00:00:00Z`).getTime()
   const endTime = new Date(`${end}T23:59:59Z`).getTime()
@@ -72,7 +74,7 @@ function postsForReportMonth(report: ReportWithPosts): ReportStatsPost[] {
     .map(reportPostToStatsPost)
 }
 
-function reportClientName(report: ReportWithPosts, client: Client | null): string {
+function reportClientName(report: RenderableReport, client: Client | null): string {
   if (client?.name) return client.name
   const stored = report.report_title?.trim()
   return stored || 'Monthly Performance Report'
@@ -96,11 +98,11 @@ export function ClientReportView({
   onSetContentExcluded,
   curationBusyId = null,
 }: {
-  report: ReportWithPosts
+  report: RenderableReport
   client?: Client | null
-  manualMetrics?: ManualPlatformMetric[]
-  previousReport?: ReportWithPosts | null
-  previousManualMetrics?: ManualPlatformMetric[]
+  manualMetrics?: ReportManualMetric[]
+  previousReport?: RenderableReport | null
+  previousManualMetrics?: ReportManualMetric[]
   googleAds: GoogleAdsDashboardData | null
   previousGoogleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
@@ -130,11 +132,18 @@ export function ClientReportView({
   const verifiedSections = useMemo(() => buildOverviewSections(facts, previousFacts), [facts, previousFacts])
 
   const normalizedFactsActive = normalizedFactsAttempted || facts.length > 0
-  const excludedContentKeys = useMemo(
-    () => new Set(contentExclusions.filter(item => item.excluded).map(item => `${item.platform}:${item.meta_object_id}`)),
-    [contentExclusions],
-  )
   const statsPosts = useMemo<ReportStatsPost[]>(() => postsForReportMonth(report), [report])
+  const excludedContentKeys = useMemo(() => {
+    const keys = contentExclusions
+      .filter(item => item.excluded)
+      .map(item => `${item.platform}:${item.meta_object_id}`)
+    report.posts.forEach(post => {
+      if ('excluded' in post && post.excluded) {
+        keys.push(contentEvidenceKey(reportPostToStatsPost(post)))
+      }
+    })
+    return new Set(keys)
+  }, [contentExclusions, report.posts, statsPosts])
   const master = useMemo(
     () => buildMasterReport(statsPosts, manualMetrics, excludedContentKeys),
     [excludedContentKeys, manualMetrics, statsPosts],
@@ -251,7 +260,7 @@ function ReportHero({
   month,
   master,
 }: {
-  report: ReportWithPosts
+  report: RenderableReport
   client: Client | null
   month: string
   master: MasterReportData
@@ -367,7 +376,7 @@ function OverviewTab({
   onSetContentExcluded,
   curationBusyId,
 }: {
-  report: ReportWithPosts
+  report: RenderableReport
   master: MasterReportData
   performance: ReportPerformance
   showEmptyStrategy: boolean
@@ -1441,7 +1450,7 @@ function StrategyBlocks({
   nextSteps,
   recommendations,
 }: {
-  report: ReportWithPosts
+  report: RenderableReport
   strategy: ReturnType<typeof readStrategyData>
   showEmptyStrategy: boolean
   nextSteps: NextStep[]
@@ -1528,7 +1537,7 @@ function StrategyBlocks({
   )
 }
 
-function buildStrategyCards(report: ReportWithPosts, strategy: ReturnType<typeof readStrategyData>) {
+function buildStrategyCards(report: RenderableReport, strategy: ReturnType<typeof readStrategyData>) {
   const record = strategy as unknown as Record<string, unknown>
 
   const guidedCards = [
@@ -1560,7 +1569,6 @@ function buildStrategyCards(report: ReportWithPosts, strategy: ReturnType<typeof
   ]
 
   const legacyCards = [
-    { label: 'Insight', title: 'Key takeaways', text: report.general_notes },
     { label: 'Performance', title: 'What worked', text: report.performance_comments },
     { label: 'Opportunity', title: 'Opportunities', text: report.previous_month_reflection },
     { label: 'Focus', title: 'Next month focus', text: report.strategy_next_month },
@@ -1635,7 +1643,7 @@ function PlatformTab({
 }: {
   view: PlatformView
   previousView: PlatformView | null
-  previousManual: ManualPlatformMetric | null
+  previousManual: ReportManualMetric | null
   previousMonthLabel: string | null
   monthLabel: string
   facts: PlatformFact[]

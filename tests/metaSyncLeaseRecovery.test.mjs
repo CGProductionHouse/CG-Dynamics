@@ -14,6 +14,14 @@ const worker = readFileSync(
   new URL('../supabase/functions/meta-sync-worker/index.ts', import.meta.url),
   'utf8',
 )
+const sharedMeta = readFileSync(
+  new URL('../supabase/functions/_shared/meta.ts', import.meta.url),
+  'utf8',
+)
+const hardeningMigration = readFileSync(
+  new URL('../supabase/migrations/20260801170000_backend_acceptance_hardening.sql', import.meta.url),
+  'utf8',
+)
 
 test('claim RPC requeues expired worker leases before claiming rows', () => {
   assert.match(migration, /i\.status = 'running'/)
@@ -62,7 +70,45 @@ test('worker restart is guarded against repeated clicks', () => {
 
 test('worker stops claiming within a time budget to avoid stranded running items', () => {
   assert.match(worker, /MAX_WORK_MS = 40_000/)
-  assert.match(worker, /Date\.now\(\) - startedAt > MAX_WORK_MS\) break/)
+  assert.match(worker, /invocationDeadline = startedAt \+ MAX_WORK_MS/)
+  assert.match(worker, /Date\.now\(\) >= invocationDeadline - PAGE_FETCH_RESERVE_MS/)
+  assert.match(worker, /remainingMs < MIN_PAGE_REQUEST_BUDGET_MS \+ PAGE_FETCH_RESERVE_MS/)
+  assert.match(worker, /assertWorkBudget\(invocationDeadline, 'Facebook post upserts'\)/)
+  assert.match(worker, /assertWorkBudget\(invocationDeadline, 'Instagram account facts'\)/)
+})
+
+test('shared account facts stop resumably between probes and cap every retry to remaining time', () => {
+  assert.match(sharedMeta, /export class MetaSyncDeadlineError extends Error/)
+  assert.match(sharedMeta, /readonly resumable = true/)
+  assert.match(sharedMeta, /deadline\?: number/)
+  assert.match(sharedMeta, /shouldCancel\?: \(\) => boolean/)
+  assert.match(sharedMeta, /for \(const spec of specs\) \{[\s\S]*assertMetaSyncActive[\s\S]*probeMetric\([\s\S]*control\)/)
+  assert.match(sharedMeta, /for \(let attempt = 0; attempt <= backoff\.length; attempt\+\+\) \{[\s\S]*assertMetaSyncActive/)
+  assert.match(sharedMeta, /Math\.min\(requestedTimeoutMs, control\.deadline - Date\.now\(\)\)/)
+  assert.match(sharedMeta, /if \(e instanceof MetaSyncDeadlineError\) throw e/)
+})
+
+test('worker passes its safe deadline and requeues the distinct connector deadline', () => {
+  assert.match(worker, /deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS/g)
+  assert.match(worker, /e instanceof MetaSyncDeadlineError[\s\S]*throw new RetryableIncompleteError\(e\.message\)/)
+  assert.match(worker, /e instanceof RetryableIncompleteError && item\.attempts < 3[\s\S]*itemStatus = 'queued'/)
+})
+
+test('worker resumes from safe per-platform cursors and clears them on page completion', () => {
+  assert.match(hardeningMigration, /facebook_next_cursor text/)
+  assert.match(hardeningMigration, /instagram_next_cursor text/)
+  assert.match(hardeningMigration, /length\(facebook_next_cursor\) between 1 and 4096/)
+  assert.match(worker, /requestUrl\.searchParams\.set\('after', nextCursor\)/)
+  assert.match(worker, /savePlatformState\('facebook', complete \? 'facts_pending' : 'pending', cursor, pagePostsSynced\)/)
+  assert.match(worker, /savePlatformState\('instagram', complete \? 'facts_pending' : 'pending', cursor, pagePostsSynced\)/)
+  assert.match(worker, /processPage[\s\S]*checkpoint\(candidateCursor, !nextUrl, pagePostsSynced\)/)
+})
+
+test('posts_synced advances atomically only with a completed page checkpoint', () => {
+  assert.match(worker, /const pagePostsSynced = await processPage[\s\S]*await checkpoint\(candidateCursor, !nextUrl, pagePostsSynced\)/)
+  assert.match(worker, /const checkpointedPostsSynced = postsSynced \+ completedPagePosts[\s\S]*posts_synced: checkpointedPostsSynced/)
+  assert.match(worker, /if \(error\) throw new Error[\s\S]*postsSynced = checkpointedPostsSynced/)
+  assert.doesNotMatch(worker, /postsSynced\+\+/)
 })
 
 test('worker self-triggers while stale running leases remain, even with zero processed', () => {

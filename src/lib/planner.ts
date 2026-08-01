@@ -1180,6 +1180,15 @@ export async function listPlannerTasks(boardId: string) {
   return { data, error: null }
 }
 
+export async function getPlannerTaskBoardId(taskId: string) {
+  const result = await supabase
+    .from(PLANNER_TASKS_TABLE)
+    .select('board_id')
+    .eq('id', taskId)
+    .maybeSingle()
+  return { boardId: typeof result.data?.board_id === 'string' ? result.data.board_id : null, error: result.error }
+}
+
 // Dated, non-archived planner tasks inside a date window — used by the CG
 // Calendar task layer so operational work appears next to events and posts.
 export async function listPlannerTasksDueBetween(startDate: string, endDateExclusive: string) {

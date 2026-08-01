@@ -205,15 +205,15 @@ Deno.serve(async request => {
   const { data: { user }, error: authError } = await service.auth.getUser(token)
   if (authError || !user) return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
 
-  const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).maybeSingle()
+  const { data: profile } = await service.from('profiles').select('role, is_active').eq('id', user.id).maybeSingle()
   const role = typeof profile?.role === 'string' ? profile.role : ''
-  if (!STAFF_ROLES.includes(role)) return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!STAFF_ROLES.includes(role) || profile?.is_active !== true) return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
 
   const contentType = request.headers.get('content-type') ?? ''
-  let action = ''
+  let action: string
   let transcript = ''
-  let eventId = ''
-  let clientId = ''
+  let eventId: string
+  let clientId: string
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}
 

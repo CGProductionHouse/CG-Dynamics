@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
-import { listPublishedReportsForClient, type Report } from '../../lib/db/reports'
+import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import {
   loadGoogleAdsDashboard,
   type GoogleAdsDashboardData,
@@ -13,7 +13,7 @@ import { readStrategyData } from '../../lib/strategyEngine'
 
 type CampaignPageData = {
   client: Client | null
-  report: Report | null
+  report: ClientReport | null
   dashboard: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
 }
@@ -45,7 +45,7 @@ export default function ClientCampaignsPage() {
       try {
         const [clientResult, reportsResult] = await Promise.all([
           getClient(profile.client_id),
-          listPublishedReportsForClient(profile.client_id),
+          listClientPublishedReports(),
         ])
         if (!active) return
         if (clientResult.error || reportsResult.error) throw new Error('Campaign data unavailable')
@@ -180,7 +180,7 @@ function GoogleAdsEmptyState({ state }: { state: GoogleAdsDashboardState }) {
   )
 }
 
-function CampaignStrategyDirection({ report }: { report: Report | null }) {
+function CampaignStrategyDirection({ report }: { report: ClientReport | null }) {
   const strategy = useMemo(() => readStrategyData(report?.strategy_data), [report])
   const hasContent = strategy.strategyGoingForward || strategy.clientDirection.length > 0 || strategy.actionPlan.campaign_recommendation.enabled
   if (!hasContent) return null

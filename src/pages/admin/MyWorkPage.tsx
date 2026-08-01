@@ -251,6 +251,10 @@ export default function MyWorkPage() {
       const assignee = searchParams.get('assignee')
       if (scope === 'overdue' || scope === 'blocked' || (scope === 'unassigned' && canViewWorkload)) next.set('scope', scope)
       if (assignee) next.set('assignee', assignee)
+      const taskId = searchParams.get('id')
+      const taskName = searchParams.get('task')
+      if (taskId) next.set('id', taskId)
+      if (taskName) next.set('task', taskName)
     }
     if (nextTab === 'workload' && searchParams.get('person')) next.set('person', searchParams.get('person') ?? '')
     setSearchParams(next)

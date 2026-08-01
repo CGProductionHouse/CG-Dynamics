@@ -230,7 +230,14 @@ export function monthFullyCoveredByRange(month: string, range: { start: string; 
 // month is a completed calendar month, deduped to one report per month. When a
 // month has duplicates, the latest updated (then master, then newest) wins.
 export function selectMonthlyReports<
-  T extends { period_start: string; period_end: string; platform?: unknown; updated_at?: string | null; created_at: string }
+  T extends {
+    period_start: string
+    period_end: string
+    platform?: unknown
+    updated_at?: string | null
+    created_at?: string | null
+    published_at?: string | null
+  }
 >(reports: T[]): T[] {
   const byMonth = new Map<string, T>()
   for (const report of reports) {
@@ -251,14 +258,14 @@ export function selectMonthlyReports<
 // Pick the better of two same-month reports: latest updated wins; ties break to
 // the master report (platform === null), then to the most recently created.
 function preferReport(
-  candidate: { platform?: unknown; updated_at?: string | null; created_at: string },
-  current: { platform?: unknown; updated_at?: string | null; created_at: string }
+  candidate: { platform?: unknown; updated_at?: string | null; created_at?: string | null; published_at?: string | null },
+  current: { platform?: unknown; updated_at?: string | null; created_at?: string | null; published_at?: string | null }
 ): boolean {
-  const candidateUpdated = candidate.updated_at ?? candidate.created_at
-  const currentUpdated = current.updated_at ?? current.created_at
+  const candidateUpdated = candidate.updated_at ?? candidate.published_at ?? candidate.created_at ?? ''
+  const currentUpdated = current.updated_at ?? current.published_at ?? current.created_at ?? ''
   if (candidateUpdated !== currentUpdated) return candidateUpdated > currentUpdated
   const candidateMaster = candidate.platform === null || candidate.platform === undefined
   const currentMaster = current.platform === null || current.platform === undefined
   if (candidateMaster !== currentMaster) return candidateMaster
-  return candidate.created_at > current.created_at
+  return (candidate.created_at ?? candidate.published_at ?? '') > (current.created_at ?? current.published_at ?? '')
 }

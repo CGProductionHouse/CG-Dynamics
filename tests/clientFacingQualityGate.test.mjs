@@ -16,6 +16,7 @@ const REPORT_VIEW = read('../src/pages/client/ClientReportView.tsx')
 const HOME = read('../src/pages/client/ClientPortalHome.tsx')
 const PERFORMANCE = read('../src/pages/client/Dashboard.tsx')
 const REPORTS_DB = read('../src/lib/db/reports.ts')
+const REPORT_PROJECTION_SQL = read('../supabase/migrations/20260801190000_client_report_safe_projection.sql')
 const CALENDAR_LIB = read('../src/lib/clientPortalCalendar.ts')
 const CAMPAIGNS_DB_LOADER = read('../src/lib/googleAdsDashboard.ts')
 const CALENDAR_RPC = read('../supabase/phase-11a-client-portal-read-access.sql')
@@ -46,8 +47,11 @@ test('client pages load only via the signed-in profile.client_id, never a URL pa
   }
 })
 
-test('client report queries are filtered to published + own client', () => {
-  assert.match(REPORTS_DB, /\.eq\('client_id', clientId\)[\s\S]*\.eq\('status', 'published'\)/)
+test('client report queries use active-role, published own-client projections', () => {
+  assert.match(REPORTS_DB, /supabase\.rpc\('client_published_reports'\)/)
+  assert.match(REPORTS_DB, /rpc\('client_published_report_posts'/)
+  assert.match(REPORT_PROJECTION_SQL, /profile\.is_active[\s\S]*profile\.role = 'client'/)
+  assert.match(REPORT_PROJECTION_SQL, /r\.status = 'published'[\s\S]*r\.client_id = public\.my_client_id\(\)/)
 })
 
 // ── 2. Published-only, no draft/strategy leakage ─────────────────────────────

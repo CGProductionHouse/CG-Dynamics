@@ -2,6 +2,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   META_CONNECTOR_VERSION,
+  MetaSyncDeadlineError,
   metaPostBounds,
   metaFetch,
   readMetaError,
@@ -14,7 +15,13 @@ import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
 // normalized facts + provenance, shared retry/backoff and token handling.
-const BATCH_SIZE = 5
+const BATCH_SIZE = 1
+const META_COLLECTION_PAGE_CAP = 25
+const MAX_WORK_MS = 40_000
+const PAGE_FETCH_RESERVE_MS = 8_000
+const MIN_PAGE_REQUEST_BUDGET_MS = 4_000
+
+class RetryableIncompleteError extends Error {}
 
 function monthBounds(month: string): { periodStart: string; periodEnd: string } {
   const year = Number(month.slice(0, 4))
@@ -52,6 +59,93 @@ async function parseMetaError(
   return redact(`${context} failed (HTTP ${res.status}): ${detail}`, tokens)
 }
 
+interface MetaCollectionResult {
+  pagesFetched: number
+  complete: boolean
+  error: string | null
+  retryable: boolean
+}
+
+type MetaSyncState = 'pending' | 'facts_pending' | 'complete' | 'failed' | 'not_applicable'
+const TERMINAL_META_STATES = new Set<MetaSyncState>(['complete', 'failed', 'not_applicable'])
+
+function assertWorkBudget(deadline: number, context: string): void {
+  if (Date.now() >= deadline - PAGE_FETCH_RESERVE_MS) {
+    throw new RetryableIncompleteError(`${context} paused to preserve the worker lease budget.`)
+  }
+}
+
+function safePagingCursor(value: unknown): string | null {
+  if (typeof value !== 'string' || value.length < 1 || value.length > 4096) return null
+  for (const character of value) {
+    const codePoint = character.codePointAt(0) ?? 0
+    if (codePoint <= 31 || codePoint === 127) return null
+  }
+  return value
+}
+
+async function fetchMetaCollection(
+  initialUrl: string,
+  resumeCursor: string | null,
+  context: string,
+  tokens: Array<string | null | undefined>,
+  deadline: number,
+  processPage: (items: Array<Record<string, unknown>>) => Promise<number>,
+  checkpoint: (nextCursor: string | null, complete: boolean, pagePostsSynced: number) => Promise<void>,
+): Promise<MetaCollectionResult> {
+  const expectedOrigin = new URL(initialUrl).origin
+  let nextCursor = resumeCursor
+  let pagesFetched = 0
+
+  while (pagesFetched < META_COLLECTION_PAGE_CAP) {
+    const remainingMs = deadline - Date.now()
+    if (remainingMs < MIN_PAGE_REQUEST_BUDGET_MS + PAGE_FETCH_RESERVE_MS) {
+      return {
+        pagesFetched,
+        complete: false,
+        error: `${context} paused before page ${pagesFetched + 1} to preserve the worker lease budget.`,
+        retryable: true,
+      }
+    }
+    // metaFetch can make three bounded attempts. Keep each attempt short enough
+    // that retries plus backoff cannot consume the rest of this invocation.
+    const requestTimeoutMs = Math.max(1_000, Math.min(3_000, Math.floor((remainingMs - PAGE_FETCH_RESERVE_MS) / 3)))
+    const requestUrl = new URL(initialUrl)
+    if (nextCursor) requestUrl.searchParams.set('after', nextCursor)
+    const res = await metaFetch(requestUrl.toString(), requestTimeoutMs)
+    pagesFetched++
+    if (!res.ok) {
+      return { pagesFetched, complete: false, error: await parseMetaError(res, `${context} page ${pagesFetched}`, tokens), retryable: false }
+    }
+    const page = await res.json()
+    const nextUrl = typeof page.paging?.next === 'string' ? page.paging.next : null
+    if (nextUrl) {
+      try {
+        if (new URL(nextUrl).origin !== expectedOrigin) {
+          return { pagesFetched, complete: false, error: `${context} returned an invalid paging URL.`, retryable: false }
+        }
+      } catch {
+        return { pagesFetched, complete: false, error: `${context} returned an invalid paging URL.`, retryable: false }
+      }
+    }
+    const candidateCursor = nextUrl ? safePagingCursor(page.paging?.cursors?.after) : null
+    if (nextUrl && !candidateCursor) {
+      return { pagesFetched, complete: false, error: `${context} returned an unsafe or missing paging cursor.`, retryable: false }
+    }
+    const pagePostsSynced = await processPage((page.data as Array<Record<string, unknown>> | undefined) ?? [])
+    await checkpoint(candidateCursor, !nextUrl, pagePostsSynced)
+    if (!nextUrl) return { pagesFetched, complete: true, error: null, retryable: false }
+    nextCursor = candidateCursor
+  }
+
+  return {
+    pagesFetched,
+    complete: false,
+    error: `${context} reached the ${META_COLLECTION_PAGE_CAP}-page invocation cap and will resume from its saved cursor.`,
+    retryable: true,
+  }
+}
+
 /* ---------- Auth ---------- */
 
 async function authorizeWorker(
@@ -73,10 +167,10 @@ async function authorizeWorker(
     if (!authError && user) {
       const { data: profile } = await sb
         .from('profiles')
-        .select('role')
+        .select('role, is_active')
         .eq('id', user.id)
         .single()
-      if (profile && ['admin', 'team'].includes(profile.role)) {
+      if (profile?.is_active === true && ['admin', 'manager'].includes(profile.role)) {
         return { ok: true }
       }
     }
@@ -88,6 +182,8 @@ async function authorizeWorker(
 /* ---------- Main handler ---------- */
 
 Deno.serve(async (req) => {
+  const startedAt = Date.now()
+  const invocationDeadline = startedAt + MAX_WORK_MS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -149,12 +245,19 @@ Deno.serve(async (req) => {
   // ── Fetch page token map once per invocation ──────────────
   const pageTokenMap = new Map<string, string>()
   let pageTokenRateLimited = false
+  let pageTokenBudgetExhausted = false
   {
     let url: string | null = `${baseUrl}/me/accounts?fields=id,access_token&limit=100&access_token=${encodeURIComponent(accessToken)}`
     let guard = 0
     while (url && guard < 10 && !pageTokenRateLimited) {
+      const remainingMs = invocationDeadline - Date.now()
+      if (remainingMs < MIN_PAGE_REQUEST_BUDGET_MS + PAGE_FETCH_RESERVE_MS) {
+        pageTokenBudgetExhausted = true
+        break
+      }
       guard++
-      const res = await metaFetch(url, 30_000)
+      const requestTimeoutMs = Math.max(1_000, Math.min(3_000, Math.floor((remainingMs - PAGE_FETCH_RESERVE_MS) / 3)))
+      const res = await metaFetch(url, requestTimeoutMs)
       if (!res.ok) {
         const errBody = await res.json().catch(() => null)
         if (errBody?.error && (errBody.error.code === 4 || errBody.error.error_subcode === 2069032)) {
@@ -176,15 +279,14 @@ Deno.serve(async (req) => {
   // never kill the invocation mid-chunk and strand claimed items as "running".
   // If we run out of budget we stop claiming and let the self-trigger below
   // pick up the next chunk (leases make this safe under concurrency).
-  const MAX_WORK_MS = 40_000
-  const startedAt = Date.now()
   const processed: Array<{ itemId: string; clientName: string; month: string; status: string; postsSynced: number; error?: string }> = []
   const batchIds = new Set<string>()
   let claimCount = 0
   let claimFailed = false
+  let budgetDeferred = false
 
   while (claimCount < MAX_CHUNKS) {
-    if (Date.now() - startedAt > MAX_WORK_MS) break
+    if (Date.now() >= invocationDeadline - PAGE_FETCH_RESERVE_MS || pageTokenBudgetExhausted) break
     const { data: items, error: claimError } = await sb.rpc('claim_sync_batch_items', {
       p_limit: body.maxItems ?? BATCH_SIZE,
       p_batch_id: body.batchId ?? null,
@@ -216,10 +318,13 @@ Deno.serve(async (req) => {
 
       const { periodStart, periodEnd } = monthBounds(item.month)
       const postBounds = metaPostBounds(periodStart, periodEnd)
-      let postsSynced = 0
-      let reportsCreated = 0
-      let reportsReused = 0
-      const warnings: string[] = []
+      let postsSynced = Number(item.posts_synced ?? 0)
+      let reportsCreated = Number(item.reports_created ?? 0)
+      let reportsReused = Number(item.reports_reused ?? 0)
+      const warnings: string[] = Array.isArray(item.warnings)
+        ? item.warnings.filter((warning: unknown): warning is string => typeof warning === 'string')
+        : []
+      const providerPaging: Record<string, { pagesFetched: number; complete: boolean; pageCap: number }> = {}
       let itemError: string | null = null
       let itemStatus = 'completed'
 
@@ -280,29 +385,78 @@ Deno.serve(async (req) => {
         const instagramAccountId = (asset?.instagram_not_applicable === true) ? null : (asset?.instagram_account_id ?? null)
 
         const now = new Date().toISOString()
+        let facebookState = (item.facebook_sync_state ?? 'pending') as MetaSyncState
+        let instagramState = (item.instagram_sync_state ?? 'pending') as MetaSyncState
+        let facebookCursor = (item.facebook_next_cursor as string | null | undefined) ?? null
+        let instagramCursor = (item.instagram_next_cursor as string | null | undefined) ?? null
 
-      // ── Sync Facebook posts ──
-      if (facebookPageId && reportId) {
-          if (pageTokenRateLimited) {
-            warnings.push('Facebook sync skipped: Meta API rate limit reached (will retry on next sync cycle).')
+        const savePlatformState = async (
+          platform: 'facebook' | 'instagram',
+          state: MetaSyncState,
+          cursor: string | null,
+          completedPagePosts = 0,
+        ): Promise<void> => {
+          const checkpointedPostsSynced = postsSynced + completedPagePosts
+          const { error } = await sb.from('meta_sync_batch_items').update({
+            [`${platform}_sync_state`]: state,
+            [`${platform}_next_cursor`]: cursor,
+            posts_synced: checkpointedPostsSynced,
+          }).eq('id', item.id).eq('status', 'running')
+          if (error) throw new Error(`Could not checkpoint ${platform} sync: ${error.message}`)
+          postsSynced = checkpointedPostsSynced
+          if (platform === 'facebook') {
+            facebookState = state
+            facebookCursor = cursor
           } else {
-            const pageToken = pageTokenMap.get(facebookPageId)
-            if (!pageToken) {
-              warnings.push('Facebook page token unavailable for linked page. Relink Meta or verify page access.')
-            } else {
-              try {
-                const params = new URLSearchParams({
-                  access_token: pageToken,
-                  fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
-                  since: postBounds.since,
-                  until: postBounds.until,
-                  limit: '100',
-                })
-                const res = await metaFetch(`${baseUrl}/${facebookPageId}/posts?${params.toString()}`, 30_000)
-                if (res.ok) {
-                  const fbData = await res.json()
-                  const rawPosts: Array<Record<string, unknown>> = fbData.data ?? []
+            instagramState = state
+            instagramCursor = cursor
+          }
+        }
+
+        if (!reportId) {
+          await savePlatformState('facebook', 'failed', null)
+          await savePlatformState('instagram', 'failed', null)
+        }
+
+        // Page checkpoints happen only after every post on that page has been
+        // idempotently upserted. If budget expires mid-loop, the page repeats.
+        if (!facebookPageId && !TERMINAL_META_STATES.has(facebookState)) {
+          await savePlatformState('facebook', 'not_applicable', null)
+        } else if (facebookPageId && reportId && facebookState === 'pending') {
+          if (pageTokenRateLimited) {
+            const message = 'Facebook sync paused because Meta rate-limited the Page token request.'
+            if (item.attempts < 3) throw new RetryableIncompleteError(message)
+            warnings.push(message)
+            itemStatus = 'failed'
+            itemError = message
+            await savePlatformState('facebook', 'failed', null)
+          }
+          const pageToken = pageTokenMap.get(facebookPageId)
+          if (facebookState === 'pending' && !pageToken) {
+            const message = 'Facebook page token unavailable for linked page. Relink Meta or verify page access.'
+            warnings.push(message)
+            itemStatus = 'failed'
+            itemError = message
+            await savePlatformState('facebook', 'failed', null)
+          } else if (facebookState === 'pending' && pageToken) {
+            try {
+              const params = new URLSearchParams({
+                access_token: pageToken,
+                fields: 'id,message,created_time,permalink_url,full_picture,shares,reactions.summary(true),comments.summary(true)',
+                since: postBounds.since,
+                until: postBounds.until,
+                limit: '100',
+              })
+              const fbCollection = await fetchMetaCollection(
+                `${baseUrl}/${facebookPageId}/posts?${params.toString()}`,
+                facebookCursor,
+                'Facebook posts fetch',
+                [accessToken, ...pageTokenMap.values()],
+                invocationDeadline,
+                async rawPosts => {
+                  let pagePostsSynced = 0
                   for (const raw of rawPosts) {
+                    assertWorkBudget(invocationDeadline, 'Facebook post upserts')
                     const metaPostId = String(raw.id ?? '')
                     if (!metaPostId) continue
                     const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
@@ -312,56 +466,51 @@ Deno.serve(async (req) => {
                     const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
                     const shares = (raw.shares as { count?: number })?.count ?? 0
                     const fullPicture = raw.full_picture as string | null ?? null
-
-                    const postPayload: Record<string, unknown> = {
-                      report_id: reportId,
-                      platform: 'facebook',
-                      meta_post_id: metaPostId,
-                      publish_time: publishTime,
-                      caption,
-                      permalink,
-                      views: null,
-                      reach: null,
-                      reactions,
-                      comments,
-                      shares,
-                      raw: {
-                        source: 'meta_sync',
-                        platform: 'facebook',
-                        synced_at: now,
-                        views: null,
-                        reach: null,
-                        engagements: { reactions, comments, shares },
-                        metric_availability: {
-                          views: false,
-                          reach: false,
-                          content_interactions: true,
-                          source: 'direct_fields',
-                        },
-                        meta_payload: raw,
-                        ...(fullPicture ? { full_picture: fullPicture } : {}),
-                      },
-                    }
-
                     await upsertMetaReportPost(sb, {
                       clientId: item.client_id,
                       metaObjectId: metaPostId,
-                      payload: postPayload as Parameters<typeof upsertMetaReportPost>[1]['payload'],
+                      payload: {
+                        report_id: reportId, platform: 'facebook', meta_post_id: metaPostId,
+                        publish_time: publishTime, caption, permalink, views: null, reach: null,
+                        reactions, comments, shares,
+                        raw: {
+                          source: 'meta_sync', platform: 'facebook', synced_at: now,
+                          views: null, reach: null, engagements: { reactions, comments, shares },
+                          metric_availability: { views: false, reach: false, content_interactions: true, source: 'direct_fields' },
+                          meta_payload: raw, ...(fullPicture ? { full_picture: fullPicture } : {}),
+                        },
+                      },
                     })
-                    postsSynced++
+                    pagePostsSynced++
                   }
-                } else {
-                  warnings.push(await parseMetaError(res, 'Facebook posts fetch', [accessToken, ...pageTokenMap.values()]))
-                }
-              } catch (e) {
-                warnings.push(redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()]))
+                  return pagePostsSynced
+                },
+                async (cursor, complete, pagePostsSynced) => savePlatformState('facebook', complete ? 'facts_pending' : 'pending', cursor, pagePostsSynced),
+              )
+              providerPaging.facebook = { pagesFetched: fbCollection.pagesFetched, complete: fbCollection.complete, pageCap: META_COLLECTION_PAGE_CAP }
+              if (!fbCollection.complete) {
+                const message = fbCollection.error ?? 'Facebook posts result was incomplete.'
+                warnings.push(message)
+                if (fbCollection.retryable) throw new RetryableIncompleteError(message)
+                itemStatus = 'failed'
+                itemError = message
+                await savePlatformState('facebook', 'failed', null)
               }
+            } catch (e) {
+              if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
+              const message = redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
+              providerPaging.facebook = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
+              warnings.push(message)
+              itemStatus = 'failed'
+              itemError = message
+              await savePlatformState('facebook', 'failed', null)
             }
           }
         }
 
-      // ── Sync Instagram media ──
-      if (instagramAccountId && reportId) {
+        if (!instagramAccountId && !TERMINAL_META_STATES.has(instagramState)) {
+          await savePlatformState('instagram', 'not_applicable', null)
+        } else if (instagramAccountId && reportId && instagramState === 'pending') {
           const pageToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
           try {
             const params = new URLSearchParams({
@@ -369,132 +518,143 @@ Deno.serve(async (req) => {
               fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
               limit: '100',
             })
-            const res = await metaFetch(`${baseUrl}/${instagramAccountId}/media?${params.toString()}`, 30_000)
-            if (res.ok) {
-              const igData = await res.json()
-              const rawMedia: Array<Record<string, unknown>> = igData.data ?? []
-              for (const raw of rawMedia) {
-                const metaPostId = String(raw.id ?? '')
-                if (!metaPostId) continue
-                const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
-                if (!timestamp) continue
-                const ts = new Date(timestamp)
-                const pStart = new Date(Number(postBounds.since) * 1000)
-                const pEnd = new Date(Number(postBounds.until) * 1000)
-                if (ts < pStart || ts >= pEnd) continue
-
-                const likes = (raw.like_count as number) ?? 0
-                const igComments = (raw.comments_count as number) ?? 0
-                const mediaType = (raw.media_type as string) ?? ''
-                const mediaProductType = raw.media_product_type as string | undefined
-                let postType = mediaType
-                if (mediaProductType === 'REELS') postType = 'Reel'
-                else if (mediaType === 'CAROUSEL_ALBUM') postType = 'Carousel'
-                else if (mediaType === 'VIDEO') postType = 'Video'
-                else if (mediaType === 'IMAGE') postType = 'Photo'
-
-                const postPayload: Record<string, unknown> = {
-                  report_id: reportId,
-                  platform: 'instagram',
-                  meta_post_id: metaPostId,
-                  publish_time: timestamp,
-                  caption: (raw.caption as string | null) ?? null,
-                  permalink: (raw.permalink as string | null) ?? null,
-                  views: null,
-                  reach: null,
-                  reactions: likes,
-                  comments: igComments,
-                  shares: 0,
-                  raw: {
-                    source: 'meta_sync',
-                    platform: 'instagram',
-                    synced_at: now,
-                    content_type: postType,
-                    views: null,
-                    reach: null,
-                    engagements: { likes: likes, comments: igComments },
-                    metric_availability: {
-                      views: false,
-                      reach: false,
-                      content_interactions: true,
-                      source: 'media_fields',
+            const igCollection = await fetchMetaCollection(
+              `${baseUrl}/${instagramAccountId}/media?${params.toString()}`,
+              instagramCursor,
+              'Instagram media fetch',
+              [accessToken, ...pageTokenMap.values()],
+              invocationDeadline,
+              async rawMedia => {
+                let pagePostsSynced = 0
+                for (const raw of rawMedia) {
+                  assertWorkBudget(invocationDeadline, 'Instagram post upserts')
+                  const metaPostId = String(raw.id ?? '')
+                  if (!metaPostId) continue
+                  const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
+                  if (!timestamp) continue
+                  const ts = new Date(timestamp)
+                  const pStart = new Date(Number(postBounds.since) * 1000)
+                  const pEnd = new Date(Number(postBounds.until) * 1000)
+                  if (ts < pStart || ts >= pEnd) continue
+                  const likes = (raw.like_count as number) ?? 0
+                  const igComments = (raw.comments_count as number) ?? 0
+                  const mediaType = (raw.media_type as string) ?? ''
+                  const mediaProductType = raw.media_product_type as string | undefined
+                  let postType = mediaType
+                  if (mediaProductType === 'REELS') postType = 'Reel'
+                  else if (mediaType === 'CAROUSEL_ALBUM') postType = 'Carousel'
+                  else if (mediaType === 'VIDEO') postType = 'Video'
+                  else if (mediaType === 'IMAGE') postType = 'Photo'
+                  await upsertMetaReportPost(sb, {
+                    clientId: item.client_id,
+                    metaObjectId: metaPostId,
+                    metaObjectType: postType,
+                    payload: {
+                      report_id: reportId, platform: 'instagram', meta_post_id: metaPostId,
+                      publish_time: timestamp, caption: (raw.caption as string | null) ?? null,
+                      permalink: (raw.permalink as string | null) ?? null, views: null, reach: null,
+                      reactions: likes, comments: igComments, shares: 0,
+                      raw: {
+                        source: 'meta_sync', platform: 'instagram', synced_at: now,
+                        content_type: postType, views: null, reach: null,
+                        engagements: { likes, comments: igComments },
+                        metric_availability: { views: false, reach: false, content_interactions: true, source: 'media_fields' },
+                        meta_payload: raw,
+                        ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}),
+                        ...(raw.media_url ? { media_url: raw.media_url as string } : {}),
+                      },
                     },
-                    meta_payload: raw,
-                    ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}),
-                    ...(raw.media_url ? { media_url: raw.media_url as string } : {}),
-                  },
+                  })
+                  pagePostsSynced++
                 }
-
-                await upsertMetaReportPost(sb, {
-                  clientId: item.client_id,
-                  metaObjectId: metaPostId,
-                  metaObjectType: postType,
-                  payload: postPayload as Parameters<typeof upsertMetaReportPost>[1]['payload'],
-                })
-                postsSynced++
-              }
-            } else {
-              warnings.push(await parseMetaError(res, 'Instagram media fetch', [accessToken, ...pageTokenMap.values()]))
+                return pagePostsSynced
+              },
+              async (cursor, complete, pagePostsSynced) => savePlatformState('instagram', complete ? 'facts_pending' : 'pending', cursor, pagePostsSynced),
+            )
+            providerPaging.instagram = { pagesFetched: igCollection.pagesFetched, complete: igCollection.complete, pageCap: META_COLLECTION_PAGE_CAP }
+            if (!igCollection.complete) {
+              const message = igCollection.error ?? 'Instagram media result was incomplete.'
+              warnings.push(message)
+              if (igCollection.retryable) throw new RetryableIncompleteError(message)
+              itemStatus = 'failed'
+              itemError = message
+              await savePlatformState('instagram', 'failed', null)
             }
           } catch (e) {
-            warnings.push(redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()]))
+            if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
+            const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
+            providerPaging.instagram = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
+            warnings.push(message)
+            itemStatus = 'failed'
+            itemError = message
+            await savePlatformState('instagram', 'failed', null)
           }
         }
 
-        // ── Account-level truth via the shared connector (normalized facts) ──
-        // Identical engine to the manual sync: per-metric availability states,
-        // provenance snapshots, preserve-verified-on-failure. Missing/unavailable
-        // account metrics are never stored as zero.
-        let accountFactsFailed = false
-        if (!pageTokenRateLimited && (facebookPageId || instagramAccountId)) {
-          const allTokens = [accessToken, ...pageTokenMap.values()]
-          if (facebookPageId) {
-            const fbPageToken = pageTokenMap.get(facebookPageId)
-            if (fbPageToken) {
-              try {
-                await syncAccountFacts(sb, {
-                  clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
-                  platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
-                  baseUrl, apiVersion: graphVersion,
-                  periodMonth: item.month, periodStart, periodEnd,
-                  tokens: allTokens, tokenClass: 'page', reconstructInteractions: null,
-                  runType: 'scheduled',
-                })
-              } catch (e) {
-                accountFactsFailed = true
-                warnings.push(redact(`Facebook account facts error: ${String(e)}`, allTokens))
-              }
-            } else {
-              accountFactsFailed = true
-              warnings.push('Facebook account facts failed: Page access token unavailable.')
-            }
-          }
-          if (instagramAccountId) {
-            const igToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
+        // Account facts are separately resumable after post pagination. Check
+        // budget before each sequential stage so the lease has time to requeue.
+        const allTokens = [accessToken, ...pageTokenMap.values()]
+        if (facebookState === 'facts_pending' && facebookPageId) {
+          const fbPageToken = pageTokenMap.get(facebookPageId)
+          if (!fbPageToken) {
+            warnings.push('Facebook account facts failed: Page access token unavailable.')
+            itemStatus = 'failed'
+            itemError = 'Normalized Facebook account facts failed. Post content was preserved, but reporting truth is incomplete.'
+            await savePlatformState('facebook', 'failed', null)
+          } else {
             try {
+              assertWorkBudget(invocationDeadline, 'Facebook account facts')
               await syncAccountFacts(sb, {
                 clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
-                platform: 'instagram', objectId: instagramAccountId, token: igToken,
-                baseUrl, apiVersion: graphVersion,
-                periodMonth: item.month, periodStart, periodEnd,
-                tokens: allTokens,
-                tokenClass: facebookPageId && pageTokenMap.get(facebookPageId) ? 'page' : 'user',
-                reconstructInteractions: null,
-                runType: 'scheduled',
+                platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
+                baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
+                tokens: allTokens, tokenClass: 'page', reconstructInteractions: null, runType: 'scheduled',
+                deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
               })
+              await savePlatformState('facebook', 'complete', null)
             } catch (e) {
-              accountFactsFailed = true
-              warnings.push(redact(`Instagram account facts error: ${String(e)}`, allTokens))
+              if (e instanceof MetaSyncDeadlineError) {
+                throw new RetryableIncompleteError(e.message)
+              }
+              if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
+              warnings.push(redact(`Facebook account facts error: ${String(e)}`, allTokens))
+              itemStatus = 'failed'
+              itemError = 'Normalized Facebook account facts failed. Post content was preserved, but reporting truth is incomplete.'
+              await savePlatformState('facebook', 'failed', null)
             }
           }
         }
-        if (pageTokenRateLimited && (facebookPageId || instagramAccountId)) {
-          accountFactsFailed = true
-          warnings.push('Normalized account facts failed because Meta rate-limited the Page token request.')
+        if (instagramState === 'facts_pending' && instagramAccountId) {
+          const igToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
+          try {
+            assertWorkBudget(invocationDeadline, 'Instagram account facts')
+            await syncAccountFacts(sb, {
+              clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
+              platform: 'instagram', objectId: instagramAccountId, token: igToken,
+              baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
+              tokens: allTokens, tokenClass: facebookPageId && pageTokenMap.get(facebookPageId) ? 'page' : 'user',
+              reconstructInteractions: null, runType: 'scheduled',
+              deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
+            })
+            await savePlatformState('instagram', 'complete', null)
+          } catch (e) {
+            if (e instanceof MetaSyncDeadlineError) {
+              throw new RetryableIncompleteError(e.message)
+            }
+            if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
+            warnings.push(redact(`Instagram account facts error: ${String(e)}`, allTokens))
+            itemStatus = 'failed'
+            itemError = 'Normalized Instagram account facts failed. Post content was preserved, but reporting truth is incomplete.'
+            await savePlatformState('instagram', 'failed', null)
+          }
         }
-        if (accountFactsFailed) {
+
+        if (!TERMINAL_META_STATES.has(facebookState) || !TERMINAL_META_STATES.has(instagramState)) {
+          throw new RetryableIncompleteError('Meta platform stages are incomplete and will resume from their saved checkpoints.')
+        }
+        if (facebookState === 'failed' || instagramState === 'failed') {
           itemStatus = 'failed'
-          itemError = 'Normalized account facts failed. Post content was preserved, but reporting truth is incomplete.'
+          itemError ??= 'One or more Meta platform stages failed. Completed platform data was preserved.'
         }
 
         if (postsSynced === 0 && warnings.length > 0) {
@@ -513,7 +673,7 @@ Deno.serve(async (req) => {
             period_start: periodStart,
             period_end: periodEnd,
             status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
-            summary: { postsSynced, warnings, reportsCreated, reportsReused, worker: META_CONNECTOR_VERSION },
+            summary: { postsSynced, warnings, reportsCreated, reportsReused, providerPaging, worker: META_CONNECTOR_VERSION },
             started_at: now,
             finished_at: now,
           })
@@ -525,8 +685,17 @@ Deno.serve(async (req) => {
         }
 
       } catch (e) {
-        itemStatus = 'failed'
-        itemError = redact(String(e), [accessToken, ...pageTokenMap.values()])
+        const message = redact(String(e), [accessToken, ...pageTokenMap.values()])
+        if (e instanceof RetryableIncompleteError && item.attempts < 3) {
+          itemStatus = 'queued'
+          itemError = message
+          budgetDeferred = true
+        } else {
+          itemStatus = 'failed'
+          itemError = e instanceof RetryableIncompleteError
+            ? `${message} Incomplete pagination exhausted 3 bounded attempts.`
+            : message
+        }
       }
 
       const updatePayload: Record<string, unknown> = {
@@ -534,8 +703,9 @@ Deno.serve(async (req) => {
         posts_synced: postsSynced,
         reports_created: reportsCreated,
         reports_reused: reportsReused,
-        finished_at: new Date().toISOString(),
+        finished_at: itemStatus === 'queued' ? null : new Date().toISOString(),
       }
+      if (itemStatus === 'queued') updatePayload.started_at = null
       if (warnings.length > 0) updatePayload.warnings = warnings
       if (itemError) updatePayload.error = String(itemError).slice(0, 1000)
       await sb.from('meta_sync_batch_items').update(updatePayload).eq('id', item.id)
@@ -559,6 +729,7 @@ Deno.serve(async (req) => {
         error: itemError ?? undefined,
       })
     }
+    if (budgetDeferred) break
   }
 
   // ── Recalculate parent batch statuses ──────────────────────

@@ -19,6 +19,8 @@ const CTX = {
   role: 'team',
   currentClientId: null,
   currentClientName: null,
+  currentTaskId: 'task-1',
+  currentTaskName: 'Prepare Dulux artwork',
 }
 
 before(async () => {
@@ -93,16 +95,21 @@ test('assign with NO date leaves due_date null (no due date invented)', () => {
   assert.equal(r.fields.due_date, null)
 })
 
+test('assign without an open Planner task clarifies instead of proposing a duplicate create', () => {
+  const r = parseAssistantAction('Assign this task to Amonique', { ...CTX, currentTaskId: null, currentTaskName: null })
+  assert.match(r.clarify, /Open the Planner task first/i)
+})
+
 test('ambiguous / unknown assignee asks instead of guessing', () => {
   const r = parseAssistantAction('Assign this task to Xolani for Friday', CTX)
   assert.ok(r.clarify, 'should ask for clarification')
 })
 
-test('schedule move is a PROPOSAL requiring admin approval, never a direct change', () => {
+test('schedule move is a PROPOSAL requiring manager/admin approval, never a direct change', () => {
   const r = parseAssistantAction('Move the DP schedule post to next month', CTX)
   assert.equal(r.type, 'schedule.propose')
   assert.equal(r.requiresApproval, true)
-  assert.match(r.approvalNote, /pending until an Admin/i)
+  assert.match(r.approvalNote, /pending until a manager or admin/i)
 })
 
 test('"Mark this task as done" → task.update status done', () => {
@@ -123,11 +130,12 @@ test('"This task is blocked" → task.update blocked', () => {
   assert.equal(r.fields.status, 'blocked')
 })
 
-test('"Run Meta sync with baseline" → job.enqueue meta_sync + baseline', () => {
-  const r = parseAssistantAction('Run Meta sync with baseline', CTX)
+test('"Run Meta sync and also sync the previous month" uses plain preview fields', () => {
+  const r = parseAssistantAction('Run Meta sync and also sync the previous month', CTX)
   assert.equal(r.type, 'job.enqueue')
   assert.equal(r.fields.job, 'meta_sync')
-  assert.equal(r.fields.baseline, 'yes')
+  assert.equal(r.fields.sync_previous_month, 'yes')
+  assert.equal('baseline' in r.fields, false)
 })
 
 test('"sync all connected meta clients" → job.enqueue meta_sync (was falling through to chat)', () => {

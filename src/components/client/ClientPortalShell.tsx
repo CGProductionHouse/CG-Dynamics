@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { ClientLogo } from '../ClientLogo'
 import BrandMark from '../BrandMark'
@@ -22,6 +22,7 @@ export function ClientPortalShell({
   children: ReactNode
 }) {
   const { signOut } = useAuth()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#030706] text-report-text">
@@ -54,13 +55,47 @@ export function ClientPortalShell({
           <button
             type="button"
             onClick={() => void signOut()}
-            className="ml-auto shrink-0 rounded-full border border-white/10 px-3 py-1.5 text-xs font-medium text-report-muted transition hover:border-report-accent/40 hover:text-white sm:text-sm"
+            className="ml-auto min-h-11 shrink-0 rounded-full border border-white/10 px-3 py-2 text-xs font-medium text-report-muted transition hover:border-report-accent/40 hover:text-white sm:text-sm"
           >
             Sign out
           </button>
         </div>
 
-        <nav aria-label="Client portal" className="mx-auto max-w-7xl overflow-x-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 pb-3 sm:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(open => !open)}
+            className="flex min-h-11 w-full items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-white"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="client-mobile-navigation"
+          >
+            Portal menu
+            <span aria-hidden>{mobileMenuOpen ? 'Close' : 'Open'}</span>
+          </button>
+          {mobileMenuOpen && (
+            <nav id="client-mobile-navigation" aria-label="Client portal mobile" className="mt-2 grid grid-cols-2 gap-2 pb-[env(safe-area-inset-bottom)]">
+              {NAV_ITEMS.map(item => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex min-h-11 items-center rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'border-report-accent/50 bg-report-accent/10 text-white'
+                        : 'border-white/10 text-report-muted hover:border-white/20 hover:text-white'
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+          )}
+        </div>
+
+        <nav aria-label="Client portal" className="mx-auto hidden max-w-7xl overflow-x-auto px-4 sm:block sm:px-6 lg:px-8">
           <div className="flex min-w-max gap-1">
             {NAV_ITEMS.map(item => (
               <NavLink
@@ -68,7 +103,7 @@ export function ClientPortalShell({
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  `border-b-2 px-3 py-3 text-sm font-medium transition-colors ${
+                  `inline-flex min-h-11 items-center border-b-2 px-3 py-3 text-sm font-medium transition-colors ${
                     isActive
                       ? 'border-report-accent text-white'
                       : 'border-transparent text-report-faint hover:text-report-muted'

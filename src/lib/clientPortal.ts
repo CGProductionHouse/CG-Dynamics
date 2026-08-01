@@ -1,4 +1,4 @@
-import type { Report } from './db/reports'
+import type { ClientReport, Report } from './db/reports'
 import type { PlatformFact } from './overviewModel'
 import { hasRenderableFact } from './overviewModel'
 import { getReportMonthFromPeriod } from './reportPeriod'
@@ -23,7 +23,7 @@ export function nextMonth(month: string): string | null {
     .slice(0, 7)
 }
 
-export function actionMonthForReport(report: Report | null): string | null {
+export function actionMonthForReport(report: Report | ClientReport | null): string | null {
   return report ? nextMonth(getReportMonthFromPeriod(report)) : null
 }
 
@@ -45,7 +45,7 @@ function campaignRecValue(strategy: StrategyData): string | null {
   return parts.length > 0 ? parts.join('\n') : null
 }
 
-export function buildClientStrategyPreview(report: Report | null): ClientStrategyPreview[] {
+export function buildClientStrategyPreview(report: Report | ClientReport | null): ClientStrategyPreview[] {
   if (!report || report.status !== 'published') return []
 
   const strategy = readStrategyData(report.strategy_data)
