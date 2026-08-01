@@ -20,6 +20,7 @@ export type AssistantActionType =
   | 'schedule.propose'
   | 'video.move'
   | 'video.mark_shot'
+  | 'job.enqueue'
 
 export interface ActionClient {
   id: string
@@ -202,6 +203,27 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   const raw = input.trim()
   if (!raw) return null
   const lower = raw.toLowerCase()
+
+  // 0. Durable background jobs (Meta sync, report preparation).
+  if (/\b(meta[\s-]?sync|sync meta)\b/.test(lower)) {
+    const baseline = /\bbaseline|previous month|vorige maand\b/.test(lower)
+    return {
+      type: 'job.enqueue',
+      title: baseline ? 'Run Meta sync (+ previous-month baseline)' : 'Run Meta sync',
+      fields: { job: 'meta_sync', baseline: baseline ? 'yes' : 'no' },
+      clientId: context.currentClientId ?? null,
+      clientName: context.currentClientName ?? null,
+    }
+  }
+  if (/\b(prepare|prep|generate|build|voorberei|opstel)\b/.test(lower) && /\b(report|reports|verslag|verslae)\b/.test(lower)) {
+    return {
+      type: 'job.enqueue',
+      title: 'Prepare reports (background)',
+      fields: { job: 'report_prep' },
+      clientId: context.currentClientId ?? null,
+      clientName: context.currentClientName ?? null,
+    }
+  }
 
   // 1. Mark video(s) as shot.
   if (MARK_SHOT.test(lower) && VIDEO_NOUN.test(lower)) {
