@@ -431,6 +431,7 @@ export default function MetaIntegrationPage() {
   const [batchStalled, setBatchStalled] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const stallRef = useRef(0)
+  const retryWorkerRef = useRef(false)
   // Signature of the last observed child-item state — ANY movement resets stall.
   const lastProgressSigRef = useRef('')
 
@@ -697,22 +698,64 @@ export default function MetaIntegrationPage() {
   }
 
   async function handleRetryWorker() {
-    if (!batch?.id) return
+    if (!batch?.id || retryWorkerRef.current) return
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+      setSyncResult({ status: 'failed', message: 'Missing Supabase frontend environment variables.', phase: 'config', debug: safeStringify({}) })
+      return
+    }
+
+    retryWorkerRef.current = true
+    setBatchStalled(false)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) return
-      await fetch(`${SUPABASE_URL}/functions/v1/meta-sync-worker`, {
+      if (!session?.access_token) {
+        setSyncResult({ status: 'failed', message: 'Authentication required. Please sign in again before retrying the worker.', phase: 'auth' })
+        return
+      }
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/meta-sync-worker`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({ batchId: batch.id }),
       })
+
+      const text = await response.text()
+      let data: SyncResponse | null = null
+      try {
+        data = text ? JSON.parse(text) : null
+      } catch {
+        data = null
+      }
+
+      if (!response.ok || data?.ok === false) {
+        const detail = typeof data?.error === 'string'
+          ? data.error
+          : typeof data?.message === 'string'
+            ? data.message
+            : text ? redactForDisplay(text).slice(0, 500) : 'No response body from worker.'
+        setSyncResult({
+          status: 'failed',
+          message: `Worker restart failed: ${detail}`,
+          phase: 'worker',
+          debug: safeStringify({ httpStatus: response.status, body: data ?? redactForDisplay(text).slice(0, 500) }),
+        })
+        return
+      }
+
       stallRef.current = 0
       setBatchStalled(false)
-    } catch {
-      // Silently ignore — next poll will update UI
+    } catch (e) {
+      setSyncResult({
+        status: 'failed',
+        message: `Worker restart failed: ${redactForDisplay(e instanceof Error ? e.message : String(e))}`,
+        phase: 'network',
+        debug: safeStringify({ error: redactForDisplay(e instanceof Error ? e.message : String(e)) }),
+      })
+    } finally {
+      retryWorkerRef.current = false
     }
   }
 
