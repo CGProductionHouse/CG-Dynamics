@@ -260,6 +260,7 @@ function MyWorkView({
   const inProgress = useMemo(() => myTasks.filter(t => t.status === 'in_progress'), [myTasks])
   const upcoming = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date && t.due_date > todayKey), [myTasks, todayKey])
   const waiting = useMemo(() => myTasks.filter(t => t.status === 'waiting_client'), [myTasks])
+  const blocked = useMemo(() => myTasks.filter(t => t.status === 'blocked'), [myTasks])
   const noDate = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && !t.due_date), [myTasks])
 
   return (
@@ -279,6 +280,9 @@ function MyWorkView({
       )}
       {waiting.length > 0 && (
         <TaskSection title={`Waiting / Review (${waiting.length})`} tasks={waiting} color="text-sky-200" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
+      )}
+      {blocked.length > 0 && (
+        <TaskSection title={`Blocked (${blocked.length})`} tasks={blocked} color="text-red-300" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
       )}
       {noDate.length > 0 && (
         <TaskSection title={`No Due Date (${noDate.length})`} tasks={noDate} color="text-white/40" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />

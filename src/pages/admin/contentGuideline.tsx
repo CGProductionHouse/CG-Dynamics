@@ -443,7 +443,7 @@ export function GuidelineCard({
 // filming essentials (requirements, script, shot breakdown, notes), prev/next
 // navigation, copy folder name and mark-shot. No editing-board clutter.
 export function ShootMode({
-  runName, runDate, runLocation, guidelines, clients, marking, onClose, onMarkShot,
+  runName, runDate, runLocation, guidelines, clients, marking, error, onClose, onMarkShot,
 }: {
   runName: string
   runDate: string | null
@@ -451,6 +451,7 @@ export function ShootMode({
   guidelines: ContentGuideIdea[]
   clients: ClientOption[]
   marking: boolean
+  error: string | null
   onClose: () => void
   onMarkShot: (idea: ContentGuideIdea) => void
 }) {
@@ -492,6 +493,7 @@ export function ShootMode({
             {idea.production_status === 'not_shot' && (
               <ActionButton className="w-full" loading={marking} disabled={marking} onClick={() => onMarkShot(idea)}>Mark video shot</ActionButton>
             )}
+            {error && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
           </div>
         </div>
       ) : (

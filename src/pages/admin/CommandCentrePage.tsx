@@ -8,6 +8,7 @@ import { ClientPicker } from '../../components/ClientPicker'
 import { useAuth } from '../../contexts/AuthContext'
 import { businessDateKey } from '../../lib/businessTime'
 import { isManagerRole } from '../../lib/roles'
+import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import {
   listTasks,
   createTask,
@@ -1303,6 +1304,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, onClose, onSaved, onDelete
   onDeleted: (id: string) => void
 }) {
   const { profile } = useAuth()
+  const keyboardInset = useVisualViewportBottomInset()
   const [title, setTitle] = useState(task.title)
   const [clientId, setClientId] = useState(task.client_id ?? '')
   const [clientName, setClientName] = useState(task.client_name ?? '')
@@ -1581,7 +1583,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, onClose, onSaved, onDelete
           </div>
         </div>
 
-        <div className="border-t border-white/[0.08] px-5 py-4">
+        <div className="border-t border-white/[0.08] px-5 py-4" style={{ paddingBottom: keyboardInset > 0 ? `calc(1rem + ${keyboardInset}px)` : undefined }}>
           {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
           {saveMsg && <p className="mb-2 text-xs text-[#2dd4bf]">{saveMsg}</p>}
           <div className="flex items-center gap-3">

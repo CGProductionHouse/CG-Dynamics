@@ -73,6 +73,10 @@ export function RequestApproval({ task, onStatusChange }: RequestApprovalProps) 
         </ActionButton>
       </div>
 
+      <p className="text-[11px] text-amber-200/70">
+        These buttons only stage the status in the draft below — press <strong>Save</strong> on the task to make it live.
+      </p>
+
       {showChangesInput && (
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
           <textarea
