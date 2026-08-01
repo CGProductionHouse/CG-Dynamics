@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { invokeVoiceDebriefRequest } from './voiceDebriefRequest'
 
 // Post-meeting voice debrief client. Mirrors contentRunDebrief.ts: analyse
 // (audio or typed text) → one editable confirmation → apply. Applying appends
@@ -33,23 +34,35 @@ export interface MeetingDebriefAnalysis {
   candidates: MeetingCandidate[]
 }
 
+type MeetingDebriefResponse = {
+  ok?: boolean
+  error?: string
+  analysis?: MeetingDebriefAnalysis
+}
+
 function functionError(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) return error.message
   return fallback
 }
 
 export async function analyseMeetingAudio(
+  userId: string,
   audio: Blob,
+  durationSeconds: number,
   opts: { eventId?: string; clientId?: string } = {},
 ): Promise<{ data: MeetingDebriefAnalysis | null; error: string | null }> {
-  const body = new FormData()
-  body.append('action', 'analyse_audio')
-  if (opts.eventId) body.append('eventId', opts.eventId)
-  if (opts.clientId) body.append('clientId', opts.clientId)
-  body.append('audio', audio, `meeting-debrief.${audio.type.includes('mp4') ? 'm4a' : 'webm'}`)
   try {
-    const { data, error } = await supabase.functions.invoke('meeting-debrief', { body })
-    if (error) return { data: null, error: error.message }
+    const { data, error } = await invokeVoiceDebriefRequest<MeetingDebriefResponse>(userId, requestId => {
+      const body = new FormData()
+      body.append('action', 'analyse_audio')
+      body.append('requestId', requestId)
+      body.append('durationSeconds', String(durationSeconds))
+      if (opts.eventId) body.append('eventId', opts.eventId)
+      if (opts.clientId) body.append('clientId', opts.clientId)
+      body.append('audio', audio, `meeting-debrief.${audio.type.includes('mp4') ? 'm4a' : 'webm'}`)
+      return supabase.functions.invoke('meeting-debrief', { body })
+    })
+    if (error) return { data: null, error: functionError(error, 'The voice debrief could not be analysed.') }
     if (!data?.ok) return { data: null, error: data?.error ?? 'The voice debrief could not be analysed.' }
     return { data: data.analysis as MeetingDebriefAnalysis, error: null }
   } catch (error) {
@@ -58,14 +71,15 @@ export async function analyseMeetingAudio(
 }
 
 export async function analyseMeetingText(
+  userId: string,
   transcript: string,
   opts: { eventId?: string; clientId?: string } = {},
 ): Promise<{ data: MeetingDebriefAnalysis | null; error: string | null }> {
   try {
-    const { data, error } = await supabase.functions.invoke('meeting-debrief', {
-      body: { action: 'analyse_text', transcript, eventId: opts.eventId, clientId: opts.clientId },
-    })
-    if (error) return { data: null, error: error.message }
+    const { data, error } = await invokeVoiceDebriefRequest<MeetingDebriefResponse>(userId, requestId => supabase.functions.invoke('meeting-debrief', {
+      body: { action: 'analyse_text', transcript, eventId: opts.eventId, clientId: opts.clientId, requestId },
+    }))
+    if (error) return { data: null, error: functionError(error, 'The debrief could not be analysed.') }
     if (!data?.ok) return { data: null, error: data?.error ?? 'The debrief could not be analysed.' }
     return { data: data.analysis as MeetingDebriefAnalysis, error: null }
   } catch (error) {

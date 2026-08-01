@@ -155,7 +155,7 @@ test('composer enqueue idempotency key is user-scoped', () => {
 test('composer debrief requests are profile-bound and invalidated on close', () => {
   assert.match(composer, /const token = \{ id: \+\+debriefRequestSeqRef\.current, profileId: requestedProfileId \}/)
   assert.match(composer, /return current === token && profileIdRef\.current === token\.profileId/)
-  assert.match(composer, /if \(blob\.size > 0 && debriefRequestIsCurrent\('analysis', requestToken\)\) void analyseDebrief/)
+  assert.match(composer, /if \(blob\.size > 0 && debriefRequestIsCurrent\('analysis', requestToken\)\) \{\s*void analyseDebrief\(\{ audio: blob, durationSeconds/)
   assert.match(composer, /function closeDebrief\(\) \{\s*invalidateDebriefRequests\(\)/)
 })
 

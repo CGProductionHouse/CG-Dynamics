@@ -103,6 +103,7 @@ test('Admin-only routes are gated under RequireAdmin', () => {
   assert.match(app, /<Route element=\{<RequireAdmin \/>\}>/)
   assert.match(app, /path="\/admin\/users" element=\{<UsersHub \/>\}/)
   assert.match(app, /path="\/admin\/import-health" element=\{<ImportHealthPage \/>\}/)
+  assert.match(app, /path="\/admin\/ai-health" element=\{<AiUsageHealthPage \/>\}/)
   assert.match(app, /path="\/admin\/marketing-library" element=\{<MarketingLibraryPage \/>\}/)
 })
 

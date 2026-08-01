@@ -706,19 +706,33 @@ export async function suggestContentVideos(
   clientId: string,
   coverageStart: string,
   coverageEnd: string,
-  options?: { guidelineId?: string },
+  options?: { guidelineId?: string; requestId?: string },
 ): Promise<QueryResult<SuggestContentVideosResult>> {
   const sessionResult = await supabase.auth.getSession()
   const token = sessionResult.data.session?.access_token
   if (!token) return { data: null as never, error: 'Authentication required.', migrationNeeded: false }
 
   const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/suggest-content-videos`
+  const requestId = options?.requestId ?? crypto.randomUUID()
+  const requestBody = JSON.stringify({
+    requestId,
+    clientId,
+    coverageStart,
+    coverageEnd,
+    guidelineId: options?.guidelineId,
+  })
+  const sendRequest = () => fetch(functionUrl, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: requestBody,
+  })
   try {
-    const response = await fetch(functionUrl, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId, coverageStart, coverageEnd, guidelineId: options?.guidelineId }),
-    })
+    let response: Response
+    try {
+      response = await sendRequest()
+    } catch {
+      response = await sendRequest()
+    }
     if (!response.ok) {
       const body = await response.json().catch(() => ({}))
       return { data: null as never, error: body.error ?? `Server responded ${response.status}.`, migrationNeeded: false }

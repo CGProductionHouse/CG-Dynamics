@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { invokeVoiceDebriefRequest } from './voiceDebriefRequest'
 
 export type ContentRunDebriefAction =
   | 'shot'
@@ -36,23 +37,34 @@ export interface ContentRunDebriefDiagnostics {
   interpretationProviders: string[]
 }
 
+type ContentRunDebriefResponse = {
+  ok?: boolean
+  error?: string
+  analysis?: ContentRunDebriefAnalysis
+}
+
 function functionError(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) return error.message
   return fallback
 }
 
 export async function analyseContentRunAudio(
+  userId: string,
   runId: string,
   audio: Blob,
+  durationSeconds: number,
 ): Promise<{ data: ContentRunDebriefAnalysis | null; error: string | null }> {
-  const body = new FormData()
-  body.append('action', 'analyse_audio')
-  body.append('runId', runId)
-  body.append('audio', audio, `content-run-debrief.${audio.type.includes('mp4') ? 'm4a' : 'webm'}`)
-
   try {
-    const { data, error } = await supabase.functions.invoke('content-run-voice-debrief', { body })
-    if (error) return { data: null, error: error.message }
+    const { data, error } = await invokeVoiceDebriefRequest<ContentRunDebriefResponse>(userId, requestId => {
+      const body = new FormData()
+      body.append('action', 'analyse_audio')
+      body.append('runId', runId)
+      body.append('requestId', requestId)
+      body.append('durationSeconds', String(durationSeconds))
+      body.append('audio', audio, `content-run-debrief.${audio.type.includes('mp4') ? 'm4a' : 'webm'}`)
+      return supabase.functions.invoke('content-run-voice-debrief', { body })
+    })
+    if (error) return { data: null, error: functionError(error, 'The voice debrief could not be analysed.') }
     if (!data?.ok) return { data: null, error: data?.error ?? 'The voice debrief could not be analysed.' }
     return { data: data.analysis as ContentRunDebriefAnalysis, error: null }
   } catch (error) {
@@ -61,14 +73,15 @@ export async function analyseContentRunAudio(
 }
 
 export async function analyseContentRunText(
+  userId: string,
   runId: string,
   transcript: string,
 ): Promise<{ data: ContentRunDebriefAnalysis | null; error: string | null }> {
   try {
-    const { data, error } = await supabase.functions.invoke('content-run-voice-debrief', {
-      body: { action: 'analyse_text', runId, transcript },
-    })
-    if (error) return { data: null, error: error.message }
+    const { data, error } = await invokeVoiceDebriefRequest<ContentRunDebriefResponse>(userId, requestId => supabase.functions.invoke('content-run-voice-debrief', {
+      body: { action: 'analyse_text', runId, transcript, requestId },
+    }))
+    if (error) return { data: null, error: functionError(error, 'The debrief could not be analysed.') }
     if (!data?.ok) return { data: null, error: data?.error ?? 'The debrief could not be analysed.' }
     return { data: data.analysis as ContentRunDebriefAnalysis, error: null }
   } catch (error) {

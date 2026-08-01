@@ -5,13 +5,13 @@ import { test } from 'node:test'
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8')
 const INDEX = read('../supabase/functions/suggest-content-videos/index.ts')
 const ROUTER = read('../supabase/functions/cg-assistant-chat/ai-router.ts')
+const WORKFLOW = read('../src/lib/contentWorkflow.ts')
 
 // ── Architecture: uses existing AI provider stack ───────────────────────────
 
 test('imports ai-router from cg-assistant-chat (not a second AI stack)', () => {
   assert.match(INDEX, /from\s+['"]\.\.\/cg-assistant-chat\/ai-router\.ts['"]/)
   assert.match(INDEX, /routeAiChat/)
-  assert.match(INDEX, /hasAnyConfiguredProvider/)
 })
 
 test('imports cors helpers from _shared', () => {
@@ -45,7 +45,8 @@ test('rejects client-role users', () => {
 
 test('resolves caller profile and role', () => {
   assert.match(INDEX, /profiles['"]/)
-  assert.match(INDEX, /\.select\(['"]role['"]\)/)
+  assert.match(INDEX, /\.select\(['"]role, is_active['"]\)/)
+  assert.match(INDEX, /profile\.is_active !== true/)
 })
 
 test('never trusts supplied clientId alone — verifies via DB', () => {
@@ -67,10 +68,15 @@ test('uses service-role access only after caller authorisation', () => {
 
 // ── Input validation ────────────────────────────────────────────────────────
 
-test('requires clientId, coverageStart and coverageEnd', () => {
-  assert.match(INDEX, /clientId.*coverageStart.*coverageEnd/)
+test('requires a client request ID plus clientId, coverageStart and coverageEnd', () => {
+  assert.match(INDEX, /requestId.*clientId.*coverageStart.*coverageEnd/)
   assert.match(INDEX, /are required/)
   assert.match(INDEX, /400/)
+})
+
+test('validates the client-generated request ID', () => {
+  assert.match(INDEX, /\^\[a-zA-Z0-9:_-\]\{8,200\}\$/)
+  assert.match(INDEX, /valid client-generated identifier/)
 })
 
 test('validates UUID format for clientId', () => {
@@ -196,6 +202,13 @@ test('suggestions are drafts — never silently written', () => {
   assert.match(INDEX, /drafts/)
 })
 
+test('frontend generates one stable request ID and reuses its request body for a network retry', () => {
+  assert.match(WORKFLOW, /options\?\.requestId\s*\?\?\s*crypto\.randomUUID\(\)/)
+  assert.match(WORKFLOW, /const requestBody = JSON\.stringify\(\{\s*requestId,/s)
+  assert.match(WORKFLOW, /const sendRequest = \(\) => fetch[\s\S]*body: requestBody/)
+  assert.match(WORKFLOW, /response = await sendRequest\(\)[\s\S]*catch[\s\S]*response = await sendRequest\(\)/)
+})
+
 test('safe operational logging without secrets or prompts', () => {
   const logMatch = INDEX.match(/console\.info\(([^)]+)\)/)
   assert.ok(logMatch, 'console.info found')
@@ -210,14 +223,45 @@ test('safe operational logging without secrets or prompts', () => {
 
 // ── Provider fallback ───────────────────────────────────────────────────────
 
-test('returns structured error when no provider keys configured', () => {
+test('returns structured error when no provider keys configured through canonical routing', () => {
   assert.match(INDEX, /No AI provider key is configured/)
-  assert.match(INDEX, /hasAnyConfiguredProvider/)
+  assert.doesNotMatch(INDEX, /hasAnyConfiguredProvider/)
 })
 
 test('returns structured error when provider call fails', () => {
   assert.match(INDEX, /AI provider is currently unavailable/)
   assert.match(INDEX, /NO_AI_PROVIDER_KEYS/)
+})
+
+test('canonical routing context classifies and meters content video generation', () => {
+  assert.match(INDEX, /usageClient:\s*sb as unknown as AiUsageClient/)
+  assert.match(INDEX, /feature:\s*['"]content_video_suggestions['"]/)
+  assert.match(INDEX, /action:\s*['"]generate['"]/)
+  assert.match(INDEX, /actorId:\s*user\.id/)
+  assert.match(INDEX, /idempotencyKey:\s*requestId/)
+  assert.match(INDEX, /complexity:\s*['"]complex['"]/)
+  assert.match(INDEX, /maxOutputTokens:\s*SUGGESTION_MAX_OUTPUT_TOKENS/)
+  assert.match(INDEX, /validateContent:\s*content => extractSuggestions\(content\)\.length > 0/)
+})
+
+test('fingerprint is SHA-256 of canonical non-secret semantic inputs, not prompt contents', () => {
+  assert.match(INDEX, /crypto\.subtle\.digest\(['"]SHA-256['"]/)
+  const fingerprintSection = INDEX.slice(INDEX.indexOf('const fingerprint ='), INDEX.indexOf('aiResult = await routeAiChat'))
+  for (const input of ['actorId: user.id', 'clientId', 'coverageStart', 'coverageEnd', 'guidelineId']) {
+    assert.match(fingerprintSection, new RegExp(input.replace('.', '\\.')))
+  }
+  assert.doesNotMatch(fingerprintSection, /messages|systemPrompt|userMessage|rawContent|script/)
+})
+
+test('duplicate reservation replays a completed response or fails safely without another paid provider call', () => {
+  assert.match(INDEX, /errorMessage === ['"]AI_DUPLICATE_REQUEST['"]/)
+  assert.match(INDEX, /No duplicate provider request was sent/)
+  assert.match(INDEX, /deduplicated: true/)
+  assert.match(INDEX, /duplicate \? 425/)
+  assert.match(ROUTER, /if \(reservation\.duplicate\) throw new AiDuplicateRequestError\(reservation\.request_id\)/)
+  assert.match(INDEX, /fetchAiUsageReplay<SuggestResponse>/)
+  assert.match(INDEX, /replayKind: 'suggestion_response'/)
+  assert.match(INDEX, /buildReplayPayload:/)
 })
 
 // ── guidelineId binding ──────────────────────────────────────────────────────
@@ -271,8 +315,8 @@ test('caps suggestions at MAX_SUGGESTIONS after parsing', () => {
 
 test('requests enough output tokens for complete structured video scripts', () => {
   assert.match(INDEX, /SUGGESTION_MAX_OUTPUT_TOKENS\s*=\s*4000/)
-  assert.match(INDEX, /routeAiChat\(messages,\s*\{\s*maxOutputTokens:\s*SUGGESTION_MAX_OUTPUT_TOKENS/s)
-  assert.match(ROUTER, /options\.maxOutputTokens\s*\?\?\s*500/)
+  assert.match(INDEX, /routeAiChat\(messages,\s*\{[\s\S]*maxOutputTokens:\s*SUGGESTION_MAX_OUTPUT_TOKENS/)
+  assert.match(ROUTER, /Math\.floor\(options\.maxOutputTokens\)/)
   assert.match(ROUTER, /max_tokens:\s*maxOutputTokens/)
   assert.match(ROUTER, /maxOutputTokens,\s*\n\s*\}/)
 })
@@ -280,6 +324,10 @@ test('requests enough output tokens for complete structured video scripts', () =
 test('does not silently report success for incomplete provider JSON', () => {
   assert.match(INDEX, /suggestions\.length\s*===\s*0/)
   assert.match(INDEX, /AI provider returned an incomplete response/)
+  const invalidResponseSection = INDEX.slice(INDEX.indexOf('if (suggestions.length === 0)'), INDEX.indexOf('// ── Return'))
+  assert.match(invalidResponseSection, /}, 502\)/)
+  assert.match(ROUTER, /status: 'failed', outcome: 'invalid_response'/)
+  assert.match(ROUTER, /continue\n\s*}/)
 })
 
 // ── Cross-client prompt safety ──────────────────────────────────────────────
