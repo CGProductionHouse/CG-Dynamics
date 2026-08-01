@@ -172,11 +172,19 @@ Deno.serve(async (req) => {
 
   // ── Process items in chunks (continuation loop) ─────────────
   const MAX_CHUNKS = 5
+  // Stay well under the platform function timeout so a slow Meta API call can
+  // never kill the invocation mid-chunk and strand claimed items as "running".
+  // If we run out of budget we stop claiming and let the self-trigger below
+  // pick up the next chunk (leases make this safe under concurrency).
+  const MAX_WORK_MS = 40_000
+  const startedAt = Date.now()
   const processed: Array<{ itemId: string; clientName: string; month: string; status: string; postsSynced: number; error?: string }> = []
   const batchIds = new Set<string>()
   let claimCount = 0
+  let claimFailed = false
 
   while (claimCount < MAX_CHUNKS) {
+    if (Date.now() - startedAt > MAX_WORK_MS) break
     const { data: items, error: claimError } = await sb.rpc('claim_sync_batch_items', {
       p_limit: body.maxItems ?? BATCH_SIZE,
       p_batch_id: body.batchId ?? null,
@@ -184,6 +192,7 @@ Deno.serve(async (req) => {
 
     if (claimError) {
       // RPC may not exist yet — process what we have so far
+      claimFailed = true
       break
     }
 
@@ -562,14 +571,28 @@ Deno.serve(async (req) => {
   }
 
   // ── Trigger next worker if items remain ─────────────────────
-  if (body.batchId && processed.length > 0) {
+  // Counts BOTH still-queued items and stale running leases: the claim RPC
+  // requeues expired leases on the next invocation, so a stalled batch must
+  // keep self-triggering until every item is drained.
+  if (body.batchId) {
+    const staleBefore = new Date(Date.now() - 5 * 60 * 1000).toISOString()
     const { count: remaining } = await sb
       .from('meta_sync_batch_items')
       .select('id', { count: 'exact', head: true })
       .eq('batch_id', body.batchId)
       .eq('status', 'queued')
 
-    if (remaining && remaining > 0) {
+    const { count: staleRunning } = await sb
+      .from('meta_sync_batch_items')
+      .select('id', { count: 'exact', head: true })
+      .eq('batch_id', body.batchId)
+      .eq('status', 'running')
+      .lt('started_at', staleBefore)
+
+    const workRemaining = (remaining ?? 0) > 0 || (staleRunning ?? 0) > 0
+    // Never self-amplify when the claim RPC is missing/failing (avoids an
+    // infinite trigger loop against a broken deployment).
+    if (!claimFailed && workRemaining) {
       const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
       const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
       const triggerPromise = fetch(workerUrl, {
