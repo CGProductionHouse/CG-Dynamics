@@ -136,6 +136,18 @@ test('"Prepare the reports" → job.enqueue report_prep', () => {
   assert.equal(r.fields.job, 'report_prep')
 })
 
+test('"Remember: Dulux prefers Friday posts" → memory.add with note', () => {
+  const r = parseAssistantAction('Remember: Dulux prefers Friday posts', CTX)
+  assert.equal(r.type, 'memory.add')
+  assert.equal(r.fields.note, 'Dulux prefers Friday posts')
+})
+
+test('AF: "Onthou dat Braize nie Maandae wil plaas nie" → memory.add', () => {
+  const r = parseAssistantAction('Onthou dat Braize nie Maandae wil plaas nie', CTX)
+  assert.equal(r.type, 'memory.add')
+  assert.match(r.fields.note, /Braize nie Maandae/)
+})
+
 test('plain question / non-action returns null (falls through to chat)', () => {
   assert.equal(parseAssistantAction('What should I focus on today?', CTX), null)
   assert.equal(parseAssistantAction('', CTX), null)

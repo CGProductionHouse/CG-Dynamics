@@ -21,6 +21,7 @@ export type AssistantActionType =
   | 'video.move'
   | 'video.mark_shot'
   | 'job.enqueue'
+  | 'memory.add'
 
 export interface ActionClient {
   id: string
@@ -203,6 +204,18 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   const raw = input.trim()
   if (!raw) return null
   const lower = raw.toLowerCase()
+
+  // 0a. Durable per-user memory: "remember ..." / "onthou ...".
+  const remember = raw.match(/^(?:remember|onthou)(?:\s+that|\s+dat)?[:\s]+(.+)/i)
+  if (remember && remember[1].trim().length > 1) {
+    return {
+      type: 'memory.add',
+      title: 'Remember this',
+      fields: { note: remember[1].trim() },
+      clientId: context.currentClientId ?? null,
+      clientName: context.currentClientName ?? null,
+    }
+  }
 
   // 0. Durable background jobs (Meta sync, report preparation).
   if (/\b(meta[\s-]?sync|sync meta)\b/.test(lower)) {
