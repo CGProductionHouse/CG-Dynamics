@@ -1,7 +1,8 @@
 # CG Dynamics — Controlled Beta Launch (Monday 27 July 2026)
 
 Last updated: 2026-07-25
-Status: Release readiness — CONDITIONAL GO
+Status: Release readiness — CONDITIONAL GO (historical; superseded by
+`docs/cg-dynamics-current-state.md`, canonical production status 2 Aug 2026)
 Scope: Controlled production beta for CG staff and selected clients.
 
 ## 1. Launch scope

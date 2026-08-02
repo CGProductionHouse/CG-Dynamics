@@ -1,246 +1,87 @@
-# Pending Supabase migrations
+# Supabase migration procedure — targeted production changes
 
-**Status as of 2026-06-30 — neither migration has been applied.**
+Status: adopted 2 August 2026. Replaces the earlier `pending-supabase-migrations`
+runbook (which predated the `supabase/migrations/` timestamped convention and
+listed migrations that have since been applied).
 
----
+## 1. Where migrations live
 
-## 1. Pending migrations
+- **New and current migrations:** `supabase/migrations/<YYYYMMDDHHmmss>_<slug>.sql`
+  (timestamped version = the file's leading 14 digits).
+- **Legacy migrations (historical, do not re-run):** `supabase/phase-*.sql`
+  files at the repo root of `supabase/`. These were applied via the SQL editor
+  before the timestamped convention started. Their schema is already live; treat
+  them as historical artifacts, not pending work.
+- **Verify your understanding of a version's state before acting:** run
+  `npx supabase migration list --linked` and compare `local` vs `remote` columns.
 
-| # | File | Applied | Idempotent | Purpose |
-|---|---|---|---|---|
-| A | `supabase/phase-6f-staff-production-status-rls.sql` | ❌ No | ✅ Yes | Lets staff update production statuses in Monthly Planner |
-| B | `supabase/phase-7a-client-request-package-link.sql` | ❌ No | ✅ Yes | Adds package classification columns to `command_centre_tasks` |
+## 2. Ground rules (from `AGENTS.md`, unchanged)
 
-### A — phase-6f (staff production status RLS)
+- Never run a broad `db push`. It applies every unapplied local migration in
+  timestamp order and can surprise production.
+- Never rewrite or re-run an already-applied production migration.
+- Never touch live Supabase data or run SQL against production without explicit
+  approval. Review new SQL in the Supabase SQL editor first.
+- Client-side code uses only `VITE_SUPABASE_URL` and
+  `VITE_SUPABASE_PUBLISHABLE_KEY`. Anything privileged (service-role, Meta,
+  Microsoft, provider keys) belongs in an Edge Function.
+- Never expose, log, commit or return secrets.
 
-- Adds one new RLS UPDATE policy on `monthly_deliverables`
-- Policy name: `"monthly_deliverables: staff production status update"`
-- Staff (`role = 'team'`) can only set: `to_do`, `in_progress`, `ready_internal_review`, `ready_client_approval`
-- Admin keeps full update rights via the existing `"monthly_deliverables: admin update"` policy
-- Uses `drop policy if exists` before `create policy` — safe to re-run
-- No data changes. No table structure changes.
-- **App depends on it:** staff saving production status changes in Monthly Planner will fail (RLS blocked) until this is applied
+## 3. Adding a new production migration
 
-### B — phase-7a (client request package link)
+1. Create a timestamped file:
+   `supabase/migrations/<YYYYMMDDHHmmss>_<slug>.sql`.
+2. Keep it additive, idempotent where practical (`if not exists` /
+   `drop policy if exists` guards), and single-purpose.
+3. Review the SQL in the Supabase SQL editor before applying.
+4. Apply with the SQL editor (or `supabase db push` **only** after confirming
+   every migration already recorded in the ledger has a local file and the only
+   pending ones are the intended new file).
+5. After applying, record it in the ledger automatically (the editor applies it
+   and the CLI `migration list` then shows `remote` = version). If applied
+   manually without a ledger row, see section 4.
+6. Update `docs/cg-dynamics-current-state.md` (canonical current state) if the
+   migration changes deployed capabilities, and the relevant feature doc.
 
-- Adds 3 nullable columns to `command_centre_tasks`:
-  - `package_action text` — `'use_slot' | 'addon' | 'move_work'`
-  - `quote_needed boolean not null default false`
-  - `admin_package_note text`
-- Adds 2 partial indexes (`package_action is not null`, `quote_needed = true`)
-- All column additions wrapped in `if not exists` checks — safe to re-run
-- `deliverable_id` FK was already added by phase-6 and should already exist
-- No data changes. No RLS changes.
-- **App depends on it:** the Package action menu in Monthly Planner is currently a placeholder. Saving will not be wired until this migration is applied and the save logic is built.
+## 4. Reconcile drift (applied-but-unrecorded migrations)
 
----
-
-## 2. Correct application order
-
-Run **A before B**. Neither depends on the other, but A unblocks live staff usage faster.
-
-```
-1. phase-6f-staff-production-status-rls.sql
-2. phase-7a-client-request-package-link.sql
-```
-
----
-
-## 3. Run instructions
-
-### Open Supabase SQL editor
-
-1. Go to your Supabase project dashboard
-2. Click **SQL Editor** in the left sidebar
-3. Click **New query**
-
----
-
-### Step 1 — Run phase-6f
-
-Paste and run the full contents of:
+When a migration was applied via the SQL editor but never recorded in
+`supabase_migrations.schema_migrations`, `supabase migration list --linked`
+shows `local: <version>` with `remote: ""`. The safe repair records it without
+re-running any SQL:
 
 ```
-supabase/phase-6f-staff-production-status-rls.sql
+npx supabase migration repair --status applied <version> --linked
 ```
 
-Expected result: `Success. No rows returned.`
+Repeat for each version (or pass several versions in one command). Verify with
+`npx supabase migration list --linked`. This mutates only the ledger table
+(metadata), never schema or data. Do **not** re-run the migration SQL.
 
-Then run the verification queries in section 4A below.
+> The 11 local-only migrations from the SQL-editor era were reconciled this way
+> on 2 August 2026 (`20260726075342`, `20260731090000`, `20260731100000`,
+> `20260801090000`, `20260801120000`, `20260801150000`, `20260801160000`,
+> `20260801170000`, `20260801180000`, `20260801190000`).
+> `20260726190000_microsoft_background_safe_apply.sql` was **never applied** and
+> was removed with its dead feature (see current-state technical debt).
 
----
+## 5. Removing a never-applied migration
 
-### Step 2 — Run phase-7a
+A migration file that was never applied to any environment (no ledger row, no
+schema objects) is a dead artifact. It can be deleted from the repo with its
+feature. Confirm absence first: `npx supabase migration list --linked` must show
+`remote: ""` for it, and the schema objects it creates must not exist in
+production. Never delete an applied migration's file after it is live.
 
-Paste and run the full contents of:
+## 6. Verification through the latest version
 
-```
-supabase/phase-7a-client-request-package-link.sql
-```
+`npx supabase migration list --linked` must end with the latest expected
+version. As of 2 August 2026 the ledger is consistent through
+`20260802120000`. For each reconciled version, spot-check that the objects the
+migration creates exist in production (e.g. via `npx supabase db query --linked`).
 
-Expected result: `Success. No rows returned.`
+## 7. Rollback
 
-Then run the verification queries in section 4B below.
-
----
-
-## 4. Verification SQL
-
-### 4A — Verify phase-6f
-
-**Confirm the new policy exists:**
-
-```sql
-select policyname, cmd, qual, with_check
-from pg_policies
-where schemaname = 'public'
-  and tablename  = 'monthly_deliverables'
-order by policyname;
-```
-
-Expected rows (minimum):
-
-| policyname | cmd |
-|---|---|
-| monthly_deliverables: admin delete | DELETE |
-| monthly_deliverables: admin insert | INSERT |
-| monthly_deliverables: admin update | UPDATE |
-| monthly_deliverables: staff production status update | UPDATE |
-| monthly_deliverables: staff select | SELECT |
-
----
-
-**Confirm the new policy's allowed statuses:**
-
-```sql
-select with_check
-from pg_policies
-where schemaname = 'public'
-  and tablename  = 'monthly_deliverables'
-  and policyname = 'monthly_deliverables: staff production status update';
-```
-
-`with_check` must contain:
-- `is_staff()`
-- `'to_do'`, `'in_progress'`, `'ready_internal_review'`, `'ready_client_approval'`
-
----
-
-**Confirm admin update policy is unchanged:**
-
-```sql
-select policyname, qual, with_check
-from pg_policies
-where schemaname = 'public'
-  and tablename  = 'monthly_deliverables'
-  and policyname = 'monthly_deliverables: admin update';
-```
-
-Expected: `qual = is_admin()`, `with_check = null`.
-
----
-
-### 4B — Verify phase-7a
-
-**Confirm new columns exist on command_centre_tasks:**
-
-```sql
-select column_name, data_type, is_nullable, column_default
-from information_schema.columns
-where table_schema = 'public'
-  and table_name   = 'command_centre_tasks'
-  and column_name  in (
-    'deliverable_id',
-    'package_action',
-    'quote_needed',
-    'admin_package_note'
-  )
-order by column_name;
-```
-
-Expected rows:
-
-| column_name | data_type | is_nullable | column_default |
-|---|---|---|---|
-| admin_package_note | text | YES | null |
-| deliverable_id | uuid | YES | null |
-| package_action | text | YES | null |
-| quote_needed | boolean | NO | false |
-
----
-
-**Confirm indexes exist:**
-
-```sql
-select indexname, indexdef
-from pg_indexes
-where schemaname = 'public'
-  and tablename  = 'command_centre_tasks'
-  and indexname  in (
-    'idx_command_centre_tasks_package_action',
-    'idx_command_centre_tasks_quote_needed'
-  );
-```
-
-Expected: 2 rows returned.
-
----
-
-**Confirm existing tasks are untouched:**
-
-```sql
-select count(*) as total_tasks,
-       count(package_action) as with_package_action,
-       count(case when quote_needed then 1 end) as quote_needed_count
-from public.command_centre_tasks;
-```
-
-Expected: `total_tasks` = your existing task count, `with_package_action = 0`, `quote_needed_count = 0`.
-
----
-
-## 5. Rollback notes
-
-**Do not roll back without a Supabase backup in place first.**
-
-### Rollback phase-6f
-
-```sql
-drop policy if exists "monthly_deliverables: staff production status update"
-  on public.monthly_deliverables;
-```
-
-Effect: staff can no longer save production status updates (UI will show errors or silently fail).
-
-### Rollback phase-7a
-
-```sql
-alter table public.command_centre_tasks
-  drop column if exists package_action,
-  drop column if exists quote_needed,
-  drop column if exists admin_package_note;
-
-drop index if exists public.idx_command_centre_tasks_package_action;
-drop index if exists public.idx_command_centre_tasks_quote_needed;
-```
-
-Effect: package classification fields removed. The placeholder Package action menu in Monthly Planner continues to show but remains non-functional (same as current state).
-
-**Do not drop `deliverable_id` here** — it was added by phase-6 and may be in use elsewhere.
-
----
-
-## 6. App dependency notes
-
-| Migration | Not yet applied means... |
-|---|---|
-| phase-6f | Staff clicking the status dropdown in Monthly Planner will get an RLS error. Admins are unaffected. |
-| phase-7a | Package action menu in Monthly Planner shows disabled placeholders. No saves are attempted. App loads normally. |
-
-The app is safe to use before either migration is applied. Only the specific features above are blocked or inactive.
-
----
-
-## 7. CG Hours
-
-These migrations do not touch CG Hours tables, CG Hours schema, or any payroll/finance data. No CG Hours verification is needed.
+There is no automatic rollback. Prefer forward additive migrations. If a
+migration must be reversed, write a new timestamped migration that drops only
+what it added, review it, and apply it through the same procedure.

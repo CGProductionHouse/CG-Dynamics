@@ -50,10 +50,6 @@ export async function listMyBackgroundJobs(limit = 25) {
     .limit(limit)
 }
 
-export async function getBackgroundJob(id: string) {
-  return supabase.from('background_jobs').select('*').eq('id', id).single()
-}
-
 // Opportunistic nudge so a freshly enqueued job starts without waiting for the
 // next scheduled tick. Fire-and-forget; the scheduled worker is the durable
 // guarantee. Never throws.
