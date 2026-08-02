@@ -57,8 +57,10 @@ deployed capabilities, providers, debt or rules change. Descriptive only.
 - `cg-assistant-chat` (v1, `verify_jwt: true`), `meeting-debrief`,
   `content-run-voice-debrief`, `suggest-content-videos`,
   `microsoft-transition-sync`, `marketing-library-ingest`.
-- Note: `marketing-library-ingest` source exists only on retained unmerged
-  branch `codex/package-classification-client-guard` (3 commits not in main).
+- `marketing-library-ingest` source is in main via PR #136 (2 Aug 2026);
+  phase-24a/24b SQL recorded alongside the other `phase-*.sql` files. Full-text
+  ingestion remains blocked pending a lawful machine-readable edition (see
+  `docs/ai-workforce/INGESTION-STATUS.md`).
 
 ## 5. Known debt / risks
 
@@ -67,7 +69,6 @@ deployed capabilities, providers, debt or rules change. Descriptive only.
 - 203 Microsoft reconciliation conflicts and 0 assigned staff remain from the
   transition checkpoint (staff identity resolution needs `User.Read.All`).
 - Bundle is one large chunk (xlsx-heavy) — code-splitting outstanding.
-- `marketing-library-ingest` source is on an unmerged branch, not main.
 - CG Hub daily-use pass, Performance/Reports cleanup, Meta diagnostics pass
   outstanding (see `docs/cg-dynamics-product-goals.md` /
   `docs/cg-dynamics-outstanding-audit.md`).
@@ -81,9 +82,9 @@ deployed capabilities, providers, debt or rules change. Descriptive only.
    report/guideline coverage before GA.
 3. CG Hub daily-use pass; Planner Board recurring-task correctness.
 4. Performance/Reports cleanup pass; Meta connector diagnostics.
-5. Merge `codex/package-classification-client-guard` (brings
-   `marketing-library-ingest` source + phase-24a/24b) and decide the fate of
-   `fix/secure-admin-invites` / `security/ops-hub-production-hardening`.
+5. Decide the fate of `fix/secure-admin-invites` /
+   `security/ops-hub-production-hardening` (divergent unmerged work) and
+   `docs/ai-workforce-governance` (preserved AI Workforce governance docs).
 
 ## 7. Future: WhatsApp Assistant
 
