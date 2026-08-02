@@ -616,6 +616,7 @@ async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
   return jsonResponse({
     ok: true,
     diagnostics: {
+      diagnosticsVersion: 2,
       assistantStatus: configuredProviders > 0 ? 'ready' : 'setup_required',
       setupStatus:
         configuredProviders > 0
