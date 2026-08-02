@@ -9,6 +9,7 @@ import {
   isCurrentDashboardRequest,
   monthStart,
   runMaskedProviderHealthCheck,
+  runTranscriptionProviderHealthCheck,
   setAiBudget,
   type AiBudget,
   type AiUsageAggregates,
@@ -42,8 +43,9 @@ function budgetState(budget: AiBudget | null) {
 
 function statusClasses(status: ProviderDisplayStatus) {
   if (status === 'healthy') return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
-  if (status === 'degraded') return 'border-amber-400/25 bg-amber-400/10 text-amber-200'
-  if (status === 'unavailable') return 'border-red-400/25 bg-red-400/10 text-red-200'
+  if (status === 'degraded' || status === 'temporary_outage') return 'border-amber-400/25 bg-amber-400/10 text-amber-200'
+  if (status === 'unavailable' || status === 'authentication_failed') return 'border-red-400/25 bg-red-400/10 text-red-200'
+  if (status === 'configured') return 'border-sky-400/25 bg-sky-400/10 text-sky-200'
   return 'border-white/10 bg-white/[0.05] text-white/55'
 }
 
@@ -117,6 +119,7 @@ export default function AiUsageHealthPage() {
   const [error, setError] = useState<string | null>(null)
   const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null)
   const [checking, setChecking] = useState(false)
+  const [transcriptionAudio, setTranscriptionAudio] = useState<File | null>(null)
   const [checkMessage, setCheckMessage] = useState<string | null>(null)
   const [savingBudget, setSavingBudget] = useState(false)
   const [budgetError, setBudgetError] = useState<string | null>(null)
@@ -235,11 +238,14 @@ export default function AiUsageHealthPage() {
     setChecking(true)
     setCheckMessage(null)
     try {
-      const result = await runMaskedProviderHealthCheck()
+      const routes = diagnostics.filter(item => item.capability === 'text' && item.enabled && item.configured)
+      if (routes.length === 0) throw new Error('No configured text provider route is available to test.')
+      const results = []
+      for (const route of routes) results.push(await runMaskedProviderHealthCheck(route.provider, route.routeId))
       if (isCurrentDashboardRequest(request, monthRef.current, loadSequenceRef.current)) {
-        setCheckMessage(result?.success
-          ? `Health check succeeded via ${result.provider ?? 'an enabled provider'} (${result.model ?? 'configured model'}).`
-          : result?.error ?? 'No provider was available.')
+        setCheckMessage(results.map(result => result?.success
+          ? `${result.provider ?? 'Provider'} healthy (${result.model ?? 'configured model'})`
+          : result?.error ?? 'Provider unavailable').join(' · '))
         await load(request.month)
       }
     } catch (reason) {
@@ -249,7 +255,34 @@ export default function AiUsageHealthPage() {
     }
   }
 
-  const configuredByProvider = new Map(diagnostics.map(item => [item.provider, item.configured]))
+  async function runTranscriptionHealthCheck() {
+    if (!transcriptionAudio) {
+      setCheckMessage('Choose a short WebM, MP4, or M4A sample. Audio is sent directly to the provider and is never stored.')
+      return
+    }
+    const operationSequence = ++healthSequenceRef.current
+    const request = { month: monthRef.current, loadSequence: loadSequenceRef.current }
+    setChecking(true)
+    setCheckMessage(null)
+    try {
+      const routes = diagnostics.filter(item => item.capability === 'transcription' && item.enabled && item.configured)
+      if (routes.length === 0) throw new Error('No configured transcription route is available to test.')
+      const results = []
+      for (const route of routes) results.push(await runTranscriptionProviderHealthCheck(route.provider, route.routeId, transcriptionAudio))
+      if (isCurrentDashboardRequest(request, monthRef.current, loadSequenceRef.current)) {
+        setCheckMessage(results.map(result => result?.success
+          ? `${result.provider ?? 'Transcription provider'} ready (${result.model ?? 'configured model'})`
+          : result?.error ?? 'Transcription provider unavailable').join(' · '))
+        await load(request.month)
+      }
+    } catch (reason) {
+      if (isCurrentDashboardRequest(request, monthRef.current, loadSequenceRef.current)) setCheckMessage(reason instanceof Error ? reason.message : 'Transcription health check failed.')
+    } finally {
+      if (operationSequence === healthSequenceRef.current) setChecking(false)
+    }
+  }
+
+  const diagnosticsByRoute = new Map(diagnostics.map(item => [item.routeId, item]))
   const protection = budgetState(data?.budget ?? null)
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -311,7 +344,11 @@ export default function AiUsageHealthPage() {
                 {diagnosticsError ? <p className="mt-2 text-xs text-amber-200">{diagnosticsError}</p> : null}
                 {checkMessage ? <p className="mt-2 text-sm text-white/70" aria-live="polite">{checkMessage}</p> : null}
               </div>
-              <ActionButton variant="secondary" onClick={() => void runHealthCheck()} loading={checking} className="min-h-11 shrink-0">Run metered health check</ActionButton>
+              <div className="flex flex-col gap-2 sm:items-end">
+                <ActionButton variant="secondary" onClick={() => void runHealthCheck()} loading={checking} className="min-h-11 shrink-0">Test configured text routes</ActionButton>
+                <label className="text-xs font-bold text-white/55">Short transcription sample (never stored)<input type="file" accept="audio/webm,audio/mp4,audio/x-m4a" onChange={event => setTranscriptionAudio(event.target.files?.[0] ?? null)} className="mt-1 block max-w-72 text-xs text-white/45 file:mr-2 file:rounded-md file:border-0 file:bg-white/10 file:px-2 file:py-2 file:text-white" /></label>
+                <ActionButton variant="outline" onClick={() => void runTranscriptionHealthCheck()} loading={checking} className="min-h-11 shrink-0">Test configured transcription routes</ActionButton>
+              </div>
             </div>
             <div className="mt-4 overflow-x-auto rounded-xl border border-white/8">
               <table className="min-w-[860px] w-full text-left text-sm">
@@ -321,16 +358,17 @@ export default function AiUsageHealthPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {data.routes.map(route => {
-                    const configured = configuredByProvider.get(route.provider)
+                    const diagnostic = diagnosticsByRoute.get(route.id)
+                    const configured = diagnostic?.configured
                     const runtime = getProviderDisplayStatus(route, configured, now)
                     return (
                       <tr key={route.id} className="text-white/70">
                         <th scope="row" className="px-3 py-3 font-bold text-white">{route.priority}</th>
-                        <td className="px-3 py-3"><span className="font-semibold text-white">{route.provider}</span><span className="block text-xs text-white/40">{route.capability} · {route.enabled ? 'enabled' : 'disabled'}</span></td>
+                        <td className="px-3 py-3"><span className="font-semibold text-white">{route.provider}</span><span className="block text-xs text-white/40">{route.capability} · {route.enabled ? 'enabled' : 'disabled'} · {diagnostic?.optional ? 'optional fallback' : 'required route'}</span></td>
                         <td className="px-3 py-3 capitalize">{route.tier}</td>
                         <td className="max-w-64 px-3 py-3 font-mono text-xs">{route.model}</td>
                         <td className="px-3 py-3 text-xs">{route.pricing_currency}<span className="block text-white/40">as of {route.pricing_as_of}</span></td>
-                        <td className="px-3 py-3">{configured == null ? 'Unknown' : configured ? 'Configured (masked)' : 'Missing'}</td>
+                        <td className="px-3 py-3">{diagnostic == null ? 'Unknown' : diagnostic.keyStatus === 'configured (legacy alias)' ? 'Configured (legacy alias)' : configured ? 'Configured (masked)' : diagnostic.optional ? 'Missing (optional)' : 'Missing (required)'}</td>
                         <td className="px-3 py-3"><StatusPill status={runtime} /><span className="mt-1 block text-xs text-white/35">{observationFreshness(route.last_observed_at, now)}</span>{route.last_latency_ms != null ? <span className="block text-xs text-white/35">{number.format(route.last_latency_ms)} ms</span> : null}</td>
                       </tr>
                     )
@@ -385,7 +423,8 @@ function MetricCard({ label, value, detail }: { label: string; value: string; de
 }
 
 function StatusPill({ status }: { status: ProviderDisplayStatus }) {
-  return <span className={`inline-flex rounded-full border px-2 py-1 text-[11px] font-black capitalize ${statusClasses(status)}`}>{status === 'stale' ? 'Stale / unknown' : status}</span>
+  const label = status === 'stale' ? 'Stale / unknown' : status === 'authentication_failed' ? 'Authentication failed' : status === 'temporary_outage' ? 'Temporary outage' : status
+  return <span className={`inline-flex rounded-full border px-2 py-1 text-[11px] font-black capitalize ${statusClasses(status)}`}>{label}</span>
 }
 
 function UsageBars({ rows }: { rows: UsageSeriesRow[] }) {

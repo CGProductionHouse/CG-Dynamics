@@ -198,12 +198,17 @@ Provider variables:
 - `OPENROUTER_API_KEY` / `OPENROUTER_MODEL` route OpenRouter free/low-cost
   model calls through the OpenAI-compatible chat completions endpoint.
 - `GEMINI_API_KEY` / `GEMINI_MODEL` route Gemini API calls.
-- `GROQ_API_KEY` / `GROQ_MODEL` route Groq OpenAI-compatible calls.
+- `GROQ_API_KEY` is the canonical Groq text and transcription credential. The
+  legacy `Grok` name is read only as a migration fallback.
 - `OPENAI_API_KEY` / `OPENAI_MODEL` are paid OpenAI fallback only when
   configured and earlier providers fail.
 - `AI_PROVIDER_ORDER` controls provider priority.
 - `AI_MAX_FALLBACKS=3` allows the default four-provider chain to try the first
   provider plus three fallbacks.
+
+Canonical production route order and models are stored in
+`public.ai_provider_routes`. The model and order variables above are retained
+for compatibility callers only.
 
 ChatGPT Plus/Pro subscriptions do not power API usage. Each API provider needs
 its own key, billing/quota setup, and rate-limit handling. Free models may be

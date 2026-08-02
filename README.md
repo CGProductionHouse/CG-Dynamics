@@ -23,8 +23,11 @@ AI_MAX_FALLBACKS=3
 ```
 
 AI provider keys are server-side only. Set them as Supabase Edge Function
-secrets, not as `VITE_` browser variables. If no provider key is configured, the
-assistant page still loads and shows a clear setup message.
+secrets, not as `VITE_` browser variables. Canonical production route order,
+models and pricing live in `ai_provider_routes`; the model/order variables above
+remain compatibility settings for callers that have not loaded canonical
+routes. If no provider key is configured, the assistant page still loads and
+shows a clear setup message.
 
 Public Supabase signup is intentionally disabled. Administrators onboard users
 from **Admin > Team > Invites**, which calls the JWT-protected
@@ -36,7 +39,9 @@ Provider variables:
 - `OPENROUTER_API_KEY` / `OPENROUTER_MODEL`: OpenRouter chat completions, useful
   for free or low-cost models first.
 - `GEMINI_API_KEY` / `GEMINI_MODEL`: Google Gemini fallback.
-- `GROQ_API_KEY` / `GROQ_MODEL`: Groq OpenAI-compatible fallback.
+- `GROQ_API_KEY`: canonical Groq text and transcription credential. The legacy
+  production name `Grok` is recognized during migration but must not be used for
+  new configuration.
 - `OPENAI_API_KEY` / `OPENAI_MODEL`: paid OpenAI fallback only when configured
   and earlier providers fail.
 - `AI_PROVIDER_ORDER`: comma-separated routing order.

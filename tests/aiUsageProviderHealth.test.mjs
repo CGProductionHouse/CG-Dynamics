@@ -13,6 +13,13 @@ const navigation = read('../src/pages/admin/adminNavigation.ts')
 const importHealth = read('../src/pages/admin/ImportHealthPage.tsx')
 const dashboard = read('../src/pages/admin/AiUsageHealthPage.tsx')
 const dashboardData = read('../src/lib/aiUsageHealth.ts')
+const providerSecrets = read('../supabase/functions/_shared/providerSecrets.ts')
+const voiceTranscribe = read('../supabase/functions/_shared/voiceTranscribe.ts')
+const meetingDebrief = read('../supabase/functions/meeting-debrief/index.ts')
+const contentRunDebrief = read('../supabase/functions/content-run-voice-debrief/index.ts')
+const voiceDebriefDocs = read('../docs/content-run-voice-debrief.md')
+const routeScopedReservation = read('../supabase/migrations/20260802120000_ai_health_route_scoped_reservations.sql')
+const assistantClient = read('../src/lib/assistant.ts')
 
 let server
 let selectRoutes
@@ -22,6 +29,9 @@ let loadRecentlyDegradedRouteIds
 let finalizeAiUsageWithReplay
 let getProviderDisplayStatus
 let isCurrentDashboardRequest
+let getProviderDiagnostics
+let resolveProviderSecret
+let configuredProviderNames
 
 before(async () => {
   server = await createServer({
@@ -30,9 +40,10 @@ before(async () => {
     appType: 'custom',
     optimizeDeps: { noDiscovery: true },
   })
-  ;({ selectRoutes, routeAiChat } = await server.ssrLoadModule('/supabase/functions/cg-assistant-chat/ai-router.ts'))
+  ;({ selectRoutes, routeAiChat, getProviderDiagnostics } = await server.ssrLoadModule('/supabase/functions/cg-assistant-chat/ai-router.ts'))
   ;({ estimateRouteCost, loadRecentlyDegradedRouteIds, finalizeAiUsageWithReplay } = await server.ssrLoadModule('/supabase/functions/_shared/aiUsage.ts'))
   ;({ getProviderDisplayStatus, isCurrentDashboardRequest } = await server.ssrLoadModule('/src/lib/aiUsageHealth.ts'))
+  ;({ resolveProviderSecret, configuredProviderNames } = await server.ssrLoadModule('/supabase/functions/_shared/providerSecrets.ts'))
 })
 
 after(async () => { await server.close() })
@@ -130,10 +141,15 @@ test('dashboard exposes ordered route health and only masked configuration diagn
   assert.match(sql, /'runtime_status', case[\s\S]*'healthy'[\s\S]*'degraded'[\s\S]*'unavailable'[\s\S]*'unknown'/)
   assert.match(sql, /order by route\.capability, route\.tier, route\.priority/)
   assert.match(dashboard, /Configured \(masked\)/)
-  assert.match(dashboard, /Run metered health check/)
+  assert.match(dashboard, /Test configured text routes/)
+  assert.match(dashboard, /Test configured transcription routes/)
+  assert.match(dashboard, /diagnosticsByRoute/)
+  assert.match(dashboard, /Missing \(optional\)/)
+  assert.match(dashboard, /Authentication failed/)
+  assert.match(dashboard, /Temporary outage/)
   assert.match(assistant, /message: 'Health check completed\.'/)
   assert.doesNotMatch(assistant.slice(assistant.indexOf('async function handleProviderTest'), assistant.indexOf('// ── Skilled-agent mode')), /message: result\.content/)
-  assert.doesNotMatch(dashboard, /prompt|transcript|api[_ ]?key|authorization|raw response/i)
+  assert.doesNotMatch(dashboard, /prompt|api[_ ]?key|authorization|raw response/i)
 })
 
 test('budget editor uses optimistic versioning and renders hard protection states', () => {
@@ -182,7 +198,7 @@ test('budget saves and health checks cannot reload an obsolete month or invalida
   assert.equal(isCurrentDashboardRequest({ month: '2026-07', loadSequence: 4 }, '2026-08', 4), false)
   assert.equal(isCurrentDashboardRequest({ month: '2026-08', loadSequence: 4 }, '2026-08', 5), false)
   assert.match(dashboard, /if \(selectedMonth !== monthRef\.current\) return\s+const sequence = \+\+loadSequenceRef\.current/)
-  assert.equal((dashboard.match(/isCurrentDashboardRequest\(request, monthRef\.current, loadSequenceRef\.current\)/g) ?? []).length, 4)
+  assert.equal((dashboard.match(/isCurrentDashboardRequest\(request, monthRef\.current, loadSequenceRef\.current\)/g) ?? []).length, 6)
   assert.match(dashboard, /operationSequence === budgetSequenceRef\.current\) setSavingBudget\(false\)/)
   assert.match(dashboard, /operationSequence === healthSequenceRef\.current\) setChecking\(false\)/)
   assert.match(dashboard, /finally \{\s+if \(sequence === loadSequenceRef\.current && selectedMonth === monthRef\.current\) setLoading\(false\)/)
@@ -222,6 +238,84 @@ test('provider freshness transitions after fifteen minutes while precedence rema
   assert.equal(getProviderDisplayStatus(base, true, observed + 15 * 60_000 + 1), 'stale')
   assert.equal(getProviderDisplayStatus({ ...base, enabled: false }, false, observed + 60 * 60_000), 'disabled')
   assert.equal(getProviderDisplayStatus(base, false, observed + 60 * 60_000), 'missing')
+  assert.equal(getProviderDisplayStatus({ ...base, last_observed_at: null }, true, observed), 'configured')
+  assert.equal(getProviderDisplayStatus({ ...base, safe_error_code: 'PROVIDER_AUTH' }, true, observed), 'authentication_failed')
+  for (const safe_error_code of ['PROVIDER_RATE_LIMIT', 'PROVIDER_UPSTREAM', 'PROVIDER_TIMEOUT', 'PROVIDER_NETWORK_ERROR']) {
+    assert.equal(getProviderDisplayStatus({ ...base, safe_error_code }, true, observed), 'temporary_outage')
+  }
+})
+
+test('all AI paths use one canonical provider-secret resolver with a Groq legacy alias', { concurrency: false }, () => {
+  assert.match(providerSecrets, /groq: \{ canonical: 'GROQ_API_KEY', legacy: 'Grok' \}/)
+  for (const source of [router, voiceTranscribe, meetingDebrief, contentRunDebrief]) {
+    assert.doesNotMatch(source, /Deno\.env\.get\(['"](?:GROQ_API_KEY|Grok)['"]\)/)
+  }
+  assert.match(router, /resolveProviderSecret/)
+  assert.match(voiceTranscribe, /resolveProviderSecret/)
+  assert.match(meetingDebrief, /configuredProviderNames\('transcription', routes\.map/)
+  assert.match(contentRunDebrief, /configuredProviderNames\('transcription', transcriptionRoutes\.map/)
+
+  const originalDeno = globalThis.Deno
+  try {
+    globalThis.Deno = { env: { get: name => name === 'Grok' ? 'legacy-masked' : '' } }
+    assert.deepEqual(resolveProviderSecret('groq'), { value: 'legacy-masked', source: 'legacy' })
+    assert.deepEqual(configuredProviderNames('transcription'), ['groq'])
+    globalThis.Deno = { env: { get: name => name === 'GROQ_API_KEY' ? 'canonical-masked' : name === 'Grok' ? 'legacy-masked' : '' } }
+    assert.deepEqual(resolveProviderSecret('groq'), { value: 'canonical-masked', source: 'canonical' })
+  } finally {
+    globalThis.Deno = originalDeno
+  }
+})
+
+test('route diagnostics preserve direct provider identity and optional status', { concurrency: false }, () => {
+  const originalDeno = globalThis.Deno
+  globalThis.Deno = { env: { get: name => name === 'OPENROUTER_API_KEY' ? 'masked' : '' } }
+  try {
+    const openRouterRoute = { ...route('openrouter', 'cheap', 10), id: 'openrouter-route', model: 'google/gemini-flash' }
+    const groqRoute = { ...route('groq', 'cheap', 20), id: 'groq-route', capability: 'transcription' }
+    const diagnostics = getProviderDiagnostics([openRouterRoute, groqRoute])
+    assert.deepEqual(diagnostics.map(item => [item.routeId, item.provider, item.configured, item.optional]), [
+      ['openrouter-route', 'openrouter', true, false],
+      ['groq-route', 'groq', false, false],
+    ])
+    assert.equal(diagnostics[0].model, 'google/gemini-flash')
+  } finally {
+    globalThis.Deno = originalDeno
+  }
+})
+
+test('health checks target exact configured routes and transcription health stores no audio', () => {
+  assert.match(dashboard, /runMaskedProviderHealthCheck\(route\.provider, route\.routeId\)/)
+  assert.match(dashboard, /runTranscriptionProviderHealthCheck\(route\.provider, route\.routeId, transcriptionAudio\)/)
+  assert.match(dashboardData, /body: \{ action: 'test_provider', provider, routeId, requestId: crypto\.randomUUID\(\) \}/)
+  assert.match(router, /filter\(route => !options\.routeId \|\| route\.id === options\.routeId\)/)
+  assert.match(assistant, /routeId, forceProbe: true/)
+  assert.match(meetingDebrief, /action === 'transcription_health'/)
+  assert.match(meetingDebrief, /feature: 'provider_health', action: 'transcribe'/)
+  assert.match(meetingDebrief, /audio\.size > MAX_AUDIO_BYTES/)
+  assert.match(meetingDebrief, /`\$\{provider\}\\n\$\{routeId\}\\n\$\{audioHash\}`/)
+  assert.match(meetingDebrief, /deleteAiUsageReplay/)
+  assert.doesNotMatch(meetingDebrief, /audio_(?:data|bytes|blob)\s*:/i)
+  assert.doesNotMatch(voiceDebriefDocs, /VOICE_TRANSCRIPTION_ORDER|GROQ_TRANSCRIPTION_MODEL|OPENAI_TRANSCRIPTION_MODEL/)
+})
+
+test('route-scoped reservations preserve hard-budget safety without charging unrelated routes', () => {
+  assert.ok(routeScopedReservation.indexOf('drop function if exists public.ai_reserve_usage') < routeScopedReservation.indexOf('create or replace function public.ai_reserve_usage'))
+  assert.match(routeScopedReservation, /p_route_ids uuid\[\] default null/)
+  assert.match(routeScopedReservation, /p_route_ids is null or route\.id = any\(p_route_ids\)/)
+  assert.match(routeScopedReservation, /cardinality\(p_route_ids\) = 0/)
+  assert.match(routeScopedReservation, /auth\.role\(\) is distinct from 'service_role'/)
+  assert.match(routeScopedReservation, /revoke all on function public\.ai_reserve_usage\([^;]+uuid\[\]\) from public, anon, authenticated/)
+  assert.match(usage, /p_route_ids: input\.routeIds \?\? null/)
+  assert.match(router, /routeIds: routes\.map\(route => route\.id\)/)
+  assert.match(voiceTranscribe, /routeIds: routes\.map\(route => route\.id\)/)
+})
+
+test('existing Assistant provider test selects an exact configured text route', () => {
+  assert.match(assistantClient, /provider\.capability === 'text' && provider\.enabled && provider\.configured/)
+  assert.match(assistantClient, /provider: route\.provider/)
+  assert.match(assistantClient, /routeId: route\.routeId/)
+  assert.match(assistantClient, /requestId: crypto\.randomUUID\(\)/)
 })
 
 test('reserve sums the four worst-case eligible attempts under the monthly row lock', () => {
@@ -561,7 +655,8 @@ test('assistant supplies hashed identity/context, keeps local answers unmetered,
   assert.match(assistant, /feature: 'cg_assistant'/)
   assert.match(assistant, /classifyChatComplexity\(message\)/)
   assert.match(assistant, /`skilled_\$\{agentKey\}`[\s\S]*'complex'/)
-  assert.match(assistant, /'provider_test', '\[masked provider test\]', 'complex'/)
+  assert.match(assistant, /`provider_test_\$\{provider\}`/)
+  assert.match(assistant, /`\[masked \$\{provider\}:\$\{routeId\} provider test\]`/)
   assert.match(assistant, /return redactPrompt \? '\[restricted prompt omitted\]' : '\[prompt omitted\]'/)
   assert.match(assistant, /if \(!isAdminRole\(role\)\)/)
   assert.match(assistant, /configured \(masked\)/)

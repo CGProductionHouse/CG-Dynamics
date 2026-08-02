@@ -12,6 +12,7 @@ import {
   type AiUsageClient,
 } from './aiUsage.ts'
 import { deriveAudioDurationSeconds } from './audioDuration.ts'
+import { isAiProviderName, resolveProviderSecret, type AiProviderName } from './providerSecrets.ts'
 
 export const MAX_VOICE_SECONDS = 300
 const TRANSCRIPTION_TIMEOUT_MS = 45_000
@@ -25,6 +26,9 @@ export interface VoiceUsageContext {
   fingerprint: string
   audioDurationSeconds: number
   audioBytes: number
+  provider?: AiProviderName
+  routeId?: string
+  forceProbe?: boolean
 }
 
 interface TranscriptionResult {
@@ -53,15 +57,8 @@ class TranscriptionProviderError extends Error {
   }
 }
 
-function env(name: string): string {
-  return (Deno.env.get(name) ?? '').trim()
-}
-
 function secretForProvider(provider: string): string | null {
-  if (provider === 'groq') return env('GROQ_API_KEY') || null
-  if (provider === 'gemini') return env('GEMINI_API_KEY') || null
-  if (provider === 'openai') return env('OPENAI_API_KEY') || null
-  return null
+  return isAiProviderName(provider) ? resolveProviderSecret(provider).value : null
 }
 
 function safeHttpCode(status: number): string {
@@ -214,7 +211,9 @@ export async function transcribeAudio(
   if (audioDurationSeconds > MAX_VOICE_SECONDS) throw new Error('VOICE_DURATION_LIMIT')
 
   const startedAt = Date.now()
-  const routes = await loadAiProviderRoutes(client, 'transcription')
+  const routes = (await loadAiProviderRoutes(client, 'transcription'))
+    .filter(route => !context.provider || route.provider === context.provider)
+    .filter(route => !context.routeId || route.id === context.routeId)
   const reservation = await reserveAiUsage(client, {
     idempotencyKey: context.idempotencyKey,
     fingerprint: context.fingerprint,
@@ -224,6 +223,7 @@ export async function transcribeAudio(
     capability: 'transcription',
     complexity: 'simple',
     maxAudioSeconds: Math.ceil(audioDurationSeconds),
+    routeIds: routes.map(route => route.id),
   })
   if (!reservation.allowed) {
     if (reservation.duplicate) {
@@ -244,7 +244,7 @@ export async function transcribeAudio(
   let unrecordedProviderAttempts = 0
   let hasConfiguredProvider = false
   try {
-    const degraded = await loadRecentlyDegradedRouteIds(client)
+    const degraded = context.forceProbe ? new Set<string>() : await loadRecentlyDegradedRouteIds(client)
     for (const route of routes) {
       attemptNumber += 1
       const apiKey = secretForProvider(route.provider)

@@ -96,7 +96,7 @@ test('typed debrief skips transcription while audio gets canonical transcribe co
 test('durable debrief IDs return an existing draft before paid calls and duplicate work is safe', () => {
   for (const edge of [meeting, contentRun]) {
     const existingIndex = edge.indexOf(".eq('id', requestId)")
-    const transcribeIndex = edge.indexOf('await transcribeAudio')
+    const transcribeIndex = edge.indexOf('await transcribeAudio', edge.indexOf("if (action === 'analyse_audio')"))
     const interpretIndex = edge.indexOf('await analyseTranscript', existingIndex)
     assert.ok(existingIndex >= 0 && transcribeIndex > existingIndex && interpretIndex > existingIndex)
     assert.match(edge, /deduplicated: true/)

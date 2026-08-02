@@ -2,7 +2,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { AiDuplicateRequestError, routeAiChat, type AiChatMessage } from '../cg-assistant-chat/ai-router.ts'
 import { transcribeAudio } from '../_shared/voiceTranscribe.ts'
-import { deleteAiUsageReplay, fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { deleteAiUsageReplay, fetchAiUsageReplay, loadAiProviderRoutes, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { configuredProviderNames } from '../_shared/providerSecrets.ts'
 
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024
@@ -328,15 +329,12 @@ Deno.serve(async request => {
 
   if (action === 'diagnostics') {
     if (role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
-    const transcriptionProviders = [
-      env('GROQ_API_KEY') ? 'groq' : null,
-      env('GEMINI_API_KEY') ? 'gemini' : null,
-      env('OPENAI_API_KEY') ? 'openai' : null,
-    ].filter((provider): provider is string => provider !== null)
-    const interpretationProviders = [
-      env('OPENROUTER_API_KEY') ? 'openrouter' : null,
-      ...transcriptionProviders,
-    ].filter((provider): provider is string => provider !== null)
+    const [transcriptionRoutes, textRoutes] = await Promise.all([
+      loadAiProviderRoutes(service as unknown as AiUsageClient, 'transcription'),
+      loadAiProviderRoutes(service as unknown as AiUsageClient, 'text'),
+    ])
+    const transcriptionProviders = configuredProviderNames('transcription', transcriptionRoutes.map(route => route.provider))
+    const interpretationProviders = configuredProviderNames('text', textRoutes.map(route => route.provider))
     return jsonResponse({
       ok: true,
       transcriptionConfigured: transcriptionProviders.length > 0,

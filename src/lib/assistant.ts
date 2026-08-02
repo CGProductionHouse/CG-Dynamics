@@ -137,10 +137,14 @@ export const SOCIAL_PLATFORMS: { slug: string; name: string; surfaces: { key: st
 ]
 
 export interface AssistantProviderDiagnostic {
+  routeId: string
+  capability: 'text' | 'transcription'
   provider: string
   model: string
   configured: boolean
   keyStatus: string
+  optional: boolean
+  enabled: boolean
 }
 
 export interface AssistantDiagnostics {
@@ -284,9 +288,15 @@ export async function getAssistantDiagnostics(): Promise<AssistantDiagnosticsRes
 }
 
 export async function testAssistantProvider(): Promise<AssistantProviderTestResponse> {
+  const diagnostics = await getAssistantDiagnostics()
+  const route = diagnostics.diagnostics?.providers.find(provider => provider.capability === 'text' && provider.enabled && provider.configured)
+  if (!route) return { ok: false, error: 'No configured text provider route is available.' }
   const { data, error } = await supabase.functions.invoke<AssistantProviderTestResponse>('cg-assistant-chat', {
     body: {
       action: 'test_provider',
+      provider: route.provider,
+      routeId: route.routeId,
+      requestId: crypto.randomUUID(),
     },
   })
 
