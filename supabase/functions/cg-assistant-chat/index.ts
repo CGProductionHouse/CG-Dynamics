@@ -5,7 +5,8 @@ import {
   routeAiChat,
   type AiChatMessage,
 } from './ai-router.ts'
-import { loadAiProviderRoutes, type AiComplexity, type AiProviderRoute, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { loadAiProviderRouteInventory, type AiComplexity, type AiProviderRoute, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { isAiProviderName, type AiProviderName } from '../_shared/providerSecrets.ts'
 import {
   AGENT_CONTRACTS,
   buildPlan,
@@ -602,14 +603,14 @@ async function auditStatus(sb: ReturnType<typeof createClient>): Promise<'availa
 async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
   let routes: AiProviderRoute[] | null = null
   try {
-    const textRoutes = await loadAiProviderRoutes(sb as unknown as AiUsageClient, 'text')
-    const transcriptionRoutes = await loadAiProviderRoutes(sb as unknown as AiUsageClient, 'transcription')
+    const textRoutes = await loadAiProviderRouteInventory(sb as unknown as AiUsageClient, 'text')
+    const transcriptionRoutes = await loadAiProviderRouteInventory(sb as unknown as AiUsageClient, 'transcription')
     routes = [...textRoutes, ...transcriptionRoutes]
   } catch {
     // A masked setup response remains available before the migration is applied.
   }
   const providers = getProviderDiagnostics(routes ?? undefined)
-  const configuredProviders = providers.filter((provider) => provider.configured).length
+  const configuredProviders = providers.filter((provider) => provider.enabled && provider.configured).length
   const auditLogging = await auditStatus(sb)
 
   return jsonResponse({
@@ -621,10 +622,14 @@ async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
           ? 'At least one AI provider key appears configured.'
           : 'No AI provider key appears configured yet.',
       providers: providers.map((provider) => ({
+        routeId: provider.routeId,
+        capability: provider.capability,
         provider: provider.provider,
         model: provider.model,
         configured: provider.configured,
-        keyStatus: provider.configured ? 'configured (masked)' : 'missing',
+        keyStatus: provider.keyStatus === 'legacy' ? 'configured (legacy alias)' : provider.configured ? 'configured (masked)' : 'missing',
+        optional: provider.optional,
+        enabled: provider.enabled,
       })),
       providerOrder: providers.map(provider => ({ provider: provider.provider, model: provider.model })),
       auditLogging,
@@ -638,6 +643,8 @@ async function handleProviderTest(
   userId: string,
   role: string,
   idempotencyKey: string,
+  provider: AiProviderName,
+  routeId: string,
 ) {
   const messages: AiChatMessage[] = [
     {
@@ -649,9 +656,10 @@ async function handleProviderTest(
   ]
 
   try {
-    const result = await routeAiChat(messages, await aiRequestContext(
-      sb, userId, idempotencyKey, 'provider_test', '[masked provider test]', 'complex', 128,
-    ))
+    const context = await aiRequestContext(
+      sb, userId, idempotencyKey, `provider_test_${provider}`, `[masked ${provider}:${routeId} provider test]`, 'complex', 128,
+    )
+    const result = await routeAiChat(messages, { ...context, provider, routeId, forceProbe: true })
     await auditAssistantRequest(sb, {
       userId,
       role,
@@ -927,7 +935,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'test_provider') {
-      return await handleProviderTest(sb, user.id, role, idempotencyKey)
+      const provider = typeof body.provider === 'string' ? body.provider.trim().toLowerCase() : ''
+      const routeId = typeof body.routeId === 'string' ? body.routeId.trim() : ''
+      if (!isAiProviderName(provider)) return jsonResponse({ ok: false, error: 'A supported provider is required.' }, 400)
+      if (!/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(routeId)) return jsonResponse({ ok: false, error: 'A valid provider route is required.' }, 400)
+      return await handleProviderTest(sb, user.id, role, idempotencyKey, provider, routeId)
     }
   }
 

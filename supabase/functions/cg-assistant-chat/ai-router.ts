@@ -12,8 +12,14 @@ import {
   type AiReplayKind,
   type AiUsageClient,
 } from '../_shared/aiUsage.ts'
+import {
+  isAiProviderName,
+  providerIsOptional,
+  resolveProviderSecret,
+  type AiProviderName,
+} from '../_shared/providerSecrets.ts'
 
-export type AiProviderName = 'openrouter' | 'gemini' | 'groq' | 'openai'
+export type { AiProviderName } from '../_shared/providerSecrets.ts'
 
 export interface AiChatMessage {
   role: 'system' | 'user' | 'assistant'
@@ -36,6 +42,9 @@ export interface AiRouterOptions {
   complexity: AiComplexity
   maxOutputTokens: number
   usageClient: AiUsageClient
+  provider?: AiProviderName
+  routeId?: string
+  forceProbe?: boolean
   validateContent?: (content: string) => boolean | Promise<boolean>
   replayKind?: AiReplayKind
   buildReplayPayload?: (result: { content: string; provider: AiProviderName; model: string }) => Record<string, unknown>
@@ -46,10 +55,14 @@ interface LegacyAiRouterOptions {
 }
 
 export interface AiProviderDiagnostic {
+  routeId: string
+  capability: 'text' | 'transcription'
   provider: AiProviderName
   model: string
   configured: boolean
-  keyStatus: 'configured' | 'missing'
+  keyStatus: 'configured' | 'legacy' | 'missing'
+  optional: boolean
+  enabled: boolean
 }
 
 interface ProviderConfig {
@@ -90,22 +103,12 @@ function envValue(name: string, fallback = ''): string {
   return (Deno.env.get(name) ?? fallback).trim()
 }
 
-function isKnownProvider(value: string): value is AiProviderName {
-  return value === 'openrouter' || value === 'gemini' || value === 'groq' || value === 'openai'
-}
-
 function secretForProvider(name: AiProviderName): string | null {
-  const names: Record<AiProviderName, string> = {
-    openrouter: 'OPENROUTER_API_KEY',
-    gemini: 'GEMINI_API_KEY',
-    groq: 'GROQ_API_KEY',
-    openai: 'OPENAI_API_KEY',
-  }
-  return envValue(names[name]) || null
+  return resolveProviderSecret(name).value
 }
 
 function providerConfig(route: AiProviderRoute): ProviderConfig | null {
-  if (!isKnownProvider(route.provider)) return null
+  if (!isAiProviderName(route.provider)) return null
   return { name: route.provider, apiKey: secretForProvider(route.provider), model: route.model }
 }
 
@@ -123,7 +126,7 @@ function providerOrder(): AiProviderName[] {
   const requested = envValue('AI_PROVIDER_ORDER', DEFAULT_PROVIDER_ORDER.join(','))
     .split(',')
     .map(item => item.trim().toLowerCase())
-    .filter(isKnownProvider)
+    .filter(isAiProviderName)
   return requested.length > 0 ? requested : DEFAULT_PROVIDER_ORDER
 }
 
@@ -147,19 +150,23 @@ export function getProviderDiagnostics(routes?: AiProviderRoute[]): AiProviderDi
     request_cost_micros: 0,
     fx_zar_micros: 1_000_000,
   }))
-  return configuredRoutes.filter(route => isKnownProvider(route.provider)).map(route => {
-    const configured = Boolean(secretForProvider(route.provider as AiProviderName))
+  return configuredRoutes.filter(route => isAiProviderName(route.provider)).map(route => {
+    const secret = resolveProviderSecret(route.provider as AiProviderName)
     return {
+      routeId: route.id,
+      capability: route.capability,
       provider: route.provider as AiProviderName,
       model: route.model,
-      configured,
-      keyStatus: configured ? 'configured' : 'missing',
+      configured: Boolean(secret.value),
+      keyStatus: secret.source,
+      optional: providerIsOptional(route.provider as AiProviderName, route.capability),
+      enabled: route.enabled,
     }
   })
 }
 
 export function selectRoutes(routes: AiProviderRoute[], complexity: AiComplexity): AiProviderRoute[] {
-  const enabled = routes.filter(route => route.enabled && isKnownProvider(route.provider))
+  const enabled = routes.filter(route => route.enabled && isAiProviderName(route.provider))
   if (complexity === 'simple') return enabled.filter(route => route.tier === 'cheap').sort((a, b) => a.priority - b.priority)
   return enabled.sort((a, b) => {
     if (a.tier !== b.tier) return a.tier === 'strong' ? -1 : 1
@@ -330,6 +337,8 @@ export async function routeAiChat(
   const maxOutputTokens = Math.min(Math.max(Math.floor(options.maxOutputTokens), 128), 4000)
   const maxInputTokens = Math.min(128000, Math.max(512, Math.ceil(messages.reduce((sum, message) => sum + message.content.length, 0) / 2)))
   const routes = selectRoutes(await loadAiProviderRoutes(options.usageClient, 'text'), options.complexity)
+    .filter(route => !options.provider || route.provider === options.provider)
+    .filter(route => !options.routeId || route.id === options.routeId)
   const reservation = await reserveAiUsage(options.usageClient, {
     idempotencyKey: options.idempotencyKey,
     fingerprint: options.fingerprint,
@@ -340,6 +349,7 @@ export async function routeAiChat(
     complexity: options.complexity,
     maxInputTokens,
     maxOutputTokens,
+    routeIds: routes.map(route => route.id),
   })
   if (!reservation.allowed) {
     if (reservation.duplicate) throw new AiDuplicateRequestError(reservation.request_id)
@@ -353,7 +363,7 @@ export async function routeAiChat(
   let unrecordedProviderAttempts = 0
 
   try {
-    const degraded = await loadRecentlyDegradedRouteIds(options.usageClient)
+    const degraded = options.forceProbe ? new Set<string>() : await loadRecentlyDegradedRouteIds(options.usageClient)
     for (const route of routes) {
       attemptNumber += 1
       const config = providerConfig(route)

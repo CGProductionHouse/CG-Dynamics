@@ -10,7 +10,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { AiDuplicateRequestError, routeAiChat, type AiChatMessage } from '../cg-assistant-chat/ai-router.ts'
 import { transcribeAudio } from '../_shared/voiceTranscribe.ts'
-import { deleteAiUsageReplay, fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { deleteAiUsageReplay, fetchAiUsageReplay, loadAiProviderRoutes, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { configuredProviderNames, isAiProviderName } from '../_shared/providerSecrets.ts'
 
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024
@@ -269,6 +270,8 @@ Deno.serve(async request => {
   let eventId: string
   let clientId: string
   let requestId: string
+  let providerName = ''
+  let providerRouteId = ''
   let durationSeconds = 0
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}
@@ -280,6 +283,8 @@ Deno.serve(async request => {
       eventId = String(form.get('eventId') ?? '')
       clientId = String(form.get('clientId') ?? '')
       requestId = String(form.get('requestId') ?? '')
+      providerName = String(form.get('provider') ?? '')
+      providerRouteId = String(form.get('routeId') ?? '')
       durationSeconds = Number(form.get('durationSeconds'))
       const file = form.get('audio')
       audio = file instanceof File ? file : null
@@ -290,6 +295,8 @@ Deno.serve(async request => {
       eventId = typeof jsonBody.eventId === 'string' ? jsonBody.eventId : ''
       clientId = typeof jsonBody.clientId === 'string' ? jsonBody.clientId : ''
       requestId = typeof jsonBody.requestId === 'string' ? jsonBody.requestId : ''
+      providerName = typeof jsonBody.provider === 'string' ? jsonBody.provider : ''
+      providerRouteId = typeof jsonBody.routeId === 'string' ? jsonBody.routeId : ''
     }
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid debrief request.' }, 400)
@@ -297,8 +304,33 @@ Deno.serve(async request => {
 
   if (action === 'diagnostics') {
     if (role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
-    const providers = [env('GROQ_API_KEY') ? 'groq' : null, env('GEMINI_API_KEY') ? 'gemini' : null, env('OPENAI_API_KEY') ? 'openai' : null].filter((p): p is string => p !== null)
+    const routes = await loadAiProviderRoutes(service as unknown as AiUsageClient, 'transcription')
+    const providers = configuredProviderNames('transcription', routes.map(route => route.provider))
     return jsonResponse({ ok: true, transcriptionConfigured: providers.length > 0, transcriptionProviders: providers })
+  }
+
+  if (action === 'transcription_health') {
+    if (role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
+    if (!validRequestId(requestId)) return jsonResponse({ ok: false, error: 'A valid health request ID is required.' }, 400)
+    const provider = providerName.trim().toLowerCase()
+    const routeId = providerRouteId.trim()
+    if (!isAiProviderName(provider) || provider === 'openrouter') return jsonResponse({ ok: false, error: 'A supported transcription provider is required.' }, 400)
+    if (!audio || audio.size === 0) return jsonResponse({ ok: false, error: 'A minimal health-check audio file is required.' }, 400)
+    if (audio.size > MAX_AUDIO_BYTES) return jsonResponse({ ok: false, error: 'The health-check audio file is too large.' }, 413)
+    if (!/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(routeId)) return jsonResponse({ ok: false, error: 'A valid transcription route is required.' }, 400)
+    const audioHash = await sha256(await audio.arrayBuffer())
+    const fingerprint = await sha256(`${provider}\n${routeId}\n${audioHash}`)
+    try {
+      const result = await transcribeAudio(service as unknown as AiUsageClient, audio, {
+        feature: 'provider_health', action: 'transcribe', actorId: user.id,
+        idempotencyKey: `${requestId}:transcribe`, fingerprint,
+        audioDurationSeconds: durationSeconds, audioBytes: audio.size, provider, routeId, forceProbe: true,
+      })
+      await deleteAiUsageReplay(service as unknown as AiUsageClient, fingerprint, 'debrief_transcript', user.id)
+      return jsonResponse({ ok: true, result: { success: true, provider: result.provider, model: result.model, audioSeconds: result.audioSeconds } })
+    } catch (error) {
+      return jsonResponse({ ok: true, result: { success: false, provider, error: error instanceof Error ? error.message : 'Transcription health check failed.' } })
+    }
   }
 
   if (action === 'apply') {

@@ -53,16 +53,11 @@ Deploy:
 supabase/functions/content-run-voice-debrief
 ```
 
-The function reuses the existing server-side AI provider keys. Optional
-transcription settings:
+The function reuses the canonical server-side provider keys. Transcription
+order, enabled state and models are controlled by `ai_provider_routes`; they are
+not separate Edge Function environment variables. Groq is the required
+production transcription route. Gemini and OpenAI are optional fallbacks.
 
-```text
-VOICE_TRANSCRIPTION_ORDER=groq,gemini,openai
-GROQ_TRANSCRIPTION_MODEL=whisper-large-v3-turbo
-OPENAI_TRANSCRIPTION_MODEL=gpt-4o-mini-transcribe
-```
-
-No key is exposed to the browser. Groq is attempted first by default, Gemini is
-second, and OpenAI is the final configured fallback. The typed debrief path
-still works when no audio transcription provider is available, provided a text
-AI provider is configured.
+No key is exposed to the browser. The typed debrief path still works when no
+audio transcription provider is available, provided a text AI provider is
+configured.

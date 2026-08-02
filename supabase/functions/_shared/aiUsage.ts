@@ -39,6 +39,7 @@ export interface ReserveAiUsageInput {
   maxInputTokens?: number | null
   maxOutputTokens?: number | null
   maxAudioSeconds?: number | null
+  routeIds?: string[] | null
 }
 
 export interface AiUsageReservation {
@@ -97,6 +98,18 @@ export async function loadAiProviderRoutes(client: AiUsageClient, capability: Ai
   return result.data ?? []
 }
 
+export async function loadAiProviderRouteInventory(client: AiUsageClient, capability: AiCapability): Promise<AiProviderRoute[]> {
+  const builder = client.from('ai_provider_routes').select(
+    'id, capability, provider, model, tier, priority, enabled, pricing_currency, input_per_million_micros, output_per_million_micros, audio_per_minute_micros, request_cost_micros, fx_zar_micros',
+  ) as { eq(column: string, value: unknown): unknown }
+  const capabilityRoutes = builder.eq('capability', capability) as {
+    order(column: string, options: { ascending: boolean }): unknown
+  }
+  const result = await query<AiProviderRoute[]>(capabilityRoutes.order('priority', { ascending: true }))
+  if (result.error) throw new Error('AI_ROUTE_LOAD_FAILED')
+  return result.data ?? []
+}
+
 export async function loadRecentlyDegradedRouteIds(client: AiUsageClient): Promise<Set<string>> {
   const since = new Date(Date.now() - 5 * 60 * 1000).toISOString()
   const builder = client.from('ai_provider_health_observations').select('route_id, observation, observed_at') as {
@@ -131,6 +144,7 @@ export async function reserveAiUsage(client: AiUsageClient, input: ReserveAiUsag
     p_max_input_tokens: input.maxInputTokens ?? null,
     p_max_output_tokens: input.maxOutputTokens ?? null,
     p_max_audio_seconds: input.maxAudioSeconds ?? null,
+    p_route_ids: input.routeIds ?? null,
   })
   if (error || !data || typeof data !== 'object') throw new Error('AI_USAGE_RESERVATION_FAILED')
   return data as AiUsageReservation

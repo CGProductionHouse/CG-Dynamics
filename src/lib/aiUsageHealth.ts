@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 export type RuntimeHealth = 'healthy' | 'degraded' | 'unavailable' | 'unknown'
-export type ProviderDisplayStatus = RuntimeHealth | 'disabled' | 'missing' | 'stale'
+export type ProviderDisplayStatus = RuntimeHealth | 'disabled' | 'missing' | 'stale' | 'configured' | 'authentication_failed' | 'temporary_outage'
 
 export type DashboardRequestSnapshot = {
   month: string
@@ -159,9 +159,11 @@ export function getProviderDisplayStatus(
 ): ProviderDisplayStatus {
   if (!route.enabled) return 'disabled'
   if (configured === false) return 'missing'
-  if (!route.last_observed_at) return 'unknown'
+  if (!route.last_observed_at) return configured ? 'configured' : 'unknown'
   const observedAt = Date.parse(route.last_observed_at)
   if (!Number.isFinite(observedAt) || now - observedAt > 15 * 60 * 1000) return 'stale'
+  if (route.safe_error_code === 'PROVIDER_AUTH') return 'authentication_failed'
+  if (['PROVIDER_RATE_LIMIT', 'PROVIDER_UPSTREAM', 'PROVIDER_TIMEOUT', 'PROVIDER_NETWORK_ERROR'].includes(route.safe_error_code ?? '')) return 'temporary_outage'
   return route.runtime_status
 }
 
@@ -179,10 +181,14 @@ export type AiUsageAggregates = {
 }
 
 export type MaskedProviderDiagnostic = {
+  routeId: string
+  capability: 'text' | 'transcription'
   provider: string
   model: string
   configured: boolean
-  keyStatus: 'configured (masked)' | 'missing'
+  keyStatus: 'configured (masked)' | 'configured (legacy alias)' | 'missing'
+  optional: boolean
+  enabled: boolean
 }
 
 type DiagnosticsResponse = {
@@ -236,11 +242,29 @@ export async function getMaskedProviderDiagnostics(): Promise<MaskedProviderDiag
   return data.diagnostics?.providers ?? []
 }
 
-export async function runMaskedProviderHealthCheck(): Promise<HealthCheckResponse['result']> {
+export async function runMaskedProviderHealthCheck(provider: string, routeId: string): Promise<HealthCheckResponse['result']> {
   const { data, error } = await supabase.functions.invoke<HealthCheckResponse>('cg-assistant-chat', {
-    body: { action: 'test_provider', requestId: crypto.randomUUID() },
+    body: { action: 'test_provider', provider, routeId, requestId: crypto.randomUUID() },
   })
   if (error) throw error
   if (!data?.ok || !data.result) throw new Error(data?.error ?? 'Provider health check failed.')
+  return data.result
+}
+
+export async function runTranscriptionProviderHealthCheck(
+  provider: string,
+  routeId: string,
+  audio: File,
+): Promise<HealthCheckResponse['result'] & { audioSeconds?: number }> {
+  const body = new FormData()
+  body.set('action', 'transcription_health')
+  body.set('provider', provider)
+  body.set('routeId', routeId)
+  body.set('requestId', crypto.randomUUID())
+  body.set('durationSeconds', '0')
+  body.set('audio', audio, audio.name || 'provider-health.webm')
+  const { data, error } = await supabase.functions.invoke<HealthCheckResponse>('meeting-debrief', { body })
+  if (error) throw error
+  if (!data?.ok || !data.result) throw new Error(data?.error ?? 'Transcription provider health check failed.')
   return data.result
 }

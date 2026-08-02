@@ -318,7 +318,7 @@ test('requests enough output tokens for complete structured video scripts', () =
   assert.match(INDEX, /routeAiChat\(messages,\s*\{[\s\S]*maxOutputTokens:\s*SUGGESTION_MAX_OUTPUT_TOKENS/)
   assert.match(ROUTER, /Math\.floor\(options\.maxOutputTokens\)/)
   assert.match(ROUTER, /max_tokens:\s*maxOutputTokens/)
-  assert.match(ROUTER, /maxOutputTokens,\s*\n\s*\}/)
+  assert.match(ROUTER, /maxOutputTokens:\s*number/)
 })
 
 test('does not silently report success for incomplete provider JSON', () => {
