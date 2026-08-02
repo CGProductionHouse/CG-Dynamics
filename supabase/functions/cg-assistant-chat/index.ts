@@ -621,6 +621,7 @@ async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
         configuredProviders > 0
           ? 'At least one AI provider key appears configured.'
           : 'No AI provider key appears configured yet.',
+      // Route identity keeps direct-provider checks separate from models served through OpenRouter.
       providers: providers.map((provider) => ({
         routeId: provider.routeId,
         capability: provider.capability,
