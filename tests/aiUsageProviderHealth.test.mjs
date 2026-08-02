@@ -148,6 +148,7 @@ test('dashboard exposes ordered route health and only masked configuration diagn
   assert.match(dashboard, /Authentication failed/)
   assert.match(dashboard, /Temporary outage/)
   assert.match(assistant, /message: 'Health check completed\.'/)
+  assert.match(assistant, /diagnosticsVersion: 2/)
   assert.doesNotMatch(assistant.slice(assistant.indexOf('async function handleProviderTest'), assistant.indexOf('// ── Skilled-agent mode')), /message: result\.content/)
   assert.doesNotMatch(dashboard, /prompt|api[_ ]?key|authorization|raw response/i)
 })
