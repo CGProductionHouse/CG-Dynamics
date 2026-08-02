@@ -2,7 +2,9 @@
 
 Living tracker for cross-area CG Dynamics milestones, product notes and future fixes that should not be lost while work is focused elsewhere.
 
-Last updated: 2026-07-02
+Last updated: 2026-08-02 (post-launch cleanup pass — Microsoft transition
+reconciliation shipped; see `docs/cg-dynamics-current-state.md` for canonical
+production status)
 
 ## Full-System Push Notes
 

@@ -1,10 +1,8 @@
 import { supabase } from './supabase'
 import {
-  canAddGuideToRun,
   guideActionTarget,
   isMicrosoftOwnedEvent,
   mapRunStatusToCalendar,
-  runItemFieldsFromGuide,
   type ContentGuideAction,
   type ContentGuideStatus,
   type ContentRunStatus,
@@ -290,60 +288,13 @@ export async function removeRunItem(id: string): Promise<QueryResult<boolean>> {
   return wrap(!error, error, false)
 }
 
-// Add an approved guideline to a run: creates a linked shot item (title carried
-// over, shot notes from the full brief) at the end of the shot list, and marks
-// the guideline added_to_run. Enforces the approved-only rule up front so the
-// UI cannot bypass it. The shot-list mapping uses the full-brief fields
-// (shot_breakdown / requirements), falling back to hook / visual_notes.
-export async function addApprovedIdeaToRun(
-  run: ContentRun,
-  idea: ContentGuideIdea,
-  currentItemCount: number,
-): Promise<QueryResult<ContentRunItem | null>> {
-  if (!canAddGuideToRun(idea.status)) {
-    return { data: null, error: 'Only an approved guideline can be added to a run.', migrationNeeded: false }
-  }
-  const carried = runItemFieldsFromGuide(idea)
-  const itemResult = await addRunItem(run.id, {
-    guide_idea_id: idea.id,
-    title: idea.title,
-    shot_notes: carried.shot_notes,
-    requirements: carried.requirements,
-    sort_order: currentItemCount,
-  })
-  if (itemResult.error || itemResult.migrationNeeded || !itemResult.data) return itemResult
-  await updateGuideIdea(idea.id, { status: 'added_to_run' })
-  return itemResult
-}
-
-// All run items (across every run) that link to a given guideline. Used to
-// decide whether unlinking a guideline should return it to 'approved'.
+// All run items (across every run) that link to a given guideline.
 export async function listRunItemsForGuide(guideId: string): Promise<QueryResult<ContentRunItem[]>> {
   const { data, error } = await supabase
     .from('content_run_items')
     .select('*')
     .eq('guide_idea_id', guideId)
   return wrap((data ?? []) as ContentRunItem[], error, [])
-}
-
-// Unlink a guideline from a run: removes ONLY the run-item link (never touches
-// the guideline, its deliverable or the calendar run). When no other run item
-// references the guideline, its status returns from added_to_run to approved so
-// it can be added to another run. Nothing is hard-deleted except the link row.
-export async function unlinkGuidelineFromRun(
-  item: ContentRunItem,
-): Promise<QueryResult<boolean>> {
-  if (!item.guide_idea_id) {
-    return removeRunItem(item.id)
-  }
-  const guideId = item.guide_idea_id
-  const removed = await removeRunItem(item.id)
-  if (removed.error || removed.migrationNeeded || !removed.data) return removed
-  const remaining = await listRunItemsForGuide(guideId)
-  if (!remaining.error && remaining.data.length === 0) {
-    await updateGuideIdea(guideId, { status: 'approved' })
-  }
-  return removed
 }
 
 // Guide ideas linked to a set of deliverable ids â€” used by Client Schedule to

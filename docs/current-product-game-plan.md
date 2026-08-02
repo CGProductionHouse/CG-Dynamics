@@ -23,17 +23,15 @@ the sake of it.
 
 ## 2. Current release state
 
-Latest supplied release status:
+Latest supplied release status (verified 2 August 2026):
 
-- UX PR #78 merged as `ab8135d`.
-- Content Run propagation PR #79 merged as `c4147b1`.
-- Main SHA: `c4147b1b68d4918f1e8b8ca21f7f563b9337bc2c`.
-- Production migration applied:
-  `20260726075342_content_run_client_propagation.sql`.
-- Tests: 518 passed.
-- Build passed.
-- Final Vercel production READY and authenticated desktop/mobile checks were not
-  proven at the last available check.
+- Main SHA: `56d71dcc99a5e12f933bef85f99ca6978d9cfa96`.
+- The AI provider health/usage fix shipped via PRs #132–#134 and is live in
+  production (`cg-assistant-chat` v1, `verify_jwt: true`).
+- Production migration ledger is consistent with the repo through
+  `20260802120000`; the 11 local-only files from the SQL-editor era were recorded
+  via `supabase migration repair --status applied`.
+- Tests: 938 passed, `npm run build` (tsc + vite) clean.
 
 Microsoft reconciliation supplied state:
 

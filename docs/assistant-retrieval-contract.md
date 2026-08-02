@@ -219,7 +219,7 @@ A Skill Card is eligible only when:
 - industry filters match or are empty;
 - the card is not client-specific unless the schema later supports an explicit client boundary.
 
-The first retrieval release must exclude all five current Scientific Advertising cards because they remain `needs_review`.
+The first retrieval release must exclude all current Skill Cards (37 in production as of 2 August 2026) because they remain `needs_review`.
 
 ### Platform knowledge
 
@@ -545,7 +545,7 @@ Safe Assistant retrieval is complete only when:
 - only active approved knowledge can enter the model prompt;
 - expired Platform Expert items are excluded;
 - client scope is explicit and tested;
-- the five current `needs_review` cards are proven absent from retrieval;
+- all current `needs_review` cards (37 in production as of 2 August 2026) are proven absent from retrieval;
 - the empty platform shells are proven absent from retrieval context;
 - no-approved-knowledge is visible and useful;
 - source provenance is returned to the UI;
