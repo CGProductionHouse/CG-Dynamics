@@ -819,7 +819,7 @@ async function handleSkilledChat(
   const statuses = mode === 'production' ? ['active'] : ['active', 'reviewed', 'needs_review']
   const { data: rawCards } = await sb
     .from('skill_cards')
-    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference')
+    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference, relevant_agents')
     .in('status', statuses)
   const cards = (rawCards ?? []) as unknown as CardRow[]
 

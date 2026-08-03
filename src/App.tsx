@@ -35,6 +35,7 @@ import AiUsageHealthPage from './pages/admin/AiUsageHealthPage'
 import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
 import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
+import MarketingAiDepartmentPage from './pages/admin/MarketingAiDepartmentPage'
 import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
 import MyWorkPage from './pages/admin/MyWorkPage'
 import OpsHubPage from './pages/admin/OpsHubPage'
@@ -135,6 +136,7 @@ export default function App() {
                 <Route path="/admin/ai-health" element={<AiUsageHealthPage />} />
                 <Route path="/admin/microsoft-import" element={<MicrosoftImportPage />} />
                 <Route path="/admin/marketing-library" element={<MarketingLibraryPage />} />
+                <Route path="/admin/marketing-ai" element={<MarketingAiDepartmentPage />} />
               </Route>
             </Route>
           </Route>

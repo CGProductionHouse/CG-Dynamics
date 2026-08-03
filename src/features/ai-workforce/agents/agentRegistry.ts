@@ -200,8 +200,57 @@ export const AI_WORKFORCE_AGENTS: AgentProfile[] = [
   },
 ]
 
+// ── Agent key normalisation ──────────────────────────────────────────────────
+// Seeded Skill Cards carry legacy spellings in `relevant_agents` (notably
+// `creative_director_agent` for the canonical `creative_director`). Rather than
+// rewriting seeded rows — which would break anything already referencing the
+// stored value — aliases are resolved at READ time, exactly like the knowledge
+// layer aliases in retrievalV1. An unrecognised key resolves to null so a
+// mislabelled card is EXCLUDED rather than silently routed to a wrong
+// specialist.
+const AGENT_KEY_ALIASES: Record<string, string> = {
+  creative_director_agent: 'creative_director',
+  creative_director: 'creative_director',
+  marketing_strategist_agent: 'marketing_strategist',
+  marketing_strategist: 'marketing_strategist',
+  copywriter: 'copywriting_agent',
+  copywriting: 'copywriting_agent',
+  copywriting_agent: 'copywriting_agent',
+  brand_guardian_agent: 'brand_guardian',
+  brand_guardian: 'brand_guardian',
+  paid_ads: 'paid_ads_agent',
+  paid_ads_agent: 'paid_ads_agent',
+  content_planner_agent: 'content_planner',
+  content_planner: 'content_planner',
+  client_report: 'client_report_agent',
+  client_report_agent: 'client_report_agent',
+  research_librarian_agent: 'research_librarian',
+  research_librarian: 'research_librarian',
+  historical_advertising_analyst_agent: 'historical_advertising_analyst',
+  historical_advertising_analyst: 'historical_advertising_analyst',
+  social_media_strategist_agent: 'social_media_strategist',
+  social_media_strategist: 'social_media_strategist',
+}
+
+/** Canonical agent key for a stored/legacy value, or null when unrecognised. */
+export function normaliseAgentKey(key: string | null | undefined): string | null {
+  if (!key) return null
+  const canonical = AGENT_KEY_ALIASES[key.trim().toLowerCase()] ?? null
+  // Only ever return a key that is a real registered agent.
+  return canonical && AI_WORKFORCE_AGENTS.some(a => a.key === canonical) ? canonical : null
+}
+
+/** True when a card's relevant_agents list targets this agent. */
+export function cardTargetsAgent(relevantAgents: readonly string[] | null | undefined, agentKey: string): boolean {
+  if (!relevantAgents || relevantAgents.length === 0) return false
+  const target = normaliseAgentKey(agentKey)
+  if (!target) return false
+  return relevantAgents.some(raw => normaliseAgentKey(raw) === target)
+}
+
 export function getAgentProfile(key: string): AgentProfile | null {
-  return AI_WORKFORCE_AGENTS.find(a => a.key === key) ?? null
+  const canonical = normaliseAgentKey(key)
+  return canonical ? AI_WORKFORCE_AGENTS.find(a => a.key === canonical) ?? null : null
 }
 
 export const AGENT_KEYS = AI_WORKFORCE_AGENTS.map(a => a.key)

@@ -53,6 +53,7 @@ export const adminNavItems: NavItem[] = [
   { to: '/admin/microsoft-import', label: 'Microsoft Sync', shortLabel: 'Microsoft', marker: 'MS', access: 'admin' },
   { to: '/admin/import-health', label: 'System Health', shortLabel: 'Health', marker: 'IH', access: 'admin', activePaths: ['/admin/import-health', '/admin/ai-health'] },
   { to: '/admin/marketing-library', label: 'Marketing Library', shortLabel: 'Library', marker: 'ML', access: 'admin' },
+  { to: '/admin/marketing-ai', label: 'Marketing AI', shortLabel: 'Marketing AI', marker: 'AI', access: 'manager', activePaths: ['/admin/marketing-ai'] },
 ]
 
 export function canShowNavItem(item: NavItem, role: string) {

@@ -121,6 +121,21 @@ access.
 | SELECT (all) | ✓ | ✗ | ✗ | ✗ |
 | UPDATE (any) | ✓ | ✗ | ✗ | ✗ |
 
+### AI Marketing artifacts
+
+| Operation | Admin | Manager | Staff/Team | Client |
+|-----------|-------|---------|------------|--------|
+| Read internal artifacts/versions/history | ✓ | ✓ | ✓ | ✗ |
+| Generate/regenerate/handoff draft | ✓ | ✓ | ✓ | ✗ |
+| Request changes / return to specialist | ✓ | ✓ | ✓ | ✗ |
+| Approve or reject current version | ✓ | ✓ | ✗ | ✗ |
+| Direct table writes / history mutation | ✗ | ✗ | ✗ | ✗ |
+
+Artifacts require an exact active `client_id`; optional campaign IDs must exist
+for that same client. Versions, transitions, approvals and audit rows are
+append-only. AI review never grants human approval, publishes, activates
+knowledge, changes client records or spends advertising budget.
+
 ### clients
 
 | Operation | Admin | Manager | Staff/Team | Client |

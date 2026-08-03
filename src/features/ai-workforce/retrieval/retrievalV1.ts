@@ -10,6 +10,7 @@
 // carries a citation). It is pure so it is unit-testable and shared by the
 // Assistant edge function and any admin tooling.
 // ============================================================================
+import { cardTargetsAgent } from '../agents/agentRegistry'
 import type { AgentProfile, KnowledgeLayer } from '../agents/agentRegistry'
 
 export interface RetrievalContext {
@@ -29,6 +30,8 @@ export interface SkillCardRecord {
   sourceType: string | null      // e.g. 'book', 'ai_generated', 'unsourced_blog'
   sourceId: string | null
   title: string
+  /** Stored `skill_cards.relevant_agents`; may contain legacy key spellings. */
+  relevantAgents?: readonly string[] | null
 }
 
 export interface SourceRecord {
@@ -105,6 +108,10 @@ export function isCardRetrievable(card: SkillCardRecord, ctx: RetrievalContext):
   // allow-list, and an unrecognised layer is excluded rather than trusted.
   const layer = normaliseKnowledgeLayer(card.knowledgeLayer)
   if (!layer || !ctx.agent.allowedKnowledgeLayers.includes(layer)) return false
+  // The card must be addressed to THIS specialist. Legacy key spellings (e.g.
+  // `creative_director_agent`) are normalised, and a card with no/unrecognised
+  // targeting is excluded rather than broadcast to every agent.
+  if (!cardTargetsAgent(card.relevantAgents, ctx.agent.key)) return false
   return true
 }
 

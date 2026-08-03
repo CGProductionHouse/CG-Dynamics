@@ -19,7 +19,8 @@ after(async () => { await server?.close() })
 // A rights card shaped like the seeded MCR/TIK cards (needs_review, universal_principle).
 const rightsCard = o => ({
   id: 'r', status: 'needs_review', knowledgeLayer: 'universal_principle', clientSpecific: false,
-  activeClientId: null, sourceType: 'official_documentation', sourceId: 's', title: 'Rights', ...o,
+  activeClientId: null, sourceType: 'official_documentation', sourceId: 's', title: 'Rights',
+  relevantAgents: ['brand_guardian'], ...o,
 })
 const guardianCtx = (mode = 'production') => ({ agent: reg.getAgentProfile('brand_guardian'), activeClientId: null, industry: null, mode })
 
