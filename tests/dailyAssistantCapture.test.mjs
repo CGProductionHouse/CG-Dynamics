@@ -100,11 +100,11 @@ test('daily assistant drafts use an allowed service-only AI replay kind', () => 
 })
 
 test('manager interpretation context stays bounded for free-provider fallback', () => {
-  assert.match(edge, /order\('updated_at', \{ ascending: false \}\)\.limit\(40\)/)
-  assert.match(edge, /order\('start_at'\)\.limit\(15\)/)
-  assert.match(edge, /order\('run_date', \{ ascending: false \}\)\.limit\(15\)/)
+  assert.match(edge, /order\('updated_at', \{ ascending: false \}\)\.limit\(20\)/)
+  assert.match(edge, /order\('start_at'\)\.limit\(8\)/)
+  assert.match(edge, /order\('run_date', \{ ascending: false \}\)\.limit\(8\)/)
   assert.doesNotMatch(edge, /\.limit\(400\)/)
-  assert.match(edge, /maxOutputTokens: 1600/)
+  assert.match(edge, /maxOutputTokens: 1000/)
 })
 
 test('nothing applies before the explicit mobile confirmation', () => {
