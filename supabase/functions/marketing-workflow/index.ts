@@ -335,6 +335,26 @@ Deno.serve(async request => {
     if (msg === 'NO_AI_PROVIDER_KEYS') {
       return jsonResponse({ ok: false, error: 'No AI provider key is configured.' }, 503)
     }
+    // Every provider was exhausted. Because a response that cites none of the
+    // supplied evidence is rejected, the usual cause is that no provider
+    // produced a grounded answer — not that the infrastructure is down. Report
+    // that honestly on the same `uncited` path rather than as a generic
+    // failure, so the caller can regenerate instead of treating it as an
+    // outage. Nothing has been written either way.
+    if (msg.startsWith('NO_AI_PROVIDER_AVAILABLE')) {
+      return jsonResponse({
+        ok: true,
+        insufficientEvidence: true,
+        uncited: true,
+        specialist,
+        specialistName: contract.name,
+        routeReason,
+        evidenceOffered: evidence.length,
+        message:
+          `No available AI provider produced a result that cites the ${evidence.length} approved card(s) ` +
+          `${contract.name} was given, so nothing was saved. Regenerate to try again.`,
+      })
+    }
     return jsonResponse({ ok: false, error: `The specialist could not complete: ${msg}`.slice(0, 400) }, 502)
   }
 

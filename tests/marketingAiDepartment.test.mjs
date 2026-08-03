@@ -310,3 +310,11 @@ test('review-stage specialists are called out explicitly', () => {
   assert.match(fn, /const REVIEW_STAGE = new Set\(\['brand_guardian'\]\)/)
   assert.match(fn, /A review-stage specialist must ground its sign-off in approved evidence/)
 })
+
+test('provider exhaustion is reported honestly, not as an outage', () => {
+  assert.match(fn, /msg\.startsWith\('NO_AI_PROVIDER_AVAILABLE'\)/)
+  const block = fn.slice(fn.indexOf("msg.startsWith('NO_AI_PROVIDER_AVAILABLE')"))
+  assert.match(block.slice(0, 900), /uncited: true/)
+  assert.match(block.slice(0, 900), /No available AI provider produced a result that cites/)
+  assert.match(fn, /Nothing has been written either way/)
+})
