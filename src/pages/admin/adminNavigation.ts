@@ -54,6 +54,7 @@ export const adminNavItems: NavItem[] = [
   { to: '/admin/import-health', label: 'System Health', shortLabel: 'Health', marker: 'IH', access: 'admin', activePaths: ['/admin/import-health', '/admin/ai-health'] },
   { to: '/admin/marketing-library', label: 'Marketing Library', shortLabel: 'Library', marker: 'ML', access: 'admin' },
   { to: '/admin/marketing-ai', label: 'Marketing AI', shortLabel: 'Marketing AI', marker: 'AI', access: 'manager', activePaths: ['/admin/marketing-ai'] },
+  { to: '/admin/skill-card-review', label: 'Skill Card Review', shortLabel: 'Cards', marker: 'SC', access: 'admin', activePaths: ['/admin/skill-card-review'] },
 ]
 
 export function canShowNavItem(item: NavItem, role: string) {
