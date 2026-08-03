@@ -99,6 +99,13 @@ test('daily assistant drafts use an allowed service-only AI replay kind', () => 
   assert.match(edge, /replayKind: 'daily_assistant_draft'/)
 })
 
+test('manager interpretation context stays bounded for free-provider fallback', () => {
+  assert.match(edge, /order\('updated_at', \{ ascending: false \}\)\.limit\(80\)/)
+  assert.match(edge, /order\('start_at'\)\.limit\(30\)/)
+  assert.match(edge, /order\('run_date', \{ ascending: false \}\)\.limit\(30\)/)
+  assert.doesNotMatch(edge, /\.limit\(400\)/)
+})
+
 test('nothing applies before the explicit mobile confirmation', () => {
   assert.match(client, /applyDailyAssistantCapture/)
   assert.match(panel, /Confirm selected/)
@@ -138,7 +145,7 @@ test('both assistant surfaces receive own timeline context and day questions rou
 
 test('launch acceptance fixture set covers required English, Afrikaans, mixed and multi-action notes', () => {
   const fixtures = [
-    'I had a call with Germo Parts. Ger-Marie must do the Womenâ€™s Day poster before Thursday, and I must still send Red Oak the footage link.',
+    'I had a call with Germo Parts. Ger-Marie must do the WomenÃ¢â‚¬â„¢s Day poster before Thursday, and I must still send Red Oak the footage link.',
     'Ek het met Gerhard gepraat. Onthou my om die footage link vir Red Oak te stuur.',
     'Ger Marie moet die poster doen en ek sal Dabo bel about the website.',
     'German parts needs the artwork. Maybe Thursday, but I am not sure.',

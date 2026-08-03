@@ -209,16 +209,16 @@ async function loadContext(
     .select('id,title,client_id,client_name,due_date,assigned_to_name,board_id,created_at')
     .in('status', ACTIVE_TASK_STATUSES).is('archived_at', null)
     .gte('created_at', new Date(Date.now() - 120 * 24 * 3600 * 1000).toISOString())
-    .order('updated_at', { ascending: false }).limit(400)
+    .order('updated_at', { ascending: false }).limit(80)
   if (visibleBoardIds.length) taskQuery = taskQuery.in('board_id', visibleBoardIds)
   const [{ data: taskRows }, { data: events }, { data: runs }] = await Promise.all([
     taskQuery,
     service.from('company_calendar_events').select('id,title,client_id,client_name,start_at,event_type,status')
       .neq('status', 'cancelled').gte('start_at', new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString())
-      .lte('start_at', new Date(Date.now() + 21 * 24 * 3600 * 1000).toISOString()).order('start_at').limit(100),
+      .lte('start_at', new Date(Date.now() + 21 * 24 * 3600 * 1000).toISOString()).order('start_at').limit(30),
     service.from('content_runs').select('id,name,client_id,client_name,run_date,status')
       .gte('run_date', new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString().slice(0, 10))
-      .order('run_date', { ascending: false }).limit(100),
+      .order('run_date', { ascending: false }).limit(30),
   ])
   const assignedTaskIds = new Set((assignmentRows ?? []).map(row => row.task_id))
   const tasks = ((taskRows ?? []) as Array<TaskContext & { board_id: string; assigned_to_name: string | null }>)
