@@ -140,7 +140,7 @@ test('integration state is always real, never conditional on naming the integrat
   // reporting live integrations as unavailable. Integration status must never be
   // guessed, and no finite pattern list can cover every way of asking, so both
   // are now always fetched (in parallel) on any answering path.
-  assert.match(INDEX, /await Promise\.all\(\[\s*getMetaIntegrationState\(sb\),\s*getMicrosoftIntegrationState\(sb\),\s*\]\)/)
+  assert.match(INDEX, /await Promise\.all\(\[[\s\S]*?getMetaIntegrationState\(sb\),[\s\S]*?getMicrosoftIntegrationState\(sb\),[\s\S]*?\]\)/)
   assert.doesNotMatch(INDEX, /isMetaMention/)
   assert.doesNotMatch(INDEX, /META_MENTION_PATTERNS/)
 })

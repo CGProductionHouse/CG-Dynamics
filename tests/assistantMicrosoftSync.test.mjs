@@ -128,7 +128,7 @@ test('integration state is ALWAYS real — never conditional on naming the integ
   // integration, so "what can you do?" had no state and the model guessed,
   // reporting live Microsoft as unavailable. There is no finite list of
   // phrasings that can ask about capabilities, so it is always fetched now.
-  assert.match(chatFn, /await Promise\.all\(\[\s*getMetaIntegrationState\(sb\),\s*getMicrosoftIntegrationState\(sb\),\s*\]\)/)
+  assert.match(chatFn, /await Promise\.all\(\[[\s\S]*?getMetaIntegrationState\(sb\),[\s\S]*?getMicrosoftIntegrationState\(sb\),[\s\S]*?\]\)/)
   assert.doesNotMatch(chatFn, /isMicrosoftMention/)
   assert.doesNotMatch(chatFn, /isMetaMention/)
 })

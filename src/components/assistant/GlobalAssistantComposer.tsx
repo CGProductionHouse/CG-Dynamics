@@ -27,6 +27,16 @@ import {
   type MeetingDebriefAnalysis,
 } from '../../lib/meetingDebrief'
 import { runMicrosoftSync, checkMicrosoftSyncAvailability } from '../../lib/assistantMicrosoftSync'
+import {
+  findOpenArtifact,
+  getCurrentVersion,
+  listAwaitingReview,
+  recordMarketingDecision,
+  runMarketingSpecialist,
+  SPECIALIST_LABELS,
+  type MarketingArtifact,
+  type MarketingSpecialist,
+} from '../../lib/marketingWorkflow'
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
@@ -150,6 +160,8 @@ export function GlobalAssistantComposer() {
   const [applying, setApplying] = useState(false)
   // Live progress line while the controlled Microsoft sync runs.
   const [microsoftSyncNote, setMicrosoftSyncNote] = useState<string | null>(null)
+  // Live stage progress while a Marketing AI specialist is running.
+  const [marketingNote, setMarketingNote] = useState<string | null>(null)
   const [showJobs, setShowJobs] = useState(false)
   const [jobs, setJobs] = useState<BackgroundJob[]>([])
 
@@ -450,6 +462,107 @@ export function GlobalAssistantComposer() {
         setShowJobs(true)
         void loadJobs(actionIsCurrent)
         pushAssistant(`Queued ${jobType === 'meta_sync' ? 'Meta sync' : 'report preparation'} as a background job. It runs on the server and continues even if you close the app — I'll notify you when it finishes. Progress is under "Background jobs".`)
+        return
+      }
+      if (p.type === 'marketing.start' || p.type === 'marketing.continue') {
+        // Marketing AI department. The controlled workflow, its evidence gate,
+        // citation rules, metering and approval gates are untouched - this only
+        // starts or advances it and reports the result honestly.
+        if (!p.clientId) { setProposalError('I need an exact active client before starting marketing work.'); return }
+        const specialistField = String(p.fields.specialist ?? 'auto')
+        const specialist = specialistField !== 'auto' ? specialistField as MarketingSpecialist : undefined
+
+        // Continue the existing open artifact rather than duplicating records.
+        let artifactId: string | undefined
+        if (p.type === 'marketing.continue') {
+          const openArtifact = await findOpenArtifact(p.clientId)
+          if (!actionIsCurrent()) return
+          if (!openArtifact) {
+            setProposalError(`${p.clientName} has no open marketing artifact to continue. Start a new one instead.`)
+            return
+          }
+          artifactId = openArtifact.id
+        }
+
+        setProposal(null)
+        setMarketingNote(artifactId ? 'Handing off to the next specialist...' : 'Starting the Marketing AI workflow...')
+        const result = await runMarketingSpecialist({
+          clientId: p.clientId,
+          request: p.type === 'marketing.start' ? String(p.fields.request ?? '') : undefined,
+          artifactId,
+          specialist,
+        })
+        if (!actionIsCurrent()) return
+        setMarketingNote(null)
+
+        if (!result.ok) { pushAssistant(result.error ?? 'The specialist could not be run.'); return }
+        if (result.insufficientEvidence) {
+          // Honest insufficient-evidence / provider-exhaustion result.
+          pushAssistant(result.message ?? 'Not enough approved knowledge to produce a grounded draft.')
+          return
+        }
+        const cited = result.evidenceUsed?.length ?? 0
+        const next = result.nextSpecialist ? SPECIALIST_LABELS[result.nextSpecialist] : null
+        pushAssistant(
+          `${result.specialistName} produced version ${result.version?.version} for ${p.clientName}, ` +
+          `citing ${cited} approved card${cited === 1 ? '' : 's'}. ` +
+          (next
+            ? `Next: ${next} - say "continue the marketing workflow".`
+            : 'The chain is complete and it is ready for a manager to review.') +
+          ' Open it in Marketing AI to read the full draft.',
+        )
+        return
+      }
+      if (p.type === 'marketing.list') {
+        const res = await listAwaitingReview()
+        if (!actionIsCurrent()) return
+        setProposal(null)
+        if (res.error) { pushAssistant(`Could not load marketing drafts: ${res.error.message}`); return }
+        const rows = (res.data ?? []) as MarketingArtifact[]
+        if (rows.length === 0) { pushAssistant('No marketing drafts are waiting for review right now.'); return }
+        const lines = rows.slice(0, 8).map(a => {
+          const name = clientsRef.current.find(c => c.id === a.client_id)?.name ?? 'Unknown client'
+          return `- ${name}: ${a.artifact_type.replace(/_/g, ' ')} v${a.current_version} (${a.status.replace(/_/g, ' ')}), with ${SPECIALIST_LABELS[a.current_specialist] ?? a.current_specialist}`
+        })
+        pushAssistant(
+          `${rows.length} marketing draft${rows.length === 1 ? '' : 's'} awaiting review:\n` +
+          `${lines.join('\n')}\n\nOpen Marketing AI to review and decide.`,
+        )
+        return
+      }
+      if (p.type === 'marketing.decide') {
+        const decision = String(p.fields.decision) as 'approved' | 'rejected' | 'changes_requested'
+        // Approve/reject stay manager+admin only. The RPC enforces this as well;
+        // refusing here means the Assistant never appears to act beyond the
+        // signed-in user's role.
+        if ((decision === 'approved' || decision === 'rejected') && !isManager) {
+          setProposalError('Approving or rejecting a marketing draft is restricted to managers and admins. You can request changes instead.')
+          return
+        }
+        if (!p.clientId) { setProposalError('Which client draft should I act on? Open the client or name it.'); return }
+        const openArtifact = await findOpenArtifact(p.clientId)
+        if (!actionIsCurrent()) return
+        if (!openArtifact) { setProposalError(`${p.clientName} has no open marketing draft to decide on.`); return }
+        const version = await getCurrentVersion(openArtifact)
+        if (!actionIsCurrent()) return
+        if (!version) { setProposalError('Could not read the current version of that draft.'); return }
+        const res = await recordMarketingDecision({
+          artifactId: openArtifact.id,
+          versionId: version.id,
+          decision,
+          note: p.fields.note ? String(p.fields.note) : undefined,
+        })
+        if (!actionIsCurrent()) return
+        if (res.error) { setProposalError(res.error.message); return }
+        setProposal(null)
+        const label = openArtifact.artifact_type.replace(/_/g, ' ')
+        pushAssistant(
+          decision === 'approved'
+            ? `Approved v${version.version} of the ${label} for ${p.clientName}. Nothing was published or changed on the client record - this records a human sign-off only.`
+            : decision === 'rejected'
+              ? `Rejected v${version.version} for ${p.clientName}. The version history is kept.`
+              : `Requested changes on v${version.version} for ${p.clientName}. Say "continue the marketing workflow" to regenerate.`,
+        )
         return
       }
       if (p.type === 'microsoft.sync') {
@@ -971,6 +1084,16 @@ export function GlobalAssistantComposer() {
                 <button type="button" onClick={() => setOpen(false)} className="min-h-11 min-w-11 rounded-md px-2 text-sm font-bold text-brand-primary/70 hover:text-white" aria-label="Minimise assistant">–</button>
               </div>
             </div>
+
+            {marketingNote && (
+              <div className="border-b border-white/10 px-3 py-2.5">
+                <p className="text-[11px] font-black uppercase tracking-wide text-brand-primary/60">Marketing AI</p>
+                <p className="mt-1 text-xs text-brand-primary/80">{marketingNote}</p>
+                <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full w-1/3 animate-pulse rounded-full bg-brand-teal" />
+                </div>
+              </div>
+            )}
 
             {microsoftSyncNote && (
               <div className="border-b border-white/10 px-3 py-2.5">

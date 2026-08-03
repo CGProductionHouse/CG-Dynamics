@@ -192,6 +192,45 @@ export async function recordMarketingDecision(input: {
   })
 }
 
+/**
+ * The most recent artifact for a client that is still open. Used by CG Assistant
+ * to CONTINUE existing work rather than duplicating records. Approved and
+ * rejected artifacts are closed and are never continued.
+ */
+export async function findOpenArtifact(clientId: string): Promise<MarketingArtifact | null> {
+  const { data, error } = await supabase
+    .from('ai_marketing_artifacts')
+    .select('*')
+    .eq('client_id', clientId)
+    .in('status', ['draft', 'in_review', 'changes_requested'])
+    .order('updated_at', { ascending: false })
+    .limit(1)
+  if (error || !data || data.length === 0) return null
+  return data[0] as MarketingArtifact
+}
+
+/** Artifacts with a version waiting for a human decision. */
+export async function listAwaitingReview(limit = 20) {
+  return supabase
+    .from('ai_marketing_artifacts')
+    .select('*')
+    .in('status', ['in_review', 'changes_requested'])
+    .order('updated_at', { ascending: false })
+    .limit(limit)
+}
+
+/** The current version row of an artifact, for a decision that must target it. */
+export async function getCurrentVersion(artifact: MarketingArtifact): Promise<MarketingArtifactVersion | null> {
+  const { data, error } = await supabase
+    .from('ai_marketing_artifact_versions')
+    .select('*')
+    .eq('artifact_id', artifact.id)
+    .eq('version', artifact.current_version)
+    .maybeSingle()
+  if (error || !data) return null
+  return data as MarketingArtifactVersion
+}
+
 export async function listCampaignOptions(clientId: string) {
   return supabase.rpc('ai_marketing_campaign_options', { p_client_id: clientId })
 }

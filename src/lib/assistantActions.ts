@@ -23,6 +23,10 @@ export type AssistantActionType =
   | 'job.enqueue'
   | 'memory.add'
   | 'microsoft.sync'
+  | 'marketing.start'
+  | 'marketing.continue'
+  | 'marketing.list'
+  | 'marketing.decide'
 
 export interface ActionClient {
   id: string
@@ -263,6 +267,63 @@ export function defaultMicrosoftSyncRange(today: string): { start: string; end: 
   return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) }
 }
 
+// ── Marketing AI department intents ─────────────────────────────────────────
+// Deterministic EN/AF/mixed detection for the Marketing AI specialist chain
+// (Marketing Strategist -> Copywriting Agent -> Brand Guardian -> approval).
+// Everything here only classifies the request and resolves the client; the
+// controlled workflow, its evidence gate and its approval rules are untouched.
+
+const MARKETING_NOUN = /\b(campaign|kampanje|strategy|strategie|marketing|copy|kopie|advert|advertensie|social copy|caption|onderskrif|ad copy|brand review|handelsmerk)\b/
+const MARKETING_MAKE = /\b(create|build|make|draft|write|skryf|skep|bou|maak|ontwerp|plan|beplan|start|begin)\b/
+
+/** "continue the marketing workflow" / "gaan voort met die bemarkingswerkvloei" */
+function isMarketingContinue(lower: string): boolean {
+  const cont = /\b(continue|carry on|next step|hand ?off|gaan voort|voortgaan|volgende stap|hervat)\b/.test(lower)
+  const scope = /\b(marketing|bemarking|campaign|kampanje|workflow|werkvloei|artifact|draft|konsep|specialist|spesialis)\b/.test(lower)
+  return cont && scope
+}
+
+/** "show me drafts awaiting approval" / "wys konsepte wat goedkeuring wag" */
+function isMarketingList(lower: string): boolean {
+  const show = /\b(show|list|what|which|wys|lys|watter)\b/.test(lower)
+  const drafts = /\b(draft|drafts|konsep|konsepte|artifact|artifacts|version|versions|weergawe)\b/.test(lower)
+  const pending = /\b(await|awaiting|pending|review|approval|goedkeuring|hersiening|wag)\b/.test(lower)
+  return show && drafts && pending
+}
+
+/** approve / reject / request changes on the latest version. */
+function marketingDecision(lower: string): 'approved' | 'rejected' | 'changes_requested' | null {
+  // A decision names a DRAFT or VERSION. Requiring that keeps phrases like
+  // "review this copy against the approved knowledge" — which merely contains
+  // the word "approved" — from being read as an approval.
+  const scope = /\b(draft|drafts|konsep|konsepte|version|versions|weergawe|artifact)\b/.test(lower)
+  if (!scope) return null
+  if (/\b(request changes|changes requested|vra veranderinge|verander|amend|revise|hersien)\b/.test(lower)) return 'changes_requested'
+  if (/\b(reject|afkeur|verwerp|decline)\b/.test(lower)) return 'rejected'
+  // Afrikaans splits "keur ... goed" around the object, so match both parts.
+  if (/\b(approve|approved|goedkeur|sign ?off)\b/.test(lower)) return 'approved'
+  if (/\bkeur\b/.test(lower) && /\bgoed\b/.test(lower)) return 'approved'
+  return null
+}
+
+/** Which specialist a phrasing asks for, or null to route automatically. */
+function marketingSpecialist(lower: string): string | null {
+  if (/\b(brand review|review (?:this |the )?copy|on-?brand|brand guardian|handelsmerk|tone of voice)\b/.test(lower)) return 'brand_guardian'
+  if (/\b(social copy|sosiale kopie|caption|onderskrif|ad copy|advertensiekopie|copywrit|write copy|skryf kopie|kopieskrywer|headline|opskrif)\b/.test(lower)) return 'copywriting_agent'
+  // Bare "kopie"/"copy" with a writing verb also means copywriting.
+  if (/\b(skryf|write|draft)\b/.test(lower) && /\b(kopie|copy)\b/.test(lower)) return 'copywriting_agent'
+  if (/\b(strategy|strategie|strateeg|strategist)\b/.test(lower)) return 'marketing_strategist'
+  return null
+}
+
+function isMarketingStart(lower: string): boolean {
+  if (!MARKETING_NOUN.test(lower)) return false
+  if (MARKETING_MAKE.test(lower)) return true
+  // "review this copy against the client brand" reads as a request even without
+  // an explicit make verb.
+  return /\b(review|hersien|check|kyk na)\b/.test(lower)
+}
+
 // ── Main parser ──────────────────────────────────────────────────────────────
 
 export function parseAssistantAction(input: string, context: ActionContext): ParseResult {
@@ -279,6 +340,63 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
       fields: { note: remember[1].trim() },
       clientId: context.currentClientId ?? null,
       clientName: context.currentClientName ?? null,
+    }
+  }
+
+  // 0a2. Marketing AI department. Checked before the sync detectors so campaign
+  // phrasing can never be mistaken for an integration sync.
+  {
+    const decision = marketingDecision(lower)
+    if (isMarketingList(lower)) {
+      return {
+        type: 'marketing.list',
+        title: 'Marketing drafts awaiting review',
+        fields: {},
+        clientId: context.currentClientId ?? null,
+        clientName: context.currentClientName ?? null,
+      }
+    }
+    if (decision) {
+      return {
+        type: 'marketing.decide',
+        title: decision === 'approved' ? 'Approve the latest marketing draft'
+          : decision === 'rejected' ? 'Reject the latest marketing draft'
+          : 'Request changes on the latest marketing draft',
+        fields: { decision },
+        clientId: context.currentClientId ?? null,
+        clientName: context.currentClientName ?? null,
+      }
+    }
+    if (isMarketingContinue(lower)) {
+      const { matches } = findClient(lower, context.clients)
+      if (matches.length > 1) return { clarify: `Which client — ${matches.map(m => m.name).join(' or ')}?` }
+      const client = matches[0] ?? (context.currentClientId ? { id: context.currentClientId, name: context.currentClientName ?? 'this client' } : null)
+      if (!client) return { clarify: 'Which client should I continue the marketing workflow for?' }
+      return {
+        type: 'marketing.continue',
+        title: `Continue the marketing workflow for ${client.name}`,
+        fields: {},
+        clientId: client.id,
+        clientName: client.name,
+      }
+    }
+    if (isMarketingStart(lower)) {
+      const { matches } = findClient(lower, context.clients)
+      // Never guess the client. Ambiguity and absence both ask.
+      if (matches.length > 1) return { clarify: `Which client — ${matches.map(m => m.name).join(' or ')}?` }
+      const client = matches[0] ?? (context.currentClientId ? { id: context.currentClientId, name: context.currentClientName ?? 'this client' } : null)
+      if (!client) return { clarify: 'Which active client is this marketing work for?' }
+      const specialist = marketingSpecialist(lower)
+      return {
+        type: 'marketing.start',
+        title: `Start marketing work for ${client.name}`,
+        fields: {
+          request: raw,
+          specialist: specialist ?? 'auto',
+        },
+        clientId: client.id,
+        clientName: client.name,
+      }
     }
   }
 

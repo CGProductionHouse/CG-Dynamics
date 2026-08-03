@@ -14,6 +14,7 @@ import {
   isPlatformKnowledgeCurrent,
   neutralise,
   NO_SOURCE_MESSAGE,
+  normaliseAgentKey,
   type PlatformKnowledgeRow,
   SOCIAL_AWARE_AGENTS,
 } from './skilledAgents.ts'
@@ -94,6 +95,12 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
     name: 'Microsoft 365 (Planner + Outlook)',
     status: 'protected',
     description: 'Live admin-only controlled reconciliation sync. Produces a reviewed Planner/Outlook preview; never writes to the Client Schedule on its own.',
+  },
+  {
+    key: 'marketing-ai',
+    name: 'Marketing AI department',
+    status: 'available',
+    description: 'Live specialist chain: Marketing Strategist, Copywriting Agent and Brand Guardian, grounded only in approved Skill Cards. Produces internal drafts with citations; publishing, spend and client-record changes never happen automatically, and approval is manager/admin only.',
   },
   {
     key: 'cg-hours',
@@ -266,6 +273,62 @@ function buildMicrosoftStatusLine(state: MicrosoftIntegrationState | null): stri
     return `- Microsoft 365: connected (${state.planSourceCount} Planner/Outlook source${state.planSourceCount === 1 ? '' : 's'} available). Controlled reconciliation sync can run (admins).`
   }
   return `- Microsoft 365: not available for sync. ${state.message}`
+}
+
+interface MarketingAiState {
+  live: boolean
+  activeCards: number
+  specialists: string[]
+  awaitingReview: number
+  message: string
+}
+
+// Real Marketing AI department state. Read from the same tables the workflow
+// uses, so capability answers reflect what is actually approved and running
+// rather than a static registry entry. Returns null only if the schema is absent.
+async function getMarketingAiState(sb: ReturnType<typeof createClient>): Promise<MarketingAiState | null> {
+  try {
+    const { data: cards } = await sb
+      .from('skill_cards')
+      .select('relevant_agents')
+      .eq('status', 'active')
+    const rows = cards ?? []
+    const perSpecialist = new Map<string, number>()
+    for (const row of rows) {
+      const agents = Array.isArray((row as { relevant_agents?: unknown }).relevant_agents)
+        ? ((row as { relevant_agents: unknown[] }).relevant_agents as unknown[])
+        : []
+      for (const raw of agents) {
+        const key = normaliseAgentKey(String(raw))
+        if (key) perSpecialist.set(key, (perSpecialist.get(key) ?? 0) + 1)
+      }
+    }
+    const { count: awaiting } = await sb
+      .from('ai_marketing_artifacts')
+      .select('*', { head: true, count: 'exact' })
+      .in('status', ['in_review', 'changes_requested'])
+
+    // A specialist can only work when it has approved knowledge routed to it.
+    const ready = [...perSpecialist.entries()].filter(([, n]) => n > 0).map(([k]) => k).sort()
+    const live = rows.length > 0 && ready.length > 0
+    return {
+      live,
+      activeCards: rows.length,
+      specialists: ready,
+      awaitingReview: awaiting ?? 0,
+      message: live
+        ? `Marketing AI is live with ${rows.length} approved Skill Cards.`
+        : 'Marketing AI has no approved Skill Cards yet, so specialists cannot produce grounded drafts.',
+    }
+  } catch {
+    return null
+  }
+}
+
+function buildMarketingAiStatusLine(state: MarketingAiState | null): string {
+  if (!state) return '- Marketing AI department: status could not be verified from diagnostics right now.'
+  if (!state.live) return `- Marketing AI department: available but not usable yet. ${state.message}`
+  return `- Marketing AI department: LIVE. ${state.activeCards} approved Skill Cards; specialists with approved knowledge: ${state.specialists.join(', ')}. ${state.awaitingReview} draft(s) awaiting human review. Staff can start work from CG Assistant; approval stays manager/admin only.`
 }
 
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
@@ -508,6 +571,7 @@ function buildCapabilitiesResponse(
   role: string,
   metaState: MetaIntegrationState | null,
   microsoftState: MicrosoftIntegrationState | null,
+  marketingAiState: MarketingAiState | null,
 ): string {
   const connected = TOOL_REGISTRY
     .filter((tool) => tool.status === 'available')
@@ -535,6 +599,7 @@ function buildCapabilitiesResponse(
     '',
     buildMetaStatusLine(metaState),
     buildMicrosoftStatusLine(microsoftState),
+    buildMarketingAiStatusLine(marketingAiState),
     '',
     `Your access tier: ${accessSummary(role)}`,
   ].join('\n')
@@ -618,11 +683,15 @@ function buildSystemPrompt(
   role: string,
   metaState: MetaIntegrationState | null,
   microsoftState: MicrosoftIntegrationState | null,
+  marketingAiState: MarketingAiState | null,
 ): string {
   const tools = TOOL_REGISTRY.map((tool) => `${tool.name}: ${tool.status}`).join(', ')
   const metaFacts = metaState
     ? `Live Meta Business integration state (from diagnostics, do not contradict it): ${metaState.connected ? 'CONNECTED' : 'NOT_CONNECTED'} (status: ${metaState.status}, linked client assets: ${metaState.linkedAssetsCount}).`
     : 'Live Meta Business integration state is currently unverifiable in this function.'
+  const marketingFacts = marketingAiState
+    ? `Live Marketing AI department state (from diagnostics, do not contradict it): ${marketingAiState.live ? 'LIVE' : 'NOT_USABLE_YET'} (approved Skill Cards: ${marketingAiState.activeCards}, specialists with approved knowledge: ${marketingAiState.specialists.join(', ') || 'none'}, drafts awaiting review: ${marketingAiState.awaitingReview}).`
+    : 'Live Marketing AI department state is currently unverifiable in this function.'
   const microsoftFacts = microsoftState
     ? `Live Microsoft 365 integration state (from diagnostics, do not contradict it): ${microsoftState.connected ? 'CONNECTED' : 'NOT_AVAILABLE'} (status: ${microsoftState.status}, Planner/Outlook sources: ${microsoftState.planSourceCount}).`
     : 'Live Microsoft 365 integration state is currently unverifiable in this function.'
@@ -634,10 +703,13 @@ function buildSystemPrompt(
     `Tool registry: ${tools}. Only sanitized My Day context may be supplied with the request; other live operational tools are not connected yet.`,
     metaFacts,
     microsoftFacts,
+    marketingFacts,
     'If asked for live tasks beyond the supplied My Day context, calendar lookups, client task details, approvals, or CG Hours data, say that specific integration is not connected yet and offer a useful checklist, draft, or workflow. This never applies to Meta Business or Microsoft 365 — for those, use the live state above.',
     `When asked whether Meta is connected, reply based ONLY on the live Meta integration state above: ${metaState?.connected ? 'it is connected, so say it is connected and available for sync.' : 'it is not connected, so say it is not connected and never claim otherwise.'}`,
     `When asked about Microsoft 365, Planner, Outlook, Teams, or running a Microsoft sync, reply based ONLY on the live Microsoft state above: ${microsoftState?.connected ? 'it IS connected and a controlled Planner/Outlook reconciliation sync can be run by an admin from CG Assistant, so never say it is not connected.' : 'it is not available for sync right now, so say exactly that and give the real reason above.'}`,
     'A Microsoft sync produces a reviewed reconciliation preview; it never writes to the Client Schedule on its own.',
+    `When asked about marketing work, campaigns, copy, brand review or the AI specialists, use ONLY the live Marketing AI state above: ${marketingAiState?.live ? 'the department IS live, so say staff can start a campaign strategy, social copy or brand review straight from CG Assistant for an exact active client.' : 'it is not usable yet because no approved Skill Cards are routed to a specialist; say exactly that.'}`,
+    'Marketing AI produces internal drafts only. It cites approved Skill Cards, never publishes, never spends budget, never changes client records, and approval is restricted to managers and admins.',
     'Never reveal, infer, summarise, or guess salaries, payroll, bank details, Xero/accounting values, profit/loss, revenue, invoice totals, tax, owner notes, ID numbers, confidential finance, or private HR/payroll fields.',
     'Do not hallucinate data. If no data was provided or connected, say so.',
     'Answer as CG Assistant.',
@@ -1064,13 +1136,14 @@ Deno.serve(async (req) => {
   // claim that must never be guessed, and there is no finite list of phrasings
   // that could ask for it, so the state is now always real. Restricted requests
   // return above and never pay for it.
-  const [metaState, microsoftState] = await Promise.all([
+  const [metaState, microsoftState, marketingAiState] = await Promise.all([
     getMetaIntegrationState(sb),
     getMicrosoftIntegrationState(sb),
+    getMarketingAiState(sb),
   ])
 
   if (isCapabilitiesQuestion(message)) {
-    const answer = buildCapabilitiesResponse(role, metaState, microsoftState)
+    const answer = buildCapabilitiesResponse(role, metaState, microsoftState, marketingAiState)
 
     await auditAssistantRequest(sb, {
       userId: user.id,
@@ -1133,7 +1206,7 @@ Deno.serve(async (req) => {
   }
 
   const messages: AiChatMessage[] = [
-    { role: 'system', content: buildSystemPrompt(role, metaState, microsoftState) },
+    { role: 'system', content: buildSystemPrompt(role, metaState, microsoftState, marketingAiState) },
     ...history,
     { role: 'user', content: message },
   ]
