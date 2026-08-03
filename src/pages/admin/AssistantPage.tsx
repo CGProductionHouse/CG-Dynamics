@@ -22,9 +22,11 @@ import {
   type SpecialistReadiness,
 } from '../../lib/assistant'
 import { getMyDayContext } from '../../lib/workforceMyDay'
+import { dailyAssistantContextLine, listMyAssistantDayCaptures, listMyAssistantDayItems } from '../../lib/dailyAssistant'
 import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { Pill } from '../../components/ui/Badges'
+import { DailyAssistantCapture } from '../../components/assistant/DailyAssistantCapture'
 
 const SESSION_KEY_PREFIX = 'cg-assistant-chat-session-v1'
 
@@ -203,6 +205,7 @@ export default function AssistantPage() {
   const [showDiagnostics, setShowDiagnostics] = useState(false)
   const [showProtected, setShowProtected] = useState(false)
   const [localWorkContext, setLocalWorkContext] = useState<AssistantLocalWorkContext | null>(null)
+  const [dailyCaptureOpen, setDailyCaptureOpen] = useState(false)
   const [selectedAgentKey, setSelectedAgentKey] = useState<string>('')
   const [activeClientId, setActiveClientId] = useState<string>('')
   const [researchMode, setResearchMode] = useState(false)
@@ -247,8 +250,16 @@ export default function AssistantPage() {
 
     async function loadLocalWork() {
       try {
-        const context = await getMyDayContext(profile)
-        if (!cancelled && profileIdRef.current === requestedProfileId) setLocalWorkContext(buildAssistantLocalWorkContext(context))
+        const [context, captureResult, itemResult] = await Promise.all([
+          getMyDayContext(profile),
+          listMyAssistantDayCaptures(),
+          listMyAssistantDayItems(),
+        ])
+        if (!cancelled && profileIdRef.current === requestedProfileId) {
+          const work = buildAssistantLocalWorkContext(context)
+          if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
+          setLocalWorkContext(work)
+        }
       } catch {
         if (!cancelled && profileIdRef.current === requestedProfileId) setLocalWorkContext(null)
       }
@@ -373,7 +384,7 @@ export default function AssistantPage() {
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
 
       {/* Header */}
-      <div className="mb-5 flex items-end justify-between gap-3">
+      <div className="mb-5 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Staff portal</p>
           <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">CG Assistant</h1>
@@ -381,8 +392,29 @@ export default function AssistantPage() {
             Ask for drafts, task summaries and checks. My Day context is used when available.
           </p>
         </div>
-        <Pill tone="accent">{roleLabel(profile?.role)}</Pill>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => setDailyCaptureOpen(true)} className="min-h-12 rounded-full bg-brand-teal px-4 text-sm font-black text-black">Record my day</button>
+          <Pill tone="accent">{roleLabel(profile?.role)}</Pill>
+        </div>
       </div>
+
+      {dailyCaptureOpen && profileId && (
+        <DailyAssistantCapture
+          userId={profileId}
+          page="CG Assistant"
+          onClose={() => setDailyCaptureOpen(false)}
+          onSaved={message => {
+            setDailyCaptureOpen(false)
+            setMessages(current => [...current, makeMessage('assistant', message)])
+            void Promise.all([getMyDayContext(profile), listMyAssistantDayCaptures(), listMyAssistantDayItems()]).then(([context, captureResult, itemResult]) => {
+              if (profileIdRef.current !== profileId) return
+              const work = buildAssistantLocalWorkContext(context)
+              if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
+              setLocalWorkContext(work)
+            })
+          }}
+        />
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
 

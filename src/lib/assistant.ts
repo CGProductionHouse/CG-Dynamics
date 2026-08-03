@@ -210,6 +210,7 @@ export interface AssistantLocalWorkContext {
   suggestedNextAction: string
   workloadWarning: string | null
   setupNotes: string[]
+  personalDaySummary?: string | null
 }
 
 export function buildAssistantLocalWorkContext(context: MyDayContext | null): AssistantLocalWorkContext | null {

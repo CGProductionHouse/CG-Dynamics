@@ -40,6 +40,8 @@ import {
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
+import { DailyAssistantCapture } from './DailyAssistantCapture'
+import { dailyAssistantContextLine, listMyAssistantDayCaptures, listMyAssistantDayItems } from '../../lib/dailyAssistant'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Global CG Assistant composer.
@@ -167,6 +169,7 @@ export function GlobalAssistantComposer() {
 
   // Post-meeting debrief flow: record/type → analyse → ONE editable confirmation
   // (meeting match, background, decisions, unresolved, tasks) → apply.
+  const [dailyCaptureOpen, setDailyCaptureOpen] = useState(false)
   const [debriefOpen, setDebriefOpen] = useState(false)
   const [debriefText, setDebriefText] = useState('')
   const [debriefBusy, setDebriefBusy] = useState(false)
@@ -255,6 +258,7 @@ export function GlobalAssistantComposer() {
     setDebrief(null)
     setDebriefCandidates([])
     setDebriefOpen(false)
+    setDailyCaptureOpen(false)
     setDebriefText('')
     setInput('')
     setSending(false)
@@ -353,8 +357,13 @@ export function GlobalAssistantComposer() {
     let active = true
     const requestedProfileId = profileId
     getMyDayContext(profile ?? null)
-      .then(ctx => {
-        if (active && profileIdRef.current === requestedProfileId) workContextRef.current = buildAssistantLocalWorkContext(ctx)
+      .then(async ctx => {
+        const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
+        if (active && profileIdRef.current === requestedProfileId) {
+          const work = buildAssistantLocalWorkContext(ctx)
+          if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
+          workContextRef.current = work
+        }
       })
       .catch(() => {})
     return () => {
@@ -860,6 +869,15 @@ export function GlobalAssistantComposer() {
     setDebriefRecordingSeconds(0)
   }
 
+  function startDailyCapture() {
+    invalidateDebriefRequests()
+    stopActiveDebriefMedia()
+    setDebriefOpen(false)
+    setDebrief(null)
+    setDailyCaptureOpen(true)
+    setPlusOpen(false)
+    setOpen(true)
+  }
   function startNewDebrief() {
     invalidateDebriefRequests()
     stopActiveDebriefMedia()
@@ -1173,6 +1191,24 @@ export function GlobalAssistantComposer() {
           </div>
         )}
 
+        {dailyCaptureOpen && profileId && (
+          <DailyAssistantCapture
+            userId={profileId}
+            page={pageLabel}
+            clientId={clientId || undefined}
+            onClose={() => setDailyCaptureOpen(false)}
+            onSaved={message => {
+              setDailyCaptureOpen(false)
+              pushAssistant(message)
+              void getMyDayContext(profile ?? null).then(async ctx => {
+                const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
+                const work = buildAssistantLocalWorkContext(ctx)
+                if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
+                workContextRef.current = work
+              })
+            }}
+          />
+        )}
         {/* Meeting debrief — record/type → ONE editable confirmation → apply */}
         {debriefOpen && (
           <div className="mb-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
@@ -1372,6 +1408,7 @@ export function GlobalAssistantComposer() {
             <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
               <button type="button" onClick={newChat} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
               <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
+              <button type="button" onClick={startDailyCapture} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm font-black text-brand-teal hover:bg-white/[0.05]">Record my day</button>
               <button type="button" onClick={startNewDebrief} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
               <button type="button" onClick={() => { attachRef.current?.click() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
               <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
