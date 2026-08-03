@@ -279,6 +279,7 @@ interface MarketingAiState {
   live: boolean
   activeCards: number
   specialists: string[]
+  specialistCounts: Record<string, number>
   awaitingReview: number
   message: string
 }
@@ -315,6 +316,7 @@ async function getMarketingAiState(sb: ReturnType<typeof createClient>): Promise
       live,
       activeCards: rows.length,
       specialists: ready,
+      specialistCounts: Object.fromEntries(perSpecialist),
       awaitingReview: awaiting ?? 0,
       message: live
         ? `Marketing AI is live with ${rows.length} approved Skill Cards.`
@@ -393,7 +395,7 @@ const SETUP_QUESTION_PATTERNS = [
   /\bpermissions?\b/i,
 ]
 
-type AssistantAction = 'chat' | 'diagnostics' | 'test_provider'
+type AssistantAction = 'chat' | 'diagnostics' | 'test_provider' | 'specialist_status'
 
 interface AuditValues {
   userId: string
@@ -505,6 +507,7 @@ function isAdminRole(role: string): boolean {
 function normalizeAction(value: unknown): AssistantAction {
   if (value === 'diagnostics') return 'diagnostics'
   if (value === 'test_provider') return 'test_provider'
+  if (value === 'specialist_status') return 'specialist_status'
   return 'chat'
 }
 
@@ -1076,6 +1079,20 @@ Deno.serve(async (req) => {
 
   const action = normalizeAction(body.action)
   const idempotencyKey = requestId(body.requestId)
+
+  if (action === 'specialist_status') {
+    const state = await getMarketingAiState(sb)
+    const counts = state?.specialistCounts ?? {}
+    return jsonResponse({
+      ok: true,
+      specialists: Object.values(AGENT_CONTRACTS).map(agent => ({
+        key: agent.key,
+        name: agent.name,
+        approvedCards: counts[agent.key] ?? 0,
+        available: (counts[agent.key] ?? 0) > 0,
+      })),
+    })
+  }
 
   if (action !== 'chat') {
     if (!isAdminRole(role)) {
