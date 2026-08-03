@@ -90,6 +90,12 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
     description: 'Future connection for approved social/reporting context without exposing credentials.',
   },
   {
+    key: 'microsoft',
+    name: 'Microsoft 365 (Planner + Outlook)',
+    status: 'protected',
+    description: 'Live admin-only controlled reconciliation sync. Produces a reviewed Planner/Outlook preview; never writes to the Client Schedule on its own.',
+  },
+  {
     key: 'cg-hours',
     name: 'CG Hours',
     status: 'planned',
@@ -189,6 +195,90 @@ async function getMetaIntegrationState(sb: ReturnType<typeof createClient>): Pro
     // Meta schema not present yet — unknown rather than a guess.
     return null
   }
+}
+
+interface MicrosoftIntegrationState {
+  connected: boolean
+  status: string
+  message: string
+  planSourceCount: number
+}
+
+// Real Microsoft 365 transition state, read from the SAME truth the Integrations
+// page and the microsoft-transition-sync `status` action use: the configured
+// Graph credentials + source manifest, the admin-managed plan registry, and the
+// transition lifecycle switch. Without this the model answered Microsoft
+// questions from the static TOOL_REGISTRY and wrongly claimed "not connected"
+// while Planner/Outlook were live. Returns null only when the schema is missing.
+async function getMicrosoftIntegrationState(sb: ReturnType<typeof createClient>): Promise<MicrosoftIntegrationState | null> {
+  try {
+    const tenantId = Deno.env.get('MICROSOFT_TENANT_ID')
+    const clientId = Deno.env.get('MICROSOFT_CLIENT_ID')
+    const clientSecret = Deno.env.get('MICROSOFT_CLIENT_SECRET')
+    let manifestUserId: string | null = null
+    let manifestPlans = 0
+    try {
+      const raw = Deno.env.get('MICROSOFT_SYNC_SOURCES_JSON')
+      if (raw) {
+        const manifest = JSON.parse(raw) as { userId?: string; plans?: unknown[] }
+        manifestUserId = typeof manifest.userId === 'string' ? manifest.userId : null
+        manifestPlans = Array.isArray(manifest.plans) ? manifest.plans.length : 0
+      }
+    } catch {
+      manifestUserId = null
+    }
+
+    const { count: registryCount } = await sb
+      .from('microsoft_sync_plan_sources')
+      .select('*', { head: true, count: 'exact' })
+      .eq('active', true)
+
+    const planSourceCount = manifestPlans + (registryCount ?? 0)
+    const configured = Boolean(tenantId && clientId && clientSecret && manifestUserId)
+
+    const { data: setting, error: settingError } = await sb
+      .from('microsoft_sync_settings')
+      .select('transition_status')
+      .eq('id', true)
+      .maybeSingle()
+
+    if (settingError) {
+      return { connected: false, status: 'unavailable', message: 'Microsoft transition lifecycle status is unavailable.', planSourceCount }
+    }
+    const transitionStatus = (setting?.transition_status as string) ?? 'paused'
+
+    if (!configured) {
+      return { connected: false, status: 'not_configured', message: 'Microsoft transition connection is not configured.', planSourceCount }
+    }
+    if (transitionStatus !== 'active') {
+      return { connected: false, status: transitionStatus, message: `Microsoft transition sync is ${transitionStatus}.`, planSourceCount }
+    }
+    return { connected: true, status: 'active', message: 'Microsoft transition connection is available.', planSourceCount }
+  } catch {
+    // Microsoft schema not present — unknown rather than a guess.
+    return null
+  }
+}
+
+const MICROSOFT_MENTION_PATTERNS = [
+  /\bmicrosoft\b/i,
+  /\bms\s?365\b/i,
+  /\boffice\s?365\b/i,
+  /\bplanner\b/i,
+  /\boutlook\b/i,
+  /\bteams\b/i,
+]
+
+function isMicrosoftMention(message: string): boolean {
+  return MICROSOFT_MENTION_PATTERNS.some((pattern) => pattern.test(message))
+}
+
+function buildMicrosoftStatusLine(state: MicrosoftIntegrationState | null): string {
+  if (!state) return '- Microsoft 365: status could not be verified from diagnostics right now.'
+  if (state.connected) {
+    return `- Microsoft 365: connected (${state.planSourceCount} Planner/Outlook source${state.planSourceCount === 1 ? '' : 's'} available). Controlled reconciliation sync can run (admins).`
+  }
+  return `- Microsoft 365: not available for sync. ${state.message}`
 }
 
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
@@ -441,7 +531,11 @@ function buildMetaStatusLine(metaState: MetaIntegrationState | null): string {
   return `- Meta Business: not connected. ${metaState.message}${metaState.linkedAssetsCount > 0 ? ` ${metaState.linkedAssetsCount} linked client asset${metaState.linkedAssetsCount === 1 ? '' : 's'} still exist.` : ''}`
 }
 
-function buildCapabilitiesResponse(role: string, metaState: MetaIntegrationState | null): string {
+function buildCapabilitiesResponse(
+  role: string,
+  metaState: MetaIntegrationState | null,
+  microsoftState: MicrosoftIntegrationState | null,
+): string {
   const connected = TOOL_REGISTRY
     .filter((tool) => tool.status === 'available')
     .map((tool) => `- ${tool.name}: ${tool.description}`)
@@ -467,6 +561,7 @@ function buildCapabilitiesResponse(role: string, metaState: MetaIntegrationState
     notConnected,
     '',
     buildMetaStatusLine(metaState),
+    buildMicrosoftStatusLine(microsoftState),
     '',
     `Your access tier: ${accessSummary(role)}`,
   ].join('\n')
@@ -546,11 +641,18 @@ function accessSummary(role: string): string {
   return 'Staff: own tasks, public schedule items, already-visible client/project task info, and general operational help when those tools are connected.'
 }
 
-function buildSystemPrompt(role: string, metaState: MetaIntegrationState | null): string {
+function buildSystemPrompt(
+  role: string,
+  metaState: MetaIntegrationState | null,
+  microsoftState: MicrosoftIntegrationState | null,
+): string {
   const tools = TOOL_REGISTRY.map((tool) => `${tool.name}: ${tool.status}`).join(', ')
   const metaFacts = metaState
     ? `Live Meta Business integration state (from diagnostics, do not contradict it): ${metaState.connected ? 'CONNECTED' : 'NOT_CONNECTED'} (status: ${metaState.status}, linked client assets: ${metaState.linkedAssetsCount}).`
     : 'Live Meta Business integration state is currently unverifiable in this function.'
+  const microsoftFacts = microsoftState
+    ? `Live Microsoft 365 integration state (from diagnostics, do not contradict it): ${microsoftState.connected ? 'CONNECTED' : 'NOT_AVAILABLE'} (status: ${microsoftState.status}, Planner/Outlook sources: ${microsoftState.planSourceCount}).`
+    : 'Live Microsoft 365 integration state is currently unverifiable in this function.'
 
   return [
     'You are CG Assistant inside CG Dynamics.',
@@ -558,8 +660,11 @@ function buildSystemPrompt(role: string, metaState: MetaIntegrationState | null)
     `User role: ${role}. ${accessSummary(role)}`,
     `Tool registry: ${tools}. Only sanitized My Day context may be supplied with the request; other live operational tools are not connected yet.`,
     metaFacts,
-    'If asked for live tasks beyond the supplied My Day context, calendar lookups, client task details, approvals, or CG Hours data, say the integration is not connected yet and offer a useful checklist, draft, or workflow.',
+    microsoftFacts,
+    'If asked for live tasks beyond the supplied My Day context, calendar lookups, client task details, approvals, or CG Hours data, say that specific integration is not connected yet and offer a useful checklist, draft, or workflow. This never applies to Meta Business or Microsoft 365 — for those, use the live state above.',
     `When asked whether Meta is connected, reply based ONLY on the live Meta integration state above: ${metaState?.connected ? 'it is connected, so say it is connected and available for sync.' : 'it is not connected, so say it is not connected and never claim otherwise.'}`,
+    `When asked about Microsoft 365, Planner, Outlook, Teams, or running a Microsoft sync, reply based ONLY on the live Microsoft state above: ${microsoftState?.connected ? 'it IS connected and a controlled Planner/Outlook reconciliation sync can be run by an admin from CG Assistant, so never say it is not connected.' : 'it is not available for sync right now, so say exactly that and give the real reason above.'}`,
+    'A Microsoft sync produces a reviewed reconciliation preview; it never writes to the Client Schedule on its own.',
     'Never reveal, infer, summarise, or guess salaries, payroll, bank details, Xero/accounting values, profit/loss, revenue, invoice totals, tax, owner notes, ID numbers, confidential finance, or private HR/payroll fields.',
     'Do not hallucinate data. If no data was provided or connected, say so.',
     'Answer as CG Assistant.',
@@ -956,6 +1061,9 @@ Deno.serve(async (req) => {
   // Real Meta integration state — fetched lazily (only when Meta is relevant to
   // the message) so ordinary chat does not pay an extra DB round trip.
   const metaState = isMetaMention(message) ? await getMetaIntegrationState(sb) : null
+  // Same lazy pattern for Microsoft 365 so the model answers Planner/Outlook and
+  // "run a Microsoft sync" from live diagnostics instead of the static registry.
+  const microsoftState = isMicrosoftMention(message) ? await getMicrosoftIntegrationState(sb) : null
 
   if (isRestrictedRequest(message)) {
     const setupAllowed = isPrivilegedRole(role) && isSetupQuestion(message)
@@ -981,7 +1089,7 @@ Deno.serve(async (req) => {
   }
 
   if (isCapabilitiesQuestion(message)) {
-    const answer = buildCapabilitiesResponse(role, metaState)
+    const answer = buildCapabilitiesResponse(role, metaState, microsoftState)
 
     await auditAssistantRequest(sb, {
       userId: user.id,
@@ -1044,7 +1152,7 @@ Deno.serve(async (req) => {
   }
 
   const messages: AiChatMessage[] = [
-    { role: 'system', content: buildSystemPrompt(role, metaState) },
+    { role: 'system', content: buildSystemPrompt(role, metaState, microsoftState) },
     ...history,
     { role: 'user', content: message },
   ]

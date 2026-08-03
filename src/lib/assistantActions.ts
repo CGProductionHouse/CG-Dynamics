@@ -22,6 +22,7 @@ export type AssistantActionType =
   | 'video.mark_shot'
   | 'job.enqueue'
   | 'memory.add'
+  | 'microsoft.sync'
 
 export interface ActionClient {
   id: string
@@ -231,6 +232,37 @@ function isMetaSyncIntent(lower: string): boolean {
     /\b(?:client|clients|kliënt|kliënte)\b/.test(lower)
 }
 
+// ── Microsoft 365 sync intent ────────────────────────────────────────────────
+// Lexical detector (EN + AF + mixed) for the controlled Microsoft transition
+// sync (Planner + Outlook → reviewed reconciliation preview). Deterministic
+// keyword matching only — the assistant never guesses whether Microsoft is
+// connected; the confirmed action reads the live integration status first.
+//   "run a microsoft sync", "sync microsoft", "sync planner", "pull outlook",
+//   "sinkroniseer microsoft", "trek planner in", "microsoft 365 sync"
+function isMicrosoftSyncIntent(lower: string): boolean {
+  const brand = /\b(?:microsoft|microsoft\s?365|ms\s?365|office\s?365|planner|outlook|teams)\b/.test(lower)
+  if (!brand) return false
+
+  // Explicit adjacency forms.
+  if (/\b(?:microsoft|planner|outlook|teams)[\s-]?(?:sync|sinkronisering)\b/.test(lower)) return true
+  if (/\b(?:sync|sinkroniseer)[\s-]?(?:microsoft|planner|outlook|teams)\b/.test(lower)) return true
+
+  // Verb + brand + sync-ish context.
+  const verb = /\b(?:sync(?:hroniz?e|hronise)?|sinkroniseer|synchroniseer|refresh|verfris|update|opdateer|run|voer uit|pull|import|invoer|trek|reconcile|rekonsilieer)\b/.test(lower)
+  const context = /\b(?:sync|sinkronisering|task|tasks|taak|take|plan|plans|schedule|skedule|calendar|kalender|data|preview|voorskou|reconciliation|rekonsiliasie|change|changes)\b/.test(lower)
+  return verb && context
+}
+
+// Default bounded Outlook/Planner window: start of this month through the end
+// of the fifth month ahead (a 6-month operating window). Always shown in the
+// confirmation step so the admin can narrow or widen it before anything runs.
+export function defaultMicrosoftSyncRange(today: string): { start: string; end: string } {
+  const base = new Date(`${today}T12:00:00Z`)
+  const start = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), 1))
+  const end = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + 6, 0))
+  return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) }
+}
+
 // ── Main parser ──────────────────────────────────────────────────────────────
 
 export function parseAssistantAction(input: string, context: ActionContext): ParseResult {
@@ -247,6 +279,20 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
       fields: { note: remember[1].trim() },
       clientId: context.currentClientId ?? null,
       clientName: context.currentClientName ?? null,
+    }
+  }
+
+  // 0b. Microsoft 365 controlled sync (Planner + Outlook reconciliation preview).
+  // Checked BEFORE the Meta detector so Microsoft phrasing can never be routed
+  // to a Meta sync. The action itself verifies the live integration state.
+  if (isMicrosoftSyncIntent(lower)) {
+    const range = defaultMicrosoftSyncRange(context.today)
+    return {
+      type: 'microsoft.sync',
+      title: 'Run Microsoft 365 sync (Planner + Outlook preview)',
+      fields: { range_start: range.start, range_end: range.end },
+      clientId: null,
+      clientName: null,
     }
   }
 
