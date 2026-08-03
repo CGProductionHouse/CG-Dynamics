@@ -117,6 +117,26 @@ export async function recordSkillCardReview(input: {
   })
 }
 
+/** All specialists a card may be routed to. */
+export const ALL_SPECIALISTS = [
+  'marketing_strategist', 'copywriting_agent', 'creative_director', 'brand_guardian',
+  'social_media_strategist', 'paid_ads_agent', 'content_planner',
+  'research_librarian', 'historical_advertising_analyst', 'client_report_agent',
+] as const
+
+/**
+ * Change which specialists a card reaches. Kept separate from wording review on
+ * purpose: routing is structural, so it must be a deliberate decision rather
+ * than something that rides along with a copy edit. Never changes status.
+ */
+export async function setSkillCardRouting(input: { cardId: string; agents: string[]; note?: string }) {
+  return supabase.rpc('skill_card_set_routing', {
+    p_card_id: input.cardId,
+    p_agents: input.agents,
+    p_note: input.note ?? null,
+  })
+}
+
 /** Activate exactly one card. The database gate decides; there is no bulk path. */
 export async function activateSkillCard(cardId: string) {
   return supabase.rpc('skill_card_activate', { p_card_id: cardId })

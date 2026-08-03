@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { isAdminRole } from '../../lib/roles'
 import {
   activateSkillCard,
+  ALL_SPECIALISTS,
   applyQueueFilters,
   EDITABLE_FIELDS,
   EMPTY_FILTERS,
@@ -11,6 +12,7 @@ import {
   PRIORITY_GROUPS,
   recommendedQueue,
   recordSkillCardReview,
+  setSkillCardRouting,
   summariseReadiness,
   type EditableField,
   type QueueFilters,
@@ -91,6 +93,7 @@ export default function SkillCardReviewPage() {
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
   const [edits, setEdits] = useState<Partial<Record<EditableField, string>>>({})
+  const [routing, setRouting] = useState<string[] | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -120,7 +123,19 @@ export default function SkillCardReviewPage() {
     [filtered],
   )
 
-  useEffect(() => { setNote(''); setEdits({}) }, [openId])
+  useEffect(() => { setNote(''); setEdits({}); setRouting(null) }, [openId])
+
+  async function saveRouting() {
+    if (!open || !routing || busy) return
+    setBusy(true); setError(null); setNotice(null)
+    try {
+      const res = await setSkillCardRouting({ cardId: open.id, agents: routing, note: note.trim() || undefined })
+      if (res.error) { setError(res.error.message); return }
+      setNotice(`Routing updated for "${open.title}".`)
+      setRouting(null)
+      await load()
+    } finally { setBusy(false) }
+  }
 
   async function decide(decision: ReviewDecision) {
     if (!open || busy) return
@@ -367,6 +382,35 @@ export default function SkillCardReviewPage() {
                       Unrecognised agent key{open.unrecognised_agents.length === 1 ? '' : 's'}: {open.unrecognised_agents.join(', ')} — fix before activating.
                     </p>
                   )}
+                  <div className="mt-2 border-t border-white/10 pt-2">
+                    <p className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Change routing</p>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {ALL_SPECIALISTS.map(sp => {
+                        const current = routing ?? open.resolved_agents
+                        const on = current.includes(sp)
+                        return (
+                          <button
+                            key={sp}
+                            type="button"
+                            onClick={() => {
+                              const base = routing ?? open.resolved_agents
+                              setRouting(on ? base.filter(x => x !== sp) : [...base, sp])
+                            }}
+                            className={`rounded-full border px-2 py-0.5 text-[10px] font-bold transition-colors ${on ? 'border-brand-teal/50 bg-brand-teal/[0.10] text-white' : 'border-white/12 text-brand-primary/60 hover:text-white'}`}
+                          >
+                            {sp.replace(/_/g, ' ')}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {routing && (
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <button type="button" onClick={() => void saveRouting()} disabled={busy || routing.length === 0} className="rounded-full bg-brand-teal px-3 py-1 text-[11px] font-black text-black disabled:opacity-40">Save routing</button>
+                        <button type="button" onClick={() => setRouting(null)} className="text-[11px] font-bold text-brand-primary/60 hover:text-white">Cancel</button>
+                        {routing.length === 0 && <span className="text-[11px] text-amber-200">A card must reach at least one specialist.</span>}
+                      </div>
+                    )}
+                  </div>
                   <p className="mt-1.5 text-[11px] text-brand-primary/60">
                     {open.client_specific
                       ? <>Client-specific: only <strong className="text-white">{open.active_client_name ?? 'no client assigned'}</strong>{open.active_client_is_active === false && <span className="text-amber-200"> (client is not active)</span>}.</>

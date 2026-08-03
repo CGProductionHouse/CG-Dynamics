@@ -260,3 +260,37 @@ test('client-specific routing and inactive clients are made obvious', () => {
   assert.match(page, /Client-specific: only/)
   assert.match(page, /client is not active/)
 })
+
+// ── Routing review (separate from wording review) ───────────────────────────
+const routingSql = read('../supabase/migrations/20260803140000_skill_card_routing_review.sql')
+
+test('routing changes are admin-gated and refuse unrecognised specialist keys', () => {
+  assert.match(routingSql, /if not public\.is_admin\(\) then/)
+  assert.match(routingSql, /Admin access required to change Skill Card routing/)
+  assert.match(routingSql, /Unrecognised specialist key/)
+  assert.match(routingSql, /revoke all on function public\.skill_card_set_routing\(uuid, text\[\], text\) from public, anon/)
+})
+
+test('a card can never be routed to nobody', () => {
+  assert.match(routingSql, /cardinality\(p_agents\) = 0 then/)
+  assert.match(routingSql, /A card must route to at least one specialist/)
+})
+
+test('routing changes never touch status and are recorded in the review trail', () => {
+  assert.doesNotMatch(routingSql, /set status =/)
+  assert.match(routingSql, /insert into public\.skill_card_reviews/)
+  assert.match(routingSql, /Routing updated to \[/)
+})
+
+test('routing stays out of the wording-review allow-list', () => {
+  const body = fnBody('skill_card_record_review')
+  const allow = body.slice(body.indexOf('v_allowed'), body.indexOf('begin'))
+  assert.ok(!allow.includes("'relevant_agents'"), 'routing must not be editable via wording review')
+})
+
+test('the review UI offers routing as a deliberate, separate action', () => {
+  assert.match(page, /Change routing/)
+  assert.match(page, /setSkillCardRouting/)
+  assert.match(page, /Save routing/)
+  assert.match(page, /A card must reach at least one specialist/)
+})
