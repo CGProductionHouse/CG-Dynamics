@@ -30,6 +30,9 @@ export interface SkillCardRecord {
   sourceType: string | null      // e.g. 'book', 'ai_generated', 'unsourced_blog'
   sourceId: string | null
   title: string
+  principle?: string | null
+  summary?: string | null
+  sourceReference?: string | null
   /** Stored `skill_cards.relevant_agents`; may contain legacy key spellings. */
   relevantAgents?: readonly string[] | null
 }
@@ -133,9 +136,20 @@ export function buildRetrievalPlan(
   candidateCards: SkillCardRecord[],
   ctx: RetrievalContext,
   limit = 8,
+  query = '',
 ): RetrievalPlan {
   const gated = candidateCards.filter(card => isCardRetrievable(card, ctx))
+  const terms = [...new Set(query.toLowerCase().match(/[a-z0-9]{4,}/g) ?? [])]
+  const queryScore = (card: SkillCardRecord) => {
+    const haystack = [card.title, card.principle, card.summary, card.sourceReference]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+    return terms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0)
+  }
   gated.sort((a, b) => {
+    const queryRank = queryScore(b) - queryScore(a)
+    if (queryRank !== 0) return queryRank
     const r = layerRank(a.knowledgeLayer) - layerRank(b.knowledgeLayer)
     if (r !== 0) return r
     // Prefer active-client-specific matches within the same layer.

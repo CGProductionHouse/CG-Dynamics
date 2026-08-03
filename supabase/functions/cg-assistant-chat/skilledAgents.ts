@@ -236,9 +236,25 @@ export function isCardRetrievable(card: CardRow, ctx: GateContext): boolean {
   return true
 }
 
-export function buildPlan(cards: CardRow[], ctx: GateContext, limit = 8): { cards: CardRow[]; insufficient: boolean } {
+function queryTerms(query: string): string[] {
+  return [...new Set(query.toLowerCase().match(/[a-z0-9]{4,}/g) ?? [])]
+}
+
+function queryScore(card: CardRow, terms: string[]): number {
+  if (terms.length === 0) return 0
+  const haystack = [card.title, card.principle, card.summary, card.source_reference]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  return terms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0)
+}
+
+export function buildPlan(cards: CardRow[], ctx: GateContext, limit = 8, query = ''): { cards: CardRow[]; insufficient: boolean } {
   const gated = cards.filter((c) => isCardRetrievable(c, ctx))
+  const terms = queryTerms(query)
   gated.sort((a, b) => {
+    const queryRank = queryScore(b, terms) - queryScore(a, terms)
+    if (queryRank !== 0) return queryRank
     const ra = LAYER_PRIORITY.indexOf(normaliseKnowledgeLayer(a.knowledge_layer) as KnowledgeLayer)
     const rb = LAYER_PRIORITY.indexOf(normaliseKnowledgeLayer(b.knowledge_layer) as KnowledgeLayer)
     if (ra !== rb) return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb)

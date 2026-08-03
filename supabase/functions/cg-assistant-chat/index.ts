@@ -291,7 +291,7 @@ async function getMarketingAiState(sb: ReturnType<typeof createClient>): Promise
   try {
     const { data: cards } = await sb
       .from('skill_cards')
-      .select('relevant_agents')
+      .select('relevant_agents, source_type')
       .eq('status', 'active')
     const rows = cards ?? []
     const perSpecialist = new Map<string, number>()
@@ -301,6 +301,9 @@ async function getMarketingAiState(sb: ReturnType<typeof createClient>): Promise
         : []
       for (const raw of agents) {
         const key = normaliseAgentKey(String(raw))
+        // Governance-only cards tell the Historical Analyst when to refuse;
+        // they do not make it ready to make historical source claims.
+        if (key === 'historical_advertising_analyst' && row.source_type === 'internal_campaign_data') continue
         if (key) perSpecialist.set(key, (perSpecialist.get(key) ?? 0) + 1)
       }
     }
@@ -898,8 +901,38 @@ async function handleSkilledChat(
     .in('status', statuses)
   const cards = (rawCards ?? []) as unknown as CardRow[]
 
-  const plan = buildPlan(cards, { agent, activeClientId: clientId, mode })
+  const plan = buildPlan(cards, { agent, activeClientId: clientId, mode }, 8, message)
   const reviewWarning = 'Draft from an AI agent. Human review is required before any client-facing use.'
+
+  if (
+    agentKey === 'historical_advertising_analyst'
+    && !plan.cards.some(card => card.source_type !== 'internal_campaign_data')
+  ) {
+    return {
+      answer: [
+        'original_source_claim: Not available from active approved evidence.',
+        'source_location: No active original historical source card with a verified location is available.',
+        'historical_context: Withheld.',
+        'modern_interpretation: Withheld; historical material cannot be converted into current platform rules.',
+        'outdated_assumption: Not assessed without the original source.',
+        'applicability_limit: Exact source support must be reviewed and activated first.',
+        'evidence_ids: none.',
+        'confidence: Insufficient approved evidence.',
+      ].join('\n'),
+      agent: agent.key,
+      agentName: agent.name,
+      mode,
+      platformSlug,
+      surfaceKey,
+      cardsUsed: [],
+      sourcesUsed: [],
+      citations: [],
+      platformKnowledgeUsed: [],
+      insufficientEvidence: true,
+      reviewWarning,
+      model: 'local:insufficient_evidence',
+    }
+  }
 
   // Platform knowledge (social-aware agents only). Service role bypasses RLS, so
   // currency is gated in code: production sees only verified_current/observed_current
