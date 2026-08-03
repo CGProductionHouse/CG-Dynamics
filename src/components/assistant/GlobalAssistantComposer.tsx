@@ -26,6 +26,7 @@ import {
   applyMeetingDebrief,
   type MeetingDebriefAnalysis,
 } from '../../lib/meetingDebrief'
+import { runMicrosoftSync, checkMicrosoftSyncAvailability } from '../../lib/assistantMicrosoftSync'
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
@@ -147,6 +148,8 @@ export function GlobalAssistantComposer() {
   // preview before ANY write. Nothing mutates until the user confirms.
   const [proposal, setProposal] = useState<ActionProposal | null>(null)
   const [applying, setApplying] = useState(false)
+  // Live progress line while the controlled Microsoft sync runs.
+  const [microsoftSyncNote, setMicrosoftSyncNote] = useState<string | null>(null)
   const [showJobs, setShowJobs] = useState(false)
   const [jobs, setJobs] = useState<BackgroundJob[]>([])
 
@@ -178,6 +181,10 @@ export function GlobalAssistantComposer() {
   const staffRef = useRef<string[]>([])
   const managementRef = useRef<string | null>(null)
   const memoryRef = useRef<string[]>([])
+  // Live Microsoft 365 state, so conversational answers are grounded in the real
+  // integration instead of a model guess. Admin-only (the status endpoint is
+  // admin-gated), which matches who can actually run the sync.
+  const microsoftStateRef = useRef<string | null>(null)
   const profileIdRef = useRef<string | null>(profile?.id ?? null)
   const actionRequestRef = useRef(0)
   const debriefRequestSeqRef = useRef(0)
@@ -298,8 +305,19 @@ export function GlobalAssistantComposer() {
           (busiest ? `, busiest ${busiest.full_name} (${busiest.active_task_count} active)` : '')
       }).catch(() => {})
     }
+    // Live Microsoft 365 state for grounded answers. The status endpoint is
+    // admin-gated server-side, so only admins fetch it — matching who may run
+    // the sync. Failures stay silent; an absent line is better than a guess.
+    if (profile?.role === 'admin') {
+      checkMicrosoftSyncAvailability().then(state => {
+        if (!active || profileIdRef.current !== requestedProfileId || state.error) return
+        microsoftStateRef.current = state.connected
+          ? `microsoft365: CONNECTED (${state.sourceCount} Planner/Outlook source${state.sourceCount === 1 ? '' : 's'}); an admin can run the controlled reconciliation sync from CG Assistant`
+          : `microsoft365: unavailable for sync (${state.message})`
+      }).catch(() => {})
+    }
     return () => { active = false }
-  }, [isManager, profileId])
+  }, [isManager, profileId, profile?.role])
 
   // Durable per-user memory (own-only via RLS). Loaded once so the personal
   // assistant is grounded in what this user has asked it to remember. Strictly
@@ -381,6 +399,8 @@ export function GlobalAssistantComposer() {
     if (isManager && managementRef.current) parts.push(managementRef.current)
     // Durable per-user memory (own-only) grounds the personal assistant.
     if (memoryRef.current.length > 0) parts.push(`remembered: ${memoryRef.current.slice(0, 6).join('; ')}`)
+    // Real Microsoft 365 integration state (never a guess).
+    if (microsoftStateRef.current) parts.push(microsoftStateRef.current)
     return parts.join(', ')
   }
 
@@ -430,6 +450,29 @@ export function GlobalAssistantComposer() {
         setShowJobs(true)
         void loadJobs(actionIsCurrent)
         pushAssistant(`Queued ${jobType === 'meta_sync' ? 'Meta sync' : 'report preparation'} as a background job. It runs on the server and continues even if you close the app — I'll notify you when it finishes. Progress is under "Background jobs".`)
+        return
+      }
+      if (p.type === 'microsoft.sync') {
+        // Controlled Microsoft 365 sync. Admin-only server-side; we surface that
+        // truthfully here instead of letting the model claim "not connected".
+        if (profile?.role !== 'admin') {
+          setProposalError('Microsoft sync is restricted to admins. Ask an admin to run it from CG Assistant or the Microsoft Import page.')
+          return
+        }
+        const rangeStart = String(p.fields.range_start)
+        const rangeEnd = String(p.fields.range_end)
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(rangeStart) || !/^\d{4}-\d{2}-\d{2}$/.test(rangeEnd) || rangeEnd <= rangeStart) {
+          setProposalError('Give me a valid date range (start before end) for the Microsoft sync.')
+          return
+        }
+        setProposal(null)
+        setMicrosoftSyncNote('Checking the live Microsoft connection…')
+        const outcome = await runMicrosoftSync(rangeStart, rangeEnd, {
+          onProgress: (_progress, note) => { if (actionIsCurrent()) setMicrosoftSyncNote(note) },
+        })
+        if (!actionIsCurrent()) return
+        setMicrosoftSyncNote(null)
+        pushAssistant(outcome.message)
         return
       }
       if (p.type === 'calendar.create') {
@@ -928,6 +971,16 @@ export function GlobalAssistantComposer() {
                 <button type="button" onClick={() => setOpen(false)} className="min-h-11 min-w-11 rounded-md px-2 text-sm font-bold text-brand-primary/70 hover:text-white" aria-label="Minimise assistant">–</button>
               </div>
             </div>
+
+            {microsoftSyncNote && (
+              <div className="border-b border-white/10 px-3 py-2.5">
+                <p className="text-[11px] font-black uppercase tracking-wide text-brand-primary/60">Microsoft 365 sync</p>
+                <p className="mt-1 text-xs text-brand-primary/80">{microsoftSyncNote}</p>
+                <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full w-1/3 animate-pulse rounded-full bg-brand-teal" />
+                </div>
+              </div>
+            )}
 
             {showJobs && (
               <div className="border-b border-white/10 px-3 py-2.5">
