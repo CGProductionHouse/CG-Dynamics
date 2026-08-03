@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import {
   buildAssistantLocalWorkContext,
   fetchActiveClients,
+  fetchSpecialistReadiness,
   getAssistantDiagnostics,
   sendAssistantMessage,
   SKILLED_AGENTS,
@@ -18,6 +19,7 @@ import {
   type AssistantProviderTestResponse,
   type AssistantSourceUsed,
   type AssistantToolStatus,
+  type SpecialistReadiness,
 } from '../../lib/assistant'
 import { getMyDayContext } from '../../lib/workforceMyDay'
 import { ActionButton } from '../../components/ui/Buttons'
@@ -205,6 +207,7 @@ export default function AssistantPage() {
   const [activeClientId, setActiveClientId] = useState<string>('')
   const [researchMode, setResearchMode] = useState(false)
   const [activeClients, setActiveClients] = useState<ActiveClientOption[]>([])
+  const [specialistReadiness, setSpecialistReadiness] = useState<SpecialistReadiness[]>([])
   const [platformSlug, setPlatformSlug] = useState('')
   const [surfaceKey, setSurfaceKey] = useState('')
   const [channel, setChannel] = useState<'organic' | 'paid' | 'both'>('both')
@@ -259,6 +262,14 @@ export default function AssistantPage() {
     let cancelled = false
     const requestedProfileId = profileId
     void fetchActiveClients().then((clients) => { if (!cancelled && profileIdRef.current === requestedProfileId) setActiveClients(clients) })
+    return () => { cancelled = true }
+  }, [profileId])
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchSpecialistReadiness().then((readiness) => {
+      if (!cancelled) setSpecialistReadiness(readiness)
+    })
     return () => { cancelled = true }
   }, [profileId])
 
@@ -409,9 +420,20 @@ export default function AssistantPage() {
                 className="rounded-lg border border-brand-muted bg-brand-bg px-3 py-1.5 text-sm text-white outline-none focus:border-brand-accent"
               >
                 <option value="">General Assistant</option>
-                {SKILLED_AGENTS.map((agent) => (
-                  <option key={agent.key} value={agent.key}>{agent.name}</option>
-                ))}
+                {SKILLED_AGENTS.map((agent) => {
+                  const readiness = specialistReadiness.find((item) => item.key === agent.key)
+                  const readinessLabel = readiness
+                    ? readiness.available
+                      ? ` (${readiness.approvedCards} approved)`
+                      : ' (not ready)'
+                    : ''
+
+                  return (
+                    <option key={agent.key} value={agent.key}>
+                      {agent.name}{readinessLabel}
+                    </option>
+                  )
+                })}
               </select>
 
               {selectedAgent?.needsClient && (
@@ -481,7 +503,12 @@ export default function AssistantPage() {
             </div>
             {selectedAgent && (
               <p className="mt-2 text-[11px] leading-relaxed text-brand-primary/45">
-                Skilled agents answer only from approved source material and always cite. If nothing is approved yet, they say so honestly. Drafts require human review before client-facing use.
+                {(() => {
+                  const readiness = specialistReadiness.find((item) => item.key === selectedAgent.key)
+                  return readiness?.available
+                    ? `${selectedAgent.name} is ready with ${readiness.approvedCards} approved knowledge card(s). Every factual point still requires a citation and human review.`
+                    : `${selectedAgent.name} is not ready for production because no approved knowledge is routed to it. Admin research can review candidate cards, but they are never production evidence.`
+                })()}
               </p>
             )}
             <div className="mt-3">

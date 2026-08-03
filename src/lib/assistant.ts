@@ -86,6 +86,21 @@ export interface ActiveClientOption {
   name: string
 }
 
+export interface SpecialistReadiness {
+  key: string
+  name: string
+  approvedCards: number
+  available: boolean
+}
+
+export async function fetchSpecialistReadiness(): Promise<SpecialistReadiness[]> {
+  const { data, error } = await supabase.functions.invoke<{ ok: boolean; specialists?: SpecialistReadiness[] }>('cg-assistant-chat', {
+    body: { action: 'specialist_status' },
+  })
+  if (error || !data?.ok || !Array.isArray(data.specialists)) return []
+  return data.specialists
+}
+
 export async function fetchActiveClients(): Promise<ActiveClientOption[]> {
   const { data, error } = await supabase
     .from('clients')

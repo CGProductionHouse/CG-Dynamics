@@ -31,14 +31,19 @@ export type EvidenceLabel =
   | 'hypothesis'
 
 export type RelevantAgent =
+  | 'research_librarian'
   | 'marketing_strategist'
   | 'copywriting_agent'
-  | 'graphic_design_first_draft_agent'
+  | 'creative_director'
+  | 'creative_director_agent'
   | 'brand_guardian'
   | 'paid_ads_agent'
-  | 'seo_agent'
+  | 'content_planner'
   | 'client_report_agent'
-  | 'creative_director_agent'
+  | 'historical_advertising_analyst'
+  | 'social_media_strategist'
+  | 'graphic_design_first_draft_agent'
+  | 'seo_agent'
 
 export type IndustryTag =
   | 'real_estate'
