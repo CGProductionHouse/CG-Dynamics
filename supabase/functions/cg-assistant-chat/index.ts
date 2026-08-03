@@ -260,19 +260,6 @@ async function getMicrosoftIntegrationState(sb: ReturnType<typeof createClient>)
   }
 }
 
-const MICROSOFT_MENTION_PATTERNS = [
-  /\bmicrosoft\b/i,
-  /\bms\s?365\b/i,
-  /\boffice\s?365\b/i,
-  /\bplanner\b/i,
-  /\boutlook\b/i,
-  /\bteams\b/i,
-]
-
-function isMicrosoftMention(message: string): boolean {
-  return MICROSOFT_MENTION_PATTERNS.some((pattern) => pattern.test(message))
-}
-
 function buildMicrosoftStatusLine(state: MicrosoftIntegrationState | null): string {
   if (!state) return '- Microsoft 365: status could not be verified from diagnostics right now.'
   if (state.connected) {
@@ -341,16 +328,6 @@ const SETUP_QUESTION_PATTERNS = [
   /\bfuture\b/i,
   /\bguardrails?\b/i,
   /\bpermissions?\b/i,
-]
-
-const META_MENTION_PATTERNS = [
-  /\bmeta\b/i,
-  /\bfacebook\b/i,
-  /\binstagram\b/i,
-  /\bmeta[\s-]?sync\b/i,
-  /\bsync(?:hronis(?:e|ing|ation))?\b/i,
-  /\brefresh meta\b/i,
-  /\bconnected\b/i,
 ]
 
 type AssistantAction = 'chat' | 'diagnostics' | 'test_provider'
@@ -444,10 +421,6 @@ function isRestrictedRequest(message: string): boolean {
 
 function isCapabilitiesQuestion(message: string): boolean {
   return CAPABILITIES_PATTERNS.some((pattern) => pattern.test(message))
-}
-
-function isMetaMention(message: string): boolean {
-  return META_MENTION_PATTERNS.some((pattern) => pattern.test(message))
 }
 
 function isTaskLookupRequest(message: string): boolean {
@@ -1058,13 +1031,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Message is required.' }, 400)
   }
 
-  // Real Meta integration state — fetched lazily (only when Meta is relevant to
-  // the message) so ordinary chat does not pay an extra DB round trip.
-  const metaState = isMetaMention(message) ? await getMetaIntegrationState(sb) : null
-  // Same lazy pattern for Microsoft 365 so the model answers Planner/Outlook and
-  // "run a Microsoft sync" from live diagnostics instead of the static registry.
-  const microsoftState = isMicrosoftMention(message) ? await getMicrosoftIntegrationState(sb) : null
-
   if (isRestrictedRequest(message)) {
     const setupAllowed = isPrivilegedRole(role) && isSetupQuestion(message)
     const answer = buildRestrictedResponse(role, setupAllowed)
@@ -1087,6 +1053,21 @@ Deno.serve(async (req) => {
       tools: TOOL_REGISTRY,
     })
   }
+
+  // Real integration state for Meta and Microsoft 365, always fetched (in
+  // parallel) for any request that reaches an answering path.
+  //
+  // This used to be fetched only when the message NAMED the integration. That
+  // left every other phrasing — "what can you do?", "what tools do you have?" —
+  // with no state, so the model filled the gap by guessing, and reported live
+  // integrations as unavailable. Integration status is exactly the class of
+  // claim that must never be guessed, and there is no finite list of phrasings
+  // that could ask for it, so the state is now always real. Restricted requests
+  // return above and never pay for it.
+  const [metaState, microsoftState] = await Promise.all([
+    getMetaIntegrationState(sb),
+    getMicrosoftIntegrationState(sb),
+  ])
 
   if (isCapabilitiesQuestion(message)) {
     const answer = buildCapabilitiesResponse(role, metaState, microsoftState)
