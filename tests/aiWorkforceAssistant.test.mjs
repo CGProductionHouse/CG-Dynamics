@@ -15,7 +15,9 @@ after(async () => { await server?.close() })
 
 const card = o => ({
   id: 'c1', status: 'active', knowledge_layer: 'universal_principle', client_specific: false,
-  active_client_id: null, source_type: 'book', source_id: 's1', title: 'T', principle: 'P', summary: 'S', source_reference: null, ...o,
+  active_client_id: null, source_type: 'book', source_id: 's1', title: 'T', principle: 'P', summary: 'S', source_reference: null,
+  // Real cards always name their specialist; the gate now routes on it.
+  relevant_agents: ['marketing_strategist'], ...o,
 })
 const ctx = o => ({ agent: sa.AGENT_CONTRACTS.marketing_strategist, activeClientId: 'client-A', mode: 'production', ...o })
 
@@ -66,8 +68,9 @@ test('AI-generated / unsourced cards are never retrievable', () => {
 
 test('an agent cannot use a knowledge layer outside its contract', () => {
   const analyst = ctx({ agent: sa.AGENT_CONTRACTS.historical_advertising_analyst, activeClientId: null })
-  assert.equal(sa.isCardRetrievable(card({ knowledge_layer: 'internal_learning' }), analyst), false)
-  assert.equal(sa.isCardRetrievable(card({ knowledge_layer: 'universal_principle' }), analyst), true)
+  const analystCard = o => card({ relevant_agents: ['historical_advertising_analyst'], ...o })
+  assert.equal(sa.isCardRetrievable(analystCard({ knowledge_layer: 'internal_learning' }), analyst), false)
+  assert.equal(sa.isCardRetrievable(analystCard({ knowledge_layer: 'universal_principle' }), analyst), true)
 })
 
 test('plan orders by layer priority', () => {

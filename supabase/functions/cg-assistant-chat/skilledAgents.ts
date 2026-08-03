@@ -166,6 +166,49 @@ export interface CardRow {
   principle: string | null
   summary: string | null
   source_reference: string | null
+  /** Stored `skill_cards.relevant_agents`; may contain legacy key spellings. */
+  relevant_agents?: string[] | null
+}
+
+// Seeded cards carry legacy agent spellings (notably `creative_director_agent`
+// for the canonical `creative_director`). Resolve at READ time so seeded data
+// keeps working untouched; an unrecognised key resolves to null so the card is
+// EXCLUDED rather than routed to the wrong specialist.
+const AGENT_KEY_ALIASES: Record<string, string> = {
+  creative_director_agent: 'creative_director',
+  creative_director: 'creative_director',
+  marketing_strategist_agent: 'marketing_strategist',
+  marketing_strategist: 'marketing_strategist',
+  copywriter: 'copywriting_agent',
+  copywriting: 'copywriting_agent',
+  copywriting_agent: 'copywriting_agent',
+  brand_guardian_agent: 'brand_guardian',
+  brand_guardian: 'brand_guardian',
+  paid_ads: 'paid_ads_agent',
+  paid_ads_agent: 'paid_ads_agent',
+  content_planner_agent: 'content_planner',
+  content_planner: 'content_planner',
+  client_report: 'client_report_agent',
+  client_report_agent: 'client_report_agent',
+  research_librarian_agent: 'research_librarian',
+  research_librarian: 'research_librarian',
+  historical_advertising_analyst_agent: 'historical_advertising_analyst',
+  historical_advertising_analyst: 'historical_advertising_analyst',
+  social_media_strategist_agent: 'social_media_strategist',
+  social_media_strategist: 'social_media_strategist',
+}
+
+export function normaliseAgentKey(key: string | null | undefined): string | null {
+  if (!key) return null
+  const canonical = AGENT_KEY_ALIASES[key.trim().toLowerCase()] ?? null
+  return canonical && AGENT_CONTRACTS[canonical] ? canonical : null
+}
+
+export function cardTargetsAgent(relevantAgents: string[] | null | undefined, agentKey: string): boolean {
+  if (!relevantAgents || relevantAgents.length === 0) return false
+  const target = normaliseAgentKey(agentKey)
+  if (!target) return false
+  return relevantAgents.some(raw => normaliseAgentKey(raw) === target)
 }
 
 export interface GateContext {
@@ -188,6 +231,8 @@ export function isCardRetrievable(card: CardRow, ctx: GateContext): boolean {
   }
   const layer = normaliseKnowledgeLayer(card.knowledge_layer)
   if (!layer || !ctx.agent.allowedLayers.includes(layer)) return false
+  // The card must be addressed to THIS specialist (legacy keys normalised).
+  if (!cardTargetsAgent(card.relevant_agents, ctx.agent.key)) return false
   return true
 }
 
