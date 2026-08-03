@@ -123,8 +123,21 @@ test('capabilities answer reports the live Microsoft line', () => {
   assert.match(chatFn, /Microsoft 365: connected/)
 })
 
-test('Microsoft state is fetched lazily only when Microsoft is mentioned', () => {
-  assert.match(chatFn, /isMicrosoftMention\(message\) \? await getMicrosoftIntegrationState\(sb\) : null/)
+test('integration state is ALWAYS real — never conditional on naming the integration', () => {
+  // Previously the state was only fetched when the message named the
+  // integration, so "what can you do?" had no state and the model guessed,
+  // reporting live Microsoft as unavailable. There is no finite list of
+  // phrasings that can ask about capabilities, so it is always fetched now.
+  assert.match(chatFn, /await Promise\.all\(\[\s*getMetaIntegrationState\(sb\),\s*getMicrosoftIntegrationState\(sb\),\s*\]\)/)
+  assert.doesNotMatch(chatFn, /isMicrosoftMention/)
+  assert.doesNotMatch(chatFn, /isMetaMention/)
+})
+
+test('restricted requests still short-circuit before any integration lookup', () => {
+  const restrictedAt = chatFn.indexOf('if (isRestrictedRequest(message))')
+  const fetchAt = chatFn.indexOf('getMetaIntegrationState(sb),')
+  assert.ok(restrictedAt > -1 && fetchAt > -1 && restrictedAt < fetchAt,
+    'restricted guard must return before the integration state round trips')
 })
 
 // ── Controlled sync, truthful reporting, protections intact ─────────────────

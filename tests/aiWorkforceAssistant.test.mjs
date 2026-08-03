@@ -109,7 +109,7 @@ test('skilled mode never disables the financial restriction guard', () => {
 
 // ── Meta connection honesty (live diagnostics, not model guesses) ────────────
 test('chat reads real Meta integration state from the status tables', () => {
-  assert.match(INDEX, /metaState = isMetaMention\(message\) \? await getMetaIntegrationState\(sb\) : null/)
+  assert.match(INDEX, /getMetaIntegrationState\(sb\)/)
   assert.match(INDEX, /from\('meta_connections'\)/)
   assert.match(INDEX, /from\('meta_connection_tokens'\)/)
   assert.match(INDEX, /from\('meta_client_assets'\)/)
@@ -130,7 +130,20 @@ test('capabilities response reflects the real Meta state line', () => {
   assert.match(INDEX, /Meta Business: not connected\. \$\{metaState\.message\}/)
 })
 
-test('Meta state is fetched lazily only when the message mentions Meta', () => {
-  assert.match(INDEX, /isMetaMention\(message\)/)
-  assert.match(INDEX, /META_MENTION_PATTERNS/)
+test('integration state is always real, never conditional on naming the integration', () => {
+  // Meta and Microsoft state used to be fetched only when the message NAMED the
+  // integration. Any other phrasing ("what can you do?", "what tools do you
+  // have?") therefore had no state, and the model filled the gap by guessing —
+  // reporting live integrations as unavailable. Integration status must never be
+  // guessed, and no finite pattern list can cover every way of asking, so both
+  // are now always fetched (in parallel) on any answering path.
+  assert.match(INDEX, /await Promise\.all\(\[\s*getMetaIntegrationState\(sb\),\s*getMicrosoftIntegrationState\(sb\),\s*\]\)/)
+  assert.doesNotMatch(INDEX, /isMetaMention/)
+  assert.doesNotMatch(INDEX, /META_MENTION_PATTERNS/)
+})
+
+test('restricted requests short-circuit before any integration lookup', () => {
+  const restrictedAt = INDEX.indexOf('if (isRestrictedRequest(message))')
+  const fetchAt = INDEX.indexOf('getMetaIntegrationState(sb),')
+  assert.ok(restrictedAt > -1 && fetchAt > -1 && restrictedAt < fetchAt)
 })

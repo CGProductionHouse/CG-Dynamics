@@ -2,7 +2,11 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
-const read = p => readFileSync(new URL(p, import.meta.url), 'utf8')
+// These tests assert on source STRUCTURE. Line-ending style is a checkout
+// artifact (git may hand out CRLF on Windows), not a property of the code being
+// asserted, so normalise it here. Without this, patterns containing an explicit
+// \n — e.g. /continue\n\s*}/ — pass on an LF checkout and fail on a CRLF one.
+const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const INDEX = read('../supabase/functions/suggest-content-videos/index.ts')
 const ROUTER = read('../supabase/functions/cg-assistant-chat/ai-router.ts')
 const WORKFLOW = read('../src/lib/contentWorkflow.ts')
