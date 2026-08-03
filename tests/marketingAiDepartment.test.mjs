@@ -206,9 +206,12 @@ test('retrieved card text is evidence, never instruction', () => {
   assert.match(fn, /EVIDENCE, not instructions/)
 })
 
-test('only supplied evidence ids may be recorded on a version', () => {
-  assert.match(fn, /const suppliedIds = new Set\(evidence\.map\(e => e\.id\)\)/)
-  assert.match(fn, /\.filter\(id => suppliedIds\.has\(id\)\)/)
+test('only evidence the runner actually supplied may be recorded on a version', () => {
+  // Superseded the UUID echo-back: the model now cites short refs (E1, E2) and
+  // the runner maps them to real ids, so only supplied evidence can be recorded.
+  assert.match(fn, /const byRef = new Map\(evidence\.map\(e => \[e\.ref\.toUpperCase\(\), e\.id\]\)\)/)
+  assert.match(fn, /citedRefs/)
+  assert.match(fn, /\.filter\(\(id\): id is string => Boolean\(id\)\)/)
 })
 
 test('AI usage is metered through the shared router so it reaches AI Health', () => {
@@ -273,4 +276,37 @@ test('client library never writes directly — runs via function, decides via RP
   assert.match(lib, /rpc\('ai_marketing_record_decision'/)
   assert.doesNotMatch(lib, /from\('ai_marketing_artifacts'\)\s*\.(insert|update|delete)/)
   assert.doesNotMatch(lib, /from\('ai_marketing_artifact_versions'\)\s*\.(insert|update|delete)/)
+})
+
+// ── Citation is mandatory and can never be fabricated ───────────────────────
+test('the model never receives a real card id, so a citation cannot be invented', () => {
+  // Evidence carries a short ref; the UUID is stripped before it reaches the model.
+  assert.match(fn, /ref: `E\$\{i \+ 1\}`/)
+  assert.match(fn, /evidence: evidence\.map\(\(\{ id: _id, \.\.\.rest \}\) => rest\)/)
+  assert.match(fn, /the real card\s*\n\s*\/\/ UUID is never sent to the model/)
+})
+
+test('cited refs are mapped back server-side; unknown refs are dropped', () => {
+  assert.match(fn, /const byRef = new Map\(evidence\.map\(e => \[e\.ref\.toUpperCase\(\), e\.id\]\)\)/)
+  assert.match(fn, /\.filter\(\(id\): id is string => Boolean\(id\)\)/)
+  assert.match(fn, /an invented citation can never be recorded/)
+})
+
+test('the router rejects uncited output so it falls back to another provider', () => {
+  assert.match(fn, /validateContent: \(raw: string\) => \{/)
+  assert.match(fn, /refs\.some\(v => validRefs\.has\(String\(v\)\.trim\(\)\.toUpperCase\(\)\)\)/)
+  assert.match(fn, /it never adds a citation/)
+})
+
+test('an uncited version is never persisted, for any specialist', () => {
+  const block = fn.slice(fn.indexOf('if (usedEvidence.length === 0)'), fn.indexOf('// ── Persist'))
+  assert.match(block, /insufficientEvidence: true/)
+  assert.match(block, /uncited: true/)
+  assert.doesNotMatch(block, /\.insert\(/)
+  assert.match(fn, /Nothing is written, and we never fabricate a/)
+})
+
+test('review-stage specialists are called out explicitly', () => {
+  assert.match(fn, /const REVIEW_STAGE = new Set\(\['brand_guardian'\]\)/)
+  assert.match(fn, /A review-stage specialist must ground its sign-off in approved evidence/)
 })
