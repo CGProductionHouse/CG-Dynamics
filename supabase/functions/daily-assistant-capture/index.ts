@@ -3,7 +3,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { AiDuplicateRequestError, routeAiChat, type AiChatMessage } from '../cg-assistant-chat/ai-router.ts'
 import { transcribeAudio } from '../_shared/voiceTranscribe.ts'
 import { deleteAiUsageReplay, fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
-import { entityNameSimilarity as similarity, resolveDirectoryEntity as resolveEntity, type DirectoryEntry, type EntityCandidate as Candidate, type ResolutionStatus } from '../_shared/dailyEntityResolution.ts'
+import { entityMentionedInText, entityNameSimilarity as similarity, resolveDirectoryEntity as resolveEntity, type DirectoryEntry, type EntityCandidate as Candidate, type ResolutionStatus } from '../_shared/dailyEntityResolution.ts'
 
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024
@@ -103,6 +103,7 @@ function normaliseAnalysis(
   tasks: TaskContext[],
   actor: DirectoryEntry,
   preferredClientId: string | null,
+  transcript: string,
 ): Analysis {
   const value = raw as Record<string, unknown>
   const language = value.detectedLanguage
@@ -118,12 +119,23 @@ function normaliseAnalysis(
       const rawKind = typeof item.kind === 'string' ? item.kind : 'note'
       const kind: Suggestion['kind'] = rawKind === 'update_task' || rawKind === 'follow_up' || rawKind === 'note' ? rawKind : 'create_task'
       const clientRaw = typeof item.client_name === 'string' ? item.client_name.trim() : ''
-      const client = resolveEntity(clientRaw, clients, preferredClientId)
+      const resolvedClient = resolveEntity(clientRaw, clients, preferredClientId)
+      const clientGrounded = !clientRaw || resolvedClient.id === preferredClientId
+        || entityMentionedInText(clientRaw, transcript)
+      const client = resolvedClient.status === 'resolved' && !clientGrounded
+        ? { id: null, name: clientRaw, status: 'unresolved' as const, candidates: resolvedClient.candidates }
+        : resolvedClient
       const assigneeRaw = typeof item.assignee_name === 'string' ? item.assignee_name.trim() : ''
       const selfWords = new Set(['me', 'myself', 'i', 'ek', 'my'])
-      const assignee = selfWords.has(assigneeRaw.toLowerCase())
+      const resolvedAssignee = selfWords.has(assigneeRaw.toLowerCase())
         ? { id: actor.id, name: actor.name, status: 'resolved' as const, candidates: [{ ...actor, confidence: 1 }] }
         : resolveEntity(assigneeRaw, staff)
+      const hasSelfReference = /\b(?:i|me|my|myself|ek|my)\b/i.test(transcript)
+      const assigneeGrounded = !assigneeRaw || entityMentionedInText(assigneeRaw, transcript)
+        || (resolvedAssignee.id === actor.id && hasSelfReference)
+      const assignee = resolvedAssignee.status === 'resolved' && !assigneeGrounded
+        ? { id: null, name: assigneeRaw, status: 'unresolved' as const, candidates: resolvedAssignee.candidates }
+        : resolvedAssignee
       const duplicate = kind === 'create_task' || kind === 'follow_up'
         ? findDuplicate(title, client.id, tasks)
         : null
@@ -176,11 +188,11 @@ function normaliseAnalysis(
   }
 }
 
-function validateAnalysis(content: string, staff: DirectoryEntry[], clients: DirectoryEntry[], tasks: TaskContext[], actor: DirectoryEntry, preferredClientId: string | null): boolean {
+function validateAnalysis(content: string, staff: DirectoryEntry[], clients: DirectoryEntry[], tasks: TaskContext[], actor: DirectoryEntry, preferredClientId: string | null, transcript: string): boolean {
   const raw = extractJson(content) as Record<string, unknown>
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false
   if (typeof raw.summary !== 'string' || !Array.isArray(raw.suggestions)) return false
-  const analysis = normaliseAnalysis(raw, staff, clients, tasks, actor, preferredClientId)
+  const analysis = normaliseAnalysis(raw, staff, clients, tasks, actor, preferredClientId, transcript)
   return Boolean(analysis.summary || analysis.suggestions.length || analysis.calls.length || analysis.notes.length)
 }
 
@@ -279,15 +291,15 @@ async function analyseTranscript(
       feature: 'daily_assistant_capture', action: 'interpret', actorId: actor.id,
       idempotencyKey: `${requestId}:interpret`, fingerprint, complexity: 'complex',
       maxOutputTokens: 1000, usageClient,
-      validateContent: content => validateAnalysis(content, context.staff, context.clients, context.tasks, actor, preferredClientId),
+      validateContent: content => validateAnalysis(content, context.staff, context.clients, context.tasks, actor, preferredClientId, transcript),
       replayKind: 'daily_assistant_draft',
       buildReplayPayload: routed => ({
-        analysis: normaliseAnalysis(extractJson(routed.content), context.staff, context.clients, context.tasks, actor, preferredClientId),
+        analysis: normaliseAnalysis(extractJson(routed.content), context.staff, context.clients, context.tasks, actor, preferredClientId, transcript),
         provider: `${routed.provider}:${routed.model}`,
       }),
     })
     return {
-      analysis: normaliseAnalysis(extractJson(result.content), context.staff, context.clients, context.tasks, actor, preferredClientId),
+      analysis: normaliseAnalysis(extractJson(result.content), context.staff, context.clients, context.tasks, actor, preferredClientId, transcript),
       provider: `${result.provider}:${result.model}`,
     }
   } catch (error) {
@@ -297,7 +309,7 @@ async function analyseTranscript(
     )
     if (!replay || typeof replay.provider !== 'string') throw new Error('AI_DUPLICATE_REPLAY_UNAVAILABLE', { cause: error })
     return {
-      analysis: normaliseAnalysis(replay.analysis, context.staff, context.clients, context.tasks, actor, preferredClientId),
+      analysis: normaliseAnalysis(replay.analysis, context.staff, context.clients, context.tasks, actor, preferredClientId, transcript),
       provider: replay.provider,
     }
   }
