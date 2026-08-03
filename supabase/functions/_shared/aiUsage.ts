@@ -51,7 +51,13 @@ export interface AiUsageReservation {
   reservation_zar_micros?: number
 }
 
-export type AiReplayKind = 'text_response' | 'suggestion_response' | 'debrief_transcript' | 'meeting_debrief_draft' | 'content_run_debrief_draft'
+export type AiReplayKind =
+  | 'text_response'
+  | 'suggestion_response'
+  | 'debrief_transcript'
+  | 'meeting_debrief_draft'
+  | 'content_run_debrief_draft'
+  | 'daily_assistant_draft'
 
 export interface AiAttemptInput {
   requestId: string
