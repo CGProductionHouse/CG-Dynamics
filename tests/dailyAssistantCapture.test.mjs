@@ -5,6 +5,7 @@ import { resolveDirectoryEntity } from '../supabase/functions/_shared/dailyEntit
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const migration = read('../supabase/migrations/20260803163045_personal_daily_assistant.sql')
+const replayMigration = read('../supabase/migrations/20260803194000_allow_daily_assistant_ai_replay.sql')
 const edge = read('../supabase/functions/daily-assistant-capture/index.ts')
 const client = read('../src/lib/dailyAssistant.ts')
 const panel = read('../src/components/assistant/DailyAssistantCapture.tsx')
@@ -85,6 +86,19 @@ test('audio is transcribed server-side and never persisted as bytes or a storage
   assert.doesNotMatch(migration, /audio_(?:data|bytes|blob)|storage_path/i)
 })
 
+test('daily assistant drafts use an allowed service-only AI replay kind', () => {
+  assert.match(replayMigration, /ai_usage_replays_kind_check/)
+  assert.match(replayMigration, /'daily_assistant_draft'/)
+  assert.match(replayMigration, /p_replay_kind not in \([\s\S]*'daily_assistant_draft'/)
+  assert.match(replayMigration, /auth\.role\(\) is distinct from 'service_role'/)
+  assert.match(replayMigration, /ai_replay_payload_is_safe\(p_replay_payload\)/)
+  assert.match(
+    replayMigration,
+    /revoke all on function public\.ai_finalize_usage_with_replay\([\s\S]*from public, anon, authenticated/,
+  )
+  assert.match(edge, /replayKind: 'daily_assistant_draft'/)
+})
+
 test('nothing applies before the explicit mobile confirmation', () => {
   assert.match(client, /applyDailyAssistantCapture/)
   assert.match(panel, /Confirm selected/)
@@ -124,7 +138,7 @@ test('both assistant surfaces receive own timeline context and day questions rou
 
 test('launch acceptance fixture set covers required English, Afrikaans, mixed and multi-action notes', () => {
   const fixtures = [
-    'I had a call with Germo Parts. Ger-Marie must do the Women’s Day poster before Thursday, and I must still send Red Oak the footage link.',
+    'I had a call with Germo Parts. Ger-Marie must do the Womenâ€™s Day poster before Thursday, and I must still send Red Oak the footage link.',
     'Ek het met Gerhard gepraat. Onthou my om die footage link vir Red Oak te stuur.',
     'Ger Marie moet die poster doen en ek sal Dabo bel about the website.',
     'German parts needs the artwork. Maybe Thursday, but I am not sure.',
