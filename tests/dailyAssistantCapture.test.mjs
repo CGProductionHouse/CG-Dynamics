@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { resolveDirectoryEntity } from '../supabase/functions/_shared/dailyEntityResolution.ts'
+import { entityMentionedInText, resolveDirectoryEntity } from '../supabase/functions/_shared/dailyEntityResolution.ts'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const migration = read('../supabase/migrations/20260803163045_personal_daily_assistant.sql')
@@ -43,6 +43,15 @@ test('ambiguous and unknown names never silently become canonical identities', (
   assert.equal(unknown.id, null)
 })
 
+test('only identities grounded in spoken text may become canonical suggestions', () => {
+  const transcript = 'German parts needs artwork and I must send Red oke the footage.'
+  assert.equal(entityMentionedInText('German Parts', transcript), true)
+  assert.equal(entityMentionedInText('Red Oak', transcript), true)
+  assert.equal(entityMentionedInText('Piek Group', transcript), false)
+  assert.match(edge, /clientGrounded/)
+  assert.match(edge, /assigneeGrounded/)
+  assert.match(edge, /status: 'unresolved' as const/)
+})
 test('personal timeline tables are own-only staff data and clients have no policy path', () => {
   for (const table of ['assistant_day_captures', 'assistant_day_items']) {
     assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`))

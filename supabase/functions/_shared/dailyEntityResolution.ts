@@ -45,6 +45,26 @@ export function entityNameSimilarity(a: string, b: string): number {
   return Math.max(edit, sound)
 }
 
+function entityWords(value: string): string[] {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .split(/[^a-z0-9]+/).filter(Boolean)
+}
+
+export function entityMentionedInText(entityName: string, text: string): boolean {
+  const targetWords = entityWords(entityName)
+  const textWords = entityWords(text)
+  if (!targetWords.length || !textWords.length) return false
+  if (normaliseEntityName(text).includes(normaliseEntityName(entityName))) return true
+  const minimumWindow = Math.max(1, targetWords.length - 1)
+  const maximumWindow = Math.min(textWords.length, targetWords.length + 1)
+  for (let size = minimumWindow; size <= maximumWindow; size += 1) {
+    for (let start = 0; start + size <= textWords.length; start += 1) {
+      if (entityNameSimilarity(entityName, textWords.slice(start, start + size).join(' ')) >= 0.78) return true
+    }
+  }
+  return false
+}
+
 export function resolveDirectoryEntity(raw: unknown, entries: DirectoryEntry[], preferredId?: string | null): EntityResolution {
   const value = typeof raw === 'string' ? raw.trim() : ''
   if (!value) return { id: null, name: null, status: 'unresolved', candidates: [] }
