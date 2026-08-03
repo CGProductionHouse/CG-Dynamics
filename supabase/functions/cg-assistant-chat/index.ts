@@ -57,6 +57,7 @@ interface LocalWorkContext {
   suggestedNextAction: string
   workloadWarning: string | null
   setupNotes: string[]
+  personalDaySummary: string | null
 }
 
 const TOOL_REGISTRY: AssistantToolStatus[] = [
@@ -383,6 +384,12 @@ const TASK_LOOKUP_PATTERNS = [
   /\bwhat's urgent\b/i,
   /\bfocus on today\b/i,
   /\btoday's priorities\b/i,
+  /\bwhat (have i done|did i promise|am i forgetting|must i still do|should i do next)\b/i,
+  /\bshow today'?s voice notes?\b/i,
+  /\bwhat did i discuss with\b/i,
+  /\bwat het ek vandag gedoen\b/i,
+  /\bwat moet ek nog doen\b/i,
+  /\bwat het ek .* belowe\b/i,
   /\btask module\b/i,
 ]
 
@@ -480,6 +487,7 @@ function normalizeLocalWorkContext(value: unknown): LocalWorkContext | null {
     setupNotes: Array.isArray(payload.setupNotes)
       ? payload.setupNotes.map(note => stringOrNull(note, 180)).filter((note): note is string => Boolean(note)).slice(0, 4)
       : [],
+    personalDaySummary: stringOrNull(payload.personalDaySummary, 4000),
   }
 }
 
@@ -643,8 +651,9 @@ function buildLocalWorkResponse(context: LocalWorkContext): string {
   if (context.currentTaskTitle) lines.push(`- Start with: ${context.currentTaskTitle}${context.currentTaskSource ? ` (${context.currentTaskSource})` : ''}`)
   if (context.nextTaskTitle) lines.push(`- Next: ${context.nextTaskTitle}${context.nextTaskSource ? ` (${context.nextTaskSource})` : ''}`)
   if (context.workloadWarning) lines.push(`- Capacity note: ${context.workloadWarning}`)
+  if (context.personalDaySummary) lines.push('', 'Confirmed personal day capture:', context.personalDaySummary)
 
-  if (!hasAssignedWork) {
+  if (!hasAssignedWork && !context.personalDaySummary) {
     lines.push('', 'You do not have assigned focus work or CG Calendar events showing for today. Check Planner, CG Calendar, or Client Schedule if you expected work to be assigned.')
   } else {
     lines.push('', context.suggestedNextAction)

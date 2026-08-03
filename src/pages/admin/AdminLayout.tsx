@@ -5,7 +5,7 @@ import BrandMark from '../../components/BrandMark'
 import { roleLabel } from '../../lib/roles'
 import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'
 import { GlobalAssistantComposer } from '../../components/assistant/GlobalAssistantComposer'
-import { listMyNotifications, markAllNotificationsRead, markNotificationRead, safeNotificationLink, unreadNotificationCount, type AppNotification } from '../../lib/notifications'
+import { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from '../../lib/notifications'
 
 const NOTIFICATION_POLL_MS = 30_000
 const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
@@ -125,6 +125,7 @@ export default function AdminLayout() {
 
   async function refreshNotifications(showLoading = false) {
     if (showLoading) setNotificationsLoading(true)
+    await refreshAssistantDayNotifications().catch(() => null)
     const [listResult, countResult] = await Promise.all([listMyNotifications(), unreadNotificationCount()])
     const error = listResult.error ?? countResult.error
     if (error) {
@@ -179,6 +180,18 @@ export default function AdminLayout() {
     const readAt = new Date().toISOString()
     setNotifications(current => current.map(item => item.read_at ? item : { ...item, read_at: readAt }))
     setUnreadCount(0)
+  }
+
+  async function snoozeNotification(notification: AppNotification) {
+    const result = await snoozeAssistantNotification(notification.id, 30)
+    if (result.error) { setNotificationsError(result.error.message); return }
+    await refreshNotifications()
+  }
+
+  async function dismissNotification(notification: AppNotification) {
+    const result = await dismissAssistantNotification(notification.id)
+    if (result.error) { setNotificationsError(result.error.message); return }
+    await refreshNotifications()
   }
 
   async function openNotification(notification: AppNotification) {
@@ -348,7 +361,9 @@ export default function AdminLayout() {
                           <p className="mt-2 text-xs text-brand-primary/45">{notificationTime(notification.created_at)}</p>
                         </div>
                       </div>
-                      <div className="mt-2 flex justify-end gap-2">
+                      <div className="mt-2 flex flex-wrap justify-end gap-2">
+                        {(notification.type === 'assistant_day' || notification.type === 'assistant_reminder') && <button type="button" onClick={() => void snoozeNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Snooze 30m</button>}
+                        {(notification.type === 'assistant_day' || notification.type === 'assistant_reminder') && <button type="button" onClick={() => void dismissNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Dismiss</button>}
                         {!notification.read_at && <button type="button" onClick={() => void readNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Mark read</button>}
                         {link && <button type="button" onClick={() => void openNotification(notification)} className="min-h-11 rounded-md bg-brand-teal/15 px-3 text-xs font-black text-brand-teal hover:bg-brand-teal/25">Open</button>}
                       </div>
