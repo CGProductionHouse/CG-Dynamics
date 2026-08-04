@@ -180,3 +180,18 @@ test('the handler can never return a bare 500 with no diagnostics', () => {
   assert.match(handler, /const stranded = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
   assert.match(handler, /crashClient\.rpc\('meta_sync_release_items'/)
 })
+
+test('a throttled page-token request processes NOTHING rather than failing every client', () => {
+  // When the page-token request is throttled the token map is empty, so every
+  // client's Facebook stage fails for want of a token. Without this guard the
+  // worker chewed through the queue marking clients failed — 25 were wrongly
+  // failed this way in production for what was only a temporary throttle.
+  const guard = worker.slice(worker.indexOf('Do not process anything without page tokens'), worker.indexOf('Process items in chunks'))
+  assert.match(guard, /if \(pageTokenRateLimited\) \{/)
+  assert.match(guard, /meta_sync_begin_cooldown/)
+  assert.match(guard, /waitingForRateLimit: true/)
+  assert.match(guard, /workerRan: false/)
+  // Crucially it returns BEFORE the claim loop, so nothing is claimed at all.
+  assert.ok(worker.indexOf('waitingForRateLimit') < worker.indexOf('claim_sync_batch_items'),
+    'the guard must return before any item is claimed')
+})
