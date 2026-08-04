@@ -36,6 +36,7 @@ test('service worker displays private pushes and opens only safe same-origin app
 })
 
 test('subscription and delivery tables are RLS protected and never directly exposed', () => {
+  assert.doesNotMatch(migration, /(?:as |\n)\$(?:\r?\n|;)/)
   for (const table of ['web_push_subscriptions', 'web_push_deliveries']) {
     assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`))
     assert.match(migration, new RegExp(`revoke all on table public\\.${table} from public, anon, authenticated`))
