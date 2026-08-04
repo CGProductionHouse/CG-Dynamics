@@ -288,6 +288,12 @@ export default function MyWorkPage() {
                 <Link to="?tab=board&scope=blocked" className="text-red-300 hover:text-white">Blocked work</Link>
                 {canViewWorkload && <Link to="?tab=board&scope=unassigned" className="text-brand-teal hover:text-white">Unassigned work</Link>}
               </div>
+              {canViewWorkload && (
+                <div className="flex flex-wrap gap-2 text-xs font-bold">
+                  <Link to="/admin/command-centre" className="text-brand-teal hover:text-white">Team Work / Command Centre</Link>
+                  <Link to="/admin/command-centre#morning-import" className="text-brand-teal hover:text-white">Morning List Import</Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -39,6 +39,7 @@ import MarketingAiDepartmentPage from './pages/admin/MarketingAiDepartmentPage'
 import SkillCardReviewPage from './pages/admin/SkillCardReviewPage'
 import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
 import MyWorkPage from './pages/admin/MyWorkPage'
+import CommandCentrePage from './pages/admin/CommandCentrePage'
 import OpsHubPage from './pages/admin/OpsHubPage'
 import Dashboard from './pages/client/Dashboard'
 import ClientPortalHome from './pages/client/ClientPortalHome'
@@ -92,7 +93,7 @@ export default function App() {
               <Route path="/admin/work" element={<MyWorkPage />} />
               <Route path="/admin/my-work" element={<MyWorkPage />} />
               <Route path="/admin/my-day" element={<Navigate to="/admin/work?tab=my-day" replace />} />
-              <Route path="/admin/command-centre" element={<Navigate to="/admin/work?tab=daily-tasks" replace />} />
+              <Route path="/admin/command-centre" element={<CommandCentrePage />} />
               <Route path="/admin/planner" element={<Navigate to="/admin/work?tab=board" replace />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
