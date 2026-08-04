@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "CG Dynamics",
+  "short_name": "CG Dynamics",
+  "description": "CG Production House operations and personal daily assistant.",
+  "start_url": "/admin/assistant",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#060908",
+  "theme_color": "#063f3d",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/CG_App_Icon.png", "sizes": "1254x1254", "type": "image/png", "purpose": "any" },
+    { "src": "/CG_ICON_TEAL.png", "sizes": "1080x1080", "type": "image/png", "purpose": "maskable" }
+  ]
+}

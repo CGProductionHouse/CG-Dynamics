@@ -5,6 +5,7 @@
 // drains the durable queue with its own service role; it performs no action on
 // behalf of the caller and trusts nothing from the request body.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import webpush from 'npm:web-push@3.6.7'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -100,6 +101,9 @@ async function runJob(
       // item, defers without consuming attempts while items are still running,
       // and fails when the whole batch failed.
       return await runMetaSyncBatch(supabase, job, url, payload, worker)
+    }
+    case 'web_push_delivery': {
+      return await runWebPushDelivery(supabase, payload)
     }
     case 'report_prep': {
       // Real report preparation: idempotent find-or-create of the previous-month
@@ -270,4 +274,125 @@ async function runMetaSyncBatch(
     itemsFailed: failed,
     itemsTotal: batchRow.total_items ?? completed + failed,
   }
+}
+
+interface WebPushDeliveryRow {
+  id: string
+  subscription_id: string
+  attempts: number
+}
+
+interface WebPushSubscriptionRow {
+  id: string
+  user_id: string
+  endpoint: string
+  p256dh: string
+  auth_secret: string
+  is_active: boolean
+}
+
+function safePushLink(value: unknown): string {
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return '/admin/assistant'
+  return value.startsWith('/admin/') || value.startsWith('/dashboard') ? value : '/admin/assistant'
+}
+
+async function runWebPushDelivery(
+  supabase: ReturnType<typeof createClient>,
+  payload: Record<string, unknown>,
+): Promise<JobResult> {
+  const notificationId = typeof payload.notification_id === 'string' ? payload.notification_id : ''
+  if (!/^[0-9a-f-]{36}$/i.test(notificationId)) throw new Error('Push job has no valid notification id.')
+  const publicKey = (Deno.env.get('VAPID_PUBLIC_KEY') ?? '').trim()
+  const privateKey = (Deno.env.get('VAPID_PRIVATE_KEY') ?? '').trim()
+  const subject = (Deno.env.get('VAPID_SUBJECT') ?? 'mailto:info@cgproductionhouse.com').trim()
+  if (!publicKey || !privateKey) throw new Error('Web Push VAPID keys are not configured.')
+
+  const { data: notification, error: notificationError } = await supabase
+    .from('notifications')
+    .select('id,user_id,type,title,body,entity_type,entity_id,link')
+    .eq('id', notificationId)
+    .maybeSingle()
+  if (notificationError) throw new Error(`Could not load push notification: ${notificationError.message}`)
+  if (!notification) return { ok: true, skipped: 'notification_missing' }
+
+  const { data: deliveries, error: deliveriesError } = await supabase
+    .from('web_push_deliveries')
+    .select('id,subscription_id,attempts')
+    .eq('notification_id', notificationId)
+    .in('status', ['queued', 'failed'])
+    .lt('attempts', 4)
+  if (deliveriesError) throw new Error(`Could not load push deliveries: ${deliveriesError.message}`)
+  if (!deliveries?.length) return { ok: true, delivered: 0, remaining: 0 }
+
+  webpush.setVapidDetails(subject, publicKey, privateKey)
+  const pushPayload = JSON.stringify({
+    notificationId: notification.id,
+    type: notification.type,
+    title: String(notification.title ?? 'CG Dynamics').slice(0, 120),
+    body: String(notification.body ?? 'You have a new notification.').slice(0, 240),
+    url: safePushLink(notification.link),
+  })
+  let delivered = 0
+  let expired = 0
+  let transientFailures = 0
+
+  for (const row of deliveries as WebPushDeliveryRow[]) {
+    const { data: claimed } = await supabase.from('web_push_deliveries').update({
+      status: 'processing', locked_at: new Date().toISOString(), attempts: row.attempts + 1,
+    }).eq('id', row.id).in('status', ['queued', 'failed']).select('id').maybeSingle()
+    if (!claimed) continue
+
+    const { data: subscriptionData } = await supabase
+      .from('web_push_subscriptions')
+      .select('id,user_id,endpoint,p256dh,auth_secret,is_active')
+      .eq('id', row.subscription_id)
+      .eq('user_id', notification.user_id)
+      .maybeSingle()
+    const subscription = subscriptionData as WebPushSubscriptionRow | null
+    if (!subscription?.is_active) {
+      await supabase.from('web_push_deliveries').update({ status: 'expired', error_code: 'inactive_subscription' }).eq('id', row.id)
+      expired += 1
+      continue
+    }
+
+    try {
+      const result = await webpush.sendNotification({
+        endpoint: subscription.endpoint,
+        keys: { p256dh: subscription.p256dh, auth: subscription.auth_secret },
+      }, pushPayload, { TTL: 300 })
+      await supabase.from('web_push_deliveries').update({
+        status: 'sent', provider_status: result.statusCode ?? 201,
+        error_code: null, sent_at: new Date().toISOString(), locked_at: null,
+      }).eq('id', row.id)
+      await supabase.from('web_push_subscriptions').update({
+        failure_count: 0, last_error_code: null, last_seen_at: new Date().toISOString(),
+      }).eq('id', subscription.id)
+      delivered += 1
+    } catch (cause) {
+      const error = cause as { statusCode?: number; body?: string; message?: string }
+      const status = Number(error.statusCode ?? 0)
+      if (status === 404 || status === 410) {
+        await supabase.from('web_push_subscriptions').update({
+          is_active: false, expires_at: new Date().toISOString(),
+          failure_count: row.attempts + 1, last_error_code: `http_${status}`,
+        }).eq('id', subscription.id)
+        await supabase.from('web_push_deliveries').update({
+          status: 'expired', provider_status: status, error_code: `http_${status}`, locked_at: null,
+        }).eq('id', row.id)
+        expired += 1
+      } else {
+        const errorCode = status ? `http_${status}` : 'delivery_error'
+        await supabase.from('web_push_subscriptions').update({
+          failure_count: row.attempts + 1, last_error_code: errorCode,
+        }).eq('id', subscription.id)
+        await supabase.from('web_push_deliveries').update({
+          status: 'failed', provider_status: status || null, error_code: errorCode, locked_at: null,
+        }).eq('id', row.id)
+        transientFailures += 1
+      }
+    }
+  }
+
+  if (transientFailures > 0) throw new Error(`${transientFailures} Web Push delivery attempt(s) need retry.`)
+  return { ok: true, delivered, expired }
 }

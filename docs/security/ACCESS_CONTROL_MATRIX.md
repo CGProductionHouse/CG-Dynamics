@@ -159,3 +159,15 @@ knowledge, changes client records or spends advertising budget.
 `package_action`, `quote_needed`, `admin_package_note`, `deliverable_id` on
 `command_centre_tasks` are manager-write-only. Staff cannot set these fields
 through RLS or the `admin_set_package_classification` RPC.
+
+### Web Push subscriptions and delivery
+
+| Operation | Admin | Manager | Staff/Team | Client |
+|-----------|-------|---------|------------|--------|
+| Register/status/unregister own device | yes | yes | yes | no |
+| Read raw subscription endpoint/key material | no | no | no | no |
+| Receive own notification push | yes | yes | yes | no |
+| Receive another staff member's personal reminder | no | no | no | no |
+| Process delivery queue | service role only | service role only | service role only | no |
+
+The browser considers push active only when permission is granted, a browser subscription exists, and the same endpoint is active server-side for the signed-in user.
