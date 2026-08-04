@@ -210,6 +210,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Method not allowed' }, 405)
   }
 
+  // Declared outside the guarded body below so that if anything throws we can
+  // still hand back whatever this invocation had claimed.
+  const claimedIds = new Set<string>()
+  const settledIds = new Set<string>()
+  let crashClient: ReturnType<typeof createClient> | null = null
+
+  try {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) {
@@ -217,6 +224,7 @@ Deno.serve(async (req) => {
   }
 
   const sb = createClient(supabaseUrl, serviceRoleKey)
+  crashClient = sb
 
   const auth = await authorizeWorker(req, sb)
   if (!auth.ok) return jsonResponse(auth.body, auth.status)
@@ -275,7 +283,27 @@ Deno.serve(async (req) => {
       }
       guard++
       const requestTimeoutMs = Math.max(1_000, Math.min(3_000, Math.floor((remainingMs - PAGE_FETCH_RESERVE_MS) / 3)))
-      const res = await metaFetch(url, requestTimeoutMs)
+      // THE ORIGINAL TRIGGER OF INCIDENT #161.
+      //
+      // metaFetch aborts on its own timeout, and an abort throws. Nothing here
+      // caught it, so when Meta was slow (which is exactly what it is while
+      // throttling us) the whole invocation died as a bare platform 500 with no
+      // diagnostics. Three of those exhausted the driver job's attempts, it went
+      // terminally 'failed', and 70 items were left queued with nothing able to
+      // start a worker.
+      //
+      // A timeout fetching page tokens is a transient upstream condition, not a
+      // reason to lose the batch: treat it exactly like a rate limit so the
+      // invocation returns cleanly, the batch cools down, and the reaper retries.
+      let res: Response
+      try {
+        res = await metaFetch(url, requestTimeoutMs)
+      } catch (error) {
+        const aborted = error instanceof DOMException && ['TimeoutError', 'AbortError'].includes(error.name)
+        if (!aborted && !/signal .*abort|abort/i.test(String(error))) throw error
+        pageTokenRateLimited = true
+        break
+      }
       if (!res.ok) {
         const errBody = await res.json().catch(() => null)
         if (errBody?.error && (errBody.error.code === 4 || errBody.error.error_subcode === 2069032)) {
@@ -302,12 +330,9 @@ Deno.serve(async (req) => {
   let claimCount = 0
   let claimFailed = false
   let budgetDeferred = false
-  // Every item this invocation has claimed, and every item it actually reached.
-  // The difference is released at the end so an abandoned claim never burns a
-  // retry attempt — that is what used to force-fail clients the worker never
-  // even looked at.
-  const claimedIds = new Set<string>()
-  const settledIds = new Set<string>()
+  // claimedIds / settledIds are declared at the top of the handler: their
+  // difference is released on the way out — including on a crash — so an
+  // abandoned claim never burns a retry attempt.
 
   while (claimCount < MAX_CHUNKS) {
     if (Date.now() >= invocationDeadline - PAGE_FETCH_RESERVE_MS || pageTokenBudgetExhausted) break
@@ -909,4 +934,29 @@ Deno.serve(async (req) => {
     claimFailed,
     rateLimited,
   })
+  } catch (error) {
+    // Any unhandled throw used to escape as a bare platform 500 with no
+    // diagnostics. That is exactly how this incident started: three such 500s
+    // exhausted the driver job's attempts, it went terminally 'failed', and the
+    // batch was left with 70 items queued and nothing able to invoke a worker.
+    //
+    // Now a crash (a) hands back everything this invocation had claimed, so no
+    // work is stranded, and (b) reports a real message the UI and the job can
+    // act on. The cron reaper picks the batch up again within the minute.
+    const detail = error instanceof Error ? error.message : String(error)
+    const stranded = [...claimedIds].filter(id => !settledIds.has(id))
+    if (crashClient && stranded.length > 0) {
+      try {
+        await crashClient.rpc('meta_sync_release_items', { p_item_ids: stranded })
+      } catch {
+        // Left 'running'; the stale-lease sweep reclaims them.
+      }
+    }
+    return jsonResponse({
+      ok: false,
+      error: `Meta sync worker failed: ${detail}`.slice(0, 500),
+      itemsReleased: stranded.length,
+      workerRan: settledIds.size > 0,
+    }, 500)
+  }
 })

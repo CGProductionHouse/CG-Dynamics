@@ -158,3 +158,25 @@ test('a missing worker secret surfaces on the batch instead of failing silently'
   assert.match(background, /META_SYNC_WORKER_SECRET is not configured, so the recovery worker cannot authorise/)
   assert.match(background, /missing_secret/)
 })
+
+// ── The original trigger: an abort escaping as a bare platform 500 ──────────
+test('a page-token fetch timeout is handled, not fatal', () => {
+  // metaFetch aborts on its own timeout and an abort THROWS. Nothing caught it,
+  // so when Meta was slow — exactly what it is while throttling — the whole
+  // invocation died as a bare 500. Three of those exhausted the driver job's
+  // attempts and stranded 70 items. Reproduced live: HTTP 500,
+  // "The signal has been aborted"; after the fix, HTTP 200 + rateLimited.
+  const block = worker.slice(worker.indexOf('Fetch page token map once per invocation'), worker.indexOf('Process items in chunks'))
+  assert.match(block, /try \{\s*res = await metaFetch\(url, requestTimeoutMs\)/)
+  assert.match(block, /\['TimeoutError', 'AbortError'\]\.includes\(error\.name\)/)
+  assert.match(block, /pageTokenRateLimited = true/)
+})
+
+test('the handler can never return a bare 500 with no diagnostics', () => {
+  const handler = worker.slice(worker.indexOf('Deno.serve(async (req)'))
+  assert.match(handler, /\} catch \(error\) \{/)
+  assert.match(handler, /Meta sync worker failed: \$\{detail\}/)
+  // A crash must hand back whatever it was holding, or the items are stranded.
+  assert.match(handler, /const stranded = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
+  assert.match(handler, /crashClient\.rpc\('meta_sync_release_items'/)
+})
