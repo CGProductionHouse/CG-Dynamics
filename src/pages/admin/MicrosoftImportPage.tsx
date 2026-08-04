@@ -174,6 +174,32 @@ function RunHistory({ runs, onSelect }: { runs: MicrosoftSyncRunSummary[]; onSel
   ))}</div>
 }
 
+// Which preview job has already been applied.
+//
+// Kept in sessionStorage so a refresh or a reopen in the same tab cannot bring a
+// finished reconciliation back as the active workflow. Deliberately NOT
+// localStorage: this is about the current working session, not a durable record
+// — the durable record is the run in Sync history.
+const APPLIED_PREVIEW_JOB_KEY = 'cg-microsoft-applied-preview-job-v1'
+
+function rememberAppliedPreviewJob(jobId: string | null) {
+  if (!jobId) return
+  try {
+    window.sessionStorage.setItem(APPLIED_PREVIEW_JOB_KEY, jobId)
+  } catch {
+    // Private mode / storage disabled. The server-side completeness check still
+    // stops a finished preview being resumed; this is belt and braces.
+  }
+}
+
+function readAppliedPreviewJob(): string | null {
+  try {
+    return window.sessionStorage.getItem(APPLIED_PREVIEW_JOB_KEY)
+  } catch {
+    return null
+  }
+}
+
 export default function MicrosoftImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [connection, setConnection] = useState<MicrosoftConnectionStatus | null>(null)
@@ -238,11 +264,61 @@ export default function MicrosoftImportPage() {
     return () => window.clearTimeout(timer)
   }, [])
 
+  // Return the workspace to a clean "Ready to sync" state. This is the ONLY
+  // thing that clears a finished reconciliation; it deliberately does not touch
+  // `runs` (Sync history) or `applyResult` (the success confirmation), and it
+  // never starts another sync.
+  function resetToReadyState() {
+    setSnapshot(null)
+    setItems([])
+    setJob(null)
+    setReviewed(false)
+    setApproveRemovals(false)
+    setRecovery(null)
+    setError(null)
+    setParseErrors([])
+    setProgress({ completed: 0, total: 0 })
+    setSourceFilter('all')
+    setActionFilter('create')
+    setStatusFilter('all')
+    setConflictFilter('all')
+  }
+
+  // Nothing is in flight and no preview is open: the next action really is a
+  // fresh fetch. Drives the "Ready to sync" badge on the fetch panel.
+  const workspaceReady = !snapshot && !job && !recovery && !loading && !applying
+
+  function scrollWorkspaceToTop() {
+    // The apply button sits at the bottom of a long preview, so without this the
+    // admin is left staring at the workspace that was just cleared.
+    //
+    // Deliberately INSTANT, and written directly to scrollTop rather than via
+    // scrollTo({ behavior: 'smooth' }). Smooth scrolling is animation-frame
+    // driven: measured in-browser it did not move the element at all when
+    // frames were not being produced (1281.6px -> 1281.6px), while an instant
+    // scroll landed at 0 every time. Returning to the top is the whole point of
+    // this fix, so it must not depend on a frame that may never arrive — and
+    // animating through a preview that has just been cleared would be odd
+    // anyway.
+    if (typeof window === 'undefined') return
+    window.scrollTo(0, 0)
+    // On desktop the page scrolls inside AdminLayout's <main>, not the window,
+    // so this is the one that actually matters there.
+    const main = document.querySelector('main')
+    if (main) main.scrollTop = 0
+  }
+
   // Resume any in-flight preview job after a refresh or navigation. The job lives
   // server-side, so its per-source progress is restored; the admin resumes/retries.
+  //
+  // A preview that has already been APPLIED is never resumed, even if the server
+  // still reports it as running with incomplete sources — reopening the page
+  // must not bring a finished reconciliation back as the active workflow.
   const resumeJobEvent = useEffectEvent(async () => {
     const latest = await getMicrosoftLatestJob()
-    if (latest.job && !latest.job.progress.allRequiredComplete && latest.job.status === 'running') setJob(latest.job)
+    if (!latest.job) return
+    if (latest.job.jobId === readAppliedPreviewJob()) return
+    if (!latest.job.progress.allRequiredComplete && latest.job.status === 'running') setJob(latest.job)
   })
   useEffect(() => {
     const timer = window.setTimeout(() => { void resumeJobEvent() }, 0)
@@ -358,17 +434,36 @@ export default function MicrosoftImportPage() {
     setError(null)
     setProgress({ completed: 0, total: applicableCount })
     try {
+      const appliedJobId = job?.jobId ?? null
       const result = await applyMicrosoftReconciliation(
         items,
         snapshot,
         approveRemovals,
         (completed, total) => setProgress({ completed, total }),
-        { previewJobId: job?.jobId ?? null },
+        { previewJobId: appliedJobId },
       )
+      // Refresh Sync history first so the completed run is present the moment the
+      // workspace clears — the run must never disappear from the page.
       await loadStatus()
-      await prepareSnapshot(snapshot)
+
+      if (result.errors.length > 0) {
+        // Something still needs attention. Keep the preview as the active
+        // workspace and re-reconcile it so what remains is accurate, and leave
+        // the page where the admin was working.
+        await prepareSnapshot(snapshot)
+        setApplyResult(result)
+        setError(result.errors[0])
+        return
+      }
+
+      // Clean success: the reconciliation is finished, so it stops being the
+      // active workflow. Previously this re-ran prepareSnapshot on the SAME
+      // snapshot, which rebuilt the completed preview as though it were still
+      // live and left the admin scrolled at the bottom of it.
+      rememberAppliedPreviewJob(appliedJobId)
+      resetToReadyState()
       setApplyResult(result)
-      if (result.errors.length > 0) setError(result.errors[0])
+      scrollWorkspaceToTop()
     } catch {
       setError('Microsoft reconciliation apply stopped unexpectedly. Check sync history before retrying.')
     } finally {
@@ -479,8 +574,32 @@ export default function MicrosoftImportPage() {
         <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Last successful sync</p><p className="mt-2 text-xl font-black text-white">{lastSuccess ? new Date(lastSuccess.finishedAt ?? lastSuccess.createdAt).toLocaleString('en-ZA') : 'Not run yet'}</p><p className="mt-1 text-xs text-white/45">{lastSuccess ? `${lastSuccess.summary.create ?? 0} created · ${lastSuccess.summary.update ?? 0} updated` : 'A reviewed run will appear here.'}</p></div>
       </section>
 
+      {/* Apply confirmation. Sits directly ABOVE the fetch panel so that after a
+          successful apply scrolls the page to the top, the admin reads the
+          result and then immediately sees the next action. Shown once, and
+          dismissable. */}
+      {applyResult && (
+        <section className="mt-5 rounded-2xl border border-emerald-300/25 bg-emerald-300/[0.07] p-4" role="status" aria-live="polite" data-testid="apply-confirmation">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-200/80">
+                {applyResult.failed > 0 ? 'Reconciliation applied with failures' : 'Reconciliation applied'}
+              </p>
+              <p className="mt-2 font-black text-white">
+                Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied now · {applyResult.previouslyApplied} previously applied · {applyResult.failed} still failed · {applyResult.conflictsUntouched} conflicts untouched.
+              </p>
+              <p className="mt-1 text-xs text-white/50">CG Dynamics only. No Microsoft writes were made.</p>
+              <p className="mt-1 text-xs text-white/45">
+                This run is kept under <span className="font-bold text-white/70">Recent reconciliation runs</span> below. Fetch again when you are ready — nothing starts on its own.
+              </p>
+            </div>
+            <button type="button" onClick={() => setApplyResult(null)} className="shrink-0 rounded-lg border border-white/15 px-3 py-1.5 text-xs font-bold text-white/70 hover:text-white">Dismiss</button>
+          </div>
+        </section>
+      )}
+
       <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview latest changes</p><h2 className="mt-1 text-xl font-black text-white">Fetch complete configured sources</h2><p className="mt-1 text-sm text-white/45">Newly completed operational tasks are not imported (they are automatically skipped). Existing linked tasks can still complete. Client Socials items are never skipped.</p></div><div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><label className="text-xs text-white/45">Outlook from<input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">Outlook to<input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><button type="button" onClick={() => void previewLatest()} disabled={!connection?.connected || transitionStatus !== 'active' || loading} className="self-end rounded-xl bg-brand-teal px-5 py-2.5 text-sm font-black text-black disabled:opacity-35">{loading ? 'Fetching...' : 'Preview latest changes'}</button></div></div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><div className="flex flex-wrap items-center gap-2"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Preview latest changes</p>{workspaceReady && <span data-testid="ready-to-sync" className="rounded-full border border-brand-teal/30 bg-brand-teal/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-teal">Ready to sync</span>}</div><h2 className="mt-1 text-xl font-black text-white">Fetch complete configured sources</h2><p className="mt-1 text-sm text-white/45">Newly completed operational tasks are not imported (they are automatically skipped). Existing linked tasks can still complete. Client Socials items are never skipped.</p></div><div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><label className="text-xs text-white/45">Outlook from<input type="date" value={rangeStart} onChange={event => setRangeStart(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><label className="text-xs text-white/45">Outlook to<input type="date" value={rangeEnd} onChange={event => setRangeEnd(event.target.value)} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white" /></label><button type="button" onClick={() => void previewLatest()} disabled={!connection?.connected || transitionStatus !== 'active' || loading} className="self-end rounded-xl bg-brand-teal px-5 py-2.5 text-sm font-black text-black disabled:opacity-35">{loading ? 'Fetching...' : 'Preview latest changes'}</button></div></div>
         <button type="button" onClick={() => setAdvancedOpen(value => !value)} className="mt-4 text-xs font-bold text-white/40 hover:text-white/70">{advancedOpen ? 'Hide' : 'Show'} connected-agent snapshot transport</button>
         {advancedOpen && <div className="mt-3 rounded-xl border border-dashed border-white/10 p-4"><p className="text-xs leading-relaxed text-white/45">For an authorised connected agent or recovery only. Version 3 snapshots include assignee identity metadata for staff assignment resolution. Version 2 and legacy snapshots are also accepted.</p><button type="button" disabled={transitionStatus !== 'active'} onClick={() => fileInputRef.current?.click()} className="mt-3 rounded-lg border border-white/10 px-4 py-2 text-xs font-black text-white disabled:opacity-35">Choose normalized snapshot</button><input ref={fileInputRef} type="file" accept=".json,application/json" className="hidden" onChange={event => { void onSnapshotFile(event.target.files); event.target.value = '' }} /></div>}
         {parseErrors.length > 0 && <div className="mt-3 rounded-xl border border-red-300/20 bg-red-300/[0.06] p-3 text-xs text-red-100">{parseErrors.join(' ')}</div>}
@@ -522,7 +641,6 @@ export default function MicrosoftImportPage() {
       )}
       {migrationNeeded && <section className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5"><h2 className="text-lg font-black text-white">Phase 17a review is required</h2><p className="mt-2 text-sm text-white/60">Preview is available after the transition-sync schema is reviewed and applied. Apply remains blocked; no migration is run from this page.</p></section>}
       {error && <div className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</div>}
-      {applyResult && <section className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-4"><p className="font-black text-white">Run {applyResult.runId ?? 'not created'}: {applyResult.applied} applied now · {applyResult.previouslyApplied} previously applied · {applyResult.failed} still failed · {applyResult.conflictsUntouched} conflicts untouched.</p><p className="mt-1 text-xs text-white/50">CG Dynamics only. No Microsoft writes were made.</p></section>}
 
       {recovery && (
         <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5">
