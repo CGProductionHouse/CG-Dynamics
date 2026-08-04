@@ -38,7 +38,8 @@ import {
   type MarketingSpecialist,
 } from '../../lib/marketingWorkflow'
 import { isManagerRole } from '../../lib/roles'
-import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
+import { friendlyAssistantError } from '../../lib/assistantErrors'
+import { useBodyScrollLock, useIsMobileViewport, useVisualViewportBottomInset, useVisualViewportRect } from '../../lib/mobileViewport'
 import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
 import { DailyAssistantCapture } from './DailyAssistantCapture'
 import { dailyAssistantContextLine, listMyAssistantDayCaptures, listMyAssistantDayItems } from '../../lib/dailyAssistant'
@@ -49,8 +50,11 @@ import { dailyAssistantContextLine, listMyAssistantDayCaptures, listMyAssistantD
 // A persistent, ChatGPT-style composer available across the whole authenticated
 // staff app. Collapsed it is a slim launcher; expanded it is a chat panel.
 //
-// - Mobile: docked above the bottom navigation, full width.
-// - Desktop: docked bottom-right, clear of the sidebar.
+// - Mobile: a slim launcher docked above the bottom navigation. Opening it
+//   promotes the assistant to a FULL-SCREEN sheet sized to the visual viewport,
+//   so the keyboard shrinks the sheet instead of covering it, the page behind is
+//   frozen and untappable, and the app's bottom navigation steps aside.
+// - Desktop: docked bottom-right, clear of the sidebar. Unchanged.
 //
 // It is automatically aware of the current page, client and record (derived from
 // the route) plus the signed-in user's live work context, and routes models
@@ -137,7 +141,16 @@ function getSpeechRecognition(): SpeechRecognitionLike | null {
   return Impl ? new Impl() : null
 }
 
-export function GlobalAssistantComposer() {
+interface GlobalAssistantComposerProps {
+  /**
+   * Reports whether the assistant currently owns the whole mobile screen, so
+   * the app shell can stand its bottom navigation down and put the page behind
+   * out of the accessibility tree.
+   */
+  onMobileFullscreenChange?: (fullscreen: boolean) => void
+}
+
+export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssistantComposerProps = {}) {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const { profile } = useAuth()
@@ -147,6 +160,10 @@ export function GlobalAssistantComposer() {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [chatError, setChatError] = useState<string | null>(null)
+  // Whether the last failure is worth retrying, and the message to retry with.
+  // Raw Edge Function / provider strings never reach the UI — see assistantErrors.
+  const [chatErrorRetryable, setChatErrorRetryable] = useState(false)
+  const [lastUserMessage, setLastUserMessage] = useState('')
   const [proposalError, setProposalError] = useState<string | null>(null)
   const [debriefError, setDebriefError] = useState<string | null>(null)
   const [plusOpen, setPlusOpen] = useState(false)
@@ -212,6 +229,12 @@ export function GlobalAssistantComposer() {
   const debriefAnalysisRequestRef = useRef<DebriefRequestToken | null>(null)
   const debriefConfirmationRequestRef = useRef<DebriefRequestToken | null>(null)
   const viewportBottomInset = useVisualViewportBottomInset()
+  const viewport = useVisualViewportRect()
+  const isMobile = useIsMobileViewport()
+  // Held in a ref so the reporting effect depends only on the fullscreen flag —
+  // an inline callback from the parent would otherwise re-fire it every render.
+  const onMobileFullscreenChangeRef = useRef(onMobileFullscreenChange)
+  onMobileFullscreenChangeRef.current = onMobileFullscreenChange
 
   function invalidateDebriefRequests() {
     debriefRequestSeqRef.current += 1
@@ -458,6 +481,54 @@ export function GlobalAssistantComposer() {
   // and send takes over as soon as there is text.
   const mobileMicPrimary = speechSupported && !sending && (listening || input.trim() === '')
   const mobileSendPrimary = sending || (!listening && input.trim() !== '')
+
+  // ── Mobile full-screen shell ──────────────────────────────────────────────
+  // Opening the assistant on a phone takes over the whole screen rather than
+  // floating another layer on top of the app. Everything below drives that.
+  const mobileFullscreen = isMobile && open && !onAssistantPage
+  // Freeze and restore the page behind. The hook captures the scroll offset on
+  // lock and scrolls back to it on release, so closing returns the user to
+  // exactly where they were.
+  useBodyScrollLock(mobileFullscreen)
+
+  useEffect(() => {
+    onMobileFullscreenChangeRef.current?.(mobileFullscreen)
+  }, [mobileFullscreen])
+
+  // Tell the shell the assistant is gone if this component ever unmounts while
+  // still open, so the bottom navigation can never be left hidden.
+  useEffect(() => () => { onMobileFullscreenChangeRef.current?.(false) }, [])
+
+  // Hardware/browser back closes the sheet instead of leaving the page, which is
+  // what a full-screen surface is expected to do on a phone.
+  useEffect(() => {
+    if (!mobileFullscreen) return
+    window.history.pushState({ cgAssistant: true }, '')
+    const onPop = () => setOpen(false)
+    window.addEventListener('popstate', onPop)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      // Only unwind our own entry — if the pop is what closed the sheet the
+      // entry is already gone and going back again would leave the page.
+      if (window.history.state?.cgAssistant) window.history.back()
+    }
+  }, [mobileFullscreen])
+
+  // Escape closes it too (external keyboards, and desktop-sized browser windows
+  // dragged narrow during testing).
+  useEffect(() => {
+    if (!mobileFullscreen) return
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mobileFullscreen])
+
+  // Keep the newest message in view as the keyboard opens and the sheet shrinks.
+  useEffect(() => {
+    if (!mobileFullscreen || !viewport.keyboardOpen) return
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [mobileFullscreen, viewport.keyboardOpen, viewport.height])
 
   async function loadJobs(actionIsCurrent?: () => boolean) {
     const requestedProfileId = profileIdRef.current
@@ -1018,6 +1089,7 @@ export function GlobalAssistantComposer() {
     setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
     setInput('')
     setChatError(null)
+    setLastUserMessage(clean)
     setSending(true)
     setOpen(true)
 
@@ -1028,7 +1100,11 @@ export function GlobalAssistantComposer() {
     try {
       const response = await sendAssistantMessage(contextual, history, workContext, null)
       if (profileIdRef.current !== sendingProfileId) return
-      if (!response.ok) setChatError(response.error ?? 'CG Assistant is unavailable right now.')
+      if (!response.ok) {
+        const friendly = friendlyAssistantError(response.error)
+        setChatError(friendly.message)
+        setChatErrorRetryable(friendly.retryable)
+      }
       setMessages(current => [
         ...current,
         {
@@ -1040,8 +1116,12 @@ export function GlobalAssistantComposer() {
         },
       ])
       window.setTimeout(() => inputRef.current?.focus(), 0)
-    } catch {
-      if (profileIdRef.current === sendingProfileId) setChatError('CG Assistant is unavailable right now.')
+    } catch (err) {
+      if (profileIdRef.current === sendingProfileId) {
+        const friendly = friendlyAssistantError(err instanceof Error ? err.message : null)
+        setChatError(friendly.message)
+        setChatErrorRetryable(friendly.retryable)
+      }
     } finally {
       if (profileIdRef.current === sendingProfileId) setSending(false)
     }
@@ -1113,9 +1193,26 @@ export function GlobalAssistantComposer() {
     window.setTimeout(() => inputRef.current?.focus(), 0)
   }
 
+  // Re-send the last message after a recoverable failure. The failed exchange is
+  // dropped first so the retry does not stack a duplicate question in the thread.
+  function retryLastMessage() {
+    if (!lastUserMessage || sending) return
+    setChatError(null)
+    setChatErrorRetryable(false)
+    setMessages(current => {
+      const trimmed = [...current]
+      if (trimmed.at(-1)?.role === 'assistant') trimmed.pop()
+      if (trimmed.at(-1)?.role === 'user') trimmed.pop()
+      return trimmed
+    })
+    void send(lastUserMessage)
+  }
+
   function newChat() {
     setMessages([])
     setChatError(null)
+    setChatErrorRetryable(false)
+    setLastUserMessage('')
     setProposalError(null)
     setDebriefError(null)
     setMoreOpen(false)
@@ -1146,16 +1243,56 @@ export function GlobalAssistantComposer() {
 
   if (onAssistantPage) return null
 
+  // ── Shell geometry ────────────────────────────────────────────────────────
+  // Full-screen (mobile, open): sized to the VISUAL viewport rather than any vh
+  // unit, and offset by the viewport's own scroll. iOS shrinks only the visual
+  // viewport when the keyboard opens, so this is what makes the sheet end
+  // exactly at the top of the keyboard with the composer still on screen —
+  // instead of 100dvh running underneath it. `translateY(offsetTop)` keeps the
+  // sheet pinned when iOS scrolls the page to reveal a focused field.
+  //
+  // Docked (desktop, or mobile while collapsed): unchanged behaviour.
+  const shellStyle: CSSProperties = mobileFullscreen
+    ? { height: `${viewport.height}px`, transform: `translateY(${viewport.offsetTop}px)` }
+    : ({ '--assistant-viewport-inset': `${viewportBottomInset}px` } as CSSProperties)
+
+  const shellClass = mobileFullscreen
+    ? 'fixed inset-x-0 top-0 z-[60] flex flex-col bg-[#080b0a]'
+    : 'pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--assistant-viewport-inset))] z-40 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] md:inset-x-auto md:right-5 md:bottom-[calc(1.25rem+var(--assistant-viewport-inset))] md:px-0'
+
+  const innerClass = mobileFullscreen
+    ? 'flex min-h-0 w-full flex-1 flex-col px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))]'
+    : 'pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-[26rem]'
+
+  // When a capture / debrief / proposal surface is open it IS the task, so in
+  // full-screen it takes the flexible space and the chat log collapses instead.
+  // Otherwise a tall panel overflows the shrunken sheet once the keyboard opens.
+  const overlayOpen = dailyCaptureOpen || debriefOpen || Boolean(proposal)
+
+  // Full-screen: the panel is the page, so it loses its floating card treatment
+  // and becomes part of the flex column.
+  const panelClass = mobileFullscreen
+    ? `flex min-h-0 flex-col overflow-hidden ${overlayOpen ? 'shrink' : 'flex-1'}`
+    : 'mb-2 overflow-hidden rounded-2xl border border-white/12 bg-[#0c0f0e]/98 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl'
+
+  const scrollClass = mobileFullscreen
+    ? 'min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain px-1 py-3'
+    : 'max-h-[min(60vh,26rem)] min-h-[8rem] space-y-2.5 overflow-y-auto overscroll-contain px-3 py-3'
+
   return (
     <div
       data-assistant-composer
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--assistant-viewport-inset))] z-40 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] md:inset-x-auto md:right-5 md:bottom-[calc(1.25rem+var(--assistant-viewport-inset))] md:px-0"
-      style={{ '--assistant-viewport-inset': `${viewportBottomInset}px` } as CSSProperties}
+      data-assistant-fullscreen={mobileFullscreen ? 'true' : undefined}
+      role={mobileFullscreen ? 'dialog' : undefined}
+      aria-modal={mobileFullscreen ? true : undefined}
+      aria-label={mobileFullscreen ? 'CG Assistant' : undefined}
+      className={shellClass}
+      style={shellStyle}
     >
-      <div className="pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-[26rem]">
+      <div className={innerClass}>
         {open && (
-          <div className="mb-2 overflow-hidden rounded-2xl border border-white/12 bg-[#0c0f0e]/98 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl">
-            <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5">
+          <div className={panelClass}>
+            <div className={`flex items-center justify-between gap-2 border-b border-white/10 ${mobileFullscreen ? 'px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))]' : 'px-4 py-2.5'}`}>
               <div className="flex items-center gap-2">
                 <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-teal/15 text-[11px] font-black text-brand-teal">CG</span>
                 <div className="leading-tight">
@@ -1166,7 +1303,14 @@ export function GlobalAssistantComposer() {
               </div>
               <div className="flex items-center gap-1">
                 <Link to="/admin/assistant" onClick={() => setOpen(false)} className="flex min-h-11 items-center rounded-md px-2 text-[11px] font-bold text-brand-primary/70 hover:text-white" title="Open full assistant">Expand</Link>
-                <button type="button" onClick={() => setOpen(false)} className="min-h-11 min-w-11 rounded-md px-2 text-sm font-bold text-brand-primary/70 hover:text-white" aria-label="Minimise assistant">–</button>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className={`min-h-11 rounded-md text-sm font-bold text-brand-primary/70 hover:text-white ${mobileFullscreen ? 'border border-white/12 px-3' : 'min-w-11 px-2'}`}
+                  aria-label={mobileFullscreen ? 'Close assistant' : 'Minimise assistant'}
+                >
+                  {mobileFullscreen ? 'Close' : '–'}
+                </button>
               </div>
             </div>
 
@@ -1222,7 +1366,7 @@ export function GlobalAssistantComposer() {
               </div>
             )}
 
-            <div ref={scrollRef} className="max-h-[min(60vh,26rem)] min-h-[8rem] space-y-2.5 overflow-y-auto overscroll-contain px-3 py-3">
+            <div ref={scrollRef} className={scrollClass}>
               {messages.length === 0 && !sending && !mobileSuggestionAreaHidden && (
                 <div className="space-y-2 py-1.5 md:hidden">
                   <p className="px-1 text-xs text-brand-primary/60">What do you need help with?</p>
@@ -1268,11 +1412,31 @@ export function GlobalAssistantComposer() {
                   <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-brand-primary/60">CG Assistant is thinking…</div>
                 </div>
               )}
-              {chatError && <p className="px-1 text-xs text-red-300">{chatError}</p>}
+              {chatError && (
+                <div className="rounded-xl border border-red-400/25 bg-red-400/[0.07] px-3 py-2.5" role="alert">
+                  <p className="text-xs leading-relaxed text-red-100">{chatError}</p>
+                  {chatErrorRetryable && lastUserMessage && (
+                    <button
+                      type="button"
+                      onClick={retryLastMessage}
+                      disabled={sending}
+                      className="mt-2 min-h-11 rounded-full border border-red-300/30 px-3 text-xs font-black text-red-100 transition-colors hover:bg-red-400/15 disabled:opacity-40"
+                    >
+                      Try again
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
 
+        {/*
+          Capture / debrief / proposal surfaces. `contents` keeps the docked
+          layout byte-identical; in full-screen they become a bounded, scrollable
+          band so a tall panel can never push the composer off the bottom.
+        */}
+        <div className={mobileFullscreen && overlayOpen ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain' : 'contents'}>
         {dailyCaptureOpen && profileId && (
           <DailyAssistantCapture
             userId={profileId}
@@ -1483,9 +1647,11 @@ export function GlobalAssistantComposer() {
             </div>
           </div>
         )}
+        </div>
 
-        {/* Composer bar */}
-        <form onSubmit={handleSubmit} className="relative flex items-end gap-1.5 rounded-2xl border border-white/12 bg-[#0c0f0e]/98 px-2 py-1.5 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+        {/* Composer bar — the fixed footer of the full-screen column, so it is
+            always the element sitting directly above the keyboard. */}
+        <form onSubmit={handleSubmit} className={`relative flex items-end gap-1.5 rounded-2xl border border-white/12 bg-[#0c0f0e]/98 px-2 py-1.5 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl ${mobileFullscreen ? 'shrink-0' : ''}`}>
           {plusOpen && (
             <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
               <button type="button" onClick={newChat} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>

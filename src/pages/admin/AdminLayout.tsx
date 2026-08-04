@@ -104,6 +104,10 @@ export default function AdminLayout() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notificationsLoading, setNotificationsLoading] = useState(true)
   const [notificationsError, setNotificationsError] = useState<string | null>(null)
+  // True while CG Assistant owns the whole mobile screen. The bottom navigation
+  // stands down and the page behind leaves the accessibility tree, so the
+  // assistant is a single focused surface rather than another floating layer.
+  const [assistantFullscreen, setAssistantFullscreen] = useState(false)
   const [zone, setZone] = useState<NavZone>(() => {
     const routeZone = resolveNavZone(location.pathname)
     if (!isSharedNavZonePath(location.pathname)) return routeZone
@@ -304,24 +308,33 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}>
+      <main
+        className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
+        aria-hidden={assistantFullscreen || undefined}
+        inert={assistantFullscreen || undefined}
+      >
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
-        <div className="grid grid-cols-5 gap-1 px-2 pt-1.5" style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}>
-          {mobilePrimaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="min-h-11 min-w-11 rounded-md px-1 text-center text-[11px] font-bold text-brand-primary transition-colors hover:text-white"
-            aria-expanded={mobileMenuOpen}
-            aria-controls="staff-mobile-navigation"
-          >
-            More
-          </button>
-        </div>
-      </nav>
+      {/* The bottom navigation is removed — not merely covered — while the
+          assistant is full-screen, so it cannot be tapped through and does not
+          compete with the keyboard. It returns as soon as the sheet closes. */}
+      {!assistantFullscreen && (
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
+          <div className="grid grid-cols-5 gap-1 px-2 pt-1.5" style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}>
+            {mobilePrimaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="min-h-11 min-w-11 rounded-md px-1 text-center text-[11px] font-bold text-brand-primary transition-colors hover:text-white"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="staff-mobile-navigation"
+            >
+              More
+            </button>
+          </div>
+        </nav>
+      )}
 
       {notificationOpen && (
         <section
@@ -383,7 +396,7 @@ export default function AdminLayout() {
         </section>
       )}
 
-      <GlobalAssistantComposer />
+      <GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} />
     </div>
   )
 }
