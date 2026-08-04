@@ -150,6 +150,9 @@ export function GlobalAssistantComposer() {
   const [proposalError, setProposalError] = useState<string | null>(null)
   const [debriefError, setDebriefError] = useState<string | null>(null)
   const [plusOpen, setPlusOpen] = useState(false)
+  // Mobile initial state: secondary suggestions stay behind a small "More"
+  // toggle so the first screen is just a prompt + two primary actions.
+  const [moreOpen, setMoreOpen] = useState(false)
   const [listening, setListening] = useState(false)
   // Afrikaans + English + code-switched speech. Web Speech is single-locale, so
   // we let the user flip the dictation locale; server-side Whisper is the
@@ -409,6 +412,26 @@ export function GlobalAssistantComposer() {
   const plannerTaskId = onPlannerBoard ? (searchParams.get('id') ?? '') : ''
   const plannerTaskName = plannerTaskId ? (searchParams.get('task') ?? '') : ''
   const selectedRunId = location.pathname.includes('/admin/content') ? (searchParams.get('runId') ?? '') : ''
+
+  // Mobile initial state: a single short context line (client name when one is
+  // selected, otherwise the page label), so the header never dumps page content.
+  const mobileContextLabel = clientId
+    ? (clientsRef.current.find(c => c.id === clientId)?.name ?? pageLabel)
+    : pageLabel
+  // The compact suggestion area only exists while idle: typing, a chat in
+  // flight, voice recording/transcribing, or a proposal being reviewed/applied
+  // all hide it, and a clean idle state restores the two primary actions.
+  const mobileSuggestionAreaHidden =
+    input.trim() !== '' ||
+    sending ||
+    listening ||
+    dailyCaptureOpen ||
+    debriefOpen ||
+    debriefRecording ||
+    debriefBusy ||
+    Boolean(debrief) ||
+    Boolean(proposal) ||
+    applying
 
   function currentContextLine(): string {
     const parts = [`page: ${pageLabel}`, `role: ${profile?.role ?? 'team'}`]
@@ -747,6 +770,7 @@ export function GlobalAssistantComposer() {
   async function startDebriefRecording() {
     const requestToken = beginDebriefRequest('analysis')
     if (!requestToken || !debriefRequestIsCurrent('analysis', requestToken)) return
+    setMoreOpen(false)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       if (!debriefRequestIsCurrent('analysis', requestToken)) {
@@ -875,6 +899,7 @@ export function GlobalAssistantComposer() {
     setDebriefOpen(false)
     setDebrief(null)
     setDailyCaptureOpen(true)
+    setMoreOpen(false)
     setPlusOpen(false)
     setOpen(true)
   }
@@ -890,6 +915,7 @@ export function GlobalAssistantComposer() {
     setDebriefRecording(false)
     setDebriefRecordingSeconds(0)
     setDebriefOpen(true)
+    setMoreOpen(false)
     setPlusOpen(false)
   }
 
@@ -905,6 +931,9 @@ export function GlobalAssistantComposer() {
     const clean = text.trim()
     const sendingProfileId = profileIdRef.current
     if (!clean || sending || applying || !sendingProfileId) return
+    // Collapse the mobile "More" list: any send takes the assistant out of the
+    // clean idle state that shows the two primary actions.
+    setMoreOpen(false)
 
     // Action agent first: understand the instruction as a concrete app action.
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
@@ -1015,6 +1044,7 @@ export function GlobalAssistantComposer() {
   function startListening() {
     const recognition = getSpeechRecognition()
     if (!recognition) return
+    setMoreOpen(false)
     const listeningProfileId = profileIdRef.current
     recognition.lang = micLang
     recognition.continuous = false
@@ -1065,6 +1095,7 @@ export function GlobalAssistantComposer() {
     setChatError(null)
     setProposalError(null)
     setDebriefError(null)
+    setMoreOpen(false)
     setPlusOpen(false)
     try {
       if (profileId) window.sessionStorage.removeItem(sessionKey(profileId))
@@ -1078,6 +1109,17 @@ export function GlobalAssistantComposer() {
     `Summarise this ${pageLabel} page for me`,
     'Draft a client update',
   ]
+  // The existing suggestion chips, shared by desktop (idle surface) and mobile
+  // (behind "More") so their actions are defined exactly once.
+  const starterChips = (
+    <div className="flex flex-wrap gap-1.5">
+      {STARTERS.map(s => (
+        <button key={s} type="button" onClick={() => void send(s)} className="min-h-11 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-brand-primary/80 hover:border-brand-teal/40 hover:text-white">
+          {s}
+        </button>
+      ))}
+    </div>
+  )
 
   if (onAssistantPage) return null
 
@@ -1095,7 +1137,8 @@ export function GlobalAssistantComposer() {
                 <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-teal/15 text-[11px] font-black text-brand-teal">CG</span>
                 <div className="leading-tight">
                   <p className="text-sm font-bold text-white">CG Assistant</p>
-                  <p className="text-[10px] text-brand-primary/55">Knows: {pageLabel}{clientId ? ' · this client' : ''}</p>
+                  <p className="text-[10px] text-brand-primary/55 md:hidden">Context: {mobileContextLabel}</p>
+                  <p className="hidden text-[10px] text-brand-primary/55 md:block">Knows: {pageLabel}{clientId ? ' · this client' : ''}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -1157,16 +1200,31 @@ export function GlobalAssistantComposer() {
             )}
 
             <div ref={scrollRef} className="max-h-[min(60vh,26rem)] min-h-[8rem] space-y-2.5 overflow-y-auto overscroll-contain px-3 py-3">
-              {messages.length === 0 && !sending && (
-                <div className="space-y-2 py-2">
-                  <p className="px-1 text-xs text-brand-primary/60">Ask anything about your work, clients or this page.</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {STARTERS.map(s => (
-                      <button key={s} type="button" onClick={() => void send(s)} className="min-h-11 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-brand-primary/80 hover:border-brand-teal/40 hover:text-white">
-                        {s}
-                      </button>
-                    ))}
+              {messages.length === 0 && !sending && !mobileSuggestionAreaHidden && (
+                <div className="space-y-2 py-1.5 md:hidden">
+                  <p className="px-1 text-xs text-brand-primary/60">What do you need help with?</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button type="button" onClick={startDailyCapture} className="min-h-11 rounded-lg border border-brand-teal/30 bg-brand-teal/10 px-2 text-xs font-bold text-brand-teal hover:bg-brand-teal/20">
+                      Record my update
+                    </button>
+                    <button type="button" onClick={() => void send('What should I do next?')} className="min-h-11 rounded-lg border border-white/10 bg-white/[0.04] px-2 text-xs font-bold text-brand-primary hover:border-brand-teal/40 hover:text-white">
+                      What should I do next?
+                    </button>
                   </div>
+                  {moreOpen ? (
+                    <div className="space-y-1">
+                      {starterChips}
+                      <button type="button" onClick={() => setMoreOpen(false)} className="min-h-11 rounded-md px-1 text-xs font-bold text-brand-primary/60 hover:text-white">Less</button>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => setMoreOpen(true)} className="min-h-11 rounded-md px-1 text-xs font-bold text-brand-primary/60 hover:text-white">More</button>
+                  )}
+                </div>
+              )}
+              {messages.length === 0 && !sending && (
+                <div className="hidden space-y-2 py-2 md:block">
+                  <p className="px-1 text-xs text-brand-primary/60">Ask anything about your work, clients or this page.</p>
+                  {starterChips}
                 </div>
               )}
               {messages.map(message => (
@@ -1429,7 +1487,7 @@ export function GlobalAssistantComposer() {
           <textarea
             ref={inputRef}
             value={input}
-            onChange={event => setInput(event.target.value)}
+            onChange={event => { setInput(event.target.value); setMoreOpen(false) }}
             onFocus={() => setOpen(true)}
             onKeyDown={event => {
               if (event.key === 'Enter' && !event.shiftKey) {
