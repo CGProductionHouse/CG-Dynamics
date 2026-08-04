@@ -9,6 +9,11 @@ import webpush from 'npm:web-push@3.6.7'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
+// A live worker heartbeats every item (a few seconds apart) and each invocation
+// runs ~35s. 120s is comfortably longer than one invocation plus its hand-off,
+// so a healthy batch is never double-driven, while a dead one is picked up on
+// the second or third cron tick.
+const META_SYNC_STALE_SECONDS = 120
 
 interface JobRow {
   id: string
@@ -76,8 +81,95 @@ Deno.serve(async () => {
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, worker, processed }), { headers: { 'Content-Type': 'application/json' } })
+  // ── Meta sync batch reaper ────────────────────────────────────────────────
+  // The durable safety net for production blocker #161.
+  //
+  // Previously the ONLY thing that could drive a Meta sync batch was its
+  // background_jobs row. Once that row exhausted its 3 attempts it became
+  // terminally 'failed', and the batch was left 'running' with 69 items queued
+  // and nothing on earth able to invoke a worker for it. The worker's own
+  // self-continuation could not save it either — that chain dies after a few
+  // hops.
+  //
+  // This runs on the existing per-minute cron tick and is deliberately
+  // independent of background_jobs: any batch whose worker heartbeat has gone
+  // stale while real work remains gets a worker, forever, until it finishes or
+  // the bounded recovery budget declares it unrecoverable.
+  const reaped = await reapStalledMetaSyncBatches(supabase, url)
+
+  return new Response(JSON.stringify({ ok: true, worker, processed, reaped }), { headers: { 'Content-Type': 'application/json' } })
 })
+
+interface StalledBatchRow {
+  batch_id: string
+  queued_items: number
+  stale_running_items: number
+  recovery_attempts: number
+  seconds_since_heartbeat: number
+}
+
+async function reapStalledMetaSyncBatches(
+  supabase: ReturnType<typeof createClient>,
+  url: string,
+): Promise<Array<{ batchId: string; queued: number; staleRunning: number; invoked: boolean; detail?: string }>> {
+  const out: Array<{ batchId: string; queued: number; staleRunning: number; invoked: boolean; detail?: string }> = []
+
+  const { data, error } = await supabase.rpc('meta_sync_stalled_batches', {
+    p_stale_seconds: META_SYNC_STALE_SECONDS,
+    p_limit: 2,
+  })
+  if (error || !Array.isArray(data) || data.length === 0) return out
+
+  const workerSecret = (Deno.env.get('META_SYNC_WORKER_SECRET') ?? '').trim()
+
+  for (const row of data as StalledBatchRow[]) {
+    // Without the shared secret the reaper cannot authorise a worker. Record it
+    // on the batch so the failure is visible in the UI rather than silent.
+    if (!workerSecret) {
+      await supabase.rpc('meta_sync_note_recovery', {
+        p_batch_id: row.batch_id,
+        p_error: 'META_SYNC_WORKER_SECRET is not configured, so the recovery worker cannot authorise.',
+      })
+      out.push({ batchId: row.batch_id, queued: row.queued_items, staleRunning: row.stale_running_items, invoked: false, detail: 'missing_secret' })
+      continue
+    }
+
+    // Count the attempt BEFORE invoking. A worker that dies without reporting
+    // must still consume recovery budget, otherwise an unrecoverable batch
+    // would be retried every minute forever.
+    const { data: note } = await supabase.rpc('meta_sync_note_recovery', { p_batch_id: row.batch_id, p_error: null })
+    if (note && note.exhausted === true) {
+      out.push({ batchId: row.batch_id, queued: row.queued_items, staleRunning: row.stale_running_items, invoked: false, detail: 'recovery_exhausted' })
+      continue
+    }
+
+    let invoked = false
+    let detail: string | undefined
+    try {
+      // Fire and forget: the worker runs ~35s, far longer than this tick should
+      // wait. Aborting after 2s is the healthy path — by then it has claimed
+      // and heartbeated, which is the proof that it really started.
+      await fetch(`${url}/functions/v1/meta-sync-worker`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-worker-secret': workerSecret },
+        body: JSON.stringify({ batchId: row.batch_id }),
+        signal: AbortSignal.timeout(2_000),
+      })
+      invoked = true
+    } catch (err) {
+      if (err instanceof DOMException && ['TimeoutError', 'AbortError'].includes(err.name)) {
+        invoked = true
+      } else {
+        detail = String(err instanceof Error ? err.message : err).slice(0, 200)
+        await supabase.rpc('meta_sync_note_recovery', { p_batch_id: row.batch_id, p_error: detail })
+      }
+    }
+
+    out.push({ batchId: row.batch_id, queued: row.queued_items, staleRunning: row.stale_running_items, invoked, detail })
+  }
+
+  return out
+}
 
 // Runs one job to its real completion and returns a TRUTHFUL result summary that
 // is stored on the job row. Throwing marks the job failed (with retry/backoff).

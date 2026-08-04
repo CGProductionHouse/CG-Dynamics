@@ -670,6 +670,18 @@ export default function MetaIntegrationPage() {
         queued_items: queuedCount,
       })
 
+      // Restoration is finished the moment we have real counts — replace the
+      // "Restoring sync progress..." placeholder with live status. It used to
+      // be set once and never cleared, so an interrupted batch appeared to be
+      // restoring forever even while it was plainly progressing (or dead).
+      if (batchData) {
+        setSyncProgress(
+          totalCount > 0
+            ? `Syncing ${doneCount + failedCount} of ${totalCount} — ${runningCount} running, ${queuedCount} queued.`
+            : 'Syncing...',
+        )
+      }
+
       // Stall detection: ANY child movement (done/failed/running/queued shifts)
       // counts as progress. "Stuck" only shows after ~25s with zero movement
       // AND nothing actively running.
@@ -745,6 +757,30 @@ export default function MetaIntegrationPage() {
         return
       }
 
+      // Confirm a worker ACTUALLY ran. A 200 alone is not proof: the worker
+      // returns 200 when it claims nothing, which is exactly what a "restart"
+      // that silently did nothing looks like. Report honestly either way.
+      const workerRan = data?.workerRan === true || Number(data?.chunksProcessed ?? 0) > 0
+      const workRemaining = data?.workRemaining === true
+      if (!workerRan) {
+        setSyncResult({
+          status: workRemaining ? 'failed' : 'success',
+          message: workRemaining
+            ? (data?.claimFailed === true
+                ? 'Restart could not claim any work — the queue lock is unavailable. The recovery worker retries automatically every minute; if this persists, check the Meta connection.'
+                : 'Restart reached the worker but it claimed no items. Items are still queued, so the automatic recovery worker will retry within a minute.')
+            : 'Nothing left to process — this batch has no remaining work.',
+          phase: 'worker',
+          debug: safeStringify({ chunksProcessed: data?.chunksProcessed ?? 0, workRemaining, claimFailed: data?.claimFailed ?? null }),
+        })
+        return
+      }
+
+      setSyncResult({
+        status: 'success',
+        message: `Worker restarted: processed ${data?.processed ?? 0} item(s)${data?.handedOff === true ? ' and handed off to the next worker' : ''}${workRemaining ? '. Remaining items continue automatically.' : '.'}`,
+        phase: 'worker',
+      })
       stallRef.current = 0
       setBatchStalled(false)
     } catch (e) {

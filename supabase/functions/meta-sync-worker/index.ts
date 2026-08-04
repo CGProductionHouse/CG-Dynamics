@@ -146,6 +146,24 @@ async function fetchMetaCollection(
   }
 }
 
+/**
+ * Durable "a worker is alive and holding this batch" marker.
+ *
+ * MUST NOT throw. supabase-js query builders are thenable but do NOT implement
+ * `.catch()`, so `sb.rpc(...).catch(...)` raises a TypeError that escapes as an
+ * unhandled rejection and kills the invocation — which strands exactly the
+ * items this call exists to protect. A real try/catch is the only safe form,
+ * and a missed heartbeat is harmless: the reaper simply revives the batch a
+ * minute later.
+ */
+async function touchBatch(sb: ReturnType<typeof createClient>, batchId: string): Promise<void> {
+  try {
+    await sb.rpc('meta_sync_touch_batch', { p_batch_id: batchId })
+  } catch {
+    // Heartbeat is best-effort by design.
+  }
+}
+
 /* ---------- Auth ---------- */
 
 async function authorizeWorker(
@@ -284,6 +302,12 @@ Deno.serve(async (req) => {
   let claimCount = 0
   let claimFailed = false
   let budgetDeferred = false
+  // Every item this invocation has claimed, and every item it actually reached.
+  // The difference is released at the end so an abandoned claim never burns a
+  // retry attempt — that is what used to force-fail clients the worker never
+  // even looked at.
+  const claimedIds = new Set<string>()
+  const settledIds = new Set<string>()
 
   while (claimCount < MAX_CHUNKS) {
     if (Date.now() >= invocationDeadline - PAGE_FETCH_RESERVE_MS || pageTokenBudgetExhausted) break
@@ -304,6 +328,10 @@ Deno.serve(async (req) => {
 
     for (const item of items) {
       batchIds.add(item.batch_id)
+      claimedIds.add(item.id)
+      // Durable proof that a worker is alive and holding this batch. The cron
+      // reaper reads this to tell a working batch from an abandoned one.
+      await touchBatch(sb, item.batch_id)
 
       // ── Skip current/future months ──
       if (item.month >= currentMonthStr()) {
@@ -312,6 +340,7 @@ Deno.serve(async (req) => {
           error: 'Month is not yet completed.',
           finished_at: new Date().toISOString(),
         }).eq('id', item.id)
+        settledIds.add(item.id)
         processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
         continue
       }
@@ -709,6 +738,10 @@ Deno.serve(async (req) => {
       if (warnings.length > 0) updatePayload.warnings = warnings
       if (itemError) updatePayload.error = String(itemError).slice(0, 1000)
       await sb.from('meta_sync_batch_items').update(updatePayload).eq('id', item.id)
+      settledIds.add(item.id)
+      // Heartbeat after every item too, so a long batch never looks abandoned
+      // to the reaper while it is genuinely progressing.
+      await touchBatch(sb, item.batch_id)
 
       // Keep the parent batch counters live after EVERY item so the UI never
       // shows a stale 0/N while this worker is mid-chunk. Safe while items
@@ -732,6 +765,63 @@ Deno.serve(async (req) => {
     if (budgetDeferred) break
   }
 
+  // ── Return anything claimed but never reached ───────────────
+  // Running out of invocation budget is not an attempt. Releasing these at
+  // their original attempt count is what stops untouched clients being
+  // force-failed by the stale-lease sweep, and it makes the work immediately
+  // visible as 'queued' to the reaper instead of waiting out a 5-minute lease.
+  // ── Back off when Meta throttles us ─────────────────────────
+  // A rate limit is a wait, not a failure. Without this the reaper retries
+  // every minute, no item can settle, and the bounded no-progress budget would
+  // eventually force-fail every remaining client for a temporary throttle.
+  const rateLimited = processed.some(p => /rate.?limit/i.test(p.error ?? ''))
+  if (rateLimited) {
+    // A client that only failed because Meta throttled us has not really
+    // failed. Put it back on the queue at its original attempt count so a
+    // throttle can never burn through the retry budget and permanently mark a
+    // client failed for something that had nothing to do with its data.
+    const throttled = processed
+      .filter(p => p.status === 'failed' && /rate.?limit/i.test(p.error ?? ''))
+      .map(p => p.itemId)
+    if (throttled.length > 0) {
+      try {
+        await sb.from('meta_sync_batch_items')
+          .update({ status: 'queued', started_at: null, finished_at: null, error: null })
+          .in('id', throttled)
+        await sb.rpc('meta_sync_release_items', { p_item_ids: throttled })
+      } catch {
+        // Left failed; the operator can retry the client explicitly.
+      }
+      for (const entry of processed) {
+        if (throttled.includes(entry.itemId)) entry.status = 'queued'
+      }
+    }
+
+    for (const batchId of batchIds) {
+      try {
+        await sb.rpc('meta_sync_begin_cooldown', {
+          p_batch_id: batchId,
+          p_seconds: 900,
+          p_reason: 'Meta rate-limited the sync. Waiting before retrying - no work has been lost.',
+        })
+      } catch {
+        // Best effort; the reaper simply retries sooner.
+      }
+    }
+  }
+
+  const abandoned = [...claimedIds].filter(id => !settledIds.has(id))
+  if (abandoned.length > 0) {
+    // supabase-js query builders are thenable but expose no .catch(), so this
+    // must be a real try/catch — a rejection here would kill the invocation and
+    // strand the very items it is trying to hand back.
+    try {
+      await sb.rpc('meta_sync_release_items', { p_item_ids: abandoned })
+    } catch {
+      // Left 'running'; the stale-lease sweep reclaims them.
+    }
+  }
+
   // ── Recalculate parent batch statuses ──────────────────────
   for (const batchId of batchIds) {
     try {
@@ -745,6 +835,8 @@ Deno.serve(async (req) => {
   // Counts BOTH still-queued items and stale running leases: the claim RPC
   // requeues expired leases on the next invocation, so a stalled batch must
   // keep self-triggering until every item is drained.
+  let selfTriggered = false
+  let workRemaining = false
   if (body.batchId) {
     const staleBefore = new Date(Date.now() - 5 * 60 * 1000).toISOString()
     const { count: remaining } = await sb
@@ -760,28 +852,44 @@ Deno.serve(async (req) => {
       .eq('status', 'running')
       .lt('started_at', staleBefore)
 
-    const workRemaining = (remaining ?? 0) > 0 || (staleRunning ?? 0) > 0
+    workRemaining = (remaining ?? 0) > 0 || (staleRunning ?? 0) > 0
     // Never self-amplify when the claim RPC is missing/failing (avoids an
     // infinite trigger loop against a broken deployment).
     if (!claimFailed && workRemaining) {
       const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
       const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
-      const triggerPromise = fetch(workerUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-worker-secret': workerSecret,
-        },
-        body: JSON.stringify({ batchId: body.batchId }),
-      })
-      // Keep runtime alive until the trigger completes
-      if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime.waitUntil === 'function') {
-        EdgeRuntime.waitUntil(triggerPromise)
-      }
+      // Hand off WITHOUT waiting for the next generation to finish.
+      //
+      // This used to keep the outbound promise alive with EdgeRuntime.waitUntil
+      // and race it for 5s. Because the callee only responds after its own
+      // ~35s of work, every generation stayed alive holding all of its
+      // ancestors open. The nesting hit the platform's resource ceiling after
+      // two or three hops and the whole chain died mid-flight, stranding the
+      // rest of the queue with no worker — the production stall in #161.
+      //
+      // Now the request is aborted as soon as the next worker has certainly
+      // picked up the job (it claims and heartbeats within the first second),
+      // so this invocation can return immediately. Correctness no longer
+      // depends on the chain surviving at all: the per-minute cron reaper in
+      // background-worker revives any batch whose heartbeat goes stale.
+      selfTriggered = true
       try {
-        await Promise.race([triggerPromise, new Promise(resolve => setTimeout(resolve, 5_000))])
-      } catch {
-        // Trigger failed — batch stays running, next poll / retry will continue
+        await fetch(workerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-worker-secret': workerSecret,
+          },
+          body: JSON.stringify({ batchId: body.batchId }),
+          signal: AbortSignal.timeout(2_000),
+        })
+      } catch (error) {
+        // An abort here is the expected, healthy path — the next worker is
+        // already running. Anything else means the hand-off did not land, and
+        // the reaper will pick the batch up within a minute.
+        if (!(error instanceof DOMException && ['TimeoutError', 'AbortError'].includes(error.name))) {
+          selfTriggered = false
+        }
       }
     }
   }
@@ -792,5 +900,13 @@ Deno.serve(async (req) => {
     chunksProcessed: claimCount,
     processed: processed.length,
     items: processed,
+    // Honest report of what this invocation actually did, so "Restart worker"
+    // can say whether a worker really ran instead of silently doing nothing.
+    workerRan: claimCount > 0,
+    itemsReleased: abandoned.length,
+    workRemaining,
+    handedOff: selfTriggered,
+    claimFailed,
+    rateLimited,
   })
 })
