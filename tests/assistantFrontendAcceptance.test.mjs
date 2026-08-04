@@ -147,8 +147,8 @@ test('schedule changes clarify before preview when no typed Client Schedule targ
 test('composer uses visualViewport inset and 44px primary touch targets', () => {
   assert.match(composer, /useVisualViewportBottomInset\(\)/)
   assert.match(composer, /--assistant-viewport-inset/)
-  assert.match(composer, /className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal/)
-  assert.match(composer, /className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border/)
+  assert.match(composer, /h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal/)
+  assert.match(composer, /h-11 w-11 items-center justify-center rounded-full border/)
 })
 
 test('operation errors are separate and sends use try-finally rather than leaving stale busy state', () => {

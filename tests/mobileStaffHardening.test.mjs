@@ -282,3 +282,95 @@ test('existing suggestion actions stay wired to the same handlers', () => {
   const chipUses = composer.match(/\{starterChips\}/g) ?? []
   assert.equal(chipUses.length, 2, 'starter chips should be shared by mobile More and desktop, not duplicated')
 })
+
+// ── Frontend: composer mobile control cleanup ────────────────────────────────
+
+test('empty mobile composer shows exactly one primary microphone action', () => {
+  assert.match(composer, /const mobileMicPrimary = speechSupported && !sending && \(listening \|\| input\.trim\(\) === ''\)/)
+  assert.match(composer, /const mobileSendPrimary = sending \|\| \(!listening && input\.trim\(\) !== ''\)/)
+  assert.match(composer, /<div className="flex shrink-0 items-center md:hidden">/)
+  assert.match(composer, /hidden shrink-0 items-center gap-1 md:flex/)
+  assert.match(composer, /border border-transparent bg-brand-teal text-black font-black/)
+  // Empty input → mic is primary, send is NOT rendered: exactly one of the two
+  // branches can win inside the single mobile primary slot.
+  assert.match(composer, /mobileSendPrimary \? \([\s\S]*?\) : mobileMicPrimary \? \([\s\S]*?\) : null/)
+  assert.doesNotMatch(composer, /mobileSendPrimary[\s\S]{0,80}input\.trim\(\) === ''/)
+})
+
+test('text input switches the primary action to send', () => {
+  assert.match(composer, /sending \? 'bg-brand-teal\/70' : 'bg-brand-teal hover:bg-brand-teal\/90'/)
+  assert.match(composer, /\{sending \? '[^']*' : '↑'\}/)
+  assert.match(composer, /mobileSendPrimary \? \([\s\S]*?\) : mobileMicPrimary \? \([\s\S]*?\) : null/)
+  // Typed input → mic drops out (mobileMicPrimary requires empty input or
+  // listening), send becomes the only primary control.
+  assert.match(composer, /mobileMicPrimary = speechSupported && !sending && \(listening \|\| input\.trim\(\) === ''\)/)
+  assert.match(composer, /mobileSendPrimary = sending \|\| \(!listening && input\.trim\(\) !== ''\)/)
+})
+
+test('duplicate send is blocked while sending', () => {
+  assert.match(composer, /disabled=\{sending \|\| listening \|\| !input\.trim\(\)\}/)
+  assert.match(composer, /if \(!clean \|\| sending \|\| applying \|\| !sendingProfileId\) return/)
+})
+
+test('duplicate microphone start is blocked while listening', () => {
+  assert.match(composer, /const listeningRef = useRef\(false\)/)
+  assert.match(composer, /function startListening\(\) \{\s*if \(listeningRef\.current\) return/)
+  assert.match(composer, /function toggleMic\(\) \{\s*if \(listeningRef\.current\) stopListening\(\)\s*else startListening\(\)/)
+  assert.match(composer, /recognition\.onend = \(\) => \{\s*listeningRef\.current = false/)
+})
+
+test('controls stay within the mobile composer width', () => {
+  assert.match(composer, /min-h-11 min-w-0 flex-1 resize-none overflow-y-auto/)
+  assert.match(composer, /h-11 w-11 shrink-0/)
+  assert.match(composer, /mobileSendPrimary \? \([\s\S]*?\) : mobileMicPrimary \? \([\s\S]*?\) : null/)
+  const mobilePrimaryDivs = composer.match(/<div className="flex shrink-0 items-center md:hidden">/g) ?? []
+  assert.equal(mobilePrimaryDivs.length, 1, 'exactly one mobile right-control container')
+  // The whole bar is width-constrained inside the 375px viewport: fixed inset-x-0
+  // wrapper + safe-area side padding + a w-full inner column (no min-w).
+  assert.match(composer, /fixed inset-x-0 bottom-\[calc\(3\.5rem\+env\(safe-area-inset-bottom\)/)
+  assert.match(composer, /pl-\[max\(0\.5rem,env\(safe-area-inset-left\)\)\] pr-\[max\(0\.5rem,env\(safe-area-inset-right\)\)\]/)
+  assert.match(composer, /pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-\[26rem\]/)
+})
+
+test('all main controls meet the 44px tap-target requirement', () => {
+  const fixed44 = composer.match(/h-11 w-11/g) ?? []
+  assert.equal(fixed44.length, 5, 'action, mobile mic/send and desktop mic/send are all exactly 44px')
+  assert.match(composer, /min-h-11 min-w-11 rounded-md px-1 text-\[10px\]/)
+})
+
+test('accessible labels and focus states exist on the composer controls', () => {
+  assert.match(composer, /aria-label="Add action"/)
+  assert.match(composer, /aria-expanded=\{plusOpen\}/)
+  assert.match(composer, /aria-label=\{listening \? 'Stop voice input' : 'Start voice input'\}/)
+  assert.match(composer, /aria-pressed=\{listening\}/)
+  assert.match(composer, /aria-label="Send message"/)
+  assert.match(composer, /aria-label="Ask CG Assistant"/)
+  assert.match(composer, /focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal/)
+})
+
+test('composer exposes the exact spec accessible names', () => {
+  for (const name of ['Add action', 'Start voice input', 'Stop voice input', 'Send message']) {
+    assert.ok(composer.includes(name), `composer must expose accessible name "${name}"`)
+  }
+})
+
+test('active voice state exposes an explicit stop label', () => {
+  assert.match(composer, /aria-label=\{listening \? 'Stop voice input' : 'Start voice input'\}/)
+  assert.match(composer, /animate-pulse[\s\S]*?bg-red-400\/15 text-red-200/)
+})
+
+test('desktop composer controls remain available', () => {
+  assert.match(composer, /onClick=\{\(\) => setMicLang\(l => \(l === 'en-ZA' \? 'af-ZA' : 'en-ZA'\)\)\}/)
+  assert.match(composer, /\{micLang === 'en-ZA' \? 'EN' : 'AF'\}/)
+  assert.match(composer, /hidden shrink-0 items-center gap-1 md:flex/)
+  assert.match(composer, /className="hidden h-11 w-11 shrink-0/)
+})
+
+test('existing send, voice and action handlers stay wired', () => {
+  assert.match(composer, /onSubmit=\{handleSubmit\}/)
+  assert.match(composer, /function handleSubmit\(event: FormEvent<HTMLFormElement>\) \{\s*event\.preventDefault\(\)\s*void send\(input\)/)
+  assert.match(composer, /onClick=\{toggleMic\}/)
+  assert.match(composer, /recognition\.start\(\)/)
+  assert.match(composer, /onClick=\{\(\) => setPlusOpen\(value => !value\)\}/)
+  assert.match(composer, /onClick=\{\(\) => \{ attachRef\.current\?\.click\(\) \}\}/)
+})
