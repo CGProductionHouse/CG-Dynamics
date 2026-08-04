@@ -220,3 +220,65 @@ test('composer bar respects left/right safe-area insets on mobile while desktop 
   assert.match(composer, /md:inset-x-auto md:right-5/)
   assert.match(composer, /md:px-0/)
 })
+
+// ── Frontend: composer mobile initial-state simplification ───────────────────
+
+test('mobile idle shows exactly two primary actions before any interaction', () => {
+  assert.match(composer, /What do you need help with\?/)
+  assert.match(composer, /Record my update/)
+  assert.match(composer, /What should I do next\?/)
+  assert.match(composer, /grid grid-cols-2 gap-1\.5/)
+  assert.match(composer, /messages\.length === 0 && !sending && !mobileSuggestionAreaHidden && \(/)
+})
+
+test('secondary suggestions are hidden behind the More toggle, not on the idle surface', () => {
+  assert.match(composer, /moreOpen \?/)
+  assert.match(composer, /setMoreOpen\(true\)/)
+  assert.match(composer, /setMoreOpen\(false\)/)
+  assert.match(composer, />More<\/button>/)
+})
+
+test('typing hides every mobile suggestion', () => {
+  const start = composer.indexOf('const mobileSuggestionAreaHidden')
+  const expr = composer.slice(start, composer.indexOf('applying', start))
+  assert.match(expr, /input\.trim\(\) !== ''/)
+})
+
+test('recording, transcribing, reviewing and applying all hide the suggestions', () => {
+  const start = composer.indexOf('const mobileSuggestionAreaHidden')
+  const expr = composer.slice(start, composer.indexOf('applying', start) + 'applying'.length)
+  for (const term of ['sending', 'listening', 'dailyCaptureOpen', 'debriefOpen', 'debriefRecording', 'debriefBusy', 'Boolean(debrief)', 'Boolean(proposal)', 'applying']) {
+    assert.ok(expr.includes(term), `expected mobileSuggestionAreaHidden to include ${term}`)
+  }
+})
+
+test('entering any non-idle state collapses More so idle restores the two primary actions', () => {
+  assert.match(composer, /const mobileSuggestionAreaHidden =/)
+  assert.match(composer, /onChange=\{event => \{ setInput\(event\.target\.value\); setMoreOpen\(false\) \}\}/)
+  assert.match(composer, /async function send\(text: string\) \{[\s\S]*?setMoreOpen\(false\)/)
+  assert.match(composer, /function startDailyCapture\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+  assert.match(composer, /function startNewDebrief\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+  assert.match(composer, /function startListening\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+  assert.match(composer, /function newChat\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+  assert.match(composer, /messages\.length === 0 && !sending && !mobileSuggestionAreaHidden && \(/)
+})
+
+test('mobile context renders as one compact line', () => {
+  assert.match(composer, /const mobileContextLabel = clientId/)
+  assert.match(composer, /clientsRef\.current\.find\(c => c\.id === clientId\)\?\.name \?\? pageLabel/)
+  assert.match(composer, />Context: \{mobileContextLabel\}</)
+})
+
+test('desktop suggestion behaviour and header remain available', () => {
+  assert.match(composer, /hidden space-y-2 py-2 md:block/)
+  assert.match(composer, /Ask anything about your work, clients or this page\./)
+  assert.match(composer, /md:block">Knows: \{pageLabel\}/)
+})
+
+test('existing suggestion actions stay wired to the same handlers', () => {
+  assert.match(composer, /onClick=\{startDailyCapture\}/)
+  assert.match(composer, /onClick=\{\(\) => void send\('What should I do next\?'\)\}/)
+  assert.match(composer, /onClick=\{\(\) => void send\(s\)\}/)
+  const chipUses = composer.match(/\{starterChips\}/g) ?? []
+  assert.equal(chipUses.length, 2, 'starter chips should be shared by mobile More and desktop, not duplicated')
+})
