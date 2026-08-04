@@ -3,12 +3,12 @@
 -- per-user/per-device, deliveries are idempotent, and clients are excluded.
 
 create or replace function public.set_web_push_updated_at()
-returns trigger language plpgsql set search_path = public as $
+returns trigger language plpgsql set search_path = public as $$
 begin
   new.updated_at = now();
   return new;
 end;
-$;
+$$;
 revoke all on function public.set_web_push_updated_at() from public, anon, authenticated;
 
 create table if not exists public.web_push_subscriptions (
