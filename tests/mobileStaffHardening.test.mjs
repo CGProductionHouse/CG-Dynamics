@@ -18,6 +18,7 @@ const contentGuideline = read('../src/pages/admin/contentGuideline.tsx')
 const commandCentrePage = read('../src/pages/admin/CommandCentrePage.tsx')
 const companyCalendar = read('../src/pages/admin/CompanyCalendarPage.tsx')
 const mobileViewport = read('../src/lib/mobileViewport.ts')
+const indexCss = read('../src/index.css')
 
 // ── Migration: schedule change-request notifications ─────────────────────────
 
@@ -198,4 +199,24 @@ test('fixed drawer save bars pad bottom by the keyboard inset', () => {
   assert.match(clientSchedulePage, /keyboardInset > 0 \? `calc\(1rem \+ \$\{keyboardInset\}px\)` : undefined/)
   assert.match(companyCalendar, /keyboardInset > 0 \? `calc\(1rem \+ \$\{keyboardInset\}px\)` : undefined/)
   assert.match(commandCentrePage, /keyboardInset > 0 \? `calc\(1rem \+ \$\{keyboardInset\}px\)` : undefined/)
+})
+
+// ── Frontend: composer mobile input zoom + width overflow ────────────────────
+
+test('composer inputs/textareas sit at ≥16px on mobile so iOS does not auto-zoom on focus', () => {
+  assert.match(indexCss, /@media \(max-width: 640px\)/)
+  assert.match(indexCss, /\[data-assistant-composer\] input[\s\S]*font-size: 16px/)
+  assert.match(indexCss, /\[data-assistant-composer\] textarea[\s\S]*font-size: 16px/)
+  assert.match(composer, /data-assistant-composer/)
+})
+
+test('composer textarea can shrink below its placeholder width so the bar fits the viewport', () => {
+  assert.match(composer, /max-h-28 min-h-11 min-w-0 flex-1 resize-none overflow-y-auto/)
+})
+
+test('composer bar respects left/right safe-area insets on mobile while desktop is unchanged', () => {
+  assert.match(composer, /pl-\[max\(0\.5rem,env\(safe-area-inset-left\)\)\]/)
+  assert.match(composer, /pr-\[max\(0\.5rem,env\(safe-area-inset-right\)\)\]/)
+  assert.match(composer, /md:inset-x-auto md:right-5/)
+  assert.match(composer, /md:px-0/)
 })
