@@ -319,6 +319,40 @@ Deno.serve(async (req) => {
     }
   }
 
+  // ── Do not process anything without page tokens ─────────────
+  // If the page-token request was throttled the map is EMPTY, so every client's
+  // Facebook stage would fail for want of a token and be marked failed — 25
+  // clients were wrongly failed this way before this guard existed. A throttle
+  // must cost us nothing: cool the batch down, leave every item queued, and let
+  // the reaper retry once Meta lets us back in.
+  if (pageTokenRateLimited) {
+    if (body.batchId) {
+      try {
+        await sb.rpc('meta_sync_begin_cooldown', {
+          p_batch_id: body.batchId,
+          p_seconds: 900,
+          p_reason: 'Meta rate-limited the page-token request. Waiting before retrying - no work has been lost.',
+        })
+      } catch {
+        // Best effort; the reaper simply retries sooner.
+      }
+    }
+    return jsonResponse({
+      ok: true,
+      syncEngineVersion: META_CONNECTOR_VERSION,
+      chunksProcessed: 0,
+      processed: 0,
+      items: [],
+      workerRan: false,
+      itemsReleased: 0,
+      workRemaining: true,
+      handedOff: false,
+      claimFailed: false,
+      rateLimited: true,
+      waitingForRateLimit: true,
+    })
+  }
+
   // ── Process items in chunks (continuation loop) ─────────────
   const MAX_CHUNKS = 5
   // Stay well under the platform function timeout so a slow Meta API call can
