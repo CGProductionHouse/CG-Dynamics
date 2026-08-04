@@ -192,6 +192,9 @@ export function GlobalAssistantComposer() {
 
   const workContextRef = useRef<AssistantLocalWorkContext | null>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
+  // Synchronous mirror of the `listening` state so a rapid double-tap cannot
+  // start a second recognition instance before React re-renders.
+  const listeningRef = useRef(false)
   const attachRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
@@ -254,6 +257,7 @@ export function GlobalAssistantComposer() {
     managementRef.current = null
     memoryRef.current = []
     recognitionRef.current = null
+    listeningRef.current = false
     audioChunksRef.current = []
     actionRequestRef.current += 1
     setMessages(loadSession(profileId))
@@ -447,6 +451,13 @@ export function GlobalAssistantComposer() {
     if (microsoftStateRef.current) parts.push(microsoftStateRef.current)
     return parts.join(', ')
   }
+
+  // Mobile composer controls: exactly one primary right-hand control. A sending
+  // state keeps the send button in place (no width shift), an active dictation
+  // always keeps the stop control visible, otherwise the mic shows while empty
+  // and send takes over as soon as there is text.
+  const mobileMicPrimary = speechSupported && !sending && (listening || input.trim() === '')
+  const mobileSendPrimary = sending || (!listening && input.trim() !== '')
 
   async function loadJobs(actionIsCurrent?: () => boolean) {
     const requestedProfileId = profileIdRef.current
@@ -1042,6 +1053,9 @@ export function GlobalAssistantComposer() {
   }
 
   function startListening() {
+    if (listeningRef.current) return
+    // One recognition at a time: ignore re-entrant taps while recording so a
+    // second instance can never start underneath an active one.
     const recognition = getSpeechRecognition()
     if (!recognition) return
     setMoreOpen(false)
@@ -1056,25 +1070,34 @@ export function GlobalAssistantComposer() {
       }
       if (profileIdRef.current === listeningProfileId) setInput(transcript)
     }
-    recognition.onerror = () => { if (profileIdRef.current === listeningProfileId) setListening(false) }
-    recognition.onend = () => { if (profileIdRef.current === listeningProfileId) setListening(false) }
+    recognition.onerror = () => {
+      listeningRef.current = false
+      if (profileIdRef.current === listeningProfileId) setListening(false)
+    }
+    recognition.onend = () => {
+      listeningRef.current = false
+      if (profileIdRef.current === listeningProfileId) setListening(false)
+    }
     recognitionRef.current = recognition
+    listeningRef.current = true
     setOpen(true)
     setListening(true)
     try {
       recognition.start()
     } catch {
+      listeningRef.current = false
       setListening(false)
     }
   }
 
   function stopListening() {
+    listeningRef.current = false
     recognitionRef.current?.stop()
     setListening(false)
   }
 
   function toggleMic() {
-    if (listening) stopListening()
+    if (listeningRef.current) stopListening()
     else startListening()
   }
 
@@ -1478,8 +1501,10 @@ export function GlobalAssistantComposer() {
           <button
             type="button"
             onClick={() => setPlusOpen(value => !value)}
-            aria-label="More actions"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white"
+            aria-label="Add action"
+            aria-expanded={plusOpen}
+            disabled={listening}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40"
           >
             +
           </button>
@@ -1492,7 +1517,7 @@ export function GlobalAssistantComposer() {
             onKeyDown={event => {
               if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault()
-                void send(input)
+                if (!listening) void send(input)
               }
             }}
             rows={1}
@@ -1502,11 +1527,12 @@ export function GlobalAssistantComposer() {
           />
 
           {speechSupported && (
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="hidden shrink-0 items-center gap-1 md:flex">
               <button
                 type="button"
                 onClick={() => setMicLang(l => (l === 'en-ZA' ? 'af-ZA' : 'en-ZA'))}
-                className="min-h-11 min-w-11 rounded-md px-1 text-[10px] font-black uppercase tracking-wide text-brand-primary/60 hover:text-white"
+                disabled={listening || sending}
+                className="min-h-11 min-w-11 rounded-md px-1 text-[10px] font-black uppercase tracking-wide text-brand-primary/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40"
                 title="Dictation language"
                 aria-label={`Dictation language: ${micLang === 'en-ZA' ? 'English' : 'Afrikaans'}`}
               >
@@ -1515,9 +1541,10 @@ export function GlobalAssistantComposer() {
               <button
                 type="button"
                 onClick={toggleMic}
-                aria-label={listening ? 'Stop dictation' : 'Start dictation'}
+                disabled={sending}
+                aria-label={listening ? 'Stop voice input' : 'Start voice input'}
                 aria-pressed={listening}
-                className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-colors ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40 ${
                   listening ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 bg-white/[0.04] text-brand-primary hover:text-white'
                 }`}
               >
@@ -1526,13 +1553,43 @@ export function GlobalAssistantComposer() {
             </div>
           )}
 
+          {/* Mobile: exactly one primary control — mic while empty/listening, send otherwise */}
+          <div className="flex shrink-0 items-center md:hidden">
+            {mobileSendPrimary ? (
+              <button
+                type="submit"
+                disabled={sending || listening || !input.trim()}
+                aria-label="Send message"
+                className={`flex h-11 w-11 items-center justify-center rounded-full text-base font-black text-black transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:opacity-35 ${
+                  sending ? 'bg-brand-teal/70' : 'bg-brand-teal hover:bg-brand-teal/90'
+                }`}
+              >
+                {sending ? '…' : '↑'}
+              </button>
+            ) : mobileMicPrimary ? (
+              <button
+                type="button"
+                onClick={toggleMic}
+                aria-label={listening ? 'Stop voice input' : 'Start voice input'}
+                aria-pressed={listening}
+                className={`flex h-11 w-11 items-center justify-center rounded-full text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal ${
+                  listening
+                    ? 'animate-pulse border border-red-400/40 bg-red-400/15 text-red-200'
+                    : 'border border-transparent bg-brand-teal text-black font-black hover:bg-brand-teal/90'
+                }`}
+              >
+                ●
+              </button>
+            ) : null}
+          </div>
+
           <button
             type="submit"
-            disabled={sending || !input.trim()}
-            aria-label="Send to CG Assistant"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal text-base font-black text-black transition-opacity disabled:opacity-35"
+            disabled={sending || listening || !input.trim()}
+            aria-label="Send message"
+            className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal text-base font-black text-black transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:opacity-35 md:flex"
           >
-            ↑
+            {sending ? '…' : '↑'}
           </button>
         </form>
       </div>
