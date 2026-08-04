@@ -1083,7 +1083,8 @@ export function GlobalAssistantComposer() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--assistant-viewport-inset))] z-40 px-2 md:inset-x-auto md:right-5 md:bottom-[calc(1.25rem+var(--assistant-viewport-inset))] md:px-0"
+      data-assistant-composer
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--assistant-viewport-inset))] z-40 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] md:inset-x-auto md:right-5 md:bottom-[calc(1.25rem+var(--assistant-viewport-inset))] md:px-0"
       style={{ '--assistant-viewport-inset': `${viewportBottomInset}px` } as CSSProperties}
     >
       <div className="pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-[26rem]">
@@ -1439,7 +1440,7 @@ export function GlobalAssistantComposer() {
             rows={1}
             placeholder="Ask CG Assistant"
             aria-label="Ask CG Assistant"
-            className="max-h-28 min-h-11 flex-1 resize-none bg-transparent px-1 py-2.5 text-sm text-white placeholder:text-brand-primary/45 focus:outline-none"
+            className="max-h-28 min-h-11 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-1 py-2.5 text-sm text-white placeholder:text-brand-primary/45 focus:outline-none"
           />
 
           {speechSupported && (

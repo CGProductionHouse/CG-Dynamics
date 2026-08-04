@@ -48,3 +48,13 @@ select,
 textarea {
   color-scheme: dark;
 }
+
+/* Mobile: CG Assistant text inputs at ≥16px so iOS Safari does not auto-zoom
+   when they receive focus. Scoped to the composer wrapper and to small screens
+   only, so desktop and other surfaces keep their existing sizes. */
+@media (max-width: 640px) {
+  [data-assistant-composer] input,
+  [data-assistant-composer] textarea {
+    font-size: 16px;
+  }
+}
