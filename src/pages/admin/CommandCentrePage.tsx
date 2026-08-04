@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import type { FormEvent } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
@@ -162,6 +163,7 @@ function buildEndOfDay(activeTasks: CommandCentreTask[]) {
 
 export default function CommandCentrePage({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
+  const location = useLocation()
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -204,6 +206,17 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
     const timer = window.setTimeout(() => { void load() }, 0)
     return () => window.clearTimeout(timer)
   }, [])
+
+  // Morning List Import is reachable directly via /admin/command-centre#morning-import.
+  // Scroll to it once the page has finished loading so the navigation entry lands
+  // on the import experience instead of silently showing the task list.
+  useEffect(() => {
+    if (loading || location.hash !== '#morning-import') return
+    const timer = window.setTimeout(() => {
+      document.getElementById('morning-import')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+    return () => window.clearTimeout(timer)
+  }, [loading, location.hash])
 
   const now = useMemo(() => {
     const value = new Date(`${today}T00:00:00`)
@@ -407,9 +420,19 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
       {/* A — Header */}
       <div className={`mb-5 ${embedded ? 'rounded-xl border border-white/8 bg-white/[0.025] p-4' : ''}`}>
-        <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub</p>
+        <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub · Command Centre</p>
         <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
         <p className="mt-1 text-sm text-brand-primary/60">Today's work list.</p>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+          <Link to="/admin/ops-hub?tab=client-work" className="rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-brand-teal hover:text-white">Capture client request</Link>
+          <button
+            type="button"
+            onClick={() => document.getElementById('morning-import')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-brand-primary hover:text-white"
+          >
+            Morning List Import
+          </button>
+        </div>
       </div>
 
       {/* B — Quick Add */}

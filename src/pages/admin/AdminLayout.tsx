@@ -10,6 +10,11 @@ import { dismissAssistantNotification, listMyNotifications, markAllNotifications
 const NOTIFICATION_POLL_MS = 30_000
 const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
 
+// The mobile quick-nav stays the same for every role — Hub / Work / Calendar /
+// Schedule / More. Manager-only work entries (Team Work, Morning List Import)
+// live in the More drawer instead of displacing Calendar or Schedule.
+const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/cg-calendar', '/admin/client-schedule']
+
 function notificationTime(value: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'Recently'
@@ -111,7 +116,9 @@ export default function AdminLayout() {
   const performanceItems = performanceNavItems.filter(item => canShowNavItem(item, currentRole))
   const adminItems = adminNavItems.filter(item => canShowNavItem(item, currentRole))
   const zoneItems = zone === 'performance' ? performanceItems : primaryItems
-  const mobilePrimaryItems = zoneItems.slice(0, 4)
+  const mobilePrimaryItems = zone === 'performance'
+    ? zoneItems.slice(0, 4)
+    : primaryItems.filter(item => MOBILE_QUICK_PATHS.includes(item.to))
   const assistantVisible = location.pathname !== '/admin/assistant'
   const closeMobile = () => setMobileMenuOpen(false)
 

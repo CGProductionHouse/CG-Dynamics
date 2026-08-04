@@ -14,13 +14,19 @@ test('canonical and compatibility work routes preserve every former destination'
   assert.match(app, /path="\/admin\/my-work" element=\{<MyWorkPage \/>\}/)
   assert.match(app, /path="\/admin\/my-day" element=\{<Navigate to="\/admin\/work\?tab=my-day" replace \/>\}/)
   assert.match(app, /path="\/admin\/planner" element=\{<Navigate to="\/admin\/work\?tab=board" replace \/>\}/)
-  assert.match(app, /path="\/admin\/command-centre" element=\{<Navigate to="\/admin\/work\?tab=daily-tasks" replace \/>\}/)
+  // Command Centre is a real destination again, not a silent redirect.
+  assert.match(app, /path="\/admin\/command-centre" element=\{<CommandCentrePage \/>\}/)
 })
 
 test('desktop and mobile primary navigation each expose one Work and no My Work or Planner', () => {
   assert.equal((adminNav.match(/label: 'Work'/g) ?? []).length, 1)
   assert.doesNotMatch(adminNav, /label: 'My Work'|label: 'Planner'/)
   assert.match(adminNav, /to: '\/admin\/work'/)
+})
+
+test('Command Centre and Morning List Import are first-class manager nav entries, not hidden URLs', () => {
+  assert.match(adminNav, /\{ to: '\/admin\/command-centre', label: 'Team Work', shortLabel: 'Team', marker: 'TW', access: 'manager'/)
+  assert.match(adminNav, /\{ to: '\/admin\/command-centre#morning-import', label: 'Morning List Import', shortLabel: 'Import', marker: 'MI', access: 'manager'/)
 })
 
 test('calendar and schedule remain separate while Content navigates to unified path', () => {
