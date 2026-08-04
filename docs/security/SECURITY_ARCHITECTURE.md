@@ -55,3 +55,12 @@ Every exposed table has RLS enabled. Policies follow least-privilege:
 - Meta: OAuth flow through Edge Functions, tokens stored server-side.
 - Google Ads: OAuth flow through Edge Functions, tokens stored server-side.
 - Microsoft: Edge Function with isolated service-role access, no client exposure.
+
+## Web Push notifications
+
+- The existing `notifications` row remains the canonical message; Web Push is an additive delivery transport.
+- `web_push_subscriptions` and `web_push_deliveries` have RLS enabled and no authenticated table grants. Only narrow own-device RPCs expose registration state.
+- Registration requires an active `admin`, `manager`, `staff` or `team` profile. Client profiles are rejected.
+- VAPID private keys exist only as Supabase Edge Function secrets. Push endpoints and encryption key material are never returned to another user or included in logs.
+- Delivery joins the notification recipient to that recipient's active device subscription. Manager status does not grant access to another user's personal reminders.
+- Push failures do not remove in-app notifications. HTTP 404/410 endpoints are deactivated safely.

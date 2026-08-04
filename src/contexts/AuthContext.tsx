@@ -4,6 +4,7 @@ import type { User, AuthError, PostgrestError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { getProfile, type Profile } from '../lib/db/profiles'
 import { acceptInvite, validatePendingInvite } from '../lib/db/invites'
+import { disableWebPush } from '../lib/webPush'
 
 type AuthContextError = AuthError | PostgrestError | Error
 
@@ -249,6 +250,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const requestId = ++authRequestRef.current
     setLoading(true)
     markRecovery(false)
+    // Remove this browser's private push endpoint while the user session can
+    // still authenticate the own-device unregister RPC. Logout must continue
+    // even when the browser or network cannot complete push cleanup.
+    try { await disableWebPush() } catch { /* dead endpoints expire on delivery */ }
     await supabase.auth.signOut()
     if (requestId !== authRequestRef.current) return
     setUser(null)

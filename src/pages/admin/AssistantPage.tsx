@@ -27,6 +27,7 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { Pill } from '../../components/ui/Badges'
 import { DailyAssistantCapture } from '../../components/assistant/DailyAssistantCapture'
+import { WebPushSetupCard } from '../../components/assistant/WebPushSetupCard'
 
 const SESSION_KEY_PREFIX = 'cg-assistant-chat-session-v1'
 
@@ -415,6 +416,8 @@ export default function AssistantPage() {
           }}
         />
       )}
+
+      <WebPushSetupCard />
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
 
