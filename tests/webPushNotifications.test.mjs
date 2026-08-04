@@ -4,6 +4,7 @@ import test from 'node:test'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const migration = read('../supabase/migrations/20260804070651_iphone_web_push_notifications.sql')
+const multiDeviceFix = read('../supabase/migrations/20260804081500_web_push_multi_device_counts.sql')
 const worker = read('../supabase/functions/background-worker/index.ts')
 const configFn = read('../supabase/functions/web-push-config/index.ts')
 const client = read('../src/lib/webPush.ts')
@@ -66,6 +67,11 @@ test('every canonical notification queues one idempotent delivery per active rec
   assert.match(queue, /'web-push:' \|\| new\.id::text/)
   assert.match(queue, /jsonb_build_object\('notification_id', new\.id\), null/)
   assert.match(queue, /on conflict \(idempotency_key\) do nothing/)
+})
+
+test('multi-device subscriptions do not multiply morning open-loop counts', () => {
+  assert.match(multiDeviceFix, /count\(distinct item\.id\)/)
+  assert.doesNotMatch(multiDeviceFix, /count\(item\.id\)/)
 })
 
 test('closed-app schedule creates only per-user quiet-hour notifications and reminders', () => {
