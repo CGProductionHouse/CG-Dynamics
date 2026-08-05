@@ -5,6 +5,11 @@ import { listClients, type Client } from '../../lib/db/clients'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
 import { StatusBadge } from '../../components/ui/Badges'
 import { ActionButton } from '../../components/ui/Buttons'
+import {
+  groupMetaFailuresByClient,
+  summariseMetaTerminalResult,
+  type MetaFailureGroup,
+} from '../../lib/metaSyncFailures'
 
 const STEP_LABELS = ['Connect Meta', 'Link assets', 'Sync data', 'Review draft']
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -409,12 +414,22 @@ export default function MetaIntegrationPage() {
     warnings?: string[]
     failedClients?: { name: string; error: string }[]
     succeededClients?: { name: string; postsSynced: number }[]
+    // Client-month rows vs unique clients — kept separate on purpose.
+    itemsAttempted?: number
+    itemsSucceeded?: number
+    itemsFailed?: number
+    /** Failures grouped by client, classified, with raw text kept for detail. */
+    failureGroups?: MetaFailureGroup[]
+    /** The batch these failures belong to, so retry targets it directly. */
+    batchId?: string
     steps?: string[]
     diagnostics?: unknown[]
     details?: unknown[]
     debug?: string
     reportId?: string
   } | null>(null)
+
+  const [retryingFailed, setRetryingFailed] = useState(false)
 
   // Background sync (queue-based). Counts are derived live from the child
   // meta_sync_batch_items rows so progress moves even while the parent batch
@@ -569,6 +584,41 @@ export default function MetaIntegrationPage() {
     }
   }
 
+  // Retry only the failed items that a retry can actually fix, on the EXISTING
+  // batch. The RPC enforces the same rule server-side: it requeues failed
+  // retryable rows, resets only the platform stage that failed (so collected
+  // posts are kept and not re-fetched), never touches successful items, and
+  // never creates a batch. The per-minute reaper then drains it.
+  async function retryFailedItems(batchIdValue: string, itemIds: string[]) {
+    if (retryingFailed) return
+    setRetryingFailed(true)
+    try {
+      const { data, error } = await supabase.rpc('meta_sync_retry_failed_items', {
+        p_batch_id: batchIdValue,
+        p_item_ids: itemIds.length > 0 ? itemIds : null,
+      })
+      if (error || !data?.ok) {
+        setSyncResult(current => current ? {
+          ...current,
+          message: (data?.error as string) ?? error?.message ?? 'Could not retry the failed items.',
+        } : current)
+        return
+      }
+      // Re-adopt the reopened batch so progress is visible again, and let the
+      // existing completion path recalculate every counter from the items.
+      localStorage.setItem('cg_meta_active_sync_batch_id', batchIdValue)
+      setSyncResult(null)
+      setSyncing(true)
+      setSyncProgress(`Retrying ${data.requeued} failed item${data.requeued === 1 ? '' : 's'}...`)
+      setBatchStalled(false)
+      stallRef.current = 0
+      lastProgressSigRef.current = ''
+      startPolling(batchIdValue)
+    } finally {
+      setRetryingFailed(false)
+    }
+  }
+
   async function handleBatchComplete(batchIdValue: string) {
     if (pollRef.current) clearInterval(pollRef.current)
     pollRef.current = null
@@ -578,9 +628,9 @@ export default function MetaIntegrationPage() {
 
     const { data: items } = await supabase
       .from('meta_sync_batch_items')
-      .select('status, client_name, month, posts_synced, reports_created, reports_reused, error')
+      .select('id, client_id, status, client_name, month, posts_synced, reports_created, reports_reused, error, warnings, attempts, facebook_sync_state, instagram_sync_state')
       .eq('batch_id', batchIdValue)
-    const itemList = (items ?? []) as Array<{ status: string; client_name: string; month: string; posts_synced: number; reports_created: number; reports_reused: number; error?: string | null }>
+    const itemList = (items ?? []) as Array<{ id: string; client_id: string; status: string; client_name: string; month: string; posts_synced: number; reports_created: number; reports_reused: number; error?: string | null; warnings?: unknown; attempts?: number; facebook_sync_state?: string; instagram_sync_state?: string }>
 
     const uniqueClientNames = new Set(itemList.map(it => it.client_name))
     const uniqueMonths = new Set(itemList.map(it => it.month))
@@ -588,22 +638,36 @@ export default function MetaIntegrationPage() {
     const monthCount = uniqueMonths.size
     const totalItems = itemList.length
 
-    const totals = { clientsSucceeded: 0, clientsFailed: 0, postsSynced: 0, reportsCreated: 0, reportsReused: 0 }
-    const failedClients: { name: string; error: string }[] = []
-    const succeededClients: { name: string; postsSynced: number }[] = []
-    for (const it of itemList) {
-      totals.postsSynced += it.posts_synced ?? 0
-      totals.reportsCreated += it.reports_created ?? 0
-      totals.reportsReused += it.reports_reused ?? 0
-      if (it.status === 'completed' || it.status === 'warning') {
-        totals.clientsSucceeded++
-        succeededClients.push({ name: it.client_name, postsSynced: it.posts_synced ?? 0 })
-      } else if (it.status === 'failed') {
-        totals.clientsFailed++
-        failedClients.push({ name: it.client_name, error: it.error ?? 'Unknown error' })
-      }
+    // Items and clients are DIFFERENT units. Production showed
+    // "Clients succeeded: 67 of 74" beside "across 37 clients" — 74 is
+    // client-month rows, 37 is clients. summariseMetaTerminalResult keeps them
+    // apart and counts a client as failed if any of its months failed.
+    const terminal = summariseMetaTerminalResult(itemList.map(it => ({
+      clientId: it.client_id, clientName: it.client_name, month: it.month, status: it.status,
+      postsSynced: it.posts_synced, reportsCreated: it.reports_created, reportsReused: it.reports_reused,
+    })))
+    const totals = {
+      clientsSucceeded: terminal.clientsSucceeded,
+      clientsFailed: terminal.clientsFailed,
+      postsSynced: terminal.postsSynced,
+      reportsCreated: terminal.reportsCreated,
+      reportsReused: terminal.reportsReused,
     }
-    const status = totals.clientsSucceeded > 0 && totals.clientsFailed === 0 ? 'success' : totals.clientsSucceeded > 0 ? 'partial' : 'failed'
+    const succeededClients: { name: string; postsSynced: number }[] = itemList
+      .filter(it => it.status === 'completed' || it.status === 'warning')
+      .map(it => ({ name: it.client_name, postsSynced: it.posts_synced ?? 0 }))
+    // Grouped by client with affected months, classified, raw text kept for the
+    // expandable detail rather than shown inline.
+    const failureGroups = groupMetaFailuresByClient(itemList
+      .filter(it => it.status === 'failed')
+      .map(it => ({
+        id: it.id, clientId: it.client_id, clientName: it.client_name, month: it.month,
+        error: it.error ?? null, warnings: Array.isArray(it.warnings) ? it.warnings.filter((w): w is string => typeof w === 'string') : [],
+        facebookState: it.facebook_sync_state ?? 'pending', instagramState: it.instagram_sync_state ?? 'pending',
+        postsSynced: it.posts_synced ?? 0, attempts: it.attempts ?? 0,
+      })))
+    const failedClients = failureGroups.map(group => ({ name: group.clientName, error: group.headline }))
+    const status = terminal.itemsSucceeded > 0 && terminal.itemsFailed === 0 ? 'success' : terminal.itemsSucceeded > 0 ? 'partial' : 'failed'
 
     let message: string
     if (status === 'success') {
@@ -611,15 +675,22 @@ export default function MetaIntegrationPage() {
         ? `Synced ${uniqueClients} client${uniqueClients !== 1 ? 's' : ''} × ${monthCount} month${monthCount !== 1 ? 's' : ''} (${totalItems} item${totalItems !== 1 ? 's' : ''}).`
         : `Synced 1 item.`
     } else if (status === 'partial') {
-      message = `Sync completed with ${totals.clientsSucceeded} succeeded and ${totals.clientsFailed} failed across ${uniqueClients} client${uniqueClients !== 1 ? 's' : ''}, ${monthCount} month${monthCount !== 1 ? 's' : ''}.`
+      message = `${terminal.itemsSucceeded} of ${terminal.itemsAttempted} client-month items synced. ${terminal.clientsFailed} of ${terminal.clientsAttempted} client${terminal.clientsAttempted !== 1 ? 's' : ''} need attention across ${monthCount} month${monthCount !== 1 ? 's' : ''}.`
     } else {
       message = `Sync failed for all ${totalItems} item${totalItems !== 1 ? 's' : ''}.`
     }
 
     setSyncResult({
-      status, monthsAttempted: totalItems, clientsAttempted: totalItems,
+      status,
+      monthsAttempted: terminal.monthsCovered,
+      itemsAttempted: terminal.itemsAttempted,
+      itemsSucceeded: terminal.itemsSucceeded,
+      itemsFailed: terminal.itemsFailed,
+      clientsAttempted: terminal.clientsAttempted,
       clientsSucceeded: totals.clientsSucceeded, clientsSynced: totals.clientsSucceeded,
       clientsFailed: totals.clientsFailed,
+      failureGroups,
+      batchId: batchIdValue,
       reportsCreated: totals.reportsCreated, reportsReused: totals.reportsReused,
       postsSynced: totals.postsSynced,
       message,
@@ -2100,10 +2171,12 @@ export default function MetaIntegrationPage() {
                 <ul className="mt-2 space-y-1 text-sm text-brand-primary">
                   {syncResult.phase && <li>Failed phase: {syncResult.phase}</li>}
                   {syncResult.syncEngineVersion && <li>Sync engine: {syncResult.syncEngineVersion}</li>}
-                  <li>Months attempted: {syncResult.monthsAttempted ?? 0}</li>
-                  <li>Clients succeeded: {syncResult.clientsSucceeded ?? syncResult.clientsSynced ?? 0}{syncResult.clientsAttempted !== undefined ? ` of ${syncResult.clientsAttempted}` : ''}</li>
+                  {syncResult.itemsAttempted !== undefined
+                    ? <li>Client-month items synced: {syncResult.itemsSucceeded ?? 0} of {syncResult.itemsAttempted}</li>
+                    : <li>Months attempted: {syncResult.monthsAttempted ?? 0}</li>}
+                  <li>Clients fully synced: {syncResult.clientsSucceeded ?? syncResult.clientsSynced ?? 0}{syncResult.clientsAttempted !== undefined ? ` of ${syncResult.clientsAttempted}` : ''}</li>
                   {syncResult.clientsFailed !== undefined && syncResult.clientsFailed > 0 && (
-                    <li className="text-amber-400">Clients failed: {syncResult.clientsFailed}</li>
+                    <li className="text-amber-400">Clients needing attention: {syncResult.clientsFailed}</li>
                   )}
                   <li>Reports created: {syncResult.reportsCreated ?? 0}</li>
                   <li>Reports reused: {syncResult.reportsReused ?? syncResult.reportsUpdated ?? 0}</li>
@@ -2113,18 +2186,79 @@ export default function MetaIntegrationPage() {
                   )}
                 </ul>
               )}
-              {syncResult.failedClients && syncResult.failedClients.length > 0 && (
-                <div className="mt-3 rounded-lg border border-red-400/20 bg-red-400/5 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-red-300">Failed clients</p>
-                  <ul className="mt-2 space-y-1.5 text-xs text-brand-primary">
-                    {syncResult.failedClients.map(fc => (
-                      <li key={fc.name}>
-                        <span className="font-medium text-white">{fc.name}:</span> <span className="text-red-300">{fc.error}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* Failures: one row per CLIENT with its affected months, a plain
+                  explanation, and the raw provider text tucked into an
+                  expandable detail instead of dumped on screen. */}
+              {syncResult.failureGroups && syncResult.failureGroups.length > 0 && (() => {
+                const groups = syncResult.failureGroups
+                const retryable = groups.filter(g => g.retryable)
+                const retryableItemIds = retryable.flatMap(g => g.itemIds)
+                return (
+                  <div className="mt-3 rounded-lg border border-red-400/20 bg-red-400/5 p-3" data-testid="failure-groups">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-red-300">
+                        {groups.length} client{groups.length !== 1 ? 's' : ''} need attention
+                      </p>
+                      {retryableItemIds.length > 0 && syncResult.batchId && (
+                        <ActionButton
+                          variant="secondary"
+                          size="sm"
+                          disabled={retryingFailed}
+                          onClick={() => void retryFailedItems(syncResult.batchId!, retryableItemIds)}
+                        >
+                          {retryingFailed ? 'Retrying...' : `Retry ${retryableItemIds.length} failed item${retryableItemIds.length !== 1 ? 's' : ''}`}
+                        </ActionButton>
+                      )}
+                    </div>
+                    <ul className="mt-2 space-y-2">
+                      {groups.map(group => (
+                        <li key={group.clientId || group.clientName} className="rounded-lg border border-white/10 bg-black/20 p-2.5" data-testid="failure-group">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-white">{group.clientName}</p>
+                              <p className="mt-0.5 text-[11px] text-brand-primary/60">
+                                {group.months.length} month{group.months.length !== 1 ? 's' : ''}: {group.months.join(', ')}
+                              </p>
+                            </div>
+                            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${
+                              group.category === 'permission'
+                                ? 'border-amber-400/30 bg-amber-400/10 text-amber-200'
+                                : group.category === 'transient'
+                                  ? 'border-sky-400/30 bg-sky-400/10 text-sky-200'
+                                  : 'border-red-400/30 bg-red-400/10 text-red-200'
+                            }`}>
+                              {group.category === 'permission' ? 'Needs permission' : group.category === 'transient' ? 'Retryable' : 'Stage failed'}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-xs leading-relaxed text-brand-primary">{group.headline}</p>
+                          {group.action && (
+                            <p className="mt-1.5 rounded border border-amber-400/20 bg-amber-400/[0.06] px-2 py-1.5 text-[11px] leading-relaxed text-amber-100">
+                              {group.action}
+                            </p>
+                          )}
+                          {group.diagnostics.length > 0 && (
+                            <details className="mt-1.5">
+                              <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-brand-primary/50 hover:text-brand-primary">
+                                Technical detail
+                              </summary>
+                              <ul className="mt-1.5 space-y-1">
+                                {group.diagnostics.map((line, index) => (
+                                  <li key={index} className="break-words rounded bg-black/40 px-2 py-1 font-mono text-[10px] leading-relaxed text-brand-primary/70">{line}</li>
+                                ))}
+                              </ul>
+                            </details>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    {retryable.length === 0 && (
+                      <p className="mt-2 text-[11px] text-amber-200/80">
+                        None of these can be fixed by retrying — each needs the action above first.
+                      </p>
+                    )}
+                  </div>
+                )
+              })()}
 
               {/* Staff-only diagnostics */}
               {(syncResult.debug || (syncResult.steps && syncResult.steps.length > 0)) && (
