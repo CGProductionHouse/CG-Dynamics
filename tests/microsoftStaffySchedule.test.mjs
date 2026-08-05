@@ -40,14 +40,44 @@ test('2025 CLIENTS SCHEDULE is classified as a monthly Client Schedule source', 
   assert.equal(m.targetBoardSlug, 'client-schedule')
 })
 
-// ── Bucket → client resolution (explicit alias, no guessing) ──────────────────
-test('THE STAFFORDHIRE PUB bucket resolves to The Staffy and requires client review', () => {
+// ── Bucket → client resolution (directory-driven, no guessing) ──────────────
+test('THE STAFFORDHIRE PUB bucket requires client review and carries no hardcoded alias', () => {
   const b = map.resolveMicrosoftBucketMapping('2025 CLIENTS SCHEDULE', 'THE STAFFORDHIRE PUB')
-  assert.deepEqual(b.clientAliases, ['The Staffy'])
   assert.equal(b.requiresClientReview, true)
-  // trailing-space / casing tolerance
+  assert.equal(b.targetBucket, 'THE STAFFORDHIRE PUB')
+  // The mapper no longer ships client aliases in code; they live in client_aliases.
+  assert.equal('clientAliases' in b, false)
   const b2 = map.resolveMicrosoftBucketMapping('2025 CLIENTS SCHEDULE', 'The Staffordhire Pub ')
-  assert.deepEqual(b2.clientAliases, ['The Staffy'])
+  assert.equal(b2.requiresClientReview, true)
+})
+
+test('THE STAFFORDHIRE PUB resolves to The Staffy from a stored directory alias', () => {
+  const ctx = {
+    clients: [{ id: 'staffy', name: 'The Staffy', active: true, aliases: ['the staffordhire pub'] }],
+    boards: [],
+    buckets: [],
+    packages: [{ id: 'pkg-staffy', clientId: 'staffy', status: 'active' }],
+    templates: [{ id: 't-dp1', packageId: 'pkg-staffy', code: 'DP1', deliverableType: 'dp', active: true }],
+  }
+  const item = prev.previewPlannerTask({
+    sourceType: 'planner_task',
+    sourcePlanId: 'plan-2025',
+    sourcePlanName: '2025 CLIENTS SCHEDULE',
+    sourceBucketId: 'bucket-staffordhire',
+    sourceBucketName: 'THE STAFFORDHIRE PUB',
+    sourceTaskId: 'task-1',
+    title: 'DP1 - STAFFY',
+    description: null,
+    startDate: '2026-07-01',
+    dueDate: '2026-07-06',
+    assigneeMicrosoftIds: [],
+    percentComplete: 0,
+    completedDate: null,
+    sourceModifiedAt: '2026-07-01T08:00:00Z',
+  }, ctx)
+  assert.equal(item.previewStatus, 'new')
+  assert.equal(item.mappedClientId, 'staffy')
+  assert.equal(item.mappedClientName, 'The Staffy')
 })
 
 // ── Deliverable parsing of the REAL Staffy July titles ────────────────────────

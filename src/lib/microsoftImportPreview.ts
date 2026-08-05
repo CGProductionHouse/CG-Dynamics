@@ -1,9 +1,9 @@
+import { matchClient, type ClientDirectoryEntry } from './clientMatcher'
 import {
   inferMicrosoftEventType,
   microsoftOutlookSourceKey,
   microsoftPlannerSourceKey,
   resolveMicrosoftBucketMapping,
-  resolveMicrosoftOutlookClientAliases,
   resolveMicrosoftPlanMapping,
 } from './microsoftImportMap'
 import type {
@@ -20,6 +20,10 @@ import type {
 export interface MicrosoftPreviewClient {
   id: string
   name: string
+  /** False only for clients that must never resolve. Omitted defaults to active. */
+  active?: boolean
+  /** Non-derivable spellings from client_aliases. Derivable forms are computed. */
+  aliases?: string[]
 }
 
 export interface MicrosoftPreviewBoard {
@@ -57,7 +61,8 @@ export interface MicrosoftPreviewMappingContext {
 
 type ClientResolution =
   | { status: 'matched'; client: MicrosoftPreviewClient }
-  | { status: 'unresolved' | 'ambiguous'; client: null }
+  | { status: 'ambiguous'; client: null; ambiguousBetween: string[] }
+  | { status: 'unresolved'; client: null }
 
 const MONTH_NAMES: Record<string, string> = {
   january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
@@ -68,12 +73,27 @@ export function normalizeMicrosoftMatchName(value: string): string {
   return value.trim().toLocaleLowerCase('en-ZA').replace(/\s+/g, ' ')
 }
 
-export function resolveMicrosoftClient(name: string, clients: MicrosoftPreviewClient[], aliases: string[] = []): ClientResolution {
-  const keys = new Set([name, ...aliases].map(normalizeMicrosoftMatchName).filter(Boolean))
-  if (keys.size === 0) return { status: 'unresolved', client: null }
-  const matches = clients.filter(client => keys.has(normalizeMicrosoftMatchName(client.name)))
-  if (matches.length === 1) return { status: 'matched', client: matches[0] }
-  if (matches.length > 1) return { status: 'ambiguous', client: null }
+export function resolveMicrosoftClient(name: string, entries: MicrosoftPreviewClient[]): ClientResolution {
+  // The shared directory-driven matcher (clientMatcher, PR #173). Only ACTIVE
+  // clients may resolve, an alias must map to one active client, and ambiguity
+  // stays unresolved for the operator instead of being guessed. clientId and
+  // clientName are set together from one directory entry, so they can never
+  // diverge. The original imported text is not rewritten — callers keep it in
+  // original_bucket_name / microsoft_source_description for audit.
+  const directory: ClientDirectoryEntry[] = entries.map(entry => ({
+    id: entry.id,
+    name: entry.name,
+    active: entry.active ?? true,
+    aliases: entry.aliases ?? [],
+  }))
+  const match = matchClient(name, directory)
+  if (match.clientId !== null && match.clientName !== null) {
+    const client = entries.find(entry => entry.id === match.clientId) ?? null
+    if (client) return { status: 'matched', client }
+  }
+  if (match.ambiguousBetween.length > 0) {
+    return { status: 'ambiguous', client: null, ambiguousBetween: match.ambiguousBetween }
+  }
   return { status: 'unresolved', client: null }
 }
 
@@ -244,7 +264,7 @@ export function previewPlannerTask(
     const monthKey = planMonth(source.sourcePlanName)
       ?? (normalizeMicrosoftMatchName(source.sourcePlanName) === '2025 clients schedule' ? (source.dueDate ?? source.startDate)?.slice(0, 7) ?? null : null)
     const month = monthKey ? `${monthKey}-01` : null
-    const client = resolveMicrosoftClient(source.sourceBucketName, context.clients, bucketMapping.clientAliases)
+    const client = resolveMicrosoftClient(source.sourceBucketName, context.clients)
     const identity = deliverableIdentity(source.title)
     const clientId = client.client?.id ?? null
     const packages = clientId
@@ -308,7 +328,7 @@ export function previewPlannerTask(
   const bucket = board
     ? context.buckets.find(item => item.boardId === board.id && normalizeMicrosoftMatchName(item.name) === normalizeMicrosoftMatchName(bucketMapping.targetBucket)) ?? null
     : null
-  const client = bucketMapping.requiresClientReview ? resolveMicrosoftClient(source.sourceBucketName, context.clients, bucketMapping.clientAliases) : null
+  const client = bucketMapping.requiresClientReview ? resolveMicrosoftClient(source.sourceBucketName, context.clients) : null
   const payload: MicrosoftPlannerPayload = {
     destination: 'planner',
     board_id: board?.id ?? null,
@@ -354,7 +374,7 @@ export function previewOutlookEvent(
   const eventType = inferMicrosoftEventType(source.title)
   const clientLabel = outlookClientLabel(source.title)
   const client = clientLabel
-    ? resolveMicrosoftClient(clientLabel, context.clients, resolveMicrosoftOutlookClientAliases(clientLabel))
+    ? resolveMicrosoftClient(clientLabel, context.clients)
     : null
   const warnings = source.assigneeMicrosoftIds.length > 0
     ? ['Outlook attendee or assignee IDs are not imported.']
