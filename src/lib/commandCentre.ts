@@ -118,6 +118,10 @@ export interface TaskInput {
 }
 
 const TABLE = 'command_centre_tasks'
+// Operational reads reach planner tasks through listPlannerTaskRows, which
+// reads the canonical view — so a superseded legacy copy can never appear here
+// beside its authoritative Planner-backed record (PR 2). This constant remains
+// for the archive/status WRITES below, which must target the base table.
 const PLANNER_TASKS_TABLE = 'planner_tasks'
 const PLANNER_BUCKETS_TABLE = 'planner_buckets'
 

@@ -1005,6 +1005,11 @@ export interface PlannerTask {
 }
 
 const PLANNER_TASKS_TABLE = 'planner_tasks'
+// Reads for OPERATIONAL views go through the canonical view, which drops
+// archived rows and rows superseded by a canonical duplicate (PR 2). Writes
+// still target the base table. Reading the base table directly is what let one
+// logical task appear twice with conflicting assignees.
+const PLANNER_TASKS_CANONICAL = 'planner_tasks_canonical'
 
 const PLANNER_CALENDAR_HISTORY_STATUSES = new Set<string>([
   'approved',
@@ -1118,7 +1123,7 @@ export async function listPlannerTaskRows(options: PlannerTaskReadOptions = {}) 
   let from = 0
 
   while (true) {
-    let query = supabase.from(PLANNER_TASKS_TABLE).select('*')
+    let query = supabase.from(PLANNER_TASKS_CANONICAL).select('*')
     if (options.boardId) query = query.eq('board_id', options.boardId)
     if (options.activeOnly) {
       query = query
