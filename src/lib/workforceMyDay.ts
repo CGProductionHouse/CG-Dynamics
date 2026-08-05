@@ -115,22 +115,28 @@ function nameMatches(value: string | null | undefined, userName: string | null) 
   return value.trim().toLowerCase() === userName.trim().toLowerCase()
 }
 
-function helperMatches(values: string[] | undefined, userName: string | null) {
-  if (!values || !userName) return false
-  return values.some(value => nameMatches(value, userName))
-}
-
+/**
+ * Does this record belong to the signed-in user?
+ *
+ * CANONICAL IDS ONLY. This previously fell back to
+ * `nameMatches(assignedName) || helperMatches(helperNames)`, which put a task
+ * into someone's personal work because their name appeared in imported text, or
+ * because they were listed as a HELPER rather than an owner. Both are ownership
+ * guesses from display strings, and both produced work under the wrong person.
+ *
+ * `reviewState` is honoured too: partly-resolved or conflicting ownership is not
+ * verified ownership, so it never enters a person's own list.
+ */
 function userMatches(
   assignedUserId: string | null | undefined,
   assigneeUserIds: string[] | undefined,
-  assignedName: string | null | undefined,
-  helperNames: string[] | undefined,
   profile: Profile | null,
+  reviewState?: string | null,
 ) {
-  if (assigneeUserIds?.length && profile?.id) return assigneeUserIds.includes(profile.id)
-  if (assignedUserId && profile?.id && assignedUserId === profile.id) return true
-  const userName = profile?.full_name?.trim() || null
-  return nameMatches(assignedName, userName) || helperMatches(helperNames, userName)
+  if (!profile?.id) return false
+  if (reviewState && reviewState !== 'ok') return false
+  if (assigneeUserIds?.length) return assigneeUserIds.includes(profile.id)
+  return Boolean(assignedUserId && assignedUserId === profile.id)
 }
 
 function localMinutesFromIso(value: string | null | undefined) {
@@ -422,7 +428,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
 
   const tasks = ((tasksResult.data ?? []) as CommandCentreTask[])
     .filter(task => ACTIVE_TASK_STATUSES.has(task.status))
-    .filter(task => userMatches(task.assigned_to_user_id, task.assignee_user_ids, task.assigned_to_name, task.helper_names, profile))
+    .filter(task => userMatches(task.assigned_to_user_id, task.assignee_user_ids, profile, task.assignment_review_state))
     .filter(task => !task.due_date || task.due_date <= weekEnd)
     .map(task => toTaskItem(task, today))
 
@@ -433,7 +439,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
       const status = normalizeScheduleStatus(deliverable.production_status)
       return status !== 'scheduled_posted' && status !== 'meta_drafts' && deliverable.production_status !== 'moved'
     })
-    .filter(deliverable => userMatches(deliverable.assigned_to_user_id, undefined, deliverable.assigned_to_name, deliverable.helper_names, profile))
+    .filter(deliverable => userMatches(deliverable.assigned_to_user_id, undefined, profile))
     .filter(deliverable => {
       const rawDate = getEffectiveScheduleDate(deliverable)
       const date = rawDate && !isMonthKey(rawDate) ? rawDate : null

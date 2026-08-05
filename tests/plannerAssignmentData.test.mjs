@@ -118,9 +118,17 @@ test('Hub and My Day exclude completed history at the query boundary', () => {
   assert.match(myDay, /listTasks\(\{ activeOnly: true \}\)/)
 })
 
-test('My Day matches every canonical assignee before legacy fallback and uses Work links', () => {
-  assert.match(myDay, /if \(assigneeUserIds\?\.length && profile\?\.id\) return assigneeUserIds\.includes\(profile\.id\)/)
+// PR 3 removed the legacy name/helper fallback this test used to assert. My Day
+// now matches canonical ids ONLY: the fallback was what put a task into someone's
+// personal work because their name appeared in imported text, or because they
+// were a helper rather than an owner.
+test('My Day matches canonical assignees only, with no legacy name fallback, and uses Work links', () => {
+  assert.match(myDay, /if \(assigneeUserIds\?\.length\) return assigneeUserIds\.includes\(profile\.id\)/)
   assert.match(myDay, /task\.assignee_user_ids/)
+  const fn = myDay.slice(myDay.indexOf('function userMatches'), myDay.indexOf('function localMinutesFromIso'))
+  const code = fn.replace(/^\s*\*.*$/gm, '').replace(/^\s*\/\*\*[\s\S]*?\*\//m, '')
+  assert.ok(!/nameMatches\(/.test(code), 'no name fallback may remain')
+  assert.ok(!/helperMatches\(/.test(code), 'no helper fallback may remain')
   assert.match(myDay, /\/admin\/work\?tab=board/)
   assert.doesNotMatch(myDay, /\/admin\/planner/)
 })
