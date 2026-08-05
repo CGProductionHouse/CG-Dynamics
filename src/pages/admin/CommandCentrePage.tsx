@@ -1086,7 +1086,7 @@ function MorningImportCard({ onTasksCreated }: {
     let created = 0
     const createdIds: string[] = []
     for (const edit of edits) {
-      const input = morningEditToInput(edit)
+      const input = morningEditToInput(edit, clients)
       const original = parsed?.find(p => p.id === edit.id)
       input.assigned_to_name = original?.staffName === 'Unassigned' ? null : original?.staffName ?? null
       const { error } = await createTask(input)
@@ -1155,9 +1155,20 @@ function MorningImportCard({ onTasksCreated }: {
                         {original?.staffName ?? `Task ${i + 1}`}
                       </span>
                       <ConfidenceBadge confidence={confidence} />
-                      {original?.clientName && (
-                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium text-brand-primary/70">
-                          {confidence === 'suggested' ? 'Suggested client' : 'Client'}: {original.clientName}
+                      {/* Reads the SELECTED client, never a separate suggestion.
+                          A badge naming a client the field does not hold is what
+                          made the preview disagree with what was saved. */}
+                      {edit.clientOption && edit.clientOption !== '__manual__' && (
+                        <span
+                          data-testid="selected-client"
+                          className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium text-brand-primary/70"
+                        >
+                          Client: {clients.find(c => c.id === edit.clientOption)?.name ?? edit.clientName}
+                        </span>
+                      )}
+                      {!edit.clientOption && original?.reviewReasons?.some(r => r.startsWith('Choose the client')) && (
+                        <span className="rounded-full border border-amber-400/25 bg-amber-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-amber-200">
+                          {original.reviewReasons.find(r => r.startsWith('Choose the client'))}
                         </span>
                       )}
                     </div>
@@ -1299,12 +1310,12 @@ function MorningImportCard({ onTasksCreated }: {
 }
 
 function ConfidenceBadge({ confidence }: { confidence: ParsedMorningTask['clientConfidence'] }) {
-  const label = confidence === 'matched' ? 'Matched' : confidence === 'suggested' ? 'Suggested' : 'Needs review'
-  const tone = confidence === 'matched'
+  // Two states only. There is no 'Suggested' badge, because a suggestion that
+  // is not also the selected client is exactly the divergence being removed.
+  const label = confidence === 'confident' ? 'Matched' : 'Needs review'
+  const tone = confidence === 'confident'
     ? 'border-brand-teal/25 bg-brand-teal/[0.08] text-[#2dd4bf]'
-    : confidence === 'suggested'
-      ? 'border-amber-400/25 bg-amber-400/[0.08] text-amber-300'
-      : 'border-red-400/25 bg-red-400/[0.08] text-red-300'
+    : 'border-amber-400/25 bg-amber-400/[0.08] text-amber-300'
 
   return (
     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${tone}`}>
