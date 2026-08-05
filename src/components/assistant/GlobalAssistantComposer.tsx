@@ -14,7 +14,7 @@ import { getMyDayContext } from '../../lib/workforceMyDay'
 import { parseAssistantAction, type ActionProposal } from '../../lib/assistantActions'
 import { listStaffProfiles } from '../../lib/contentWorkflow'
 import { createCompanyEvent } from '../../lib/companyCalendar'
-import { logPlannerActivity, listPlannerWorkloadSummary } from '../../lib/planner'
+import { logPlannerActivity, listPlannerWorkloadSummary, loadOwnershipReviewSummary } from '../../lib/planner'
 import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
 import { enqueueBackgroundJob, nudgeBackgroundWorker, listMyBackgroundJobs, type BackgroundJob } from '../../lib/backgroundJobs'
 import { createAssistantTask, updateAssistantTask } from '../../lib/assistantTasks'
@@ -223,6 +223,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   // integration instead of a model guess. Admin-only (the status endpoint is
   // admin-gated), which matches who can actually run the sync.
   const microsoftStateRef = useRef<string | null>(null)
+  // Manager-only ownership review state, so the management Assistant can say a
+  // task needs review instead of naming an owner it cannot verify.
+  const ownershipReviewRef = useRef<string | null>(null)
   const profileIdRef = useRef<string | null>(profile?.id ?? null)
   const actionRequestRef = useRef(0)
   const debriefRequestSeqRef = useRef(0)
@@ -278,6 +281,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     clientsRef.current = []
     staffRef.current = []
     managementRef.current = null
+    ownershipReviewRef.current = null
     memoryRef.current = []
     recognitionRef.current = null
     listeningRef.current = false
@@ -350,6 +354,17 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         managementRef.current = `cross-team: ${overdue} overdue, ${blocked} blocked, ${unassigned} unassigned` +
           (busiest ? `, busiest ${busiest.full_name} (${busiest.active_task_count} active)` : '')
       }).catch(() => {})
+
+      // Ownership review state, manager-gated server-side. Without this the
+      // management Assistant cannot tell verified work from work whose owner is
+      // unknown, and would answer "whose is this?" from whatever it was given.
+      void loadOwnershipReviewSummary().then(summary => {
+        if (!active || profileIdRef.current !== requestedProfileId || !summary) return
+        ownershipReviewRef.current =
+          `ownership review (manager-only): ${summary.conflicts} assignment conflict, ` +
+          `${summary.needsAssignmentReview} needing assignment review, ${summary.unassigned} unassigned. ` +
+          'These have NO verified owner — never say such a task belongs to a specific person; say it needs assignment review.'
+      })
     }
     // Live Microsoft 365 state for grounded answers. The status endpoint is
     // admin-gated server-side, so only admins fetch it — matching who may run
@@ -468,6 +483,8 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     if (selectedRunId) parts.push(`contentRunId: ${selectedRunId}`)
     // Management grounding is only ever added for authorised admin/manager.
     if (isManager && managementRef.current) parts.push(managementRef.current)
+    // Manager-only. Ordinary staff never receive conflict evidence about others.
+    if (isManager && ownershipReviewRef.current) parts.push(ownershipReviewRef.current)
     // Durable per-user memory (own-only) grounds the personal assistant.
     if (memoryRef.current.length > 0) parts.push(`remembered: ${memoryRef.current.slice(0, 6).join('; ')}`)
     // Real Microsoft 365 integration state (never a guess).

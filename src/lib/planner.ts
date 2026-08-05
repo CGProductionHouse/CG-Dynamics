@@ -1378,3 +1378,28 @@ export async function addDeliverableHelperName(id: string, currentHelpers: strin
 export async function removeDeliverableHelperName(id: string, currentHelpers: string[], name: string) {
   return supabase.from(DELIVERABLES_TABLE).update({ helper_names: currentHelpers.filter(n => n !== name) }).eq('id', id).select().single()
 }
+
+
+export interface OwnershipReviewSummary {
+  conflicts: number
+  needsAssignmentReview: number
+  unassigned: number
+}
+
+/**
+ * Manager-only ownership review counts for the management Assistant.
+ *
+ * The RPC is manager-gated server-side, so an ordinary staff member never
+ * receives conflict evidence about colleagues. Without this the management
+ * Assistant cannot distinguish verified work from work whose owner is unknown.
+ */
+export async function loadOwnershipReviewSummary(): Promise<OwnershipReviewSummary | null> {
+  const { data, error } = await supabase.rpc('assistant_ownership_review_summary')
+  if (error || !data) return null
+  const summary = data as Partial<OwnershipReviewSummary>
+  return {
+    conflicts: summary.conflicts ?? 0,
+    needsAssignmentReview: summary.needsAssignmentReview ?? 0,
+    unassigned: summary.unassigned ?? 0,
+  }
+}
