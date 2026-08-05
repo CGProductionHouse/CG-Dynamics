@@ -111,12 +111,20 @@ test('morning list parser still splits staff headings and bullet items', () => {
   assert.match(fn, /Original WhatsApp: \$\{originalText\}/, 'preserves the original WhatsApp line')
 })
 
+// PR 4 removed the 'suggested' confidence state this test used to assert. A
+// suggestion that was not also the selected client is exactly the divergence
+// being eliminated: the badge could name a client the saved task did not carry.
+// There are now two states — a client is selected, or it is left for the
+// operator with a reason.
 test('morning list parser resolves clients with confidence and flags uncertainty', () => {
   const fn = parserSrc.slice(parserSrc.indexOf('export function parseMorningList'))
   assert.match(fn, /tryMatchClient\(titleText, clients\)/)
-  assert.match(fn, /confidence === 'suggested'[\s\S]*Suggested client match/)
-  assert.match(fn, /confidence === 'needs_review'[\s\S]*No confident client match/)
-  assert.match(fn, /clientConfidence: reviewReasons\.length > 0 && confidence === 'matched' \? 'needs_review' : confidence/)
+  assert.match(fn, /confidence === 'needs_review'/)
+  assert.match(fn, /No confident client match/)
+  assert.match(fn, /Choose the client/)
+  assert.match(fn, /clientConfidence: confidence/)
+  const code = parserSrc.replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.ok(!code.includes("'suggested'"), 'the divergent suggested state must be gone')
 })
 
 test('morning list import never creates tasks before explicit review confirmation', () => {

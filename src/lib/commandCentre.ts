@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { matchClient, clientSelection } from './clientMatcher'
 import { isMissingPlannerAssignmentRpcError, listPlannerBoardAssignments, listPlannerTaskRows } from './planner'
 
 export type TaskBucket =
@@ -463,14 +464,36 @@ export async function removeTaskHelperName(id: string, currentHelpers: string[],
 export interface ClientOption {
   id: string
   name: string
+  /** Non-derivable spellings from client_aliases. Derivable forms are computed. */
+  aliases?: string[]
 }
 
+/**
+ * The active client directory — the ONLY authority for client recognition.
+ *
+ * Stored aliases come along so the matcher can resolve spellings it cannot
+ * derive (an external system's typo). Everything else — tokens, shortened
+ * names, punctuation variants — is computed, so a new client needs no code.
+ */
 export async function listActiveClients() {
-  return supabase
-    .from('clients')
-    .select('id, name')
-    .eq('active', true)
-    .order('name')
+  const [clientsResult, aliasResult] = await Promise.all([
+    supabase.from('clients').select('id, name').eq('active', true).order('name'),
+    supabase.from('client_aliases').select('client_id, alias'),
+  ])
+  if (clientsResult.error || !clientsResult.data) return clientsResult
+
+  const aliasesByClient = new Map<string, string[]>()
+  for (const row of (aliasResult.data ?? []) as Array<{ client_id: string; alias: string }>) {
+    aliasesByClient.set(row.client_id, [...(aliasesByClient.get(row.client_id) ?? []), row.alias])
+  }
+
+  return {
+    ...clientsResult,
+    data: clientsResult.data.map(client => ({
+      ...client,
+      aliases: aliasesByClient.get(client.id) ?? [],
+    })),
+  }
 }
 
 export const BUCKETS: TaskBucket[] = [
@@ -505,7 +528,9 @@ export interface ParsedMorningTask {
   staffName: string
   clientId: string | null
   clientName: string | null
-  clientConfidence: 'matched' | 'suggested' | 'needs_review'
+  // Two states only. A 'suggested' state is deliberately absent: it is what
+  // allowed a badge to name a client while the actual field stayed empty.
+  clientConfidence: 'confident' | 'needs_review'
   reviewReasons: string[]
   originalText: string
   title: string
@@ -527,87 +552,32 @@ export interface MorningTaskEdit {
   notes: string
 }
 
-const CLIENT_ALIASES: Record<string, string[]> = {
-  'Zooz Lifestyle WFF': ['WFF', 'Zooz', 'Lifestyle WFF'],
-  'Madison Wear': ['Madison', 'Madisons'],
-  'Bouwer & Coetzee': ['Bouwer', 'Bouwer & Coetsee', 'Bouwer and Coetzee'],
-  'EHP Slaghuis': ['EHP', 'EHP slaguis', 'EHP slaghuis'],
-  'Supa Quick BFN': ['Supa Quick BFN', 'BFN'],
-  'Supa Quick Centurion': ['Supa Quick Centurion', 'Centurion'],
-  'Wiseman Group': ['Wiseman', 'Wiseman group'],
-  'Red Oak': ['Red Oak'],
-  'Watch Addict': ['Watch Addict'],
-  Loraclox: ['Loraclox'],
-  Securiforce: ['Securiforce'],
-  Germoparts: ['Germoparts'],
-}
-
-const COMMON_CLIENT_WORDS = new Set(['and', 'the', 'group', 'pty', 'ltd', 'cc', 'co', 'company', 'production', 'house', 'vir', 'for', 'in', 'on', 'of'])
-
-function normaliseText(value: string) {
-  return value.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ')
-}
-
-function tokenise(value: string) {
-  return normaliseText(value).split(' ').filter(token => token.length > 1 && !COMMON_CLIENT_WORDS.has(token))
-}
-
-function getClientAliases(clientName: string) {
-  const aliases = new Set<string>([clientName])
-  const normalisedClient = normaliseText(clientName)
-  for (const [canonical, values] of Object.entries(CLIENT_ALIASES)) {
-    const normalisedCanonical = normaliseText(canonical)
-    if (normalisedClient.includes(normalisedCanonical) || normalisedCanonical.includes(normalisedClient)) {
-      aliases.add(canonical)
-      values.forEach(alias => aliases.add(alias))
-    }
-  }
-  const initials = clientName.split(/\s+/).map(part => part[0]).join('').toUpperCase()
-  if (initials.length >= 2) aliases.add(initials)
-  return Array.from(aliases).sort((a, b) => b.length - a.length)
-}
-
-function removeClientAlias(text: string, alias: string) {
-  const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return text
-    .replace(new RegExp(`(^|\\b)${escaped}(\\b|$)`, 'i'), ' ')
-    .replace(/\b(vir|for)\s*$/i, ' ')
-    .replace(/^\s*(vir|for)\b/i, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
+/**
+ * Morning List client matching.
+ *
+ * Delegates to the shared, directory-driven matcher. This file previously held
+ * a CLIENT_ALIASES map naming twelve real clients, so a new client could not be
+ * recognised without a code change. Nothing here names a client now.
+ */
 function tryMatchClient(text: string, clients: ClientOption[]) {
-  const normalised = normaliseText(text)
-  const textTokens = new Set(tokenise(text))
-  let best: { client: ClientOption; alias: string; score: number } | null = null
-
-  for (const client of clients) {
-    for (const alias of getClientAliases(client.name)) {
-      const aliasNorm = normaliseText(alias)
-      const aliasTokens = tokenise(alias)
-      let score = 0
-      if (aliasNorm && new RegExp(`(^|\\s)${aliasNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(normalised)) {
-        score = aliasTokens.length <= 1 ? 82 : 96
-      } else if (aliasTokens.length > 0 && aliasTokens.every(token => textTokens.has(token))) {
-        score = aliasTokens.length === 1 ? 58 : 88
-      } else {
-        const overlap = aliasTokens.filter(token => textTokens.has(token)).length
-        if (overlap > 0) score = Math.round((overlap / aliasTokens.length) * 62)
-      }
-      if (!best || score > best.score || (score === best.score && alias.length > best.alias.length)) best = { client, alias, score }
-    }
-  }
-
-  if (!best || best.score < 55) {
-    return { clientId: null, clientName: null, confidence: 'needs_review' as const, remaining: text }
-  }
-
+  const match = matchClient(text, clients.map(client => ({
+    id: client.id,
+    name: client.name,
+    // listActiveClients only returns active clients; the flag keeps the shared
+    // matcher's inactive-client guard meaningful if that ever changes.
+    active: true,
+    aliases: client.aliases,
+  })))
+  const selection = clientSelection(match)
   return {
-    clientId: best.client.id,
-    clientName: best.client.name,
-    confidence: best.score >= 80 ? 'matched' as const : 'suggested' as const,
-    remaining: removeClientAlias(text, best.alias) || text,
+    clientId: selection.clientId,
+    clientName: selection.clientName,
+    // 'confident' when a client was actually selected; the badge and the field
+    // read the SAME selection object, so they cannot disagree.
+    confidence: selection.showSuggestion ? 'confident' as const : 'needs_review' as const,
+    remaining: match.remaining,
+    reason: match.reason,
+    ambiguousBetween: match.ambiguousBetween,
   }
 }
 
@@ -615,7 +585,7 @@ function inferBucket(text: string, sectionBucket: TaskBucket | null): { bucket: 
   const lower = text.toLowerCase()
   if (/\b(website|web|landing page|google site|shopify|wordpress)\b/.test(lower)) return { bucket: 'Websites', confident: true }
   if (/\b(content guide|content plan|posting guide|caption guide|guideline)\b/.test(lower)) return { bucket: 'Content Guides', confident: true }
-  if (/\b(video|bts|reel|liedjie|liedjue|audio|music|content run)\b/.test(lower)) return { bucket: 'Video', confident: true }
+  if (/\b(video|bts|reel|liedjie|liedjue|audio|music|content run|edit|shoot)\b/.test(lower)) return { bucket: 'Video', confident: true }
   if (/\b(designed poster|poster|posters|design|designs|photo|photos|menu|profile|logo)\b/.test(lower)) return { bucket: 'Graphic Design', confident: true }
   if (/\b(changes|change|requests|request|client asked|meeting changes)\b/.test(lower)) return { bucket: 'Client Requests', confident: true }
   if (sectionBucket) return { bucket: sectionBucket, confident: true }
@@ -712,11 +682,17 @@ export function parseMorningList(input: string, clients: ClientOption[]): Parsed
     let titleText = extracted.title
     const extraNotes = [...extracted.notes]
 
-    const { clientId, clientName, confidence, remaining } = tryMatchClient(titleText, clients)
+    const clientMatch = tryMatchClient(titleText, clients)
+    const { clientId, clientName, confidence, remaining } = clientMatch
     titleText = remaining || titleText
 
-    if (confidence === 'suggested') reviewReasons.push('Suggested client match')
-    if (confidence === 'needs_review') reviewReasons.push('No confident client match')
+    // A client is either confidently selected or left for the operator. There
+    // is no in-between state that could show a badge without setting the field.
+    if (confidence === 'needs_review') {
+      reviewReasons.push(clientMatch.ambiguousBetween.length > 0
+        ? `Choose the client: ${clientMatch.ambiguousBetween.join(' or ')}`
+        : 'No confident client match')
+    }
 
     const bucketResult = inferBucket(content, sectionBucket)
     if (!bucketResult.confident) reviewReasons.push('Bucket needs review')
@@ -735,7 +711,7 @@ export function parseMorningList(input: string, clients: ClientOption[]): Parsed
       staffName: currentStaff,
       clientId,
       clientName: clientName || null,
-      clientConfidence: reviewReasons.length > 0 && confidence === 'matched' ? 'needs_review' : confidence,
+      clientConfidence: confidence,
       reviewReasons,
       originalText,
       title,
@@ -749,13 +725,26 @@ export function parseMorningList(input: string, clients: ClientOption[]): Parsed
   return result
 }
 
-export function morningEditToInput(edit: MorningTaskEdit): TaskInput {
+/**
+ * Build the saved payload from ONE selection source.
+ *
+ * client_id and client_name are derived together. Previously client_id came
+ * from `clientOption` while client_name came from a separate `clientName`
+ * field, so a stale name could be saved with no id — the preview and the saved
+ * task disagreeing. A directory client now always carries BOTH or NEITHER;
+ * only an explicit manual entry may set a name without an id.
+ */
+export function morningEditToInput(edit: MorningTaskEdit, clients: ClientOption[] = []): TaskInput {
   const isManual = edit.clientOption === '__manual__'
   const selectedClientId = isManual || !edit.clientOption ? null : edit.clientOption
+  // The name is looked up from the id wherever possible, so it cannot drift.
+  const resolvedName = selectedClientId
+    ? (clients.find(c => c.id === selectedClientId)?.name ?? edit.clientName ?? null)
+    : null
   return {
     title: edit.title,
     client_id: selectedClientId,
-    client_name: isManual ? edit.manualClientName.trim() || null : edit.clientName,
+    client_name: isManual ? edit.manualClientName.trim() || null : resolvedName,
     assigned_to_name: null,
     bucket: edit.bucket,
     priority: edit.priority,
