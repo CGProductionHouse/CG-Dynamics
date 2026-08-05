@@ -74,7 +74,7 @@ export function normalizeMicrosoftMatchName(value: string): string {
 }
 
 export function resolveMicrosoftClient(name: string, entries: MicrosoftPreviewClient[]): ClientResolution {
-  // The shared directory-driven matcher (clientMatcher, PR #73). Only ACTIVE
+  // The shared directory-driven matcher (clientMatcher, PR #173). Only ACTIVE
   // clients may resolve, an alias must map to one active client, and ambiguity
   // stays unresolved for the operator instead of being guessed. clientId and
   // clientName are set together from one directory entry, so they can never
