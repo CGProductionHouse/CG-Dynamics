@@ -6,7 +6,6 @@ let server
 let previewPlannerTask
 let previewOutlookEvent
 let outlookClientLabel
-let resolveMicrosoftOutlookClientAliases
 let resolveMicrosoftBucketMapping
 let buildMicrosoftReconciliation
 let buildMicrosoftConflictBreakdown
@@ -76,7 +75,7 @@ function snapshot(records, rangeStart = '2026-05-19T00:00:00+02:00') {
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
   ;({ previewPlannerTask, previewOutlookEvent, outlookClientLabel } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
-  ;({ resolveMicrosoftBucketMapping, resolveMicrosoftOutlookClientAliases } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
+  ;({ resolveMicrosoftBucketMapping } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
   ;({ buildMicrosoftReconciliation } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   ;({ buildMicrosoftConflictBreakdown, filterMicrosoftPreviewItems, microsoftIncomingStatus, summarizeMicrosoftCreateStatuses } = await server.ssrLoadModule('/src/lib/microsoftSyncPresentation.ts'))
   ;({ parseMicrosoftSnapshot } = await server.ssrLoadModule('/src/lib/microsoftSnapshot.ts'))
@@ -169,7 +168,7 @@ test('Outlook content runs resolve reviewed one-to-one client aliases', () => {
       { id: 'client-toyota', name: 'Toyota Bloemfontein' },
     ],
   }
-  const item = previewOutlookEvent({
+  const staffy = previewOutlookEvent({
     sourceType: 'outlook_event',
     sourceCalendarId: 'calendar-1',
     sourceEventId: 'event-staffy',
@@ -184,9 +183,17 @@ test('Outlook content runs resolve reviewed one-to-one client aliases', () => {
     assigneeMicrosoftIds: [],
     sourceModifiedAt: '2026-07-20T08:00:00Z',
   }, aliasContext)
-  assert.equal(item.mappedClientId, 'client-staffy')
-  assert.equal(item.proposedPayload.client_name, 'The Staffy')
-  assert.deepEqual(resolveMicrosoftOutlookClientAliases('TOYOTA'), ['Toyota Bloemfontein'])
+  assert.equal(staffy.mappedClientId, 'client-staffy')
+  assert.equal(staffy.proposedPayload.client_name, 'The Staffy')
+  // Directory-driven: the shortened "toyota" spelling resolves Toyota Bloemfontein
+  // with no application-code alias at all.
+  const toyota = previewOutlookEvent({
+    ...staffy,
+    sourceEventId: 'event-toyota',
+    title: 'CONTENT RUN - TOYOTA',
+  }, aliasContext)
+  assert.equal(toyota.mappedClientId, 'client-toyota')
+  assert.equal(toyota.proposedPayload.client_name, 'Toyota Bloemfontein')
 })
 
 test('reconciliation enriches only an empty Calendar client from a deterministic Outlook match', () => {
@@ -267,8 +274,32 @@ test('Outlook client labels support client-first content run titles', () => {
 })
 
 test('ambiguous Outlook labels have no guessed alias', () => {
-  assert.deepEqual(resolveMicrosoftOutlookClientAliases('SUPA QUICK'), [])
-  assert.deepEqual(resolveMicrosoftOutlookClientAliases('MIDAS'), [])
+  const event = (sourceEventId, title) => ({
+    sourceType: 'outlook_event',
+    sourceCalendarId: 'calendar-1',
+    sourceEventId,
+    title,
+    safeSummary: null,
+    startDate: '2026-07-28T08:00:00+02:00',
+    endDate: '2026-07-28T09:00:00+02:00',
+    allDay: false,
+    location: null,
+    private: false,
+    cancelled: false,
+    assigneeMicrosoftIds: [],
+    sourceModifiedAt: '2026-07-20T08:00:00Z',
+  })
+  // "SUPA QUICK" is owned by two active branches → genuinely ambiguous, never guessed.
+  const supa = previewOutlookEvent(event('event-supa', 'CONTENT RUN - SUPA QUICK'), context)
+  assert.equal(supa.previewStatus, 'conflict')
+  assert.equal(supa.conflictCode, 'ambiguous_client_match')
+  assert.equal(supa.mappedClientId, null)
+  // "MIDAS" is not a client at all → stays unlinked with a warning, never guessed.
+  const midas = previewOutlookEvent(event('event-midas', 'CONTENT RUN - MIDAS'), context)
+  assert.equal(midas.previewStatus, 'new')
+  assert.equal(midas.mappedClientId, null)
+  assert.equal(midas.proposedPayload.client_id, null)
+  assert.match(midas.warnings.join(' '), /no active client exactly matches/i)
 })
 
 test('Outlook attendees remain informational and do not block calendar import', () => {
@@ -472,7 +503,9 @@ test('Client Socials resolves reviewed client bucket aliases without guessing ID
     ['RC POLYPIPE', 'RC-Polypipe'],
     ['THE STAFFORDHIRE PUB', 'The Staffy'],
   ]
-  const clients = aliases.map(([, name], index) => ({ id: `alias-client-${index}`, name }))
+  // The directory now carries the DB-loaded client_aliases, mirroring
+  // loadMicrosoftMappingContext — the resolver itself ships no alias data.
+  const clients = aliases.map(([alias, name], index) => ({ id: `alias-client-${index}`, name, aliases: [alias] }))
   const packages = clients.map((client, index) => ({ id: `alias-package-${index}`, clientId: client.id, status: 'active' }))
   const templates = packages.map((item, index) => ({ id: `alias-template-${index}`, packageId: item.id, code: 'DP1', deliverableType: 'dp', active: true }))
   const aliasContext = { ...context, clients, packages, templates }

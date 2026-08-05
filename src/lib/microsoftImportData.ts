@@ -52,19 +52,35 @@ export interface MicrosoftContextResult {
 }
 
 export async function loadMicrosoftMappingContext(): Promise<MicrosoftContextResult> {
-  const [clients, boards, buckets, packages, templates] = await Promise.all([
+  const [clients, aliasRows, boards, buckets, packages, templates] = await Promise.all([
     supabase.from('clients').select('id, name').eq('active', true),
+    supabase.from('client_aliases').select('client_id, alias'),
     supabase.from('planner_boards').select('id, slug').is('archived_at', null),
     supabase.from('planner_buckets').select('id, board_id, name').is('archived_at', null),
     supabase.from('client_packages').select('id, client_id, status').is('archived_at', null),
     supabase.from('package_deliverable_templates').select('id, package_id, code, deliverable_type, active'),
   ])
-  const failed = [clients.error, boards.error, buckets.error, packages.error, templates.error].find(Boolean)
+  const failed = [clients.error, aliasRows.error, boards.error, buckets.error, packages.error, templates.error].find(Boolean)
   if (failed) return { context: null, error: failed.message }
+
+  // Client aliases live in the database beside the client (public.client_aliases),
+  // so adding or correcting a spelling takes effect with NO application code
+  // change or deploy. Only active clients are loaded, and the matcher still
+  // enforces the active guard independently.
+  const aliasesByClient = new Map<string, string[]>()
+  for (const row of aliasRows.data ?? []) {
+    const clientId = row.client_id as string
+    aliasesByClient.set(clientId, [...(aliasesByClient.get(clientId) ?? []), row.alias as string])
+  }
 
   return {
     context: {
-      clients: (clients.data ?? []).map(row => ({ id: row.id as string, name: row.name as string })),
+      clients: (clients.data ?? []).map(row => ({
+        id: row.id as string,
+        name: row.name as string,
+        active: true,
+        aliases: aliasesByClient.get(row.id as string) ?? [],
+      })),
       boards: (boards.data ?? []).map(row => ({ id: row.id as string, slug: row.slug as string })),
       buckets: (buckets.data ?? []).map(row => ({ id: row.id as string, boardId: row.board_id as string, name: row.name as string })),
       packages: (packages.data ?? []).map(row => ({ id: row.id as string, clientId: row.client_id as string, status: row.status as 'active' | 'paused' | 'archived' })),

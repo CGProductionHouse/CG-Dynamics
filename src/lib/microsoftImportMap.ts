@@ -13,7 +13,6 @@ export interface MicrosoftBucketMapping {
   sourceBucket: string
   targetBucket: string
   requiresClientReview: boolean
-  clientAliases: string[]
 }
 
 const EXACT_PLAN_MAPPINGS: Record<string, Omit<MicrosoftPlanMapping, 'sourcePlan'>> = {
@@ -63,40 +62,6 @@ const CG_SOCIAL_BUCKETS: Record<string, string> = {
   'cg schedule': 'CG Schedule',
 }
 
-const MASTER_CLIENT_ALIASES: Record<string, string[]> = {
-  'ehrlich park': ['Ehrlich Park Butchery'],
-  'supa quick': ['Supa Quick BFN', 'Supa Quick Centurion'],
-}
-
-const CLIENT_SCHEDULE_ALIASES: Record<string, string[]> = {
-  'braize promotions': ['Braize'],
-  'hmhi attorneys': ['HMH Attorneys'],
-  'human auto ford': ['Human Auto'],
-  'rc polypipe': ['RC-Polypipe'],
-  'the staffordhire pub': ['The Staffy'],
-}
-
-const OUTLOOK_CLIENT_ALIASES: Record<string, string[]> = {
-  'actio sports': ['Action Sport'],
-  'action sports': ['Action Sport'],
-  'bloem marble': ['Bloem Marble & Granite'],
-  'bouwer coetzee attorneys': ['Bouwer & Coetzee Attorneys'],
-  case: ['Case Bloemfontein'],
-  dulux: ['Dulux Bloemfontein'],
-  econofoods: ['Econo'],
-  madisons: ['Madison Wear'],
-  'novust steel': ['Novus Steel'],
-  'piek get together': ['Piek Group'],
-  secufriforce: ['Securiforce'],
-  staffy: ['The Staffy'],
-  toyota: ['Toyota Bloemfontein'],
-  'welkom human auto': ['Human Auto'],
-}
-
-export function resolveMicrosoftOutlookClientAliases(label: string): string[] {
-  return OUTLOOK_CLIENT_ALIASES[normalizeMicrosoftLabel(label)] ?? []
-}
-
 export function normalizeMicrosoftLabel(value: string): string {
   return value
     .normalize('NFKD')
@@ -144,7 +109,6 @@ export function resolveMicrosoftBucketMapping(
       sourceBucket,
       targetBucket: TODO_BUCKETS[normalizedBucket] ?? '',
       requiresClientReview: false,
-      clientAliases: [],
     }
   }
 
@@ -153,7 +117,6 @@ export function resolveMicrosoftBucketMapping(
       sourceBucket,
       targetBucket: 'CLIENT REQUESTS',
       requiresClientReview: true,
-      clientAliases: MASTER_CLIENT_ALIASES[normalizedBucket] ?? [],
     }
   }
 
@@ -162,7 +125,6 @@ export function resolveMicrosoftBucketMapping(
       sourceBucket,
       targetBucket: CG_SOCIAL_BUCKETS[normalizedBucket] ?? '',
       requiresClientReview: false,
-      clientAliases: [],
     }
   }
 
@@ -172,7 +134,6 @@ export function resolveMicrosoftBucketMapping(
     sourceBucket,
     targetBucket: sourceBucket,
     requiresClientReview: usesClientBuckets,
-    clientAliases: usesClientBuckets ? CLIENT_SCHEDULE_ALIASES[normalizedBucket] ?? [] : [],
   }
 }
 
