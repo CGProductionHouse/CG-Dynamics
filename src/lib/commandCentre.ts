@@ -40,6 +40,12 @@ export interface CommandCentreTask {
   assigned_to_user_id: string | null
   assignee_user_ids?: string[]
   assigned_to_name: string | null
+  /** PR 1: 'ok' | 'unresolved' | 'conflict'. The ownership authority reads this. */
+  assignment_review_state?: string | null
+  /** PR 2: non-null means this row is superseded and must never be shown. */
+  superseded_by_task_id?: string | null
+  /** Durable Planner evidence, shown in the manager conflict section. */
+  microsoft_task_id?: string | null
   bucket: TaskBucket
   priority: TaskPriority
   status: TaskStatus
@@ -145,6 +151,11 @@ type PlannerTaskRow = {
   updated_at: string
   helper_names?: string[]
   unresolved_assignee_names?: string[]
+  // PR 1 review state and PR 2 supersession pointer. Ownership decisions read
+  // these, never the free-text assignee columns above.
+  assignment_review_state?: string | null
+  superseded_by_task_id?: string | null
+  microsoft_task_id?: string | null
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
@@ -239,6 +250,9 @@ function plannerTaskToCommandTask(
     completed_at: row.status === 'scheduled' || row.status === 'approved' ? row.updated_at : null,
     helper_names: row.helper_names,
     unresolved_assignee_names: row.unresolved_assignee_names ?? [],
+    assignment_review_state: row.assignment_review_state ?? 'ok',
+    superseded_by_task_id: row.superseded_by_task_id ?? null,
+    microsoft_task_id: row.microsoft_task_id ?? null,
   }
 }
 

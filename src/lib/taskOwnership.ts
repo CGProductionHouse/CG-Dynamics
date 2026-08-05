@@ -193,3 +193,28 @@ export function ownershipCounts<T>(grouping: OwnershipGrouping<T>) {
     unassigned: grouping.unassigned.length,
   }
 }
+
+/**
+ * Adapter from a Command Centre task row to the ownership authority.
+ *
+ * Lives here rather than in a page so every consumer uses the same reading of
+ * the same fields — a page-local adapter is how divergent ownership rules crept
+ * in before.
+ */
+export function taskOwnershipInput(t: {
+  assignee_user_ids?: string[]
+  assigned_to_user_id?: string | null
+  assignment_review_state?: string | null
+  assigned_to_name?: string | null
+  unresolved_assignee_names?: string[]
+  helper_names?: string[]
+}): OwnershipInput {
+  return {
+    assigneeUserIds: t.assignee_user_ids,
+    assignedToUserId: t.assigned_to_user_id,
+    assignmentReviewState: t.assignment_review_state,
+    importedAssigneeText: t.assigned_to_name,
+    unresolvedNames: t.unresolved_assignee_names,
+    helperNames: t.helper_names,
+  }
+}

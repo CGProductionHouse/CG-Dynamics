@@ -1,4 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { listStaffProfiles } from '../../lib/contentWorkflow'
+import {
+  groupByOwnership,
+  ownershipCounts,
+  resolveOwnership,
+  taskOwnershipInput,
+  type Ownership,
+  type OwnershipGrouping,
+} from '../../lib/taskOwnership'
 import type { FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { PremiumCard } from '../../components/ui/PremiumCard'
@@ -23,7 +32,6 @@ import {
   BUCKETS,
   PRIORITIES,
   STATUSES,
-  KNOWN_STAFF,
   type CommandCentreTask,
   type TaskInput,
   type TaskBucket,
@@ -115,23 +123,44 @@ function copyToClipboard(text: string) {
   navigator.clipboard.writeText(text).catch(() => {})
 }
 
-function buildMorningMessage(byStaff: Map<string, CommandCentreTask[]>) {
+/**
+ * The copy-ready morning message.
+ *
+ * Named sections contain ONLY verified canonical work. This used to group by
+ * `assigned_to_name`, so a raw imported string like
+ * "Sydney Oosthuizen;Franco Lessing" became a staff heading and stale text put
+ * work under the wrong person. Unresolved and conflicting work now goes to a
+ * manager-only block instead of being attributed to somebody.
+ */
+function buildMorningMessage(grouping: OwnershipGrouping<CommandCentreTask>) {
   const lines: string[] = ['CGPH TO DO', '']
-  for (const [staff, tasks] of byStaff) {
-    const clientRequests = tasks.filter(t => t.priority === 'client_request')
-    const normal = tasks.filter(t => t.priority !== 'client_request')
-    const sorted = [...clientRequests, ...normal]
-    lines.push(`@${staff}`)
-    for (const t of sorted) {
+  const owners = [...grouping.byOwner.values()].sort((a, b) => a.person.name.localeCompare(b.person.name))
+
+  for (const { person, items } of owners) {
+    if (items.length === 0) continue
+    const clientRequests = items.filter(t => t.priority === 'client_request')
+    const normal = items.filter(t => t.priority !== 'client_request')
+    lines.push(`@${person.name}`)
+    for (const t of [...clientRequests, ...normal]) {
       const prefix = t.client_name ? `${t.client_name} — ` : ''
       lines.push(`- ${prefix}${t.title}`)
     }
     lines.push('')
   }
+
+  const counts = ownershipCounts(grouping)
+  if (counts.needsReview > 0 || counts.conflicts > 0 || counts.unassigned > 0) {
+    lines.push('— MANAGER REVIEW (not sent to staff) —')
+    if (counts.conflicts > 0) lines.push(`Assignment conflict: ${counts.conflicts}`)
+    if (counts.needsReview > 0) lines.push(`Needs assignment review: ${counts.needsReview}`)
+    if (counts.unassigned > 0) lines.push(`Unassigned: ${counts.unassigned}`)
+    lines.push('These are NOT included above because their ownership is not verified.')
+    lines.push('')
+  }
   return lines.join('\n')
 }
 
-function buildEndOfDay(activeTasks: CommandCentreTask[]) {
+function buildEndOfDay(activeTasks: CommandCentreTask[], ownershipOf: (t: CommandCentreTask) => Ownership) {
   const groups: Record<string, CommandCentreTask[]> = {
     'DONE': [],
     'STILL BUSY / IN PROGRESS': [],
@@ -152,9 +181,19 @@ function buildEndOfDay(activeTasks: CommandCentreTask[]) {
     if (items.length === 0) continue
     lines.push(heading)
     for (const t of items) {
-      const name = t.assigned_to_name ? ` (${t.assigned_to_name})` : ''
+      // Only a VERIFIED canonical owner may be named. This used to print
+      // `assigned_to_name` verbatim, publishing stale imported text as though
+      // it were confirmed ownership.
+      const ownership = ownershipOf(t)
+      const label = ownership.state === 'verified'
+        ? ` (${ownership.owners.map(o => o.name).join(', ')})`
+        : ownership.state === 'conflict'
+          ? ' (assignment conflict — needs review)'
+          : ownership.state === 'unresolved'
+            ? ' (needs assignment review)'
+            : ''
       const prefix = t.client_name ? `${t.client_name} — ` : ''
-      lines.push(`- ${prefix}${t.title}${name}`)
+      lines.push(`- ${prefix}${t.title}${label}`)
     }
     lines.push('')
   }
@@ -165,6 +204,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
   const { profile } = useAuth()
   const location = useLocation()
   const [tasks, setTasks] = useState<CommandCentreTask[]>([])
+  const [staffProfiles, setStaffProfiles] = useState<Array<{ id: string; full_name: string | null }>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tableMissing, setTableMissing] = useState(false)
@@ -205,6 +245,16 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
   useEffect(() => {
     const timer = window.setTimeout(() => { void load() }, 0)
     return () => window.clearTimeout(timer)
+  }, [])
+
+  // Active staff, loaded from the profile directory. This is the canonical
+  // display-name source for verified owners — there is no hardcoded staff list.
+  useEffect(() => {
+    let active = true
+    void listStaffProfiles().then(result => {
+      if (active && result.data) setStaffProfiles(result.data)
+    })
+    return () => { active = false }
   }, [])
 
   // Morning List Import is reachable directly via /admin/command-centre#morning-import.
@@ -263,47 +313,43 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
     return base
   }, [tasks, filterStaff, profile, today])
 
-  const focusGrouped = useMemo(() => {
-    const groups = new Map<string, CommandCentreTask[]>()
-    for (const t of focusTasks) {
-      const name = t.assigned_to_name ?? 'Unassigned'
-      if (!groups.has(name)) groups.set(name, [])
-      groups.get(name)!.push(t)
-    }
-    return groups
-  }, [focusTasks])
+  // Canonical staff directory, loaded from active profiles. Replaces the
+  // hardcoded KNOWN_STAFF array as the ownership and grouping authority.
+  const staffDirectory = useMemo(() => new Map(staffProfiles.map(p => [p.id, p.full_name ?? 'Unknown'])), [staffProfiles])
 
-  const focusGroupEntries = useMemo(() =>
-    [...focusGrouped.entries()].sort(([a], [b]) => {
-      const ai = KNOWN_STAFF.indexOf(a)
-      const bi = KNOWN_STAFF.indexOf(b)
-      if (ai !== -1 && bi !== -1) return ai - bi
-      if (ai !== -1) return -1
-      if (bi !== -1) return 1
-      if (a === 'Unassigned') return 1
-      if (b === 'Unassigned') return -1
-      return a.localeCompare(b)
-    }),
-  [focusGrouped])
+  const ownershipOf = useCallback(
+    (t: CommandCentreTask) => resolveOwnership(taskOwnershipInput(t), staffDirectory),
+    [staffDirectory],
+  )
 
-  const staffGroups = useMemo(() => {
-    const groups = new Map<string, CommandCentreTask[]>()
-    for (const t of allActiveTasks) {
-      const name = t.assigned_to_name ?? 'Unassigned'
-      if (!groups.has(name)) groups.set(name, [])
-      groups.get(name)!.push(t)
+  // Board grouping now keys on VERIFIED canonical owners. Unresolved and
+  // conflicting work gets its own explicit heading instead of being filed under
+  // whatever name happened to be in the imported text.
+  const focusGroupEntries = useMemo(() => {
+    const grouping = groupByOwnership(focusTasks, taskOwnershipInput, staffDirectory)
+    const entries: Array<[string, CommandCentreTask[]]> = [...grouping.byOwner.values()]
+      .sort((a, b) => a.person.name.localeCompare(b.person.name))
+      .map(entry => [entry.person.name, entry.items])
+    if (grouping.assignmentConflict.length > 0) {
+      entries.push(['Assignment conflict', grouping.assignmentConflict.map(x => x.item)])
     }
-    return [...groups.entries()].sort(([a], [b]) => {
-      const ai = KNOWN_STAFF.indexOf(a)
-      const bi = KNOWN_STAFF.indexOf(b)
-      if (ai !== -1 && bi !== -1) return ai - bi
-      if (ai !== -1) return -1
-      if (bi !== -1) return 1
-      if (a === 'Unassigned') return 1
-      if (b === 'Unassigned') return -1
-      return a.localeCompare(b)
-    })
-  }, [allActiveTasks])
+    if (grouping.needsAssignmentReview.length > 0) {
+      entries.push(['Needs assignment review', grouping.needsAssignmentReview.map(x => x.item)])
+    }
+    if (grouping.unassigned.length > 0) entries.push(['Unassigned', grouping.unassigned])
+    return entries
+  }, [focusTasks, staffDirectory])
+
+  const ownershipGrouping = useMemo(
+    () => groupByOwnership(allActiveTasks, taskOwnershipInput, staffDirectory),
+    [allActiveTasks, staffDirectory],
+  )
+  const ownershipTotals = useMemo(() => ownershipCounts(ownershipGrouping), [ownershipGrouping])
+  // Assignee pickers list ACTIVE canonical staff, discovered from the directory.
+  const staffNames = useMemo(
+    () => staffProfiles.map(p => p.full_name).filter((n): n is string => Boolean(n)).sort((a, b) => a.localeCompare(b)),
+    [staffProfiles],
+  )
 
   const allRelevant = useMemo(() =>
     tasks
@@ -437,7 +483,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
       {/* B — Quick Add */}
       <div className="mb-5">
-        <QuickAddCard onTaskCreated={load} />
+        <QuickAddCard onTaskCreated={load} staffNames={staffNames} />
       </div>
 
       {/* C — Stats */}
@@ -479,7 +525,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           className="rounded-lg border border-brand-muted/60 bg-brand-bg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
         >
           <option value="">All staff</option>
-          {KNOWN_STAFF.map(name => (
+          {staffNames.map(name => (
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
@@ -533,6 +579,23 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
             {workFilter === 'focus' ? 'Focus' : workFilter === 'client_requests' ? 'Client Requests' : workFilter.replace('_', ' ')}
           </h2>
           <span className="rounded-full bg-brand-accent/10 px-2 py-0.5 text-xs font-medium text-brand-accent">{focusTasks.length}</span>
+        </div>
+        {/* Truthful ownership headline. Most legacy work is still awaiting
+            identity resolution; presenting it as cleanly assigned would be the
+            exact falsehood this layer exists to stop. */}
+        <div className="mb-3 flex flex-wrap gap-2 text-[11px]" data-testid="ownership-summary">
+          <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 font-bold text-emerald-200">
+            {ownershipTotals.verified} verified
+          </span>
+          <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 font-bold text-amber-200">
+            {ownershipTotals.needsReview} need assignment review
+          </span>
+          <span className="rounded-full border border-red-400/25 bg-red-400/10 px-2 py-0.5 font-bold text-red-200">
+            {ownershipTotals.conflicts} assignment conflict
+          </span>
+          <span className="rounded-full border border-white/15 bg-white/[0.04] px-2 py-0.5 font-bold text-brand-primary/70">
+            {ownershipTotals.unassigned} unassigned
+          </span>
         </div>
         {focusTasks.length === 0 ? (
           <EmptyState title="All clear" message="No tasks match these filters." centered={false} />
@@ -605,12 +668,13 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       {/* G — WhatsApp morning + end-of-day */}
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         <MorningMessageCard
-          staffGroups={staffGroups}
+          ownershipGrouping={ownershipGrouping}
           copiedSection={copiedSection}
           onCopy={handleCopy}
         />
         <EndOfDayCard
           allRelevant={allRelevant}
+          ownershipOf={ownershipOf}
           copiedSection={copiedSection}
           onCopy={handleCopy}
         />
@@ -623,6 +687,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
       {drawerTask && (
         <TaskDetailDrawer
+          staffNames={staffNames}
           task={drawerTask}
           isAdmin={isAdmin}
           canManage={canManage}
@@ -657,7 +722,7 @@ function StatCard({ label, value, accent, teal, amber, danger }: {
   )
 }
 
-function QuickAddCard({ onTaskCreated }: { onTaskCreated: () => void }) {
+function QuickAddCard({ onTaskCreated, staffNames }: { onTaskCreated: () => void; staffNames: string[] }) {
   const { profile } = useAuth()
   const [title, setTitle] = useState('')
   const [showDetails, setShowDetails] = useState(false)
@@ -810,7 +875,7 @@ function QuickAddCard({ onTaskCreated }: { onTaskCreated: () => void }) {
                   className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
                 >
                   <option value="">Unassigned</option>
-                  {KNOWN_STAFF.map(name => (
+                  {staffNames.map(name => (
                     <option key={name} value={name}>{name}</option>
                   ))}
                 </select>
@@ -1248,12 +1313,14 @@ function ConfidenceBadge({ confidence }: { confidence: ParsedMorningTask['client
   )
 }
 
-function MorningMessageCard({ staffGroups, copiedSection, onCopy }: {
-  staffGroups: [string, CommandCentreTask[]][]
+function MorningMessageCard({ ownershipGrouping, copiedSection, onCopy }: {
+  ownershipGrouping: OwnershipGrouping<CommandCentreTask>
   copiedSection: string | null
   onCopy: (section: string, text: string) => void
 }) {
-  const message = useMemo(() => buildMorningMessage(new Map(staffGroups.filter(([, tasks]) => tasks.length > 0))), [staffGroups])
+  const message = useMemo(() => buildMorningMessage(ownershipGrouping), [ownershipGrouping])
+  const totals = useMemo(() => ownershipCounts(ownershipGrouping), [ownershipGrouping])
+  const hasAnything = totals.verified + totals.needsReview + totals.conflicts + totals.unassigned > 0
   const isCopied = copiedSection === 'morning'
 
   return (
@@ -1267,12 +1334,17 @@ function MorningMessageCard({ staffGroups, copiedSection, onCopy }: {
           variant="outline"
           size="sm"
           onClick={() => onCopy('morning', message)}
-          disabled={staffGroups.length === 0}
+          disabled={!hasAnything}
         >
           {isCopied ? 'Copied!' : 'Copy'}
         </ActionButton>
       </div>
-      {staffGroups.length === 0 ? (
+      {/* Truthful headline. Most legacy work is awaiting identity resolution;
+          hiding that would misrepresent how much of this is actually verified. */}
+      <p className="mt-2 text-[11px] text-brand-primary/70" data-testid="ownership-totals">
+        {totals.verified} verified · {totals.needsReview} need assignment review · {totals.conflicts} conflict · {totals.unassigned} unassigned
+      </p>
+      {!hasAnything ? (
         <p className="mt-3 text-xs text-brand-primary/60">No tasks to generate a message.</p>
       ) : (
         <pre className="mt-3 overflow-x-auto rounded-lg border border-brand-muted bg-brand-bg p-3 text-xs leading-relaxed text-brand-primary/80 whitespace-pre-wrap font-mono">
@@ -1283,12 +1355,13 @@ function MorningMessageCard({ staffGroups, copiedSection, onCopy }: {
   )
 }
 
-function EndOfDayCard({ allRelevant, copiedSection, onCopy }: {
+function EndOfDayCard({ allRelevant, ownershipOf, copiedSection, onCopy }: {
   allRelevant: CommandCentreTask[]
+  ownershipOf: (t: CommandCentreTask) => Ownership
   copiedSection: string | null
   onCopy: (section: string, text: string) => void
 }) {
-  const message = useMemo(() => buildEndOfDay(allRelevant), [allRelevant])
+  const message = useMemo(() => buildEndOfDay(allRelevant, ownershipOf), [allRelevant, ownershipOf])
   const isCopied = copiedSection === 'end-of-day'
 
   return (
@@ -1318,10 +1391,11 @@ function EndOfDayCard({ allRelevant, copiedSection, onCopy }: {
   )
 }
 
-function TaskDetailDrawer({ task, isAdmin, canManage, onClose, onSaved, onDeleted }: {
+function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSaved, onDeleted }: {
   task: CommandCentreTask
   isAdmin: boolean
   canManage: boolean
+  staffNames: string[]
   onClose: () => void
   onSaved: (updated: CommandCentreTask) => void
   onDeleted: (id: string) => void
@@ -1478,7 +1552,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, onClose, onSaved, onDelete
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label>
             <select value={assignedName} onChange={e => setAssignedName(e.target.value)} className={inputCls}>
               <option value="">Unassigned</option>
-              {KNOWN_STAFF.map(name => <option key={name} value={name}>{name}</option>)}
+              {staffNames.map(name => <option key={name} value={name}>{name}</option>)}
             </select>
           </div>
 
