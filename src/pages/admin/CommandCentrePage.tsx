@@ -1056,7 +1056,7 @@ function MorningImportCard({ onTasksCreated }: {
     setParsed(parsedTasks)
     setEdits(parsedTasks.map(t => ({
       id: t.id,
-      clientOption: t.clientConfidence === 'matched' ? t.clientId || '' : '',
+      clientOption: t.clientId ? t.clientId : '',
       manualClientName: '',
       clientName: t.clientName,
       title: t.title,

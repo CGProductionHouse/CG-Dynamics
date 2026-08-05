@@ -544,6 +544,18 @@ const CLIENT_ALIASES: Record<string, string[]> = {
 
 const COMMON_CLIENT_WORDS = new Set(['and', 'the', 'group', 'pty', 'ltd', 'cc', 'co', 'company', 'production', 'house', 'vir', 'for', 'in', 'on', 'of'])
 
+// Content/task-descriptor words describe the work, not the client, so they must
+// never be treated as distinctive client tokens on their own. "video", "design",
+// "poster" etc. appearing in a task text must not auto-assign a client whose
+// name happens to contain that word.
+const TASK_CONTEXT_WORDS = new Set([
+  'video', 'reel', 'bts', 'edit', 'shoot', 'audio', 'music', 'liedjie', 'liedjue',
+  'photo', 'photos', 'poster', 'posters', 'design', 'designs', 'logo', 'menu', 'profile',
+  'website', 'web', 'landing', 'page', 'shopify', 'wordpress', 'content', 'guide', 'guideline',
+  'caption', 'posting', 'plan', 'report', 'request', 'requests', 'change', 'changes',
+  'campaign', 'strategy', 'admin', 'asap', 'urgent', 'next', 'month',
+])
+
 function normaliseText(value: string) {
   return value.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ')
 }
@@ -577,37 +589,90 @@ function removeClientAlias(text: string, alias: string) {
     .trim()
 }
 
+function buildClientTokenIndex(clients: ClientOption[]) {
+  const index = new Map<string, Set<string>>()
+  for (const client of clients) {
+    for (const alias of getClientAliases(client.name)) {
+      for (const token of tokenise(alias)) {
+        const owners = index.get(token) ?? new Set<string>()
+        owners.add(client.id)
+        index.set(token, owners)
+      }
+    }
+  }
+  return index
+}
+
 function tryMatchClient(text: string, clients: ClientOption[]) {
   const normalised = normaliseText(text)
   const textTokens = new Set(tokenise(text))
+  const tokenIndex = buildClientTokenIndex(clients)
+
+  // Distinctive tokens: task tokens that belong to exactly one active client.
+  // A token owned by several clients (e.g. "supa" for both Supa Quick branches)
+  // never auto-matches, and content words never act as client names.
+  const distinctive = new Map<string, Set<string>>()
+  for (const token of textTokens) {
+    if (TASK_CONTEXT_WORDS.has(token)) continue
+    const owners = tokenIndex.get(token)
+    if (!owners || owners.size !== 1) continue
+    const ownerId = [...owners][0]
+    const tokens = distinctive.get(ownerId) ?? new Set<string>()
+    tokens.add(token)
+    distinctive.set(ownerId, tokens)
+  }
+
   let best: { client: ClientOption; alias: string; score: number } | null = null
+  let bestPhrase: { client: ClientOption; alias: string; score: number } | null = null
 
   for (const client of clients) {
     for (const alias of getClientAliases(client.name)) {
       const aliasNorm = normaliseText(alias)
       const aliasTokens = tokenise(alias)
       let score = 0
+      let phrase = false
       if (aliasNorm && new RegExp(`(^|\\s)${aliasNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(normalised)) {
         score = aliasTokens.length <= 1 ? 82 : 96
+        phrase = true
       } else if (aliasTokens.length > 0 && aliasTokens.every(token => textTokens.has(token))) {
         score = aliasTokens.length === 1 ? 58 : 88
       } else {
         const overlap = aliasTokens.filter(token => textTokens.has(token)).length
         if (overlap > 0) score = Math.round((overlap / aliasTokens.length) * 62)
       }
-      if (!best || score > best.score || (score === best.score && alias.length > best.alias.length)) best = { client, alias, score }
+      if (score > 0 && (!best || score > best.score || (score === best.score && alias.length > best.alias.length))) {
+        best = { client, alias, score }
+      }
+      if (phrase && (!bestPhrase || score > bestPhrase.score || (score === bestPhrase.score && alias.length > bestPhrase.alias.length))) {
+        bestPhrase = { client, alias, score }
+      }
     }
   }
 
-  if (!best || best.score < 55) {
+  // One active client uniquely identified by a distinctive token present in the
+  // text is a confident auto-match. A full-name phrase match always wins over a
+  // distinctive token so a real directory name is never overridden.
+  let chosen: { client: ClientOption; alias: string; score: number } | null = null
+  if (bestPhrase && bestPhrase.score >= 80) {
+    chosen = bestPhrase
+  } else if (distinctive.size === 1) {
+    const clientId = [...distinctive.keys()][0]
+    const client = clients.find(c => c.id === clientId)
+    const token = [...(distinctive.get(clientId) ?? [])][0]
+    if (client) chosen = { client, alias: token, score: 90 }
+  } else if (best && best.score >= 55) {
+    chosen = best
+  }
+
+  if (!chosen) {
     return { clientId: null, clientName: null, confidence: 'needs_review' as const, remaining: text }
   }
 
   return {
-    clientId: best.client.id,
-    clientName: best.client.name,
-    confidence: best.score >= 80 ? 'matched' as const : 'suggested' as const,
-    remaining: removeClientAlias(text, best.alias) || text,
+    clientId: chosen.client.id,
+    clientName: chosen.client.name,
+    confidence: chosen.score >= 80 ? 'matched' as const : 'suggested' as const,
+    remaining: removeClientAlias(text, chosen.alias) || text,
   }
 }
 
@@ -615,7 +680,7 @@ function inferBucket(text: string, sectionBucket: TaskBucket | null): { bucket: 
   const lower = text.toLowerCase()
   if (/\b(website|web|landing page|google site|shopify|wordpress)\b/.test(lower)) return { bucket: 'Websites', confident: true }
   if (/\b(content guide|content plan|posting guide|caption guide|guideline)\b/.test(lower)) return { bucket: 'Content Guides', confident: true }
-  if (/\b(video|bts|reel|liedjie|liedjue|audio|music|content run)\b/.test(lower)) return { bucket: 'Video', confident: true }
+  if (/\b(video|bts|reel|liedjie|liedjue|audio|music|content run|edit|shoot)\b/.test(lower)) return { bucket: 'Video', confident: true }
   if (/\b(designed poster|poster|posters|design|designs|photo|photos|menu|profile|logo)\b/.test(lower)) return { bucket: 'Graphic Design', confident: true }
   if (/\b(changes|change|requests|request|client asked|meeting changes)\b/.test(lower)) return { bucket: 'Client Requests', confident: true }
   if (sectionBucket) return { bucket: sectionBucket, confident: true }
