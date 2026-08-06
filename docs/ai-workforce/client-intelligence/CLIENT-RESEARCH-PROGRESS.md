@@ -1,0 +1,53 @@
+# Client Marketing Intelligence — Progress Ledger
+
+Last updated: 2026-08-06
+Status: Canonical client-by-client research progress for Issue #184.
+
+## Workflow
+
+Work alphabetically from the captured CG client directory. After each completed client, state the next client name and let CA answer `skip` or `go`.
+
+Before researching any ambiguous client name:
+
+1. verify the exact business through its website and official socials;
+2. match location, products/services, contact details and visual identity;
+3. do not infer identity from the name alone;
+4. keep every client pack isolated;
+5. mark current prices, packages, claims and performance data for internal confirmation where not proven.
+
+Each completed pack should cover exact services, audiences, buying journeys, competitors, positioning, website, SEO, Google Business Profile, content, paid media, partnerships, promotions/activations, reviews, sales funnel, measurement and a 90-day plan.
+
+## Progress
+
+1. **Action Sport / Bloem Action Sports** — completed.
+   - File: `ACTION-SPORT-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `e8b2cd44d9788ac413039d21bd43e6ee0601bbaa`
+2. **Adnitor** — skipped by CA.
+3. **Agri-Secure** — completed.
+   - File: `AGRI-SECURE-FARM-ARMED-RESPONSE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `f68e1cdfdc7940999996b8a3a91df001e19c5004`
+4. **AV Event Life** — completed.
+   - File: `AV-EVENT-LIFE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `da5557ad6b35bd010473f228ca8245f00a83942a`
+5. **Avodah** — completed after identity correction.
+   - Correct business: Avodah Manufacturers, Bloemfontein; cattle gates, feeding rings and custom cattle-handling systems.
+   - Correct file: `AVODAH-MANUFACTURERS-CATTLE-HANDLING-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Correct commit: `8ec7766a764a14825529f0d090b1d8d94e3f4fdc`
+   - Incorrect Christian gap-year pack was deleted in commit `d147ea6313e33f6fc0de4bff0b33ca307c06248d`.
+6. **Bat Hill Royale** — completed.
+   - File: `BAT-HILL-ROYALE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `07ec9e20be4b117b3a38bfdce3d8eb6afa059988`
+
+## Exact next action
+
+Next client in the captured alphabetical directory:
+
+**BFN Polisie Klub**
+
+Ask CA: `BFN Polisie Klub — skip or go?`
+
+## Remaining order after BFN Polisie Klub
+
+Bloem Marble & Granite; Bloem Vascular; Bohemia; Bouwer & Coetzee Attorneys; Braize; Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+
+The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
