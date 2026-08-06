@@ -45,17 +45,22 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `BLOEM-MARBLE-GRANITE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `3f1b1475ba43508055b88fef6decfb92858a2bee`
    - Scope includes kitchens, commercial work, outdoor surfaces, memorials, material education, competitor analysis, architect/designer/builder partnerships, quote and showroom funnels, paid media, SEO, content, reputation, measurement and a 90-day plan.
+9. **BloemVascular** — completed as a healthcare and referrer-growth deep research pack.
+   - File: `BLOEM-VASCULAR-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `c7f707f21478c9e0a437492cf8aa26fd21f20ba8`
+   - Verified scope includes Prof AF Malan, Dr RS Letsoara, Life Rosepark and Mediclinic rooms, arterial and venous pathology, aneurysms, peripheral arterial disease, DVT, diabetic foot, varicose veins and dialysis access.
+   - Strategy separates patient education, clinical referral growth and professional authority, with strict HPCSA, POPIA, emergency-channel and medical-content review controls.
 
 ## Exact next action
 
 Next client in the captured alphabetical directory:
 
-**Bloem Vascular**
+**Bohemia**
 
-Ask CA: `Bloem Vascular — skip or go?`
+Ask CA: `Bohemia — skip or go?`
 
-## Remaining order after Bloem Vascular
+## Remaining order after Bohemia
 
-Bohemia; Bouwer & Coetzee Attorneys; Braize; Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Bouwer & Coetzee Attorneys; Braize; Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
