@@ -39,7 +39,7 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `BAT-HILL-ROYALE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `07ec9e20be4b117b3a38bfdce3d8eb6afa059988`
 7. **BFN Polisie Rugbyklub** — completed after CA corrected the scope from generic venue to rugby club.
-   - Correct file: `BFN-POLISIE-RUGBYKLUB-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - File: `BFN-POLISIE-RUGBYKLUB-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `1e55d14048c09d4bd5f682333a8dc385c116e790`
 8. **Bloem Marble & Granite** — completed as a major-client deep research pack.
    - File: `BLOEM-MARBLE-GRANITE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
@@ -61,24 +61,22 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - Commit: `44ba0864cbd004928dc5cf9ad318eb1f830b5d7f`
 13. **Brocor** — skipped by CA.
 14. **C&L Innovations** — completed as a zero-sales recovery and furniture conversion pack.
-   - Current evidence supplied by CA: Instagram `c.linnovations`, approximately 44 followers and 63 posts, with live-edge/natural wood furniture and workshop-oriented content.
    - File: `C-L-INNOVATIONS-FURNITURE-SALES-RECOVERY-2026-08.md`
    - Commit: `8bb244c2efba560494914b7264ef0889961ffb11`
 15. **Cape Lumber Marketing** — completed as a major performance and growth pack after an initial generic response was rejected and discarded.
-   - Current official website, product catalogue, prices, service area, delivery, machining, treatment and procurement capability were researched on 2026-08-06.
-   - Current social evidence supplied by CA: Instagram `deniscoyne`, 863 posts, 895 followers, 1,015 following.
    - File: `CAPE-LUMBER-MARKETING-PERFORMANCE-AND-GROWTH-INTELLIGENCE-2026-08.md`
    - Commit: `2d851f06cce2eac1bb9670f2693ff120961e45d3`
 16. **Case Bloemfontein** — completed as a full dealership, machinery, parts, service and Husqvarna intelligence pack.
-   - Verified current business: Case Bloemfontein and Case Ladybrand under one team; Case IH agriculture, CASE/CSE construction, used equipment, parts, technical support and Husqvarna sales/workshop.
    - File: `CASE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `b46fcad468e277b7fdbc342b1c60964bbb7263d4`
 17. **Central Canvas** — completed as a cargo-protection, truck-tarp, cargo-net and custom-cover intelligence pack.
-   - Verified current business: Bloemfontein-based since 2006, specialising in cargo equipment, truck tarpaulins, truck-tarp repairs and cargo netting.
    - File: `CENTRAL-CANVAS-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `c976ebfac3deae8ea44c5c0bfa344350dc1ddb62`
-   - Scope includes current contact and address evidence, buyer journeys for logistics, agriculture, construction, fleets and private custom-cover buyers, competitor analysis, website conversion audit, quote and WhatsApp funnel, fleet-account strategy, repair and fabrication content, SEO, Google/Meta/LinkedIn, partnerships, activations, commercial KPI reporting and a 90-day implementation plan.
-   - Current website conflicts in sales names/emails and broader directory-listed products are explicitly marked for client confirmation before operational use.
+18. **CG Production House** — completed as a major internal agency growth and positioning blueprint.
+   - Current official website, services, studio offer, public team, LinkedIn positioning, local competitors and current platform guidance were researched on 2026-08-06.
+   - File: `CG-PRODUCTION-HOUSE-GROWTH-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `28cafa1193b925dbbfec30bd91769b9ba011d4c2`
+   - Scope includes current public offer and studio details, honest website and positioning diagnosis, outcome-led solution architecture, priority industries and buyer groups, competitor analysis, website rebuild priorities, founder-led content, signature campaign platforms, lead generation, referrals, Google/Meta/LinkedIn, sales process, packaging, proof system, agency and marketing KPIs, CG Dynamics as the operating advantage, guardrails and a 90-day growth plan.
 
 ## System rule added during this sequence
 
@@ -93,12 +91,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**CG Production House**
+**Dabo**
 
-Ask CA: `CG Production House — skip or go?`
+Ask CA: `Dabo — skip or go?`
 
-## Remaining order after CG Production House
+## Remaining order after Dabo
 
-Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
