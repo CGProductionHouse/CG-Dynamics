@@ -60,6 +60,11 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `BRAIZE-EVENT-STAFFING-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `44ba0864cbd004928dc5cf9ad318eb1f830b5d7f`
 13. **Brocor** — skipped by CA.
+14. **C&L Innovations** — completed as a zero-sales recovery and furniture conversion pack.
+   - Current evidence supplied by CA: Instagram `c.linnovations`, approximately 44 followers and 63 posts, with live-edge/natural wood furniture and workshop-oriented content.
+   - File: `C-L-INNOVATIONS-FURNITURE-SALES-RECOVERY-2026-08.md`
+   - Commit: `8bb244c2efba560494914b7264ef0889961ffb11`
+   - Diagnosis: the feed creates attractive luxury mood but lacks a clear hero product, real completed-client proof, visible price anchors, dimensions, wood/finish details, lead times, delivery terms, warranty confidence and a low-friction sales path. The recovery plan prioritises one real buyable table, a Ready Collection plus Bespoke split, exact product information, a WhatsApp funnel, local partnerships, Marketplace and Google visibility, and conversion measurement instead of likes.
 
 ## System rule added during this sequence
 
@@ -74,12 +79,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**C&L Innovations**
+**Cape Lumber**
 
-Ask CA: `C&L Innovations — skip or go?`
+Ask CA: `Cape Lumber — skip or go?`
 
-## Remaining order after C&L Innovations
+## Remaining order after Cape Lumber
 
-Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
