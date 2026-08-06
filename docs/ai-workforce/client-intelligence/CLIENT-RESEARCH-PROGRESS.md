@@ -83,6 +83,12 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `DAISY-CO-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `ca689ba96e528cfeed029c3a2b106d48f7fa002f`
    - Scope includes current identity and location evidence, hours conflict and freshness controls, gifts/homeware/fresh-bakes/flowers buyer journeys, occasion-led positioning, ready-to-give bundles, corporate gifting, fresh-stock content, Google and local SEO, Meta, Preller Square and Tal Florals partnerships, CRM, commercial KPIs, guardrails and a 90-day implementation plan.
+21. **Delta Gas Bloemfontein** — completed as an LPG refill, exchange, delivery, repeat-purchase and safety-authority intelligence pack.
+   - Exact identity verified as the Dan Pienaar business at 36 General Dan Pienaar Drive; unrelated Delta Gas brands and Delta Service Station were excluded.
+   - File: `DELTA-GAS-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `7cab9f7f6cc809055ab34cfdb6abf942a1d62688`
+   - Scope includes current address and phone evidence, review-language analysis, household and business buyer journeys, competitor analysis, refill/delivery systems, business continuity accounts, accessories, responsible safety content, Google and local SEO, Meta, CRM and refill reminders, partnerships, reviews, commercial KPIs, CG Dynamics data requirements, guardrails and a 90-day implementation plan.
+   - Current hours, exact product range, delivery rules, installation scope, website status and social handles are explicitly marked for direct client confirmation before operational use.
 
 ## System rule added during this sequence
 
@@ -97,12 +103,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Delta Gas**
+**Dulux Bloemfontein**
 
-Ask CA: `Delta Gas — skip or go?`
+Ask CA: `Dulux Bloemfontein — skip or go?`
 
-## Remaining order after Delta Gas
+## Remaining order after Dulux Bloemfontein
 
-Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
