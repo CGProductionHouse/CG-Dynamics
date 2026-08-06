@@ -1,10 +1,11 @@
 # Continue CG Dynamics Here
 
-For any new ChatGPT, Codex or Claude session, read this first:
+For any new ChatGPT, Codex or Claude session, read these first:
 
-- `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-06.md`
+1. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-06.md`
+2. `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md`
 
-That canonical handoff contains:
+The canonical handoff contains:
 
 - the CG Dynamics product vision;
 - how CG Production House currently works;
@@ -17,7 +18,13 @@ That canonical handoff contains:
 - the complete Marketing Library programme;
 - completed industry and client research;
 - the client directory and skip/go workflow;
-- corrected Avodah Manufacturers identity;
-- the exact next action.
+- corrected Avodah Manufacturers identity.
 
-Do not ask the user to explain the project again before reading that file and checking the latest repository, PR and issue state.
+The client-research progress ledger contains:
+
+- every completed and skipped client;
+- exact client-pack files and commits;
+- the remaining alphabetical order;
+- the exact next client and action.
+
+Do not ask the user to explain the project again before reading these files and checking the latest repository, PR and issue state.
