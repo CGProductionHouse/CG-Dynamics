@@ -70,6 +70,11 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `CAPE-LUMBER-MARKETING-PERFORMANCE-AND-GROWTH-INTELLIGENCE-2026-08.md`
    - Commit: `2d851f06cce2eac1bb9670f2693ff120961e45d3`
    - Scope includes structural/industrial pine, treated timber, laminated beams, decking species, boards, Nutec, machining, treatment, delivery, procurement, website conversion audit, live pricing issues, competitor analysis, five commercial marketing systems, Google/Meta/LinkedIn, partnerships, trade and project funnels, commercial KPI reporting and a 90-day performance recovery plan.
+16. **Case Bloemfontein** — completed as a full dealership, machinery, parts, service and Husqvarna intelligence pack.
+   - Verified current business: Case Bloemfontein and Case Ladybrand under one team; Case IH agriculture, CASE/CSE construction, used equipment, parts, technical support and Husqvarna sales/workshop.
+   - File: `CASE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `b46fcad468e277b7fdbc342b1c60964bbb7263d4`
+   - Scope includes current contact and branch details, named sales roles, current used inventory and visible prices, national finance/promotion controls, buyer journeys, regional competitor analysis, seasonal agriculture campaigns, used-equipment sales engine, uptime/after-sales authority, demos and field days, CRM, separate Husqvarna system, website conversion, paid media, partnerships, reputation, commercial KPI reporting and a 90-day implementation plan.
 
 ## System rule added during this sequence
 
@@ -84,12 +89,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Case Bloemfontein**
+**Central Canvas**
 
-Ask CA: `Case Bloemfontein — skip or go?`
+Ask CA: `Central Canvas — skip or go?`
 
-## Remaining order after Case Bloemfontein
+## Remaining order after Central Canvas
 
-Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
