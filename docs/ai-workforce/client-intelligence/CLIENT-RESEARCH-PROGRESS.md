@@ -37,17 +37,21 @@ Each completed pack should cover exact services, audiences, buying journeys, com
 6. **Bat Hill Royale** — completed.
    - File: `BAT-HILL-ROYALE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `07ec9e20be4b117b3a38bfdce3d8eb6afa059988`
+7. **BFN Polisie Rugbyklub** — completed after CA corrected the scope from generic venue to rugby club.
+   - Correct file: `BFN-POLISIE-RUGBYKLUB-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `1e55d14048c09d4bd5f682333a8dc385c116e790`
+   - Verified public anchors include BFN Police / BFN Polisie as 2019 Rowan Cup winner and Bloemfontein Police participation at Bobbies Park in 2016 Gold Cup competition.
 
 ## Exact next action
 
 Next client in the captured alphabetical directory:
 
-**BFN Polisie Klub**
+**Bloem Marble & Granite**
 
-Ask CA: `BFN Polisie Klub — skip or go?`
+Ask CA: `Bloem Marble & Granite — skip or go?`
 
-## Remaining order after BFN Polisie Klub
+## Remaining order after Bloem Marble & Granite
 
-Bloem Marble & Granite; Bloem Vascular; Bohemia; Bouwer & Coetzee Attorneys; Braize; Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Bloem Vascular; Bohemia; Bouwer & Coetzee Attorneys; Braize; Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
