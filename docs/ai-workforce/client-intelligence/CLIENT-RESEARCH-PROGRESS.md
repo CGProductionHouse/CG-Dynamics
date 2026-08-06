@@ -15,7 +15,7 @@ Before researching any ambiguous client name:
 4. keep every client pack isolated;
 5. mark current prices, packages, claims and performance data for internal confirmation where not proven.
 
-Each completed pack should cover exact services, audiences, buying journeys, competitors, positioning, website, SEO, Google Business Profile, content, paid media, partnerships, promotions/activations, reviews, sales funnel, measurement and a 90-day plan.
+Each completed pack should cover exact services, audiences, buying journeys, competitors, positioning, website, SEO, Google Business Profile, content, paid media, partnerships, promotions/activations, reviews, sales funnel, measurement and a 90-day plan, unless CA explicitly requests a smaller scope for a light client package.
 
 ## Progress
 
@@ -50,17 +50,22 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - Commit: `c7f707f21478c9e0a437492cf8aa26fd21f20ba8`
    - Verified scope includes Prof AF Malan, Dr RS Letsoara, Life Rosepark and Mediclinic rooms, arterial and venous pathology, aneurysms, peripheral arterial disease, DVT, diabetic foot, varicose veins and dialysis access.
    - Strategy separates patient education, clinical referral growth and professional authority, with strict HPCSA, POPIA, emergency-channel and medical-content review controls.
+10. **Bohemia Quick Shop** — completed as a light two-poster monthly guide.
+   - Identity confirmed directly by CA through the supplied Facebook page.
+   - File: `BOHEMIA-QUICK-SHOP-LIGHT-MARKETING-GUIDE-2026-08.md`
+   - Commit: `5a0fb3a3a70f9e15eee9b367f236c9ad0ac6d0ac`
+   - Scope deliberately limited to one sales/product poster and one timely convenience/brand poster per month, with price, stock and date verification controls.
 
 ## Exact next action
 
 Next client in the captured alphabetical directory:
 
-**Bohemia**
+**Bouwer & Coetzee Attorneys**
 
-Ask CA: `Bohemia — skip or go?`
+Ask CA: `Bouwer & Coetzee Attorneys — skip or go?`
 
-## Remaining order after Bohemia
+## Remaining order after Bouwer & Coetzee Attorneys
 
-Bouwer & Coetzee Attorneys; Braize; Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Braize; Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
