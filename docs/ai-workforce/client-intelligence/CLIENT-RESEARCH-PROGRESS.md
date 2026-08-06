@@ -77,6 +77,7 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `CG-PRODUCTION-HOUSE-GROWTH-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `28cafa1193b925dbbfec30bd91769b9ba011d4c2`
    - Scope includes current public offer and studio details, honest website and positioning diagnosis, outcome-led solution architecture, priority industries and buyer groups, competitor analysis, website rebuild priorities, founder-led content, signature campaign platforms, lead generation, referrals, Google/Meta/LinkedIn, sales process, packaging, proof system, agency and marketing KPIs, CG Dynamics as the operating advantage, guardrails and a 90-day growth plan.
+19. **Dabo** — skipped by CA.
 
 ## System rule added during this sequence
 
@@ -91,12 +92,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Dabo**
+**Daisy & Co**
 
-Ask CA: `Dabo — skip or go?`
+Ask CA: `Daisy & Co — skip or go?`
 
-## Remaining order after Dabo
+## Remaining order after Daisy & Co
 
-Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
