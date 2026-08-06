@@ -51,11 +51,17 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - Identity confirmed directly by CA through the supplied Facebook page.
    - File: `BOHEMIA-QUICK-SHOP-LIGHT-MARKETING-GUIDE-2026-08.md`
    - Commit: `5a0fb3a3a70f9e15eee9b367f236c9ad0ac6d0ac`
-11. **Bouwer & Coetzee Attorneys** — completed.
-   - Correct identity: Bloemfontein firm previously confirmed at 8 Louw Wepener, Dan Pienaar; Attorney, Conveyancer and Notary positioning.
+11. **Bouwer & Coetzee Attorneys** — completed and then refreshed from current source evidence supplied by CA.
    - File: `BOUWER-COETZEE-ATTORNEYS-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `3ef981ceaa94ade3873e77d8a4ed2fbb45d53e2a`
-   - Current website/social details were not fully crawlable on 2026-08-06, so mutable contact, team and service facts are explicitly awaiting current official-source revalidation.
+   - Verified source update: `BOUWER-COETZEE-ATTORNEYS-VERIFIED-SOURCE-UPDATE-2026-08-06.md`
+   - Update commit: `61335910fd0bb6f1f281e06a1127251414fdd682`
+   - Current verified details include Luané Bouwer-Coetzee, 8 Louw Wepener, Dan Pienaar, 083 266 5507, `luane@bouwercoetzee.co.za`, Instagram `bouwer_coetzee_attorneys`, property transfers, personal injury, correspondent services, antenuptial contracts, civil matters, consultation, notarial services, family law and agreements.
+12. **Braize** — completed as an event-staffing and promotional-personnel deep research pack.
+   - Identity confirmed directly from the current Instagram evidence supplied by CA: `braize_za`, `www.braize.co.za`, professional waitresses, bartenders and promo staff.
+   - File: `BRAIZE-EVENT-STAFFING-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `44ba0864cbd004928dc5cf9ad318eb1f830b5d7f`
+   - Scope includes client acquisition, venues/planners/caterers, hospitality and promotional staffing, recruitment, vetting, staff matching, briefs, supervisors, backup systems, worker experience, compliance, website, SEO, paid media, partnerships, commercial and operational measurement, and a 90-day growth plan.
 
 ## System rule added during this sequence
 
@@ -70,12 +76,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Braize**
+**Brocor**
 
-Ask CA: `Braize — skip or go?`
+Ask CA: `Brocor — skip or go?`
 
-## Remaining order after Braize
+## Remaining order after Brocor
 
-Brocor; C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+C&L Innovations; Cape Lumber; Case Bloemfontein; Central Canvas; CG Production House; Dabo; Daisy & Co; Delta Gas; Dulux Bloemfontein; Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
