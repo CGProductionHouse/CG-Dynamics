@@ -73,22 +73,21 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `CENTRAL-CANVAS-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `c976ebfac3deae8ea44c5c0bfa344350dc1ddb62`
 18. **CG Production House** — completed as a major internal agency growth and positioning blueprint.
-   - Current official website, services, studio offer, public team, LinkedIn positioning, local competitors and current platform guidance were researched on 2026-08-06.
    - File: `CG-PRODUCTION-HOUSE-GROWTH-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `28cafa1193b925dbbfec30bd91769b9ba011d4c2`
-   - Scope includes current public offer and studio details, honest website and positioning diagnosis, outcome-led solution architecture, priority industries and buyer groups, competitor analysis, website rebuild priorities, founder-led content, signature campaign platforms, lead generation, referrals, Google/Meta/LinkedIn, sales process, packaging, proof system, agency and marketing KPIs, CG Dynamics as the operating advantage, guardrails and a 90-day growth plan.
 19. **Dabo** — skipped by CA.
 20. **Daisy & Co Bloemfontein** — completed as a local gift, fresh-treat, flower and occasion-retail intelligence pack.
-   - Exact identity verified as Daisy & Co at Shop 8A, Preller Square, Bloemfontein; unrelated online Daisy & Co businesses were excluded.
    - File: `DAISY-CO-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `ca689ba96e528cfeed029c3a2b106d48f7fa002f`
-   - Scope includes current identity and location evidence, hours conflict and freshness controls, gifts/homeware/fresh-bakes/flowers buyer journeys, occasion-led positioning, ready-to-give bundles, corporate gifting, fresh-stock content, Google and local SEO, Meta, Preller Square and Tal Florals partnerships, CRM, commercial KPIs, guardrails and a 90-day implementation plan.
 21. **Delta Gas Bloemfontein** — completed as an LPG refill, exchange, delivery, repeat-purchase and safety-authority intelligence pack.
-   - Exact identity verified as the Dan Pienaar business at 36 General Dan Pienaar Drive; unrelated Delta Gas brands and Delta Service Station were excluded.
    - File: `DELTA-GAS-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `7cab9f7f6cc809055ab34cfdb6abf942a1d62688`
-   - Scope includes current address and phone evidence, review-language analysis, household and business buyer journeys, competitor analysis, refill/delivery systems, business continuity accounts, accessories, responsible safety content, Google and local SEO, Meta, CRM and refill reminders, partnerships, reviews, commercial KPIs, CG Dynamics data requirements, guardrails and a 90-day implementation plan.
-   - Current hours, exact product range, delivery rules, installation scope, website status and social handles are explicitly marked for direct client confirmation before operational use.
+22. **Dulux Paint & Paper Bloemfontein** — completed as a colour-confidence, product-selection, mixing, wallpaper, trade and local-store growth pack.
+   - Current client evidence used: Instagram profile and grid screenshots, historical product/price photos, the four-video Dulux content guideline, and CG Dynamics Meta reporting history.
+   - File: `DULUX-PAINT-PAPER-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `a46d09551ee106d3c69679c12885c97ed7ce1f22`
+   - Scope includes homeowner, contractor, designer and property buyer journeys; colour-confidence and right-product systems; mixing/tinting content; project-ready baskets; wallpaper; trade relationships; activations; local search; Meta and Google; commercial measurement; reporting truth; guardrails; and a 90-day plan.
+   - Current store address, phone, hours, delivery, exact services, current promotions, competitor offers and official product data are explicitly marked for refresh because external web browsing was unavailable during this research session.
 
 ## System rule added during this sequence
 
@@ -103,12 +102,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Dulux Bloemfontein**
+**Econ Foods**
 
-Ask CA: `Dulux Bloemfontein — skip or go?`
+Ask CA: `Econ Foods — skip or go?`
 
-## Remaining order after Dulux Bloemfontein
+## Remaining order after Econ Foods
 
-Econ Foods; Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
