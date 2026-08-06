@@ -119,6 +119,14 @@ export function parseStaffInviteRequest(body: unknown): Parsed {
 export interface ExistingState {
   authUserExists: boolean
   activeProfile: { role: string; isActive: boolean; isClientAccount: boolean } | null
+  /**
+   * Whether the account has ever actually been used. Supabase creates the
+   * profile row the moment an Auth user is invited, with the default 'client'
+   * role, so a profile alone does NOT mean the person has an account — it may
+   * be an invitation that was never accepted. Only a password or a sign-in
+   * proves the account is real.
+   */
+  accountInUse: boolean
   liveInvitation: { id: string; status: StaffInviteStatus; role: StaffRole } | null
   duplicateIdentityForms: string[]
 }
@@ -133,7 +141,7 @@ export type Decision =
  * a second account being made for somebody who already has one.
  */
 export function decideStaffInvite(request: StaffInviteRequest, state: ExistingState): Decision {
-  if (state.activeProfile?.isClientAccount) {
+  if (state.activeProfile?.isClientAccount && state.accountInUse) {
     return {
       ok: false,
       code: 'client_account_conflict',
@@ -141,7 +149,10 @@ export function decideStaffInvite(request: StaffInviteRequest, state: ExistingSt
     }
   }
 
-  if (state.activeProfile && state.activeProfile.isActive) {
+  // A profile that exists only because an invitation was created is not an
+  // account. Refusing on that would make an unaccepted invitation permanently
+  // un-reinvitable.
+  if (state.activeProfile && state.activeProfile.isActive && state.accountInUse) {
     return {
       ok: false,
       code: 'already_active',

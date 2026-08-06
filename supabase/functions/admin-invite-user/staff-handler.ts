@@ -42,7 +42,7 @@ interface Queryable {
   from(table: string): TableQuery
   auth: {
     admin: {
-      listUsers(args: { page: number; perPage: number }): Promise<{ data: { users: Array<{ id: string; email?: string | null }> }; error: unknown }>
+      listUsers(args: { page: number; perPage: number }): Promise<{ data: { users: Array<{ id: string; email?: string | null; last_sign_in_at?: string | null }> }; error: unknown }>
       inviteUserByEmail(email: string, options: { redirectTo: string; data?: Record<string, unknown> }): Promise<{ data: { user: { id: string } | null } | null; error: ProviderError | null }>
     }
   }
@@ -57,14 +57,16 @@ function fail(status: number, code: string, error: string, extra: Record<string,
   return { status, body: { ok: false, code, error, ...extra } }
 }
 
-async function listAllAuthUsers(admin: Queryable): Promise<{ users: Array<{ id: string; email: string }>; failed: boolean }> {
-  const collected: Array<{ id: string; email: string }> = []
+async function listAllAuthUsers(admin: Queryable): Promise<{ users: Array<{ id: string; email: string; signedIn: boolean }>; failed: boolean }> {
+  const collected: Array<{ id: string; email: string; signedIn: boolean }> = []
   const perPage = 1000
   for (let page = 1; page <= 20; page += 1) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage })
     if (error) return { users: collected, failed: true }
     for (const user of data.users) {
-      if (user.email) collected.push({ id: user.id, email: user.email.trim().toLowerCase() })
+      if (user.email) {
+        collected.push({ id: user.id, email: user.email.trim().toLowerCase(), signedIn: Boolean(user.last_sign_in_at) })
+      }
     }
     if (data.users.length < perPage) break
   }
@@ -119,6 +121,9 @@ export async function handleStaffInvite(
     activeProfile: profileRow
       ? { role: profileRow.role, isActive: profileRow.is_active, isClientAccount: profileRow.client_id !== null }
       : null,
+    // Supabase writes a default 'client' profile as soon as an Auth user is
+    // invited, so a profile row is not evidence of a real account.
+    accountInUse: Boolean(authUser?.signedIn),
     liveInvitation: liveRow ? { id: liveRow.id, status: liveRow.status, role: liveRow.intended_role as never } : null,
     duplicateIdentityForms: [],
   }

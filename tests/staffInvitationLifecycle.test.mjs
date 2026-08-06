@@ -177,17 +177,34 @@ test('somebody who already has an active account is not invited again', () => {
   const decision = policy.decideStaffInvite(
     { email: 'a@b.com', role: 'team', fullName: null },
     { authUserExists: true, activeProfile: { role: 'team', isActive: true, isClientAccount: false },
-      liveInvitation: null, duplicateIdentityForms: [] },
+      accountInUse: true, liveInvitation: null, duplicateIdentityForms: [] },
   )
   assert.equal(decision.ok, false)
   assert.equal(decision.code, 'already_active')
+})
+
+test('a profile that exists only because an invitation was sent is not an account', () => {
+  // Supabase writes a default 'client' profile the moment an Auth user is
+  // invited. Treating that as an existing account made an unaccepted
+  // invitation impossible to re-send, and reported the wrong reason.
+  const decision = policy.decideStaffInvite(
+    { email: 'a@b.com', role: 'team', fullName: null },
+    { authUserExists: true, activeProfile: { role: 'client', isActive: true, isClientAccount: false },
+      accountInUse: false, liveInvitation: null, duplicateIdentityForms: [] },
+  )
+  assert.equal(decision.ok, true)
+})
+
+test('the account-in-use signal comes from a real sign-in, not from a profile row', () => {
+  assert.match(handlerSrc, /accountInUse: Boolean\(authUser\?\.signedIn\)/)
+  assert.match(handlerSrc, /signedIn: Boolean\(user\.last_sign_in_at\)/)
 })
 
 test('a client login cannot be reused as a staff identity', () => {
   const decision = policy.decideStaffInvite(
     { email: 'a@b.com', role: 'team', fullName: null },
     { authUserExists: true, activeProfile: { role: 'client', isActive: true, isClientAccount: true },
-      liveInvitation: null, duplicateIdentityForms: [] },
+      accountInUse: true, liveInvitation: null, duplicateIdentityForms: [] },
   )
   assert.equal(decision.ok, false)
   assert.equal(decision.code, 'client_account_conflict')
@@ -197,7 +214,7 @@ test('a second live invitation for the same address is refused', () => {
   for (const status of ['pending', 'sending', 'sent']) {
     const decision = policy.decideStaffInvite(
       { email: 'a@b.com', role: 'team', fullName: null },
-      { authUserExists: false, activeProfile: null,
+      { authUserExists: false, activeProfile: null, accountInUse: false,
         liveInvitation: { id: 'x', status, role: 'team' }, duplicateIdentityForms: [] },
     )
     assert.equal(decision.ok, false, status)
@@ -208,7 +225,7 @@ test('a second live invitation for the same address is refused', () => {
 test('a failed invitation does not block a fresh one', () => {
   const decision = policy.decideStaffInvite(
     { email: 'a@b.com', role: 'team', fullName: null },
-    { authUserExists: false, activeProfile: null,
+    { authUserExists: false, activeProfile: null, accountInUse: false,
       liveInvitation: { id: 'x', status: 'failed', role: 'team' }, duplicateIdentityForms: [] },
   )
   assert.equal(decision.ok, true)
