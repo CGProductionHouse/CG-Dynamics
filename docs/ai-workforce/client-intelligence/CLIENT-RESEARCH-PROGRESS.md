@@ -1,6 +1,6 @@
 # Client Marketing Intelligence — Progress Ledger
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 Status: Canonical client-by-client research progress for Issue #184.
 
 ## Workflow
@@ -16,7 +16,7 @@ Before researching any ambiguous client name:
 5. mark current prices, packages, claims and performance data for internal confirmation where not proven;
 6. apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` so mutable stored facts are compared with current official sources before use.
 
-Each completed pack should cover exact services, audiences, buying journeys, competitors, positioning, website, SEO, Google Business Profile, content, paid media, partnerships, promotions/activations, reviews, sales funnel, measurement and a 90-day plan, unless CA explicitly requests a smaller scope for a light client package.
+Each completed pack should cover exact services, audiences, buying journeys, competitors, positioning, website, SEO, Google Business Profile, content, paid media, partnerships, promotions/activations, reviews, sales funnel, measurement and a 90-day plan, unless CA explicitly requests a smaller scope for a light client package or a channel-specific scope.
 
 ## Progress
 
@@ -83,11 +83,14 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `DELTA-GAS-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `7cab9f7f6cc809055ab34cfdb6abf942a1d62688`
 22. **Dulux Paint & Paper Bloemfontein** — completed as a colour-confidence, product-selection, mixing, wallpaper, trade and local-store growth pack.
-   - Current client evidence used: Instagram profile and grid screenshots, historical product/price photos, the four-video Dulux content guideline, and CG Dynamics Meta reporting history.
    - File: `DULUX-PAINT-PAPER-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `a46d09551ee106d3c69679c12885c97ed7ce1f22`
-   - Scope includes homeowner, contractor, designer and property buyer journeys; colour-confidence and right-product systems; mixing/tinting content; project-ready baskets; wallpaper; trade relationships; activations; local search; Meta and Google; commercial measurement; reporting truth; guardrails; and a 90-day plan.
-   - Current store address, phone, hours, delivery, exact services, current promotions, competitor offers and official product data are explicitly marked for refresh because external web browsing was unavailable during this research session.
+23. **Econofoods South Africa** — completed as a video-first commercial playbook because CG's scope is primarily video production.
+   - Current official sources verified the frozen/chilled/grocery retail model, national and regional specials, online shopping/delivery, foodservice/reseller activity, 1996 Bloemfontein origin and HO HOLA culture.
+   - Historical CG commercial records confirm recurring four-video short-form packages, event/store-opening production, school-partnership work and prior campaign work including `Want chips with that?`.
+   - File: `ECONOFOODS-SOUTH-AFRICA-VIDEO-COMMERCIAL-PLAYBOOK-2026-08.md`
+   - Commit: `1692d4afb6723214e314d3ecf925a472a969e9fa`
+   - Scope is deliberately video-heavy: commercial video jobs, cheeky-brand rules, humour mechanics, hook systems, recurring franchises, product/value/craving structures, four-video monthly architecture, shoot-day B-roll capture, store openings, events, foodservice/B2B video, editing language, campaign territories, performance learning and food/price/comparative-claim guardrails.
 
 ## System rule added during this sequence
 
@@ -102,12 +105,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Econ Foods**
+**Ehrlich Park Butchery**
 
-Ask CA: `Econ Foods — skip or go?`
+Ask CA: `Ehrlich Park Butchery — skip or go?`
 
-## Remaining order after Econ Foods
+## Remaining order after Ehrlich Park Butchery
 
-Ehrlich Park Butchery; Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
