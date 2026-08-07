@@ -97,6 +97,12 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `EHRLICH-PARK-BUTCHERY-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `dc1b428096903df7121011b878ea5a1711e39485`
    - Scope includes competitor positioning, `Since 1975` heritage system, owner-led butcher authority, braai-by-headcount offers, family/freezer buyers, gifting, processing funnel if confirmed, Google/local SEO cleanup, website conversion, Meta/Search, community partnerships, reviews, repeat-purchase measurement and a 90-day plan.
+25. **Emmanuel Funeral Services Bloemfontein** — completed as a dignity, practical-relief, family-trust and local-search intelligence pack.
+   - Exact identity verified from the current official website: 16 Falck Street, Oranjesig, Bloemfontein; office 051 448 8566; after-hours 076 784 8131; `jeanette@emmanuelfuneralsbfn.co.za`.
+   - Current 2025 profile verifies Jeanette Ball as owner/current leader and confirms the family-business legacy after her mother, the founder, stepped back.
+   - File: `EMMANUEL-FUNERAL-SERVICES-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `df4943515d0734162e691d064dac921ba55352b0`
+   - Scope includes immediate-bereavement and arrangement journeys, funeral/cremation/tombstone service paths, 24-hour emergency clarity, owner-led trust content, cultural respect, practical education, website/local SEO/Google Business, sensitive review handling, paid search, community/referral relationships, privacy guardrails, commercial measurement and a 90-day plan.
 
 ## System rule added during this sequence
 
@@ -111,12 +117,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Emmanuel Funerals**
+**Emoya Driving Range**
 
-Ask CA: `Emmanuel Funerals — skip or go?`
+Ask CA: `Emoya Driving Range — skip or go?`
 
-## Remaining order after Emmanuel Funerals
+## Remaining order after Emoya Driving Range
 
-Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
