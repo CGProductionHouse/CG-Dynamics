@@ -98,16 +98,19 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - Main commit: `ccbd1cbb5d0242d8fcc3f12ba098f781633df294`
    - Verified current-source update: `EMOYA-DRIVING-RANGE-VERIFIED-SOURCE-UPDATE-2026-08-07.md`
    - Update commit: `ecffe6db5e5c21693ecc03bff5accad917325213`
-   - Current Instagram truth now verifies `@emoyadrivingrange`, public name `Emoya Estate Driving Range`, `Practice • Play • Improve`, 7 Frans Kleynhans Ave, event/booking WhatsApp `065 081 2405`, current opening hours, visible bucket prices/packages, night golf, Hit the Gong, event enquiries and current-feed promotional evidence. Chipping/putting greens remain marked `coming soon` until completion is confirmed.
 27. **First Technology Central — Bloemfontein only** — completed as a B2B IT, managed services, cyber security, Microsoft, cloud, networking, hardware/procurement and local-authority intelligence pack.
-   - Exact local identity verified as `First Technology Central`, current address `87 General Hertzog Street, Dan Pienaar, Bloemfontein, 9301`, phone `051 430 4455`, and local First Technology Free State email domain.
-   - Current local LinkedIn evidence confirms hardware, secure networks, cloud solutions, ongoing IT support, managed services, cybersecurity, endpoint protection and digital solutions.
-   - National First Technology Group scale/vendor proof is used only as group context and is not misrepresented as Bloemfontein-only performance.
-   - Local competitor research includes IPT Bloemfontein, SciBit and Lesedi ICT, with the strategy focused on `local team + national-scale specialist/vendor depth + business outcomes` rather than generic IT-product marketing.
    - File: `FIRST-TECHNOLOGY-CENTRAL-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `02f95e7df90251a8648627fcc5ec854ce82f3d44`
 28. **Full Rig Auto Worx** — skipped by CA.
 29. **G6** — skipped by CA.
+30. **Germoparts Bloemfontein** — completed as a major-client automotive aftermarket deep pack.
+   - Exact current branch verified from Germoparts official sources: 66A Harvey Road, Oranjesig, Bloemfontein; 051 430 0401.
+   - Official Germoparts sources verify the 2005 Hein and Neville Joerdens founder story, six current listed branches, nationwide courier/delivery positioning and extensive categories across service parts, brakes, suspension/steering, engine components, cooling, electronics, transmission, fuel systems and oils/consumables.
+   - Current local competitor research includes Goldwagen Bloemfontein/Hilton, AutoZone Bloemfontein, Midas and the Harvey Road automotive cluster.
+   - The pack is tied into the existing `AUTOMOTIVE-HUMAN-MARKETING-GOLDMINE-2026-08.md` and `INDUSTRY-AUTOMOTIVE-DEALERSHIP-AFTERMARKET.md` source foundations.
+   - Strategy prioritises workshop/trade relationships, correct-parts matching, delivery/availability, high-intent Search, local SEO, a vehicle-details quote funnel, specialist parts content, commercial video, reviews, fleet/workshop retention and sales-linked reporting.
+   - File: `GERMOPARTS-BLOEMFONTEIN-MAJOR-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `93de9792af0e6bbd19c7b81cadfbb83c44f426ab`
 
 ## System rule added during this sequence
 
@@ -122,12 +125,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Germoparts**
+**Hino Trucks**
 
-Ask CA: `Germoparts — skip or go?`
+Ask CA: `Hino Trucks — skip or go?`
 
-## Remaining order after Germoparts
+## Remaining order after Hino Trucks
 
-Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
