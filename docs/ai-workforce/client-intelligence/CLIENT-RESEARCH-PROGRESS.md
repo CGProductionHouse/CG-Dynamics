@@ -91,6 +91,12 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `ECONOFOODS-SOUTH-AFRICA-VIDEO-COMMERCIAL-PLAYBOOK-2026-08.md`
    - Commit: `1692d4afb6723214e314d3ecf925a472a969e9fa`
    - Scope is deliberately video-heavy: commercial video jobs, cheeky-brand rules, humour mechanics, hook systems, recurring franchises, product/value/craving structures, four-video monthly architecture, shoot-day B-roll capture, store openings, events, foodservice/B2B video, editing language, campaign territories, performance learning and food/price/comparative-claim guardrails.
+24. **Ehrlich Park Butchery** — completed as a heritage, butcher-expertise, braai, repeat-purchase and local growth intelligence pack.
+   - Exact current identity verified from the official site: family-owned since 1975, 55 De Waal Road, Bloemfontein, with current store contact, owner contact and opening hours.
+   - Current external evidence also supports biltong/droëwors gift packs, vouchers and a processing-related use case, but those product/service details are marked for direct client confirmation before operational use.
+   - File: `EHRLICH-PARK-BUTCHERY-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `dc1b428096903df7121011b878ea5a1711e39485`
+   - Scope includes competitor positioning, `Since 1975` heritage system, owner-led butcher authority, braai-by-headcount offers, family/freezer buyers, gifting, processing funnel if confirmed, Google/local SEO cleanup, website conversion, Meta/Search, community partnerships, reviews, repeat-purchase measurement and a 90-day plan.
 
 ## System rule added during this sequence
 
@@ -105,12 +111,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**Ehrlich Park Butchery**
+**Emmanuel Funerals**
 
-Ask CA: `Ehrlich Park Butchery — skip or go?`
+Ask CA: `Emmanuel Funerals — skip or go?`
 
-## Remaining order after Ehrlich Park Butchery
+## Remaining order after Emmanuel Funerals
 
-Emmanuel Funerals; Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Emoya Driving Range; First Tech; Full Rig Auto Worx; G6; Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
