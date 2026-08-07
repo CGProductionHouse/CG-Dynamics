@@ -50,12 +50,14 @@ Each completed pack should cover exact services, audiences, buying journeys, com
 28. **Full Rig Auto Worx** — skipped by CA.
 29. **G6** — skipped by CA.
 30. **Germoparts Bloemfontein** — completed major-client automotive aftermarket deep pack. `GERMOPARTS-BLOEMFONTEIN-MAJOR-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` — `93de9792af0e6bbd19c7b81cadfbb83c44f426ab`
-31. **Hino Oranje Bloemfontein** — completed as a truck-sales, fleet, aftersales, service/parts, application and uptime intelligence pack.
-   - Current official CFAO evidence verifies Hino Bloemfontein (Oranje), Cnr Nelson Mandela & Muller Road, Spitskop Small H, Bloemfontein; dealer contact 051 406 3000; new/used sales, service, parts and finance.
-   - Current Hino SA sources verify the Hino 300, 500 and 700 ranges, Total Support, warranty/maintenance support, national dealer-network support and strong current parts/aftersales evidence.
-   - Local competitor context includes Motus Commercial Bloemfontein Isuzu/UD and Scania Bloemfontein, with strategy centred on application fit, uptime, TCO, local dealer accountability, fleet growth and aftersales rather than passenger-car-style truck advertising.
-   - File: `HINO-ORANJE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
-   - Commit: `e6f86908e2222d4678fda5245a1ad288326f6bd7`
+31. **Hino Oranje Bloemfontein** — completed truck/fleet/aftersales/application pack. `HINO-ORANJE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` — `e6f86908e2222d4678fda5245a1ad288326f6bd7`
+32. **HMH Attorneys / Howard Maimela Heyns — Lydenburg/Mashishing** — completed as a legal-services, local-search, professional-authority and B2B/referral intelligence pack.
+   - Public-source identity is explicitly freshness-gated: older official records show Howard Maimela Heyns Inc / HMH Attorneys at 72 Kantoor Street; a 2024 Gazette matter uses Heyns Attorneys Inc., 61 Viljoen Street, Lydenburg, while retaining the `@hmhattorneys.co.za` domain.
+   - Public evidence supports civil/labour/representation work, estate-related historical work, commercial business-transfer work and public-sector tender participation, but all current practice areas remain client-confirmation gated.
+   - Competitor research includes Seymore, Du Toit & Basson, Schoeman Borman, Maluleke Mcdonovan Attorneys, JT Ratau Attorneys and JM Malatsi Attorneys.
+   - Strategy is backed by the LPC Code of Conduct and the existing `LEGAL-PROFESSIONAL-SERVICES-HUMAN-MARKETING-GOLDMINE-2026-08.md` foundation.
+   - File: `HMH-ATTORNEYS-LYDENBURG-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
+   - Commit: `fb661a0c79f706b36ee990cc843d5c8608fa72ef`
 
 ## System rule added during this sequence
 
@@ -70,12 +72,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**HMH Attorneys**
+**Human Auto**
 
-Ask CA: `HMH Attorneys — skip or go?`
+Ask CA: `Human Auto — skip or go?`
 
-## Remaining order after HMH Attorneys
+## Remaining order after Human Auto
 
-Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
