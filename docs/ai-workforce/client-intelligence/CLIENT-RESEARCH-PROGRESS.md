@@ -107,6 +107,7 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `FIRST-TECHNOLOGY-CENTRAL-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `02f95e7df90251a8648627fcc5ec854ce82f3d44`
 28. **Full Rig Auto Worx** — skipped by CA.
+29. **G6** — skipped by CA.
 
 ## System rule added during this sequence
 
@@ -121,12 +122,12 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 Next client in the captured alphabetical directory:
 
-**G6**
+**Germoparts**
 
-Ask CA: `G6 — skip or go?`
+Ask CA: `Germoparts — skip or go?`
 
-## Remaining order after G6
+## Remaining order after Germoparts
 
-Germoparts; Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Hino Trucks; HMH Attorneys; Human Auto; Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.
