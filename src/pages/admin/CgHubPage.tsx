@@ -503,9 +503,9 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
           <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
             {currentItem ? currentItem.title : focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
           </h2>
-          <p className="mt-1 text-sm text-brand-primary/65">
-            {nextItem ? `Next: ${nextItem.title}` : context.summary.suggestedNextAction}
-          </p>
+          {nextItem && (
+            <p className="mt-1 text-sm text-brand-primary/65">Next: {nextItem.title}</p>
+          )}
           {context.summary.workloadWarning && (
             <p className="mt-2 text-xs font-semibold text-amber-200">{context.summary.workloadWarning}</p>
           )}
