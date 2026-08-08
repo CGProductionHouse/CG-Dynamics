@@ -10,6 +10,7 @@ import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import { useAuth } from '../../contexts/AuthContext'
 import { isManagerRole } from '../../lib/roles'
+import { CALENDAR_HEADERS, monthGridCells, todayIso } from '../../lib/scheduleCalendar'
 import {
   approveScheduleChange,
   listMyScheduleChangeRequests,
@@ -445,7 +446,7 @@ export default function ClientSchedulePage() {
       ) : view === 'year' ? (
         <YearView items={yearItems} clientDisplay={clientDisplay} onOpen={openDeliverable} />
       ) : (
-        <CalendarView month={selectedMonth} items={calendarItems} clientDisplay={clientDisplay} onOpen={openDeliverable} onMore={setDayDrawer} />
+        <CalendarView key={selectedMonth} month={selectedMonth} items={calendarItems} clientDisplay={clientDisplay} onOpen={openDeliverable} onMore={setDayDrawer} />
       )}
 
       {drawerDeliverable && (
@@ -774,66 +775,111 @@ function BoardView({ items, clientDisplay, selectedClientId, onOpen }: { items: 
   )
 }
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
 function CalendarView({ month, items, clientDisplay, onOpen, onMore }: { month: string; items: MonthlyDeliverable[]; clientDisplay: (item: MonthlyDeliverable) => ClientDisplay; onOpen: (item: MonthlyDeliverable) => void; onMore: (day: { date: string; items: MonthlyDeliverable[] }) => void }) {
-  const [year, m] = month.split('-').map(Number)
-  const firstDay = new Date(year, m - 1, 1).getDay()
-  const daysInMonth = new Date(year, m, 0).getDate()
-  const cells: Array<number | null> = [...Array.from({ length: firstDay }, () => null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)]
-  const byDate = new Map<string, MonthlyDeliverable[]>()
-  for (const item of items) {
-    const date = getEffectiveScheduleDate(item)
-    if (!date) continue
-    if (!byDate.has(date)) byDate.set(date, [])
-    byDate.get(date)!.push(item)
-  }
-  const today = new Date().toISOString().slice(0, 10)
-  const mobileGroups = [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b))
+  const byDate = useMemo(() => {
+    const map = new Map<string, MonthlyDeliverable[]>()
+    for (const item of items) {
+      const date = getEffectiveScheduleDate(item)
+      if (!date) continue
+      if (!map.has(date)) map.set(date, [])
+      map.get(date)!.push(item)
+    }
+    return map
+  }, [items])
+  const cells = useMemo(() => monthGridCells(month), [month])
+  const today = todayIso()
+  const defaultDay = cells.some(cell => cell.iso === today) && byDate.has(today)
+    ? today
+    : ([...byDate.keys()][0] ?? today)
+  const [mobileDay, setMobileDay] = useState<string | null>(defaultDay)
+  const selectedDay = mobileDay && byDate.has(mobileDay) ? mobileDay : defaultDay
+  const selectedItems = selectedDay ? byDate.get(selectedDay)! : []
 
   return (
     <div>
       <div className="hidden sm:block">
-        <div className="mb-1 grid grid-cols-7 gap-px">{DAY_NAMES.map(day => <div key={day} className="py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/30">{day}</div>)}</div>
+        <div className="mb-1 grid grid-cols-7 gap-px">{CALENDAR_HEADERS.map(day => <div key={day} className="py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/30">{day}</div>)}</div>
         <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.04]">
-          {cells.map((day, index) => {
-            if (day === null) return <div key={`empty-${index}`} className="min-h-[104px] bg-[#0c0c0c]" />
-            const date = `${month}-${String(day).padStart(2, '0')}`
-            const dayItems = byDate.get(date) ?? []
+          {cells.map(cell => {
+            const dayItems = byDate.get(cell.iso) ?? []
+            const isToday = cell.iso === today
             return (
-              <div key={date} className={`min-h-[104px] p-1.5 ${date === today ? 'bg-brand-teal/[0.055]' : 'bg-[#0c0c0c]'}`}>
-                <span className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${date === today ? 'bg-brand-teal text-black' : 'text-white/35'}`}>{day}</span>
+              <div key={cell.iso} className={`min-h-[104px] p-1.5 ${isToday ? 'bg-brand-teal/[0.055]' : 'bg-[#0c0c0c]'} ${cell.outside ? 'opacity-40' : ''}`}>
+                <button
+                  type="button"
+                  disabled={cell.outside}
+                  onClick={() => onMore({ date: cell.iso, items: dayItems })}
+                  className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${isToday ? 'bg-brand-teal text-black' : 'text-white/35'} ${cell.outside ? '' : 'hover:bg-white/10 hover:text-white'}`}
+                >
+                  {cell.day}
+                </button>
                 <div className="space-y-0.5">
                   {dayItems.slice(0, 4).map(item => (
                     <button key={item.id} type="button" onClick={() => onOpen(item)} className={`flex w-full items-center gap-1 rounded border px-1 py-0.5 text-left text-[10px] ${scheduleStatusOf(item) === 'scheduled_posted' ? 'border-white/[0.06] bg-white/[0.02] text-white/35' : 'border-brand-teal/20 bg-brand-teal/[0.06] text-[#2dd4bf]'}`}>
                       <span className="font-bold">{displayCode(item)}</span><span className="min-w-0 truncate opacity-70">{clientDisplay(item).label}</span>
                     </button>
                   ))}
-                  {dayItems.length > 4 && <button type="button" onClick={() => onMore({ date, items: dayItems })} className="w-full rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-left text-[10px] font-semibold text-white/40">+{dayItems.length - 4} more</button>}
+                  {dayItems.length > 4 && <button type="button" onClick={() => onMore({ date: cell.iso, items: dayItems })} className="w-full rounded border border-white/[0.06] bg-white/[0.025] px-1 py-0.5 text-left text-[10px] font-semibold text-white/40">+{dayItems.length - 4} more</button>}
                 </div>
               </div>
             )
           })}
         </div>
       </div>
-      <div className="space-y-5 sm:hidden">
-        {mobileGroups.map(([date, dayItems]) => (
-          <section key={date}>
-            <button
-              type="button"
-              onClick={() => onMore({ date, items: dayItems })}
-              className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-left"
-            >
-              <span className="text-xs font-black uppercase tracking-[0.14em] text-white">
-                {new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' })}
-              </span>
-              <span className="text-[10px] font-bold text-brand-primary/55">{dayItems.length} post{dayItems.length === 1 ? '' : 's'}</span>
-            </button>
-            <div className="space-y-2">
-              {dayItems.map(item => <ScheduleCard key={item.id} item={item} display={clientDisplay(item)} onOpen={() => onOpen(item)} />)}
+
+      <div className="sm:hidden">
+        <div className="mb-1 grid grid-cols-7 gap-1">{CALENDAR_HEADERS.map(day => <div key={day} className="py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white/30">{day}</div>)}</div>
+        <div className="grid grid-cols-7 gap-1">
+          {cells.map(cell => {
+            const dayItems = byDate.get(cell.iso) ?? []
+            const isToday = cell.iso === today
+            const isSelected = cell.iso === selectedDay
+            return (
+              <button
+                key={cell.iso}
+                type="button"
+                aria-label={`${cell.iso}${dayItems.length > 0 ? `, ${dayItems.length} post(s)` : ''}`}
+                onClick={() => setMobileDay(cell.iso)}
+                className={`flex aspect-square flex-col items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
+                  isSelected
+                    ? 'border-brand-accent bg-brand-accent text-black'
+                    : isToday
+                      ? 'border-brand-teal/45 bg-brand-teal/[0.08] text-white'
+                      : cell.outside
+                        ? 'border-transparent text-white/25'
+                        : 'border-white/[0.06] bg-white/[0.02] text-white/60'
+                }`}
+              >
+                <span>{cell.day}</span>
+                {dayItems.length > 0 && <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-black/70' : 'bg-brand-teal/70'}`} />}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="mt-3 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.025]">
+          <div className="flex items-center justify-between gap-3 border-b border-white/[0.08] px-3 py-2">
+            <h3 className="text-xs font-black uppercase tracking-[0.14em] text-white">
+              {new Date(`${selectedDay}T00:00:00`).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' })}
+            </h3>
+            <span className="text-[10px] font-bold text-brand-primary/55">{selectedItems.length} post{selectedItems.length === 1 ? '' : 's'}</span>
+          </div>
+          {selectedItems.length === 0 ? (
+            <p className="px-3 py-4 text-xs text-white/45">Nothing scheduled on this day.</p>
+          ) : (
+            <div className="divide-y divide-white/[0.05]">
+              {selectedItems.map(item => (
+                <button key={item.id} type="button" onClick={() => onOpen(item)} className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/[0.03]">
+                  <span className={`w-12 shrink-0 rounded border px-1 py-0.5 text-center text-[10px] font-black ${scheduleStatusOf(item) === 'scheduled_posted' ? 'border-white/[0.06] bg-white/[0.02] text-white/35' : 'border-brand-teal/20 bg-brand-teal/[0.06] text-[#2dd4bf]'}`}>
+                    {displayCode(item)}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-xs font-semibold text-white">{item.title}</span>
+                  <span className={`shrink-0 text-[10px] font-bold ${scheduleStatusOf(item) === 'scheduled_posted' ? 'text-white/35' : 'text-brand-primary/60'}`}>{clientDisplay(item).label}</span>
+                </button>
+              ))}
             </div>
-          </section>
-        ))}
+          )}
+        </div>
       </div>
     </div>
   )

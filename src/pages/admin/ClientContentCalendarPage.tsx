@@ -15,6 +15,7 @@ import {
   type DeliverableType,
   type MonthlyDeliverable,
 } from '../../lib/planner'
+import { CALENDAR_HEADERS, monthGridCells, todayIso } from '../../lib/scheduleCalendar'
 
 // Client-ready monthly content calendar.
 //
@@ -25,10 +26,6 @@ import {
 // production noise. Staff controls live in the clearly-marked internal bar,
 // which "Preview as client" hides for screen-shares.
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
-// Client-facing post type badges. Only package post types (dp/photo/video/
-// reel) are shown on this calendar; anything else is filtered out upstream.
 const TYPE_BADGES: Partial<Record<DeliverableType, { short: string; label: string; cls: string }>> = {
   dp: { short: 'Poster', label: 'Designed poster', cls: 'border-[#2dd4bf]/30 bg-[#2dd4bf]/10 text-[#8af5e8]' },
   photo: { short: 'Photo', label: 'Photo', cls: 'border-report-sand/35 bg-report-sand/10 text-report-sand' },
@@ -269,7 +266,7 @@ export default function ClientContentCalendarPage() {
             ) : (
               <>
                 <MonthGrid month={month} byDate={byDate} onOpenDay={setDayPanel} />
-                <MobileAgenda byDate={byDate} />
+                <MobileCalendar key={month} month={month} byDate={byDate} />
 
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 pt-4">
                   {STATUS_ORDER.map(status => (
@@ -342,31 +339,30 @@ function MonthGrid({ month, byDate, onOpenDay }: {
   byDate: Map<string, MonthlyDeliverable[]>
   onOpenDay: (day: { date: string; items: MonthlyDeliverable[] }) => void
 }) {
-  const [year, m] = month.split('-').map(Number)
-  const firstDay = new Date(year, m - 1, 1).getDay()
-  const daysInMonth = new Date(year, m, 0).getDate()
-  const cells: Array<number | null> = [
-    ...Array.from({ length: firstDay }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-  ]
-  const today = new Date().toISOString().slice(0, 10)
+  const cells = monthGridCells(month)
+  const today = todayIso()
 
   return (
     <div className="hidden sm:block">
       <div className="mb-1 grid grid-cols-7 gap-px">
-        {DAY_NAMES.map(day => (
+        {CALENDAR_HEADERS.map(day => (
           <div key={day} className="py-2 text-center text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">{day}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 shadow-[0_28px_80px_-54px_rgba(0,0,0,0.95)]">
-        {cells.map((day, index) => {
-          if (day === null) return <div key={`empty-${index}`} className="min-h-[116px] bg-[#04100e]/80" />
-          const date = `${month}-${String(day).padStart(2, '0')}`
-          const dayItems = byDate.get(date) ?? []
-          const isToday = date === today
+        {cells.map(cell => {
+          const dayItems = byDate.get(cell.iso) ?? []
+          const isToday = cell.iso === today
           return (
-            <div key={date} className={`min-h-[116px] p-1.5 ${isToday ? 'bg-[#2dd4bf]/[0.075]' : 'bg-[#081614]/86'}`}>
-              <span className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${isToday ? 'bg-[#2dd4bf] text-[#03110f] shadow-[0_0_22px_-7px_rgba(45,212,191,0.9)]' : 'text-slate-500'}`}>{day}</span>
+            <div key={cell.iso} className={`min-h-[116px] p-1.5 ${isToday ? 'bg-[#2dd4bf]/[0.075]' : 'bg-[#081614]/86'} ${cell.outside ? 'opacity-40' : ''}`}>
+              <button
+                type="button"
+                disabled={cell.outside}
+                onClick={() => onOpenDay({ date: cell.iso, items: dayItems })}
+                className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${isToday ? 'bg-[#2dd4bf] text-[#03110f] shadow-[0_0_22px_-7px_rgba(45,212,191,0.9)]' : 'text-slate-500'} ${cell.outside ? '' : 'hover:bg-white/10 hover:text-white'}`}
+              >
+                {cell.day}
+              </button>
               <div className="space-y-1">
                 {dayItems.slice(0, 3).map(item => {
                   const status = toClientSafeStatus(item.production_status)
@@ -374,7 +370,7 @@ function MonthGrid({ month, byDate, onOpenDay }: {
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => onOpenDay({ date, items: dayItems })}
+                      onClick={() => onOpenDay({ date: cell.iso, items: dayItems })}
                       title={`${item.title} · ${CLIENT_SAFE_STATUS_LABELS[status]}`}
                       className="flex w-full items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.055] px-1.5 py-1 text-left transition-colors hover:border-[#2dd4bf]/35 hover:bg-white/[0.08]"
                     >
@@ -387,7 +383,7 @@ function MonthGrid({ month, byDate, onOpenDay }: {
                 {dayItems.length > 3 && (
                   <button
                     type="button"
-                    onClick={() => onOpenDay({ date, items: dayItems })}
+                    onClick={() => onOpenDay({ date: cell.iso, items: dayItems })}
                     className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-1.5 py-1 text-left text-[10px] font-semibold text-slate-400 transition hover:text-white"
                   >
                     +{dayItems.length - 3} more
@@ -402,20 +398,91 @@ function MonthGrid({ month, byDate, onOpenDay }: {
   )
 }
 
-// Mobile: calm agenda list grouped by day instead of a cramped grid.
-function MobileAgenda({ byDate }: { byDate: Map<string, MonthlyDeliverable[]> }) {
-  const days = [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b))
-  if (days.length === 0) return null
+// Mobile: true month grid (compact cells with a count dot), with the selected
+// day's posts shown as an agenda beneath. Never a stacked all-month feed.
+// Keyed by month up in the page so the selection resets on month navigation.
+function MobileCalendar({ month, byDate }: {
+  month: string
+  byDate: Map<string, MonthlyDeliverable[]>
+}) {
+  const cells = monthGridCells(month)
+  const today = todayIso()
+  const defaultDay = cells.some(cell => cell.iso === today) && byDate.has(today)
+    ? today
+    : ([...byDate.keys()][0] ?? null)
+  const [day, setDay] = useState<string | null>(defaultDay)
+  const effectiveDay = day && byDate.has(day) ? day : defaultDay
   return (
-    <div className="space-y-4 sm:hidden">
-      {days.map(([date, dayItems]) => (
-        <div key={date}>
-          <h3 className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500">{formatDayHeading(date)}</h3>
-          <div className="space-y-2">
-            {dayItems.map(item => <PostCard key={item.id} item={item} />)}
-          </div>
+    <>
+      <MobileMonthGrid month={month} byDate={byDate} day={effectiveDay} onSelect={setDay} />
+      <MobileAgenda byDate={byDate} day={effectiveDay} />
+    </>
+  )
+}
+
+function MobileMonthGrid({ month, byDate, day, onSelect }: {
+  month: string
+  byDate: Map<string, MonthlyDeliverable[]>
+  day: string | null
+  onSelect: (date: string) => void
+}) {
+  const cells = monthGridCells(month)
+  const today = todayIso()
+  return (
+    <div className="sm:hidden">
+      <div className="mb-1 grid grid-cols-7 gap-1">
+        {CALENDAR_HEADERS.map(dayName => (
+          <div key={dayName} className="py-1 text-center text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">{dayName}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map(cell => {
+          const count = byDate.get(cell.iso)?.length ?? 0
+          const isToday = cell.iso === today
+          const isSelected = cell.iso === day
+          return (
+            <button
+              key={cell.iso}
+              type="button"
+              aria-label={`${cell.iso}${count > 0 ? `, ${count} post(s)` : ''}`}
+              onClick={() => onSelect(cell.iso)}
+              className={`flex aspect-square flex-col items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
+                isSelected
+                  ? 'border-[#2dd4bf] bg-[#2dd4bf]/20 text-white'
+                  : isToday
+                    ? 'border-[#2dd4bf]/45 bg-[#2dd4bf]/[0.08] text-white'
+                    : cell.outside
+                      ? 'border-transparent text-slate-700'
+                      : 'border-white/10 bg-white/[0.035] text-slate-300'
+              }`}
+            >
+              <span>{cell.day}</span>
+              {count > 0 && <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-[#2dd4bf]' : 'bg-[#2dd4bf]/70'}`} />}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// Mobile: agenda for the selected day under the compact grid.
+function MobileAgenda({ byDate, day }: { byDate: Map<string, MonthlyDeliverable[]>; day: string | null }) {
+  const dayItems = day ? byDate.get(day) ?? [] : []
+  if (!day) return null
+  return (
+    <div className="mt-4 sm:hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
+        <h3 className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{formatDayHeading(day)}</h3>
+        <span className="text-[10px] font-bold text-slate-500">{dayItems.length} post{dayItems.length === 1 ? '' : 's'}</span>
+      </div>
+      {dayItems.length === 0 ? (
+        <p className="py-4 text-xs text-slate-500">Nothing planned on this day.</p>
+      ) : (
+        <div className="mt-3 space-y-2">
+          {dayItems.map(item => <PostCard key={item.id} item={item} />)}
         </div>
-      ))}
+      )}
     </div>
   )
 }
