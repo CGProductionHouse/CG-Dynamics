@@ -92,27 +92,17 @@ export default function MyDayPage({ embedded = false }: { embedded?: boolean }) 
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-10">
-      <div className={`relative mb-5 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:rounded-3xl ${embedded ? 'sm:p-5' : 'sm:p-7'}`}>
-        <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-brand-teal">Workforce</p>
-            <h1 className={`mt-2 font-display font-black uppercase leading-none tracking-wide text-white ${embedded ? 'text-3xl sm:text-4xl' : 'text-3xl sm:text-6xl'}`}>
-              My Day
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-brand-primary/72">
-              A focused daily view built from assigned Planner tasks, CG Calendar events and Client Schedule work.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary/55">
-              {context?.todayLabel ?? 'Today'}
-            </p>
-            <p className="mt-1 text-lg font-semibold text-white">
-              {context?.userName ?? profile?.email ?? 'Staff member'}
-            </p>
-          </div>
+    <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 ${embedded ? 'pb-6 pt-2' : 'py-4 sm:py-6'}`}>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 sm:px-5">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal">My Day</p>
+          <h1 className="mt-0.5 truncate text-lg font-black text-white sm:text-xl">
+            {context?.todayLabel ?? 'Today'}
+          </h1>
         </div>
+        <span className="text-sm font-semibold text-brand-primary/70">
+          {context?.userName ?? profile?.email ?? 'You'}
+        </span>
       </div>
 
       {message && (
@@ -128,7 +118,9 @@ export default function MyDayPage({ embedded = false }: { embedded?: boolean }) 
           ))}
         </div>
       ) : !context ? (
-        <EmptyPanel title="My Day could not load" text="Refresh the page or ask admin to check your profile." />
+        <div role="alert" className="rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-200">
+          Could not load My Day. Refresh the page or try again shortly.
+        </div>
       ) : (
         <>
           <Diagnostics context={context} />
@@ -150,25 +142,21 @@ export default function MyDayPage({ embedded = false }: { embedded?: boolean }) 
             <section className="space-y-5 xl:order-1">
               <WorkSection
                 title="Overdue work"
-                subtitle="Late assigned work that needs a decision, update or handoff."
                 items={context.overdue.slice(0, 10)}
                 context={context}
                 busyId={busyId}
                 onStart={startItem}
                 onReview={sendToReview}
-                emptyTitle="Nothing overdue"
-                emptyText="No overdue assigned work is showing for your profile."
+                empty="Nothing overdue"
               />
               <WorkSection
                 title="Assigned work"
-                subtitle="Due today and upcoming assigned work for the next seven days."
                 items={assignedItems}
                 context={context}
                 busyId={busyId}
                 onStart={startItem}
                 onReview={sendToReview}
-                emptyTitle="No assigned work found"
-                emptyText="If this looks wrong, ask admin to check your profile name, helper names or direct task assignment."
+                empty="No assigned work"
               />
             </section>
           </div>
@@ -179,49 +167,51 @@ export default function MyDayPage({ embedded = false }: { embedded?: boolean }) 
 }
 
 function Diagnostics({ context }: { context: MyDayContext }) {
-  const notes: string[] = []
-  if (context.diagnostics.profileNameMissing) notes.push('Add a full name to your profile so imported name/helper assignments can match you. User-ID assignments can still match.')
-  if (context.diagnostics.companyEventsMissing) notes.push('CG Calendar events table is not available yet.')
-  notes.push(...context.diagnostics.errors)
-
-  if (notes.length === 0) return null
+  if (context.diagnostics.errors.length === 0) return null
 
   return (
-    <div className="mb-5 rounded-2xl border border-amber-400/20 bg-amber-400/[0.06] p-4 text-sm text-amber-100">
-      <p className="font-semibold">Setup notes</p>
-      <ul className="mt-2 space-y-1 text-xs text-amber-100/80">
-        {notes.map(note => <li key={note}>{note}</li>)}
+    <div role="alert" className="mb-5 rounded-xl border border-amber-400/25 bg-amber-400/[0.06] px-4 py-3 text-sm text-amber-100">
+      <p className="font-semibold">Some work couldn't load</p>
+      <ul className="mt-1 space-y-1 text-xs text-amber-100/80">
+        {context.diagnostics.errors.map(error => <li key={error}>{error}</li>)}
       </ul>
     </div>
   )
 }
 
 function PlanSummary({ context }: { context: MyDayContext }) {
-  const { currentTask, nextTask, suggestedNextAction, workloadWarning, plannedMinutes, availableMinutes } = context.summary
-  const plannedLabel = `${Math.round(plannedMinutes / 60)}h planned of ${Math.round(availableMinutes / 60)}h`
+  const { currentTask, nextTask, workloadWarning, plannedMinutes, availableMinutes } = context.summary
+  const plannedLabel = `${Math.round(plannedMinutes / 60)}h of ${Math.round(availableMinutes / 60)}h`
+  const hasFocus = Boolean(currentTask) || Boolean(nextTask)
+
+  if (!hasFocus && !workloadWarning) {
+    return (
+      <section className="mb-5 rounded-2xl border border-white/10 bg-brand-surface/80 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary/55">Today's plan</h2>
+          <span className="text-sm font-semibold text-brand-primary/60">No scheduled work · {plannedLabel}</span>
+        </div>
+      </section>
+    )
+  }
 
   return (
-    <section className="mb-6 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-teal">Recommended flow</p>
-          <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
-            {currentTask ? currentTask.title : 'No assigned focus work due now'}
-          </h2>
-          <p className="mt-2 text-sm text-brand-primary/65">{suggestedNextAction}</p>
-          {workloadWarning && (
-            <p className="mt-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs font-semibold text-amber-100">
-              {workloadWarning}
-            </p>
-          )}
-        </div>
-        <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:w-[26rem]">
-          <PlanMiniCard label="Current" item={currentTask} context={context} />
-          <PlanMiniCard label="Next" item={nextTask} context={context} />
-          <div className="rounded-xl border border-white/10 bg-black/20 p-3 sm:col-span-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/45">Capacity</p>
-            <p className="mt-1 text-sm font-semibold text-white">{plannedLabel}</p>
-          </div>
+    <section className="mb-5 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
+      <div className="min-w-0">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-teal">Today's plan</p>
+        <h2 className="mt-1 truncate text-lg font-black text-white sm:text-xl">
+          {currentTask ? `Start: ${currentTask.title}` : nextTask ? `Up next: ${nextTask.title}` : 'Open day'}
+        </h2>
+        {workloadWarning && (
+          <p className="mt-1.5 text-xs font-semibold text-amber-200">{workloadWarning}</p>
+        )}
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <PlanMiniCard label="Current" item={currentTask} context={context} />
+        <PlanMiniCard label="Next" item={nextTask} context={context} />
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/45">Capacity</p>
+          <p className="mt-1 text-sm font-semibold text-white">{plannedLabel}</p>
         </div>
       </div>
     </section>
@@ -257,38 +247,31 @@ function Signal({ label, value, danger }: { label: string; value: number; danger
 
 function WorkSection({
   title,
-  subtitle,
   items,
   context,
   busyId,
   onStart,
   onReview,
-  emptyTitle = 'Clear for now',
-  emptyText = 'No assigned active work in this section.',
+  empty,
 }: {
   title: string
-  subtitle: string
   items: MyDayItem[]
   context: MyDayContext
   busyId: string | null
   onStart: (item: MyDayItem) => void
   onReview: (item: MyDayItem) => void
-  emptyTitle?: string
-  emptyText?: string
+  empty: string
 }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-4 sm:p-5">
-      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="font-display text-2xl font-black uppercase tracking-wide text-white">{title}</h2>
-          <p className="text-sm text-brand-primary/60">{subtitle}</p>
-        </div>
-        <span className="text-xs font-semibold text-brand-primary/45">{items.length} item{items.length === 1 ? '' : 's'}</span>
+    <section className="rounded-2xl border border-white/10 bg-brand-surface/80 px-3 py-3 sm:p-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-black uppercase tracking-[0.14em] text-white">{title}</h2>
+        <span className="text-xs font-semibold text-brand-primary/45">{items.length}</span>
       </div>
       {items.length === 0 ? (
-        <EmptyPanel title={emptyTitle} text={emptyText} compact />
+        <p className="mt-1.5 text-sm text-brand-primary/50">{empty}</p>
       ) : (
-        <div className="space-y-3">
+        <div className="mt-3 space-y-3">
           {items.map(item => (
             <WorkItemCard
               key={item.id}
@@ -374,13 +357,12 @@ function WorkItemCard({
 
 function TimelineSection({ context }: { context: MyDayContext }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-4 sm:p-5">
-      <h2 className="font-display text-2xl font-black uppercase tracking-wide text-white">Workday plan</h2>
-      <p className="mt-1 text-sm text-brand-primary/60">08:00 to 17:00, anchored by CG Calendar events.</p>
+    <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-3 sm:p-4">
+      <h2 className="text-sm font-black uppercase tracking-[0.14em] text-white">Workday plan</h2>
       {context.timelineBlocks.length === 0 ? (
-        <EmptyPanel title="No dated items today" text="Use the open time for upcoming assigned work." compact />
+        <p className="mt-1.5 text-sm text-brand-primary/50">Nothing scheduled in this workday.</p>
       ) : (
-        <div className="mt-4 space-y-3">
+        <div className="mt-3 space-y-3">
           {context.timelineBlocks.map(block => <TimelineBlock key={block.id} block={block} />)}
         </div>
       )}
@@ -426,16 +408,13 @@ function TimelineBlock({ block }: { block: MyDayTimelineBlock }) {
 
 function SourceSummary({ context }: { context: MyDayContext }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-4 sm:p-5">
-      <h2 className="font-display text-2xl font-black uppercase tracking-wide text-white">Connected work</h2>
-      <div className="mt-4 grid gap-3">
+    <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-3 sm:p-4">
+      <h2 className="text-sm font-black uppercase tracking-[0.14em] text-white">Connected work</h2>
+      <div className="mt-3 grid gap-2">
         <SourceRow label="Planner tasks" value={context.tasks.length} to="/admin/planner" />
         <SourceRow label="CG Calendar events" value={context.events.length} to="/admin/cg-calendar" />
         <SourceRow label="Client Schedule work" value={context.deliverables.length} to="/admin/client-schedule?view=calendar" />
       </div>
-      <p className="mt-4 text-xs text-brand-primary/45">
-        My Day only shows real connected data. If a module has no dated or assigned items, it stays quiet.
-      </p>
     </section>
   )
 }
@@ -446,14 +425,5 @@ function SourceRow({ label, value, to }: { label: string; value: number; to: str
       <span className="text-sm font-semibold text-white">{label}</span>
       <span className="text-sm font-black text-brand-teal">{value}</span>
     </Link>
-  )
-}
-
-function EmptyPanel({ title, text, compact }: { title: string; text: string; compact?: boolean }) {
-  return (
-    <div className={`rounded-2xl border border-white/8 bg-white/[0.025] text-center ${compact ? 'p-4' : 'p-8'}`}>
-      <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-1 text-sm text-brand-primary/55">{text}</p>
-    </div>
   )
 }
