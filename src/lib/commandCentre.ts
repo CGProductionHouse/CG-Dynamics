@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import { matchClient, clientSelection } from './clientMatcher'
-import { isMissingPlannerAssignmentRpcError, listPlannerBoardAssignments, listPlannerTaskRows } from './planner'
+import { isMissingPlannerAssignmentRpcError, listPlannerBoardAssignments, listPlannerTaskRows, PLANNER_TASK_STATUS_LABELS } from './planner'
 
 export type TaskBucket =
   | 'Client Requests'
@@ -50,6 +50,12 @@ export interface CommandCentreTask {
   bucket: TaskBucket
   priority: TaskPriority
   status: TaskStatus
+  /** Raw Planner workflow status preserved for display (e.g. 'approved',
+   *  'scheduled', 'ready_internal_review'). The coarse `status` above keeps the
+   *  task ACTIVE; this field keeps the truthful Planner label visible on cards,
+   *  history, filters and Assistant context. Only set for planner rows.
+   */
+  planner_status?: string
   due_date: string
   notes: string | null
   source: TaskSource
@@ -205,12 +211,18 @@ function cleanBucketName(value: string | null | undefined): string {
   return raw
 }
 
+// Maps a stored planner status onto the ops TaskStatus surface. Operational
+// completion is decided by src/lib/taskLifecycle: only 'done' (or legacy
+// 'completed') counts. 'approved' and 'scheduled' are content scheduling
+// states and stay ACTIVE for work; the old shortcut that smuggled them through
+// 'done' is what kept finished-feeling tasks alive on boards (issue #176).
 function taskStatusFromPlanner(status: string): TaskStatus {
   if (status === 'in_progress') return 'in_progress'
   if (status === 'blocked') return 'blocked'
   if (status === 'waiting_client') return 'waiting_client'
-  if (status === 'scheduled' || status === 'approved' || status === 'done') return 'done'
-  if (status === 'ready_internal_review') return 'in_progress'
+  if (status === 'done' || status === 'completed') return 'done'
+  if (status === 'approved' || status === 'scheduled' || status === 'ready_internal_review') return 'in_progress'
+  if (status === 'moved_to_tomorrow') return 'moved_to_tomorrow'
   return 'to_do'
 }
 
@@ -220,6 +232,27 @@ function plannerStatusFromTask(status: TaskStatus): string {
   if (status === 'waiting_client') return 'waiting_client'
   if (status === 'done') return 'done'
   return 'to_do'
+}
+
+const OPS_STATUS_LABELS: Record<TaskStatus, string> = {
+  to_do: 'To do',
+  in_progress: 'In progress',
+  done: 'Done',
+  blocked: 'Blocked',
+  waiting_client: 'Waiting client',
+  moved_to_tomorrow: 'Moved to tomorrow',
+}
+
+// Display-only resolver. The coarse `status` keeps the task ACTIVE (approved /
+// scheduled / ready_internal_review all project to an active bucket) but that
+// would mislabel the card as "In progress". The raw `planner_status` field
+// carries the truthful Planner label, so visible surfaces render it here.
+export function taskStatusDisplayLabel(task: { status: TaskStatus; data_origin?: string; planner_status?: string }): string {
+  if (task.data_origin === 'planner_tasks' && task.planner_status) {
+    const override = PLANNER_TASK_STATUS_LABELS[task.planner_status as keyof typeof PLANNER_TASK_STATUS_LABELS]
+    if (override) return override
+  }
+  return OPS_STATUS_LABELS[task.status] ?? task.status
 }
 
 function plannerTaskToCommandTask(
@@ -241,6 +274,7 @@ function plannerTaskToCommandTask(
     bucket: bucket as TaskBucket,
     priority: row.priority ?? 'normal',
     status: taskStatusFromPlanner(row.status),
+    planner_status: row.status,
     due_date: row.due_date ?? row.start_date ?? '',
     notes: row.notes,
     source: row.source === 'teams_import' ? 'teams_import' : 'other',
@@ -248,7 +282,10 @@ function plannerTaskToCommandTask(
     created_by: null,
     created_at: row.created_at,
     updated_at: row.updated_at,
-    completed_at: row.status === 'scheduled' || row.status === 'approved' ? row.updated_at : null,
+    // planner_tasks has no completed_at column. Completion evidence for planner
+    // rows lives only in the status transition, so the adapter must never
+    // fabricate a completion timestamp or a 'done' from scheduling states.
+    completed_at: null,
     helper_names: row.helper_names,
     unresolved_assignee_names: row.unresolved_assignee_names ?? [],
     assignment_review_state: row.assignment_review_state ?? 'ok',
@@ -268,7 +305,7 @@ export async function listTasks(options: ListTaskOptions = {}) {
     .order('created_at', { ascending: false })
 
   if (options.activeOnly) {
-    nativeQuery = nativeQuery.not('status', 'in', '(done,moved_to_tomorrow)')
+    nativeQuery = nativeQuery.not('status', 'in', '(done,completed)')
   }
 
   const [nativeResult, plannerResult, assignmentResult] = await Promise.all([

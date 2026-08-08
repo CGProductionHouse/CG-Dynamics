@@ -113,8 +113,13 @@ test('Command Centre carries every canonical assignee while retaining legacy fie
 
 test('Hub and My Day exclude completed history at the query boundary', () => {
   assert.match(planner, /activeOnly\?: boolean/)
-  assert.match(planner, /\.not\('status', 'in', '\(approved,scheduled,done,completed,moved_to_tomorrow\)'\)/)
-  assert.match(commandCentre, /nativeQuery = nativeQuery\.not\('status', 'in', '\(done,moved_to_tomorrow\)'\)/)
+  // #176: activeOnly means "genuine active work". Scheduling states
+  // (approved/scheduled/ready_internal_review) and deferral stay in the pool;
+  // only operational completion is excluded at the query boundary. Hub / My Day
+  // then apply the shared isActiveForToday helper for the today axis.
+  assert.match(planner, /\.not\('status', 'in', '\(done,completed\)'\)/)
+  assert.match(commandCentre, /nativeQuery = nativeQuery\.not\('status', 'in', '\(done,completed\)'\)/)
+  assert.match(commandCentre, /listPlannerTaskRows\(\{ order: 'due', activeOnly: options\.activeOnly \}\)/)
   assert.match(myDay, /listTasks\(\{ activeOnly: true \}\)/)
 })
 

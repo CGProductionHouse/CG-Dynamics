@@ -1129,7 +1129,14 @@ export async function listPlannerTaskRows(options: PlannerTaskReadOptions = {}) 
       query = query
         .is('archived_at', null)
         .is('recurrence_rule', null)
-        .not('status', 'in', '(approved,scheduled,done,completed,moved_to_tomorrow)')
+        // Shared completion authority (#176): activeOnly means "genuine active
+        // work is present". Planner scheduling states (approved, scheduled,
+        // ready_internal_review) and deferral (moved_to_tomorrow) are NOT
+        // completed, so they pass here; consumers that need a strict
+        // today-axis (focus/overdue/due-now) apply `isActiveForToday(task)`
+        // from src/lib/taskLifecycle after the bounded fetch instead of
+        // duplicating a competing status list.
+        .not('status', 'in', '(done,completed)')
     }
 
     query = options.order === 'due'

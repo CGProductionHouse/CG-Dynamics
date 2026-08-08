@@ -33,6 +33,7 @@ import {
 } from '../../lib/planner'
 import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
 import { isManagerRole } from '../../lib/roles'
+import { isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
 
 type PlannerWorkView = 'active' | 'history'
 type QuickScope = 'all' | 'overdue' | 'blocked' | 'unassigned'
@@ -57,7 +58,10 @@ function formatPlannerDate(value: string) {
 }
 
 function isPlannerHistoryTask(task: PlannerTask) {
-  return Boolean(task.archived_at) || ['approved', 'scheduled', 'done'].includes(task.status)
+  // History = genuinely completed operational work (done / legacy completed) or
+  // archived/superseded rows. approved/scheduled are scheduling states and
+  // remain ACTIVE work — they must never be filed under Completed history.
+  return Boolean(task.archived_at) || isOperationallyCompletedStatus(task.status)
 }
 
 function isOverdue(task: PlannerTask) {

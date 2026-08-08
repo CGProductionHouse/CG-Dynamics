@@ -41,7 +41,9 @@ import {
   type ClientOption,
   type ParsedMorningTask,
   type MorningTaskEdit,
+  taskStatusDisplayLabel,
 } from '../../lib/commandCentre'
+import { isActiveForToday, isActiveWorkTask } from '../../lib/taskLifecycle'
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
 
@@ -60,13 +62,13 @@ function focusSortOrder(task: CommandCentreTask, today: string, now: Date): numb
 }
 
 function isOverdue(task: CommandCentreTask, now: Date) {
-  if (!task.due_date || task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  if (!task.due_date || !isActiveForToday(task)) return false
   return new Date(`${task.due_date}T00:00:00`) < now
 }
 
 function matchesWorkFilter(task: CommandCentreTask, filter: WorkFilter, today: string, now: Date) {
   if (filter === 'done') return task.status === 'done'
-  if (task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  if (!isActiveForToday(task)) return false
   if (filter === 'today') return task.due_date === today
   if (filter === 'overdue') return isOverdue(task, now)
   if (filter === 'client_requests') return task.priority === 'client_request' || task.bucket === 'Client Requests'
@@ -274,7 +276,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
   }, [today])
 
   const allActiveTasks = useMemo(() =>
-    tasks.filter(t => t.status !== 'done' && t.status !== 'moved_to_tomorrow'),
+    tasks.filter(t => isActiveWorkTask(t)),
   [tasks])
 
   const focusTasks = useMemo(() => {
@@ -290,6 +292,10 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
     }
     if (workFilter !== 'focus') {
       filtered = filtered.filter(t => matchesWorkFilter(t, workFilter, today, now))
+    } else {
+      // Focus is a today-axis surface: a deferred task is unfinished but belongs
+      // to its own future day, never today's focus queue.
+      filtered = filtered.filter(t => isActiveForToday(t))
     }
     if (bucketFilter) filtered = filtered.filter(t => t.bucket === bucketFilter)
     if (clientSearch.trim()) {
@@ -363,7 +369,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
     inProgress: allActiveTasks.filter(t => t.status === 'in_progress').length,
     doneToday: tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today).length,
     overdue: allActiveTasks.filter(t => isOverdue(t, now)).length,
-    today: allActiveTasks.filter(t => t.due_date === today).length,
+    today: allActiveTasks.filter(t => isActiveForToday(t) && t.due_date === today).length,
   }), [tasks, allActiveTasks, focusTasks, today, now])
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
@@ -981,7 +987,11 @@ function TaskRow({ task, busyId, onStatusChange, onOpenDetails }: {
                 disabled={busyId === task.id}
                 className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
               >
-                {STATUSES.map(s => (
+                {/* The current value shows the truthful label (raw Planner state
+                    for approved/scheduled/ready rows) while still allowing a
+                    coarse change from this surface. */}
+                <option value={task.status}>{taskStatusDisplayLabel(task)}</option>
+                {STATUSES.filter(s => s !== task.status).map(s => (
                   <option key={s} value={s}>{statusLabel(s)}</option>
                 ))}
               </select>

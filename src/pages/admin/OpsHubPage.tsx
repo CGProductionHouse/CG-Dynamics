@@ -22,6 +22,7 @@ import {
   type MonthlyDeliverable,
 } from '../../lib/planner'
 import { businessDateKey } from '../../lib/businessTime'
+import { isActiveWorkTask, isActiveForToday } from '../../lib/taskLifecycle'
 import { TaskCard, OpsQuickAdd, TaskDetailDrawer, RequestIntake } from '../../components/operations'
 
 type OpsTab = 'my-work' | 'board' | 'client-work' | 'calendar' | 'admin'
@@ -255,8 +256,8 @@ function MyWorkView({
   onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
   onOpenTask: (task: CommandCentreTask) => void
 }) {
-  const overdue = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
-  const today = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date === todayKey), [myTasks, todayKey])
+  const overdue = useMemo(() => myTasks.filter(t => isActiveForToday(t) && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
+  const today = useMemo(() => myTasks.filter(t => isActiveForToday(t) && t.status !== 'blocked' && t.due_date === todayKey), [myTasks, todayKey])
   const inProgress = useMemo(() => myTasks.filter(t => t.status === 'in_progress'), [myTasks])
   const upcoming = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date && t.due_date > todayKey), [myTasks, todayKey])
   const waiting = useMemo(() => myTasks.filter(t => t.status === 'waiting_client'), [myTasks])
@@ -323,6 +324,7 @@ function BoardView({ tasks, onOpenTask, onBucketChange }: { tasks: CommandCentre
   const buckets = useMemo(() => {
     const map = new Map<TaskBucket, CommandCentreTask[]>()
     for (const task of tasks) {
+      if (!isActiveWorkTask(task)) continue
       const bucket = (task.bucket || 'Once-off') as TaskBucket
       if (!map.has(bucket)) map.set(bucket, [])
       map.get(bucket)!.push(task)
@@ -930,7 +932,7 @@ function AdminBoardView({ tasks, onOpenTask, onStatusChange }: {
   onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
 }) {
   const adminTasks = useMemo(() =>
-    tasks.filter(t => t.bucket === 'Admin / To Do'),
+    tasks.filter(t => isActiveWorkTask(t) && t.bucket === 'Admin / To Do'),
     [tasks],
   )
 

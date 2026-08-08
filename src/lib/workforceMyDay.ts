@@ -1,4 +1,4 @@
-import { listTasks, type CommandCentreTask } from './commandCentre'
+import { listTasks, taskStatusDisplayLabel, type CommandCentreTask } from './commandCentre'
 import {
   getEffectiveScheduleDate,
   isMonthKey,
@@ -10,6 +10,7 @@ import { listCompanyEvents, EVENT_TYPE_LABELS, type CompanyCalendarEvent } from 
 import { listActiveClients } from './commandCentre'
 import type { Profile } from './db/profiles'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMinutes, businessMonthKey, formatBusinessDate, formatBusinessTime } from './businessTime'
+import { isActiveForToday } from './taskLifecycle'
 
 export type MyDaySource = 'daily_task' | 'planner_task' | 'calendar_event' | 'client_deliverable'
 
@@ -75,7 +76,6 @@ export interface MyDayContext {
   }
 }
 
-const ACTIVE_TASK_STATUSES = new Set(['to_do', 'in_progress', 'blocked', 'waiting_client'])
 const WORKDAY_START_MINUTES = 8 * 60
 const WORKDAY_END_MINUTES = 17 * 60
 const DEFAULT_TASK_MINUTES = 45
@@ -156,11 +156,8 @@ function formatTime(value: string | null) {
   return formatBusinessTime(value)
 }
 
-function taskStatusLabel(status: CommandCentreTask['status']) {
-  if (status === 'in_progress') return 'In progress'
-  if (status === 'blocked') return 'Blocked'
-  if (status === 'waiting_client') return 'Waiting client'
-  return 'To do'
+function taskStatusLabel(task: CommandCentreTask) {
+  return taskStatusDisplayLabel(task)
 }
 
 function deliverableStatusLabel(raw: MonthlyDeliverable['production_status']) {
@@ -191,7 +188,7 @@ function toTaskItem(task: CommandCentreTask, today: string): MyDayItem {
     clientName: task.client_name,
     date: task.due_date || null,
     timeLabel: null,
-    statusLabel: taskStatusLabel(task.status),
+    statusLabel: taskStatusLabel(task),
     priority: task.priority,
     assignedTo: task.assigned_to_name,
     helperNames: task.helper_names ?? [],
@@ -427,7 +424,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
   if (clientsResult.error) errors.push(clientsResult.error.message)
 
   const tasks = ((tasksResult.data ?? []) as CommandCentreTask[])
-    .filter(task => ACTIVE_TASK_STATUSES.has(task.status))
+    .filter(task => isActiveForToday(task))
     .filter(task => userMatches(task.assigned_to_user_id, task.assignee_user_ids, profile, task.assignment_review_state))
     .filter(task => !task.due_date || task.due_date <= weekEnd)
     .map(task => toTaskItem(task, today))
