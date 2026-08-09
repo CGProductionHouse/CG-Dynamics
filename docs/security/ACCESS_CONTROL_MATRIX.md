@@ -38,7 +38,11 @@ Clients have no direct table access. The client portal RPC exposes only the
 client's own unarchived DP/Photo/Video/Reel rows with explicit disclosure
 evidence: `sent_to_client_at`, `client_approved_at`, or `posted_at`. Internal
 `production_status` values never grant portal visibility. Client labels are
-derived from those evidence timestamps.
+derived from those evidence timestamps. Client dates use only an explicit
+`scheduled_date`, or the Johannesburg-local date of `posted_at` for posted work;
+the internal `due_date` is never projected. A deliverable with disclosure or
+posting history cannot be reassigned to another client without explicit
+reconciliation, and its evidence is never silently cleared or transferred.
 
 ### company_calendar_events
 
@@ -53,7 +57,10 @@ state, records the actor/time, and retains the native row for audit. Clients
 have no direct table access and receive only their own explicitly visible,
 non-cancelled, non-superseded Shoot, Content Run, and Client Event projection.
 Microsoft import and re-sync never publish events. Reviewed supersession carries
-an already-explicit native visibility decision to the canonical Outlook row.
+an already-explicit native visibility decision and its complete audit evidence
+to the canonical Outlook row. A visible event is invalid without both the audit
+timestamp and manager/admin profile ID; hidden events may be unreviewed or retain
+a complete explicit-off audit pair.
 
 The active-manager-only supersession RPC preserves native `client_id`/`client_name`, `notes` and
 `assigned_to_name` only when the Outlook row is empty and fails closed on

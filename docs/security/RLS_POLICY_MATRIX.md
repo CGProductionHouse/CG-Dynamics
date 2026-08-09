@@ -24,7 +24,10 @@
 
 Clients have no direct SELECT policy. The client portal projection requires an
 active client profile, own `client_id`, an eligible unarchived deliverable, and
-at least one explicit disclosure timestamp. Status alone never grants access.
+at least one explicit disclosure timestamp. Status alone never grants access,
+and the projection never substitutes internal `due_date` for a client schedule
+date. Client reassignment is rejected while disclosure or posting evidence
+exists, preserving history until an explicit reconciliation process is used.
 
 ## company_calendar_events
 
@@ -39,7 +42,9 @@ at least one explicit disclosure timestamp. Status alone never grants access.
 `set_company_calendar_event_client_visibility` is the sole authenticated write
 path for event publication state. It requires an active manager/admin, locks the
 event, and validates client linkage, event type, cancellation, and supersession.
-Microsoft does not own or write this state.
+Microsoft does not own or write this state. A database constraint requires every
+`client_visible = true` row to have both visibility audit fields populated; a
+false row permits either a null pair or a complete explicit-off pair.
 
 ## client_packages
 

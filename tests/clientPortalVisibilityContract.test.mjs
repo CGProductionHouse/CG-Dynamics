@@ -13,8 +13,8 @@ const microsoftApply = read('../src/lib/microsoftApply.ts')
 const microsoftEnrichment = read('../supabase/migrations/20260725233500_microsoft_calendar_client_enrichment.sql')
 
 const postFunction = migration.slice(
-  migration.indexOf('create function public.client_portal_month_ahead_posts'),
-  migration.indexOf('-- Replace the latest event projection shape'),
+  migration.indexOf('create function public.client_portal_month_ahead_posts_v2'),
+  migration.indexOf('-- Migration-first compatibility for a cached/previous frontend'),
 )
 const eventFunction = migration.slice(
   migration.indexOf('create function public.client_portal_month_ahead_events'),
@@ -27,6 +27,10 @@ const visibilityFunction = migration.slice(
 const supersessionTrigger = migration.slice(
   migration.indexOf('create or replace function public.preserve_calendar_client_visibility_on_supersession'),
   migration.indexOf('-- Replace the old status-based client post projection'),
+)
+const ownerChangeTrigger = migration.slice(
+  migration.indexOf('create or replace function public.prevent_deliverable_client_change_with_history'),
+  migration.indexOf('-- A visible event must be re-approved'),
 )
 
 let server
@@ -42,6 +46,15 @@ after(async () => { await server?.close() })
 function assertEvidenceGate() {
   assert.match(postFunction, /deliverable\.sent_to_client_at is not null[\s\S]*?or deliverable\.client_approved_at is not null[\s\S]*?or deliverable\.posted_at is not null/)
   assert.doesNotMatch(postFunction, /production_status/)
+}
+
+function auditStateIsValid(visible, updatedAt, updatedBy) {
+  const pairIsComplete = (updatedAt === null && updatedBy === null) || (updatedAt !== null && updatedBy !== null)
+  return pairIsComplete && (!visible || (updatedAt !== null && updatedBy !== null))
+}
+
+function ownerChangeIsBlocked(oldClientId, newClientId, evidence = {}) {
+  return oldClientId !== newClientId && Object.values(evidence).some(value => value !== null)
 }
 
 test('draft without evidence is hidden', assertEvidenceGate)
@@ -74,7 +87,7 @@ test('archived deliverables stay hidden', () => {
 
 test('other-client deliverables stay hidden', () => {
   assert.match(postFunction, /deliverable\.client_id = v_allowed_client_id/)
-  assert.match(migration, /clear_deliverable_client_evidence_on_owner_change[\s\S]*?new\.sent_to_client_at := null[\s\S]*?new\.client_approved_at := null[\s\S]*?new\.posted_at := null/)
+  assert.match(ownerChangeTrigger, /old\.client_id is distinct from new\.client_id[\s\S]*?raise exception/)
 })
 
 test('no status-only path grants deliverable visibility', () => {
@@ -86,9 +99,87 @@ test('the migration-first legacy post RPC stays safe and vocabulary-compatible',
   assert.match(migration, /revoke all on function public\.client_portal_month_ahead_posts_v2\(uuid, date\)/)
 })
 
+test('due_date is never emitted as the client portal schedule date', () => {
+  assert.doesNotMatch(postFunction, /deliverable\.due_date/)
+  assert.match(postFunction, /else deliverable\.scheduled_date/)
+})
+
+test('sent evidence with only an internal due date remains undated and Awaiting approval', () => {
+  assert.doesNotMatch(postFunction, /coalesce\(deliverable\.scheduled_date, deliverable\.due_date\)/)
+  assert.match(postFunction, /else deliverable\.scheduled_date[\s\S]*?else 'awaiting_approval'/)
+})
+
+test('approved evidence with only an internal due date remains undated and Approved', () => {
+  assert.doesNotMatch(postFunction, /deliverable\.due_date/)
+  assert.match(postFunction, /when deliverable\.client_approved_at is not null then 'approved'/)
+})
+
+test('approved evidence with scheduled_date returns the scheduled date and Scheduled status', () => {
+  assert.match(postFunction, /else deliverable\.scheduled_date/)
+  assert.match(postFunction, /client_approved_at is not null and deliverable\.scheduled_date is not null then 'scheduled'/)
+})
+
+test('posted evidence returns the Johannesburg-local posting date and Posted status', () => {
+  assert.match(postFunction, /\(deliverable\.posted_at at time zone 'Africa\/Johannesburg'\)::date/)
+  assert.match(postFunction, /when deliverable\.posted_at is not null then 'posted'/)
+})
+
 test('new events default to client-visible false with no backfill', () => {
   assert.match(migration, /client_visible boolean not null default false/)
   assert.doesNotMatch(migration, /update public\.company_calendar_events[\s\S]{0,120}set client_visible = true[\s\S]{0,120}where/i)
+})
+
+test('visible events require both audit fields', () => {
+  assert.match(migration, /company_calendar_events_client_visible_requires_audit[\s\S]*?client_visible is false[\s\S]*?client_visibility_updated_at is not null[\s\S]*?client_visibility_updated_by_profile_id is not null/)
+  assert.equal(auditStateIsValid(true, null, null), false)
+  assert.equal(auditStateIsValid(true, '2026-08-09T12:00:00Z', null), false)
+  assert.equal(auditStateIsValid(true, null, 'manager-1'), false)
+  assert.equal(auditStateIsValid(true, '2026-08-09T12:00:00Z', 'manager-1'), true)
+})
+
+test('explicit false may be unreviewed or retain a complete audit pair', () => {
+  assert.equal(auditStateIsValid(false, null, null), true)
+  assert.equal(auditStateIsValid(false, '2026-08-09T12:00:00Z', 'manager-1'), true)
+})
+
+test('a partial visibility audit pair is invalid even when hidden', () => {
+  assert.match(migration, /company_calendar_events_client_visibility_audit_complete[\s\S]*?updated_at is null and client_visibility_updated_by_profile_id is null[\s\S]*?updated_at is not null and client_visibility_updated_by_profile_id is not null/)
+  assert.equal(auditStateIsValid(false, '2026-08-09T12:00:00Z', null), false)
+  assert.equal(auditStateIsValid(false, null, 'manager-1'), false)
+})
+
+test('an evidence-free client reassignment is permitted', () => {
+  assert.equal(ownerChangeIsBlocked('client-1', 'client-2', {
+    sent_to_client_at: null,
+    client_approved_at: null,
+    posted_at: null,
+  }), false)
+  assert.match(ownerChangeTrigger, /old\.client_id is distinct from new\.client_id[\s\S]*?and \(/)
+})
+
+test('sent history blocks client reassignment', () => {
+  assert.equal(ownerChangeIsBlocked('client-1', 'client-2', { sent_to_client_at: '2026-08-09T12:00:00Z' }), true)
+  assert.match(ownerChangeTrigger, /old\.sent_to_client_at is not null/)
+})
+
+test('approved history blocks client reassignment', () => {
+  assert.equal(ownerChangeIsBlocked('client-1', 'client-2', { client_approved_at: '2026-08-09T12:00:00Z' }), true)
+  assert.match(ownerChangeTrigger, /old\.client_approved_at is not null/)
+})
+
+test('posted history blocks client reassignment', () => {
+  assert.equal(ownerChangeIsBlocked('client-1', 'client-2', { posted_at: '2026-08-09T12:00:00Z' }), true)
+  assert.match(ownerChangeTrigger, /old\.posted_at is not null/)
+})
+
+test('same-client updates remain allowed', () => {
+  assert.equal(ownerChangeIsBlocked('client-1', 'client-1', { posted_at: '2026-08-09T12:00:00Z' }), false)
+})
+
+test('client reassignment never clears or transfers historical evidence', () => {
+  assert.match(ownerChangeTrigger, /cannot be reassigned without explicit reconciliation/)
+  assert.match(ownerChangeTrigger, /new\.sent_to_client_at is not null[\s\S]*?new\.client_approved_at is not null[\s\S]*?new\.posted_at is not null/)
+  assert.doesNotMatch(ownerChangeTrigger, /new\.(sent_to_client_at|client_approved_at|posted_at)\s*:=/)
 })
 
 test('a linked client alone does not expose an event', () => {

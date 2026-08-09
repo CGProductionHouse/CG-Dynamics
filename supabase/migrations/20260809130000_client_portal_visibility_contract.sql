@@ -36,6 +36,27 @@ begin
 end;
 $$;
 
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'company_calendar_events_client_visible_requires_audit'
+      and conrelid = 'public.company_calendar_events'::regclass
+  ) then
+    alter table public.company_calendar_events
+      add constraint company_calendar_events_client_visible_requires_audit
+      check (
+        client_visible is false
+        or (
+          client_visibility_updated_at is not null
+          and client_visibility_updated_by_profile_id is not null
+        )
+      );
+  end if;
+end;
+$$;
+
 create index if not exists company_calendar_events_client_visible_idx
   on public.company_calendar_events(client_id, start_at)
   where client_visible is true
@@ -48,19 +69,27 @@ revoke update (
   client_visibility_updated_by_profile_id
 ) on public.company_calendar_events from authenticated;
 
--- Disclosure evidence belongs to the client that saw the deliverable. Relinking
--- the record fails closed rather than carrying old evidence to another client.
-create or replace function public.clear_deliverable_client_evidence_on_owner_change()
+-- Disclosure evidence belongs to the client that saw the deliverable. A record
+-- with client-visible history must be reconciled explicitly before reassignment.
+create or replace function public.prevent_deliverable_client_change_with_history()
 returns trigger
 language plpgsql
 security definer
 set search_path = ''
 as $$
 begin
-  if old.client_id is distinct from new.client_id then
-    new.sent_to_client_at := null;
-    new.client_approved_at := null;
-    new.posted_at := null;
+  if old.client_id is distinct from new.client_id
+     and (
+       old.sent_to_client_at is not null
+       or old.client_approved_at is not null
+       or old.posted_at is not null
+       or new.sent_to_client_at is not null
+       or new.client_approved_at is not null
+       or new.posted_at is not null
+     ) then
+    raise exception
+      'This deliverable has client-visible history and cannot be reassigned without explicit reconciliation.'
+      using errcode = '23514';
   end if;
   return new;
 end;
@@ -68,11 +97,13 @@ $$;
 
 drop trigger if exists trg_clear_deliverable_client_evidence_on_owner_change
   on public.monthly_deliverables;
-create trigger trg_clear_deliverable_client_evidence_on_owner_change
+drop trigger if exists trg_prevent_deliverable_client_change_with_history
+  on public.monthly_deliverables;
+create trigger trg_prevent_deliverable_client_change_with_history
   before update of client_id on public.monthly_deliverables
-  for each row execute function public.clear_deliverable_client_evidence_on_owner_change();
+  for each row execute function public.prevent_deliverable_client_change_with_history();
 
-revoke all on function public.clear_deliverable_client_evidence_on_owner_change()
+revoke all on function public.prevent_deliverable_client_change_with_history()
   from public, anon, authenticated;
 
 -- A visible event must be re-approved if its client/type changes or it is
@@ -280,7 +311,11 @@ begin
   return query
   select
     'post-' || substr(md5(deliverable.id::text), 1, 16),
-    coalesce(deliverable.scheduled_date, deliverable.due_date),
+    case
+      when deliverable.posted_at is not null
+        then (deliverable.posted_at at time zone 'Africa/Johannesburg')::date
+      else deliverable.scheduled_date
+    end,
     deliverable.title,
     deliverable.deliverable_type::text,
     case
@@ -299,7 +334,13 @@ begin
       or deliverable.client_approved_at is not null
       or deliverable.posted_at is not null
     )
-  order by coalesce(deliverable.scheduled_date, deliverable.due_date, date '9999-12-31'), deliverable.title;
+  order by
+    case
+      when deliverable.posted_at is not null
+        then (deliverable.posted_at at time zone 'Africa/Johannesburg')::date
+      else deliverable.scheduled_date
+    end nulls last,
+    deliverable.title;
 end;
 $$;
 
