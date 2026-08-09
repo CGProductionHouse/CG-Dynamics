@@ -134,7 +134,7 @@ async function fetchBoardTasks(board: PlannerBoard, shouldMaterialize: boolean) 
     const materialized = await materializeRecurringTasks()
     if (materialized.error) return { data: null, completionEvidence: {}, error: { message: materialized.error } }
     if (materialized.migrationNeeded) {
-      return { data: null, completionEvidence: {}, error: { message: 'Recurring task migration is required before Planner can load safely.' } }
+      return { data: null, completionEvidence: {}, error: { message: 'Recurring tasks are not available yet.' } }
     }
   }
   const { data, error } = await listPlannerTasks(board.id)
@@ -189,7 +189,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       if (!active) return
       if (error) {
         setAssignmentError(isMissingPlannerAssignmentRpcError(error)
-          ? 'Planner assignment migration required. Assignment changes are disabled until it is applied.'
+          ? 'Planner assignment setup is required. Assignment changes are disabled.'
           : `Could not load the assignment directory. Assignment changes are disabled. ${error.message ?? ''}`.trim())
         return
       }
@@ -529,8 +529,8 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       <div className={`mx-auto max-w-7xl px-4 ${embedded ? 'py-2' : 'py-8'}`}>
         {!embedded && <h1 className="mb-6 text-xl font-black text-white">Planner</h1>}
         <EmptyState
-          title={tableMissing ? 'Planner tables not set up yet' : 'No boards found'}
-          message={tableMissing ? 'Run the Planner migrations.' : 'Create or seed a Planner board to begin.'}
+          title={tableMissing ? 'Work setup required' : 'No boards found'}
+          message={tableMissing ? 'Planner is not available yet.' : 'No Planner boards are available yet.'}
           compact
         />
       </div>

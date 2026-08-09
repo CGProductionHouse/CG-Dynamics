@@ -56,6 +56,33 @@ test('Calendar removes ordinary framing but preserves diagnostics and Outlook re
   assert.match(calendar, /supersessionMigrationNeeded/)
 })
 
+test('ordinary rendered copy hides implementation setup mechanisms', () => {
+  assert.doesNotMatch(hub, /CG Calendar setup needed\. Run phase-/)
+  assert.match(hub, /CG Calendar setup is required\./)
+
+  assert.doesNotMatch(planner, /Planner tables not set up yet/)
+  assert.doesNotMatch(planner, /Run the Planner migrations/)
+  assert.doesNotMatch(planner, /Create or seed a Planner board/)
+  assert.match(planner, /title=\{tableMissing \? 'Work setup required'/)
+  assert.match(planner, /message=\{tableMissing \? 'Planner is not available yet\.'/)
+
+  assert.doesNotMatch(schedule, /July shadow-run/)
+  assert.match(schedule, /Some dates were imported from Teams and still need review\./)
+
+  assert.doesNotMatch(commandCentre, /Run the phase-[^']+/)
+  assert.doesNotMatch(commandCentre, /After migration/)
+  assert.doesNotMatch(commandCentre, /request linking is migrated/)
+  assert.match(commandCentre, /Daily Tasks is not available yet\./)
+
+  assert.doesNotMatch(calendar, /Company calendar SQL not applied/)
+  assert.doesNotMatch(calendar, /Apply `supabase\/phase-/)
+  assert.doesNotMatch(calendar, /supersession migration is applied/)
+  assert.match(calendar, /Calendar duplicate resolution is not available yet\./)
+
+  assert.doesNotMatch(opsHub, /Database-protected/)
+  assert.match(opsHub, /Only admin and manager roles can view or edit these records\./)
+})
+
 test('Client Schedule hides implementation terms while preserving all operational views and review', () => {
   assert.doesNotMatch(schedule, /· monthly_deliverables/)
   assert.doesNotMatch(schedule, /Calendar shows all/)

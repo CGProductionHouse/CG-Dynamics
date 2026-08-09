@@ -643,7 +643,7 @@ function CompanyCalendarSection({
         <HubSectionHeader title="CG Calendar" subtitle="Next 7 days" />
         <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-4">
           <p className="text-xs text-amber-300/80">
-            CG Calendar setup needed. Run phase-10a SQL to enable company events.
+            CG Calendar setup is required.
           </p>
           <Link
             to="/admin/cg-calendar"

@@ -456,8 +456,8 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Daily Tasks</h1>
         </div>
         <EmptyState
-          title="Migration required"
-          message="Daily Tasks tables are not set up yet. Run the phase-5 CG Command Centre migration."
+          title="Work setup required"
+          message="Daily Tasks is not available yet."
         />
       </div>
     )
@@ -1502,7 +1502,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
       if (result.error) {
         const err = result.error as { code?: string; message?: string }
         setSaveError(err.code === '42703'
-          ? 'Archive migration is not applied yet. Run phase-9a-planner-task-archive.sql in Supabase.'
+          ? 'Archiving is not available yet.'
           : err.message ?? 'Could not remove task.')
         setDeleting(false)
         return
@@ -1635,7 +1635,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
                 <p className="text-[11px] text-white/40">No helpers yet</p>
               )
             ) : (
-              <p className="text-[11px] text-white/30">After migration phase-7b</p>
+              <p className="text-[11px] text-white/30">Not available yet</p>
             )}
           </div>
 
@@ -1644,7 +1644,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
               <p className="mb-2.5 text-xs font-medium text-brand-primary">Client request decision</p>
               {task.data_origin === 'planner_tasks' && (
                 <p className="mb-3 rounded-md border border-amber-400/20 bg-amber-400/[0.06] px-2.5 py-2 text-[11px] text-amber-200">
-                  Imported Planner request. Edit task details here; handle package decisions in Monthly Planner/Package until request linking is migrated.
+                  Imported Planner request. Edit task details here; handle package decisions in Client Schedule.
                 </p>
               )}
               <div className="flex flex-wrap gap-2">
@@ -1692,7 +1692,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
               <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Pause</button>
               <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Stop</button>
             </div>
-            <p className="mt-1.5 text-[11px] text-brand-primary/40">After migration</p>
+            <p className="mt-1.5 text-[11px] text-brand-primary/40">Not available yet</p>
           </div>
         </div>
 

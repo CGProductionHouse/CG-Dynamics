@@ -413,7 +413,7 @@ export default function ClientSchedulePage() {
       )}
       {hasLegacyDates && (
         <p className="mb-4 text-[11px] text-amber-300/70">
-          Some dates are shown from legacy Teams import data during the July shadow-run. They stay labelled as Schedule date until reconciled.
+          Some dates were imported from Teams and still need review.
         </p>
       )}
       {!hasLegacyDates && <div className="mb-4" />}

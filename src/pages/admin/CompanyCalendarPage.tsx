@@ -341,7 +341,7 @@ export default function CompanyCalendarPage() {
 
   async function handleUseOutlookRecord(nativeEvent: CompanyCalendarEvent, outlookEvent: CompanyCalendarEvent) {
     if (supersessionMigrationNeeded) {
-      setResolutionError('Calendar duplicate resolution is unavailable until the reviewed supersession migration is applied.')
+      setResolutionError('Calendar duplicate resolution is not available yet.')
       return
     }
     const confirmed = window.confirm(`Use the Outlook record for "${outlookEvent.title}"? The native record will be retained as superseded audit history.`)
@@ -422,14 +422,14 @@ export default function CompanyCalendarPage() {
 
       {supersessionMigrationNeeded && (
         <div className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-xs text-amber-100">
-          Calendar events are available in legacy mode. Duplicate resolution is disabled until the reviewed supersession migration is applied.
+          Calendar events are available, but duplicate resolution is not available yet.
         </div>
       )}
 
       {canManage && reviewCandidates.length > 0 && (
         <section className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-4" aria-label="Possible calendar duplicates">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-200">Review possible duplicates ({reviewCandidates.length})</p>
-          <p className="mt-1 text-xs leading-5 text-amber-100/70">These native and Outlook records share a title and start time, but remain separate until their identity is explicitly reviewed.</p>
+          <p className="mt-1 text-xs leading-5 text-amber-100/70">These native and Outlook records share a title and start time, but remain separate until a manager reviews them.</p>
           {resolutionError && <p className="mt-2 rounded-lg border border-red-300/20 bg-red-300/[0.07] px-3 py-2 text-xs text-red-200">{resolutionError}</p>}
           <div className="mt-3 space-y-2">
             {reviewCandidates.map(({ nativeEvent, outlookEvent }) => (
@@ -463,7 +463,7 @@ export default function CompanyCalendarPage() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" onClick={() => setDrawerEvent(nativeEvent)} className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-bold text-brand-primary hover:text-white">Open native</button>
                   <button type="button" onClick={() => setDrawerEvent(outlookEvent)} className="rounded-md border border-sky-300/20 bg-sky-300/[0.06] px-2.5 py-1.5 text-xs font-bold text-sky-200 hover:text-white">Open Outlook</button>
-                  <button type="button" disabled={supersessionMigrationNeeded || resolvingCandidateId === nativeEvent.id} onClick={() => void handleUseOutlookRecord(nativeEvent, outlookEvent)} title={supersessionMigrationNeeded ? 'Apply the reviewed calendar supersession migration first.' : undefined} className="rounded-md bg-amber-300 px-2.5 py-1.5 text-xs font-black text-black hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50">{resolvingCandidateId === nativeEvent.id ? 'Resolving...' : 'Use Outlook record'}</button>
+                  <button type="button" disabled={supersessionMigrationNeeded || resolvingCandidateId === nativeEvent.id} onClick={() => void handleUseOutlookRecord(nativeEvent, outlookEvent)} title={supersessionMigrationNeeded ? 'Calendar duplicate resolution is not available yet.' : undefined} className="rounded-md bg-amber-300 px-2.5 py-1.5 text-xs font-black text-black hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50">{resolvingCandidateId === nativeEvent.id ? 'Resolving...' : 'Use Outlook record'}</button>
                 </div>
               </div>
             ))}
@@ -606,9 +606,9 @@ function CalendarDiagnostics({
       </div>
       <div className="mt-3 space-y-1 text-xs text-brand-primary/65">
         {missingLayers && <p>Empty layer this month: {missingLayers}.</p>}
-        {tableMissing && <p className="text-amber-200">Company calendar events table is missing. Apply `supabase/phase-10a-company-calendar-events.sql` before adding normal events.</p>}
-        {!tableMissing && eventCount === 0 && <p>Calendar event seed may not be applied yet. `phase-10b-cg-calendar-teams-seed-2026.sql` is optional; Planner dated tasks are loaded separately if the optional task layer is enabled.</p>}
-        {recurrenceMigrationNeeded && <p>Recurring task columns are not applied yet. Calendar still shows existing dated tasks; apply `supabase/phase-13a-recurring-tasks.sql` to materialise future recurring instances.</p>}
+        {tableMissing && <p className="text-amber-200">CG Calendar setup is required before events can be added.</p>}
+        {!tableMissing && eventCount === 0 && <p>No calendar events are available for this month.</p>}
+        {recurrenceMigrationNeeded && <p>Recurring tasks are not available yet. Existing dated tasks remain visible.</p>}
         {eventError && <p className="text-red-300">Events query error: {eventError}</p>}
         {taskError && <p className="text-red-300">Planner task query error: {taskError}</p>}
         {recurrenceError && <p className="text-red-300">Recurring task materialisation error: {recurrenceError}</p>}
@@ -921,7 +921,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
         }
         const result = await createCompanyEvent(input)
         if (result.tableMissing) {
-          setSaveError('Company calendar SQL not applied yet. Run phase-10a migration.')
+          setSaveError('CG Calendar setup is required before events can be saved.')
           return
         }
         if (result.error) { setSaveError(result.error.message); return }
@@ -941,7 +941,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
         }
         const result = await updateCompanyEvent(event.id, patch)
         if (result.tableMissing) {
-          setSaveError('Company calendar SQL not applied yet. Run phase-10a migration.')
+          setSaveError('CG Calendar setup is required before events can be saved.')
           return
         }
         if (result.error) { setSaveError(result.error.message); return }
@@ -960,7 +960,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
     try {
       const result = await deleteCompanyEvent(event.id)
       if (result.tableMissing) {
-        setSaveError('Company calendar SQL not applied yet. Run phase-10a migration.')
+        setSaveError('CG Calendar setup is required before events can be removed.')
         setDeleting(false)
         return
       }

@@ -940,7 +940,7 @@ function AdminBoardView({ tasks, onOpenTask, onStatusChange }: {
           Admin Tasks ({adminTasks.length})
         </p>
         <p className="mt-1 text-xs text-white/35">
-          Database-protected — only admin/manager roles can view or edit these records.
+          Only admin and manager roles can view or edit these records.
         </p>
       </div>
       {adminTasks.length === 0 ? (
