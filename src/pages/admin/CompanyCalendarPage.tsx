@@ -9,6 +9,7 @@ import {
   createCompanyEvent,
   updateCompanyEvent,
   deleteCompanyEvent,
+  supersedeNativeCompanyEvent,
   EVENT_TYPES,
   EVENT_TYPE_LABELS,
   EVENT_STATUS_LABELS,
@@ -27,6 +28,7 @@ import { materializeRecurringTasks } from '../../lib/recurrence'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
+import { reconcileCalendarLogicalItems } from '../../lib/calendarIdentity'
 
 type EventFilter = 'all' | 'cancelled' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
@@ -168,6 +170,8 @@ export default function CompanyCalendarPage() {
   const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
   const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; recurrence: string | null }>({ tasks: null, recurrence: null })
   const [recurrenceMigrationNeeded, setRecurrenceMigrationNeeded] = useState(false)
+  const [resolvingCandidateId, setResolvingCandidateId] = useState<string | null>(null)
+  const [resolutionError, setResolutionError] = useState<string | null>(null)
   const loadRequestRef = useRef(0)
 
   const canManage = isManagerRole(profile?.role)
@@ -258,18 +262,26 @@ export default function CompanyCalendarPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerEvent])
 
+  const calendarAuthority = useMemo(() => reconcileCalendarLogicalItems(events, []), [events])
+  const canonicalEvents = calendarAuthority.events
+  const reviewCandidates = calendarAuthority.reviewCandidates
+
   const filtered = useMemo(() => {
-    if (filter === 'cancelled') return sortEvents(events.filter(event => event.status === 'cancelled'))
-    const active = events.filter(event => event.status !== 'cancelled')
+    if (filter === 'cancelled') return sortEvents(canonicalEvents.filter(event => event.status === 'cancelled'))
+    const active = canonicalEvents.filter(event => event.status !== 'cancelled')
     if (filter === 'all') return sortEvents(active)
     return sortEvents(active.filter(e => e.event_type === filter))
-  }, [events, filter])
+  }, [canonicalEvents, filter])
 
-  const allMonthEvents = events
+  const allMonthEvents = canonicalEvents
   const monthEvents = filtered
 
-  const visibleTasks = useMemo(() => (layers.tasks ? monthTasks : []), [layers.tasks, monthTasks])
-  const visibleEvents = useMemo(() => (layers.events ? monthEvents : []), [layers.events, monthEvents])
+  const visibleItems = useMemo(() => reconcileCalendarLogicalItems(
+    layers.events ? monthEvents : [],
+    layers.tasks ? monthTasks : [],
+  ), [layers.events, layers.tasks, monthEvents, monthTasks])
+  const visibleTasks = visibleItems.tasks
+  const visibleEvents = visibleItems.events
 
   const tasksByDate = useMemo(() => {
     const map = new Map<string, CalendarTaskRow[]>()
@@ -295,7 +307,7 @@ export default function CompanyCalendarPage() {
   }, [selectedMonth, visibleEvents, tasksByDate])
 
   const counts = useMemo(() => {
-    const active = events.filter(e => e.status !== 'cancelled')
+    const active = canonicalEvents.filter(e => e.status !== 'cancelled')
     return {
       all: active.length,
       meeting: active.filter(e => e.event_type === 'meeting').length,
@@ -304,9 +316,9 @@ export default function CompanyCalendarPage() {
       client_event: active.filter(e => e.event_type === 'client_event').length,
       deadline: active.filter(e => e.event_type === 'deadline').length,
       internal: active.filter(e => e.event_type === 'internal').length,
-      cancelled: events.filter(e => e.status === 'cancelled').length,
+      cancelled: canonicalEvents.filter(e => e.status === 'cancelled').length,
     }
-  }, [events])
+  }, [canonicalEvents])
 
   const handleCreateEvent = useCallback((date?: string) => {
     const defaultDate = date ?? (selectedMonth === businessMonthKey() ? businessDateKey() : `${selectedMonth}-01`)
@@ -317,6 +329,20 @@ export default function CompanyCalendarPage() {
   function handleSaved() {
     setDrawerEvent(null)
     void load()
+  }
+
+  async function handleUseOutlookRecord(nativeEvent: CompanyCalendarEvent, outlookEvent: CompanyCalendarEvent) {
+    const confirmed = window.confirm(`Use the Outlook record for "${outlookEvent.title}"? The native record will be retained as superseded audit history.`)
+    if (!confirmed) return
+    setResolvingCandidateId(nativeEvent.id)
+    setResolutionError(null)
+    const result = await supersedeNativeCompanyEvent(nativeEvent.id, outlookEvent.id, nativeEvent.updated_at)
+    setResolvingCandidateId(null)
+    if (result.error) {
+      setResolutionError(result.error.message)
+      return
+    }
+    await load()
   }
 
   if (loading) {
@@ -383,6 +409,29 @@ export default function CompanyCalendarPage() {
           Planner tasks ({monthTasks.length})
         </label>
       </div>
+
+      {canManage && reviewCandidates.length > 0 && (
+        <section className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-4" aria-label="Possible calendar duplicates">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-200">Review possible duplicates ({reviewCandidates.length})</p>
+          <p className="mt-1 text-xs leading-5 text-amber-100/70">These native and Outlook records share a title and time, but remain separate until their identity is explicitly reviewed.</p>
+          {resolutionError && <p className="mt-2 rounded-lg border border-red-300/20 bg-red-300/[0.07] px-3 py-2 text-xs text-red-200">{resolutionError}</p>}
+          <div className="mt-3 space-y-2">
+            {reviewCandidates.map(({ nativeEvent, outlookEvent }) => (
+              <div key={`${nativeEvent.id}:${outlookEvent.id}`} className="flex flex-col gap-2 rounded-lg border border-white/[0.08] bg-black/15 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-bold text-white">{outlookEvent.title}</p>
+                  <p className="mt-0.5 text-xs text-brand-primary/55">{formatEventTime(outlookEvent.start_at).full}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={() => setDrawerEvent(nativeEvent)} className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-bold text-brand-primary hover:text-white">Open native</button>
+                  <button type="button" onClick={() => setDrawerEvent(outlookEvent)} className="rounded-md border border-sky-300/20 bg-sky-300/[0.06] px-2.5 py-1.5 text-xs font-bold text-sky-200 hover:text-white">Open Outlook</button>
+                  <button type="button" disabled={resolvingCandidateId === nativeEvent.id} onClick={() => void handleUseOutlookRecord(nativeEvent, outlookEvent)} className="rounded-md bg-amber-300 px-2.5 py-1.5 text-xs font-black text-black hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50">{resolvingCandidateId === nativeEvent.id ? 'Resolving...' : 'Use Outlook record'}</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (allMonthEvents.length + monthTasks.length === 0)) && (
         <CalendarDiagnostics

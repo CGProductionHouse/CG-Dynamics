@@ -5,6 +5,7 @@ import type {
   MicrosoftImportPreviewItem,
   MicrosoftReconciliationAction,
   MicrosoftReconciliationSummary,
+  MicrosoftUnlinkedCalendarRow,
 } from './microsoftImport'
 import { summarizeMicrosoftReconciliation } from './microsoftImport'
 import type { MicrosoftSnapshot } from './microsoftSnapshot'
@@ -103,6 +104,9 @@ export interface MicrosoftExistingResult {
   /** Slot key → occupying rows that have NO Microsoft task id (legacy rows
    *  eligible for deterministic link_existing). */
   unlinkedSlotRows: Map<string, UnlinkedSlotRow[]>
+  /** Native calendar rows without a durable Outlook identity. Used only to
+   * block ambiguous creates for review, never to infer source identity. */
+  unlinkedCalendarRows: MicrosoftUnlinkedCalendarRow[]
   migrationNeeded: boolean
   error: string | null
 }
@@ -123,9 +127,8 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
         .range(from, to)),
     fetchAllPages((from, to) => supabase
         .from('company_calendar_events')
-        .select('id, updated_at, microsoft_calendar_id, microsoft_event_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, title, event_type, client_id, client_name, start_at, end_at, all_day, location, notes, status')
-        .not('microsoft_calendar_id', 'is', null)
-        .not('microsoft_event_id', 'is', null)
+        .select('id, updated_at, microsoft_calendar_id, microsoft_event_id, microsoft_last_synced_at, microsoft_source_hash, microsoft_source_removed_at, microsoft_source_description, title, event_type, client_id, client_name, start_at, end_at, all_day, location, notes, status, superseded_by_event_id')
+        .is('superseded_by_event_id', null)
         .range(from, to)),
     fetchAllPages((from, to) => supabase
         .from('monthly_deliverables')
@@ -137,12 +140,24 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
   if (microsoftError) {
     if (isMissingMicrosoftColumnError(microsoftError)) {
       const deliverableSlotKeys = collectSlotKeys(slotRows.data ?? [])
-      return { targets: [], deliverableSlotKeys, unlinkedSlotRows: collectUnlinkedSlotRows(slotRows.data ?? []), migrationNeeded: true, error: slotRows.error?.message ?? null }
+      return { targets: [], deliverableSlotKeys, unlinkedSlotRows: collectUnlinkedSlotRows(slotRows.data ?? []), unlinkedCalendarRows: [], migrationNeeded: true, error: slotRows.error?.message ?? null }
     }
-    return { targets: [], deliverableSlotKeys: new Set(), unlinkedSlotRows: new Map(), migrationNeeded: false, error: microsoftError.message }
+    return { targets: [], deliverableSlotKeys: new Set(), unlinkedSlotRows: new Map(), unlinkedCalendarRows: [], migrationNeeded: false, error: microsoftError.message }
   }
   if (slotRows.error) {
-    return { targets: [], deliverableSlotKeys: new Set(), unlinkedSlotRows: new Map(), migrationNeeded: false, error: slotRows.error.message }
+    return { targets: [], deliverableSlotKeys: new Set(), unlinkedSlotRows: new Map(), unlinkedCalendarRows: [], migrationNeeded: false, error: slotRows.error.message }
+  }
+
+  const partialCalendarIdentity = (calendarRows.data ?? []).find(row => Boolean(row.microsoft_calendar_id) !== Boolean(row.microsoft_event_id))
+  if (partialCalendarIdentity) {
+    return {
+      targets: [],
+      deliverableSlotKeys: new Set(),
+      unlinkedSlotRows: new Map(),
+      unlinkedCalendarRows: [],
+      migrationNeeded: false,
+      error: 'A CG Calendar row has an incomplete Outlook identity. Repair it before running Microsoft reconciliation.',
+    }
   }
 
   const targets: MicrosoftExistingTarget[] = []
@@ -211,6 +226,7 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
     })
   }
   for (const row of calendarRows.data ?? []) {
+    if (!row.microsoft_calendar_id || !row.microsoft_event_id) continue
     targets.push({
       destination: 'cg_calendar',
       id: row.id as string,
@@ -236,7 +252,18 @@ export async function loadMicrosoftExistingTargets(): Promise<MicrosoftExistingR
     })
   }
 
-  return { targets, deliverableSlotKeys: collectSlotKeys(slotRows.data ?? []), unlinkedSlotRows: collectUnlinkedSlotRows(slotRows.data ?? []), migrationNeeded: false, error: null }
+  const unlinkedCalendarRows = (calendarRows.data ?? [])
+    .filter(row => !row.microsoft_calendar_id && !row.microsoft_event_id)
+    .map(row => ({
+      id: row.id as string,
+      updatedAt: row.updated_at as string,
+      title: row.title as string,
+      startAt: row.start_at as string,
+      endAt: row.end_at as string | null,
+      allDay: Boolean(row.all_day),
+    }))
+
+  return { targets, deliverableSlotKeys: collectSlotKeys(slotRows.data ?? []), unlinkedSlotRows: collectUnlinkedSlotRows(slotRows.data ?? []), unlinkedCalendarRows, migrationNeeded: false, error: null }
 }
 
 function collectSlotKeys(rows: Array<Record<string, unknown>>): Set<string> {

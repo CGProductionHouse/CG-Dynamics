@@ -31,6 +31,7 @@ import {
 } from '../../lib/microsoftImportData'
 import {
   buildMicrosoftRecoveryPlan,
+  approveCalendarDuplicateAsSeparate,
   getMicrosoftExecutableItems,
   getMicrosoftReviewedItems,
   type MicrosoftRecoveryPlan,
@@ -129,7 +130,7 @@ function AssigneeLookupDiagnostic({ snapshot }: { snapshot: MicrosoftSnapshot })
   )
 }
 
-function PreviewItem({ item }: { item: MicrosoftImportPreviewItem }) {
+function PreviewItem({ item, onImportSeparate }: { item: MicrosoftImportPreviewItem; onImportSeparate: (item: MicrosoftImportPreviewItem) => void }) {
   const action = item.reconciliationAction ?? 'skipped'
   const incomingStatus = microsoftIncomingStatus(item)
   return (
@@ -159,6 +160,7 @@ function PreviewItem({ item }: { item: MicrosoftImportPreviewItem }) {
       {item.requiresRemovalApproval && <p className="mt-3 rounded-lg border border-orange-300/15 bg-orange-300/[0.06] px-3 py-2 text-xs text-orange-100">Missing from a complete source fetch. Explicit source-removal approval is required.</p>}
       {item.conflictCode && <p className="mt-3 text-[10px] font-black uppercase tracking-wider text-red-200/70">Conflict: {item.conflictCode.replaceAll('_', ' ')}</p>}
       {item.conflictReason && <p className="mt-3 rounded-lg border border-red-300/15 bg-red-300/[0.06] px-3 py-2 text-xs text-red-100">{item.conflictReason}</p>}
+      {item.conflictCode === 'possible_calendar_duplicate' && <button type="button" onClick={() => onImportSeparate(item)} className="mt-3 rounded-lg border border-amber-300/30 bg-amber-300/[0.08] px-3 py-2 text-xs font-black text-amber-200 hover:bg-amber-300/[0.14]">Import as a separate Outlook event</button>}
       {item.warnings.map(warning => <p key={warning} className="mt-2 text-xs text-amber-100/70">{warning}</p>)}
     </article>
   )
@@ -346,6 +348,7 @@ export default function MicrosoftImportPage() {
         existingResult.deliverableSlotKeys,
         mapped => resolvePreviewAssignees(mapped, nextSnapshot.assigneeMap ?? {}, mappingsResult.data, profilesResult.data),
         existingResult.unlinkedSlotRows,
+        existingResult.unlinkedCalendarRows,
       )
       setSnapshot(nextSnapshot)
       setItems(resolved)
@@ -548,6 +551,13 @@ export default function MicrosoftImportPage() {
   const actionCounts = useMemo(() => new Map(ACTIONS.map(action => [action.value, summary[action.value]])), [summary])
   const canApply = Boolean(snapshot) && !recovery && transitionStatus === 'active' && reviewed && !migrationNeeded && !applying && applicableCount > 0
 
+  function importCalendarCandidateAsSeparate(item: MicrosoftImportPreviewItem) {
+    const confirmed = window.confirm(`Import "${item.title}" as a separate Outlook event? No native event will be merged or changed.`)
+    if (!confirmed) return
+    setReviewed(false)
+    setItems(current => current.map(candidate => candidate === item ? approveCalendarDuplicateAsSeparate(candidate) : candidate))
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
       <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.18),transparent_38%),linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-5 sm:p-8">
@@ -697,7 +707,7 @@ export default function MicrosoftImportPage() {
           <div className="mt-3 flex items-center justify-between gap-3"><p className="text-xs text-white/40">Showing {visibleItems.length} of {items.length} records</p><button type="button" onClick={() => { setSourceFilter('all'); setActionFilter('all'); setStatusFilter('all'); setConflictFilter('all') }} className="text-xs font-black text-brand-teal">Clear filters</button></div>
         </section>
 
-        <section className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{visibleItems.map((item, index) => <PreviewItem key={itemKey(item, index)} item={item} />)}</section>
+        <section className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{visibleItems.map((item, index) => <PreviewItem key={itemKey(item, index)} item={item} onImportSeparate={importCalendarCandidateAsSeparate} />)}</section>
         {visibleItems.length === 0 && <p className="mt-3 rounded-xl border border-dashed border-white/10 py-8 text-center text-sm text-white/35">No items match these filters.</p>}
         {!recovery && <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><p className="mb-3 rounded-lg border border-brand-teal/20 bg-brand-teal/[0.06] px-3 py-2 text-xs text-brand-teal">Only the reviewed executable actions are processed. Per-item audit history is retained if this tab closes.</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>}
       </>}

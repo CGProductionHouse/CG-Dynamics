@@ -3,6 +3,7 @@ import type {
   MicrosoftImportPreviewItem,
   MicrosoftProposedPayload,
   MicrosoftReconciliationAction,
+  MicrosoftUnlinkedCalendarRow,
 } from './microsoftImport'
 import {
   buildMicrosoftImportPreview,
@@ -13,6 +14,7 @@ import {
 } from './microsoftImportPreview'
 import { microsoftOutlookSourceKey, microsoftPlannerSourceKey } from './microsoftImportMap'
 import type { MicrosoftSnapshot, MicrosoftSnapshotSource } from './microsoftSnapshot'
+import { calendarMaterialReviewKey } from './calendarIdentity'
 
 function stableHash(value: unknown): string {
   const text = JSON.stringify(value)
@@ -235,6 +237,7 @@ export function buildMicrosoftReconciliation(
   deliverableSlotKeys: Set<string>,
   prepareItems: (items: MicrosoftImportPreviewItem[]) => MicrosoftImportPreviewItem[] = items => items,
   unlinkedSlotRows: Map<string, UnlinkedSlotRow[]> = new Map(),
+  unlinkedCalendarRows: MicrosoftUnlinkedCalendarRow[] = [],
 ): MicrosoftImportPreviewItem[] {
   const mapped = prepareItems(buildMicrosoftImportPreview(snapshot.records, context))
   const targetsByKey = new Map<string, MicrosoftExistingTarget[]>()
@@ -244,6 +247,11 @@ export function buildMicrosoftReconciliation(
     targetsByKey.set(key, [...(targetsByKey.get(key) ?? []), target])
   }
   const seen = new Set<string>()
+  const unlinkedCalendarByMaterialKey = new Map<string, MicrosoftUnlinkedCalendarRow[]>()
+  for (const row of unlinkedCalendarRows) {
+    const key = calendarMaterialReviewKey({ title: row.title, start_at: row.startAt, end_at: row.endAt, all_day: row.allDay })
+    unlinkedCalendarByMaterialKey.set(key, [...(unlinkedCalendarByMaterialKey.get(key) ?? []), row])
+  }
 
   const reconciled: MicrosoftImportPreviewItem[] = mapped.map(item => {
     const source = sourceForItem(item, snapshot.sources)
@@ -258,6 +266,23 @@ export function buildMicrosoftReconciliation(
     if (!key) return { ...item, previewStatus: 'conflict' as const, reconciliationAction: 'conflict' as const, sourceComplete }
     const targets = targetsByKey.get(key) ?? []
     if (targets.length === 0) {
+      if (item.destination === 'cg_calendar' && item.proposedPayload?.destination === 'cg_calendar') {
+        const reviewKey = calendarMaterialReviewKey(item.proposedPayload)
+        const nativeMatches = unlinkedCalendarByMaterialKey.get(reviewKey) ?? []
+        if (nativeMatches.length > 0) {
+          return {
+            ...item,
+            existingTargetId: nativeMatches.length === 1 ? nativeMatches[0].id : null,
+            expectedTargetUpdatedAt: nativeMatches.length === 1 ? nativeMatches[0].updatedAt : null,
+            previewStatus: 'conflict' as const,
+            reconciliationAction: 'conflict' as const,
+            conflictCode: 'possible_calendar_duplicate' as const,
+            conflictReason: 'A native CG Calendar event has the same title and time. Review both records; title and time are not used as Microsoft identity.',
+            sourceHash: stableHash(ownedPayload(item.proposedPayload)),
+            sourceComplete,
+          }
+        }
+      }
       if (item.destination === 'planner' && item.proposedPayload?.destination === 'planner' && item.proposedPayload.status === 'done') {
         return { ...item, previewStatus: 'skipped' as const, reconciliationAction: 'skipped' as const, skipCode: 'completed_operational_not_imported' as const, sourceComplete, warnings: [...item.warnings, 'Newly completed operational task is not imported. Existing linked tasks can still complete.'] }
       }

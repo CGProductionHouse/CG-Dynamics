@@ -34,6 +34,9 @@ export interface CompanyCalendarEvent {
   microsoft_calendar_id?: string | null
   microsoft_event_id?: string | null
   microsoft_last_synced_at?: string | null
+  superseded_by_event_id?: string | null
+  superseded_at?: string | null
+  superseded_by_profile_id?: string | null
   created_at: string
   updated_at: string
 }
@@ -122,6 +125,7 @@ export async function listCompanyEvents(
     let query = supabase
       .from(TABLE)
       .select('*')
+      .is('superseded_by_event_id', null)
       .order('start_at', { ascending: true })
 
     if (rangeEnd) query = query.lt('start_at', rangeEnd)
@@ -251,5 +255,22 @@ export async function deleteCompanyEvent(
     return { data: null, error: null, tableMissing: false }
   } catch (err) {
     return { data: null, error: handleError(err), tableMissing: false }
+  }
+}
+
+export async function supersedeNativeCompanyEvent(
+  nativeEventId: string,
+  outlookEventId: string,
+  expectedNativeUpdatedAt: string,
+): Promise<{ error: { message: string; code?: string } | null }> {
+  try {
+    const { error } = await supabase.rpc('supersede_native_calendar_event', {
+      p_native_event_id: nativeEventId,
+      p_outlook_event_id: outlookEventId,
+      p_expected_native_updated_at: expectedNativeUpdatedAt,
+    })
+    return { error: error ? handleError(error) : null }
+  } catch (err) {
+    return { error: handleError(err) }
   }
 }

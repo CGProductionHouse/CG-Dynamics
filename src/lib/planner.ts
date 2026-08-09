@@ -1210,7 +1210,7 @@ export async function getPlannerTaskBoardId(taskId: string) {
 // Calendar task layer so operational work appears next to events and posts.
 export async function listPlannerTasksDueBetween(startDate: string, endDateExclusive: string) {
   const withRecurrence = await supabase
-    .from(PLANNER_TASKS_TABLE)
+    .from(PLANNER_TASKS_CANONICAL)
     .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id, recurrence_rule')
     .is('archived_at', null)
     .gte('due_date', startDate)
@@ -1226,7 +1226,7 @@ export async function listPlannerTasksDueBetween(startDate: string, endDateExclu
   }
 
   const fallback = await supabase
-    .from(PLANNER_TASKS_TABLE)
+    .from(PLANNER_TASKS_CANONICAL)
     .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id')
     .is('archived_at', null)
     .gte('due_date', startDate)
