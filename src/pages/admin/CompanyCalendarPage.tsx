@@ -9,6 +9,7 @@ import {
   createCompanyEvent,
   updateCompanyEvent,
   deleteCompanyEvent,
+  supersedeNativeCompanyEvent,
   EVENT_TYPES,
   EVENT_TYPE_LABELS,
   EVENT_STATUS_LABELS,
@@ -27,6 +28,7 @@ import { materializeRecurringTasks } from '../../lib/recurrence'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
+import { reconcileCalendarLogicalItems } from '../../lib/calendarIdentity'
 
 type EventFilter = 'all' | 'cancelled' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
@@ -66,6 +68,11 @@ function formatEventTime(dateStr: string) {
 
 function formatShortDate(dateStr: string) {
   return formatBusinessDate(`${dateStr}T12:00:00+02:00`, { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+function formatReviewDateTime(value: string | null): string {
+  if (!value) return 'No end time'
+  return `${formatBusinessDate(value, { day: 'numeric', month: 'short', year: 'numeric' })} · ${formatBusinessTime(value)}`
 }
 
 function monthKey(date: Date) {
@@ -168,6 +175,9 @@ export default function CompanyCalendarPage() {
   const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
   const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; recurrence: string | null }>({ tasks: null, recurrence: null })
   const [recurrenceMigrationNeeded, setRecurrenceMigrationNeeded] = useState(false)
+  const [supersessionMigrationNeeded, setSupersessionMigrationNeeded] = useState(false)
+  const [resolvingCandidateId, setResolvingCandidateId] = useState<string | null>(null)
+  const [resolutionError, setResolutionError] = useState<string | null>(null)
   const loadRequestRef = useRef(0)
 
   const canManage = isManagerRole(profile?.role)
@@ -177,12 +187,14 @@ export default function CompanyCalendarPage() {
     setLoading(true)
     setError(null)
     setTableMissing(false)
+    setSupersessionMigrationNeeded(false)
     try {
       const result = await listCompanyEvents(
         businessDayBoundaryIso(`${selectedMonth}-01`),
         businessDayBoundaryIso(nextMonthStart(selectedMonth)),
       )
       if (requestId !== loadRequestRef.current) return
+      setSupersessionMigrationNeeded(Boolean(result.supersessionMigrationNeeded))
       if (result.tableMissing) {
         setTableMissing(true)
         setEvents([])
@@ -258,18 +270,26 @@ export default function CompanyCalendarPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerEvent])
 
+  const calendarAuthority = useMemo(() => reconcileCalendarLogicalItems(events, []), [events])
+  const canonicalEvents = calendarAuthority.events
+  const reviewCandidates = calendarAuthority.reviewCandidates
+
   const filtered = useMemo(() => {
-    if (filter === 'cancelled') return sortEvents(events.filter(event => event.status === 'cancelled'))
-    const active = events.filter(event => event.status !== 'cancelled')
+    if (filter === 'cancelled') return sortEvents(canonicalEvents.filter(event => event.status === 'cancelled'))
+    const active = canonicalEvents.filter(event => event.status !== 'cancelled')
     if (filter === 'all') return sortEvents(active)
     return sortEvents(active.filter(e => e.event_type === filter))
-  }, [events, filter])
+  }, [canonicalEvents, filter])
 
-  const allMonthEvents = events
+  const allMonthEvents = canonicalEvents
   const monthEvents = filtered
 
-  const visibleTasks = useMemo(() => (layers.tasks ? monthTasks : []), [layers.tasks, monthTasks])
-  const visibleEvents = useMemo(() => (layers.events ? monthEvents : []), [layers.events, monthEvents])
+  const visibleItems = useMemo(() => reconcileCalendarLogicalItems(
+    layers.events ? monthEvents : [],
+    layers.tasks ? monthTasks : [],
+  ), [layers.events, layers.tasks, monthEvents, monthTasks])
+  const visibleTasks = visibleItems.tasks
+  const visibleEvents = visibleItems.events
 
   const tasksByDate = useMemo(() => {
     const map = new Map<string, CalendarTaskRow[]>()
@@ -295,7 +315,7 @@ export default function CompanyCalendarPage() {
   }, [selectedMonth, visibleEvents, tasksByDate])
 
   const counts = useMemo(() => {
-    const active = events.filter(e => e.status !== 'cancelled')
+    const active = canonicalEvents.filter(e => e.status !== 'cancelled')
     return {
       all: active.length,
       meeting: active.filter(e => e.event_type === 'meeting').length,
@@ -304,9 +324,9 @@ export default function CompanyCalendarPage() {
       client_event: active.filter(e => e.event_type === 'client_event').length,
       deadline: active.filter(e => e.event_type === 'deadline').length,
       internal: active.filter(e => e.event_type === 'internal').length,
-      cancelled: events.filter(e => e.status === 'cancelled').length,
+      cancelled: canonicalEvents.filter(e => e.status === 'cancelled').length,
     }
-  }, [events])
+  }, [canonicalEvents])
 
   const handleCreateEvent = useCallback((date?: string) => {
     const defaultDate = date ?? (selectedMonth === businessMonthKey() ? businessDateKey() : `${selectedMonth}-01`)
@@ -317,6 +337,24 @@ export default function CompanyCalendarPage() {
   function handleSaved() {
     setDrawerEvent(null)
     void load()
+  }
+
+  async function handleUseOutlookRecord(nativeEvent: CompanyCalendarEvent, outlookEvent: CompanyCalendarEvent) {
+    if (supersessionMigrationNeeded) {
+      setResolutionError('Calendar duplicate resolution is unavailable until the reviewed supersession migration is applied.')
+      return
+    }
+    const confirmed = window.confirm(`Use the Outlook record for "${outlookEvent.title}"? The native record will be retained as superseded audit history.`)
+    if (!confirmed) return
+    setResolvingCandidateId(nativeEvent.id)
+    setResolutionError(null)
+    const result = await supersedeNativeCompanyEvent(nativeEvent.id, outlookEvent.id, nativeEvent.updated_at, outlookEvent.updated_at)
+    setResolvingCandidateId(null)
+    if (result.error) {
+      setResolutionError(result.error.message)
+      return
+    }
+    await load()
   }
 
   if (loading) {
@@ -383,6 +421,57 @@ export default function CompanyCalendarPage() {
           Planner tasks ({monthTasks.length})
         </label>
       </div>
+
+      {supersessionMigrationNeeded && (
+        <div className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-xs text-amber-100">
+          Calendar events are available in legacy mode. Duplicate resolution is disabled until the reviewed supersession migration is applied.
+        </div>
+      )}
+
+      {canManage && reviewCandidates.length > 0 && (
+        <section className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-4" aria-label="Possible calendar duplicates">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-200">Review possible duplicates ({reviewCandidates.length})</p>
+          <p className="mt-1 text-xs leading-5 text-amber-100/70">These native and Outlook records share a title and start time, but remain separate until their identity is explicitly reviewed.</p>
+          {resolutionError && <p className="mt-2 rounded-lg border border-red-300/20 bg-red-300/[0.07] px-3 py-2 text-xs text-red-200">{resolutionError}</p>}
+          <div className="mt-3 space-y-2">
+            {reviewCandidates.map(({ nativeEvent, outlookEvent }) => (
+              <div key={`${nativeEvent.id}:${outlookEvent.id}`} className="rounded-lg border border-white/[0.08] bg-black/15 p-3">
+                <p className="text-sm font-bold text-white">{outlookEvent.title}</p>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  {([
+                    { label: 'Native', event: nativeEvent, outlook: false },
+                    { label: 'Microsoft Outlook', event: outlookEvent, outlook: true },
+                  ] as const).map(item => (
+                    <div key={item.label} className="rounded-lg border border-white/[0.08] bg-white/[0.025] p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-primary/55">{item.label}</p>
+                        {item.outlook && <span className="rounded-full border border-blue-300/20 bg-blue-300/[0.07] px-2 py-0.5 text-[10px] font-bold text-blue-200">Outlook</span>}
+                      </div>
+                      <dl className="mt-2 grid grid-cols-[58px_1fr] gap-x-2 gap-y-1 text-xs">
+                        <dt className="text-brand-primary/40">Start</dt><dd className="text-white/80">{formatReviewDateTime(item.event.start_at)}</dd>
+                        <dt className="text-brand-primary/40">End</dt><dd className="text-white/80">{formatReviewDateTime(item.event.end_at)}</dd>
+                        <dt className="text-brand-primary/40">Location</dt><dd className="text-white/80">{item.event.location || 'No location'}</dd>
+                        <dt className="text-brand-primary/40">Client</dt><dd className="text-white/80">{item.event.client_name || (item.event.client_id ? 'Linked client' : 'No client')}</dd>
+                        <dt className="text-brand-primary/40">Type</dt><dd className="text-white/80">{EVENT_TYPE_LABELS[item.event.event_type]}</dd>
+                        <dt className="text-brand-primary/40">All day</dt><dd className="text-white/80">{item.event.all_day ? 'Yes' : 'No'}</dd>
+                        <dt className="text-brand-primary/40">Status</dt><dd className="text-white/80">{EVENT_STATUS_LABELS[item.event.status]}</dd>
+                        <dt className="text-brand-primary/40">Assignee</dt><dd className="text-white/80">{item.event.assigned_to_name || 'Unassigned'}</dd>
+                        <dt className="text-brand-primary/40">Notes</dt><dd className="break-words text-white/80">{item.event.notes || 'No notes'}</dd>
+                        <dt className="text-brand-primary/40">Links</dt><dd className="text-white/80">{[item.event.linked_task_id ? 'Planner task' : null, item.event.linked_deliverable_id ? 'Deliverable' : null].filter(Boolean).join(', ') || 'No direct links'}</dd>
+                      </dl>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => setDrawerEvent(nativeEvent)} className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-bold text-brand-primary hover:text-white">Open native</button>
+                  <button type="button" onClick={() => setDrawerEvent(outlookEvent)} className="rounded-md border border-sky-300/20 bg-sky-300/[0.06] px-2.5 py-1.5 text-xs font-bold text-sky-200 hover:text-white">Open Outlook</button>
+                  <button type="button" disabled={supersessionMigrationNeeded || resolvingCandidateId === nativeEvent.id} onClick={() => void handleUseOutlookRecord(nativeEvent, outlookEvent)} title={supersessionMigrationNeeded ? 'Apply the reviewed calendar supersession migration first.' : undefined} className="rounded-md bg-amber-300 px-2.5 py-1.5 text-xs font-black text-black hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50">{resolvingCandidateId === nativeEvent.id ? 'Resolving...' : 'Use Outlook record'}</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (allMonthEvents.length + monthTasks.length === 0)) && (
         <CalendarDiagnostics

@@ -34,6 +34,22 @@
 | UPDATE (production status only) | ✓ | ✓ | ✓ | ✗ |
 | DELETE | ✓ | ✓ | ✗ | ✗ |
 
+### company_calendar_events
+
+All staff may read active company events. Managers/admins may explicitly
+supersede a matching native event with an Outlook-backed event through
+`supersede_native_calendar_event`; the RPC checks both role and current row
+state, records the actor/time, and retains the native row for audit. Clients
+have no direct table access and receive only their own active, client-safe event
+projection.
+
+The active-manager-only supersession RPC preserves native `client_id`/`client_name`, `notes` and
+`assigned_to_name` only when the Outlook row is empty and fails closed on
+conflicts. It never changes Outlook identity, start/end time or location, and it
+refuses differing event types/statuses, cancelled events, all `content_run`
+events, or either selected event being linked to tasks, deliverables, Content
+Runs or meeting debriefs.
+
 ### client_packages, package_deliverable_templates
 
 | Operation | Admin | Manager | Staff/Team | Client |

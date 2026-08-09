@@ -18,6 +18,8 @@ export interface MicrosoftReviewedItem {
   title: string
   action: MicrosoftReconciliationAction
   removalApproved: boolean
+  calendarDuplicateReviewed?: boolean
+  sourceHash?: string | null
 }
 
 export interface MicrosoftRecoveryAuditItem {
@@ -51,6 +53,21 @@ export function isMicrosoftExecutableItem(item: MicrosoftImportPreviewItem, appr
   return Boolean(action && EXECUTABLE_ACTIONS.has(action) && (!item.requiresRemovalApproval || approveRemovals))
 }
 
+export function approveCalendarDuplicateAsSeparate(item: MicrosoftImportPreviewItem): MicrosoftImportPreviewItem {
+  if (item.conflictCode !== 'possible_calendar_duplicate' || !item.sourceHash) return item
+  return {
+    ...item,
+    existingTargetId: null,
+    expectedTargetUpdatedAt: null,
+    previewStatus: 'new',
+    reconciliationAction: 'create',
+    conflictCode: null,
+    conflictReason: null,
+    calendarDuplicateReviewed: true,
+    warnings: [...item.warnings, 'Explicitly reviewed as a separate Outlook event.'],
+  }
+}
+
 export function getMicrosoftExecutableItems(
   items: MicrosoftImportPreviewItem[],
   approveRemovals: boolean,
@@ -73,6 +90,8 @@ export function getMicrosoftReviewedItems(
       title: item.title,
       action: item.reconciliationAction as MicrosoftReconciliationAction,
       removalApproved: Boolean(item.requiresRemovalApproval && approveRemovals),
+      calendarDuplicateReviewed: item.calendarDuplicateReviewed,
+      sourceHash: item.sourceHash ?? null,
     }
   })
 }
@@ -92,7 +111,13 @@ export function buildMicrosoftRecoveryPlan(
 
   for (const reviewed of reviewedItems) {
     const audit = auditByKey.get(reviewed.key)
-    const current = currentByKey.get(reviewed.key) ?? null
+    const rawCurrent = currentByKey.get(reviewed.key) ?? null
+    const current = rawCurrent?.conflictCode === 'possible_calendar_duplicate'
+      && reviewed.calendarDuplicateReviewed
+      && reviewed.action === 'create'
+      && reviewed.sourceHash === rawCurrent.sourceHash
+      ? approveCalendarDuplicateAsSeparate(rawCurrent)
+      : rawCurrent
     if (audit?.resultStatus === 'failed') failedBeforeRetry += 1
     else if (!audit || audit.resultStatus === 'previewed') notAttemptedBeforeRetry += 1
 
