@@ -102,7 +102,8 @@ test('dashboard route is strictly admin nested and has no separate navigation it
   const adminGuardEnd = app.indexOf('</Route>', app.indexOf('path="/admin/marketing-library"'))
   assert.ok(route > adminGuard && route < adminGuardEnd, 'AI health route is inside RequireAdmin')
   assert.doesNotMatch(navigation, /to: '\/admin\/ai-health'/)
-  assert.match(navigation, /label: 'System Health'[\s\S]*activePaths: \['\/admin\/import-health', '\/admin\/ai-health'\]/)
+  // AI health is grouped under the admin-only System parent, not a separate item.
+  assert.match(navigation, /label: 'System'[\s\S]*activePaths: \['\/admin\/system', '\/admin\/import-health', '\/admin\/ai-health'\]/)
   assert.match(importHealth, /to="\/admin\/ai-health"/)
 })
 

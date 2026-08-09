@@ -36,6 +36,8 @@ import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
 import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
 import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
 import MarketingAiDepartmentPage from './pages/admin/MarketingAiDepartmentPage'
+import MarketingWorkspacePage from './pages/admin/MarketingWorkspacePage'
+import SystemHubPage from './pages/admin/SystemHubPage'
 import SkillCardReviewPage from './pages/admin/SkillCardReviewPage'
 import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
 import MyWorkPage from './pages/admin/MyWorkPage'
@@ -120,6 +122,9 @@ export default function App() {
 
               {/* Manager/admin operational write routes nested inside AdminLayout */}
               <Route element={<RequireManager />}>
+                {/* Marketing/Knowledge parent — groups Library, Marketing AI and
+                    Skill Card Review. Admin-only children keep their own guards. */}
+                <Route path="/admin/marketing" element={<MarketingWorkspacePage />} />
                 <Route path="/admin/integrations" element={<IntegrationsPage />} />
                 <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
                 <Route path="/admin/integrations/google-ads" element={<GoogleAdsIntegrationPage />} />
@@ -131,6 +136,9 @@ export default function App() {
 
               {/* Admin-only security/setup routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>
+                {/* System — grouped admin diagnostics (health tools), out of
+                    daily navigation. */}
+                <Route path="/admin/system" element={<SystemHubPage />} />
                 <Route path="/admin/users" element={<UsersHub />} />
                 <Route path="/admin/team" element={<UsersHub />} />
                 <Route path="/admin/invites" element={<Navigate to="/admin/users?tab=invites" replace />} />

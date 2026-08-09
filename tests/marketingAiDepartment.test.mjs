@@ -242,8 +242,8 @@ test('the runner never publishes, spends budget or activates knowledge', () => {
 // ── UI surface ──────────────────────────────────────────────────────────────
 test('route and nav exist and are staff-scoped (never client-facing)', () => {
   assert.match(app, /path="\/admin\/marketing-ai"/)
-  assert.match(nav, /to: '\/admin\/marketing-ai'[^}]*access: 'manager'/)
-  // It lives in adminNavItems, which is only rendered inside the admin shell.
+  // Grouped under the Marketing parent nav entry (rendered only in the admin shell).
+  assert.match(nav, /to: '\/admin\/marketing'[^}]*'\/admin\/marketing-ai'/)
 })
 
 test('UI exposes evidence, confidence, provider, specialist, creator and timestamps', () => {

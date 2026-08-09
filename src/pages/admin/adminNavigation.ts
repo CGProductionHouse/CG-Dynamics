@@ -50,15 +50,21 @@ export function isSharedNavZonePath(pathname: string): boolean {
   return SHARED_ZONE_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`))
 }
 
+// Grouped specialist/admin destinations (#182). Backend and setup tools are no
+// longer separate top-level entries — they live behind four parent areas:
+//   • Integrations  — all provider sync/import/connection tools
+//                     (Microsoft Sync, Planner Import, Meta, Google Ads).
+//   • Marketing     — the Marketing/Knowledge workspace
+//                     (Library, Marketing AI, Skill Card Review).
+//   • Users         — staff/user administration.
+//   • System        — admin diagnostics (System Health, AI usage health).
+// Each parent's activePaths keep it highlighted while on a grouped child route,
+// and legacy deep links continue to resolve. Ordinary staff see none of these.
 export const adminNavItems: NavItem[] = [
-  { to: '/admin/integrations', label: 'Integrations', shortLabel: 'Integrations', marker: 'IN', access: 'manager', activePaths: ['/admin/integrations'] },
-  { to: '/admin/planner-import', label: 'Planner Import', shortLabel: 'Planner', marker: 'PI', access: 'manager' },
+  { to: '/admin/integrations', label: 'Integrations', shortLabel: 'Integrations', marker: 'IN', access: 'manager', activePaths: ['/admin/integrations', '/admin/microsoft-import', '/admin/planner-import', '/admin/import', '/admin/import-csv', '/admin/imports', '/admin/manual-metrics'] },
+  { to: '/admin/marketing', label: 'Marketing', shortLabel: 'Marketing', marker: 'MK', access: 'manager', activePaths: ['/admin/marketing', '/admin/marketing-library', '/admin/marketing-ai', '/admin/skill-card-review'] },
   { to: '/admin/users', label: 'Users', shortLabel: 'Users', marker: 'U', access: 'admin', activePaths: ['/admin/users', '/admin/team', '/admin/invites'] },
-  { to: '/admin/microsoft-import', label: 'Microsoft Sync', shortLabel: 'Microsoft', marker: 'MS', access: 'admin' },
-  { to: '/admin/import-health', label: 'System Health', shortLabel: 'Health', marker: 'IH', access: 'admin', activePaths: ['/admin/import-health', '/admin/ai-health'] },
-  { to: '/admin/marketing-library', label: 'Marketing Library', shortLabel: 'Library', marker: 'ML', access: 'admin' },
-  { to: '/admin/marketing-ai', label: 'Marketing AI', shortLabel: 'Marketing AI', marker: 'AI', access: 'manager', activePaths: ['/admin/marketing-ai'] },
-  { to: '/admin/skill-card-review', label: 'Skill Card Review', shortLabel: 'Cards', marker: 'SC', access: 'admin', activePaths: ['/admin/skill-card-review'] },
+  { to: '/admin/system', label: 'System', shortLabel: 'System', marker: 'SY', access: 'admin', activePaths: ['/admin/system', '/admin/import-health', '/admin/ai-health'] },
 ]
 
 export function canShowNavItem(item: NavItem, role: string) {
