@@ -47,10 +47,12 @@ create index if not exists company_calendar_events_superseded_by_event_idx
   on public.company_calendar_events(superseded_by_event_id)
   where superseded_by_event_id is not null;
 
-create or replace function public.supersede_native_calendar_event(
+drop function if exists public.supersede_native_calendar_event(uuid, uuid, timestamptz);
+create function public.supersede_native_calendar_event(
   p_native_event_id uuid,
   p_outlook_event_id uuid,
-  p_expected_native_updated_at timestamptz
+  p_expected_native_updated_at timestamptz,
+  p_expected_outlook_updated_at timestamptz
 )
 returns uuid
 language plpgsql
@@ -61,8 +63,8 @@ declare
   v_native public.company_calendar_events%rowtype;
   v_outlook public.company_calendar_events%rowtype;
 begin
-  if not public.is_manager() then
-    raise exception 'Manager access required';
+  if not public.is_active_planner_manager() then
+    raise exception 'Active manager access required';
   end if;
   if p_native_event_id = p_outlook_event_id then
     raise exception 'An event cannot supersede itself';
@@ -86,11 +88,27 @@ begin
   if v_native.updated_at is distinct from p_expected_native_updated_at then
     raise exception 'The native calendar event changed; reload before resolving';
   end if;
+  if v_outlook.updated_at is distinct from p_expected_outlook_updated_at then
+    raise exception 'The Outlook calendar event changed; reload before resolving';
+  end if;
+  if v_native.status = 'cancelled' or v_outlook.status = 'cancelled' then
+    raise exception 'Cancelled calendar history cannot be used for duplicate resolution';
+  end if;
   if v_native.microsoft_calendar_id is not null or v_native.microsoft_event_id is not null then
     raise exception 'Only a native calendar event can be superseded';
   end if;
-  if v_native.linked_deliverable_id is not null or v_native.linked_task_id is not null then
-    raise exception 'Linked native events require manual relationship review';
+  if v_native.event_type = 'content_run' or v_outlook.event_type = 'content_run' then
+    raise exception 'Content Run calendar events require manual relationship review before supersession';
+  end if;
+  if v_native.linked_deliverable_id is not null or v_native.linked_task_id is not null
+     or v_outlook.linked_deliverable_id is not null or v_outlook.linked_task_id is not null then
+    raise exception 'Linked calendar events require manual relationship review';
+  end if;
+  if exists (select 1 from public.content_runs where calendar_event_id in (v_native.id, v_outlook.id)) then
+    raise exception 'Linked Content Run requires manual relationship review before this calendar event can be superseded.';
+  end if;
+  if exists (select 1 from public.meeting_debriefs where calendar_event_id in (v_native.id, v_outlook.id)) then
+    raise exception 'Linked meeting debrief requires manual relationship review before this calendar event can be superseded.';
   end if;
   if v_outlook.microsoft_calendar_id is null or v_outlook.microsoft_event_id is null then
     raise exception 'The canonical event must have a complete Outlook identity';
@@ -98,9 +116,58 @@ begin
   if upper(regexp_replace(btrim(v_native.title), '\s+', ' ', 'g'))
        is distinct from upper(regexp_replace(btrim(v_outlook.title), '\s+', ' ', 'g'))
      or v_native.start_at is distinct from v_outlook.start_at
-     or v_native.end_at is distinct from v_outlook.end_at
      or v_native.all_day is distinct from v_outlook.all_day then
-    raise exception 'The events no longer match the reviewed title and time';
+    raise exception 'The events no longer match the reviewed title, start time and all-day state';
+  end if;
+
+  -- Preserve simple CG-owned metadata only where the Outlook row is empty.
+  -- Conflicting values fail closed for manual review; Microsoft identity, time,
+  -- end time and location remain untouched.
+  if v_native.client_id is not null and v_outlook.client_id is not null
+     and v_native.client_id is distinct from v_outlook.client_id then
+    raise exception 'Conflicting client links require manual review';
+  end if;
+  if nullif(btrim(v_native.client_name), '') is not null
+     and nullif(btrim(v_outlook.client_name), '') is not null
+     and nullif(btrim(v_native.client_name), '') is distinct from nullif(btrim(v_outlook.client_name), '') then
+    raise exception 'Conflicting client names require manual review';
+  end if;
+  if v_native.client_id is not null and v_outlook.client_id is null
+     and nullif(btrim(v_outlook.client_name), '') is not null
+     and nullif(btrim(v_native.client_name), '') is null then
+    raise exception 'An existing Outlook client name conflicts with the native client link';
+  end if;
+  if v_native.client_id is null and nullif(btrim(v_native.client_name), '') is not null
+     and v_outlook.client_id is not null and nullif(btrim(v_outlook.client_name), '') is null then
+    raise exception 'A native client name cannot be safely applied to a different linked client';
+  end if;
+  if nullif(btrim(v_native.notes), '') is not null
+     and nullif(btrim(v_outlook.notes), '') is not null
+     and v_native.notes is distinct from v_outlook.notes then
+    raise exception 'Conflicting calendar notes require manual review';
+  end if;
+  if nullif(btrim(v_native.assigned_to_name), '') is not null
+     and nullif(btrim(v_outlook.assigned_to_name), '') is not null
+     and v_native.assigned_to_name is distinct from v_outlook.assigned_to_name then
+    raise exception 'Conflicting calendar assignees require manual review';
+  end if;
+  if v_native.event_type is distinct from v_outlook.event_type then
+    raise exception 'Conflicting calendar event types require manual review';
+  end if;
+  if v_native.status is distinct from v_outlook.status then
+    raise exception 'Conflicting calendar statuses require manual review';
+  end if;
+
+  if (v_outlook.client_id is null and v_native.client_id is not null)
+     or (nullif(btrim(v_outlook.client_name), '') is null and nullif(btrim(v_native.client_name), '') is not null)
+     or (nullif(btrim(v_outlook.notes), '') is null and nullif(btrim(v_native.notes), '') is not null)
+     or (nullif(btrim(v_outlook.assigned_to_name), '') is null and nullif(btrim(v_native.assigned_to_name), '') is not null) then
+    update public.company_calendar_events
+       set client_id = coalesce(v_outlook.client_id, v_native.client_id),
+           client_name = case when nullif(btrim(v_outlook.client_name), '') is null then v_native.client_name else v_outlook.client_name end,
+           notes = case when nullif(btrim(v_outlook.notes), '') is null then v_native.notes else v_outlook.notes end,
+           assigned_to_name = case when nullif(btrim(v_outlook.assigned_to_name), '') is null then v_native.assigned_to_name else v_outlook.assigned_to_name end
+     where id = v_outlook.id;
   end if;
 
   update public.company_calendar_events
@@ -113,8 +180,8 @@ begin
 end;
 $$;
 
-revoke all on function public.supersede_native_calendar_event(uuid, uuid, timestamptz) from public, anon;
-grant execute on function public.supersede_native_calendar_event(uuid, uuid, timestamptz) to authenticated;
+revoke all on function public.supersede_native_calendar_event(uuid, uuid, timestamptz, timestamptz) from public, anon;
+grant execute on function public.supersede_native_calendar_event(uuid, uuid, timestamptz, timestamptz) to authenticated;
 
 -- Direct browser writes retain normal event management but cannot forge or
 -- clear supersession audit evidence. The security-definer RPC owns those fields.
@@ -132,13 +199,13 @@ grant update (
 drop policy if exists "company_calendar_events: manager update" on public.company_calendar_events;
 create policy "company_calendar_events: manager update"
   on public.company_calendar_events for update
-  using (public.is_manager() and superseded_by_event_id is null)
-  with check (public.is_manager() and superseded_by_event_id is null);
+  using (public.is_active_planner_manager() and superseded_by_event_id is null)
+  with check (public.is_active_planner_manager() and superseded_by_event_id is null);
 
 drop policy if exists "company_calendar_events: manager delete" on public.company_calendar_events;
 create policy "company_calendar_events: manager delete"
   on public.company_calendar_events for delete
-  using (public.is_manager() and superseded_by_event_id is null);
+  using (public.is_active_planner_manager() and superseded_by_event_id is null);
 
 -- The canonical Planner authority must execute with caller RLS. Without this,
 -- a view-owner query could expose restricted boards through Calendar overlays.

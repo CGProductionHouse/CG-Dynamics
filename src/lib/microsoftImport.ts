@@ -179,6 +179,7 @@ export interface MicrosoftUnlinkedCalendarRow {
   startAt: string
   endAt: string | null
   allDay: boolean
+  status: 'planned' | 'confirmed' | 'completed' | 'cancelled'
 }
 
 export interface MicrosoftAssigneeMapEntry {

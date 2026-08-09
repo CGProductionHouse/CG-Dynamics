@@ -4,6 +4,7 @@ export interface CalendarIdentityEvent {
   start_at: string
   end_at: string | null
   all_day: boolean
+  status?: string | null
   linked_task_id?: string | null
   microsoft_calendar_id?: string | null
   microsoft_event_id?: string | null
@@ -38,11 +39,10 @@ export function outlookCalendarIdentity(event: CalendarIdentityEvent): string | 
   return calendarId && eventId ? JSON.stringify(['outlook', calendarId, eventId]) : null
 }
 
-export function calendarMaterialReviewKey(event: Pick<CalendarIdentityEvent, 'title' | 'start_at' | 'end_at' | 'all_day'>): string {
+export function calendarMaterialReviewKey(event: Pick<CalendarIdentityEvent, 'title' | 'start_at' | 'all_day'>): string {
   return JSON.stringify([
     normalizedTitle(event.title),
     normalizedIso(event.start_at),
-    normalizedIso(event.end_at),
     event.all_day,
   ])
 }
@@ -88,6 +88,7 @@ export function reconcileCalendarLogicalItems<
   const nativeByReviewKey = new Map<string, TEvent[]>()
   const outlookByReviewKey = new Map<string, TEvent[]>()
   for (const event of canonicalEvents) {
+    if (event.status === 'cancelled') continue
     const map = outlookCalendarIdentity(event) ? outlookByReviewKey : nativeByReviewKey
     const key = calendarMaterialReviewKey(event)
     map.set(key, [...(map.get(key) ?? []), event])

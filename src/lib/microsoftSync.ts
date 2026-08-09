@@ -249,7 +249,8 @@ export function buildMicrosoftReconciliation(
   const seen = new Set<string>()
   const unlinkedCalendarByMaterialKey = new Map<string, MicrosoftUnlinkedCalendarRow[]>()
   for (const row of unlinkedCalendarRows) {
-    const key = calendarMaterialReviewKey({ title: row.title, start_at: row.startAt, end_at: row.endAt, all_day: row.allDay })
+    if (row.status === 'cancelled') continue
+    const key = calendarMaterialReviewKey({ title: row.title, start_at: row.startAt, all_day: row.allDay })
     unlinkedCalendarByMaterialKey.set(key, [...(unlinkedCalendarByMaterialKey.get(key) ?? []), row])
   }
 
@@ -268,7 +269,7 @@ export function buildMicrosoftReconciliation(
     if (targets.length === 0) {
       if (item.destination === 'cg_calendar' && item.proposedPayload?.destination === 'cg_calendar') {
         const reviewKey = calendarMaterialReviewKey(item.proposedPayload)
-        const nativeMatches = unlinkedCalendarByMaterialKey.get(reviewKey) ?? []
+        const nativeMatches = item.proposedPayload.status === 'cancelled' ? [] : unlinkedCalendarByMaterialKey.get(reviewKey) ?? []
         if (nativeMatches.length > 0) {
           return {
             ...item,
