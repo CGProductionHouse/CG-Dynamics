@@ -49,6 +49,13 @@ Every exposed table has RLS enabled. Policies follow least-privilege:
 - Edge Functions handle privileged operations (Meta sync, Google Ads, invites).
 - SECURITY DEFINER RPCs restrict dangerous operations (package classification,
   status changes with assignment verification).
+- Client portal calendar RPCs require an active profile and project only the
+  caller's client-safe records. Deliverables require explicit sent/approved/
+  posted evidence; Calendar events require the separate `client_visible`
+  authority. Neither client ownership nor workflow status implies publication.
+- Company Calendar event visibility defaults off and is writable only through
+  an active-manager SECURITY DEFINER RPC. Direct browser and Microsoft writes
+  cannot modify it.
 
 ## Third-party integrations
 

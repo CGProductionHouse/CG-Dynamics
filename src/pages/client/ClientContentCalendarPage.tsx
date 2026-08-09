@@ -115,7 +115,7 @@ export default function ClientContentCalendarPage() {
       ) : calendar?.loadFailed ? (
         <CalendarMessage
           tone="error"
-          message="Calendar details could not be loaded right now. Your schedule may still be available while client portal access is being prepared."
+          message="Content calendar could not be loaded right now."
         />
       ) : calendar && (calendar.posts.length > 0 || calendar.events.length > 0) ? (
         <>

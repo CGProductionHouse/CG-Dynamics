@@ -394,6 +394,9 @@ export type ClientSafeStatus =
   | 'in_production'
   | 'for_review'
   | 'awaiting_approval'
+  | 'approved'
+  | 'scheduled'
+  | 'posted'
   | 'scheduled_posted'
 
 export const CLIENT_SAFE_STATUS_LABELS: Record<ClientSafeStatus, string> = {
@@ -401,6 +404,9 @@ export const CLIENT_SAFE_STATUS_LABELS: Record<ClientSafeStatus, string> = {
   in_production: 'In production',
   for_review: 'For review',
   awaiting_approval: 'Awaiting approval',
+  approved: 'Approved',
+  scheduled: 'Scheduled',
+  posted: 'Posted',
   scheduled_posted: 'Scheduled / Posted',
 }
 

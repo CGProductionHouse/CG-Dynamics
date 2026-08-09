@@ -34,14 +34,26 @@
 | UPDATE (production status only) | ✓ | ✓ | ✓ | ✗ |
 | DELETE | ✓ | ✓ | ✗ | ✗ |
 
+Clients have no direct table access. The client portal RPC exposes only the
+client's own unarchived DP/Photo/Video/Reel rows with explicit disclosure
+evidence: `sent_to_client_at`, `client_approved_at`, or `posted_at`. Internal
+`production_status` values never grant portal visibility. Client labels are
+derived from those evidence timestamps.
+
 ### company_calendar_events
 
-All staff may read active company events. Managers/admins may explicitly
+All staff may read active company events. Client portal visibility is separate
+from client ownership and event workflow state: events default to
+`client_visible = false`, and only an active manager/admin may change that state
+through `set_company_calendar_event_client_visibility`. Direct browser updates
+cannot write the visibility columns. Managers/admins may explicitly
 supersede a matching native event with an Outlook-backed event through
 `supersede_native_calendar_event`; the RPC checks both role and current row
 state, records the actor/time, and retains the native row for audit. Clients
-have no direct table access and receive only their own active, client-safe event
-projection.
+have no direct table access and receive only their own explicitly visible,
+non-cancelled, non-superseded Shoot, Content Run, and Client Event projection.
+Microsoft import and re-sync never publish events. Reviewed supersession carries
+an already-explicit native visibility decision to the canonical Outlook row.
 
 The active-manager-only supersession RPC preserves native `client_id`/`client_name`, `notes` and
 `assigned_to_name` only when the Outlook row is empty and fails closed on

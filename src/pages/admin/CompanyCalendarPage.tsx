@@ -10,6 +10,7 @@ import {
   updateCompanyEvent,
   deleteCompanyEvent,
   supersedeNativeCompanyEvent,
+  setCompanyEventClientVisibility,
   EVENT_TYPES,
   EVENT_TYPE_LABELS,
   EVENT_STATUS_LABELS,
@@ -331,7 +332,7 @@ export default function CompanyCalendarPage() {
   const handleCreateEvent = useCallback((date?: string) => {
     const defaultDate = date ?? (selectedMonth === businessMonthKey() ? businessDateKey() : `${selectedMonth}-01`)
     const start = `${defaultDate}T09:00`
-    setDrawerEvent({ id: '', title: '', event_type: 'internal', client_id: null, client_name: null, start_at: start, end_at: null, all_day: false, location: null, notes: null, assigned_to_name: null, status: 'planned', linked_deliverable_id: null, linked_task_id: null, created_at: '', updated_at: '' })
+    setDrawerEvent({ id: '', title: '', event_type: 'internal', client_id: null, client_name: null, start_at: start, end_at: null, all_day: false, location: null, notes: null, assigned_to_name: null, status: 'planned', linked_deliverable_id: null, linked_task_id: null, client_visible: false, client_visibility_updated_at: null, client_visibility_updated_by_profile_id: null, created_at: '', updated_at: '' })
   }, [selectedMonth])
 
   function handleSaved() {
@@ -453,6 +454,7 @@ export default function CompanyCalendarPage() {
                         <dt className="text-brand-primary/40">Type</dt><dd className="text-white/80">{EVENT_TYPE_LABELS[item.event.event_type]}</dd>
                         <dt className="text-brand-primary/40">All day</dt><dd className="text-white/80">{item.event.all_day ? 'Yes' : 'No'}</dd>
                         <dt className="text-brand-primary/40">Status</dt><dd className="text-white/80">{EVENT_STATUS_LABELS[item.event.status]}</dd>
+                        <dt className="text-brand-primary/40">Client visibility</dt><dd className="text-white/80">{item.event.client_visible ? 'Visible' : 'Internal only'}</dd>
                         <dt className="text-brand-primary/40">Assignee</dt><dd className="text-white/80">{item.event.assigned_to_name || 'Unassigned'}</dd>
                         <dt className="text-brand-primary/40">Notes</dt><dd className="break-words text-white/80">{item.event.notes || 'No notes'}</dd>
                         <dt className="text-brand-primary/40">Links</dt><dd className="text-white/80">{[item.event.linked_task_id ? 'Planner task' : null, item.event.linked_deliverable_id ? 'Deliverable' : null].filter(Boolean).join(', ') || 'No direct links'}</dd>
@@ -861,6 +863,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
   const keyboardInset = useVisualViewportBottomInset()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [visibilitySaving, setVisibilitySaving] = useState(false)
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
 
@@ -965,6 +968,29 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
     }
   }
 
+  const canPublishToClient = Boolean(
+    event.client_id
+      && ['shoot', 'content_run', 'client_event'].includes(event.event_type)
+      && event.status !== 'cancelled'
+      && !event.superseded_by_event_id,
+  )
+
+  async function handleClientVisibility() {
+    if (isNew || !canManage || visibilitySaving) return
+    const nextVisible = !event.client_visible
+    if (nextVisible && !canPublishToClient) return
+
+    setVisibilitySaving(true)
+    setSaveError(null)
+    const result = await setCompanyEventClientVisibility(event.id, nextVisible)
+    setVisibilitySaving(false)
+    if (result.error) {
+      setSaveError('Could not update client visibility.')
+      return
+    }
+    onSaved()
+  }
+
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
@@ -1063,6 +1089,35 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
             />
           </div>
         </fieldset>
+
+        <div className="border-t border-white/[0.08] px-5 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold text-white">Visible to client</p>
+              <p className="mt-0.5 text-xs text-brand-primary/60">
+                {event.client_visible ? 'On' : 'Off'}
+              </p>
+            </div>
+            {!isNew && canManage && (
+              <button
+                type="button"
+                onClick={() => void handleClientVisibility()}
+                disabled={visibilitySaving || (!event.client_visible && !canPublishToClient)}
+                className={`min-h-10 rounded-full border px-4 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-45 ${
+                  event.client_visible
+                    ? 'border-brand-teal/30 bg-brand-teal/10 text-[#2dd4bf]'
+                    : 'border-white/10 bg-white/[0.04] text-brand-primary hover:text-white'
+                }`}
+              >
+                {visibilitySaving ? 'Updating...' : event.client_visible ? 'Turn off' : 'Turn on'}
+              </button>
+            )}
+          </div>
+          {isNew && <p className="mt-2 text-xs text-brand-primary/55">Save the event before making it visible.</p>}
+          {!isNew && canManage && !event.client_visible && !canPublishToClient && (
+            <p className="mt-2 text-xs text-amber-200/75">Link a client and use Shoot, Content Run or Client Event.</p>
+          )}
+        </div>
 
         <div className="border-t border-white/[0.08] px-5 py-4" style={{ paddingBottom: keyboardInset > 0 ? `calc(1rem + ${keyboardInset}px)` : undefined }}>
           {!isNew && event.event_type === 'content_run' && (
