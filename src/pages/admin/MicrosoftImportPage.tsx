@@ -559,7 +559,7 @@ export default function MicrosoftImportPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-8 lg:px-8">
       <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.18),transparent_38%),linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-5 sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div><p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Temporary one-way coexistence bridge</p><h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-5xl">Microsoft Sync</h1><p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-primary/70 sm:text-base">Preview and reconcile Outlook, Planner and active Client Socials into CG Dynamics. Microsoft is read-only; every destination change remains reviewable and auditable.</p></div>

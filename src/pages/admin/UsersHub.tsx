@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 import UsersAdmin from './UsersAdmin'
 import InvitesAdmin from './InvitesAdmin'
+import { PageContainer } from '../../components/layout/PageShell'
 
 // Consolidated Users workspace: user accounts and invites in one place. Each tab
 // renders the existing standalone page component. Both are admin-only (this hub
@@ -18,7 +19,7 @@ export default function UsersHub() {
   ]
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
+    <PageContainer width="content" gap={false}>
       <div className="mb-5 rounded-2xl border border-white/10 bg-brand-surface/60 p-4 sm:p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Administration</p>
           <h1 className="mt-2 text-3xl font-black text-white">Users</h1>
@@ -43,6 +44,6 @@ export default function UsersHub() {
 
       {tab === 'users' && <UsersAdmin embedded />}
       {tab === 'invites' && <InvitesAdmin embedded />}
-    </div>
+    </PageContainer>
   )
 }

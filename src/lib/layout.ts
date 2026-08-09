@@ -16,6 +16,7 @@ export const PAGE_GUTTER = 'px-4 sm:px-6 lg:px-8'
 // focused detail/list pages; `narrow` suits forms and settings.
 export const PAGE_MAX_WIDTH = {
   wide: 'max-w-7xl',
+  content: 'max-w-6xl',
   medium: 'max-w-5xl',
   narrow: 'max-w-3xl',
   full: 'max-w-none',

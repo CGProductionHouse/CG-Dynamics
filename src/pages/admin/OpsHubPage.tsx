@@ -132,7 +132,7 @@ export default function OpsHubPage() {
   }, [tasks, profile])
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 sm:px-6 sm:pt-6">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 sm:px-6 sm:pt-6 lg:px-8">
       <header className="mb-5 flex items-center justify-between gap-4">
         <div>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">

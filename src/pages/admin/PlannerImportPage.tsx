@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { PageContainer } from '../../components/layout/PageShell'
 import { ActionButton } from '../../components/ui/Buttons'
 import { useAuth } from '../../contexts/AuthContext'
 import { listPlannerBoards, type PlannerBoard } from '../../lib/planner'
@@ -127,7 +128,7 @@ export default function PlannerImportPage() {
     : 0
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <PageContainer width="content" gap={false}>
       <div className="mb-6">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Planner</p>
         <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Microsoft Planner Import</h1>
@@ -276,6 +277,6 @@ export default function PlannerImportPage() {
           {selectedBoard && <p className="mt-2 text-xs text-brand-primary/50">Importing into: {selectedBoard.name}</p>}
         </section>
       )}
-    </div>
+    </PageContainer>
   )
 }

@@ -15,6 +15,14 @@ const pageShell = read('../src/components/layout/PageShell.tsx')
 const marketing = read('../src/pages/admin/MarketingWorkspacePage.tsx')
 const system = read('../src/pages/admin/SystemHubPage.tsx')
 const integrations = read('../src/pages/admin/IntegrationsPage.tsx')
+const usersHub = read('../src/pages/admin/UsersHub.tsx')
+const plannerImport = read('../src/pages/admin/PlannerImportPage.tsx')
+const ADMIN_PAGE_FILES = [
+  'CgHubPage', 'MyWorkPage', 'OpsHubPage', 'ContentWorkflowPage', 'MarketingLibraryPage',
+  'MicrosoftImportPage', 'GoogleAdsIntegrationPage', 'MetaIntegrationPage', 'IntegrationsPage',
+  'UsersHub', 'PlannerImportPage', 'ImportHealthPage', 'AiUsageHealthPage', 'PackageMasterPage',
+  'CompanyCalendarPage', 'ClientSchedulePage', 'CommandCentrePage',
+].map(name => [name, read(`../src/pages/admin/${name}.tsx`)])
 
 // ── #182 Information architecture: grouped specialist nav ─────────────────────
 
@@ -105,4 +113,37 @@ test('the new hub pages and Integrations consume the shared container', () => {
     assert.match(src, /<PageContainer/, `${name} uses PageContainer`)
     assert.match(src, /<PageHeader/, `${name} uses PageHeader`)
   }
+})
+
+// ── #181 rollout: adoption + gutter defects removed ──────────────────────────
+
+test('the content (max-w-6xl) width token exists so page widths are preserved on conversion', () => {
+  assert.match(layoutTokens, /content: 'max-w-6xl'/)
+})
+
+test('converted admin pages consume PageContainer instead of a bespoke wrapper', () => {
+  assert.match(usersHub, /<PageContainer/)
+  assert.match(plannerImport, /<PageContainer/)
+})
+
+test('no authenticated admin page uses the off-standard lg:px-10 page gutter', () => {
+  for (const [name, src] of ADMIN_PAGE_FILES) {
+    assert.ok(!src.includes('lg:px-10'), `${name} must use the standard lg:px-8 gutter`)
+  }
+})
+
+test('no admin page uses a bare p-4 sm:p-6 lg:p-8 page wrapper (non-standard gutter)', () => {
+  for (const [name, src] of ADMIN_PAGE_FILES) {
+    assert.ok(!src.includes('className="p-4 sm:p-6 lg:p-8"'), `${name} must use the standard px gutter`)
+    assert.ok(!src.includes('className="w-full max-w-7xl p-4 sm:p-6 lg:p-8"'), `${name} must use the standard px gutter`)
+  }
+})
+
+// ── #182 Integrations / System overlap resolved ──────────────────────────────
+
+test('System is diagnostics-only — provider setup (Microsoft) lives under Integrations', () => {
+  assert.ok(!system.includes('/admin/microsoft-import'), 'System must not link Microsoft setup')
+  assert.match(system, /\/admin\/import-health/)
+  assert.match(system, /\/admin\/ai-health/)
+  assert.match(integrations, /\/admin\/microsoft-import/)
 })

@@ -29,13 +29,10 @@ const TOOLS: SystemTool[] = [
     marker: 'AI',
     description: 'AI provider usage, quota and error diagnostics across CG Dynamics.',
   },
-  {
-    to: '/admin/microsoft-import',
-    title: 'Microsoft Sync',
-    marker: 'MS',
-    description: 'Planner and Outlook reconciliation diagnostics. Setup lives under Integrations.',
-  },
 ]
+
+// Provider setup and sync (including Microsoft) live under Integrations, not
+// here — System stays diagnostics-only so the two areas do not overlap.
 
 export default function SystemHubPage() {
   return (

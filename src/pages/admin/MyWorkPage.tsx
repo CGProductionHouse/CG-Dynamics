@@ -36,7 +36,7 @@ function MyVideoQueue() {
 
   if (videos.length === 0 && !loadError) return null
   return (
-    <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-10">
+    <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
           <h2 className="text-[11px] font-black uppercase tracking-[0.14em] text-white/45">My Video Queue</h2>
@@ -90,7 +90,7 @@ function MyContentRuns() {
 
   if (runs.length === 0 && !loadError) return null
   return (
-    <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-10">
+    <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
           <h2 className="text-[11px] font-black uppercase tracking-[0.14em] text-white/45">My Content Runs</h2>
@@ -151,9 +151,9 @@ function WorkloadView({ selectedPerson }: { selectedPerson: string | null }) {
     return () => { active = false }
   }, [])
 
-  if (loading) return <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10"><div className="h-48 animate-pulse rounded-2xl bg-white/[0.04]" /></div>
+  if (loading) return <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8"><div className="h-48 animate-pulse rounded-2xl bg-white/[0.04]" /></div>
   if (error) return <div role="alert" className="mx-auto mt-5 max-w-7xl rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-200">{error}</div>
-  if (people.length === 0 && tasks.length === 0) return <div className="mx-auto mt-5 max-w-7xl px-4 sm:px-6 lg:px-10"><EmptyState title="No active work" message="No team workload is available." compact centered={false} /></div>
+  if (people.length === 0 && tasks.length === 0) return <div className="mx-auto mt-5 max-w-7xl px-4 sm:px-6 lg:px-8"><EmptyState title="No active work" message="No team workload is available." compact centered={false} /></div>
 
   const canonicalUnassignedTasks = tasks.filter(task => task.assignee_profile_ids.length === 0)
   const unassignedTotal = people[0]?.unassigned_total ?? canonicalUnassignedTasks.length
@@ -169,7 +169,7 @@ function WorkloadView({ selectedPerson }: { selectedPerson: string | null }) {
     : `?tab=board&assignee=${encodeURIComponent(selectedPerson ?? '')}`
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-10">
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
       {selectedTasks && (
         <section className="mb-4 rounded-2xl border border-brand-teal/25 bg-brand-teal/[0.04] p-4" aria-labelledby="selected-workload-heading">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -264,7 +264,7 @@ export default function MyWorkPage() {
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-white/10 bg-brand-surface/60 p-3 sm:p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -302,7 +302,7 @@ export default function MyWorkPage() {
       {tab === 'board' && <PlannerPage embedded />}
       {tab === 'daily-tasks' && (
         <>
-          <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-10">
+          <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
             <Link to="/admin/ops-hub?tab=client-work" className="inline-flex rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-xs font-black text-brand-teal hover:text-white">Capture client request</Link>
           </div>
           <CommandCentrePage embedded />

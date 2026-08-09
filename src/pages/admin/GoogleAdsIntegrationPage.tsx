@@ -165,7 +165,7 @@ export default function GoogleAdsIntegrationPage() {
   const readyAccounts = workspace?.accounts.filter(account => isGoogleAdsAccountReady(account, workspace.accountLinks, workspace.campaignLinks)) ?? []
 
   return (
-    <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Integrations</p>
