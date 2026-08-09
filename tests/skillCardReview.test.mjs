@@ -213,7 +213,8 @@ test('the recommended queue only orders work — it approves nothing', () => {
 // ── UI surface ──────────────────────────────────────────────────────────────
 test('route is admin-only in nav and mounted in the admin shell', () => {
   assert.match(app, /path="\/admin\/skill-card-review"/)
-  assert.match(nav, /to: '\/admin\/skill-card-review'[^}]*access: 'admin'/)
+  // Grouped under the Marketing parent nav entry (no longer a separate top-level item).
+  assert.match(nav, /to: '\/admin\/marketing'[^}]*'\/admin\/skill-card-review'/)
 })
 
 test('non-admin staff see a refusal, not the queue', () => {

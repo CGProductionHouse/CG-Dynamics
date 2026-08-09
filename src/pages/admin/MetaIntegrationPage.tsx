@@ -1566,7 +1566,7 @@ export default function MetaIntegrationPage() {
   }), [suggestions])
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="max-w-3xl">
         <p className="text-xs uppercase tracking-[0.22em] text-brand-primary">Integrations</p>
         <h1 className="mt-2 text-2xl font-semibold text-white">Meta Business Sync</h1>

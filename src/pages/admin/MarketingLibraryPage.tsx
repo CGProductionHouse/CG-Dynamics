@@ -769,7 +769,7 @@ export default function MarketingLibraryPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
+    <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-5 sm:px-6 sm:pt-8 lg:px-8">
       <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.14),transparent_40%),linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 sm:p-8">
         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">AI Workforce</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Marketing Library</h1>
