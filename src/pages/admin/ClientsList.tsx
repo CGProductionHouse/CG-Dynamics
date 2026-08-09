@@ -21,32 +21,9 @@ import {
   type Client,
   type PackageSettings,
 } from '../../lib/db/clients'
-import { listImportGroups } from '../../lib/db/importedMetaPosts'
-import { listManualMetrics } from '../../lib/db/manualMetrics'
 import { ClientLogo } from '../../components/ClientLogo'
-import { listReports } from '../../lib/db/reports'
-import { supabase } from '../../lib/supabase'
 
-interface OverviewStats {
-  totalClients: number
-  publishedReports: number
-  draftReports: number
-  imports: number
-  manualSummaries: number
-}
-
-interface ClientOpsSummary {
-  activePackage: boolean
-  packageTemplates: number
-  monthlyDeliverables: number
-  openTasks: number
-}
-
-function errorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error) return error.message
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
-  }
+function errorMessage(_error: unknown, fallback: string) {
   return fallback
 }
 
@@ -81,13 +58,6 @@ export default function ClientsList() {
   } = useLocalDraft<boolean>(`cg_bulk_open_${profile?.id ?? 'anon'}`)
 
   const [clients, setClients] = useState<Client[]>([])
-  const [overview, setOverview] = useState<OverviewStats>({
-    totalClients: 0,
-    publishedReports: 0,
-    draftReports: 0,
-    imports: 0,
-    manualSummaries: 0,
-  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modal, setModal] = useState<{ open: boolean; client?: Client }>({ open: false })
@@ -95,7 +65,6 @@ export default function ClientsList() {
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active')
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const [packageNotice, setPackageNotice] = useState<string | null>(null)
-  const [opsSummary, setOpsSummary] = useState<Record<string, ClientOpsSummary>>({})
 
   const displayClients = useMemo(() => {
     if (viewFilter === 'active') return clients.filter(c => c.active)
@@ -151,26 +120,13 @@ export default function ClientsList() {
       setError(null)
     }
     try {
-      const [clientsRes, reportsRes, importsRes, manualRes] = await Promise.all([
-        listClients(),
-        listReports(),
-        listImportGroups(),
-        listManualMetrics(),
-      ])
+      const clientsRes = await listClients()
       if (clientsRes.error) {
-        const message = clientsRes.error.message
+        const message = 'Could not load clients.'
         setError(message)
         return message
       }
       setClients(clientsRes.data)
-      setOverview({
-        totalClients: clientsRes.data.length,
-        publishedReports: reportsRes.data.filter(report => report.status === 'published').length,
-        draftReports: reportsRes.data.filter(report => report.status === 'draft').length,
-        imports: importsRes.data.length,
-        manualSummaries: manualRes.data.length,
-      })
-      void loadOperationalSummary(clientsRes.data)
       setError(null)
       return null
     } catch (error) {
@@ -180,53 +136,6 @@ export default function ClientsList() {
     } finally {
       if (!options.silent) setLoading(false)
     }
-  }
-
-  async function loadOperationalSummary(clientRows: Client[]) {
-    const clientIds = clientRows.map(client => client.id)
-    if (clientIds.length === 0) {
-      setOpsSummary({})
-      return
-    }
-
-    const [packagesRes, templatesRes, deliverablesRes, tasksRes] = await Promise.all([
-      supabase.from('client_packages').select('id, client_id').in('client_id', clientIds).eq('status', 'active').is('archived_at', null),
-      supabase.from('package_deliverable_templates').select('package_id').eq('active', true),
-      supabase.from('monthly_deliverables').select('client_id').in('client_id', clientIds).is('archived_at', null),
-      supabase.from('planner_tasks').select('client_id, status').in('client_id', clientIds),
-    ])
-
-    const next: Record<string, ClientOpsSummary> = Object.fromEntries(
-      clientRows.map(client => [client.id, {
-        activePackage: false,
-        packageTemplates: 0,
-        monthlyDeliverables: 0,
-        openTasks: 0,
-      }]),
-    )
-
-    const packageClientById = new Map<string, string>()
-    for (const pkg of packagesRes.data ?? []) {
-      packageClientById.set(pkg.id, pkg.client_id)
-      if (next[pkg.client_id]) next[pkg.client_id].activePackage = true
-    }
-
-    for (const template of templatesRes.data ?? []) {
-      const clientId = packageClientById.get(template.package_id)
-      if (clientId && next[clientId]) next[clientId].packageTemplates += 1
-    }
-
-    for (const deliverable of deliverablesRes.data ?? []) {
-      if (next[deliverable.client_id]) next[deliverable.client_id].monthlyDeliverables += 1
-    }
-
-    for (const task of tasksRes.data ?? []) {
-      if (task.client_id && next[task.client_id] && task.status !== 'scheduled' && task.status !== 'approved') {
-        next[task.client_id].openTasks += 1
-      }
-    }
-
-    setOpsSummary(next)
   }
 
   async function handleSave(
@@ -248,7 +157,7 @@ export default function ClientsList() {
           active: input.active,
           logo_url: input.logo_url,
         })
-        if (error) return error.message
+        if (error) return 'Could not update this client.'
         if (data) {
           savedId = data.id
           setClients(current => upsertClient(current, data))
@@ -259,21 +168,20 @@ export default function ClientsList() {
           tier: input.tier,
           active: input.active,
         })
-        if (error) return error.message
+        if (error) return 'Could not create this client.'
         if (data) {
           savedId = data.id
           setClients(current => upsertClient(current, data))
         }
       }
 
-      // Best-effort package save: never blocks the core client save. If the
-      // phase-3j column is not present yet, show a soft migration notice.
+      // Package settings remain a separate best-effort save from the client record.
       if (savedId) {
         const pkgResult = await updateClientPackage(savedId, input.package)
         if (pkgResult.migrationNeeded) {
-          setPackageNotice('Client saved. Monthly package settings need the phase-3j migration (clients.package_settings) before they can be stored.')
+          setPackageNotice('Client saved, but monthly package settings are not available yet.')
         } else if (pkgResult.error) {
-          setPackageNotice(`Client saved, but the package could not be stored: ${pkgResult.error.message}`)
+          setPackageNotice('Client saved, but monthly package settings could not be stored.')
         } else {
           setPackageNotice(null)
           if (pkgResult.data) setClients(current => upsertClient(current, pkgResult.data!))
@@ -295,7 +203,6 @@ export default function ClientsList() {
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f] mb-2">Client management</p>
           <h1 className="font-display text-4xl font-black uppercase tracking-wide text-white">Clients</h1>
         </div>
         {isAdmin && (
@@ -305,19 +212,6 @@ export default function ClientsList() {
           </div>
         )}
       </div>
-
-      <section className="mb-5 grid grid-cols-3 gap-2 lg:max-w-2xl">
-        {([
-          ['Total clients', overview.totalClients],
-          ['Published reports', overview.publishedReports],
-          ['Draft reports', overview.draftReports],
-        ] as const).map(([label, value]) => (
-          <PremiumCard key={label} padding="sm" className="bg-white/[0.035]">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/70">{label}</p>
-            <p className="mt-2 text-2xl font-black text-white">{value}</p>
-          </PremiumCard>
-        ))}
-      </section>
 
       {packageNotice && (
         <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2">
@@ -358,8 +252,9 @@ export default function ClientsList() {
             {displayClients.length === 0 ? (
               <EmptyState
                 title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
-                message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client, then link Meta assets before syncing reports.' : 'Clients you add will appear here.'}
+                message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Active clients will appear here.' : 'Clients will appear here.'}
                 centered={false}
+                compact
               />
             ) : (
               displayClients.map(c => (
@@ -378,7 +273,6 @@ export default function ClientsList() {
                       <div className="mt-2">
                         <PackageChips client={c} />
                       </div>
-                      <ClientOpsChips summary={opsSummary[c.id]} />
                     </div>
                   </div>
 
@@ -421,8 +315,9 @@ export default function ClientsList() {
                       <div className="mx-auto max-w-sm">
                         <EmptyState
                           title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
-                          message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Add a client, then link Meta assets before syncing reports.' : 'Clients you add will appear here.'}
+                          message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Active clients will appear here.' : 'Clients will appear here.'}
                           centered={false}
+                          compact
                         />
                       </div>
                     </td>
@@ -450,7 +345,6 @@ export default function ClientsList() {
                       </td>
                       <td className="px-4 py-3">
                         <PackageChips client={c} />
-                        <ClientOpsChips summary={opsSummary[c.id]} compact />
                       </td>
                       {c.active ? (
                         <>
@@ -567,34 +461,6 @@ function PackageChips({ client }: { client: Client }) {
           {chip.label} {chip.value}
         </span>
       ))}
-    </div>
-  )
-}
-
-// Mobile card actions — split into Performance and Production groups
-function ClientOpsChips({ summary, compact = false }: { summary?: ClientOpsSummary; compact?: boolean }) {
-  if (!summary) {
-    return <p className="mt-2 text-[11px] text-white/25">Loading production summary...</p>
-  }
-
-  return (
-    <div className={`mt-2 flex flex-wrap gap-1.5 ${compact ? 'max-w-xs' : ''}`}>
-      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${
-        summary.activePackage
-          ? 'border-brand-teal/25 bg-brand-teal/[0.07] text-[#2dd4bf]'
-          : 'border-amber-400/20 bg-amber-400/[0.06] text-amber-300'
-      }`}>
-        {summary.activePackage ? 'Active package' : 'No active package'}
-      </span>
-      <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-bold text-white/55">
-        {summary.packageTemplates} package items
-      </span>
-      <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-bold text-white/55">
-        {summary.monthlyDeliverables} deliverables
-      </span>
-      <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-bold text-white/55">
-        {summary.openTasks} open tasks
-      </span>
     </div>
   )
 }
@@ -868,8 +734,8 @@ function ConfirmModal({
     try {
       await fn()
       onClose()
-    } catch (err) {
-      setModalError(err instanceof Error ? err.message : 'Something went wrong.')
+    } catch {
+      setModalError('Could not complete this client action.')
       setSaving(false)
     }
   }
