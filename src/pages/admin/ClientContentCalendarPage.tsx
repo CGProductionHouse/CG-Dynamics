@@ -38,6 +38,9 @@ const STATUS_DOT: Record<ClientSafeStatus, string> = {
   in_production: 'bg-[#2dd4bf]',
   for_review: 'bg-[#e9dcc3]',
   awaiting_approval: 'bg-[#9ec3d8]',
+  approved: 'bg-[#8af5e8]',
+  scheduled: 'bg-[#f5b071]',
+  posted: 'bg-[#f97316]',
   scheduled_posted: 'bg-[#f97316]',
 }
 
@@ -46,6 +49,9 @@ const STATUS_PILL: Record<ClientSafeStatus, string> = {
   in_production: 'border-[#2dd4bf]/25 bg-[#2dd4bf]/10 text-[#8af5e8]',
   for_review: 'border-[#e9dcc3]/30 bg-[#e9dcc3]/[0.08] text-[#e9dcc3]',
   awaiting_approval: 'border-[#9ec3d8]/30 bg-[#9ec3d8]/[0.08] text-[#9ec3d8]',
+  approved: 'border-[#2dd4bf]/25 bg-[#2dd4bf]/10 text-[#8af5e8]',
+  scheduled: 'border-[#f97316]/25 bg-[#f97316]/8 text-[#f5b071]',
+  posted: 'border-[#f97316]/25 bg-[#f97316]/8 text-[#f5b071]',
   scheduled_posted: 'border-[#f97316]/25 bg-[#f97316]/8 text-[#f5b071]',
 }
 

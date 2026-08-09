@@ -22,6 +22,30 @@
 | staff production status update | UPDATE | `is_staff() AND production_status IN ('to_do','in_progress','ready_internal_review','ready_client_approval')` |
 | admin delete | DELETE | `is_admin()` |
 
+Clients have no direct SELECT policy. The client portal projection requires an
+active client profile, own `client_id`, an eligible unarchived deliverable, and
+at least one explicit disclosure timestamp. Status alone never grants access,
+and the projection never substitutes internal `due_date` for a client schedule
+date. Client reassignment is rejected while disclosure or posting evidence
+exists, preserving history until an explicit reconciliation process is used.
+
+## company_calendar_events
+
+| Policy | Type | Effect |
+|--------|------|--------|
+| staff select | SELECT | `is_staff()` |
+| active manager insert | INSERT | Manager/admin event fields only; `client_visible` defaults false |
+| active manager update | UPDATE | Non-superseded rows and an explicit field allowlist that excludes client-visibility audit columns |
+| active manager delete | DELETE | Non-superseded rows only |
+| client direct access | SELECT/WRITE | No policy; client-safe RPC projection only |
+
+`set_company_calendar_event_client_visibility` is the sole authenticated write
+path for event publication state. It requires an active manager/admin, locks the
+event, and validates client linkage, event type, cancellation, and supersession.
+Microsoft does not own or write this state. A database constraint requires every
+`client_visible = true` row to have both visibility audit fields populated; a
+false row permits either a null pair or a complete explicit-off pair.
+
 ## client_packages
 
 | Policy | Type | Effect |

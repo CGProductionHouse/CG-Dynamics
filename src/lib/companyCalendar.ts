@@ -37,6 +37,9 @@ export interface CompanyCalendarEvent {
   superseded_by_event_id?: string | null
   superseded_at?: string | null
   superseded_by_profile_id?: string | null
+  client_visible: boolean
+  client_visibility_updated_at: string | null
+  client_visibility_updated_by_profile_id: string | null
   created_at: string
   updated_at: string
 }
@@ -303,6 +306,21 @@ export async function supersedeNativeCompanyEvent(
       p_outlook_event_id: outlookEventId,
       p_expected_native_updated_at: expectedNativeUpdatedAt,
       p_expected_outlook_updated_at: expectedOutlookUpdatedAt,
+    })
+    return { error: error ? handleError(error) : null }
+  } catch (err) {
+    return { error: handleError(err) }
+  }
+}
+
+export async function setCompanyEventClientVisibility(
+  eventId: string,
+  visible: boolean,
+): Promise<{ error: { message: string; code?: string } | null }> {
+  try {
+    const { error } = await supabase.rpc('set_company_calendar_event_client_visibility', {
+      p_event_id: eventId,
+      p_visible: visible,
     })
     return { error: error ? handleError(error) : null }
   } catch (err) {
