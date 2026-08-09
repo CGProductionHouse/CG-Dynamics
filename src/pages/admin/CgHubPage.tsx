@@ -6,10 +6,10 @@ import {
   listTasks,
   createTask,
   listActiveClients,
+  taskStatusDisplayLabel,
   type CommandCentreTask,
   type ClientOption,
   type TaskInput,
-  type TaskStatus,
 } from '../../lib/commandCentre'
 import {
   listMonthlyDeliverablesByMonth,
@@ -27,25 +27,15 @@ import { buildHubSevenDayCalendar, formatHubCalendarDay, type HubCalendarDay } f
 import { listRuns, listPipelineVideos, type ContentRun, type ContentGuideIdea } from '../../lib/contentWorkflow'
 import { isRunUpcoming } from '../../lib/contentWorkflowRules'
 import { isManagerRole } from '../../lib/roles'
+import { isActiveForToday, isActuallyInProgressTask } from '../../lib/taskLifecycle'
 
 // ── Constants ─────────────────────────────────────────────────
-
-const HUB_COMPLETED = new Set<TaskStatus>(['done', 'moved_to_tomorrow'])
-const HUB_EXCLUDED_STATUS = new Set<TaskStatus>(['done', 'moved_to_tomorrow'])
 
 
 const PRIORITY_RANK: Record<string, number> = {
   client_request: 0,
   urgent: 1,
   normal: 3,
-}
-
-const TASK_STATUS_SHORT: Record<string, string> = {
-  to_do: 'To do',
-  in_progress: 'In progress',
-  blocked: 'Blocked',
-  waiting_client: 'Waiting',
-  done: 'Done',
 }
 
 const DELIVERABLE_TYPE_CODE: Record<string, string> = {
@@ -84,7 +74,7 @@ function workMatchesProfile(work: { assigned_to_user_id?: string | null; assigne
 }
 
 function isOverdueTask(task: CommandCentreTask, today: string) {
-  return !!task.due_date && task.due_date < today && !HUB_COMPLETED.has(task.status)
+  return !!task.due_date && task.due_date < today && isActiveForToday(task)
 }
 
 function taskPriorityRank(t: CommandCentreTask, today: string): number {
@@ -92,7 +82,7 @@ function taskPriorityRank(t: CommandCentreTask, today: string): number {
   if (t.priority === 'urgent') return 1
   if (t.due_date && t.due_date < today) return 2
   if (t.due_date === today) return 3
-  if (t.status === 'in_progress') return 4
+  if (isActuallyInProgressTask(t)) return 4
   return 5
 }
 
@@ -172,7 +162,7 @@ export default function CgHubPage() {
 
   const canSeeTeamWork = isManagerRole(profile?.role)
   const activeTasks = useMemo(() => tasks.filter(task =>
-    !HUB_EXCLUDED_STATUS.has(task.status) && (canSeeTeamWork || workMatchesProfile(task, profile))),
+    isActiveForToday(task) && (canSeeTeamWork || workMatchesProfile(task, profile))),
   [canSeeTeamWork, profile, tasks])
 
   const relevantDeliverables = useMemo(() => deliverables.filter(deliverable =>
@@ -185,7 +175,7 @@ export default function CgHubPage() {
         t.priority === 'client_request' ||
         t.priority === 'urgent' ||
         (t.due_date && t.due_date <= today) ||
-        t.status === 'in_progress'
+        isActuallyInProgressTask(t)
       )
       .sort((a, b) => taskPriorityRank(a, today) - taskPriorityRank(b, today))
   }, [activeTasks, today])
@@ -311,7 +301,7 @@ export default function CgHubPage() {
     clientRequests: clientRequests.length,
     dueToday: dueToday.length,
     overdue: overdue.length,
-    inProgress: activeTasks.filter(t => t.status === 'in_progress').length,
+    inProgress: activeTasks.filter(isActuallyInProgressTask).length,
     waitingReview: waitingReview.length,
     dueTodayDeliverables: dueTodayDeliverables.length,
     unscheduledDeliverables: unscheduledDeliverables.length,
@@ -977,7 +967,7 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
         {meta && <p className="mt-0.5 text-xs text-brand-primary/45">{meta}</p>}
       </div>
       <span className="shrink-0 text-xs font-semibold text-brand-primary/40">
-        {TASK_STATUS_SHORT[task.status] ?? task.status}
+        {taskStatusDisplayLabel(task)}
       </span>
     </Link>
   )

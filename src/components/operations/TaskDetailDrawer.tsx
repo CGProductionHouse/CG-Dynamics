@@ -223,7 +223,9 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
 
   if (!task) return null
 
-  const statusOptions = STATUSES.filter(s => s !== 'moved_to_tomorrow')
+  const statusOptions = task.data_origin === 'planner_tasks'
+    ? STATUSES.filter(status => status !== 'moved_to_tomorrow')
+    : STATUSES
 
   const selectedDeliverable = clientDeliverables.find(d => d.id === draft.deliverableId)
 

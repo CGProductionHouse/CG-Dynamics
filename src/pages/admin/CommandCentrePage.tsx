@@ -37,11 +37,14 @@ import {
   type TaskBucket,
   type TaskPriority,
   type TaskStatus,
+  type TaskUpdateFields,
   type PackageAction,
   type ClientOption,
   type ParsedMorningTask,
   type MorningTaskEdit,
+  taskStatusDisplayLabel,
 } from '../../lib/commandCentre'
+import { isActiveForToday, isActiveWorkTask, isActuallyInProgressTask, isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
 
@@ -53,24 +56,24 @@ function focusSortOrder(task: CommandCentreTask, today: string, now: Date): numb
   const dueDate = task.due_date ? new Date(`${task.due_date}T00:00:00`) : null
   if (dueDate && dueDate < now) return 2
   if (task.due_date === today) return 3
-  if (task.status === 'in_progress') return 4
+  if (isActuallyInProgressTask(task)) return 4
   if (dueDate && dueDate.getTime() - now.getTime() <= 7 * 86400000) return 5
   if (!dueDate) return 7
   return 6
 }
 
 function isOverdue(task: CommandCentreTask, now: Date) {
-  if (!task.due_date || task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  if (!task.due_date || !isActiveForToday(task)) return false
   return new Date(`${task.due_date}T00:00:00`) < now
 }
 
 function matchesWorkFilter(task: CommandCentreTask, filter: WorkFilter, today: string, now: Date) {
-  if (filter === 'done') return task.status === 'done'
-  if (task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  if (filter === 'done') return isOperationallyCompletedStatus(task)
+  if (!isActiveForToday(task)) return false
   if (filter === 'today') return task.due_date === today
   if (filter === 'overdue') return isOverdue(task, now)
   if (filter === 'client_requests') return task.priority === 'client_request' || task.bucket === 'Client Requests'
-  if (filter === 'in_progress') return task.status === 'in_progress'
+  if (filter === 'in_progress') return isActuallyInProgressTask(task)
   return true
 }
 
@@ -167,14 +170,15 @@ function buildEndOfDay(activeTasks: CommandCentreTask[], ownershipOf: (t: Comman
     'BLOCKED': [],
     'WAITING CLIENT': [],
     'MOVED TO TOMORROW': [],
+    'OTHER ACTIVE': [],
   }
   for (const t of activeTasks) {
-    if (t.status === 'done') groups['DONE'].push(t)
-    else if (t.status === 'in_progress') groups['STILL BUSY / IN PROGRESS'].push(t)
+    if (isOperationallyCompletedStatus(t)) groups['DONE'].push(t)
+    else if (isActuallyInProgressTask(t)) groups['STILL BUSY / IN PROGRESS'].push(t)
     else if (t.status === 'blocked') groups['BLOCKED'].push(t)
     else if (t.status === 'waiting_client') groups['WAITING CLIENT'].push(t)
     else if (t.status === 'moved_to_tomorrow') groups['MOVED TO TOMORROW'].push(t)
-    else groups['STILL BUSY / IN PROGRESS'].push(t)
+    else groups['OTHER ACTIVE'].push(t)
   }
   const lines: string[] = ['CGPH END OF DAY UPDATE', '']
   for (const [heading, items] of Object.entries(groups)) {
@@ -274,7 +278,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
   }, [today])
 
   const allActiveTasks = useMemo(() =>
-    tasks.filter(t => t.status !== 'done' && t.status !== 'moved_to_tomorrow'),
+    tasks.filter(t => isActiveWorkTask(t)),
   [tasks])
 
   const focusTasks = useMemo(() => {
@@ -290,6 +294,10 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
     }
     if (workFilter !== 'focus') {
       filtered = filtered.filter(t => matchesWorkFilter(t, workFilter, today, now))
+    } else {
+      // Focus is a today-axis surface: a deferred task is unfinished but belongs
+      // to its own future day, never today's focus queue.
+      filtered = filtered.filter(t => isActiveForToday(t))
     }
     if (bucketFilter) filtered = filtered.filter(t => t.bucket === bucketFilter)
     if (clientSearch.trim()) {
@@ -303,7 +311,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
   }, [allActiveTasks, bucketFilter, clientSearch, filterStaff, profile, tasks, today, now, workFilter])
 
   const doneTodayTasks = useMemo(() => {
-    let base = tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today)
+    let base = tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today)
     if (filterStaff === '__my__') {
       const myName = profile?.full_name ?? ''
       base = base.filter(t => t.assigned_to_name === myName)
@@ -353,17 +361,17 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
   const allRelevant = useMemo(() =>
     tasks
-      .filter(t => t.status !== 'done' || (t.completed_at && t.completed_at.slice(0, 10) === today))
+      .filter(t => !isOperationallyCompletedStatus(t) || (t.completed_at && t.completed_at.slice(0, 10) === today))
       .sort((a, b) => (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99)),
   [tasks, today])
 
   const stats = useMemo(() => ({
     focus: focusTasks.length,
     clientRequests: allActiveTasks.filter(t => t.priority === 'client_request').length,
-    inProgress: allActiveTasks.filter(t => t.status === 'in_progress').length,
-    doneToday: tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today).length,
+    inProgress: allActiveTasks.filter(t => isActuallyInProgressTask(t)).length,
+    doneToday: tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today).length,
     overdue: allActiveTasks.filter(t => isOverdue(t, now)).length,
-    today: allActiveTasks.filter(t => t.due_date === today).length,
+    today: allActiveTasks.filter(t => isActiveForToday(t) && t.due_date === today).length,
   }), [tasks, allActiveTasks, focusTasks, today, now])
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
@@ -376,12 +384,14 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       } else {
         setTasks(prev => prev.map(t => {
           if (t.id !== id) return t
-          const now = new Date().toISOString()
-          return {
-            ...t,
-            status,
-            updated_at: now,
-            completed_at: (status as string) === 'done' ? now : null,
+           const now = new Date().toISOString()
+           return {
+             ...t,
+             status,
+             updated_at: now,
+             completed_at: t.data_origin === 'planner_tasks'
+               ? null
+               : (status as string) === 'done' ? now : null,
           }
         }))
       }
@@ -974,19 +984,23 @@ function TaskRow({ task, busyId, onStatusChange, onOpenDetails }: {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {task.status !== 'done' && (
+            {!isOperationallyCompletedStatus(task) && (
               <select
                 value={task.status}
                 onChange={e => onStatusChange(task.id, e.target.value as TaskStatus)}
                 disabled={busyId === task.id}
                 className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
               >
-                {STATUSES.map(s => (
+                {/* The current value shows the truthful label (raw Planner state
+                    for approved/scheduled/ready rows) while still allowing a
+                    coarse change from this surface. */}
+                <option value={task.status}>{taskStatusDisplayLabel(task)}</option>
+                {STATUSES.filter(s => s !== task.status).map(s => (
                   <option key={s} value={s}>{statusLabel(s)}</option>
                 ))}
               </select>
             )}
-            {task.status === 'done' && (
+            {isOperationallyCompletedStatus(task) && (
               <button
                 type="button"
                 onClick={() => onStatusChange(task.id, 'to_do')}
@@ -1431,6 +1445,9 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
   const [saveError, setSaveError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const statusOptions = task.data_origin === 'planner_tasks'
+    ? STATUSES.filter(value => value !== 'moved_to_tomorrow')
+    : STATUSES
 
   async function handleSave() {
     if (saving || !title.trim()) return
@@ -1439,33 +1456,52 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
     setSaveError(null)
     try {
       if (!canManage) {
+        if (status === task.status) {
+          setSaveMsg('No changes')
+          return
+        }
         const result = await updateTaskStatus(task.id, status)
         if (result.error) { setSaveError(result.error.message); return }
-        onSaved({ ...task, status, updated_at: new Date().toISOString(), completed_at: status === 'done' ? new Date().toISOString() : null })
+        const saved = result.data as { updated_at?: string; completed_at?: string | null } | null
+        onSaved({
+          ...task,
+          status,
+          updated_at: saved?.updated_at ?? task.updated_at,
+          completed_at: saved && 'completed_at' in saved ? saved.completed_at ?? null : task.completed_at,
+        })
         setSaveMsg('Status saved')
         return
       }
-      const updates = {
-        title: title.trim(),
-        client_id: clientId || null,
-        client_name: clientName || null,
-        assigned_to_name: assignedName.trim() || null,
-        assigned_to_user_id: task.data_origin === 'planner_tasks'
-          ? null
-          : assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null,
-        bucket,
-        priority,
-        status,
-        due_date: dueDate,
-        notes: notes.trim() || null,
-        helper_names: helperNames.split(',').map(name => name.trim()).filter(Boolean),
-        ...(task.data_origin !== 'planner_tasks'
-          ? {
-              package_action: packageAction || null,
-              quote_needed: quoteNeeded,
-              admin_package_note: adminPackageNote.trim() || null,
-            }
-          : {}),
+      const updates: Partial<TaskUpdateFields> = {}
+      const nextTitle = title.trim()
+      const nextClientId = clientId || null
+      const nextClientName = clientName || null
+      const nextNotes = notes.trim() || null
+      if (nextTitle !== task.title) updates.title = nextTitle
+      if (nextClientId !== task.client_id) updates.client_id = nextClientId
+      if (nextClientName !== task.client_name) updates.client_name = nextClientName
+      if (bucket !== task.bucket) updates.bucket = bucket
+      if (priority !== task.priority) updates.priority = priority
+      if (status !== task.status) updates.status = status
+      if (dueDate !== task.due_date) updates.due_date = dueDate
+      if (nextNotes !== task.notes) updates.notes = nextNotes
+
+      if (task.data_origin !== 'planner_tasks') {
+        const nextAssignedName = assignedName.trim() || null
+        const nextAssignedId = assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null
+        const nextHelpers = helperNames.split(',').map(name => name.trim()).filter(Boolean)
+        if (nextAssignedName !== task.assigned_to_name) updates.assigned_to_name = nextAssignedName
+        if (nextAssignedId !== task.assigned_to_user_id) updates.assigned_to_user_id = nextAssignedId
+        if (JSON.stringify(nextHelpers) !== JSON.stringify(task.helper_names ?? [])) updates.helper_names = nextHelpers
+        const nextPackageAction = packageAction || null
+        const nextAdminNote = adminPackageNote.trim() || null
+        if (nextPackageAction !== (task.package_action ?? null)) updates.package_action = nextPackageAction
+        if (quoteNeeded !== (task.quote_needed ?? false)) updates.quote_needed = quoteNeeded
+        if (nextAdminNote !== (task.admin_package_note ?? null)) updates.admin_package_note = nextAdminNote
+      }
+      if (Object.keys(updates).length === 0) {
+        setSaveMsg('No changes')
+        return
       }
       const { error } = await updateTask(task.id, updates)
       if (error) { setSaveError(error.message); return }
@@ -1473,9 +1509,11 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
         ...task,
         ...updates,
         updated_at: new Date().toISOString(),
-        completed_at: (status as string) === 'done'
-          ? (task.completed_at ?? new Date().toISOString())
-          : null,
+        completed_at: task.data_origin === 'planner_tasks'
+          ? null
+          : status !== task.status
+            ? (status as string) === 'done' ? new Date().toISOString() : null
+            : task.completed_at,
       }
       onSaved(updated)
       setSaveMsg('Saved')
@@ -1587,7 +1625,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
               <select value={status} onChange={e => setStatus(e.target.value as TaskStatus)} className={inputCls}>
-                {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
+                {statusOptions.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
               </select>
             </div>
             <div>

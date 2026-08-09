@@ -91,7 +91,7 @@ test('guards rapid board switches from stale buckets and task responses', () => 
 })
 
 test('keeps bucket and task query failures distinct from truthful empty states', () => {
-  assert.match(page, /if \(error\) return \{ data: null, error \}/)
+  assert.match(page, /if \(error\) return \{ data: null, completionEvidence: \{\}, error \}/)
   assert.doesNotMatch(page, /const \{ data \} = await listPlannerTasks/)
   assert.match(page, /Planner columns could not be loaded/)
   assert.match(page, /Planner tasks could not be loaded/)
@@ -142,7 +142,7 @@ test('board query failures are distinct from missing tables and genuine empty bo
 
 test('recurrence materialization failures block an incomplete board load visibly', () => {
   assert.match(page, /const materialized = await materializeRecurringTasks\(\)/)
-  assert.match(page, /if \(materialized\.error\) return \{ data: null, error:/)
+  assert.match(page, /if \(materialized\.error\) return \{ data: null, completionEvidence: \{\}, error:/)
   assert.match(page, /materialized\.migrationNeeded/)
   assert.match(page, /Recurring task migration is required before Planner can load safely/)
 })
