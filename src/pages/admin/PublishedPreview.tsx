@@ -14,8 +14,9 @@ import {
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
-import { ClientDashboardShell, ClientReportView, EmptyReportState } from '../client/ClientReportView'
+import { ClientDashboardShell, ClientReportView } from '../client/ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
+import { EmptyState } from '../../components/ui/States'
 import {
   loadGoogleAdsDashboard,
   type GoogleAdsDashboardData,
@@ -33,11 +34,7 @@ import type { PlatformFact } from '../../lib/overviewModel'
 import type { ReportStatsPost } from '../../lib/reportStats'
 import { isStaffRole } from '../../lib/roles'
 
-function errorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error) return error.message
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
-  }
+function errorMessage(_error: unknown, fallback: string) {
   return fallback
 }
 
@@ -110,7 +107,7 @@ export default function PublishedPreview() {
         const [clientsRes, reportsRes] = await Promise.all([listClients(), listReports()])
         const loadError = clientsRes.error ?? reportsRes.error
         if (loadError) {
-          setError(loadError.message)
+          setError('Could not load dashboard options.')
           return
         }
         setClients(clientsRes.data)
@@ -173,7 +170,7 @@ export default function PublishedPreview() {
         const { data, error } = await getReportWithPosts(selectedReportId)
         if (!active) return
         if (error) {
-          setError(error.message)
+          setError('Could not load this dashboard.')
           return
         }
         setReport(data)
@@ -207,7 +204,7 @@ export default function PublishedPreview() {
           setGoogleAds(googleAdsResult.data)
           setPreviousGoogleAds(previousGoogleAdsResult.data)
           setGoogleAdsState(googleAdsResult.state)
-          setGoogleAdsError(googleAdsResult.error ?? previousGoogleAdsResult.error)
+          setGoogleAdsError(googleAdsResult.error || previousGoogleAdsResult.error ? 'Google Ads data could not be loaded.' : null)
           setFacts(factsResult.facts)
           setPreviousFacts(factsResult.previousFacts)
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
@@ -264,7 +261,7 @@ export default function PublishedPreview() {
         reason: excluded ? 'Skipped from client-facing report highlights' : null,
       })
       if (result.error || !result.data) {
-        setError(result.error?.message ?? 'Could not update report curation.')
+        setError('Could not update report curation.')
         return
       }
       setContentExclusions(current => [
@@ -294,7 +291,7 @@ export default function PublishedPreview() {
     try {
       const { error } = await updateReportStatus(report.id, status)
       if (error) {
-        setError(error.message)
+        setError(status === 'published' ? 'Could not publish this dashboard.' : 'Could not unpublish this dashboard.')
         return
       }
       setSuccess(status === 'published' ? 'Dashboard published.' : 'Dashboard unpublished.')
@@ -313,11 +310,8 @@ export default function PublishedPreview() {
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.22em] text-brand-primary mb-2">Client Intelligence</p>
-        <h1 className="text-2xl font-semibold text-white sm:text-3xl">Client Dashboard</h1>
-        <p className="text-sm text-brand-primary mt-2 max-w-3xl">
-          CG's working view for reviewing, editing, previewing and publishing the client dashboard before the client sees it.
-        </p>
+        <h1 className="text-2xl font-semibold text-white sm:text-3xl">Client Dashboard Preview</h1>
+        <p className="mt-2 text-sm text-brand-primary">Staff preview and publishing controls.</p>
       </div>
 
       {error && <Message tone="error" text={error} />}
@@ -379,7 +373,6 @@ export default function PublishedPreview() {
       ) : report && mode === 'editor' ? (
         <EditorPanel
           report={report}
-          client={selectedClient}
           isAdmin={isAdmin}
           busy={busy}
           onEdit={() => navigate(`/admin/reports/${report.id}/edit`)}
@@ -409,20 +402,19 @@ export default function PublishedPreview() {
               showEmptyStrategy
               showAdminDiagnostics={isStaff}
             />
-            {/* Same client-safe month-ahead module the client portal renders.
-                Staff RLS can read the schedule, so this previews the real thing. */}
             {selectedClientId && <ClientMonthAhead clientId={selectedClientId} />}
           </ClientDashboardShell>
         </div>
       ) : (
-        <EmptyReportState
+        <EmptyState
           title={initialMonth ? 'No dashboard for this synced month' : 'No report selected'}
-          message={initialMonth ? 'Google Ads data was synced, but this client does not have a monthly dashboard for that period yet.' : 'Select a client and report period to review the dashboard workspace.'}
+          message={initialMonth ? 'No monthly dashboard exists for this period.' : 'Choose a client and report period above.'}
+          compact
         />
       )}
       <div className="mt-5 text-right">
         <Link to="/admin/reports" className="text-xs font-medium text-brand-primary/45 underline-offset-4 hover:text-brand-primary hover:underline">
-          Legacy reports
+          All reports
         </Link>
       </div>
     </div>
@@ -431,7 +423,6 @@ export default function PublishedPreview() {
 
 function EditorPanel({
   report,
-  client,
   isAdmin,
   busy,
   onEdit,
@@ -439,7 +430,6 @@ function EditorPanel({
   onUnpublish,
 }: {
   report: ReportWithPosts
-  client: Client | null
   isAdmin: boolean
   busy: boolean
   onEdit: () => void
@@ -450,24 +440,14 @@ function EditorPanel({
     <section className="rounded-xl border border-brand-muted bg-brand-surface p-5 sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-primary/60">Editor View</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Dashboard workspace</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
-            Use this panel to confirm the selected client dashboard, open the strategy/action plan editor, and control publishing.
-          </p>
+          <h2 className="text-xl font-semibold text-white">Dashboard controls</h2>
         </div>
         <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${report.status === 'published' ? 'border-brand-teal/30 bg-brand-teal/10 text-[#66d0c3]' : 'border-white/10 bg-white/[0.04] text-brand-primary'}`}>
           {statusLabel(report.status)}
         </span>
       </div>
 
-      <dl className="mt-6 grid gap-3 sm:grid-cols-3">
-        <InfoTile label="Selected client" value={client?.name ?? 'Unknown client'} />
-        <InfoTile label="Selected report/month" value={reportLabel(report)} />
-        <InfoTile label="Current status" value={statusLabel(report.status)} />
-      </dl>
-
-      <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {isAdmin ? (
           <>
             <button
@@ -501,15 +481,6 @@ function EditorPanel({
         )}
       </div>
     </section>
-  )
-}
-
-function InfoTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-white/8 bg-brand-bg/55 p-4">
-      <dt className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/50">{label}</dt>
-      <dd className="mt-2 text-sm font-semibold text-white">{value}</dd>
-    </div>
   )
 }
 

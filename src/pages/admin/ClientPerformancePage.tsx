@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
-import { Pill, StatusBadge } from '../../components/ui/Badges'
+import { StatusBadge } from '../../components/ui/Badges'
+import { EmptyState } from '../../components/ui/States'
 import { listClients, type Client } from '../../lib/db/clients'
 import { listReports, type Report } from '../../lib/db/reports'
 import {
@@ -79,34 +80,7 @@ const LINKS = [
   },
 ]
 
-const WORKFLOW_STEPS = [
-  {
-    title: 'Sync Meta',
-    description: 'Refresh Facebook and Instagram data for the month.',
-    to: '/admin/integrations/meta',
-  },
-  {
-    title: 'Review dashboard',
-    description: 'Open the Client Dashboard Editor and check the monthly workspace.',
-    to: '/admin/client-dashboard',
-  },
-  {
-    title: 'Add dashboard action plan',
-    description: 'Turn the numbers into the next practical client move.',
-    to: '/admin/client-dashboard',
-  },
-  {
-    title: 'Client view and publish',
-    description: 'Check the client view, then make the report live.',
-    to: '/admin/client-dashboard',
-  },
-]
-
-function errorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error) return error.message
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
-  }
+function errorMessage(_error: unknown, fallback: string) {
   return fallback
 }
 
@@ -173,7 +147,7 @@ export default function ClientPerformancePage() {
 
         const loadError = clientsRes.error ?? reportsRes.error
         if (loadError) {
-          setError(loadError.message)
+          setError('Could not load the performance dashboard.')
           return
         }
 
@@ -279,42 +253,30 @@ export default function ClientPerformancePage() {
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand-surface via-brand-bg to-black p-6 shadow-2xl sm:p-8">
-        <div className="absolute right-0 top-0 h-48 w-48 rounded-full bg-brand-teal/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-brand-accent/10 blur-3xl" />
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-4xl font-black uppercase tracking-wide text-white">Performance</h1>
+          <p className="mt-2 text-sm text-brand-primary/80">Client and monthly dashboard status.</p>
+        </div>
 
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <Pill tone="teal">Client Intelligence</Pill>
-              <Pill tone="neutral">Performance snapshot</Pill>
-            </div>
-            <h1 className="mt-4 font-display text-4xl font-black uppercase tracking-wide text-white sm:text-5xl">
-              Performance
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-primary/80 sm:text-base">
-              A quick read on active clients, dashboard publishing status and what needs attention before month-end reporting.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <HeaderAction to="/admin/integrations/meta">Sync Meta</HeaderAction>
-            <HeaderAction to="/admin/client-dashboard" primary>Client Dashboard</HeaderAction>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <HeaderAction to="/admin/integrations/meta">Sync Meta</HeaderAction>
+          <HeaderAction to="/admin/client-dashboard" primary>Client Dashboard</HeaderAction>
         </div>
       </section>
-
-      {error && (
-        <div className="mt-5 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
 
       {loading ? (
         <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-2xl border border-white/8 bg-white/[0.03] py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-muted border-t-brand-accent" />
           <p className="text-sm text-brand-primary">Loading performance snapshot...</p>
         </div>
+      ) : error ? (
+        <EmptyState
+          title="Performance unavailable"
+          message="Client performance could not be loaded. Try again shortly."
+          className="mt-6"
+          compact
+        />
       ) : (
         <>
           <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -344,40 +306,10 @@ export default function ClientPerformancePage() {
             />
           </section>
 
-          <section className="mt-6 grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+          <section className="mt-6">
             <PremiumCard padding="lg" className="bg-white/[0.035]">
               <PremiumCardHeader
-                eyebrow="Month-end workflow"
-                title="Reporting flow"
-                subtitle="Meta Sync -> Client Dashboard Editor -> Client View -> Publish."
-              />
-
-              <div className="grid gap-3 md:grid-cols-2">
-                {WORKFLOW_STEPS.map((step, index) => (
-                  <Link
-                    key={step.title}
-                    to={step.to}
-                    className="group rounded-2xl border border-white/8 bg-white/[0.03] p-4 transition-all hover:-translate-y-0.5 hover:border-brand-accent/35 hover:bg-brand-accent/[0.06]"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-brand-accent/25 bg-brand-accent/10 text-xs font-black text-[#f2b66f]">
-                        {index + 1}
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-black text-white group-hover:text-[#f2b66f]">{step.title}</h3>
-                        <p className="mt-1 text-xs leading-relaxed text-brand-primary/75">{step.description}</p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </PremiumCard>
-
-            <PremiumCard padding="lg" className="bg-white/[0.035]">
-              <PremiumCardHeader
-                eyebrow="Needs attention"
                 title="Dashboard queue"
-                subtitle="Based on existing report status and readiness only."
               />
 
               {snapshot.attention.length === 0 ? (
@@ -415,9 +347,7 @@ export default function ClientPerformancePage() {
           <section className="mt-6">
             <PremiumCard padding="lg" className="bg-white/[0.025]">
               <PremiumCardHeader
-                eyebrow="Quick links"
                 title="Performance workspaces"
-                subtitle="Secondary navigation for client setup, dashboard review, integrations, calendar and internal data support."
               />
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

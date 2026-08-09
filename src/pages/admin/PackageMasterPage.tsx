@@ -225,7 +225,7 @@ export default function PackageMasterPage() {
     }
     const { error } = await createClientPackage(input)
     if (error) {
-      setPkgError(error.message)
+      setPkgError('Could not create this package.')
     } else {
       setPkgName('')
       setPkgNotes('')
@@ -299,7 +299,7 @@ export default function PackageMasterPage() {
     }
     const { error } = await createPackageDeliverableTemplate(input)
     if (error) {
-      setTplError(error.message)
+      setTplError('Could not add this package item.')
     } else {
       setTplCode('')
       setTplTitle('')
@@ -331,8 +331,9 @@ export default function PackageMasterPage() {
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <h1 className="mb-6 text-xl font-black tracking-tight text-white">Package</h1>
         <EmptyState
-          title="Planner tables not set up"
-          message="Run Phase 6 migrations."
+          title="Package setup required"
+          message="Packages are not available yet."
+          compact
         />
       </div>
     )
@@ -341,11 +342,8 @@ export default function PackageMasterPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 lg:px-8">
 
-      {/* Header */}
       <div className="mb-5">
-        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2b66f]">Client workflow</p>
-        <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Package</h1>
-        <p className="mt-1 text-sm text-brand-primary/60">Monthly package quantities.</p>
+        <h1 className="font-display text-4xl font-black uppercase tracking-wide text-white">Package</h1>
       </div>
 
       {/* Client selector */}
@@ -361,26 +359,6 @@ export default function PackageMasterPage() {
               placeholder={selectedClient ? selectedClient.name : 'Search clients…'}
               className="w-full rounded-lg border border-white/10 bg-brand-bg px-3 py-2.5 text-sm text-white placeholder-white/45 focus:outline-none focus:ring-1 focus:ring-brand-accent"
             />
-            {clientSearch && filteredClients.length > 0 && (
-              <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-white/10 bg-brand-surface shadow-xl">
-                {filteredClients.map(c => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedClientId(c.id)
-                      setClientSearch('')
-                      setCreatePkgOpen(false)
-                    }}
-                    className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/[0.04] ${
-                      selectedClientId === c.id ? 'text-brand-accent font-medium' : 'text-white/70'
-                    }`}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            )}
             {clientSearch && filteredClients.length === 0 && (
               <p className="mt-1 text-xs text-white/30">No clients match "{clientSearch}"</p>
             )}
@@ -413,31 +391,27 @@ export default function PackageMasterPage() {
       {!selectedClient ? (
         <EmptyState
           title="Select a client"
-          message="Search above to get started."
+          message="Choose a client above."
           centered={false}
+          compact
         />
       ) : (
         <>
-          {/* Package header */}
           {packagesLoading ? (
             <div className="mb-5 h-20 animate-pulse rounded-xl bg-white/[0.04]" />
           ) : packages.length === 0 ? (
-            <div className="mb-5">
-              <div className="mb-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-teal/60">{selectedClient.name}</p>
-                  <p className="mt-0.5 text-sm text-white/40">No package yet.</p>
-                </div>
-                {isAdmin && (
-                  <ActionButton variant="outline" size="sm" onClick={() => setCreatePkgOpen(!createPkgOpen)}>
-                    {createPkgOpen ? 'Cancel' : 'New package'}
-                  </ActionButton>
-                )}
-              </div>
-              {!isAdmin && (
-                <EmptyState title="No package yet" message="No package configured." centered={false} />
-              )}
-            </div>
+            <EmptyState
+              title="No package"
+              message={`${selectedClient.name} does not have a package yet.`}
+              centered={false}
+              compact
+              action={isAdmin ? (
+                <ActionButton variant="outline" size="sm" onClick={() => setCreatePkgOpen(!createPkgOpen)}>
+                  {createPkgOpen ? 'Cancel' : 'New package'}
+                </ActionButton>
+              ) : undefined}
+              className="mb-5"
+            />
           ) : currentPackage && (
             <div className="mb-5 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4">
               <div className="flex items-start justify-between gap-3">
@@ -621,13 +595,13 @@ export default function PackageMasterPage() {
                   )}
 
                   {!isAdmin && (
-                    <p className="mb-3 text-xs text-amber-400/70">Admin access required to edit templates.</p>
+                    <p className="mb-3 text-xs text-amber-400/70">Admin access is required to edit package items.</p>
                   )}
 
                   {/* Custom template form */}
                   {createTplOpen && isAdmin && (
                     <div className="mb-4 rounded-xl bg-white/[0.035] p-4">
-                      <h3 className="mb-3 text-sm font-semibold text-white">Add deliverable template</h3>
+                      <h3 className="mb-3 text-sm font-semibold text-white">Add package item</h3>
                       <form onSubmit={handleCreateTemplate} className="space-y-3">
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                           <div>
@@ -653,7 +627,7 @@ export default function PackageMasterPage() {
                             </select>
                           </div>
                           <div>
-                            <label className="mb-1 block text-[11px] text-white/50">Title template</label>
+                            <label className="mb-1 block text-[11px] text-white/50">Title</label>
                             <input
                               value={tplTitle}
                               onChange={e => setTplTitle(e.target.value)}
@@ -685,7 +659,7 @@ export default function PackageMasterPage() {
                         </div>
                         {tplError && <p className="text-xs text-red-400">{tplError}</p>}
                         <ActionButton variant="primary" type="submit" disabled={tplSaving || !tplCode.trim()} loading={tplSaving}>
-                          Add template
+                          Add item
                         </ActionButton>
                       </form>
                     </div>
