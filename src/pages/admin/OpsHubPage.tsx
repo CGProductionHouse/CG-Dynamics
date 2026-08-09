@@ -256,6 +256,7 @@ function MyWorkView({
   onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
   onOpenTask: (task: CommandCentreTask) => void
 }) {
+  const activeMyTasks = useMemo(() => myTasks.filter(isActiveWorkTask), [myTasks])
   const overdue = useMemo(() => myTasks.filter(t => isActiveForToday(t) && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
   const today = useMemo(() => myTasks.filter(t => isActiveForToday(t) && t.status !== 'blocked' && t.due_date === todayKey), [myTasks, todayKey])
   const inProgress = useMemo(() => myTasks.filter(isActuallyInProgressTask), [myTasks])
@@ -266,7 +267,7 @@ function MyWorkView({
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-white/60">Showing {myTasks.length} tasks assigned to you.</p>
+      <p className="text-sm text-white/60">Showing {activeMyTasks.length} active tasks assigned to you.</p>
       {overdue.length > 0 && (
         <TaskSection title={`Overdue (${overdue.length})`} tasks={overdue} color="text-red-300" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
       )}

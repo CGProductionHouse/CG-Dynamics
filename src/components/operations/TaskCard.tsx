@@ -115,7 +115,7 @@ export function TaskCard({ task, onStatusChange, onOpen, compact }: TaskCardProp
             <option value="in_progress">In progress</option>
             <option value="waiting_client">Waiting</option>
             <option value="blocked">Blocked</option>
-            <option value="moved_to_tomorrow">Moved to tomorrow</option>
+            {task.data_origin !== 'planner_tasks' && <option value="moved_to_tomorrow">Moved to tomorrow</option>}
             <option value="done">Done</option>
           </select>
         )}

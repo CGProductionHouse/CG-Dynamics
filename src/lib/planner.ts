@@ -111,6 +111,11 @@ export interface PlannerActivityLog {
   created_at: string
 }
 
+export interface PlannerStatusTransition {
+  oldStatus: string | null
+  newStatus: string | null
+}
+
 export interface PlannerAssignmentDirectoryEntry {
   id: string
   full_name: string
@@ -1360,6 +1365,69 @@ export async function listPlannerActivity(taskId?: string) {
 
   if (taskId) query = query.eq('entity_id', taskId)
   return query as unknown as Promise<{ data: PlannerActivityLog[] | null; error: PlannerRpcError | null }>
+}
+
+function nestedActivityStatus(metadata: PlannerActivityMetadata, side: 'old' | 'new'): string | null {
+  const value = metadata[side]
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const status = (value as Record<string, unknown>).status
+  return typeof status === 'string' ? status : null
+}
+
+export function plannerActivityStatusTransition(activity: Pick<PlannerActivityLog, 'metadata'>): PlannerStatusTransition {
+  const metadata = activity.metadata ?? {}
+  const oldStatus = typeof metadata.old_status === 'string'
+    ? metadata.old_status
+    : typeof metadata.from_status === 'string'
+      ? metadata.from_status
+      : nestedActivityStatus(metadata, 'old')
+  const newStatus = typeof metadata.new_status === 'string'
+    ? metadata.new_status
+    : typeof metadata.to_status === 'string'
+      ? metadata.to_status
+      : nestedActivityStatus(metadata, 'new')
+  return { oldStatus, newStatus }
+}
+
+export function plannerCompletionEvidence(activity: PlannerActivityLog[]): Record<string, string> {
+  const completedByTaskId: Record<string, string> = {}
+  const newestFirst = [...activity].sort((a, b) => b.created_at.localeCompare(a.created_at))
+  for (const item of newestFirst) {
+    if (completedByTaskId[item.entity_id]) continue
+    const { oldStatus, newStatus } = plannerActivityStatusTransition(item)
+    if ((newStatus === 'done' || newStatus === 'completed') && oldStatus !== 'done' && oldStatus !== 'completed') {
+      completedByTaskId[item.entity_id] = item.created_at
+    }
+  }
+  return completedByTaskId
+}
+
+export async function listPlannerCompletionEvidence(taskIds: string[]) {
+  const ids = [...new Set(taskIds)]
+  const activity: PlannerActivityLog[] = []
+
+  for (let chunkStart = 0; chunkStart < ids.length; chunkStart += 100) {
+    const chunk = ids.slice(chunkStart, chunkStart + 100)
+    let from = 0
+    while (chunk.length > 0) {
+      const result = await supabase
+        .from(ACTIVITY_LOG_TABLE)
+        .select('*')
+        .eq('entity_type', 'planner_task')
+        .in('entity_id', chunk)
+        .in('action', ['status_changed', 'task_updated'])
+        .order('created_at', { ascending: false })
+        .range(from, from + PLANNER_READ_PAGE_SIZE - 1)
+      if (result.error) return { data: null, error: result.error as PlannerRpcError }
+
+      const page = (result.data ?? []) as PlannerActivityLog[]
+      activity.push(...page)
+      if (page.length < PLANNER_READ_PAGE_SIZE) break
+      from += PLANNER_READ_PAGE_SIZE
+    }
+  }
+
+  return { data: plannerCompletionEvidence(activity), error: null }
 }
 
 export async function archivePlannerTask(id: string, actorName: string | null, reason = 'Removed from active work') {

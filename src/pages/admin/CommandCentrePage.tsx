@@ -37,6 +37,7 @@ import {
   type TaskBucket,
   type TaskPriority,
   type TaskStatus,
+  type TaskUpdateFields,
   type PackageAction,
   type ClientOption,
   type ParsedMorningTask,
@@ -383,12 +384,14 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       } else {
         setTasks(prev => prev.map(t => {
           if (t.id !== id) return t
-          const now = new Date().toISOString()
-          return {
-            ...t,
-            status,
-            updated_at: now,
-            completed_at: (status as string) === 'done' ? now : null,
+           const now = new Date().toISOString()
+           return {
+             ...t,
+             status,
+             updated_at: now,
+             completed_at: t.data_origin === 'planner_tasks'
+               ? null
+               : (status as string) === 'done' ? now : null,
           }
         }))
       }
@@ -1442,6 +1445,9 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
   const [saveError, setSaveError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const statusOptions = task.data_origin === 'planner_tasks'
+    ? STATUSES.filter(value => value !== 'moved_to_tomorrow')
+    : STATUSES
 
   async function handleSave() {
     if (saving || !title.trim()) return
@@ -1450,6 +1456,10 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
     setSaveError(null)
     try {
       if (!canManage) {
+        if (status === task.status) {
+          setSaveMsg('No changes')
+          return
+        }
         const result = await updateTaskStatus(task.id, status)
         if (result.error) { setSaveError(result.error.message); return }
         const saved = result.data as { updated_at?: string; completed_at?: string | null } | null
@@ -1462,27 +1472,36 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
         setSaveMsg('Status saved')
         return
       }
-      const updates = {
-        title: title.trim(),
-        client_id: clientId || null,
-        client_name: clientName || null,
-        assigned_to_name: assignedName.trim() || null,
-        assigned_to_user_id: task.data_origin === 'planner_tasks'
-          ? null
-          : assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null,
-        bucket,
-        priority,
-        status,
-        due_date: dueDate,
-        notes: notes.trim() || null,
-        helper_names: helperNames.split(',').map(name => name.trim()).filter(Boolean),
-        ...(task.data_origin !== 'planner_tasks'
-          ? {
-              package_action: packageAction || null,
-              quote_needed: quoteNeeded,
-              admin_package_note: adminPackageNote.trim() || null,
-            }
-          : {}),
+      const updates: Partial<TaskUpdateFields> = {}
+      const nextTitle = title.trim()
+      const nextClientId = clientId || null
+      const nextClientName = clientName || null
+      const nextNotes = notes.trim() || null
+      if (nextTitle !== task.title) updates.title = nextTitle
+      if (nextClientId !== task.client_id) updates.client_id = nextClientId
+      if (nextClientName !== task.client_name) updates.client_name = nextClientName
+      if (bucket !== task.bucket) updates.bucket = bucket
+      if (priority !== task.priority) updates.priority = priority
+      if (status !== task.status) updates.status = status
+      if (dueDate !== task.due_date) updates.due_date = dueDate
+      if (nextNotes !== task.notes) updates.notes = nextNotes
+
+      if (task.data_origin !== 'planner_tasks') {
+        const nextAssignedName = assignedName.trim() || null
+        const nextAssignedId = assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null
+        const nextHelpers = helperNames.split(',').map(name => name.trim()).filter(Boolean)
+        if (nextAssignedName !== task.assigned_to_name) updates.assigned_to_name = nextAssignedName
+        if (nextAssignedId !== task.assigned_to_user_id) updates.assigned_to_user_id = nextAssignedId
+        if (JSON.stringify(nextHelpers) !== JSON.stringify(task.helper_names ?? [])) updates.helper_names = nextHelpers
+        const nextPackageAction = packageAction || null
+        const nextAdminNote = adminPackageNote.trim() || null
+        if (nextPackageAction !== (task.package_action ?? null)) updates.package_action = nextPackageAction
+        if (quoteNeeded !== (task.quote_needed ?? false)) updates.quote_needed = quoteNeeded
+        if (nextAdminNote !== (task.admin_package_note ?? null)) updates.admin_package_note = nextAdminNote
+      }
+      if (Object.keys(updates).length === 0) {
+        setSaveMsg('No changes')
+        return
       }
       const { error } = await updateTask(task.id, updates)
       if (error) { setSaveError(error.message); return }
@@ -1490,9 +1509,11 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
         ...task,
         ...updates,
         updated_at: new Date().toISOString(),
-        completed_at: (status as string) === 'done'
-          ? (task.completed_at ?? new Date().toISOString())
-          : null,
+        completed_at: task.data_origin === 'planner_tasks'
+          ? null
+          : status !== task.status
+            ? (status as string) === 'done' ? new Date().toISOString() : null
+            : task.completed_at,
       }
       onSaved(updated)
       setSaveMsg('Saved')
@@ -1604,7 +1625,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
               <select value={status} onChange={e => setStatus(e.target.value as TaskStatus)} className={inputCls}>
-                {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
+                {statusOptions.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
               </select>
             </div>
             <div>

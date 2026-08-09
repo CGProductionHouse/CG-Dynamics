@@ -226,12 +226,17 @@ function taskStatusFromPlanner(status: string): TaskStatus {
   return 'to_do'
 }
 
-function plannerStatusFromTask(status: TaskStatus): string {
+function plannerStatusFromTask(status: TaskStatus): string | null {
   if (status === 'in_progress') return 'in_progress'
   if (status === 'blocked') return 'blocked'
   if (status === 'waiting_client') return 'waiting_client'
   if (status === 'done') return 'done'
+  if (status === 'moved_to_tomorrow') return null
   return 'to_do'
+}
+
+function unsupportedPlannerStatusError(status: TaskStatus) {
+  return { data: null, error: { message: `${OPS_STATUS_LABELS[status]} is not supported for Planner tasks.` } }
 }
 
 const OPS_STATUS_LABELS: Record<TaskStatus, string> = {
@@ -406,9 +411,8 @@ export async function updateTaskStatus(id: string, status: TaskStatus) {
   if (isPlannerTaskId(id)) {
     const taskId = stripPlannerTaskId(id)
     const mappedStatus = plannerStatusFromTask(status)
-    const rpcResult = await supabase.rpc('update_planner_task_status', { p_task_id: taskId, p_status: mappedStatus })
-    if (!rpcResult.error || rpcResult.error.code !== 'PGRST202') return rpcResult
-    return supabase.from(PLANNER_TASKS_TABLE).update({ status: mappedStatus }).eq('id', taskId).select().single()
+    if (!mappedStatus) return unsupportedPlannerStatusError(status)
+    return supabase.rpc('update_planner_task_status', { p_task_id: taskId, p_status: mappedStatus })
   }
 
   const rpcResult = await supabase.rpc('update_command_centre_task_status', { p_task_id: id, p_status: status })
@@ -431,14 +435,24 @@ export async function updateTask(
     delete patch.assigned_to_user_id
     delete patch.assigned_to_name
     delete patch.helper_names
+    let requestedStatus: TaskStatus | null = null
     if (patch.bucket !== undefined) {
       patch.original_bucket_name = patch.bucket
       delete patch.bucket
     }
     if (patch.status !== undefined) {
-      patch.status = plannerStatusFromTask(patch.status as TaskStatus)
+      const status = patch.status as TaskStatus
+      const mappedStatus = plannerStatusFromTask(status)
+      if (!mappedStatus) return unsupportedPlannerStatusError(status)
+      requestedStatus = status
+      delete patch.status
     }
 
+    if (requestedStatus && Object.keys(patch).length > 0) {
+      return { data: null, error: { message: 'Save other Planner changes before changing its status.' } }
+    }
+
+    if (requestedStatus) return updateTaskStatus(id, requestedStatus)
     return supabase
       .from(PLANNER_TASKS_TABLE)
       .update(patch)

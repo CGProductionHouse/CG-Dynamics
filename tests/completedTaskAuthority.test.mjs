@@ -164,6 +164,37 @@ test('workforce MyDay filters through isActiveForToday, not a local set', () => 
 test('Ops Hub board and admin board exclude completed via the shared helper', () => {
   assert.ok(opsHub.includes('isActiveWorkTask'))
   assert.ok(opsHub.includes('isActiveForToday'))
+  assert.match(opsHub, /activeMyTasks = useMemo\(\(\) => myTasks\.filter\(isActiveWorkTask\)/)
+  assert.match(opsHub, /Showing \{activeMyTasks\.length\} active tasks assigned to you/)
+})
+
+test('Planner-backed command-centre controls cannot offer or silently coerce deferral', () => {
+  const detailDrawer = read('../src/components/operations/TaskDetailDrawer.tsx')
+  assert.match(taskCard, /task\.data_origin !== 'planner_tasks' && <option value="moved_to_tomorrow"/)
+  assert.match(detailDrawer, /task\.data_origin === 'planner_tasks'[\s\S]*STATUSES\.filter\(status => status !== 'moved_to_tomorrow'\)[\s\S]*: STATUSES/)
+  assert.match(commandCentrePage, /task\.data_origin === 'planner_tasks'[\s\S]*STATUSES\.filter\(value => value !== 'moved_to_tomorrow'\)[\s\S]*: STATUSES/)
+  const mapper = commandCentre.slice(commandCentre.indexOf('function plannerStatusFromTask'), commandCentre.indexOf('const OPS_STATUS_LABELS'))
+  assert.match(mapper, /status === 'moved_to_tomorrow'\) return null/)
+  assert.ok(mapper.indexOf("status === 'moved_to_tomorrow') return null") < mapper.lastIndexOf("return 'to_do'"))
+  assert.match(commandCentre, /if \(!mappedStatus\) return unsupportedPlannerStatusError\(status\)/)
+  assert.match(commandCentre, /requestedStatus = status[\s\S]*delete patch\.status[\s\S]*return updateTaskStatus\(id, requestedStatus\)/,
+    'supported Planner status changes must use the audited status RPC')
+  assert.match(commandCentre, /requestedStatus && Object\.keys\(patch\)\.length > 0[\s\S]*Save other Planner changes before changing its status/,
+    'mixed Planner edits must fail before a partial write')
+  const plannerStatusWriter = commandCentre.slice(commandCentre.indexOf('export async function updateTaskStatus'), commandCentre.indexOf('export async function updateTask('))
+  assert.doesNotMatch(plannerStatusWriter, /PLANNER_TASKS_TABLE\)\.update/,
+    'Planner status changes must not fall back to an unaudited direct write')
+})
+
+test('Command Centre preserves richer Planner scheduling states during unrelated edits', () => {
+  assert.match(commandCentrePage, /if \(status !== task\.status\) updates\.status = status/)
+  assert.match(commandCentrePage, /if \(!canManage\) \{[\s\S]*if \(status === task\.status\) \{[\s\S]*setSaveMsg\('No changes'\)[\s\S]*return[\s\S]*updateTaskStatus/,
+    'staff saves must not write an unchanged coarse status over a richer Planner status')
+  assert.match(commandCentrePage, /completed_at: task\.data_origin === 'planner_tasks'[\s\S]*\? null/,
+    'Command Centre must not invent a Planner completion timestamp')
+  const quickStatus = commandCentrePage.slice(commandCentrePage.indexOf('const handleStatusChange'), commandCentrePage.indexOf('const handleCopy'))
+  assert.match(quickStatus, /completed_at: t\.data_origin === 'planner_tasks'[\s\S]*\? null/,
+    'quick Planner completion must not invent browser-time evidence')
 })
 
 test('Command Centre routes filters through the shared reasons', () => {
@@ -178,6 +209,17 @@ test('Planner history is genuinely completed + archived only', () => {
   assert.match(fn, /isOperationallyCompletedStatus/)
   assert.ok(!/['"]approved['"]/.test(fn) && !/['"]scheduled['"]/.test(fn),
     'approved/scheduled must not be filed under Completed history')
+})
+
+test('Planner history renders only durable completion evidence, never updated_at', () => {
+  assert.ok(planner.includes('export function plannerCompletionEvidence'))
+  assert.ok(planner.includes(".in('action', ['status_changed', 'task_updated'])"))
+  assert.match(plannerPage, /completedAt \? `Completed \$\{new Date\(completedAt\)/)
+  assert.ok(plannerPage.includes('Completion date unavailable'))
+  assert.doesNotMatch(plannerPage, /Completed \$\{new Date\(task\.updated_at\)/)
+  assert.match(plannerPage, /fetchBoardTasks[\s\S]*listPlannerCompletionEvidence/)
+  assert.ok((plannerPage.match(/setCompletionEvidence\(result\.completionEvidence\)/g) ?? []).length >= 3,
+    'initial loads, drawer reloads, and board refreshes must all refresh completion evidence')
 })
 
 // ── Reopen path stays truthful ───────────────────────────────────────────────
