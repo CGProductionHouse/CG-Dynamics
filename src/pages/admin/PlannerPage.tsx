@@ -134,7 +134,7 @@ async function fetchBoardTasks(board: PlannerBoard, shouldMaterialize: boolean) 
     const materialized = await materializeRecurringTasks()
     if (materialized.error) return { data: null, completionEvidence: {}, error: { message: materialized.error } }
     if (materialized.migrationNeeded) {
-      return { data: null, completionEvidence: {}, error: { message: 'Recurring task migration is required before Planner can load safely.' } }
+      return { data: null, completionEvidence: {}, error: { message: 'Recurring tasks are not available yet.' } }
     }
   }
   const { data, error } = await listPlannerTasks(board.id)
@@ -189,7 +189,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       if (!active) return
       if (error) {
         setAssignmentError(isMissingPlannerAssignmentRpcError(error)
-          ? 'Planner assignment migration required. Assignment changes are disabled until it is applied.'
+          ? 'Planner assignment setup is required. Assignment changes are disabled.'
           : `Could not load the assignment directory. Assignment changes are disabled. ${error.message ?? ''}`.trim())
         return
       }
@@ -529,8 +529,9 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       <div className={`mx-auto max-w-7xl px-4 ${embedded ? 'py-2' : 'py-8'}`}>
         {!embedded && <h1 className="mb-6 text-xl font-black text-white">Planner</h1>}
         <EmptyState
-          title={tableMissing ? 'Planner tables not set up yet' : 'No boards found'}
-          message={tableMissing ? 'Run the Planner migrations.' : 'Create or seed a Planner board to begin.'}
+          title={tableMissing ? 'Work setup required' : 'No boards found'}
+          message={tableMissing ? 'Planner is not available yet.' : 'No Planner boards are available yet.'}
+          compact
         />
       </div>
     )
@@ -584,7 +585,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
         <LoadError title="Planner tasks could not be loaded" message={taskError} onRetry={retryTasks} />
       ) : displayedBuckets.length === 0 && tasksLoading ? (
         <div className="h-48 animate-pulse rounded-xl bg-white/[0.04]" aria-label="Loading Planner tasks" />
-      ) : displayedBuckets.length === 0 && bucketlessTasks.length === 0 ? <EmptyState title="No columns configured" message="This board has no columns yet." centered={false} /> : (
+      ) : displayedBuckets.length === 0 && bucketlessTasks.length === 0 ? <EmptyState title="No columns configured" message="This board has no columns yet." compact centered={false} /> : (
         <>
         {taskError && <LoadError title="Planner tasks could not be loaded" message={taskError} onRetry={retryTasks} />}
         <div ref={boardScrollRef} data-testid="planner-board-scroller" onWheel={handleBoardWheel} className="flex h-[min(68vh,46rem)] min-h-[30rem] gap-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/[0.06] bg-black/10 p-3 pb-4">
@@ -736,7 +737,7 @@ function BucketColumn({ bucket, boardId, tasks, completionEvidence, tasksLoading
 
       <div ref={setScrollRef} data-testid="planner-bucket-scroll" className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1">
         {tasksLoading ? <div className="h-20 animate-pulse rounded-lg bg-white/[0.04]" /> : tasksError ? <p className="py-8 text-center text-xs text-red-200/65">Tasks unavailable</p> : tasks.map(task => <PlannerTaskCard key={task.id} task={task} completedAt={completionEvidence[task.id] ?? null} onClick={() => onOpenTask(task)} />)}
-        {!tasksLoading && !tasksError && tasks.length === 0 && <p className="py-8 text-center text-xs text-white/25">No matching tasks</p>}
+        {!tasksLoading && !tasksError && tasks.length === 0 && <p className="py-4 text-center text-xs text-white/25">No matching tasks</p>}
       </div>
     </section>
   )
@@ -762,7 +763,7 @@ function PlannerTaskCard({ task, completedAt, onClick }: { task: PlannerTask; co
         <PlannerAssigneeAvatars people={taskPeople(task)} maxVisible={3} />
         {progress.total > 0 && <span className="text-[10px] text-white/40" aria-label={`${progress.complete} of ${progress.total} checklist items complete`}>{progress.complete}/{progress.total} checklist</span>}
       </div>
-      {task.unresolved_assignee_names.length > 0 && <p className="mt-2 truncate text-[10px] text-amber-200/75" title={`Imported identities: ${task.unresolved_assignee_names.join(', ')}`}>Imported identity: {task.unresolved_assignee_names.join(', ')}</p>}
+      {task.unresolved_assignee_names.length > 0 && <p className="mt-2 truncate text-[10px] text-amber-200/75" title={`Assignment review: ${task.unresolved_assignee_names.join(', ')}`}>Assignment review: {task.unresolved_assignee_names.join(', ')}</p>}
     </button>
   )
 }

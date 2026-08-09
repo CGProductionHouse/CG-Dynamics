@@ -7,6 +7,7 @@ interface EmptyStateProps {
   icon?: ReactNode
   className?: string
   centered?: boolean
+  compact?: boolean
 }
 
 export function EmptyState({
@@ -16,25 +17,27 @@ export function EmptyState({
   icon,
   className = '',
   centered = true,
+  compact = false,
 }: EmptyStateProps) {
   return (
     <div
       className={`
-        rounded-xl border border-white/8 bg-brand-surface/90 p-5 text-center sm:p-6
+        rounded-xl border border-white/8 bg-brand-surface/90 text-center
+        ${compact ? 'px-4 py-3' : 'p-5 sm:p-6'}
         ${centered ? 'mx-auto max-w-xl' : ''}
         ${className}
       `}
     >
       {icon && (
-        <div className="mb-4 flex justify-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-brand-primary/70">
+        <div className={`${compact ? 'mb-2' : 'mb-4'} flex justify-center`}>
+          <div className={`${compact ? 'h-8 w-8' : 'h-11 w-11'} flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-brand-primary/70`}>
             {icon}
           </div>
         </div>
       )}
-      <h2 className="text-base font-bold text-white sm:text-lg">{title}</h2>
-      <p className="mt-2 max-w-md mx-auto text-sm leading-relaxed text-brand-primary/80">{message}</p>
-      {action && <div className="mt-4">{action}</div>}
+      <h2 className={`${compact ? 'text-sm' : 'text-base sm:text-lg'} font-bold text-white`}>{title}</h2>
+      <p className={`${compact ? 'mt-1 text-xs' : 'mt-2 text-sm leading-relaxed'} mx-auto max-w-md text-brand-primary/80`}>{message}</p>
+      {action && <div className={compact ? 'mt-2' : 'mt-4'}>{action}</div>}
     </div>
   )
 }

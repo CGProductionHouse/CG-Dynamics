@@ -456,8 +456,8 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Daily Tasks</h1>
         </div>
         <EmptyState
-          title="Migration required"
-          message="Daily Tasks tables are not set up yet. Run the phase-5 CG Command Centre migration."
+          title="Work setup required"
+          message="Daily Tasks is not available yet."
         />
       </div>
     )
@@ -476,9 +476,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
       {/* A — Header */}
       <div className={`mb-5 ${embedded ? 'rounded-xl border border-white/8 bg-white/[0.025] p-4' : ''}`}>
-        <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub · Command Centre</p>
         <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
-        <p className="mt-1 text-sm text-brand-primary/60">Today's work list.</p>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
           <Link to="/admin/ops-hub?tab=client-work" className="rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-brand-teal hover:text-white">Capture client request</Link>
           <button
@@ -494,15 +492,6 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       {/* B — Quick Add */}
       <div className="mb-5">
         <QuickAddCard onTaskCreated={load} staffNames={staffNames} />
-      </div>
-
-      {/* C — Stats */}
-      <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard label="Focus" value={stats.focus} />
-        <StatCard label="Client requests" value={stats.clientRequests} accent />
-        <StatCard label="In progress" value={stats.inProgress} />
-        <StatCard label="Done today" value={stats.doneToday} teal />
-        <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
       </div>
 
       {/* D — Filter row */}
@@ -608,7 +597,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           </span>
         </div>
         {focusTasks.length === 0 ? (
-          <EmptyState title="All clear" message="No tasks match these filters." centered={false} />
+          <EmptyState title="All clear" message="No tasks match these filters." compact centered={false} />
         ) : filterStaff !== '' ? (
           <div className="space-y-2">
             {focusTasks.map(task => (
@@ -706,28 +695,6 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           onDeleted={handleDeleteTask}
         />
       )}
-    </div>
-  )
-}
-
-function StatCard({ label, value, accent, teal, amber, danger }: {
-  label: string
-  value: number
-  accent?: boolean
-  teal?: boolean
-  amber?: boolean
-  danger?: boolean
-}) {
-  const valClass = danger
-    ? 'text-red-400'
-    : accent ? 'text-brand-accent'
-    : teal ? 'text-[#2dd4bf]'
-    : amber ? 'text-amber-400'
-    : 'text-white'
-  return (
-    <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
-      <p className={`mt-1.5 text-xl font-semibold ${valClass}`}>{value}</p>
     </div>
   )
 }
@@ -1535,7 +1502,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
       if (result.error) {
         const err = result.error as { code?: string; message?: string }
         setSaveError(err.code === '42703'
-          ? 'Archive migration is not applied yet. Run phase-9a-planner-task-archive.sql in Supabase.'
+          ? 'Archiving is not available yet.'
           : err.message ?? 'Could not remove task.')
         setDeleting(false)
         return
@@ -1668,7 +1635,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
                 <p className="text-[11px] text-white/40">No helpers yet</p>
               )
             ) : (
-              <p className="text-[11px] text-white/30">After migration phase-7b</p>
+              <p className="text-[11px] text-white/30">Not available yet</p>
             )}
           </div>
 
@@ -1677,7 +1644,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
               <p className="mb-2.5 text-xs font-medium text-brand-primary">Client request decision</p>
               {task.data_origin === 'planner_tasks' && (
                 <p className="mb-3 rounded-md border border-amber-400/20 bg-amber-400/[0.06] px-2.5 py-2 text-[11px] text-amber-200">
-                  Imported Planner request. Edit task details here; handle package decisions in Monthly Planner/Package until request linking is migrated.
+                  Imported Planner request. Edit task details here; handle package decisions in Client Schedule.
                 </p>
               )}
               <div className="flex flex-wrap gap-2">
@@ -1725,7 +1692,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
               <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Pause</button>
               <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Stop</button>
             </div>
-            <p className="mt-1.5 text-[11px] text-brand-primary/40">After migration</p>
+            <p className="mt-1.5 text-[11px] text-brand-primary/40">Not available yet</p>
           </div>
         </div>
 

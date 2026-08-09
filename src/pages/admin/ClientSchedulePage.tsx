@@ -344,10 +344,9 @@ export default function ClientSchedulePage() {
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">CG Hub</p>
           <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Client Schedule</h1>
           <p className="mt-1 text-sm text-brand-primary/65">
-            {view === 'year' ? selectedYear : formatMonthHeading(selectedMonth)} · monthly_deliverables
+            {view === 'year' ? selectedYear : formatMonthHeading(selectedMonth)}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -395,13 +394,7 @@ export default function ClientSchedulePage() {
         <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search schedule" className="rounded-lg border border-white/10 bg-brand-bg px-3 py-2 text-sm text-white placeholder:text-white/35 outline-none focus:border-brand-accent/50" />
       </div>
 
-      {view === 'calendar' || view === 'year' ? (
-        <div className="mb-4 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-xs text-brand-primary/55">
-          {view === 'calendar'
-            ? `Calendar shows all ${calendarItems.length} dated posts for ${formatMonthHeading(selectedMonth)}. Use the filters above to narrow the view.`
-            : `Year overview shows all ${yearItems.length} matching package posts across ${selectedYear}, grouped by report month.`}
-        </div>
-      ) : (
+      {view !== 'calendar' && view !== 'year' && (
         <>
           <div className="mb-4 flex flex-wrap gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
             {([
@@ -416,16 +409,11 @@ export default function ClientSchedulePage() {
             ))}
           </div>
 
-          <p className="mb-1 text-xs text-brand-primary/55">
-            {mode === 'unscheduled'
-              ? 'Unscheduled means package items with no schedule date and no legacy date. Status (work progress) is separate.'
-              : 'Schedule date is when a post is planned. Status is the work progress. A dated post can still be Not started.'}
-          </p>
         </>
       )}
       {hasLegacyDates && (
         <p className="mb-4 text-[11px] text-amber-300/70">
-          Some dates are shown from legacy Teams import data during the July shadow-run. They stay labelled as Schedule date until reconciled.
+          Some dates were imported from Teams and still need review.
         </p>
       )}
       {!hasLegacyDates && <div className="mb-4" />}
@@ -436,7 +424,7 @@ export default function ClientSchedulePage() {
       {loading ? (
         <div className="grid gap-3 md:grid-cols-3">{[1, 2, 3, 4, 5, 6].map(item => <div key={item} className="h-32 animate-pulse rounded-xl bg-white/[0.04]" />)}</div>
       ) : (view === 'calendar' ? calendarItems.length === 0 : view === 'year' ? yearItems.length === 0 : filtered.length === 0) ? (
-        <EmptyState title="No package posts match" message="Adjust the filters or change the month." centered={false} />
+        <EmptyState title="No package posts match" message="Adjust the filters or month." compact centered={false} />
       ) : view === 'grid' ? (
         <StickyHScroll><GridView items={filtered} clientDisplay={clientDisplay} onOpen={openDeliverable} /></StickyHScroll>
       ) : view === 'board' ? (
@@ -552,7 +540,6 @@ function ScheduleReviewSection({ canReview, onApplied }: { canReview: boolean; o
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 id="schedule-review-heading" className="text-sm font-black text-white">Schedule change review</h2>
-          <p className="mt-0.5 text-xs text-brand-primary/55">Review proposed changes and track your requests.</p>
         </div>
         <button type="button" onClick={() => void loadRequests()} disabled={loading} className="min-h-11 rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-white/70 hover:text-white disabled:opacity-50">Refresh requests</button>
       </div>

@@ -137,12 +137,12 @@ test('board query failures are distinct from missing tables and genuine empty bo
   assert.match(page, /Planner boards could not be loaded/)
   assert.match(page, /function retryBoards\(\)/)
   assert.ok(page.indexOf('if (boardError)') < page.indexOf('if (tableMissing || boards.length === 0)'))
-  assert.match(page, /title=\{tableMissing \? 'Planner tables not set up yet' : 'No boards found'\}/)
+  assert.match(page, /title=\{tableMissing \? 'Work setup required' : 'No boards found'\}/)
 })
 
 test('recurrence materialization failures block an incomplete board load visibly', () => {
   assert.match(page, /const materialized = await materializeRecurringTasks\(\)/)
   assert.match(page, /if \(materialized\.error\) return \{ data: null, completionEvidence: \{\}, error:/)
   assert.match(page, /materialized\.migrationNeeded/)
-  assert.match(page, /Recurring task migration is required before Planner can load safely/)
+  assert.match(page, /Recurring tasks are not available yet/)
 })

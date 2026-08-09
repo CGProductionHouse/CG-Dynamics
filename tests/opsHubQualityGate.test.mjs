@@ -225,7 +225,7 @@ test('package_action has DB check constraint values', () => {
 
 test('AdminBoardView shows honest description', () => {
   assert.match(OPS_HUB_PAGE, /Admin Tasks/, 'AdminBoardView has Admin Tasks header')
-  assert.match(OPS_HUB_PAGE, /Database-protected/, 'AdminBoardView mentions DB protection')
+  assert.match(OPS_HUB_PAGE, /Only admin and manager roles can view or edit these records/, 'AdminBoardView explains role protection')
 })
 
 // ── 18. No regression in client-facing truth ─────────────────────────────────

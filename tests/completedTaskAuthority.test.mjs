@@ -165,7 +165,7 @@ test('Ops Hub board and admin board exclude completed via the shared helper', ()
   assert.ok(opsHub.includes('isActiveWorkTask'))
   assert.ok(opsHub.includes('isActiveForToday'))
   assert.match(opsHub, /activeMyTasks = useMemo\(\(\) => myTasks\.filter\(isActiveWorkTask\)/)
-  assert.match(opsHub, /Showing \{activeMyTasks\.length\} active tasks assigned to you/)
+  assert.match(opsHub, /activeMyTasks\.length === 0/)
 })
 
 test('Planner-backed command-centre controls cannot offer or silently coerce deferral', () => {

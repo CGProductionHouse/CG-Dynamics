@@ -331,7 +331,7 @@ test('the repair migration is manager-only, audited, and non-destructive', async
   assert.match(sql, /Africa\/Johannesburg/)
   assert.doesNotMatch(sql, /delete\s+from\s+public\.company_calendar_events/i)
   assert.match(calendarPage, /disabled=\{supersessionMigrationNeeded \|\| resolvingCandidateId/)
-  assert.match(calendarPage, /Calendar events are available in legacy mode/)
+  assert.match(calendarPage, /Calendar events are available, but duplicate resolution is not available yet/)
   assert.match(calendarData, /query = query\.is\('superseded_by_event_id', null\)/)
   assert.match(calendarData, /readCompanyEventsWithSupersessionFallback\(\(\) => read\(true\), \(\) => read\(false\)\)/)
 })
