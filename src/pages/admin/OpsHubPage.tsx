@@ -135,7 +135,6 @@ export default function OpsHubPage() {
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 sm:px-6 sm:pt-6">
       <header className="mb-5 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Operations Hub</p>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
             {activeTab === 'my-work' && 'My Work'}
             {activeTab === 'board' && 'Board'}
@@ -187,10 +186,7 @@ export default function OpsHubPage() {
         </div>
       )}
 
-      <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2">
-        <p className="text-xs text-brand-primary/60">Focused operations workspace</p>
-        <Link to="/admin/my-work" className="text-xs font-black text-brand-teal hover:text-white">Back to My Work</Link>
-      </div>
+      <Link to="/admin/my-work" className="mb-4 inline-block text-xs font-black text-brand-teal hover:text-white">Back to Work</Link>
       {loading ? (
         <LoadingState message="Loading operations data..." />
       ) : error ? (
@@ -267,7 +263,7 @@ function MyWorkView({
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-white/60">Showing {activeMyTasks.length} active tasks assigned to you.</p>
+      {activeMyTasks.length === 0 && <p className="rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 text-xs text-white/45">No active tasks.</p>}
       {overdue.length > 0 && (
         <TaskSection title={`Overdue (${overdue.length})`} tasks={overdue} color="text-red-300" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
       )}
@@ -405,7 +401,7 @@ function BoardView({ tasks, onOpenTask, onBucketChange }: { tasks: CommandCentre
                 <p className="py-1 text-center text-[10px] text-white/30">+{items.length - 20} more</p>
               )}
               {items.length === 0 && (
-                <p className="py-4 text-center text-[10px] text-white/20">No tasks</p>
+                <p className="py-2 text-center text-[10px] text-white/20">No tasks</p>
               )}
             </div>
           </div>

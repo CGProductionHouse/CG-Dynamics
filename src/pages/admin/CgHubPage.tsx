@@ -296,17 +296,6 @@ export default function CgHubPage() {
       (b.openRequests + b.overdueTasks + b.waitingDeliverables + b.unscheduledItems)
       - (a.openRequests + a.overdueTasks + a.waitingDeliverables + a.unscheduledItems))
   }, [clients, clientRequests, overdue, unscheduledDeliverables, waitingDeliverables])
-  const stats = useMemo(() => ({
-    focus: priorityQueue.length,
-    clientRequests: clientRequests.length,
-    dueToday: dueToday.length,
-    overdue: overdue.length,
-    inProgress: activeTasks.filter(isActuallyInProgressTask).length,
-    waitingReview: waitingReview.length,
-    dueTodayDeliverables: dueTodayDeliverables.length,
-    unscheduledDeliverables: unscheduledDeliverables.length,
-  }), [priorityQueue, clientRequests, dueToday, overdue, activeTasks, waitingReview, dueTodayDeliverables, unscheduledDeliverables.length])
-
   async function handleQuickAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!quickTitle.trim() || quickSaving) return
@@ -405,7 +394,6 @@ export default function CgHubPage() {
             clientRequests={clientRequests}
             waitingReview={waitingReview}
             myActiveWork={myActiveWork}
-            stats={stats}
           />
 
           {/* D — CG Calendar */}
@@ -506,12 +494,6 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
         </div>
         <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
           <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
-            {context.overdue.length} overdue
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
-            {context.dueToday.length} due today
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
             {todayEvents} event{todayEvents === 1 ? '' : 's'} today
           </span>
           <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
@@ -561,7 +543,6 @@ function TodayFocusSection({
   clientRequests,
   waitingReview,
   myActiveWork,
-  stats,
 }: {
   today: string
   priorityQueue: CommandCentreTask[]
@@ -570,22 +551,10 @@ function TodayFocusSection({
   clientRequests: CommandCentreTask[]
   waitingReview: CommandCentreTask[]
   myActiveWork: CommandCentreTask[]
-  stats: { focus: number; clientRequests: number; dueToday: number; overdue: number; inProgress: number; waitingReview: number; dueTodayDeliverables: number; unscheduledDeliverables: number }
 }) {
   return (
     <div className="mb-8">
-      <HubSectionHeader
-        title="Today Focus"
-        subtitle="What needs your attention"
-      />
-
-      {/* Stats row */}
-      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <HubMetricCard label="Priority Queue" value={stats.focus} accent={stats.focus > 0} />
-        <HubMetricCard label="Due Today" value={stats.dueToday} accent={stats.dueToday > 0} />
-        <HubMetricCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
-        <HubMetricCard label="Client Requests" value={stats.clientRequests} accent={stats.clientRequests > 0} />
-      </div>
+      <HubSectionHeader title="Today Focus" />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <HubWorkCard
@@ -671,7 +640,7 @@ function CompanyCalendarSection({
   if (companyEventsMissing) {
     return (
       <div className="mb-8">
-        <HubSectionHeader title="CG Calendar — Next 7 Days" />
+        <HubSectionHeader title="CG Calendar" subtitle="Next 7 days" />
         <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-4">
           <p className="text-xs text-amber-300/80">
             CG Calendar setup needed. Run phase-10a SQL to enable company events.
@@ -692,8 +661,8 @@ function CompanyCalendarSection({
   return (
     <div className="mb-8">
       <HubSectionHeader
-        title="CG Calendar — Next 7 Days"
-        subtitle={`${eventCount} event${eventCount === 1 ? '' : 's'}`}
+        title="CG Calendar"
+        subtitle={`Next 7 days · ${eventCount} event${eventCount === 1 ? '' : 's'}`}
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -772,10 +741,7 @@ function ProductionScheduleSection({
 }) {
   return (
     <div className="mb-8">
-      <HubSectionHeader
-        title="Production Schedule"
-        subtitle="Package deliverables and schedule"
-      />
+      <HubSectionHeader title="Production Schedule" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <HubWorkCard
@@ -874,24 +840,6 @@ function HubSectionHeader({ title, subtitle }: { title: string; subtitle?: strin
       <h2 className="font-display text-xl font-black uppercase tracking-wide text-white sm:text-2xl">{title}</h2>
       <div className="h-px flex-1 bg-white/10" />
       {subtitle && <p className="shrink-0 text-xs text-brand-primary/50">{subtitle}</p>}
-    </div>
-  )
-}
-
-function HubMetricCard({ label, value, accent, danger }: {
-  label: string
-  value: number
-  accent?: boolean
-  danger?: boolean
-}) {
-  const valClass = danger
-    ? 'text-red-400'
-    : accent ? 'text-[#2dd4bf]'
-    : 'text-white'
-  return (
-    <div className="rounded-xl border border-white/8 bg-brand-surface/80 p-3">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
-      <p className={`mt-1 text-xl font-semibold ${valClass}`}>{value}</p>
     </div>
   )
 }

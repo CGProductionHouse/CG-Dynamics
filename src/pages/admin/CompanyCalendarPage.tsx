@@ -388,9 +388,7 @@ export default function CompanyCalendarPage() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Calendar</p>
           <h1 className="mt-1 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
-          <p className="mt-1 text-sm text-brand-primary/60">Meetings, shoots, content runs and internal events.</p>
         </div>
         {canManage && <ActionButton variant="primary" onClick={() => handleCreateEvent()}>
           + Add Event
@@ -509,7 +507,7 @@ export default function CompanyCalendarPage() {
           onOpenDay={setDayPanel}
         />
       ) : grouped.length === 0 ? (
-        <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No company events or dated Planner tasks this month yet." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton> : undefined} />
+        <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No events or dated tasks." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton> : undefined} compact />
       ) : (
         <div className="space-y-6">
           {grouped.map(group => (
@@ -735,8 +733,7 @@ function CgCalendarGrid({
             )
           })}
         </div>
-        <p className="mt-3 text-center text-xs text-brand-primary/50">Tap a date to view its events{tasksByDate.size > 0 ? ' and Planner tasks' : ''}.</p>
-        {groups.length === 0 && <EmptyState className="mt-4" title={`Nothing in ${formatMonthHeading(month)}`} message="No company events or dated Planner tasks this month. See the diagnostics above." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} centered={false} />}
+        {groups.length === 0 && <EmptyState className="mt-4" title={`Nothing in ${formatMonthHeading(month)}`} message="No events or dated tasks." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} compact centered={false} />}
       </div>
     </div>
   )
