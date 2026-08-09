@@ -33,7 +33,7 @@ import {
 } from '../../lib/planner'
 import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
 import { isManagerRole } from '../../lib/roles'
-import { isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
+import { isActiveForToday, isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
 
 type PlannerWorkView = 'active' | 'history'
 type QuickScope = 'all' | 'overdue' | 'blocked' | 'unassigned'
@@ -65,7 +65,7 @@ function isPlannerHistoryTask(task: PlannerTask) {
 }
 
 function isOverdue(task: PlannerTask) {
-  return Boolean(task.due_date && task.due_date < dateKey() && !isPlannerHistoryTask(task))
+  return Boolean(task.due_date && task.due_date < dateKey() && isActiveForToday(task))
 }
 
 function taskSortRank(task: PlannerTask) {

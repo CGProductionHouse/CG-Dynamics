@@ -85,6 +85,8 @@ export interface AssistantDayItem {
    *  bounded enrichment inside listMyAssistantDayItems. Only present when the
    *  item carries planner_task_id and the task was resolvable. */
   linked_planner_status?: string | null
+  /** True only when planner_task_id resolves through planner_tasks_canonical. */
+  linked_planner_is_current?: boolean
 }
 
 type DailyCaptureResponse = {
@@ -171,15 +173,14 @@ export async function listMyAssistantDayItems(limit = 80) {
 }
 
 // #176: the assistant day item model has no Planner status of its own. When an
-// item links to a Planner task, resolve that task's operational status in ONE
-// bounded query (id,status only) so the #176 completion authority from
-// taskLifecycle can be applied where the item is surfaced. Unlinked items keep
-// their own state authoritative. Query errors propagate instead of failing open.
+// item links to a Planner task, resolve it through the canonical task view in
+// ONE bounded query. Missing ids are archived/superseded/retired (or invisible)
+// and fail closed rather than becoming duplicate current work.
 async function enrichLinkedPlannerStatuses(items: AssistantDayItem[]) {
   const linkedIds = Array.from(new Set(items.flatMap(item => item.planner_task_id ? [item.planner_task_id] : [])))
   if (linkedIds.length === 0) return { data: items, error: null }
   const result = await supabase
-    .from('planner_tasks')
+    .from('planner_tasks_canonical')
     .select('id,status')
     .in('id', linkedIds)
   if (result.error) return { data: null, error: result.error }
@@ -189,7 +190,11 @@ async function enrichLinkedPlannerStatuses(items: AssistantDayItem[]) {
   }
   return {
     data: items.map(item => item.planner_task_id
-      ? { ...item, linked_planner_status: statusById.get(item.planner_task_id) ?? null }
+      ? {
+          ...item,
+          linked_planner_status: statusById.get(item.planner_task_id) ?? null,
+          linked_planner_is_current: statusById.has(item.planner_task_id),
+        }
       : item),
     error: null,
   }

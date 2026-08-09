@@ -10,7 +10,7 @@ import { listCompanyEvents, EVENT_TYPE_LABELS, type CompanyCalendarEvent } from 
 import { listActiveClients } from './commandCentre'
 import type { Profile } from './db/profiles'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMinutes, businessMonthKey, formatBusinessDate, formatBusinessTime } from './businessTime'
-import { isActiveForToday } from './taskLifecycle'
+import { isActiveForToday, isActuallyInProgressTask } from './taskLifecycle'
 
 export type MyDaySource = 'daily_task' | 'planner_task' | 'calendar_event' | 'client_deliverable'
 
@@ -175,7 +175,7 @@ function taskSortRank(task: CommandCentreTask, today: string) {
   if (task.priority === 'urgent') return 1
   if (task.due_date && task.due_date < today) return 2
   if (task.due_date === today) return 3
-  if (task.status === 'in_progress') return 4
+  if (isActuallyInProgressTask(task)) return 4
   return 7
 }
 

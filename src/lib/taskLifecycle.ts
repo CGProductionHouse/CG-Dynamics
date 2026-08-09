@@ -16,11 +16,16 @@
 //   - 'blocked' / 'waiting_client' / 'ready_internal_review' are active.
 //   - 'completed' is a legacy import alias for done and is treated as done.
 
-export type WorkTaskLike = { status?: string | null } | { status: string } | null | undefined
+export type WorkTaskLike = {
+  status?: string | null
+  data_origin?: string | null
+  planner_status?: string | null
+} | null | undefined
 export type AssistantDayItemLifecycleLike = {
   state?: string | null
   planner_task_id?: string | null
   linked_planner_status?: string | null
+  linked_planner_is_current?: boolean
 }
 
 export const OPERATIONAL_COMPLETED_STATUSES = ['done', 'completed'] as const
@@ -53,12 +58,22 @@ export function isActiveForToday(task: WorkTaskLike | string): boolean {
   return isActiveWorkTask(task) && !isDeferredToTomorrow(task)
 }
 
+// Planner scheduling states use an active coarse projection, but reporting must
+// still follow the raw source status so they never inflate In Progress counts.
+export function isActuallyInProgressTask(task: WorkTaskLike | string): boolean {
+  if (typeof task === 'string') return task === 'in_progress'
+  if (!task) return false
+  if (task.data_origin === 'planner_tasks') return task.planner_status === 'in_progress'
+  return task.status === 'in_progress'
+}
+
 // Assistant item state remains its own user decision. Planner completion only
 // derives whether an otherwise-open linked item should surface right now, so a
 // task reopen makes it active again without rewriting assistant_day_items.
 export function isActiveAssistantDayItem(item: AssistantDayItemLifecycleLike): boolean {
   if (item.state !== 'open') return false
   if (!item.planner_task_id) return true
+  if (item.linked_planner_is_current !== true) return false
   return !isOperationallyCompletedStatus(item.linked_planner_status)
 }
 

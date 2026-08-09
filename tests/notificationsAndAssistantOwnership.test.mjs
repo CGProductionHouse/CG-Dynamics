@@ -16,6 +16,7 @@ import { test } from 'node:test'
 
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const sql = read('../supabase/migrations/20260805120000_canonical_ownership_notifications.sql')
+const completedAuthoritySql = read('../supabase/migrations/20260806090001_assistant_linked_completed_authority.sql')
 const planner = read('../src/lib/planner.ts')
 const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 const assistant = read('../src/lib/assistant.ts')
@@ -40,6 +41,28 @@ test('a helper never receives an owner notification', () => {
 
 test('unresolved and conflicting ownership raises a manager alert instead of being dropped', () => {
   assert.match(sql, /manager review alert so unresolved and conflicting ownership is\s*\n--\s*surfaced rather than silently dropped/)
+})
+
+test('#176 does not recreate task notifications from the pre-ownership raw baseline', () => {
+  const fn = completedAuthoritySql.slice(completedAuthoritySql.indexOf('function public.generate_due_assistant_notifications'))
+  const approachingDue = fn.slice(fn.indexOf("select assignment.profile_id, 'approaching_due'"))
+  assert.match(approachingDue, /from public\.planner_tasks_canonical task/)
+  assert.doesNotMatch(approachingDue, /from public\.planner_tasks task/)
+  assert.match(approachingDue, /task\.assignment_review_state = 'ok'/)
+  assert.match(approachingDue, /unnest\(coalesce\(task\.helper_names, '\{\}'::text\[\]\)\)/)
+})
+
+test('#176 preserves manager ownership review rather than replacing it', () => {
+  const fn = completedAuthoritySql.slice(completedAuthoritySql.indexOf('function public.generate_due_assistant_notifications'))
+  const digest = fn.slice(fn.indexOf("select manager.id, 'ownership_review'"))
+  assert.match(digest, /cross join public\.planner_tasks_canonical task/)
+  assert.match(digest, /task\.assignment_review_state in \('unresolved', 'conflict'\)/)
+  assert.match(digest, /manager\.role in \('admin', 'manager'\)/)
+  assert.match(digest, /subscription\.user_id = manager\.id/)
+  assert.match(digest, /'\/admin\/work\?tab=workload'/)
+  assert.match(digest, /'ownership-review:' \|\| manager\.id::text \|\| ':' \|\| v_today::text \|\| ':approaching-due'/)
+  assert.match(sql, /create or replace function public\.assistant_ownership_review_summary/)
+  assert.doesNotMatch(completedAuthoritySql, /create or replace function public\.assistant_ownership_review_summary/)
 })
 
 // ── Assistant context ───────────────────────────────────────────────────────

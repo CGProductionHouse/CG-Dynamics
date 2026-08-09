@@ -43,7 +43,7 @@ import {
   type MorningTaskEdit,
   taskStatusDisplayLabel,
 } from '../../lib/commandCentre'
-import { isActiveForToday, isActiveWorkTask } from '../../lib/taskLifecycle'
+import { isActiveForToday, isActiveWorkTask, isActuallyInProgressTask, isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
 
@@ -55,7 +55,7 @@ function focusSortOrder(task: CommandCentreTask, today: string, now: Date): numb
   const dueDate = task.due_date ? new Date(`${task.due_date}T00:00:00`) : null
   if (dueDate && dueDate < now) return 2
   if (task.due_date === today) return 3
-  if (task.status === 'in_progress') return 4
+  if (isActuallyInProgressTask(task)) return 4
   if (dueDate && dueDate.getTime() - now.getTime() <= 7 * 86400000) return 5
   if (!dueDate) return 7
   return 6
@@ -67,12 +67,12 @@ function isOverdue(task: CommandCentreTask, now: Date) {
 }
 
 function matchesWorkFilter(task: CommandCentreTask, filter: WorkFilter, today: string, now: Date) {
-  if (filter === 'done') return task.status === 'done'
+  if (filter === 'done') return isOperationallyCompletedStatus(task)
   if (!isActiveForToday(task)) return false
   if (filter === 'today') return task.due_date === today
   if (filter === 'overdue') return isOverdue(task, now)
   if (filter === 'client_requests') return task.priority === 'client_request' || task.bucket === 'Client Requests'
-  if (filter === 'in_progress') return task.status === 'in_progress'
+  if (filter === 'in_progress') return isActuallyInProgressTask(task)
   return true
 }
 
@@ -169,14 +169,15 @@ function buildEndOfDay(activeTasks: CommandCentreTask[], ownershipOf: (t: Comman
     'BLOCKED': [],
     'WAITING CLIENT': [],
     'MOVED TO TOMORROW': [],
+    'OTHER ACTIVE': [],
   }
   for (const t of activeTasks) {
-    if (t.status === 'done') groups['DONE'].push(t)
-    else if (t.status === 'in_progress') groups['STILL BUSY / IN PROGRESS'].push(t)
+    if (isOperationallyCompletedStatus(t)) groups['DONE'].push(t)
+    else if (isActuallyInProgressTask(t)) groups['STILL BUSY / IN PROGRESS'].push(t)
     else if (t.status === 'blocked') groups['BLOCKED'].push(t)
     else if (t.status === 'waiting_client') groups['WAITING CLIENT'].push(t)
     else if (t.status === 'moved_to_tomorrow') groups['MOVED TO TOMORROW'].push(t)
-    else groups['STILL BUSY / IN PROGRESS'].push(t)
+    else groups['OTHER ACTIVE'].push(t)
   }
   const lines: string[] = ['CGPH END OF DAY UPDATE', '']
   for (const [heading, items] of Object.entries(groups)) {
@@ -309,7 +310,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
   }, [allActiveTasks, bucketFilter, clientSearch, filterStaff, profile, tasks, today, now, workFilter])
 
   const doneTodayTasks = useMemo(() => {
-    let base = tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today)
+    let base = tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today)
     if (filterStaff === '__my__') {
       const myName = profile?.full_name ?? ''
       base = base.filter(t => t.assigned_to_name === myName)
@@ -359,15 +360,15 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
   const allRelevant = useMemo(() =>
     tasks
-      .filter(t => t.status !== 'done' || (t.completed_at && t.completed_at.slice(0, 10) === today))
+      .filter(t => !isOperationallyCompletedStatus(t) || (t.completed_at && t.completed_at.slice(0, 10) === today))
       .sort((a, b) => (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99)),
   [tasks, today])
 
   const stats = useMemo(() => ({
     focus: focusTasks.length,
     clientRequests: allActiveTasks.filter(t => t.priority === 'client_request').length,
-    inProgress: allActiveTasks.filter(t => t.status === 'in_progress').length,
-    doneToday: tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today).length,
+    inProgress: allActiveTasks.filter(t => isActuallyInProgressTask(t)).length,
+    doneToday: tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today).length,
     overdue: allActiveTasks.filter(t => isOverdue(t, now)).length,
     today: allActiveTasks.filter(t => isActiveForToday(t) && t.due_date === today).length,
   }), [tasks, allActiveTasks, focusTasks, today, now])
@@ -980,7 +981,7 @@ function TaskRow({ task, busyId, onStatusChange, onOpenDetails }: {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {task.status !== 'done' && (
+            {!isOperationallyCompletedStatus(task) && (
               <select
                 value={task.status}
                 onChange={e => onStatusChange(task.id, e.target.value as TaskStatus)}
@@ -996,7 +997,7 @@ function TaskRow({ task, busyId, onStatusChange, onOpenDetails }: {
                 ))}
               </select>
             )}
-            {task.status === 'done' && (
+            {isOperationallyCompletedStatus(task) && (
               <button
                 type="button"
                 onClick={() => onStatusChange(task.id, 'to_do')}
@@ -1451,7 +1452,13 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
       if (!canManage) {
         const result = await updateTaskStatus(task.id, status)
         if (result.error) { setSaveError(result.error.message); return }
-        onSaved({ ...task, status, updated_at: new Date().toISOString(), completed_at: status === 'done' ? new Date().toISOString() : null })
+        const saved = result.data as { updated_at?: string; completed_at?: string | null } | null
+        onSaved({
+          ...task,
+          status,
+          updated_at: saved?.updated_at ?? task.updated_at,
+          completed_at: saved && 'completed_at' in saved ? saved.completed_at ?? null : task.completed_at,
+        })
         setSaveMsg('Status saved')
         return
       }

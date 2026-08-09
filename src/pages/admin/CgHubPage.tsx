@@ -27,7 +27,7 @@ import { buildHubSevenDayCalendar, formatHubCalendarDay, type HubCalendarDay } f
 import { listRuns, listPipelineVideos, type ContentRun, type ContentGuideIdea } from '../../lib/contentWorkflow'
 import { isRunUpcoming } from '../../lib/contentWorkflowRules'
 import { isManagerRole } from '../../lib/roles'
-import { isActiveForToday } from '../../lib/taskLifecycle'
+import { isActiveForToday, isActuallyInProgressTask } from '../../lib/taskLifecycle'
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ function taskPriorityRank(t: CommandCentreTask, today: string): number {
   if (t.priority === 'urgent') return 1
   if (t.due_date && t.due_date < today) return 2
   if (t.due_date === today) return 3
-  if (t.status === 'in_progress') return 4
+  if (isActuallyInProgressTask(t)) return 4
   return 5
 }
 
@@ -175,7 +175,7 @@ export default function CgHubPage() {
         t.priority === 'client_request' ||
         t.priority === 'urgent' ||
         (t.due_date && t.due_date <= today) ||
-        t.status === 'in_progress'
+        isActuallyInProgressTask(t)
       )
       .sort((a, b) => taskPriorityRank(a, today) - taskPriorityRank(b, today))
   }, [activeTasks, today])
@@ -301,7 +301,7 @@ export default function CgHubPage() {
     clientRequests: clientRequests.length,
     dueToday: dueToday.length,
     overdue: overdue.length,
-    inProgress: activeTasks.filter(t => t.status === 'in_progress').length,
+    inProgress: activeTasks.filter(isActuallyInProgressTask).length,
     waitingReview: waitingReview.length,
     dueTodayDeliverables: dueTodayDeliverables.length,
     unscheduledDeliverables: unscheduledDeliverables.length,

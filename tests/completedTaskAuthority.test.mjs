@@ -5,6 +5,7 @@ import {
   isActiveAssistantDayItem,
   isActiveForToday,
   isActiveWorkTask,
+  isActuallyInProgressTask,
   isDeferredToTomorrow,
   isOperationallyCompletedStatus,
 } from '../src/lib/taskLifecycle.ts'
@@ -42,6 +43,7 @@ const assistantMigration = read('../supabase/migrations/20260806090001_assistant
 const originalAssistantMigration = read('../supabase/migrations/20260803163045_personal_daily_assistant.sql')
 const originalPushMigration = read('../supabase/migrations/20260804070651_iphone_web_push_notifications.sql')
 const effectivePushMigration = read('../supabase/migrations/20260804081500_web_push_multi_device_counts.sql')
+const ownershipMigration = read('../supabase/migrations/20260805120000_canonical_ownership_notifications.sql')
 
 // ── The one shared authority ─────────────────────────────────────────────────
 test('the lifecycle module is the single completed-status authority', () => {
@@ -115,6 +117,23 @@ test('visible surfaces resolve the label through the display helper', () => {
   assert.ok(commandCentrePage.includes('taskStatusDisplayLabel'), 'Command Centre rows show the truthful label')
 })
 
+test('actual In Progress reporting follows the source status, not the coarse projection', () => {
+  assert.equal(isActuallyInProgressTask({ status: 'in_progress', data_origin: 'command_centre_tasks' }), true)
+  assert.equal(isActuallyInProgressTask({ status: 'in_progress', data_origin: 'planner_tasks', planner_status: 'in_progress' }), true)
+  for (const plannerStatus of ['approved', 'scheduled', 'ready_internal_review', 'waiting_client', 'blocked', 'to_do']) {
+    assert.equal(isActuallyInProgressTask({ status: 'in_progress', data_origin: 'planner_tasks', planner_status: plannerStatus }), false)
+  }
+})
+
+test('all changed In Progress consumers use the shared truthful helper', () => {
+  for (const [name, src] of [['Command Centre', commandCentrePage], ['Ops Hub', opsHub], ['CG Hub', cgHub], ['My Day', myDay]]) {
+    assert.ok(src.includes('isActuallyInProgressTask'), `${name} must use the shared helper`)
+  }
+  assert.doesNotMatch(commandCentrePage, /filter === 'in_progress'\) return task\.status === 'in_progress'/)
+  assert.doesNotMatch(commandCentrePage, /inProgress: allActiveTasks\.filter\(t => t\.status === 'in_progress'\)/)
+  assert.doesNotMatch(opsHub, /myTasks\.filter\(t => t\.status === 'in_progress'\)/)
+})
+
 // ── No competing per-page status lists ───────────────────────────────────────
 test('no page may re-declare a finished/done status list', () => {
   for (const src of [cgHub, opsHub, myDay, commandCentrePage]) {
@@ -169,11 +188,12 @@ test('completion is a decision from status, never frozen by evidence', () => {
 })
 
 // ── Linked Assistant item lifecycle ──────────────────────────────────────────
-function assistantItem(state = 'open', linkedPlannerStatus = undefined) {
+function assistantItem(state = 'open', linkedPlannerStatus = undefined, linkedPlannerIsCurrent = true) {
   return {
     state,
     planner_task_id: linkedPlannerStatus === undefined ? null : 'planner-task-1',
     linked_planner_status: linkedPlannerStatus,
+    linked_planner_is_current: linkedPlannerStatus === undefined ? undefined : linkedPlannerIsCurrent,
   }
 }
 
@@ -197,6 +217,11 @@ test('linked Assistant item reopening is derived while explicit item decisions w
   assert.equal(isActiveAssistantDayItem(item), false, 'explicit dismissal survives Planner reopen')
 })
 
+test('archived and superseded linked rows cannot surface as current Assistant work', () => {
+  assert.equal(isActiveAssistantDayItem(assistantItem('open', 'to_do', false)), false)
+  assert.equal(isActiveAssistantDayItem(assistantItem('open', 'in_progress', false)), false)
+})
+
 test('unlinked open Assistant items remain active', () => {
   assert.equal(isActiveAssistantDayItem(assistantItem('open')), true)
   assert.equal(isActiveAssistantDayItem(assistantItem('completed')), false)
@@ -217,7 +242,7 @@ test('both Assistant notification functions guard every assistant_day_items path
   const refresh = sqlFunction(assistantMigration, 'refresh_my_assistant_day_notifications')
   const push = sqlFunction(assistantMigration, 'generate_due_assistant_notifications')
   for (const [name, fn] of [['refresh', refresh], ['push', push]]) {
-    const guards = [...fn.matchAll(/not exists \(\s*select 1 from public\.planner_tasks linked_task\s*where linked_task\.id = item\.planner_task_id\s*and linked_task\.status in \('done', 'completed'\)\s*\)/g)]
+    const guards = [...fn.matchAll(/item\.planner_task_id is null or exists \(\s*select 1 from public\.planner_tasks_canonical linked_task\s*where linked_task\.id = item\.planner_task_id\s*and linked_task\.status not in \('done', 'completed'\)\s*\)/g)]
     assert.equal(guards.length, 4, `${name} must guard morning, midday, end-of-day and direct reminders`)
     for (const guard of guards) {
       assert.doesNotMatch(guard[0], /approved|scheduled|ready_internal_review|waiting_client/)
@@ -225,15 +250,29 @@ test('both Assistant notification functions guard every assistant_day_items path
   }
 })
 
-test('forward SQL changes only the linked-completed guard in the effective functions', () => {
+test('forward SQL changes only linked eligibility in personal refresh and push open-loop paths', () => {
   assert.equal(
     normalizeFunctionWithoutLinkedGuard(sqlFunction(assistantMigration, 'refresh_my_assistant_day_notifications')),
     normalizeSql(sqlFunction(originalAssistantMigration, 'refresh_my_assistant_day_notifications')),
   )
+  const currentPush = sqlFunction(assistantMigration, 'generate_due_assistant_notifications')
+  const oldPush = sqlFunction(effectivePushMigration, 'generate_due_assistant_notifications')
   assert.equal(
-    normalizeFunctionWithoutLinkedGuard(sqlFunction(assistantMigration, 'generate_due_assistant_notifications')),
-    normalizeSql(sqlFunction(effectivePushMigration, 'generate_due_assistant_notifications')),
+    normalizeFunctionWithoutLinkedGuard(currentPush.slice(0, currentPush.indexOf("select assignment.profile_id, 'approaching_due'"))),
+    normalizeSql(oldPush.slice(0, oldPush.indexOf("select assignment.profile_id, 'approaching_due'"))),
   )
+})
+
+test('person-specific task notifications retain every PR #172 ownership gate', () => {
+  const push = sqlFunction(assistantMigration, 'generate_due_assistant_notifications')
+  const block = push.slice(push.indexOf("select assignment.profile_id, 'approaching_due'"))
+  assert.match(block, /from public\.planner_tasks_canonical task/)
+  assert.doesNotMatch(block, /from public\.planner_tasks task/)
+  assert.match(block, /task\.assignment_review_state = 'ok'/)
+  assert.match(block, /unnest\(coalesce\(task\.helper_names, '\{\}'::text\[\]\)\)/)
+  assert.match(block, /lower\(btrim\(helper\.name\)\) = lower\(btrim\(profile\.full_name\)\)/)
+  assert.match(ownershipMigration, /assistant_ownership_review_summary/)
+  assert.doesNotMatch(assistantMigration, /create or replace function public\.assistant_ownership_review_summary/)
 })
 
 test('forward SQL preserves security, grants, and the original iphone notification contract', () => {
@@ -269,11 +308,30 @@ test('Assistant linked-completion SQL is derived and non-destructive', () => {
   assert.match(assistantMigration, /item\.state = 'open'/)
 })
 
-test('linked Planner enrichment reads the exact FK row and propagates query errors', () => {
-  assert.match(dailyAssistant, /\.from\('planner_tasks'\)\s*\.select\('id,status'\)/)
-  assert.doesNotMatch(dailyAssistant, /\.from\('planner_tasks_canonical'\)/)
+test('linked Planner enrichment uses canonical authority and suppresses retired rows', () => {
+  assert.match(dailyAssistant, /\.from\('planner_tasks_canonical'\)\s*\.select\('id,status'\)/)
+  assert.doesNotMatch(dailyAssistant, /\.from\('planner_tasks'\)/)
+  assert.match(dailyAssistant, /linked_planner_is_current: statusById\.has\(item\.planner_task_id\)/)
   assert.match(dailyAssistant, /if \(result\.error\) return \{ data: null, error: result\.error \}/)
   assert.match(dailyAssistant, /if \(enriched\.error\) return \{ \.\.\.result, data: null, error: enriched\.error \}/)
+})
+
+test('moved-to-tomorrow cannot render an overdue TaskCard state', () => {
+  assert.match(taskCard, /task\.due_date < businessDateKey\(new Date\(\)\) && isActiveForToday\(task\)/)
+  assert.doesNotMatch(taskCard, /isOverdue[^\n]*!isOperationallyCompletedStatus/)
+})
+
+test('moved-to-tomorrow cannot enter Planner overdue sorting or filters', () => {
+  const fn = plannerPage.slice(plannerPage.indexOf('function isOverdue'), plannerPage.indexOf('function taskSortRank'))
+  assert.match(fn, /isActiveForToday\(task\)/)
+  assert.doesNotMatch(fn, /!isPlannerHistoryTask\(task\)/)
+})
+
+test('Done filters use completion authority and done-today still requires evidence', () => {
+  assert.match(commandCentrePage, /filter === 'done'\) return isOperationallyCompletedStatus\(task\)/)
+  assert.doesNotMatch(commandCentrePage, /filter === 'done'\) return task\.status === 'done'/)
+  assert.match(commandCentrePage, /isOperationallyCompletedStatus\(t\) && t\.completed_at\?\.slice\(0, 10\) === today/)
+  assert.doesNotMatch(commandCentrePage, /completed_at: status === 'done' \? new Date/)
 })
 
 // ── Scope discipline ─────────────────────────────────────────────────────────
@@ -295,7 +353,7 @@ function normalizeSql(src) {
 
 function normalizeFunctionWithoutLinkedGuard(src) {
   return normalizeSql(src.replace(
-    /\s+and not exists \(\s*select 1 from public\.planner_tasks linked_task\s*where linked_task\.id = item\.planner_task_id\s*and linked_task\.status in \('done', 'completed'\)\s*\)/g,
+    /\s+and \(\s*item\.planner_task_id is null or exists \(\s*select 1 from public\.planner_tasks_canonical linked_task\s*where linked_task\.id = item\.planner_task_id\s*and linked_task\.status not in \('done', 'completed'\)\s*\)\s*\)/g,
     '',
   ))
 }
