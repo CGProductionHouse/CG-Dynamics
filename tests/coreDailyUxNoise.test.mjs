@@ -47,13 +47,28 @@ test('Daily Tasks keeps actions and ownership truth without a duplicate metric b
   assert.match(commandCentre, /assignment conflict/)
 })
 
-test('Calendar removes ordinary framing but preserves diagnostics and Outlook review evidence', () => {
+test('Calendar removes ordinary framing but preserves status and Outlook review evidence', () => {
   assert.doesNotMatch(calendar, /Meetings, shoots, content runs and internal events/)
   assert.doesNotMatch(calendar, /Tap a date to view its events/)
   assert.match(calendar, /CalendarDiagnostics/)
   assert.match(calendar, /Review possible duplicates/)
   assert.match(calendar, /Use Outlook record/)
   assert.match(calendar, /supersessionMigrationNeeded/)
+})
+
+test('Calendar status never renders raw backend errors or implementation diagnostics', () => {
+  for (const rawError of ['eventError', 'taskError', 'recurrenceError']) {
+    assert.doesNotMatch(calendar, new RegExp(`<p[^>]*>[^<]*\\{${rawError}\\}<\\/p>`))
+  }
+  for (const oldCopy of ['query error', 'materialisation error', 'Calendar diagnostics', 'Empty layer this month']) {
+    assert.ok(!calendar.includes(oldCopy), `${oldCopy} must not return to rendered Calendar copy`)
+  }
+  assert.match(calendar, /Calendar status/)
+  assert.match(calendar, /Calendar events could not be loaded\./)
+  assert.match(calendar, /Dated tasks could not be loaded\./)
+  assert.match(calendar, /Recurring tasks could not be refreshed\./)
+  assert.match(calendar, /No calendar events this month\./)
+  assert.match(calendar, /No dated tasks this month\./)
 })
 
 test('ordinary rendered copy hides implementation setup mechanisms', () => {

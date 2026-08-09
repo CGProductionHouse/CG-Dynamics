@@ -576,22 +576,12 @@ function CalendarDiagnostics({
   recurrenceError: string | null
   recurrenceMigrationNeeded: boolean
 }) {
-  const missingLayers = [
-    eventCount === 0 ? 'events' : null,
-    taskCount === 0 ? 'Planner dated tasks' : null,
-  ].filter(Boolean).join(', ')
-
   return (
     <div className="mb-5 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/45">Calendar diagnostics</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/45">Calendar status</p>
           <p className="mt-1 text-sm font-semibold text-white">{formatMonthHeading(month)}</p>
-          <p className="mt-1 text-xs text-brand-primary/60">
-            {eventCount + taskCount === 0
-              ? 'No operational calendar items were returned for this selected month.'
-              : 'One or more calendar layers need attention.'}
-          </p>
         </div>
         <div className="grid grid-cols-2 gap-2 text-center sm:min-w-[240px]">
           <div className="rounded-xl border border-sky-400/15 bg-sky-400/[0.05] px-3 py-2">
@@ -605,13 +595,13 @@ function CalendarDiagnostics({
         </div>
       </div>
       <div className="mt-3 space-y-1 text-xs text-brand-primary/65">
-        {missingLayers && <p>Empty layer this month: {missingLayers}.</p>}
         {tableMissing && <p className="text-amber-200">CG Calendar setup is required before events can be added.</p>}
-        {!tableMissing && eventCount === 0 && <p>No calendar events are available for this month.</p>}
+        {!tableMissing && !eventError && eventCount === 0 && <p>No calendar events this month.</p>}
+        {!taskError && taskCount === 0 && <p>No dated tasks this month.</p>}
         {recurrenceMigrationNeeded && <p>Recurring tasks are not available yet. Existing dated tasks remain visible.</p>}
-        {eventError && <p className="text-red-300">Events query error: {eventError}</p>}
-        {taskError && <p className="text-red-300">Planner task query error: {taskError}</p>}
-        {recurrenceError && <p className="text-red-300">Recurring task materialisation error: {recurrenceError}</p>}
+        {eventError && <p className="text-red-300">Calendar events could not be loaded.</p>}
+        {taskError && <p className="text-red-300">Dated tasks could not be loaded.</p>}
+        {recurrenceError && <p className="text-red-300">Recurring tasks could not be refreshed.</p>}
       </div>
     </div>
   )
