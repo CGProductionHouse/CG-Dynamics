@@ -9,6 +9,13 @@ const migration = readFileSync(
   ),
   'utf8',
 )
+const workloadAuthorityMigration = readFileSync(
+  new URL(
+    '../supabase/migrations/20260809090000_planner_workload_completed_authority.sql',
+    import.meta.url,
+  ),
+  'utf8',
+)
 
 test('adds active/avatar profile fields and canonical ordered assignment schema', () => {
   assert.match(migration, /add column if not exists is_active boolean not null default true/)
@@ -334,16 +341,16 @@ test('activity writes are server-owned and staff reads are scoped to visible pla
 })
 
 test('workload summary and details share scope and inactive-assignee semantics', () => {
-  const summaryStart = migration.indexOf('create or replace function public.list_planner_workload_summary')
-  const detailsStart = migration.indexOf('create or replace function public.list_planner_workload_tasks')
-  const grantsStart = migration.indexOf('revoke all on function public.list_planner_assignment_directory')
-  const summary = migration.slice(summaryStart, detailsStart)
-  const details = migration.slice(detailsStart, grantsStart)
+  const summaryStart = workloadAuthorityMigration.indexOf('create or replace function public.list_planner_workload_summary')
+  const detailsStart = workloadAuthorityMigration.indexOf('create or replace function public.list_planner_workload_tasks')
+  const grantsStart = workloadAuthorityMigration.indexOf('revoke all on function public.list_planner_workload_summary')
+  const summary = workloadAuthorityMigration.slice(summaryStart, detailsStart)
+  const details = workloadAuthorityMigration.slice(detailsStart, grantsStart)
   for (const rpc of [summary, details]) {
     assert.match(rpc, /if not public\.is_active_planner_manager\(\)/)
-    assert.match(rpc, /task\.archived_at is null/)
+    assert.match(rpc, /from public\.planner_tasks_canonical task/)
     assert.match(rpc, /task\.recurrence_rule is null/)
-    assert.match(rpc, /task\.status not in \('approved', 'scheduled', 'done'\)/)
+    assert.match(rpc, /task\.status not in \('done', 'completed'\)/)
     assert.match(rpc, /join public\.planner_boards board on board\.id = task\.board_id/)
     assert.match(rpc, /board\.archived_at is null/)
     assert.match(rpc, /board\.board_type <> 'client_schedule'/)
@@ -358,8 +365,8 @@ test('workload summary and details share scope and inactive-assignee semantics',
   assert.match(details, /board_name text[\s\S]*bucket_name text[\s\S]*assignee_profile_ids uuid\[\][\s\S]*is_unassigned boolean/)
   assert.match(details, /array_agg\(assignment\.profile_id order by assignment\.position\)/)
   assert.match(details, /cardinality\(active_assignees\.profile_ids\) = 0/)
-  assert.match(migration, /revoke all on function public\.list_planner_workload_tasks\(\) from public, anon, authenticated;/)
-  assert.match(migration, /grant execute on function public\.list_planner_workload_tasks\(\) to authenticated;/)
+  assert.match(workloadAuthorityMigration, /revoke all on function public\.list_planner_workload_tasks\(\) from public, anon, authenticated;/)
+  assert.match(workloadAuthorityMigration, /grant execute on function public\.list_planner_workload_tasks\(\) to authenticated;/)
 })
 
 test('functions have fixed paths, privileged entry points are definers, and Microsoft stays read-only', () => {
