@@ -23,6 +23,10 @@ export const primaryNavItems: NavItem[] = [
   { to: '/admin/client-schedule', label: 'Client Schedule', shortLabel: 'Schedule', marker: 'S', activePaths: ['/admin/client-schedule', '/admin/monthly-planner', '/admin/master-schedule'] },
   { to: '/admin/content', label: 'Content', shortLabel: 'Content', marker: 'CT', activePaths: ['/admin/content', '/admin/content-workflow', '/admin/full-content-guide'] },
   { to: '/admin/clients', label: 'Clients', shortLabel: 'Clients', marker: 'CL', activePaths: ['/admin/clients', '/admin/client-performance', '/admin/client-dashboard', '/admin/client-calendar'] },
+  // Marketing/Knowledge is a daily destination all staff can use: they search
+  // approved shared knowledge. Source administration, review and registration
+  // sections are admin-scoped inside the page and by RLS.
+  { to: '/admin/marketing', label: 'Marketing', shortLabel: 'Marketing', marker: 'MK', activePaths: ['/admin/marketing', '/admin/marketing-library', '/admin/marketing-ai', '/admin/skill-card-review'] },
 ]
 
 // Client Performance zone — the client-intelligence surfaces, kept prominent and
@@ -62,7 +66,6 @@ export function isSharedNavZonePath(pathname: string): boolean {
 // and legacy deep links continue to resolve. Ordinary staff see none of these.
 export const adminNavItems: NavItem[] = [
   { to: '/admin/integrations', label: 'Integrations', shortLabel: 'Integrations', marker: 'IN', access: 'manager', activePaths: ['/admin/integrations', '/admin/microsoft-import', '/admin/planner-import', '/admin/import', '/admin/import-csv', '/admin/imports', '/admin/manual-metrics'] },
-  { to: '/admin/marketing', label: 'Marketing', shortLabel: 'Marketing', marker: 'MK', access: 'manager', activePaths: ['/admin/marketing', '/admin/marketing-library', '/admin/marketing-ai', '/admin/skill-card-review'] },
   { to: '/admin/users', label: 'Users', shortLabel: 'Users', marker: 'U', access: 'admin', activePaths: ['/admin/users', '/admin/team', '/admin/invites'] },
   { to: '/admin/system', label: 'System', shortLabel: 'System', marker: 'SY', access: 'admin', activePaths: ['/admin/system', '/admin/import-health', '/admin/ai-health'] },
 ]

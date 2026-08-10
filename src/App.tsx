@@ -112,6 +112,10 @@ export default function App() {
               <Route path="/admin/published" element={<PublishedPreview />} />
               <Route path="/admin/cg-calendar" element={<CompanyCalendarPage />} />
               <Route path="/admin/company-calendar" element={<Navigate to="/admin/cg-calendar" replace />} />
+              {/* Marketing/Knowledge workspace — staff may search approved shared
+                  knowledge; sources/review/registration sections are admin-scoped
+                  in-page and by RLS. */}
+              <Route path="/admin/marketing" element={<MarketingWorkspacePage />} />
 
               {/* Consolidated Import workspace (CSV import is admin-gated inside
                   the hub; manual summaries + history are staff read-only). */}
@@ -122,9 +126,6 @@ export default function App() {
 
               {/* Manager/admin operational write routes nested inside AdminLayout */}
               <Route element={<RequireManager />}>
-                {/* Marketing/Knowledge parent — groups Library, Marketing AI and
-                    Skill Card Review. Admin-only children keep their own guards. */}
-                <Route path="/admin/marketing" element={<MarketingWorkspacePage />} />
                 <Route path="/admin/integrations" element={<IntegrationsPage />} />
                 <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
                 <Route path="/admin/integrations/google-ads" element={<GoogleAdsIntegrationPage />} />
