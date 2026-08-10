@@ -133,6 +133,12 @@ export default function App() {
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
                 <Route path="/admin/planner-import" element={<PlannerImportPage />} />
+                {/* Marketing AI is a manager-usable workspace: managers and
+                    admins may run specialists against approved knowledge. Source
+                    administration, review and card governance stay admin-only
+                    (their own routes below and the admin-scoped workspace
+                    sections). */}
+                <Route path="/admin/marketing-ai" element={<MarketingAiDepartmentPage />} />
               </Route>
 
               {/* Admin-only security/setup routes nested inside AdminLayout */}
@@ -147,7 +153,6 @@ export default function App() {
                 <Route path="/admin/ai-health" element={<AiUsageHealthPage />} />
                 <Route path="/admin/microsoft-import" element={<MicrosoftImportPage />} />
                 <Route path="/admin/marketing-library" element={<MarketingLibraryPage />} />
-                <Route path="/admin/marketing-ai" element={<MarketingAiDepartmentPage />} />
                 <Route path="/admin/skill-card-review" element={<SkillCardReviewPage />} />
               </Route>
             </Route>

@@ -3,17 +3,20 @@ import { after, before, test } from 'node:test'
 import { readFileSync } from 'node:fs'
 import { createServer } from 'vite'
 
-// Marketing/Knowledge workspace (#183/#184). Pure filtering + registration
-// helpers load through Vite SSR (type-only imports, no Supabase at runtime).
-// Workspace/permission/AI contracts are checked by parsing source. No database
-// is touched and nothing is written.
+// Marketing/Knowledge workspace (#183/#184). Pure filtering, cited-source
+// extraction, registration and AI-grounding helpers load through Vite SSR
+// (type-only imports, no Supabase at runtime). Workspace/permission contracts
+// are checked by parsing source. No database is touched and nothing is written.
 
-let server, filters, registry
+let server, filters, registry, extraction, generated, skilled
 
 before(async () => {
   server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   filters = await server.ssrLoadModule('/src/lib/marketing-library/knowledgeFilters.ts')
   registry = await server.ssrLoadModule('/src/lib/marketing-library/sourceRegistry.ts')
+  extraction = await server.ssrLoadModule('/src/lib/marketing-library/citedSourceExtraction.ts')
+  generated = await server.ssrLoadModule('/src/lib/marketing-library/citedSources.generated.ts')
+  skilled = await server.ssrLoadModule('/supabase/functions/cg-assistant-chat/skilledAgents.ts')
 })
 after(async () => { await server?.close() })
 
@@ -74,30 +77,52 @@ test('source provenance filters', () => {
   assert.deepEqual(filters.filterMarketingSources(rows, { sourceType: 'research_paper' }).map(s => s.id), ['b'])
 })
 
-// ── #184 registration manifest + dedupe/idempotency ──────────────────────────
+// ── #184 cited-source extraction: distinct sources, not one row per file ──────
 
-test('manifest is 29 unique repo-identified reference-only candidates', () => {
-  const m = registry.REPO_SOURCE_MANIFEST
-  assert.equal(m.length, 29)
-  const ids = new Set(m.map(c => c.sourceIdentifier))
-  assert.equal(ids.size, 29, 'identifiers are unique')
-  for (const c of m) {
-    assert.match(c.sourceIdentifier, /^repo:docs\/ai-workforce\//)
+test('the committed cited-source manifest matches a fresh extraction of the packs (drift guard)', () => {
+  const files = generated.PACK_FILES.map(path => ({ path, content: readFileSync(new URL(`../${path}`, import.meta.url), 'utf8') }))
+  const cited = extraction.extractCitedSources(files)
+  const containers = extraction.buildContainerReferences(files, cited)
+  assert.deepEqual(cited, generated.CITED_SOURCES, 'run `node scripts/generate-cited-sources.mjs` to refresh')
+  assert.deepEqual(containers, generated.CONTAINER_REFERENCES, 'run `node scripts/generate-cited-sources.mjs` to refresh')
+})
+
+test('registration is the distinct CITED sources inside the packs, not one flattened row per file', () => {
+  const cited = generated.CITED_SOURCES
+  // Far more distinct cited sources than there are pack files — this is the fix.
+  assert.ok(cited.length > generated.PACK_FILES.length * 3, 'many cited sources per pack')
+  // Identifiers are unique and stable (canonical URL or repo: path, never a db id).
+  const ids = new Set(cited.map(c => c.sourceIdentifier))
+  assert.equal(ids.size, cited.length, 'cited-source identifiers are unique')
+  for (const c of cited) {
+    assert.ok(/^https?:\/\//.test(c.sourceIdentifier) || /^repo:docs\/ai-workforce\//.test(c.sourceIdentifier))
     assert.equal(c.trustTier, 'needs_review', 'nothing auto-trusted')
-    assert.equal(c.ingestionEligibility, 'metadata_reference', 'reference only, no full text')
+    assert.ok(c.title && c.title.trim().length > 0, 'every cited source has a title')
+    assert.ok(c.citedIn.length >= 1, 'every cited source records its container pack(s)')
   }
+  // The overwhelming majority carry explicit per-source provenance (a canonical
+  // URL, an attribution or a rights note); the rest are named internal sources.
+  const withProvenance = cited.filter(c => c.canonicalUrl || c.sourceAttribution || c.rightsNote || c.family === 'book')
+  assert.ok(withProvenance.length >= cited.length * 0.9, 'per-source provenance is captured broadly')
+  assert.ok(cited.filter(c => c.canonicalUrl).length > 100, 'most cited sources carry a canonical URL')
+  // Real cited-source families are represented (campaign cases, books, official docs, research).
+  const families = new Set(cited.map(c => c.family))
+  for (const f of ['campaign_case', 'book', 'official_documentation', 'research_paper']) assert.ok(families.has(f), `has ${f}`)
 })
 
 test('classifyRegistrations dedupes by identifier and is idempotent', () => {
-  const m = registry.REPO_SOURCE_MANIFEST
+  const m = registry.REGISTRATION_MANIFEST
+  assert.ok(m.length >= generated.CITED_SOURCES.length + generated.CONTAINER_REFERENCES.length - 0)
   // Against an empty library: everything is eligible.
   const first = registry.classifyRegistrations(m, [])
-  assert.equal(first.counts.unregistered, 29)
+  assert.equal(first.counts.unregistered, m.length)
   assert.equal(first.counts.registered, 0)
+  assert.equal(first.counts.citedSources, generated.CITED_SOURCES.length)
+  assert.equal(first.counts.containers, generated.CONTAINER_REFERENCES.length)
   // Simulate having registered them: re-running registers nothing new (idempotent).
   const existing = m.map(c => ({ source_identifier: c.sourceIdentifier }))
   const second = registry.classifyRegistrations(m, existing)
-  assert.equal(second.counts.registered, 29)
+  assert.equal(second.counts.registered, m.length)
   assert.equal(second.counts.unregistered, 0)
   // A duplicated identifier in the manifest is caught, never double-counted.
   const withDup = registry.classifyRegistrations([m[0], m[0]], [])
@@ -105,17 +130,63 @@ test('classifyRegistrations dedupes by identifier and is idempotent', () => {
   assert.equal(withDup.counts.unregistered, 1)
 })
 
-test('the phase-28a seed migration is idempotent and mirrors the manifest', () => {
-  // Idempotency machinery.
+test('the phase-28a seed is valid against the schema, idempotent, and mirrors the manifest', () => {
+  // Idempotency machinery: partial unique index + an ON CONFLICT arbiter whose
+  // predicate matches the index WHERE (so PostgreSQL can infer it).
   assert.match(SEED, /create unique index if not exists uniq_marketing_library_sources_source_identifier/)
-  assert.match(SEED, /on conflict \(source_identifier\) do nothing/)
-  // Nothing auto-trusted; reference-only.
+  assert.match(SEED, /where source_identifier is not null/)
+  assert.match(SEED, /on conflict \(source_identifier\) where source_identifier is not null do nothing/)
+  // Rights: the allowed value, never the rejected 'internal_repository'.
+  assert.match(SEED, /'bibliographic_only'/)
+  assert.ok(!SEED.includes('internal_repository'), "must not use the invalid rights_status 'internal_repository'")
+  // Reference-only + nothing auto-trusted.
+  assert.match(SEED, /false, 'unknown', 'catalogued'/) // full_text_storage=false
   assert.match(SEED, /'needs_review'/)
-  assert.match(SEED, /false/) // full_text_storage
-  // Every manifest identifier is present in the seed (kept in sync).
-  for (const c of registry.REPO_SOURCE_MANIFEST) {
-    assert.ok(SEED.includes(`'${c.sourceIdentifier}'`), `seed must register ${c.sourceIdentifier}`)
+  // canonical_url dedupe guard so a live source sharing a URL is not duplicated.
+  assert.match(SEED, /or \(v\.canonical_url is not null and s\.canonical_url = v\.canonical_url\)/)
+  // Every manifest identifier is present in the seed (kept in sync by the generator).
+  for (const c of registry.REGISTRATION_MANIFEST) {
+    assert.ok(SEED.includes(`'${c.sourceIdentifier.replace(/'/g, "''")}'`), `seed must register ${c.sourceIdentifier}`)
   }
+})
+
+// ── Marketing AI grounding: approved-only AND not stale/expired (Blocker 4) ───
+
+test('production grounding excludes an active card whose review has expired', () => {
+  const agent = skilled.AGENT_CONTRACTS.copywriting_agent
+  const base = {
+    id: 'x', status: 'active', knowledge_layer: 'universal', client_specific: false, active_client_id: null,
+    source_type: 'book', source_id: 's1', title: 'Hook', principle: 'Open strong', summary: 's',
+    source_reference: null, relevant_agents: ['copywriting_agent'],
+  }
+  const current = { ...base, id: 'current', review_expires_at: '2027-01-01' }
+  const expired = { ...base, id: 'expired', review_expires_at: '2020-01-01' }
+  const noExpiry = { ...base, id: 'no-expiry', review_expires_at: null }
+  const now = '2026-08-10T00:00:00.000Z'
+
+  // Production, with a clock: the expired active card must NOT ground an answer.
+  const prod = skilled.buildPlan([current, expired, noExpiry], { agent, activeClientId: null, mode: 'production', now })
+  const prodIds = prod.cards.map(c => c.id)
+  assert.ok(prodIds.includes('current'), 'a current active card still grounds')
+  assert.ok(prodIds.includes('no-expiry'), 'an active card with no expiry still grounds')
+  assert.ok(!prodIds.includes('expired'), 'an expired active card is excluded from production grounding')
+
+  // The gate itself is explicit about the expired card.
+  assert.equal(skilled.isCardRetrievable(expired, { agent, activeClientId: null, mode: 'production', now }), false)
+  assert.equal(skilled.isCardRetrievable(current, { agent, activeClientId: null, mode: 'production', now }), true)
+
+  // Admin research mode is a preview surface — expiry does not exclude there.
+  assert.equal(skilled.isCardRetrievable(expired, { agent, activeClientId: null, mode: 'admin_research', now }), true)
+
+  // Honest refusal is preserved when everything is stale.
+  const allStale = skilled.buildPlan([expired], { agent, activeClientId: null, mode: 'production', now })
+  assert.equal(allStale.insufficient, true)
+})
+
+test('the marketing-workflow retrieval passes the clock and expiry column into the gate', () => {
+  const wf = read('../supabase/functions/marketing-workflow/index.ts')
+  assert.match(wf, /review_expires_at/) // selected from skill_cards
+  assert.match(wf, /mode: 'production', now/) // buildPlan receives the current instant
 })
 
 // ── Workspace consolidation + permissions ────────────────────────────────────
@@ -126,11 +197,11 @@ test('the workspace consumes the canonical data layer, not a parallel one', () =
   assert.match(PAGE, /listMarketingLibrarySources/)
 })
 
-test('staff can enter Marketing; source/review/registration are admin-scoped', () => {
-  // Library section is available to all; admin-only sections gate on isAdmin.
+test('staff can enter Marketing; source/review/registration are admin-scoped; AI is manager-scoped', () => {
   assert.match(PAGE, /section === 'sources' && isAdmin/)
   assert.match(PAGE, /section === 'review' && isAdmin/)
   assert.match(PAGE, /section === 'registration' && isAdmin/)
+  assert.match(PAGE, /section === 'ai' && isManager/)
   // Marketing is a staff nav destination (no access gate) — see nav.
   const primary = NAV.slice(NAV.indexOf('export const primaryNavItems'), NAV.indexOf('export const performanceNavItems'))
   assert.match(primary, /to: '\/admin\/marketing', label: 'Marketing'/)
@@ -138,20 +209,27 @@ test('staff can enter Marketing; source/review/registration are admin-scoped', (
 })
 
 test('client users cannot reach Marketing (staff-guarded route)', () => {
-  // The route lives inside the RequireStaff + AdminLayout block; clients are denied.
   assert.match(APP, /<Route element=\{<RequireStaff \/>\}>/)
   assert.match(APP, /path="\/admin\/marketing" element=\{<MarketingWorkspacePage \/>\}/)
+})
+
+test('Marketing AI route and UI agree on manager access (Blocker 3)', () => {
+  // The route sits inside the RequireManager block, not RequireAdmin.
+  const managerIdx = APP.indexOf('<Route element={<RequireManager />}>')
+  const adminIdx = APP.indexOf('<Route element={<RequireAdmin />}>')
+  const aiIdx = APP.indexOf('path="/admin/marketing-ai"')
+  assert.ok(aiIdx > managerIdx && aiIdx < adminIdx, 'marketing-ai is in the RequireManager block, before RequireAdmin')
+  // The page itself gates manager-only capabilities on the manager role.
+  const aiPage = read('../src/pages/admin/MarketingAiDepartmentPage.tsx')
+  assert.match(aiPage, /isManagerRole/)
 })
 
 // ── Marketing AI approved-only grounding (contract) ──────────────────────────
 
 test('Marketing AI grounding contract is preserved (approved-only, no auto-promote)', () => {
-  // The data layer still carries evidence + insufficient-evidence signals.
   assert.match(WORKFLOW, /insufficientEvidence\?: boolean/)
   assert.match(WORKFLOW, /evidence_card_ids: string\[\]/)
-  // Human decisions gate approval; AI output is a draft/version, never auto-approved.
   assert.match(WORKFLOW, /export async function recordMarketingDecision/)
-  // The workspace states the approved-only, review-first behaviour.
   assert.match(PAGE, /approved/)
   assert.match(PAGE, /never auto-approved/)
 })

@@ -31,7 +31,7 @@ import {
   type SkillCardFilters,
   type SourceFilters,
 } from '../../lib/marketing-library/knowledgeFilters'
-import { REPO_SOURCE_MANIFEST, classifyRegistrations } from '../../lib/marketing-library/sourceRegistry'
+import { REGISTRATION_MANIFEST, classifyRegistrations } from '../../lib/marketing-library/sourceRegistry'
 import type { IndustryTag, KnowledgeLayer, SkillCardStatus, SourceType } from '../../types/skillCards'
 
 // ── Marketing / Knowledge workspace (#183/#184) ──────────────────────────────
@@ -246,37 +246,56 @@ function ReviewSection() {
 
 // ── #184 registration inventory (admin) ──────────────────────────────────────
 
+const REGISTRATION_FAMILY_LABELS: Record<string, string> = {
+  campaign_case: 'Campaign case', book: 'Book', research_paper: 'Research paper',
+  official_documentation: 'Official docs', professional_source: 'Professional source', container: 'Pack container',
+}
+
 function RegistrationSection() {
   const { sources, loading, error, migrationNeeded } = useSources()
-  const classification = useMemo(() => classifyRegistrations(REPO_SOURCE_MANIFEST, sources), [sources])
+  const classification = useMemo(() => classifyRegistrations(REGISTRATION_MANIFEST, sources), [sources])
+  const [showContainers, setShowContainers] = useState(false)
+  const unregistered = useMemo(
+    () => classification.unregistered.filter(c => showContainers || c.kind === 'cited_source'),
+    [classification, showContainers],
+  )
   return (
     <div className="space-y-3">
-      <p className="text-xs text-white/50">Repository research inventory (#184). The reviewed idempotent migration <code className="rounded bg-black/40 px-1 text-[11px] text-amber-100">supabase/phase-28a-marketing-library-repo-source-registration.sql</code> registers these as reference-only sources (needs-review, no auto-approval). Not yet applied.</p>
+      <p className="text-xs text-white/50">
+        Distinct <span className="font-bold text-white/70">cited sources</span> extracted from the reusable research packs (#184) — campaign cases, books, official platform docs and research, deduped by canonical URL. The reviewed idempotent migration <code className="rounded bg-black/40 px-1 text-[11px] text-amber-100">supabase/phase-28a-marketing-library-repo-source-registration.sql</code> registers them as reference-only (needs-review, <span className="font-bold text-white/70">bibliographic_only</span> rights, no full text, no auto-approval). Not yet applied.
+      </p>
       {migrationNeeded ? <p className="rounded-lg border border-amber-300/25 bg-amber-300/[0.07] px-3 py-2 text-sm text-amber-100">The Marketing Library tables are not in this database yet.</p>
-        : loading ? <LoadingState message="Classifying repository sources…" />
+        : loading ? <LoadingState message="Classifying cited sources…" />
         : error ? <EmptyState title="Could not classify sources" message={error} />
         : (
         <>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {([['In manifest', classification.counts.manifest], ['Already registered', classification.counts.registered], ['Eligible to register', classification.counts.unregistered]] as const).map(([label, n]) => (
+          <div className="grid gap-3 sm:grid-cols-4">
+            {([
+              ['Cited sources', classification.counts.citedSources],
+              ['Pack containers', classification.counts.containers],
+              ['Already registered', classification.counts.registered],
+              ['Eligible to register', classification.counts.unregistered],
+            ] as const).map(([label, n]) => (
               <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                 <p className="text-sm font-black uppercase tracking-[0.12em] text-white/45">{label}</p>
                 <p className="mt-1 text-2xl font-black text-white">{n}</p>
               </div>
             ))}
           </div>
+          <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={showContainers} onChange={e => setShowContainers(e.target.checked)} />Include pack container references</label>
           <ul className="grid gap-2 lg:grid-cols-2">
-            {classification.unregistered.map(c => (
+            {unregistered.map(c => (
               <li key={c.sourceIdentifier} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="truncate text-sm font-bold text-white">{c.title}</p>
-                  <Pill tone="amber">Eligible</Pill>
+                  <p className="truncate text-sm font-bold text-white">{c.title}{c.author ? <span className="font-normal text-white/50"> — {c.author}</span> : null}</p>
+                  <Pill tone={c.kind === 'container' ? 'neutral' : 'amber'}>{c.kind === 'container' ? 'Container' : 'Eligible'}</Pill>
                 </div>
                 <p className="mt-0.5 truncate font-mono text-[11px] text-white/45">{c.sourceIdentifier}</p>
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  <Pill>{c.family === 'industry_pack' ? 'Industry pack' : 'Source pack'}</Pill>
-                  {c.industries.slice(0, 3).map(i => <span key={i} className="text-[11px] text-white/40">{INDUSTRY_LABELS[i]}</span>)}
-                  <span className="text-[11px] text-white/40">reference only</span>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <Pill>{REGISTRATION_FAMILY_LABELS[c.family] ?? c.family}</Pill>
+                  {c.canonicalUrl && <a href={c.canonicalUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-brand-teal hover:text-white">Open source →</a>}
+                  <span className="text-[11px] text-white/40">reference only · needs review</span>
+                  {c.citedIn[0] && <span className="truncate text-[11px] text-white/35">cited in {c.citedIn[0].replace('docs/ai-workforce/', '')}{c.citedIn.length > 1 ? ` +${c.citedIn.length - 1}` : ''}</span>}
                 </div>
               </li>
             ))}
