@@ -7,7 +7,7 @@ Production app: `https://cg-dynamics.vercel.app`
 
 > This file supersedes the 2026-08-06 continuity handoff for current work. The older handoff is historical only.
 
-## 1. Mandatory start procedure
+## Mandatory start procedure
 
 Before proposing or making changes:
 
@@ -23,7 +23,7 @@ Before proposing or making changes:
 
 GitHub `main` is the code/document source of truth. Open PR state is the source of truth for in-flight work.
 
-## 2. Current repository checkpoint
+## Repository checkpoint
 
 Last product-code merge before this documentation refresh:
 
@@ -43,17 +43,16 @@ Important merged work immediately before PR #194:
 
 Do not re-implement these foundations from scratch.
 
-## 3. Active large implementation mission — PR #195
+## Active large implementation mission — PR #195
 
-**PR #195** — `Marketing/Knowledge workspace on the canonical layer + #184 registration pipeline`
+PR #195: `Marketing/Knowledge workspace on the canonical layer + #184 registration pipeline`
 
 Branch: `feat/marketing-knowledge-workspace`
-Current reviewed head at this handoff: `0295aa4c6af5add0c22fce1df2494446cc40c1d4`
-State at review: open; must remain unmerged until the final freshness contract is fixed and re-verified.
+Reviewed head at this handoff: `0295aa4c6af5add0c22fce1df2494446cc40c1d4`
 
-This PR is the active large Claude mission for Issues #183 + #184. Do not start a parallel Marketing/Knowledge rewrite.
+This is the active large Claude mission for Issues #183 + #184. Do not start a parallel Marketing/Knowledge rewrite.
 
-### What PR #195 already accomplished
+### Already accomplished on PR #195
 
 - Removed the accidental duplicate Marketing Library data model and returned to the canonical `src/lib/marketing-library/skillCardsData.ts` domain layer.
 - `/admin/marketing` became a real shared Marketing/Knowledge workspace.
@@ -61,32 +60,32 @@ This PR is the active large Claude mission for Issues #183 + #184. Do not start 
 - Managers can access Marketing AI.
 - Admins retain Sources, Review, Registration and governance functions.
 - Marketing moved into daily staff navigation; clients remain excluded.
-- Live read-only audit established that production already contains 45 `marketing_library_sources`, 47 `skill_cards`, 45 `skill_card_reviews`, 16 `platform_knowledge_items`, 45 `client_industry_profiles`, and zero Library documents/chunks.
-- Repository source registration was corrected so source packs/goldmine files are containers, not substitutes for the distinct sources inside them.
-- Deterministic cited-source extraction now produces **216 distinct cited sources plus 34 container references**, all review-state/reference-only.
+- Live read-only audit established 45 `marketing_library_sources`, 47 `skill_cards`, 45 `skill_card_reviews`, 16 `platform_knowledge_items`, 45 `client_industry_profiles`, and zero Library documents/chunks.
+- Repository registration was corrected so source packs/goldmine files are containers, not substitutes for the distinct sources inside them.
+- Deterministic cited-source extraction now produces 216 distinct cited sources plus 34 container references, all review-state/reference-only.
 - `phase-28a` registration SQL was corrected to use allowed rights values and a valid partial-index conflict arbiter; isolated PostgreSQL validation was reported clean and idempotent.
 - Manager Marketing AI route access was aligned with the workspace UI.
 - Marketing Workflow production grounding now excludes review-expired cards.
 
 ### Final unresolved PR #195 blocker at this handoff
 
-Freshness must be made consistent across **all** production consumers before merge:
+Freshness must be consistent across all production consumers before merge:
 
-- `review_expires_at` is a PostgreSQL `date`, so comparisons must use one date-only `YYYY-MM-DD` value.
-- Marketing Workflow should use that date consistently.
+- `review_expires_at` is PostgreSQL `date`; compare it against one date-only `YYYY-MM-DD` value.
+- Marketing Workflow must use that date consistently.
 - CG Assistant skilled-agent production retrieval must select `review_expires_at` and pass the freshness date into `buildPlan`.
 - `listActiveSharedSkillCards()` must exclude stale active cards so ordinary staff are not shown expired knowledge as current approved guidance.
 - Marketing AI capability/status counts must not call expired active cards live/approved.
-- Regression cases required: expired yesterday excluded; expires today current; future current; null expiry current.
+- Regression cases: expired yesterday excluded; expires today current; future current; null expiry current.
 
-**Do not merge #195 until a newer commit resolves this and the full tests/build are green.**
+Do not merge PR #195 until a newer commit resolves this and the full tests/build are green.
 
-Production data modified by #195 so far: **NO**.
-Production migration applied by #195 so far: **NO**.
+Production data modified by PR #195 so far: NO.
+Production migration applied by PR #195 so far: NO.
 
-## 4. Other active PR — PR #175 must not be overlapped
+## Other active PR — PR #175 must not be overlapped
 
-**PR #175** — real staff invitation lifecycle, activation and identity reconciliation.
+PR #175: real staff invitation lifecycle, activation and identity reconciliation.
 
 Branch: `pr5/staff-invitation-lifecycle`
 State: open draft.
@@ -101,7 +100,7 @@ Still unproven:
 
 Do not touch invitation/auth/user-lifecycle files during unrelated work unless CA explicitly redirects or #175 has first been reconciled with current main.
 
-## 5. Non-regression product authorities
+## Non-regression product authorities
 
 ### Client Schedule authority
 
@@ -131,17 +130,17 @@ Do not touch invitation/auth/user-lifecycle files during unrelated work unless C
 - OneDrive remains internal raw-media storage.
 - Raw media, internal OneDrive links/IDs and source-file metadata must never be exposed to clients.
 
-## 6. CALENDAR LOCK — do not redesign the calendar every mission
+## CALENDAR LOCK — do not redesign the calendar every mission
 
 This section exists because repeated calendar reinterpretation has caused wasted work.
 
 ### CG Calendar purpose is fixed
 
-`/admin/cg-calendar` is the **operational company calendar**, similar to the useful Teams/Outlook company-calendar experience.
+`/admin/cg-calendar` is the operational company calendar.
 
 It may contain meetings, shoots, content runs, client events, deadlines, internal company events and optional real dated Planner tasks where intentionally enabled.
 
-It must **not** become the Client Schedule or content-post calendar.
+It must not become the Client Schedule or content-post calendar.
 
 ### Forbidden CG Calendar regressions
 
@@ -158,15 +157,13 @@ Do not:
 
 ### #177 duplicate Outlook event — current truth
 
-Issue #177 remains open because **production rollout/acceptance is not complete**, even though the code fix merged in PR #189 (`64026b8a9811e6bda8500c81e67b478954a35ac0`).
+Issue #177 remains open because production rollout/acceptance is not complete, even though the code fix merged in PR #189 (`64026b8a9811e6bda8500c81e67b478954a35ac0`).
 
 PR #189 established durable Outlook identity, reviewed candidate matching, non-destructive native-event supersession, fail-closed handling for cancelled/linked/content-run/conflicting states, no title-only merge, preserved source/audit history and read-only Microsoft upstream.
 
 Do not start another calendar dedupe architecture. The remaining work is deployment/acceptance of the existing contract.
 
 ### Calendar production migration dependency
-
-Production rollout is separate from normal feature work.
 
 Required migration order:
 
@@ -190,7 +187,7 @@ Only after migration approval/application and separately authorised duplicate re
 
 Do not modify unrelated calendar events during this acceptance.
 
-## 7. Client Portal visibility contract — merged code, production rollout separate
+## Client Portal visibility contract — merged code, production rollout separate
 
 PR #192 merged the explicit visibility contract at `98cdeb9b76e660ae93715e55784c145ab0c867dd`.
 
@@ -208,7 +205,7 @@ Company events are client-visible only after explicit `client_visible=true` publ
 
 Frontend must fail closed while the capability/migration is unavailable. Do not add an unsafe fallback.
 
-## 8. UX / responsive / navigation progress — do not restart the architecture
+## UX / responsive / navigation progress — do not restart the architecture
 
 ### #180 UX noise
 
@@ -230,7 +227,7 @@ Current direction: daily goal-based navigation; Integrations owns provider setup
 
 Do not restore the old flat top-level list of Microsoft Sync / Planner Import / Marketing AI / Skill Card Review / diagnostics.
 
-## 9. Marketing / Knowledge product contract
+## Marketing / Knowledge product contract
 
 Issues #183 + #184 are one connected product mission currently implemented through PR #195.
 
@@ -248,27 +245,27 @@ Knowledge rules:
 
 The canonical repository resource inventory explicitly says whole goldmine files are containers. Distinct cited sources must carry their own provenance/rights/review evidence.
 
-## 10. Client research status
+## Client research status
 
 Canonical ledger: `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md`.
 
-Current sequence has progressed through **HMH Attorneys**.
+Current sequence has progressed through HMH Attorneys.
 
-Exact next client: **Human Auto**.
+Exact next client: Human Auto.
 
 Do not research Human Auto automatically. Ask CA `Human Auto — skip or go?` and proceed only on `go`.
 
-## 11. Current issue status agents must respect
+## Current issue status agents must respect
 
-- #176 **closed** — completed tasks authority implemented.
-- #177 **open** — code merged in #189; production migration + exact acceptance remain.
-- #180 **open** — UX cleanup partially delivered in #190/#191; remaining work should be evidence-based.
-- #181 **open** — shared responsive system merged in #194; remaining acceptance/device verification.
-- #182 **open** — IA overhaul largely merged in #194; remaining acceptance/refinement, not a restart.
-- #183 **open** — active implementation in PR #195.
-- #184 **open** — active implementation in PR #195; no parallel registration pipeline.
+- #176 closed — completed tasks authority implemented.
+- #177 open — code merged in #189; production migration + exact acceptance remain.
+- #180 open — UX cleanup partially delivered in #190/#191; remaining work should be evidence-based.
+- #181 open — shared responsive system merged in #194; remaining acceptance/device verification.
+- #182 open — IA overhaul largely merged in #194; remaining acceptance/refinement, not a restart.
+- #183 open — active implementation in PR #195.
+- #184 open — active implementation in PR #195; no parallel registration pipeline.
 
-## 12. Agent allocation / working method
+## Agent allocation / working method
 
 CA's working preference:
 
@@ -281,11 +278,11 @@ CA's working preference:
 
 If a mission is already underway, improve the existing branch/PR instead of creating another parallel architecture.
 
-## 13. Production safety
+## Production safety
 
 Without explicit CA approval, agents must not apply production Supabase migrations, mutate production data, resolve #177 production duplicate records, publish/unpublish client calendar events, create historical visibility backfills, change Microsoft upstream data or invent production state from assumptions.
 
-## 14. Immediate next actions
+## Immediate next actions
 
 Unless CA redirects:
 
@@ -296,7 +293,7 @@ Unless CA redirects:
 5. Keep PR #175 isolated until delivery/browser acceptance is resolved.
 6. Continue client research only when CA explicitly answers `go` for Human Auto.
 
-## 15. Anti-abortive-work checklist
+## Anti-abortive-work checklist
 
 Before editing any area, ask:
 
