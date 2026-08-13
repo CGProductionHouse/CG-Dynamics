@@ -1,8 +1,9 @@
-# CG Dynamics — Canonical Project Continuity Handoff
+# CG Dynamics — Project Continuity Handoff (Historical 2026-08-06 Snapshot)
 
-> **HISTORICAL SNAPSHOT — superseded on 2026-08-13.**
->
-> Do not use this file as the current active-mission or client-sequence authority.
-> Read `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md` instead.
->
-> This 2026-08-06 snapshot is intentionally retained only for historical context. Current PRs, issues, merged work, migration dependencies, calendar non-regression rules and client-research progress have moved on.
+This file is intentionally retained only as a historical marker.
+
+**Current continuity authority:**
+
+- `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
+
+Do not use this 2026-08-06 snapshot for current active PRs, issues, migration state, Calendar behavior, Marketing/Knowledge work or client-research position. The original detailed 2026-08-06 content remains available in git history if historical comparison is required.
