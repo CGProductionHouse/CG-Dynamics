@@ -12,33 +12,32 @@ For any new ChatGPT, Claude Code, Codex, OpenCode or other agent session, read t
 
 The **2026-08-13 handoff is the current continuity authority**. The older `PROJECT-CONTINUITY-HANDOFF-2026-08-06.md` is historical only.
 
-The current handoff contains:
+## Current active work
 
-- latest merged app-shell / responsive / IA progress;
-- active PR #195 Marketing/Knowledge work and its exact remaining blocker;
-- isolated open PR #175 invitation work;
-- completed-task authority already delivered;
-- Outlook duplicate/calendar rollout state;
-- Client Portal visibility contract and migration order;
-- non-regression rules for CG Calendar vs Client Schedule;
-- Marketing Library / AI grounding rules;
-- client research progress through HMH Attorneys;
-- exact next client (`Human Auto`) and skip/go rule;
-- production-write restrictions;
-- anti-abortive-work rules so agents do not duplicate existing systems or restart completed architecture.
+- **PR #195** owns #183/#184 Marketing/Knowledge. Continue/review the same PR; do not create a parallel Library architecture. Reviewed head `0295aa4` still needs the final cross-consumer freshness fix before merge.
+- **PR #175** owns staff invitation/auth lifecycle. Keep isolated from unrelated work.
 
-## Before coding
+## Already implemented — do not redo
 
-Always:
+- #176 completed-task authority: PR #188.
+- #177 Outlook duplicate architecture: PR #189; remaining work is controlled production rollout/acceptance.
+- #180 major UX cleanup phases: PR #190/#191; visibility prerequisite PR #192.
+- #181/#182 responsive + navigation architecture: PR #194. Remaining work is authenticated acceptance/evidence-based defects, not another shell rewrite.
+- Client Portal explicit visibility contract: PR #192; production migration remains separate.
 
-- check current `main` first;
-- check open PRs before creating a new branch;
-- continue an existing active PR when it already owns the requested area;
-- preserve page contracts and canonical data authorities;
-- never apply production Supabase SQL without explicit user approval;
-- never redesign CG Calendar into Client Schedule or re-add `monthly_deliverables` to CG Calendar;
-- never create a second Marketing Library, task authority or schedule source of truth;
-- do not restart #181/#182 shell/navigation architecture already merged in PR #194;
-- do not overlap PR #175 invitation/auth work from unrelated missions.
+## Hard locks
 
-Do not ask CA to explain the project again before reading these files and checking the live GitHub state.
+- `monthly_deliverables` = Client Schedule truth.
+- CG Calendar = operational company calendar. Never merge it with Client Schedule or inject scheduled content posts into it.
+- Do not dedupe Outlook/native events by title alone.
+- Do not create a second Marketing Library, task authority or schedule source of truth.
+- Do not apply production Supabase SQL without explicit CA approval.
+- Pending migration order is `20260809120000_calendar_outlook_identity.sql` then `20260809130000_client_portal_visibility_contract.sql`.
+
+## Client research
+
+The canonical ledger is `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md`.
+
+Completed through HMH Attorneys. Next client: **Human Auto**. Do not start until CA says `go`.
+
+Do not ask CA to explain the project again before reading these files and checking current GitHub state.
