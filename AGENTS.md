@@ -10,13 +10,12 @@ Before planning or editing code, read:
 2. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
 3. `docs/cg-dynamics-page-vision-and-milestones.md`
 4. `docs/current-product-game-plan.md`
-5. the latest relevant open PRs/issues on GitHub
+5. `docs/vision/CURRENT-MILESTONE.md`
+6. the latest relevant open PRs/issues on GitHub
 
-The 2026-08-13 handoff is the current continuity authority. Older handoffs are historical context only.
+The 2026-08-13 handoff is the current continuity authority. Older handoffs are historical only.
 
-Before changing page behavior, navigation, permissions or product scope, read `docs/cg-dynamics-page-vision-and-milestones.md`. The page contracts in that document override generic product ideas and agent assumptions.
-
-Before planning or implementing current product work, also read `docs/current-product-game-plan.md`. It is the canonical business-workflow handoff, including Content Guidelines, OneDrive, WhatsApp, Microsoft/package sync, CG Assistant and release-verification requirements.
+Before changing page behavior, navigation, permissions or product scope, read `docs/cg-dynamics-page-vision-and-milestones.md`. Page contracts override generic product ideas and agent assumptions.
 
 ## Product direction
 
@@ -24,36 +23,34 @@ CG Dynamics is the internal operating system for CG Production House. It is repl
 
 Three product areas:
 
-- **Client Intelligence** — Clients, Performance Dashboard, Meta / Integrations, Reports, Client Preview, and the client-ready monthly content calendar.
-- **Operations Hub** — CG Hub, Work, Planner, Client Schedule / master schedule, CG Calendar, team workflow.
+- **Client Intelligence** — Clients, Performance, reports, integrations and client-safe projections.
+- **Operations Hub** — Hub, Work, Planner, Client Schedule, CG Calendar and team workflow.
 - **AI Workforce** — CG Assistant, Marketing/Knowledge and specialist agents grounded in reviewed evidence.
 
 ## Source of truth
 
-- **GitHub `main` is the source of truth.** Everything worth keeping is committed and pushed; local working environments are ephemeral.
+- **GitHub `main` is the source of truth.**
 - **Open PR state is the source of truth for in-flight work.** If a PR already owns the requested area, continue/review it instead of starting a duplicate branch.
-- **`monthly_deliverables` is the source of truth for the client content schedule.** Do not create a second/duplicate schedule table.
-- **Client Schedule (`/admin/client-schedule`) is the operational content-schedule editing surface.** Source: `monthly_deliverables`.
-- **The client-ready content calendar is a read-only/client-safe projection** over approved/visible data. It is not another editing authority.
-- Planner/Work (`planner_tasks`) is a separate operational task system from Client Schedule and must stay separate.
+- **`monthly_deliverables` is Client Schedule truth.** Do not create a duplicate schedule table.
+- **Client Schedule (`/admin/client-schedule`) is the operational content-schedule editing surface.**
+- **Client-ready schedule/calendar views are safe projections**, not another editing authority.
+- Planner/Work (`planner_tasks`) is separate operational task management.
 - One Content Run has one canonical Content Guideline.
 
 ## Non-regression rules
-
-### Do not redo solved architecture
 
 Before creating code, check whether the behavior already landed on `main` or is owned by an open PR.
 
 Specifically:
 
-- Completed-task authority for #176 already landed. Do not create screen-specific competing completion rules.
-- The responsive/layout and navigation foundation for #181/#182 already landed in PR #194. Do not create a second shell/layout/IA system.
-- Client Portal explicit visibility contract landed in PR #192. Do not add unsafe fallbacks or infer visibility from internal status alone.
-- Outlook duplicate identity architecture landed in PR #189. Do not invent a second dedupe model.
-- Marketing/Knowledge #183/#184 is currently owned by PR #195. Do not start a parallel Marketing Library rewrite while that PR is active.
+- #176 completed-task authority already landed through PR #188. Do not create competing screen-specific completion rules.
+- #177 Outlook duplicate identity architecture already landed through PR #189. Remaining work is controlled production rollout/acceptance, not a new dedupe model.
+- Client Portal explicit visibility contract already landed through PR #192. Do not add unsafe fallbacks or infer client visibility from internal status alone.
+- #181/#182 responsive/layout/navigation foundation already landed through PR #194. Do not create a second shell/IA system.
+- #183/#184 Marketing/Knowledge is currently owned by PR #195. Do not start a parallel Library rewrite.
 - Staff invitation lifecycle remains isolated in draft PR #175. Avoid overlapping its auth/invite/user-lifecycle files unless explicitly directed.
 
-### CALENDAR LOCK
+## CALENDAR LOCK
 
 CG Calendar and Client Schedule are intentionally separate products.
 
@@ -64,15 +61,13 @@ CG Calendar and Client Schedule are intentionally separate products.
 Do NOT:
 
 - inject `monthly_deliverables` into CG Calendar;
-- turn CG Calendar into the content posting schedule;
+- turn CG Calendar into the posting calendar;
 - merge CG Calendar and Client Schedule;
 - treat missing scheduled posts in CG Calendar as a defect;
 - deduplicate Outlook/native events by title alone;
 - destructively delete audit/history rows to hide duplicates;
 - write back to Outlook/Microsoft;
-- redesign the Calendar merely because another mission touches UX, responsive layout, Marketing, AI or navigation.
-
-Issue #177 code is already implemented through PR #189. Remaining work is controlled production migration/acceptance, not another calendar architecture rewrite.
+- redesign Calendar merely because another mission touches UX, responsive layout, Marketing, AI or navigation.
 
 ## Workflow rules
 
@@ -82,7 +77,7 @@ Issue #177 code is already implemented through PR #189. Remaining work is contro
 - Use one coherent branch/PR per substantial mission rather than chains of tiny overlapping PRs.
 - Inspect the repo before editing. Do not rewrite working business processes without explicit approval.
 - Do not duplicate the master schedule, task authority, Marketing Library data model or calendar authority.
-- Do not add new **production** dependencies without approval. Dev-only tooling changes still need a clear reason.
+- Do not add new production dependencies without approval.
 - Preserve safe legacy deep links when consolidating navigation.
 - Keep changes shippable and verifiable.
 
@@ -98,16 +93,16 @@ CA's preferred workflow:
 ## Data and secrets safety
 
 - Never touch live Supabase data or run SQL against production without explicit user approval.
-- A migration file existing on `main` does **not** mean it has been applied in production.
-- Supabase Edge Function secrets, service-role keys, Meta tokens and provider API keys must NEVER be exposed, logged, committed or returned to the client.
-- Client-side code only uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Anything privileged belongs in an Edge Function.
-- Do not commit ignored files (`.env.local`, `dist/`, `node_modules/`, generated temporary artifacts).
+- A migration file existing on `main` does not mean it has been applied in production.
+- Never expose or commit privileged secrets.
+- Client-side code only uses public/publishable Supabase settings; privileged operations belong server-side.
+- Do not commit ignored environment/build artifacts.
 - Never guess a `client_id` UUID.
 - Microsoft/Outlook remains read-only upstream unless CA explicitly authorises a future write-back design.
 
 ## Production migration guard
 
-The currently pending calendar/client-portal rollout requires this order:
+Pending calendar/client-portal rollout order:
 
 1. `20260809120000_calendar_outlook_identity.sql`
 2. `20260809130000_client_portal_visibility_contract.sql`
@@ -118,32 +113,31 @@ Do not apply either without explicit production approval. Do not replay obsolete
 
 - Build command: `npm run build` (`tsc -b && vite build`).
 - Commit and push only if the build passes.
-- `noUnusedLocals` / `noUnusedParameters` are on — unused code fails the build.
-- Vite is pinned to 7.x on purpose: vite 8 (rolldown) previously tree-shook app code out of the production bundle. Do not bump vite to 8 without proving the built bundle contains the app.
-- Vercel preview success proves deployability of that branch; it does not prove authenticated product acceptance or production database rollout.
+- Vite is pinned to 7.x on purpose. Do not bump to vite 8 without proving the built app bundle is intact.
+- Vercel preview success proves branch deployability; it does not prove authenticated product acceptance or production database rollout.
 
 ## Security requirements
 
 Before adding tables, RPCs, routes, Edge Functions or Storage:
 
 1. Read `docs/security/SECURITY_ARCHITECTURE.md` and `docs/security/ACCESS_CONTROL_MATRIX.md`.
-2. Document the access model for the new component.
-3. Enable RLS on every exposed table.
-4. Add explicit least-privilege policies.
-5. Distinguish authentication from authorisation — never treat `auth.uid()` alone as ownership.
+2. Document the access model.
+3. Enable RLS on exposed tables.
+4. Add least-privilege policies.
+5. Distinguish authentication from authorisation.
 6. Use `USING` and `WITH CHECK` appropriately.
-7. Never expose service-role or secret credentials.
-8. Do not trust editable user metadata for roles — read from `public.profiles.role`.
-9. Test horizontal access between users and clients.
-10. Stop and document security-model conflicts rather than guessing.
+7. Never expose service-role credentials.
+8. Read roles from `public.profiles.role`, not editable metadata.
+9. Test horizontal access.
+10. Stop on security-model conflicts rather than guessing.
 
 ## Marketing / Knowledge safety
 
 - Source material is not automatically company knowledge.
-- AI output is never automatically a trusted source.
+- AI output is never automatically trusted knowledge.
 - Draft, stale and retired knowledge must not ground production answers.
-- Client-specific knowledge must remain client-isolated and linked by canonical client ID.
-- Goldmine/source-pack markdown files are containers; registration must preserve distinct cited sources and their provenance.
+- Client-specific knowledge remains client-isolated and linked by canonical client ID.
+- Goldmine/source-pack markdown files are containers; distinct cited sources retain their own provenance.
 - Do not ingest copyrighted full text unless rights explicitly permit it.
 
 ## Client research workflow
@@ -154,15 +148,15 @@ Current sequence is complete through HMH Attorneys. Exact next client is **Human
 
 Do not begin Human Auto automatically. Ask CA `Human Auto — skip or go?` and proceed only on `go`.
 
-## Reporting (end of every task)
+## Reporting
 
-Report:
+At the end of every task report:
 
 - files touched;
-- build/test result;
+- tests/build;
 - production migration/data impact;
 - security/role checks;
 - browser/device verification actually performed;
-- risks or anything left unverified;
-- whether the work overlaps an existing PR;
+- risks/unverified work;
+- whether the work overlapped an existing PR;
 - exact next step.
