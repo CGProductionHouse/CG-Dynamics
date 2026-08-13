@@ -36,7 +36,7 @@ The **2026-08-13 handoff is the current continuity authority**. The older `PROJE
 
 ## Client research
 
-The canonical ledger is `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md`.
+Canonical ledger: `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md`.
 
 Completed through HMH Attorneys. Next client: **Human Auto**. Do not start until CA says `go`.
 
