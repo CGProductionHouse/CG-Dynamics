@@ -1,11 +1,11 @@
 # CG Dynamics Master Goal Tracker
 
-Last updated: 2026-07-23
-Status: Source of truth for product direction
+Last updated: 2026-08-13
+Status: Source of truth for long-term product direction
 
 ## Purpose
 
-CG Dynamics is the operating system for CG Production House and, later, a sellable AI enhanced service business platform.
+CG Dynamics is the operating system for CG Production House and, later, a sellable AI-enhanced service business platform.
 
 The app must not become a random collection of features. It must stay focused on three separate but connected divisions:
 
@@ -13,267 +13,286 @@ The app must not become a random collection of features. It must stay focused on
 2. Operations Hub
 3. AI Workforce
 
-Each division must feel like its own product area with its own menu, goals, workflows and mental model, while still sharing the same underlying environment, data model and design language.
+Each division must feel like its own product area with its own goals, workflows and mental model while sharing the same underlying environment, data model and design language.
 
 ## Product definition
 
 CG Dynamics is not just a task manager, not just a dashboard and not just an AI tool.
 
-CG Dynamics is an AI assisted business operating system where operations, client reporting and specialist knowledge agents work together.
+It is an AI-assisted business operating system where operations, client reporting and specialist knowledge agents work together.
 
 The app should help the company:
 
-- Deliver work more efficiently.
-- Show clients clear value.
-- Build a permanent knowledge base.
-- Reduce repetitive production pressure on staff.
-- Let staff move from mass production into vision, quality control and creative direction.
-- Use AI to retrieve, reason and apply verified expertise instead of inventing generic content.
+- deliver work more efficiently;
+- show clients clear value;
+- build a permanent verified knowledge base;
+- reduce repetitive production pressure on staff;
+- let staff move from mass production into vision, quality control and creative direction;
+- use AI to retrieve, reason and apply verified expertise instead of inventing generic content.
 
 ## The three divisions
 
 ### 1. Client Intelligence
 
-Goal: create the client facing performance and value layer.
+Goal: create the client-facing performance and value layer.
 
-This section is the storefront for clients. It must show that the work is making a difference and that the service is worth continuing.
+It should include over time:
 
-It should include, over time:
-
-- Performance dashboards.
-- Monthly and quarterly reports.
-- Campaign results.
-- Meta, Google, website and SEO insights.
-- Lead and enquiry tracking where available.
-- Recommendations.
-- Competitor and market notes.
-- Growth timelines.
-- Client specific insights pulled only from active clients in the system.
+- performance dashboards;
+- monthly and quarterly reports;
+- campaign results;
+- Meta, Google, website and SEO insights;
+- lead and enquiry tracking where available;
+- recommendations;
+- competitor and market notes;
+- growth timelines;
+- client-specific insights pulled only from active clients in the system.
 
 Rules:
 
-- Do not hardcode old or inactive client names into the long term knowledge base.
-- Client specific content must come from active client records, approved client notes, interviews, campaign data or current system data.
+- Do not hardcode old or inactive client names into the long-term knowledge base.
+- Client-specific content must come from active client records, approved client notes, interviews, campaign data or current system data.
 - The client dashboard should feel premium enough to send directly to a client.
-- Reports must not be generic AI summaries. They must explain what happened, why it matters and what to do next.
-- Automated platform metrics must preserve their source, definition, period, API version and completeness.
+- Reports must explain what happened, why it matters and what to do next.
+- Automated metrics must preserve source, definition, period, API version and completeness.
 - Missing, unsupported, partial or failed metrics may never be converted into numeric zero.
 - Month-on-month movement may render only when both periods use compatible metric definitions and source coverage.
 - Cross-platform unique audiences must not be summed when the same person may appear on more than one platform.
-- A connector failure is an internal integration incident, not a client performance result.
-- AI strategy must be withheld when the evidence package fails the data-quality or comparability gate.
-
-Detailed reporting truth strategy:
-
-- `docs/client-intelligence/META-REPORTING-TRUTH-STRATEGY.md`
+- Connector failure is an integration incident, not a performance result.
+- AI strategy must be withheld when evidence fails the data-quality or comparability gate.
+- Client Portal visibility must be explicit/evidenced; internal workflow state alone must not publish client-facing information.
 
 ### 2. Operations Hub
 
-Goal: replace day to day scattered internal workflow tools.
+Goal: replace scattered internal workflow tools only where CG Dynamics is genuinely easier and better.
 
-This section is for staff workflow, planning and production management.
+It should include:
 
-It should include, over time:
-
-- Tasks.
-- Buckets.
-- Planner style views.
-- Calendar and content schedule.
-- Client requests.
-- WhatsApp intake and approvals where technically possible.
-- Morning lists.
-- Staff assignments.
-- Production pipeline.
-- Internal notes and handovers.
+- tasks and buckets;
+- Work / My Day / team workflow;
+- Planner-style operational views;
+- CG Calendar;
+- Client Schedule;
+- client requests;
+- WhatsApp intake/status tracking;
+- morning lists;
+- staff assignments;
+- production pipeline;
+- internal notes and handovers.
 
 Rules:
 
-- This is not the client reporting area.
-- This is not the payroll system.
-- CG Hours remains a separate controlled payroll and time environment.
-- CG Dynamics may integrate high level operational signals from other systems later, but must not expose payroll or confidential staff financial data.
-- The hub must reduce daily friction. If the app is more manual than existing tools, the feature is not good enough.
+- Operations Hub is not Client Intelligence.
+- It is not payroll; CG Hours remains separate.
+- The hub must reduce daily friction. If a feature is more manual than the existing real workflow, it is not good enough.
+- `planner_tasks` is operational task truth; do not merge it into `monthly_deliverables`.
+- completed task authority must be shared across Work, notifications and Assistant rather than reimplemented per screen.
 
 ### 3. AI Workforce
 
 Goal: create specialist AI agents powered by a verified knowledge base.
 
-This section contains the skill agents, marketing library, skill cards, prompt patterns, source notes and internal AI workflows.
+It includes over time:
 
-It should include, over time:
-
-- Marketing Library.
-- Skill Cards.
-- Industry libraries.
-- Specialist agents.
-- Source management.
-- Prompt templates.
-- Internal campaign learnings.
-- Brand guardians.
-- Creative review agents.
-- Copywriting agents.
-- SEO agents.
-- Paid ads agents.
-- Reporting agents.
+- CG Assistant;
+- Marketing / Knowledge workspace;
+- Skill Cards / Playbooks;
+- industry libraries;
+- specialist agents;
+- source management;
+- internal campaign learnings;
+- Brand Guardian;
+- creative/copy/SEO/paid-ads/reporting specialists.
 
 Rules:
 
 - AI is not allowed to invent expertise.
-- AI must retrieve, reason and apply knowledge from the library, active client context and verified sources.
+- AI must retrieve, reason and apply knowledge from approved/current Library material, active-client context and verified sources.
+- Draft, stale and retired knowledge must not ground production answers.
 - Generic AI wording must be flagged and rewritten.
-- AI generated work should be explainable. The system should be able to answer why a recommendation, headline, campaign or report was suggested.
+- AI-generated work should be explainable and source-aware.
 - AI may not repair missing data through assumptions.
 - Strategy agents must separate observed fact, interpretation, hypothesis, action, test and confidence.
 - Client-facing AI strategy requires human review.
+- AI output is never automatically promoted to trusted company knowledge.
 
 ## Separation principle
 
-The three divisions must be visually and mentally separated.
+The three divisions must remain visually and mentally distinct.
 
-A user should feel like they are working inside a focused product area:
+- Client Intelligence = client value and performance.
+- Operations Hub = internal delivery.
+- AI Workforce = knowledge, skills and specialist agents.
 
-- Client Intelligence is for client value and performance.
-- Operations Hub is for internal delivery.
-- AI Workforce is for knowledge, skills and specialist agents.
+Shared components and data models are allowed. Confused menus, mixed authorities and duplicate systems are not.
 
-Shared components, design tokens and data models are allowed. Confused menus, mixed workflows and random cross linking are not allowed.
+## Non-negotiable operational authorities
+
+### Client Schedule
+
+- `monthly_deliverables` is the canonical client content schedule source of truth.
+- `/admin/client-schedule` is the editing surface.
+- Client-ready schedule/calendar views are projections.
+- Never create a second schedule table.
+
+### CG Calendar
+
+CG Calendar is the operational company calendar.
+
+It is for meetings, shoots, content runs, client events, deadlines, internal events and intentionally enabled dated Planner tasks.
+
+It is **not** the Client Schedule and must not become the posting calendar.
+
+Do not:
+
+- inject `monthly_deliverables` into CG Calendar;
+- merge CG Calendar and Client Schedule;
+- treat missing posting items in CG Calendar as a defect;
+- deduplicate Outlook/native events by title alone;
+- redesign the Calendar during unrelated UX, Marketing or navigation work.
+
+### Content
+
+- One Content Run has one canonical Content Guideline.
+- Marketing/Knowledge and Content Guidelines are related but distinct data concepts.
+- Do not merge reusable marketing knowledge with operational client content documents.
+
+### Communications and media
+
+- WhatsApp remains the actual client communication/approval channel for now.
+- CG Dynamics tracks status honestly and must not fake a send.
+- OneDrive raw media remains internal and must never be exposed to clients.
 
 ## CG Hours boundary
 
-CG Hours must remain separate.
+CG Hours remains separate because it contains payroll/time and sensitive staff data.
 
-Reasons:
+Hard rule: do not blend payroll or confidential staff financial information into CG Dynamics.
 
-- It is payroll related.
-- It contains sensitive staff and time data.
-- It should stay stable and controlled.
-- CG Dynamics is the experimental and expandable business operating environment.
+## Marketing / Knowledge philosophy
 
-Hard rule: do not blend payroll data or confidential staff financial data into CG Dynamics.
+The Marketing/Knowledge system is the source of truth for future marketing skill agents.
 
-## Marketing Library philosophy
+The goal is to master human decision making, not to copy generic AI marketing fluff.
 
-The Marketing Library is the source of truth for future skill agents.
+Prioritise:
 
-The goal is to master human decision making, not to copy modern AI marketing fluff.
+- classic advertising and copywriting sources;
+- behavioural psychology and consumer research;
+- official platform documentation;
+- reputable South African market evidence;
+- internal campaign performance data;
+- client interviews and approved client insights;
+- staff observations clearly labelled as internal learning.
 
-The library must prioritise:
+Avoid:
 
-- Classic advertising and copywriting books.
-- Behavioural psychology.
-- Consumer behaviour research.
-- Platform documentation from official sources.
-- South African market data from reputable sources.
-- Internal campaign performance data.
-- Client interviews and approved client insights.
-- Staff observations clearly labelled as internal learning.
+- unverified SEO blogs;
+- generic AI-written marketing posts;
+- unsupported trend chasing;
+- invented case studies;
+- vague AI phrases such as elevate, unlock, revolutionise, seamless and game-changing;
+- treating AI output as source material.
 
-The library must avoid:
+## Knowledge-source rule
 
-- Unverified SEO blogs.
-- Generic AI written marketing posts.
-- Trend chasing without evidence.
-- Repeating vague phrases like elevate, unlock, revolutionise, seamless, game changing and similar generic wording.
-- Treating AI output as source material.
+Source material is not automatically company knowledge.
+
+Research-pack/goldmine files are containers. Distinct cited sources inside them must retain their own provenance, rights, date, strength, limitations and review state.
+
+Only evidence-supported findings may become review-state knowledge or Skill Cards.
+
+No automatic approval.
 
 ## Skill Card principle
 
-Every serious piece of knowledge should become a Skill Card.
+A Skill Card should state:
 
-A Skill Card should clearly state:
+- the principle;
+- source/provenance;
+- reliability/confidence;
+- safe claim and prohibited overclaim where applicable;
+- jurisdiction/freshness;
+- how it should be applied;
+- applicable industries/clients;
+- intended agents;
+- mistakes it prevents;
+- review/expiry state.
 
-- What the principle is.
-- Where it comes from.
-- How reliable it is.
-- How it should be applied.
-- Which industries it applies to.
-- Which agents may use it.
-- What mistakes it helps prevent.
+Production AI may use only current approved cards.
 
-Skill Cards can be created from:
+## Client-specific knowledge rule
 
-- Books.
-- Research papers.
-- Official platform documentation.
-- Reputable market reports.
-- Internal campaign data.
-- Client approved notes.
-- Staff experience, clearly labelled as internal learning.
+Client-specific knowledge must not be stored as permanent hardcoded noise in master documents.
 
-## Client specific knowledge rule
+Client knowledge belongs in active client records, client-linked knowledge cards or current client context.
 
-Client specific knowledge must not be stored as permanent hardcoded noise in the master goal documents.
-
-Client knowledge belongs in active client records, active client knowledge cards or client dashboard context.
-
-If a client is inactive, their knowledge should not pollute the default active workflow unless intentionally archived and searched.
+Inactive clients must not pollute the default active workflow.
 
 ## Platform connector principle
 
-Every automated reporting connector must operate like a durable data product, not a one-off API script.
+Every automated connector must operate like a durable data product, not a one-off API script.
 
 It must support:
 
-- versioned API contracts;
-- source provenance;
+- versioned contracts;
+- provenance;
 - safe token handling;
-- idempotent sync and re-sync;
+- idempotent sync/re-sync;
 - delayed-data refresh windows;
-- permission and token health checks;
+- permission/token health;
 - deprecation monitoring;
-- data-quality and comparability states;
+- data-quality/comparability states;
 - safe failure without destroying the last verified dataset;
-- representative cross-client validation before global completion is claimed.
-
-Third-party connectors may be evaluated or used as parity benchmarks. They become permanent dependencies only after a deliberate decision on cost, control, data ownership, latency, metric parity and vendor lock-in.
+- representative cross-client validation before completion is claimed.
 
 ## Development process
 
-Every major development session should start by checking:
+Every major session starts by checking:
 
-1. This master goal tracker.
-2. The current milestone file.
-3. The parking lot file.
-4. The relevant roadmap file.
-5. Any active detailed strategy referenced by the milestone.
+1. `AGENTS.md`;
+2. `CONTINUE-HERE.md`;
+3. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`;
+4. this master goal tracker;
+5. `docs/vision/CURRENT-MILESTONE.md`;
+6. relevant open PRs/issues;
+7. current `main`.
 
-Every coding prompt should be focused on one task or one tightly bounded end-to-end milestone.
+Do not create duplicate broad work when an open PR already owns the same product area.
 
-Every new idea should be handled in one of three ways:
+Large architecture should be handled as one substantial coherent mission. Claude Code is preferred for that style of work; bounded isolated implementation may be delegated separately when it does not overlap.
 
-1. Add it to the current milestone if it directly supports the milestone.
-2. Add it to the parking lot if it is valuable but distracting.
-3. Reject it if it does not support the product vision.
+## Anti-drift rule
 
-## Anti drift rule
+When implementation becomes technical, ask:
 
-When implementation becomes technical, return to this question:
+**Does this make CG Dynamics smarter, easier to use or more valuable to clients?**
 
-Does this make CG Dynamics smarter, easier to use or more valuable to clients?
+Also ask:
 
-If not, stop and reassess.
+- Does this preserve the canonical data authority?
+- Is this already solved on `main`?
+- Is an open PR already solving it?
+- Is this creating a duplicate system?
+- Is this accidentally mixing CG Calendar and Client Schedule?
+- Is this weakening client isolation or publication truth?
 
-For Client Intelligence, also ask:
-
-Can every client-facing claim be traced to verified evidence, and would we confidently defend the number or recommendation to the client?
-
-If not, do not publish it.
+If the answer exposes drift, stop and reconcile before coding.
 
 ## Current build order
 
-Recommended order from this point:
+As of 2026-08-13:
 
-1. Repair Meta reporting truth and verify parity against Meta Business Suite.
-2. Add metric provenance, completeness, comparability and connector-health architecture.
-3. Correct the Client Overview and publication quality gate.
-4. Complete the Cape Lumber benchmark report with Meta and Google Ads.
-5. Activate the minimum trusted client and construction/timber Skill Cards required for the pilot.
-6. Generate the first reviewed evidence-based sales and campaign strategy.
-7. Scale the verified reporting and specialist-intelligence pattern to active clients.
-8. Continue improving Operations Hub daily usability without mixing the divisions.
+1. Finish the existing PR #195 Marketing/Knowledge freshness contract and merge only after verification.
+2. Keep #183/#184 implementation on that same coherent branch/PR rather than creating parallel Library architecture.
+3. Keep PR #175 invitation work isolated until real delivery/browser acceptance is proven.
+4. Treat #177 remaining work as controlled production migration/acceptance of the already-merged #189 architecture, not another Calendar rewrite.
+5. Finish authenticated device/role acceptance for #180/#181/#182 without restarting the shell/IA foundation merged in #194.
+6. Resume active-client research from Human Auto only when CA explicitly says `go`.
+7. Expand Website Intelligence / GA4 / Search Console / Google Ads attribution and leads only after the active foundations are stable.
 
-## Long term outcome
+## Long-term outcome
 
-CG Dynamics should become a system that gets smarter with every client, campaign, task, report and lesson learned.
+CG Dynamics should get smarter with every client, campaign, task, report and reviewed lesson.
 
-The long term moat is not only the code. The moat is the structured knowledge, applied workflow, trustworthy data and accumulated marketing intelligence inside the system.
+The moat is not only code. It is the structured knowledge, applied workflow, trustworthy data and accumulated marketing intelligence inside the system.
