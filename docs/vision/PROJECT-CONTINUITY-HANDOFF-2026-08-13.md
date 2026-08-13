@@ -7,9 +7,9 @@ Production app: `https://cg-dynamics.vercel.app`
 
 This file supersedes the 2026-08-06 continuity handoff. The older handoff is historical only.
 
-## Mandatory start procedure
+## Start here
 
-Before proposing or making changes:
+Before proposing or changing anything:
 
 1. Read `AGENTS.md`.
 2. Read `CONTINUE-HERE.md`.
@@ -23,14 +23,14 @@ Before proposing or making changes:
 
 GitHub `main` is source of truth for committed state; open PR state is source of truth for in-flight work.
 
-## Current product checkpoint
+## Product-code checkpoint
 
 Last product-code merge before the 2026-08-13 documentation refresh:
 
 - `6c0dcc39fb1fe6caa6fbe11144296a5899baed3d`
 - PR #194 — app-shell #181/#182 responsive rollout + IA consolidation.
 
-Documentation-only continuity commits followed directly on `main`. Always fetch current `main` before coding.
+Documentation-only continuity commits followed. Always fetch current `main` before coding.
 
 Already merged and not to be reinvented:
 
@@ -50,7 +50,7 @@ Reviewed head: `0295aa4c6af5add0c22fce1df2494446cc40c1d4`
 
 Do not start a parallel Marketing/Knowledge rewrite.
 
-Already delivered on the branch:
+Already delivered:
 
 - canonical Marketing Library data layer retained; accidental parallel data layer removed;
 - real `/admin/marketing` workspace;
@@ -60,7 +60,7 @@ Already delivered on the branch:
 - live read-only evidence: 45 Library sources, 47 Skill Cards, 45 reviews, 16 platform knowledge items, 45 client-industry profiles, 0 Library documents/chunks;
 - goldmine/source-pack files treated as containers, not flattened source substitutes;
 - deterministic extraction: 216 distinct cited sources + 34 container references;
-- conservative needs-review/reference-only phase-28a registration pipeline;
+- conservative needs-review/reference-only registration pipeline;
 - isolated PostgreSQL validation reported clean/idempotent;
 - Marketing Workflow excludes expired Skill Cards.
 
@@ -83,26 +83,11 @@ PR #175 owns staff invitation/auth lifecycle and remains a separate open draft. 
 
 ## Product authorities
 
-### Client Schedule
-
-- `monthly_deliverables` is canonical Client Schedule truth.
-- `/admin/client-schedule` is the content schedule editing surface.
-- client-ready schedule/calendar views are projections.
-- never create another schedule authority.
-
-### Planner/work
-
-- `planner_tasks` is operational task truth, separate from Client Schedule.
+- `monthly_deliverables` is canonical Client Schedule truth; `/admin/client-schedule` is the editing surface.
+- `planner_tasks` is operational task truth and stays separate.
 - completed-task authority was centralised in #176/#188; reuse it.
-
-### Content
-
 - one Content Run has one canonical Content Guideline.
-- Content Guidelines are operational/client-content documents, not Marketing Library knowledge.
-
-### WhatsApp / OneDrive
-
-- WhatsApp remains actual client communication/approval; Dynamics never fakes a send.
+- WhatsApp remains actual client communication/approval; Dynamics never fakes sends.
 - raw OneDrive media stays internal and must never be exposed to clients.
 
 ## CALENDAR LOCK
@@ -134,7 +119,7 @@ Pending migration order:
 
 No production migration without explicit CA approval. Do not replay obsolete client-portal phase scripts afterward.
 
-Exact acceptance later: review only the Aug 24 2026 `MEETING - CG INTERNAL` native/Outlook pair, preserve Outlook badge/location `CG STUDIO`, retain native superseded audit history, hard-refresh and separately verify a Microsoft resync does not recreate the duplicate. Do not alter unrelated events.
+Exact acceptance later: review only the Aug 24 2026 `MEETING - CG INTERNAL` native/Outlook pair, preserve `CG STUDIO`, retain native superseded audit history, hard-refresh and separately verify a Microsoft resync does not recreate the duplicate. Do not alter unrelated events.
 
 ## Client Portal visibility contract
 
