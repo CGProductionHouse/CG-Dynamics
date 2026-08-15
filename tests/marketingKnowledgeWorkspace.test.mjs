@@ -26,6 +26,8 @@ const APP = read('../src/App.tsx')
 const NAV = read('../src/pages/admin/adminNavigation.ts')
 const SEED = read('../supabase/phase-28a-marketing-library-repo-source-registration.sql')
 const WORKFLOW = read('../src/lib/marketingWorkflow.ts')
+const STAFF_DATA = read('../src/lib/marketing-library/skillCardsData.ts')
+const ASSISTANT = read('../supabase/functions/cg-assistant-chat/index.ts')
 
 const card = (over = {}) => ({
   id: 'c', title: 'Hook first 3 seconds', summary: 'Open with tension', principle: 'p', category: 'Creative',
@@ -44,6 +46,7 @@ test('skill-card review-state helpers', () => {
   assert.equal(filters.skillCardNeedsReview({ status: 'draft' }), true)
   assert.equal(filters.skillCardNeedsReview({ status: 'active' }), false)
   assert.equal(filters.skillCardIsStale({ review_expires_at: '2020-01-01' }, '2026-08-10'), true)
+  assert.equal(filters.skillCardIsStale({ review_expires_at: '2026-08-10' }, '2026-08-10'), false)
   assert.equal(filters.skillCardIsStale({ review_expires_at: '2099-01-01' }, '2026-08-10'), false)
   assert.equal(filters.skillCardIsStale({ review_expires_at: null }, '2026-08-10'), false)
   assert.equal(filters.skillCardMissingSource({ source_id: null }), true)
@@ -152,41 +155,53 @@ test('the phase-28a seed is valid against the schema, idempotent, and mirrors th
 
 // ── Marketing AI grounding: approved-only AND not stale/expired (Blocker 4) ───
 
-test('production grounding excludes an active card whose review has expired', () => {
+test('production grounding uses the date-only freshness boundary', () => {
   const agent = skilled.AGENT_CONTRACTS.copywriting_agent
   const base = {
     id: 'x', status: 'active', knowledge_layer: 'universal', client_specific: false, active_client_id: null,
     source_type: 'book', source_id: 's1', title: 'Hook', principle: 'Open strong', summary: 's',
     source_reference: null, relevant_agents: ['copywriting_agent'],
   }
-  const current = { ...base, id: 'current', review_expires_at: '2027-01-01' }
-  const expired = { ...base, id: 'expired', review_expires_at: '2020-01-01' }
+  const expired = { ...base, id: 'expired-yesterday', review_expires_at: '2026-08-09' }
+  const currentToday = { ...base, id: 'current-today', review_expires_at: '2026-08-10' }
+  const currentFuture = { ...base, id: 'current-future', review_expires_at: '2026-08-11' }
   const noExpiry = { ...base, id: 'no-expiry', review_expires_at: null }
-  const now = '2026-08-10T00:00:00.000Z'
+  const today = '2026-08-10'
 
   // Production, with a clock: the expired active card must NOT ground an answer.
-  const prod = skilled.buildPlan([current, expired, noExpiry], { agent, activeClientId: null, mode: 'production', now })
+  const prod = skilled.buildPlan([expired, currentToday, currentFuture, noExpiry], { agent, activeClientId: null, mode: 'production', today })
   const prodIds = prod.cards.map(c => c.id)
-  assert.ok(prodIds.includes('current'), 'a current active card still grounds')
+  assert.ok(!prodIds.includes('expired-yesterday'), 'a card expired yesterday is excluded')
+  assert.ok(prodIds.includes('current-today'), 'a card expiring today is still current')
+  assert.ok(prodIds.includes('current-future'), 'a future expiry is still current')
   assert.ok(prodIds.includes('no-expiry'), 'an active card with no expiry still grounds')
-  assert.ok(!prodIds.includes('expired'), 'an expired active card is excluded from production grounding')
 
   // The gate itself is explicit about the expired card.
-  assert.equal(skilled.isCardRetrievable(expired, { agent, activeClientId: null, mode: 'production', now }), false)
-  assert.equal(skilled.isCardRetrievable(current, { agent, activeClientId: null, mode: 'production', now }), true)
+  assert.equal(skilled.isCardRetrievable(expired, { agent, activeClientId: null, mode: 'production', today }), false)
+  assert.equal(skilled.isCardRetrievable(currentToday, { agent, activeClientId: null, mode: 'production', today }), true)
 
   // Admin research mode is a preview surface — expiry does not exclude there.
-  assert.equal(skilled.isCardRetrievable(expired, { agent, activeClientId: null, mode: 'admin_research', now }), true)
+  assert.equal(skilled.isCardRetrievable(expired, { agent, activeClientId: null, mode: 'admin_research', today }), true)
 
   // Honest refusal is preserved when everything is stale.
-  const allStale = skilled.buildPlan([expired], { agent, activeClientId: null, mode: 'production', now })
+  const allStale = skilled.buildPlan([expired], { agent, activeClientId: null, mode: 'production', today })
   assert.equal(allStale.insufficient, true)
 })
 
-test('the marketing-workflow retrieval passes the clock and expiry column into the gate', () => {
+test('production consumers select and pass the date-only freshness boundary', () => {
   const wf = read('../supabase/functions/marketing-workflow/index.ts')
   assert.match(wf, /review_expires_at/) // selected from skill_cards
-  assert.match(wf, /mode: 'production', now/) // buildPlan receives the current instant
+  assert.match(wf, /new Date\(\)\.toISOString\(\)\.slice\(0, 10\)/)
+  assert.match(wf, /mode: 'production', today/)
+  assert.match(ASSISTANT, /review_expires_at/)
+  assert.match(ASSISTANT, /mode, today/)
+})
+
+test('staff Library and Marketing AI capability counts exclude expired cards', () => {
+  assert.match(STAFF_DATA, /review_expires_at\.is\.null,review_expires_at\.gte\.\$\{today\}/)
+  const stateReader = ASSISTANT.slice(ASSISTANT.indexOf('async function getMarketingAiState'), ASSISTANT.indexOf('function formatMarketingAiState'))
+  assert.match(stateReader, /relevant_agents, source_type, review_expires_at/)
+  assert.match(stateReader, /review_expires_at\.is\.null,review_expires_at\.gte\.\$\{today\}/)
 })
 
 // ── Workspace consolidation + permissions ────────────────────────────────────

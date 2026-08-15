@@ -222,11 +222,10 @@ export interface GateContext {
   activeClientId: string | null
   mode: 'production' | 'admin_research'
   /**
-   * Current instant (ISO) used to exclude expired approvals in production. When
-   * omitted, expiry is not enforced (callers that pass no clock get the legacy
-   * behaviour); production callers MUST pass it so stale cards are excluded.
+   * Current date (YYYY-MM-DD) used to exclude expired approvals in production.
+   * `review_expires_at` is a PostgreSQL date, so expires-today remains current.
    */
-  now?: string
+  today: string
 }
 
 export function isCardRetrievable(card: CardRow, ctx: GateContext): boolean {
@@ -235,7 +234,8 @@ export function isCardRetrievable(card: CardRow, ctx: GateContext): boolean {
     if (card.status !== 'active') return false
     // An active card whose review has lapsed is stale: it was approved for a
     // window that has now passed, so it cannot ground a production answer.
-    if (ctx.now && card.review_expires_at && card.review_expires_at < ctx.now) return false
+    const expiresOn = card.review_expires_at?.slice(0, 10)
+    if (expiresOn && expiresOn < ctx.today) return false
   } else if (!['active', 'needs_review', 'reviewed'].includes(card.status)) {
     return false
   }

@@ -258,11 +258,13 @@ export async function listSkillCards(): Promise<QueryResult<SkillCardRecord[]>> 
 // RLS read policy so the same call is safe for any staff role. (Admins may also
 // use it when they only want the shared, active set.)
 export async function listActiveSharedSkillCards(): Promise<QueryResult<SkillCardRecord[]>> {
+  const today = new Date().toISOString().slice(0, 10)
   const { data, error } = await supabase
     .from('skill_cards')
     .select('*')
     .eq('status', 'active')
     .eq('client_specific', false)
+    .or(`review_expires_at.is.null,review_expires_at.gte.${today}`)
     .order('category', { ascending: true })
   return result((data ?? []) as SkillCardRecord[], error, [])
 }
