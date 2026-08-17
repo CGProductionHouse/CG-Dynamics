@@ -7,21 +7,22 @@ Canonical URL: `https://github.com/CGProductionHouse/CG-Dynamics/blob/main/docs/
 
 This is the cross-project authority for AI tools, coding agents, shared capabilities, reusable systems and working process used across CG projects.
 
-Project-specific product decisions still belong in each project's own `AGENTS.md`, continuity docs, issues and codebase.
+Project-specific product/design/business decisions still belong in each project's own `AGENTS.md`, continuity/decision docs, issues, PRs and codebase.
 
 ## 1. Mandatory grounding rule
 
-Every new ChatGPT project/chat, Claude Code session, OpenCode session, Codex task, Cline task, Roo Code task or other coding/research agent should ground itself in this order before proposing work:
+Every new ChatGPT project/chat, Claude Code session, OpenCode session, Codex task, Antigravity session, Cline task, Roo Code task or other coding/research agent should ground itself in this order before proposing work:
 
-1. Read this file.
-2. Identify the exact project and repository. Never invent a repo, owner, local path or target branch.
-3. Read that project's `AGENTS.md`, `CONTINUE-HERE.md`, `README.md`, current goal/decision docs and any project-specific standards.
+1. Read this file when the task touches shared tools/agents/workflow.
+2. Identify the exact project and repository. Never invent a repo, owner, local path, target branch or deployment target.
+3. Read the project's `AGENTS.md`, `CONTINUE-HERE.md`, `README.md`, current goal/decision docs and project standards.
 4. Inspect current GitHub `main`, latest relevant commits, open PRs and open issues.
-5. Continue an existing branch/PR when it already owns the task instead of creating duplicate work.
-6. Check whether a reusable system already solves the foundation before scaffolding anything new.
-7. Only then decide which agent/tool should do the work.
+5. Continue an existing branch/PR when it already owns the task instead of creating duplicate/abortive work.
+6. Check whether a reusable CG system already solves the foundation before scaffolding anything new.
+7. Check connected/current tool state when the answer depends on GitHub, Vercel, email/calendar, Supabase, model/provider availability or other live systems.
+8. Only then choose the agent/tool and execute.
 
-Every new CG repository's `AGENTS.md` should include a direct pointer to this canonical file.
+Every new CG repository's `AGENTS.md` should point directly to this file.
 
 Do not ask CA to repeat information that can be recovered from current GitHub, connected tools or established continuity files.
 
@@ -29,34 +30,31 @@ Do not ask CA to repeat information that can be recovered from current GitHub, c
 
 ### Current state beats static checkpoints
 
-Static commit SHAs in this file are historical orientation only.
+Historical commit SHAs in shared docs are orientation only. When a repo is accessible, current GitHub `main` is authoritative unless the project explicitly pins a version.
 
-When a repository is accessible, current GitHub `main` is authoritative unless a project explicitly pins a version.
-
-Never treat a historical milestone as the required current commit.
-
-### Verify repository identity before blaming authentication
+### Verify identity before blaming credentials
 
 If `gh repo view owner/repo` or a connector lookup fails:
 
-1. verify the documented repo owner/name;
-2. search GitHub for the repository/name/known commit;
-3. check whether the documentation is stale;
-4. only then investigate GitHub authentication or permissions.
+1. verify the documented owner/name;
+2. search GitHub for the repo/name/known commit;
+3. check whether documentation is stale;
+4. only then investigate authentication/permissions.
 
-Do **not** immediately switch GitHub accounts.
+Do not immediately switch GitHub accounts.
 
-### Canonical shared references must be machine-verifiable
+### Shared references must be verifiable
 
-Before changing repo/path/checkpoint facts in this master, verify that:
+Before recording repo/path/checkpoint facts as canonical, verify:
 
-- the repo exists;
-- the owner/name is exact;
-- referenced files exist;
-- historical checkpoints actually belong to the stated repo;
-- local canonical paths are clearly labelled as workstation-local rather than GitHub truth.
+- repo exists;
+- owner/name is exact;
+- referenced file exists;
+- checkpoint belongs to the stated repo;
+- local paths are clearly labelled workstation-local;
+- current `main` is not being confused with a historical milestone.
 
-The Website System improvement PR described below adds `validate-shared-truth.ps1` for this purpose.
+The Website System draft improvement adds `validate-shared-truth.ps1` to automate much of this.
 
 ## 3. Verified shared-system registry
 
@@ -64,13 +62,11 @@ The Website System improvement PR described below adds `validate-shared-truth.ps
 
 Product/system name: **CG Website Builder / CG Website System**
 
-Verified GitHub repository:
+GitHub repo:
 
 `CGProductionHouse/cg-website-editor`
 
-Verified accessible on 17 August 2026.
-
-Local canonical repository path on CA's current workstation:
+Local canonical repo path on CA's current workstation:
 
 `C:\Projects\CG-Websites\cg-website-editor`
 
@@ -78,197 +74,202 @@ Reusable system directory:
 
 `C:\Projects\CG-Websites\cg-website-editor\website-system`
 
-Historical foundation milestone:
-
-`ed823b7` — verified to belong to `CGProductionHouse/cg-website-editor`.
-
-Observed current-main checkpoint during the CG ARCC setup test:
-
-`f891383` — **not pinned**; always re-check current `main` before work.
+Historical foundation milestone: `ed823b7` — not pinned.
 
 Old `Captured-Growth/cg-website-builder` references are stale and must not be used as current truth.
 
 ### Imbewu reference site
 
-Verified GitHub repository:
+GitHub repo:
 
 `CGProductionHouse/Imbewu-Website`
 
-Historical bootstrap checkpoint:
+Historical bootstrap checkpoint: `df00359` — not pinned.
 
-`df00359` — verified to belong to that repository.
-
-Old `Captured-Growth/cg-imbewu-website` references are stale and must not be used as current truth.
+Imbewu is a learning/reference project, not a visual template every new site should copy.
 
 ### CG ARCC setup test
 
-`CGProductionHouse/cg-arcc` now exists as a private repo and was used as the real-world new-project setup test on 17 August 2026.
-
-Do not move CG ARCC project-specific decisions into this master; its value here is as the test case that exposed shared startup friction.
+`CGProductionHouse/cg-arcc` was used as a real new-project setup test on 17 August 2026 and exposed shared GitHub/Vercel/startup friction. Project-specific CG ARCC decisions do not belong in this master.
 
 ## 4. What belongs in this master
 
-Update this file when a change affects multiple projects or agents, including:
+Update this file when a change affects multiple projects/agents, including:
 
 - AI subscriptions/provider availability;
-- OpenCode global provider/model setup;
-- which coding agent is used for which class of work;
-- new connected tools/connectors that materially change capability;
-- reusable website-system milestones that affect every new site;
-- global bootstrap/QA/deployment process;
-- agent coordination rules;
-- model retirement/replacement decisions;
+- coding-agent installation/availability;
+- shared model/provider lessons;
+- agent routing by job type;
+- unattended/autonomous execution policy;
+- reusable Website System capabilities/startup/deployment process;
+- shared connected tools;
+- cross-agent coordination/anti-duplicate rules;
 - major shared workflow decisions.
 
-Do **not** turn this into a duplicate log of each project's tickets, UI changes or client-specific decisions.
+Do not turn this into a duplicate log of each project's features/client decisions.
 
-## 5. Current AI / agent stack
+## 5. Current practical AI / coding stack
 
-| Tool / service | Current role | Current state |
+| Tool | Practical role | Current lesson/state |
 |---|---|---|
-| **ChatGPT Plus** | Product direction, research, connected-tool work, GitHub inspection, prompt control, review and cross-project continuity | Active. Use connected tools when available instead of asking CA to search manually. |
-| **Claude Code** | Primary heavy engineering agent for architecture, substantial multi-file work and repo-wide missions | Available. Give it the goal, constraints and acceptance result; do not micromanage file-by-file. |
-| **OpenCode** | Practical coding workhorse for bounded implementation, routine fixes and continued coding | Active with global provider/model configuration. Model/provider routed; not synonymous with DeepSeek. |
-| **Codex** | Focused coding/review work | Available but usage can be constrained; keep missions focused. |
-| **Cline** | VS Code fallback coding agent | Wired into shared workflow. Must read current repo instructions first. |
-| **Roo Code** | VS Code fallback coding agent | Wired into shared workflow. Must read current repo instructions first. |
-| **Google / Gemini** | Secondary coding/research option | Connected, but CA reports current quota/cap behaviour is too restrictive for dependable daily coding. Keep available; do not depend on it for critical continuity. |
-| **OpenRouter** | Separate paid API-backed multi-model route used through OpenCode | Active connection. Treat as separate from OpenCode Zen free limits. Never store keys/billing secrets in GitHub. |
-| **OpenCode Zen** | Free/fallback model pool | Active. Curated shortlist should be used rather than the full catalogue. |
-| **Direct OpenAI in OpenCode** | Direct OpenAI models available inside OpenCode | Connected and visible. Do not hide the provider globally. Exact billing/auth mechanism is not recorded here. |
+| **ChatGPT Plus** | Product/visual direction, connected tools, GitHub/Vercel inspection, research, planning, review, cross-project continuity and efficient coding-agent missions | Active. Inspect connected/current state instead of asking CA to manually find information. Can make targeted GitHub changes directly where appropriate. |
+| **Claude Code** | Heavy engineering, architecture, substantial multi-file missions, repo-wide refactors/audits | Strong option but usage frequently depletes. Use when available for substantial work; give objective/constraints/acceptance, not file-by-file micromanagement. |
+| **OpenCode** | Main practical coding workhorse when current provider/model quota is available | Keep prompts tight and execution-focused. Check actual current models/providers rather than assuming a model ID or quota still exists. |
+| **Codex** | Focused implementation/review/fixes | Useful but usage is too limited for long continuous website builds unless quota clearly exists. |
+| **Antigravity CLI (`agy`)** | Proper fallback coding-agent bucket | Installed, Google sign-in working and tested successfully on Imbewu. Gemini 3.7 Flash High completed useful multi-file website implementation, lint/build/QA, Git commit and push. Launch from the project folder with `agy`. Treat quota as limited. |
+| **Cline** | VS Code fallback coding agent | Keep as fallback. Must use same repo/project grounding; never independently reinvent architecture. |
+| **Roo Code** | VS Code fallback coding agent | Same rules as Cline. |
+| **Google / Gemini services** | Secondary coding/research capability | Keep available, but CA reports caps/quotas are poor for dependable daily coding. Do not make critical continuity depend on Google quota. |
+| **OpenRouter** | Separate paid API-backed multi-model route usable through OpenCode | Useful when available; separate from Zen/free limits. Never store keys/billing secrets in GitHub. |
+| **OpenCode Zen** | Free/fallback OpenCode models | Availability changes. Inspect current list before assigning work. |
+| **Direct OpenAI through OpenCode** | Additional model route when connected/available | Previously visible on 17 Aug 2026; inspect current state before relying on it. Do not hide working provider access through speculative global filtering. |
+| **Ollama / local models** | Optional experimental/simple/local tasks | Do not route production website implementation to an unproven local model merely because it is free. |
 
-### Possible future research subscription
+### Possible research subscription
 
-A dedicated paid Google research/deep-research product may be considered for high-volume Media/Marketing Library research/custodian work.
+A dedicated paid Google research/deep-research product may be considered for high-volume Media/Marketing Library custodian/research work.
 
-Status: **candidate only**. Verify current product, pricing, quotas and terms before spending money.
+Status: **candidate only**. Verify the actual current product, pricing, quotas and terms before spending money.
 
-## 6. OpenCode global configuration — current checkpoint
+## 6. OpenCode configuration — rollback and current rule
 
-Global configuration is managed under `%USERPROFILE%\.config\opencode\opencode.json`.
+On 17 August 2026 an experimental global OpenCode provider/model filtering config was introduced, caused confusion by hiding/changing already-working provider/model access, then was **backed up and removed**.
 
-Important decision: **do not use a global `enabled_providers` allowlist at the moment.** It previously hid direct OpenAI and other already-connected providers. Curate large providers with per-provider model whitelists instead.
+Previous path:
 
-### OpenCode Zen shortlist
+`%USERPROFILE%\.config\opencode\opencode.json`
 
-Current global whitelist:
+Current rule:
 
-- `deepseek-v4-flash-free` — CA's proven favourite OpenCode model; keep visible unless it actually stops working;
-- `big-pickle`;
-- `mimo-v2.5-free`;
-- `nemotron-3-ultra-free`;
-- `nemotron-3.5-lightning-free`.
+- do **not** assume a custom global OpenCode config exists;
+- do not recreate restrictive provider/model whitelists merely to make the picker cleaner;
+- do not hide already-working providers;
+- actual current provider/model availability beats stale documentation;
+- never guess model IDs;
+- project-level `opencode.json` may still exist for legitimate project-specific tooling/MCP and must be inspected before changing anything.
 
-Do not confuse the working Zen model `opencode/deepseek-v4-flash-free` with an older/dead similarly named provider endpoint.
-
-### OpenRouter shortlist
-
-Current global whitelist:
-
-- `~deepseek/deepseek-v4-flash-latest`;
-- `deepseek/deepseek-v4-pro-0813`;
-- `~anthropic/claude-sonnet-latest`;
-- `~anthropic/claude-haiku-latest`;
-- `~moonshotai/kimi-latest`;
-- `~openai/gpt-latest`;
-- `~openai/gpt-mini-latest`.
-
-Current global defaults recorded locally:
-
-- normal model: `openrouter/deepseek/deepseek-v4-pro-0813`;
-- small model: `openrouter/~openai/gpt-mini-latest`.
-
-These are defaults, not a claim that they outperform CA's preferred Zen DeepSeek for every task.
-
-### Google shortlist
-
-Current global whitelist:
-
-- `gemini-flash-latest`;
-- `gemini-3.1-pro-preview`;
-- `deep-research-max-preview-04-2026`.
-
-Google remains secondary because of quota/cap experience.
-
-### Direct OpenAI currently visible in OpenCode
-
-Confirmed on 17 August 2026:
-
-- `openai/gpt-5.3-codex-spark`;
-- `openai/gpt-5.4`;
-- `openai/gpt-5.4-fast`;
-- `openai/gpt-5.4-mini`;
-- `openai/gpt-5.4-mini-fast`;
-- `openai/gpt-5.5`;
-- `openai/gpt-5.5-fast`;
-- `openai/gpt-5.6-luna`;
-- `openai/gpt-5.6-luna-fast`;
-- `openai/gpt-5.6-sol`;
-- `openai/gpt-5.6-sol-fast`;
-- `openai/gpt-5.6-terra`;
-- `openai/gpt-5.6-terra-fast`.
-
-Direct OpenAI is intentionally not globally whitelisted yet so useful models such as Sol are not accidentally hidden again.
-
-### OpenCode maintenance
-
-When a model fails, is retired or the catalogue becomes stale:
+Before troubleshooting OpenCode:
 
 ```powershell
 opencode --version
+opencode models
+```
+
+Then inspect, in order:
+
+1. current session model;
+2. actual provider/model list;
+3. project-level `opencode.json`;
+4. provider/auth state;
+5. global config only if one actually exists.
+
+If catalogue/version drift is the problem:
+
+```powershell
 opencode upgrade
 opencode models --refresh
 ```
 
-Then inspect the real current model IDs before editing global/project config. Do not guess provider IDs.
+Do not repeatedly patch global config based on a guessed model/provider name.
 
-Project-level `opencode.json` can override global settings. Inspect it before diagnosing a project-specific model problem.
+### Local-model lesson
 
-## 7. Agent allocation
+Gemma 4 12B was tested through OpenCode for real agentic website implementation/tool use and performed poorly: incorrect/nonexistent tools and irrelevant tasks were attempted.
 
-### Claude Code
+Do not route production website implementation to Gemma by default. Local models are experimental/simple-task options unless a specific model proves itself on the real workflow.
 
-Use for large architecture, substantial multi-file implementation, repo-wide refactors/audits and major product missions.
+## 7. Agent routing by job type
 
-Give Claude the objective, source-of-truth docs, boundaries and acceptance criteria. Let it choose implementation shape unless there is a real product/security constraint.
+| Job type | Preferred routing |
+|---|---|
+| Thinking, product/visual direction, research, connected accounts, repo inspection, prompt preparation, review | ChatGPT / strongest available reasoning/vision capability |
+| Initial visual/reference audit or genuinely new creative direction | Strong vision/reasoning agent first; capture result in project docs before coding |
+| Major architecture / risky multi-file change | Claude Code or another proven strong coding agent when quota exists |
+| Approved implementation already defined in repo docs | OpenCode or Antigravity as practical workhorse; Claude where complexity warrants it |
+| Styling, components, responsive work, testing, repetitive implementation | Coding workhorse with repo docs as authority |
+| Bounded fixes, docs, simple mechanical refactors | Cheaper/smaller proven model is acceptable |
+| Unproven local model experiment | Only when it cannot delay the production path |
 
-### OpenCode
+Use the strongest **suitable available** tool, not simply the cheapest tool.
 
-Use for bounded implementation, routine fixes, practical continued development and local setup/automation once the mission is understood.
+Never spend expensive coding-agent quota re-planning decisions already captured in the repository.
 
-OpenCode must still inspect repo instructions/current GitHub first. Do not let a cheap model redo architecture another agent already delivered.
+## 8. Prompt efficiency — think before coding
 
-### Codex
+New standard:
 
-Use for focused implementation/review where useful. Keep missions tight because usage may be constrained.
+**DO THE THINKING BEFORE THE CODING PROMPT.**
 
-### Cline / Roo Code
+ChatGPT/project docs should establish:
 
-Fallback execution paths, not separate product brains. They must use the same GitHub source of truth, repo instructions and current mission ownership.
+- exact objective;
+- verified content/facts;
+- assets and their roles;
+- design direction/references;
+- constraints;
+- reusable patterns/skills;
+- acceptance criteria;
+- explicit out-of-scope items.
 
-### ChatGPT
+Then the coding-agent prompt should normally be tiny:
 
-Use for deciding what happens next, inspecting GitHub/current state, research/connected-account work, reviewing agent output, writing efficient agent missions, cross-project continuity and business/product/professional reasoning.
+```text
+Read AGENTS.md and the current approved PHASE-X.md. Implement it using the CG Website System. Use the standard autonomous/unattended execution rules. Build, test, run CG Website System QA, commit and push only if verification passes.
+```
 
-ChatGPT should not invent local/repo state when it can inspect it.
+Long prompts are justified only for a genuinely new creative phase, architecture change, or unattended boundary not already captured in repo docs.
 
-## 8. New website startup — canonical process
+Do not paste the full client history into every coding session.
 
-The CG ARCC setup test confirmed the **human-controlled start is correct**, but repetitive verification/setup must be automated.
+## 9. Standard autonomous / unattended execution
 
-### Step 1 — human confirms the three facts
+CA frequently leaves agents running. Routine project development should not repeatedly stop for `Yes` on reversible in-scope work.
 
-Before automation, CA confirms:
+When a coding prompt explicitly invokes autonomous/unattended execution, the agent is authorised to perform normal project development without repeated confirmation, including:
+
+- reading/searching project files;
+- editing/creating/moving/deleting in-scope files where Git makes the change reversible;
+- normal dependency install justified by the approved phase;
+- non-interactive development commands;
+- lint/typecheck/tests/build/CG Website System QA;
+- fixing failures and rerunning checks;
+- Git status/diff/add/commit;
+- pushing when repository instructions allow it and required verification passes.
+
+The agent should choose safe/reversible implementation details itself, fix failures and continue, and finish all unblocked work rather than sitting indefinitely on a minor external blocker.
+
+**Stop only for:**
+
+- required missing credentials/secrets unavailable through an approved connected tool;
+- purchases/subscriptions/billing;
+- DNS/domain ownership changes or external account ownership actions not explicitly approved;
+- irreversible production deletion/destruction;
+- destructive work outside scope;
+- genuine unrecoverable technical blocker;
+- major unresolved product/design decision not answered by current project authority.
+
+Unattended mode never authorises weakening security, inventing client facts, exposing secrets or making unrelated destructive external changes.
+
+Website-specific reusable block:
+
+`CGProductionHouse/cg-website-editor/website-system/prompts/AUTONOMOUS-EXECUTION.md` (currently on the draft Website System improvement branch until merged).
+
+## 10. New website startup — canonical target process
+
+The human-controlled start remains correct, but repetitive mechanics should be automated.
+
+### CA confirms once
 
 - exact local folder;
 - exact GitHub `owner/repo`;
-- visibility (normally private unless explicitly public).
+- repo visibility;
+- intended Vercel scope/team.
 
-Nothing else should be guessed.
+Automation must stop rather than guess anything ambiguous.
 
-### Step 2 — one read-only preflight
+### Read-only preflight
 
-Target shared command (implemented in draft Website System PR #1):
+Draft Website System PR #1 adds:
 
 ```powershell
 C:\Projects\CG-Websites\cg-website-editor\website-system\scripts\check-new-project.ps1 `
@@ -276,162 +277,252 @@ C:\Projects\CG-Websites\cg-website-editor\website-system\scripts\check-new-proje
   -TargetRepo "CGProductionHouse/client-site"
 ```
 
-It reports without modifying anything:
+It is intended to report folder/Git/origin, GitHub auth/repo identity, Node/npm, Ollama inventory, Website System state, Vercel CLI/version/capabilities/link/config, bootstrap/project-doc state and other startup truth without modifying anything.
 
-- local folder and empty/non-empty state;
-- Git state/current branch/origin/working tree;
-- GitHub CLI/authenticated account;
-- target repo existence;
-- Node/npm;
-- Ollama + installed models;
-- canonical Website System path/current branch/commit/clean state;
-- bootstrap state;
-- master-pointer presence;
-- application scaffold presence.
+### Combined new-site command
 
-### Step 3 — one normal new-site command
-
-Target shared command (implemented in draft Website System PR #1):
+Draft target:
 
 ```powershell
 C:\Projects\CG-Websites\cg-website-editor\website-system\scripts\new-site.ps1 `
   -ProjectPath "C:\Projects\CG-Websites\client-site" `
   -Repo "CGProductionHouse/client-site" `
-  -Private
+  -Private `
+  -VercelScope <verified-vercel-scope>
 ```
 
-It is designed to stop rather than guess and to combine:
+Target end state:
 
-- Git/main initialisation;
-- GitHub account/target repo verification;
-- private/public repo creation;
-- origin verification;
-- canonical Next.js scaffold;
-- project docs/agent bootstrap;
-- cross-project master pointer;
-- dependency install;
-- lint/build;
-- clean initial commit/push only when verification passes.
+- Git initialized on `main`;
+- exact GitHub repo created/connected;
+- origin verified;
+- canonical Next.js scaffold installed;
+- dependencies installed;
+- `AGENTS.md` + project intelligence created;
+- cross-project master + Website System pointers present;
+- local `reference/` ignored;
+- lint/build/shared QA passing;
+- initial commit pushed;
+- Vercel project linked to the intended scope;
+- Next.js framework/build/install/output auto-detection verified;
+- Git integration connected;
+- temporary Vercel URL verified and recorded before deployment setup is considered complete.
 
-Vercel remains a separate verified step because project/team/domain choice can be ambiguous.
+The script must never guess a generated deployment URL; verify the real result.
 
-### Terminology
+### Production-readiness status
 
-- `bootstrap-site.ps1` = repo docs/agent grounding only;
-- canonical Next.js template = application scaffold only;
-- `new-site.ps1` = preferred combined brand-new-site workflow once merged and validated.
+The enhanced startup automation is still **draft/experimental** in `CGProductionHouse/cg-website-editor#1` until one complete real Windows workstation acceptance run proves the full path.
 
-Do not say a site is fully bootstrapped when it only has docs and no application scaffold.
+Do not call it production-ready before that happens and the PR is merged.
 
-### Current implementation status
+Existing reusable standards/templates/create-only bootstrap remain available independently.
 
-Draft Website System PR:
+## 11. Standard website project document flow
 
-`CGProductionHouse/cg-website-editor#1` — **Automate verified new website startup and shared grounding**.
+Every new site should quickly establish/maintain:
 
-It also updates `bootstrap-site.ps1` so new `AGENTS.md` files automatically include:
+- `AGENTS.md`
+- `docs/PROJECT-BRIEF.md`
+- `docs/DESIGN-DIRECTION.md`
+- `docs/CONTENT-SOURCE.md`
+- `docs/ASSET-MANIFEST.md`
+- `docs/DECISIONS.md`
+- `docs/DEPLOYMENT.md`
+- current `docs/PHASE-X.md`
 
-- this master pointer;
-- canonical Website System pointer;
-- grounding order;
-- current Git/GitHub verification;
-- anti-duplicate rules.
+Authority:
 
-The PR is intentionally draft until one real Windows workstation dry run validates the PowerShell path end-to-end. Do not claim these new commands are production-ready until that acceptance passes and the PR is merged.
+- `CONTENT-SOURCE` = verified facts/assets/source provenance safe to publish;
+- `ASSET-MANIFEST` = which assets map to which website roles;
+- `DESIGN-DIRECTION` = approved visual benchmark and brand/interaction direction;
+- `DECISIONS` = durable choices future agents should not reopen without reason;
+- `PHASE-X` = actual approved implementation authority;
+- `DEPLOYMENT` = repo/Vercel/domain/verification state, never secrets.
 
-## 9. Reusable Website System capability
+This is what allows a coding agent to receive a tiny prompt instead of redoing research/planning.
 
-Current verified reusable-system repo is `CGProductionHouse/cg-website-editor`.
+## 12. Reusable Website System capability
 
-The system includes:
+Current verified reusable-system repo: `CGProductionHouse/cg-website-editor`.
 
-- create-only/idempotent project bootstrap;
-- canonical Next.js template;
-- shared agent wiring for OpenCode, Claude Code, Codex, Cline and Roo Code;
-- skills for project bootstrap, content audit, asset selection, image quality, responsive design, animation/motion, SEO, production QA, Vercel deployment and domain handover;
-- patterns for accessible header/mobile dialog, responsive hero video, gallery carousel, logo marquee, reveal/ambient motion, interactive cards, section/CTA primitives, responsive images, PDF fallback, footer and Sharp image optimisation.
+It contains reusable standards/templates/skills/patterns around:
 
-Every new website should inherit the strongest current reusable standards rather than recreating responsive/mobile foundations, accessibility/navigation/footer, media fallbacks, image optimisation, SEO, animation primitives, QA, Vercel conventions or agent setup.
+- project bootstrap/grounding;
+- server-first typed Next.js architecture;
+- responsive/mobile/accessibility foundations;
+- navigation/footer;
+- media fallbacks and image optimisation;
+- SEO/metadata;
+- motion/animation primitives;
+- QA;
+- Vercel deployment/domain handover;
+- agent automation.
 
-If a new site improves a reusable pattern, feed the verified client-agnostic improvement back into the Website System.
+Every new website should inherit the strongest verified foundation instead of rebuilding basics.
 
-## 10. New chat / project grounding protocol
+## 13. Creative quality lesson from Imbewu
 
-A fresh ChatGPT chat should not behave like a blank generic assistant.
+Do **not** turn every future website into an Imbewu clone.
 
-Before advising on an existing CG project, it should:
+General lesson: a technically clean one-page site is not automatically premium.
+
+Creative review should consider, where appropriate:
+
+- visual storytelling density;
+- human imagery/trust;
+- section variety;
+- hero depth/layering;
+- overlapping/breakout composition;
+- purposeful motion/immersive transitions;
+- translucent/glass surfaces where brand-appropriate;
+- opening/load animation where useful;
+- multi-page architecture when content supports it;
+- avoiding repetitive card-grid layouts;
+- deliberate mobile composition.
+
+These are available techniques, not mandatory styling.
+
+### Pattern candidates discovered during Imbewu
+
+Candidates only until visually approved/proven/extracted:
+
+- opening brand reveal;
+- frosted/matte glass navigation;
+- human breakout image composition;
+- dimensional/rotating hero stack;
+- pointer-responsive hero depth;
+- ambient living-background system;
+- no-controls interactive marquee;
+- browser-friendly contact modal: Copy email / Open Gmail / `mailto:` fallback.
+
+Promotion process:
+
+client implementation → visual approval → responsive/accessibility/performance proof → clean client-agnostic extraction → shared-system validation.
+
+Do not promote an experimental client implementation directly into the shared Website System.
+
+## 14. Responsive website standard
+
+Minimum creative/QA viewport set:
+
+Desktop: 1920, 1440
+
+Tablet: 1024, 768
+
+Mobile: 430, 390, 375
+
+Mobile must be designed, not merely stacked.
+
+Check at minimum:
+
+- page overflow;
+- navigation;
+- image/video crops/fallbacks;
+- hero composition;
+- interactive elements;
+- motion + reduced motion;
+- typography/wrapping;
+- touch targets;
+- modals/dialogs/focus;
+- performance;
+- intentional horizontal scrollers remaining contained.
+
+Automated lint/build is not a replacement for browser/device/visual QA.
+
+## 15. Vercel / deployment / domain handover
+
+Shared lessons:
+
+- connect GitHub/Vercel early enough to verify automatic `main` deployment;
+- record the real temporary Vercel URL;
+- standard Next.js projects must not inherit stale static `public` output settings;
+- current Vercel CLI capabilities must be checked before automation creates a project;
+- framework/build/dev/install/output settings should be normalized/auto-detected for the canonical Next.js path before first Git deployment;
+- local build success does not prove Vercel project configuration is correct.
+
+For final domain connection:
+
+- read the **exact DNS records shown by that project's current Vercel configuration**;
+- inspect existing DNS/screenshots first;
+- never guess registrar UI behaviour when visible state exists;
+- preserve MX/SPF/DKIM/DMARC unless mail migration is explicitly in scope;
+- change only web records required for the website;
+- expect propagation and verify intended hosts;
+- update canonical/OG/sitemap metadata to the real production domain after connection.
+
+Screenshots/current DNS supplied by CA are source-of-truth evidence for visible state; generic registrar instructions must not contradict them.
+
+## 16. New chat / project grounding protocol
+
+A fresh ChatGPT/agent session must not behave like a blank generic assistant.
+
+Before advising on an existing project:
 
 1. identify the project;
-2. inspect this master when the question touches tools/agents/shared workflow;
-3. inspect the relevant repo if one exists;
-4. read repo-specific instructions/decisions;
-5. check connected files/accounts when the answer depends on them;
-6. distinguish known facts from assumptions;
-7. avoid proposing setup/build work already completed elsewhere.
+2. read this master when shared tooling/workflow matters;
+3. inspect the real repo/current GitHub state;
+4. read repo-specific instructions/decisions/current phase;
+5. inspect connected files/accounts where relevant;
+6. distinguish verified facts from assumptions;
+7. avoid setup/build work already completed elsewhere.
 
-For a brand-new project with no repo yet, ChatGPT should establish the three human-controlled setup facts first, then use the shared verified startup workflow. It should **not** invent a target repo/folder tree/coding mission and ask CA to catch up.
+For a brand-new project, establish the human-controlled setup facts and use the verified shared startup path. Do not invent a repo/folder tree/coding mission and ask CA to catch up.
 
-## 11. Master vs Website AI tracker
+## 17. Master vs Website appendix
 
-Authority is intentionally split:
+Authority split:
 
-- `CG-Dynamics/docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` = cross-project authority;
-- `cg-website-editor/website-system/AI-TOOLCHAIN.md` = website-specific implementation/tooling appendix.
+- this file = cross-project AI/tool/workflow authority;
+- `cg-website-editor/website-system/AI-TOOLCHAIN.md` = website-specific implementation/tooling appendix;
+- project `AGENTS.md` / docs = project-specific truth.
 
-The website appendix must point back to this master and must not duplicate stale account/repo/provider facts as independent truth.
+The website appendix must reference this master and not become a competing source for subscriptions/accounts/provider truth.
 
-## 12. Research / connected tools
+## 18. Connected tools
 
-Use connected tools when they materially reduce manual work, but verify the tool is actually available in the current session before claiming capability.
+Use connected tools when they materially reduce manual work, but verify availability in the current session before claiming capability.
 
 Examples:
 
 - GitHub for repo/current state;
-- Gmail/Outlook for correspondence when connected;
-- Calendar for schedules/events when connected;
+- Vercel for projects/deployments/build/runtime state;
+- Gmail/Outlook/Calendar when correspondence/schedules matter;
 - Supabase for authorised schema/data inspection;
-- Vercel for deployment/build state;
-- web research for current laws, standards, products, prices and professional guidance.
+- web research for current laws/standards/products/prices/professional guidance.
 
-Never claim a connected-account action happened without actually invoking the relevant tool.
+Never claim an external action happened without invoking the relevant tool.
 
-## 13. Cross-agent anti-duplicate rules
+## 19. Cross-agent anti-duplicate rules
 
-Before starting work, every agent asks:
+Before starting work, ask:
 
 - Is this already on `main`?
 - Is an open PR already solving it?
 - Is another agent/session actively working on it?
-- Is there already a reusable system/pattern/skill for it?
+- Is there already a reusable pattern/skill/system for it?
 - Is the requested behaviour intentionally locked by project docs?
 - Am I about to create another source of truth?
 
-If yes, reconcile first.
+If yes, reconcile/continue first.
 
-## 14. Security / secrets
+## 20. Security / secrets
 
-Never commit:
+Never commit API keys, OpenCode auth tokens, provider billing secrets, passwords, Supabase service-role secrets, Vercel tokens or private credentials.
 
-- OpenRouter keys;
-- OpenAI/Anthropic/Google keys;
-- OpenCode auth/session tokens;
-- Supabase service-role secrets;
-- paid-provider billing secrets;
-- passwords or private credentials.
+Track capability/process, not secret values.
 
-Track capability and process, not secrets.
+## 21. Continuity loop
 
-## 15. Update rule
+The biggest goal is that **each website/project should take less avoidable setup time than the previous one**.
 
-When an agent changes something that affects the shared stack, it must update this file in the same work.
+Every project asks:
 
-Examples:
+- What existing CG capability can solve this?
+- What did the previous project teach us?
+- Is this reusable or project-specific?
+- Can the next project inherit it automatically?
 
-- new/replaced coding agent;
-- new shared subscription;
-- OpenCode provider/model strategy change;
-- reusable Website System milestone affecting all future sites;
-- new global bootstrap/QA/deployment process;
-- new research tooling affecting multiple projects.
+New websites should spend more time on client-specific research/creative quality and less time rebuilding navigation, mobile menus, SEO, metadata, image optimisation, motion primitives, accessibility, deployment structure, contact fundamentals, project grounding and QA.
 
-For shared website repo/path/checkpoint changes, run the shared-truth validation once PR #1 is merged. Project-specific work should update that project's own continuity files instead.
+When a shared tool/process materially changes, update this master in the same work. Project-specific changes stay in project-specific continuity.
