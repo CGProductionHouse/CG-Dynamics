@@ -37,6 +37,8 @@ These help CA build and maintain CG software. They are **not** CG Dynamics runti
 | Claude Code | Primary heavy engineering agent for large architecture, substantial multi-file work and repo-wide missions. Do not micromanage it file-by-file. |
 | OpenCode | Practical workhorse for bounded implementation, routine coding, fixes and continued work when other agent usage is constrained. OpenCode is a shell over selectable model providers; it is not synonymous with DeepSeek. |
 | Codex | Focused coding/review work when useful and available; keep prompts tight because usage can be constrained. |
+| Cline | Wired as an additional VS Code coding-agent fallback. Use when it materially helps continuity or another primary agent is constrained; it must follow repository instructions and current GitHub state. |
+| Roo Code | Wired as an additional VS Code coding-agent fallback. Use under the same continuity/source-of-truth rules as the other coding agents. |
 | Gemini / Google tools | Secondary option. Keep available, but CA has found current quota/cap behaviour too restrictive for regular coding use. |
 
 Agents must check GitHub `main`, open PRs and continuity docs before starting work so multiple agents do not solve the same problem twice.
@@ -47,7 +49,24 @@ These are optional model/provider resources used for research or as model backen
 
 A future paid Google research/deep-research option may be considered for a research/custodian role working on Media/Marketing Library research. This is a **candidate decision only**, not an approved subscription or production dependency.
 
-## 2. OpenCode workstation checkpoint
+## 2. Cross-project reusable website agent system checkpoint
+
+Confirmed on 17 August 2026 from the reusable website-system handoff:
+
+- reusable Website Builder repository: `Captured-Growth/cg-website-builder`;
+- Website Builder checkpoint commit: `ed823b7`;
+- Imbewu repository: `Captured-Growth/cg-imbewu-website`;
+- Imbewu bootstrap checkpoint commit: `df00359`;
+- OpenCode, Claude Code, Codex, Cline and Roo Code are wired into the reusable website workflow;
+- active sessions need restart to reload changed global instructions;
+- `bootstrap-site.ps1` is create-only and idempotent; a second Imbewu bootstrap preserved existing files;
+- reusable website skills now cover project bootstrap, content audit, asset selection, image quality, responsive design, animation/motion, SEO, production QA, Vercel deployment and domain handover;
+- reusable implementation patterns include accessible header/mobile dialog, responsive hero video, controlled gallery carousel, logo marquee, reveal/ambient motion, interactive cards, section/CTA primitives, responsive images, PDF fallback, footer and Sharp image optimisation;
+- the reusable system is intended to make each new website start from proven standards rather than relearn/rebuild the same foundation.
+
+Keep detailed website implementation history in the Website Builder and site repositories. This document records the **AI/agent workflow and reusable-system relationship only**, so CG Dynamics does not become a duplicate website-project log.
+
+## 3. OpenCode workstation checkpoint
 
 Confirmed by CA on 17 August 2026:
 
@@ -58,7 +77,7 @@ Confirmed by CA on 17 August 2026:
 
 The model catalogue is dynamic. Exact model names in this file are a dated checkpoint, not a permanent truth.
 
-## 3. OpenCode provider strategy
+## 4. OpenCode provider strategy
 
 ### OpenCode Zen — free fallback pool
 
@@ -96,7 +115,7 @@ A provider or model appearing in OpenCode's catalogue does **not** prove that CA
 
 Before changing provider strategy, inspect the local OpenCode config/auth state without printing secrets.
 
-## 4. Model-selector policy
+## 5. Model-selector policy
 
 The goal is a **small, current working set**, not a museum of every model exposed by Models.dev.
 
@@ -119,7 +138,7 @@ Hide old/legacy model versions from the daily selector when they are not intenti
 
 A legacy model may remain temporarily visible only when a specific compatibility/reproduction task requires it.
 
-## 5. OpenCode global vs project configuration
+## 6. OpenCode global vs project configuration
 
 OpenCode supports a global config and project-level config. Project settings can change what happens inside one repository, so a stale model override can survive even after the global model catalogue is refreshed.
 
@@ -144,7 +163,7 @@ Before diagnosing model failures, inspect:
 
 Do not commit machine-specific credentials or auth files to any repo.
 
-## 6. Maintenance procedure
+## 7. Maintenance procedure
 
 Run this when a model is retired, the selector becomes stale, or approximately monthly while OpenCode is being used heavily:
 
@@ -165,7 +184,7 @@ Then:
 
 Do not hardcode a model name into every project merely to make today's selection consistent. Prefer global policy unless a project genuinely requires a different model.
 
-## 7. Model retirement / failure rule
+## 8. Model retirement / failure rule
 
 If a provider reports end-of-life, unavailable, gone/410 or model-not-found:
 
@@ -177,7 +196,7 @@ If a provider reports end-of-life, unavailable, gone/410 or model-not-found:
 - preserve the failure in logs/history when relevant;
 - do not let a model retirement trigger duplicate application code or a new AI architecture.
 
-## 8. Cost and routing principle
+## 9. Cost and routing principle
 
 Use the cheapest model that can perform the task reliably, but do not optimise cost by accepting repeated failures or poor engineering.
 
@@ -189,7 +208,9 @@ Suggested routing principle:
 - broad evidence-heavy research → purpose-fit research model/tool with source capture and human review;
 - CG Dynamics runtime AI → server-side routing governed by the application's AI architecture, not by CA's desktop coding-agent preferences.
 
-## 9. Security and continuity
+Cline and Roo Code are continuity fallbacks, not a reason to duplicate architecture or run broad overlapping missions. They must inherit the same repository instructions, current GitHub state and scope discipline as the primary agents.
+
+## 10. Security and continuity
 
 Never store in GitHub:
 
