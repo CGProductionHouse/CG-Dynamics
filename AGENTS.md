@@ -11,7 +11,8 @@ Before planning or editing code, read:
 3. `docs/cg-dynamics-page-vision-and-milestones.md`
 4. `docs/current-product-game-plan.md`
 5. `docs/vision/CURRENT-MILESTONE.md`
-6. the latest relevant open PRs/issues on GitHub
+6. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when the task involves AI agents, providers, models, research tooling or coding-agent setup
+7. the latest relevant open PRs/issues on GitHub
 
 The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
 
@@ -77,9 +78,13 @@ Do NOT:
 CA's preferred workflow:
 
 - Claude Code handles large architecture/substantial implementation; do not micromanage it file-by-file.
-- OpenCode handles bounded isolated fixes.
+- OpenCode handles bounded isolated fixes and is provider/model-routed, not permanently tied to one DeepSeek model.
+- ChatGPT coordinates product direction, GitHub continuity, prompts and review.
+- Codex is used for focused coding/review when useful and available.
 - Do not launch overlapping broad missions.
 - Review actual GitHub output before merge advice.
+
+External coding-agent/model routing is **not** the same thing as CG Dynamics runtime AI. Read `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` before changing the coding/research provider stack. Never redesign product AI because a desktop coding model is capped, retired or unavailable.
 
 ## Data and production safety
 
@@ -112,6 +117,15 @@ Do not apply either without approval. Do not replay obsolete client-portal phase
 - client knowledge remains isolated and client-ID linked;
 - goldmine/source-pack markdown files are containers; distinct cited sources retain provenance;
 - no copyrighted full-text ingestion without explicit rights.
+
+## AI tooling / provider continuity
+
+- Canonical external AI/coding/research tool inventory: `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`.
+- OpenCode Zen is the free/fallback pool; CA's OpenRouter API route is the primary paid multi-model OpenCode route unless CA changes this.
+- Google remains available as secondary/research tooling, but do not assume its current quota is dependable for critical coding continuity.
+- Keep the OpenCode selector curated to a small current working set; do not hardcode retired model IDs across projects.
+- Never commit OpenRouter, Google, OpenAI, Anthropic or OpenCode auth secrets.
+- If the external agent/provider/model stack materially changes, update the canonical tooling document in the same work.
 
 ## Client research
 
