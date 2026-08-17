@@ -3,6 +3,7 @@
 Last updated: 17 August 2026 SAST
 Status: CURRENT cross-project authority
 Repository: `CGProductionHouse/CG-Dynamics`
+Canonical URL: `https://github.com/CGProductionHouse/CG-Dynamics/blob/main/docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`
 
 This is the master continuity file for the AI tools, coding agents, shared capabilities, reusable systems and working process used across CG projects.
 
@@ -19,6 +20,8 @@ Every new ChatGPT project/chat, Claude Code session, OpenCode session, Codex tas
 5. Continue an existing branch/PR when it already owns the task instead of creating duplicate work.
 6. Check whether a reusable system already solves the foundation before scaffolding anything new.
 7. Only then decide which agent/tool should do the work.
+
+Every new CG repository's `AGENTS.md` should include a direct pointer to the canonical URL above. Website bootstrap/agent automation should add this pointer automatically so agents in other repos know where the shared process lives.
 
 Do not ask CA to repeat information that can be recovered from current GitHub, connected tools or established continuity files.
 
