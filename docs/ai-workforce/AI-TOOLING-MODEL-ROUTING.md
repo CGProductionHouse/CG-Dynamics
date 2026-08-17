@@ -106,13 +106,33 @@ Keep visible/selectable models in three buckets:
 2. **Primary paid coding** — a few current OpenRouter models suitable for implementation/reasoning/tool use.
 3. **Research/specialist** — only current Google/research or specialist models that have a real workflow reason to exist.
 
-Hide old/legacy model versions from the daily selector when they are not intentionally needed. Do not delete historical model names from documentation, logs or audit records when they explain past runs.
+OpenCode supports this directly:
+
+- `enabled_providers` can allowlist only the providers that should load;
+- each provider can use a `whitelist` to keep only chosen model IDs in the picker;
+- a provider `blacklist` can hide specific unwanted model IDs instead;
+- model IDs must match the IDs shown by OpenCode's `/models` picker.
+
+Prefer a **whitelist** for the large OpenRouter/Google catalogues so newly surfaced old or irrelevant models do not automatically clutter daily use. Do not create an enormous blacklist that must be maintained forever.
+
+Hide old/legacy model versions from the daily selector when they are not intentionally needed. This hides them from normal selection; it does not erase upstream catalogue history. Do not delete historical model names from documentation, logs or audit records when they explain past runs.
 
 A legacy model may remain temporarily visible only when a specific compatibility/reproduction task requires it.
 
 ## 5. OpenCode global vs project configuration
 
 OpenCode supports a global config and project-level config. Project settings can change what happens inside one repository, so a stale model override can survive even after the global model catalogue is refreshed.
+
+For CA's workflow, provider/model curation should be **global by default** so all OpenCode projects inherit the same clean working set. Project overrides are only for a genuine project-specific need.
+
+Desired provider-level direction is currently:
+
+- OpenCode Zen: enabled;
+- OpenRouter: enabled;
+- Google: enabled for secondary/research use;
+- other providers: do not assume they are intentionally active merely because Models.dev exposes them.
+
+Before writing the final global allowlist, inspect the actual local provider IDs/config without printing secrets. Do not guess IDs from display labels.
 
 Before diagnosing model failures, inspect:
 
