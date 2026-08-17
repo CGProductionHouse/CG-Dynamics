@@ -1,118 +1,86 @@
-# AI Tooling and Model Routing — detailed appendix
+# AI Tooling and Model Routing — inspection appendix
 
 Last updated: 17 August 2026 SAST
 
-Cross-project authority now lives in:
+Cross-project authority:
 
 - `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`
 
-Read the master first. This file is the detailed provider/model appendix only. If this file conflicts with the master, update both and treat the master as the current workflow authority.
+Read the master first. This appendix records troubleshooting/inspection details only. It must not become a competing provider/model configuration authority.
 
 No API keys, tokens, passwords or billing secrets belong in GitHub.
 
-## OpenCode current checkpoint
+## OpenCode rollback checkpoint
 
-Confirmed on 17 August 2026:
+Observed on 17 August 2026:
 
-- OpenCode CLI `1.18.18`;
-- global model cache refresh completed successfully;
-- global config exists at `%USERPROFILE%\.config\opencode\opencode.json`;
-- project-level configs may still override global settings;
-- CG Accounting has a project `opencode.json` for MCP configuration but no model/provider override was observed in the safe inspection;
-- **no global `enabled_providers` allowlist is currently desired**, because it previously hid direct OpenAI and useful models;
-- use verified per-provider whitelists for large catalogues instead.
+- OpenCode CLI `1.18.18` was installed during troubleshooting;
+- model catalogue refresh succeeded;
+- an experimental global config was created under `%USERPROFILE%\.config\opencode\opencode.json` to filter providers/models;
+- that filtering caused confusion and hid/changed useful already-working provider/model access;
+- the experimental global file was backed up and removed later the same day.
 
-## OpenCode Zen
+**Current rule: do not assume a custom global OpenCode config exists.**
 
-Current whitelist:
+Do not restore the old whitelists/defaults from Git history simply because they appear in an older commit.
 
-- `deepseek-v4-flash-free`;
-- `big-pickle`;
-- `mimo-v2.5-free`;
-- `nemotron-3-ultra-free`;
-- `nemotron-3.5-lightning-free`.
+## Provider/model state is dynamic
 
-`opencode/deepseek-v4-flash-free` is CA's proven favourite OpenCode model and should stay visible while it works.
+OpenCode may expose models through OpenCode Zen, OpenRouter, direct OpenAI, Google and other connected providers. Exact model IDs/quotas can change quickly.
 
-Do not infer that this model is dead because another provider identifier with a similar DeepSeek name reports end-of-life.
+Historical observations are useful for diagnosis, but they are not durable routing truth.
 
-## OpenRouter
-
-Separate paid API-backed OpenCode route.
-
-Current whitelist:
-
-- `~deepseek/deepseek-v4-flash-latest`;
-- `deepseek/deepseek-v4-pro-0813`;
-- `~anthropic/claude-sonnet-latest`;
-- `~anthropic/claude-haiku-latest`;
-- `~moonshotai/kimi-latest`;
-- `~openai/gpt-latest`;
-- `~openai/gpt-mini-latest`.
-
-Current local defaults recorded on 17 August 2026:
-
-- model: `openrouter/deepseek/deepseek-v4-pro-0813`;
-- small model: `openrouter/~openai/gpt-mini-latest`.
-
-These are defaults only. They do not override CA's judgement about which model actually performs best for a task.
-
-## Google
-
-Keep as secondary/research provider for now.
-
-Current whitelist:
-
-- `gemini-flash-latest`;
-- `gemini-3.1-pro-preview`;
-- `deep-research-max-preview-04-2026`.
-
-CA reports Google quota/cap behaviour is currently too restrictive to rely on for day-to-day critical coding continuity.
-
-Possible future paid Google research/deep-research subscription for Media/Marketing Library research remains unapproved and must be researched before purchase.
-
-## Direct OpenAI in OpenCode
-
-Direct OpenAI is connected and must not be hidden by global provider filtering.
-
-Visible model IDs confirmed 17 August 2026:
-
-- `openai/gpt-5.3-codex-spark`;
-- `openai/gpt-5.4`;
-- `openai/gpt-5.4-fast`;
-- `openai/gpt-5.4-mini`;
-- `openai/gpt-5.4-mini-fast`;
-- `openai/gpt-5.5`;
-- `openai/gpt-5.5-fast`;
-- `openai/gpt-5.6-luna`;
-- `openai/gpt-5.6-luna-fast`;
-- `openai/gpt-5.6-sol`;
-- `openai/gpt-5.6-sol-fast`;
-- `openai/gpt-5.6-terra`;
-- `openai/gpt-5.6-terra-fast`.
-
-Direct OpenAI is intentionally not whitelisted yet so Sol and other useful current variants are not accidentally hidden while the preferred shortlist is still being evaluated.
-
-Do not infer billing/subscription details from model visibility alone.
-
-## Maintenance
-
-When a model is retired/unavailable or the model picker is stale:
+Before assigning or troubleshooting a model:
 
 ```powershell
 opencode --version
+opencode models
+```
+
+Then inspect:
+
+1. current session-selected model;
+2. actual current model/provider list;
+3. project-level `opencode.json`;
+4. provider/auth state;
+5. global config only if a file actually exists.
+
+Do not guess a model ID from memory or from an old screenshot/document.
+
+## Project-level OpenCode configuration
+
+Project configs may legitimately exist for MCP/tooling even when there is no global model config.
+
+During the 17 August safe inspection, `C:\Projects\CG-Accounting\opencode.json` contained MCP configuration and no observed model/provider override. Treat that as a dated observation only; inspect the file again before changing it.
+
+Project configuration should not be deleted merely to solve a model-picker problem.
+
+## Catalogue/version maintenance
+
+If the picker is stale or a model endpoint has actually been retired:
+
+```powershell
 opencode upgrade
 opencode models --refresh
 ```
 
-Then:
+Then re-inspect the live catalogue.
 
-1. inspect real current model IDs;
-2. inspect global config without printing secrets;
-3. inspect project `opencode.json` overrides;
-4. preserve working models CA actually relies on;
-5. replace only proven-dead identifiers;
-6. update `MASTER-AI-TOOLS-AND-WORKFLOW.md` if the shared strategy changed.
+A similarly named model on another provider may have different lifecycle/availability. Do not conclude all variants are dead from one provider's `410 Gone` response.
+
+## Google quota lesson
+
+Google/Gemini remains available as a secondary coding/research route, but CA reports current quota/cap behaviour is too restrictive for dependable critical coding continuity.
+
+Antigravity CLI (`agy`) is separately documented in the master as a tested fallback coding route. Its quota should also be treated as limited.
+
+A future paid Google research/deep-research subscription for Media/Marketing Library work remains a candidate decision and requires current pricing/quota research before purchase.
+
+## Local-model lesson
+
+Gemma 4 12B was tested for agentic website coding/tool calling and performed poorly. Do not route production website implementation to it by default.
+
+Local models are optional simple/experimental routes unless a specific model is proven on the actual project workflow.
 
 ## Security
 
@@ -123,4 +91,4 @@ Never commit:
 - OpenCode auth/session tokens;
 - provider billing secrets.
 
-Track roles, model IDs, non-secret configuration policy and operational observations only.
+Track provider roles, troubleshooting observations and non-secret process only.
