@@ -4,13 +4,18 @@ How the different agents and connectors are used on CG Dynamics. The point is
 to route each job to the tool that does it best, with GitHub `main` as the
 shared source of truth.
 
-Current provider/model routing, OpenCode maintenance and the separation between
-product AI and development AI are tracked in:
+Cross-project authority for AI tools, subscriptions/provider state, OpenCode
+configuration, new-chat grounding, reusable website startup and agent allocation:
+
+- `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`
+
+Detailed provider/model appendix:
 
 - `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`
 
-Do not treat CG Dynamics runtime AI, OpenCode models and external coding agents
-as one system. They have separate permissions, costs and failure modes.
+Read the master first. Do not treat CG Dynamics runtime AI, OpenCode models and
+external coding agents as one system. They have separate permissions, costs and
+failure modes.
 
 ## Which agent for what
 
@@ -26,8 +31,8 @@ as one system. They have separate permissions, costs and failure modes.
 
 Rule of thumb: architecture and anything cross-cutting → Claude Code; a
 well-defined isolated change → OpenCode or Codex; Cline/Roo Code are fallback
-execution paths; direction/review/coordination → ChatGPT. Use the current
-model-routing document for OpenCode/provider choice.
+execution paths; direction/review/coordination → ChatGPT. Use the master for the
+current shared workflow and the detailed model-routing appendix for provider IDs.
 
 ## External AI stack vs CG Dynamics product AI
 
@@ -44,34 +49,30 @@ retired, capped or temporarily unavailable.
 
 ## Cross-project reusable website workflow
 
-The external agent stack is also wired into the reusable CG website-building
-system. The current reusable-system checkpoints are recorded in
-`docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` rather than duplicated here.
+New website startup is defined in the cross-project master. The important rule is
+that a new site first confirms local folder/Git/GitHub/reusable-system state, then
+reuses the Website Builder standards/skills/bootstrap, then hands approved
+implementation to the appropriate coding agent.
 
-Important principle: new websites should inherit proven standards, skills,
-patterns and bootstrap automation from the Website Builder instead of rebuilding
-the same foundation per client. Detailed website implementation history belongs
-in the Website Builder/site repositories, not in CG Dynamics.
+Do not invent a repo or ask a coding agent to create project foundations that CA
+has not yet confirmed.
+
+Detailed website implementation history belongs in the Website Builder/site
+repositories, not in CG Dynamics.
 
 ## OpenCode provider policy
 
-Current user-confirmed direction (17 August 2026):
+The authoritative current OpenCode setup is in
+`docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`.
 
-- keep **OpenCode Zen** as the free/fallback pool;
-- use CA's separate **OpenRouter API route** as the primary paid multi-model
-  OpenCode route rather than depending on Zen free limits;
-- keep **Google** available for now, but CA reports the current caps are too
-  restrictive for dependable day-to-day coding;
-- consider a dedicated paid Google research/deep-research option later for
-  high-volume Media/Marketing Library research only after current product,
-  pricing and quota verification;
-- curate a small current model selector and hide obsolete/redundant versions;
-- when a model reaches end-of-life, refresh the catalogue and replace the dead
-  identifier instead of retrying it or redesigning the workflow.
+Important current rules:
 
-Current OpenCode maintenance procedure and security rules are in
-`docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`. Never commit provider API keys or
-auth tokens.
+- OpenCode Zen remains a free/fallback pool and CA's working `deepseek-v4-flash-free` model must not be hidden just because a similarly named provider endpoint dies;
+- CA's separate OpenRouter API route is the paid multi-model OpenCode route;
+- direct OpenAI is connected and must not be accidentally hidden by a global provider allowlist;
+- Google remains available but is not dependable enough under current caps for critical coding continuity;
+- curate models with verified IDs, favouring per-provider whitelists over a global provider allowlist when the latter would hide valid connected providers;
+- never commit provider keys/auth tokens.
 
 ## Connectors
 
@@ -84,13 +85,12 @@ auth tokens.
 
 ## Shared instructions and skills
 
-- `AGENTS.md` — shared rules for every agent (product direction, source of
-  truth, workflow, secrets, build/ship, reporting).
+- `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` — mandatory cross-project grounding and shared-stack authority.
+- `AGENTS.md` — CG Dynamics-specific rules for product direction, source of truth, workflow, secrets, build/ship and reporting.
 - `CLAUDE.md` — Claude Code memory; imports `AGENTS.md` and adds Claude notes.
 - `.claude/skills/` — skills for Claude Code.
 - `.agents/skills/` — mirrored skills for Codex where applicable.
-- `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` — current external AI/tool/model
-  routing, cross-project agent workflow and maintenance authority.
+- `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` — detailed external provider/model appendix.
 
 Core skills include **product-architect** (direction/priority),
 **repo-auditor** (health/dead code/duplication), **feature-implementer**
@@ -99,19 +99,13 @@ calendar domain), and **agent-reviewer** (pre-merge gate).
 
 ## Non-negotiables for every agent
 
+- Read the cross-project master first for shared tool/process decisions.
 - `git status` first; pull latest `main`; inspect open PRs before starting work.
-- Continue an existing PR when it already owns the area; do not create duplicate
-  architecture or overlapping broad missions.
-- Do not rewrite the app or duplicate the schedule/task/Marketing Library source
-  of truth without approval.
-- Respect the CG Calendar vs Client Schedule lock in `AGENTS.md` and the current
-  continuity handoff.
-- `npm run build` must pass (and the bundle must contain app code) before
-  commit/push.
+- Continue an existing PR when it already owns the area; do not create duplicate architecture or overlapping broad missions.
+- Do not rewrite the app or duplicate the schedule/task/Marketing Library source of truth without approval.
+- Respect the CG Calendar vs Client Schedule lock in `AGENTS.md` and the current continuity handoff.
+- `npm run build` must pass (and the bundle must contain app code) before commit/push.
 - Never expose Supabase Edge Function secrets or external AI provider credentials.
 - Report files touched, build result, risks and next steps.
-- Cline and Roo Code are fallback agents, not permission to bypass current PR
-  ownership, repository instructions or source-of-truth rules.
-- If agent/provider/model routing materially changes, update
-  `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` so the next agent does not redo
-  setup or reintroduce retired models.
+- Cline and Roo Code are fallback agents, not permission to bypass current PR ownership, repository instructions or source-of-truth rules.
+- If a shared agent/provider/subscription/model/bootstrap/reusable-system decision materially changes, update the master file in the same work so the next agent does not redo setup or reintroduce retired decisions.
