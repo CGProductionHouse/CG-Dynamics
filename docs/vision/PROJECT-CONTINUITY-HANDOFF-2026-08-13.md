@@ -1,6 +1,6 @@
 # CG Dynamics — Canonical Project Continuity Handoff
 
-Last updated: 2026-08-13 SAST
+Last updated: 2026-08-17 SAST
 Status: CURRENT canonical handoff for ChatGPT, Claude Code, Codex, OpenCode and other agents
 Repository: `CGProductionHouse/CG-Dynamics`
 Production app: `https://cg-dynamics.vercel.app`
@@ -17,15 +17,16 @@ Before proposing or changing anything:
 4. Read `docs/cg-dynamics-page-vision-and-milestones.md`.
 5. Read `docs/current-product-game-plan.md`.
 6. Read `docs/vision/CURRENT-MILESTONE.md`.
-7. Check current `main`, open PRs and relevant issues.
-8. Continue an existing PR when it already owns the requested area instead of creating duplicate work.
-9. Production SQL/data changes require explicit CA approval.
+7. Read `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when the task involves AI providers, coding agents, OpenCode models or research tooling.
+8. Check current `main`, open PRs and relevant issues.
+9. Continue an existing PR when it already owns the requested area instead of creating duplicate work.
+10. Production SQL/data changes require explicit CA approval.
 
 GitHub `main` is source of truth for committed state; open PR state is source of truth for in-flight work.
 
 ## Product-code checkpoint
 
-Last product-code merge before the 2026-08-13 documentation refresh:
+Last product-code merge before the continuity documentation refresh:
 
 - `6c0dcc39fb1fe6caa6fbe11144296a5899baed3d`
 - PR #194 — app-shell #181/#182 responsive rollout + IA consolidation.
@@ -146,6 +147,26 @@ PR #192 merged the code contract; production rollout remains separate.
 - inactive clients do not pollute default knowledge;
 - goldmine/source-pack markdown documents are containers; cited sources retain separate provenance/rights/review evidence.
 
+## AI tooling / model stack
+
+Canonical external tool/model inventory:
+
+- `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`
+
+Important distinction: **CG Dynamics product AI** (CG Assistant, AI Workforce, Marketing AI) is not the same system as the **external tools used to build/research CG software** (ChatGPT, Claude Code, OpenCode, Codex, Google/research tools).
+
+Current external model direction confirmed 17 August 2026:
+
+- OpenCode Zen = free/fallback pool;
+- CA's OpenRouter API route = primary paid multi-model route inside OpenCode, independent of Zen free-model limits;
+- Google remains available as secondary/research tooling, but current quota behaviour is not dependable enough to make it the coding continuity backbone;
+- a paid Google research/deep-research option may be evaluated later for Media/Marketing Library research; not approved/subscribed by this document;
+- keep OpenCode's daily selector small/current; old catalogue entries may exist upstream but should not remain selected/default merely because they are visible;
+- model retirement must trigger catalogue/config maintenance, **not** duplicate app code or a new AI architecture;
+- no provider/API secrets in GitHub.
+
+If provider/model roles materially change, update the tooling document and `docs/agent-operating-model.md` in the same work so future agents do not repeat setup or resurrect retired models.
+
 ## Client research
 
 Canonical ledger: `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md`.
@@ -157,7 +178,9 @@ Do not research Human Auto automatically. Ask `Human Auto — skip or go?` and p
 ## Working method
 
 - Claude Code gets large architecture/substantial implementation missions; do not micromanage it file-by-file.
-- OpenCode handles bounded isolated fixes.
+- OpenCode handles bounded isolated fixes and is provider/model-routed rather than tied permanently to DeepSeek.
+- ChatGPT handles product direction, continuity, prompt control and review.
+- Codex is used for focused coding/review where useful.
 - Avoid chains of tiny overlapping PRs.
 - Review actual GitHub output before merge advice.
 - Prefer continuing an existing active PR to creating duplicate architecture.
@@ -182,6 +205,7 @@ Before editing ask:
 - mixing CG Calendar with Client Schedule?
 - weakening visibility/security for convenience?
 - redoing #194 shell/navigation architecture?
+- changing external AI/provider routing without checking the canonical tooling doc?
 - touching production SQL without approval?
 
 If yes, stop and reconcile first.
