@@ -1,171 +1,103 @@
-# AI Tooling and Model Routing
+# AI Tooling and Model Routing — detailed appendix
 
-Last updated: 17 August 2026
+Last updated: 17 August 2026 SAST
 
-This document tracks the AI systems used **inside CG Dynamics** and the separate AI tools/models used by CA to **build, review and research** CG systems. These are related but must not be confused.
+Cross-project authority now lives in:
 
-No API keys, tokens or secrets belong in this file or anywhere else in GitHub.
+- `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`
 
-## 1. Three separate AI layers
+Read the master first. This file is the detailed provider/model appendix only. If this file conflicts with the master, update both and treat the master as the current workflow authority.
 
-### A. CG Dynamics product AI
+No API keys, tokens, passwords or billing secrets belong in GitHub.
 
-This is application functionality shipped inside CG Dynamics:
+## OpenCode current checkpoint
 
-- CG Assistant;
-- AI Workforce / specialist agents;
-- Marketing AI;
-- reviewed Marketing/Knowledge retrieval;
-- future staff-specific agents and management routing.
+Confirmed on 17 August 2026:
 
-Product AI remains provider-agnostic and server-side. Model/provider changes must not weaken permissions, client isolation, review gates, citations, auditability or confirmed-write rules.
+- OpenCode CLI `1.18.18`;
+- global model cache refresh completed successfully;
+- global config exists at `%USERPROFILE%\.config\opencode\opencode.json`;
+- project-level configs may still override global settings;
+- CG Accounting has a project `opencode.json` for MCP configuration but no model/provider override was observed in the safe inspection;
+- **no global `enabled_providers` allowlist is currently desired**, because it previously hid direct OpenAI and useful models;
+- use verified per-provider whitelists for large catalogues instead.
 
-Canonical architecture references:
+## OpenCode Zen
 
-- `docs/ai-department-architecture.md`
-- `docs/ai-workforce/AI-WORKFORCE-MASTER-ARCHITECTURE.md`
-- `docs/ai-workforce/AI-WORKFORCE-IMPLEMENTATION-PLAN.md`
-- `docs/agent-operating-model.md`
+Current whitelist:
 
-### B. External development agents
+- `deepseek-v4-flash-free`;
+- `big-pickle`;
+- `mimo-v2.5-free`;
+- `nemotron-3-ultra-free`;
+- `nemotron-3.5-lightning-free`.
 
-These help CA build and maintain CG software. They are **not** CG Dynamics runtime AI.
+`opencode/deepseek-v4-flash-free` is CA's proven favourite OpenCode model and should stay visible while it works.
 
-| Tool | Current role |
-|---|---|
-| ChatGPT | Product direction, GitHub inspection, prompt control, review, second opinion and cross-project continuity. |
-| Claude Code | Primary heavy engineering agent for large architecture, substantial multi-file work and repo-wide missions. Do not micromanage it file-by-file. |
-| OpenCode | Practical workhorse for bounded implementation, routine coding, fixes and continued work when other agent usage is constrained. OpenCode is a shell over selectable model providers; it is not synonymous with DeepSeek. |
-| Codex | Focused coding/review work when useful and available; keep prompts tight because usage can be constrained. |
-| Cline | Wired as an additional VS Code coding-agent fallback. Use when it materially helps continuity or another primary agent is constrained; it must follow repository instructions and current GitHub state. |
-| Roo Code | Wired as an additional VS Code coding-agent fallback. Use under the same continuity/source-of-truth rules as the other coding agents. |
-| Gemini / Google tools | Secondary option. Keep available, but CA has found current quota/cap behaviour too restrictive for regular coding use. |
+Do not infer that this model is dead because another provider identifier with a similar DeepSeek name reports end-of-life.
 
-Agents must check GitHub `main`, open PRs and continuity docs before starting work so multiple agents do not solve the same problem twice.
+## OpenRouter
 
-### C. External research/model services
+Separate paid API-backed OpenCode route.
 
-These are optional model/provider resources used for research or as model backends. They do not automatically become CG Dynamics production dependencies.
+Current whitelist:
 
-A future paid Google research/deep-research option may be considered for a research/custodian role working on Media/Marketing Library research. This is a **candidate decision only**, not an approved subscription or production dependency.
+- `~deepseek/deepseek-v4-flash-latest`;
+- `deepseek/deepseek-v4-pro-0813`;
+- `~anthropic/claude-sonnet-latest`;
+- `~anthropic/claude-haiku-latest`;
+- `~moonshotai/kimi-latest`;
+- `~openai/gpt-latest`;
+- `~openai/gpt-mini-latest`.
 
-## 2. Cross-project reusable website agent system checkpoint
+Current local defaults recorded on 17 August 2026:
 
-Confirmed on 17 August 2026 from the reusable website-system handoff:
+- model: `openrouter/deepseek/deepseek-v4-pro-0813`;
+- small model: `openrouter/~openai/gpt-mini-latest`.
 
-- reusable Website Builder repository: `Captured-Growth/cg-website-builder`;
-- Website Builder checkpoint commit: `ed823b7`;
-- Imbewu repository: `Captured-Growth/cg-imbewu-website`;
-- Imbewu bootstrap checkpoint commit: `df00359`;
-- OpenCode, Claude Code, Codex, Cline and Roo Code are wired into the reusable website workflow;
-- active sessions need restart to reload changed global instructions;
-- `bootstrap-site.ps1` is create-only and idempotent; a second Imbewu bootstrap preserved existing files;
-- reusable website skills now cover project bootstrap, content audit, asset selection, image quality, responsive design, animation/motion, SEO, production QA, Vercel deployment and domain handover;
-- reusable implementation patterns include accessible header/mobile dialog, responsive hero video, controlled gallery carousel, logo marquee, reveal/ambient motion, interactive cards, section/CTA primitives, responsive images, PDF fallback, footer and Sharp image optimisation;
-- the reusable system is intended to make each new website start from proven standards rather than relearn/rebuild the same foundation.
+These are defaults only. They do not override CA's judgement about which model actually performs best for a task.
 
-Keep detailed website implementation history in the Website Builder and site repositories. This document records the **AI/agent workflow and reusable-system relationship only**, so CG Dynamics does not become a duplicate website-project log.
+## Google
 
-## 3. OpenCode workstation checkpoint
+Keep as secondary/research provider for now.
 
-Confirmed by CA on 17 August 2026:
+Current whitelist:
 
-- OpenCode CLI version: `1.18.18`.
-- Global model cache refresh completed successfully with `opencode models --refresh`.
-- OpenCode Desktop exposes a very large Models.dev/provider catalogue, including many legacy model versions.
-- The previous selected DeepSeek V4 Flash endpoint reached end-of-life and failed; stale/retired models therefore must not remain durable defaults.
+- `gemini-flash-latest`;
+- `gemini-3.1-pro-preview`;
+- `deep-research-max-preview-04-2026`.
 
-The model catalogue is dynamic. Exact model names in this file are a dated checkpoint, not a permanent truth.
+CA reports Google quota/cap behaviour is currently too restrictive to rely on for day-to-day critical coding continuity.
 
-## 4. OpenCode provider strategy
+Possible future paid Google research/deep-research subscription for Media/Marketing Library research remains unapproved and must be researched before purchase.
 
-### OpenCode Zen — free fallback pool
+## Direct OpenAI in OpenCode
 
-Purpose: free/included models for cheap or fallback work.
+Direct OpenAI is connected and must not be hidden by global provider filtering.
 
-Current catalogue includes several free OpenCode Zen entries. Keep the provider available, but curate the model selector so obsolete/low-value entries do not clutter daily use.
+Visible model IDs confirmed 17 August 2026:
 
-Free availability and model identities can change. A free model must not be assumed healthy merely because it still appears in the catalogue.
+- `openai/gpt-5.3-codex-spark`;
+- `openai/gpt-5.4`;
+- `openai/gpt-5.4-fast`;
+- `openai/gpt-5.4-mini`;
+- `openai/gpt-5.4-mini-fast`;
+- `openai/gpt-5.5`;
+- `openai/gpt-5.5-fast`;
+- `openai/gpt-5.6-luna`;
+- `openai/gpt-5.6-luna-fast`;
+- `openai/gpt-5.6-sol`;
+- `openai/gpt-5.6-sol-fast`;
+- `openai/gpt-5.6-terra`;
+- `openai/gpt-5.6-terra-fast`.
 
-### OpenRouter — primary paid API route for OpenCode
+Direct OpenAI is intentionally not whitelisted yet so Sol and other useful current variants are not accidentally hidden while the preferred shortlist is still being evaluated.
 
-CA has a separate API-backed OpenCode route intended to avoid being limited by OpenCode Zen's free-model quota. Treat OpenRouter as the primary paid multi-model route unless CA deliberately changes provider strategy.
+Do not infer billing/subscription details from model visibility alone.
 
-Rules:
+## Maintenance
 
-- prefer a small curated current model set rather than hundreds of catalogue entries;
-- prefer stable current aliases such as `...latest` where they are suitable, or a deliberately pinned current model when reproducibility matters;
-- never keep a known retired model as a project/global default;
-- model choice should reflect job type, quality, speed and cost rather than brand loyalty;
-- provider/model retirement is maintenance, not a reason to redesign agent workflows.
-
-Current refreshed catalogue confirms current OpenRouter families are available for Anthropic/Claude, DeepSeek, Google/Gemini, Moonshot/Kimi, OpenAI, Qwen, GLM and others. The visible catalogue is not the approved daily shortlist.
-
-### Google
-
-Keep Google available as a secondary provider/research option for now.
-
-CA's current operational feedback: Google model usage is capped too aggressively to be dependable as the main coding workhorse. Do not architect critical coding continuity around Google quota being available.
-
-Potential future decision: evaluate a paid Google research/deep-research product specifically for high-volume Media/Marketing Library research. Confirm current product, pricing, quotas and terms before any purchase.
-
-### Direct OpenAI / other providers
-
-A provider or model appearing in OpenCode's catalogue does **not** prove that CA has intentionally configured a paid API route for it. Do not record a provider as active/paid merely because its section is visible in Manage Models.
-
-Before changing provider strategy, inspect the local OpenCode config/auth state without printing secrets.
-
-## 5. Model-selector policy
-
-The goal is a **small, current working set**, not a museum of every model exposed by Models.dev.
-
-Keep visible/selectable models in three buckets:
-
-1. **Free fallback** — a few current OpenCode Zen models that are verified working.
-2. **Primary paid coding** — a few current OpenRouter models suitable for implementation/reasoning/tool use.
-3. **Research/specialist** — only current Google/research or specialist models that have a real workflow reason to exist.
-
-OpenCode supports this directly:
-
-- `enabled_providers` can allowlist only the providers that should load;
-- each provider can use a `whitelist` to keep only chosen model IDs in the picker;
-- a provider `blacklist` can hide specific unwanted model IDs instead;
-- model IDs must match the IDs shown by OpenCode's `/models` picker.
-
-Prefer a **whitelist** for the large OpenRouter/Google catalogues so newly surfaced old or irrelevant models do not automatically clutter daily use. Do not create an enormous blacklist that must be maintained forever.
-
-Hide old/legacy model versions from the daily selector when they are not intentionally needed. This hides them from normal selection; it does not erase upstream catalogue history. Do not delete historical model names from documentation, logs or audit records when they explain past runs.
-
-A legacy model may remain temporarily visible only when a specific compatibility/reproduction task requires it.
-
-## 6. OpenCode global vs project configuration
-
-OpenCode supports a global config and project-level config. Project settings can change what happens inside one repository, so a stale model override can survive even after the global model catalogue is refreshed.
-
-For CA's workflow, provider/model curation should be **global by default** so all OpenCode projects inherit the same clean working set. Project overrides are only for a genuine project-specific need.
-
-Desired provider-level direction is currently:
-
-- OpenCode Zen: enabled;
-- OpenRouter: enabled;
-- Google: enabled for secondary/research use;
-- other providers: do not assume they are intentionally active merely because Models.dev exposes them.
-
-Before writing the final global allowlist, inspect the actual local provider IDs/config without printing secrets. Do not guess IDs from display labels.
-
-Before diagnosing model failures, inspect:
-
-- global OpenCode config under the user's OpenCode config directory;
-- project `opencode.json` files;
-- connected providers;
-- currently selected session model;
-- model-cache freshness.
-
-Do not commit machine-specific credentials or auth files to any repo.
-
-## 7. Maintenance procedure
-
-Run this when a model is retired, the selector becomes stale, or approximately monthly while OpenCode is being used heavily:
+When a model is retired/unavailable or the model picker is stale:
 
 ```powershell
 opencode --version
@@ -175,51 +107,20 @@ opencode models --refresh
 
 Then:
 
-1. restart OpenCode Desktop;
-2. remove/hide retired and redundant models from the selector;
-3. confirm the global default points to a current model;
-4. search project `opencode.json` files for stale model overrides;
-5. smoke-test the chosen free fallback and paid primary route;
-6. update this document only when provider roles or the curated model policy materially changes.
+1. inspect real current model IDs;
+2. inspect global config without printing secrets;
+3. inspect project `opencode.json` overrides;
+4. preserve working models CA actually relies on;
+5. replace only proven-dead identifiers;
+6. update `MASTER-AI-TOOLS-AND-WORKFLOW.md` if the shared strategy changed.
 
-Do not hardcode a model name into every project merely to make today's selection consistent. Prefer global policy unless a project genuinely requires a different model.
+## Security
 
-## 8. Model retirement / failure rule
+Never commit:
 
-If a provider reports end-of-life, unavailable, gone/410 or model-not-found:
-
-- stop retrying the dead identifier;
-- refresh the model catalogue;
-- check whether the model was selected only for the current session or hardcoded globally/project-locally;
-- move to a current replacement in the same role;
-- update any durable config that still points to the dead identifier;
-- preserve the failure in logs/history when relevant;
-- do not let a model retirement trigger duplicate application code or a new AI architecture.
-
-## 9. Cost and routing principle
-
-Use the cheapest model that can perform the task reliably, but do not optimise cost by accepting repeated failures or poor engineering.
-
-Suggested routing principle:
-
-- simple bounded edit / repetitive implementation → capable low-cost OpenCode model;
-- difficult multi-file engineering or architectural ambiguity → Claude Code or another proven strong coding model;
-- independent review / product reasoning → ChatGPT or a separate strong reviewer;
-- broad evidence-heavy research → purpose-fit research model/tool with source capture and human review;
-- CG Dynamics runtime AI → server-side routing governed by the application's AI architecture, not by CA's desktop coding-agent preferences.
-
-Cline and Roo Code are continuity fallbacks, not a reason to duplicate architecture or run broad overlapping missions. They must inherit the same repository instructions, current GitHub state and scope discipline as the primary agents.
-
-## 10. Security and continuity
-
-Never store in GitHub:
-
-- OpenRouter API keys;
-- Google API keys;
-- OpenAI/Anthropic keys;
+- OpenRouter keys;
+- OpenAI/Anthropic/Google keys;
 - OpenCode auth/session tokens;
-- paid-provider billing secrets.
+- provider billing secrets.
 
-Store only provider roles, non-secret configuration principles, known quota/quality observations and maintenance decisions.
-
-When another AI agent changes the coding/research stack, it must update this file and `docs/agent-operating-model.md` in the same work so the next agent does not repeat setup work or reintroduce retired models.
+Track roles, model IDs, non-secret configuration policy and operational observations only.
