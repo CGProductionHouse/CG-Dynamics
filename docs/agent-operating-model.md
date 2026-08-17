@@ -20,11 +20,14 @@ as one system. They have separate permissions, costs and failure modes.
 | **Codex** | Focused implementation/review work when useful and available. Keep tasks tight because usage can be constrained. Reads the mirrored skills in `.agents/skills/`. |
 | **ChatGPT** | Business direction, GitHub inspection, prompt control, review, second opinion and continuity across projects. Not the primary code writer for large repo changes. |
 | **OpenCode** | Practical workhorse for bounded implementation, routine fixes and continued coding. OpenCode is model/provider-routed; do not equate it permanently with DeepSeek or hardcode one retired model across projects. |
+| **Cline** | Additional VS Code coding-agent fallback. Use for continuity or bounded work when it materially helps; it must follow repository instructions and current GitHub state. |
+| **Roo Code** | Additional VS Code coding-agent fallback under the same repository/source-of-truth rules. |
 | **Google/Gemini tools** | Secondary coding/research option. Keep available, but do not depend on current quota being available for critical coding continuity. |
 
 Rule of thumb: architecture and anything cross-cutting → Claude Code; a
-well-defined isolated change → OpenCode or Codex; direction/review/coordination →
-ChatGPT. Use the current model-routing document for OpenCode/provider choice.
+well-defined isolated change → OpenCode or Codex; Cline/Roo Code are fallback
+execution paths; direction/review/coordination → ChatGPT. Use the current
+model-routing document for OpenCode/provider choice.
 
 ## External AI stack vs CG Dynamics product AI
 
@@ -38,6 +41,17 @@ review gates and confirmed-write/audit rules.
 
 Never change product AI architecture merely because a desktop coding model is
 retired, capped or temporarily unavailable.
+
+## Cross-project reusable website workflow
+
+The external agent stack is also wired into the reusable CG website-building
+system. The current reusable-system checkpoints are recorded in
+`docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` rather than duplicated here.
+
+Important principle: new websites should inherit proven standards, skills,
+patterns and bootstrap automation from the Website Builder instead of rebuilding
+the same foundation per client. Detailed website implementation history belongs
+in the Website Builder/site repositories, not in CG Dynamics.
 
 ## OpenCode provider policy
 
@@ -76,7 +90,7 @@ auth tokens.
 - `.claude/skills/` — skills for Claude Code.
 - `.agents/skills/` — mirrored skills for Codex where applicable.
 - `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` — current external AI/tool/model
-  routing and maintenance authority.
+  routing, cross-project agent workflow and maintenance authority.
 
 Core skills include **product-architect** (direction/priority),
 **repo-auditor** (health/dead code/duplication), **feature-implementer**
@@ -96,6 +110,8 @@ calendar domain), and **agent-reviewer** (pre-merge gate).
   commit/push.
 - Never expose Supabase Edge Function secrets or external AI provider credentials.
 - Report files touched, build result, risks and next steps.
+- Cline and Roo Code are fallback agents, not permission to bypass current PR
+  ownership, repository instructions or source-of-truth rules.
 - If agent/provider/model routing materially changes, update
   `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` so the next agent does not redo
   setup or reintroduce retired models.
