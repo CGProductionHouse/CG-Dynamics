@@ -6,15 +6,16 @@ Shared operating instructions for Codex, Claude Code, OpenCode and any other cod
 
 Before planning or editing code, read:
 
-1. `CONTINUE-HERE.md`
-2. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
-3. `docs/cg-dynamics-page-vision-and-milestones.md`
-4. `docs/current-product-game-plan.md`
-5. `docs/vision/CURRENT-MILESTONE.md`
-6. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when the task involves AI agents, providers, models, research tooling or coding-agent setup
-7. the latest relevant open PRs/issues on GitHub
+1. `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` — cross-project AI tools, agent allocation, new-chat grounding, OpenCode state and reusable website workflow.
+2. `CONTINUE-HERE.md`
+3. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
+4. `docs/cg-dynamics-page-vision-and-milestones.md`
+5. `docs/current-product-game-plan.md`
+6. `docs/vision/CURRENT-MILESTONE.md`
+7. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when changing detailed provider/model configuration
+8. the latest relevant open PRs/issues on GitHub
 
-The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
+The master AI/tools file is cross-project authority for shared capability/process. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
 
 ## Product direction
 
@@ -75,16 +76,19 @@ Do NOT:
 
 ## Agent allocation
 
-CA's preferred workflow:
+CA's preferred workflow is defined cross-project in `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`.
+
+In short:
 
 - Claude Code handles large architecture/substantial implementation; do not micromanage it file-by-file.
 - OpenCode handles bounded isolated fixes and is provider/model-routed, not permanently tied to one DeepSeek model.
 - ChatGPT coordinates product direction, GitHub continuity, prompts and review.
 - Codex is used for focused coding/review when useful and available.
+- Cline/Roo Code are fallback execution paths, not separate product brains.
 - Do not launch overlapping broad missions.
 - Review actual GitHub output before merge advice.
 
-External coding-agent/model routing is **not** the same thing as CG Dynamics runtime AI. Read `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` before changing the coding/research provider stack. Never redesign product AI because a desktop coding model is capped, retired or unavailable.
+External coding-agent/model routing is **not** the same thing as CG Dynamics runtime AI. Never redesign product AI because a desktop coding model is capped, retired or unavailable.
 
 ## Data and production safety
 
@@ -120,12 +124,12 @@ Do not apply either without approval. Do not replay obsolete client-portal phase
 
 ## AI tooling / provider continuity
 
-- Canonical external AI/coding/research tool inventory: `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`.
-- OpenCode Zen is the free/fallback pool; CA's OpenRouter API route is the primary paid multi-model OpenCode route unless CA changes this.
-- Google remains available as secondary/research tooling, but do not assume its current quota is dependable for critical coding continuity.
-- Keep the OpenCode selector curated to a small current working set; do not hardcode retired model IDs across projects.
+- Cross-project master authority: `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`.
+- Detailed provider/model appendix: `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`.
+- Do not use a global OpenCode provider allowlist that accidentally hides connected providers without first verifying the intended effect.
+- Keep CA's proven working models available; distinguish a dead provider endpoint from a similarly named working Zen model.
 - Never commit OpenRouter, Google, OpenAI, Anthropic or OpenCode auth secrets.
-- If the external agent/provider/model stack materially changes, update the canonical tooling document in the same work.
+- If the external agent/provider/model stack materially changes, update the master file in the same work.
 
 ## Client research
 
