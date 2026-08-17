@@ -1,10 +1,10 @@
 # Continue CG Dynamics Here
 
-Read `AGENTS.md` and `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md` first, then the page constitution, current product game plan, current milestone, client research ledger, current `main`, and open PRs/issues.
+Read `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` first for cross-project AI/tool/workflow grounding, then `AGENTS.md` and `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`, followed by the page constitution, current product game plan, current milestone, client research ledger, current `main`, and open PRs/issues.
 
-If the task involves AI agents, OpenCode, model providers, coding-agent setup or research tooling, also read `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` before changing anything.
+Use `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` as the detailed provider/model appendix when changing OpenCode/provider configuration.
 
-The 2026-08-13 handoff is current. The 2026-08-06 handoff is historical only.
+The 2026-08-13 handoff is current for CG Dynamics. The 2026-08-06 handoff is historical only.
 
 Critical continuity:
 
@@ -16,7 +16,7 @@ Critical continuity:
 - `monthly_deliverables` is Client Schedule truth.
 - CG Calendar is the separate operational company calendar. Never inject Client Schedule posts into it or merge the two.
 - Pending production migration order: `20260809120000_calendar_outlook_identity.sql` then `20260809130000_client_portal_visibility_contract.sql`; no production SQL without explicit CA approval.
-- External AI tool/model routing is tracked separately from CG Dynamics runtime AI. OpenCode Zen is the free fallback pool; CA's OpenRouter API route is the primary paid OpenCode route; Google remains secondary/research for now.
+- External AI tools, OpenCode models/providers, shared website bootstrap and agent allocation are tracked in the cross-project master file, not re-decided inside each project.
 - Client research is complete through HMH Attorneys; next is Human Auto, only after CA says `go`.
 
-Do not ask CA to explain the project again before reading current GitHub continuity state.
+Do not ask CA to explain the project or shared tool workflow again before reading current GitHub continuity state.
