@@ -19,7 +19,7 @@ const card = o => ({
   // Real cards always name their specialist; the gate now routes on it.
   relevant_agents: ['marketing_strategist'], ...o,
 })
-const ctx = o => ({ agent: sa.AGENT_CONTRACTS.marketing_strategist, activeClientId: 'client-A', mode: 'production', ...o })
+const ctx = o => ({ agent: sa.AGENT_CONTRACTS.marketing_strategist, activeClientId: 'client-A', mode: 'production', today: '2026-08-10', ...o })
 
 // ── Agent contracts ───────────────────────────────────────────────────────────
 test('nine skilled agents exist with distinct system contracts', () => {

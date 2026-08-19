@@ -290,10 +290,12 @@ interface MarketingAiState {
 // rather than a static registry entry. Returns null only if the schema is absent.
 async function getMarketingAiState(sb: ReturnType<typeof createClient>): Promise<MarketingAiState | null> {
   try {
+    const today = new Date().toISOString().slice(0, 10)
     const { data: cards } = await sb
       .from('skill_cards')
-      .select('relevant_agents, source_type')
+      .select('relevant_agents, source_type, review_expires_at')
       .eq('status', 'active')
+      .or(`review_expires_at.is.null,review_expires_at.gte.${today}`)
     const rows = cards ?? []
     const perSpecialist = new Map<string, number>()
     for (const row of rows) {
@@ -906,11 +908,11 @@ async function handleSkilledChat(
   const statuses = mode === 'production' ? ['active'] : ['active', 'reviewed', 'needs_review']
   const { data: rawCards } = await sb
     .from('skill_cards')
-    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference, relevant_agents')
+    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference, relevant_agents, review_expires_at')
     .in('status', statuses)
   const cards = (rawCards ?? []) as unknown as CardRow[]
 
-  const plan = buildPlan(cards, { agent, activeClientId: clientId, mode }, 8, message)
+  const plan = buildPlan(cards, { agent, activeClientId: clientId, mode, today }, 8, message)
   const reviewWarning = 'Draft from an AI agent. Human review is required before any client-facing use.'
 
   if (

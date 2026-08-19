@@ -216,14 +216,19 @@ Deno.serve(async request => {
   if (!contract) return jsonResponse({ ok: false, error: `Unknown specialist: ${specialist}` }, 400)
 
   // ── Approved knowledge only ───────────────────────────────────────────────
-  // production mode => ACTIVE cards only. Cards must also be addressed to this
-  // specialist and (when client-specific) match the EXACT active client.
+  // production mode => ACTIVE cards only, whose approval has NOT expired. Cards
+  // must also be addressed to this specialist and (when client-specific) match
+  // the EXACT active client. `today` gates stale (review-expired) active cards out
+  // in buildPlan; the DB filter is a first-pass prune (defence in depth — the
+  // pure gate is authoritative and covers cards with no expiry).
+  const today = new Date().toISOString().slice(0, 10)
   const { data: rawCards } = await service
     .from('skill_cards')
-    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference, relevant_agents')
+    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference, relevant_agents, review_expires_at')
     .eq('status', 'active')
+    .or(`review_expires_at.is.null,review_expires_at.gte.${today}`)
   const cards = (rawCards ?? []) as unknown as CardRow[]
-  const plan = buildPlan(cards, { agent: contract, activeClientId: clientId, mode: 'production' })
+  const plan = buildPlan(cards, { agent: contract, activeClientId: clientId, mode: 'production', today })
 
   if (plan.insufficient) {
     // Honest refusal. Nothing is written: no artifact, no version, no AI spend.
