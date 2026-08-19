@@ -15,7 +15,9 @@ Critical continuity:
 - #181/#182 responsive + navigation architecture already landed in PR #194; do not start another shell rewrite.
 - `monthly_deliverables` is Client Schedule truth.
 - CG Calendar is the separate operational company calendar. Never inject Client Schedule posts into it or merge the two.
-- Pending production migration order: `20260809120000_calendar_outlook_identity.sql` then `20260809130000_client_portal_visibility_contract.sql`; no production SQL without explicit CA approval.
+- Production migration Stage A `20260809120000_calendar_outlook_identity.sql` was applied on 2026-08-19 with explicit CA approval through the authorised Supabase migration mechanism. Post-apply verification: company calendar row count remained 272, complete Outlook identities remained 215, partial identities remained 0, superseded rows remained 0, the supersession RPC/policies/indexes are present, and `planner_tasks_canonical` remains `security_invoker=true`. Do not reapply Stage A or auto-resolve any duplicate.
+- Stage B `20260809130000_client_portal_visibility_contract.sql` is still NOT applied and still requires separate explicit CA approval plus post-Stage-A acceptance checks before rollout.
+- The Microsoft reconciliation Apply action itself remains a separate production data mutation; do not execute reviewed Microsoft changes or duplicate resolution merely because Stage A is live.
 - External AI tools, OpenCode models/providers, shared website bootstrap and agent allocation are tracked in the cross-project master file, not re-decided inside each project.
 - Client research is complete through HMH Attorneys; next is Human Auto, only after CA says `go`.
 
