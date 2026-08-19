@@ -3,13 +3,13 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import {
   decideInviteDelivery,
-  isAdminRole,
   parseInviteRequest,
   validateClientAccess,
   type AuthUserSummary,
   type PendingInviteSummary,
   type ValidInviteRequest,
 } from './invite-policy.ts'
+import { handleStaffInvite, handleStaffResend } from './staff-handler.ts'
 
 type AdminClient = ReturnType<typeof createClient>
 
@@ -42,11 +42,11 @@ function inviteRedirectUrl(): string | null {
 
 async function requireAdmin(request: Request, admin: AdminClient) {
   const token = bearerToken(request)
-  if (!token) return { userId: null, response: jsonResponse({ ok: false, code: 'unauthenticated', error: 'Authentication required.' }, 401) }
+  if (!token) return { userId: null, role: null, response: jsonResponse({ ok: false, code: 'unauthenticated', error: 'Authentication required.' }, 401) }
 
   const { data: { user }, error: authError } = await admin.auth.getUser(token)
   if (authError || !user) {
-    return { userId: null, response: jsonResponse({ ok: false, code: 'unauthenticated', error: 'Authentication required.' }, 401) }
+    return { userId: null, role: null, response: jsonResponse({ ok: false, code: 'unauthenticated', error: 'Authentication required.' }, 401) }
   }
 
   const { data: profile, error: profileError } = await admin
@@ -56,13 +56,16 @@ async function requireAdmin(request: Request, admin: AdminClient) {
     .maybeSingle()
 
   if (profileError) {
-    return { userId: null, response: jsonResponse({ ok: false, code: 'authorization_unavailable', error: 'Admin access could not be verified.' }, 503) }
+    return { userId: null, role: null, response: jsonResponse({ ok: false, code: 'authorization_unavailable', error: 'Admin access could not be verified.' }, 503) }
   }
-  if (!isAdminRole(profile?.role)) {
-    return { userId: null, response: jsonResponse({ ok: false, code: 'forbidden', error: 'Admin access required.' }, 403) }
+  const role = typeof profile?.role === 'string' ? profile.role : null
+  // Client invitations stay admin-only, as before. Staff invitations are a
+  // manager responsibility, so managers are allowed too — and nobody else.
+  if (role !== 'admin' && role !== 'manager') {
+    return { userId: null, role: null, response: jsonResponse({ ok: false, code: 'forbidden', error: 'Manager or admin access required.' }, 403) }
   }
 
-  return { userId: user.id as string, response: null }
+  return { userId: user.id as string, role, response: null }
 }
 
 async function findAuthUser(admin: AdminClient, email: string): Promise<{ user: AuthUserSummary | null; failed: boolean }> {
@@ -91,6 +94,7 @@ async function findPendingInvite(admin: AdminClient, email: string): Promise<{ i
     .from('client_invites')
     .select('id, email, role, client_id')
     .eq('status', 'pending')
+    .is('migrated_to_staff_invitation_id', null)
     .limit(1000)
 
   const invite = (data as InviteRow[] | null)?.find(row => row.email.trim().toLowerCase() === email) ?? null
@@ -144,6 +148,23 @@ Deno.serve(async (request: Request) => {
     rawBody = await request.json()
   } catch {
     return jsonResponse({ ok: false, code: 'invalid_json', error: 'Invalid invitation request.' }, 400)
+  }
+
+  // ── Staff invitations go to their own table and their own state machine. ──
+  const body = (rawBody ?? {}) as Record<string, unknown>
+  const isStaffRequest = body.inviteType === 'workforce' || body.inviteType === 'staff'
+    || typeof body.invitationId === 'string'
+
+  if (isStaffRequest) {
+    const outcome = typeof body.invitationId === 'string'
+      ? await handleStaffResend(admin as never, body.invitationId, authorization.userId, redirectTo)
+      : await handleStaffInvite(admin as never, body, authorization.userId, redirectTo)
+    return jsonResponse(outcome.body, outcome.status)
+  }
+
+  // ── Client invitations keep the existing admin-only path. ────────────────
+  if (authorization.role !== 'admin') {
+    return jsonResponse({ ok: false, code: 'forbidden', error: 'Admin access required to invite a client.' }, 403)
   }
 
   const parsed = parseInviteRequest(rawBody)
