@@ -191,6 +191,19 @@ async function batchIsCoolingDown(
   return new Date(data.cooldown_until).getTime() > Date.now()
 }
 
+async function batchLaneSetAlreadyStarted(
+  sb: ReturnType<typeof createClient>,
+  batchId: string,
+): Promise<boolean> {
+  const { data, error } = await sb
+    .from('meta_sync_batches')
+    .select('summary')
+    .eq('id', batchId)
+    .maybeSingle()
+  if (error) return false
+  return Boolean(data?.summary?.parallel_lanes_started_at)
+}
+
 /* ---------- Auth ---------- */
 
 async function authorizeWorker(
@@ -301,6 +314,27 @@ Deno.serve(async (req) => {
       claimFailed: false,
       rateLimited: true,
       waitingForRateLimit,
+      workerLane,
+      workerLanes,
+      lanesStarted: 0,
+    })
+  }
+  if (body.batchId && body.startLanes === true && workerLanes > 1
+      && await batchLaneSetAlreadyStarted(sb, body.batchId)) {
+    return jsonResponse({
+      ok: true,
+      syncEngineVersion: META_CONNECTOR_VERSION,
+      chunksProcessed: 0,
+      processed: 0,
+      items: [],
+      workerRan: false,
+      itemsReleased: 0,
+      workRemaining: true,
+      handedOff: false,
+      claimFailed: false,
+      rateLimited: false,
+      waitingForRateLimit: false,
+      laneSetAlreadyStarted: true,
       workerLane,
       workerLanes,
       lanesStarted: 0,

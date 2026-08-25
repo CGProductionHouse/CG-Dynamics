@@ -172,9 +172,12 @@ test('only initial durable drivers create a lane set', () => {
   assert.match(background, /JSON\.stringify\(\{ batchId: row\.batch_id \}\)/)
   assert.doesNotMatch(worker, /startLanes:\s*true/, 'child continuations must never start another lane set')
   assert.match(worker, /meta_sync_begin_lane_set/)
+  assert.match(worker, /batchLaneSetAlreadyStarted/)
   assert.match(worker, /if \(!mayStartLaneSet\) \{[\s\S]*laneSetAlreadyStarted: true/)
   assert.ok(worker.indexOf('laneSetAlreadyStarted: true') < worker.indexOf('while (claimCount < MAX_CHUNKS)'),
     'a denied repeated root must return before claiming work')
+  assert.ok(worker.indexOf('await batchLaneSetAlreadyStarted') < worker.indexOf('Fetch page token map once per invocation'),
+    'already-started roots must return before repeating page-token discovery')
   assert.match(parallelSafety, /parallel_lanes_started_at/)
   assert.match(parallelSafety, /not \(coalesce\(batch\.summary, '\{\}'::jsonb\) \? 'parallel_lanes_started_at'\)/)
 })
