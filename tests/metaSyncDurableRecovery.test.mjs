@@ -17,6 +17,7 @@ const worker = read('../supabase/functions/meta-sync-worker/index.ts')
 const background = read('../supabase/functions/background-worker/index.ts')
 const page = read('../src/pages/admin/MetaIntegrationPage.tsx')
 const durable = read('../supabase/migrations/20260804130000_meta_sync_durable_recovery.sql')
+const hardening = read('../supabase/migrations/20260801170000_backend_acceptance_hardening.sql')
 const watermark = read('../supabase/migrations/20260804140000_meta_sync_recovery_progress_watermark.sql')
 const cooldown = read('../supabase/migrations/20260804150000_meta_sync_rate_limit_cooldown.sql')
 
@@ -147,6 +148,18 @@ test('claiming stays atomic so two workers cannot take the same item', () => {
   // The claim RPC locks with FOR UPDATE SKIP LOCKED — the guarantee against
   // duplicate reports when the reaper and a hand-off overlap.
   assert.match(worker, /p_batch_id: body\.batchId \?\? null/)
+})
+
+test('healthy batches use bounded flat worker lanes instead of serial or recursive fan-out', () => {
+  assert.match(worker, /const DEFAULT_WORKER_LANES = 4/)
+  assert.match(worker, /const MAX_WORKER_LANES = 6/)
+  assert.match(worker, /body\.workerLane === undefined && workerLanes > 1/)
+  assert.match(worker, /Array\.from\(\{ length: workerLanes - 1 \}/)
+  assert.match(worker, /JSON\.stringify\(\{ batchId: body\.batchId, workerLane: lane, workerLanes \}\)/)
+  assert.match(worker, /JSON\.stringify\(\{ batchId: body\.batchId, workerLane, workerLanes \}\)/)
+  assert.match(worker, /Math\.min\(requestedLanes, MAX_WORKER_LANES\)/)
+  // Atomic SKIP LOCKED claiming remains the duplicate-protection boundary.
+  assert.match(hardening, /for update skip locked/i)
 })
 
 test('the reaper cannot stampede: it is bounded and skips live batches', () => {

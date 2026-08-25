@@ -16,6 +16,8 @@ import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
 // normalized facts + provenance, shared retry/backoff and token handling.
 const BATCH_SIZE = 1
+const DEFAULT_WORKER_LANES = 4
+const MAX_WORKER_LANES = 6
 const META_COLLECTION_PAGE_CAP = 25
 const MAX_WORK_MS = 40_000
 const PAGE_FETCH_RESERVE_MS = 8_000
@@ -236,7 +238,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: error instanceof Error ? error.message : 'Internal Meta configuration error.' }, 500)
   }
 
-  let body: { batchId?: string; maxItems?: number }
+  let body: { batchId?: string; maxItems?: number; workerLane?: number; workerLanes?: number }
   try {
     body = await req.json()
   } catch {
@@ -351,6 +353,46 @@ Deno.serve(async (req) => {
       rateLimited: true,
       waitingForRateLimit: true,
     })
+  }
+
+  // A root invocation starts a small, bounded set of independent lanes. Each
+  // lane then hands off only to its own successor, so concurrency stays flat
+  // instead of growing recursively. The claim RPC uses SKIP LOCKED, making
+  // client-month work exclusive across lanes while unrelated clients progress
+  // in parallel. A stale-batch recovery invocation is another root and safely
+  // reconstructs the lane set after the previous workers have stopped.
+  const requestedLanes = Number.isFinite(body.workerLanes)
+    ? Math.trunc(body.workerLanes as number)
+    : DEFAULT_WORKER_LANES
+  const workerLanes = Math.max(1, Math.min(requestedLanes, MAX_WORKER_LANES))
+  const workerLane = Number.isFinite(body.workerLane)
+    ? Math.max(0, Math.min(Math.trunc(body.workerLane as number), workerLanes - 1))
+    : 0
+  let lanesStarted = 1
+
+  if (body.batchId && body.workerLane === undefined && workerLanes > 1) {
+    const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
+    const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
+    const starts = Array.from({ length: workerLanes - 1 }, (_, offset) => offset + 1).map(async lane => {
+      try {
+        await fetch(workerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-worker-secret': workerSecret,
+          },
+          body: JSON.stringify({ batchId: body.batchId, workerLane: lane, workerLanes }),
+          signal: AbortSignal.timeout(2_000),
+        })
+        return true
+      } catch (error) {
+        // Timeout/abort means the Edge Function accepted the request and is
+        // working. A genuine transport failure is recovered by the reaper.
+        return error instanceof DOMException && ['TimeoutError', 'AbortError'].includes(error.name)
+      }
+    })
+    const started = await Promise.all(starts)
+    lanesStarted += started.filter(Boolean).length
   }
 
   // ── Process items in chunks (continuation loop) ─────────────
@@ -939,7 +981,7 @@ Deno.serve(async (req) => {
             'Content-Type': 'application/json',
             'x-worker-secret': workerSecret,
           },
-          body: JSON.stringify({ batchId: body.batchId }),
+          body: JSON.stringify({ batchId: body.batchId, workerLane, workerLanes }),
           signal: AbortSignal.timeout(2_000),
         })
       } catch (error) {
@@ -967,6 +1009,9 @@ Deno.serve(async (req) => {
     handedOff: selfTriggered,
     claimFailed,
     rateLimited,
+    workerLane,
+    workerLanes,
+    lanesStarted,
   })
   } catch (error) {
     // Any unhandled throw used to escape as a bare platform 500 with no
