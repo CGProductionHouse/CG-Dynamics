@@ -430,6 +430,26 @@ Deno.serve(async (req) => {
   if (body.batchId && body.startLanes === true && workerLanes > 1) {
     const { data, error } = await sb.rpc('meta_sync_begin_lane_set', { p_batch_id: body.batchId })
     mayStartLaneSet = !error && data === true
+    if (!mayStartLaneSet) {
+      return jsonResponse({
+        ok: true,
+        syncEngineVersion: META_CONNECTOR_VERSION,
+        chunksProcessed: 0,
+        processed: 0,
+        items: [],
+        workerRan: false,
+        itemsReleased: 0,
+        workRemaining: true,
+        handedOff: false,
+        claimFailed: false,
+        rateLimited: false,
+        waitingForRateLimit: false,
+        laneSetAlreadyStarted: true,
+        workerLane,
+        workerLanes,
+        lanesStarted: 0,
+      })
+    }
   }
   if (body.batchId && mayStartLaneSet) {
     const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
