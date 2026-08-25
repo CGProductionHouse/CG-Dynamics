@@ -310,7 +310,7 @@ async function runMetaSyncBatch(
     res = await fetch(`${url}/functions/v1/meta-sync-worker`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-worker-secret': workerSecret },
-      body: JSON.stringify({ batchId }),
+      body: JSON.stringify({ batchId, startLanes: true }),
       signal: AbortSignal.timeout(15_000),
     })
   } catch (error) {

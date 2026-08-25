@@ -25,6 +25,10 @@ const MIN_PAGE_REQUEST_BUDGET_MS = 4_000
 
 class RetryableIncompleteError extends Error {}
 
+function isMetaRateLimitError(message: string): boolean {
+  return /rate.?limit|HTTP 429|code:\s*(4|17|32|341|613)\b/i.test(message)
+}
+
 function monthBounds(month: string): { periodStart: string; periodEnd: string } {
   const year = Number(month.slice(0, 4))
   const m = Number(month.slice(5, 7))
@@ -117,7 +121,8 @@ async function fetchMetaCollection(
     const res = await metaFetch(requestUrl.toString(), requestTimeoutMs)
     pagesFetched++
     if (!res.ok) {
-      return { pagesFetched, complete: false, error: await parseMetaError(res, `${context} page ${pagesFetched}`, tokens), retryable: false }
+      const error = await parseMetaError(res, `${context} page ${pagesFetched}`, tokens)
+      return { pagesFetched, complete: false, error, retryable: isMetaRateLimitError(error) }
     }
     const page = await res.json()
     const nextUrl = typeof page.paging?.next === 'string' ? page.paging.next : null
@@ -164,6 +169,19 @@ async function touchBatch(sb: ReturnType<typeof createClient>, batchId: string):
   } catch {
     // Heartbeat is best-effort by design.
   }
+}
+
+async function batchIsCoolingDown(
+  sb: ReturnType<typeof createClient>,
+  batchId: string,
+): Promise<boolean> {
+  const { data, error } = await sb
+    .from('meta_sync_batches')
+    .select('cooldown_until')
+    .eq('id', batchId)
+    .maybeSingle()
+  if (error || !data?.cooldown_until) return false
+  return new Date(data.cooldown_until).getTime() > Date.now()
 }
 
 /* ---------- Auth ---------- */
@@ -238,11 +256,48 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: error instanceof Error ? error.message : 'Internal Meta configuration error.' }, 500)
   }
 
-  let body: { batchId?: string; maxItems?: number; workerLane?: number; workerLanes?: number }
+  let body: { batchId?: string; maxItems?: number; workerLane?: number; workerLanes?: number; startLanes?: boolean }
   try {
     body = await req.json()
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400)
+  }
+
+  if (body.workerLane !== undefined && !Number.isInteger(body.workerLane)) {
+    return jsonResponse({ ok: false, error: 'workerLane must be an integer when provided.' }, 400)
+  }
+  if (body.workerLanes !== undefined && !Number.isInteger(body.workerLanes)) {
+    return jsonResponse({ ok: false, error: 'workerLanes must be an integer when provided.' }, 400)
+  }
+  if (body.startLanes === true && body.workerLane !== undefined) {
+    return jsonResponse({ ok: false, error: 'A child lane cannot start another lane set.' }, 400)
+  }
+
+  const requestedLanes = body.workerLanes ?? DEFAULT_WORKER_LANES
+  const workerLanes = Math.max(1, Math.min(requestedLanes, MAX_WORKER_LANES))
+  const workerLane = body.workerLane === undefined
+    ? 0
+    : Math.max(0, Math.min(body.workerLane, workerLanes - 1))
+  let lanesStarted = 1
+  let waitingForRateLimit = body.batchId ? await batchIsCoolingDown(sb, body.batchId) : false
+  if (waitingForRateLimit) {
+    return jsonResponse({
+      ok: true,
+      syncEngineVersion: META_CONNECTOR_VERSION,
+      chunksProcessed: 0,
+      processed: 0,
+      items: [],
+      workerRan: false,
+      itemsReleased: 0,
+      workRemaining: true,
+      handedOff: false,
+      claimFailed: false,
+      rateLimited: true,
+      waitingForRateLimit,
+      workerLane,
+      workerLanes,
+      lanesStarted: 0,
+    })
   }
 
   // ── Get Meta access token ──────────────────────────────────
@@ -308,7 +363,7 @@ Deno.serve(async (req) => {
       }
       if (!res.ok) {
         const errBody = await res.json().catch(() => null)
-        if (errBody?.error && (errBody.error.code === 4 || errBody.error.error_subcode === 2069032)) {
+        if (errBody?.error && ([4, 17, 32, 341, 613].includes(errBody.error.code) || errBody.error.error_subcode === 2069032)) {
           pageTokenRateLimited = true
         }
         break
@@ -359,38 +414,34 @@ Deno.serve(async (req) => {
   // lane then hands off only to its own successor, so concurrency stays flat
   // instead of growing recursively. The claim RPC uses SKIP LOCKED, making
   // client-month work exclusive across lanes while unrelated clients progress
-  // in parallel. A stale-batch recovery invocation is another root and safely
-  // reconstructs the lane set after the previous workers have stopped.
-  const requestedLanes = Number.isFinite(body.workerLanes)
-    ? Math.trunc(body.workerLanes as number)
-    : DEFAULT_WORKER_LANES
-  const workerLanes = Math.max(1, Math.min(requestedLanes, MAX_WORKER_LANES))
-  const workerLane = Number.isFinite(body.workerLane)
-    ? Math.max(0, Math.min(Math.trunc(body.workerLane as number), workerLanes - 1))
-    : 0
-  let lanesStarted = 1
-
-  if (body.batchId && body.workerLane === undefined && workerLanes > 1) {
+  // in parallel. Recovery starts only one replacement lane so two overlapping
+  // recovery requests cannot each reconstruct a complete lane set.
+  // Only the initial durable driver may create the lane set. Reapers, manual
+  // restarts, and child continuations start one replacement lane, preventing
+  // overlapping roots from multiplying the batch-wide concurrency cap.
+  if (body.batchId && body.startLanes === true && workerLanes > 1) {
     const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
     const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
-    const starts = Array.from({ length: workerLanes - 1 }, (_, offset) => offset + 1).map(async lane => {
-      try {
-        await fetch(workerUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-worker-secret': workerSecret,
-          },
-          body: JSON.stringify({ batchId: body.batchId, workerLane: lane, workerLanes }),
-          signal: AbortSignal.timeout(2_000),
-        })
-        return true
-      } catch (error) {
-        // Timeout/abort means the Edge Function accepted the request and is
-        // working. A genuine transport failure is recovered by the reaper.
-        return error instanceof DOMException && ['TimeoutError', 'AbortError'].includes(error.name)
-      }
-    })
+    const starts = workerSecret
+      ? Array.from({ length: workerLanes - 1 }, (_, offset) => offset + 1).map(async lane => {
+        try {
+          const response = await fetch(workerUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-worker-secret': workerSecret,
+            },
+            body: JSON.stringify({ batchId: body.batchId, workerLane: lane, workerLanes }),
+            signal: AbortSignal.timeout(2_000),
+          })
+          return response.ok
+        } catch {
+          // A timeout does not prove that the platform admitted the child. The
+          // durable reaper remains the recovery authority for uncertain starts.
+          return false
+        }
+      })
+      : []
     const started = await Promise.all(starts)
     lanesStarted += started.filter(Boolean).length
   }
@@ -412,6 +463,10 @@ Deno.serve(async (req) => {
 
   while (claimCount < MAX_CHUNKS) {
     if (Date.now() >= invocationDeadline - PAGE_FETCH_RESERVE_MS || pageTokenBudgetExhausted) break
+    if (body.batchId && await batchIsCoolingDown(sb, body.batchId)) {
+      waitingForRateLimit = true
+      break
+    }
     const { data: items, error: claimError } = await sb.rpc('claim_sync_batch_items', {
       p_limit: body.maxItems ?? BATCH_SIZE,
       p_batch_id: body.batchId ?? null,
@@ -875,21 +930,19 @@ Deno.serve(async (req) => {
   // A rate limit is a wait, not a failure. Without this the reaper retries
   // every minute, no item can settle, and the bounded no-progress budget would
   // eventually force-fail every remaining client for a temporary throttle.
-  const rateLimited = processed.some(p => /rate.?limit/i.test(p.error ?? ''))
+  const rateLimited = processed.some(p => isMetaRateLimitError(p.error ?? ''))
   if (rateLimited) {
+    waitingForRateLimit = true
     // A client that only failed because Meta throttled us has not really
     // failed. Put it back on the queue at its original attempt count so a
     // throttle can never burn through the retry budget and permanently mark a
     // client failed for something that had nothing to do with its data.
     const throttled = processed
-      .filter(p => p.status === 'failed' && /rate.?limit/i.test(p.error ?? ''))
+      .filter(p => ['failed', 'queued'].includes(p.status) && isMetaRateLimitError(p.error ?? ''))
       .map(p => p.itemId)
     if (throttled.length > 0) {
       try {
-        await sb.from('meta_sync_batch_items')
-          .update({ status: 'queued', started_at: null, finished_at: null, error: null })
-          .in('id', throttled)
-        await sb.rpc('meta_sync_release_items', { p_item_ids: throttled })
+        await sb.rpc('meta_sync_requeue_throttled_items', { p_item_ids: throttled })
       } catch {
         // Left failed; the operator can retry the client explicitly.
       }
@@ -956,7 +1009,7 @@ Deno.serve(async (req) => {
     workRemaining = (remaining ?? 0) > 0 || (staleRunning ?? 0) > 0
     // Never self-amplify when the claim RPC is missing/failing (avoids an
     // infinite trigger loop against a broken deployment).
-    if (!claimFailed && workRemaining) {
+    if (!claimFailed && workRemaining && !waitingForRateLimit) {
       const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
       const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
       // Hand off WITHOUT waiting for the next generation to finish.
@@ -968,27 +1021,22 @@ Deno.serve(async (req) => {
       // two or three hops and the whole chain died mid-flight, stranding the
       // rest of the queue with no worker — the production stall in #161.
       //
-      // Now the request is aborted as soon as the next worker has certainly
-      // picked up the job (it claims and heartbeats within the first second),
-      // so this invocation can return immediately. Correctness no longer
-      // depends on the chain surviving at all: the per-minute cron reaper in
-      // background-worker revives any batch whose heartbeat goes stale.
-      selfTriggered = true
-      try {
-        await fetch(workerUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-worker-secret': workerSecret,
-          },
-          body: JSON.stringify({ batchId: body.batchId, workerLane, workerLanes }),
-          signal: AbortSignal.timeout(2_000),
-        })
-      } catch (error) {
-        // An abort here is the expected, healthy path — the next worker is
-        // already running. Anything else means the hand-off did not land, and
-        // the reaper will pick the batch up within a minute.
-        if (!(error instanceof DOMException && ['TimeoutError', 'AbortError'].includes(error.name))) {
+      // A timely successful response is the only positive acknowledgement. A
+      // timeout may still have started work, but it is reported as uncertain;
+      // the per-minute reaper remains the durable recovery authority.
+      if (workerSecret) {
+        try {
+          const response = await fetch(workerUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-worker-secret': workerSecret,
+            },
+            body: JSON.stringify({ batchId: body.batchId, workerLane, workerLanes }),
+            signal: AbortSignal.timeout(2_000),
+          })
+          selfTriggered = response.ok
+        } catch {
           selfTriggered = false
         }
       }
@@ -1009,6 +1057,7 @@ Deno.serve(async (req) => {
     handedOff: selfTriggered,
     claimFailed,
     rateLimited,
+    waitingForRateLimit,
     workerLane,
     workerLanes,
     lanesStarted,

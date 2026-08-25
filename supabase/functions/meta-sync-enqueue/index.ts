@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       'Content-Type': 'application/json',
       'x-worker-secret': workerSecret,
     },
-    body: JSON.stringify({ batchId, maxItems: 5 }),
+    body: JSON.stringify({ batchId, maxItems: 1, startLanes: true }),
   })
 
   // Keep runtime alive until trigger completes

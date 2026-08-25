@@ -15,11 +15,13 @@ const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\
 const stripComments = src => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const worker = read('../supabase/functions/meta-sync-worker/index.ts')
 const background = read('../supabase/functions/background-worker/index.ts')
+const enqueue = read('../supabase/functions/meta-sync-enqueue/index.ts')
 const page = read('../src/pages/admin/MetaIntegrationPage.tsx')
 const durable = read('../supabase/migrations/20260804130000_meta_sync_durable_recovery.sql')
 const hardening = read('../supabase/migrations/20260801170000_backend_acceptance_hardening.sql')
 const watermark = read('../supabase/migrations/20260804140000_meta_sync_recovery_progress_watermark.sql')
 const cooldown = read('../supabase/migrations/20260804150000_meta_sync_rate_limit_cooldown.sql')
+const parallelSafety = read('../supabase/migrations/20260825180000_meta_sync_parallel_lane_safety.sql')
 
 // ── Root cause 1: the only durable driver could die permanently ──────────────
 test('a stalled batch is driven by the per-minute cron worker, not only by background_jobs', () => {
@@ -55,12 +57,13 @@ test('the worker hands off without holding the whole chain open', () => {
   const handoff = stripComments(worker).slice(stripComments(worker).indexOf('const workerUrl'))
   assert.doesNotMatch(handoff, /EdgeRuntime\.waitUntil/, 'must not keep ancestors alive for the whole chain')
   assert.match(handoff, /AbortSignal\.timeout\(2_000\)/)
-  assert.match(handoff, /selfTriggered = true/)
+  assert.match(handoff, /selfTriggered = response\.ok/)
 })
 
 test('correctness does not depend on the hand-off surviving', () => {
   // Even with every hand-off lost, the cron reaper must finish the batch.
-  assert.match(worker, /the per-minute cron reaper in\s*\/\/ background-worker revives any batch whose heartbeat goes stale/)
+  assert.match(background, /reapStalledMetaSyncBatches/)
+  assert.match(background, /meta_sync_stalled_batches/)
 })
 
 // ── Root cause 3: abandoned claims burned real retry attempts ───────────────
@@ -108,7 +111,8 @@ test('a Meta rate limit backs off instead of failing the remaining clients', () 
 })
 
 test('a client failed only because of throttling is requeued, not left failed', () => {
-  assert.match(worker, /p\.status === 'failed' && \/rate\.\?limit\/i\.test/)
+  assert.match(worker, /isMetaRateLimitError/)
+  assert.match(worker, /meta_sync_requeue_throttled_items/)
   assert.match(worker, /has not really\s*\/\/ failed/)
 })
 
@@ -153,13 +157,40 @@ test('claiming stays atomic so two workers cannot take the same item', () => {
 test('healthy batches use bounded flat worker lanes instead of serial or recursive fan-out', () => {
   assert.match(worker, /const DEFAULT_WORKER_LANES = 4/)
   assert.match(worker, /const MAX_WORKER_LANES = 6/)
-  assert.match(worker, /body\.workerLane === undefined && workerLanes > 1/)
+  assert.match(worker, /body\.startLanes === true && workerLanes > 1/)
   assert.match(worker, /Array\.from\(\{ length: workerLanes - 1 \}/)
   assert.match(worker, /JSON\.stringify\(\{ batchId: body\.batchId, workerLane: lane, workerLanes \}\)/)
   assert.match(worker, /JSON\.stringify\(\{ batchId: body\.batchId, workerLane, workerLanes \}\)/)
   assert.match(worker, /Math\.min\(requestedLanes, MAX_WORKER_LANES\)/)
   // Atomic SKIP LOCKED claiming remains the duplicate-protection boundary.
   assert.match(hardening, /for update skip locked/i)
+})
+
+test('only initial durable drivers create a lane set', () => {
+  assert.match(enqueue, /JSON\.stringify\(\{ batchId, maxItems: 1, startLanes: true \}\)/)
+  assert.match(background, /JSON\.stringify\(\{ batchId, startLanes: true \}\)/)
+  assert.match(background, /JSON\.stringify\(\{ batchId: row\.batch_id \}\)/)
+  assert.doesNotMatch(worker, /startLanes:\s*true/, 'child continuations must never start another lane set')
+})
+
+test('lane inputs, missing secrets, and child responses fail closed', () => {
+  assert.match(worker, /workerLane must be an integer when provided/)
+  assert.match(worker, /workerLanes must be an integer when provided/)
+  assert.match(worker, /A child lane cannot start another lane set/)
+  assert.match(worker, /const starts = workerSecret/)
+  assert.ok((worker.match(/response\.ok/g) ?? []).length >= 2)
+  assert.doesNotMatch(stripComments(worker), /TimeoutError.*return true|AbortError.*return true/s)
+})
+
+test('active cooldown stops new claims and lane handoffs', () => {
+  assert.match(worker, /await batchIsCoolingDown\(sb, body\.batchId\)/)
+  assert.match(worker, /workRemaining && !waitingForRateLimit/)
+  assert.match(worker, /waitingForRateLimit,/)
+})
+
+test('parallel batch recalculation is serialized on the parent row', () => {
+  assert.match(parallelSafety, /from public\.meta_sync_batches[\s\S]*for update/)
+  assert.match(parallelSafety, /create or replace function public\.recalculate_batch_status/)
 })
 
 test('the reaper cannot stampede: it is bounded and skips live batches', () => {
