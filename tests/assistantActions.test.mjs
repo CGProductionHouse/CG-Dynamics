@@ -14,6 +14,8 @@ const CTX = {
     { id: 'c-dulux', name: 'Dulux' },
     { id: 'c-braize', name: 'Braize' },
     { id: 'c-cape', name: 'Cape Lumber' },
+    { id: 'c-red-oak', name: 'Red Oak' },
+    { id: 'c-mimosa', name: 'Mimosa Mall' },
   ],
   staffNames: ['Franco Nel', 'Amonique Fourie', 'Chris'],
   role: 'team',
@@ -95,9 +97,51 @@ test('assign with NO date leaves due_date null (no due date invented)', () => {
   assert.equal(r.fields.due_date, null)
 })
 
-test('assign without an open Planner task clarifies instead of proposing a duplicate create', () => {
+test('existing-task assignment without an open Planner task asks for a canonical match, not Planner navigation', () => {
   const r = parseAssistantAction('Assign this task to Amonique', { ...CTX, currentTaskId: null, currentTaskName: null })
-  assert.match(r.clarify, /Open the Planner task first/i)
+  assert.match(r.clarify, /matching active task/i)
+  assert.doesNotMatch(r.clarify, /open.*planner/i)
+})
+
+test('production prompt: create and assign new Red Oak work without an open Planner task', () => {
+  const r = parseAssistantAction('Assign Franco to do a rugby table league poster design for Red Oak.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(r.type, 'task.create', JSON.stringify(r))
+  assert.equal(r.clientId, 'c-red-oak')
+  assert.equal(r.fields.assignee, 'Franco Nel')
+  assert.match(r.fields.task, /rugby table league poster design/i)
+})
+
+test('production prompt: create + client + assignee + relative due date', () => {
+  const r = parseAssistantAction('Mimosa Mall 5km logo design should be done tomorrow by Franco.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(r.type, 'task.create', JSON.stringify(r))
+  assert.equal(r.clientId, 'c-mimosa')
+  assert.equal(r.fields.assignee, 'Franco Nel')
+  assert.equal(r.fields.due_date, '2026-07-02')
+  assert.equal(r.fields.task, 'Mimosa Mall 5km logo design')
+})
+
+test('unique visible task is reassigned without creating a duplicate', () => {
+  const r = parseAssistantAction('Reassign the rugby table league poster design for Red Oak to Franco', {
+    ...CTX,
+    currentTaskId: null,
+    currentTaskName: null,
+    tasks: [{ id: 'task-rugby', title: 'Rugby table league poster design', clientId: 'c-red-oak', clientName: 'Red Oak', dueDate: '2026-07-04' }],
+  })
+  assert.equal(r.type, 'task.assign')
+  assert.equal(r.target.id, 'task-rugby')
+})
+
+test('unknown client creation command gives the supported next action without Planner internals', () => {
+  const r = parseAssistantAction('Add Newco as a client and assign Franco', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.match(r.clarify, /active client directory/i)
+  assert.match(r.clarify, /Clients first/i)
+  assert.doesNotMatch(r.clarify, /Planner/i)
 })
 
 test('ambiguous / unknown assignee asks instead of guessing', () => {

@@ -33,10 +33,19 @@ export interface ActionClient {
   name: string
 }
 
+export interface ActionTask {
+  id: string
+  title: string
+  clientId: string | null
+  clientName: string | null
+  dueDate: string | null
+}
+
 export interface ActionContext {
   today: string // YYYY-MM-DD (caller's local date)
   clients: ActionClient[]
   staffNames: string[]
+  tasks?: ActionTask[]
   role: string // 'admin' | 'manager' | 'team' | ...
   currentClientId?: string | null
   currentClientName?: string | null
@@ -98,7 +107,9 @@ const NUMBER_WORDS: Record<string, number> = {
 const CREATE_MEETING = /\b(add|create|schedule|book|set ?up|new|skep|maak|voeg|boek|skeduleer|reël|reel)\b/
 const MEETING_NOUN = /\b(meeting|vergadering|event|afspraak|call|oproep)\b/
 const CANCEL = /\b(cancel|kanselleer|delete|remove|verwyder|skrap)\b/
-const ASSIGN = /\b(assign|toewys|wys .* toe|gee (?:die|hierdie)?\s*taak|gee vir)\b/
+const ASSIGN = /\b(reassign|assign|herassign|toewys|wys .* toe|gee (?:die|hierdie)?\s*taak|gee vir)\b/
+const ASSIGNED_BY = /\b(?:done|completed|handled|designed|made|finished)\b.{0,40}\b(?:by|deur)\b/
+const EXISTING_TASK = /\b(reassign|herassign|change (?:the )?assignee|existing task|current task|this task|hierdie taak)\b/
 const TASK_NOUN = /\b(task|taak|to-?do|item)\b/
 const MOVE = /\b(move|skuif|shift|verskuif|reschedule|herskeduleer)\b/
 const THIS_TASK = /\b(this|hierdie|die)\s+(task|taak|item)\b/
@@ -186,7 +197,7 @@ function findClient(text: string, clients: ActionClient[]): { matches: ActionCli
   const matches = clients.filter(client => {
     const name = client.name.trim().toLowerCase()
     if (!name) return false
-    if (hay.includes(` ${name} `)) return true
+    if (new RegExp(`(^|[^a-z0-9])${escapeRegExp(name)}([^a-z0-9]|$)`).test(hay)) return true
     return name.split(/[^a-z0-9]+/).filter(t => t.length >= 4).some(t => new RegExp(`(^|[^a-z0-9])${t}([^a-z0-9]|$)`).test(hay))
   })
   return { matches }
@@ -198,9 +209,50 @@ function findStaff(text: string, staffNames: string[]): { matches: string[] } {
     const n = name.trim().toLowerCase()
     if (!n) return false
     // Match on first name or full name as a whole word.
-    return n.split(/\s+/).concat([n]).some(part => part.length >= 2 && hay.includes(` ${part} `))
+    return n.split(/\s+/).concat([n]).some(part => part.length >= 2 && new RegExp(`(^|[^a-z0-9])${escapeRegExp(part)}([^a-z0-9]|$)`).test(hay))
   })
   return { matches: [...new Set(matches)] }
+}
+
+function normaliseWords(value: string): string[] {
+  const ignored = new Set(['a', 'an', 'and', 'as', 'at', 'by', 'client', 'do', 'for', 'of', 'on', 'task', 'the', 'to'])
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/).filter(word => word.length > 1 && !ignored.has(word))
+}
+
+function findTasks(text: string, tasks: ActionTask[], clientId: string | null): ActionTask[] {
+  const words = new Set(normaliseWords(text))
+  const candidates = tasks
+    .filter(task => !clientId || task.clientId === clientId)
+    .map(task => {
+      const titleWords = normaliseWords(task.title)
+      const matched = titleWords.filter(word => words.has(word)).length
+      return { task, score: titleWords.length > 0 ? matched / titleWords.length : 0, matched }
+    })
+    .filter(candidate => candidate.matched >= 2 && candidate.score >= 0.5)
+    .sort((a, b) => b.score - a.score)
+  return candidates.filter(candidate => candidate.score === candidates[0]?.score).map(candidate => candidate.task)
+}
+
+function taskTarget(task: ActionTask): ActionTarget {
+  return { type: 'planner_task', id: task.id, label: task.title }
+}
+
+function taskChoice(task: ActionTask): string {
+  return `${task.title}${task.clientName ? ` (${task.clientName})` : ''}${task.dueDate ? `, due ${task.dueDate}` : ''}`
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function createTaskTitle(raw: string, assignee: string | null, clientName: string | null): string {
+  let title = raw.replace(/[.?!]+$/, '')
+    .replace(/^assign\s+.+?\s+to\s+(?:do|make|design|create)\s+/i, '')
+    .replace(/\s+should be (?:done|completed|handled|designed|made|finished)\b.{0,40}\b(?:by|deur)\s+.+$/i, '')
+    .replace(/\s+(?:due|for)\s+(?:today|tomorrow|vandag|more|môre|monday|tuesday|wednesday|thursday|friday|saturday|sunday).*$/i, '')
+  if (assignee) title = title.replace(new RegExp(`\\b${escapeRegExp(assignee)}\\b`, 'ig'), '')
+  if (clientName) title = title.replace(new RegExp(`\\b(?:for|under)\\s+${escapeRegExp(clientName)}\\b`, 'ig'), '')
+  return title.replace(/\s{2,}/g, ' ').replace(/^(?:a|an|the)\s+/i, '').trim() || 'New task'
 }
 
 function collectNumbers(text: string): number[] {
@@ -493,30 +545,40 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   }
 
   // 3. Assign / create a task.
-  if ((ASSIGN.test(lower) || (TASK_NOUN.test(lower) && CREATE_MEETING.test(lower)))) {
-    const isAssign = ASSIGN.test(lower)
+  if ((ASSIGN.test(lower) || ASSIGNED_BY.test(lower) || (TASK_NOUN.test(lower) && CREATE_MEETING.test(lower)))) {
+    const assignmentIntent = ASSIGN.test(lower) || ASSIGNED_BY.test(lower)
     const staff = findStaff(lower, context.staffNames)
-    if (isAssign && staff.matches.length === 0) return { clarify: 'Who should I assign this task to? I could not match a staff member.' }
+    if (assignmentIntent && staff.matches.length === 0) return { clarify: 'Which staff member should own this task?' }
     if (staff.matches.length > 1) return { clarify: `Did you mean ${staff.matches.join(' or ')}?` }
     const due = resolveRelativeDate(lower, context.today) // may be null → no due date, which is allowed
     const assignee = staff.matches[0] ?? null
-    if (isAssign && !context.currentTaskId) return { clarify: 'Open the Planner task first so I know exactly which existing task to assign.' }
-    // Task title: strip the command words for a readable default.
-    const title = raw
+    const clients = findClient(lower, context.clients).matches
+    if (clients.length > 1) return { clarify: `Which client - ${clients.map(client => client.name).join(' or ')}?` }
+    const client = clients[0] ?? (context.currentClientId ? { id: context.currentClientId, name: context.currentClientName ?? 'this client' } : null)
+    if (/\badd\b.*\bas (?:a )?client\b/i.test(raw) && !client) {
+      return { clarify: 'That client is not in the active client directory yet. Add it through Clients first, then I can create and assign the task.' }
+    }
+    const explicitExisting = EXISTING_TASK.test(lower) || /^assign (?:this|the) task\b/i.test(raw)
+    const currentTask: ActionTask | null = context.currentTaskId
+      ? { id: context.currentTaskId, title: context.currentTaskName ?? 'Current Planner task', clientId: context.currentClientId ?? null, clientName: context.currentClientName ?? null, dueDate: null }
+      : null
+    const matches = explicitExisting && !currentTask ? findTasks(raw, context.tasks ?? [], client?.id ?? null) : []
+    if (matches.length > 1) return { clarify: `Which task - ${matches.slice(0, 3).map(taskChoice).join(' or ')}?` }
+    const existing = currentTask ?? matches[0] ?? null
+    if (explicitExisting && !existing) return { clarify: 'I could not find one matching active task. Name the task and client.' }
+    const title = createTaskTitle(raw, assignee, client?.name ?? null)
     return {
-      type: isAssign ? 'task.assign' : 'task.create',
-      title: isAssign ? `Assign task to ${assignee}` : 'Create task',
+      type: existing ? 'task.assign' : 'task.create',
+      title: existing ? `Assign ${existing.title} to ${assignee}` : `Create and assign ${title}`,
       fields: {
         task: title,
         assignee,
         due_date: due, // null is valid — no due date when none was given
       },
-      clientId: context.currentClientId ?? null,
-      clientName: context.currentClientName ?? null,
-      target: isAssign && context.currentTaskId
-        ? { type: 'planner_task', id: context.currentTaskId, label: context.currentTaskName ?? 'Current Planner task' }
-        : undefined,
-      approvalNote: isAssign && due
+      clientId: client?.id ?? null,
+      clientName: client?.name ?? null,
+      target: existing ? taskTarget(existing) : undefined,
+      approvalNote: existing && due
         ? 'Assignment will be saved now. Change the due date separately on the task because the current backend cannot apply both atomically.'
         : undefined,
     }
