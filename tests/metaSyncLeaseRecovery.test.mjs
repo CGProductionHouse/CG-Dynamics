@@ -91,7 +91,7 @@ test('shared account facts stop resumably between probes and cap every retry to 
 test('worker passes its safe deadline and requeues the distinct connector deadline', () => {
   assert.match(worker, /deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS/g)
   assert.match(worker, /e instanceof MetaSyncDeadlineError[\s\S]*throw new RetryableIncompleteError\(e\.message\)/)
-  assert.match(worker, /e instanceof RetryableIncompleteError && item\.attempts < 3[\s\S]*itemStatus = 'queued'/)
+  assert.match(worker, /e instanceof RetryableIncompleteError && \(item\.attempts < 3 \|\| isMetaRateLimitError[\s\S]*itemStatus = 'queued'/)
 })
 
 test('worker resumes from safe per-platform cursors and clears them on page completion', () => {

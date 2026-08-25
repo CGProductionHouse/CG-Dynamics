@@ -49,8 +49,42 @@ begin
 end;
 $$;
 
+-- Admit the initial parallel lane set exactly once per durable batch. Repeated
+-- background-job passes and manual/reaper wakeups therefore cannot each create
+-- another complete generation.
+create or replace function public.meta_sync_begin_lane_set(
+  p_batch_id uuid
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_count integer;
+begin
+  update public.meta_sync_batches batch
+     set summary = jsonb_set(
+       coalesce(batch.summary, '{}'::jsonb),
+       '{parallel_lanes_started_at}',
+       to_jsonb(now()),
+       true
+     )
+   where batch.id = p_batch_id
+     and not (coalesce(batch.summary, '{}'::jsonb) ? 'parallel_lanes_started_at');
+
+  get diagnostics v_count = row_count;
+  return v_count = 1;
+end;
+$$;
+
+revoke all on function public.meta_sync_begin_lane_set(uuid) from public, anon, authenticated;
+grant execute on function public.meta_sync_begin_lane_set(uuid) to service_role;
+
 -- A provider throttle is a wait, not a consumed item attempt. Reset only the
--- failed platform stage while preserving completed stages and page checkpoints.
+-- item attempt. Platform states are not reset here: the worker keeps a
+-- rate-limited stage pending/facts_pending, preserving unrelated permanent
+-- failures and completed stages.
 create or replace function public.meta_sync_requeue_throttled_items(
   p_item_ids uuid[]
 )
@@ -67,9 +101,7 @@ begin
          attempts = greatest(0, item.attempts - 1),
          started_at = null,
          finished_at = null,
-         error = null,
-         facebook_sync_state = case when item.facebook_sync_state = 'failed' then 'pending' else item.facebook_sync_state end,
-         instagram_sync_state = case when item.instagram_sync_state = 'failed' then 'pending' else item.instagram_sync_state end
+         error = null
    where item.id = any(coalesce(p_item_ids, array[]::uuid[]))
      and item.status in ('queued', 'failed');
 

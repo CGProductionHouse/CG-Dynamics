@@ -129,7 +129,7 @@ test('Meta worker checkpoints safe cursors and resumes both platforms within its
   assert.match(metaWorker, /providerPaging\.facebook/)
   assert.match(metaWorker, /providerPaging\.instagram/)
   assert.match(metaWorker, /RetryableIncompleteError/)
-  assert.match(metaWorker, /e instanceof RetryableIncompleteError && item\.attempts < 3/)
+  assert.match(metaWorker, /e instanceof RetryableIncompleteError && \(item\.attempts < 3 \|\| isMetaRateLimitError/)
   assert.match(metaWorker, /itemStatus = 'queued'/)
   assert.match(metaWorker, /Incomplete pagination exhausted 3 bounded attempts/)
   assert.match(metaWorker, /assertWorkBudget\(invocationDeadline, 'Facebook post upserts'\)/)

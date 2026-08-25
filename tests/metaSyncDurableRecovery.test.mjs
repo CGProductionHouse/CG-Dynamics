@@ -171,6 +171,9 @@ test('only initial durable drivers create a lane set', () => {
   assert.match(background, /JSON\.stringify\(\{ batchId, startLanes: true \}\)/)
   assert.match(background, /JSON\.stringify\(\{ batchId: row\.batch_id \}\)/)
   assert.doesNotMatch(worker, /startLanes:\s*true/, 'child continuations must never start another lane set')
+  assert.match(worker, /meta_sync_begin_lane_set/)
+  assert.match(parallelSafety, /parallel_lanes_started_at/)
+  assert.match(parallelSafety, /not \(coalesce\(batch\.summary, '\{\}'::jsonb\) \? 'parallel_lanes_started_at'\)/)
 })
 
 test('lane inputs, missing secrets, and child responses fail closed', () => {
@@ -186,6 +189,15 @@ test('active cooldown stops new claims and lane handoffs', () => {
   assert.match(worker, /await batchIsCoolingDown\(sb, body\.batchId\)/)
   assert.match(worker, /workRemaining && !waitingForRateLimit/)
   assert.match(worker, /waitingForRateLimit,/)
+})
+
+test('rate-limited facts stay resumable without resetting unrelated platform failures', () => {
+  assert.match(worker, /accountFactsWereRateLimited/)
+  assert.match(worker, /Facebook account facts were rate-limited by Meta/)
+  assert.match(worker, /Instagram account facts were rate-limited by Meta/)
+  const requeue = parallelSafety.slice(parallelSafety.indexOf('create or replace function public.meta_sync_requeue_throttled_items'))
+  assert.doesNotMatch(requeue, /facebook_sync_state\s*=/)
+  assert.doesNotMatch(requeue, /instagram_sync_state\s*=/)
 })
 
 test('parallel batch recalculation is serialized on the parent row', () => {

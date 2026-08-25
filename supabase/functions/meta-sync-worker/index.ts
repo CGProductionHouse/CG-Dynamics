@@ -29,6 +29,13 @@ function isMetaRateLimitError(message: string): boolean {
   return /rate.?limit|HTTP 429|code:\s*(4|17|32|341|613)\b/i.test(message)
 }
 
+function accountFactsWereRateLimited(result: Awaited<ReturnType<typeof syncAccountFacts>>): boolean {
+  return result.probes.some(probe => isMetaRateLimitError([
+    probe.error?.message,
+    probe.error?.code ? `code: ${probe.error.code}` : null,
+  ].filter(Boolean).join(', ')))
+}
+
 function monthBounds(month: string): { periodStart: string; periodEnd: string } {
   const year = Number(month.slice(0, 4))
   const m = Number(month.slice(5, 7))
@@ -419,7 +426,12 @@ Deno.serve(async (req) => {
   // Only the initial durable driver may create the lane set. Reapers, manual
   // restarts, and child continuations start one replacement lane, preventing
   // overlapping roots from multiplying the batch-wide concurrency cap.
+  let mayStartLaneSet = false
   if (body.batchId && body.startLanes === true && workerLanes > 1) {
+    const { data, error } = await sb.rpc('meta_sync_begin_lane_set', { p_batch_id: body.batchId })
+    mayStartLaneSet = !error && data === true
+  }
+  if (body.batchId && mayStartLaneSet) {
     const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
     const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
     const starts = workerSecret
@@ -682,8 +694,9 @@ Deno.serve(async (req) => {
                 await savePlatformState('facebook', 'failed', null)
               }
             } catch (e) {
-              if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
               const message = redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
+              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+              if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
               providerPaging.facebook = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
               warnings.push(message)
               itemStatus = 'failed'
@@ -766,8 +779,9 @@ Deno.serve(async (req) => {
               await savePlatformState('instagram', 'failed', null)
             }
           } catch (e) {
-            if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
             const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
+            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+            if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
             providerPaging.instagram = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
             warnings.push(message)
             itemStatus = 'failed'
@@ -789,19 +803,22 @@ Deno.serve(async (req) => {
           } else {
             try {
               assertWorkBudget(invocationDeadline, 'Facebook account facts')
-              await syncAccountFacts(sb, {
+              const factsResult = await syncAccountFacts(sb, {
                 clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
                 platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
                 baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
                 tokens: allTokens, tokenClass: 'page', reconstructInteractions: null, runType: 'scheduled',
                 deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
               })
+              if (accountFactsWereRateLimited(factsResult)) {
+                throw new RetryableIncompleteError('Facebook account facts were rate-limited by Meta.')
+              }
               await savePlatformState('facebook', 'complete', null)
             } catch (e) {
               if (e instanceof MetaSyncDeadlineError) {
                 throw new RetryableIncompleteError(e.message)
               }
-              if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
+              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
               warnings.push(redact(`Facebook account facts error: ${String(e)}`, allTokens))
               itemStatus = 'failed'
               itemError = 'Normalized Facebook account facts failed. Post content was preserved, but reporting truth is incomplete.'
@@ -813,7 +830,7 @@ Deno.serve(async (req) => {
           const igToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
           try {
             assertWorkBudget(invocationDeadline, 'Instagram account facts')
-            await syncAccountFacts(sb, {
+            const factsResult = await syncAccountFacts(sb, {
               clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
               platform: 'instagram', objectId: instagramAccountId, token: igToken,
               baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
@@ -821,12 +838,15 @@ Deno.serve(async (req) => {
               reconstructInteractions: null, runType: 'scheduled',
               deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
             })
+            if (accountFactsWereRateLimited(factsResult)) {
+              throw new RetryableIncompleteError('Instagram account facts were rate-limited by Meta.')
+            }
             await savePlatformState('instagram', 'complete', null)
           } catch (e) {
             if (e instanceof MetaSyncDeadlineError) {
               throw new RetryableIncompleteError(e.message)
             }
-            if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
+            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
             warnings.push(redact(`Instagram account facts error: ${String(e)}`, allTokens))
             itemStatus = 'failed'
             itemError = 'Normalized Instagram account facts failed. Post content was preserved, but reporting truth is incomplete.'
@@ -871,7 +891,7 @@ Deno.serve(async (req) => {
 
       } catch (e) {
         const message = redact(String(e), [accessToken, ...pageTokenMap.values()])
-        if (e instanceof RetryableIncompleteError && item.attempts < 3) {
+        if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) {
           itemStatus = 'queued'
           itemError = message
           budgetDeferred = true
