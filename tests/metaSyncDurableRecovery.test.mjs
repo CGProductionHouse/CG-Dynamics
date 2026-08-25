@@ -22,6 +22,10 @@ const hardening = read('../supabase/migrations/20260801170000_backend_acceptance
 const watermark = read('../supabase/migrations/20260804140000_meta_sync_recovery_progress_watermark.sql')
 const cooldown = read('../supabase/migrations/20260804150000_meta_sync_rate_limit_cooldown.sql')
 const parallelSafety = read('../supabase/migrations/20260825180000_meta_sync_parallel_lane_safety.sql')
+const fencing = read('../supabase/migrations/20260825190000_meta_sync_fencing_and_idempotency.sql')
+const lanes = read('../supabase/functions/_shared/metaWorkerLanes.ts')
+const dispatch = read('../supabase/functions/_shared/metaWorkerDispatch.ts')
+const sharedMeta = read('../supabase/functions/_shared/meta.ts')
 
 // ── Root cause 1: the only durable driver could die permanently ──────────────
 test('a stalled batch is driven by the per-minute cron worker, not only by background_jobs', () => {
@@ -43,10 +47,9 @@ test('the reaper only wakes batches with real work and no live worker', () => {
 })
 
 test('the worker heartbeats durably so a live batch is never double-driven', () => {
-  assert.match(durable, /create or replace function public\.meta_sync_touch_batch/)
-  assert.match(worker, /async function touchBatch/)
-  // Heartbeat on claim AND after each item, so a long item cannot look dead.
-  assert.ok((worker.match(/await touchBatch\(sb,/g) ?? []).length >= 2)
+  assert.match(fencing, /create or replace function public\.meta_sync_touch_item_lease/)
+  assert.match(worker, /async function touchItemLease/)
+  assert.match(worker, /await touchItemLease\(sb, item\.id, leaseGeneration\)/)
 })
 
 // ── Root cause 2: the self-continuation chain collapsed ─────────────────────
@@ -56,8 +59,8 @@ test('the worker hands off without holding the whole chain open', () => {
   // died mid-flight, stranding the queue.
   const handoff = stripComments(worker).slice(stripComments(worker).indexOf('const workerUrl'))
   assert.doesNotMatch(handoff, /EdgeRuntime\.waitUntil/, 'must not keep ancestors alive for the whole chain')
-  assert.match(handoff, /AbortSignal\.timeout\(2_000\)/)
-  assert.match(handoff, /selfTriggered = response\.ok/)
+  assert.match(dispatch, /AbortSignal\.timeout\(timeoutMs\)/)
+  assert.match(worker, /selfTriggered = await dispatchMetaWorker/)
 })
 
 test('correctness does not depend on the hand-off surviving', () => {
@@ -68,10 +71,10 @@ test('correctness does not depend on the hand-off surviving', () => {
 
 // ── Root cause 3: abandoned claims burned real retry attempts ───────────────
 test('items claimed but never processed are released without consuming an attempt', () => {
-  assert.match(durable, /create or replace function public\.meta_sync_release_items/)
-  assert.match(durable, /attempts = greatest\(0, item\.attempts - 1\)/)
-  assert.match(worker, /const abandoned = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
-  assert.match(worker, /meta_sync_release_items/)
+  assert.match(fencing, /create or replace function public\.meta_sync_release_claims/)
+  assert.match(fencing, /attempts = greatest\(0, item\.attempts - 1\)/)
+  assert.match(worker, /const abandoned = \[\.\.\.claimedLeases\.entries\(\)\]/)
+  assert.match(worker, /meta_sync_release_claims/)
 })
 
 test('supabase query builders are never given a .catch() handler', () => {
@@ -112,8 +115,8 @@ test('a Meta rate limit backs off instead of failing the remaining clients', () 
 
 test('a client failed only because of throttling is requeued, not left failed', () => {
   assert.match(worker, /isMetaRateLimitError/)
-  assert.match(worker, /meta_sync_requeue_throttled_items/)
-  assert.match(worker, /has not really\s*\/\/ failed/)
+  assert.match(worker, /p_refund_attempt: refundAttempt/)
+  assert.match(fencing, /p_refund_attempt then greatest\(0, attempts - 1\)/)
 })
 
 // ── Restart must confirm a worker actually ran ──────────────────────────────
@@ -143,7 +146,7 @@ test('recovery resumes the existing batch and never creates another', () => {
   // The reaper only ever POSTs an existing batchId; it has no insert path.
   const start = background.indexOf('async function reapStalledMetaSyncBatches')
   const reaper = background.slice(start, background.lastIndexOf('return out'))
-  assert.match(reaper, /body: JSON\.stringify\(\{ batchId: row\.batch_id \}\)/)
+  assert.match(reaper, /dispatchMetaWorker[\s\S]*batchId: row\.batch_id/)
   assert.doesNotMatch(reaper, /\.insert\(/, 'the reaper must never create a batch')
 })
 
@@ -155,13 +158,12 @@ test('claiming stays atomic so two workers cannot take the same item', () => {
 })
 
 test('healthy batches use bounded flat worker lanes instead of serial or recursive fan-out', () => {
-  assert.match(worker, /const DEFAULT_WORKER_LANES = 4/)
-  assert.match(worker, /const MAX_WORKER_LANES = 6/)
-  assert.match(worker, /body\.startLanes === true && workerLanes > 1/)
+  assert.match(lanes, /DEFAULT_META_WORKER_LANES = 4/)
+  assert.match(lanes, /MAX_META_WORKER_LANES = 6/)
+  assert.match(worker, /startsLaneSet/)
   assert.match(worker, /Array\.from\(\{ length: workerLanes - 1 \}/)
-  assert.match(worker, /JSON\.stringify\(\{ batchId: body\.batchId, workerLane: lane, workerLanes \}\)/)
-  assert.match(worker, /JSON\.stringify\(\{ batchId: body\.batchId, workerLane, workerLanes \}\)/)
-  assert.match(worker, /Math\.min\(requestedLanes, MAX_WORKER_LANES\)/)
+  assert.match(worker, /dispatchMetaWorker\(workerUrl, workerSecret/)
+  assert.match(lanes, /Math\.min\(requested, MAX_META_WORKER_LANES\)/)
   // Atomic SKIP LOCKED claiming remains the duplicate-protection boundary.
   assert.match(hardening, /for update skip locked/i)
 })
@@ -169,7 +171,7 @@ test('healthy batches use bounded flat worker lanes instead of serial or recursi
 test('only initial durable drivers create a lane set', () => {
   assert.match(enqueue, /JSON\.stringify\(\{ batchId, maxItems: 1, startLanes: true \}\)/)
   assert.match(background, /JSON\.stringify\(\{ batchId, startLanes: true \}\)/)
-  assert.match(background, /JSON\.stringify\(\{ batchId: row\.batch_id \}\)/)
+  assert.match(background, /dispatchMetaWorker[\s\S]*batchId: row\.batch_id/)
   assert.doesNotMatch(worker, /startLanes:\s*true/, 'child continuations must never start another lane set')
   assert.match(worker, /meta_sync_begin_lane_set/)
   assert.match(worker, /batchLaneSetAlreadyStarted/)
@@ -183,12 +185,11 @@ test('only initial durable drivers create a lane set', () => {
 })
 
 test('lane inputs, missing secrets, and child responses fail closed', () => {
-  assert.match(worker, /workerLane must be an integer when provided/)
-  assert.match(worker, /workerLanes must be an integer when provided/)
-  assert.match(worker, /A child lane cannot start another lane set/)
-  assert.match(worker, /const starts = workerSecret/)
-  assert.ok((worker.match(/response\.ok/g) ?? []).length >= 2)
-  assert.doesNotMatch(stripComments(worker), /TimeoutError.*return true|AbortError.*return true/s)
+  assert.match(lanes, /workerLane must be an integer when provided/)
+  assert.match(lanes, /workerLanes must be an integer when provided/)
+  assert.match(lanes, /A child lane cannot start another lane set/)
+  assert.match(dispatch, /if \(!workerSecret\.trim\(\)\) return false/)
+  assert.match(dispatch, /return response\.ok/)
 })
 
 test('active cooldown stops new claims and lane handoffs', () => {
@@ -198,12 +199,11 @@ test('active cooldown stops new claims and lane handoffs', () => {
 })
 
 test('rate-limited facts stay resumable without resetting unrelated platform failures', () => {
-  assert.match(worker, /accountFactsWereRateLimited/)
-  assert.match(worker, /Facebook account facts were rate-limited by Meta/)
-  assert.match(worker, /Instagram account facts were rate-limited by Meta/)
-  const requeue = parallelSafety.slice(parallelSafety.indexOf('create or replace function public.meta_sync_requeue_throttled_items'))
-  assert.doesNotMatch(requeue, /facebook_sync_state\s*=/)
-  assert.doesNotMatch(requeue, /instagram_sync_state\s*=/)
+  assert.match(sharedMeta, /MetaFactRetryableError/)
+  assert.match(sharedMeta, /p_terminal: terminal/)
+  assert.match(fencing, /completed_metric_keys/)
+  assert.doesNotMatch(fencing.slice(fencing.indexOf('create or replace function public.meta_sync_settle_item')),
+    /facebook_sync_state\s*=|instagram_sync_state\s*=/)
 })
 
 test('parallel batch recalculation is serialized on the parent row', () => {
@@ -239,8 +239,8 @@ test('the handler can never return a bare 500 with no diagnostics', () => {
   assert.match(handler, /\} catch \(error\) \{/)
   assert.match(handler, /Meta sync worker failed: \$\{detail\}/)
   // A crash must hand back whatever it was holding, or the items are stranded.
-  assert.match(handler, /const stranded = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
-  assert.match(handler, /crashClient\.rpc\('meta_sync_release_items'/)
+  assert.match(handler, /const stranded = \[\.\.\.claimedLeases\.entries\(\)\]/)
+  assert.match(handler, /crashClient\.rpc\('meta_sync_release_claims'/)
 })
 
 test('a throttled page-token request processes NOTHING rather than failing every client', () => {

@@ -6,6 +6,7 @@
 // behalf of the caller and trusts nothing from the request body.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
+import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -96,9 +97,36 @@ Deno.serve(async () => {
   // stale while real work remains gets a worker, forever, until it finishes or
   // the bounded recovery budget declares it unrecoverable.
   const reaped = await reapStalledMetaSyncBatches(supabase, url)
+  const laneRecoveries = await recoverMetaSyncLanes(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, reaped }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ ok: true, worker, processed, reaped, laneRecoveries }), { headers: { 'Content-Type': 'application/json' } })
 })
+
+interface LaneRecoveryRow {
+  batch_id: string
+  lane_id: number
+  lane_count: number
+}
+
+async function recoverMetaSyncLanes(
+  supabase: ReturnType<typeof createClient>,
+  url: string,
+): Promise<Array<{ batchId: string; laneId: number; invoked: boolean }>> {
+  const { data, error } = await supabase.rpc('meta_sync_lane_recovery_candidates', { p_limit: 8 })
+  if (error || !Array.isArray(data)) return []
+  const workerSecret = (Deno.env.get('META_SYNC_WORKER_SECRET') ?? '').trim()
+  if (!workerSecret) return []
+  const results: Array<{ batchId: string; laneId: number; invoked: boolean }> = []
+  for (const row of data as LaneRecoveryRow[]) {
+    const invoked = await dispatchMetaWorker(`${url}/functions/v1/meta-sync-worker`, workerSecret, {
+      batchId: row.batch_id,
+      workerLane: row.lane_id,
+      workerLanes: row.lane_count,
+    })
+    results.push({ batchId: row.batch_id, laneId: row.lane_id, invoked })
+  }
+  return results
+}
 
 interface StalledBatchRow {
   batch_id: string
@@ -143,26 +171,13 @@ async function reapStalledMetaSyncBatches(
       continue
     }
 
-    let invoked = false
     let detail: string | undefined
-    try {
-      // Fire and forget: the worker runs ~35s, far longer than this tick should
-      // wait. Aborting after 2s is the healthy path — by then it has claimed
-      // and heartbeated, which is the proof that it really started.
-      await fetch(`${url}/functions/v1/meta-sync-worker`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-worker-secret': workerSecret },
-        body: JSON.stringify({ batchId: row.batch_id }),
-        signal: AbortSignal.timeout(2_000),
-      })
-      invoked = true
-    } catch (err) {
-      if (err instanceof DOMException && ['TimeoutError', 'AbortError'].includes(err.name)) {
-        invoked = true
-      } else {
-        detail = String(err instanceof Error ? err.message : err).slice(0, 200)
-        await supabase.rpc('meta_sync_note_recovery', { p_batch_id: row.batch_id, p_error: detail })
-      }
+    const invoked = await dispatchMetaWorker(
+      `${url}/functions/v1/meta-sync-worker`, workerSecret, { batchId: row.batch_id },
+    )
+    if (!invoked) {
+      detail = 'worker_admission_unconfirmed'
+      await supabase.rpc('meta_sync_note_recovery', { p_batch_id: row.batch_id, p_error: detail })
     }
 
     out.push({ batchId: row.batch_id, queued: row.queued_items, staleRunning: row.stale_running_items, invoked, detail })

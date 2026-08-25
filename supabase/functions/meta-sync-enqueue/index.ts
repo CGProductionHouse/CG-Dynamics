@@ -54,7 +54,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'No months or clients to sync.' }, 400)
   }
 
-  const totalItems = body.months.length * body.items.length
+  const months = [...new Set(body.months)]
+  if (months.some(month => !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))) {
+    return jsonResponse({ ok: false, error: 'Invalid sync month.' }, 400)
+  }
+  const items = [...new Map(body.items.map(item => [item.clientId, item])).values()]
+  const totalItems = months.length * items.length
 
   const { data: batch, error: insertError } = await sb
     .from('meta_sync_batches')
@@ -66,7 +71,7 @@ Deno.serve(async (req) => {
       total_items: totalItems,
       completed_items: 0,
       failed_items: 0,
-      summary: { months: body.months, clientCount: body.items.length },
+      summary: { months, clientCount: items.length },
     })
     .select('id')
     .single()
@@ -84,8 +89,8 @@ Deno.serve(async (req) => {
     status: string
   }> = []
 
-  for (const month of body.months) {
-    for (const item of body.items) {
+  for (const month of months) {
+    for (const item of items) {
       itemRows.push({
         batch_id: batchId,
         client_id: item.clientId,
