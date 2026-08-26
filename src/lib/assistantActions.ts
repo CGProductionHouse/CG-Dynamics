@@ -247,6 +247,7 @@ function escapeRegExp(value: string): string {
 
 function createTaskTitle(raw: string, assignee: string | null, clientName: string | null): string {
   let title = raw.replace(/[.?!]+$/, '')
+    .replace(/^add\s+(.+?)\s+as\s+(?:a )?client(?:\s+and\s+assign\s+.+)?\s*$/i, '$1 client setup')
     .replace(/^assign\s+.+?\s+to\s+(?:do|make|design|create)\s+/i, '')
     .replace(/\s+should be (?:done|completed|handled|designed|made|finished)\b.{0,40}\b(?:by|deur)\s+.+$/i, '')
     .replace(/\s+(?:due|for)\s+(?:today|tomorrow|vandag|more|môre|monday|tuesday|wednesday|thursday|friday|saturday|sunday).*$/i, '')
