@@ -459,16 +459,15 @@ Deno.serve(async (req) => {
   // must cost us nothing: cool the batch down, leave every item queued, and let
   // the reaper retry once Meta lets us back in.
   if (pageTokenRateLimited) {
-    if (body.batchId) {
-      try {
-        await sb.rpc('meta_sync_begin_cooldown', {
-          p_batch_id: body.batchId,
-          p_seconds: 900,
-          p_reason: 'Meta rate-limited the page-token request. Waiting before retrying - no work has been lost.',
-        })
-      } catch {
-        // Best effort; the reaper simply retries sooner.
-      }
+    if (activeLane) {
+      const { error } = await sb.rpc('meta_sync_begin_lane_cooldown', {
+        p_batch_id: activeLane.batchId,
+        p_lane_id: activeLane.laneId,
+        p_lease_generation: activeLane.generation,
+        p_seconds: 900,
+        p_reason: 'Meta rate-limited the page-token request. Waiting before retrying - no work has been lost.',
+      })
+      if (error) throw new Error(`Meta lane lease lost before cooldown: ${error.message}`)
     }
     await releaseActiveLane()
     return jsonResponse({

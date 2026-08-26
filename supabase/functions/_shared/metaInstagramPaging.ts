@@ -25,7 +25,7 @@ export function classifyInstagramMediaPage<T extends Record<string, unknown>>(
   let orderingMalformed = priorOrderingMalformed
   let previousMs: number | null = null
   let oldestMs: number | null = null
-  let crossedLowerBoundary = false
+  let allBelowLowerBoundary = items.length > 0
   const windowItems: T[] = []
 
   for (const item of items) {
@@ -42,13 +42,13 @@ export function classifyInstagramMediaPage<T extends Record<string, unknown>>(
     oldestMs = oldestMs === null ? timestampMs : Math.min(oldestMs, timestampMs)
 
     if (timestampMs >= startMs && timestampMs < endMs) windowItems.push(item)
-    if (timestampMs < startMs) crossedLowerBoundary = true
+    if (timestampMs >= startMs) allBelowLowerBoundary = false
   }
 
   return {
     windowItems,
     oldestTimestamp: oldestMs === null ? previousOldestTimestamp : new Date(oldestMs).toISOString(),
     orderingMalformed,
-    boundaryReached: boundaryOptimizationEnabled && !orderingMalformed && items.length > 0 && crossedLowerBoundary,
+    boundaryReached: boundaryOptimizationEnabled && !orderingMalformed && allBelowLowerBoundary,
   }
 }

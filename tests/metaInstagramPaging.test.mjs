@@ -9,7 +9,7 @@ const start = '2026-07-01T00:00:00.000Z'
 const end = '2026-08-01T00:00:00.000Z'
 const media = (id, timestamp) => ({ id, timestamp })
 
-test('verified descending page keeps the full month window then stops below it', () => {
+test('verified descending mixed page keeps the full month window and continues', () => {
   const result = classifyInstagramMediaPage([
     media('new', '2026-08-02T00:00:00Z'),
     media('in-1', '2026-07-20T00:00:00Z'),
@@ -17,8 +17,16 @@ test('verified descending page keeps the full month window then stops below it',
     media('old', '2026-06-30T23:59:59Z'),
   ], start, end, null, true, false)
   assert.deepEqual(result.windowItems.map(item => item.id), ['in-1', 'in-2'])
-  assert.equal(result.boundaryReached, true)
+  assert.equal(result.boundaryReached, false)
   assert.equal(result.orderingMalformed, false)
+})
+
+test('verified descending page stops only when every item is older than the month', () => {
+  const result = classifyInstagramMediaPage([
+    media('old-1', '2026-06-30T23:59:59Z'),
+    media('old-2', '2026-06-01T00:00:00Z'),
+  ], start, end, '2026-07-01T00:00:00Z', true, false)
+  assert.equal(result.boundaryReached, true)
 })
 
 test('upper bound is exclusive and lower bound is inclusive', () => {

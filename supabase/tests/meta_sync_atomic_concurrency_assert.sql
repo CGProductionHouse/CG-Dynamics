@@ -4,7 +4,9 @@ begin
   select id into v_report_id from public.reports
   where client_id = '20000000-0000-0000-0000-000000000001'
     and platform is null and period_start = '2026-07-01';
-  if (select count(*) <> 1 from public.reports where id = v_report_id) then
+  if (select count(*) <> 1 from public.reports
+      where client_id = '20000000-0000-0000-0000-000000000001'
+        and platform is null and period_start = '2026-07-01') then
     raise exception 'expected exactly one canonical report';
   end if;
   if (select count(*) <> 1 from public.posts where report_id = v_report_id

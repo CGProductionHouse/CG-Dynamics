@@ -12,6 +12,9 @@ alter table public.platform_sync_runs
   add column if not exists batch_item_id uuid references public.meta_sync_batch_items(id) on delete set null,
   add column if not exists completed_metric_keys text[] not null default '{}'::text[];
 
+alter table public.meta_sync_runs
+  add column if not exists batch_item_id uuid references public.meta_sync_batch_items(id) on delete set null;
+
 create table if not exists public.meta_sync_batch_lanes (
   batch_id uuid not null references public.meta_sync_batches(id) on delete cascade,
   lane_id integer not null check (lane_id between 0 and 5),
@@ -83,6 +86,8 @@ $$;
 
 create unique index if not exists meta_sync_batch_items_logical_unique
   on public.meta_sync_batch_items (batch_id, client_id, month);
+create unique index if not exists reports_master_unique
+  on public.reports (client_id, period_start) where platform is null;
 create unique index if not exists posts_report_meta_object_unique
   on public.posts (report_id, platform, meta_post_id)
   where platform in ('facebook', 'instagram') and nullif(btrim(meta_post_id), '') is not null;
@@ -90,6 +95,8 @@ create unique index if not exists meta_content_mappings_post_unique
   on public.meta_content_mappings (post_id) where post_id is not null;
 create unique index if not exists platform_sync_runs_batch_item_platform_unique
   on public.platform_sync_runs (batch_item_id, platform) where batch_item_id is not null;
+create unique index if not exists meta_sync_runs_batch_item_unique
+  on public.meta_sync_runs (batch_item_id) where batch_item_id is not null;
 
 drop function if exists public.claim_sync_batch_items(integer, uuid);
 create function public.claim_sync_batch_items(
@@ -245,6 +252,30 @@ begin
 end;
 $$;
 
+create or replace function public.meta_sync_begin_lane_cooldown(
+  p_batch_id uuid,
+  p_lane_id integer,
+  p_lease_generation bigint,
+  p_seconds integer,
+  p_reason text
+)
+returns timestamptz language plpgsql security definer set search_path = '' as $$
+declare v_until timestamptz;
+begin
+  perform 1 from public.meta_sync_batch_lanes lane
+  where lane.batch_id = p_batch_id and lane.lane_id = p_lane_id
+    and lane.lease_generation = p_lease_generation and lane.status = 'running'
+  for update;
+  if not found then raise exception 'Meta lane lease lost' using errcode = '55000'; end if;
+  v_until := now() + make_interval(secs => greatest(60, least(coalesce(p_seconds, 900), 7200)));
+  update public.meta_sync_batches set cooldown_until = v_until,
+    last_worker_error = coalesce(left(p_reason, 500), last_worker_error),
+    worker_heartbeat_at = now(), recovery_attempts = 0
+  where id = p_batch_id;
+  return v_until;
+end;
+$$;
+
 create or replace function public.meta_sync_lane_recovery_candidates(p_limit integer default 8)
 returns table(batch_id uuid, lane_id integer, lane_count integer)
 language sql stable security definer set search_path = '' as $$
@@ -274,11 +305,13 @@ revoke all on function public.meta_sync_acquire_lane(uuid, integer, integer, big
 revoke all on function public.meta_sync_touch_lane(uuid, integer, bigint) from public, anon, authenticated;
 revoke all on function public.meta_sync_prepare_lane_handoff(uuid, integer, bigint) from public, anon, authenticated;
 revoke all on function public.meta_sync_release_lane(uuid, integer, bigint) from public, anon, authenticated;
+revoke all on function public.meta_sync_begin_lane_cooldown(uuid, integer, bigint, integer, text) from public, anon, authenticated;
 revoke all on function public.meta_sync_lane_recovery_candidates(integer) from public, anon, authenticated;
 grant execute on function public.meta_sync_acquire_lane(uuid, integer, integer, bigint) to service_role;
 grant execute on function public.meta_sync_touch_lane(uuid, integer, bigint) to service_role;
 grant execute on function public.meta_sync_prepare_lane_handoff(uuid, integer, bigint) to service_role;
 grant execute on function public.meta_sync_release_lane(uuid, integer, bigint) to service_role;
+grant execute on function public.meta_sync_begin_lane_cooldown(uuid, integer, bigint, integer, text) to service_role;
 grant execute on function public.meta_sync_lane_recovery_candidates(integer) to service_role;
 
 create or replace function public.meta_sync_stalled_batches(
@@ -496,13 +529,16 @@ begin
   v_item := public.meta_sync_require_lease(p_item_id, p_lease_generation);
   v_start := (v_item.month || '-01')::date;
   v_end := (v_start + interval '1 month - 1 day')::date;
-  insert into public.meta_sync_runs
-    (client_id, connection_id, sync_type, period_start, period_end, status,
+  insert into public.meta_sync_runs as run
+    (batch_item_id, client_id, connection_id, sync_type, period_start, period_end, status,
      summary, started_at, finished_at)
   values
-    (v_item.client_id, p_connection_id, 'previous_completed_month', v_start,
+    (p_item_id, v_item.client_id, p_connection_id, 'previous_completed_month', v_start,
      v_end, p_status, coalesce(p_summary, '{}'::jsonb), now(), now())
-  returning id into v_id;
+  on conflict (batch_item_id) where batch_item_id is not null do update set
+    connection_id = excluded.connection_id, status = excluded.status,
+    summary = excluded.summary, finished_at = excluded.finished_at
+  returning run.id into v_id;
   return v_id;
 end;
 $$;
@@ -900,3 +936,6 @@ grant execute on function public.meta_sync_upsert_report_post(uuid, bigint, uuid
 grant execute on function public.meta_sync_begin_account_fact_run(uuid, bigint, text, uuid, uuid, text, text, text, date, date, jsonb) to service_role;
 grant execute on function public.meta_sync_persist_account_metric(uuid, bigint, uuid, text, boolean, jsonb, jsonb) to service_role;
 grant execute on function public.meta_sync_finalize_account_fact_run(uuid, bigint, uuid, text[], text, text, jsonb) to service_role;
+
+revoke all on function public.recalculate_batch_status(uuid) from public, anon, authenticated;
+grant execute on function public.recalculate_batch_status(uuid) to service_role;

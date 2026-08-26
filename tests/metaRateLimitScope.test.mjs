@@ -11,7 +11,7 @@ test('Meta application and token limit codes pause the batch', () => {
 
 test('Meta Page request limit code pauses only the affected item', () => {
   assert.equal(metaRateLimitScope('Meta failed, code: 32'), 'item')
-  assert.equal(metaRateLimitScope('Page rate limit reached'), 'item')
+  assert.equal(metaRateLimitScope('Facebook posts fetch page 1 failed (HTTP 429)'), 'batch')
 })
 
 test('ordinary failures do not trigger cooldown', () => {

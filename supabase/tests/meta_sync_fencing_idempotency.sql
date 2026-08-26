@@ -51,6 +51,13 @@ begin
   exception when sqlstate '55000' then v_failed := true;
   end;
   perform pg_temp.assert_true(v_failed, 'stale lane heartbeat rejected');
+  v_failed := false;
+  begin
+    perform public.meta_sync_begin_lane_cooldown(
+      '10000000-0000-0000-0000-000000000002', 0, v_lane_a, 900, 'stale');
+  exception when sqlstate '55000' then v_failed := true;
+  end;
+  perform pg_temp.assert_true(v_failed, 'stale lane cooldown rejected');
   perform public.meta_sync_touch_lane(
     '10000000-0000-0000-0000-000000000002', 0, v_lane_b);
 
@@ -168,6 +175,14 @@ begin
     public.meta_sync_release_claims(jsonb_build_array(jsonb_build_object(
       'item_id', v_a.id, 'lease_generation', v_a.lease_generation))) = 0,
     'stale release cannot release replacement claim');
+
+  perform public.meta_sync_record_run(
+    v_b.id, v_b.lease_generation, null, 'success', '{"attempt":1}'::jsonb);
+  perform public.meta_sync_record_run(
+    v_b.id, v_b.lease_generation, null, 'success', '{"attempt":2}'::jsonb);
+  perform pg_temp.assert_true(
+    (select count(*) = 1 from public.meta_sync_runs where batch_item_id = v_b.id),
+    'audit run is idempotent per batch item');
 
   perform public.meta_sync_settle_item(v_b.id, v_b.lease_generation, 'completed', 1, 0, '[]'::jsonb, null, false, null);
   v_failed := false;
