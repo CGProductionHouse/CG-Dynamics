@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import {
   InstagramMediaTimestampError,
@@ -8,6 +9,7 @@ import {
 const start = '2026-07-01T00:00:00.000Z'
 const end = '2026-08-01T00:00:00.000Z'
 const media = (id, timestamp) => ({ id, timestamp })
+const worker = readFileSync(new URL('../supabase/functions/meta-sync-worker/index.ts', import.meta.url), 'utf8')
 
 test('verified descending mixed page keeps the full month window and continues', () => {
   const result = classifyInstagramMediaPage([
@@ -62,6 +64,10 @@ test('within-page ordering increase disables boundary termination', () => {
   assert.equal(result.orderingMalformed, true)
   assert.equal(result.boundaryReached, false)
   assert.deepEqual(result.windowItems.map(item => item.id), ['newer-later'])
+})
+
+test('worker fails closed instead of traversing malformed ordering indefinitely', () => {
+  assert.match(worker, /if \(pageResult\.orderingMalformed\) \{[\s\S]*refusing to traverse unbounded history/)
 })
 
 test('unverified Graph version never stops at an observed boundary', () => {

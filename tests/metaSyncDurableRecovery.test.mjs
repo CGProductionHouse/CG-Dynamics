@@ -110,7 +110,7 @@ test('a Meta rate limit backs off instead of failing the remaining clients', () 
   // Waiting must not spend the no-progress budget.
   assert.match(cooldown, /recovery_attempts = 0/)
   assert.match(worker, /const rateLimited = processed\.some/)
-  assert.match(worker, /meta_sync_begin_cooldown/)
+  assert.match(worker, /meta_sync_begin_lane_cooldown/)
 })
 
 test('a client failed only because of throttling is requeued, not left failed', () => {
@@ -250,7 +250,8 @@ test('a throttled page-token request processes NOTHING rather than failing every
   // failed this way in production for what was only a temporary throttle.
   const guard = worker.slice(worker.indexOf('Do not process anything without page tokens'), worker.indexOf('Process items in chunks'))
   assert.match(guard, /if \(pageTokenRateLimited\) \{/)
-  assert.match(guard, /meta_sync_begin_cooldown/)
+  assert.match(guard, /meta_sync_begin_lane_cooldown/)
+  assert.match(worker, /res\.status === 429/)
   assert.match(guard, /waitingForRateLimit: true/)
   assert.match(guard, /workerRan: false/)
   // Crucially it returns BEFORE the claim loop, so nothing is claimed at all.

@@ -439,7 +439,7 @@ Deno.serve(async (req) => {
       }
       if (!res.ok) {
         const errBody = await res.json().catch(() => null)
-        if (errBody?.error && ([4, 17, 32, 341, 613].includes(errBody.error.code) || errBody.error.error_subcode === 2069032)) {
+        if (res.status === 429 || (errBody?.error && ([4, 17, 32, 341, 613].includes(errBody.error.code) || errBody.error.error_subcode === 2069032))) {
           pageTokenRateLimited = true
         }
         break
@@ -824,8 +824,10 @@ Deno.serve(async (req) => {
                   instagramOrderingMalformed,
                 )
                 instagramOldestTimestamp = pageResult.oldestTimestamp
-                if (!instagramOrderingMalformed && pageResult.orderingMalformed) {
-                  warnings.push('Instagram media ordering was not descending; exhaustive pagination was required.')
+                if (pageResult.orderingMalformed) {
+                  throw new RetryableIncompleteError(
+                    'Instagram media ordering was not descending; refusing to traverse unbounded history.',
+                  )
                 }
                 instagramOrderingMalformed = pageResult.orderingMalformed
                 let pagePostsSynced = 0
