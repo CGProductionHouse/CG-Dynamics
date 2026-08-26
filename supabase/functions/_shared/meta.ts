@@ -31,7 +31,9 @@ export function resolveMetaGraphConfig(): { version: string; baseUrl: string } {
   if (!/^v\d+\.\d+$/.test(raw)) {
     throw new MetaConfigurationError(`META_GRAPH_VERSION "${raw}" is invalid. Refusing to call Meta.`)
   }
-  return { version: raw, baseUrl: `https://graph.facebook.com/${raw}` }
+  const defaultBase = `https://graph.facebook.com/${raw}`
+  const override = (Deno.env.get('META_GRAPH_BASE_URL') ?? '').trim()
+  return { version: raw, baseUrl: override || defaultBase }
 }
 
 export const META_CONNECTOR_VERSION = 'meta-connector-v3'
