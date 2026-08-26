@@ -6,6 +6,7 @@ let server
 let parseAssistantAction
 let resolveRelativeDate
 let firstOfNextMonth
+let businessDateKey
 
 // 2026-07-01 is a Wednesday.
 const CTX = {
@@ -28,6 +29,7 @@ const CTX = {
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
   ;({ parseAssistantAction, resolveRelativeDate, firstOfNextMonth } = await server.ssrLoadModule('/src/lib/assistantActions.ts'))
+  ;({ businessDateKey } = await server.ssrLoadModule('/src/lib/businessTime.ts'))
 })
 
 after(async () => { await server.close() })
@@ -38,6 +40,21 @@ test('relative dates: next Tuesday from Wed 2026-07-01 → 2026-07-07', () => {
   assert.equal(resolveRelativeDate('vrydag', '2026-07-01'), '2026-07-03')
   assert.equal(resolveRelativeDate('vandag', '2026-07-01'), '2026-07-01')
   assert.equal(firstOfNextMonth('2026-07-01'), '2026-08-01')
+})
+
+test('businessDateKey uses Africa/Johannesburg, not UTC — timezone edge cases', () => {
+  // 2026-08-26 23:30 SAST → UTC 21:30 on same calendar day
+  assert.equal(businessDateKey(new Date('2026-08-26T21:30:00Z')), '2026-08-26')
+  // 2026-08-27 00:30 SAST → UTC 22:30 on previous calendar day
+  assert.equal(businessDateKey(new Date('2026-08-26T22:30:00Z')), '2026-08-27')
+})
+
+test('"tomorrow" resolves from business date, not live date — fixture context is 2026-07-01', () => {
+  // The 2026-07-02 due_date in the production-prompt test comes from the
+  // fixture today='2026-07-01', NOT from the current live date.
+  assert.equal(businessDateKey(new Date('2026-07-01T22:00:00Z')), '2026-07-02')
+  assert.equal(resolveRelativeDate('tomorrow', '2026-07-01'), '2026-07-02')
+  assert.equal(resolveRelativeDate('tomorrow', '2026-08-26'), '2026-08-27')
 })
 
 test('EN: "Add a Dulux meeting next Tuesday at 10" → calendar.create with resolved client + datetime', () => {

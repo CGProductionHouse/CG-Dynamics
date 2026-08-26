@@ -18,6 +18,7 @@ import { logPlannerActivity, listPlannerWorkloadSummary, loadOwnershipReviewSumm
 import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
 import { enqueueBackgroundJob, nudgeBackgroundWorker, listMyBackgroundJobs, type BackgroundJob } from '../../lib/backgroundJobs'
 import { createAssistantTask, updateAssistantTask } from '../../lib/assistantTasks'
+import { businessDateKey } from '../../lib/businessTime'
 import { listTasks, type CommandCentreTask } from '../../lib/commandCentre'
 import { listMyAssistantMemory, addAssistantMemory } from '../../lib/assistantMemory'
 import { assistantUpdateVideo, resolveContentRun } from '../../lib/assistantVideos'
@@ -584,7 +585,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       if (p.type === 'job.enqueue') {
         const jobType = String(p.fields.job)
         const syncPreviousMonth = p.fields.sync_previous_month === 'yes'
-        const today = new Date().toISOString().slice(0, 10)
+        const today = businessDateKey()
         const res = await enqueueBackgroundJob({
           jobType,
           payload: jobType === 'meta_sync' ? { baseline: syncPreviousMonth } : {},
@@ -1046,7 +1047,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
     // plain question falls through to chat.
     const parsed = parseAssistantAction(clean, {
-      today: new Date().toISOString().slice(0, 10),
+      today: businessDateKey(),
       clients: clientsRef.current,
       staffNames: staffRef.current,
       tasks: taskRef.current.flatMap(task => task.native_id ? [{
