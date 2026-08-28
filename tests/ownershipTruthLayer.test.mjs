@@ -19,10 +19,11 @@ const page = read('../src/pages/admin/CommandCentrePage.tsx')
 const myDay = read('../src/lib/workforceMyDay.ts')
 const commandCentre = read('../src/lib/commandCentre.ts')
 
-let server, M
+let server, M, T
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
   M = await server.ssrLoadModule('/src/lib/taskOwnership.ts')
+  T = await server.ssrLoadModule('/src/lib/taskLifecycle.ts')
 })
 after(async () => { await server.close() })
 
@@ -189,4 +190,53 @@ test('grouping never collapses recurring instances by title', () => {
   const b = { ...verified, id: 'b', title: 'RED OAK TV', due_date: '2026-04-14' }
   const g = M.groupByOwnership([a, b], M.taskOwnershipInput, DIR)
   assert.equal(g.byOwner.get('u-franco').items.length, 2, 'two dated instances stay two tasks')
+})
+
+// ── isVerifiedWorkTask: operational focus excludes review backlog ──────────
+test('isVerifiedWorkTask excludes unresolved tasks from operational focus', () => {
+  const task = { status: 'to_do', assignment_review_state: 'unresolved' }
+  assert.equal(T.isVerifiedWorkTask(task), false, 'unresolved must not count as verified work')
+})
+
+test('isVerifiedWorkTask excludes conflict tasks from operational focus', () => {
+  const task = { status: 'to_do', assignment_review_state: 'conflict' }
+  assert.equal(T.isVerifiedWorkTask(task), false, 'conflict must not count as verified work')
+})
+
+test('isVerifiedWorkTask includes verified tasks in operational focus', () => {
+  const task = { status: 'to_do', assignment_review_state: 'ok' }
+  assert.equal(T.isVerifiedWorkTask(task), true, 'verified ok tasks must remain in operational focus')
+})
+
+test('isVerifiedWorkTask treats missing review state as valid (compatibility)', () => {
+  const task = { status: 'to_do' }
+  assert.equal(T.isVerifiedWorkTask(task), true, 'tasks without review state must preserve current compatibility')
+  const taskNull = { status: 'to_do', assignment_review_state: null }
+  assert.equal(T.isVerifiedWorkTask(taskNull), true, 'null review state must preserve current compatibility')
+})
+
+test('isVerifiedWorkTask excludes completed tasks regardless of review state', () => {
+  const done = { status: 'done', assignment_review_state: 'ok' }
+  assert.equal(T.isVerifiedWorkTask(done), false, 'completed tasks must be excluded even if verified')
+})
+
+// ── Focus tasks pool uses verifiedActiveTasks ─────────────────────────────
+test('Command Centre focusTasks pool uses verifiedActiveTasks, not allActiveTasks', () => {
+  assert.match(page, /const taskPool = workFilter === 'done' \? tasks : verifiedActiveTasks/)
+  assert.ok(!page.includes("workFilter === 'done' ? tasks : allActiveTasks"),
+    'focusTasks must not fall back to allActiveTasks for operational filters')
+})
+
+// ── Stats use verifiedActiveTasks ──────────────────────────────────────────
+test('Command Centre stats use verifiedActiveTasks for operational counts', () => {
+  assert.match(page, /clientRequests: verifiedActiveTasks\.filter/)
+  assert.match(page, /inProgress: verifiedActiveTasks\.filter/)
+  assert.match(page, /overdue: verifiedActiveTasks\.filter/)
+  assert.match(page, /today: verifiedActiveTasks\.filter/)
+})
+
+// ── Ownership review section still uses allActiveTasks ────────────────────
+test('ownership review section still shows full backlog via allActiveTasks', () => {
+  assert.match(page, /groupByOwnership\(allActiveTasks, taskOwnershipInput, staffDirectory\)/,
+    'ownershipGrouping must still use allActiveTasks to show the full review backlog')
 })
