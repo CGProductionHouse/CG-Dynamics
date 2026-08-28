@@ -291,7 +291,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
   const focusTasks = useMemo(() => {
     let filtered: CommandCentreTask[]
-    const taskPool = workFilter === 'done' ? tasks : allActiveTasks
+    const taskPool = workFilter === 'done' ? tasks : verifiedActiveTasks
     if (filterStaff === '__my__') {
       const myName = profile?.full_name ?? ''
       filtered = taskPool.filter(t => t.assigned_to_name === myName)
@@ -316,7 +316,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       )
     }
     return [...filtered].sort((a, b) => focusSortOrder(a, today, now) - focusSortOrder(b, today, now))
-  }, [allActiveTasks, bucketFilter, clientSearch, filterStaff, profile, tasks, today, now, workFilter])
+  }, [verifiedActiveTasks, bucketFilter, clientSearch, filterStaff, profile, tasks, today, now, workFilter])
 
   const doneTodayTasks = useMemo(() => {
     let base = tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today)
