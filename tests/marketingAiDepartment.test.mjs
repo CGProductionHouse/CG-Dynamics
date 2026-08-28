@@ -74,7 +74,7 @@ function card(over = {}) {
   }
 }
 const ctxFor = (key, activeClientId = null) => ({
-  agent: getAgentProfile(key), activeClientId, mode: 'production',
+  agent: getAgentProfile(key), activeClientId, mode: 'production', today: '2026-08-10',
 })
 
 test('a card only reaches the specialist it is addressed to', () => {
@@ -134,7 +134,7 @@ test('the Deno copy mirrors the same aliases and gate', () => {
   assert.match(denoAgents, /export function normaliseAgentKey/)
   assert.match(denoAgents, /if \(!cardTargetsAgent\(card\.relevant_agents, ctx\.agent\.key\)\) return false/)
   // The card query must actually select the routing column.
-  assert.match(chatFn, /relevant_agents'\)/)
+  assert.match(chatFn, /relevant_agents, review_expires_at'\)/)
 })
 
 // ── Data model: versions, history, approval ─────────────────────────────────

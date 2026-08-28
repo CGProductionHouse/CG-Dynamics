@@ -168,6 +168,12 @@ export interface CardRow {
   source_reference: string | null
   /** Stored `skill_cards.relevant_agents`; may contain legacy key spellings. */
   relevant_agents?: string[] | null
+  /**
+   * When a card's approval lapses. An `active` card whose review has expired is
+   * STALE and must not ground a production answer (its evidence was approved for
+   * a window that has passed). Null means no expiry was recorded.
+   */
+  review_expires_at?: string | null
 }
 
 // Seeded cards carry legacy agent spellings (notably `creative_director_agent`
@@ -215,12 +221,21 @@ export interface GateContext {
   agent: AgentContract
   activeClientId: string | null
   mode: 'production' | 'admin_research'
+  /**
+   * Current date (YYYY-MM-DD) used to exclude expired approvals in production.
+   * `review_expires_at` is a PostgreSQL date, so expires-today remains current.
+   */
+  today: string
 }
 
 export function isCardRetrievable(card: CardRow, ctx: GateContext): boolean {
   if (card.source_type && NON_AUTHORITATIVE.has(card.source_type)) return false
   if (ctx.mode === 'production') {
     if (card.status !== 'active') return false
+    // An active card whose review has lapsed is stale: it was approved for a
+    // window that has now passed, so it cannot ground a production answer.
+    const expiresOn = card.review_expires_at?.slice(0, 10)
+    if (expiresOn && expiresOn < ctx.today) return false
   } else if (!['active', 'needs_review', 'reviewed'].includes(card.status)) {
     return false
   }

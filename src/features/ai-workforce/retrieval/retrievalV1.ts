@@ -19,6 +19,11 @@ export interface RetrievalContext {
   industry: string | null
   /** admin research mode may see needs-review cards; production agents may not. */
   mode: 'production' | 'admin_research'
+  /**
+   * Current date (YYYY-MM-DD) used to exclude expired approvals in production.
+   * `reviewExpiresAt` represents a PostgreSQL date, so today is still current.
+   */
+  today: string
 }
 
 export interface SkillCardRecord {
@@ -35,6 +40,11 @@ export interface SkillCardRecord {
   sourceReference?: string | null
   /** Stored `skill_cards.relevant_agents`; may contain legacy key spellings. */
   relevantAgents?: readonly string[] | null
+  /**
+   * When a card's approval lapses (`skill_cards.review_expires_at`). An active
+   * card past this date is stale and must not ground a production answer.
+   */
+  reviewExpiresAt?: string | null
 }
 
 export interface SourceRecord {
@@ -97,6 +107,10 @@ export function isCardRetrievable(card: SkillCardRecord, ctx: RetrievalContext):
   // Production only ever sees active reviewed cards; admin research may see needs-review.
   if (ctx.mode === 'production') {
     if (card.status !== 'active') return false
+    // A review-expired active card is stale: it was approved for a window that
+    // has passed, so it cannot ground a production answer.
+    const expiresOn = card.reviewExpiresAt?.slice(0, 10)
+    if (expiresOn && expiresOn < ctx.today) return false
   } else if (!['active', 'needs_review'].includes(card.status)) {
     return false
   }

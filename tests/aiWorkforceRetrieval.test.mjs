@@ -50,7 +50,7 @@ test('AI-generated and unsourced sources are never authoritative', () => {
 })
 
 // ── Skill Card trust + retrieval isolation ───────────────────────────────────
-const strategist = () => ({ agent: reg.getAgentProfile('marketing_strategist'), activeClientId: 'client-A', industry: null, mode: 'production' })
+const strategist = () => ({ agent: reg.getAgentProfile('marketing_strategist'), activeClientId: 'client-A', industry: null, mode: 'production', today: '2026-08-10' })
 const card = o => ({ id: 'x', status: 'active', knowledgeLayer: 'universal', clientSpecific: false, activeClientId: null, sourceType: 'book', sourceId: 's1', title: 'T', relevantAgents: ['marketing_strategist'], ...o })
 
 test('needs-review cards never reach production; active cards do; deprecated excluded', () => {
@@ -76,7 +76,7 @@ test('AI-generated source cards are never retrievable, even if marked active', (
 
 test('an agent cannot retrieve a knowledge layer outside its contract', () => {
   // Historical analyst only allows universal + source_chunks; an internal-learning card is excluded.
-  const analystCtx = { agent: reg.getAgentProfile('historical_advertising_analyst'), activeClientId: null, industry: null, mode: 'production' }
+  const analystCtx = { agent: reg.getAgentProfile('historical_advertising_analyst'), activeClientId: null, industry: null, mode: 'production', today: '2026-08-10' }
   const analystCard = o => card({ relevantAgents: ['historical_advertising_analyst'], ...o })
   assert.equal(rt.isCardRetrievable(analystCard({ knowledgeLayer: 'internal_learning' }), analystCtx), false)
   assert.equal(rt.isCardRetrievable(analystCard({ knowledgeLayer: 'universal' }), analystCtx), true)
@@ -107,7 +107,7 @@ test('legacy knowledge_layer values normalise so they cannot bypass an agent all
   assert.equal(rt.normaliseKnowledgeLayer('nonsense-layer'), null)
   assert.equal(rt.normaliseKnowledgeLayer(null), null)
   // A card stored as 'universal_principle' is retrievable by an agent that allows 'universal'.
-  const analystCtx = { agent: reg.getAgentProfile('historical_advertising_analyst'), activeClientId: null, industry: null, mode: 'production' }
+  const analystCtx = { agent: reg.getAgentProfile('historical_advertising_analyst'), activeClientId: null, industry: null, mode: 'production', today: '2026-08-10' }
   assert.equal(rt.isCardRetrievable(card({ knowledgeLayer: 'universal_principle', relevantAgents: ['historical_advertising_analyst'] }), analystCtx), true)
 })
 
