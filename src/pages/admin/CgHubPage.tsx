@@ -27,7 +27,7 @@ import { buildHubSevenDayCalendar, formatHubCalendarDay, type HubCalendarDay } f
 import { listRuns, listPipelineVideos, type ContentRun, type ContentGuideIdea } from '../../lib/contentWorkflow'
 import { isRunUpcoming } from '../../lib/contentWorkflowRules'
 import { isManagerRole } from '../../lib/roles'
-import { isActiveForToday, isActuallyInProgressTask } from '../../lib/taskLifecycle'
+import { isActiveForToday, isActuallyInProgressTask, isVerifiedWorkTask } from '../../lib/taskLifecycle'
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -162,7 +162,7 @@ export default function CgHubPage() {
 
   const canSeeTeamWork = isManagerRole(profile?.role)
   const activeTasks = useMemo(() => tasks.filter(task =>
-    isActiveForToday(task) && (canSeeTeamWork || workMatchesProfile(task, profile))),
+    isActiveForToday(task) && isVerifiedWorkTask(task) && (canSeeTeamWork || workMatchesProfile(task, profile))),
   [canSeeTeamWork, profile, tasks])
 
   const relevantDeliverables = useMemo(() => deliverables.filter(deliverable =>

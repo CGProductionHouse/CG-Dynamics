@@ -22,7 +22,7 @@ import {
   type MonthlyDeliverable,
 } from '../../lib/planner'
 import { businessDateKey } from '../../lib/businessTime'
-import { isActiveWorkTask, isActiveForToday, isActuallyInProgressTask } from '../../lib/taskLifecycle'
+import { isActiveWorkTask, isActiveForToday, isActuallyInProgressTask, isVerifiedWorkTask } from '../../lib/taskLifecycle'
 import { TaskCard, OpsQuickAdd, TaskDetailDrawer, RequestIntake } from '../../components/operations'
 
 type OpsTab = 'my-work' | 'board' | 'client-work' | 'calendar' | 'admin'
@@ -253,7 +253,7 @@ function MyWorkView({
   onOpenTask: (task: CommandCentreTask) => void
 }) {
   const activeMyTasks = useMemo(() => myTasks.filter(isActiveWorkTask), [myTasks])
-  const overdue = useMemo(() => myTasks.filter(t => isActiveForToday(t) && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
+  const overdue = useMemo(() => myTasks.filter(t => isActiveForToday(t) && isVerifiedWorkTask(t) && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
   const today = useMemo(() => myTasks.filter(t => isActiveForToday(t) && t.status !== 'blocked' && t.due_date === todayKey), [myTasks, todayKey])
   const inProgress = useMemo(() => myTasks.filter(isActuallyInProgressTask), [myTasks])
   const upcoming = useMemo(() => myTasks.filter(t => isActiveWorkTask(t) && t.status !== 'blocked' && t.due_date && t.due_date > todayKey), [myTasks, todayKey])

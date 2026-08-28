@@ -201,7 +201,7 @@ test('Command Centre routes filters through the shared reasons', () => {
   assert.ok(commandCentrePage.includes('isActiveForToday'))
   assert.ok(commandCentrePage.includes('isActiveWorkTask'))
   assert.ok(commandCentrePage.includes('matchesWorkFilter'))
-  assert.match(commandCentrePage, /today: allActiveTasks\.filter\(t => isActiveForToday\(t\) && t\.due_date === today\)\.length/)
+  assert.match(commandCentrePage, /today: verifiedActiveTasks\.filter\(t => isActiveForToday\(t\) && t\.due_date === today\)\.length/)
 })
 
 test('Planner history is genuinely completed + archived only', () => {
