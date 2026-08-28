@@ -321,7 +321,7 @@ function BoardView({ tasks, onOpenTask, onBucketChange }: { tasks: CommandCentre
   const buckets = useMemo(() => {
     const map = new Map<TaskBucket, CommandCentreTask[]>()
     for (const task of tasks) {
-      if (!isActiveWorkTask(task)) continue
+      if (!isActiveWorkTask(task) || !isVerifiedWorkTask(task)) continue
       const bucket = (task.bucket || 'Once-off') as TaskBucket
       if (!map.has(bucket)) map.set(bucket, [])
       map.get(bucket)!.push(task)

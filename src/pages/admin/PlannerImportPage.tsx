@@ -196,7 +196,7 @@ export default function PlannerImportPage() {
           Imported {applyResult.tasksInserted} task(s)
           {applyResult.bucketsCreated > 0 ? `, created ${applyResult.bucketsCreated} bucket(s)` : ''}
           {applyResult.skippedAsDuplicates > 0 ? `, skipped ${applyResult.skippedAsDuplicates} duplicate(s)` : ''}.{' '}
-          <Link to="/admin/planner" className="underline">Open Planner Board</Link>
+          <Link to="/admin/work?tab=board" className="underline">Open Planner Board</Link>
         </p>
       )}
 

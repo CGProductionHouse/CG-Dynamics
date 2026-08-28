@@ -761,7 +761,7 @@ function CgCalendarGrid({
 function TaskRowLink({ task }: { task: CalendarTaskRow }) {
   return (
     <Link
-      to="/admin/planner"
+      to="/admin/work?tab=board"
       className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:border-amber-300/50 ${TASK_CHIP_CLS}`}
     >
       <span className="shrink-0 rounded bg-amber-300/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide">Task</span>

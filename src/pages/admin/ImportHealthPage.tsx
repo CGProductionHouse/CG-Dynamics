@@ -225,7 +225,7 @@ export default function ImportHealthPage() {
           <ActionButton variant="outline" size="sm" onClick={load} loading={loading}>
             Refresh
           </ActionButton>
-          <Link to="/admin/planner">
+          <Link to="/admin/work?tab=board">
             <ActionButton variant="ghost" size="sm">Planner</ActionButton>
           </Link>
           <Link to="/admin/ai-health">
