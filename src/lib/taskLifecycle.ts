@@ -82,3 +82,20 @@ export function isActiveAssistantDayItem(item: AssistantDayItemLifecycleLike): b
 export function isCompletedTask(task: WorkTaskLike): boolean {
   return isOperationallyCompletedStatus(task)
 }
+
+// Assignment review gate: legacy imported tasks whose assigned_to_name could
+// not be resolved to a canonical profile carry assignment_review_state =
+// 'unresolved' or 'conflict'. These are review evidence, not verified work.
+// Operational surfaces (overdue, focus, today counts) must exclude them so
+// legacy import noise does not dominate daily work queues.
+export type ReviewStateTaskLike = WorkTaskLike & {
+  assignment_review_state?: string | null
+}
+
+export function isVerifiedWorkTask(task: ReviewStateTaskLike): boolean {
+  if (!isActiveWorkTask(task)) return false
+  const reviewState = typeof task === 'object' && task !== null
+    ? (task as ReviewStateTaskLike).assignment_review_state
+    : undefined
+  return !reviewState || reviewState === 'ok'
+}
