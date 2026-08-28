@@ -411,7 +411,7 @@ function SourceSummary({ context }: { context: MyDayContext }) {
     <section className="rounded-2xl border border-white/10 bg-brand-surface/80 p-3 sm:p-4">
       <h2 className="text-sm font-black uppercase tracking-[0.14em] text-white">Connected work</h2>
       <div className="mt-3 grid gap-2">
-        <SourceRow label="Planner tasks" value={context.tasks.length} to="/admin/planner" />
+        <SourceRow label="Planner tasks" value={context.tasks.length} to="/admin/work?tab=board" />
         <SourceRow label="CG Calendar events" value={context.events.length} to="/admin/cg-calendar" />
         <SourceRow label="Client Schedule work" value={context.deliverables.length} to="/admin/client-schedule?view=calendar" />
       </div>

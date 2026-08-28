@@ -906,7 +906,7 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
 
   return (
     <Link
-      to={task.data_origin === 'planner_tasks' ? '/admin/planner' : '/admin/command-centre'}
+      to={task.data_origin === 'planner_tasks' ? '/admin/work?tab=board' : '/admin/command-centre'}
       className="flex items-start gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]"
     >
       <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} />
