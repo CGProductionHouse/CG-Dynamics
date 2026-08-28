@@ -223,7 +223,9 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
 
   if (!task) return null
 
-  const statusOptions = STATUSES.filter(s => s !== 'moved_to_tomorrow')
+  const statusOptions = task.data_origin === 'planner_tasks'
+    ? STATUSES.filter(status => status !== 'moved_to_tomorrow')
+    : STATUSES
 
   const selectedDeliverable = clientDeliverables.find(d => d.id === draft.deliverableId)
 
@@ -260,7 +262,6 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
         {showCloseConfirm && (
           <div className="mx-5 mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-4 py-3">
             <p className="text-xs font-bold text-amber-200">Unsaved changes</p>
-            <p className="mt-1 text-xs text-amber-200/70">You have unsaved changes. What would you like to do?</p>
             <div className="mt-3 flex gap-2">
               <ActionButton size="sm" onClick={() => { setShowCloseConfirm(false) }} variant="outline">Keep editing</ActionButton>
               <ActionButton size="sm" onClick={() => { handleCancel(); onClose() }} variant="ghost">Discard</ActionButton>
@@ -275,9 +276,6 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
                 <p className="text-[10px] font-black uppercase tracking-wider text-amber-200/60">
                   Request state: {requestStateLabel(requestStateFromTask(task))}
                 </p>
-                {task.source && (
-                  <p className="mt-1 text-[10px] text-white/40">Source: {task.source.replace(/_/g, ' ')}</p>
-                )}
               </div>
             )}
 

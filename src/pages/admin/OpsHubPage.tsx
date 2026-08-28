@@ -22,6 +22,7 @@ import {
   type MonthlyDeliverable,
 } from '../../lib/planner'
 import { businessDateKey } from '../../lib/businessTime'
+import { isActiveWorkTask, isActiveForToday, isActuallyInProgressTask, isVerifiedWorkTask } from '../../lib/taskLifecycle'
 import { TaskCard, OpsQuickAdd, TaskDetailDrawer, RequestIntake } from '../../components/operations'
 
 type OpsTab = 'my-work' | 'board' | 'client-work' | 'calendar' | 'admin'
@@ -131,10 +132,9 @@ export default function OpsHubPage() {
   }, [tasks, profile])
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 sm:px-6 sm:pt-6">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 sm:px-6 sm:pt-6 lg:px-8">
       <header className="mb-5 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Operations Hub</p>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
             {activeTab === 'my-work' && 'My Work'}
             {activeTab === 'board' && 'Board'}
@@ -186,10 +186,7 @@ export default function OpsHubPage() {
         </div>
       )}
 
-      <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2">
-        <p className="text-xs text-brand-primary/60">Focused operations workspace</p>
-        <Link to="/admin/my-work" className="text-xs font-black text-brand-teal hover:text-white">Back to My Work</Link>
-      </div>
+      <Link to="/admin/my-work" className="mb-4 inline-block text-xs font-black text-brand-teal hover:text-white">Back to Work</Link>
       {loading ? (
         <LoadingState message="Loading operations data..." />
       ) : error ? (
@@ -255,17 +252,18 @@ function MyWorkView({
   onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
   onOpenTask: (task: CommandCentreTask) => void
 }) {
-  const overdue = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
-  const today = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date === todayKey), [myTasks, todayKey])
-  const inProgress = useMemo(() => myTasks.filter(t => t.status === 'in_progress'), [myTasks])
-  const upcoming = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && t.due_date && t.due_date > todayKey), [myTasks, todayKey])
+  const activeMyTasks = useMemo(() => myTasks.filter(isActiveWorkTask), [myTasks])
+  const overdue = useMemo(() => myTasks.filter(t => isActiveForToday(t) && isVerifiedWorkTask(t) && t.status !== 'blocked' && t.due_date < todayKey), [myTasks, todayKey])
+  const today = useMemo(() => myTasks.filter(t => isActiveForToday(t) && t.status !== 'blocked' && t.due_date === todayKey), [myTasks, todayKey])
+  const inProgress = useMemo(() => myTasks.filter(isActuallyInProgressTask), [myTasks])
+  const upcoming = useMemo(() => myTasks.filter(t => isActiveWorkTask(t) && t.status !== 'blocked' && t.due_date && t.due_date > todayKey), [myTasks, todayKey])
   const waiting = useMemo(() => myTasks.filter(t => t.status === 'waiting_client'), [myTasks])
   const blocked = useMemo(() => myTasks.filter(t => t.status === 'blocked'), [myTasks])
-  const noDate = useMemo(() => myTasks.filter(t => t.status !== 'done' && t.status !== 'blocked' && !t.due_date), [myTasks])
+  const noDate = useMemo(() => myTasks.filter(t => isActiveWorkTask(t) && t.status !== 'blocked' && !t.due_date), [myTasks])
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-white/60">Showing {myTasks.length} tasks assigned to you.</p>
+      {activeMyTasks.length === 0 && <p className="rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 text-xs text-white/45">No active tasks.</p>}
       {overdue.length > 0 && (
         <TaskSection title={`Overdue (${overdue.length})`} tasks={overdue} color="text-red-300" onStatusChange={onStatusChange} onOpenTask={onOpenTask} />
       )}
@@ -323,6 +321,7 @@ function BoardView({ tasks, onOpenTask, onBucketChange }: { tasks: CommandCentre
   const buckets = useMemo(() => {
     const map = new Map<TaskBucket, CommandCentreTask[]>()
     for (const task of tasks) {
+      if (!isActiveWorkTask(task)) continue
       const bucket = (task.bucket || 'Once-off') as TaskBucket
       if (!map.has(bucket)) map.set(bucket, [])
       map.get(bucket)!.push(task)
@@ -402,7 +401,7 @@ function BoardView({ tasks, onOpenTask, onBucketChange }: { tasks: CommandCentre
                 <p className="py-1 text-center text-[10px] text-white/30">+{items.length - 20} more</p>
               )}
               {items.length === 0 && (
-                <p className="py-4 text-center text-[10px] text-white/20">No tasks</p>
+                <p className="py-2 text-center text-[10px] text-white/20">No tasks</p>
               )}
             </div>
           </div>
@@ -930,7 +929,7 @@ function AdminBoardView({ tasks, onOpenTask, onStatusChange }: {
   onStatusChange: (task: CommandCentreTask, status: TaskStatus) => void
 }) {
   const adminTasks = useMemo(() =>
-    tasks.filter(t => t.bucket === 'Admin / To Do'),
+    tasks.filter(t => isActiveWorkTask(t) && t.bucket === 'Admin / To Do'),
     [tasks],
   )
 
@@ -941,7 +940,7 @@ function AdminBoardView({ tasks, onOpenTask, onStatusChange }: {
           Admin Tasks ({adminTasks.length})
         </p>
         <p className="mt-1 text-xs text-white/35">
-          Database-protected — only admin/manager roles can view or edit these records.
+          Only admin and manager roles can view or edit these records.
         </p>
       </div>
       {adminTasks.length === 0 ? (

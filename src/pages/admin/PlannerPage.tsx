@@ -18,7 +18,9 @@ import {
   listPlannerAssignmentDirectory,
   listPlannerBoards,
   listPlannerBuckets,
+  listPlannerCompletionEvidence,
   listPlannerTasks,
+  plannerActivityStatusTransition,
   PLANNER_TASK_STATUSES,
   PLANNER_TASK_STATUS_LABELS,
   PRIORITIES,
@@ -33,6 +35,7 @@ import {
 } from '../../lib/planner'
 import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
 import { isManagerRole } from '../../lib/roles'
+import { isActiveForToday, isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
 
 type PlannerWorkView = 'active' | 'history'
 type QuickScope = 'all' | 'overdue' | 'blocked' | 'unassigned'
@@ -57,11 +60,14 @@ function formatPlannerDate(value: string) {
 }
 
 function isPlannerHistoryTask(task: PlannerTask) {
-  return Boolean(task.archived_at) || ['approved', 'scheduled', 'done'].includes(task.status)
+  // History = genuinely completed operational work (done / legacy completed) or
+  // archived/superseded rows. approved/scheduled are scheduling states and
+  // remain ACTIVE work — they must never be filed under Completed history.
+  return Boolean(task.archived_at) || isOperationallyCompletedStatus(task.status)
 }
 
 function isOverdue(task: PlannerTask) {
-  return Boolean(task.due_date && task.due_date < dateKey() && !isPlannerHistoryTask(task))
+  return Boolean(task.due_date && task.due_date < dateKey() && isActiveForToday(task))
 }
 
 function taskSortRank(task: PlannerTask) {
@@ -126,14 +132,17 @@ function checklistProgress(task: PlannerTask) {
 async function fetchBoardTasks(board: PlannerBoard, shouldMaterialize: boolean) {
   if (shouldMaterialize) {
     const materialized = await materializeRecurringTasks()
-    if (materialized.error) return { data: null, error: { message: materialized.error } }
+    if (materialized.error) return { data: null, completionEvidence: {}, error: { message: materialized.error } }
     if (materialized.migrationNeeded) {
-      return { data: null, error: { message: 'Recurring task migration is required before Planner can load safely.' } }
+      return { data: null, completionEvidence: {}, error: { message: 'Recurring tasks are not available yet.' } }
     }
   }
   const { data, error } = await listPlannerTasks(board.id)
-  if (error) return { data: null, error }
-  return { data: (data ?? []).filter(task => !isRecurringTemplate(task)), error: null }
+  if (error) return { data: null, completionEvidence: {}, error }
+  const tasks = (data ?? []).filter(task => !isRecurringTemplate(task))
+  const completedIds = tasks.filter(task => isOperationallyCompletedStatus(task.status)).map(task => task.id)
+  const evidenceResult = await listPlannerCompletionEvidence(completedIds)
+  return { data: tasks, completionEvidence: evidenceResult.data ?? {}, error: null }
 }
 
 export default function PlannerPage({ embedded = false }: { embedded?: boolean }) {
@@ -154,6 +163,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
   const [tasksLoading, setTasksLoading] = useState(false)
   const [bucketError, setBucketError] = useState<string | null>(null)
   const [taskError, setTaskError] = useState<string | null>(null)
+  const [completionEvidence, setCompletionEvidence] = useState<Record<string, string>>({})
   const [bucketRetry, setBucketRetry] = useState(0)
   const [taskRetry, setTaskRetry] = useState(0)
   const [tableMissing, setTableMissing] = useState(false)
@@ -179,7 +189,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       if (!active) return
       if (error) {
         setAssignmentError(isMissingPlannerAssignmentRpcError(error)
-          ? 'Planner assignment migration required. Assignment changes are disabled until it is applied.'
+          ? 'Planner assignment setup is required. Assignment changes are disabled.'
           : `Could not load the assignment directory. Assignment changes are disabled. ${error.message ?? ''}`.trim())
         return
       }
@@ -252,6 +262,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
         setTaskError(null)
         setTasks(result.data)
         setTasksBoardId(activeBoardRecord.id)
+        setCompletionEvidence(result.completionEvidence)
       }).finally(() => {
         if (active && requestId === taskRequestRef.current) setTasksLoading(false)
       })
@@ -426,6 +437,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     setTaskError(null)
     setTasks(next)
     setTasksBoardId(board.id)
+    setCompletionEvidence(result.completionEvidence)
     const refreshed = next.find(task => task.id === taskId) ?? null
     setDrawerTask(refreshed)
     restoreScroll()
@@ -460,6 +472,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       setTaskError(null)
       setTasks(result.data)
       setTasksBoardId(board.id)
+      setCompletionEvidence(result.completionEvidence)
     }).finally(() => {
       if (requestId === taskRequestRef.current) setTasksLoading(false)
     })
@@ -516,8 +529,9 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       <div className={`mx-auto max-w-7xl px-4 ${embedded ? 'py-2' : 'py-8'}`}>
         {!embedded && <h1 className="mb-6 text-xl font-black text-white">Planner</h1>}
         <EmptyState
-          title={tableMissing ? 'Planner tables not set up yet' : 'No boards found'}
-          message={tableMissing ? 'Run the Planner migrations.' : 'Create or seed a Planner board to begin.'}
+          title={tableMissing ? 'Work setup required' : 'No boards found'}
+          message={tableMissing ? 'Planner is not available yet.' : 'No Planner boards are available yet.'}
+          compact
         />
       </div>
     )
@@ -571,7 +585,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
         <LoadError title="Planner tasks could not be loaded" message={taskError} onRetry={retryTasks} />
       ) : displayedBuckets.length === 0 && tasksLoading ? (
         <div className="h-48 animate-pulse rounded-xl bg-white/[0.04]" aria-label="Loading Planner tasks" />
-      ) : displayedBuckets.length === 0 && bucketlessTasks.length === 0 ? <EmptyState title="No columns configured" message="This board has no columns yet." centered={false} /> : (
+      ) : displayedBuckets.length === 0 && bucketlessTasks.length === 0 ? <EmptyState title="No columns configured" message="This board has no columns yet." compact centered={false} /> : (
         <>
         {taskError && <LoadError title="Planner tasks could not be loaded" message={taskError} onRetry={retryTasks} />}
         <div ref={boardScrollRef} data-testid="planner-board-scroller" onWheel={handleBoardWheel} className="flex h-[min(68vh,46rem)] min-h-[30rem] gap-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/[0.06] bg-black/10 p-3 pb-4">
@@ -581,6 +595,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
               bucket={bucket}
               boardId={activeBoardRecord?.id ?? ''}
               tasks={tasksByBucket.get(bucket.id) ?? []}
+              completionEvidence={completionEvidence}
               tasksLoading={tasksLoading}
               tasksError={taskError}
               allowAdd
@@ -602,6 +617,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
               bucket={{ id: NO_BUCKET_ID, name: 'No bucket' }}
               boardId={activeBoardRecord?.id ?? ''}
               tasks={bucketlessTasks}
+              completionEvidence={completionEvidence}
               tasksLoading={tasksLoading}
               tasksError={taskError}
               allowAdd={false}
@@ -649,10 +665,11 @@ function LoadError({ title, message, onRetry }: { title: string; message: string
   return <div role="alert" className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-400/25 bg-red-400/[0.06] px-3 py-2"><div><p className="text-xs font-bold text-red-200">{title}</p><p className="mt-0.5 text-xs text-red-100/65">{message}</p></div><button type="button" onClick={onRetry} className="rounded-md border border-red-300/25 px-3 py-1.5 text-xs font-bold text-red-100">Retry</button></div>
 }
 
-function BucketColumn({ bucket, boardId, tasks, tasksLoading, tasksError, allowAdd, people, defaultAssigneeIds, assignmentDisabled, canManage, workView, onOpenTask, onTaskCreated, setScrollRef }: {
+function BucketColumn({ bucket, boardId, tasks, completionEvidence, tasksLoading, tasksError, allowAdd, people, defaultAssigneeIds, assignmentDisabled, canManage, workView, onOpenTask, onTaskCreated, setScrollRef }: {
   bucket: Pick<PlannerBucket, 'id' | 'name'>
   boardId: string
   tasks: PlannerTask[]
+  completionEvidence: Record<string, string>
   tasksLoading: boolean
   tasksError: string | null
   allowAdd: boolean
@@ -719,16 +736,17 @@ function BucketColumn({ bucket, boardId, tasks, tasksLoading, tasksError, allowA
       )}
 
       <div ref={setScrollRef} data-testid="planner-bucket-scroll" className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1">
-        {tasksLoading ? <div className="h-20 animate-pulse rounded-lg bg-white/[0.04]" /> : tasksError ? <p className="py-8 text-center text-xs text-red-200/65">Tasks unavailable</p> : tasks.map(task => <PlannerTaskCard key={task.id} task={task} onClick={() => onOpenTask(task)} />)}
-        {!tasksLoading && !tasksError && tasks.length === 0 && <p className="py-8 text-center text-xs text-white/25">No matching tasks</p>}
+        {tasksLoading ? <div className="h-20 animate-pulse rounded-lg bg-white/[0.04]" /> : tasksError ? <p className="py-8 text-center text-xs text-red-200/65">Tasks unavailable</p> : tasks.map(task => <PlannerTaskCard key={task.id} task={task} completedAt={completionEvidence[task.id] ?? null} onClick={() => onOpenTask(task)} />)}
+        {!tasksLoading && !tasksError && tasks.length === 0 && <p className="py-4 text-center text-xs text-white/25">No matching tasks</p>}
       </div>
     </section>
   )
 }
 
-function PlannerTaskCard({ task, onClick }: { task: PlannerTask; onClick: () => void }) {
+function PlannerTaskCard({ task, completedAt, onClick }: { task: PlannerTask; completedAt: string | null; onClick: () => void }) {
   const progress = checklistProgress(task)
   const overdue = isOverdue(task)
+  const completed = isOperationallyCompletedStatus(task.status)
   return (
     <button type="button" onClick={onClick} className={`w-full rounded-lg border bg-[#151515] p-3 text-left transition-colors hover:bg-white/[0.055] ${task.status === 'blocked' ? 'border-red-400/25' : overdue ? 'border-amber-400/25' : 'border-white/[0.07]'}`}>
       <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">{task.title}</p>
@@ -737,13 +755,15 @@ function PlannerTaskCard({ task, onClick }: { task: PlannerTask; onClick: () => 
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(task.status)}`}>{PLANNER_TASK_STATUS_LABELS[task.status]}</span>
         <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] capitalize text-white/45">{task.priority.replace('_', ' ')}</span>
         {task.due_date && <span className={`rounded-full border px-2 py-0.5 text-[10px] ${overdue ? 'border-amber-400/30 bg-amber-400/10 font-bold text-amber-200' : 'border-white/10 text-white/45'}`}>{overdue ? 'Overdue ' : ''}{formatPlannerDate(task.due_date)}</span>}
+        {completed && <span className="rounded-full border border-brand-teal/20 px-2 py-0.5 text-[10px] text-brand-teal/80">{completedAt ? `Completed ${new Date(completedAt).toLocaleDateString('en-GB', { dateStyle: 'medium' })}` : 'Completion date unavailable'}</span>}
+        {isPlannerHistoryTask(task) && task.source !== 'manual' && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-white/40">Source: {task.source.replaceAll('_', ' ')}</span>}
         {task.status === 'blocked' && <span className="rounded-full bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-300">Blocked</span>}
       </div>
       <div className="mt-2 flex items-center justify-between gap-2">
         <PlannerAssigneeAvatars people={taskPeople(task)} maxVisible={3} />
         {progress.total > 0 && <span className="text-[10px] text-white/40" aria-label={`${progress.complete} of ${progress.total} checklist items complete`}>{progress.complete}/{progress.total} checklist</span>}
       </div>
-      {task.unresolved_assignee_names.length > 0 && <p className="mt-2 truncate text-[10px] text-amber-200/75" title={`Imported identities: ${task.unresolved_assignee_names.join(', ')}`}>Imported identity: {task.unresolved_assignee_names.join(', ')}</p>}
+      {task.unresolved_assignee_names.length > 0 && <p className="mt-2 truncate text-[10px] text-amber-200/75" title={`Assignment review: ${task.unresolved_assignee_names.join(', ')}`}>Assignment review: {task.unresolved_assignee_names.join(', ')}</p>}
     </button>
   )
 }
@@ -940,8 +960,7 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
 
 function ActivityRow({ item, people }: { item: PlannerActivityLog; people: PlannerPerson[] }) {
   const metadata = item.metadata ?? {}
-  const oldStatus = typeof metadata.old_status === 'string' ? metadata.old_status : typeof metadata.from_status === 'string' ? metadata.from_status : null
-  const newStatus = typeof metadata.new_status === 'string' ? metadata.new_status : typeof metadata.to_status === 'string' ? metadata.to_status : null
+  const { oldStatus, newStatus } = plannerActivityStatusTransition(item)
   const idsToNames = (value: unknown) => Array.isArray(value)
     ? value.flatMap(id => typeof id === 'string' ? [people.find(person => person.id === id)?.full_name ?? 'Unknown person'] : [])
     : []

@@ -242,8 +242,8 @@ test('the runner never publishes, spends budget or activates knowledge', () => {
 // ── UI surface ──────────────────────────────────────────────────────────────
 test('route and nav exist and are staff-scoped (never client-facing)', () => {
   assert.match(app, /path="\/admin\/marketing-ai"/)
-  assert.match(nav, /to: '\/admin\/marketing-ai'[^}]*access: 'manager'/)
-  // It lives in adminNavItems, which is only rendered inside the admin shell.
+  // Grouped under the Marketing parent nav entry (rendered only in the admin shell).
+  assert.match(nav, /to: '\/admin\/marketing'[^}]*'\/admin\/marketing-ai'/)
 })
 
 test('UI exposes evidence, confidence, provider, specialist, creator and timestamps', () => {
@@ -269,6 +269,14 @@ test('UI offers routing choice, regenerate, compare, and all four decisions', ()
 test('approve and reject are disabled for non-managers in the UI as well as the RPC', () => {
   assert.match(page, /disabled=\{busy \|\| !isManager \|\| !currentVersion/)
   assert.match(page, /Approve and reject are restricted to managers and admins/)
+})
+
+test('Marketing AI uses the shared page gutter and lets both grid panes shrink on mobile', () => {
+  assert.match(page, /<PageContainer gap=\{false\} className="space-y-5">/)
+  assert.match(page, /lg:grid-cols-\[20rem_minmax\(0,1fr\)\]/)
+  assert.match(page, /<section className="min-w-0 space-y-4">/)
+  assert.match(page, /whitespace-pre-wrap break-words/)
+  assert.doesNotMatch(page, /className="space-y-5 p-4 md:p-6"/)
 })
 
 test('client library never writes directly — runs via function, decides via RPC', () => {

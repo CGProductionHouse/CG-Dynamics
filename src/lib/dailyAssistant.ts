@@ -1,5 +1,8 @@
 import { supabase } from './supabase'
 import { invokeVoiceDebriefRequest } from './voiceDebriefRequest'
+import { isActiveAssistantDayItem } from './taskLifecycle'
+
+export { isActiveAssistantDayItem } from './taskLifecycle'
 
 export type DailyResolutionStatus = 'resolved' | 'ambiguous' | 'unresolved'
 export type DailySuggestionKind = 'create_task' | 'update_task' | 'follow_up' | 'note'
@@ -78,6 +81,12 @@ export interface AssistantDayItem {
   metadata: Record<string, unknown>
   completed_at: string | null
   created_at: string
+  /** #176: the linked Planner task's operational status, resolved in the
+   *  bounded enrichment inside listMyAssistantDayItems. Only present when the
+   *  item carries planner_task_id and the task was resolvable. */
+  linked_planner_status?: string | null
+  /** True only when planner_task_id resolves through planner_tasks_canonical. */
+  linked_planner_is_current?: boolean
 }
 
 type DailyCaptureResponse = {
@@ -154,9 +163,41 @@ export async function listMyAssistantDayCaptures(limit = 20) {
 }
 
 export async function listMyAssistantDayItems(limit = 80) {
-  return supabase.from('assistant_day_items')
+  const result = await supabase.from('assistant_day_items')
     .select('id,capture_id,user_id,kind,content,client_id,assignee_profile_id,due_date,reminder_at,planner_task_id,state,metadata,completed_at,created_at')
     .order('created_at', { ascending: false }).limit(Math.max(1, Math.min(150, limit)))
+  if (result.error || !result.data) return result
+  const enriched = await enrichLinkedPlannerStatuses(result.data as AssistantDayItem[])
+  if (enriched.error) return { ...result, data: null, error: enriched.error }
+  return { ...result, data: enriched.data }
+}
+
+// #176: the assistant day item model has no Planner status of its own. When an
+// item links to a Planner task, resolve it through the canonical task view in
+// ONE bounded query. Missing ids are archived/superseded/retired (or invisible)
+// and fail closed rather than becoming duplicate current work.
+async function enrichLinkedPlannerStatuses(items: AssistantDayItem[]) {
+  const linkedIds = Array.from(new Set(items.flatMap(item => item.planner_task_id ? [item.planner_task_id] : [])))
+  if (linkedIds.length === 0) return { data: items, error: null }
+  const result = await supabase
+    .from('planner_tasks_canonical')
+    .select('id,status')
+    .in('id', linkedIds)
+  if (result.error) return { data: null, error: result.error }
+  const statusById = new Map<string, string>()
+  for (const row of (result.data ?? []) as Array<{ id: string; status: string }>) {
+    statusById.set(row.id, row.status)
+  }
+  return {
+    data: items.map(item => item.planner_task_id
+      ? {
+          ...item,
+          linked_planner_status: statusById.get(item.planner_task_id) ?? null,
+          linked_planner_is_current: statusById.has(item.planner_task_id),
+        }
+      : item),
+    error: null,
+  }
 }
 
 export async function refreshMyAssistantDayNotifications() {
@@ -170,7 +211,7 @@ export async function completeMyAssistantDayItem(itemId: string) {
 export function dailyAssistantContextLine(captures: AssistantDayCapture[], items: AssistantDayItem[]) {
   const today = new Date().toLocaleDateString('en-CA')
   const todayCaptures = captures.filter(capture => capture.capture_date === today && capture.status === 'applied')
-  const open = items.filter(item => item.state === 'open')
+  const open = items.filter(isActiveAssistantDayItem)
   if (todayCaptures.length === 0 && open.length === 0) return null
   const summaries = todayCaptures.map(capture => capture.summary).filter(Boolean).slice(0, 5)
   const loops = open.map(item => `${item.kind}: ${item.content}${item.due_date ? ` (due ${item.due_date})` : ''}`).slice(0, 12)

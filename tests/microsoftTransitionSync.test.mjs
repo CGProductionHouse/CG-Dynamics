@@ -14,6 +14,10 @@ let microsoftIncomingStatus
 let summarizeMicrosoftCreateStatuses
 let parseMicrosoftSnapshot
 let resolvePreviewAssignees
+let buildMicrosoftApplyRpcArgs
+let isActiveWorkTask
+let isOperationallyCompletedStatus
+let plannerCompletionEvidence
 
 const context = {
   clients: [
@@ -80,6 +84,9 @@ before(async () => {
   ;({ buildMicrosoftConflictBreakdown, filterMicrosoftPreviewItems, microsoftIncomingStatus, summarizeMicrosoftCreateStatuses } = await server.ssrLoadModule('/src/lib/microsoftSyncPresentation.ts'))
   ;({ parseMicrosoftSnapshot } = await server.ssrLoadModule('/src/lib/microsoftSnapshot.ts'))
   ;({ resolvePreviewAssignees } = await server.ssrLoadModule('/src/lib/microsoftAssigneeMapping.ts'))
+  ;({ buildMicrosoftApplyRpcArgs } = await server.ssrLoadModule('/src/lib/microsoftApply.ts'))
+  ;({ isActiveWorkTask, isOperationallyCompletedStatus } = await server.ssrLoadModule('/src/lib/taskLifecycle.ts'))
+  ;({ plannerCompletionEvidence } = await server.ssrLoadModule('/src/lib/planner.ts'))
 })
 
 after(async () => { await server.close() })
@@ -427,6 +434,38 @@ test('existing linked task at 50% now at 100% reconciles to complete', () => {
   const completed = plannerTask({ percentComplete: 100, completedDate: '2026-07-19' })
   const items = buildMicrosoftReconciliation(snapshot([completed]), context, [target], new Set())
   assert.equal(items[0].reconciliationAction, 'complete')
+})
+
+test('Microsoft 100% completion reaches done authority, leaves active work, and enters history', () => {
+  const active = plannerTask({ percentComplete: 50 })
+  const created = buildMicrosoftReconciliation(snapshot([active]), context, [], new Set())[0]
+  const target = {
+    destination: 'planner', id: 'target-1', updatedAt: '2026-07-18T08:30:00Z', microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: created.sourceHash, microsoftSourceRemovedAt: null,
+    microsoftPlanId: 'plan-todo', microsoftTaskId: 'task-1', payload: { ...created.proposedPayload },
+  }
+  const completed = plannerTask({ percentComplete: 100, completedDate: '2026-07-19' })
+  const item = buildMicrosoftReconciliation(snapshot([completed]), context, [target], new Set())[0]
+  const args = buildMicrosoftApplyRpcArgs(item, snapshot([completed]), 'run-1', 'complete-task-1', false)
+
+  assert.equal(item.reconciliationAction, 'complete')
+  assert.equal(item.proposedPayload.status, 'done')
+  assert.equal(args.p_should_apply, true)
+  assert.equal(args.p_patch.status, 'done')
+  assert.equal(isOperationallyCompletedStatus(args.p_patch.status), true, 'done enters Planner completed history')
+  assert.equal(isActiveWorkTask(args.p_patch.status), false, 'done cannot remain on active work surfaces')
+})
+
+test('Planner completion evidence uses only structured transitions and keeps the latest completion', () => {
+  const evidence = plannerCompletionEvidence([
+    { id: '4', entity_type: 'planner_task', entity_id: 'task-flat', action: 'status_changed', actor_user_id: null, actor_name: null, metadata: { old_status: 'to_do', new_status: 'done' }, created_at: '2026-07-18T08:00:00Z' },
+    { id: '3', entity_type: 'planner_task', entity_id: 'task-flat', action: 'status_changed', actor_user_id: null, actor_name: null, metadata: { old_status: 'in_progress', new_status: 'done' }, created_at: '2026-07-20T09:00:00Z' },
+    { id: '2', entity_type: 'planner_task', entity_id: 'task-nested', action: 'task_updated', actor_user_id: null, actor_name: null, metadata: { old: { status: 'in_progress' }, new: { status: 'done' } }, created_at: '2026-07-19T10:00:00Z' },
+    { id: '1', entity_type: 'planner_task', entity_id: 'task-unknown', action: 'task_updated', actor_user_id: null, actor_name: null, metadata: { origin: 'direct_write' }, created_at: '2026-07-21T11:00:00Z' },
+  ])
+
+  assert.equal(evidence['task-flat'], '2026-07-20T09:00:00Z')
+  assert.equal(evidence['task-nested'], '2026-07-19T10:00:00Z')
+  assert.equal(evidence['task-unknown'], undefined, 'an unstructured write cannot prove a completion date')
 })
 
 test('existing done task reopened to 50% reconciles to reopen', () => {

@@ -24,6 +24,9 @@ const STATUS_TONES: Record<ClientSafeStatus, string> = {
   in_production: 'border-[#f59e0b]/25 bg-[#f59e0b]/10 text-[#fbbf24]',
   for_review: 'border-[#fde68a]/25 bg-[#fde68a]/10 text-[#fde68a]',
   awaiting_approval: 'border-[#7dd3fc]/25 bg-[#7dd3fc]/10 text-[#7dd3fc]',
+  approved: 'border-[#a7f3d0]/25 bg-[#a7f3d0]/10 text-[#a7f3d0]',
+  scheduled: 'border-[#2dd4bf]/25 bg-[#2dd4bf]/10 text-[#2dd4bf]',
+  posted: 'border-[#2dd4bf]/25 bg-[#2dd4bf]/10 text-[#2dd4bf]',
   scheduled_posted: 'border-[#2dd4bf]/25 bg-[#2dd4bf]/10 text-[#2dd4bf]',
 }
 

@@ -47,11 +47,7 @@ interface ReportFields {
   generalNotes: string
 }
 
-function errorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error) return error.message
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
-  }
+function errorMessage(_error: unknown, fallback: string) {
   return fallback
 }
 
@@ -151,7 +147,7 @@ export default function NewReport() {
       try {
         const { data, error } = await listClients('active')
         if (error) {
-          setError(error.message)
+          setError('Could not load clients.')
         } else {
           setClients(data)
           if (!reportId) {
@@ -192,7 +188,7 @@ export default function NewReport() {
       try {
         const { data, error } = await getReportWithPosts(reportIdToLoad)
         if (error || !data) {
-          setError(error?.message ?? 'Could not load this report.')
+          setError('Could not load this report.')
           return
         }
 
@@ -237,7 +233,7 @@ export default function NewReport() {
       try {
         const { data, error } = await listImportedMetaPosts(clientId)
         if (error) {
-          setError(error.message)
+          setError('Could not load imported posts.')
         } else {
           // Master report: combine every platform imported for this client.
           const clientPosts = [...data].sort(
@@ -539,14 +535,14 @@ export default function NewReport() {
       })
 
       if (error || !data) {
-        setError(error?.message ?? 'Could not save this report.')
+        setError('Could not save this report.')
         return
       }
 
       // Persist the structured strategy (best-effort: never blocks the save).
       const strategyResult = await updateReportStrategyData(data.id, strategyToSave)
       if (strategyResult.migrationNeeded) {
-        setStrategyNotice('Saved. The guided strategy is shown via the report text fields, but the structured version needs the phase-3j migration (reports.strategy_data) to be stored fully.')
+        setStrategyNotice('Saved, but some strategy details could not be stored. Existing report text was saved.')
       }
       setStrategyData(strategyToSave)
 
@@ -565,9 +561,7 @@ export default function NewReport() {
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
       <PremiumCard className="mb-6 lg:mb-8">
         <PremiumCardHeader
-          eyebrow="Report builder"
           title={savedReportId ? 'Edit monthly master report' : 'Create monthly master report'}
-          subtitle="Combine every platform imported for this client and month into one master dashboard, then add the strategy commentary manually."
           action={
             <ButtonGroup>
               <ActionButton
@@ -722,8 +716,8 @@ export default function NewReport() {
 
       <PremiumCard className="mb-6">
         <PremiumCardHeader
-          title="Performance story preview"
-          subtitle={`Exactly what ${selectedClient?.name ?? 'the client'} sees in the published report - no technical labels.`}
+          title="Client preview"
+          subtitle={`${selectedClient?.name ?? 'Client'} · ${currentMonthLabel}`}
           action={
             <StatusBadge
               label={PERF_LEVEL_META[performance.performanceLevel].label}
@@ -745,7 +739,6 @@ export default function NewReport() {
         {!performance.hasComparison && (
           <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
             Previous month baseline not synced yet - month-over-month growth will appear once {previousMonthLabel} is synced.
-            The client report simply hides growth sections until then, with no missing-data wording.
           </p>
         )}
 
@@ -784,20 +777,12 @@ export default function NewReport() {
                 </li>
               ))}
             </ol>
-            {!hasStrategyContent(strategyData) && (
-              <div className="mt-3 rounded-lg border border-brand-accent/30 bg-brand-accent/5 px-3 py-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-accent">Use these as the CG action plan</p>
-                <p className="mt-1 text-xs text-brand-primary">
-                  Copy the recommendations above into the strategy board to give the client a clear action plan. A complete CG action plan makes the report feel finished.
-                </p>
-              </div>
-            )}
           </div>
         )}
 
         {performance.adminMissingMetrics.length > 0 && (
           <div className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-200">Admin-only: metrics not synced (hidden from client)</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-200">Staff-only: unavailable metrics</p>
             <ul className="mt-1.5 space-y-0.5">
               {performance.adminMissingMetrics.map(item => (
                 <li key={item} className="text-xs text-amber-200/90">• {item}</li>
@@ -806,16 +791,13 @@ export default function NewReport() {
           </div>
         )}
 
-        <p className="mt-3 text-[11px] text-brand-primary/70">
-          Metric sources - Meta synced totals: account monthly total &amp; current snapshot; imported posts: post aggregation &amp; media insight; CSV rows: manual fallback. The client report shows none of these labels.
-        </p>
       </PremiumCard>
 
       {platformDiagnostics.length > 0 && (
         <PremiumCard className="mb-6">
           <PremiumCardHeader
-            title="Platform story diagnostics"
-            subtitle="Admin-only: how each platform tab is built - which metric feeds each card, what ranked the top content, why content was labelled, and whether follower growth was skipped. The client never sees this."
+            title="Platform source details"
+            subtitle="Source and availability details for staff review."
           />
           <div className="grid gap-3 lg:grid-cols-2">
             {platformDiagnostics.map(p => (
@@ -870,7 +852,7 @@ export default function NewReport() {
       <PremiumCard className="mb-6">
         <PremiumCardHeader
           title="Platform breakdown"
-          subtitle={`Meta-style platform metrics for ${selectedClient?.name ?? 'client'} in ${currentMonthLabel}.`}
+          subtitle={`${selectedClient?.name ?? 'Client'} · ${currentMonthLabel}`}
           action={
             <div className="flex flex-wrap gap-2">
               <SourceBadge source="meta" />
@@ -931,8 +913,8 @@ export default function NewReport() {
 
       <PremiumCard className="mb-6">
         <PremiumCardHeader
-          title="Available manual summaries for this client"
-          subtitle={`Report month is ${currentMonthLabel}. Rows matching this month feed into the report above.`}
+          title="Manual summaries"
+          subtitle={`Selected month: ${currentMonthLabel}`}
         />
         {manualMetrics.length === 0 ? (
           <p className="rounded-lg border border-brand-muted bg-brand-bg/50 px-3 py-3 text-xs text-brand-primary">
@@ -983,9 +965,8 @@ export default function NewReport() {
         <section className="space-y-5">
           <PremiumCard padding="md">
             <PremiumCardHeader
-              eyebrow="Strategy board"
-              title="Client-facing strategy narrative"
-              subtitle="Use these prompts to turn the report data into clear client direction."
+              title="Strategy"
+              subtitle="Review the checklist before publishing."
               action={
                 hasReportDraft && !reportId ? (
                   <div className="shrink-0 text-right">
@@ -1120,7 +1101,6 @@ function StrategyChecklist({ data }: { data: StrategyData }) {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[11px] text-brand-primary">This is a guide - you can save a draft at any time.</p>
     </div>
   )
 }

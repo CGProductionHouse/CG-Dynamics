@@ -9,6 +9,8 @@ import {
   createCompanyEvent,
   updateCompanyEvent,
   deleteCompanyEvent,
+  supersedeNativeCompanyEvent,
+  setCompanyEventClientVisibility,
   EVENT_TYPES,
   EVENT_TYPE_LABELS,
   EVENT_STATUS_LABELS,
@@ -27,6 +29,7 @@ import { materializeRecurringTasks } from '../../lib/recurrence'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
+import { reconcileCalendarLogicalItems } from '../../lib/calendarIdentity'
 
 type EventFilter = 'all' | 'cancelled' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
@@ -66,6 +69,11 @@ function formatEventTime(dateStr: string) {
 
 function formatShortDate(dateStr: string) {
   return formatBusinessDate(`${dateStr}T12:00:00+02:00`, { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+function formatReviewDateTime(value: string | null): string {
+  if (!value) return 'No end time'
+  return `${formatBusinessDate(value, { day: 'numeric', month: 'short', year: 'numeric' })} · ${formatBusinessTime(value)}`
 }
 
 function monthKey(date: Date) {
@@ -168,6 +176,10 @@ export default function CompanyCalendarPage() {
   const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
   const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; recurrence: string | null }>({ tasks: null, recurrence: null })
   const [recurrenceMigrationNeeded, setRecurrenceMigrationNeeded] = useState(false)
+  const [supersessionMigrationNeeded, setSupersessionMigrationNeeded] = useState(false)
+  const [resolvingCandidateId, setResolvingCandidateId] = useState<string | null>(null)
+  const [resolutionError, setResolutionError] = useState<string | null>(null)
+  const [showReviewPanel, setShowReviewPanel] = useState(false)
   const loadRequestRef = useRef(0)
 
   const canManage = isManagerRole(profile?.role)
@@ -177,12 +189,14 @@ export default function CompanyCalendarPage() {
     setLoading(true)
     setError(null)
     setTableMissing(false)
+    setSupersessionMigrationNeeded(false)
     try {
       const result = await listCompanyEvents(
         businessDayBoundaryIso(`${selectedMonth}-01`),
         businessDayBoundaryIso(nextMonthStart(selectedMonth)),
       )
       if (requestId !== loadRequestRef.current) return
+      setSupersessionMigrationNeeded(Boolean(result.supersessionMigrationNeeded))
       if (result.tableMissing) {
         setTableMissing(true)
         setEvents([])
@@ -258,18 +272,26 @@ export default function CompanyCalendarPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerEvent])
 
+  const calendarAuthority = useMemo(() => reconcileCalendarLogicalItems(events, []), [events])
+  const canonicalEvents = calendarAuthority.events
+  const reviewCandidates = calendarAuthority.reviewCandidates
+
   const filtered = useMemo(() => {
-    if (filter === 'cancelled') return sortEvents(events.filter(event => event.status === 'cancelled'))
-    const active = events.filter(event => event.status !== 'cancelled')
+    if (filter === 'cancelled') return sortEvents(canonicalEvents.filter(event => event.status === 'cancelled'))
+    const active = canonicalEvents.filter(event => event.status !== 'cancelled')
     if (filter === 'all') return sortEvents(active)
     return sortEvents(active.filter(e => e.event_type === filter))
-  }, [events, filter])
+  }, [canonicalEvents, filter])
 
-  const allMonthEvents = events
+  const allMonthEvents = canonicalEvents
   const monthEvents = filtered
 
-  const visibleTasks = useMemo(() => (layers.tasks ? monthTasks : []), [layers.tasks, monthTasks])
-  const visibleEvents = useMemo(() => (layers.events ? monthEvents : []), [layers.events, monthEvents])
+  const visibleItems = useMemo(() => reconcileCalendarLogicalItems(
+    layers.events ? monthEvents : [],
+    layers.tasks ? monthTasks : [],
+  ), [layers.events, layers.tasks, monthEvents, monthTasks])
+  const visibleTasks = visibleItems.tasks
+  const visibleEvents = visibleItems.events
 
   const tasksByDate = useMemo(() => {
     const map = new Map<string, CalendarTaskRow[]>()
@@ -295,7 +317,7 @@ export default function CompanyCalendarPage() {
   }, [selectedMonth, visibleEvents, tasksByDate])
 
   const counts = useMemo(() => {
-    const active = events.filter(e => e.status !== 'cancelled')
+    const active = canonicalEvents.filter(e => e.status !== 'cancelled')
     return {
       all: active.length,
       meeting: active.filter(e => e.event_type === 'meeting').length,
@@ -304,19 +326,37 @@ export default function CompanyCalendarPage() {
       client_event: active.filter(e => e.event_type === 'client_event').length,
       deadline: active.filter(e => e.event_type === 'deadline').length,
       internal: active.filter(e => e.event_type === 'internal').length,
-      cancelled: events.filter(e => e.status === 'cancelled').length,
+      cancelled: canonicalEvents.filter(e => e.status === 'cancelled').length,
     }
-  }, [events])
+  }, [canonicalEvents])
 
   const handleCreateEvent = useCallback((date?: string) => {
     const defaultDate = date ?? (selectedMonth === businessMonthKey() ? businessDateKey() : `${selectedMonth}-01`)
     const start = `${defaultDate}T09:00`
-    setDrawerEvent({ id: '', title: '', event_type: 'internal', client_id: null, client_name: null, start_at: start, end_at: null, all_day: false, location: null, notes: null, assigned_to_name: null, status: 'planned', linked_deliverable_id: null, linked_task_id: null, created_at: '', updated_at: '' })
+    setDrawerEvent({ id: '', title: '', event_type: 'internal', client_id: null, client_name: null, start_at: start, end_at: null, all_day: false, location: null, notes: null, assigned_to_name: null, status: 'planned', linked_deliverable_id: null, linked_task_id: null, client_visible: false, client_visibility_updated_at: null, client_visibility_updated_by_profile_id: null, created_at: '', updated_at: '' })
   }, [selectedMonth])
 
   function handleSaved() {
     setDrawerEvent(null)
     void load()
+  }
+
+  async function handleUseOutlookRecord(nativeEvent: CompanyCalendarEvent, outlookEvent: CompanyCalendarEvent) {
+    if (supersessionMigrationNeeded) {
+      setResolutionError('Calendar duplicate resolution is not available yet.')
+      return
+    }
+    const confirmed = window.confirm(`Use the Outlook record for "${outlookEvent.title}"? The native record will be retained as superseded audit history.`)
+    if (!confirmed) return
+    setResolvingCandidateId(nativeEvent.id)
+    setResolutionError(null)
+    const result = await supersedeNativeCompanyEvent(nativeEvent.id, outlookEvent.id, nativeEvent.updated_at, outlookEvent.updated_at)
+    setResolvingCandidateId(null)
+    if (result.error) {
+      setResolutionError(result.error.message)
+      return
+    }
+    await load()
   }
 
   if (loading) {
@@ -350,9 +390,7 @@ export default function CompanyCalendarPage() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Calendar</p>
           <h1 className="mt-1 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
-          <p className="mt-1 text-sm text-brand-primary/60">Meetings, shoots, content runs and internal events.</p>
         </div>
         {canManage && <ActionButton variant="primary" onClick={() => handleCreateEvent()}>
           + Add Event
@@ -383,6 +421,82 @@ export default function CompanyCalendarPage() {
           Planner tasks ({monthTasks.length})
         </label>
       </div>
+
+      {supersessionMigrationNeeded && (
+        <div className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-xs text-amber-100">
+          Calendar events are available, but duplicate resolution is not available yet.
+        </div>
+      )}
+
+      {canManage && reviewCandidates.length > 0 && (
+        <div className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 flex items-center justify-between gap-3" role="status" aria-label="Calendar duplicate review">
+          <div className="min-w-0">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-200">
+              {reviewCandidates.length} possible duplicate{reviewCandidates.length !== 1 ? 's' : ''}
+            </p>
+            <p className="mt-0.5 text-xs leading-4 text-amber-100/60">
+              Native and Outlook records share a title and start time.
+            </p>
+          </div>
+          <button type="button" onClick={() => setShowReviewPanel(true)} className="shrink-0 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-200 hover:bg-amber-300/20">
+            Review
+          </button>
+        </div>
+      )}
+
+      {showReviewPanel && reviewCandidates.length > 0 && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/60" onClick={() => { setShowReviewPanel(false); setResolutionError(null) }} />
+          <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#111111] sm:w-[440px]">
+            <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+              <div>
+                <h2 className="text-base font-bold text-white">Calendar Duplicate Review</h2>
+                <p className="mt-0.5 text-xs text-brand-primary/60">{reviewCandidates.length} possible duplicate{reviewCandidates.length !== 1 ? 's' : ''} to review</p>
+              </div>
+              <button type="button" onClick={() => { setShowReviewPanel(false); setResolutionError(null) }} className="rounded-lg p-1.5 text-brand-primary hover:text-white">X</button>
+            </div>
+            <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+              {resolutionError && <p className="rounded-lg border border-red-300/20 bg-red-300/[0.07] px-3 py-2 text-xs text-red-200">{resolutionError}</p>}
+              {reviewCandidates.map(({ nativeEvent, outlookEvent }) => (
+                <div key={`${nativeEvent.id}:${outlookEvent.id}`} className="rounded-lg border border-white/[0.08] bg-black/15 p-3">
+                  <p className="text-sm font-bold text-white">{outlookEvent.title}</p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {([
+                      { label: 'Native', event: nativeEvent, outlook: false },
+                      { label: 'Microsoft Outlook', event: outlookEvent, outlook: true },
+                    ] as const).map(item => (
+                      <div key={item.label} className="rounded-lg border border-white/[0.08] bg-white/[0.025] p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-primary/55">{item.label}</p>
+                          {item.outlook && <span className="rounded-full border border-blue-300/20 bg-blue-300/[0.07] px-2 py-0.5 text-[10px] font-bold text-blue-200">Outlook</span>}
+                        </div>
+                        <dl className="mt-2 grid grid-cols-[58px_1fr] gap-x-2 gap-y-1 text-xs">
+                          <dt className="text-brand-primary/40">Start</dt><dd className="text-white/80">{formatReviewDateTime(item.event.start_at)}</dd>
+                          <dt className="text-brand-primary/40">End</dt><dd className="text-white/80">{formatReviewDateTime(item.event.end_at)}</dd>
+                          <dt className="text-brand-primary/40">Location</dt><dd className="text-white/80">{item.event.location || 'No location'}</dd>
+                          <dt className="text-brand-primary/40">Client</dt><dd className="text-white/80">{item.event.client_name || (item.event.client_id ? 'Linked client' : 'No client')}</dd>
+                          <dt className="text-brand-primary/40">Type</dt><dd className="text-white/80">{EVENT_TYPE_LABELS[item.event.event_type]}</dd>
+                          <dt className="text-brand-primary/40">All day</dt><dd className="text-white/80">{item.event.all_day ? 'Yes' : 'No'}</dd>
+                          <dt className="text-brand-primary/40">Status</dt><dd className="text-white/80">{EVENT_STATUS_LABELS[item.event.status]}</dd>
+                          <dt className="text-brand-primary/40">Client visibility</dt><dd className="text-white/80">{item.event.client_visible ? 'Visible' : 'Internal only'}</dd>
+                          <dt className="text-brand-primary/40">Assignee</dt><dd className="text-white/80">{item.event.assigned_to_name || 'Unassigned'}</dd>
+                          <dt className="text-brand-primary/40">Notes</dt><dd className="break-words text-white/80">{item.event.notes || 'No notes'}</dd>
+                          <dt className="text-brand-primary/40">Links</dt><dd className="text-white/80">{[item.event.linked_task_id ? 'Planner task' : null, item.event.linked_deliverable_id ? 'Deliverable' : null].filter(Boolean).join(', ') || 'No direct links'}</dd>
+                        </dl>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => { setDrawerEvent(nativeEvent); setShowReviewPanel(false) }} className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-bold text-brand-primary hover:text-white">Open native</button>
+                    <button type="button" onClick={() => { setDrawerEvent(outlookEvent); setShowReviewPanel(false) }} className="rounded-md border border-sky-300/20 bg-sky-300/[0.06] px-2.5 py-1.5 text-xs font-bold text-sky-200 hover:text-white">Open Outlook</button>
+                    <button type="button" disabled={supersessionMigrationNeeded || resolvingCandidateId === nativeEvent.id} onClick={() => void handleUseOutlookRecord(nativeEvent, outlookEvent)} title={supersessionMigrationNeeded ? 'Calendar duplicate resolution is not available yet.' : undefined} className="rounded-md bg-amber-300 px-2.5 py-1.5 text-xs font-black text-black hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50">{resolvingCandidateId === nativeEvent.id ? 'Resolving...' : 'Use Outlook record'}</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (allMonthEvents.length + monthTasks.length === 0)) && (
         <CalendarDiagnostics
@@ -420,7 +534,7 @@ export default function CompanyCalendarPage() {
           onOpenDay={setDayPanel}
         />
       ) : grouped.length === 0 ? (
-        <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No company events or dated Planner tasks this month yet." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton> : undefined} />
+        <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No events or dated tasks." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton> : undefined} compact />
       ) : (
         <div className="space-y-6">
           {grouped.map(group => (
@@ -489,22 +603,12 @@ function CalendarDiagnostics({
   recurrenceError: string | null
   recurrenceMigrationNeeded: boolean
 }) {
-  const missingLayers = [
-    eventCount === 0 ? 'events' : null,
-    taskCount === 0 ? 'Planner dated tasks' : null,
-  ].filter(Boolean).join(', ')
-
   return (
     <div className="mb-5 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/45">Calendar diagnostics</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/45">Calendar status</p>
           <p className="mt-1 text-sm font-semibold text-white">{formatMonthHeading(month)}</p>
-          <p className="mt-1 text-xs text-brand-primary/60">
-            {eventCount + taskCount === 0
-              ? 'No operational calendar items were returned for this selected month.'
-              : 'One or more calendar layers need attention.'}
-          </p>
         </div>
         <div className="grid grid-cols-2 gap-2 text-center sm:min-w-[240px]">
           <div className="rounded-xl border border-sky-400/15 bg-sky-400/[0.05] px-3 py-2">
@@ -518,13 +622,13 @@ function CalendarDiagnostics({
         </div>
       </div>
       <div className="mt-3 space-y-1 text-xs text-brand-primary/65">
-        {missingLayers && <p>Empty layer this month: {missingLayers}.</p>}
-        {tableMissing && <p className="text-amber-200">Company calendar events table is missing. Apply `supabase/phase-10a-company-calendar-events.sql` before adding normal events.</p>}
-        {!tableMissing && eventCount === 0 && <p>Calendar event seed may not be applied yet. `phase-10b-cg-calendar-teams-seed-2026.sql` is optional; Planner dated tasks are loaded separately if the optional task layer is enabled.</p>}
-        {recurrenceMigrationNeeded && <p>Recurring task columns are not applied yet. Calendar still shows existing dated tasks; apply `supabase/phase-13a-recurring-tasks.sql` to materialise future recurring instances.</p>}
-        {eventError && <p className="text-red-300">Events query error: {eventError}</p>}
-        {taskError && <p className="text-red-300">Planner task query error: {taskError}</p>}
-        {recurrenceError && <p className="text-red-300">Recurring task materialisation error: {recurrenceError}</p>}
+        {tableMissing && <p className="text-amber-200">CG Calendar setup is required before events can be added.</p>}
+        {!tableMissing && !eventError && eventCount === 0 && <p>No calendar events this month.</p>}
+        {!taskError && taskCount === 0 && <p>No dated tasks this month.</p>}
+        {recurrenceMigrationNeeded && <p>Recurring tasks are not available yet. Existing dated tasks remain visible.</p>}
+        {eventError && <p className="text-red-300">Calendar events could not be loaded.</p>}
+        {taskError && <p className="text-red-300">Dated tasks could not be loaded.</p>}
+        {recurrenceError && <p className="text-red-300">Recurring tasks could not be refreshed.</p>}
       </div>
     </div>
   )
@@ -646,8 +750,7 @@ function CgCalendarGrid({
             )
           })}
         </div>
-        <p className="mt-3 text-center text-xs text-brand-primary/50">Tap a date to view its events{tasksByDate.size > 0 ? ' and Planner tasks' : ''}.</p>
-        {groups.length === 0 && <EmptyState className="mt-4" title={`Nothing in ${formatMonthHeading(month)}`} message="No company events or dated Planner tasks this month. See the diagnostics above." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} centered={false} />}
+        {groups.length === 0 && <EmptyState className="mt-4" title={`Nothing in ${formatMonthHeading(month)}`} message="No events or dated tasks." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} compact centered={false} />}
       </div>
     </div>
   )
@@ -785,6 +888,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
   const keyboardInset = useVisualViewportBottomInset()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [visibilitySaving, setVisibilitySaving] = useState(false)
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
 
@@ -835,7 +939,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
         }
         const result = await createCompanyEvent(input)
         if (result.tableMissing) {
-          setSaveError('Company calendar SQL not applied yet. Run phase-10a migration.')
+          setSaveError('CG Calendar setup is required before events can be saved.')
           return
         }
         if (result.error) { setSaveError(result.error.message); return }
@@ -855,7 +959,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
         }
         const result = await updateCompanyEvent(event.id, patch)
         if (result.tableMissing) {
-          setSaveError('Company calendar SQL not applied yet. Run phase-10a migration.')
+          setSaveError('CG Calendar setup is required before events can be saved.')
           return
         }
         if (result.error) { setSaveError(result.error.message); return }
@@ -874,7 +978,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
     try {
       const result = await deleteCompanyEvent(event.id)
       if (result.tableMissing) {
-        setSaveError('Company calendar SQL not applied yet. Run phase-10a migration.')
+        setSaveError('CG Calendar setup is required before events can be removed.')
         setDeleting(false)
         return
       }
@@ -887,6 +991,29 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
     } catch {
       setDeleting(false)
     }
+  }
+
+  const canPublishToClient = Boolean(
+    event.client_id
+      && ['shoot', 'content_run', 'client_event'].includes(event.event_type)
+      && event.status !== 'cancelled'
+      && !event.superseded_by_event_id,
+  )
+
+  async function handleClientVisibility() {
+    if (isNew || !canManage || visibilitySaving) return
+    const nextVisible = !event.client_visible
+    if (nextVisible && !canPublishToClient) return
+
+    setVisibilitySaving(true)
+    setSaveError(null)
+    const result = await setCompanyEventClientVisibility(event.id, nextVisible)
+    setVisibilitySaving(false)
+    if (result.error) {
+      setSaveError('Could not update client visibility.')
+      return
+    }
+    onSaved()
   }
 
   return (
@@ -987,6 +1114,35 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
             />
           </div>
         </fieldset>
+
+        <div className="border-t border-white/[0.08] px-5 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold text-white">Visible to client</p>
+              <p className="mt-0.5 text-xs text-brand-primary/60">
+                {event.client_visible ? 'On' : 'Off'}
+              </p>
+            </div>
+            {!isNew && canManage && (
+              <button
+                type="button"
+                onClick={() => void handleClientVisibility()}
+                disabled={visibilitySaving || (!event.client_visible && !canPublishToClient)}
+                className={`min-h-10 rounded-full border px-4 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-45 ${
+                  event.client_visible
+                    ? 'border-brand-teal/30 bg-brand-teal/10 text-[#2dd4bf]'
+                    : 'border-white/10 bg-white/[0.04] text-brand-primary hover:text-white'
+                }`}
+              >
+                {visibilitySaving ? 'Updating...' : event.client_visible ? 'Turn off' : 'Turn on'}
+              </button>
+            )}
+          </div>
+          {isNew && <p className="mt-2 text-xs text-brand-primary/55">Save the event before making it visible.</p>}
+          {!isNew && canManage && !event.client_visible && !canPublishToClient && (
+            <p className="mt-2 text-xs text-amber-200/75">Link a client and use Shoot, Content Run or Client Event.</p>
+          )}
+        </div>
 
         <div className="border-t border-white/[0.08] px-5 py-4" style={{ paddingBottom: keyboardInset > 0 ? `calc(1rem + ${keyboardInset}px)` : undefined }}>
           {!isNew && event.event_type === 'content_run' && (

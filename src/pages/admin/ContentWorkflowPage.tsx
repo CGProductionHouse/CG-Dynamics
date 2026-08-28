@@ -521,7 +521,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
   )
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
+    <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-5 sm:px-6 sm:pt-8 lg:px-8">
       {shootMode && selectedRun && (
         <ShootMode
           runName={selectedRun.name}

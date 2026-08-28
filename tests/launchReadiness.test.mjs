@@ -10,7 +10,7 @@ const DIAGNOSTICS = read('../src/lib/contentRunDebrief.ts')
 
 test('admin system health exposes a real production launch queue', () => {
   assert.match(HEALTH, /<LaunchReadinessPanel/)
-  assert.match(NAV, /\/admin\/import-health.*System Health/)
+  assert.match(NAV, /to: '\/admin\/system'[^}]*'\/admin\/import-health'/)
   assert.match(PANEL, /content_runs/)
   assert.match(PANEL, /content_guidelines/)
   assert.match(PANEL, /content_guide_ideas/)

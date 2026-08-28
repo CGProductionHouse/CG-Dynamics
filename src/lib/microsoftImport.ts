@@ -26,6 +26,7 @@ export type MicrosoftConflictCode =
   | 'restricted_content'
   | 'stale_snapshot'
   | 'unresolved_assignee'
+  | 'possible_calendar_duplicate'
 
 export interface MicrosoftOutlookEventSource {
   sourceType: 'outlook_event'
@@ -171,6 +172,16 @@ export type MicrosoftExistingTarget =
   | MicrosoftExistingClientScheduleTarget
   | MicrosoftExistingCalendarTarget
 
+export interface MicrosoftUnlinkedCalendarRow {
+  id: string
+  updatedAt: string
+  title: string
+  startAt: string
+  endAt: string | null
+  allDay: boolean
+  status: 'planned' | 'confirmed' | 'completed' | 'cancelled'
+}
+
 export interface MicrosoftAssigneeMapEntry {
   displayName: string
   mail: string | null
@@ -222,6 +233,9 @@ export interface MicrosoftImportPreviewItem {
   /** True only when a reviewed Outlook label can safely fill an empty client link.
    * Existing non-null client links remain CG-owned and are never overwritten. */
   calendarClientEnrichment?: boolean
+  /** Explicit admin decision that an ambiguous native lookalike is a distinct
+   * Outlook event. Persisted so failed-action recovery can repeat that decision. */
+  calendarDuplicateReviewed?: boolean
   /** For package_template_create: the deterministic template a supported source
    *  task proves the active package is missing. Applied before its deliverable. */
   proposedTemplate?: { code: string; deliverable_type: 'dp' | 'photo' | 'video' | 'reel'; instance_number: number } | null

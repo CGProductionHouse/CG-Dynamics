@@ -6,6 +6,7 @@ const planner = readFileSync(new URL('../src/lib/planner.ts', import.meta.url), 
 const commandCentre = readFileSync(new URL('../src/lib/commandCentre.ts', import.meta.url), 'utf8')
 const myDay = readFileSync(new URL('../src/lib/workforceMyDay.ts', import.meta.url), 'utf8')
 const migration = readFileSync(new URL('../supabase/migrations/20260728180000_planner_multi_assignment.sql', import.meta.url), 'utf8')
+const workloadAuthorityMigration = readFileSync(new URL('../supabase/migrations/20260809090000_planner_workload_completed_authority.sql', import.meta.url), 'utf8')
 
 test('planner tasks expose ordered canonical assignees and safe unresolved defaults', () => {
   assert.match(planner, /assignees: PlannerAssignee\[\]/)
@@ -81,7 +82,7 @@ test('paginated canonical reads fail closed instead of returning partial pages',
 })
 
 test('workload RPC treats inactive-only assignment as unassigned', () => {
-  const workloadRpc = migration.slice(migration.indexOf('create or replace function public.list_planner_workload_tasks()'))
+  const workloadRpc = workloadAuthorityMigration.slice(workloadAuthorityMigration.indexOf('create or replace function public.list_planner_workload_tasks()'))
   assert.match(workloadRpc, /assignee_profile_ids uuid\[\]/)
   assert.match(workloadRpc, /assignee\.is_active/)
   assert.match(workloadRpc, /assignee\.role in \('admin', 'manager', 'staff', 'team'\)/)
@@ -113,8 +114,13 @@ test('Command Centre carries every canonical assignee while retaining legacy fie
 
 test('Hub and My Day exclude completed history at the query boundary', () => {
   assert.match(planner, /activeOnly\?: boolean/)
-  assert.match(planner, /\.not\('status', 'in', '\(approved,scheduled,done,completed,moved_to_tomorrow\)'\)/)
-  assert.match(commandCentre, /nativeQuery = nativeQuery\.not\('status', 'in', '\(done,moved_to_tomorrow\)'\)/)
+  // #176: activeOnly means "genuine active work". Scheduling states
+  // (approved/scheduled/ready_internal_review) and deferral stay in the pool;
+  // only operational completion is excluded at the query boundary. Hub / My Day
+  // then apply the shared isActiveForToday helper for the today axis.
+  assert.match(planner, /\.not\('status', 'in', '\(done,completed\)'\)/)
+  assert.match(commandCentre, /nativeQuery = nativeQuery\.not\('status', 'in', '\(done,completed\)'\)/)
+  assert.match(commandCentre, /listPlannerTaskRows\(\{ order: 'due', activeOnly: options\.activeOnly \}\)/)
   assert.match(myDay, /listTasks\(\{ activeOnly: true \}\)/)
 })
 

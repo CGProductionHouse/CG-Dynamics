@@ -8,6 +8,7 @@ import { getGoogleAdsWorkspace } from '../../lib/googleAds'
 import { useAuth } from '../../contexts/AuthContext'
 import { isAdminRole, isManagerRole } from '../../lib/roles'
 import { getMicrosoftConnectionStatus } from '../../lib/microsoftImportData'
+import { PageContainer, PageHeader } from '../../components/layout/PageShell'
 
 type MetaState = 'loading' | 'connected' | 'disconnected'
 
@@ -99,16 +100,14 @@ export default function IntegrationsPage() {
     : 'Connect and map Google Ads accounts for monthly data sync.'
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="max-w-3xl">
-        <p className="text-xs uppercase tracking-[0.22em] text-brand-primary">Integrations</p>
-        <h1 className="mt-2 text-2xl font-semibold text-white">Integrations</h1>
-        <p className="mt-1 text-sm text-brand-primary">
-          Manage reporting and operational sync connections in one place.
-        </p>
-      </div>
+    <PageContainer width="wide" className="pb-16">
+      <PageHeader
+        eyebrow="Integrations"
+        title="Integrations"
+        description="Provider sync and connection setup in one place — Meta, Google Ads, Microsoft and imports."
+      />
 
-      <div className="mt-6 max-w-3xl rounded-xl border border-brand-muted bg-gradient-to-r from-brand-surface to-brand-bg p-5">
+      <div className="max-w-3xl rounded-xl border border-brand-muted bg-gradient-to-r from-brand-surface to-brand-bg p-4 sm:p-5">
         <p className="text-sm leading-relaxed text-brand-primary">
           <span className="font-medium text-white">Meta is the main workflow.</span> Facebook and
           Instagram sync creates monthly report drafts automatically. CSV import remains available as a
@@ -116,7 +115,7 @@ export default function IntegrationsPage() {
         </p>
       </div>
 
-      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
         {/* Meta — live status */}
         <PremiumCard padding="md" className="relative">
           <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-brand-accent to-sky-400" />
@@ -221,7 +220,28 @@ export default function IntegrationsPage() {
             </div>
           </PremiumCard>
         )}
+        {canManageGoogleAds && (
+          <PremiumCard padding="md">
+            <div className="flex flex-col">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-teal/15 text-sm font-bold text-brand-teal">PI</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-base font-semibold text-white">Planner Import</h2>
+                    <Pill tone="neutral">Import</Pill>
+                  </div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
+                    Import a morning task list or Planner export into the operations board.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-auto pt-5">
+                <ActionButton variant="outline" onClick={() => navigate('/admin/planner-import')} fullWidth>Open Planner Import</ActionButton>
+              </div>
+            </div>
+          </PremiumCard>
+        )}
       </div>
-    </div>
+    </PageContainer>
   )
 }

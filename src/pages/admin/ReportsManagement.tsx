@@ -22,7 +22,6 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { StatusBadge, SourceBadge, type SourceVariant } from '../../components/ui/Badges'
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { EmptyState } from '../../components/ui/States'
-import WorkflowGuide from '../../components/WorkflowGuide'
 import { supabase } from '../../lib/supabase'
 
 type StatusFilter = 'all' | 'internal-draft' | 'ready-to-publish' | 'published' | 'incomplete-month' | 'needs-repair'
@@ -45,11 +44,7 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'needs-repair', label: 'Needs repair' },
 ]
 
-function errorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error) return error.message
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
-  }
+function errorMessage(_error: unknown, fallback: string) {
   return fallback
 }
 
@@ -148,7 +143,7 @@ export default function ReportsManagement() {
       const [clientsRes, reportsRes] = await Promise.all([listClients(), listReports()])
       const loadError = clientsRes.error ?? reportsRes.error
       if (loadError) {
-        setError(loadError.message)
+        setError('Could not load reports.')
         return
       }
       setClients(clientsRes.data)
@@ -279,7 +274,7 @@ export default function ReportsManagement() {
     try {
       const { error } = await updateReportStatus(report.id, nextStatus)
       if (error) {
-        setError(error.message)
+        setError('Could not update report status.')
         return
       }
       setSuccess(`Report ${nextStatus === 'published' ? 'published' : 'unpublished'}.`)
@@ -303,7 +298,7 @@ export default function ReportsManagement() {
     try {
       const { error } = await deleteReport(report.id)
       if (error) {
-        setError(error.message)
+        setError('Could not delete report.')
         return
       }
       setSuccess('Report deleted.')
@@ -330,7 +325,7 @@ export default function ReportsManagement() {
     try {
       const { error } = await updateReportPeriod(report.id, start, end)
       if (error) {
-        setError(error.message)
+        setError('Could not repair report.')
         return
       }
       setSuccess(`Report repaired to ${monthDisplayLabel(month)}.`)
@@ -354,14 +349,9 @@ export default function ReportsManagement() {
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
-      {/* Page header */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="mb-2 text-xs uppercase tracking-[0.22em] text-brand-primary">Reports</p>
-          <h1 className="text-2xl font-semibold text-white sm:text-3xl">Report management</h1>
-          <p className="mt-2 max-w-2xl text-sm text-brand-primary">
-            Sync data, review performance, add CG strategy, then publish.
-          </p>
+          <h1 className="text-2xl font-semibold text-white sm:text-3xl">Reports</h1>
         </div>
         {isAdmin && (
           <div className="flex flex-wrap gap-2">
@@ -380,8 +370,6 @@ export default function ReportsManagement() {
           </div>
         )}
       </div>
-
-      <WorkflowGuide />
 
       {error && (
         <div className="mb-4 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">
@@ -505,6 +493,7 @@ export default function ReportsManagement() {
               </ActionButton>
             ) : undefined
           }
+          compact
         />
       ) : (
         <div className="space-y-3">
@@ -548,10 +537,10 @@ export default function ReportsManagement() {
                       {isPartial && isAdmin && (
                         <details className="mt-2">
                           <summary className="cursor-pointer text-[11px] text-amber-300/60 hover:text-amber-300">
-                            Admin detail
+                            Period details
                           </summary>
                           <p className="mt-1 text-[11px] text-amber-300/50">
-                            Stored period is not a full calendar month. Use "Repair to calendar month" to fix.
+                            This report does not cover a full calendar month.
                           </p>
                         </details>
                       )}

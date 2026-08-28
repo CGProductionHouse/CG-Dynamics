@@ -70,8 +70,8 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
   {
     key: 'tasks',
     name: 'Tasks',
-    status: 'planned',
-    description: 'Future connection for assigned work, due dates, and visible project task context.',
+    status: 'available',
+    description: 'Confirmed create, assignment, completion and blocker actions use canonical Planner tasks with role checks, audit logs and assignee notifications.',
   },
   {
     key: 'clients',

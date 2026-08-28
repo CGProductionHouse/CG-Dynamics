@@ -4,6 +4,7 @@ import {
   analyseDailyAssistantText,
   applyDailyAssistantCapture,
   completeMyAssistantDayItem,
+  isActiveAssistantDayItem,
   listMyAssistantDayCaptures,
   listMyAssistantDayItems,
   type AssistantDayCapture,
@@ -374,7 +375,7 @@ export function DailyAssistantCapture({ userId, page, clientId, onClose, onSaved
 
   const today = new Date().toLocaleDateString('en-CA')
   const todayCaptures = useMemo(() => captures.filter(capture => capture.capture_date === today), [captures, today])
-  const openItems = useMemo(() => items.filter(item => item.state === 'open'), [items])
+  const openItems = useMemo(() => items.filter(isActiveAssistantDayItem), [items])
 
   const selectedSuggestions = useMemo(() => (analysis?.suggestions ?? []).filter(item => item.selected), [analysis])
   const tasks = useMemo(() => (analysis?.suggestions ?? []).filter(item => item.kind === 'create_task' || item.kind === 'update_task'), [analysis])

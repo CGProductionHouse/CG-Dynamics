@@ -37,11 +37,14 @@ import {
   type TaskBucket,
   type TaskPriority,
   type TaskStatus,
+  type TaskUpdateFields,
   type PackageAction,
   type ClientOption,
   type ParsedMorningTask,
   type MorningTaskEdit,
+  taskStatusDisplayLabel,
 } from '../../lib/commandCentre'
+import { isActiveForToday, isActiveWorkTask, isActuallyInProgressTask, isOperationallyCompletedStatus, isVerifiedWorkTask } from '../../lib/taskLifecycle'
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
 
@@ -53,24 +56,24 @@ function focusSortOrder(task: CommandCentreTask, today: string, now: Date): numb
   const dueDate = task.due_date ? new Date(`${task.due_date}T00:00:00`) : null
   if (dueDate && dueDate < now) return 2
   if (task.due_date === today) return 3
-  if (task.status === 'in_progress') return 4
+  if (isActuallyInProgressTask(task)) return 4
   if (dueDate && dueDate.getTime() - now.getTime() <= 7 * 86400000) return 5
   if (!dueDate) return 7
   return 6
 }
 
 function isOverdue(task: CommandCentreTask, now: Date) {
-  if (!task.due_date || task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  if (!task.due_date || !isActiveForToday(task)) return false
   return new Date(`${task.due_date}T00:00:00`) < now
 }
 
 function matchesWorkFilter(task: CommandCentreTask, filter: WorkFilter, today: string, now: Date) {
-  if (filter === 'done') return task.status === 'done'
-  if (task.status === 'done' || task.status === 'moved_to_tomorrow') return false
+  if (filter === 'done') return isOperationallyCompletedStatus(task)
+  if (!isActiveForToday(task)) return false
   if (filter === 'today') return task.due_date === today
   if (filter === 'overdue') return isOverdue(task, now)
   if (filter === 'client_requests') return task.priority === 'client_request' || task.bucket === 'Client Requests'
-  if (filter === 'in_progress') return task.status === 'in_progress'
+  if (filter === 'in_progress') return isActuallyInProgressTask(task)
   return true
 }
 
@@ -167,14 +170,15 @@ function buildEndOfDay(activeTasks: CommandCentreTask[], ownershipOf: (t: Comman
     'BLOCKED': [],
     'WAITING CLIENT': [],
     'MOVED TO TOMORROW': [],
+    'OTHER ACTIVE': [],
   }
   for (const t of activeTasks) {
-    if (t.status === 'done') groups['DONE'].push(t)
-    else if (t.status === 'in_progress') groups['STILL BUSY / IN PROGRESS'].push(t)
+    if (isOperationallyCompletedStatus(t)) groups['DONE'].push(t)
+    else if (isActuallyInProgressTask(t)) groups['STILL BUSY / IN PROGRESS'].push(t)
     else if (t.status === 'blocked') groups['BLOCKED'].push(t)
     else if (t.status === 'waiting_client') groups['WAITING CLIENT'].push(t)
     else if (t.status === 'moved_to_tomorrow') groups['MOVED TO TOMORROW'].push(t)
-    else groups['STILL BUSY / IN PROGRESS'].push(t)
+    else groups['OTHER ACTIVE'].push(t)
   }
   const lines: string[] = ['CGPH END OF DAY UPDATE', '']
   for (const [heading, items] of Object.entries(groups)) {
@@ -274,12 +278,20 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
   }, [today])
 
   const allActiveTasks = useMemo(() =>
-    tasks.filter(t => t.status !== 'done' && t.status !== 'moved_to_tomorrow'),
+    tasks.filter(t => isActiveWorkTask(t)),
   [tasks])
+
+  // Verified work only: excludes unresolved/conflict legacy imports from
+  // operational counts (overdue, focus, today) so daily queues reflect real
+  // work rather than import noise. The ownership review section still uses
+  // allActiveTasks to show the full review backlog.
+  const verifiedActiveTasks = useMemo(() =>
+    allActiveTasks.filter(t => isVerifiedWorkTask(t)),
+  [allActiveTasks])
 
   const focusTasks = useMemo(() => {
     let filtered: CommandCentreTask[]
-    const taskPool = workFilter === 'done' ? tasks : allActiveTasks
+    const taskPool = workFilter === 'done' ? tasks : verifiedActiveTasks
     if (filterStaff === '__my__') {
       const myName = profile?.full_name ?? ''
       filtered = taskPool.filter(t => t.assigned_to_name === myName)
@@ -290,6 +302,10 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
     }
     if (workFilter !== 'focus') {
       filtered = filtered.filter(t => matchesWorkFilter(t, workFilter, today, now))
+    } else {
+      // Focus is a today-axis surface: a deferred task is unfinished but belongs
+      // to its own future day, never today's focus queue.
+      filtered = filtered.filter(t => isActiveForToday(t))
     }
     if (bucketFilter) filtered = filtered.filter(t => t.bucket === bucketFilter)
     if (clientSearch.trim()) {
@@ -300,10 +316,10 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       )
     }
     return [...filtered].sort((a, b) => focusSortOrder(a, today, now) - focusSortOrder(b, today, now))
-  }, [allActiveTasks, bucketFilter, clientSearch, filterStaff, profile, tasks, today, now, workFilter])
+  }, [verifiedActiveTasks, bucketFilter, clientSearch, filterStaff, profile, tasks, today, now, workFilter])
 
   const doneTodayTasks = useMemo(() => {
-    let base = tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today)
+    let base = tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today)
     if (filterStaff === '__my__') {
       const myName = profile?.full_name ?? ''
       base = base.filter(t => t.assigned_to_name === myName)
@@ -353,18 +369,18 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
   const allRelevant = useMemo(() =>
     tasks
-      .filter(t => t.status !== 'done' || (t.completed_at && t.completed_at.slice(0, 10) === today))
+      .filter(t => !isOperationallyCompletedStatus(t) || (t.completed_at && t.completed_at.slice(0, 10) === today))
       .sort((a, b) => (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99)),
   [tasks, today])
 
   const stats = useMemo(() => ({
     focus: focusTasks.length,
-    clientRequests: allActiveTasks.filter(t => t.priority === 'client_request').length,
-    inProgress: allActiveTasks.filter(t => t.status === 'in_progress').length,
-    doneToday: tasks.filter(t => t.status === 'done' && t.completed_at?.slice(0, 10) === today).length,
-    overdue: allActiveTasks.filter(t => isOverdue(t, now)).length,
-    today: allActiveTasks.filter(t => t.due_date === today).length,
-  }), [tasks, allActiveTasks, focusTasks, today, now])
+    clientRequests: verifiedActiveTasks.filter(t => t.priority === 'client_request').length,
+    inProgress: verifiedActiveTasks.filter(t => isActuallyInProgressTask(t)).length,
+    doneToday: tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today).length,
+    overdue: verifiedActiveTasks.filter(t => isOverdue(t, now)).length,
+    today: verifiedActiveTasks.filter(t => isActiveForToday(t) && t.due_date === today).length,
+  }), [tasks, verifiedActiveTasks, focusTasks, today, now])
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
     setBusyId(id)
@@ -376,12 +392,14 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       } else {
         setTasks(prev => prev.map(t => {
           if (t.id !== id) return t
-          const now = new Date().toISOString()
-          return {
-            ...t,
-            status,
-            updated_at: now,
-            completed_at: (status as string) === 'done' ? now : null,
+           const now = new Date().toISOString()
+           return {
+             ...t,
+             status,
+             updated_at: now,
+             completed_at: t.data_origin === 'planner_tasks'
+               ? null
+               : (status as string) === 'done' ? now : null,
           }
         }))
       }
@@ -446,8 +464,8 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Daily Tasks</h1>
         </div>
         <EmptyState
-          title="Migration required"
-          message="Daily Tasks tables are not set up yet. Run the phase-5 CG Command Centre migration."
+          title="Work setup required"
+          message="Daily Tasks is not available yet."
         />
       </div>
     )
@@ -466,9 +484,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
       {/* A — Header */}
       <div className={`mb-5 ${embedded ? 'rounded-xl border border-white/8 bg-white/[0.025] p-4' : ''}`}>
-        <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-accent">CG Hub · Command Centre</p>
         <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">Daily Tasks</h1>
-        <p className="mt-1 text-sm text-brand-primary/60">Today's work list.</p>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
           <Link to="/admin/ops-hub?tab=client-work" className="rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-brand-teal hover:text-white">Capture client request</Link>
           <button
@@ -484,15 +500,6 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
       {/* B — Quick Add */}
       <div className="mb-5">
         <QuickAddCard onTaskCreated={load} staffNames={staffNames} />
-      </div>
-
-      {/* C — Stats */}
-      <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard label="Focus" value={stats.focus} />
-        <StatCard label="Client requests" value={stats.clientRequests} accent />
-        <StatCard label="In progress" value={stats.inProgress} />
-        <StatCard label="Done today" value={stats.doneToday} teal />
-        <StatCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
       </div>
 
       {/* D — Filter row */}
@@ -598,7 +605,7 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           </span>
         </div>
         {focusTasks.length === 0 ? (
-          <EmptyState title="All clear" message="No tasks match these filters." centered={false} />
+          <EmptyState title="All clear" message="No tasks match these filters." compact centered={false} />
         ) : filterStaff !== '' ? (
           <div className="space-y-2">
             {focusTasks.map(task => (
@@ -696,28 +703,6 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
           onDeleted={handleDeleteTask}
         />
       )}
-    </div>
-  )
-}
-
-function StatCard({ label, value, accent, teal, amber, danger }: {
-  label: string
-  value: number
-  accent?: boolean
-  teal?: boolean
-  amber?: boolean
-  danger?: boolean
-}) {
-  const valClass = danger
-    ? 'text-red-400'
-    : accent ? 'text-brand-accent'
-    : teal ? 'text-[#2dd4bf]'
-    : amber ? 'text-amber-400'
-    : 'text-white'
-  return (
-    <div className="rounded-xl border border-brand-muted/30 bg-brand-surface/60 p-3">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
-      <p className={`mt-1.5 text-xl font-semibold ${valClass}`}>{value}</p>
     </div>
   )
 }
@@ -974,19 +959,23 @@ function TaskRow({ task, busyId, onStatusChange, onOpenDetails }: {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {task.status !== 'done' && (
+            {!isOperationallyCompletedStatus(task) && (
               <select
                 value={task.status}
                 onChange={e => onStatusChange(task.id, e.target.value as TaskStatus)}
                 disabled={busyId === task.id}
                 className="rounded-lg border border-brand-muted/60 bg-brand-bg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:opacity-60"
               >
-                {STATUSES.map(s => (
+                {/* The current value shows the truthful label (raw Planner state
+                    for approved/scheduled/ready rows) while still allowing a
+                    coarse change from this surface. */}
+                <option value={task.status}>{taskStatusDisplayLabel(task)}</option>
+                {STATUSES.filter(s => s !== task.status).map(s => (
                   <option key={s} value={s}>{statusLabel(s)}</option>
                 ))}
               </select>
             )}
-            {task.status === 'done' && (
+            {isOperationallyCompletedStatus(task) && (
               <button
                 type="button"
                 onClick={() => onStatusChange(task.id, 'to_do')}
@@ -1431,6 +1420,9 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
   const [saveError, setSaveError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const statusOptions = task.data_origin === 'planner_tasks'
+    ? STATUSES.filter(value => value !== 'moved_to_tomorrow')
+    : STATUSES
 
   async function handleSave() {
     if (saving || !title.trim()) return
@@ -1439,33 +1431,52 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
     setSaveError(null)
     try {
       if (!canManage) {
+        if (status === task.status) {
+          setSaveMsg('No changes')
+          return
+        }
         const result = await updateTaskStatus(task.id, status)
         if (result.error) { setSaveError(result.error.message); return }
-        onSaved({ ...task, status, updated_at: new Date().toISOString(), completed_at: status === 'done' ? new Date().toISOString() : null })
+        const saved = result.data as { updated_at?: string; completed_at?: string | null } | null
+        onSaved({
+          ...task,
+          status,
+          updated_at: saved?.updated_at ?? task.updated_at,
+          completed_at: saved && 'completed_at' in saved ? saved.completed_at ?? null : task.completed_at,
+        })
         setSaveMsg('Status saved')
         return
       }
-      const updates = {
-        title: title.trim(),
-        client_id: clientId || null,
-        client_name: clientName || null,
-        assigned_to_name: assignedName.trim() || null,
-        assigned_to_user_id: task.data_origin === 'planner_tasks'
-          ? null
-          : assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null,
-        bucket,
-        priority,
-        status,
-        due_date: dueDate,
-        notes: notes.trim() || null,
-        helper_names: helperNames.split(',').map(name => name.trim()).filter(Boolean),
-        ...(task.data_origin !== 'planner_tasks'
-          ? {
-              package_action: packageAction || null,
-              quote_needed: quoteNeeded,
-              admin_package_note: adminPackageNote.trim() || null,
-            }
-          : {}),
+      const updates: Partial<TaskUpdateFields> = {}
+      const nextTitle = title.trim()
+      const nextClientId = clientId || null
+      const nextClientName = clientName || null
+      const nextNotes = notes.trim() || null
+      if (nextTitle !== task.title) updates.title = nextTitle
+      if (nextClientId !== task.client_id) updates.client_id = nextClientId
+      if (nextClientName !== task.client_name) updates.client_name = nextClientName
+      if (bucket !== task.bucket) updates.bucket = bucket
+      if (priority !== task.priority) updates.priority = priority
+      if (status !== task.status) updates.status = status
+      if (dueDate !== task.due_date) updates.due_date = dueDate
+      if (nextNotes !== task.notes) updates.notes = nextNotes
+
+      if (task.data_origin !== 'planner_tasks') {
+        const nextAssignedName = assignedName.trim() || null
+        const nextAssignedId = assignedName.trim() === profile?.full_name?.trim() ? profile?.id ?? null : null
+        const nextHelpers = helperNames.split(',').map(name => name.trim()).filter(Boolean)
+        if (nextAssignedName !== task.assigned_to_name) updates.assigned_to_name = nextAssignedName
+        if (nextAssignedId !== task.assigned_to_user_id) updates.assigned_to_user_id = nextAssignedId
+        if (JSON.stringify(nextHelpers) !== JSON.stringify(task.helper_names ?? [])) updates.helper_names = nextHelpers
+        const nextPackageAction = packageAction || null
+        const nextAdminNote = adminPackageNote.trim() || null
+        if (nextPackageAction !== (task.package_action ?? null)) updates.package_action = nextPackageAction
+        if (quoteNeeded !== (task.quote_needed ?? false)) updates.quote_needed = quoteNeeded
+        if (nextAdminNote !== (task.admin_package_note ?? null)) updates.admin_package_note = nextAdminNote
+      }
+      if (Object.keys(updates).length === 0) {
+        setSaveMsg('No changes')
+        return
       }
       const { error } = await updateTask(task.id, updates)
       if (error) { setSaveError(error.message); return }
@@ -1473,9 +1484,11 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
         ...task,
         ...updates,
         updated_at: new Date().toISOString(),
-        completed_at: (status as string) === 'done'
-          ? (task.completed_at ?? new Date().toISOString())
-          : null,
+        completed_at: task.data_origin === 'planner_tasks'
+          ? null
+          : status !== task.status
+            ? (status as string) === 'done' ? new Date().toISOString() : null
+            : task.completed_at,
       }
       onSaved(updated)
       setSaveMsg('Saved')
@@ -1497,7 +1510,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
       if (result.error) {
         const err = result.error as { code?: string; message?: string }
         setSaveError(err.code === '42703'
-          ? 'Archive migration is not applied yet. Run phase-9a-planner-task-archive.sql in Supabase.'
+          ? 'Archiving is not available yet.'
           : err.message ?? 'Could not remove task.')
         setDeleting(false)
         return
@@ -1587,7 +1600,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
             <div>
               <label className="mb-1.5 block text-xs font-medium text-brand-primary">Status</label>
               <select value={status} onChange={e => setStatus(e.target.value as TaskStatus)} className={inputCls}>
-                {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
+                {statusOptions.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
               </select>
             </div>
             <div>
@@ -1630,7 +1643,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
                 <p className="text-[11px] text-white/40">No helpers yet</p>
               )
             ) : (
-              <p className="text-[11px] text-white/30">After migration phase-7b</p>
+              <p className="text-[11px] text-white/30">Not available yet</p>
             )}
           </div>
 
@@ -1639,7 +1652,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
               <p className="mb-2.5 text-xs font-medium text-brand-primary">Client request decision</p>
               {task.data_origin === 'planner_tasks' && (
                 <p className="mb-3 rounded-md border border-amber-400/20 bg-amber-400/[0.06] px-2.5 py-2 text-[11px] text-amber-200">
-                  Imported Planner request. Edit task details here; handle package decisions in Monthly Planner/Package until request linking is migrated.
+                  Imported Planner request. Edit task details here; handle package decisions in Client Schedule.
                 </p>
               )}
               <div className="flex flex-wrap gap-2">
@@ -1687,7 +1700,7 @@ function TaskDetailDrawer({ task, isAdmin, canManage, staffNames, onClose, onSav
               <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Pause</button>
               <button type="button" disabled className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 text-xs text-brand-primary/30">Stop</button>
             </div>
-            <p className="mt-1.5 text-[11px] text-brand-primary/40">After migration</p>
+            <p className="mt-1.5 text-[11px] text-brand-primary/40">Not available yet</p>
           </div>
         </div>
 

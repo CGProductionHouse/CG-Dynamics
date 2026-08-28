@@ -6,10 +6,10 @@ import {
   listTasks,
   createTask,
   listActiveClients,
+  taskStatusDisplayLabel,
   type CommandCentreTask,
   type ClientOption,
   type TaskInput,
-  type TaskStatus,
 } from '../../lib/commandCentre'
 import {
   listMonthlyDeliverablesByMonth,
@@ -27,25 +27,15 @@ import { buildHubSevenDayCalendar, formatHubCalendarDay, type HubCalendarDay } f
 import { listRuns, listPipelineVideos, type ContentRun, type ContentGuideIdea } from '../../lib/contentWorkflow'
 import { isRunUpcoming } from '../../lib/contentWorkflowRules'
 import { isManagerRole } from '../../lib/roles'
+import { isActiveForToday, isActuallyInProgressTask, isVerifiedWorkTask } from '../../lib/taskLifecycle'
 
 // ── Constants ─────────────────────────────────────────────────
-
-const HUB_COMPLETED = new Set<TaskStatus>(['done', 'moved_to_tomorrow'])
-const HUB_EXCLUDED_STATUS = new Set<TaskStatus>(['done', 'moved_to_tomorrow'])
 
 
 const PRIORITY_RANK: Record<string, number> = {
   client_request: 0,
   urgent: 1,
   normal: 3,
-}
-
-const TASK_STATUS_SHORT: Record<string, string> = {
-  to_do: 'To do',
-  in_progress: 'In progress',
-  blocked: 'Blocked',
-  waiting_client: 'Waiting',
-  done: 'Done',
 }
 
 const DELIVERABLE_TYPE_CODE: Record<string, string> = {
@@ -84,7 +74,7 @@ function workMatchesProfile(work: { assigned_to_user_id?: string | null; assigne
 }
 
 function isOverdueTask(task: CommandCentreTask, today: string) {
-  return !!task.due_date && task.due_date < today && !HUB_COMPLETED.has(task.status)
+  return !!task.due_date && task.due_date < today && isActiveForToday(task)
 }
 
 function taskPriorityRank(t: CommandCentreTask, today: string): number {
@@ -92,7 +82,7 @@ function taskPriorityRank(t: CommandCentreTask, today: string): number {
   if (t.priority === 'urgent') return 1
   if (t.due_date && t.due_date < today) return 2
   if (t.due_date === today) return 3
-  if (t.status === 'in_progress') return 4
+  if (isActuallyInProgressTask(t)) return 4
   return 5
 }
 
@@ -172,7 +162,7 @@ export default function CgHubPage() {
 
   const canSeeTeamWork = isManagerRole(profile?.role)
   const activeTasks = useMemo(() => tasks.filter(task =>
-    !HUB_EXCLUDED_STATUS.has(task.status) && (canSeeTeamWork || workMatchesProfile(task, profile))),
+    isActiveForToday(task) && isVerifiedWorkTask(task) && (canSeeTeamWork || workMatchesProfile(task, profile))),
   [canSeeTeamWork, profile, tasks])
 
   const relevantDeliverables = useMemo(() => deliverables.filter(deliverable =>
@@ -185,7 +175,7 @@ export default function CgHubPage() {
         t.priority === 'client_request' ||
         t.priority === 'urgent' ||
         (t.due_date && t.due_date <= today) ||
-        t.status === 'in_progress'
+        isActuallyInProgressTask(t)
       )
       .sort((a, b) => taskPriorityRank(a, today) - taskPriorityRank(b, today))
   }, [activeTasks, today])
@@ -306,17 +296,6 @@ export default function CgHubPage() {
       (b.openRequests + b.overdueTasks + b.waitingDeliverables + b.unscheduledItems)
       - (a.openRequests + a.overdueTasks + a.waitingDeliverables + a.unscheduledItems))
   }, [clients, clientRequests, overdue, unscheduledDeliverables, waitingDeliverables])
-  const stats = useMemo(() => ({
-    focus: priorityQueue.length,
-    clientRequests: clientRequests.length,
-    dueToday: dueToday.length,
-    overdue: overdue.length,
-    inProgress: activeTasks.filter(t => t.status === 'in_progress').length,
-    waitingReview: waitingReview.length,
-    dueTodayDeliverables: dueTodayDeliverables.length,
-    unscheduledDeliverables: unscheduledDeliverables.length,
-  }), [priorityQueue, clientRequests, dueToday, overdue, activeTasks, waitingReview, dueTodayDeliverables, unscheduledDeliverables.length])
-
   async function handleQuickAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!quickTitle.trim() || quickSaving) return
@@ -352,7 +331,7 @@ export default function CgHubPage() {
   // ── Render ──────────────────────────────────────────────────
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       {/* A — Hero Header */}
       <div className="mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -415,7 +394,6 @@ export default function CgHubPage() {
             clientRequests={clientRequests}
             waitingReview={waitingReview}
             myActiveWork={myActiveWork}
-            stats={stats}
           />
 
           {/* D — CG Calendar */}
@@ -503,9 +481,9 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
           <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
             {currentItem ? currentItem.title : focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
           </h2>
-          <p className="mt-1 text-sm text-brand-primary/65">
-            {nextItem ? `Next: ${nextItem.title}` : context.summary.suggestedNextAction}
-          </p>
+          {nextItem && (
+            <p className="mt-1 text-sm text-brand-primary/65">Next: {nextItem.title}</p>
+          )}
           {context.summary.workloadWarning && (
             <p className="mt-2 text-xs font-semibold text-amber-200">{context.summary.workloadWarning}</p>
           )}
@@ -515,12 +493,6 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
-            {context.overdue.length} overdue
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
-            {context.dueToday.length} due today
-          </span>
           <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
             {todayEvents} event{todayEvents === 1 ? '' : 's'} today
           </span>
@@ -571,7 +543,6 @@ function TodayFocusSection({
   clientRequests,
   waitingReview,
   myActiveWork,
-  stats,
 }: {
   today: string
   priorityQueue: CommandCentreTask[]
@@ -580,22 +551,10 @@ function TodayFocusSection({
   clientRequests: CommandCentreTask[]
   waitingReview: CommandCentreTask[]
   myActiveWork: CommandCentreTask[]
-  stats: { focus: number; clientRequests: number; dueToday: number; overdue: number; inProgress: number; waitingReview: number; dueTodayDeliverables: number; unscheduledDeliverables: number }
 }) {
   return (
     <div className="mb-8">
-      <HubSectionHeader
-        title="Today Focus"
-        subtitle="What needs your attention"
-      />
-
-      {/* Stats row */}
-      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <HubMetricCard label="Priority Queue" value={stats.focus} accent={stats.focus > 0} />
-        <HubMetricCard label="Due Today" value={stats.dueToday} accent={stats.dueToday > 0} />
-        <HubMetricCard label="Overdue" value={stats.overdue} danger={stats.overdue > 0} />
-        <HubMetricCard label="Client Requests" value={stats.clientRequests} accent={stats.clientRequests > 0} />
-      </div>
+      <HubSectionHeader title="Today Focus" />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <HubWorkCard
@@ -681,10 +640,10 @@ function CompanyCalendarSection({
   if (companyEventsMissing) {
     return (
       <div className="mb-8">
-        <HubSectionHeader title="CG Calendar — Next 7 Days" />
+        <HubSectionHeader title="CG Calendar" subtitle="Next 7 days" />
         <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-4">
           <p className="text-xs text-amber-300/80">
-            CG Calendar setup needed. Run phase-10a SQL to enable company events.
+            CG Calendar setup is required.
           </p>
           <Link
             to="/admin/cg-calendar"
@@ -702,8 +661,8 @@ function CompanyCalendarSection({
   return (
     <div className="mb-8">
       <HubSectionHeader
-        title="CG Calendar — Next 7 Days"
-        subtitle={`${eventCount} event${eventCount === 1 ? '' : 's'}`}
+        title="CG Calendar"
+        subtitle={`Next 7 days · ${eventCount} event${eventCount === 1 ? '' : 's'}`}
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -782,10 +741,7 @@ function ProductionScheduleSection({
 }) {
   return (
     <div className="mb-8">
-      <HubSectionHeader
-        title="Production Schedule"
-        subtitle="Package deliverables and schedule"
-      />
+      <HubSectionHeader title="Production Schedule" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <HubWorkCard
@@ -888,24 +844,6 @@ function HubSectionHeader({ title, subtitle }: { title: string; subtitle?: strin
   )
 }
 
-function HubMetricCard({ label, value, accent, danger }: {
-  label: string
-  value: number
-  accent?: boolean
-  danger?: boolean
-}) {
-  const valClass = danger
-    ? 'text-red-400'
-    : accent ? 'text-[#2dd4bf]'
-    : 'text-white'
-  return (
-    <div className="rounded-xl border border-white/8 bg-brand-surface/80 p-3">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-brand-primary/50">{label}</p>
-      <p className={`mt-1 text-xl font-semibold ${valClass}`}>{value}</p>
-    </div>
-  )
-}
-
 function HubWorkCard({
   title,
   count,
@@ -977,7 +915,7 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
         {meta && <p className="mt-0.5 text-xs text-brand-primary/45">{meta}</p>}
       </div>
       <span className="shrink-0 text-xs font-semibold text-brand-primary/40">
-        {TASK_STATUS_SHORT[task.status] ?? task.status}
+        {taskStatusDisplayLabel(task)}
       </span>
     </Link>
   )

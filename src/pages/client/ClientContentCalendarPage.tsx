@@ -12,9 +12,9 @@ import { EVENT_TYPE_LABELS } from '../../lib/companyCalendar'
 import { getClient, type Client } from '../../lib/db/clients'
 import { CLIENT_SAFE_STATUS_LABELS, PACKAGE_DELIVERABLE_LABELS } from '../../lib/planner'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
+import { CALENDAR_HEADERS, monthGridCells, todayIso } from '../../lib/scheduleCalendar'
 
 const MONTH_PATTERN = /^\d{4}-\d{2}$/
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function currentMonth(): string {
   const date = new Date()
@@ -115,7 +115,7 @@ export default function ClientContentCalendarPage() {
       ) : calendar?.loadFailed ? (
         <CalendarMessage
           tone="error"
-          message="Calendar details could not be loaded right now. Your schedule may still be available while client portal access is being prepared."
+          message="Content calendar could not be loaded right now."
         />
       ) : calendar && (calendar.posts.length > 0 || calendar.events.length > 0) ? (
         <>
@@ -176,44 +176,35 @@ function MonthGrid({
   posts: ClientCalendarPost[]
   events: ClientCalendarEvent[]
 }) {
-  const [year, monthNumber] = month.split('-').map(Number)
-  const firstDay = new Date(year, monthNumber - 1, 1).getDay()
-  const daysInMonth = new Date(year, monthNumber, 0).getDate()
-  const cellCount = Math.ceil((firstDay + daysInMonth) / 7) * 7
-  const cells = Array.from({ length: cellCount }, (_, index) =>
-    index < firstDay ? null : index - firstDay + 1
-  ).map(day => day && day <= daysInMonth ? day : null)
+  const cells = monthGridCells(month)
+  const today = todayIso()
 
   return (
     <section className="overflow-hidden rounded-lg border border-white/[0.08] bg-black/20">
       <div className="grid grid-cols-7 border-b border-white/[0.08] bg-white/[0.025]">
-        {WEEKDAYS.map(day => (
+        {CALENDAR_HEADERS.map(day => (
           <div key={day} className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-[0.14em] text-report-faint">
             {day}
           </div>
         ))}
       </div>
       <div className="grid grid-cols-7">
-        {cells.map((day, index) => {
-          const date = day ? `${month}-${String(day).padStart(2, '0')}` : null
-          const dayPosts = date ? posts.filter(post => post.date === date) : []
-          const dayEvents = date ? events.filter(event => localDateKey(event.startAt) === date) : []
+        {cells.map(cell => {
+          const dayPosts = posts.filter(post => post.date === cell.iso)
+          const dayEvents = events.filter(event => localDateKey(event.startAt) === cell.iso)
+          const isToday = cell.iso === today
           return (
             <div
-              key={`${index}-${day ?? 'blank'}`}
+              key={cell.iso}
               className={`min-h-36 border-b border-r border-white/[0.06] p-2 ${
-                day ? 'bg-white/[0.012]' : 'bg-black/20'
+                cell.outside ? 'bg-black/20 opacity-45' : isToday ? 'bg-white/[0.04]' : 'bg-white/[0.012]'
               }`}
             >
-              {day && (
-                <>
-                  <p className="px-1 text-xs font-medium text-report-faint">{day}</p>
-                  <div className="mt-2 space-y-1.5">
-                    {dayPosts.map(post => <PostChip key={post.id} post={post} />)}
-                    {dayEvents.map(event => <EventChip key={event.id} event={event} />)}
-                  </div>
-                </>
-              )}
+              <p className={`px-1 text-xs font-medium ${isToday ? 'text-report-accent' : 'text-report-faint'}`}>{cell.day}</p>
+              <div className="mt-2 space-y-1.5">
+                {dayPosts.map(post => <PostChip key={post.id} post={post} />)}
+                {dayEvents.map(event => <EventChip key={event.id} event={event} />)}
+              </div>
             </div>
           )
         })}
@@ -231,39 +222,62 @@ function Agenda({
   posts: ClientCalendarPost[]
   events: ClientCalendarEvent[]
 }) {
-  const rows = useMemo(() => {
-    const dates = new Set([
-      ...posts.map(post => post.date).filter((date): date is string => Boolean(date)),
-      ...events.map(event => localDateKey(event.startAt)),
-    ])
-    return [...dates]
-      .filter(date => date.startsWith(month))
-      .sort()
-      .map(date => ({
-        date,
-        posts: posts.filter(post => post.date === date),
-        events: events.filter(event => localDateKey(event.startAt) === date),
-      }))
-  }, [events, month, posts])
+const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const cells = monthGridCells(month)
+  const today = todayIso()
 
-  if (rows.length === 0) {
-    return <CalendarMessage message="No dated schedule items are available for this month yet." />
-  }
+  // Default to today when it is in the visible month, otherwise the first cell.
+  const day = selectedDay ?? (cells.some(cell => cell.iso === today) ? today : (cells[0]?.iso ?? null))
+  const dayPosts = posts.filter(post => post.date === day)
+  const dayEvents = events.filter(event => localDateKey(event.startAt) === day)
 
   return (
-    <section className="space-y-4">
-      {rows.map(row => (
-        <article key={row.date} className="rounded-lg border border-white/[0.08] bg-white/[0.025] p-4">
-          <p className="text-sm font-semibold text-white">
-            {new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
-              .format(new Date(`${row.date}T12:00:00`))}
-          </p>
-          <div className="mt-3 space-y-2">
-            {row.posts.map(post => <PostChip key={post.id} post={post} />)}
-            {row.events.map(event => <EventChip key={event.id} event={event} />)}
-          </div>
-        </article>
-      ))}
+    <section className="lg:hidden">
+      <div className="grid grid-cols-7 gap-1">
+        {CALENDAR_HEADERS.map(dayName => (
+          <div key={dayName} className="py-1 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-report-faint">{dayName}</div>
+        ))}
+      </div>
+      <div className="mt-1 grid grid-cols-7 gap-1">
+        {cells.map(cell => {
+          const count = posts.filter(post => post.date === cell.iso).length + events.filter(event => localDateKey(event.startAt) === cell.iso).length
+          const isToday = cell.iso === today
+          const isSelected = cell.iso === day
+          return (
+            <button
+              key={cell.iso}
+              type="button"
+              aria-label={`${cell.iso}${count > 0 ? `, ${count} item(s)` : ''}`}
+              onClick={() => setSelectedDay(cell.iso)}
+              className={`flex aspect-square flex-col items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
+                isSelected
+                  ? 'border-report-accent bg-report-accent/20 text-white'
+                  : isToday
+                    ? 'border-report-accent/50 bg-report-accent/[0.06] text-white'
+                    : cell.outside
+                      ? 'border-transparent text-report-faint/60'
+                      : 'border-white/10 bg-white/[0.03] text-report-muted'
+              }`}
+            >
+              <span>{cell.day}</span>
+              {count > 0 && <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-report-accent' : 'bg-report-accent/70'}`} />}
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="mt-4 border-t border-white/[0.08] pt-3">
+        <p className="text-sm font-semibold text-white">
+          {new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${day}T12:00:00`))}
+        </p>
+        <div className="mt-3 space-y-2">
+          {dayPosts.map(post => <PostChip key={post.id} post={post} />)}
+          {dayEvents.map(event => <EventChip key={event.id} event={event} />)}
+          {dayPosts.length === 0 && dayEvents.length === 0 && (
+            <p className="py-2 text-sm text-report-faint">Nothing scheduled on this day.</p>
+          )}
+        </div>
+      </div>
     </section>
   )
 }

@@ -35,7 +35,10 @@ test('task.assign updates the exact open Planner task and never creates a replac
   assert.doesNotMatch(assign, /action: 'due'/)
   assert.match(assign, /The due date was not changed; update it separately/)
   assert.match(actions, /current backend cannot apply both atomically/)
-  assert.match(actions, /Open the Planner task first so I know exactly which existing task to assign/)
+  // PR #203 removed the "open Planner first" instruction for task assignment;
+  // existing-task resolution now searches visible tasks with a canonical match.
+  assert.doesNotMatch(actions, /Open the Planner task first so I know exactly which existing task to assign/)
+  assert.match(actions, /matching active task/i)
 })
 
 test('supported Work board routes supply assistant task context and hydrate notification deep links', () => {
