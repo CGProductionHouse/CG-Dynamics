@@ -51,7 +51,7 @@ test('Calendar removes ordinary framing but preserves status and Outlook review 
   assert.doesNotMatch(calendar, /Meetings, shoots, content runs and internal events/)
   assert.doesNotMatch(calendar, /Tap a date to view its events/)
   assert.match(calendar, /CalendarDiagnostics/)
-  assert.match(calendar, /Review possible duplicates/)
+  assert.match(calendar, /possible duplicate/)
   assert.match(calendar, /Use Outlook record/)
   assert.match(calendar, /supersessionMigrationNeeded/)
 })
