@@ -18,6 +18,8 @@ import { logPlannerActivity, listPlannerWorkloadSummary, loadOwnershipReviewSumm
 import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
 import { enqueueBackgroundJob, nudgeBackgroundWorker, listMyBackgroundJobs, type BackgroundJob } from '../../lib/backgroundJobs'
 import { createAssistantTask, updateAssistantTask } from '../../lib/assistantTasks'
+import { businessDateKey } from '../../lib/businessTime'
+import { listTasks, type CommandCentreTask } from '../../lib/commandCentre'
 import { listMyAssistantMemory, addAssistantMemory } from '../../lib/assistantMemory'
 import { assistantUpdateVideo, resolveContentRun } from '../../lib/assistantVideos'
 import {
@@ -217,6 +219,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const clientsRef = useRef<ActiveClientOption[]>([])
   const staffRef = useRef<string[]>([])
+  const taskRef = useRef<CommandCentreTask[]>([])
   const managementRef = useRef<string | null>(null)
   const memoryRef = useRef<string[]>([])
   // Live Microsoft 365 state, so conversational answers are grounded in the real
@@ -280,6 +283,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     workContextRef.current = null
     clientsRef.current = []
     staffRef.current = []
+    taskRef.current = []
     managementRef.current = null
     ownershipReviewRef.current = null
     memoryRef.current = []
@@ -339,6 +343,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     fetchActiveClients().then(list => { if (active && profileIdRef.current === requestedProfileId) clientsRef.current = list }).catch(() => {})
     listStaffProfiles().then(res => {
       if (active && profileIdRef.current === requestedProfileId && !res.migrationNeeded) staffRef.current = res.data.map(s => s.full_name).filter((n): n is string => Boolean(n))
+    }).catch(() => {})
+    listTasks({ activeOnly: true }).then(res => {
+      if (active && profileIdRef.current === requestedProfileId && !res.error) {
+        taskRef.current = (res.data ?? []).filter(task => task.data_origin === 'planner_tasks' && Boolean(task.native_id))
+      }
     }).catch(() => {})
     // Management grounding: only authorised admin/manager get a cross-team
     // workload summary the master assistant can reason over. RLS on the RPC also
@@ -576,7 +585,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       if (p.type === 'job.enqueue') {
         const jobType = String(p.fields.job)
         const syncPreviousMonth = p.fields.sync_previous_month === 'yes'
-        const today = new Date().toISOString().slice(0, 10)
+        const today = businessDateKey()
         const res = await enqueueBackgroundJob({
           jobType,
           payload: jobType === 'meta_sync' ? { baseline: syncPreviousMonth } : {},
@@ -1038,9 +1047,16 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
     // plain question falls through to chat.
     const parsed = parseAssistantAction(clean, {
-      today: new Date().toISOString().slice(0, 10),
+      today: businessDateKey(),
       clients: clientsRef.current,
       staffNames: staffRef.current,
+      tasks: taskRef.current.flatMap(task => task.native_id ? [{
+        id: task.native_id,
+        title: task.title,
+        clientId: task.client_id,
+        clientName: task.client_name,
+        dueDate: task.due_date || null,
+      }] : []),
       role: profile?.role ?? 'team',
       currentClientId: clientId || null,
       currentClientName: clientsRef.current.find(c => c.id === clientId)?.name ?? null,

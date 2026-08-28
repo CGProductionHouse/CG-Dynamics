@@ -271,6 +271,14 @@ test('approve and reject are disabled for non-managers in the UI as well as the 
   assert.match(page, /Approve and reject are restricted to managers and admins/)
 })
 
+test('Marketing AI uses the shared page gutter and lets both grid panes shrink on mobile', () => {
+  assert.match(page, /<PageContainer gap=\{false\} className="space-y-5">/)
+  assert.match(page, /lg:grid-cols-\[20rem_minmax\(0,1fr\)\]/)
+  assert.match(page, /<section className="min-w-0 space-y-4">/)
+  assert.match(page, /whitespace-pre-wrap break-words/)
+  assert.doesNotMatch(page, /className="space-y-5 p-4 md:p-6"/)
+})
+
 test('client library never writes directly — runs via function, decides via RPC', () => {
   assert.match(lib, /functions\.invoke\('marketing-workflow'/)
   assert.match(lib, /rpc\('ai_marketing_record_decision'/)
