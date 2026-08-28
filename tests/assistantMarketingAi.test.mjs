@@ -109,10 +109,13 @@ test('marketing phrasing never hijacks the existing sync, task or calendar actio
   assert.equal(parse('Add a Dulux meeting next Tuesday at 10', CTX).type, 'calendar.create')
   assert.equal(parse('Mark videos one and two as shot', CTX).type, 'video.mark_shot')
   // Task assignment still asks for the exact task rather than becoming a
-  // marketing action; it is unaffected by the marketing detectors.
+  // marketing action; it is unaffected by the marketing detectors. PR #203
+  // changed the clarification from "Open the Planner task first" to a
+  // canonical task-match clarification.
   const task = parse('Assign this task to Franco for Friday', CTX)
   assert.ok(task.clarify, 'task assignment must still ask for the exact task')
-  assert.match(task.clarify, /Planner task/i)
+  assert.match(task.clarify, /matching active task/i)
+  assert.doesNotMatch(task.clarify, /Planner/i)
 })
 
 test('ordinary chat still falls through to conversation', () => {
