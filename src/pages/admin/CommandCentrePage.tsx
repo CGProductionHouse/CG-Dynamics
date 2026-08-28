@@ -44,7 +44,7 @@ import {
   type MorningTaskEdit,
   taskStatusDisplayLabel,
 } from '../../lib/commandCentre'
-import { isActiveForToday, isActiveWorkTask, isActuallyInProgressTask, isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
+import { isActiveForToday, isActiveWorkTask, isActuallyInProgressTask, isOperationallyCompletedStatus, isVerifiedWorkTask } from '../../lib/taskLifecycle'
 
 const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, client_request: 1, normal: 2 }
 
@@ -281,6 +281,14 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
     tasks.filter(t => isActiveWorkTask(t)),
   [tasks])
 
+  // Verified work only: excludes unresolved/conflict legacy imports from
+  // operational counts (overdue, focus, today) so daily queues reflect real
+  // work rather than import noise. The ownership review section still uses
+  // allActiveTasks to show the full review backlog.
+  const verifiedActiveTasks = useMemo(() =>
+    allActiveTasks.filter(t => isVerifiedWorkTask(t)),
+  [allActiveTasks])
+
   const focusTasks = useMemo(() => {
     let filtered: CommandCentreTask[]
     const taskPool = workFilter === 'done' ? tasks : allActiveTasks
@@ -367,12 +375,12 @@ export default function CommandCentrePage({ embedded = false }: { embedded?: boo
 
   const stats = useMemo(() => ({
     focus: focusTasks.length,
-    clientRequests: allActiveTasks.filter(t => t.priority === 'client_request').length,
-    inProgress: allActiveTasks.filter(t => isActuallyInProgressTask(t)).length,
+    clientRequests: verifiedActiveTasks.filter(t => t.priority === 'client_request').length,
+    inProgress: verifiedActiveTasks.filter(t => isActuallyInProgressTask(t)).length,
     doneToday: tasks.filter(t => isOperationallyCompletedStatus(t) && t.completed_at?.slice(0, 10) === today).length,
-    overdue: allActiveTasks.filter(t => isOverdue(t, now)).length,
-    today: allActiveTasks.filter(t => isActiveForToday(t) && t.due_date === today).length,
-  }), [tasks, allActiveTasks, focusTasks, today, now])
+    overdue: verifiedActiveTasks.filter(t => isOverdue(t, now)).length,
+    today: verifiedActiveTasks.filter(t => isActiveForToday(t) && t.due_date === today).length,
+  }), [tasks, verifiedActiveTasks, focusTasks, today, now])
 
   const handleStatusChange = useCallback(async (id: string, status: TaskStatus) => {
     setBusyId(id)
