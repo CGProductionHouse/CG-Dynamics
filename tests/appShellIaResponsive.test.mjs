@@ -33,14 +33,17 @@ test('daily navigation exposes no backend/specialist terminology', () => {
   }
 })
 
-test('admin specialist tools are grouped under four parents, not separate top-level items', () => {
+test('specialist admin tools are grouped under parents; Marketing is a staff destination', () => {
   const admin = nav.slice(nav.indexOf('export const adminNavItems'))
-  // The four grouped parents.
+  const primary = nav.slice(nav.indexOf('export const primaryNavItems'), nav.indexOf('export const performanceNavItems'))
+  // Admin-group parents.
   assert.match(admin, /to: '\/admin\/integrations', label: 'Integrations'[^}]*access: 'manager'/)
-  assert.match(admin, /to: '\/admin\/marketing', label: 'Marketing'[^}]*access: 'manager'/)
   assert.match(admin, /to: '\/admin\/users', label: 'Users'[^}]*access: 'admin'/)
   assert.match(admin, /to: '\/admin\/system', label: 'System'[^}]*access: 'admin'/)
-  // The former separate entries are gone as their own `to:` destinations.
+  // Marketing is a staff daily destination (no access gate), not in the admin group.
+  assert.match(primary, /to: '\/admin\/marketing', label: 'Marketing'/)
+  assert.ok(!/to: '\/admin\/marketing'/.test(admin), 'Marketing must not be an admin-group entry')
+  // The former separate specialist entries are gone as their own `to:` destinations.
   for (const gone of ['/admin/microsoft-import', '/admin/planner-import', '/admin/import-health', '/admin/marketing-library', '/admin/marketing-ai', '/admin/skill-card-review']) {
     assert.ok(!admin.includes(`to: '${gone}'`), `${gone} must not be its own top-level admin entry`)
   }
@@ -48,15 +51,20 @@ test('admin specialist tools are grouped under four parents, not separate top-le
 
 test('grouped parents keep their children highlighted via activePaths', () => {
   const admin = nav.slice(nav.indexOf('export const adminNavItems'))
+  const primary = nav.slice(nav.indexOf('export const primaryNavItems'), nav.indexOf('export const performanceNavItems'))
   assert.match(admin, /to: '\/admin\/integrations'[^}]*'\/admin\/microsoft-import'[^}]*'\/admin\/planner-import'/)
-  assert.match(admin, /to: '\/admin\/marketing'[^}]*'\/admin\/marketing-library'[^}]*'\/admin\/marketing-ai'[^}]*'\/admin\/skill-card-review'/)
+  assert.match(primary, /to: '\/admin\/marketing'[^}]*'\/admin\/marketing-library'[^}]*'\/admin\/marketing-ai'[^}]*'\/admin\/skill-card-review'/)
   assert.match(admin, /to: '\/admin\/system'[^}]*'\/admin\/import-health'[^}]*'\/admin\/ai-health'/)
 })
 
 // ── #182 Routes: parents added, children + deep links preserved ──────────────
 
-test('Marketing parent route is manager-gated; children preserved', () => {
+test('Marketing workspace route is staff-accessible; children preserved', () => {
   assert.match(app, /path="\/admin\/marketing" element=\{<MarketingWorkspacePage \/>\}/)
+  // Not nested under RequireManager/RequireAdmin — staff can search approved knowledge.
+  const marketingIdx = app.indexOf('path="/admin/marketing"')
+  const managerIdx = app.indexOf('<Route element={<RequireManager />}>')
+  assert.ok(marketingIdx < managerIdx, 'Marketing route sits at staff level, before the manager block')
   assert.match(app, /path="\/admin\/marketing-library" element=\{<MarketingLibraryPage \/>\}/)
   assert.match(app, /path="\/admin\/marketing-ai" element=\{<MarketingAiDepartmentPage \/>\}/)
   assert.match(app, /path="\/admin\/skill-card-review" element=\{<SkillCardReviewPage \/>\}/)
@@ -68,11 +76,11 @@ test('System parent route is admin-gated; health children preserved', () => {
   assert.match(app, /path="\/admin\/ai-health" element=\{<AiUsageHealthPage \/>\}/)
 })
 
-test('Marketing workspace links to each grouped child', () => {
-  assert.match(marketing, /\/admin\/marketing-library/)
+test('Marketing workspace consolidates sections in-page and links AI + review', () => {
+  // Library/Sources/Review/Registration are in-page sections; AI + review link out.
   assert.match(marketing, /\/admin\/marketing-ai/)
   assert.match(marketing, /\/admin\/skill-card-review/)
-  // Admin-only areas gate on role, not just hidden nav.
+  // Admin-only sections gate on role, not just hidden nav.
   assert.match(marketing, /isAdminRole\(profile\?\.role\)/)
 })
 

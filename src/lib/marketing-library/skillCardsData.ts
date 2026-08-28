@@ -51,6 +51,24 @@ export interface MarketingLibrarySource {
   page_or_url: string | null
   notes: string | null
   trust_tier: SourceTrustTier
+  // Rights + reconciliation fields (phase-23a / phase-24a). Optional: older rows
+  // and pre-migration schemas may not carry them. Additive only.
+  canonical_url?: string | null
+  edition?: string | null
+  language?: string | null
+  country?: string | null
+  source_identifier?: string | null
+  rights_status?: string | null
+  rights_basis?: string | null
+  licence_name?: string | null
+  commercial_use?: string | null       // allowed | restricted | unknown
+  full_text_storage?: boolean | null
+  access_mode?: string | null
+  rights_checked_at?: string | null
+  rights_review_notes?: string | null
+  ingestion_status?: string | null     // catalogued | ...
+  content_hash?: string | null
+  acquisition_status?: string | null   // to_purchase | owned | available_for_review | reviewed | not_approved
   created_at: string
   updated_at: string
 }
@@ -240,11 +258,13 @@ export async function listSkillCards(): Promise<QueryResult<SkillCardRecord[]>> 
 // RLS read policy so the same call is safe for any staff role. (Admins may also
 // use it when they only want the shared, active set.)
 export async function listActiveSharedSkillCards(): Promise<QueryResult<SkillCardRecord[]>> {
+  const today = new Date().toISOString().slice(0, 10)
   const { data, error } = await supabase
     .from('skill_cards')
     .select('*')
     .eq('status', 'active')
     .eq('client_specific', false)
+    .or(`review_expires_at.is.null,review_expires_at.gte.${today}`)
     .order('category', { ascending: true })
   return result((data ?? []) as SkillCardRecord[], error, [])
 }

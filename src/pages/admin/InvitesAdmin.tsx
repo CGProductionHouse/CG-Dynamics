@@ -9,6 +9,7 @@ import {
   type InviteRole,
 } from '../../lib/db/invites'
 import { roleLabel } from '../../lib/roles'
+import StaffInvitesPanel from './StaffInvitesPanel'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -330,8 +331,8 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
       <div className="mb-6">
         {embedded ? <h2 className="text-xl font-semibold text-white">Invites</h2> : <h1 className="text-xl font-semibold text-white">Invites</h1>}
         <p className="mt-2 text-sm text-brand-primary max-w-2xl">
-          Send secure invitations for client and workforce access. Client invites link to one
-          active client; staff and manager invites are global operational accounts.
+          Staff invitations and client portal invitations are separate systems with separate
+          records. Staff invitations are below; client invites link one login to one active client.
         </p>
         <p className="mt-3 max-w-2xl rounded-lg border border-brand-accent/20 bg-brand-accent/10 px-3 py-2 text-sm text-brand-accent">
           CG Dynamics sends a Supabase Auth invitation email. The recipient uses that secure link
@@ -342,6 +343,8 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
           configuration for reliable delivery. Without it, these emails are rate-limited and may not arrive.
         </p>
       </div>
+
+      <StaffInvitesPanel />
 
       {error && <Message tone="error" text={error} />}
       {success && <Message tone="success" text={success} />}
@@ -387,8 +390,6 @@ export default function InvitesAdmin({ embedded = false }: { embedded?: boolean 
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
             >
               <option value="client">Client</option>
-              <option value="staff">Staff</option>
-              <option value="manager">Manager</option>
             </select>
           </Field>
           <button
