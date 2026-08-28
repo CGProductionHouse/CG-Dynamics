@@ -119,3 +119,10 @@ test('UI reports active only when browser permission and server storage both exi
   assert.match(client, /send_my_test_push_notification/)
   assert.match(auth, /await disableWebPush\(\)[\s\S]*await supabase\.auth\.signOut\(\)/)
 })
+
+test('notification setup stays available without displacing mobile Assistant chat', () => {
+  assert.match(card, /<details className="group mt-3/)
+  assert.match(card, /enabled \? 'Manage notifications' : 'Set up notifications'/)
+  assert.ok(card.indexOf('<summary') < card.indexOf('<ol'), 'setup instructions must follow the expandable summary')
+  assert.match(card, /hidden max-w-2xl[^\n]*sm:block/)
+})

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { PageContainer } from '../../components/layout/PageShell'
 import { fetchActiveClients, type ActiveClientOption } from '../../lib/assistant'
 import { isManagerRole } from '../../lib/roles'
 import {
@@ -52,7 +53,7 @@ function ContentBlock({ content }: { content: Record<string, unknown> }) {
       {entries.map(([key, value]) => (
         <div key={key}>
           <dt className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">{key.replace(/_/g, ' ')}</dt>
-          <dd className="mt-0.5 whitespace-pre-wrap text-sm text-white">
+          <dd className="mt-0.5 min-w-0 whitespace-pre-wrap break-words text-sm text-white">
             {typeof value === 'string' ? value : Array.isArray(value)
               ? value.map((v, i) => <div key={i}>• {typeof v === 'string' ? v : JSON.stringify(v)}</div>)
               : JSON.stringify(value, null, 2)}
@@ -177,7 +178,7 @@ export default function MarketingAiDepartmentPage() {
   }
 
   return (
-    <div className="space-y-5 p-4 md:p-6">
+    <PageContainer gap={false} className="space-y-5">
       <header>
         <h1 className="text-xl font-black text-white md:text-2xl">Marketing AI Department</h1>
         <p className="mt-1 max-w-3xl text-sm text-brand-primary/65">
@@ -258,9 +259,9 @@ export default function MarketingAiDepartmentPage() {
         )}
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
         {/* ── Artifact list ─────────────────────────────────────────────── */}
-        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+        <section className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
           <h2 className="mb-2 text-sm font-black text-white">Artifacts</h2>
           {artifacts.length === 0 ? (
             <p className="text-xs text-brand-primary/50">No artifacts yet.</p>
@@ -289,7 +290,7 @@ export default function MarketingAiDepartmentPage() {
         </section>
 
         {/* ── Detail ────────────────────────────────────────────────────── */}
-        <section className="space-y-4">
+        <section className="min-w-0 space-y-4">
           {!selected ? (
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm text-brand-primary/50">
               Select an artifact to review its versions, evidence and approval history.
@@ -439,6 +440,6 @@ export default function MarketingAiDepartmentPage() {
           )}
         </section>
       </div>
-    </div>
+    </PageContainer>
   )
 }
