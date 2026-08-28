@@ -4,6 +4,7 @@ import type { User, AuthError, PostgrestError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { getProfile, type Profile } from '../lib/db/profiles'
 import { acceptInvite, validatePendingInvite } from '../lib/db/invites'
+import { acceptStaffInvitation } from '../lib/db/staffInvitations'
 import { disableWebPush } from '../lib/webPush'
 
 type AuthContextError = AuthError | PostgrestError | Error
@@ -205,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function completeInvite(password: string, fullName?: string) {
-    const { error: validationError } = await validatePendingInvite()
+    const { data: validationData, error: validationError } = await validatePendingInvite()
     if (validationError) return { error: validationError, role: null }
 
     const { data: updateData, error: updateError } = await supabase.auth.updateUser({
@@ -214,7 +215,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     if (updateError) return { error: updateError, role: null }
 
-    const { data: inviteData, error: inviteError } = await acceptInvite(fullName)
+    // A staff invitation is completed by its own RPC, which also activates the
+    // account and reconciles the person's imported identity. validate_pending_invite
+    // reports which kind this is, so the wrong path is never taken.
+    const isStaffInvite = (validationData as { kind?: string } | null)?.kind === 'staff'
+    const { data: inviteData, error: inviteError } = isStaffInvite
+      ? await acceptStaffInvitation(fullName)
+      : await acceptInvite(fullName)
     if (inviteError || !inviteData) {
       return { error: inviteError ?? new Error('Could not complete this invitation.'), role: null }
     }
@@ -231,7 +238,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfileError(null)
     setLoading(false)
     initialResolvedRef.current = true
-    return { error: null, role: inviteData.role }
+    return { error: null, role: (inviteData as { role?: string }).role ?? profileData.role }
   }
 
   async function resetPasswordForEmail(email: string) {

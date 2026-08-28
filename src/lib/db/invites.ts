@@ -92,6 +92,8 @@ export async function acceptInvite(fullName?: string) {
 }
 
 export async function validatePendingInvite() {
-  const { error } = await supabase.rpc('validate_pending_invite')
-  return { error }
+  // Returns { invite_id, kind } — 'staff' invitations are completed by
+  // accept_staff_invitation, client invitations by accept_invite.
+  const { data, error } = await supabase.rpc('validate_pending_invite')
+  return { data: data as { invite_id: string; kind?: 'staff' | 'client' } | null, error }
 }
