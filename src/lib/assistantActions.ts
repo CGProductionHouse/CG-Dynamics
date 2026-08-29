@@ -27,6 +27,7 @@ export type AssistantActionType =
   | 'marketing.continue'
   | 'marketing.list'
   | 'marketing.decide'
+  | 'navigation.open'
 
 export interface ActionClient {
   id: string
@@ -51,6 +52,11 @@ export interface ActionContext {
   currentClientName?: string | null
   currentTaskId?: string | null
   currentTaskName?: string | null
+  // Follow-up context: the last entity discussed in conversation.
+  lastTaskId?: string | null
+  lastTaskName?: string | null
+  lastClientId?: string | null
+  lastClientName?: string | null
 }
 
 export interface ActionTarget {
@@ -467,6 +473,69 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
     }
   }
 
+  // 0c. Navigation intents: "open X", "go to X", "take me to X", "show me X".
+  // Detected after marketing/sync intents so those can never be misread as navigation.
+  {
+    const NAV_VERB = /\b(open|go to|take me to|show me|show|wys|gaan na|neem my na)\b/i
+    if (NAV_VERB.test(lower)) {
+      // Known page routes.
+      const PAGE_ROUTES: Record<string, { path: string; label: string }> = {
+        'calendar': { path: '/admin/cg-calendar', label: 'CG Calendar' },
+        'cg calendar': { path: '/admin/cg-calendar', label: 'CG Calendar' },
+        'planner': { path: '/admin/work', label: 'Planner Board' },
+        'work': { path: '/admin/work', label: 'Planner Board' },
+        'my work': { path: '/admin/my-work', label: 'My Work' },
+        'my-day': { path: '/admin/my-day', label: 'My Day' },
+        'my day': { path: '/admin/my-day', label: 'My Day' },
+        'hub': { path: '/admin/cg-hub', label: 'CG Hub' },
+        'cg hub': { path: '/admin/cg-hub', label: 'CG Hub' },
+        'clients': { path: '/admin/clients', label: 'Clients' },
+        'client schedule': { path: '/admin/client-schedule', label: 'Client Schedule' },
+        'schedule': { path: '/admin/client-schedule', label: 'Client Schedule' },
+        'command centre': { path: '/admin/command-centre', label: 'Daily Tasks' },
+        'command center': { path: '/admin/command-centre', label: 'Daily Tasks' },
+        'daily tasks': { path: '/admin/command-centre', label: 'Daily Tasks' },
+        'marketing': { path: '/admin/marketing', label: 'Marketing' },
+        'content': { path: '/admin/content', label: 'Content' },
+        'content workflow': { path: '/admin/content-workflow', label: 'Content Runs' },
+        'reports': { path: '/admin/reports', label: 'Reports' },
+        'integrations': { path: '/admin/integrations', label: 'Integrations' },
+        'assistant': { path: '/admin/assistant', label: 'CG Assistant' },
+        'system health': { path: '/admin/system-health', label: 'System Health' },
+        'staff': { path: '/admin/staff', label: 'Staff' },
+      }
+
+      // Strip the navigation verb and try to match a known page.
+      const stripped = lower.replace(NAV_VERB, '').trim()
+      for (const [key, route] of Object.entries(PAGE_ROUTES)) {
+        if (new RegExp(`(^|\\b)${escapeRegExp(key)}(\\b|$)`).test(stripped)) {
+          return {
+            type: 'navigation.open',
+            title: `Open ${route.label}`,
+            fields: { path: route.path, label: route.label },
+            clientId: null,
+            clientName: null,
+          }
+        }
+      }
+
+      // Client name match: "open Red Oak", "show me Piek Group".
+      const { matches } = findClient(stripped, context.clients)
+      if (matches.length === 1) {
+        return {
+          type: 'navigation.open',
+          title: `Open ${matches[0].name}`,
+          fields: { path: `/admin/clients?clientId=${matches[0].id}`, label: matches[0].name },
+          clientId: matches[0].id,
+          clientName: matches[0].name,
+        }
+      }
+      if (matches.length > 1) {
+        return { clarify: `Which client — ${matches.map(m => m.name).join(' or ')}?` }
+      }
+    }
+  }
+
   // 0. Durable background jobs (Meta sync, report preparation).
   if (isMetaSyncIntent(lower)) {
     const syncPreviousMonth = /\bbaseline|previous month|vorige maand\b/.test(lower)
@@ -520,27 +589,32 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   }
 
   // 2b. Task status / completion / blocker (on "this task" / a task in context).
-  if ((THIS_TASK.test(lower) || TASK_NOUN.test(lower)) && !ASSIGN.test(lower)) {
+  // Also handles follow-up context: "mark that done", "complete it", etc.
+  if ((THIS_TASK.test(lower) || TASK_NOUN.test(lower) || COMPLETE.test(lower) || BLOCKED.test(lower)) && !ASSIGN.test(lower)) {
+    // Resolve task ID from: current page context > follow-up context > explicit match.
+    const effectiveTaskId = context.currentTaskId ?? context.lastTaskId ?? null
+    const effectiveTaskName = context.currentTaskName ?? context.lastTaskName ?? null
+
     if (COMPLETE.test(lower)) {
-      if (!context.currentTaskId) return { clarify: 'Open the Planner task first so I know exactly which task to complete.' }
+      if (!effectiveTaskId) return { clarify: 'Which task should I mark done? Open a task or name it.' }
       return {
         type: 'task.update',
-        title: 'Mark task complete',
+        title: `Mark "${effectiveTaskName ?? 'task'}" complete`,
         fields: { status: 'done' },
-        clientId: context.currentClientId ?? null,
-        clientName: context.currentClientName ?? null,
-        target: { type: 'planner_task', id: context.currentTaskId, label: context.currentTaskName ?? 'Current Planner task' },
+        clientId: context.currentClientId ?? context.lastClientId ?? null,
+        clientName: context.currentClientName ?? context.lastClientName ?? null,
+        target: { type: 'planner_task', id: effectiveTaskId, label: effectiveTaskName ?? 'Task' },
       }
     }
     if (BLOCKED.test(lower)) {
-      if (!context.currentTaskId) return { clarify: 'Open the Planner task first so I know exactly which task to block.' }
+      if (!effectiveTaskId) return { clarify: 'Which task should I block? Open a task or name it.' }
       return {
         type: 'task.update',
-        title: 'Mark task blocked',
+        title: `Mark "${effectiveTaskName ?? 'task'}" blocked`,
         fields: { status: 'blocked' },
-        clientId: context.currentClientId ?? null,
-        clientName: context.currentClientName ?? null,
-        target: { type: 'planner_task', id: context.currentTaskId, label: context.currentTaskName ?? 'Current Planner task' },
+        clientId: context.currentClientId ?? context.lastClientId ?? null,
+        clientName: context.currentClientName ?? context.lastClientName ?? null,
+        target: { type: 'planner_task', id: effectiveTaskId, label: effectiveTaskName ?? 'Task' },
       }
     }
   }
