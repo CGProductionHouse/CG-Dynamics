@@ -130,7 +130,7 @@ interface SpeechRecognitionLike {
   start: () => void
   stop: () => void
   onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
-  onerror: (() => void) | null
+  onerror: ((event: { error?: string }) => void) | null
   onend: (() => void) | null
 }
 
@@ -222,6 +222,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   const taskRef = useRef<CommandCentreTask[]>([])
   const managementRef = useRef<string | null>(null)
   const memoryRef = useRef<string[]>([])
+  // Follow-up context: last task/client discussed, so "mark that done" resolves.
+  const lastTaskRef = useRef<{ id: string; name: string } | null>(null)
+  const lastClientRef = useRef<{ id: string; name: string } | null>(null)
   // Live Microsoft 365 state, so conversational answers are grounded in the real
   // integration instead of a model guess. Admin-only (the status endpoint is
   // admin-gated), which matches who can actually run the sync.
@@ -231,6 +234,8 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   const ownershipReviewRef = useRef<string | null>(null)
   const profileIdRef = useRef<string | null>(profile?.id ?? null)
   const actionRequestRef = useRef(0)
+  // Synchronous mirror of `sending` so voice onresult can skip updates during send.
+  const sendingRef = useRef(false)
   const debriefRequestSeqRef = useRef(0)
   const debriefAnalysisRequestRef = useRef<DebriefRequestToken | null>(null)
   const debriefConfirmationRequestRef = useRef<DebriefRequestToken | null>(null)
@@ -289,6 +294,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     memoryRef.current = []
     recognitionRef.current = null
     listeningRef.current = false
+    sendingRef.current = false
     audioChunksRef.current = []
     actionRequestRef.current += 1
     setMessages(loadSession(profileId))
@@ -796,6 +802,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         const notified = assignee && assigneeResolved ? ' and they have been notified' : assignee ? ' — check the assignee name, it did not match a staff profile' : ''
         setProposal(null)
         pushAssistant(`Done — created the task${assignee ? ` for ${assignee}` : ''}${due}. It's on the board${notified}.`)
+        // Track follow-up context for "mark that done" etc.
+        const createdTaskId = res.data?.id ?? res.data?.task_id ?? null
+        if (createdTaskId) lastTaskRef.current = { id: String(createdTaskId), name: String(p.fields.task ?? 'New task') }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
       } else if (p.type === 'task.assign') {
         if (p.target?.type !== 'planner_task') {
           setProposalError('Open the Planner task first so I know exactly which existing task to assign.')
@@ -809,6 +819,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         const dueDate = p.fields.due_date ? String(p.fields.due_date) : null
         setProposal(null)
         pushAssistant(`Done — assigned "${p.target.label}" to ${assignee}.${dueDate ? ' The due date was not changed; update it separately on the task so assignment cannot partially succeed.' : ''}`)
+        // Track follow-up context.
+        lastTaskRef.current = { id: p.target.id, name: p.target.label }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
       } else if (p.type === 'task.update') {
         // Complete / block an existing task. Needs the task in context (opened
         // from a task record); otherwise ask rather than guess which task.
@@ -822,6 +835,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         if (res.error) throw new Error(res.error.message)
         setProposal(null)
         pushAssistant(action === 'complete' ? 'Done — task marked complete.' : 'Done — task flagged as blocked.')
+        // Track follow-up context.
+        lastTaskRef.current = { id: p.target.id, name: p.target.label }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
       } else if (p.type === 'video.mark_shot' || p.type === 'video.move') {
         if (p.target?.type !== 'content_run') {
           setProposalError('Open a Content Run first so I know exactly which run to update.')
@@ -860,6 +876,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           setProposal(null)
           pushAssistant(`Done — moved video ${n} to ${moved?.month ? moved.month.slice(0, 7) : 'next month'}${runName ? ` on "${runName}"` : ''}. The Client Schedule link needs confirmation before it appears on the schedule.`)
         }
+      } else if (p.type === 'navigation.open') {
+        const path = String(p.fields.path ?? '')
+        const label = String(p.fields.label ?? '')
+        if (!path) { setProposalError('Where should I take you?'); return }
+        setProposal(null)
+        pushAssistant(label ? `Opening ${label}…` : 'Opening…')
+        navigate(path)
       } else {
         // calendar.cancel still needs the on-record calendar entry to act on.
         if (!actionIsCurrent()) return
@@ -1039,9 +1062,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     const clean = text.trim()
     const sendingProfileId = profileIdRef.current
     if (!clean || sending || applying || !sendingProfileId) return
+    // Stop any active voice recognition before processing to prevent onresult
+    // from re-populating the input after we clear it.
+    if (listeningRef.current) stopListening()
     // Collapse the mobile "More" list: any send takes the assistant out of the
     // clean idle state that shows the two primary actions.
     setMoreOpen(false)
+    sendingRef.current = true
 
     // Action agent first: understand the instruction as a concrete app action.
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
@@ -1062,6 +1089,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       currentClientName: clientsRef.current.find(c => c.id === clientId)?.name ?? null,
       currentTaskId: plannerTaskId || null,
       currentTaskName: plannerTaskName || null,
+      lastTaskId: lastTaskRef.current?.id ?? null,
+      lastTaskName: lastTaskRef.current?.name ?? null,
+      lastClientId: lastClientRef.current?.id ?? null,
+      lastClientName: lastClientRef.current?.name ?? null,
     })
     if (parsed && 'type' in parsed) {
       let nextProposal = parsed
@@ -1126,6 +1157,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     setSending(true)
     setOpen(true)
 
+    // Show a thinking indicator while the request is in flight.
+    const thinkingId = nextId()
+    setMessages(current => [...current, { id: thinkingId, role: 'assistant', text: 'Checking…' }])
+
     // The assistant receives the current page/client/record as context; the user
     // only ever sees their own typed message.
     const contextual = `[Context — ${currentContextLine()}]\n${clean}`
@@ -1138,24 +1173,31 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setChatError(friendly.message)
         setChatErrorRetryable(friendly.retryable)
       }
-      setMessages(current => [
-        ...current,
-        {
-          id: nextId(),
-          role: 'assistant',
-          text: response.answer,
-          restricted: response.restricted,
-          setupRequired: response.setupRequired,
-        },
-      ])
+      // Replace the thinking indicator with the actual response.
+      setMessages(current => {
+        const filtered = current.filter(m => m.id !== thinkingId)
+        return [
+          ...filtered,
+          {
+            id: nextId(),
+            role: 'assistant',
+            text: response.answer,
+            restricted: response.restricted,
+            setupRequired: response.setupRequired,
+          },
+        ]
+      })
       window.setTimeout(() => inputRef.current?.focus(), 0)
     } catch (err) {
       if (profileIdRef.current === sendingProfileId) {
+        // Remove the thinking indicator on error.
+        setMessages(current => current.filter(m => m.id !== thinkingId))
         const friendly = friendlyAssistantError(err instanceof Error ? err.message : null)
         setChatError(friendly.message)
         setChatErrorRetryable(friendly.retryable)
       }
     } finally {
+      sendingRef.current = false
       if (profileIdRef.current === sendingProfileId) setSending(false)
     }
   }
@@ -1177,15 +1219,31 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     recognition.continuous = false
     recognition.interimResults = true
     recognition.onresult = event => {
+      // Skip transcript updates while a send is in flight to prevent the
+      // recognition from re-populating the input after send() cleared it.
+      if (sendingRef.current) return
       let transcript = ''
       for (let i = 0; i < event.results.length; i += 1) {
         transcript += event.results[i][0].transcript
       }
       if (profileIdRef.current === listeningProfileId) setInput(transcript)
     }
-    recognition.onerror = () => {
+    recognition.onerror = (event) => {
       listeningRef.current = false
-      if (profileIdRef.current === listeningProfileId) setListening(false)
+      if (profileIdRef.current !== listeningProfileId) return
+      setListening(false)
+      // Surface specific speech recognition errors in plain language instead
+      // of a generic failure message.
+      if (event.error === 'not-allowed') {
+        setChatError('Microphone access was denied. Please allow microphone access in your browser settings and try again.')
+      } else if (event.error === 'audio-capture') {
+        setChatError('No microphone was found. Check that a microphone is connected and try again.')
+      } else if (event.error === 'no-speech') {
+        setChatError('I did not hear anything. Tap the mic and try speaking again.')
+      } else if (event.error === 'network') {
+        setChatError('Speech recognition had a network error. Check your connection and try again.')
+      }
+      // Other errors (aborted, service-not-allowed) are transient — no message needed.
     }
     recognition.onend = () => {
       listeningRef.current = false
@@ -1258,9 +1316,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   }
 
   const STARTERS = [
-    'What should I focus on today?',
-    `Summarise this ${pageLabel} page for me`,
-    'Draft a client update',
+    'Sort me out for today',
+    'What is overdue?',
+    'Assign the Red Oak poster to Franco for tomorrow',
+    'Open the calendar',
   ]
   // The existing suggestion chips, shared by desktop (idle surface) and mobile
   // (behind "More") so their actions are defined exactly once.
@@ -1402,13 +1461,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
             <div ref={scrollRef} className={scrollClass}>
               {messages.length === 0 && !sending && !mobileSuggestionAreaHidden && (
                 <div className="space-y-2 py-1.5 md:hidden">
-                  <p className="px-1 text-xs text-brand-primary/60">What do you need help with?</p>
+                  <p className="px-1 text-xs text-brand-primary/60">What do you need?</p>
                   <div className="grid grid-cols-2 gap-1.5">
-                    <button type="button" onClick={startDailyCapture} className="min-h-11 rounded-lg border border-brand-teal/30 bg-brand-teal/10 px-2 text-xs font-bold text-brand-teal hover:bg-brand-teal/20">
-                      Record my update
+                    <button type="button" onClick={() => void send('Sort me out for today')} className="min-h-11 rounded-lg border border-brand-teal/30 bg-brand-teal/10 px-2 text-xs font-bold text-brand-teal hover:bg-brand-teal/20">
+                      What's on today?
                     </button>
-                    <button type="button" onClick={() => void send('What should I do next?')} className="min-h-11 rounded-lg border border-white/10 bg-white/[0.04] px-2 text-xs font-bold text-brand-primary hover:border-brand-teal/40 hover:text-white">
-                      What should I do next?
+                    <button type="button" onClick={startDailyCapture} className="min-h-11 rounded-lg border border-white/10 bg-white/[0.04] px-2 text-xs font-bold text-brand-primary hover:border-brand-teal/40 hover:text-white">
+                      Record my update
                     </button>
                   </div>
                   {moreOpen ? (

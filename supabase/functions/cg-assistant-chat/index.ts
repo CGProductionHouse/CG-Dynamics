@@ -65,55 +65,55 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
     key: 'my-day',
     name: 'My Day',
     status: 'available',
-    description: 'Sanitized summary of the signed-in user’s visible My Day plan: counts, current/next work, workload warning, and source labels only.',
+    description: 'Prioritised daily brief from real Planner, Calendar and Client Schedule data.',
   },
   {
     key: 'tasks',
     name: 'Tasks',
     status: 'available',
-    description: 'Confirmed create, assignment, completion and blocker actions use canonical Planner tasks with role checks, audit logs and assignee notifications.',
+    description: 'Create, assign, complete, block and query Planner tasks.',
   },
   {
     key: 'clients',
     name: 'Clients',
-    status: 'planned',
-    description: 'Future connection for safe client/project summaries already visible to the signed-in staff member.',
+    status: 'available',
+    description: 'Look up, open and summarise active clients.',
   },
   {
     key: 'calendar',
-    name: 'Calendar',
-    status: 'planned',
-    description: 'Future connection for public company schedule items and production planning.',
+    name: 'CG Calendar',
+    status: 'available',
+    description: 'Query and create internal company calendar events.',
+  },
+  {
+    key: 'client-schedule',
+    name: 'Client Schedule',
+    status: 'available',
+    description: 'Query upcoming deliverables and content deadlines per client.',
+  },
+  {
+    key: 'marketing-ai',
+    name: 'Marketing AI',
+    status: 'available',
+    description: 'Launch specialist chains for strategy, copy, brand review and content planning.',
+  },
+  {
+    key: 'navigation',
+    name: 'Navigation',
+    status: 'available',
+    description: 'Open any page, client, task or event directly.',
+  },
+  {
+    key: 'microsoft',
+    name: 'Microsoft 365',
+    status: 'protected',
+    description: 'Admin-only controlled reconciliation sync.',
   },
   {
     key: 'meta',
     name: 'Meta Business',
-    status: 'planned',
-    description: 'Future connection for approved social/reporting context without exposing credentials.',
-  },
-  {
-    key: 'microsoft',
-    name: 'Microsoft 365 (Planner + Outlook)',
-    status: 'protected',
-    description: 'Live admin-only controlled reconciliation sync. Produces a reviewed Planner/Outlook preview; never writes to the Client Schedule on its own.',
-  },
-  {
-    key: 'marketing-ai',
-    name: 'Marketing AI department',
     status: 'available',
-    description: 'Live specialist chain: Marketing Strategist, Copywriting Agent and Brand Guardian, grounded only in approved Skill Cards. Produces internal drafts with citations; publishing, spend and client-record changes never happen automatically, and approval is manager/admin only.',
-  },
-  {
-    key: 'cg-hours',
-    name: 'CG Hours',
-    status: 'planned',
-    description: 'Future connection for time and workload signals where role permissions allow it.',
-  },
-  {
-    key: 'approvals',
-    name: 'Approvals',
-    status: 'planned',
-    description: 'Future connection for manager/admin approval queues and non-financial status summaries.',
+    description: 'Answer real integration status from live diagnostics.',
   },
 ]
 
@@ -393,6 +393,35 @@ const TASK_LOOKUP_PATTERNS = [
   /\bwat moet ek nog doen\b/i,
   /\bwat het ek .* belowe\b/i,
   /\btask module\b/i,
+  /\bsort me out\b/i,
+  /\bwhat should i do\b/i,
+  /\bwhat's important\b/i,
+  /\bwhat is important\b/i,
+  /\bwhat's on\b/i,
+  /\bwhat is on\b/i,
+  /\bwhat have i got\b/i,
+  /\bwhat do i have\b/i,
+  /\bhow am i looking\b/i,
+  /\bhow's my day\b/i,
+  /\bhow is my day\b/i,
+  /\bwhats on today\b/i,
+  /\bwhat's happening today\b/i,
+  /\bpriorities\b/i,
+  /\boverdue\b/i,
+  /\bwhat am i forgetting\b/i,
+]
+
+const CLIENT_SCHEDULE_PATTERNS = [
+  /\bposting\b/i,
+  /\bschedule\b/i,
+  /\bcontent (?:due|scheduled|planned|this|next)\b/i,
+  /\bwhat(?:'s| is) .+ (?:posting|scheduled|due|planned)\b/i,
+  /\bdeliverables?\b/i,
+  /\bupcoming (?:content|posts?|deliverables?)\b/i,
+  /\bthis week(?:'s)?\b/i,
+  /\bnext week(?:'s)?\b/i,
+  /\bthis month(?:'s)?\b/i,
+  /\breel|photo|video|dp\b/i,
 ]
 
 const SETUP_QUESTION_PATTERNS = [
@@ -505,6 +534,10 @@ function isTaskLookupRequest(message: string): boolean {
   return TASK_LOOKUP_PATTERNS.some((pattern) => pattern.test(message))
 }
 
+function isClientScheduleQuery(message: string): boolean {
+  return CLIENT_SCHEDULE_PATTERNS.some((pattern) => pattern.test(message))
+}
+
 function isSetupQuestion(message: string): boolean {
   return SETUP_QUESTION_PATTERNS.some((pattern) => pattern.test(message))
 }
@@ -589,99 +622,242 @@ function buildCapabilitiesResponse(
   microsoftState: MicrosoftIntegrationState | null,
   marketingAiState: MarketingAiState | null,
 ): string {
-  const connected = TOOL_REGISTRY
-    .filter((tool) => tool.status === 'available')
-    .map((tool) => `- ${tool.name}: ${tool.description}`)
-    .join('\n')
-  const notConnected = TOOL_REGISTRY
-    .filter((tool) => tool.status !== 'available')
-    .map((tool) => `- ${tool.name}: ${tool.description}`)
-    .join('\n')
-
-  return [
-    'CG Assistant can help with practical operational work right now:',
-    '- Draft client updates, task notes, captions, internal checklists, and planning outlines.',
-    '- Explain what is connected, what is pending, and how to structure future safe integrations.',
-    '- Help prioritise when you provide the context directly in the chat.',
-    '',
-    'Connected right now:',
-    connected || '- None yet.',
-    '- Role checks and protected-data filtering.',
-    '- Server-side AI provider routing only.',
-    '- Best-effort audit logging when the audit migration has been run.',
-    '',
-    'Not connected yet:',
-    notConnected,
-    '',
-    buildMetaStatusLine(metaState),
-    buildMicrosoftStatusLine(microsoftState),
-    buildMarketingAiStatusLine(marketingAiState),
-    '',
-    `Your access tier: ${accessSummary(role)}`,
-  ].join('\n')
-}
-
-function buildTaskModulePendingResponse(): string {
-  const taskStatus = getTaskLookupPlaceholder()
-
-  return [
-    taskStatus.message,
-    '',
-    'I cannot see live assigned tasks, deadlines, or calendar items yet. If you paste the task list here, I can help sort it into:',
-    '- urgent today',
-    '- waiting on someone else',
-    '- client-facing updates',
-    '- quick wins',
-    '- items to escalate',
-    '',
-    'Future connection placeholder: tasks will need role checks before lookup so staff only see task/project context already visible to them.',
-  ].join('\n')
-}
-
-function buildLocalWorkResponse(context: LocalWorkContext): string {
-  const hasAssignedWork = context.focusCount > 0 || context.upcomingCount > 0 || context.todayCalendarEvents > 0
   const lines = [
-    `Today (${context.today}), using only your visible My Day context:`,
-    `- Focus now: ${context.focusCount}`,
-    `- Overdue: ${context.overdueCount}`,
-    `- Due today: ${context.dueTodayCount}`,
-    `- Upcoming this week: ${context.upcomingCount}`,
-    `- Calendar events today: ${context.todayCalendarEvents}`,
-    `- Connected sources: ${context.connectedSources.plannerTasks} Planner, ${context.connectedSources.calendarEvents} CG Calendar, ${context.connectedSources.clientScheduleItems} Client Schedule`,
+    'Here is what I can help with right now:',
+    '',
+    '**Everyday work:**',
+    '- Ask me what to do today and I will prioritise your tasks, calendar and deadlines.',
+    '- Create, assign, complete or block tasks — just tell me what needs doing.',
+    '- Check what is overdue or coming up.',
+    '',
+    '**Clients:**',
+    '- Look up any active client, open their page, or summarise their context.',
+    '',
+    '**Calendar:**',
+    '- See what is on today or this week, or create an event.',
+    '',
+    '**Client Schedule:**',
+    '- Check upcoming deliverables and content deadlines for any client.',
+    '',
+    '**Marketing:**',
+    '- Start a content plan, draft copy, or run a brand review for any active client.',
+    '',
+    '**Integrations:**',
   ]
 
-  if (context.currentTaskTitle) lines.push(`- Start with: ${context.currentTaskTitle}${context.currentTaskSource ? ` (${context.currentTaskSource})` : ''}`)
-  if (context.nextTaskTitle) lines.push(`- Next: ${context.nextTaskTitle}${context.nextTaskSource ? ` (${context.nextTaskSource})` : ''}`)
-  if (context.workloadWarning) lines.push(`- Capacity note: ${context.workloadWarning}`)
-  if (context.personalDaySummary) lines.push('', 'Confirmed personal day capture:', context.personalDaySummary)
+  if (metaState?.connected) lines.push('- Meta Business is connected and syncing.')
+  else lines.push('- Meta Business is not connected yet.')
 
-  if (!hasAssignedWork && !context.personalDaySummary) {
-    lines.push('', 'You do not have assigned focus work or CG Calendar events showing for today. Check Planner, CG Calendar, or Client Schedule if you expected work to be assigned.')
-  } else {
-    lines.push('', context.suggestedNextAction)
-  }
+  if (microsoftState?.connected) lines.push('- Microsoft 365 is connected. An admin can run the controlled Planner/Outlook sync.')
+  else lines.push('- Microsoft 365 is not available for sync right now.')
 
-  if (context.setupNotes.length > 0) {
-    lines.push('', 'Setup notes:', ...context.setupNotes.map(note => `- ${note}`))
-  }
+  if (marketingAiState?.live) lines.push(`- Marketing AI is live with ${marketingAiState.activeCards} approved cards.`)
+  else lines.push('- Marketing AI is not usable yet — no approved knowledge cards are routed to specialists.')
+
+  lines.push('')
+  lines.push('Just ask in plain language — I will do it or tell you what I cannot do.')
 
   return lines.join('\n')
 }
 
+function buildTaskModulePendingResponse(): string {
+  return 'I do not have your task list loaded yet. Try asking me again in a moment, or paste your tasks here and I will help sort them into priorities.'
+}
+
+function buildLocalWorkResponse(context: LocalWorkContext): string {
+  const hasAssignedWork = context.focusCount > 0 || context.upcomingCount > 0 || context.todayCalendarEvents > 0
+
+  if (!hasAssignedWork && !context.personalDaySummary) {
+    return `You have nothing assigned for today (${context.today}). Check Planner, CG Calendar or Client Schedule if you expected work to be assigned.`
+  }
+
+  const parts: string[] = []
+
+  if (context.overdueCount > 0) {
+    parts.push(`You have ${context.overdueCount} overdue task${context.overdueCount === 1 ? '' : 's'} — that needs attention first.`)
+  }
+
+  if (context.dueTodayCount > 0) {
+    parts.push(`${context.dueTodayCount} task${context.dueTodayCount === 1 ? ' is' : 's are'} due today.`)
+  }
+
+  if (context.todayCalendarEvents > 0) {
+    parts.push(`${context.todayCalendarEvents} calendar event${context.todayCalendarEvents === 1 ? '' : 's'} today.`)
+  }
+
+  if (context.upcomingCount > 0) {
+    parts.push(`${context.upcomingCount} coming up this week.`)
+  }
+
+  if (context.nextFocusTitle) {
+    parts.push(`Start with: ${context.nextFocusTitle}${context.currentTaskSource ? ` (${context.currentTaskSource})` : ''}.`)
+  }
+
+  if (context.workloadWarning) {
+    parts.push(`Heads up: ${context.workloadWarning}`)
+  }
+
+  if (context.personalDaySummary) {
+    parts.push('', context.personalDaySummary)
+  }
+
+  parts.push('', context.suggestedNextAction)
+
+  if (context.setupNotes.length > 0) {
+    parts.push('', ...context.setupNotes.map(note => note))
+  }
+
+  return parts.join('\n')
+}
+
+// Client Schedule query: answers "What's Red Oak posting this week?" etc.
+// Uses the same monthly_deliverables table the Client Schedule page reads.
+async function handleClientScheduleQuery(
+  sb: ReturnType<typeof createClient>,
+  message: string,
+): Promise<{ answer: string; clientId: string | null; clientName: string | null } | null> {
+  const lower = message.toLowerCase()
+
+  // Find client name in the message.
+  const { data: clients } = await sb
+    .from('clients')
+    .select('id, name')
+    .eq('active', true)
+    .order('name')
+
+  if (!clients || clients.length === 0) return null
+
+  // Match client name from message.
+  let matchedClient: { id: string; name: string } | null = null
+  for (const client of clients) {
+    const name = (client.name as string).toLowerCase()
+    if (!name) continue
+    const words = name.split(/\s+/).filter(w => w.length >= 3)
+    if (words.some(w => lower.includes(w)) || lower.includes(name)) {
+      matchedClient = { id: client.id as string, name: client.name as string }
+      break
+    }
+  }
+
+  if (!matchedClient) return null
+
+  // Determine time window.
+  const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+  const dayOfWeek = now.getDay() // 0=Sun, 6=Sat
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - dayOfWeek)
+  const endOfWeek = new Date(startOfWeek)
+  endOfWeek.setDate(startOfWeek.getDate() + 6)
+  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+  const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))
+
+  const isThisWeek = /\bthis week\b/i.test(message)
+  const isNextWeek = /\bnext week\b/i.test(message)
+  const isThisMonth = /\bthis month\b/i.test(message) || !isThisWeek && !isNextWeek
+
+  let windowStart: string
+  let windowEnd: string
+  let windowLabel: string
+
+  if (isThisWeek) {
+    windowStart = startOfWeek.toISOString().slice(0, 10)
+    windowEnd = endOfWeek.toISOString().slice(0, 10)
+    windowLabel = 'this week'
+  } else if (isNextWeek) {
+    const nextStart = new Date(startOfWeek)
+    nextStart.setDate(startOfWeek.getDate() + 7)
+    const nextEnd = new Date(nextStart)
+    nextEnd.setDate(nextStart.getDate() + 6)
+    windowStart = nextStart.toISOString().slice(0, 10)
+    windowEnd = nextEnd.toISOString().slice(0, 10)
+    windowLabel = 'next week'
+  } else {
+    windowStart = startOfMonth.toISOString().slice(0, 10)
+    windowEnd = endOfMonth.toISOString().slice(0, 10)
+    windowLabel = 'this month'
+  }
+
+  // Query deliverables.
+  const monthStart = startOfMonth.toISOString().slice(0, 10)
+  const { data: deliverables } = await sb
+    .from('monthly_deliverables')
+    .select('id, title, code, deliverable_type, production_status, priority, due_date, scheduled_date, posted_at, assigned_to_name, month')
+    .eq('client_id', matchedClient.id)
+    .eq('month', monthStart)
+    .is('archived_at', null)
+    .order('instance_number')
+
+  if (!deliverables || deliverables.length === 0) {
+    return {
+      answer: `No deliverables found for ${matchedClient.name} this month.`,
+      clientId: matchedClient.id,
+      clientName: matchedClient.name,
+    }
+  }
+
+  // Filter to the time window.
+  const inWindow = deliverables.filter(d => {
+    const date = (d.scheduled_date as string) ?? (d.due_date as string) ?? (d.posted_at as string)?.slice(0, 10)
+    if (!date) return false
+    return date >= windowStart && date <= windowEnd
+  })
+
+  // Also get upcoming (not yet posted, with dates in the future).
+  const upcoming = deliverables.filter(d => {
+    const status = d.production_status as string
+    if (status === 'posted' || status === 'moved') return false
+    const date = (d.scheduled_date as string) ?? (d.due_date as string)
+    if (!date) return false
+    return date >= today
+  })
+
+  const target = inWindow.length > 0 ? inWindow : upcoming
+  if (target.length === 0) {
+    return {
+      answer: `Nothing scheduled for ${matchedClient.name} ${windowLabel}. ${deliverables.length} total deliverable${deliverables.length === 1 ? '' : 's'} exist this month.`,
+      clientId: matchedClient.id,
+      clientName: matchedClient.name,
+    }
+  }
+
+  const statusEmoji: Record<string, string> = {
+    posted: '✅',
+    scheduled: '📅',
+    approved: '👍',
+    in_progress: '🔄',
+    to_do: '⬜',
+    ready_internal_review: '👁️',
+    blocked: '🚫',
+  }
+
+  const lines = target.map(d => {
+    const date = (d.scheduled_date as string) ?? (d.due_date as string) ?? 'no date'
+    const status = d.production_status as string
+    const emoji = statusEmoji[status] ?? '•'
+    const assignee = d.assigned_to_name ? ` (${d.assigned_to_name})` : ''
+    return `${emoji} ${d.title} — ${date}${assignee}`
+  })
+
+  const summary = `Here is what ${matchedClient.name} has ${windowLabel}:\n${lines.join('\n')}`
+
+  return {
+    answer: summary,
+    clientId: matchedClient.id,
+    clientName: matchedClient.name,
+  }
+}
+
 function buildRestrictedResponse(role: string, setupAllowed: boolean): string {
   if (setupAllowed) {
-    return [
-      'For owner/admin setup planning: CG Assistant can later support finance or admin integrations only through server-side tools, strict role checks, audit logs, and explicit field allow-lists.',
-      '',
-      'This version does not connect Xero, payroll, bank, tax, revenue, invoice totals, profit/loss, owner notes, ID numbers, or private HR data, so I cannot answer with real values. I can help draft the access rules or implementation plan safely.',
-    ].join('\n')
+    return 'Finance, payroll, bank, tax and private HR data are not connected to CG Assistant yet. I can help plan the setup or work with non-financial data instead.'
   }
 
   if (isPrivilegedRole(role)) {
-    return 'I do not have live finance, payroll, bank, Xero, tax, revenue, invoice total, profit/loss, owner-note, ID number, or private HR data connected, so I will not guess or summarise it. I can help with safe setup planning or non-financial operational work.'
+    return 'I do not have access to salary, payroll, bank, accounting, tax, revenue or private HR data, so I will not guess or summarise it. I can help with operational work or setup planning.'
   }
 
-  return 'I cannot access or discuss salary, payroll, Xero, bank, profit/loss, revenue, invoice totals, tax, ID numbers, personal HR details, owner notes, or confidential finance information for staff or manager users. I can help reshape this into an operational request, planning note, client update, or non-financial summary.'
+  return 'I cannot access salary, payroll, bank, accounting, tax or private HR information. I can help with your tasks, calendar, clients or other operational work.'
 }
 
 function accessSummary(role: string): string {
@@ -702,35 +878,70 @@ function buildSystemPrompt(
   microsoftState: MicrosoftIntegrationState | null,
   marketingAiState: MarketingAiState | null,
 ): string {
-  const tools = TOOL_REGISTRY.map((tool) => `${tool.name}: ${tool.status}`).join(', ')
   const metaFacts = metaState
-    ? `Live Meta Business integration state (from diagnostics, do not contradict it): ${metaState.connected ? 'CONNECTED' : 'NOT_CONNECTED'} (status: ${metaState.status}, linked client assets: ${metaState.linkedAssetsCount}).`
-    : 'Live Meta Business integration state is currently unverifiable in this function.'
+    ? `Meta Business: ${metaState.connected ? 'connected (' + metaState.linkedAssetsCount + ' linked asset' + (metaState.linkedAssetsCount === 1 ? '' : 's') + ')' : 'not connected'}. ${metaState.message}`
+    : 'Meta Business: status unverifiable right now.'
   const marketingFacts = marketingAiState
-    ? `Live Marketing AI department state (from diagnostics, do not contradict it): ${marketingAiState.live ? 'LIVE' : 'NOT_USABLE_YET'} (approved Skill Cards: ${marketingAiState.activeCards}, specialists with approved knowledge: ${marketingAiState.specialists.join(', ') || 'none'}, drafts awaiting review: ${marketingAiState.awaitingReview}).`
-    : 'Live Marketing AI department state is currently unverifiable in this function.'
+    ? `Marketing AI: ${marketingAiState.live ? 'live with ' + marketingAiState.activeCards + ' approved cards, specialists: ' + (marketingAiState.specialists.join(', ') || 'none') + ', ' + marketingAiState.awaitingReview + ' draft(s) awaiting review' : 'not usable yet — no approved Skill Cards routed to specialists'}.`
+    : 'Marketing AI: status unverifiable right now.'
   const microsoftFacts = microsoftState
-    ? `Live Microsoft 365 integration state (from diagnostics, do not contradict it): ${microsoftState.connected ? 'CONNECTED' : 'NOT_AVAILABLE'} (status: ${microsoftState.status}, Planner/Outlook sources: ${microsoftState.planSourceCount}).`
-    : 'Live Microsoft 365 integration state is currently unverifiable in this function.'
+    ? `Microsoft 365: ${microsoftState.connected ? 'connected (' + microsoftState.planSourceCount + ' Planner/Outlook source' + (microsoftState.planSourceCount === 1 ? '' : 's') + ')' : 'not available'}. ${microsoftState.message}`
+    : 'Microsoft 365: status unverifiable right now.'
 
   return [
-    'You are CG Assistant inside CG Dynamics.',
-    'Be practical, short, operational, and clear.',
-    `User role: ${role}. ${accessSummary(role)}`,
-    `Tool registry: ${tools}. Only sanitized My Day context may be supplied with the request; other live operational tools are not connected yet.`,
+    'You are CG Assistant, the operational remote control for CG Dynamics. You work at CG Production House.',
+    '',
+    '## How you respond',
+    'Talk like a capable human assistant, not a software agent. Be concise, natural, and direct.',
+    'Lead with the answer or action. No headings, tables, or bullet lists for simple conversational turns.',
+    'Never mention internal implementation details: no RPC names, table names, JSON structures, capability registries, tool names, or plumbing.',
+    'Never say "I cannot because this tool is not available" when a supported app action exists.',
+    'Never tell the user to navigate somewhere if you can execute the action yourself.',
+    'If you can do it, do it and confirm in one sentence. If you cannot, say what the limitation is in plain language.',
+    'No giant status dumps unless explicitly asked. No coding-agent prose.',
+    '',
+    '## Your role and access',
+    `User role: ${role}.`,
+    role === 'owner' || role === 'admin' ? 'You can access all features, run syncs, manage staff, and approve changes.' :
+    role === 'manager' ? 'You can manage team work, approve schedule changes, and access team workload data.' :
+    'You can manage your own tasks, view your calendar, and access your own work context.',
+    '',
+    '## What you can do right now',
+    '- Understand what is happening across the app (tasks, calendar, clients, schedule, marketing).',
+    '- Create, assign, complete, block and query Planner tasks.',
+    '- Look up, open and summarise active clients.',
+    '- Query and create CG Calendar events.',
+    '- Answer what content is due, scheduled or posted for any client this week or month.',
+    '- Launch Marketing AI specialists for strategy, copy, brand review and content planning.',
+    '- Navigate directly to any page, client, task or event.',
+    '- Answer real integration status from live diagnostics.',
+    '',
+    '## Daily brief',
+    'When asked what to do today, sort priorities, or what is overdue, use the supplied My Day context to give a prioritised human answer. Identify the top few priorities and why. Offer a follow-up action.',
+    '',
+    '## Follow-up context',
+    'Track the last task, client or event discussed. When the user says "mark that done", "move it to Friday", or "open that client", resolve it from the immediately preceding context. Never make the user restate full names every turn.',
+    '',
+    '## Marketing and content',
+    'When the user asks to plan content, draft copy, review a caption, or run a brand check for a client, route it through the Marketing AI specialist chain automatically. Do not explain agent names or plumbing — just say what you are doing and confirm the result.',
+    '',
+    '## Action and confirmation',
+    'For supported reversible actions: resolve identities, execute, confirm naturally.',
+    'For high-impact or ambiguous actions: show ONE compact preview, execute after confirmation.',
+    'Never weaken permissions, audit trails, finance safeguards, or external communication boundaries.',
+    '',
+    '## Integrations (live facts — do not contradict)',
     metaFacts,
     microsoftFacts,
     marketingFacts,
-    'If asked for live tasks beyond the supplied My Day context, calendar lookups, client task details, approvals, or CG Hours data, say that specific integration is not connected yet and offer a useful checklist, draft, or workflow. This never applies to Meta Business or Microsoft 365 — for those, use the live state above.',
-    `When asked whether Meta is connected, reply based ONLY on the live Meta integration state above: ${metaState?.connected ? 'it is connected, so say it is connected and available for sync.' : 'it is not connected, so say it is not connected and never claim otherwise.'}`,
-    `When asked about Microsoft 365, Planner, Outlook, Teams, or running a Microsoft sync, reply based ONLY on the live Microsoft state above: ${microsoftState?.connected ? 'it IS connected and a controlled Planner/Outlook reconciliation sync can be run by an admin from CG Assistant, so never say it is not connected.' : 'it is not available for sync right now, so say exactly that and give the real reason above.'}`,
-    'A Microsoft sync produces a reviewed reconciliation preview; it never writes to the Client Schedule on its own.',
-    `When asked about marketing work, campaigns, copy, brand review or the AI specialists, use ONLY the live Marketing AI state above: ${marketingAiState?.live ? 'the department IS live, so say staff can start a campaign strategy, social copy or brand review straight from CG Assistant for an exact active client.' : 'it is not usable yet because no approved Skill Cards are routed to a specialist; say exactly that.'}`,
-    'Marketing AI produces internal drafts only. It cites approved Skill Cards, never publishes, never spends budget, never changes client records, and approval is restricted to managers and admins.',
-    'Never reveal, infer, summarise, or guess salaries, payroll, bank details, Xero/accounting values, profit/loss, revenue, invoice totals, tax, owner notes, ID numbers, confidential finance, or private HR/payroll fields.',
-    'Do not hallucinate data. If no data was provided or connected, say so.',
-    'Answer as CG Assistant.',
-  ].join(' ')
+    '',
+    '## Hard rules',
+    'Never reveal, infer or guess salaries, payroll, bank details, accounting values, profit/loss, revenue, invoice totals, tax, owner notes, ID numbers, confidential finance, or private HR data.',
+    'Never invent data. If no data was provided or connected, say so.',
+    'Microsoft remains read-only upstream unless an existing write contract says otherwise.',
+    'Marketing AI produces internal drafts only. Approval is manager/admin only.',
+    'A Microsoft sync produces a reviewed reconciliation preview; it never writes to the Client Schedule.',
+  ].join('\n')
 }
 
 async function auditAssistantRequest(
@@ -1241,6 +1452,28 @@ Deno.serve(async (req) => {
       answer,
       tools: TOOL_REGISTRY,
     })
+  }
+
+  // Client Schedule query: "What's Red Oak posting this week?" etc.
+  if (isClientScheduleQuery(message)) {
+    const scheduleResult = await handleClientScheduleQuery(sb, message)
+    if (scheduleResult) {
+      await auditAssistantRequest(sb, {
+        userId: user.id,
+        role,
+        message,
+        responseStatus: 'client_schedule_query',
+        restricted: false,
+        promptCategory: 'client_schedule',
+        model: 'local:client_schedule',
+      })
+      return jsonResponse({
+        ok: true,
+        answer: scheduleResult.answer,
+        tools: TOOL_REGISTRY,
+      })
+    }
+    // If no client matched, fall through to general chat.
   }
 
   // Skilled-agent mode: a distinct AI Workforce agent with deterministic,

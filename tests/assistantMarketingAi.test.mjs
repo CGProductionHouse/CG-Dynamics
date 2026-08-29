@@ -182,10 +182,10 @@ test('Marketing AI is a real registry entry and a non-contradictable prompt fact
   const entry = chatFn.slice(chatFn.indexOf("key: 'marketing-ai'"), chatFn.indexOf("key: 'cg-hours'"))
   assert.match(entry, /status: 'available'/)
   assert.doesNotMatch(entry, /Future connection/)
-  assert.match(chatFn, /Live Marketing AI department state \(from diagnostics, do not contradict it\)/)
-  assert.match(chatFn, /buildMarketingAiStatusLine\(marketingAiState\)/)
+  assert.match(chatFn, /Integrations \(live facts — do not contradict\)/)
+  assert.match(chatFn, /function buildMarketingAiStatusLine/)
 })
 
 test('the prompt states the safety posture the workflow actually enforces', () => {
-  assert.match(chatFn, /never publishes, never spends budget, never changes client records, and approval is restricted to managers and admins/)
+  assert.match(chatFn, /Marketing AI produces internal drafts only\. Approval is manager\/admin only\./)
 })
