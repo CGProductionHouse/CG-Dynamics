@@ -332,8 +332,8 @@ export function defaultMicrosoftSyncRange(today: string): { start: string; end: 
 // Everything here only classifies the request and resolves the client; the
 // controlled workflow, its evidence gate and its approval rules are untouched.
 
-const MARKETING_NOUN = /\b(campaign|kampanje|strategy|strategie|marketing|copy|kopie|advert|advertensie|social copy|caption|onderskrif|ad copy|brand review|handelsmerk)\b/
-const MARKETING_MAKE = /\b(create|build|make|draft|write|skryf|skep|bou|maak|ontwerp|plan|beplan|start|begin)\b/
+const MARKETING_NOUN = /\b(campaign|kampanje|strategy|strategie|marketing|copy|kopie|advert|advertensie|social copy|caption|onderskrif|ad copy|brand review|handelsmerk|content plan|content planning|social media|posts?|posting plan)\b/
+const MARKETING_MAKE = /\b(create|build|make|draft|write|skryf|skep|bou|maak|ontwerp|plan|beplan|start|begin|put together|map out)\b/
 
 /** "continue the marketing workflow" / "gaan voort met die bemarkingswerkvloei" */
 function isMarketingContinue(lower: string): boolean {
@@ -367,11 +367,11 @@ function marketingDecision(lower: string): 'approved' | 'rejected' | 'changes_re
 
 /** Which specialist a phrasing asks for, or null to route automatically. */
 function marketingSpecialist(lower: string): string | null {
-  if (/\b(brand review|review (?:this |the )?copy|on-?brand|brand guardian|handelsmerk|tone of voice)\b/.test(lower)) return 'brand_guardian'
+  if (/\b(brand review|review (?:this |the )?copy|on-?brand|brand guardian|handelsmerk|tone of voice|check.*against.*brand|is this on.?brand)\b/.test(lower)) return 'brand_guardian'
   if (/\b(social copy|sosiale kopie|caption|onderskrif|ad copy|advertensiekopie|copywrit|write copy|skryf kopie|kopieskrywer|headline|opskrif)\b/.test(lower)) return 'copywriting_agent'
   // Bare "kopie"/"copy" with a writing verb also means copywriting.
   if (/\b(skryf|write|draft)\b/.test(lower) && /\b(kopie|copy)\b/.test(lower)) return 'copywriting_agent'
-  if (/\b(strategy|strategie|strateeg|strategist)\b/.test(lower)) return 'marketing_strategist'
+  if (/\b(strategy|strategie|strateeg|strategist|content plan|content planning|social media plan)\b/.test(lower)) return 'marketing_strategist'
   return null
 }
 
