@@ -2,6 +2,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   META_CONNECTOR_VERSION,
+  MetaFactRetryableError,
   MetaSyncDeadlineError,
   metaPostBounds,
   metaFetch,
@@ -11,6 +12,10 @@ import {
   syncAccountFacts,
 } from '../_shared/meta.ts'
 import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
+import { classifyInstagramMediaPage } from '../_shared/metaInstagramPaging.ts'
+import { normalizeMetaWorkerLanes } from '../_shared/metaWorkerLanes.ts'
+import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
+import { metaRateLimitScope } from '../_shared/metaRateLimit.ts'
 
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
@@ -21,7 +26,15 @@ const MAX_WORK_MS = 40_000
 const PAGE_FETCH_RESERVE_MS = 8_000
 const MIN_PAGE_REQUEST_BUDGET_MS = 4_000
 
-class RetryableIncompleteError extends Error {}
+class RetryableIncompleteError extends Error {
+  constructor(message: string, readonly refundAttempt = false) {
+    super(message)
+  }
+}
+
+function isMetaRateLimitError(message: string): boolean {
+  return metaRateLimitScope(message) !== null
+}
 
 function monthBounds(month: string): { periodStart: string; periodEnd: string } {
   const year = Number(month.slice(0, 4))
@@ -66,6 +79,11 @@ interface MetaCollectionResult {
   retryable: boolean
 }
 
+interface MetaProcessedPage {
+  postsSynced: number
+  stopAfterPage?: boolean
+}
+
 type MetaSyncState = 'pending' | 'facts_pending' | 'complete' | 'failed' | 'not_applicable'
 const TERMINAL_META_STATES = new Set<MetaSyncState>(['complete', 'failed', 'not_applicable'])
 
@@ -90,7 +108,7 @@ async function fetchMetaCollection(
   context: string,
   tokens: Array<string | null | undefined>,
   deadline: number,
-  processPage: (items: Array<Record<string, unknown>>) => Promise<number>,
+  processPage: (items: Array<Record<string, unknown>>) => Promise<number | MetaProcessedPage>,
   checkpoint: (nextCursor: string | null, complete: boolean, pagePostsSynced: number) => Promise<void>,
 ): Promise<MetaCollectionResult> {
   const expectedOrigin = new URL(initialUrl).origin
@@ -115,7 +133,8 @@ async function fetchMetaCollection(
     const res = await metaFetch(requestUrl.toString(), requestTimeoutMs)
     pagesFetched++
     if (!res.ok) {
-      return { pagesFetched, complete: false, error: await parseMetaError(res, `${context} page ${pagesFetched}`, tokens), retryable: false }
+      const error = await parseMetaError(res, `${context} page ${pagesFetched}`, tokens)
+      return { pagesFetched, complete: false, error, retryable: isMetaRateLimitError(error) }
     }
     const page = await res.json()
     const nextUrl = typeof page.paging?.next === 'string' ? page.paging.next : null
@@ -132,9 +151,11 @@ async function fetchMetaCollection(
     if (nextUrl && !candidateCursor) {
       return { pagesFetched, complete: false, error: `${context} returned an unsafe or missing paging cursor.`, retryable: false }
     }
-    const pagePostsSynced = await processPage((page.data as Array<Record<string, unknown>> | undefined) ?? [])
-    await checkpoint(candidateCursor, !nextUrl, pagePostsSynced)
-    if (!nextUrl) return { pagesFetched, complete: true, error: null, retryable: false }
+    const processedPage = await processPage((page.data as Array<Record<string, unknown>> | undefined) ?? [])
+    const pagePostsSynced = typeof processedPage === 'number' ? processedPage : processedPage.postsSynced
+    const stopAfterPage = typeof processedPage === 'number' ? false : processedPage.stopAfterPage === true
+    await checkpoint(stopAfterPage ? null : candidateCursor, !nextUrl || stopAfterPage, pagePostsSynced)
+    if (!nextUrl || stopAfterPage) return { pagesFetched, complete: true, error: null, retryable: false }
     nextCursor = candidateCursor
   }
 
@@ -156,12 +177,42 @@ async function fetchMetaCollection(
  * and a missed heartbeat is harmless: the reaper simply revives the batch a
  * minute later.
  */
-async function touchBatch(sb: ReturnType<typeof createClient>, batchId: string): Promise<void> {
-  try {
-    await sb.rpc('meta_sync_touch_batch', { p_batch_id: batchId })
-  } catch {
-    // Heartbeat is best-effort by design.
-  }
+async function touchItemLease(
+  sb: ReturnType<typeof createClient>,
+  itemId: string,
+  leaseGeneration: number,
+): Promise<void> {
+  const { error } = await sb.rpc('meta_sync_touch_item_lease', {
+    p_item_id: itemId,
+    p_lease_generation: leaseGeneration,
+  })
+  if (error) throw new Error(`Meta sync lease lost while heartbeating: ${error.message}`)
+}
+
+async function batchIsCoolingDown(
+  sb: ReturnType<typeof createClient>,
+  batchId: string,
+): Promise<boolean> {
+  const { data, error } = await sb
+    .from('meta_sync_batches')
+    .select('cooldown_until')
+    .eq('id', batchId)
+    .maybeSingle()
+  if (error || !data?.cooldown_until) return false
+  return new Date(data.cooldown_until).getTime() > Date.now()
+}
+
+async function batchLaneSetAlreadyStarted(
+  sb: ReturnType<typeof createClient>,
+  batchId: string,
+): Promise<boolean> {
+  const { data, error } = await sb
+    .from('meta_sync_batches')
+    .select('summary')
+    .eq('id', batchId)
+    .maybeSingle()
+  if (error) return false
+  return Boolean(data?.summary?.parallel_lanes_started_at)
 }
 
 /* ---------- Auth ---------- */
@@ -212,9 +263,10 @@ Deno.serve(async (req) => {
 
   // Declared outside the guarded body below so that if anything throws we can
   // still hand back whatever this invocation had claimed.
-  const claimedIds = new Set<string>()
+  const claimedLeases = new Map<string, number>()
   const settledIds = new Set<string>()
   let crashClient: ReturnType<typeof createClient> | null = null
+  let activeLane: { batchId: string; laneId: number; generation: number } | null = null
 
   try {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -236,11 +288,90 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: error instanceof Error ? error.message : 'Internal Meta configuration error.' }, 500)
   }
 
-  let body: { batchId?: string; maxItems?: number }
+  let body: { batchId?: string; maxItems?: number; workerLane?: number; workerLanes?: number; startLanes?: boolean; laneLeaseGeneration?: number }
   try {
     body = await req.json()
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400)
+  }
+
+  let workerLane: number
+  let workerLanes: number
+  let startsLaneSet: boolean
+  try {
+    ({ workerLane, workerLanes, startsLaneSet } = normalizeMetaWorkerLanes(body))
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error instanceof Error ? error.message : 'Invalid worker lane input.' }, 400)
+  }
+  let lanesStarted = 1
+  let waitingForRateLimit = body.batchId ? await batchIsCoolingDown(sb, body.batchId) : false
+  if (waitingForRateLimit) {
+    return jsonResponse({
+      ok: true,
+      syncEngineVersion: META_CONNECTOR_VERSION,
+      chunksProcessed: 0,
+      processed: 0,
+      items: [],
+      workerRan: false,
+      itemsReleased: 0,
+      workRemaining: true,
+      handedOff: false,
+      claimFailed: false,
+      rateLimited: true,
+      waitingForRateLimit,
+      workerLane,
+      workerLanes,
+      lanesStarted: 0,
+    })
+  }
+  if (body.batchId && startsLaneSet
+      && await batchLaneSetAlreadyStarted(sb, body.batchId)) {
+    return jsonResponse({
+      ok: true,
+      syncEngineVersion: META_CONNECTOR_VERSION,
+      chunksProcessed: 0,
+      processed: 0,
+      items: [],
+      workerRan: false,
+      itemsReleased: 0,
+      workRemaining: true,
+      handedOff: false,
+      claimFailed: false,
+      rateLimited: false,
+      waitingForRateLimit: false,
+      laneSetAlreadyStarted: true,
+      workerLane,
+      workerLanes,
+      lanesStarted: 0,
+    })
+  }
+  if (body.batchId) {
+    const previousGeneration = Number.isSafeInteger(body.laneLeaseGeneration)
+      ? Number(body.laneLeaseGeneration)
+      : null
+    const { data, error } = await sb.rpc('meta_sync_acquire_lane', {
+      p_batch_id: body.batchId,
+      p_lane_id: workerLane,
+      p_lane_count: workerLanes,
+      p_previous_generation: previousGeneration,
+    })
+    if (error) return jsonResponse({ ok: false, error: `Could not acquire Meta lane: ${error.message}` }, 500)
+    const generation = Number(Array.isArray(data) ? data[0] : data)
+    if (!Number.isSafeInteger(generation) || generation < 1) {
+      return jsonResponse({
+        ok: true, workerRan: false, workRemaining: true, handedOff: false,
+        laneAlreadyActive: true, workerLane, workerLanes, lanesStarted: 0,
+      })
+    }
+    activeLane = { batchId: body.batchId, laneId: workerLane, generation }
+  }
+  const releaseActiveLane = async (): Promise<void> => {
+    if (!activeLane) return
+    await sb.rpc('meta_sync_release_lane', {
+      p_batch_id: activeLane.batchId,
+      p_lane_id: activeLane.laneId,
+      p_lease_generation: activeLane.generation,
+    })
   }
 
   // ── Get Meta access token ──────────────────────────────────
@@ -252,6 +383,7 @@ Deno.serve(async (req) => {
     .limit(1)
 
   if (!connections || connections.length === 0) {
+    await releaseActiveLane()
     return jsonResponse({ ok: false, error: 'Meta is not connected.' }, 400)
   }
 
@@ -262,6 +394,7 @@ Deno.serve(async (req) => {
     .limit(1)
 
   if (!tokenRows || tokenRows.length === 0 || !tokenRows[0].encrypted_access_token) {
+    await releaseActiveLane()
     return jsonResponse({ ok: false, error: 'Meta connection token is missing.' }, 400)
   }
 
@@ -306,7 +439,7 @@ Deno.serve(async (req) => {
       }
       if (!res.ok) {
         const errBody = await res.json().catch(() => null)
-        if (errBody?.error && (errBody.error.code === 4 || errBody.error.error_subcode === 2069032)) {
+        if (res.status === 429 || (errBody?.error && ([4, 17, 32, 341, 613].includes(errBody.error.code) || errBody.error.error_subcode === 2069032))) {
           pageTokenRateLimited = true
         }
         break
@@ -326,17 +459,17 @@ Deno.serve(async (req) => {
   // must cost us nothing: cool the batch down, leave every item queued, and let
   // the reaper retry once Meta lets us back in.
   if (pageTokenRateLimited) {
-    if (body.batchId) {
-      try {
-        await sb.rpc('meta_sync_begin_cooldown', {
-          p_batch_id: body.batchId,
-          p_seconds: 900,
-          p_reason: 'Meta rate-limited the page-token request. Waiting before retrying - no work has been lost.',
-        })
-      } catch {
-        // Best effort; the reaper simply retries sooner.
-      }
+    if (activeLane) {
+      const { error } = await sb.rpc('meta_sync_begin_lane_cooldown', {
+        p_batch_id: activeLane.batchId,
+        p_lane_id: activeLane.laneId,
+        p_lease_generation: activeLane.generation,
+        p_seconds: 900,
+        p_reason: 'Meta rate-limited the page-token request. Waiting before retrying - no work has been lost.',
+      })
+      if (error) throw new Error(`Meta lane lease lost before cooldown: ${error.message}`)
     }
+    await releaseActiveLane()
     return jsonResponse({
       ok: true,
       syncEngineVersion: META_CONNECTOR_VERSION,
@@ -353,6 +486,55 @@ Deno.serve(async (req) => {
     })
   }
 
+  // A root invocation starts a small, bounded set of independent lanes. Each
+  // lane then hands off only to its own successor, so concurrency stays flat
+  // instead of growing recursively. The claim RPC uses SKIP LOCKED, making
+  // client-month work exclusive across lanes while unrelated clients progress
+  // in parallel. Recovery starts only one replacement lane so two overlapping
+  // recovery requests cannot each reconstruct a complete lane set.
+  // Only the initial durable driver may create the lane set. Reapers, manual
+  // restarts, and child continuations start one replacement lane, preventing
+  // overlapping roots from multiplying the batch-wide concurrency cap.
+  let mayStartLaneSet = false
+  if (body.batchId && startsLaneSet) {
+    const { data, error } = await sb.rpc('meta_sync_begin_lane_set', {
+      p_batch_id: body.batchId,
+      p_lane_count: workerLanes,
+    })
+    mayStartLaneSet = !error && data === true
+    if (!mayStartLaneSet) {
+      await releaseActiveLane()
+      return jsonResponse({
+        ok: true,
+        syncEngineVersion: META_CONNECTOR_VERSION,
+        chunksProcessed: 0,
+        processed: 0,
+        items: [],
+        workerRan: false,
+        itemsReleased: 0,
+        workRemaining: true,
+        handedOff: false,
+        claimFailed: false,
+        rateLimited: false,
+        waitingForRateLimit: false,
+        laneSetAlreadyStarted: true,
+        workerLane,
+        workerLanes,
+        lanesStarted: 0,
+      })
+    }
+  }
+  if (body.batchId && mayStartLaneSet) {
+    const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
+    const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
+    const starts = Array.from({ length: workerLanes - 1 }, (_, offset) => offset + 1)
+      .map(lane => dispatchMetaWorker(workerUrl, workerSecret, {
+        batchId: body.batchId, workerLane: lane, workerLanes,
+      }))
+    const started = await Promise.all(starts)
+    lanesStarted += started.filter(Boolean).length
+  }
+
   // ── Process items in chunks (continuation loop) ─────────────
   const MAX_CHUNKS = 5
   // Stay well under the platform function timeout so a slow Meta API call can
@@ -360,16 +542,19 @@ Deno.serve(async (req) => {
   // If we run out of budget we stop claiming and let the self-trigger below
   // pick up the next chunk (leases make this safe under concurrency).
   const processed: Array<{ itemId: string; clientName: string; month: string; status: string; postsSynced: number; error?: string }> = []
-  const batchIds = new Set<string>()
   let claimCount = 0
   let claimFailed = false
   let budgetDeferred = false
-  // claimedIds / settledIds are declared at the top of the handler: their
+  // claimedLeases / settledIds are declared at the top of the handler: their
   // difference is released on the way out — including on a crash — so an
   // abandoned claim never burns a retry attempt.
 
   while (claimCount < MAX_CHUNKS) {
     if (Date.now() >= invocationDeadline - PAGE_FETCH_RESERVE_MS || pageTokenBudgetExhausted) break
+    if (body.batchId && await batchIsCoolingDown(sb, body.batchId)) {
+      waitingForRateLimit = true
+      break
+    }
     const { data: items, error: claimError } = await sb.rpc('claim_sync_batch_items', {
       p_limit: body.maxItems ?? BATCH_SIZE,
       p_batch_id: body.batchId ?? null,
@@ -386,20 +571,52 @@ Deno.serve(async (req) => {
     claimCount++
 
     for (const item of items) {
-      batchIds.add(item.batch_id)
-      claimedIds.add(item.id)
+      const leaseGeneration = Number(item.lease_generation)
+      if (!Number.isSafeInteger(leaseGeneration) || leaseGeneration < 1) {
+        throw new Error('Claim RPC returned an invalid Meta sync lease generation.')
+      }
+      claimedLeases.set(item.id, leaseGeneration)
       // Durable proof that a worker is alive and holding this batch. The cron
       // reaper reads this to tell a working batch from an abandoned one.
-      await touchBatch(sb, item.batch_id)
+      await touchItemLease(sb, item.id, leaseGeneration)
+      if (activeLane) {
+        const { error } = await sb.rpc('meta_sync_touch_lane', {
+          p_batch_id: activeLane.batchId,
+          p_lane_id: activeLane.laneId,
+          p_lease_generation: activeLane.generation,
+        })
+        if (error) throw new Error(`Meta lane lease lost: ${error.message}`)
+      }
+
+      const settleItem = async (
+        status: string,
+        reportsCreated: number,
+        reportsReused: number,
+        warnings: string[],
+        error: string | null,
+        refundAttempt = false,
+        cooldownSeconds: number | null = null,
+        cooldownScope: 'item' | 'batch' | null = null,
+      ): Promise<void> => {
+        const { error: settleError } = await sb.rpc('meta_sync_settle_item', {
+          p_item_id: item.id,
+          p_lease_generation: leaseGeneration,
+          p_status: status,
+          p_reports_created: reportsCreated,
+          p_reports_reused: reportsReused,
+          p_warnings: warnings,
+          p_error: error,
+          p_refund_attempt: refundAttempt,
+          p_cooldown_seconds: cooldownSeconds,
+          p_cooldown_scope: cooldownScope,
+        })
+        if (settleError) throw new Error(`Meta sync lease lost while settling: ${settleError.message}`)
+        settledIds.add(item.id)
+      }
 
       // ── Skip current/future months ──
       if (item.month >= currentMonthStr()) {
-        await sb.from('meta_sync_batch_items').update({
-          status: 'skipped',
-          error: 'Month is not yet completed.',
-          finished_at: new Date().toISOString(),
-        }).eq('id', item.id)
-        settledIds.add(item.id)
+        await settleItem('skipped', 0, 0, [], 'Month is not yet completed.')
         processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
         continue
       }
@@ -415,47 +632,24 @@ Deno.serve(async (req) => {
       const providerPaging: Record<string, { pagesFetched: number; complete: boolean; pageCap: number }> = {}
       let itemError: string | null = null
       let itemStatus = 'completed'
+      let refundAttempt = false
 
       try {
         // ── Find or create report ──
-        const { data: existingReports } = await sb
-          .from('reports')
-          .select('id')
-          .eq('client_id', item.client_id)
-          .is('platform', null)
-          .gte('period_end', periodStart)
-          .lte('period_end', periodEnd)
-          .order('created_at', { ascending: false })
-          .limit(1)
-
-        let reportId: string | null = null
-        if (existingReports && existingReports.length > 0) {
-          reportId = existingReports[0].id
-          reportsReused = 1
-        } else {
-          const { data: newReport, error: insertError } = await sb
-            .from('reports')
-            .insert({
-              client_id: item.client_id,
-              platform: null,
-              period_start: periodStart,
-              period_end: periodEnd,
-              status: 'draft',
-              report_title: `${item.client_name} ${monthLabel(item.month)} Report`,
-            })
-            .select('id')
-            .single()
-          if (!insertError && newReport) {
-            reportId = newReport.id
-            reportsCreated = 1
-          }
-        }
-
-        if (!reportId) {
-          itemStatus = 'failed'
-          itemError = 'Could not create or find report'
-          // Fall through to terminal update — do not continue
-        }
+        const { data: reportRows, error: reportError } = await sb.rpc('meta_sync_get_or_create_report', {
+          p_item_id: item.id,
+          p_lease_generation: leaseGeneration,
+          p_client_id: null,
+          p_month: null,
+          p_report_title: `${item.client_name} ${monthLabel(item.month)} Report`,
+          p_created_by: null,
+        })
+        if (reportError) throw new Error(`Could not atomically acquire report: ${reportError.message}`)
+        const reportResult = Array.isArray(reportRows) ? reportRows[0] : reportRows
+        const reportId = reportResult?.report_id ? String(reportResult.report_id) : null
+        if (!reportId) throw new Error('Could not atomically acquire report: missing report id')
+        reportsCreated = reportResult.created === true ? 1 : 0
+        reportsReused = reportResult.created === true ? 0 : 1
 
         // ── Get linked assets for this client ──
         const { data: linkedAssets } = await sb
@@ -477,21 +671,32 @@ Deno.serve(async (req) => {
         let instagramState = (item.instagram_sync_state ?? 'pending') as MetaSyncState
         let facebookCursor = (item.facebook_next_cursor as string | null | undefined) ?? null
         let instagramCursor = (item.instagram_next_cursor as string | null | undefined) ?? null
+        let instagramOldestTimestamp = (item.instagram_oldest_timestamp as string | null | undefined) ?? null
+        let instagramOrderingMalformed = item.instagram_ordering_malformed === true
+        const instagramBoundaryEnabled = Deno.env.get('META_INSTAGRAM_DESCENDING_ORDER_VERIFIED_VERSION') === graphVersion
 
         const savePlatformState = async (
           platform: 'facebook' | 'instagram',
           state: MetaSyncState,
           cursor: string | null,
           completedPagePosts = 0,
+          instagramOldestTimestamp: string | null = null,
+          instagramOrderingMalformed: boolean | null = null,
         ): Promise<void> => {
-          const checkpointedPostsSynced = postsSynced + completedPagePosts
-          const { error } = await sb.from('meta_sync_batch_items').update({
-            [`${platform}_sync_state`]: state,
-            [`${platform}_next_cursor`]: cursor,
-            posts_synced: checkpointedPostsSynced,
-          }).eq('id', item.id).eq('status', 'running')
+          const { data, error } = await sb.rpc('meta_sync_checkpoint_item', {
+            p_item_id: item.id,
+            p_lease_generation: leaseGeneration,
+            p_platform: platform,
+            p_state: state,
+            p_next_cursor: cursor,
+            p_completed_page_posts: completedPagePosts,
+            p_instagram_oldest_timestamp: instagramOldestTimestamp,
+            p_instagram_ordering_malformed: instagramOrderingMalformed,
+          })
           if (error) throw new Error(`Could not checkpoint ${platform} sync: ${error.message}`)
-          postsSynced = checkpointedPostsSynced
+          const nextPostsSynced = Number(Array.isArray(data) ? data[0] : data)
+          if (!Number.isFinite(nextPostsSynced)) throw new Error(`Could not checkpoint ${platform} sync: invalid post count`)
+          postsSynced = nextPostsSynced
           if (platform === 'facebook') {
             facebookState = state
             facebookCursor = cursor
@@ -499,11 +704,6 @@ Deno.serve(async (req) => {
             instagramState = state
             instagramCursor = cursor
           }
-        }
-
-        if (!reportId) {
-          await savePlatformState('facebook', 'failed', null)
-          await savePlatformState('instagram', 'failed', null)
         }
 
         // Page checkpoints happen only after every post on that page has been
@@ -557,6 +757,7 @@ Deno.serve(async (req) => {
                     await upsertMetaReportPost(sb, {
                       clientId: item.client_id,
                       metaObjectId: metaPostId,
+                      lease: { itemId: item.id, generation: leaseGeneration },
                       payload: {
                         report_id: reportId, platform: 'facebook', meta_post_id: metaPostId,
                         publish_time: publishTime, caption, permalink, views: null, reach: null,
@@ -579,14 +780,15 @@ Deno.serve(async (req) => {
               if (!fbCollection.complete) {
                 const message = fbCollection.error ?? 'Facebook posts result was incomplete.'
                 warnings.push(message)
-                if (fbCollection.retryable) throw new RetryableIncompleteError(message)
+                if (fbCollection.retryable) throw new RetryableIncompleteError(message, fbCollection.pagesFetched > 0)
                 itemStatus = 'failed'
                 itemError = message
                 await savePlatformState('facebook', 'failed', null)
               }
             } catch (e) {
-              if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
               const message = redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
+              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+              if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
               providerPaging.facebook = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
               warnings.push(message)
               itemStatus = 'failed'
@@ -613,17 +815,28 @@ Deno.serve(async (req) => {
               [accessToken, ...pageTokenMap.values()],
               invocationDeadline,
               async rawMedia => {
+                const pageResult = classifyInstagramMediaPage(
+                  rawMedia,
+                  new Date(Number(postBounds.since) * 1000).toISOString(),
+                  new Date(Number(postBounds.until) * 1000).toISOString(),
+                  instagramOldestTimestamp,
+                  instagramBoundaryEnabled,
+                  instagramOrderingMalformed,
+                )
+                instagramOldestTimestamp = pageResult.oldestTimestamp
+                if (pageResult.orderingMalformed) {
+                  throw new RetryableIncompleteError(
+                    'Instagram media ordering was not descending; refusing to traverse unbounded history.',
+                  )
+                }
+                instagramOrderingMalformed = pageResult.orderingMalformed
                 let pagePostsSynced = 0
-                for (const raw of rawMedia) {
+                for (const raw of pageResult.windowItems) {
                   assertWorkBudget(invocationDeadline, 'Instagram post upserts')
                   const metaPostId = String(raw.id ?? '')
                   if (!metaPostId) continue
                   const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
-                  if (!timestamp) continue
-                  const ts = new Date(timestamp)
-                  const pStart = new Date(Number(postBounds.since) * 1000)
-                  const pEnd = new Date(Number(postBounds.until) * 1000)
-                  if (ts < pStart || ts >= pEnd) continue
+                  if (!timestamp) throw new Error('Instagram media timestamp was missing after page validation.')
                   const likes = (raw.like_count as number) ?? 0
                   const igComments = (raw.comments_count as number) ?? 0
                   const mediaType = (raw.media_type as string) ?? ''
@@ -637,6 +850,7 @@ Deno.serve(async (req) => {
                     clientId: item.client_id,
                     metaObjectId: metaPostId,
                     metaObjectType: postType,
+                    lease: { itemId: item.id, generation: leaseGeneration },
                     payload: {
                       report_id: reportId, platform: 'instagram', meta_post_id: metaPostId,
                       publish_time: timestamp, caption: (raw.caption as string | null) ?? null,
@@ -655,22 +869,26 @@ Deno.serve(async (req) => {
                   })
                   pagePostsSynced++
                 }
-                return pagePostsSynced
+                return { postsSynced: pagePostsSynced, stopAfterPage: pageResult.boundaryReached }
               },
-              async (cursor, complete, pagePostsSynced) => savePlatformState('instagram', complete ? 'facts_pending' : 'pending', cursor, pagePostsSynced),
+              async (cursor, complete, pagePostsSynced) => savePlatformState(
+                'instagram', complete ? 'facts_pending' : 'pending', cursor,
+                pagePostsSynced, instagramOldestTimestamp, instagramOrderingMalformed,
+              ),
             )
             providerPaging.instagram = { pagesFetched: igCollection.pagesFetched, complete: igCollection.complete, pageCap: META_COLLECTION_PAGE_CAP }
             if (!igCollection.complete) {
               const message = igCollection.error ?? 'Instagram media result was incomplete.'
               warnings.push(message)
-              if (igCollection.retryable) throw new RetryableIncompleteError(message)
+              if (igCollection.retryable) throw new RetryableIncompleteError(message, igCollection.pagesFetched > 0)
               itemStatus = 'failed'
               itemError = message
               await savePlatformState('instagram', 'failed', null)
             }
           } catch (e) {
-            if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
             const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
+            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+            if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
             providerPaging.instagram = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
             warnings.push(message)
             itemStatus = 'failed'
@@ -692,22 +910,30 @@ Deno.serve(async (req) => {
           } else {
             try {
               assertWorkBudget(invocationDeadline, 'Facebook account facts')
-              await syncAccountFacts(sb, {
+              const factsResult = await syncAccountFacts(sb, {
                 clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
                 platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
                 baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
                 tokens: allTokens, tokenClass: 'page', reconstructInteractions: null, runType: 'scheduled',
                 deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
+                checkpoint: { itemId: item.id, leaseGeneration },
               })
+              if (factsResult.healthState === 'permission_blocked' || factsResult.healthState === 'sync_error') {
+                throw new Error(`Facebook account facts ended in ${factsResult.healthState}.`)
+              }
               await savePlatformState('facebook', 'complete', null)
             } catch (e) {
               if (e instanceof MetaSyncDeadlineError) {
-                throw new RetryableIncompleteError(e.message)
+                throw new RetryableIncompleteError(e.message, true)
               }
-              if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
-              warnings.push(redact(`Facebook account facts error: ${String(e)}`, allTokens))
+              if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, true)
+              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
+              const factsError = redact(`Facebook account facts error: ${String(e)}`, allTokens)
+              warnings.push(factsError)
               itemStatus = 'failed'
-              itemError = 'Normalized Facebook account facts failed. Post content was preserved, but reporting truth is incomplete.'
+              itemError = factsError.includes('permission_blocked')
+                ? 'Facebook account facts are permission blocked. Post content was preserved.'
+                : 'Normalized Facebook account facts failed. Post content was preserved, but reporting truth is incomplete.'
               await savePlatformState('facebook', 'failed', null)
             }
           }
@@ -716,23 +942,31 @@ Deno.serve(async (req) => {
           const igToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
           try {
             assertWorkBudget(invocationDeadline, 'Instagram account facts')
-            await syncAccountFacts(sb, {
+            const factsResult = await syncAccountFacts(sb, {
               clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
               platform: 'instagram', objectId: instagramAccountId, token: igToken,
               baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
               tokens: allTokens, tokenClass: facebookPageId && pageTokenMap.get(facebookPageId) ? 'page' : 'user',
               reconstructInteractions: null, runType: 'scheduled',
               deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
+              checkpoint: { itemId: item.id, leaseGeneration },
             })
+            if (factsResult.healthState === 'permission_blocked' || factsResult.healthState === 'sync_error') {
+              throw new Error(`Instagram account facts ended in ${factsResult.healthState}.`)
+            }
             await savePlatformState('instagram', 'complete', null)
           } catch (e) {
             if (e instanceof MetaSyncDeadlineError) {
-              throw new RetryableIncompleteError(e.message)
+              throw new RetryableIncompleteError(e.message, true)
             }
-            if (e instanceof RetryableIncompleteError && item.attempts < 3) throw e
-            warnings.push(redact(`Instagram account facts error: ${String(e)}`, allTokens))
+            if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, true)
+            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
+            const factsError = redact(`Instagram account facts error: ${String(e)}`, allTokens)
+            warnings.push(factsError)
             itemStatus = 'failed'
-            itemError = 'Normalized Instagram account facts failed. Post content was preserved, but reporting truth is incomplete.'
+            itemError = factsError.includes('permission_blocked')
+              ? 'Instagram account facts are permission blocked. Post content was preserved.'
+              : 'Normalized Instagram account facts failed. Post content was preserved, but reporting truth is incomplete.'
             await savePlatformState('instagram', 'failed', null)
           }
         }
@@ -753,30 +987,21 @@ Deno.serve(async (req) => {
           warnings.push('No Facebook Page or Instagram account linked.')
         }
 
-        try {
-          const { error: runError } = await sb.from('meta_sync_runs').insert({
-            client_id: item.client_id,
-            connection_id: connections[0].id,
-            sync_type: 'previous_completed_month',
-            period_start: periodStart,
-            period_end: periodEnd,
-            status: itemStatus === 'failed' ? 'failed' : itemStatus === 'skipped' ? 'failed' : 'success',
-            summary: { postsSynced, warnings, reportsCreated, reportsReused, providerPaging, worker: META_CONNECTOR_VERSION },
-            started_at: now,
-            finished_at: now,
-          })
-          if (runError) {
-            warnings.push(`Sync run audit log failed: ${runError.message}`)
-          }
-        } catch (e) {
-          warnings.push(redact(`Sync run audit log failed: ${String(e)}`, [accessToken, ...pageTokenMap.values()]))
-        }
+        const { error: runError } = await sb.rpc('meta_sync_record_run', {
+          p_item_id: item.id,
+          p_lease_generation: leaseGeneration,
+          p_connection_id: connections[0].id,
+          p_status: itemStatus === 'failed' || itemStatus === 'skipped' ? 'failed' : 'success',
+          p_summary: { postsSynced, warnings, reportsCreated, reportsReused, providerPaging, worker: META_CONNECTOR_VERSION },
+        })
+        if (runError) throw new Error(`Could not record fenced Meta sync run: ${runError.message}`)
 
       } catch (e) {
         const message = redact(String(e), [accessToken, ...pageTokenMap.values()])
-        if (e instanceof RetryableIncompleteError && item.attempts < 3) {
+        if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) {
           itemStatus = 'queued'
           itemError = message
+          refundAttempt = e.refundAttempt
           budgetDeferred = true
         } else {
           itemStatus = 'failed'
@@ -786,31 +1011,18 @@ Deno.serve(async (req) => {
         }
       }
 
-      const updatePayload: Record<string, unknown> = {
-        status: itemStatus,
-        posts_synced: postsSynced,
-        reports_created: reportsCreated,
-        reports_reused: reportsReused,
-        finished_at: itemStatus === 'queued' ? null : new Date().toISOString(),
-      }
-      if (itemStatus === 'queued') updatePayload.started_at = null
-      if (warnings.length > 0) updatePayload.warnings = warnings
-      if (itemError) updatePayload.error = String(itemError).slice(0, 1000)
-      await sb.from('meta_sync_batch_items').update(updatePayload).eq('id', item.id)
-      settledIds.add(item.id)
-      // Heartbeat after every item too, so a long batch never looks abandoned
-      // to the reaper while it is genuinely progressing.
-      await touchBatch(sb, item.batch_id)
-
-      // Keep the parent batch counters live after EVERY item so the UI never
-      // shows a stale 0/N while this worker is mid-chunk. Safe while items
-      // remain queued/running — the RPC only completes the batch when nothing
-      // is left. The final per-batch recalc below stays as a safety net.
-      try {
-        await sb.rpc('recalculate_batch_status', { p_batch_id: item.batch_id })
-      } catch {
-        // RPC may not exist yet — final recalculation below still runs.
-      }
+      const itemRateLimited = isMetaRateLimitError(itemError ?? '')
+      const itemRateLimitScope = metaRateLimitScope(itemError ?? '')
+      await settleItem(
+        itemStatus,
+        reportsCreated,
+        reportsReused,
+        warnings,
+        itemError,
+        itemRateLimited || refundAttempt,
+        itemRateLimited ? 900 : null,
+        itemRateLimitScope,
+      )
 
       processed.push({
         itemId: item.id,
@@ -833,60 +1045,27 @@ Deno.serve(async (req) => {
   // A rate limit is a wait, not a failure. Without this the reaper retries
   // every minute, no item can settle, and the bounded no-progress budget would
   // eventually force-fail every remaining client for a temporary throttle.
-  const rateLimited = processed.some(p => /rate.?limit/i.test(p.error ?? ''))
+  const rateLimited = processed.some(p => isMetaRateLimitError(p.error ?? ''))
   if (rateLimited) {
+    waitingForRateLimit = true
     // A client that only failed because Meta throttled us has not really
     // failed. Put it back on the queue at its original attempt count so a
     // throttle can never burn through the retry budget and permanently mark a
     // client failed for something that had nothing to do with its data.
-    const throttled = processed
-      .filter(p => p.status === 'failed' && /rate.?limit/i.test(p.error ?? ''))
-      .map(p => p.itemId)
-    if (throttled.length > 0) {
-      try {
-        await sb.from('meta_sync_batch_items')
-          .update({ status: 'queued', started_at: null, finished_at: null, error: null })
-          .in('id', throttled)
-        await sb.rpc('meta_sync_release_items', { p_item_ids: throttled })
-      } catch {
-        // Left failed; the operator can retry the client explicitly.
-      }
-      for (const entry of processed) {
-        if (throttled.includes(entry.itemId)) entry.status = 'queued'
-      }
-    }
-
-    for (const batchId of batchIds) {
-      try {
-        await sb.rpc('meta_sync_begin_cooldown', {
-          p_batch_id: batchId,
-          p_seconds: 900,
-          p_reason: 'Meta rate-limited the sync. Waiting before retrying - no work has been lost.',
-        })
-      } catch {
-        // Best effort; the reaper simply retries sooner.
-      }
-    }
+    // Item settlement atomically refunded its attempt and started cooldown.
   }
 
-  const abandoned = [...claimedIds].filter(id => !settledIds.has(id))
+  const abandoned = [...claimedLeases.entries()]
+    .filter(([id]) => !settledIds.has(id))
+    .map(([itemId, leaseGeneration]) => ({ item_id: itemId, lease_generation: leaseGeneration }))
   if (abandoned.length > 0) {
     // supabase-js query builders are thenable but expose no .catch(), so this
     // must be a real try/catch — a rejection here would kill the invocation and
     // strand the very items it is trying to hand back.
     try {
-      await sb.rpc('meta_sync_release_items', { p_item_ids: abandoned })
+      await sb.rpc('meta_sync_release_claims', { p_claims: abandoned })
     } catch {
       // Left 'running'; the stale-lease sweep reclaims them.
-    }
-  }
-
-  // ── Recalculate parent batch statuses ──────────────────────
-  for (const batchId of batchIds) {
-    try {
-      await sb.rpc('recalculate_batch_status', { p_batch_id: batchId })
-    } catch {
-      // RPC may not exist yet — batch stays in current state
     }
   }
 
@@ -903,6 +1082,7 @@ Deno.serve(async (req) => {
       .select('id', { count: 'exact', head: true })
       .eq('batch_id', body.batchId)
       .eq('status', 'queued')
+      .or(`cooldown_until.is.null,cooldown_until.lte.${new Date().toISOString()}`)
 
     const { count: staleRunning } = await sb
       .from('meta_sync_batch_items')
@@ -914,7 +1094,7 @@ Deno.serve(async (req) => {
     workRemaining = (remaining ?? 0) > 0 || (staleRunning ?? 0) > 0
     // Never self-amplify when the claim RPC is missing/failing (avoids an
     // infinite trigger loop against a broken deployment).
-    if (!claimFailed && workRemaining) {
+    if (!claimFailed && workRemaining && !waitingForRateLimit) {
       const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${supabaseUrl}/functions/v1/meta-sync-worker`
       const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
       // Hand off WITHOUT waiting for the next generation to finish.
@@ -926,31 +1106,30 @@ Deno.serve(async (req) => {
       // two or three hops and the whole chain died mid-flight, stranding the
       // rest of the queue with no worker — the production stall in #161.
       //
-      // Now the request is aborted as soon as the next worker has certainly
-      // picked up the job (it claims and heartbeats within the first second),
-      // so this invocation can return immediately. Correctness no longer
-      // depends on the chain surviving at all: the per-minute cron reaper in
-      // background-worker revives any batch whose heartbeat goes stale.
-      selfTriggered = true
-      try {
-        await fetch(workerUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-worker-secret': workerSecret,
-          },
-          body: JSON.stringify({ batchId: body.batchId }),
-          signal: AbortSignal.timeout(2_000),
+      // A timely successful response is the only positive acknowledgement. A
+      // timeout may still have started work, but it is reported as uncertain;
+      // the per-minute reaper remains the durable recovery authority.
+      if (activeLane) {
+        const { error } = await sb.rpc('meta_sync_prepare_lane_handoff', {
+          p_batch_id: activeLane.batchId,
+          p_lane_id: activeLane.laneId,
+          p_lease_generation: activeLane.generation,
         })
-      } catch (error) {
-        // An abort here is the expected, healthy path — the next worker is
-        // already running. Anything else means the hand-off did not land, and
-        // the reaper will pick the batch up within a minute.
-        if (!(error instanceof DOMException && ['TimeoutError', 'AbortError'].includes(error.name))) {
-          selfTriggered = false
-        }
+        if (error) throw new Error(`Could not prepare Meta lane handoff: ${error.message}`)
       }
+      selfTriggered = await dispatchMetaWorker(workerUrl, workerSecret, {
+        batchId: body.batchId, workerLane, workerLanes,
+        laneLeaseGeneration: activeLane?.generation,
+      })
     }
+  }
+
+  if (activeLane && !selfTriggered) {
+    await sb.rpc('meta_sync_release_lane', {
+      p_batch_id: activeLane.batchId,
+      p_lane_id: activeLane.laneId,
+      p_lease_generation: activeLane.generation,
+    })
   }
 
   return jsonResponse({
@@ -967,6 +1146,10 @@ Deno.serve(async (req) => {
     handedOff: selfTriggered,
     claimFailed,
     rateLimited,
+    waitingForRateLimit,
+    workerLane,
+    workerLanes,
+    lanesStarted,
   })
   } catch (error) {
     // Any unhandled throw used to escape as a bare platform 500 with no
@@ -978,13 +1161,22 @@ Deno.serve(async (req) => {
     // work is stranded, and (b) reports a real message the UI and the job can
     // act on. The cron reaper picks the batch up again within the minute.
     const detail = error instanceof Error ? error.message : String(error)
-    const stranded = [...claimedIds].filter(id => !settledIds.has(id))
+    const stranded = [...claimedLeases.entries()]
+      .filter(([id]) => !settledIds.has(id))
+      .map(([itemId, leaseGeneration]) => ({ item_id: itemId, lease_generation: leaseGeneration }))
     if (crashClient && stranded.length > 0) {
       try {
-        await crashClient.rpc('meta_sync_release_items', { p_item_ids: stranded })
+        await crashClient.rpc('meta_sync_release_claims', { p_claims: stranded })
       } catch {
         // Left 'running'; the stale-lease sweep reclaims them.
       }
+    }
+    if (crashClient && activeLane) {
+      await crashClient.rpc('meta_sync_release_lane', {
+        p_batch_id: activeLane.batchId,
+        p_lane_id: activeLane.laneId,
+        p_lease_generation: activeLane.generation,
+      })
     }
     return jsonResponse({
       ok: false,

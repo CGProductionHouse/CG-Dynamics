@@ -31,7 +31,9 @@ export function resolveMetaGraphConfig(): { version: string; baseUrl: string } {
   if (!/^v\d+\.\d+$/.test(raw)) {
     throw new MetaConfigurationError(`META_GRAPH_VERSION "${raw}" is invalid. Refusing to call Meta.`)
   }
-  return { version: raw, baseUrl: `https://graph.facebook.com/${raw}` }
+  const defaultBase = `https://graph.facebook.com/${raw}`
+  const override = (Deno.env.get('META_GRAPH_BASE_URL') ?? '').trim()
+  return { version: raw, baseUrl: override || defaultBase }
 }
 
 export const META_CONNECTOR_VERSION = 'meta-connector-v3'
@@ -73,6 +75,16 @@ export class MetaSyncDeadlineError extends Error {
   constructor(stage: string) {
     super(`Meta sync paused during ${stage} because its resumable deadline was reached.`)
     this.name = 'MetaSyncDeadlineError'
+  }
+}
+
+export class MetaFactRetryableError extends Error {
+  readonly rateLimited: boolean
+
+  constructor(message: string, rateLimited: boolean) {
+    super(message)
+    this.name = 'MetaFactRetryableError'
+    this.rateLimited = rateLimited
   }
 }
 
@@ -526,6 +538,7 @@ export async function syncAccountFacts(
     reconstructInteractions?: number | null // fallback FB content interactions from post sums
     deadline?: number
     shouldCancel?: () => boolean
+    checkpoint?: { itemId: string; leaseGeneration: number }
   },
 ): Promise<AccountFactsResult> {
   const specs = args.platform === 'facebook' ? FB_ACCOUNT_METRICS : IG_ACCOUNT_METRICS
@@ -534,26 +547,65 @@ export async function syncAccountFacts(
 
   // 1. Open a sync run row.
   assertMetaSyncActive(control, `${args.platform} sync-run creation`)
-  const { data: runRow, error: runInsertError } = await sb.from('platform_sync_runs').insert({
-    client_id: args.clientId, asset_id: args.assetId, connection_id: args.connectionId,
-    platform: args.platform, run_type: args.runType, period_month: args.periodMonth,
-    period_start: args.periodStart, period_end: args.periodEnd,
-    api_version: args.apiVersion, connector_version: META_CONNECTOR_VERSION,
-    token_class: args.tokenClass, requested_bounds: { since: args.periodStart, until: args.periodEnd },
-    business_timezone: 'Africa/Johannesburg', status: 'running', health_state: 'sync_error',
-    started_at: new Date().toISOString(),
-  }).select('id').single()
-  if (runInsertError || !runRow?.id) {
-    throw new Error(`Failed to create ${args.platform} sync run: ${runInsertError?.message ?? 'missing run id'} (${runInsertError?.code ?? 'unknown'})`)
+  let syncRunId: string
+  let persistedSummary: Record<string, unknown> = {}
+  const completedMetricKeys = new Set<string>()
+  if (args.checkpoint) {
+    const { data, error } = await sb.rpc('meta_sync_begin_account_fact_run', {
+      p_item_id: args.checkpoint.itemId,
+      p_lease_generation: args.checkpoint.leaseGeneration,
+      p_platform: args.platform,
+      p_asset_id: args.assetId,
+      p_connection_id: args.connectionId,
+      p_api_version: args.apiVersion,
+      p_connector_version: META_CONNECTOR_VERSION,
+      p_token_class: args.tokenClass,
+      p_period_start: args.periodStart,
+      p_period_end: args.periodEnd,
+      p_requested_bounds: { since: args.periodStart, until: args.periodEnd },
+    })
+    if (error) throw new Error(`Failed to resume ${args.platform} fact run: ${error.message} (${error.code ?? 'unknown'})`)
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row?.sync_run_id) throw new Error(`Failed to resume ${args.platform} fact run: missing run id`)
+    syncRunId = String(row.sync_run_id)
+    for (const key of (Array.isArray(row.completed_metric_keys) ? row.completed_metric_keys : [])) completedMetricKeys.add(String(key))
+    persistedSummary = row.summary && typeof row.summary === 'object' && !Array.isArray(row.summary)
+      ? row.summary as Record<string, unknown>
+      : {}
+  } else {
+    const { data: runRow, error: runInsertError } = await sb.from('platform_sync_runs').insert({
+      client_id: args.clientId, asset_id: args.assetId, connection_id: args.connectionId,
+      platform: args.platform, run_type: args.runType, period_month: args.periodMonth,
+      period_start: args.periodStart, period_end: args.periodEnd,
+      api_version: args.apiVersion, connector_version: META_CONNECTOR_VERSION,
+      token_class: args.tokenClass, requested_bounds: { since: args.periodStart, until: args.periodEnd },
+      business_timezone: 'Africa/Johannesburg', status: 'running', health_state: 'sync_error',
+      started_at: new Date().toISOString(),
+    }).select('id').single()
+    if (runInsertError || !runRow?.id) {
+      throw new Error(`Failed to create ${args.platform} sync run: ${runInsertError?.message ?? 'missing run id'} (${runInsertError?.code ?? 'unknown'})`)
+    }
+    syncRunId = runRow.id as string
   }
-  const syncRunId = runRow.id as string
-
   const probes: MetricProbe[] = []
   const facts: AccountFactsResult['facts'] = {}
+  const persistedMetricResults = persistedSummary.metric_results && typeof persistedSummary.metric_results === 'object'
+    ? persistedSummary.metric_results as Record<string, { probe?: MetricProbe; value?: number | null; availability?: Availability; source_metric?: string }>
+    : {}
+  for (const key of completedMetricKeys) {
+    const prior = persistedMetricResults[key]
+    if (prior?.probe) probes.push(prior.probe)
+    if (prior) facts[key] = {
+      value: prior.value ?? null,
+      availability: prior.availability ?? 'unavailable',
+      sourceMetric: prior.source_metric ?? prior.probe?.sourceMetric ?? key,
+    }
+  }
 
   try {
     assertMetaSyncActive(control, `${args.platform} sync-run creation`)
     for (const spec of specs) {
+    if (completedMetricKeys.has(spec.metricKey)) continue
     assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} metric`)
     let probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, insightBounds.since, insightBounds.until, args.tokens, control)
     assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} probe completion`)
@@ -591,25 +643,16 @@ export async function syncAccountFacts(
       source_response: probe.rawSnapshot ?? null,
     }
     assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} snapshot persistence`)
-    const { data: snapshotRow, error: snapshotError } = await sb.from('platform_metric_snapshots').insert({
-      sync_run_id: syncRunId, client_id: args.clientId, asset_id: args.assetId, platform: args.platform,
+    const snapshotPayload = {
       source_endpoint: spec.mode === 'page_field' || spec.mode === 'ig_field' ? `/${args.platform}-object` : `/${args.platform}-object/insights`,
-      source_metric: sourceMetric, api_version: args.apiVersion, token_class: args.tokenClass,
-      period_month: args.periodMonth, period_start: args.periodStart, period_end: args.periodEnd,
+      source_metric: sourceMetric,
       metric_type: probe.metricType, response_shape: probe.responseShape,
       value: probe.value, availability: probe.availability,
       error_code: probe.error?.code ?? null, error_subcode: probe.error?.subcode ?? null,
       error_message: probe.error ? redact(probe.error.message, args.tokens) : null, trace_id: probe.error?.trace ?? null,
       raw_snapshot: safeSnapshot, retrieved_at: retrievedAt,
-    }).select('id').single()
-    if (snapshotError || !snapshotRow?.id) {
-      throw new Error(`Failed to persist ${args.platform}/${spec.metricKey} snapshot: ${snapshotError?.message ?? 'missing snapshot id'} (${snapshotError?.code ?? 'unknown'})`)
     }
-    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} snapshot persistence`)
-
-    // 3. Normalized fact (preserve-verified on failure).
-    assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} fact persistence`)
-    await upsertMonthlyFact(sb, {
+    const factPayload = {
       clientId: args.clientId, assetId: args.assetId, platform: args.platform,
       periodMonth: args.periodMonth, periodStart: args.periodStart, periodEnd: args.periodEnd,
       metricKey: spec.metricKey, sourceMetric, value: probe.value, availability: probe.availability,
@@ -617,28 +660,76 @@ export async function syncAccountFacts(
       apiVersion: args.apiVersion, sourceTimezone: META_INSIGHTS_TIMEZONE,
       provenance: {
         endpoint: spec.mode, token_class: args.tokenClass, response_shape: probe.responseShape,
-        snapshot_id: snapshotRow.id, sync_run_id: syncRunId, retrieved_at: retrievedAt,
         error_code: probe.error?.code ?? null,
       },
       syncRunId,
-    })
+      probe,
+      source_metric: sourceMetric,
+      availability: probe.availability,
+      includes_paid: spec.includesPaid,
+      comparable_group: spec.comparableGroup,
+      source_timezone: META_INSIGHTS_TIMEZONE,
+    }
+    if (args.checkpoint) {
+      const terminal = probe.availability !== 'error'
+      const { error } = await sb.rpc('meta_sync_persist_account_metric', {
+        p_item_id: args.checkpoint.itemId,
+        p_lease_generation: args.checkpoint.leaseGeneration,
+        p_sync_run_id: syncRunId,
+        p_metric_key: spec.metricKey,
+        p_terminal: terminal,
+        p_snapshot: snapshotPayload,
+        p_fact: factPayload,
+      })
+      if (error) throw new Error(`Failed to checkpoint ${args.platform}/${spec.metricKey}: ${error.message} (${error.code ?? 'unknown'})`)
+      if (terminal) completedMetricKeys.add(spec.metricKey)
+    } else {
+      const { data: snapshotRow, error: snapshotError } = await sb.from('platform_metric_snapshots').insert({
+        sync_run_id: syncRunId, client_id: args.clientId, asset_id: args.assetId, platform: args.platform,
+        api_version: args.apiVersion, token_class: args.tokenClass,
+        period_month: args.periodMonth, period_start: args.periodStart, period_end: args.periodEnd,
+        ...snapshotPayload,
+      }).select('id').single()
+      if (snapshotError || !snapshotRow?.id) {
+        throw new Error(`Failed to persist ${args.platform}/${spec.metricKey} snapshot: ${snapshotError?.message ?? 'missing snapshot id'} (${snapshotError?.code ?? 'unknown'})`)
+      }
+      await upsertMonthlyFact(sb, {
+        ...factPayload,
+        provenance: { ...factPayload.provenance, snapshot_id: snapshotRow.id, sync_run_id: syncRunId, retrieved_at: retrievedAt },
+      })
+    }
     assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} fact persistence`)
 
       facts[spec.metricKey] = { value: probe.value, availability: probe.availability, sourceMetric }
+      if (probe.availability === 'error') {
+        const detail = `${probe.error?.message ?? 'Meta metric request failed'} code: ${probe.error?.code ?? 'unknown'}`
+        const rateLimited = /rate.?limit|code:\s*(4|17|32|341|613)\b/i.test(detail)
+        throw new MetaFactRetryableError(redact(detail, args.tokens), rateLimited)
+      }
     }
   } catch (error) {
     const safeError = redact(error instanceof Error ? error.message : String(error), args.tokens)
-    const { error: failureUpdateError } = await sb.from('platform_sync_runs').update({
-      status: 'failed',
-      health_state: 'sync_error',
-      finished_at: new Date().toISOString(),
-      summary: {
-        facts,
-        connector: META_CONNECTOR_VERSION,
-        graph_version: args.apiVersion,
-        persistence_error: safeError,
-      },
-    }).eq('id', syncRunId)
+    if (args.checkpoint && (error instanceof MetaSyncDeadlineError || error instanceof MetaFactRetryableError)) throw error
+    const failureSummary = {
+      facts,
+      connector: META_CONNECTOR_VERSION,
+      graph_version: args.apiVersion,
+      persistence_error: safeError,
+    }
+    const { error: failureUpdateError } = args.checkpoint
+      ? await sb.rpc('meta_sync_finalize_account_fact_run', {
+        p_item_id: args.checkpoint.itemId,
+        p_lease_generation: args.checkpoint.leaseGeneration,
+        p_sync_run_id: syncRunId,
+        p_expected_metric_keys: specs.map(spec => spec.metricKey),
+        p_status: 'failed',
+        p_health_state: 'sync_error',
+        p_summary: failureSummary,
+      })
+      : await sb.from('platform_sync_runs').update({
+        status: 'failed', health_state: 'sync_error', finished_at: new Date().toISOString(),
+        summary: failureSummary,
+      }).eq('id', syncRunId)
     if (failureUpdateError && !(error instanceof MetaSyncDeadlineError)) {
       throw new Error(
         `${safeError}; failed to mark sync run failed: ${failureUpdateError.message} (${failureUpdateError.code ?? 'unknown'})`,
@@ -666,14 +757,20 @@ export async function syncAccountFacts(
           ? 'permission_blocked'
           : 'sync_error'
   const status = allDefinitive ? 'success' : (hasDefinitive || hasPartial) ? 'partial' : 'failed'
-  const { error: runUpdateError } = await sb.from('platform_sync_runs').update({
-    status, health_state: healthState, finished_at: new Date().toISOString(),
-    summary: {
-      facts,
-      connector: META_CONNECTOR_VERSION,
-      graph_version: args.apiVersion,
-    },
-  }).eq('id', syncRunId)
+  const finalSummary = { facts, connector: META_CONNECTOR_VERSION, graph_version: args.apiVersion }
+  const { error: runUpdateError } = args.checkpoint
+    ? await sb.rpc('meta_sync_finalize_account_fact_run', {
+      p_item_id: args.checkpoint.itemId,
+      p_lease_generation: args.checkpoint.leaseGeneration,
+      p_sync_run_id: syncRunId,
+      p_expected_metric_keys: specs.map(spec => spec.metricKey),
+      p_status: status,
+      p_health_state: healthState,
+      p_summary: finalSummary,
+    })
+    : await sb.from('platform_sync_runs').update({
+      status, health_state: healthState, finished_at: new Date().toISOString(), summary: finalSummary,
+    }).eq('id', syncRunId)
   if (runUpdateError) {
     throw new Error(`Failed to finalize ${args.platform} sync run: ${runUpdateError.message} (${runUpdateError.code ?? 'unknown'})`)
   }
