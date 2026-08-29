@@ -130,7 +130,7 @@ interface SpeechRecognitionLike {
   start: () => void
   stop: () => void
   onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
-  onerror: (() => void) | null
+  onerror: ((event: { error?: string }) => void) | null
   onend: (() => void) | null
 }
 
@@ -234,6 +234,8 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   const ownershipReviewRef = useRef<string | null>(null)
   const profileIdRef = useRef<string | null>(profile?.id ?? null)
   const actionRequestRef = useRef(0)
+  // Synchronous mirror of `sending` so voice onresult can skip updates during send.
+  const sendingRef = useRef(false)
   const debriefRequestSeqRef = useRef(0)
   const debriefAnalysisRequestRef = useRef<DebriefRequestToken | null>(null)
   const debriefConfirmationRequestRef = useRef<DebriefRequestToken | null>(null)
@@ -292,6 +294,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     memoryRef.current = []
     recognitionRef.current = null
     listeningRef.current = false
+    sendingRef.current = false
     audioChunksRef.current = []
     actionRequestRef.current += 1
     setMessages(loadSession(profileId))
@@ -1059,9 +1062,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     const clean = text.trim()
     const sendingProfileId = profileIdRef.current
     if (!clean || sending || applying || !sendingProfileId) return
+    // Stop any active voice recognition before processing to prevent onresult
+    // from re-populating the input after we clear it.
+    if (listeningRef.current) stopListening()
     // Collapse the mobile "More" list: any send takes the assistant out of the
     // clean idle state that shows the two primary actions.
     setMoreOpen(false)
+    sendingRef.current = true
 
     // Action agent first: understand the instruction as a concrete app action.
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
@@ -1190,6 +1197,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setChatErrorRetryable(friendly.retryable)
       }
     } finally {
+      sendingRef.current = false
       if (profileIdRef.current === sendingProfileId) setSending(false)
     }
   }
@@ -1211,15 +1219,31 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     recognition.continuous = false
     recognition.interimResults = true
     recognition.onresult = event => {
+      // Skip transcript updates while a send is in flight to prevent the
+      // recognition from re-populating the input after send() cleared it.
+      if (sendingRef.current) return
       let transcript = ''
       for (let i = 0; i < event.results.length; i += 1) {
         transcript += event.results[i][0].transcript
       }
       if (profileIdRef.current === listeningProfileId) setInput(transcript)
     }
-    recognition.onerror = () => {
+    recognition.onerror = (event) => {
       listeningRef.current = false
-      if (profileIdRef.current === listeningProfileId) setListening(false)
+      if (profileIdRef.current !== listeningProfileId) return
+      setListening(false)
+      // Surface specific speech recognition errors in plain language instead
+      // of a generic failure message.
+      if (event.error === 'not-allowed') {
+        setChatError('Microphone access was denied. Please allow microphone access in your browser settings and try again.')
+      } else if (event.error === 'audio-capture') {
+        setChatError('No microphone was found. Check that a microphone is connected and try again.')
+      } else if (event.error === 'no-speech') {
+        setChatError('I did not hear anything. Tap the mic and try speaking again.')
+      } else if (event.error === 'network') {
+        setChatError('Speech recognition had a network error. Check your connection and try again.')
+      }
+      // Other errors (aborted, service-not-allowed) are transient — no message needed.
     }
     recognition.onend = () => {
       listeningRef.current = false

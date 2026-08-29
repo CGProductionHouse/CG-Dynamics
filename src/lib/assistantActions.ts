@@ -332,7 +332,7 @@ export function defaultMicrosoftSyncRange(today: string): { start: string; end: 
 // Everything here only classifies the request and resolves the client; the
 // controlled workflow, its evidence gate and its approval rules are untouched.
 
-const MARKETING_NOUN = /\b(campaign|kampanje|strategy|strategie|marketing|copy|kopie|advert|advertensie|social copy|caption|onderskrif|ad copy|brand review|handelsmerk|content plan|content planning|social media|posts?|posting plan)\b/
+const MARKETING_NOUN = /\b(campaign|kampanje|strategy|strategie|marketing|copy|kopie|advert|advertensie|social copy|caption|onderskrif|ad copy|brand review|handelsmerk|content plan|content planning|social media|posts?|posting plan|content)\b/
 const MARKETING_MAKE = /\b(create|build|make|draft|write|skryf|skep|bou|maak|ontwerp|plan|beplan|start|begin|put together|map out)\b/
 
 /** "continue the marketing workflow" / "gaan voort met die bemarkingswerkvloei" */
@@ -590,7 +590,8 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
 
   // 2b. Task status / completion / blocker (on "this task" / a task in context).
   // Also handles follow-up context: "mark that done", "complete it", etc.
-  if ((THIS_TASK.test(lower) || TASK_NOUN.test(lower) || COMPLETE.test(lower) || BLOCKED.test(lower)) && !ASSIGN.test(lower)) {
+  // Exclude "done by X" / "should be done by X" which is an assignment, not a completion.
+  if ((THIS_TASK.test(lower) || TASK_NOUN.test(lower) || COMPLETE.test(lower) || BLOCKED.test(lower)) && !ASSIGN.test(lower) && !ASSIGNED_BY.test(lower)) {
     // Resolve task ID from: current page context > follow-up context > explicit match.
     const effectiveTaskId = context.currentTaskId ?? context.lastTaskId ?? null
     const effectiveTaskName = context.currentTaskName ?? context.lastTaskName ?? null
