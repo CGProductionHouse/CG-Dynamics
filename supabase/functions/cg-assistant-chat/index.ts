@@ -411,6 +411,19 @@ const TASK_LOOKUP_PATTERNS = [
   /\bwhat am i forgetting\b/i,
 ]
 
+const CLIENT_SCHEDULE_PATTERNS = [
+  /\bposting\b/i,
+  /\bschedule\b/i,
+  /\bcontent (?:due|scheduled|planned|this|next)\b/i,
+  /\bwhat(?:'s| is) .+ (?:posting|scheduled|due|planned)\b/i,
+  /\bdeliverables?\b/i,
+  /\bupcoming (?:content|posts?|deliverables?)\b/i,
+  /\bthis week(?:'s)?\b/i,
+  /\bnext week(?:'s)?\b/i,
+  /\bthis month(?:'s)?\b/i,
+  /\breel|photo|video|dp\b/i,
+]
+
 const SETUP_QUESTION_PATTERNS = [
   /\bhow (do|would|can) (we|i)\b/i,
   /\bsetup\b/i,
@@ -519,6 +532,10 @@ function isCapabilitiesQuestion(message: string): boolean {
 
 function isTaskLookupRequest(message: string): boolean {
   return TASK_LOOKUP_PATTERNS.some((pattern) => pattern.test(message))
+}
+
+function isClientScheduleQuery(message: string): boolean {
+  return CLIENT_SCHEDULE_PATTERNS.some((pattern) => pattern.test(message))
 }
 
 function isSetupQuestion(message: string): boolean {
@@ -693,6 +710,144 @@ function buildLocalWorkResponse(context: LocalWorkContext): string {
   return parts.join('\n')
 }
 
+// Client Schedule query: answers "What's Red Oak posting this week?" etc.
+// Uses the same monthly_deliverables table the Client Schedule page reads.
+async function handleClientScheduleQuery(
+  sb: ReturnType<typeof createClient>,
+  message: string,
+): Promise<{ answer: string; clientId: string | null; clientName: string | null } | null> {
+  const lower = message.toLowerCase()
+
+  // Find client name in the message.
+  const { data: clients } = await sb
+    .from('clients')
+    .select('id, name')
+    .eq('active', true)
+    .order('name')
+
+  if (!clients || clients.length === 0) return null
+
+  // Match client name from message.
+  let matchedClient: { id: string; name: string } | null = null
+  for (const client of clients) {
+    const name = (client.name as string).toLowerCase()
+    if (!name) continue
+    const words = name.split(/\s+/).filter(w => w.length >= 3)
+    if (words.some(w => lower.includes(w)) || lower.includes(name)) {
+      matchedClient = { id: client.id as string, name: client.name as string }
+      break
+    }
+  }
+
+  if (!matchedClient) return null
+
+  // Determine time window.
+  const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+  const dayOfWeek = now.getDay() // 0=Sun, 6=Sat
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - dayOfWeek)
+  const endOfWeek = new Date(startOfWeek)
+  endOfWeek.setDate(startOfWeek.getDate() + 6)
+  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+  const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))
+
+  const isThisWeek = /\bthis week\b/i.test(message)
+  const isNextWeek = /\bnext week\b/i.test(message)
+  const isThisMonth = /\bthis month\b/i.test(message) || !isThisWeek && !isNextWeek
+
+  let windowStart: string
+  let windowEnd: string
+  let windowLabel: string
+
+  if (isThisWeek) {
+    windowStart = startOfWeek.toISOString().slice(0, 10)
+    windowEnd = endOfWeek.toISOString().slice(0, 10)
+    windowLabel = 'this week'
+  } else if (isNextWeek) {
+    const nextStart = new Date(startOfWeek)
+    nextStart.setDate(startOfWeek.getDate() + 7)
+    const nextEnd = new Date(nextStart)
+    nextEnd.setDate(nextStart.getDate() + 6)
+    windowStart = nextStart.toISOString().slice(0, 10)
+    windowEnd = nextEnd.toISOString().slice(0, 10)
+    windowLabel = 'next week'
+  } else {
+    windowStart = startOfMonth.toISOString().slice(0, 10)
+    windowEnd = endOfMonth.toISOString().slice(0, 10)
+    windowLabel = 'this month'
+  }
+
+  // Query deliverables.
+  const monthStart = startOfMonth.toISOString().slice(0, 10)
+  const { data: deliverables } = await sb
+    .from('monthly_deliverables')
+    .select('id, title, code, deliverable_type, production_status, priority, due_date, scheduled_date, posted_at, assigned_to_name, month')
+    .eq('client_id', matchedClient.id)
+    .eq('month', monthStart)
+    .is('archived_at', null)
+    .order('instance_number')
+
+  if (!deliverables || deliverables.length === 0) {
+    return {
+      answer: `No deliverables found for ${matchedClient.name} this month.`,
+      clientId: matchedClient.id,
+      clientName: matchedClient.name,
+    }
+  }
+
+  // Filter to the time window.
+  const inWindow = deliverables.filter(d => {
+    const date = (d.scheduled_date as string) ?? (d.due_date as string) ?? (d.posted_at as string)?.slice(0, 10)
+    if (!date) return false
+    return date >= windowStart && date <= windowEnd
+  })
+
+  // Also get upcoming (not yet posted, with dates in the future).
+  const upcoming = deliverables.filter(d => {
+    const status = d.production_status as string
+    if (status === 'posted' || status === 'moved') return false
+    const date = (d.scheduled_date as string) ?? (d.due_date as string)
+    if (!date) return false
+    return date >= today
+  })
+
+  const target = inWindow.length > 0 ? inWindow : upcoming
+  if (target.length === 0) {
+    return {
+      answer: `Nothing scheduled for ${matchedClient.name} ${windowLabel}. ${deliverables.length} total deliverable${deliverables.length === 1 ? '' : 's'} exist this month.`,
+      clientId: matchedClient.id,
+      clientName: matchedClient.name,
+    }
+  }
+
+  const statusEmoji: Record<string, string> = {
+    posted: '✅',
+    scheduled: '📅',
+    approved: '👍',
+    in_progress: '🔄',
+    to_do: '⬜',
+    ready_internal_review: '👁️',
+    blocked: '🚫',
+  }
+
+  const lines = target.map(d => {
+    const date = (d.scheduled_date as string) ?? (d.due_date as string) ?? 'no date'
+    const status = d.production_status as string
+    const emoji = statusEmoji[status] ?? '•'
+    const assignee = d.assigned_to_name ? ` (${d.assigned_to_name})` : ''
+    return `${emoji} ${d.title} — ${date}${assignee}`
+  })
+
+  const summary = `Here is what ${matchedClient.name} has ${windowLabel}:\n${lines.join('\n')}`
+
+  return {
+    answer: summary,
+    clientId: matchedClient.id,
+    clientName: matchedClient.name,
+  }
+}
+
 function buildRestrictedResponse(role: string, setupAllowed: boolean): string {
   if (setupAllowed) {
     return 'Finance, payroll, bank, tax and private HR data are not connected to CG Assistant yet. I can help plan the setup or work with non-financial data instead.'
@@ -756,7 +911,7 @@ function buildSystemPrompt(
     '- Create, assign, complete, block and query Planner tasks.',
     '- Look up, open and summarise active clients.',
     '- Query and create CG Calendar events.',
-    '- Query upcoming deliverables and content deadlines per client.',
+    '- Answer what content is due, scheduled or posted for any client this week or month.',
     '- Launch Marketing AI specialists for strategy, copy, brand review and content planning.',
     '- Navigate directly to any page, client, task or event.',
     '- Answer real integration status from live diagnostics.',
@@ -1294,6 +1449,28 @@ Deno.serve(async (req) => {
       answer,
       tools: TOOL_REGISTRY,
     })
+  }
+
+  // Client Schedule query: "What's Red Oak posting this week?" etc.
+  if (isClientScheduleQuery(message)) {
+    const scheduleResult = await handleClientScheduleQuery(sb, message)
+    if (scheduleResult) {
+      await auditAssistantRequest(sb, {
+        userId: user.id,
+        role,
+        message,
+        responseStatus: 'client_schedule_query',
+        restricted: false,
+        promptCategory: 'client_schedule',
+        model: 'local:client_schedule',
+      })
+      return jsonResponse({
+        ok: true,
+        answer: scheduleResult.answer,
+        tools: TOOL_REGISTRY,
+      })
+    }
+    // If no client matched, fall through to general chat.
   }
 
   // Skilled-agent mode: a distinct AI Workforce agent with deterministic,
