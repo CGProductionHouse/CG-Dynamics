@@ -1,0 +1,70 @@
+name: Owner Dev Bridge Check
+run-name: Owner Dev Bridge ${{ inputs.request_id || github.run_id }} (${{ inputs.action }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Allowlisted development action
+        type: choice
+        required: true
+        options: [typecheck, lint, test, build, full, browser]
+      target_url:
+        description: Verified CG Dynamics Vercel root URL, browser action only
+        type: string
+        required: false
+      request_id:
+        description: Opaque dispatch correlation ID
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: owner-dev-check-${{ github.ref }}-${{ inputs.action }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run allowlisted action
+        env:
+          ACTION: ${{ inputs.action }}
+        run: |
+          case "$ACTION" in
+            typecheck) npm run typecheck ;;
+            lint) npm run lint ;;
+            test) npm test ;;
+            build) npm run build ;;
+            full) npm run check ;;
+            browser) echo "Browser action continues below" ;;
+            *) echo "Unsupported action" >&2; exit 2 ;;
+          esac
+      - name: Install Chromium
+        if: inputs.action == 'browser'
+        run: npx playwright install --with-deps chromium
+      - name: Run browser verification
+        if: inputs.action == 'browser'
+        env:
+          CG_BROWSER_TARGET_URL: ${{ inputs.target_url }}
+        run: npm run test:browser
+      - name: Upload browser evidence
+        if: always() && inputs.action == 'browser'
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-evidence-${{ github.run_id }}
+          path: artifacts/browser/
+          if-no-files-found: warn
+          retention-days: 14

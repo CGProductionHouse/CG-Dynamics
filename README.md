@@ -1,5 +1,11 @@
 # React + TypeScript + Vite
 
+## Owner development bridge
+
+The isolated remote MCP development control plane lives under `dev-bridge/`.
+Its architecture, security boundaries, deployment procedure and current
+ChatGPT client limitations are documented in `docs/owner-dev-bridge.md`.
+
 ## CG Assistant setup
 
 CG Assistant is a staff-facing assistant inside the existing CG Dynamics admin

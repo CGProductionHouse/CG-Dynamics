@@ -5,6 +5,11 @@
 Supabase (PostgreSQL, Auth, RLS, Storage, Edge Functions). Supabase is the only
 backend. No Convex, no other backend.
 
+The Owner Dev Bridge is a separately deployed development control plane, not a
+CG Dynamics product backend. It cannot serve application data paths and is
+locked to GitHub/Vercel/fixed read-only diagnostics. See
+`docs/owner-dev-bridge.md`.
+
 ## Authentication
 
 - Supabase Auth (email/password).
