@@ -23,9 +23,9 @@ test('only scoped development branches are accepted', () => {
 })
 
 test('known credential formats and assignments are redacted', () => {
-  const text = redactText('token ghp_abcdefghijklmnopqrstuvwxyz123456 password=hunter2 api_key:secret-value')
+  const text = redactText('token ghp_abcdefghijklmnopqrstuvwxyz123456 password=hunter2 api_key:secret-value Authorization: Bearer opaque-token')
   assert.doesNotMatch(text, /ghp_/)
-  assert.doesNotMatch(text, /hunter2|secret-value/)
+  assert.doesNotMatch(text, /hunter2|secret-value|opaque-token/)
   assert.match(text, /\[REDACTED\]/)
 })
 

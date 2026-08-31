@@ -21,6 +21,7 @@ const SECRET_PATTERNS = [
   /\b(?:sb_secret|sb_publishable)_[A-Za-z0-9_-]{20,}\b/g,
   /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g,
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----[\s\S]*?-----END (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g,
+  /(\bBearer\s+)[A-Za-z0-9._~+/=-]+/gi,
   /((?:api[_-]?key|access[_-]?token|client[_-]?secret|service[_-]?role|password)\s*[:=]\s*)[^\s,;]+/gi,
 ]
 

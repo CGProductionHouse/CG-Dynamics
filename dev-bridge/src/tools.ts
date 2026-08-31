@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/server'
 import * as z from 'zod/v4'
 import type { OwnerIdentity } from './auth.js'
 import { requireWriteScope, writeScopeChallenge } from './auth.js'
-import { audit } from './audit.js'
+import { audit, requireDurableAudit } from './audit.js'
 import {
   applyChanges, compareRefs, createBranch, createPullRequest, dispatchCheck, getWorkflowRun,
   listFiles, readFile, recentCommits, repoStatus, searchCode,
@@ -39,15 +39,16 @@ function register<T extends z.ZodObject>(server: McpServer, identity: OwnerIdent
   const toolHandler = async (args: z.output<T>) => {
     const started = Date.now()
     const requestId = randomUUID()
+    requireDurableAudit()
     try {
       if (options.risk !== 'low') requireWriteScope(identity)
       if (options.risk === 'high_impact') throw new Error('High-impact operations are not executable through this bridge.')
       const value = await options.handler(args)
-      audit({ requestId, actor: identity.subject, tool: options.name, risk: options.risk, target: options.target?.(args), outcome: 'success', durationMs: Date.now() - started })
+      await audit({ requestId, actor: identity.subject, tool: options.name, risk: options.risk, target: options.target?.(args), outcome: 'success', durationMs: Date.now() - started })
       return result({ requestId, ...value as Record<string, unknown> })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Tool failed.'
-      audit({ requestId, actor: identity.subject, tool: options.name, risk: options.risk, target: options.target?.(args), outcome: message.includes('scope') || message.includes('protected') ? 'denied' : 'failed', durationMs: Date.now() - started, error: message })
+      await audit({ requestId, actor: identity.subject, tool: options.name, risk: options.risk, target: options.target?.(args), outcome: message.includes('scope') || message.includes('protected') ? 'denied' : 'failed', durationMs: Date.now() - started, error: message })
       return {
         content: [{ type: 'text' as const, text: message }],
         isError: true,

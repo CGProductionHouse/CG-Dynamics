@@ -27,7 +27,7 @@ Implemented:
 - Vercel deployment/build diagnostics;
 - fixed read-only Supabase schema/RLS/policy/function/migration diagnostics;
 - path traversal, protected-path, secret redaction, timeout, payload and rate safeguards;
-- structured tool audit logs;
+- structured host logs plus production-only private Blob audit retention using rotating Vercel OIDC credentials;
 - PR/main CI and focused security/transport tests;
 - isolated production Vercel companion project connected to the GitHub repository with root `dev-bridge`;
 - production-only canonical public URL configuration;
@@ -38,7 +38,6 @@ Remote state is deployed but intentionally fail-closed. Authenticated tools are 
 
 - owner OAuth provider/client;
 - dedicated least-privilege GitHub App;
-- protected durable audit-log drain/retention sink; the connected Vercel team is Hobby and Drains require a paid Pro/Enterprise plan plus a destination;
 - optional Vercel/Supabase diagnostics credentials;
 - safe one-time preview-isolated authenticated browser QA mechanism;
 - ChatGPT custom MCP connection.
@@ -51,5 +50,5 @@ The OAuth and GitHub App credentials do not exist in connected access and cannot
 - Supabase migration: none.
 - Main CG Dynamics production deployment/promotion: none.
 - Isolated Owner Dev Bridge production deployment: `dpl_8PusXuZKwSqpeYHsMzEtQV57EJhw`, READY.
-- Secrets/auth/provider configuration changed: no secret configured; only the non-secret bridge public URL and WAF rule were added.
+- Secrets/auth/provider configuration changed: no owner/provider or long-lived Blob secret configured; the non-secret bridge public URL, WAF rule and production-only private Blob/OIDC store binding were added.
 - Meta PR #202 changed: no.

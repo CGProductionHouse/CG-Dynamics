@@ -1,6 +1,6 @@
 # CG Dynamics Owner Dev Bridge
 
-Status: deployed fail-closed on `feat/owner-dev-bridge`; authenticated activation requires owner-controlled OAuth, GitHub App and durable audit retention.
+Status: deployed fail-closed on `feat/owner-dev-bridge`; authenticated activation requires owner-controlled OAuth and GitHub App configuration.
 
 ## Purpose
 
@@ -39,7 +39,8 @@ Verified on 31 August 2026:
 - anonymous MCP initialization returns `401` with the correct RFC 9728 discovery challenge;
 - MCP Inspector CLI reaches the endpoint and reports `auth_required` rather than a transport/server failure;
 - the live WAF rule matches exactly `/mcp` and enforces 30 requests per IP per 60-second fixed window; a 35-request probe returned 29 `401` responses followed by 6 `429` responses because one request had already consumed the same window;
-- no OAuth, GitHub App, Vercel diagnostic or Supabase diagnostic secret is configured.
+- private production-only Vercel Blob store `cg-dynamics-owner-dev-audit` (`store_WtZpOHplAIANmBoD`) is connected for durable audit retention through rotating Vercel OIDC credentials;
+- no OAuth, GitHub App, Vercel diagnostic, Supabase diagnostic or long-lived Blob secret is configured.
 
 The endpoint is intentionally not usable for authenticated tools until all mandatory identity and audit gates below are complete. Missing provider configuration fails closed; it is not replaced with development credentials or a weaker authentication mode.
 
@@ -175,7 +176,7 @@ Supabase live schema diagnostics require a management access token and project r
 
 ## Audit and limits
 
-Every tool call writes a structured host log containing timestamp, request ID, immutable actor subject, tool, risk, target, outcome and duration. It excludes token values, source contents and raw arguments. GitHub commits, Actions runs and PRs provide additional durable write evidence. Before production activation, configure a protected Vercel log drain or equivalent owner-controlled retention sink so read-only calls are not dependent on short-lived serverless log retention.
+Every tool call writes a structured host log and one private durable JSON record containing timestamp, request ID, immutable actor subject, tool, risk, target, outcome and duration. It excludes token values, source contents and raw arguments. Each record has a unique date/request path, cannot overwrite an existing object, and must persist before the tool returns. Tool execution fails closed before work begins when the production Blob/OIDC binding is unavailable. GitHub commits, Actions runs and PRs provide additional durable write evidence.
 
 The service enforces:
 
@@ -193,7 +194,7 @@ Configure a Vercel Firewall rate rule for the `/mcp` endpoint before production 
 
 This rule is active on the isolated companion project. Vercel counters are per region and per IP on the connected Hobby plan; the authenticated in-process subject limit remains defense-in-depth behind it.
 
-The connected Vercel team is confirmed as Hobby. Vercel Drains are available only on paid Pro/Enterprise plans, and no drain destination is connected. Durable read-call retention therefore remains a hard activation gate requiring CA to approve the plan/cost and select an owner-controlled destination. Do not describe short-lived Hobby runtime logs as durable audit retention.
+The connected Vercel team is confirmed as Hobby. Vercel Drains are available only on paid Pro/Enterprise plans, so the bridge instead uses the private `cg-dynamics-owner-dev-audit` Blob store in `iad1`. Hobby Blob is free within its included limits and stops accepting access rather than creating overage charges. The store is connected only to the isolated bridge production environment. The official Blob SDK uses Vercel's rotating OIDC token plus `BLOB_STORE_ID`; the CLI-created long-lived `BLOB_READ_WRITE_TOKEN` was removed immediately. Preview/development deployments have no store binding, and the bridge exposes no audit-read or audit-delete MCP tool. Store retention and any owner deletion remain controlled in the Vercel project.
 
 ## Validation runner
 
@@ -268,7 +269,6 @@ Before OAuth is provisioned, the correct result is `auth_required`. After OAuth 
 
 - Provision the Auth0 API/CIMD client and immutable owner subject, then set its production-only Vercel configuration.
 - Create/install the least-privilege GitHub App and set its production-only Vercel configuration.
-- Upgrade/choose a supported durable log destination and configure a protected drain/retention sink.
 - Provision a one-time, preview-isolated QA identity and trusted harness before enabling authenticated browser automation.
 - Optionally provide read-only Vercel/Supabase diagnostic credentials.
 - Complete authenticated MCP Inspector tool-list/read/write/check validation, then connect from an eligible ChatGPT web workspace.
@@ -281,6 +281,7 @@ Completed activation gates:
 - public root and health endpoint verification;
 - correct unauthenticated OAuth challenge and fail-closed behavior;
 - live and measured WAF rate limiting;
-- credential-free MCP Inspector transport/authentication handshake.
+- credential-free MCP Inspector transport/authentication handshake;
+- production-only private Blob durable audit store with OIDC-only application access and fail-closed tool preflight.
 
 No production database migration is required by this bridge implementation.
