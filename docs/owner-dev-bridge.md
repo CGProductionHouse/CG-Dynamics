@@ -34,15 +34,16 @@ Verified on 31 August 2026:
 - health endpoint: `https://dev-bridge-kappa.vercel.app/health`;
 - Vercel project: `cg-dynamics-projects/dev-bridge`;
 - repository integration: `CGProductionHouse/CG-Dynamics`, root directory `dev-bridge`, production branch `main`;
-- production deployment `dpl_8PusXuZKwSqpeYHsMzEtQV57EJhw`: READY;
+- production deployment `dpl_8iKw59DiVB1EwZFtMbsrdd9QuSZY`: READY;
 - `OWNER_BRIDGE_PUBLIC_URL` is configured only in production as a non-secret;
 - anonymous MCP initialization returns `401` with the correct RFC 9728 discovery challenge;
 - MCP Inspector CLI reaches the endpoint and reports `auth_required` rather than a transport/server failure;
 - the live WAF rule matches exactly `/mcp` and enforces 30 requests per IP per 60-second fixed window; a 35-request probe returned 29 `401` responses followed by 6 `429` responses because one request had already consumed the same window;
 - private production-only Vercel Blob store `cg-dynamics-owner-dev-audit` (`store_WtZpOHplAIANmBoD`) is connected for durable audit retention through rotating Vercel OIDC credentials;
+- production resolves `BLOB_STORE_ID` and Vercel OIDC with no static Blob token; a local SDK write was rejected as the disallowed `development` environment, confirming the production-only access boundary;
 - no OAuth, GitHub App, Vercel diagnostic, Supabase diagnostic or long-lived Blob secret is configured.
 
-The endpoint is intentionally not usable for authenticated tools until all mandatory identity and audit gates below are complete. Missing provider configuration fails closed; it is not replaced with development credentials or a weaker authentication mode.
+The endpoint is intentionally not usable for authenticated tools until the mandatory identity gates below are complete. Missing provider configuration fails closed; it is not replaced with development credentials or a weaker authentication mode.
 
 ## Tools
 

@@ -49,6 +49,6 @@ The OAuth and GitHub App credentials do not exist in connected access and cannot
 - Production SQL/data mutation: none.
 - Supabase migration: none.
 - Main CG Dynamics production deployment/promotion: none.
-- Isolated Owner Dev Bridge production deployment: `dpl_8PusXuZKwSqpeYHsMzEtQV57EJhw`, READY.
+- Isolated Owner Dev Bridge production deployment: `dpl_8iKw59DiVB1EwZFtMbsrdd9QuSZY`, READY at `https://dev-bridge-kappa.vercel.app`.
 - Secrets/auth/provider configuration changed: no owner/provider or long-lived Blob secret configured; the non-secret bridge public URL, WAF rule and production-only private Blob/OIDC store binding were added.
 - Meta PR #202 changed: no.
