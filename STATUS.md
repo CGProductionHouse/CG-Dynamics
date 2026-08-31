@@ -14,6 +14,8 @@ Last updated: 2026-08-31 SAST
 
 Branch `feat/owner-dev-bridge` introduces an isolated remote MCP development control plane under `dev-bridge/`.
 
+Remote endpoint: `https://dev-bridge-kappa.vercel.app/mcp`
+
 Implemented:
 
 - OAuth 2.1/JWKS owner authentication and immutable subject allowlist;
@@ -26,24 +28,28 @@ Implemented:
 - fixed read-only Supabase schema/RLS/policy/function/migration diagnostics;
 - path traversal, protected-path, secret redaction, timeout, payload and rate safeguards;
 - structured tool audit logs;
-- PR/main CI and focused security/transport tests.
+- PR/main CI and focused security/transport tests;
+- isolated production Vercel companion project connected to the GitHub repository with root `dev-bridge`;
+- production-only canonical public URL configuration;
+- live Vercel WAF fixed-window limit of 30 `/mcp` requests per IP per 60 seconds;
+- remote root and `/health` availability, anonymous OAuth challenge, WAF enforcement and MCP Inspector unauthenticated-handshake verification.
 
-Not activated remotely yet:
+Remote state is deployed but intentionally fail-closed. Authenticated tools are not active yet because these owner-controlled gates remain:
 
 - owner OAuth provider/client;
 - dedicated least-privilege GitHub App;
-- isolated Vercel companion project and firewall;
-- protected durable audit-log drain/retention sink;
+- protected durable audit-log drain/retention sink; the connected Vercel team is Hobby and Drains require a paid Pro/Enterprise plan plus a destination;
 - optional Vercel/Supabase diagnostics credentials;
 - safe one-time preview-isolated authenticated browser QA mechanism;
 - ChatGPT custom MCP connection.
 
-These require owner-controlled external credentials/configuration. Current OpenAI availability is documented separately in `docs/owner-dev-bridge.md`.
+The OAuth and GitHub App credentials do not exist in connected access and cannot be created by the current GitHub token. Current OpenAI availability and the exact remaining owner actions are documented in `docs/owner-dev-bridge.md`.
 
 ## Production impact
 
 - Production SQL/data mutation: none.
 - Supabase migration: none.
-- Production deployment/promotion: none.
-- Secrets/auth/provider configuration changed: none.
+- Main CG Dynamics production deployment/promotion: none.
+- Isolated Owner Dev Bridge production deployment: `dpl_8PusXuZKwSqpeYHsMzEtQV57EJhw`, READY.
+- Secrets/auth/provider configuration changed: no secret configured; only the non-secret bridge public URL and WAF rule were added.
 - Meta PR #202 changed: no.

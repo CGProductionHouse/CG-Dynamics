@@ -30,13 +30,20 @@ test('protected resource metadata is OAuth 2.1/MCP discoverable', () => {
 })
 
 test('anonymous MCP requests are denied with a discovery challenge', async () => {
-  const response = await handleMcp(new Request('https://bridge.example.com/mcp', {
-    method: 'POST',
-    headers: { host: 'bridge.example.com', 'content-type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }),
-  }))
-  assert.equal(response.status, 401)
-  assert.match(response.headers.get('www-authenticate') ?? '', /oauth-protected-resource/)
+  const oauthNames = ['OWNER_BRIDGE_OAUTH_ISSUER', 'OWNER_BRIDGE_OAUTH_AUDIENCE', 'OWNER_BRIDGE_OAUTH_JWKS_URI', 'OWNER_BRIDGE_ALLOWED_SUBJECTS']
+  const saved = new Map(oauthNames.map(name => [name, process.env[name]]))
+  oauthNames.forEach(name => delete process.env[name])
+  try {
+    const response = await handleMcp(new Request('https://bridge.example.com/mcp', {
+      method: 'POST',
+      headers: { host: 'bridge.example.com', 'content-type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }),
+    }))
+    assert.equal(response.status, 401)
+    assert.match(response.headers.get('www-authenticate') ?? '', /oauth-protected-resource/)
+  } finally {
+    saved.forEach((value, name) => { if (value === undefined) delete process.env[name]; else process.env[name] = value })
+  }
 })
 
 test('wrong origins and oversized requests fail before tool execution', async () => {

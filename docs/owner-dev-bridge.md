@@ -1,6 +1,6 @@
 # CG Dynamics Owner Dev Bridge
 
-Status: implemented on `feat/owner-dev-bridge`; remote activation requires owner-controlled OAuth, GitHub App and companion Vercel project configuration.
+Status: deployed fail-closed on `feat/owner-dev-bridge`; authenticated activation requires owner-controlled OAuth, GitHub App and durable audit retention.
 
 ## Purpose
 
@@ -25,6 +25,23 @@ ChatGPT custom MCP app
 The existing Vite application remains unchanged and continues using Supabase as its only product backend. The companion service has its own Vercel root directory and dependencies.
 
 The companion includes a minimal no-index static root page because Vercel's Node project packaging requires a `public` output directory. The development API remains in serverless functions and `/mcp` still requires owner authentication.
+
+## Current remote state
+
+Verified on 31 August 2026:
+
+- production endpoint: `https://dev-bridge-kappa.vercel.app/mcp`;
+- health endpoint: `https://dev-bridge-kappa.vercel.app/health`;
+- Vercel project: `cg-dynamics-projects/dev-bridge`;
+- repository integration: `CGProductionHouse/CG-Dynamics`, root directory `dev-bridge`, production branch `main`;
+- production deployment `dpl_8PusXuZKwSqpeYHsMzEtQV57EJhw`: READY;
+- `OWNER_BRIDGE_PUBLIC_URL` is configured only in production as a non-secret;
+- anonymous MCP initialization returns `401` with the correct RFC 9728 discovery challenge;
+- MCP Inspector CLI reaches the endpoint and reports `auth_required` rather than a transport/server failure;
+- the live WAF rule matches exactly `/mcp` and enforces 30 requests per IP per 60-second fixed window; a 35-request probe returned 29 `401` responses followed by 6 `429` responses because one request had already consumed the same window;
+- no OAuth, GitHub App, Vercel diagnostic or Supabase diagnostic secret is configured.
+
+The endpoint is intentionally not usable for authenticated tools until all mandatory identity and audit gates below are complete. Missing provider configuration fails closed; it is not replaced with development credentials or a weaker authentication mode.
 
 ## Tools
 
@@ -109,6 +126,18 @@ Required:
 
 Configure authorization-code flow with PKCE S256, OAuth metadata discovery, exact ChatGPT redirect URI, resource indicator propagation, and the `dev:read`/`dev:write` scopes. Use CIMD where the provider supports it; otherwise use DCR or the predefined client configured in ChatGPT.
 
+The smallest remaining owner action is to create or select an Auth0 tenant and configure one API:
+
+1. Open `https://manage.auth0.com/` and create an API named `CG Dynamics Owner Dev Bridge`.
+2. Set its identifier/audience to exactly `https://dev-bridge-kappa.vercel.app/mcp`, signing algorithm RS256, and add permissions `dev:read` and `dev:write`.
+3. Set that API identifier as the tenant default audience so Auth0 issues a locally verifiable RS256 JWT.
+4. Enable manual CIMD registration. Import the exact ChatGPT client metadata URL shown by the ChatGPT plugin management page; use `https://chatgpt.com/oauth/client.json` only when that page confirms the stable callback mode.
+5. Grant that CIMD client user-delegated access to both bridge permissions and assign them to CA's Auth0 user.
+6. Record the tenant issuer and CA user's immutable Auth0 `user_id` (`sub`). Do not use email as the allowlist value.
+7. Add the issuer, exact audience, tenant JWKS URL and immutable subject to the four corresponding production-only Vercel variables. No Auth0 client secret belongs in this bridge when CIMD/PKCE is used.
+
+The app management page's exact client metadata and redirect URLs override generic examples. OpenAI currently uses `https://chatgpt.com/connector_platform_oauth_redirect` only when the authorization server fully supports RFC 9207 issuer identification; otherwise it supplies a callback-specific URL.
+
 ### GitHub App
 
 Install a dedicated app only on `CGProductionHouse/CG-Dynamics`.
@@ -129,6 +158,14 @@ Set:
 - `OWNER_BRIDGE_GITHUB_APP_ID`
 - `OWNER_BRIDGE_GITHUB_INSTALLATION_ID`
 - `OWNER_BRIDGE_GITHUB_PRIVATE_KEY`
+
+The current GitHub CLI token has `repo`, `workflow` and `read:org` scopes but cannot create or enumerate organisation GitHub Apps. The smallest remaining owner action is:
+
+1. Open `https://github.com/organizations/CGProductionHouse/settings/apps/new`.
+2. Create `CG Dynamics Owner Dev Bridge`, use `https://dev-bridge-kappa.vercel.app` as its homepage, disable webhooks and allow installation only on this account.
+3. Grant only Contents read/write, Pull requests read/write, Actions read/write, Checks read and Deployments read. Leave all organisation, administration, environment, secret, member and package permissions unset.
+4. Install it only on `CGProductionHouse/CG-Dynamics` and generate one private key.
+5. Add the App ID and installation ID to their production-only Vercel variables and add the private key as a sensitive production-only variable. Delete any workstation copy after Vercel confirms the value is stored.
 
 ### Optional diagnostics
 
@@ -153,6 +190,10 @@ The service enforces:
 - CG Dynamics repository/project/preview allowlists.
 
 Configure a Vercel Firewall rate rule for the `/mcp` endpoint before production activation because in-memory serverless limits are defense-in-depth, not a global distributed quota.
+
+This rule is active on the isolated companion project. Vercel counters are per region and per IP on the connected Hobby plan; the authenticated in-process subject limit remains defense-in-depth behind it.
+
+The connected Vercel team is confirmed as Hobby. Vercel Drains are available only on paid Pro/Enterprise plans, and no drain destination is connected. Durable read-call retention therefore remains a hard activation gate requiring CA to approve the plan/cost and select an owner-controlled destination. Do not describe short-lived Hobby runtime logs as durable audit retention.
 
 ## Validation runner
 
@@ -213,15 +254,33 @@ After remote activation:
 
 Use MCP Inspector against the same URL before connecting ChatGPT.
 
+Credential-free transport/authentication verification can be repeated with:
+
+```powershell
+npx --yes @modelcontextprotocol/inspector --cli `
+  --server-url "https://dev-bridge-kappa.vercel.app/mcp" `
+  --transport http --method tools/list --stored-auth-only --format json
+```
+
+Before OAuth is provisioned, the correct result is `auth_required`. After OAuth and the GitHub App are configured, complete interactive Inspector login, list all tools, call `dev_repo_status`, create a harmless test branch, run an allowlisted check and inspect its result before connecting ChatGPT.
+
 ## Remaining activation gates
 
-- Provision the established OAuth provider/client and owner subject.
-- Create/install the least-privilege GitHub App.
-- Create the isolated `dev-bridge` Vercel project and set server secrets.
-- Add a Vercel Firewall rate rule.
-- Configure a protected durable audit-log drain/retention sink.
+- Provision the Auth0 API/CIMD client and immutable owner subject, then set its production-only Vercel configuration.
+- Create/install the least-privilege GitHub App and set its production-only Vercel configuration.
+- Upgrade/choose a supported durable log destination and configure a protected drain/retention sink.
 - Provision a one-time, preview-isolated QA identity and trusted harness before enabling authenticated browser automation.
 - Optionally provide read-only Vercel/Supabase diagnostic credentials.
-- Validate the protected preview with MCP Inspector, then connect from an eligible ChatGPT web workspace.
+- Complete authenticated MCP Inspector tool-list/read/write/check validation, then connect from an eligible ChatGPT web workspace.
+
+Completed activation gates:
+
+- isolated Vercel project deployed at the stable production URL;
+- GitHub repository integration with `dev-bridge` root and `main` production branch;
+- production-only canonical public URL;
+- public root and health endpoint verification;
+- correct unauthenticated OAuth challenge and fail-closed behavior;
+- live and measured WAF rate limiting;
+- credential-free MCP Inspector transport/authentication handshake.
 
 No production database migration is required by this bridge implementation.

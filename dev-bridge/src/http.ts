@@ -1,6 +1,6 @@
 import { createMcpHandler } from '@modelcontextprotocol/server'
 import { authenticate, unauthorizedResponse } from './auth.js'
-import { getBridgeConfig } from './config.js'
+import { getPublicUrl } from './config.js'
 import { createOwnerDevServer } from './tools.js'
 
 const MAX_BODY_BYTES = 1_000_000
@@ -18,14 +18,14 @@ function requestAllowed(subject: string): boolean {
 }
 
 function requestHeadersAllowed(request: Request): boolean {
-  const config = getBridgeConfig()
-  const expectedHost = new URL(config.publicUrl).host
+  const publicUrl = getPublicUrl()
+  const expectedHost = new URL(publicUrl).host
   const previewHost = process.env.VERCEL_URL?.trim()
   const host = request.headers.get('host')
   if (host && host !== expectedHost && host !== previewHost && !/^localhost(?::\d+)?$/.test(host) && !/^127\.0\.0\.1(?::\d+)?$/.test(host)) return false
   const origin = request.headers.get('origin')
   if (!origin) return true
-  return new Set([config.publicUrl, 'https://chatgpt.com', 'https://chat.openai.com']).has(origin.replace(/\/$/, ''))
+  return new Set([publicUrl, 'https://chatgpt.com', 'https://chat.openai.com']).has(origin.replace(/\/$/, ''))
 }
 
 async function withBoundedBody(request: Request): Promise<Request | null> {

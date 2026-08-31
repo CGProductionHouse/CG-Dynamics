@@ -1,5 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
-import { getBridgeConfig, READ_SCOPE, WRITE_SCOPE } from './config.js'
+import { getBridgeConfig, getPublicUrl, READ_SCOPE, WRITE_SCOPE } from './config.js'
 
 export type OwnerIdentity = {
   subject: string
@@ -9,8 +9,8 @@ export type OwnerIdentity = {
 
 const jwksByUri = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
 
-function challenge(config = getBridgeConfig()): string {
-  return `Bearer resource_metadata="${config.publicUrl}/.well-known/oauth-protected-resource/mcp", scope="${READ_SCOPE}"`
+function challenge(): string {
+  return `Bearer resource_metadata="${getPublicUrl()}/.well-known/oauth-protected-resource/mcp", scope="${READ_SCOPE}"`
 }
 
 export function writeScopeChallenge(): string {

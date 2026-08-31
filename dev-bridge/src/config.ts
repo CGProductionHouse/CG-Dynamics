@@ -13,6 +13,10 @@ export type BridgeConfig = {
   allowedSubjects: Set<string>
 }
 
+export function getPublicUrl(): string {
+  return required('OWNER_BRIDGE_PUBLIC_URL').replace(/\/$/, '')
+}
+
 function required(name: string): string {
   const value = process.env[name]?.trim()
   if (!value) throw new Error(`Missing required configuration: ${name}`)
@@ -20,7 +24,7 @@ function required(name: string): string {
 }
 
 export function getBridgeConfig(): BridgeConfig {
-  const publicUrl = required('OWNER_BRIDGE_PUBLIC_URL').replace(/\/$/, '')
+  const publicUrl = getPublicUrl()
   return {
     publicUrl,
     issuer: required('OWNER_BRIDGE_OAUTH_ISSUER'),

@@ -2,6 +2,7 @@
   "framework": null,
   "buildCommand": null,
   "rewrites": [
+    { "source": "/health", "destination": "/api/health" },
     { "source": "/mcp", "destination": "/api/mcp" },
     { "source": "/.well-known/oauth-protected-resource", "destination": "/api/oauth-protected-resource" },
     { "source": "/.well-known/oauth-protected-resource/mcp", "destination": "/api/oauth-protected-resource" }
