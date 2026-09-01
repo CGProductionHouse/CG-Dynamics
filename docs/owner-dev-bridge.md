@@ -34,7 +34,7 @@ Verified on 1 September 2026:
 - health endpoint: `https://dev-bridge-kappa.vercel.app/health`;
 - Vercel project: `cg-dynamics-projects/dev-bridge`;
 - repository integration: `CGProductionHouse/CG-Dynamics`, root directory `dev-bridge`, production branch `main`;
-- production deployment `dpl_8iKw59DiVB1EwZFtMbsrdd9QuSZY`: READY;
+- production deployment `dpl_6s65tVcjxbwyY6yJmyxsT9wQh5HT`: READY;
 - `OWNER_BRIDGE_PUBLIC_URL` is configured only in production as a non-secret;
 - anonymous MCP initialization returns `401` with the correct RFC 9728 discovery challenge;
 - MCP Inspector CLI reaches the endpoint and reports `auth_required` rather than a transport/server failure;
