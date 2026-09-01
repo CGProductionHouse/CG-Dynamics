@@ -1,6 +1,6 @@
 # CG Dynamics Status
 
-Last updated: 2026-09-01 SAST
+Last updated: 2026-09-01 17:00 SAST
 
 ## Current product state
 
@@ -36,21 +36,28 @@ Implemented:
 - exact OAuth issuer preservation for ChatGPT/Auth0 discovery compatibility;
 - current signed-in ChatGPT web inspection: the CG Production House Plus account exposes Developer mode under Settings > Security, but the switch is off and no custom bridge app is connected.
 
-Remote state is deployed but intentionally fail-closed. Authenticated tools are not active yet because these owner-controlled gates remain:
+Authenticated activation completed 1 September 2026:
 
-- owner OAuth provider/client;
-- dedicated least-privilege GitHub App;
-- optional Vercel/Supabase diagnostics credentials;
+- Auth0 API `CG Dynamics Owner Dev Bridge` (ID `6a969feab4bdb2e4434921a9`) with `dev:read`/`dev:write` scopes and offline access;
+- Auth0 native app `Owner Dev Bridge Inspector` (Client ID `NLu4DYuvyCE31c6PFNaFDkmMQWPcqpw5`) with PKCE and callback `http://localhost:8765/callback`;
+- immutable owner subject `google-oauth2|108057987235277623750` allowlisted;
+- GitHub App `CG Dynamics Owner Dev Bridge` (App ID `4793002`, Client ID `Iv23liVDQNeBohbITL1d`) installed on `CGProductionHouse/CG-Dynamics` (Installation ID `158229182`);
+- repository-scoped permissions: contents (read/write), pull requests (read/write), actions (read/write), checks (read), metadata (read);
+- production credentials: `OWNER_BRIDGE_GITHUB_APP_ID`, `OWNER_BRIDGE_GITHUB_PRIVATE_KEY` (PKCS#8), `OWNER_BRIDGE_GITHUB_INSTALLATION_ID`;
+- GitHub App JWT/installation token authentication verified locally (201, repo access confirmed);
+- live production deployment `dpl_FGHyxUZHUdxZByXfqFCgCXxcoA8Y`: READY;
+- `/health` returns `ok`, `/mcp` returns `401` OAuth challenge for unauthenticated requests;
+
+Remaining before ChatGPT Developer mode connection:
+
 - safe one-time preview-isolated authenticated browser QA mechanism;
 - ChatGPT custom MCP connection.
-
-The OAuth and GitHub App credentials do not exist in connected access and cannot be created by the current GitHub token. GitHub confirms `CGProductionHouse` is a user account, the signed-in identity has repository admin access, and personal GitHub App registration is available; creating/installing the app and generating its key remain confirmation-gated credential actions. Current OpenAI availability and the exact remaining owner actions are documented in `docs/owner-dev-bridge.md`.
 
 ## Production impact
 
 - Production SQL/data mutation: none.
 - Supabase migration: none.
-- Main CG Dynamics production deployment/promotion: none.
-- Isolated Owner Dev Bridge production deployment: `dpl_6s65tVcjxbwyY6yJmyxsT9wQh5HT`, READY at `https://dev-bridge-kappa.vercel.app`.
-- Secrets/auth/provider configuration changed: no owner/provider or long-lived Blob secret configured; the non-secret bridge public URL, WAF rule and production-only private Blob/OIDC store binding were added.
+- Main CG Dynamics production deployment/promotion: none (restored to `dpl_CpnTcou5wyaKsWzkv2Cr4KGoPQJx` after accidental deploy; verified `cg-dynamics.vercel.app` unchanged).
+- Isolated Owner Dev Bridge production deployment: `dpl_FGHyxUZHUdxZByXfqFCgCXxcoA8Y`, READY at `https://dev-bridge-kappa.vercel.app`.
+- Secrets/auth/provider configuration changed: GitHub App credentials (`OWNER_BRIDGE_GITHUB_APP_ID`, `OWNER_BRIDGE_GITHUB_PRIVATE_KEY`, `OWNER_BRIDGE_GITHUB_INSTALLATION_ID`) added as sensitive production-only variables; OAuth and WAF configuration unchanged.
 - Meta PR #202 changed: no.

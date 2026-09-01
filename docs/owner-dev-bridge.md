@@ -1,6 +1,6 @@
 # CG Dynamics Owner Dev Bridge
 
-Status: deployed fail-closed on `feat/owner-dev-bridge`; authenticated activation requires owner-controlled OAuth and GitHub App configuration.
+Status: deployed authenticated on `feat/owner-dev-bridge` (1 September 2026). OAuth + GitHub App credentials active. ChatGPT Developer mode connection pending.
 
 ## Purpose
 
@@ -28,22 +28,27 @@ The companion includes a minimal no-index static root page because Vercel's Node
 
 ## Current remote state
 
-Verified on 1 September 2026:
+Verified on 1 September 2026 17:00 SAST:
 
 - production endpoint: `https://dev-bridge-kappa.vercel.app/mcp`;
 - health endpoint: `https://dev-bridge-kappa.vercel.app/health`;
 - Vercel project: `cg-dynamics-projects/dev-bridge`;
 - repository integration: `CGProductionHouse/CG-Dynamics`, root directory `dev-bridge`, production branch `main`;
-- production deployment `dpl_6s65tVcjxbwyY6yJmyxsT9wQh5HT`: READY;
+- production deployment `dpl_FGHyxUZHUdxZByXfqFCgCXxcoA8Y`: READY;
 - `OWNER_BRIDGE_PUBLIC_URL` is configured only in production as a non-secret;
 - anonymous MCP initialization returns `401` with the correct RFC 9728 discovery challenge;
 - MCP Inspector CLI reaches the endpoint and reports `auth_required` rather than a transport/server failure;
 - the live WAF rule matches exactly `/mcp` and enforces 30 requests per IP per 60-second fixed window; a 35-request probe returned 29 `401` responses followed by 6 `429` responses because one request had already consumed the same window;
 - private production-only Vercel Blob store `cg-dynamics-owner-dev-audit` (`store_WtZpOHplAIANmBoD`) is connected for durable audit retention through rotating Vercel OIDC credentials;
 - production resolves `BLOB_STORE_ID` and Vercel OIDC with no static Blob token; a local SDK write was rejected as the disallowed `development` environment, confirming the production-only access boundary;
-- no OAuth, GitHub App, Vercel diagnostic, Supabase diagnostic or long-lived Blob secret is configured.
-
-The endpoint is intentionally not usable for authenticated tools until the mandatory identity gates below are complete. Missing provider configuration fails closed; it is not replaced with development credentials or a weaker authentication mode.
+- **Auth0 API configured**: ID `6a969feab4bdb2e4434921a9`, Name `CG Dynamics Owner Dev Bridge`, Audience `https://dev-bridge-kappa.vercel.app/mcp`, Scopes `dev:read`/`dev:write` + offline access;
+- **Auth0 native app**: Name `Owner Dev Bridge Inspector`, Client ID `NLu4DYuvyCE31c6PFNaFDkmMQWPcqpw5`, Callback `http://localhost:8765/callback`;
+- **Immutable owner subject allowlisted**: `google-oauth2|108057987235277623750`;
+- **GitHub App**: `CG Dynamics Owner Dev Bridge`, App ID `4793002`, Client ID `Iv23liVDQNeBohbITL1d`, Slug `cg-dynamics-owner-dev-bridge`, Installation ID `158229182`;
+- **GitHub App permissions**: contents (read/write), pull requests (read/write), actions (read/write), checks (read), metadata (read);
+- **GitHub App credentials verified**: JWT generation → installation token → repo access → branches API all succeed;
+- **Production env vars active**: `OWNER_BRIDGE_GITHUB_APP_ID`, `OWNER_BRIDGE_GITHUB_PRIVATE_KEY` (PKCS#8), `OWNER_BRIDGE_GITHUB_INSTALLATION_ID`;
+- Webhook inactive; OAuth token exchange disabled; visibility private; scoped to `CGProductionHouse/CG-Dynamics` only.
 
 ## Tools
 
@@ -271,11 +276,10 @@ Before OAuth is provisioned, the correct result is `auth_required`. After OAuth 
 
 ## Remaining activation gates
 
-- Provision the Auth0 API/CIMD client and immutable owner subject, then set its production-only Vercel configuration.
-- Create/install the least-privilege GitHub App and set its production-only Vercel configuration.
 - Provision a one-time, preview-isolated QA identity and trusted harness before enabling authenticated browser automation.
 - Optionally provide read-only Vercel/Supabase diagnostic credentials.
-- Complete authenticated MCP Inspector tool-list/read/write/check validation, then connect from an eligible ChatGPT web workspace.
+- Complete authenticated MCP Inspector tool-list/read/write/check validation against the live production endpoint.
+- Connect ChatGPT Developer mode to the bridge and validate end-to-end.
 
 Completed activation gates:
 
@@ -286,6 +290,13 @@ Completed activation gates:
 - correct unauthenticated OAuth challenge and fail-closed behavior;
 - live and measured WAF rate limiting;
 - credential-free MCP Inspector transport/authentication handshake;
-- production-only private Blob durable audit store with OIDC-only application access and fail-closed tool preflight.
+- production-only private Blob durable audit store with OIDC-only application access and fail-closed tool preflight;
+- **Auth0 API with `dev:read`/`dev:write` scopes and offline access**;
+- **Auth0 native app `Owner Dev Bridge Inspector` with PKCE and callback**;
+- **Immutable owner subject allowlisted in production configuration**;
+- **GitHub App `CG Dynamics Owner Dev Bridge` created and installed**;
+- **GitHub App permissions verified**: contents, pull requests, actions, checks, metadata;
+- **GitHub App credentials validated**: JWT → installation token → repo access → branches API;
+- **Production env vars active**: `OWNER_BRIDGE_GITHUB_APP_ID`, `OWNER_BRIDGE_GITHUB_PRIVATE_KEY`, `OWNER_BRIDGE_GITHUB_INSTALLATION_ID`;
 
 No production database migration is required by this bridge implementation.
