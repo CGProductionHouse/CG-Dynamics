@@ -23,7 +23,7 @@ async function readMcpResponse(response: Response): Promise<{ result?: Record<st
 test('protected resource metadata is OAuth 2.1/MCP discoverable', () => {
   assert.deepEqual(protectedResourceMetadata(), {
     resource: 'https://bridge.example.com/mcp',
-    authorization_servers: ['https://issuer.example.com'],
+    authorization_servers: ['https://issuer.example.com/'],
     scopes_supported: ['dev:read', 'dev:write'],
     resource_documentation: 'https://github.com/CGProductionHouse/CG-Dynamics/blob/main/docs/owner-dev-bridge.md',
   })

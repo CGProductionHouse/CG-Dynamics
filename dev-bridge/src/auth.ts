@@ -61,7 +61,10 @@ export function protectedResourceMetadata(): Record<string, unknown> {
   const config = getBridgeConfig()
   return {
     resource: `${config.publicUrl}/mcp`,
-    authorization_servers: [config.issuer.replace(/\/$/, '')],
+    // RFC 8414 issuer identifiers are exact strings. In particular, Auth0's
+    // discovery document normally includes a trailing slash; changing it here
+    // can make ChatGPT reject the authorization response issuer.
+    authorization_servers: [config.issuer],
     scopes_supported: [READ_SCOPE, WRITE_SCOPE],
     resource_documentation: 'https://github.com/CGProductionHouse/CG-Dynamics/blob/main/docs/owner-dev-bridge.md',
   }

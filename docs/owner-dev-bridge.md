@@ -28,7 +28,7 @@ The companion includes a minimal no-index static root page because Vercel's Node
 
 ## Current remote state
 
-Verified on 31 August 2026:
+Verified on 1 September 2026:
 
 - production endpoint: `https://dev-bridge-kappa.vercel.app/mcp`;
 - health endpoint: `https://dev-bridge-kappa.vercel.app/health`;
@@ -128,15 +128,18 @@ Required:
 
 Configure authorization-code flow with PKCE S256, OAuth metadata discovery, exact ChatGPT redirect URI, resource indicator propagation, and the `dev:read`/`dev:write` scopes. Use CIMD where the provider supports it; otherwise use DCR or the predefined client configured in ChatGPT.
 
+Preserve the authorization server's issuer exactly as advertised by its discovery document, including any trailing slash. ChatGPT validates that identifier as an exact string. Request `offline_access` and configure refresh-token issuance so the connection survives access-token expiry.
+
 The smallest remaining owner action is to create or select an Auth0 tenant and configure one API:
 
 1. Open `https://manage.auth0.com/` and create an API named `CG Dynamics Owner Dev Bridge`.
 2. Set its identifier/audience to exactly `https://dev-bridge-kappa.vercel.app/mcp`, signing algorithm RS256, and add permissions `dev:read` and `dev:write`.
-3. Set that API identifier as the tenant default audience so Auth0 issues a locally verifiable RS256 JWT.
-4. Enable manual CIMD registration. Import the exact ChatGPT client metadata URL shown by the ChatGPT plugin management page; use `https://chatgpt.com/oauth/client.json` only when that page confirms the stable callback mode.
-5. Grant that CIMD client user-delegated access to both bridge permissions and assign them to CA's Auth0 user.
-6. Record the tenant issuer and CA user's immutable Auth0 `user_id` (`sub`). Do not use email as the allowlist value.
-7. Add the issuer, exact audience, tenant JWKS URL and immutable subject to the four corresponding production-only Vercel variables. No Auth0 client secret belongs in this bridge when CIMD/PKCE is used.
+3. In the API settings, enable **Allow Offline Access** and the **Resource Parameter Compatibility Profile** so ChatGPT can request refresh tokens and RFC 8707's `resource` value becomes the token audience.
+4. Set that API identifier as the tenant default audience so Auth0 issues a locally verifiable RS256 JWT.
+5. In tenant settings, enable **Client ID Metadata Document Registration**. Import the exact ChatGPT client metadata URL shown by ChatGPT app management; use `https://chatgpt.com/oauth/client.json` only when that page confirms the stable-client mode.
+6. Grant that CIMD client authorization-code and refresh-token grants, user-delegated access to both bridge permissions, and assign both permissions to CA's Auth0 user. Ensure the issued access token contains the space-delimited `scope` claim.
+7. Record the exact discovery-document issuer and CA user's immutable Auth0 `user_id` (`sub`). Do not remove the issuer's trailing slash and do not use email as the allowlist value.
+8. Add the issuer, exact audience, tenant JWKS URL and immutable subject to the four corresponding production-only Vercel variables. No Auth0 client secret belongs in this bridge when CIMD/PKCE is used.
 
 The app management page's exact client metadata and redirect URLs override generic examples. OpenAI currently uses `https://chatgpt.com/connector_platform_oauth_redirect` only when the authorization server fully supports RFC 9207 issuer identification; otherwise it supplies a callback-specific URL.
 
@@ -222,13 +225,13 @@ The repository gains focused bridge CI plus application typecheck/build checks o
 
 The bridge itself can be run locally and tested with MCP Inspector. Remote read/write tools become usable after the companion Vercel project, OAuth provider and GitHub App are configured.
 
-## ChatGPT availability as of 30 August 2026
+## ChatGPT availability as of 1 September 2026
 
 OpenAI currently documents full custom MCP, including write/modify tools, as a beta for ChatGPT Business, Enterprise and Edu on ChatGPT web.
 
 - Business: workspace admins/owners enable developer mode and deploy the custom app.
 - Enterprise/Edu: developer mode can be assigned through RBAC; admins/owners publish.
-- Personal Plus: OpenAI does not currently document developer mode or arbitrary custom MCP access. Do not represent it as available.
+- The signed-in CG Production House Personal Plus account now shows a Developer mode switch on ChatGPT web, but it is off and no CG Dynamics custom app has been added. This observed UI does not override OpenAI's public plan documentation or guarantee write-tool access; complete the connection test before treating Plus as an activated client.
 - Mobile and desktop: the current custom-MCP article says web only. Ordinary approved plugins/apps may have broader client availability, but that does not enable this custom MCP.
 - Write actions remain subject to ChatGPT confirmation, app permissions and safety controls; especially risky actions may be blocked.
 
@@ -239,14 +242,14 @@ Official references:
 - https://developers.openai.com/plugins/build/mcp-server
 - https://developers.openai.com/plugins/build/auth
 - https://developers.openai.com/plugins/deploy/connect-chatgpt
-- https://help.openai.com/en/articles/12584461-developer-mode-and-full-mcp-connectors-in-chatgpt-beta
+- https://help.openai.com/en/articles/12584461-developer-mode-apps-and-full-mcp-connectors-in-chatgpt-beta
 - https://platform.openai.com/docs/mcp
 
 ## ChatGPT connection
 
 After remote activation:
 
-1. In an eligible Business/Enterprise/Edu web workspace, enable developer mode.
+1. In ChatGPT web, enable developer mode for the owner account/workspace. The current CG Production House Plus account exposes this switch under Settings > Security, but it remains owner-controlled and must be tested for write-tool support.
 2. Add a custom MCP app using `https://<bridge-host>/mcp`.
 3. Complete OAuth as the allowlisted owner identity.
 4. Review the discovered tools and scopes.

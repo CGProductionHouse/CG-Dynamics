@@ -1,6 +1,6 @@
 # CG Dynamics Status
 
-Last updated: 2026-08-31 SAST
+Last updated: 2026-09-01 SAST
 
 ## Current product state
 
@@ -32,7 +32,9 @@ Implemented:
 - isolated production Vercel companion project connected to the GitHub repository with root `dev-bridge`;
 - production-only canonical public URL configuration;
 - live Vercel WAF fixed-window limit of 30 `/mcp` requests per IP per 60 seconds;
-- remote root and `/health` availability, anonymous OAuth challenge, WAF enforcement and MCP Inspector unauthenticated-handshake verification.
+- remote root and `/health` availability, anonymous OAuth challenge, WAF enforcement and MCP Inspector unauthenticated-handshake verification;
+- exact OAuth issuer preservation for ChatGPT/Auth0 discovery compatibility;
+- current signed-in ChatGPT web inspection: the CG Production House Plus account exposes Developer mode under Settings > Security, but the switch is off and no custom bridge app is connected.
 
 Remote state is deployed but intentionally fail-closed. Authenticated tools are not active yet because these owner-controlled gates remain:
 
