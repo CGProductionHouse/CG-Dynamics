@@ -14,10 +14,13 @@
 export type AssistantActionType =
   | 'calendar.create'
   | 'calendar.cancel'
+  | 'calendar.query'
   | 'task.create'
   | 'task.assign'
   | 'task.update'
+  | 'task.due_date'
   | 'schedule.propose'
+  | 'schedule.query_overdue'
   | 'video.move'
   | 'video.mark_shot'
   | 'job.enqueue'
@@ -57,6 +60,10 @@ export interface ActionContext {
   lastTaskName?: string | null
   lastClientId?: string | null
   lastClientName?: string | null
+  // Calendar context: today's events for daily brief.
+  todayCalendarEvents?: Array<{ id: string; title: string; start_at: string; client_name?: string | null }>
+  // Schedule context: upcoming deliverables for schedule queries.
+  upcomingDeliverables?: Array<{ id: string; title: string; scheduled_date?: string | null; due_date?: string | null; client_name?: string | null; production_status?: string | null }>
 }
 
 export interface ActionTarget {
@@ -118,7 +125,7 @@ const ASSIGNED_BY = /\b(?:done|completed|handled|designed|made|finished)\b.{0,40
 const EXISTING_TASK = /\b(reassign|herassign|change (?:the )?assignee|existing task|current task|this task|hierdie taak)\b/
 const TASK_NOUN = /\b(task|taak|to-?do|item)\b/
 const TASK_CREATE_DIRECTION = /\b(?:add|put|chuck)\b.{0,60}\b(?:planner|task list|to-?do list|[a-z][a-z'’-]+['’]s list)\b|\bremind me to\b/
-const MOVE = /\b(move|skuif|shift|verskuif|reschedule|herskeduleer)\b/
+const MOVE = /\b(move|change|skuif|shift|verskuif|reschedule|herskeduleer)\b/
 const THIS_TASK = /\b(this|hierdie|die)\s+(task|taak|item)\b/
 const COMPLETE = /\b(complete|completed|done|klaar|voltooi|finish|afgehandel)\b/
 const BLOCKED = /\b(block|blocked|geblokkeer|vasgevang|stuck|wag(?:tend)?)\b/
@@ -729,6 +736,45 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
       clientName: context.currentClientName ?? null,
       requiresApproval: true,
       approvalNote: 'Client Schedule changes stay pending until a manager or admin approves them.',
+    }
+  }
+
+  // 7. Change due date on an existing task (standalone, not combined with assign).
+  if (MOVE.test(lower) && /\b(due date|deadline|vervaldatum|datum)\b/.test(lower) && !ASSIGN.test(lower)) {
+    const effectiveTaskId = context.currentTaskId ?? context.lastTaskId ?? null
+    const effectiveTaskName = context.currentTaskName ?? context.lastTaskName ?? null
+    if (!effectiveTaskId) return { clarify: 'Which task should I reschedule? Open a task or name it.' }
+    const target = /\bnext month\b|\bvolgende maand\b/.test(lower) ? firstOfNextMonth(context.today) : resolveRelativeDate(lower, context.today)
+    if (!target) return { clarify: 'What new due date should I set?' }
+    return {
+      type: 'task.due_date',
+      title: `Change due date of "${effectiveTaskName ?? 'task'}" to ${target}`,
+      fields: { due_date: target },
+      clientId: context.currentClientId ?? context.lastClientId ?? null,
+      clientName: context.currentClientName ?? context.lastClientName ?? null,
+      target: { type: 'planner_task', id: effectiveTaskId, label: effectiveTaskName ?? 'Task' },
+    }
+  }
+
+  // 8. Query today's calendar events / "what's on today?"
+  if (/\b(what(?:'s| is) on today|what(?:'s| is) happening today|today(?:'s)? events|vandag(?: se)? vergaderings)\b/i.test(lower) || (/\b(today|vandag|this week|hierdie week)\b/.test(lower) && /\b(calendar|kalender|events|vergaderings|meetings|meeting|schedule|skedule)\b/.test(lower))) {
+    return {
+      type: 'calendar.query',
+      title: 'Query calendar events',
+      fields: { scope: /\bweek\b/.test(lower) ? 'week' : 'today' },
+      clientId: context.currentClientId ?? null,
+      clientName: context.currentClientName ?? null,
+    }
+  }
+
+  // 9. Query overdue/missing schedule items / "what's overdue?"
+  if (/\b(overdue|oorvenge|missing|ontbrekend|late|agterstallig|behind|agter)\b/.test(lower) && /\b(schedule|skedule|deliverable|post|posts|plasing|content|inhoud|planned|geskeduleer)\b/.test(lower)) {
+    return {
+      type: 'schedule.query_overdue',
+      title: 'Query overdue or missing schedule items',
+      fields: {},
+      clientId: context.currentClientId ?? null,
+      clientName: context.currentClientName ?? null,
     }
   }
 

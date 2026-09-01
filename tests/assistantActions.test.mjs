@@ -283,3 +283,38 @@ test('meeting with no resolvable day asks for the day', () => {
   const r = parseAssistantAction('Add a Dulux meeting at 10', CTX)
   assert.ok(r.clarify)
 })
+
+test('"Move the due date to Friday" → task.due_date with resolved date', () => {
+  const r = parseAssistantAction('Move the due date to Friday', CTX)
+  assert.equal(r.type, 'task.due_date')
+  assert.equal(r.fields.due_date, '2026-07-03')
+  assert.equal(r.target.id, 'task-1')
+})
+
+test('"Change deadline to next Tuesday" → task.due_date', () => {
+  const r = parseAssistantAction('Change deadline to next Tuesday', CTX)
+  assert.equal(r.type, 'task.due_date')
+  assert.equal(r.fields.due_date, '2026-07-07')
+})
+
+test('"What\'s on today?" → calendar.query today', () => {
+  const r = parseAssistantAction("What's on today?", CTX)
+  assert.equal(r.type, 'calendar.query')
+  assert.equal(r.fields.scope, 'today')
+})
+
+test('"Show me this week\'s meetings" → calendar.query week', () => {
+  const r = parseAssistantAction("Show me this week's meetings", CTX)
+  assert.equal(r.type, 'calendar.query')
+  assert.equal(r.fields.scope, 'week')
+})
+
+test('"What schedule items are overdue?" → schedule.query_overdue', () => {
+  const r = parseAssistantAction('What schedule items are overdue?', CTX)
+  assert.equal(r.type, 'schedule.query_overdue')
+})
+
+test('"Any missing posts?" → schedule.query_overdue', () => {
+  const r = parseAssistantAction('Any missing posts?', CTX)
+  assert.equal(r.type, 'schedule.query_overdue')
+})
