@@ -145,7 +145,7 @@ The app management page's exact client metadata and redirect URLs override gener
 
 ### GitHub App
 
-Install a dedicated app only on `CGProductionHouse/CG-Dynamics`.
+Create the dedicated app under the `CGProductionHouse` GitHub user account and install it only on `CGProductionHouse/CG-Dynamics`.
 
 Recommended repository permissions:
 
@@ -164,9 +164,9 @@ Set:
 - `OWNER_BRIDGE_GITHUB_INSTALLATION_ID`
 - `OWNER_BRIDGE_GITHUB_PRIVATE_KEY`
 
-The current GitHub CLI token has `repo`, `workflow` and `read:org` scopes but cannot create or enumerate organisation GitHub Apps. The smallest remaining owner action is:
+GitHub confirms that `CGProductionHouse` is a user account (not an organisation), the signed-in identity has repository admin permission, and personal GitHub App registration is available. App creation, installation and private-key generation are still confirmation-gated credential actions. The current GitHub CLI token has `repo`, `workflow` and `read:org` scopes but cannot create or enumerate GitHub Apps. The smallest remaining owner action is:
 
-1. Open `https://github.com/organizations/CGProductionHouse/settings/apps/new`.
+1. Open `https://github.com/settings/apps/new` while signed in as `CGProductionHouse`.
 2. Create `CG Dynamics Owner Dev Bridge`, use `https://dev-bridge-kappa.vercel.app` as its homepage, disable webhooks and allow installation only on this account.
 3. Grant only Contents read/write, Pull requests read/write, Actions read/write, Checks read and Deployments read. Leave all organisation, administration, environment, secret, member and package permissions unset.
 4. Install it only on `CGProductionHouse/CG-Dynamics` and generate one private key.

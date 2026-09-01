@@ -44,7 +44,7 @@ Remote state is deployed but intentionally fail-closed. Authenticated tools are 
 - safe one-time preview-isolated authenticated browser QA mechanism;
 - ChatGPT custom MCP connection.
 
-The OAuth and GitHub App credentials do not exist in connected access and cannot be created by the current GitHub token. Current OpenAI availability and the exact remaining owner actions are documented in `docs/owner-dev-bridge.md`.
+The OAuth and GitHub App credentials do not exist in connected access and cannot be created by the current GitHub token. GitHub confirms `CGProductionHouse` is a user account, the signed-in identity has repository admin access, and personal GitHub App registration is available; creating/installing the app and generating its key remain confirmation-gated credential actions. Current OpenAI availability and the exact remaining owner actions are documented in `docs/owner-dev-bridge.md`.
 
 ## Production impact
 
