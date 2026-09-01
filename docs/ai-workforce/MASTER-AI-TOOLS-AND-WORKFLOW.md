@@ -493,6 +493,19 @@ Examples:
 
 Never claim an external action happened without invoking the relevant tool.
 
+### CG Dynamics Owner Dev Bridge
+
+CG Dynamics now contains an isolated remote MCP development-control package at
+`dev-bridge/`. It is designed to let an authorised owner ChatGPT client inspect
+and develop only `CGProductionHouse/CG-Dynamics` through narrow GitHub,
+validation, Vercel and fixed read-only Supabase tools. It is not a raw shell,
+does not replace CG Assistant or Crestodian/Workboard, and has no merge,
+production deploy, arbitrary SQL, secret, auth-change or default-branch write
+tool. Durable call audits use a private production-only Vercel Blob store with
+rotating OIDC access; no long-lived Blob credential or audit MCP tool exists.
+Activation and current ChatGPT plan/client constraints are documented in
+`docs/owner-dev-bridge.md`.
+
 ## 19. Cross-agent anti-duplicate rules
 
 Before starting work, ask:
