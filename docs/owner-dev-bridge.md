@@ -1,6 +1,6 @@
 # CG Dynamics Owner Dev Bridge
 
-Status: deployed authenticated on `feat/owner-dev-bridge` (1 September 2026). OAuth + GitHub App credentials active. ChatGPT Developer mode connection pending.
+Status: deployed authenticated on `feat/owner-dev-bridge` (1 September 2026). OAuth + GitHub App credentials active. ChatGPT Developer mode connection blocked by account MFA.
 
 ## Purpose
 
@@ -28,7 +28,7 @@ The companion includes a minimal no-index static root page because Vercel's Node
 
 ## Current remote state
 
-Verified on 1 September 2026 17:00 SAST:
+Verified on 1 September 2026 17:30 SAST:
 
 - production endpoint: `https://dev-bridge-kappa.vercel.app/mcp`;
 - health endpoint: `https://dev-bridge-kappa.vercel.app/health`;
@@ -48,7 +48,8 @@ Verified on 1 September 2026 17:00 SAST:
 - **GitHub App permissions**: contents (read/write), pull requests (read/write), actions (read/write), checks (read), metadata (read);
 - **GitHub App credentials verified**: JWT generation → installation token → repo access → branches API all succeed;
 - **Production env vars active**: `OWNER_BRIDGE_GITHUB_APP_ID`, `OWNER_BRIDGE_GITHUB_PRIVATE_KEY` (PKCS#8), `OWNER_BRIDGE_GITHUB_INSTALLATION_ID`;
-- Webhook inactive; OAuth token exchange disabled; visibility private; scoped to `CGProductionHouse/CG-Dynamics` only.
+- Webhook inactive; OAuth token exchange disabled; visibility private; scoped to `CGProductionHouse/CG-Dynamics` only;
+- **MFA blocker identified**: ChatGPT login requires multi-factor authentication (passkey, authenticator app, push notification, or email verification) which blocks automated browser connection; this is an external human-authentication gate.
 
 ## Tools
 
@@ -279,7 +280,7 @@ Before OAuth is provisioned, the correct result is `auth_required`. After OAuth 
 - Provision a one-time, preview-isolated QA identity and trusted harness before enabling authenticated browser automation.
 - Optionally provide read-only Vercel/Supabase diagnostic credentials.
 - Complete authenticated MCP Inspector tool-list/read/write/check validation against the live production endpoint.
-- Connect ChatGPT Developer mode to the bridge and validate end-to-end.
+- **Resolve ChatGPT account MFA**: the CG Production House account requires multi-factor authentication (passkey, authenticator app, push notification, or email verification) which blocks automated browser login; CA must complete the MFA challenge manually or provide a session cookie before automated ChatGPT connection is possible.
 
 Completed activation gates:
 

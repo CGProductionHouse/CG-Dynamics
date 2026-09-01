@@ -1,6 +1,6 @@
 # CG Dynamics Status
 
-Last updated: 2026-09-01 17:00 SAST
+Last updated: 2026-09-01 17:30 SAST
 
 ## Current product state
 
@@ -51,6 +51,7 @@ Authenticated activation completed 1 September 2026:
 Remaining before ChatGPT Developer mode connection:
 
 - safe one-time preview-isolated authenticated browser QA mechanism;
+- **ChatGPT MFA requirement**: the CG Production House account requires multi-factor authentication (passkey, authenticator app, push notification, or email verification) which blocks automated browser login; this is an external human-authentication gate that cannot be bypassed autonomously;
 - ChatGPT custom MCP connection.
 
 ## Production impact
