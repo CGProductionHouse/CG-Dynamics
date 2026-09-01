@@ -202,6 +202,8 @@ export interface AssistantLocalWorkContext {
     clientScheduleItems: number
   }
   todayCalendarEvents: number
+  todayCalendarEventSummaries: Array<{ id: string; title: string; startAt: string | null; clientName: string | null }>
+  upcomingDeliverableSummaries: Array<{ id: string; title: string; clientName: string | null; scheduledDate: string | null; statusLabel: string; overdue: boolean }>
   nextFocusTitle: string | null
   currentTaskTitle: string | null
   currentTaskSource: string | null
@@ -229,6 +231,25 @@ export function buildAssistantLocalWorkContext(context: MyDayContext | null): As
       clientScheduleItems: context.deliverables.length,
     },
     todayCalendarEvents: context.events.filter(item => item.date === context.today).length,
+    todayCalendarEventSummaries: context.events
+      .filter(item => item.date === context.today)
+      .slice(0, 20)
+      .map(item => ({
+        id: item.eventId ?? item.id,
+        title: item.title,
+        startAt: item.timeLabel,
+        clientName: item.clientName,
+      })),
+    upcomingDeliverableSummaries: context.deliverables
+      .slice(0, 20)
+      .map(item => ({
+        id: item.deliverableId ?? item.id,
+        title: item.title,
+        clientName: item.clientName,
+        scheduledDate: item.date,
+        statusLabel: item.statusLabel,
+        overdue: item.source === 'client_deliverable' && item.date != null && item.date < context.today,
+      })),
     nextFocusTitle: nextFocus?.title ?? null,
     currentTaskTitle: context.summary.currentTask?.title ?? null,
     currentTaskSource: context.summary.currentTask ? sourceLabel(context.summary.currentTask.source) : null,

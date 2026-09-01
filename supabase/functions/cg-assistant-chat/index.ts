@@ -49,6 +49,8 @@ interface LocalWorkContext {
     clientScheduleItems: number
   }
   todayCalendarEvents: number
+  todayCalendarEventSummaries: Array<{ id: string; title: string; startAt: string | null; clientName: string | null }>
+  upcomingDeliverableSummaries: Array<{ id: string; title: string; clientName: string | null; scheduledDate: string | null; statusLabel: string; overdue: boolean }>
   nextFocusTitle: string | null
   currentTaskTitle: string | null
   currentTaskSource: string | null
@@ -410,6 +412,24 @@ const CLIENT_SCHEDULE_PATTERNS = [
   /\breel|photo|video|dp\b/i,
 ]
 
+const CALENDAR_QUERY_PATTERNS = [
+  /\bwhat(?:'s| is) (?:on |happening )?today\b/i,
+  /\btoday(?:'s)? (?:events?|meetings?|schedule|calendar)\b/i,
+  /\b(what|which) .+ (?:today|tonight)\b/i,
+  /\bshow me .+ today\b/i,
+  /\bcalendar (?:for )?today\b/i,
+  /\bvandag(?: se)? (?:vergaderings?|kalender)\b/i,
+]
+
+const SCHEDULE_OVERDUE_PATTERNS = [
+  /\boverdue\b/i,
+  /\bmissing (?:posts?|content|deliverables?)\b/i,
+  /\blate (?:posts?|content|deliverables?)\b/i,
+  /\bwhat(?:'s| is) (?:overdue|late|missing)\b/i,
+  /\bbehind (?:schedule|on posts?)\b/i,
+  /\bany (?:missing|late|overdue)\b/i,
+]
+
 const SETUP_QUESTION_PATTERNS = [
   /\bhow (do|would|can) (we|i)\b/i,
   /\bsetup\b/i,
@@ -481,6 +501,40 @@ function normalizeLocalWorkContext(value: unknown): LocalWorkContext | null {
 
   if (!today) return null
 
+  const todayEventSummaries = Array.isArray(payload.todayCalendarEventSummaries)
+    ? payload.todayCalendarEventSummaries
+        .map((e: unknown) => {
+          if (!e || typeof e !== 'object') return null
+          const ev = e as Record<string, unknown>
+          return {
+            id: stringOrNull(ev.id, 40) ?? '',
+            title: stringOrNull(ev.title, 120) ?? '',
+            startAt: stringOrNull(ev.startAt, 40),
+            clientName: stringOrNull(ev.clientName, 80),
+          }
+        })
+        .filter((e): e is { id: string; title: string; startAt: string | null; clientName: string | null } => Boolean(e?.id))
+        .slice(0, 20)
+    : []
+
+  const deliverableSummaries = Array.isArray(payload.upcomingDeliverableSummaries)
+    ? payload.upcomingDeliverableSummaries
+        .map((d: unknown) => {
+          if (!d || typeof d !== 'object') return null
+          const del = d as Record<string, unknown>
+          return {
+            id: stringOrNull(del.id, 40) ?? '',
+            title: stringOrNull(del.title, 120) ?? '',
+            clientName: stringOrNull(del.clientName, 80),
+            scheduledDate: stringOrNull(del.scheduledDate, 20),
+            statusLabel: stringOrNull(del.statusLabel, 40) ?? '',
+            overdue: Boolean(del.overdue),
+          }
+        })
+        .filter((d): d is { id: string; title: string; clientName: string | null; scheduledDate: string | null; statusLabel: string; overdue: boolean } => Boolean(d?.id))
+        .slice(0, 20)
+    : []
+
   return {
     today,
     userName: stringOrNull(payload.userName),
@@ -494,6 +548,8 @@ function normalizeLocalWorkContext(value: unknown): LocalWorkContext | null {
       clientScheduleItems: numberFromPayload(sources.clientScheduleItems),
     },
     todayCalendarEvents: numberFromPayload(payload.todayCalendarEvents),
+    todayCalendarEventSummaries: todayEventSummaries,
+    upcomingDeliverableSummaries: deliverableSummaries,
     nextFocusTitle: stringOrNull(payload.nextFocusTitle),
     currentTaskTitle: stringOrNull(payload.currentTaskTitle),
     currentTaskSource: stringOrNull(payload.currentTaskSource, 80),
@@ -522,6 +578,14 @@ function isTaskLookupRequest(message: string): boolean {
 
 function isClientScheduleQuery(message: string): boolean {
   return CLIENT_SCHEDULE_PATTERNS.some((pattern) => pattern.test(message))
+}
+
+function isCalendarQuery(message: string): boolean {
+  return CALENDAR_QUERY_PATTERNS.some((pattern) => pattern.test(message))
+}
+
+function isScheduleOverdueQuery(message: string): boolean {
+  return SCHEDULE_OVERDUE_PATTERNS.some((pattern) => pattern.test(message))
 }
 
 function isSetupQuestion(message: string): boolean {
@@ -811,6 +875,161 @@ async function handleClientScheduleQuery(
     answer: summary,
     clientId: matchedClient.id,
     clientName: matchedClient.name,
+  }
+}
+
+// Calendar query: answers "What's on today?", "Show me today's meetings" etc.
+// Uses the same company_events table the CG Calendar page reads.
+async function handleCalendarQuery(
+  sb: ReturnType<typeof createClient>,
+  message: string,
+  localWorkContext: LocalWorkContext | null,
+): Promise<{ answer: string } | null> {
+  const lower = message.toLowerCase()
+  const isWeek = /\bweek\b/i.test(lower)
+
+  const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+
+  // Use localWorkContext data if available and matches today.
+  if (localWorkContext && localWorkContext.today === today && localWorkContext.todayCalendarEventSummaries.length > 0) {
+    const events = localWorkContext.todayCalendarEventSummaries
+    const lines = events.slice(0, 5).map(e => {
+      const time = e.startAt ? ` at ${e.startAt}` : ''
+      const client = e.clientName ? ` (${e.clientName})` : ''
+      return `${e.title}${time}${client}`
+    })
+    const extra = events.length > lines.length ? ` I kept this to the first ${lines.length} of ${events.length} events.` : ''
+    return {
+      answer: `You have ${events.length} event${events.length === 1 ? '' : 's'} today: ${lines.join('; ')}.${extra}`,
+    }
+  }
+
+  // Query from database if no local context or different day.
+  const { data: events } = await sb
+    .from('company_events')
+    .select('id, title, start_at, client_id')
+    .gte('start_at', `${today}T00:00:00`)
+    .lte('start_at', `${today}T23:59:59`)
+    .order('start_at')
+    .limit(10)
+
+  if (!events || events.length === 0) {
+    return { answer: 'You have no calendar events scheduled for today.' }
+  }
+
+  // Resolve client names if needed.
+  const clientIds = [...new Set(events.map(e => e.client_id).filter(Boolean))]
+  let clientMap: Record<string, string> = {}
+  if (clientIds.length > 0) {
+    const { data: clients } = await sb
+      .from('clients')
+      .select('id, name')
+      .in('id', clientIds)
+    if (clients) {
+      clientMap = Object.fromEntries(clients.map(c => [c.id, c.name]))
+    }
+  }
+
+  const lines = events.slice(0, 5).map(e => {
+    const time = e.start_at ? new Date(e.start_at).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' }) : ''
+    const client = e.client_id && clientMap[e.client_id] ? ` (${clientMap[e.client_id]})` : ''
+    return `${e.title}${time ? ' at ' + time : ''}${client}`
+  })
+  const extra = events.length > lines.length ? ` I kept this to the first ${lines.length} of ${events.length} events.` : ''
+  return {
+    answer: `You have ${events.length} event${events.length === 1 ? '' : 's'} today: ${lines.join('; ')}.${extra}`,
+  }
+}
+
+// Schedule overdue query: answers "What's overdue?", "Any missing posts?" etc.
+// Uses the same monthly_deliverables table the Client Schedule page reads.
+async function handleScheduleOverdueQuery(
+  sb: ReturnType<typeof createClient>,
+  message: string,
+  localWorkContext: LocalWorkContext | null,
+): Promise<{ answer: string } | null> {
+  const lower = message.toLowerCase()
+
+  // Filter to specific client if mentioned.
+  let clientIdFilter: string | null = null
+  let clientNameFilter: string | null = null
+  const { data: clients } = await sb
+    .from('clients')
+    .select('id, name')
+    .eq('active', true)
+  if (clients) {
+    for (const client of clients) {
+      const name = (client.name as string).toLowerCase()
+      if (!name) continue
+      const words = name.split(/\s+/).filter(w => w.length >= 3)
+      if (words.some(w => lower.includes(w)) || lower.includes(name)) {
+        clientIdFilter = client.id as string
+        clientNameFilter = client.name as string
+        break
+      }
+    }
+  }
+
+  const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10)
+
+  // Query overdue deliverables.
+  let query = sb
+    .from('monthly_deliverables')
+    .select('id, title, code, production_status, scheduled_date, due_date, posted_at, assigned_to_name, client_id')
+    .eq('month', monthStart)
+    .is('archived_at', null)
+    .order('scheduled_date')
+
+  if (clientIdFilter) {
+    query = query.eq('client_id', clientIdFilter)
+  }
+
+  const { data: deliverables } = await query
+
+  if (!deliverables || deliverables.length === 0) {
+    const clientNote = clientNameFilter ? ` for ${clientNameFilter}` : ''
+    return { answer: `No deliverables found${clientNote} this month.` }
+  }
+
+  // Find overdue items: not posted, with a date in the past.
+  const overdue = deliverables.filter(d => {
+    const status = d.production_status as string
+    if (status === 'posted' || status === 'moved') return false
+    const date = (d.scheduled_date as string) ?? (d.due_date as string)
+    if (!date) return false
+    return date < today
+  })
+
+  if (overdue.length === 0) {
+    const clientNote = clientNameFilter ? ` for ${clientNameFilter}` : ''
+    return { answer: `Nothing overdue${clientNote}. All deliverables are on track or already posted.` }
+  }
+
+  // Resolve client names.
+  const clientIds = [...new Set(overdue.map(d => d.client_id).filter(Boolean))]
+  let clientMap: Record<string, string> = {}
+  if (clientIds.length > 0) {
+    const { data: clientList } = await sb
+      .from('clients')
+      .select('id, name')
+      .in('id', clientIds)
+    if (clientList) {
+      clientMap = Object.fromEntries(clientList.map(c => [c.id, c.name]))
+    }
+  }
+
+  const lines = overdue.slice(0, 5).map(d => {
+    const date = (d.scheduled_date as string) ?? (d.due_date as string) ?? 'no date'
+    const client = d.client_id && clientMap[d.client_id] ? ` (${clientMap[d.client_id]})` : ''
+    return `${d.title}${client} — was due ${date}`
+  })
+  const extra = overdue.length > lines.length ? ` I kept this to the first ${lines.length} of ${overdue.length} overdue items.` : ''
+  const clientNote = clientNameFilter ? ` for ${clientNameFilter}` : ''
+  return {
+    answer: `${overdue.length} overdue deliverable${overdue.length === 1 ? '' : 's'}${clientNote}: ${lines.join('; ')}.${extra}`,
   }
 }
 
@@ -1433,6 +1652,48 @@ Deno.serve(async (req) => {
       })
     }
     // If no client matched, fall through to general chat.
+  }
+
+  // Calendar query: "What's on today?", "Show me today's meetings" etc.
+  if (isCalendarQuery(message)) {
+    const calendarResult = await handleCalendarQuery(sb, message, localWorkContext)
+    if (calendarResult) {
+      await auditAssistantRequest(sb, {
+        userId: user.id,
+        role,
+        message,
+        responseStatus: 'calendar_query',
+        restricted: false,
+        promptCategory: 'calendar',
+        model: 'local:calendar_query',
+      })
+      return jsonResponse({
+        ok: true,
+        answer: calendarResult.answer,
+        tools: TOOL_REGISTRY,
+      })
+    }
+  }
+
+  // Schedule overdue query: "What's overdue?", "Any missing posts?" etc.
+  if (isScheduleOverdueQuery(message)) {
+    const overdueResult = await handleScheduleOverdueQuery(sb, message, localWorkContext)
+    if (overdueResult) {
+      await auditAssistantRequest(sb, {
+        userId: user.id,
+        role,
+        message,
+        responseStatus: 'schedule_overdue_query',
+        restricted: false,
+        promptCategory: 'schedule_overdue',
+        model: 'local:schedule_overdue',
+      })
+      return jsonResponse({
+        ok: true,
+        answer: overdueResult.answer,
+        tools: TOOL_REGISTRY,
+      })
+    }
   }
 
   // Skilled-agent mode: a distinct AI Workforce agent with deterministic,
