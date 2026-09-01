@@ -17,6 +17,7 @@ const CTX = {
     { id: 'c-cape', name: 'Cape Lumber' },
     { id: 'c-red-oak', name: 'Red Oak' },
     { id: 'c-mimosa', name: 'Mimosa Mall' },
+    { id: 'c-germoparts', name: 'Germoparts' },
   ],
   staffNames: ['Franco Nel', 'Amonique Fourie', 'Chris'],
   role: 'team',
@@ -128,6 +129,34 @@ test('production prompt: create and assign new Red Oak work without an open Plan
   assert.equal(r.clientId, 'c-red-oak')
   assert.equal(r.fields.assignee, 'Franco Nel')
   assert.match(r.fields.task, /rugby table league poster design/i)
+})
+
+test('P0 mobile prompt: add-to-Planner wording reaches the canonical task proposal', () => {
+  const r = parseAssistantAction('Add to planner that Franco should send managing requests to all Germoparts Google Business Profiles.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(r.type, 'task.create', JSON.stringify(r))
+  assert.equal(r.clientId, 'c-germoparts')
+  assert.equal(r.fields.assignee, 'Franco Nel')
+  assert.equal(r.fields.task, 'send managing requests to all Germoparts Google Business Profiles')
+})
+
+test('natural task creation variants route semantically without an exact phrase whitelist', () => {
+  const make = parseAssistantAction('Make Franco a task to finish the Germoparts poster by Thursday.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(make.type, 'task.create', JSON.stringify(make))
+  assert.equal(make.fields.assignee, 'Franco Nel')
+  assert.equal(make.fields.due_date, '2026-07-02')
+  assert.match(make.fields.task, /finish the Germoparts poster/i)
+
+  const remind = parseAssistantAction('Remind me to phone Red Oak tomorrow.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(remind.type, 'task.create', JSON.stringify(remind))
+  assert.equal(remind.clientId, 'c-red-oak')
+  assert.equal(remind.fields.due_date, '2026-07-02')
+  assert.equal(remind.fields.task, 'phone Red Oak')
 })
 
 test('production prompt: create + client + assignee + relative due date', () => {

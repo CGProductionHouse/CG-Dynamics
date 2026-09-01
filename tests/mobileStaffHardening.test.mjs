@@ -211,7 +211,7 @@ test('composer inputs/textareas sit at ≥16px on mobile so iOS does not auto-zo
 })
 
 test('composer textarea can shrink below its placeholder width so the bar fits the viewport', () => {
-  assert.match(composer, /max-h-28 min-h-11 min-w-0 flex-1 resize-none overflow-y-auto/)
+  assert.match(composer, /min-h-\[4\.5rem\] min-w-0 flex-1 resize-none overflow-y-hidden/)
 })
 
 test('composer bar respects left/right safe-area insets on mobile while desktop is unchanged', () => {
@@ -224,9 +224,9 @@ test('composer bar respects left/right safe-area insets on mobile while desktop 
 // ── Frontend: composer mobile initial-state simplification ───────────────────
 
 test('mobile idle shows exactly two primary actions before any interaction', () => {
-  assert.match(composer, /What do you need help with\?/)
+  assert.match(composer, /What do you need\?/)
   assert.match(composer, /Record my update/)
-  assert.match(composer, /What should I do next\?/)
+  assert.match(composer, /Sort me out for today/)
   assert.match(composer, /grid grid-cols-2 gap-1\.5/)
   assert.match(composer, /messages\.length === 0 && !sending && !mobileSuggestionAreaHidden && \(/)
 })
@@ -277,7 +277,7 @@ test('desktop suggestion behaviour and header remain available', () => {
 
 test('existing suggestion actions stay wired to the same handlers', () => {
   assert.match(composer, /onClick=\{startDailyCapture\}/)
-  assert.match(composer, /onClick=\{\(\) => void send\('What should I do next\?'\)\}/)
+  assert.match(composer, /onClick=\{\(\) => void send\('Sort me out for today'\)\}/)
   assert.match(composer, /onClick=\{\(\) => void send\(s\)\}/)
   const chipUses = composer.match(/\{starterChips\}/g) ?? []
   assert.equal(chipUses.length, 2, 'starter chips should be shared by mobile More and desktop, not duplicated')
@@ -309,18 +309,18 @@ test('text input switches the primary action to send', () => {
 
 test('duplicate send is blocked while sending', () => {
   assert.match(composer, /disabled=\{sending \|\| listening \|\| !input\.trim\(\)\}/)
-  assert.match(composer, /if \(!clean \|\| sending \|\| applying \|\| !sendingProfileId\) return/)
+  assert.match(composer, /if \(!clean \|\| sendingRef\.current \|\| sending \|\| applying \|\| !sendingProfileId\) return/)
 })
 
 test('duplicate microphone start is blocked while listening', () => {
   assert.match(composer, /const listeningRef = useRef\(false\)/)
   assert.match(composer, /function startListening\(\) \{\s*if \(listeningRef\.current\) return/)
   assert.match(composer, /function toggleMic\(\) \{\s*if \(listeningRef\.current\) stopListening\(\)\s*else startListening\(\)/)
-  assert.match(composer, /recognition\.onend = \(\) => \{\s*listeningRef\.current = false/)
+  assert.match(composer, /recognition\.onend = \(\) => \{[\s\S]*voiceManualStopRef\.current[\s\S]*recognitionRestartTimerRef\.current = window\.setTimeout/)
 })
 
 test('controls stay within the mobile composer width', () => {
-  assert.match(composer, /min-h-11 min-w-0 flex-1 resize-none overflow-y-auto/)
+  assert.match(composer, /min-h-\[4\.5rem\] min-w-0 flex-1 resize-none overflow-y-hidden/)
   assert.match(composer, /h-11 w-11 shrink-0/)
   assert.match(composer, /mobileSendPrimary \? \([\s\S]*?\) : mobileMicPrimary \? \([\s\S]*?\) : null/)
   const mobilePrimaryDivs = composer.match(/<div className="flex shrink-0 items-center md:hidden">/g) ?? []

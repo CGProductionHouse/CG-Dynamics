@@ -110,13 +110,14 @@ const NUMBER_WORDS: Record<string, number> = {
   ten: 10, tien: 10, '10': 10,
 }
 
-const CREATE_MEETING = /\b(add|create|schedule|book|set ?up|new|skep|maak|voeg|boek|skeduleer|reël|reel)\b/
+const CREATE_MEETING = /\b(add|create|make|schedule|book|set ?up|new|skep|maak|voeg|boek|skeduleer|reël|reel)\b/
 const MEETING_NOUN = /\b(meeting|vergadering|event|afspraak|call|oproep)\b/
 const CANCEL = /\b(cancel|kanselleer|delete|remove|verwyder|skrap)\b/
 const ASSIGN = /\b(reassign|assign|herassign|toewys|wys .* toe|gee (?:die|hierdie)?\s*taak|gee vir)\b/
 const ASSIGNED_BY = /\b(?:done|completed|handled|designed|made|finished)\b.{0,40}\b(?:by|deur)\b/
 const EXISTING_TASK = /\b(reassign|herassign|change (?:the )?assignee|existing task|current task|this task|hierdie taak)\b/
 const TASK_NOUN = /\b(task|taak|to-?do|item)\b/
+const TASK_CREATE_DIRECTION = /\b(?:add|put|chuck)\b.{0,60}\b(?:planner|task list|to-?do list|[a-z][a-z'’-]+['’]s list)\b|\bremind me to\b/
 const MOVE = /\b(move|skuif|shift|verskuif|reschedule|herskeduleer)\b/
 const THIS_TASK = /\b(this|hierdie|die)\s+(task|taak|item)\b/
 const COMPLETE = /\b(complete|completed|done|klaar|voltooi|finish|afgehandel)\b/
@@ -254,12 +255,23 @@ function escapeRegExp(value: string): string {
 function createTaskTitle(raw: string, assignee: string | null, clientName: string | null): string {
   let title = raw.replace(/[.?!]+$/, '')
     .replace(/^add\s+(.+?)\s+as\s+(?:a )?client(?:\s+and\s+assign\s+.+)?\s*$/i, '$1 client setup')
+    .replace(/^(?:can you\s+|please\s+)?(?:add|put|chuck)\s+(?:this\s+)?(?:to|on|into)\s+(?:the\s+)?(?:planner|task list|to-?do list)(?:\s+that)?\s+/i, '')
+    .replace(/^(?:can you\s+|please\s+)?(?:make|create)\s+.+?\s+(?:a\s+)?task\s+(?:to\s+)?/i, '')
+    .replace(/^remind me to\s+/i, '')
     .replace(/^assign\s+.+?\s+to\s+(?:do|make|design|create)\s+/i, '')
     .replace(/\s+should be (?:done|completed|handled|designed|made|finished)\b.{0,40}\b(?:by|deur)\s+.+$/i, '')
-    .replace(/\s+(?:due|for)\s+(?:today|tomorrow|vandag|more|môre|monday|tuesday|wednesday|thursday|friday|saturday|sunday).*$/i, '')
-  if (assignee) title = title.replace(new RegExp(`\\b${escapeRegExp(assignee)}\\b`, 'ig'), '')
+    .replace(/\s+(?:due|for|by)\s+(?:today|tomorrow|vandag|more|môre|monday|tuesday|wednesday|thursday|friday|saturday|sunday).*$/i, '')
+    .replace(/\s+(?:today|tomorrow|vandag|more|môre|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s*$/i, '')
+  if (assignee) {
+    const nameParts = [assignee, ...assignee.split(/\s+/).filter(part => part.length >= 2)]
+    for (const name of nameParts) title = title.replace(new RegExp(`\\b${escapeRegExp(name)}\\b`, 'ig'), '')
+  }
   if (clientName) title = title.replace(new RegExp(`\\b(?:for|under)\\s+${escapeRegExp(clientName)}\\b`, 'ig'), '')
-  return title.replace(/\s{2,}/g, ' ').replace(/^(?:a|an|the)\s+/i, '').trim() || 'New task'
+  return title
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^\s*(?:that\s+)?(?:should|needs? to|must)\s+/i, '')
+    .replace(/^(?:a|an|the)\s+/i, '')
+    .trim() || 'New task'
 }
 
 function collectNumbers(text: string): number[] {
@@ -591,7 +603,13 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   // 2b. Task status / completion / blocker (on "this task" / a task in context).
   // Also handles follow-up context: "mark that done", "complete it", etc.
   // Exclude "done by X" / "should be done by X" which is an assignment, not a completion.
-  if ((THIS_TASK.test(lower) || TASK_NOUN.test(lower) || COMPLETE.test(lower) || BLOCKED.test(lower)) && !ASSIGN.test(lower) && !ASSIGNED_BY.test(lower)) {
+  if (
+    (THIS_TASK.test(lower) || TASK_NOUN.test(lower) || COMPLETE.test(lower) || BLOCKED.test(lower))
+    && !ASSIGN.test(lower)
+    && !ASSIGNED_BY.test(lower)
+    && !TASK_CREATE_DIRECTION.test(lower)
+    && !(TASK_NOUN.test(lower) && CREATE_MEETING.test(lower))
+  ) {
     // Resolve task ID from: current page context > follow-up context > explicit match.
     const effectiveTaskId = context.currentTaskId ?? context.lastTaskId ?? null
     const effectiveTaskName = context.currentTaskName ?? context.lastTaskName ?? null
@@ -621,7 +639,7 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
   }
 
   // 3. Assign / create a task.
-  if ((ASSIGN.test(lower) || ASSIGNED_BY.test(lower) || (TASK_NOUN.test(lower) && CREATE_MEETING.test(lower)))) {
+  if ((ASSIGN.test(lower) || ASSIGNED_BY.test(lower) || TASK_CREATE_DIRECTION.test(lower) || (TASK_NOUN.test(lower) && CREATE_MEETING.test(lower)))) {
     const assignmentIntent = ASSIGN.test(lower) || ASSIGNED_BY.test(lower)
     const staff = findStaff(lower, context.staffNames)
     if (assignmentIntent && staff.matches.length === 0) return { clarify: 'Which staff member should own this task?' }

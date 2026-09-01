@@ -45,6 +45,7 @@ import { useBodyScrollLock, useIsMobileViewport, useVisualViewportBottomInset, u
 import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
 import { DailyAssistantCapture } from './DailyAssistantCapture'
 import { dailyAssistantContextLine, listMyAssistantDayCaptures, listMyAssistantDayItems } from '../../lib/dailyAssistant'
+import { joinSpeechTranscript, presentAssistantReply } from '../../lib/assistantPresentation'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Global CG Assistant composer.
@@ -94,7 +95,12 @@ function loadSession(userId: string | null): ComposerMessage[] {
     const raw = window.sessionStorage.getItem(sessionKey(userId))
     if (!raw) return []
     const parsed = JSON.parse(raw) as ComposerMessage[]
-    return Array.isArray(parsed) ? parsed.slice(-40) : []
+    return Array.isArray(parsed)
+      ? parsed
+        .filter(message => !(message.role === 'assistant' && /^(?:Checking…|CG Assistant is thinking…)$/.test(message.text)))
+        .slice(-40)
+        .map(message => message.role === 'assistant' ? { ...message, text: presentAssistantReply(message.text) } : message)
+      : []
   } catch {
     return []
   }
@@ -129,7 +135,7 @@ interface SpeechRecognitionLike {
   interimResults: boolean
   start: () => void
   stop: () => void
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal?: boolean }> }) => void) | null
   onerror: ((event: { error?: string }) => void) | null
   onend: (() => void) | null
 }
@@ -214,6 +220,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   // Synchronous mirror of the `listening` state so a rapid double-tap cannot
   // start a second recognition instance before React re-renders.
   const listeningRef = useRef(false)
+  const voiceManualStopRef = useRef(false)
+  const voiceInitialInputRef = useRef('')
+  const voiceCommittedTranscriptRef = useRef('')
+  const voiceSessionTranscriptRef = useRef('')
+  const recognitionRestartTimerRef = useRef<number | null>(null)
   const attachRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
@@ -292,8 +303,15 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     managementRef.current = null
     ownershipReviewRef.current = null
     memoryRef.current = []
+    recognitionRef.current?.stop()
     recognitionRef.current = null
     listeningRef.current = false
+    voiceManualStopRef.current = true
+    voiceInitialInputRef.current = ''
+    voiceCommittedTranscriptRef.current = ''
+    voiceSessionTranscriptRef.current = ''
+    if (recognitionRestartTimerRef.current !== null) window.clearTimeout(recognitionRestartTimerRef.current)
+    recognitionRestartTimerRef.current = null
     sendingRef.current = false
     audioChunksRef.current = []
     actionRequestRef.current += 1
@@ -323,6 +341,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   useEffect(() => () => {
     invalidateDebriefRequests()
     stopActiveDebriefMedia()
+    voiceManualStopRef.current = true
+    listeningRef.current = false
+    recognitionRef.current?.stop()
+    if (recognitionRestartTimerRef.current !== null) window.clearTimeout(recognitionRestartTimerRef.current)
   }, [])
 
   useEffect(() => {
@@ -490,20 +512,24 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     Boolean(proposal) ||
     applying
 
-  function currentContextLine(): string {
+  function currentContextLine(userMessage = ''): string {
     const parts = [`page: ${pageLabel}`, `role: ${profile?.role ?? 'team'}`]
     if (clientId) parts.push(`clientId: ${clientId}`)
     if (recordId) parts.push(`recordId: ${recordId}`)
     if (plannerTaskId) parts.push(`plannerTaskId: ${plannerTaskId}`)
     if (selectedRunId) parts.push(`contentRunId: ${selectedRunId}`)
-    // Management grounding is only ever added for authorised admin/manager.
-    if (isManager && managementRef.current) parts.push(managementRef.current)
-    // Manager-only. Ordinary staff never receive conflict evidence about others.
-    if (isManager && ownershipReviewRef.current) parts.push(ownershipReviewRef.current)
+    // A personal/ordinary turn stays personal even for an admin. Team workload
+    // and legacy ownership-review debt are supplied only when the user explicitly
+    // asks for team or review state; neither belongs in "what should I do today?".
+    const asksForTeam = /\b(team|everyone|company|workload|overloaded|who can|what is .+ busy with|what should .+ focus on)\b/i.test(userMessage)
+    const asksForOwnershipReview = /\b(assignment review|ownership review|unassigned|assignment conflict|who owns)\b/i.test(userMessage)
+    const asksForMicrosoft = /\b(microsoft|outlook|planner sync|sync status|sync microsoft)\b/i.test(userMessage)
+    if (isManager && asksForTeam && managementRef.current) parts.push(managementRef.current)
+    if (isManager && asksForOwnershipReview && ownershipReviewRef.current) parts.push(ownershipReviewRef.current)
     // Durable per-user memory (own-only) grounds the personal assistant.
     if (memoryRef.current.length > 0) parts.push(`remembered: ${memoryRef.current.slice(0, 6).join('; ')}`)
     // Real Microsoft 365 integration state (never a guess).
-    if (microsoftStateRef.current) parts.push(microsoftStateRef.current)
+    if (asksForMicrosoft && microsoftStateRef.current) parts.push(microsoftStateRef.current)
     return parts.join(', ')
   }
 
@@ -562,6 +588,20 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     if (el) el.scrollTop = el.scrollHeight
   }, [mobileFullscreen, viewport.keyboardOpen, viewport.height])
 
+  // Grow to a comfortable multi-line surface on iPhone, then scroll internally
+  // only after the bounded height is reached. The visual viewport keeps this
+  // footer directly above the software keyboard.
+  useEffect(() => {
+    const textarea = inputRef.current
+    if (!textarea) return
+    const minHeight = isMobile && open ? 72 : 44
+    const maxHeight = isMobile ? Math.min(192, Math.max(132, viewport.height * 0.32)) : 112
+    textarea.style.height = 'auto'
+    const nextHeight = Math.min(maxHeight, Math.max(minHeight, textarea.scrollHeight))
+    textarea.style.height = `${nextHeight}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [input, isMobile, open, viewport.height])
+
   async function loadJobs(actionIsCurrent?: () => boolean) {
     const requestedProfileId = profileIdRef.current
     if (!requestedProfileId || (actionIsCurrent && !actionIsCurrent())) return
@@ -571,7 +611,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   }
 
   function pushAssistant(text: string) {
-    setMessages(current => [...current, { id: nextId(), role: 'assistant', text }])
+    setMessages(current => [...current, { id: nextId(), role: 'assistant', text: presentAssistantReply(text) }])
   }
 
   // Confirmed action → execute through an existing RLS-protected path, then
@@ -1061,15 +1101,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   async function send(text: string) {
     const clean = text.trim()
     const sendingProfileId = profileIdRef.current
-    if (!clean || sending || applying || !sendingProfileId) return
+    if (!clean || sendingRef.current || sending || applying || !sendingProfileId) return
     // Stop any active voice recognition before processing to prevent onresult
     // from re-populating the input after we clear it.
     if (listeningRef.current) stopListening()
     // Collapse the mobile "More" list: any send takes the assistant out of the
     // clean idle state that shows the two primary actions.
     setMoreOpen(false)
-    sendingRef.current = true
-
     // Action agent first: understand the instruction as a concrete app action.
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
     // plain question falls through to chat.
@@ -1105,6 +1143,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         return
       }
       if (parsed.type === 'video.mark_shot' || parsed.type === 'video.move') {
+        sendingRef.current = true
         setSending(true)
         setChatError(null)
         try {
@@ -1129,6 +1168,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           if (profileIdRef.current === sendingProfileId) setChatError('I could not verify the selected Content Run. Try again.')
           return
         } finally {
+          sendingRef.current = false
           if (profileIdRef.current === sendingProfileId) setSending(false)
         }
       }
@@ -1154,16 +1194,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     setInput('')
     setChatError(null)
     setLastUserMessage(clean)
+    sendingRef.current = true
     setSending(true)
     setOpen(true)
 
-    // Show a thinking indicator while the request is in flight.
-    const thinkingId = nextId()
-    setMessages(current => [...current, { id: thinkingId, role: 'assistant', text: 'Checking…' }])
-
     // The assistant receives the current page/client/record as context; the user
     // only ever sees their own typed message.
-    const contextual = `[Context — ${currentContextLine()}]\n${clean}`
+    const contextual = `[Context — ${currentContextLine(clean)}]\n${clean}`
     const workContext = workContextRef.current
     try {
       const response = await sendAssistantMessage(contextual, history, workContext, null)
@@ -1173,25 +1210,19 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setChatError(friendly.message)
         setChatErrorRetryable(friendly.retryable)
       }
-      // Replace the thinking indicator with the actual response.
-      setMessages(current => {
-        const filtered = current.filter(m => m.id !== thinkingId)
-        return [
-          ...filtered,
-          {
-            id: nextId(),
-            role: 'assistant',
-            text: response.answer,
-            restricted: response.restricted,
-            setupRequired: response.setupRequired,
-          },
-        ]
-      })
+      setMessages(current => [
+        ...current,
+        {
+          id: nextId(),
+          role: 'assistant',
+          text: presentAssistantReply(response.answer, clean),
+          restricted: response.restricted,
+          setupRequired: response.setupRequired,
+        },
+      ])
       window.setTimeout(() => inputRef.current?.focus(), 0)
     } catch (err) {
       if (profileIdRef.current === sendingProfileId) {
-        // Remove the thinking indicator on error.
-        setMessages(current => current.filter(m => m.id !== thinkingId))
         const friendly = friendlyAssistantError(err instanceof Error ? err.message : null)
         setChatError(friendly.message)
         setChatErrorRetryable(friendly.retryable)
@@ -1215,8 +1246,12 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     if (!recognition) return
     setMoreOpen(false)
     const listeningProfileId = profileIdRef.current
+    voiceManualStopRef.current = false
+    voiceInitialInputRef.current = input
+    voiceCommittedTranscriptRef.current = ''
+    voiceSessionTranscriptRef.current = ''
     recognition.lang = micLang
-    recognition.continuous = false
+    recognition.continuous = true
     recognition.interimResults = true
     recognition.onresult = event => {
       // Skip transcript updates while a send is in flight to prevent the
@@ -1224,30 +1259,61 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       if (sendingRef.current) return
       let transcript = ''
       for (let i = 0; i < event.results.length; i += 1) {
-        transcript += event.results[i][0].transcript
+        transcript = joinSpeechTranscript(transcript, event.results[i][0].transcript)
       }
-      if (profileIdRef.current === listeningProfileId) setInput(transcript)
+      voiceSessionTranscriptRef.current = transcript
+      if (profileIdRef.current === listeningProfileId) {
+        setInput(joinSpeechTranscript(voiceInitialInputRef.current, voiceCommittedTranscriptRef.current, transcript))
+      }
     }
     recognition.onerror = (event) => {
-      listeningRef.current = false
       if (profileIdRef.current !== listeningProfileId) return
-      setListening(false)
       // Surface specific speech recognition errors in plain language instead
       // of a generic failure message.
       if (event.error === 'not-allowed') {
+        voiceManualStopRef.current = true
         setChatError('Microphone access was denied. Please allow microphone access in your browser settings and try again.')
       } else if (event.error === 'audio-capture') {
+        voiceManualStopRef.current = true
         setChatError('No microphone was found. Check that a microphone is connected and try again.')
-      } else if (event.error === 'no-speech') {
-        setChatError('I did not hear anything. Tap the mic and try speaking again.')
       } else if (event.error === 'network') {
+        voiceManualStopRef.current = true
         setChatError('Speech recognition had a network error. Check your connection and try again.')
+      } else if (event.error === 'service-not-allowed') {
+        voiceManualStopRef.current = true
+        setChatError('Voice input is not available in this browser. You can type the message instead.')
       }
-      // Other errors (aborted, service-not-allowed) are transient — no message needed.
+      if (voiceManualStopRef.current) {
+        listeningRef.current = false
+        setListening(false)
+      }
+      // A no-speech pause is allowed to end and restart the session silently.
     }
     recognition.onend = () => {
-      listeningRef.current = false
-      if (profileIdRef.current === listeningProfileId) setListening(false)
+      voiceCommittedTranscriptRef.current = joinSpeechTranscript(
+        voiceCommittedTranscriptRef.current,
+        voiceSessionTranscriptRef.current,
+      )
+      voiceSessionTranscriptRef.current = ''
+      if (profileIdRef.current !== listeningProfileId || voiceManualStopRef.current || sendingRef.current || !listeningRef.current) {
+        listeningRef.current = false
+        if (profileIdRef.current === listeningProfileId) setListening(false)
+        return
+      }
+      // Safari may end recognition after a natural pause even with continuous
+      // mode enabled. Restart the same explicit listening session and retain the
+      // accumulated transcript; never submit on end.
+      recognitionRestartTimerRef.current = window.setTimeout(() => {
+        recognitionRestartTimerRef.current = null
+        if (profileIdRef.current !== listeningProfileId || voiceManualStopRef.current || sendingRef.current || !listeningRef.current) return
+        try {
+          recognition.start()
+        } catch {
+          listeningRef.current = false
+          setListening(false)
+          setChatError('Voice input stopped. Your transcript is still here, so you can continue typing or send it.')
+        }
+      }, 180)
     }
     recognitionRef.current = recognition
     listeningRef.current = true
@@ -1262,7 +1328,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   }
 
   function stopListening() {
+    voiceManualStopRef.current = true
     listeningRef.current = false
+    if (recognitionRestartTimerRef.current !== null) window.clearTimeout(recognitionRestartTimerRef.current)
+    recognitionRestartTimerRef.current = null
     recognitionRef.current?.stop()
     setListening(false)
   }
@@ -1501,7 +1570,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
               ))}
               {sending && (
                 <div className="flex justify-start">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-brand-primary/60">CG Assistant is thinking…</div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-brand-primary/60" role="status" aria-live="polite">Checking…</div>
                 </div>
               )}
               {chatError && (
@@ -1778,10 +1847,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
                 if (!listening) void send(input)
               }
             }}
-            rows={1}
+            rows={2}
             placeholder="Ask CG Assistant"
             aria-label="Ask CG Assistant"
-            className="max-h-28 min-h-11 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-1 py-2.5 text-sm text-white placeholder:text-brand-primary/45 focus:outline-none"
+            className="min-h-[4.5rem] min-w-0 flex-1 resize-none overflow-y-hidden bg-transparent px-1 py-2.5 text-sm leading-5 text-white placeholder:text-brand-primary/45 focus:outline-none md:min-h-11"
           />
 
           {speechSupported && (
