@@ -14,13 +14,11 @@
 export type AssistantActionType =
   | 'calendar.create'
   | 'calendar.cancel'
-  | 'calendar.query'
   | 'task.create'
   | 'task.assign'
   | 'task.update'
   | 'task.due_date'
   | 'schedule.propose'
-  | 'schedule.query_overdue'
   | 'video.move'
   | 'video.mark_shot'
   | 'job.enqueue'
@@ -60,10 +58,6 @@ export interface ActionContext {
   lastTaskName?: string | null
   lastClientId?: string | null
   lastClientName?: string | null
-  // Calendar context: today's events for daily brief.
-  todayCalendarEvents?: Array<{ id: string; title: string; start_at: string; client_name?: string | null }>
-  // Schedule context: upcoming deliverables for schedule queries.
-  upcomingDeliverables?: Array<{ id: string; title: string; scheduled_date?: string | null; due_date?: string | null; client_name?: string | null; production_status?: string | null }>
 }
 
 export interface ActionTarget {
@@ -753,28 +747,6 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
       clientId: context.currentClientId ?? context.lastClientId ?? null,
       clientName: context.currentClientName ?? context.lastClientName ?? null,
       target: { type: 'planner_task', id: effectiveTaskId, label: effectiveTaskName ?? 'Task' },
-    }
-  }
-
-  // 8. Query today's calendar events / "what's on today?"
-  if (/\b(what(?:'s| is) on today|what(?:'s| is) happening today|today(?:'s)? events|vandag(?: se)? vergaderings)\b/i.test(lower) || (/\b(today|vandag|this week|hierdie week)\b/.test(lower) && /\b(calendar|kalender|events|vergaderings|meetings|meeting|schedule|skedule)\b/.test(lower))) {
-    return {
-      type: 'calendar.query',
-      title: 'Query calendar events',
-      fields: { scope: /\bweek\b/.test(lower) ? 'week' : 'today' },
-      clientId: context.currentClientId ?? null,
-      clientName: context.currentClientName ?? null,
-    }
-  }
-
-  // 9. Query overdue/missing schedule items / "what's overdue?"
-  if (/\b(overdue|oorvenge|missing|ontbrekend|late|agterstallig|behind|agter)\b/.test(lower) && /\b(schedule|skedule|deliverable|post|posts|plasing|content|inhoud|planned|geskeduleer)\b/.test(lower)) {
-    return {
-      type: 'schedule.query_overdue',
-      title: 'Query overdue or missing schedule items',
-      fields: {},
-      clientId: context.currentClientId ?? null,
-      clientName: context.currentClientName ?? null,
     }
   }
 

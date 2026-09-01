@@ -297,24 +297,22 @@ test('"Change deadline to next Tuesday" → task.due_date', () => {
   assert.equal(r.fields.due_date, '2026-07-07')
 })
 
-test('"What\'s on today?" → calendar.query today', () => {
+test('"What\'s on today?" falls through to server (no client proposal)', () => {
   const r = parseAssistantAction("What's on today?", CTX)
-  assert.equal(r.type, 'calendar.query')
-  assert.equal(r.fields.scope, 'today')
+  assert.equal(r, null)
 })
 
-test('"Show me this week\'s meetings" → calendar.query week', () => {
+test('"Show me this week\'s meetings" falls through to server', () => {
   const r = parseAssistantAction("Show me this week's meetings", CTX)
-  assert.equal(r.type, 'calendar.query')
-  assert.equal(r.fields.scope, 'week')
+  assert.equal(r, null)
 })
 
-test('"What schedule items are overdue?" → schedule.query_overdue', () => {
+test('"What schedule items are overdue?" falls through to server', () => {
   const r = parseAssistantAction('What schedule items are overdue?', CTX)
-  assert.equal(r.type, 'schedule.query_overdue')
+  assert.equal(r, null)
 })
 
-test('"Any missing posts?" → schedule.query_overdue', () => {
+test('"Any missing posts?" falls through to server', () => {
   const r = parseAssistantAction('Any missing posts?', CTX)
-  assert.equal(r.type, 'schedule.query_overdue')
+  assert.equal(r, null)
 })

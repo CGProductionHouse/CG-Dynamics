@@ -936,25 +936,6 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setProposal(null)
         pushAssistant(`Done — due date for "${p.target.label}" changed to ${dueDate}.`)
         lastTaskRef.current = { id: p.target.id, name: p.target.label }
-      } else if (p.type === 'calendar.query') {
-        setProposal(null)
-        const scope = String(p.fields.scope ?? 'today')
-        if (scope === 'week') {
-          pushAssistant('Opening CG Calendar to show this week\'s events.')
-          navigate('/admin/cg-calendar')
-        } else {
-          pushAssistant('Opening CG Calendar to show today\'s events.')
-          navigate('/admin/cg-calendar')
-        }
-      } else if (p.type === 'schedule.query_overdue') {
-        setProposal(null)
-        if (p.clientId) {
-          pushAssistant(`Opening Client Schedule for ${p.clientName ?? 'this client'} to check overdue items.`)
-          navigate(`/admin/client-schedule?clientId=${p.clientId}`)
-        } else {
-          pushAssistant('Opening Client Schedule to check overdue or missing items.')
-          navigate('/admin/client-schedule')
-        }
       } else {
         // calendar.cancel still needs the on-record calendar entry to act on.
         if (!actionIsCurrent()) return
