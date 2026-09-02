@@ -13,6 +13,7 @@ import {
 } from '../../lib/reportPeriod'
 import { readStrategyData, strategyRequiredComplete } from '../../lib/strategyEngine'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 
 type ReportState = 'published' | 'ready-to-publish' | 'needs-strategy' | 'internal-draft' | 'needs-repair'
 
@@ -26,6 +27,17 @@ interface AttentionItem {
 }
 
 const LINKS = [
+  {
+    title: 'Client onboarding',
+    description: 'Welcome links, setup intake and access status.',
+    to: '/admin/client-onboarding',
+    icon: (
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 3v18M3 12h18" />
+        <path d="M5.25 5.25l13.5 13.5M18.75 5.25l-13.5 13.5" opacity=".35" />
+      </svg>
+    ),
+  },
   {
     title: 'Clients',
     description: 'Profiles, tiers and packages.',
@@ -120,6 +132,7 @@ function formatDate(value: string | null | undefined) {
 }
 
 export default function ClientPerformancePage() {
+  const { profile } = useAuth()
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [linkedMetaClients, setLinkedMetaClients] = useState<number | null>(null)
@@ -350,8 +363,8 @@ export default function ClientPerformancePage() {
                 title="Performance workspaces"
               />
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                {LINKS.map((link) => (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                {LINKS.filter(link => link.to !== '/admin/client-onboarding' || profile?.role === 'admin' || profile?.role === 'manager').map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
