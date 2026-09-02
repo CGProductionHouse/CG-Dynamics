@@ -49,6 +49,9 @@ import ClientCampaignsPage from './pages/client/ClientCampaignsPage'
 import ClientPortalCalendarPage from './pages/client/ClientContentCalendarPage'
 import ClientContentGuidesPage from './pages/client/ClientContentGuidesPage'
 import ClientStrategyPage from './pages/client/ClientStrategyPage'
+import WelcomeToCgPage from './features/client-onboarding/WelcomeToCgPage'
+import ClientSetupPage from './features/client-onboarding/ClientSetupPage'
+import InternalOnboardingPage from './features/client-onboarding/InternalOnboardingPage'
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -83,6 +86,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/welcome" element={<WelcomeToCgPage />} />
 
           {/* Staff routes */}
           <Route element={<RequireStaff />}>
@@ -139,6 +143,7 @@ export default function App() {
                     (their own routes below and the admin-scoped workspace
                     sections). */}
                 <Route path="/admin/marketing-ai" element={<MarketingAiDepartmentPage />} />
+                <Route path="/admin/client-onboarding" element={<InternalOnboardingPage />} />
               </Route>
 
               {/* Admin-only security/setup routes nested inside AdminLayout */}
@@ -166,6 +171,7 @@ export default function App() {
             <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
             <Route path="/client/content-guides" element={<ClientContentGuidesPage />} />
             <Route path="/client/strategy" element={<ClientStrategyPage />} />
+            <Route path="/client/setup" element={<ClientSetupPage />} />
             <Route path="/dashboard" element={<Navigate to="/client" replace />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
