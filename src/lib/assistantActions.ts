@@ -53,11 +53,27 @@ export interface ActionContext {
   currentClientName?: string | null
   currentTaskId?: string | null
   currentTaskName?: string | null
-  // Follow-up context: the last entity discussed in conversation.
+  // Follow-up context: the last entities discussed in conversation.
   lastTaskId?: string | null
   lastTaskName?: string | null
   lastClientId?: string | null
   lastClientName?: string | null
+  // Schedule item (deliverable) follow-up context.
+  lastScheduleItemId?: string | null
+  lastScheduleItemTitle?: string | null
+  lastScheduleItemClient?: string | null
+  // Calendar event follow-up context.
+  lastCalendarEventId?: string | null
+  lastCalendarEventTitle?: string | null
+  lastCalendarEventClient?: string | null
+  // Content Run follow-up context.
+  lastContentRunId?: string | null
+  lastContentRunTitle?: string | null
+  lastContentRunClient?: string | null
+  // Marketing/content artifact follow-up context.
+  lastMarketingArtifactId?: string | null
+  lastMarketingArtifactTitle?: string | null
+  lastMarketingArtifactClient?: string | null
 }
 
 export interface ActionTarget {

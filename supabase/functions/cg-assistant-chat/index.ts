@@ -1050,7 +1050,7 @@ function buildRestrictedResponse(role: string, setupAllowed: boolean): string {
 // output actions from this schema — it cannot create new CRUD paths, bypass
 // permissions, confirmation rules, RLS, validation, audit, or canonical services.
 interface SemanticIntentAction {
-  action_type: 'task_create' | 'task_assign' | 'task_due_date' | 'task_complete' | 'task_block' | 'calendar_create' | 'navigation_open' | 'client_lookup'
+  action_type: 'task_create' | 'task_assign' | 'task_due_date' | 'task_complete' | 'task_block' | 'calendar_create' | 'navigation_open' | 'client_lookup' | 'schedule_move' | 'video_mark_shot' | 'video_move' | 'marketing_start' | 'marketing_continue'
   task_title?: string | null
   assignee?: string | null
   due_date?: string | null
@@ -1059,13 +1059,24 @@ interface SemanticIntentAction {
   calendar_date?: string | null
   calendar_time?: string | null
   navigation_target?: string | null
-  follow_up_reference?: 'last_task' | 'last_client' | null
+  schedule_item_title?: string | null
+  schedule_new_date?: string | null
+  video_number?: number | null
+  video_action?: 'shot' | 'move' | null
+  marketing_request?: string | null
+  follow_up_reference?: 'last_task' | 'last_client' | 'last_schedule_item' | 'last_calendar_event' | 'last_content_run' | 'last_marketing_artifact' | null
   confidence: number
 }
 
 const VALID_SEMANTIC_ACTION_TYPES = new Set([
   'task_create', 'task_assign', 'task_due_date', 'task_complete', 'task_block',
   'calendar_create', 'navigation_open', 'client_lookup',
+  'schedule_move', 'video_mark_shot', 'video_move', 'marketing_start', 'marketing_continue',
+])
+
+const VALID_FOLLOW_UP_REFERENCES = new Set([
+  'last_task', 'last_client', 'last_schedule_item', 'last_calendar_event',
+  'last_content_run', 'last_marketing_artifact',
 ])
 
 function isValidSemanticIntent(value: unknown): value is SemanticIntentAction {
@@ -1074,7 +1085,7 @@ function isValidSemanticIntent(value: unknown): value is SemanticIntentAction {
   if (typeof obj.action_type !== 'string' || !VALID_SEMANTIC_ACTION_TYPES.has(obj.action_type)) return false
   if (typeof obj.confidence !== 'number' || obj.confidence < 0.5) return false
   // Follow-up reference must be valid if present.
-  if (obj.follow_up_reference != null && obj.follow_up_reference !== 'last_task' && obj.follow_up_reference !== 'last_client') return false
+  if (obj.follow_up_reference != null && !VALID_FOLLOW_UP_REFERENCES.has(obj.follow_up_reference as string)) return false
   return true
 }
 
@@ -1093,6 +1104,9 @@ function buildIntentExtractionPrompt(
   const taskList = tasks.slice(0, 20).map(t => `${t.title}${t.clientName ? ` (${t.clientName})` : ''}${t.dueDate ? `, due ${t.dueDate}` : ''}`).join('\n') || 'none loaded'
   const lastTask = localWorkContext?.currentTaskTitle ?? 'none'
   const lastClient = localWorkContext?.currentClientName ?? 'none'
+  const lastScheduleItem = localWorkContext?.upcomingDeliverableSummaries?.[0]?.title ?? 'none'
+  const lastCalendarEvent = localWorkContext?.todayCalendarEventSummaries?.[0]?.title ?? 'none'
+  const lastContentRun = localWorkContext?.upcomingDeliverableSummaries?.[0]?.title ?? 'none'
 
   return `You are CG Assistant's intent parser. Extract structured intent from natural language instructions.
 
@@ -1102,10 +1116,12 @@ function buildIntentExtractionPrompt(
 - If you cannot confidently extract an action, set action_type to "none" and confidence below 0.5.
 - NEVER invent CRUD paths, bypass permissions, or create new backend operations.
 - NEVER guess staff names, client names, or task titles — only use values explicitly mentioned or in context.
+- NEVER guess between multiple plausible entities. Ask one compact clarification instead.
+- NEVER carry entity references across user/client boundaries.
 
 ## SCHEMA
 {
-  "action_type": "task_create" | "task_assign" | "task_due_date" | "task_complete" | "task_block" | "calendar_create" | "navigation_open" | "client_lookup" | "none",
+  "action_type": "task_create" | "task_assign" | "task_due_date" | "task_complete" | "task_block" | "calendar_create" | "navigation_open" | "client_lookup" | "schedule_move" | "video_mark_shot" | "video_move" | "marketing_start" | "marketing_continue" | "none",
   "task_title": string | null (clean title without dates/assignees),
   "assignee": string | null (staff member name),
   "due_date": string | null (YYYY-MM-DD),
@@ -1114,7 +1130,12 @@ function buildIntentExtractionPrompt(
   "calendar_date": string | null (YYYY-MM-DD),
   "calendar_time": string | null (HH:MM),
   "navigation_target": string | null (page or client name),
-  "follow_up_reference": "last_task" | "last_client" | null (if user references previous entity),
+  "schedule_item_title": string | null (schedule item title),
+  "schedule_new_date": string | null (YYYY-MM-DD for schedule move),
+  "video_number": number | null (video number for video actions),
+  "video_action": "shot" | "move" | null,
+  "marketing_request": string | null (marketing request description),
+  "follow_up_reference": "last_task" | "last_client" | "last_schedule_item" | "last_calendar_event" | "last_content_run" | "last_marketing_artifact" | null,
   "confidence": number (0.0 to 1.0)
 }
 
@@ -1127,6 +1148,11 @@ function buildIntentExtractionPrompt(
 - calendar_create: "add a meeting on Tuesday", "schedule a call with X"
 - navigation_open: "open X", "take me to X", "show me X"
 - client_lookup: "show me X client", "open X"
+- schedule_move: "move the video to Friday", "reschedule the post"
+- video_mark_shot: "mark video 3 as shot", "video 2 is filmed"
+- video_move: "move video 1 to next month"
+- marketing_start: "start marketing for X", "create a campaign for X"
+- marketing_continue: "continue the marketing workflow"
 - none: unclear or unsupported request
 
 ## CONTEXT
@@ -1138,9 +1164,12 @@ Active tasks (recent):
 ${taskList}
 Last discussed task: ${lastTask}
 Last discussed client: ${lastClient}
+Last discussed schedule item: ${lastScheduleItem}
+Last discussed calendar event: ${lastCalendarEvent}
+Last discussed content run: ${lastContentRun}
 
 ## FOLLOW-UP REFERENCES
-If the user says "it", "that", "him", "this", "the task", "the client", etc., use follow_up_reference to indicate what they're referring to based on conversation context.
+If the user says "it", "that", "him", "this", "the task", "the client", "the video", "the post", etc., use follow_up_reference to indicate what they're referring to based on conversation context. Only use follow-up references when there is exactly one plausible entity. If ambiguous, ask for clarification.
 
 ## EXAMPLES
 User: "can you chuck this on Franco's list for tomorrow"
@@ -1159,7 +1188,28 @@ User: "move the Red Oak poster deadline to Friday"
 {"action_type":"task_due_date","task_title":"Red Oak poster","due_date":"2026-09-04","client_name":"Red Oak","confidence":0.9}
 
 User: "add a meeting with Dulux tomorrow at 10"
-{"action_type":"calendar_create","calendar_title":"Dulux meeting","calendar_date":"${today}","calendar_time":"10:00","client_name":"Dulux","confidence":0.95}`
+{"action_type":"calendar_create","calendar_title":"Dulux meeting","calendar_date":"${today}","calendar_time":"10:00","client_name":"Dulux","confidence":0.95}
+
+User: "move the video to Friday"
+{"action_type":"schedule_move","schedule_new_date":"2026-09-04","follow_up_reference":"last_content_run","confidence":0.85}
+
+User: "mark video 3 as shot"
+{"action_type":"video_mark_shot","video_number":3,"follow_up_reference":"last_content_run","confidence":0.9}
+
+User: "move video 1 to next month"
+{"action_type":"video_move","video_number":1,"follow_up_reference":"last_content_run","confidence":0.9}
+
+User: "start marketing for Red Oak"
+{"action_type":"marketing_start","client_name":"Red Oak","confidence":0.9}
+
+User: "continue the marketing workflow"
+{"action_type":"marketing_continue","confidence":0.85}
+
+User: "move that one to Friday"
+{"action_type":"schedule_move","schedule_new_date":"2026-09-04","follow_up_reference":"last_calendar_event","confidence":0.8}
+
+User: "what is Red Oak posting this week"
+{"action_type":"none","confidence":0.1}`
 }
 
 // Extract semantic intent from natural language using the AI model.
@@ -1176,7 +1226,7 @@ async function extractSemanticIntent(
   // Only attempt semantic extraction for instruction-like messages.
   // Questions, greetings, and vague requests should go to general chat.
   const lower = message.toLowerCase()
-  const isInstruction = /\b(add|create|make|assign|give|move|mark|complete|block|open|show|take|chuck|put|set|schedule|book)\b/i.test(lower)
+  const isInstruction = /\b(add|create|make|assign|give|move|mark|complete|block|open|show|take|chuck|put|set|schedule|book|reschedule|continue|start|film|shot|video)\b/i.test(lower)
   const isQuestion = /\b(what|how|why|when|where|who|can|could|would|should|do|does|is|are|was|were)\b/i.test(lower)
   const isGreeting = /^(hi|hello|hey|good morning|good afternoon|goeie|hallo)\b/i.test(lower)
 
@@ -1270,12 +1320,12 @@ function buildActionFromIntent(
     return match ?? null
   }
 
-  // Resolve staff name.
+  // Resolve staff name — returns null if not found (model output is never authority).
   const resolveStaff = (name: string | null): string | null => {
     if (!name) return null
     const lower = name.toLowerCase()
     const match = staffNames.find(s => s.toLowerCase() === lower || s.toLowerCase().includes(lower))
-    return match ?? name
+    return match ?? null
   }
 
   // Resolve task from follow-up reference or title match.
@@ -1292,9 +1342,54 @@ function buildActionFromIntent(
     return null
   }
 
+  // Resolve schedule item from follow-up reference or title match.
+  const resolveScheduleItem = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
+    if (followUp === 'last_schedule_item' && localWorkContext?.upcomingDeliverableSummaries?.[0]) {
+      const item = localWorkContext.upcomingDeliverableSummaries[0]
+      return { id: item.id, title: item.title }
+    }
+    if (title && localWorkContext?.upcomingDeliverableSummaries) {
+      const lower = title.toLowerCase()
+      const item = localWorkContext.upcomingDeliverableSummaries.find(i => i.title.toLowerCase().includes(lower))
+      return item ? { id: item.id, title: item.title } : null
+    }
+    return null
+  }
+
+  // Resolve calendar event from follow-up reference or title match.
+  const resolveCalendarEvent = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
+    if (followUp === 'last_calendar_event' && localWorkContext?.todayCalendarEventSummaries?.[0]) {
+      const event = localWorkContext.todayCalendarEventSummaries[0]
+      return { id: event.id, title: event.title }
+    }
+    if (title && localWorkContext?.todayCalendarEventSummaries) {
+      const lower = title.toLowerCase()
+      const event = localWorkContext.todayCalendarEventSummaries.find(e => e.title.toLowerCase().includes(lower))
+      return event ? { id: event.id, title: event.title } : null
+    }
+    return null
+  }
+
+  // Resolve content run from follow-up reference or title match.
+  const resolveContentRun = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
+    if (followUp === 'last_content_run' && localWorkContext?.upcomingDeliverableSummaries?.[0]) {
+      const run = localWorkContext.upcomingDeliverableSummaries[0]
+      return { id: run.id, title: run.title }
+    }
+    if (title && localWorkContext?.upcomingDeliverableSummaries) {
+      const lower = title.toLowerCase()
+      const run = localWorkContext.upcomingDeliverableSummaries.find(r => r.title.toLowerCase().includes(lower))
+      return run ? { id: run.id, title: run.title } : null
+    }
+    return null
+  }
+
   const client = resolveClient(intent.client_name)
   const assignee = resolveStaff(intent.assignee)
   const task = resolveTask(intent.task_title, intent.follow_up_reference)
+  const scheduleItem = resolveScheduleItem(intent.schedule_item_title, intent.follow_up_reference)
+  const calendarEvent = resolveCalendarEvent(intent.calendar_title, intent.follow_up_reference)
+  const contentRun = resolveContentRun(null, intent.follow_up_reference)
 
   switch (intent.action_type) {
     case 'task_create':
@@ -1390,6 +1485,80 @@ function buildActionFromIntent(
         fields: {
           path: `/admin/clients?clientId=${client.id}`,
           label: client.name,
+        },
+        clientId: client.id,
+        clientName: client.name,
+      }
+
+    case 'schedule_move': {
+      if (!scheduleItem && !intent.schedule_item_title) return null
+      if (!intent.schedule_new_date) return null
+      return {
+        type: 'schedule.propose',
+        title: `Move ${scheduleItem?.title ?? intent.schedule_item_title} to ${intent.schedule_new_date}`,
+        fields: {
+          title: scheduleItem?.title ?? intent.schedule_item_title,
+          new_date: intent.schedule_new_date,
+          note: 'Moved via CG Assistant',
+        },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+        requiresApproval: true,
+        approvalNote: 'This Client Schedule change stays pending until a manager or admin approves it.',
+      }
+    }
+
+    case 'video_mark_shot': {
+      if (!contentRun) return null
+      if (!intent.video_number) return null
+      return {
+        type: 'video.mark_shot',
+        title: `Mark video ${intent.video_number} as shot`,
+        fields: {
+          videos: String(intent.video_number),
+        },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+        target: { type: 'content_run', id: contentRun.id, label: contentRun.title },
+      }
+    }
+
+    case 'video_move': {
+      if (!contentRun) return null
+      if (!intent.video_number) return null
+      return {
+        type: 'video.move',
+        title: `Move video ${intent.video_number}`,
+        fields: {
+          video: String(intent.video_number),
+          scheduled_date: intent.due_date,
+        },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+        target: { type: 'content_run', id: contentRun.id, label: contentRun.title },
+      }
+    }
+
+    case 'marketing_start':
+      if (!client) return null
+      return {
+        type: 'marketing.start',
+        title: `Start marketing for ${client.name}`,
+        fields: {
+          request: intent.marketing_request || 'General marketing request',
+          specialist: 'auto',
+        },
+        clientId: client.id,
+        clientName: client.name,
+      }
+
+    case 'marketing_continue':
+      if (!client) return null
+      return {
+        type: 'marketing.continue',
+        title: `Continue marketing for ${client.name}`,
+        fields: {
+          specialist: 'auto',
         },
         clientId: client.id,
         clientName: client.name,

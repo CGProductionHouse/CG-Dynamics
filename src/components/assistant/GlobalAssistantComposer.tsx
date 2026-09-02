@@ -233,9 +233,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   const taskRef = useRef<CommandCentreTask[]>([])
   const managementRef = useRef<string | null>(null)
   const memoryRef = useRef<string[]>([])
-  // Follow-up context: last task/client discussed, so "mark that done" resolves.
+  // Follow-up context: last entities discussed, so "mark that done" resolves.
   const lastTaskRef = useRef<{ id: string; name: string } | null>(null)
   const lastClientRef = useRef<{ id: string; name: string } | null>(null)
+  const lastScheduleItemRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
+  const lastCalendarEventRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
+  const lastContentRunRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
+  const lastMarketingArtifactRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
   // Live Microsoft 365 state, so conversational answers are grounded in the real
   // integration instead of a model guess. Admin-only (the status endpoint is
   // admin-gated), which matches who can actually run the sync.
@@ -697,6 +701,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
             : 'The chain is complete and it is ready for a manager to review.') +
           ' Open it in Marketing AI to read the full draft.',
         )
+        // Track marketing artifact follow-up context.
+        if (result.version?.artifact_id) {
+          lastMarketingArtifactRef.current = { id: result.version.artifact_id, title: `${p.clientName} marketing`, client: p.clientName }
+        }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         return
       }
       if (p.type === 'marketing.list') {
@@ -749,6 +758,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
               ? `Rejected v${version.version} for ${p.clientName}. The version history is kept.`
               : `Requested changes on v${version.version} for ${p.clientName}. Say "continue the marketing workflow" to regenerate.`,
         )
+        // Track marketing artifact follow-up context.
+        lastMarketingArtifactRef.current = { id: openArtifact.id, title: `${p.clientName} ${label}`, client: p.clientName }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         return
       }
       if (p.type === 'microsoft.sync') {
@@ -798,6 +810,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         }
         setProposal(null)
         pushAssistant(`Done — created "${p.fields.title}" on ${date}${time ? ` at ${time}` : ''} in CG Calendar.`)
+        // Track calendar event follow-up context.
+        if (res.data?.id) {
+          lastCalendarEventRef.current = { id: res.data.id, title: String(p.fields.title ?? 'Meeting'), client: p.clientName ?? null }
+        }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
       } else if (p.type === 'schedule.propose') {
         if (!recordId) { setProposalError('Open the Client Schedule post first so I know which item to change.'); return }
         const res = await proposeScheduleChange({
@@ -811,6 +828,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         if (res.error) throw new Error(res.error.message)
         setProposal(null)
         pushAssistant('Submitted. This Client Schedule change stays pending until a manager or admin approves it.')
+        // Track schedule item follow-up context.
+        const scheduleTitle = String(p.fields.title ?? p.fields.item ?? 'Schedule item')
+        lastScheduleItemRef.current = { id: recordId, title: scheduleTitle, client: p.clientName ?? null }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
       } else if (p.type === 'memory.add') {
         // Durable per-user memory. RLS constrains the row to this user only.
         const note = String(p.fields.note ?? '').trim()
@@ -899,6 +920,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           }
           setProposal(null)
           pushAssistant(`Done — marked video${numbers.length > 1 ? 's' : ''} ${numbers.join(', ')} as shot${runName ? ` on "${runName}"` : ''}.`)
+          // Track Content Run follow-up context.
+          lastContentRunRef.current = { id: runId, title: runName, client: p.clientName ?? null }
+          if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         } else {
           const n = Number(p.fields.video)
           if (!Number.isInteger(n) || n <= 0) { setProposalError('Which video number should I move?'); return }
@@ -915,6 +939,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           const moved = res.data as { month?: string | null } | null
           setProposal(null)
           pushAssistant(`Done — moved video ${n} to ${moved?.month ? moved.month.slice(0, 7) : 'next month'}${runName ? ` on "${runName}"` : ''}. The Client Schedule link needs confirmation before it appears on the schedule.`)
+          // Track Content Run follow-up context.
+          lastContentRunRef.current = { id: runId, title: runName, client: p.clientName ?? null }
+          if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         }
       } else if (p.type === 'navigation.open') {
         const path = String(p.fields.path ?? '')
@@ -1144,6 +1171,18 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       lastTaskName: lastTaskRef.current?.name ?? null,
       lastClientId: lastClientRef.current?.id ?? null,
       lastClientName: lastClientRef.current?.name ?? null,
+      lastScheduleItemId: lastScheduleItemRef.current?.id ?? null,
+      lastScheduleItemTitle: lastScheduleItemRef.current?.title ?? null,
+      lastScheduleItemClient: lastScheduleItemRef.current?.client ?? null,
+      lastCalendarEventId: lastCalendarEventRef.current?.id ?? null,
+      lastCalendarEventTitle: lastCalendarEventRef.current?.title ?? null,
+      lastCalendarEventClient: lastCalendarEventRef.current?.client ?? null,
+      lastContentRunId: lastContentRunRef.current?.id ?? null,
+      lastContentRunTitle: lastContentRunRef.current?.title ?? null,
+      lastContentRunClient: lastContentRunRef.current?.client ?? null,
+      lastMarketingArtifactId: lastMarketingArtifactRef.current?.id ?? null,
+      lastMarketingArtifactTitle: lastMarketingArtifactRef.current?.title ?? null,
+      lastMarketingArtifactClient: lastMarketingArtifactRef.current?.client ?? null,
     })
     if (parsed && 'type' in parsed) {
       let nextProposal = parsed
