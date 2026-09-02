@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { downloadOnboardingFile } from './api'
 import type { ClientOnboardingState } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
 import { logoRequirementSatisfied, servicesRequirementSatisfied } from './validation'
@@ -12,11 +14,12 @@ export function SetupSummary({ state }: { state: ClientOnboardingState }) {
       </header>
       <div className="grid gap-4 sm:grid-cols-2">
         <SummaryCard title="Logo & brand files" ready={logoRequirementSatisfied(state)}>
-          {state.uploads.filter(upload => upload.category === 'logo').map(upload => <p key={upload.id}>{upload.originalFilename}</p>)}
+          {state.uploads.filter(upload => upload.category === 'logo').map(upload => <p key={upload.id} className="flex items-center justify-between gap-2"><span>{upload.originalFilename}</span>{upload.uploadStatus === 'received' && <DownloadButton uploadId={upload.id} />}</p>)}
         </SummaryCard>
         <SummaryCard title="Services" ready={servicesRequirementSatisfied(state)}>
           {state.typedDescription && <p>{state.typedDescription}</p>}
           {state.serviceItems.length > 0 && <p>{state.serviceItems.join(', ')}</p>}
+          {state.uploads.filter(upload => upload.category === 'services').map(upload => <p key={upload.id} className="flex items-center justify-between gap-2"><span>{upload.originalFilename}</span>{upload.uploadStatus === 'received' && <DownloadButton uploadId={upload.id} />}</p>)}
         </SummaryCard>
       </div>
       <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
@@ -39,6 +42,39 @@ export function SetupSummary({ state }: { state: ClientOnboardingState }) {
 
 function SummaryCard({ title, ready, children }: { title: string; ready: boolean; children: React.ReactNode }) {
   return <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-bold text-white">{title}</h2><span className={`rounded-full px-3 py-1 text-xs font-semibold ${ready ? 'bg-report-accent/15 text-report-accent' : 'bg-white/[0.06] text-report-faint'}`}>{ready ? 'Received' : 'Still needed'}</span></div><div className="mt-4 space-y-2 text-sm leading-relaxed text-report-muted">{children || <p>Nothing shared yet.</p>}</div></section>
+}
+
+function DownloadButton({ uploadId }: { uploadId: string }) {
+  const [downloading, setDownloading] = useState(false)
+
+  async function download() {
+    setDownloading(true)
+    const { data, error } = await downloadOnboardingFile(uploadId)
+    if (data) {
+      const blob = data as Blob
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = (data as Blob & { name?: string }).name ?? 'download'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }
+    void error
+    setDownloading(false)
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => void download()}
+      disabled={downloading}
+      className="min-h-9 shrink-0 rounded-lg border border-white/15 px-3 text-xs font-semibold text-report-accent hover:bg-white/[0.05]"
+    >
+      {downloading ? '...' : 'Download'}
+    </button>
+  )
 }
 
 function choiceLabel(access: ClientOnboardingState['platformAccess'][number]) {

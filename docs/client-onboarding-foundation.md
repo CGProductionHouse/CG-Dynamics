@@ -46,22 +46,58 @@ edge/WAF rate limiting before a public rollout.
 not binary files. A row can be `received` only when it has a OneDrive provider,
 drive ID, item ID, and upload timestamp.
 
-This foundation intentionally does not upload bytes. The current Microsoft
-transition connector is read-only and no approved Graph write permission or
-client-folder resolver exists. The UI therefore states that a selected file was
-not uploaded and does not allow logo completion from local metadata. Staff link
-generation and the server action both fail closed until
-`CLIENT_ONBOARDING_UPLOADS_ENABLED=true`; that gate must not be enabled before
-the approved adapter and its security tests exist.
+### Phase 2: scoped upload adapter
 
-Approved follow-up work must provide a server-only adapter with:
+The upload adapter (`supabase/functions/client-onboarding/onedrive-adapter.ts`)
+uses a dedicated least-privilege Microsoft app for onboarding uploads. It must
+never share credentials with the existing `microsoft-transition-sync` connector.
 
-1. exact-client folder resolution against the existing CG OneDrive structure;
-2. small-file and Graph upload-session/chunked paths;
-3. MIME, extension, size, executable and archive validation;
-4. idempotency, retry and safe failure state;
-5. no internal reference in any client response;
-6. explicit Microsoft permission review and CA approval before deployment.
+The adapter resolves the exact client's Brand Identity folder through a
+`client_onboarding_drive_mapping` table that staff populate when they first set
+up a client. The Edge Function:
+
+1. validates file metadata (MIME, extension, size, executable blocking);
+2. generates a safe server-side filename;
+3. resolves the target Brand Identity folder from the drive mapping;
+4. creates a Microsoft Graph resumable upload session;
+5. returns the short-lived upload URL to the client;
+6. the client uploads directly to Microsoft Graph;
+7. the client signals completion, and the Edge Function marks the upload as
+   `received`.
+
+### Environment variables
+
+The dedicated upload app requires:
+
+- `ONBOARDING_MS_TENANT_ID`
+- `ONBOARDING_MS_CLIENT_ID`
+- `ONBOARDING_MS_CLIENT_SECRET`
+
+These MUST be a separate app from `MICROSOFT_TENANT_ID` / `MICROSOFT_CLIENT_ID`
+used by `microsoft-transition-sync`. The upload app needs only:
+
+- `Files.ReadWrite.All` (application) scoped to the Brand Identity folder;
+- no user delegation; client credentials flow only.
+
+### Server-mediated download
+
+Staff and client downloads go through the Edge Function, which proxies
+OneDrive content without exposing drive IDs, item IDs, URLs, paths, or
+Microsoft credentials. The `download_file` action is staff-only; the
+`portal_download` action is client-only and enforces exact client isolation.
+
+### Resume and cancel
+
+Pending uploads can be cancelled. Expired upload sessions are cleaned up by
+Microsoft automatically. The upload record transitions from `pending` to
+`received` only after the Edge Function confirms completion.
+
+### Filename safety
+
+The server generates a safe filename by stripping non-word characters, collapsing
+underscores, and truncating to 120 characters. The original filename is preserved
+in `original_filename` for display. Duplicate filenames within the same folder
+are resolved by Microsoft Graph's `conflictBehavior: rename`.
 
 ## Credential boundary
 
@@ -73,7 +109,6 @@ with one-way submission semantics and tightly audited access.
 
 ## Deferred integrations
 
-- actual OneDrive uploads and internal file-open actions;
 - secure credential vault/handoff;
 - completion email to the configured CG mailbox and Outlook rule;
 - voice-note retention and transcription;

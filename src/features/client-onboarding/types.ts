@@ -82,3 +82,18 @@ export interface UploadCandidate {
   type: string
   size: number
 }
+
+export interface UploadSession {
+  uploadId: string
+  uploadUrl: string
+  expiresAt: string
+}
+
+export interface UploadProgress {
+  uploadId: string
+  category: UploadCategory
+  filename: string
+  progress: number
+  status: 'pending' | 'uploading' | 'received' | 'failed' | 'cancelled'
+  error?: string
+}
