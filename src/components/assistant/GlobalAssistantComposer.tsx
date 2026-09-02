@@ -1223,12 +1223,23 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setChatError(friendly.message)
         setChatErrorRetryable(friendly.retryable)
       }
+      // If the server returned a semantic intent action, show it as a proposal.
+      if (response.action) {
+        const proposal = response.action as ActionProposal
+        setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+        setInput('')
+        setChatError(null)
+        setProposalError(null)
+        setOpen(true)
+        setProposal(proposal)
+        return
+      }
       setMessages(current => [
         ...current,
         {
           id: nextId(),
           role: 'assistant',
-          text: presentAssistantReply(response.answer, clean),
+          text: presentAssistantReply(response.answer ?? '', clean),
           restricted: response.restricted,
           setupRequired: response.setupRequired,
         },

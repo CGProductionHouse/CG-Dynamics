@@ -38,12 +38,23 @@ export interface AssistantCardUsed {
 
 export interface AssistantChatResponse {
   ok: boolean
-  answer: string
+  answer?: string
   setupRequired?: boolean
   restricted?: boolean
   model?: string
   tools?: AssistantToolStatus[]
   error?: string
+  // Semantic intent action (present when model extracts structured intent).
+  action?: {
+    type: string
+    title: string
+    fields: Record<string, string | number | null>
+    clientId: string | null
+    clientName: string | null
+    target?: { type: string; id: string; label: string }
+    requiresApproval?: boolean
+    approvalNote?: string
+  }
   // Skilled-agent fields (present when an agentKey was sent).
   agent?: string
   agentName?: string

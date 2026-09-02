@@ -1045,6 +1045,361 @@ function buildRestrictedResponse(role: string, setupAllowed: boolean): string {
   return 'I cannot access salary, payroll, bank, accounting, tax or private HR information. I can help with your tasks, calendar, clients or other operational work.'
 }
 
+// ── Semantic intent extraction schema ─────────────────────────────────────
+// Strict JSON schema for model-backed intent extraction. The model may ONLY
+// output actions from this schema — it cannot create new CRUD paths, bypass
+// permissions, confirmation rules, RLS, validation, audit, or canonical services.
+interface SemanticIntentAction {
+  action_type: 'task_create' | 'task_assign' | 'task_due_date' | 'task_complete' | 'task_block' | 'calendar_create' | 'navigation_open' | 'client_lookup'
+  task_title?: string | null
+  assignee?: string | null
+  due_date?: string | null
+  client_name?: string | null
+  calendar_title?: string | null
+  calendar_date?: string | null
+  calendar_time?: string | null
+  navigation_target?: string | null
+  follow_up_reference?: 'last_task' | 'last_client' | null
+  confidence: number
+}
+
+const VALID_SEMANTIC_ACTION_TYPES = new Set([
+  'task_create', 'task_assign', 'task_due_date', 'task_complete', 'task_block',
+  'calendar_create', 'navigation_open', 'client_lookup',
+])
+
+function isValidSemanticIntent(value: unknown): value is SemanticIntentAction {
+  if (!value || typeof value !== 'object') return false
+  const obj = value as Record<string, unknown>
+  if (typeof obj.action_type !== 'string' || !VALID_SEMANTIC_ACTION_TYPES.has(obj.action_type)) return false
+  if (typeof obj.confidence !== 'number' || obj.confidence < 0.5) return false
+  // Follow-up reference must be valid if present.
+  if (obj.follow_up_reference != null && obj.follow_up_reference !== 'last_task' && obj.follow_up_reference !== 'last_client') return false
+  return true
+}
+
+// Build the system prompt for semantic intent extraction. This is strictly
+// controlled — the model can ONLY output the schema, never free-form text.
+function buildIntentExtractionPrompt(
+  role: string,
+  clients: Array<{ id: string; name: string }>,
+  staffNames: string[],
+  tasks: Array<{ id: string; title: string; clientName: string | null; dueDate: string | null }>,
+  localWorkContext: LocalWorkContext | null,
+  today: string,
+): string {
+  const clientList = clients.map(c => c.name).join(', ') || 'none loaded'
+  const staffList = staffNames.join(', ') || 'none loaded'
+  const taskList = tasks.slice(0, 20).map(t => `${t.title}${t.clientName ? ` (${t.clientName})` : ''}${t.dueDate ? `, due ${t.dueDate}` : ''}`).join('\n') || 'none loaded'
+  const lastTask = localWorkContext?.currentTaskTitle ?? 'none'
+  const lastClient = localWorkContext?.currentClientName ?? 'none'
+
+  return `You are CG Assistant's intent parser. Extract structured intent from natural language instructions.
+
+## STRICT OUTPUT RULES
+- Output ONLY a valid JSON object matching the schema below.
+- NO explanatory text, NO markdown, NO code fences, NO conversation.
+- If you cannot confidently extract an action, set action_type to "none" and confidence below 0.5.
+- NEVER invent CRUD paths, bypass permissions, or create new backend operations.
+- NEVER guess staff names, client names, or task titles — only use values explicitly mentioned or in context.
+
+## SCHEMA
+{
+  "action_type": "task_create" | "task_assign" | "task_due_date" | "task_complete" | "task_block" | "calendar_create" | "navigation_open" | "client_lookup" | "none",
+  "task_title": string | null (clean title without dates/assignees),
+  "assignee": string | null (staff member name),
+  "due_date": string | null (YYYY-MM-DD),
+  "client_name": string | null (exact client name from list),
+  "calendar_title": string | null (event title),
+  "calendar_date": string | null (YYYY-MM-DD),
+  "calendar_time": string | null (HH:MM),
+  "navigation_target": string | null (page or client name),
+  "follow_up_reference": "last_task" | "last_client" | null (if user references previous entity),
+  "confidence": number (0.0 to 1.0)
+}
+
+## ACTION TYPES
+- task_create: "add X to planner", "create a task for X", "chuck this on Franco's list"
+- task_assign: "assign this to X", "give it to X", "have X do this"
+- task_due_date: "move the deadline to Friday", "set due date to next week"
+- task_complete: "mark that done", "complete it", "finish this"
+- task_block: "this is blocked", "stuck on X"
+- calendar_create: "add a meeting on Tuesday", "schedule a call with X"
+- navigation_open: "open X", "take me to X", "show me X"
+- client_lookup: "show me X client", "open X"
+- none: unclear or unsupported request
+
+## CONTEXT
+Today: ${today}
+User role: ${role}
+Available clients: ${clientList}
+Available staff: ${staffList}
+Active tasks (recent):
+${taskList}
+Last discussed task: ${lastTask}
+Last discussed client: ${lastClient}
+
+## FOLLOW-UP REFERENCES
+If the user says "it", "that", "him", "this", "the task", "the client", etc., use follow_up_reference to indicate what they're referring to based on conversation context.
+
+## EXAMPLES
+User: "can you chuck this on Franco's list for tomorrow"
+{"action_type":"task_assign","assignee":"Franco","due_date":"${today}","follow_up_reference":"last_task","confidence":0.9}
+
+User: "actually give it to Sydney"
+{"action_type":"task_assign","assignee":"Sydney","follow_up_reference":"last_task","confidence":0.95}
+
+User: "take me to what I need to work on"
+{"action_type":"navigation_open","navigation_target":"my-day","confidence":0.8}
+
+User: "what's the weather like"
+{"action_type":"none","confidence":0.1}
+
+User: "move the Red Oak poster deadline to Friday"
+{"action_type":"task_due_date","task_title":"Red Oak poster","due_date":"2026-09-04","client_name":"Red Oak","confidence":0.9}
+
+User: "add a meeting with Dulux tomorrow at 10"
+{"action_type":"calendar_create","calendar_title":"Dulux meeting","calendar_date":"${today}","calendar_time":"10:00","client_name":"Dulux","confidence":0.95}`
+}
+
+// Extract semantic intent from natural language using the AI model.
+// Returns an ActionProposal if the model confidently extracts a valid action,
+// or null if the message should fall through to general chat.
+async function extractSemanticIntent(
+  sb: ReturnType<typeof createClient>,
+  userId: string,
+  idempotencyKey: string,
+  role: string,
+  message: string,
+  localWorkContext: LocalWorkContext | null,
+): Promise<{ action: Record<string, unknown>; model: string } | null> {
+  // Only attempt semantic extraction for instruction-like messages.
+  // Questions, greetings, and vague requests should go to general chat.
+  const lower = message.toLowerCase()
+  const isInstruction = /\b(add|create|make|assign|give|move|mark|complete|block|open|show|take|chuck|put|set|schedule|book)\b/i.test(lower)
+  const isQuestion = /\b(what|how|why|when|where|who|can|could|would|should|do|does|is|are|was|were)\b/i.test(lower)
+  const isGreeting = /^(hi|hello|hey|good morning|good afternoon|goeie|hallo)\b/i.test(lower)
+
+  // Skip extraction for questions, greetings, or very short messages.
+  if (!isInstruction || isQuestion || isGreeting || message.length < 5) return null
+
+  // Load context data for the model.
+  const { data: clients } = await sb
+    .from('clients')
+    .select('id, name')
+    .eq('active', true)
+    .order('name')
+    .limit(50)
+
+  const { data: staff } = await sb
+    .from('profiles')
+    .select('full_name')
+    .not('full_name', 'is', null)
+    .limit(50)
+
+  const { data: tasks } = await sb
+    .from('planner_tasks')
+    .select('native_id, title, client_name, due_date')
+    .is('completed_at', null)
+    .is('blocked_at', null)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  const clientList = (clients ?? []).map(c => ({ id: c.id as string, name: c.name as string }))
+  const staffNames = (staff ?? []).map(s => (s.full_name as string).trim()).filter(Boolean)
+  const taskList = (tasks ?? []).map(t => ({
+    id: t.native_id as string,
+    title: t.title as string,
+    clientName: t.client_name as string | null,
+    dueDate: t.due_date as string | null,
+  }))
+
+  const today = localWorkContext?.today ?? new Date().toISOString().slice(0, 10)
+  const systemPrompt = buildIntentExtractionPrompt(role, clientList, staffNames, taskList, localWorkContext, today)
+
+  try {
+    const messages: AiChatMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: message },
+    ]
+
+    const result = await routeAiChat(messages, await aiRequestContext(
+      sb, userId, idempotencyKey, 'semantic_intent', message, classifyChatComplexity(message), 200,
+    ))
+
+    // Parse the model output as JSON.
+    let parsed: unknown
+    try {
+      // Strip markdown code fences if present.
+      const cleaned = result.content.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
+      parsed = JSON.parse(cleaned)
+    } catch {
+      return null
+    }
+
+    // Validate against schema.
+    if (!isValidSemanticIntent(parsed)) return null
+    if (parsed.action_type === 'none') return null
+
+    // Build ActionProposal from validated intent.
+    const action = buildActionFromIntent(parsed, clientList, staffNames, taskList, localWorkContext, today)
+    if (!action) return null
+
+    return { action, model: `${result.provider}:${result.model}` }
+  } catch {
+    return null
+  }
+}
+
+// Build an ActionProposal from a validated SemanticIntentAction.
+// This is the ONLY place where model output is converted to an action —
+// all validation happens here.
+function buildActionFromIntent(
+  intent: SemanticIntentAction,
+  clients: Array<{ id: string; name: string }>,
+  staffNames: string[],
+  tasks: Array<{ id: string; title: string; clientName: string | null; dueDate: string | null }>,
+  localWorkContext: LocalWorkContext | null,
+  today: string,
+): Record<string, unknown> | null {
+  // Resolve client name to ID.
+  const resolveClient = (name: string | null): { id: string; name: string } | null => {
+    if (!name) return null
+    const lower = name.toLowerCase()
+    const match = clients.find(c => c.name.toLowerCase() === lower || c.name.toLowerCase().includes(lower))
+    return match ?? null
+  }
+
+  // Resolve staff name.
+  const resolveStaff = (name: string | null): string | null => {
+    if (!name) return null
+    const lower = name.toLowerCase()
+    const match = staffNames.find(s => s.toLowerCase() === lower || s.toLowerCase().includes(lower))
+    return match ?? name
+  }
+
+  // Resolve task from follow-up reference or title match.
+  const resolveTask = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
+    if (followUp === 'last_task' && localWorkContext?.currentTaskTitle) {
+      const task = tasks.find(t => t.title === localWorkContext.currentTaskTitle)
+      return task ? { id: task.id, title: task.title } : null
+    }
+    if (title) {
+      const lower = title.toLowerCase()
+      const task = tasks.find(t => t.title.toLowerCase().includes(lower))
+      return task ? { id: task.id, title: task.title } : null
+    }
+    return null
+  }
+
+  const client = resolveClient(intent.client_name)
+  const assignee = resolveStaff(intent.assignee)
+  const task = resolveTask(intent.task_title, intent.follow_up_reference)
+
+  switch (intent.action_type) {
+    case 'task_create':
+      return {
+        type: 'task.create',
+        title: `Create task: ${intent.task_title || 'New task'}`,
+        fields: {
+          task: intent.task_title || 'New task',
+          assignee,
+          due_date: intent.due_date,
+        },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+      }
+
+    case 'task_assign':
+      if (!task && !intent.follow_up_reference) return null
+      return {
+        type: 'task.assign',
+        title: `Assign ${task?.title ?? 'task'} to ${assignee}`,
+        fields: {
+          assignee,
+          due_date: intent.due_date,
+        },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+        target: task ? { type: 'planner_task', id: task.id, label: task.title } : undefined,
+      }
+
+    case 'task_due_date':
+      if (!intent.due_date) return null
+      return {
+        type: 'task.due_date',
+        title: `Change due date to ${intent.due_date}`,
+        fields: { due_date: intent.due_date },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+        target: task ? { type: 'planner_task', id: task.id, label: task.title } : undefined,
+      }
+
+    case 'task_complete':
+      return {
+        type: 'task.update',
+        title: `Mark "${task?.title ?? 'task'}" complete`,
+        fields: { status: 'done' },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+        target: task ? { type: 'planner_task', id: task.id, label: task.title } : undefined,
+      }
+
+    case 'task_block':
+      return {
+        type: 'task.update',
+        title: `Mark "${task?.title ?? 'task'}" blocked`,
+        fields: { status: 'blocked' },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+        target: task ? { type: 'planner_task', id: task.id, label: task.title } : undefined,
+      }
+
+    case 'calendar_create':
+      if (!intent.calendar_date) return null
+      return {
+        type: 'calendar.create',
+        title: `New meeting: ${intent.calendar_title || 'Meeting'}`,
+        fields: {
+          title: intent.calendar_title || 'Meeting',
+          date: intent.calendar_date,
+          time: intent.calendar_time,
+          event_type: 'meeting',
+        },
+        clientId: client?.id ?? null,
+        clientName: client?.name ?? null,
+      }
+
+    case 'navigation_open':
+      return {
+        type: 'navigation.open',
+        title: `Open ${intent.navigation_target}`,
+        fields: {
+          path: `/admin/${intent.navigation_target}`,
+          label: intent.navigation_target,
+        },
+        clientId: null,
+        clientName: null,
+      }
+
+    case 'client_lookup':
+      if (!client) return null
+      return {
+        type: 'navigation.open',
+        title: `Open ${client.name}`,
+        fields: {
+          path: `/admin/clients?clientId=${client.id}`,
+          label: client.name,
+        },
+        clientId: client.id,
+        clientName: client.name,
+      }
+
+    default:
+      return null
+  }
+}
+
 function buildSystemPrompt(
   role: string,
   metaState: MetaIntegrationState | null,
@@ -1694,6 +2049,30 @@ Deno.serve(async (req) => {
         tools: TOOL_REGISTRY,
       })
     }
+  }
+
+  // ── Model-backed semantic intent extraction ─────────────────────────────
+  // When deterministic parsing cannot resolve a request, use the AI to extract
+  // structured intent into a strict validated schema. This ONLY handles actions
+  // that the deterministic parser already supports — it never creates new CRUD
+  // paths or bypasses permissions, confirmation rules, RLS, validation, audit,
+  // or canonical services.
+  const semanticAction = await extractSemanticIntent(sb, user.id, idempotencyKey, role, message, localWorkContext)
+  if (semanticAction) {
+    await auditAssistantRequest(sb, {
+      userId: user.id,
+      role,
+      message,
+      responseStatus: 'semantic_intent',
+      restricted: false,
+      promptCategory: 'semantic_intent',
+      model: semanticAction.model,
+    })
+    return jsonResponse({
+      ok: true,
+      action: semanticAction.action,
+      tools: TOOL_REGISTRY,
+    })
   }
 
   // Skilled-agent mode: a distinct AI Workforce agent with deterministic,

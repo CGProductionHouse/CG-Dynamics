@@ -318,7 +318,7 @@ export default function AssistantPage() {
 
       setMessages((current) => [
         ...current,
-        makeMessage('assistant', response.answer, {
+        makeMessage('assistant', response.answer ?? 'Done.', {
           restricted: response.restricted,
           setupRequired: response.setupRequired,
           agentName: response.agentName,
