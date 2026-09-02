@@ -23,3 +23,14 @@ Critical continuity:
 - Client research is complete through HMH Attorneys; next is Human Auto, only after CA says `go`.
 
 Do not ask CA to explain the project or shared tool workflow again before reading current GitHub continuity state.
+
+## Current Active Work
+
+### Issue #208: CG Assistant V2 — The Main Operating Remote
+- **Branch**: `fix/assistant-v2-mobile-regressions` (PR #212)
+- **Status**: Semantic intent extraction complete, 1685 tests pass, build passes
+- **Completed**: Mobile UX hardening, grounded query handlers, deterministic action parser, model-backed intent extraction
+- **Next**: Test in production, extend entity context for follow-up references, add conversational edge case tests
+
+### Issue #196: Control — V2 Actions
+- **Status**: All V2 action features complete (query handlers, grounded queries, semantic intent extraction)

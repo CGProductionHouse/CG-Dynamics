@@ -125,6 +125,62 @@ Launch checklist:
 - Test the assistant on mobile widths.
 - Confirm the Vercel build still passes.
 
+## CG Assistant V2 Features
+
+The Assistant V2 is a staff-facing assistant that can understand and operate the
+app via canonical actions, not just answer questions. It supports:
+
+### Grounded Queries (Read-Only)
+- **Calendar queries**: "What's on the calendar today?", "Show me upcoming shoots"
+- **Schedule queries**: "Are there overdue deliverables?", "What's past due?"
+- **Task queries**: "What do I need to do?", "Show me my tasks"
+- **Client queries**: "Show me Red Oak", "Open Dulux"
+
+### Canonical Actions (Write)
+- **Task creation**: "Add Red Oak poster to Franco's list for tomorrow"
+- **Task assignment**: "Assign this to Sydney", "Give it to Franco"
+- **Task completion**: "Mark that done", "Complete the poster task"
+- **Task blocking**: "This is blocked", "Block the Red Oak task"
+- **Due date changes**: "Move the deadline to Friday", "Set due date tomorrow"
+- **Calendar events**: "Add a meeting with Dulux tomorrow at 10"
+- **Navigation**: "Open Red Oak", "Take me to the calendar"
+
+### Semantic Intent Extraction
+For requests that deterministic parsing can't resolve, the Assistant uses
+model-backed intent extraction with a strict schema:
+- 8 action types: `task_create`, `task_assign`, `task_due_date`, `task_complete`,
+  `task_block`, `calendar_create`, `navigation_open`, `client_lookup`
+- Confidence threshold ≥ 0.5
+- Follow-up reference validation (`last_task`, `last_client`)
+- Instruction detection: skips questions, greetings, short messages
+
+### Conversational Variants
+The Assistant understands natural language variations:
+- "chuck this on Franco's list for tomorrow" → task.create
+- "give it to Sydney" → task.assign (uses follow-up context)
+- "take me to what I need to work on" → navigation.open
+- "move the Red Oak poster deadline to Friday" → task.due_date
+- "actually give it to Sydney" → task.assign (semantic intent)
+
+### Mobile UX
+- Single progress bubble during streaming
+- Duplicate-send guard (double-tap protection)
+- Server and display output sanitization
+- Personal request gating (staff sees only their tasks)
+- Voice dictation support (Web Speech API)
+
+### Testing
+Run all tests:
+```bash
+npm test
+```
+
+Key test files:
+- `tests/assistantActions.test.mjs` — deterministic parser tests
+- `tests/assistantGroundedQueries.test.mjs` — grounded query handler tests
+- `tests/assistantMobileRegressions.test.mjs` — mobile UX tests
+- `tests/assistantSemanticIntent.test.mjs` — semantic intent extraction tests
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
