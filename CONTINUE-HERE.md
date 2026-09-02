@@ -21,5 +21,6 @@ Critical continuity:
 - Client Calendar event visibility is now explicit manager/admin opt-in only; Outlook events remain internal by default. Do not bulk-publish historical events.
 - External AI tools, OpenCode models/providers, shared website bootstrap and agent allocation are tracked in the cross-project master file, not re-decided inside each project.
 - Client research is complete through HMH Attorneys; next is Human Auto, only after CA says `go`.
+- PR #214 (feat/client-onboarding, Issue #213): onboarding foundation merged; expansion adds OnboardingProgress (5-step progress bar), BrandAssetLibrary (grouped uploads with download), OnboardingTimeline (milestone timeline), and OnboardingStatusCard on Performance page. 48/48 tests pass, build clean, lint clean. Ready to commit.
 
 Do not ask CA to explain the project or shared tool workflow again before reading current GitHub continuity state.
