@@ -11,7 +11,15 @@ import {
   type AssistantLocalWorkContext,
 } from '../../lib/assistant'
 import { getMyDayContext } from '../../lib/workforceMyDay'
-import { parseAssistantAction, type ActionProposal } from '../../lib/assistantActions'
+import { parseAssistantAction, type ActionProposal, type AssistantActionType } from '../../lib/assistantActions'
+
+// Compound action plan: multiple actions extracted from a single message.
+interface CompoundActionPlan {
+  is_compound: true
+  actions: Array<ActionProposal & { type: AssistantActionType }>
+  client_name: string | null
+  confidence: number
+}
 import { listStaffProfiles } from '../../lib/contentWorkflow'
 import { createCompanyEvent } from '../../lib/companyCalendar'
 import { logPlannerActivity, listPlannerWorkloadSummary, loadOwnershipReviewSummary } from '../../lib/planner'
@@ -45,6 +53,7 @@ import { useBodyScrollLock, useIsMobileViewport, useVisualViewportBottomInset, u
 import { MAX_VOICE_SECONDS } from '../../lib/voiceDebriefRequest'
 import { DailyAssistantCapture } from './DailyAssistantCapture'
 import { dailyAssistantContextLine, listMyAssistantDayCaptures, listMyAssistantDayItems } from '../../lib/dailyAssistant'
+import { joinSpeechTranscript, presentAssistantReply } from '../../lib/assistantPresentation'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Global CG Assistant composer.
@@ -94,7 +103,12 @@ function loadSession(userId: string | null): ComposerMessage[] {
     const raw = window.sessionStorage.getItem(sessionKey(userId))
     if (!raw) return []
     const parsed = JSON.parse(raw) as ComposerMessage[]
-    return Array.isArray(parsed) ? parsed.slice(-40) : []
+    return Array.isArray(parsed)
+      ? parsed
+        .filter(message => !(message.role === 'assistant' && /^(?:Checking…|CG Assistant is thinking…)$/.test(message.text)))
+        .slice(-40)
+        .map(message => message.role === 'assistant' ? { ...message, text: presentAssistantReply(message.text) } : message)
+      : []
   } catch {
     return []
   }
@@ -129,7 +143,7 @@ interface SpeechRecognitionLike {
   interimResults: boolean
   start: () => void
   stop: () => void
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal?: boolean }> }) => void) | null
   onerror: ((event: { error?: string }) => void) | null
   onend: (() => void) | null
 }
@@ -181,6 +195,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   // Action-agent state: a parsed proposal is shown as a confirm/edit/cancel
   // preview before ANY write. Nothing mutates until the user confirms.
   const [proposal, setProposal] = useState<ActionProposal | null>(null)
+  const [compoundProposal, setCompoundProposal] = useState<CompoundActionPlan | null>(null)
   const [applying, setApplying] = useState(false)
   // Live progress line while the controlled Microsoft sync runs.
   const [microsoftSyncNote, setMicrosoftSyncNote] = useState<string | null>(null)
@@ -214,6 +229,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   // Synchronous mirror of the `listening` state so a rapid double-tap cannot
   // start a second recognition instance before React re-renders.
   const listeningRef = useRef(false)
+  const voiceManualStopRef = useRef(false)
+  const voiceInitialInputRef = useRef('')
+  const voiceCommittedTranscriptRef = useRef('')
+  const voiceSessionTranscriptRef = useRef('')
+  const recognitionRestartTimerRef = useRef<number | null>(null)
   const attachRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
@@ -222,9 +242,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   const taskRef = useRef<CommandCentreTask[]>([])
   const managementRef = useRef<string | null>(null)
   const memoryRef = useRef<string[]>([])
-  // Follow-up context: last task/client discussed, so "mark that done" resolves.
+  // Follow-up context: last entities discussed, so "mark that done" resolves.
   const lastTaskRef = useRef<{ id: string; name: string } | null>(null)
   const lastClientRef = useRef<{ id: string; name: string } | null>(null)
+  const lastScheduleItemRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
+  const lastCalendarEventRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
+  const lastContentRunRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
+  const lastMarketingArtifactRef = useRef<{ id: string; title: string; client: string | null } | null>(null)
   // Live Microsoft 365 state, so conversational answers are grounded in the real
   // integration instead of a model guess. Admin-only (the status endpoint is
   // admin-gated), which matches who can actually run the sync.
@@ -292,8 +316,15 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     managementRef.current = null
     ownershipReviewRef.current = null
     memoryRef.current = []
+    recognitionRef.current?.stop()
     recognitionRef.current = null
     listeningRef.current = false
+    voiceManualStopRef.current = true
+    voiceInitialInputRef.current = ''
+    voiceCommittedTranscriptRef.current = ''
+    voiceSessionTranscriptRef.current = ''
+    if (recognitionRestartTimerRef.current !== null) window.clearTimeout(recognitionRestartTimerRef.current)
+    recognitionRestartTimerRef.current = null
     sendingRef.current = false
     audioChunksRef.current = []
     actionRequestRef.current += 1
@@ -323,6 +354,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   useEffect(() => () => {
     invalidateDebriefRequests()
     stopActiveDebriefMedia()
+    voiceManualStopRef.current = true
+    listeningRef.current = false
+    recognitionRef.current?.stop()
+    if (recognitionRestartTimerRef.current !== null) window.clearTimeout(recognitionRestartTimerRef.current)
   }, [])
 
   useEffect(() => {
@@ -490,20 +525,24 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     Boolean(proposal) ||
     applying
 
-  function currentContextLine(): string {
+  function currentContextLine(userMessage = ''): string {
     const parts = [`page: ${pageLabel}`, `role: ${profile?.role ?? 'team'}`]
     if (clientId) parts.push(`clientId: ${clientId}`)
     if (recordId) parts.push(`recordId: ${recordId}`)
     if (plannerTaskId) parts.push(`plannerTaskId: ${plannerTaskId}`)
     if (selectedRunId) parts.push(`contentRunId: ${selectedRunId}`)
-    // Management grounding is only ever added for authorised admin/manager.
-    if (isManager && managementRef.current) parts.push(managementRef.current)
-    // Manager-only. Ordinary staff never receive conflict evidence about others.
-    if (isManager && ownershipReviewRef.current) parts.push(ownershipReviewRef.current)
+    // A personal/ordinary turn stays personal even for an admin. Team workload
+    // and legacy ownership-review debt are supplied only when the user explicitly
+    // asks for team or review state; neither belongs in "what should I do today?".
+    const asksForTeam = /\b(team|everyone|company|workload|overloaded|who can|what is .+ busy with|what should .+ focus on)\b/i.test(userMessage)
+    const asksForOwnershipReview = /\b(assignment review|ownership review|unassigned|assignment conflict|who owns)\b/i.test(userMessage)
+    const asksForMicrosoft = /\b(microsoft|outlook|planner sync|sync status|sync microsoft)\b/i.test(userMessage)
+    if (isManager && asksForTeam && managementRef.current) parts.push(managementRef.current)
+    if (isManager && asksForOwnershipReview && ownershipReviewRef.current) parts.push(ownershipReviewRef.current)
     // Durable per-user memory (own-only) grounds the personal assistant.
     if (memoryRef.current.length > 0) parts.push(`remembered: ${memoryRef.current.slice(0, 6).join('; ')}`)
     // Real Microsoft 365 integration state (never a guess).
-    if (microsoftStateRef.current) parts.push(microsoftStateRef.current)
+    if (asksForMicrosoft && microsoftStateRef.current) parts.push(microsoftStateRef.current)
     return parts.join(', ')
   }
 
@@ -562,6 +601,20 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     if (el) el.scrollTop = el.scrollHeight
   }, [mobileFullscreen, viewport.keyboardOpen, viewport.height])
 
+  // Grow to a comfortable multi-line surface on iPhone, then scroll internally
+  // only after the bounded height is reached. The visual viewport keeps this
+  // footer directly above the software keyboard.
+  useEffect(() => {
+    const textarea = inputRef.current
+    if (!textarea) return
+    const minHeight = isMobile && open ? 72 : 44
+    const maxHeight = isMobile ? Math.min(192, Math.max(132, viewport.height * 0.32)) : 112
+    textarea.style.height = 'auto'
+    const nextHeight = Math.min(maxHeight, Math.max(minHeight, textarea.scrollHeight))
+    textarea.style.height = `${nextHeight}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [input, isMobile, open, viewport.height])
+
   async function loadJobs(actionIsCurrent?: () => boolean) {
     const requestedProfileId = profileIdRef.current
     if (!requestedProfileId || (actionIsCurrent && !actionIsCurrent())) return
@@ -571,7 +624,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   }
 
   function pushAssistant(text: string) {
-    setMessages(current => [...current, { id: nextId(), role: 'assistant', text }])
+    setMessages(current => [...current, { id: nextId(), role: 'assistant', text: presentAssistantReply(text) }])
   }
 
   // Confirmed action → execute through an existing RLS-protected path, then
@@ -657,6 +710,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
             : 'The chain is complete and it is ready for a manager to review.') +
           ' Open it in Marketing AI to read the full draft.',
         )
+        // Track marketing artifact follow-up context.
+        if (result.version?.artifact_id) {
+          lastMarketingArtifactRef.current = { id: result.version.artifact_id, title: `${p.clientName} marketing`, client: p.clientName }
+        }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         return
       }
       if (p.type === 'marketing.list') {
@@ -709,6 +767,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
               ? `Rejected v${version.version} for ${p.clientName}. The version history is kept.`
               : `Requested changes on v${version.version} for ${p.clientName}. Say "continue the marketing workflow" to regenerate.`,
         )
+        // Track marketing artifact follow-up context.
+        lastMarketingArtifactRef.current = { id: openArtifact.id, title: `${p.clientName} ${label}`, client: p.clientName }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         return
       }
       if (p.type === 'microsoft.sync') {
@@ -758,6 +819,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         }
         setProposal(null)
         pushAssistant(`Done — created "${p.fields.title}" on ${date}${time ? ` at ${time}` : ''} in CG Calendar.`)
+        // Track calendar event follow-up context.
+        if (res.data?.id) {
+          lastCalendarEventRef.current = { id: res.data.id, title: String(p.fields.title ?? 'Meeting'), client: p.clientName ?? null }
+        }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
       } else if (p.type === 'schedule.propose') {
         if (!recordId) { setProposalError('Open the Client Schedule post first so I know which item to change.'); return }
         const res = await proposeScheduleChange({
@@ -771,6 +837,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         if (res.error) throw new Error(res.error.message)
         setProposal(null)
         pushAssistant('Submitted. This Client Schedule change stays pending until a manager or admin approves it.')
+        // Track schedule item follow-up context.
+        const scheduleTitle = String(p.fields.title ?? p.fields.item ?? 'Schedule item')
+        lastScheduleItemRef.current = { id: recordId, title: scheduleTitle, client: p.clientName ?? null }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
       } else if (p.type === 'memory.add') {
         // Durable per-user memory. RLS constrains the row to this user only.
         const note = String(p.fields.note ?? '').trim()
@@ -859,6 +929,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           }
           setProposal(null)
           pushAssistant(`Done — marked video${numbers.length > 1 ? 's' : ''} ${numbers.join(', ')} as shot${runName ? ` on "${runName}"` : ''}.`)
+          // Track Content Run follow-up context.
+          lastContentRunRef.current = { id: runId, title: runName, client: p.clientName ?? null }
+          if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         } else {
           const n = Number(p.fields.video)
           if (!Number.isInteger(n) || n <= 0) { setProposalError('Which video number should I move?'); return }
@@ -875,6 +948,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           const moved = res.data as { month?: string | null } | null
           setProposal(null)
           pushAssistant(`Done — moved video ${n} to ${moved?.month ? moved.month.slice(0, 7) : 'next month'}${runName ? ` on "${runName}"` : ''}. The Client Schedule link needs confirmation before it appears on the schedule.`)
+          // Track Content Run follow-up context.
+          lastContentRunRef.current = { id: runId, title: runName, client: p.clientName ?? null }
+          if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
         }
       } else if (p.type === 'navigation.open') {
         const path = String(p.fields.path ?? '')
@@ -883,6 +959,19 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setProposal(null)
         pushAssistant(label ? `Opening ${label}…` : 'Opening…')
         navigate(path)
+      } else if (p.type === 'task.due_date') {
+        if (p.target?.type !== 'planner_task') {
+          setProposalError('Open the Planner task first so I know exactly which task to reschedule.')
+          return
+        }
+        const dueDate = String(p.fields.due_date)
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) { setProposalError('Give me a valid date (YYYY-MM-DD) for the new due date.'); return }
+        const res = await updateAssistantTask({ taskId: p.target.id, action: 'due', dueDate })
+        if (!actionIsCurrent()) return
+        if (res.error) throw new Error(res.error.message)
+        setProposal(null)
+        pushAssistant(`Done — due date for "${p.target.label}" changed to ${dueDate}.`)
+        lastTaskRef.current = { id: p.target.id, name: p.target.label }
       } else {
         // calendar.cancel still needs the on-record calendar entry to act on.
         if (!actionIsCurrent()) return
@@ -892,6 +981,201 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       }
     } catch (err) {
       if (actionIsCurrent()) setProposalError(err instanceof Error ? err.message : 'Could not complete that action.')
+    } finally {
+      if (actionIsCurrent()) setApplying(false)
+    }
+  }
+
+  // Apply a compound action plan: execute all actions in deterministic order.
+  // Handles partial failure: never silently claims the whole bundle succeeded.
+  // Prevents duplicate writes on retry by tracking completed actions.
+  async function applyCompoundProposal() {
+    if (!compoundProposal || applying) return
+    const plan = compoundProposal
+    const applyingProfileId = profileIdRef.current
+    if (!applyingProfileId) return
+    const applyingProfileName = profile?.id === applyingProfileId ? profile.full_name : null
+    const actionRequestId = ++actionRequestRef.current
+    const actionIsCurrent = () => Boolean(applyingProfileId) && profileIdRef.current === applyingProfileId && actionRequestRef.current === actionRequestId
+    if (!actionIsCurrent()) return
+    setApplying(true)
+    setProposalError(null)
+
+    // Dependency-aware execution order: tasks before assignment, calendar before video, etc.
+    // Actions that depend on each other must run in the correct sequence.
+    const executionOrder = ['task.create', 'task.assign', 'task.due_date', 'task.update', 'calendar.create', 'schedule.propose', 'video.mark_shot', 'video.move', 'marketing.start', 'marketing.continue', 'navigation.open']
+    const sortedActions = [...plan.actions].sort((a, b) => {
+      const aIndex = executionOrder.indexOf(a.type)
+      const bIndex = executionOrder.indexOf(b.type)
+      return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex)
+    })
+
+    const results: Array<{ index: number; type: string; title: string; success: boolean; error?: string; unsupported?: boolean }> = []
+    const completedActions = new Set<string>()
+    const failedActions = new Set<string>()
+
+    try {
+      for (let i = 0; i < sortedActions.length; i++) {
+        if (!actionIsCurrent()) return
+        const action = sortedActions[i]
+        const actionKey = `${action.type}:${JSON.stringify(action.fields)}:${action.target?.id ?? ''}`
+
+        // Prevent duplicate writes on retry.
+        if (completedActions.has(actionKey)) {
+          results.push({ index: i, type: action.type, title: action.title, success: true })
+          continue
+        }
+
+        // Skip actions that depend on previously failed actions.
+        if (action.type === 'task.assign' || action.type === 'task.due_date' || action.type === 'task.update') {
+          const targetId = action.target?.id
+          if (targetId && failedActions.has(targetId)) {
+            results.push({ index: i, type: action.type, title: action.title, success: false, error: 'Skipped: dependent task action failed' })
+            continue
+          }
+        }
+
+        try {
+          // Re-resolve entity immediately before mutation to avoid stale context.
+          // For tasks, verify the target still exists.
+          if (action.type === 'task.assign' || action.type === 'task.due_date' || action.type === 'task.update') {
+            if (action.target?.type !== 'planner_task') throw new Error('Open the Planner task first so I know exactly which task to update.')
+            // Verify task still exists and is accessible.
+            const taskList = taskRef.current
+            const taskExists = taskList.some(t => t.native_id === action.target!.id)
+            if (!taskExists) throw new Error('That task is no longer available. Open it again before making changes.')
+          }
+
+          // For video actions, verify Content Run still exists.
+          if (action.type === 'video.mark_shot' || action.type === 'video.move') {
+            if (action.target?.type !== 'content_run') throw new Error('Open a Content Run first so I know exactly which run to update.')
+            // Verify Content Run still exists.
+            if (!selectedRunId || selectedRunId !== action.target.id) {
+              const run = await resolveContentRun(action.target.id)
+              if (!actionIsCurrent()) return
+              if (!run) throw new Error('That Content Run is no longer available. Open it again before making changes.')
+            }
+          }
+
+          // Execute the action based on type.
+          if (action.type === 'task.create') {
+            const res = await createAssistantTask({
+              title: String(action.fields.task ?? 'New task'),
+              assigneeName: action.fields.assignee ? String(action.fields.assignee) : null,
+              dueDate: action.fields.due_date ? String(action.fields.due_date) : null,
+              clientId: action.clientId,
+              clientName: action.clientName,
+            })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            const createdTaskId = res.data?.id ?? res.data?.task_id ?? null
+            if (createdTaskId) lastTaskRef.current = { id: String(createdTaskId), name: String(action.fields.task ?? 'New task') }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'task.assign') {
+            const assignee = action.fields.assignee ? String(action.fields.assignee) : null
+            if (!assignee) throw new Error('Choose an assignee.')
+            const res = await updateAssistantTask({ taskId: action.target!.id, action: 'assign', assigneeName: assignee })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            lastTaskRef.current = { id: action.target!.id, name: action.target!.label }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'task.update') {
+            const taskAction = action.fields.status === 'done' ? 'complete' : 'block'
+            const res = await updateAssistantTask({ taskId: action.target!.id, action: taskAction })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            lastTaskRef.current = { id: action.target!.id, name: action.target!.label }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'calendar.create') {
+            const date = String(action.fields.date)
+            const time = action.fields.time ? String(action.fields.time) : null
+            const startAt = `${date}T${time ?? '09:00'}:00`
+            const res = await createCompanyEvent({
+              title: String(action.fields.title ?? 'Meeting'),
+              event_type: String(action.fields.event_type) === 'client_event' ? 'client_event' : 'meeting',
+              client_id: action.clientId,
+              client_name: action.clientName,
+              start_at: startAt,
+            })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            if (res.tableMissing) throw new Error('CG Calendar is not enabled in this database yet.')
+            if (res.data) {
+              await logPlannerActivity({
+                entity_type: 'company_calendar_event', entity_id: res.data.id, action: 'assistant_created',
+                actor_user_id: applyingProfileId, actor_name: applyingProfileName,
+                metadata: { via: 'cg_assistant', title: res.data.title, start_at: startAt },
+              })
+              if (!actionIsCurrent()) return
+            }
+            if (res.data?.id) lastCalendarEventRef.current = { id: res.data.id, title: String(action.fields.title ?? 'Meeting'), client: action.clientName ?? null }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'video.mark_shot') {
+            const numbers = String(action.fields.videos ?? '').split(/[\s,]+/).map(Number).filter(n => Number.isInteger(n) && n > 0)
+            if (numbers.length === 0) throw new Error('Which video number should I mark as shot?')
+            for (const n of numbers) {
+              if (!actionIsCurrent()) return
+              const res = await assistantUpdateVideo({ runId: action.target!.id, videoNumber: n, action: 'shot' })
+              if (!actionIsCurrent()) return
+              if (res.error) throw new Error(`Video ${n}: ${res.error.message}`)
+            }
+            lastContentRunRef.current = { id: action.target!.id, title: action.target!.label, client: action.clientName ?? null }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'video.move') {
+            const n = Number(action.fields.video)
+            if (!Number.isInteger(n) || n <= 0) throw new Error('Which video number should I move?')
+            const month = String(action.fields.scheduled_date ?? '')
+            if (!actionIsCurrent()) return
+            const res = await assistantUpdateVideo({
+              runId: action.target!.id,
+              videoNumber: n,
+              action: /^\d{4}-\d{2}-\d{2}$/.test(month) ? 'move_to_month' : 'move_next_month',
+              scheduledMonth: /^\d{4}-\d{2}-\d{2}$/.test(month) ? month : null,
+            })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            lastContentRunRef.current = { id: action.target!.id, title: action.target!.label, client: action.clientName ?? null }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'navigation.open') {
+            const path = String(action.fields.path ?? '')
+            if (path) navigate(path)
+          } else {
+            // Unsupported action type in compound plan.
+            results.push({ index: i, type: action.type, title: action.title, success: false, error: 'This action type is not supported in compound plans', unsupported: true })
+            continue
+          }
+
+          completedActions.add(actionKey)
+          results.push({ index: i, type: action.type, title: action.title, success: true })
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+          results.push({ index: i, type: action.type, title: action.title, success: false, error: errorMsg })
+          // Track failed task targets to skip dependent actions.
+          if (action.target?.id) failedActions.add(action.target.id)
+        }
+      }
+
+      // Build compact outcome summary.
+      const succeeded = results.filter(r => r.success)
+      const failed = results.filter(r => !r.success)
+      const unsupported = results.filter(r => r.unsupported)
+      
+      if (failed.length === 0 && unsupported.length === 0) {
+        setCompoundProposal(null)
+        const actionList = succeeded.map(r => r.title).join(', ')
+        pushAssistant(`Done — ${actionList}`)
+      } else if (succeeded.length === 0 && unsupported.length === 0) {
+        setProposalError(`All actions failed: ${failed.map(f => f.error).join('; ')}`)
+      } else {
+        setCompoundProposal(null)
+        const parts: string[] = []
+        if (succeeded.length > 0) parts.push(`Done: ${succeeded.map(r => r.title).join(', ')}`)
+        if (failed.length > 0) parts.push(`Failed: ${failed.map(f => `${f.title}: ${f.error}`).join('; ')}`)
+        if (unsupported.length > 0) parts.push(`Not yet supported: ${unsupported.map(u => u.title).join(', ')}`)
+        pushAssistant(parts.join('\n'))
+      }
+    } catch (err) {
+      if (actionIsCurrent()) setProposalError(err instanceof Error ? err.message : 'Could not complete the action bundle.')
     } finally {
       if (actionIsCurrent()) setApplying(false)
     }
@@ -1061,15 +1345,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   async function send(text: string) {
     const clean = text.trim()
     const sendingProfileId = profileIdRef.current
-    if (!clean || sending || applying || !sendingProfileId) return
+    if (!clean || sendingRef.current || sending || applying || !sendingProfileId) return
     // Stop any active voice recognition before processing to prevent onresult
     // from re-populating the input after we clear it.
     if (listeningRef.current) stopListening()
     // Collapse the mobile "More" list: any send takes the assistant out of the
     // clean idle state that shows the two primary actions.
     setMoreOpen(false)
-    sendingRef.current = true
-
     // Action agent first: understand the instruction as a concrete app action.
     // A proposal is shown as a confirm/edit/cancel preview; ambiguity asks; a
     // plain question falls through to chat.
@@ -1093,6 +1375,18 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       lastTaskName: lastTaskRef.current?.name ?? null,
       lastClientId: lastClientRef.current?.id ?? null,
       lastClientName: lastClientRef.current?.name ?? null,
+      lastScheduleItemId: lastScheduleItemRef.current?.id ?? null,
+      lastScheduleItemTitle: lastScheduleItemRef.current?.title ?? null,
+      lastScheduleItemClient: lastScheduleItemRef.current?.client ?? null,
+      lastCalendarEventId: lastCalendarEventRef.current?.id ?? null,
+      lastCalendarEventTitle: lastCalendarEventRef.current?.title ?? null,
+      lastCalendarEventClient: lastCalendarEventRef.current?.client ?? null,
+      lastContentRunId: lastContentRunRef.current?.id ?? null,
+      lastContentRunTitle: lastContentRunRef.current?.title ?? null,
+      lastContentRunClient: lastContentRunRef.current?.client ?? null,
+      lastMarketingArtifactId: lastMarketingArtifactRef.current?.id ?? null,
+      lastMarketingArtifactTitle: lastMarketingArtifactRef.current?.title ?? null,
+      lastMarketingArtifactClient: lastMarketingArtifactRef.current?.client ?? null,
     })
     if (parsed && 'type' in parsed) {
       let nextProposal = parsed
@@ -1105,6 +1399,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         return
       }
       if (parsed.type === 'video.mark_shot' || parsed.type === 'video.move') {
+        sendingRef.current = true
         setSending(true)
         setChatError(null)
         try {
@@ -1129,6 +1424,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           if (profileIdRef.current === sendingProfileId) setChatError('I could not verify the selected Content Run. Try again.')
           return
         } finally {
+          sendingRef.current = false
           if (profileIdRef.current === sendingProfileId) setSending(false)
         }
       }
@@ -1154,16 +1450,13 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     setInput('')
     setChatError(null)
     setLastUserMessage(clean)
+    sendingRef.current = true
     setSending(true)
     setOpen(true)
 
-    // Show a thinking indicator while the request is in flight.
-    const thinkingId = nextId()
-    setMessages(current => [...current, { id: thinkingId, role: 'assistant', text: 'Checking…' }])
-
     // The assistant receives the current page/client/record as context; the user
     // only ever sees their own typed message.
-    const contextual = `[Context — ${currentContextLine()}]\n${clean}`
+    const contextual = `[Context — ${currentContextLine(clean)}]\n${clean}`
     const workContext = workContextRef.current
     try {
       const response = await sendAssistantMessage(contextual, history, workContext, null)
@@ -1173,25 +1466,41 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setChatError(friendly.message)
         setChatErrorRetryable(friendly.retryable)
       }
-      // Replace the thinking indicator with the actual response.
-      setMessages(current => {
-        const filtered = current.filter(m => m.id !== thinkingId)
-        return [
-          ...filtered,
-          {
-            id: nextId(),
-            role: 'assistant',
-            text: response.answer,
-            restricted: response.restricted,
-            setupRequired: response.setupRequired,
-          },
-        ]
-      })
+      // If the server returned a semantic intent action, show it as a proposal.
+      if (response.action) {
+        const proposal = response.action as ActionProposal
+        setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+        setInput('')
+        setChatError(null)
+        setProposalError(null)
+        setOpen(true)
+        setProposal(proposal)
+        return
+      }
+      // If the server returned a compound action plan, show it as a bundle proposal.
+      if (response.compound_action) {
+        const plan = response.compound_action as CompoundActionPlan
+        setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+        setInput('')
+        setChatError(null)
+        setProposalError(null)
+        setOpen(true)
+        setCompoundProposal(plan)
+        return
+      }
+      setMessages(current => [
+        ...current,
+        {
+          id: nextId(),
+          role: 'assistant',
+          text: presentAssistantReply(response.answer ?? '', clean),
+          restricted: response.restricted,
+          setupRequired: response.setupRequired,
+        },
+      ])
       window.setTimeout(() => inputRef.current?.focus(), 0)
     } catch (err) {
       if (profileIdRef.current === sendingProfileId) {
-        // Remove the thinking indicator on error.
-        setMessages(current => current.filter(m => m.id !== thinkingId))
         const friendly = friendlyAssistantError(err instanceof Error ? err.message : null)
         setChatError(friendly.message)
         setChatErrorRetryable(friendly.retryable)
@@ -1215,8 +1524,12 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     if (!recognition) return
     setMoreOpen(false)
     const listeningProfileId = profileIdRef.current
+    voiceManualStopRef.current = false
+    voiceInitialInputRef.current = input
+    voiceCommittedTranscriptRef.current = ''
+    voiceSessionTranscriptRef.current = ''
     recognition.lang = micLang
-    recognition.continuous = false
+    recognition.continuous = true
     recognition.interimResults = true
     recognition.onresult = event => {
       // Skip transcript updates while a send is in flight to prevent the
@@ -1224,30 +1537,61 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       if (sendingRef.current) return
       let transcript = ''
       for (let i = 0; i < event.results.length; i += 1) {
-        transcript += event.results[i][0].transcript
+        transcript = joinSpeechTranscript(transcript, event.results[i][0].transcript)
       }
-      if (profileIdRef.current === listeningProfileId) setInput(transcript)
+      voiceSessionTranscriptRef.current = transcript
+      if (profileIdRef.current === listeningProfileId) {
+        setInput(joinSpeechTranscript(voiceInitialInputRef.current, voiceCommittedTranscriptRef.current, transcript))
+      }
     }
     recognition.onerror = (event) => {
-      listeningRef.current = false
       if (profileIdRef.current !== listeningProfileId) return
-      setListening(false)
       // Surface specific speech recognition errors in plain language instead
       // of a generic failure message.
       if (event.error === 'not-allowed') {
+        voiceManualStopRef.current = true
         setChatError('Microphone access was denied. Please allow microphone access in your browser settings and try again.')
       } else if (event.error === 'audio-capture') {
+        voiceManualStopRef.current = true
         setChatError('No microphone was found. Check that a microphone is connected and try again.')
-      } else if (event.error === 'no-speech') {
-        setChatError('I did not hear anything. Tap the mic and try speaking again.')
       } else if (event.error === 'network') {
+        voiceManualStopRef.current = true
         setChatError('Speech recognition had a network error. Check your connection and try again.')
+      } else if (event.error === 'service-not-allowed') {
+        voiceManualStopRef.current = true
+        setChatError('Voice input is not available in this browser. You can type the message instead.')
       }
-      // Other errors (aborted, service-not-allowed) are transient — no message needed.
+      if (voiceManualStopRef.current) {
+        listeningRef.current = false
+        setListening(false)
+      }
+      // A no-speech pause is allowed to end and restart the session silently.
     }
     recognition.onend = () => {
-      listeningRef.current = false
-      if (profileIdRef.current === listeningProfileId) setListening(false)
+      voiceCommittedTranscriptRef.current = joinSpeechTranscript(
+        voiceCommittedTranscriptRef.current,
+        voiceSessionTranscriptRef.current,
+      )
+      voiceSessionTranscriptRef.current = ''
+      if (profileIdRef.current !== listeningProfileId || voiceManualStopRef.current || sendingRef.current || !listeningRef.current) {
+        listeningRef.current = false
+        if (profileIdRef.current === listeningProfileId) setListening(false)
+        return
+      }
+      // Safari may end recognition after a natural pause even with continuous
+      // mode enabled. Restart the same explicit listening session and retain the
+      // accumulated transcript; never submit on end.
+      recognitionRestartTimerRef.current = window.setTimeout(() => {
+        recognitionRestartTimerRef.current = null
+        if (profileIdRef.current !== listeningProfileId || voiceManualStopRef.current || sendingRef.current || !listeningRef.current) return
+        try {
+          recognition.start()
+        } catch {
+          listeningRef.current = false
+          setListening(false)
+          setChatError('Voice input stopped. Your transcript is still here, so you can continue typing or send it.')
+        }
+      }, 180)
     }
     recognitionRef.current = recognition
     listeningRef.current = true
@@ -1262,7 +1606,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   }
 
   function stopListening() {
+    voiceManualStopRef.current = true
     listeningRef.current = false
+    if (recognitionRestartTimerRef.current !== null) window.clearTimeout(recognitionRestartTimerRef.current)
+    recognitionRestartTimerRef.current = null
     recognitionRef.current?.stop()
     setListening(false)
   }
@@ -1501,7 +1848,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
               ))}
               {sending && (
                 <div className="flex justify-start">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-brand-primary/60">CG Assistant is thinking…</div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-brand-primary/60" role="status" aria-live="polite">Checking…</div>
                 </div>
               )}
               {chatError && (
@@ -1739,6 +2086,46 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
             </div>
           </div>
         )}
+
+        {/* Compound action plan: multiple actions from a single message. */}
+        {compoundProposal && (
+          <div className="mb-2 rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="min-w-0 truncate text-sm font-black text-white">{compoundProposal.actions.length} actions to confirm</p>
+              <span className="shrink-0 rounded-full border border-brand-teal/30 bg-brand-teal/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-teal">Bundle Preview</span>
+            </div>
+            {compoundProposal.client_name && (
+              <p className="mb-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-xs text-brand-primary">
+                <span className="font-black text-white">Client:</span> {compoundProposal.client_name}
+              </p>
+            )}
+            <div className="space-y-2">
+              {compoundProposal.actions.map((action, index) => (
+                <div key={index} className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-brand-teal">{index + 1}.</span>
+                    <span className="text-xs font-bold text-white">{action.title}</span>
+                    {action.requiresApproval && (
+                      <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-[9px] font-black text-amber-200">APPROVAL</span>
+                    )}
+                  </div>
+                  {action.target && (
+                    <p className="mt-1 text-[10px] text-brand-primary/60">
+                      {action.target.type === 'planner_task' ? 'Task' : 'Content Run'}: {action.target.label}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+            {proposalError && <p className="mt-2 text-xs text-red-300">{proposalError}</p>}
+            <div className="mt-3 flex gap-2">
+              <button type="button" onClick={() => void applyCompoundProposal()} disabled={applying} className="min-h-11 flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
+                {applying ? 'Working…' : `Confirm all ${compoundProposal.actions.length} actions`}
+              </button>
+              <button type="button" onClick={() => { setCompoundProposal(null); setProposalError(null); inputRef.current?.focus() }} className="min-h-11 rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Cancel</button>
+            </div>
+          </div>
+        )}
         </div>
 
         {/* Composer bar — the fixed footer of the full-screen column, so it is
@@ -1778,10 +2165,10 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
                 if (!listening) void send(input)
               }
             }}
-            rows={1}
+            rows={2}
             placeholder="Ask CG Assistant"
             aria-label="Ask CG Assistant"
-            className="max-h-28 min-h-11 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-1 py-2.5 text-sm text-white placeholder:text-brand-primary/45 focus:outline-none"
+            className="min-h-[4.5rem] min-w-0 flex-1 resize-none overflow-y-hidden bg-transparent px-1 py-2.5 text-sm leading-5 text-white placeholder:text-brand-primary/45 focus:outline-none md:min-h-11"
           />
 
           {speechSupported && (

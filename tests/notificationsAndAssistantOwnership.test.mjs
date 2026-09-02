@@ -91,8 +91,9 @@ test('the Assistant is told the rule, not left to infer it', () => {
   assert.match(composer, /These have NO verified owner — never say such a task belongs to a specific person; say it needs assignment review\./)
 })
 
-test('ownership review reaches managers only', () => {
-  assert.match(composer, /if \(isManager && ownershipReviewRef\.current\) parts\.push\(ownershipReviewRef\.current\)/)
+test('ownership review reaches managers only when they explicitly ask for it', () => {
+  assert.match(composer, /const asksForOwnershipReview = \/\\b\(assignment review\|ownership review\|unassigned\|assignment conflict\|who owns\)\\b\/i\.test\(userMessage\)/)
+  assert.match(composer, /if \(isManager && asksForOwnershipReview && ownershipReviewRef\.current\) parts\.push\(ownershipReviewRef\.current\)/)
   // Guarded by the same isManager block that gates the cross-team summary.
   const start = composer.indexOf('if (isManager) {')
   const block = composer.slice(start, composer.indexOf('admin-gated server-side', start))
