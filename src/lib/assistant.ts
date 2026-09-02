@@ -55,6 +55,22 @@ export interface AssistantChatResponse {
     requiresApproval?: boolean
     approvalNote?: string
   }
+  // Compound action plan (present when model extracts multiple actions).
+  compound_action?: {
+    is_compound: true
+    actions: Array<{
+      type: string
+      title: string
+      fields: Record<string, string | number | null>
+      clientId: string | null
+      clientName: string | null
+      target?: { type: string; id: string; label: string }
+      requiresApproval?: boolean
+      approvalNote?: string
+    }>
+    client_name: string | null
+    confidence: number
+  }
   // Skilled-agent fields (present when an agentKey was sent).
   agent?: string
   agentName?: string

@@ -1068,6 +1068,14 @@ interface SemanticIntentAction {
   confidence: number
 }
 
+// Compound action: multiple actions extracted from a single message.
+interface CompoundSemanticIntent {
+  is_compound: true
+  actions: SemanticIntentAction[]
+  client_name?: string | null
+  confidence: number
+}
+
 const VALID_SEMANTIC_ACTION_TYPES = new Set([
   'task_create', 'task_assign', 'task_due_date', 'task_complete', 'task_block',
   'calendar_create', 'navigation_open', 'client_lookup',
@@ -1079,7 +1087,7 @@ const VALID_FOLLOW_UP_REFERENCES = new Set([
   'last_content_run', 'last_marketing_artifact',
 ])
 
-function isValidSemanticIntent(value: unknown): value is SemanticIntentAction {
+function isValidSemanticIntentAction(value: unknown): value is SemanticIntentAction {
   if (!value || typeof value !== 'object') return false
   const obj = value as Record<string, unknown>
   if (typeof obj.action_type !== 'string' || !VALID_SEMANTIC_ACTION_TYPES.has(obj.action_type)) return false
@@ -1087,6 +1095,21 @@ function isValidSemanticIntent(value: unknown): value is SemanticIntentAction {
   // Follow-up reference must be valid if present.
   if (obj.follow_up_reference != null && !VALID_FOLLOW_UP_REFERENCES.has(obj.follow_up_reference as string)) return false
   return true
+}
+
+function isValidCompoundIntent(value: unknown): value is CompoundSemanticIntent {
+  if (!value || typeof value !== 'object') return false
+  const obj = value as Record<string, unknown>
+  if (obj.is_compound !== true) return false
+  if (!Array.isArray(obj.actions) || obj.actions.length < 2 || obj.actions.length > 10) return false
+  if (typeof obj.confidence !== 'number' || obj.confidence < 0.5) return false
+  // Every action in the array must be valid.
+  return obj.actions.every((action: unknown) => isValidSemanticIntentAction(action))
+}
+
+// Legacy single intent validator (kept for backwards compatibility).
+function isValidSemanticIntent(value: unknown): value is SemanticIntentAction {
+  return isValidSemanticIntentAction(value)
 }
 
 // Build the system prompt for semantic intent extraction. This is strictly
@@ -1118,8 +1141,9 @@ function buildIntentExtractionPrompt(
 - NEVER guess staff names, client names, or task titles — only use values explicitly mentioned or in context.
 - NEVER guess between multiple plausible entities. Ask one compact clarification instead.
 - NEVER carry entity references across user/client boundaries.
+- For COMPOUND messages with multiple distinct actions, use the COMPOUND SCHEMA.
 
-## SCHEMA
+## SINGLE ACTION SCHEMA
 {
   "action_type": "task_create" | "task_assign" | "task_due_date" | "task_complete" | "task_block" | "calendar_create" | "navigation_open" | "client_lookup" | "schedule_move" | "video_mark_shot" | "video_move" | "marketing_start" | "marketing_continue" | "none",
   "task_title": string | null (clean title without dates/assignees),
@@ -1137,6 +1161,14 @@ function buildIntentExtractionPrompt(
   "marketing_request": string | null (marketing request description),
   "follow_up_reference": "last_task" | "last_client" | "last_schedule_item" | "last_calendar_event" | "last_content_run" | "last_marketing_artifact" | null,
   "confidence": number (0.0 to 1.0)
+}
+
+## COMPOUND ACTION SCHEMA (for messages with 2+ distinct actions)
+{
+  "is_compound": true,
+  "actions": [array of single action objects, each following the SINGLE ACTION SCHEMA above],
+  "client_name": string | null (shared client if applicable),
+  "confidence": number (0.0 to 1.0, average confidence of all actions)
 }
 
 ## ACTION TYPES
@@ -1171,7 +1203,7 @@ Last discussed content run: ${lastContentRun}
 ## FOLLOW-UP REFERENCES
 If the user says "it", "that", "him", "this", "the task", "the client", "the video", "the post", etc., use follow_up_reference to indicate what they're referring to based on conversation context. Only use follow-up references when there is exactly one plausible entity. If ambiguous, ask for clarification.
 
-## EXAMPLES
+## SINGLE ACTION EXAMPLES
 User: "can you chuck this on Franco's list for tomorrow"
 {"action_type":"task_assign","assignee":"Franco","due_date":"${today}","follow_up_reference":"last_task","confidence":0.9}
 
@@ -1209,7 +1241,17 @@ User: "move that one to Friday"
 {"action_type":"schedule_move","schedule_new_date":"2026-09-04","follow_up_reference":"last_calendar_event","confidence":0.8}
 
 User: "what is Red Oak posting this week"
-{"action_type":"none","confidence":0.1}`
+{"action_type":"none","confidence":0.1}
+
+## COMPOUND ACTION EXAMPLES
+User: "I was at Securiforce's content run. We shot two videos. Video one was X, video two was Y. Franco still needs drone shots tomorrow."
+{"is_compound":true,"actions":[{"action_type":"video_mark_shot","video_number":1,"client_name":"Securiforce","confidence":0.9},{"action_type":"video_mark_shot","video_number":2,"client_name":"Securiforce","confidence":0.9},{"action_type":"task_create","task_title":"Drone shots for Securiforce","assignee":"Franco","due_date":"${today}","client_name":"Securiforce","confidence":0.85}],"client_name":"Securiforce","confidence":0.88}
+
+User: "Mark video 1 as shot and assign the next video to Sydney"
+{"is_compound":true,"actions":[{"action_type":"video_mark_shot","video_number":1,"follow_up_reference":"last_content_run","confidence":0.9},{"action_type":"video_move","video_number":2,"assignee":"Sydney","follow_up_reference":"last_content_run","confidence":0.85}],"confidence":0.87}
+
+User: "Create a task to call Red Oak and schedule a meeting with them tomorrow"
+{"is_compound":true,"actions":[{"action_type":"task_create","task_title":"Call Red Oak","client_name":"Red Oak","confidence":0.9},{"action_type":"calendar_create","calendar_title":"Meeting with Red Oak","calendar_date":"${today}","client_name":"Red Oak","confidence":0.85}],"client_name":"Red Oak","confidence":0.87}`
 }
 
 // Extract semantic intent from natural language using the AI model.
@@ -1287,7 +1329,32 @@ async function extractSemanticIntent(
       return null
     }
 
-    // Validate against schema.
+    // Handle compound intent (multiple actions).
+    if (isValidCompoundIntent(parsed)) {
+      const actions: Record<string, unknown>[] = []
+      for (const intent of parsed.actions) {
+        if (intent.action_type === 'none') continue
+        const action = buildActionFromIntent(intent, clientList, staffNames, taskList, localWorkContext, today)
+        if (action) actions.push(action)
+      }
+      if (actions.length === 0) return null
+      if (actions.length === 1) {
+        // Single valid action — return as single action (not compound).
+        return { action: actions[0], model: `${result.provider}:${result.model}` }
+      }
+      // Multiple actions — return as compound plan.
+      return {
+        action: {
+          is_compound: true,
+          actions,
+          client_name: parsed.client_name ?? null,
+          confidence: parsed.confidence,
+        },
+        model: `${result.provider}:${result.model}`,
+      }
+    }
+
+    // Handle single intent (backwards compatible).
     if (!isValidSemanticIntent(parsed)) return null
     if (parsed.action_type === 'none') return null
 
@@ -2237,6 +2304,15 @@ Deno.serve(async (req) => {
       promptCategory: 'semantic_intent',
       model: semanticAction.model,
     })
+    // Check if this is a compound action (multiple actions).
+    const action = semanticAction.action as Record<string, unknown>
+    if (action && typeof action === 'object' && 'is_compound' in action) {
+      return jsonResponse({
+        ok: true,
+        compound_action: action,
+        tools: TOOL_REGISTRY,
+      })
+    }
     return jsonResponse({
       ok: true,
       action: semanticAction.action,

@@ -11,7 +11,15 @@ import {
   type AssistantLocalWorkContext,
 } from '../../lib/assistant'
 import { getMyDayContext } from '../../lib/workforceMyDay'
-import { parseAssistantAction, type ActionProposal } from '../../lib/assistantActions'
+import { parseAssistantAction, type ActionProposal, type AssistantActionType } from '../../lib/assistantActions'
+
+// Compound action plan: multiple actions extracted from a single message.
+interface CompoundActionPlan {
+  is_compound: true
+  actions: Array<ActionProposal & { type: AssistantActionType }>
+  client_name: string | null
+  confidence: number
+}
 import { listStaffProfiles } from '../../lib/contentWorkflow'
 import { createCompanyEvent } from '../../lib/companyCalendar'
 import { logPlannerActivity, listPlannerWorkloadSummary, loadOwnershipReviewSummary } from '../../lib/planner'
@@ -187,6 +195,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   // Action-agent state: a parsed proposal is shown as a confirm/edit/cancel
   // preview before ANY write. Nothing mutates until the user confirms.
   const [proposal, setProposal] = useState<ActionProposal | null>(null)
+  const [compoundProposal, setCompoundProposal] = useState<CompoundActionPlan | null>(null)
   const [applying, setApplying] = useState(false)
   // Live progress line while the controlled Microsoft sync runs.
   const [microsoftSyncNote, setMicrosoftSyncNote] = useState<string | null>(null)
@@ -977,6 +986,171 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     }
   }
 
+  // Apply a compound action plan: execute all actions in deterministic order.
+  // Handles partial failure: never silently claims the whole bundle succeeded.
+  // Prevents duplicate writes on retry by tracking completed actions.
+  async function applyCompoundProposal() {
+    if (!compoundProposal || applying) return
+    const plan = compoundProposal
+    const applyingProfileId = profileIdRef.current
+    if (!applyingProfileId) return
+    const applyingProfileName = profile?.id === applyingProfileId ? profile.full_name : null
+    const actionRequestId = ++actionRequestRef.current
+    const actionIsCurrent = () => Boolean(applyingProfileId) && profileIdRef.current === applyingProfileId && actionRequestRef.current === actionRequestId
+    if (!actionIsCurrent()) return
+    setApplying(true)
+    setProposalError(null)
+
+    // Deterministic execution order: tasks first, then calendar, then videos, then navigation.
+    // This ensures dependent actions (like creating a task before assigning it) work correctly.
+    const executionOrder = ['task.create', 'task.assign', 'task.due_date', 'task.update', 'calendar.create', 'schedule.propose', 'video.mark_shot', 'video.move', 'marketing.start', 'marketing.continue', 'navigation.open']
+    const sortedActions = [...plan.actions].sort((a, b) => {
+      const aIndex = executionOrder.indexOf(a.type)
+      const bIndex = executionOrder.indexOf(b.type)
+      return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex)
+    })
+
+    const results: Array<{ index: number; type: string; success: boolean; error?: string }> = []
+    const completedActions = new Set<string>()
+
+    try {
+      for (let i = 0; i < sortedActions.length; i++) {
+        if (!actionIsCurrent()) return
+        const action = sortedActions[i]
+        const actionKey = `${action.type}:${JSON.stringify(action.fields)}:${action.target?.id ?? ''}`
+
+        // Prevent duplicate writes on retry.
+        if (completedActions.has(actionKey)) {
+          results.push({ index: i, type: action.type, success: true })
+          continue
+        }
+
+        try {
+          // Apply individual action using the existing applyProposal logic.
+          // We temporarily set the proposal and call the handler.
+          const tempProposal = { ...action, clientId: action.clientId ?? plan.client_name ? (plan.actions.find(a => a.clientId)?.clientId ?? null) : null, clientName: action.clientName ?? plan.client_name }
+          
+          // Execute the action based on type.
+          if (tempProposal.type === 'task.create') {
+            const res = await createAssistantTask({
+              title: String(tempProposal.fields.task ?? 'New task'),
+              assigneeName: tempProposal.fields.assignee ? String(tempProposal.fields.assignee) : null,
+              dueDate: tempProposal.fields.due_date ? String(tempProposal.fields.due_date) : null,
+              clientId: tempProposal.clientId,
+              clientName: tempProposal.clientName,
+            })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            const createdTaskId = res.data?.id ?? res.data?.task_id ?? null
+            if (createdTaskId) lastTaskRef.current = { id: String(createdTaskId), name: String(tempProposal.fields.task ?? 'New task') }
+            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
+          } else if (tempProposal.type === 'task.assign') {
+            if (tempProposal.target?.type !== 'planner_task') throw new Error('Open the Planner task first so I know exactly which existing task to assign.')
+            const assignee = tempProposal.fields.assignee ? String(tempProposal.fields.assignee) : null
+            if (!assignee) throw new Error('Choose an assignee.')
+            const res = await updateAssistantTask({ taskId: tempProposal.target.id, action: 'assign', assigneeName: assignee })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            lastTaskRef.current = { id: tempProposal.target.id, name: tempProposal.target.label }
+            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
+          } else if (tempProposal.type === 'task.update') {
+            if (tempProposal.target?.type !== 'planner_task') throw new Error('Open the Planner task first so I know exactly which task to update.')
+            const taskAction = tempProposal.fields.status === 'done' ? 'complete' : 'block'
+            const res = await updateAssistantTask({ taskId: tempProposal.target.id, action: taskAction })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            lastTaskRef.current = { id: tempProposal.target.id, name: tempProposal.target.label }
+            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
+          } else if (tempProposal.type === 'calendar.create') {
+            const date = String(tempProposal.fields.date)
+            const time = tempProposal.fields.time ? String(tempProposal.fields.time) : null
+            const startAt = `${date}T${time ?? '09:00'}:00`
+            const res = await createCompanyEvent({
+              title: String(tempProposal.fields.title ?? 'Meeting'),
+              event_type: String(tempProposal.fields.event_type) === 'client_event' ? 'client_event' : 'meeting',
+              client_id: tempProposal.clientId,
+              client_name: tempProposal.clientName,
+              start_at: startAt,
+            })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            if (res.tableMissing) throw new Error('CG Calendar is not enabled in this database yet.')
+            if (res.data) {
+              await logPlannerActivity({
+                entity_type: 'company_calendar_event', entity_id: res.data.id, action: 'assistant_created',
+                actor_user_id: applyingProfileId, actor_name: applyingProfileName,
+                metadata: { via: 'cg_assistant', title: res.data.title, start_at: startAt },
+              })
+              if (!actionIsCurrent()) return
+            }
+            if (res.data?.id) lastCalendarEventRef.current = { id: res.data.id, title: String(tempProposal.fields.title ?? 'Meeting'), client: tempProposal.clientName ?? null }
+            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
+          } else if (tempProposal.type === 'video.mark_shot') {
+            if (tempProposal.target?.type !== 'content_run') throw new Error('Open a Content Run first so I know exactly which run to update.')
+            const numbers = String(tempProposal.fields.videos ?? '').split(/[\s,]+/).map(Number).filter(n => Number.isInteger(n) && n > 0)
+            if (numbers.length === 0) throw new Error('Which video number should I mark as shot?')
+            for (const n of numbers) {
+              if (!actionIsCurrent()) return
+              const res = await assistantUpdateVideo({ runId: tempProposal.target.id, videoNumber: n, action: 'shot' })
+              if (!actionIsCurrent()) return
+              if (res.error) throw new Error(`Video ${n}: ${res.error.message}`)
+            }
+            lastContentRunRef.current = { id: tempProposal.target.id, title: tempProposal.target.label, client: tempProposal.clientName ?? null }
+            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
+          } else if (tempProposal.type === 'video.move') {
+            if (tempProposal.target?.type !== 'content_run') throw new Error('Open a Content Run first so I know exactly which run to update.')
+            const n = Number(tempProposal.fields.video)
+            if (!Number.isInteger(n) || n <= 0) throw new Error('Which video number should I move?')
+            const month = String(tempProposal.fields.scheduled_date ?? '')
+            if (!actionIsCurrent()) return
+            const res = await assistantUpdateVideo({
+              runId: tempProposal.target.id,
+              videoNumber: n,
+              action: /^\d{4}-\d{2}-\d{2}$/.test(month) ? 'move_to_month' : 'move_next_month',
+              scheduledMonth: /^\d{4}-\d{2}-\d{2}$/.test(month) ? month : null,
+            })
+            if (!actionIsCurrent()) return
+            if (res.error) throw new Error(res.error.message)
+            lastContentRunRef.current = { id: tempProposal.target.id, title: tempProposal.target.label, client: tempProposal.clientName ?? null }
+            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
+          } else if (tempProposal.type === 'navigation.open') {
+            const path = String(tempProposal.fields.path ?? '')
+            if (path) navigate(path)
+          } else {
+            // Unsupported action type in compound plan.
+            throw new Error(`Action type "${tempProposal.type}" is not supported in compound plans.`)
+          }
+
+          completedActions.add(actionKey)
+          results.push({ index: i, type: action.type, success: true })
+        } catch (err) {
+          results.push({ index: i, type: action.type, success: false, error: err instanceof Error ? err.message : 'Unknown error' })
+        }
+      }
+
+      // Build outcome summary.
+      const succeeded = results.filter(r => r.success)
+      const failed = results.filter(r => !r.success)
+      
+      if (failed.length === 0) {
+        setCompoundProposal(null)
+        pushAssistant(`Done — all ${succeeded.length} actions completed successfully.`)
+      } else if (succeeded.length === 0) {
+        setProposalError(`All ${failed.length} actions failed: ${failed.map(f => f.error).join('; ')}`)
+      } else {
+        setCompoundProposal(null)
+        pushAssistant(
+          `Partially completed: ${succeeded.length} of ${results.length} actions succeeded.\n` +
+          `Failed: ${failed.map(f => `${f.type}: ${f.error}`).join('; ')}`,
+        )
+      }
+    } catch (err) {
+      if (actionIsCurrent()) setProposalError(err instanceof Error ? err.message : 'Could not complete the action bundle.')
+    } finally {
+      if (actionIsCurrent()) setApplying(false)
+    }
+  }
+
   // ── Meeting debrief flow ────────────────────────────────────────────────
   async function startDebriefRecording() {
     const requestToken = beginDebriefRequest('analysis')
@@ -1271,6 +1445,17 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setProposalError(null)
         setOpen(true)
         setProposal(proposal)
+        return
+      }
+      // If the server returned a compound action plan, show it as a bundle proposal.
+      if (response.compound_action) {
+        const plan = response.compound_action as CompoundActionPlan
+        setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+        setInput('')
+        setChatError(null)
+        setProposalError(null)
+        setOpen(true)
+        setCompoundProposal(plan)
         return
       }
       setMessages(current => [
@@ -1868,6 +2053,46 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
                 {applying ? 'Working…' : proposal.requiresApproval ? 'Submit for approval' : 'Confirm'}
               </button>
               <button type="button" onClick={() => { setProposal(null); setProposalError(null); inputRef.current?.focus() }} className="min-h-11 rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Cancel</button>
+            </div>
+          </div>
+        )}
+
+        {/* Compound action plan: multiple actions from a single message. */}
+        {compoundProposal && (
+          <div className="mb-2 rounded-2xl border border-brand-teal/30 bg-[#0c0f0e]/98 p-3 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="min-w-0 truncate text-sm font-black text-white">{compoundProposal.actions.length} actions to confirm</p>
+              <span className="shrink-0 rounded-full border border-brand-teal/30 bg-brand-teal/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-teal">Bundle Preview</span>
+            </div>
+            {compoundProposal.client_name && (
+              <p className="mb-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-xs text-brand-primary">
+                <span className="font-black text-white">Client:</span> {compoundProposal.client_name}
+              </p>
+            )}
+            <div className="space-y-2">
+              {compoundProposal.actions.map((action, index) => (
+                <div key={index} className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-brand-teal">{index + 1}.</span>
+                    <span className="text-xs font-bold text-white">{action.title}</span>
+                    {action.requiresApproval && (
+                      <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-[9px] font-black text-amber-200">APPROVAL</span>
+                    )}
+                  </div>
+                  {action.target && (
+                    <p className="mt-1 text-[10px] text-brand-primary/60">
+                      {action.target.type === 'planner_task' ? 'Task' : 'Content Run'}: {action.target.label}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+            {proposalError && <p className="mt-2 text-xs text-red-300">{proposalError}</p>}
+            <div className="mt-3 flex gap-2">
+              <button type="button" onClick={() => void applyCompoundProposal()} disabled={applying} className="min-h-11 flex-1 rounded-full bg-brand-teal px-3 py-1.5 text-sm font-black text-black transition-opacity disabled:opacity-40">
+                {applying ? 'Working…' : `Confirm all ${compoundProposal.actions.length} actions`}
+              </button>
+              <button type="button" onClick={() => { setCompoundProposal(null); setProposalError(null); inputRef.current?.focus() }} className="min-h-11 rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white">Cancel</button>
             </div>
           </div>
         )}
