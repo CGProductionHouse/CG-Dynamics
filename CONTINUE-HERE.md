@@ -28,9 +28,10 @@ Do not ask CA to explain the project or shared tool workflow again before readin
 
 ### Issue #208: CG Assistant V2 — The Main Operating Remote
 - **Branch**: `fix/assistant-v2-mobile-regressions` (PR #212)
-- **Status**: Multi-action composition complete, 1756 tests pass, build passes
-- **Completed**: Mobile UX hardening, grounded query handlers, deterministic action parser, model-backed intent extraction, extended entity context, multi-action composition, semantic/action-truth audit, hardened compound execution
-- **Next**: Test in production, add more compound action examples, consider deterministic parser compound support, Content Run debrief integration
+- **Status**: Acceptance-matrix audit complete, 1816 tests pass, build passes
+- **Completed**: Mobile UX hardening, grounded query handlers, deterministic action parser, model-backed intent extraction, extended entity context, multi-action composition, semantic/action-truth audit, hardened compound execution, acceptance-matrix audit (all 11 scenarios verified)
+- **Next**: Real-iPhone acceptance testing (blocked on CA availability), PR review and merge
+- **Remaining gaps**: Calendar cancel (direct deletion), task reopen, approvals/admin queues, CG Hours, comment/note on tasks, TTS (all non-blocking per Issue #208)
 
 ### Issue #196: Control — V2 Actions
-- **Status**: All V2 action features complete (query handlers, grounded queries, semantic intent extraction, extended entity context, multi-action composition, semantic/action-truth audit)
+- **Status**: All V2 action features complete (query handlers, grounded queries, semantic intent extraction, extended entity context, multi-action composition, semantic/action-truth audit, acceptance-matrix audit)
