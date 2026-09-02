@@ -3,8 +3,8 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { completePublicOnboarding, loadPublicOnboarding, savePublicOnboarding, uploadOnboardingFile } from './api'
 import { OnboardingShell } from './OnboardingShell'
 import { PlatformAccessCard } from './PlatformAccessCard'
-import type { ClientAccessChoice, ClientOnboardingState, OnboardingPlatform } from './types'
-import { coreOnboardingComplete, logoRequirementSatisfied, servicesRequirementSatisfied, validateLogoCandidate } from './validation'
+import type { ClientAccessChoice, ClientOnboardingState, OnboardingPlatform, UploadCategory } from './types'
+import { coreOnboardingComplete, logoRequirementSatisfied, servicesRequirementSatisfied, validateLogoCandidate, validateServicesCandidate } from './validation'
 
 const fieldClass = 'min-h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none placeholder:text-report-faint focus:border-report-accent/60'
 
@@ -19,6 +19,8 @@ export default function WelcomeToCgPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [serviceItem, setServiceItem] = useState('')
+  const [uploadingCategory, setUploadingCategory] = useState<UploadCategory | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const loadedRef = useRef(false)
   const saveRequestRef = useRef(0)
   const autosaveTimerRef = useRef<number | null>(null)
@@ -93,6 +95,17 @@ export default function WelcomeToCgPage() {
     setState(current => current ? { ...current, ...patch } : current)
   }
 
+  async function handleFileUpload(category: UploadCategory, file: File) {
+    setUploadingCategory(category)
+    setUploadProgress(0)
+    setError(null)
+    const result = await uploadOnboardingFile(token, category, file, progress => setUploadProgress(progress))
+    if (result.data) setState(result.data)
+    if (result.error) setError(result.error)
+    setUploadingCategory(null)
+    setUploadProgress(0)
+  }
+
   async function chooseAccess(platform: OnboardingPlatform, clientChoice: ClientAccessChoice, clientConfirmed = false) {
     await save({
       platformAccess: [{
@@ -150,11 +163,12 @@ export default function WelcomeToCgPage() {
                 if (!file) return
                 const validationError = validateLogoCandidate(file)
                 if (validationError) setError(validationError)
-                else void uploadOnboardingFile(token, 'logo', file).then(result => setError(result.error))
+                else void handleFileUpload('logo', file)
                 event.target.value = ''
               }}
             />
           </label>
+          {uploadingCategory === 'logo' && <UploadProgressBar progress={uploadProgress} />}
           <label className="mt-5 flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-sm text-report-text">
             <input type="checkbox" checked={state.vectorUnavailable} onChange={event => void save({ vectorUnavailable: event.target.checked })} className="h-5 w-5 accent-[#c17a49]" />
             I don't have a vector version
@@ -181,11 +195,25 @@ export default function WelcomeToCgPage() {
             </div>
             {state.serviceItems.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{state.serviceItems.map((item, index) => <button key={`${item}-${index}`} type="button" onClick={() => updateLocal({ serviceItems: state.serviceItems.filter((_, itemIndex) => itemIndex !== index) })} className="min-h-11 rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm text-report-text">{item} <span className="ml-2 text-report-faint">Remove</span></button>)}</div>}
           </div>
-          <div className="mt-6 rounded-2xl border border-dashed border-white/15 p-5">
-            <p className="font-semibold text-white">Or upload something you already have</p>
-            <p className="mt-1 text-sm text-report-muted">A company profile, brochure, menu, catalogue, pricelist, presentation, screenshots or photos all work.</p>
-            <p className="mt-3 text-xs text-[#e5b18d]">Secure OneDrive file transfer is not connected in this foundation build. No file selected here will be treated as received.</p>
-          </div>
+          <label className="mt-6 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-6 text-center">
+            <span className="text-base font-bold text-white">Or upload something you already have</span>
+            <span className="mt-2 text-sm text-report-muted">A company profile, brochure, menu, catalogue, pricelist, presentation, screenshots or photos all work.</span>
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg,.zip"
+              className="sr-only"
+              onChange={event => {
+                const file = event.target.files?.[0]
+                if (!file) return
+                const validationError = validateServicesCandidate(file)
+                if (validationError) setError(validationError)
+                else void handleFileUpload('services', file)
+                event.target.value = ''
+              }}
+            />
+          </label>
+          {uploadingCategory === 'services' && <UploadProgressBar progress={uploadProgress} />}
           <StickyActions onBack={() => void goToStep(1)} onContinue={() => void goToStep(3)} continueDisabled={!servicesRequirementSatisfied(state)} saving={saving} />
         </Step>
       )}
@@ -219,7 +247,23 @@ export default function WelcomeToCgPage() {
       {step === 5 && (
         <Step title="Anything else we should know?" intro="Completely optional. Share anything you'd love us to focus on, or anything you definitely don't want us to do.">
           <textarea className={`${fieldClass} mt-6 min-h-44 resize-y`} value={state.additionalNotes} onChange={event => updateLocal({ additionalNotes: event.target.value })} placeholder="Anything else we should know?" />
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-report-muted">Extra uploads and voice notes will be added after the secure OneDrive handoff is approved. Your onboarding is already complete.</div>
+          <label className="mt-6 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-6 text-center">
+            <span className="text-base font-bold text-white">Upload extra files or screenshots</span>
+            <span className="mt-2 text-sm text-report-muted">Anything that helps us understand your brand better.</span>
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.png,.jpg,.jpeg,.zip,.txt,.csv"
+              className="sr-only"
+              onChange={event => {
+                const file = event.target.files?.[0]
+                if (!file) return
+                void handleFileUpload('optional', file)
+                event.target.value = ''
+              }}
+            />
+          </label>
+          {uploadingCategory === 'optional' && <UploadProgressBar progress={uploadProgress} />}
           <StickyActions onBack={() => void goToStep(4)} onContinue={() => void goToStep(4)} saving={saving} label="Save and finish" />
         </Step>
       )}
@@ -233,6 +277,20 @@ function Step({ title, intro, children }: { title: string; intro: string; childr
 
 function StickyActions({ onBack, onContinue, continueDisabled, saving, label = 'Continue' }: { onBack: () => void; onContinue: () => void; continueDisabled?: boolean; saving: boolean; label?: string }) {
   return <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#030706]/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 backdrop-blur-xl"><div className="mx-auto flex max-w-3xl gap-3"><ActionButton variant="secondary" className="min-h-12" onClick={onBack}>Back</ActionButton><ActionButton fullWidth className="min-h-12" onClick={onContinue} disabled={continueDisabled} loading={saving}>{label}</ActionButton></div></div>
+}
+
+function UploadProgressBar({ progress }: { progress: number }) {
+  return (
+    <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-report-muted">Uploading...</span>
+        <span className="font-semibold text-report-accent">{Math.round(progress)}%</span>
+      </div>
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-full rounded-full bg-report-accent transition-all duration-300" style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
+      </div>
+    </div>
+  )
 }
 
 function Message({ title, body }: { title: string; body: string }) {

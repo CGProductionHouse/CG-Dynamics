@@ -1,7 +1,25 @@
 import { createClient, type SupabaseClient, type User } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createUploadSession, downloadFile, isUploadAdapterConfigured } from './onedrive-adapter.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
+
+const UPLOAD_CATEGORIES = new Set(['logo', 'services', 'optional'])
+const ALLOWED_UPLOAD_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/png', 'image/jpeg', 'image/svg+xml', 'image/webp', 'image/tiff',
+  'application/postscript', 'application/illustrator',
+  'application/vnd.adobe.photoshop', 'application/x-photoshop',
+  'application/zip', 'application/x-zip-compressed',
+  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain', 'text/csv',
+])
+const MAX_ONBOARDING_FILE_BYTES = 250 * 1024 * 1024
+const BLOCKED_EXTENSIONS = new Set([
+  'app', 'bat', 'cmd', 'com', 'cpl', 'exe', 'hta', 'js', 'jse', 'msi', 'ps1', 'scr', 'vbs', 'wsf', 'sh', 'bash',
+])
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-onboarding-token',
@@ -52,6 +70,36 @@ function randomToken() {
   let binary = ''
   for (const byte of bytes) binary += String.fromCharCode(byte)
   return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '')
+}
+
+function extensionOf(filename: string) {
+  const match = /\.([a-z0-9]+)$/i.exec(filename.trim())
+  return match?.[1]?.toLowerCase() ?? ''
+}
+
+function sanitizeFilename(raw: string) {
+  const base = raw.replace(/[^\w.]/g, '_').replace(/_{2,}/g, '_').replace(/^_+|_+$/g, '').slice(0, 120)
+  return base || 'upload'
+}
+
+function validateUploadFile(file: { name: string; type: string; size: number }): string | null {
+  const ext = extensionOf(file.name)
+  if (!ext || BLOCKED_EXTENSIONS.has(ext)) return 'This file type is not safe to upload.'
+  if (file.size <= 0) return 'This file appears to be empty.'
+  if (file.size > MAX_ONBOARDING_FILE_BYTES) return 'This file is larger than 250 MB.'
+  if (!ALLOWED_UPLOAD_MIME_TYPES.has(file.type) && !ext) return 'Could not determine the file type.'
+  return null
+}
+
+function streamResponse(data: ArrayBuffer, mimeType: string, filename: string) {
+  return new Response(data, {
+    headers: {
+      ...corsHeaders,
+      'Content-Type': mimeType,
+      'Content-Disposition': `attachment; filename="${filename.replace(/"/g, '\\"')}"`,
+      'Cache-Control': 'no-store',
+    },
+  })
 }
 
 async function getTokenSession(service: SupabaseClient, request: Request): Promise<SessionRow | null> {
@@ -315,6 +363,207 @@ Deno.serve(async request => {
     const responseState = await safeState(service, current, true)
     if (!responseState) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
     return json({ ok: true, data: responseState })
+  }
+
+  // ── Upload actions (public token + staff portal) ──────────────────────
+
+  if (action === 'upload_init' || action === 'upload_init_staff') {
+    const session = action === 'upload_init_staff'
+      ? null // staff uses staff_session_id below
+      : await getTokenSession(service, request)
+
+    if (action === 'upload_init_staff') {
+      const sessionId = cleanString(body.sessionId, 50)
+      const { data: staffSession } = await service
+        .from('client_onboarding_sessions')
+        .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
+        .eq('id', sessionId)
+        .maybeSingle()
+      if (!staffSession) return json({ ok: false, error: 'Session not found.' }, 404)
+      const staffState = staffSession as SessionRow
+
+      const category = cleanString(body.category, 20)
+      if (!UPLOAD_CATEGORIES.has(category)) return json({ ok: false, error: 'Invalid upload category.' }, 400)
+
+      const originalFilename = cleanString(body.filename, 255)
+      const mimeType = cleanString(body.mimeType, 100)
+      const sizeBytes = Number(body.sizeBytes)
+      if (!originalFilename || !Number.isFinite(sizeBytes) || sizeBytes <= 0) return json({ ok: false, error: 'Missing file details.' }, 400)
+
+      const validationError = validateUploadFile({ name: originalFilename, type: mimeType, size: sizeBytes })
+      if (validationError) return json({ ok: false, error: validationError }, 400)
+
+      if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'Secure file transfer is not configured yet.' }, 503)
+
+      const safeFilename = sanitizeFilename(originalFilename)
+      const sessionResult = await createUploadSession({
+        clientId: staffState.client_id,
+        filename: safeFilename,
+        fileSize: sizeBytes,
+        mimeType,
+      })
+      if (!sessionResult) return json({ ok: false, error: 'Could not prepare the upload. Check that the client has a mapped Brand Identity folder.' }, 503)
+
+      const { data: uploadRow, error: insertError } = await service.from('client_onboarding_uploads').insert({
+        client_id: staffState.client_id,
+        onboarding_session_id: staffState.id,
+        category,
+        original_filename: originalFilename,
+        mime_type: mimeType || null,
+        size_bytes: sizeBytes,
+        upload_status: 'pending',
+        storage_provider: 'onedrive',
+        storage_drive_id: sessionResult.driveId,
+        storage_item_id: sessionResult.itemId,
+        storage_web_url: null,
+        storage_original_reference: `Brand Identity/${safeFilename}`,
+        source: 'staff',
+        upload_session_id: sessionResult.uploadUrl,
+        upload_session_expires_at: sessionResult.expiresAt,
+      }).select('id').maybeSingle()
+
+      if (insertError || !uploadRow) return json({ ok: false, error: 'Could not record the upload.' }, 503)
+
+      return json({ ok: true, data: { uploadId: uploadRow.id, uploadUrl: sessionResult.uploadUrl, expiresAt: sessionResult.expiresAt } })
+    }
+
+    if (!session) return json({ ok: false, error: 'This welcome link is no longer available.' }, 404)
+
+    const category = cleanString(body.category, 20)
+    if (!UPLOAD_CATEGORIES.has(category)) return json({ ok: false, error: 'Invalid upload category.' }, 400)
+
+    const originalFilename = cleanString(body.filename, 255)
+    const mimeType = cleanString(body.mimeType, 100)
+    const sizeBytes = Number(body.sizeBytes)
+    if (!originalFilename || !Number.isFinite(sizeBytes) || sizeBytes <= 0) return json({ ok: false, error: 'Missing file details.' }, 400)
+
+    const validationError = validateUploadFile({ name: originalFilename, type: mimeType, size: sizeBytes })
+    if (validationError) return json({ ok: false, error: validationError }, 400)
+
+    if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'Secure file transfer is not configured yet. Your file was not uploaded.' }, 503)
+
+    const safeFilename = sanitizeFilename(originalFilename)
+    const sessionResult = await createUploadSession({
+      clientId: session.client_id,
+      filename: safeFilename,
+      fileSize: sizeBytes,
+      mimeType,
+    })
+    if (!sessionResult) return json({ ok: false, error: 'Could not prepare the upload. Please try again.' }, 503)
+
+    const { data: uploadRow, error: insertError } = await service.from('client_onboarding_uploads').insert({
+      client_id: session.client_id,
+      onboarding_session_id: session.id,
+      category,
+      original_filename: originalFilename,
+      mime_type: mimeType || null,
+      size_bytes: sizeBytes,
+      upload_status: 'pending',
+      storage_provider: 'onedrive',
+      storage_drive_id: sessionResult.driveId,
+      storage_item_id: sessionResult.itemId,
+      storage_web_url: null,
+      storage_original_reference: `Brand Identity/${safeFilename}`,
+      source: 'welcome_link',
+      upload_session_id: sessionResult.uploadUrl,
+      upload_session_expires_at: sessionResult.expiresAt,
+    }).select('id').maybeSingle()
+
+    if (insertError || !uploadRow) return json({ ok: false, error: 'Could not record the upload.' }, 503)
+
+    const current = await refreshedSession(service, session.id)
+    if (current) await savePatch(service, current, {})
+
+    return json({ ok: true, data: { uploadId: uploadRow.id, uploadUrl: sessionResult.uploadUrl, expiresAt: sessionResult.expiresAt } })
+  }
+
+  if (action === 'upload_complete') {
+    const session = await getTokenSession(service, request)
+    if (!session) return json({ ok: false, error: 'This welcome link is no longer available.' }, 404)
+
+    const uploadId = cleanString(body.uploadId, 50)
+    if (!uploadId) return json({ ok: false, error: 'Missing upload reference.' }, 400)
+
+    const now = new Date().toISOString()
+    const { data: updated, error } = await service
+      .from('client_onboarding_uploads')
+      .update({
+        upload_status: 'received',
+        uploaded_at: now,
+        upload_session_id: null,
+        upload_session_expires_at: null,
+      })
+      .eq('id', uploadId)
+      .eq('onboarding_session_id', session.id)
+      .eq('upload_status', 'pending')
+      .select('id, category')
+      .maybeSingle()
+
+    if (error || !updated) return json({ ok: false, error: 'Could not confirm the upload.' }, error ? 503 : 404)
+
+    const current = await refreshedSession(service, session.id)
+    if (!current) return json({ ok: false, error: 'Onboarding state is unavailable.' }, 503)
+    const responseState = await safeState(service, current)
+    if (!responseState) return json({ ok: false, error: 'Onboarding state is unavailable.' }, 503)
+    return json({ ok: true, data: responseState })
+  }
+
+  if (action === 'upload_cancel') {
+    const session = await getTokenSession(service, request)
+    if (!session) return json({ ok: false, error: 'This welcome link is no longer available.' }, 404)
+
+    const uploadId = cleanString(body.uploadId, 50)
+    if (!uploadId) return json({ ok: false, error: 'Missing upload reference.' }, 400)
+
+    const { data: deleted, error } = await service
+      .from('client_onboarding_uploads')
+      .delete()
+      .eq('id', uploadId)
+      .eq('onboarding_session_id', session.id)
+      .eq('upload_status', 'pending')
+      .select('id')
+      .maybeSingle()
+
+    if (error || !deleted) return json({ ok: false, error: 'Could not cancel the upload.' }, error ? 503 : 404)
+    return json({ ok: true, data: null })
+  }
+
+  // ── Download actions (server-mediated proxy) ──────────────────────────
+
+  if (action === 'download_file' || action === 'portal_download') {
+    const authorizedUser = await getAuthorizedUser(service, request)
+    if (!authorizedUser) return json({ ok: false, error: 'Authentication required.' }, 401)
+
+    const uploadId = cleanString(body.uploadId, 50)
+    if (!uploadId) return json({ ok: false, error: 'Missing upload reference.' }, 400)
+
+    const { data: upload, error: lookupError } = await service
+      .from('client_onboarding_uploads')
+      .select('id, client_id, original_filename, mime_type, storage_drive_id, storage_item_id, upload_status')
+      .eq('id', uploadId)
+      .maybeSingle()
+
+    if (lookupError || !upload) return json({ ok: false, error: 'Upload not found.' }, 404)
+    if (upload.upload_status !== 'received') return json({ ok: false, error: 'File is not available for download.' }, 409)
+
+    if (action === 'portal_download') {
+      if (authorizedUser.profile.role !== 'client' || authorizedUser.profile.client_id !== upload.client_id) {
+        return json({ ok: false, error: 'Access denied.' }, 403)
+      }
+    } else {
+      if (!['admin', 'manager', 'staff', 'team'].includes(authorizedUser.profile.role)) {
+        return json({ ok: false, error: 'Staff access required.' }, 403)
+      }
+    }
+
+    if (!upload.storage_drive_id || !upload.storage_item_id) return json({ ok: false, error: 'File reference is incomplete.' }, 500)
+    if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'File download is not configured yet.' }, 503)
+
+    const result = await downloadFile(upload.storage_drive_id, upload.storage_item_id)
+    if (!result) return json({ ok: false, error: 'Could not retrieve the file.' }, 503)
+
+    const buffer = await result.stream.arrayBuffer()
+    return streamResponse(buffer, upload.mime_type ?? result.mimeType, upload.original_filename)
   }
 
   return json({ ok: false, error: 'Not found.' }, 404)

@@ -5,9 +5,12 @@ import { createServer } from 'vite'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const migration = read('../supabase/migrations/20260902100000_client_onboarding_foundation.sql')
+const uploadMigration = read('../supabase/migrations/20260902110000_client_onboarding_upload_phase2.sql')
 const edge = read('../supabase/functions/client-onboarding/index.ts')
+const adapter = read('../supabase/functions/client-onboarding/onedrive-adapter.ts')
 const page = read('../src/features/client-onboarding/WelcomeToCgPage.tsx')
 const api = read('../src/features/client-onboarding/api.ts')
+const setupSummary = read('../src/features/client-onboarding/SetupSummary.tsx')
 const app = read('../src/App.tsx')
 
 let server
@@ -155,7 +158,8 @@ test('credential and OneDrive internals are absent from client payloads', () => 
   const safeState = edge.slice(edge.indexOf('async function safeState'), edge.indexOf('async function savePatch'))
   assert.doesNotMatch(safeState, /storage_drive_id|storage_item_id|storage_web_url|password/)
   assert.doesNotMatch(page, /type="password"|localStorage|sessionStorage/)
-  assert.match(api, /Your file was not uploaded/)
+  assert.match(api, /upload_init/)
+  assert.match(api, /uploadFileToSession/)
 })
 
 test('link rollout fails closed until secure OneDrive upload is enabled', () => {
@@ -177,4 +181,116 @@ test('mobile flow uses touch targets, sticky actions, and bounded responsive lay
   assert.match(page, /min-h-12/)
   assert.match(page, /fixed inset-x-0 bottom-0/)
   assert.doesNotMatch(page, /overflow-x-auto|<table/)
+})
+
+test('upload adapter rejects files that are empty, too large, or executable', () => {
+  assert.match(edge, /BLOCKED_EXTENSIONS/)
+  assert.match(edge, /validateUploadFile/)
+  assert.match(edge, /size > MAX_ONBOARDING_FILE_BYTES/)
+  assert.match(api, /upload_init/)
+  assert.match(api, /upload_complete/)
+  assert.match(api, /upload_cancel/)
+  assert.match(api, /uploadFileToSession/)
+})
+
+test('upload init validates category, filename, size, and mime before creating a session', () => {
+  assert.match(edge, /UPLOAD_CATEGORIES\.has\(category\)/)
+  assert.match(edge, /originalFilename/)
+  assert.match(edge, /sizeBytes/)
+  assert.match(edge, /validateUploadFile/)
+  assert.match(edge, /sanitizeFilename/)
+})
+
+test('upload complete moves pending uploads to received and clears the upload session', () => {
+  assert.match(edge, /upload_status: 'received'/)
+  assert.match(edge, /upload_session_id: null/)
+  assert.match(edge, /upload_session_expires_at: null/)
+})
+
+test('upload cancel deletes pending uploads only', () => {
+  assert.match(edge, /upload_status: 'pending'/)
+  assert.match(edge, /\.delete\(\)/)
+})
+
+test('download proxy requires authentication and serves only received uploads', () => {
+  assert.match(edge, /download_file/)
+  assert.match(edge, /portal_download/)
+  assert.match(edge, /upload_status !== 'received'/)
+  assert.match(edge, /storage_drive_id/)
+  assert.match(edge, /storage_item_id/)
+  assert.match(edge, /isUploadAdapterConfigured/)
+})
+
+test('download proxy enforces client isolation for portal downloads', () => {
+  assert.match(edge, /action === 'portal_download'/)
+  assert.match(edge, /authorizedUser\.profile\.role !== 'client'/)
+  assert.match(edge, /authorizedUser\.profile\.client_id !== upload\.client_id/)
+  assert.match(edge, /Access denied/)
+})
+
+test('download proxy restricts staff downloads to authenticated staff roles', () => {
+  assert.match(edge, /\['admin', 'manager', 'staff', 'team'\]\.includes\(authorizedUser\.profile\.role\)/)
+})
+
+test('upload adapter uses a separate Microsoft app from the read-only transition connector', () => {
+  assert.match(adapter, /ONBOARDING_MS_TENANT_ID/)
+  assert.match(adapter, /ONBOARDING_MS_CLIENT_ID/)
+  assert.match(adapter, /ONBOARDING_MS_CLIENT_SECRET/)
+  assert.match(adapter, /isUploadAdapterConfigured/)
+  assert.doesNotMatch(adapter, /MICROSOFT_TENANT_ID/)
+  assert.doesNotMatch(adapter, /MICROSOFT_CLIENT_SECRET/)
+})
+
+test('upload adapter resolves exact-client Brand Identity folder from drive mapping table', () => {
+  assert.match(adapter, /client_onboarding_drive_mapping/)
+  assert.match(adapter, /resolveClientFolder/)
+  assert.match(adapter, /drive_id/)
+  assert.match(adapter, /folder_item_id/)
+})
+
+test('upload adapter creates resumable upload session and proxies downloads', () => {
+  assert.match(adapter, /createUploadSession/)
+  assert.match(adapter, /createUploadSession/)
+  assert.match(adapter, /downloadFile/)
+  assert.match(adapter, /\/content/)
+})
+
+test('client upload API replaces the foundation stub with real upload, cancel, and download', () => {
+  assert.match(api, /initOnboardingUpload/)
+  assert.match(api, /completeOnboardingUpload/)
+  assert.match(api, /cancelOnboardingUpload/)
+  assert.match(api, /uploadFileToSession/)
+  assert.match(api, /downloadOnboardingFile/)
+  assert.doesNotMatch(api, /Secure file transfer is not connected yet\. Your file was not uploaded\./)
+})
+
+test('welcome page drives real upload with progress, category tracking, and retry-safe cancellation', () => {
+  assert.match(page, /handleFileUpload/)
+  assert.match(page, /uploadingCategory/)
+  assert.match(page, /uploadProgress/)
+  assert.match(page, /UploadProgressBar/)
+  assert.match(page, /validateServicesCandidate/)
+  assert.match(page, /handleFileUpload\('logo', file\)/)
+  assert.match(page, /handleFileUpload\('services', file\)/)
+  assert.match(page, /handleFileUpload\('optional', file\)/)
+  assert.doesNotMatch(page, /Secure OneDrive file transfer is not connected in this foundation build\. No file selected here will be treated as received\./)
+})
+
+test('setup summary exposes received uploads with mediated download and never exposes drive internals', () => {
+  assert.match(setupSummary, /DownloadButton/)
+  assert.match(setupSummary, /downloadOnboardingFile/)
+  assert.match(setupSummary, /uploadStatus === 'received'/)
+  assert.doesNotMatch(setupSummary, /storage_drive_id|storage_item_id|storage_web_url/)
+})
+
+test('upload phase2 migration maps clients to a Brand Identity drive folder and extends upload metadata', () => {
+  assert.match(uploadMigration, /client_onboarding_drive_mapping/)
+  assert.match(uploadMigration, /drive_id/)
+  assert.match(uploadMigration, /folder_item_id/)
+  assert.match(uploadMigration, /Brand Identity/)
+  assert.match(uploadMigration, /revoke all on public\.client_onboarding_drive_mapping from anon, authenticated/)
+  assert.match(uploadMigration, /storage_original_reference/)
+  assert.match(uploadMigration, /upload_session_id/)
+  assert.match(uploadMigration, /upload_session_expires_at/)
+  assert.match(uploadMigration, /enable row level security/)
 })
