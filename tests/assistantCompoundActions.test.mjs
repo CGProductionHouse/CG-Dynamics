@@ -86,12 +86,12 @@ test('client: duplicate write protection exists', () => {
 test('client: partial failure handling exists', () => {
   assert.ok(composer.includes('results.filter(r => r.success)'))
   assert.ok(composer.includes('results.filter(r => !r.success)'))
-  assert.ok(composer.includes('Partially completed'))
+  assert.ok(composer.includes('Failed:'))
 })
 
 test('client: compound action outcome summary exists', () => {
-  assert.ok(composer.includes('all ${succeeded.length} actions completed successfully'))
-  assert.ok(composer.includes('All ${failed.length} actions failed'))
+  assert.ok(composer.includes('Done — ${actionList}'))
+  assert.ok(composer.includes('All actions failed:'))
 })
 
 // ── AssistantChatResponse compound_action field ────────────────────────────
@@ -158,8 +158,8 @@ test('edge: compound example for Securiforce content run', () => {
   assert.ok(edge.includes('"action_type":"task_create"'))
 })
 
-test('edge: compound example for video mark shot and assign', () => {
-  assert.ok(edge.includes('Mark video 1 as shot and assign the next video to Sydney'))
+test('edge: compound example for video mark shot and move', () => {
+  assert.ok(edge.includes('Mark video 1 as shot and move video 2 to next month'))
   assert.ok(edge.includes('"action_type":"video_mark_shot"'))
   assert.ok(edge.includes('"action_type":"video_move"'))
 })
@@ -210,13 +210,13 @@ test('safety: compound plan requires client for marketing actions', () => {
 test('partial failure: try/catch per action in compound plan', () => {
   assert.ok(composer.includes('try {'))
   assert.ok(composer.includes('} catch (err) {'))
-  assert.ok(composer.includes('results.push({ index: i, type: action.type, success: false'))
+  assert.ok(composer.includes('results.push({ index: i, type: action.type, title: action.title, success: false'))
 })
 
 test('partial failure: outcome distinguishes success/failure', () => {
   assert.ok(composer.includes('succeeded.length === 0'))
   assert.ok(composer.includes('failed.length === 0'))
-  assert.ok(composer.includes('Partially completed'))
+  assert.ok(composer.includes('Failed:'))
 })
 
 // ── Conversational wording tests ───────────────────────────────────────────
@@ -228,6 +228,93 @@ test('conversational: compound prompts use natural language', () => {
 })
 
 test('conversational: compound examples include filler words', () => {
-  assert.ok(edge.includes('Mark video 1 as shot and assign the next video to Sydney'))
+  assert.ok(edge.includes('Mark video 1 as shot and move video 2 to next month'))
   assert.ok(edge.includes('Create a task to call Red Oak and schedule a meeting with them tomorrow'))
+})
+
+// ── Semantic-type mismatch regression tests ─────────────────────────────────
+test('video_move: does NOT accept assignee field', () => {
+  // video_move is for rescheduling only, not assignment.
+  assert.ok(!edge.includes('"video_move","video_number":2,"assignee":"Sydney"'))
+  assert.ok(edge.includes('video_move: "move video 1 to next month" (rescheduling only, NOT assignment)'))
+})
+
+test('video_move: buildActionFromIntent maps to video.move type', () => {
+  assert.ok(edge.includes("case 'video_move':"))
+  assert.ok(edge.includes("type: 'video.move'"))
+})
+
+test('video assignment: no canonical video_assign action exists', () => {
+  assert.ok(!edge.includes("'video.assign'"))
+  assert.ok(!edge.includes("'video_assign'"))
+})
+
+test('safety: prompt warns about unsupported debrief facts', () => {
+  assert.ok(edge.includes('NEVER claim to save facts that don\'t have a canonical CRUD path'))
+  assert.ok(edge.includes('video descriptions, meeting notes'))
+  assert.ok(edge.includes('Valid mark_shot actions execute; unsupported captured facts must remain clearly unsaved'))
+})
+
+test('safety: prompt warns about no canonical video-assignment', () => {
+  assert.ok(edge.includes('If no canonical video-assignment action exists, do not fake one'))
+})
+
+test('compound example: Securiforce debrief clarifies descriptions not saved', () => {
+  assert.ok(edge.includes('NOTE: The video descriptions (X, Y) are NOT saved'))
+})
+
+// ── Unsupported sub-action handling ─────────────────────────────────────────
+test('compound execution: unsupported actions are tracked separately', () => {
+  assert.ok(composer.includes('unsupported?: boolean'))
+  assert.ok(composer.includes('Unsupported action type in compound plan'))
+  assert.ok(composer.includes('Not yet supported:'))
+})
+
+test('compound execution: unsupported actions do not count as success', () => {
+  assert.ok(composer.includes('results.push({ index: i, type: action.type, title: action.title, success: false, error: \'This action type is not supported in compound plans\', unsupported: true })'))
+})
+
+// ── Stale entity context regression tests ───────────────────────────────────
+test('compound execution: re-resolves tasks before mutation', () => {
+  assert.ok(composer.includes('Re-resolve entity immediately before mutation'))
+  assert.ok(composer.includes('const taskExists = taskList.some(t => t.native_id === action.target!.id)'))
+  assert.ok(composer.includes('That task is no longer available. Open it again before making changes.'))
+})
+
+test('compound execution: re-resolves Content Run before mutation', () => {
+  assert.ok(composer.includes('Verify Content Run still exists'))
+  assert.ok(composer.includes('const run = await resolveContentRun(action.target.id)'))
+  assert.ok(composer.includes('That Content Run is no longer available. Open it again before making changes.'))
+})
+
+// ── Dependency-aware ordering tests ─────────────────────────────────────────
+test('compound execution: dependency-aware ordering skips failed task targets', () => {
+  assert.ok(composer.includes('failedActions'))
+  assert.ok(composer.includes('Skip actions that depend on previously failed actions'))
+  assert.ok(composer.includes('Skipped: dependent task action failed'))
+})
+
+test('compound execution: failed task targets tracked for dependent actions', () => {
+  assert.ok(composer.includes('if (action.target?.id) failedActions.add(action.target.id)'))
+})
+
+// ── Retry/idempotency protection tests ──────────────────────────────────────
+test('compound execution: duplicate action prevention survives retry', () => {
+  assert.ok(composer.includes('const completedActions = new Set<string>()'))
+  assert.ok(composer.includes('Prevent duplicate writes on retry'))
+  assert.ok(composer.includes('completedActions.has(actionKey)'))
+})
+
+// ── Truthful outcome wording tests ──────────────────────────────────────────
+test('truthful outcome: compact confirmation lists action titles', () => {
+  assert.ok(composer.includes('const actionList = succeeded.map(r => r.title).join(\', \')'))
+  assert.ok(composer.includes('Done — ${actionList}'))
+})
+
+test('truthful outcome: partial failure lists each failure reason', () => {
+  assert.ok(composer.includes('Failed: ${failed.map(f => `${f.title}: ${f.error}`).join(\'; \')}'))
+})
+
+test('truthful outcome: unsupported actions listed separately', () => {
+  assert.ok(composer.includes('Not yet supported: ${unsupported.map(u => u.title).join(\', \')}'))
 })

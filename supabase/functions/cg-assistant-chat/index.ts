@@ -1182,7 +1182,7 @@ function buildIntentExtractionPrompt(
 - client_lookup: "show me X client", "open X"
 - schedule_move: "move the video to Friday", "reschedule the post"
 - video_mark_shot: "mark video 3 as shot", "video 2 is filmed"
-- video_move: "move video 1 to next month"
+- video_move: "move video 1 to next month" (rescheduling only, NOT assignment)
 - marketing_start: "start marketing for X", "create a campaign for X"
 - marketing_continue: "continue the marketing workflow"
 - none: unclear or unsupported request
@@ -1243,12 +1243,19 @@ User: "move that one to Friday"
 User: "what is Red Oak posting this week"
 {"action_type":"none","confidence":0.1}
 
+## SAFETY RULES
+- NEVER claim to save facts that don't have a canonical CRUD path (e.g., video descriptions, meeting notes).
+- Valid mark_shot actions execute; unsupported captured facts must remain clearly unsaved.
+- If a user mentions "video one was X, video two was Y", mark them as shot but do NOT claim the descriptions were saved.
+- If no canonical video-assignment action exists, do not fake one; ask a compact clarification or state that portion cannot yet be applied.
+
 ## COMPOUND ACTION EXAMPLES
 User: "I was at Securiforce's content run. We shot two videos. Video one was X, video two was Y. Franco still needs drone shots tomorrow."
 {"is_compound":true,"actions":[{"action_type":"video_mark_shot","video_number":1,"client_name":"Securiforce","confidence":0.9},{"action_type":"video_mark_shot","video_number":2,"client_name":"Securiforce","confidence":0.9},{"action_type":"task_create","task_title":"Drone shots for Securiforce","assignee":"Franco","due_date":"${today}","client_name":"Securiforce","confidence":0.85}],"client_name":"Securiforce","confidence":0.88}
+NOTE: The video descriptions (X, Y) are NOT saved — only mark_shot actions execute. Unsupported facts remain unsaved.
 
-User: "Mark video 1 as shot and assign the next video to Sydney"
-{"is_compound":true,"actions":[{"action_type":"video_mark_shot","video_number":1,"follow_up_reference":"last_content_run","confidence":0.9},{"action_type":"video_move","video_number":2,"assignee":"Sydney","follow_up_reference":"last_content_run","confidence":0.85}],"confidence":0.87}
+User: "Mark video 1 as shot and move video 2 to next month"
+{"is_compound":true,"actions":[{"action_type":"video_mark_shot","video_number":1,"follow_up_reference":"last_content_run","confidence":0.9},{"action_type":"video_move","video_number":2,"follow_up_reference":"last_content_run","confidence":0.85}],"confidence":0.87}
 
 User: "Create a task to call Red Oak and schedule a meeting with them tomorrow"
 {"is_compound":true,"actions":[{"action_type":"task_create","task_title":"Call Red Oak","client_name":"Red Oak","confidence":0.9},{"action_type":"calendar_create","calendar_title":"Meeting with Red Oak","calendar_date":"${today}","client_name":"Red Oak","confidence":0.85}],"client_name":"Red Oak","confidence":0.87}`

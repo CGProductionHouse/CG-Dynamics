@@ -1001,8 +1001,8 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     setApplying(true)
     setProposalError(null)
 
-    // Deterministic execution order: tasks first, then calendar, then videos, then navigation.
-    // This ensures dependent actions (like creating a task before assigning it) work correctly.
+    // Dependency-aware execution order: tasks before assignment, calendar before video, etc.
+    // Actions that depend on each other must run in the correct sequence.
     const executionOrder = ['task.create', 'task.assign', 'task.due_date', 'task.update', 'calendar.create', 'schedule.propose', 'video.mark_shot', 'video.move', 'marketing.start', 'marketing.continue', 'navigation.open']
     const sortedActions = [...plan.actions].sort((a, b) => {
       const aIndex = executionOrder.indexOf(a.type)
@@ -1010,8 +1010,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex)
     })
 
-    const results: Array<{ index: number; type: string; success: boolean; error?: string }> = []
+    const results: Array<{ index: number; type: string; title: string; success: boolean; error?: string; unsupported?: boolean }> = []
     const completedActions = new Set<string>()
+    const failedActions = new Set<string>()
 
     try {
       for (let i = 0; i < sortedActions.length; i++) {
@@ -1021,55 +1022,79 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
 
         // Prevent duplicate writes on retry.
         if (completedActions.has(actionKey)) {
-          results.push({ index: i, type: action.type, success: true })
+          results.push({ index: i, type: action.type, title: action.title, success: true })
           continue
         }
 
+        // Skip actions that depend on previously failed actions.
+        if (action.type === 'task.assign' || action.type === 'task.due_date' || action.type === 'task.update') {
+          const targetId = action.target?.id
+          if (targetId && failedActions.has(targetId)) {
+            results.push({ index: i, type: action.type, title: action.title, success: false, error: 'Skipped: dependent task action failed' })
+            continue
+          }
+        }
+
         try {
-          // Apply individual action using the existing applyProposal logic.
-          // We temporarily set the proposal and call the handler.
-          const tempProposal = { ...action, clientId: action.clientId ?? plan.client_name ? (plan.actions.find(a => a.clientId)?.clientId ?? null) : null, clientName: action.clientName ?? plan.client_name }
-          
+          // Re-resolve entity immediately before mutation to avoid stale context.
+          // For tasks, verify the target still exists.
+          if (action.type === 'task.assign' || action.type === 'task.due_date' || action.type === 'task.update') {
+            if (action.target?.type !== 'planner_task') throw new Error('Open the Planner task first so I know exactly which task to update.')
+            // Verify task still exists and is accessible.
+            const taskList = taskRef.current
+            const taskExists = taskList.some(t => t.native_id === action.target!.id)
+            if (!taskExists) throw new Error('That task is no longer available. Open it again before making changes.')
+          }
+
+          // For video actions, verify Content Run still exists.
+          if (action.type === 'video.mark_shot' || action.type === 'video.move') {
+            if (action.target?.type !== 'content_run') throw new Error('Open a Content Run first so I know exactly which run to update.')
+            // Verify Content Run still exists.
+            if (!selectedRunId || selectedRunId !== action.target.id) {
+              const run = await resolveContentRun(action.target.id)
+              if (!actionIsCurrent()) return
+              if (!run) throw new Error('That Content Run is no longer available. Open it again before making changes.')
+            }
+          }
+
           // Execute the action based on type.
-          if (tempProposal.type === 'task.create') {
+          if (action.type === 'task.create') {
             const res = await createAssistantTask({
-              title: String(tempProposal.fields.task ?? 'New task'),
-              assigneeName: tempProposal.fields.assignee ? String(tempProposal.fields.assignee) : null,
-              dueDate: tempProposal.fields.due_date ? String(tempProposal.fields.due_date) : null,
-              clientId: tempProposal.clientId,
-              clientName: tempProposal.clientName,
+              title: String(action.fields.task ?? 'New task'),
+              assigneeName: action.fields.assignee ? String(action.fields.assignee) : null,
+              dueDate: action.fields.due_date ? String(action.fields.due_date) : null,
+              clientId: action.clientId,
+              clientName: action.clientName,
             })
             if (!actionIsCurrent()) return
             if (res.error) throw new Error(res.error.message)
             const createdTaskId = res.data?.id ?? res.data?.task_id ?? null
-            if (createdTaskId) lastTaskRef.current = { id: String(createdTaskId), name: String(tempProposal.fields.task ?? 'New task') }
-            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
-          } else if (tempProposal.type === 'task.assign') {
-            if (tempProposal.target?.type !== 'planner_task') throw new Error('Open the Planner task first so I know exactly which existing task to assign.')
-            const assignee = tempProposal.fields.assignee ? String(tempProposal.fields.assignee) : null
+            if (createdTaskId) lastTaskRef.current = { id: String(createdTaskId), name: String(action.fields.task ?? 'New task') }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'task.assign') {
+            const assignee = action.fields.assignee ? String(action.fields.assignee) : null
             if (!assignee) throw new Error('Choose an assignee.')
-            const res = await updateAssistantTask({ taskId: tempProposal.target.id, action: 'assign', assigneeName: assignee })
+            const res = await updateAssistantTask({ taskId: action.target!.id, action: 'assign', assigneeName: assignee })
             if (!actionIsCurrent()) return
             if (res.error) throw new Error(res.error.message)
-            lastTaskRef.current = { id: tempProposal.target.id, name: tempProposal.target.label }
-            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
-          } else if (tempProposal.type === 'task.update') {
-            if (tempProposal.target?.type !== 'planner_task') throw new Error('Open the Planner task first so I know exactly which task to update.')
-            const taskAction = tempProposal.fields.status === 'done' ? 'complete' : 'block'
-            const res = await updateAssistantTask({ taskId: tempProposal.target.id, action: taskAction })
+            lastTaskRef.current = { id: action.target!.id, name: action.target!.label }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'task.update') {
+            const taskAction = action.fields.status === 'done' ? 'complete' : 'block'
+            const res = await updateAssistantTask({ taskId: action.target!.id, action: taskAction })
             if (!actionIsCurrent()) return
             if (res.error) throw new Error(res.error.message)
-            lastTaskRef.current = { id: tempProposal.target.id, name: tempProposal.target.label }
-            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
-          } else if (tempProposal.type === 'calendar.create') {
-            const date = String(tempProposal.fields.date)
-            const time = tempProposal.fields.time ? String(tempProposal.fields.time) : null
+            lastTaskRef.current = { id: action.target!.id, name: action.target!.label }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'calendar.create') {
+            const date = String(action.fields.date)
+            const time = action.fields.time ? String(action.fields.time) : null
             const startAt = `${date}T${time ?? '09:00'}:00`
             const res = await createCompanyEvent({
-              title: String(tempProposal.fields.title ?? 'Meeting'),
-              event_type: String(tempProposal.fields.event_type) === 'client_event' ? 'client_event' : 'meeting',
-              client_id: tempProposal.clientId,
-              client_name: tempProposal.clientName,
+              title: String(action.fields.title ?? 'Meeting'),
+              event_type: String(action.fields.event_type) === 'client_event' ? 'client_event' : 'meeting',
+              client_id: action.clientId,
+              client_name: action.clientName,
               start_at: startAt,
             })
             if (!actionIsCurrent()) return
@@ -1083,66 +1108,71 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
               })
               if (!actionIsCurrent()) return
             }
-            if (res.data?.id) lastCalendarEventRef.current = { id: res.data.id, title: String(tempProposal.fields.title ?? 'Meeting'), client: tempProposal.clientName ?? null }
-            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
-          } else if (tempProposal.type === 'video.mark_shot') {
-            if (tempProposal.target?.type !== 'content_run') throw new Error('Open a Content Run first so I know exactly which run to update.')
-            const numbers = String(tempProposal.fields.videos ?? '').split(/[\s,]+/).map(Number).filter(n => Number.isInteger(n) && n > 0)
+            if (res.data?.id) lastCalendarEventRef.current = { id: res.data.id, title: String(action.fields.title ?? 'Meeting'), client: action.clientName ?? null }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'video.mark_shot') {
+            const numbers = String(action.fields.videos ?? '').split(/[\s,]+/).map(Number).filter(n => Number.isInteger(n) && n > 0)
             if (numbers.length === 0) throw new Error('Which video number should I mark as shot?')
             for (const n of numbers) {
               if (!actionIsCurrent()) return
-              const res = await assistantUpdateVideo({ runId: tempProposal.target.id, videoNumber: n, action: 'shot' })
+              const res = await assistantUpdateVideo({ runId: action.target!.id, videoNumber: n, action: 'shot' })
               if (!actionIsCurrent()) return
               if (res.error) throw new Error(`Video ${n}: ${res.error.message}`)
             }
-            lastContentRunRef.current = { id: tempProposal.target.id, title: tempProposal.target.label, client: tempProposal.clientName ?? null }
-            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
-          } else if (tempProposal.type === 'video.move') {
-            if (tempProposal.target?.type !== 'content_run') throw new Error('Open a Content Run first so I know exactly which run to update.')
-            const n = Number(tempProposal.fields.video)
+            lastContentRunRef.current = { id: action.target!.id, title: action.target!.label, client: action.clientName ?? null }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'video.move') {
+            const n = Number(action.fields.video)
             if (!Number.isInteger(n) || n <= 0) throw new Error('Which video number should I move?')
-            const month = String(tempProposal.fields.scheduled_date ?? '')
+            const month = String(action.fields.scheduled_date ?? '')
             if (!actionIsCurrent()) return
             const res = await assistantUpdateVideo({
-              runId: tempProposal.target.id,
+              runId: action.target!.id,
               videoNumber: n,
               action: /^\d{4}-\d{2}-\d{2}$/.test(month) ? 'move_to_month' : 'move_next_month',
               scheduledMonth: /^\d{4}-\d{2}-\d{2}$/.test(month) ? month : null,
             })
             if (!actionIsCurrent()) return
             if (res.error) throw new Error(res.error.message)
-            lastContentRunRef.current = { id: tempProposal.target.id, title: tempProposal.target.label, client: tempProposal.clientName ?? null }
-            if (tempProposal.clientId && tempProposal.clientName) lastClientRef.current = { id: tempProposal.clientId, name: tempProposal.clientName }
-          } else if (tempProposal.type === 'navigation.open') {
-            const path = String(tempProposal.fields.path ?? '')
+            lastContentRunRef.current = { id: action.target!.id, title: action.target!.label, client: action.clientName ?? null }
+            if (action.clientId && action.clientName) lastClientRef.current = { id: action.clientId, name: action.clientName }
+          } else if (action.type === 'navigation.open') {
+            const path = String(action.fields.path ?? '')
             if (path) navigate(path)
           } else {
             // Unsupported action type in compound plan.
-            throw new Error(`Action type "${tempProposal.type}" is not supported in compound plans.`)
+            results.push({ index: i, type: action.type, title: action.title, success: false, error: 'This action type is not supported in compound plans', unsupported: true })
+            continue
           }
 
           completedActions.add(actionKey)
-          results.push({ index: i, type: action.type, success: true })
+          results.push({ index: i, type: action.type, title: action.title, success: true })
         } catch (err) {
-          results.push({ index: i, type: action.type, success: false, error: err instanceof Error ? err.message : 'Unknown error' })
+          const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+          results.push({ index: i, type: action.type, title: action.title, success: false, error: errorMsg })
+          // Track failed task targets to skip dependent actions.
+          if (action.target?.id) failedActions.add(action.target.id)
         }
       }
 
-      // Build outcome summary.
+      // Build compact outcome summary.
       const succeeded = results.filter(r => r.success)
       const failed = results.filter(r => !r.success)
+      const unsupported = results.filter(r => r.unsupported)
       
-      if (failed.length === 0) {
+      if (failed.length === 0 && unsupported.length === 0) {
         setCompoundProposal(null)
-        pushAssistant(`Done — all ${succeeded.length} actions completed successfully.`)
-      } else if (succeeded.length === 0) {
-        setProposalError(`All ${failed.length} actions failed: ${failed.map(f => f.error).join('; ')}`)
+        const actionList = succeeded.map(r => r.title).join(', ')
+        pushAssistant(`Done — ${actionList}`)
+      } else if (succeeded.length === 0 && unsupported.length === 0) {
+        setProposalError(`All actions failed: ${failed.map(f => f.error).join('; ')}`)
       } else {
         setCompoundProposal(null)
-        pushAssistant(
-          `Partially completed: ${succeeded.length} of ${results.length} actions succeeded.\n` +
-          `Failed: ${failed.map(f => `${f.type}: ${f.error}`).join('; ')}`,
-        )
+        const parts: string[] = []
+        if (succeeded.length > 0) parts.push(`Done: ${succeeded.map(r => r.title).join(', ')}`)
+        if (failed.length > 0) parts.push(`Failed: ${failed.map(f => `${f.title}: ${f.error}`).join('; ')}`)
+        if (unsupported.length > 0) parts.push(`Not yet supported: ${unsupported.map(u => u.title).join(', ')}`)
+        pushAssistant(parts.join('\n'))
       }
     } catch (err) {
       if (actionIsCurrent()) setProposalError(err instanceof Error ? err.message : 'Could not complete the action bundle.')
