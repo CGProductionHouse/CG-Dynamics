@@ -4,6 +4,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { loadPortalSetup } from './api'
 import { SetupSummary } from './SetupSummary'
+import { OnboardingProgress } from './OnboardingProgress'
+import { BrandAssetLibrary } from './BrandAssetLibrary'
+import { OnboardingTimeline } from './OnboardingTimeline'
 import type { ClientOnboardingState } from './types'
 
 export default function ClientSetupPage() {
@@ -32,7 +35,14 @@ export default function ClientSetupPage() {
     <ClientPortalShell client={client}>
       {loading ? <p className="text-sm text-report-muted">Loading setup...</p> : error || !state ? (
         <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-6"><h1 className="text-2xl font-black text-white">Setup is not available yet</h1><p className="mt-3 text-sm text-report-muted">Your CG team will make this available when your welcome link is prepared.</p></div>
-      ) : <SetupSummary state={state} />}
+      ) : (
+        <div className="space-y-5">
+          <OnboardingProgress state={state} />
+          <SetupSummary state={state} />
+          <BrandAssetLibrary state={state} />
+          <OnboardingTimeline state={state} />
+        </div>
+      )}
     </ClientPortalShell>
   )
 }
