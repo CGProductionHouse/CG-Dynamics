@@ -17,7 +17,7 @@ let server
 let validation
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   validation = await server.ssrLoadModule('/src/features/client-onboarding/validation.ts')
 })
 
@@ -159,7 +159,7 @@ test('credential and OneDrive internals are absent from client payloads', () => 
   assert.doesNotMatch(safeState, /storage_drive_id|storage_item_id|storage_web_url|password/)
   assert.doesNotMatch(page, /type="password"|localStorage|sessionStorage/)
   assert.match(api, /upload_init/)
-  assert.match(api, /uploadFileToSession/)
+  assert.match(api, /uploadFileToGraphSession/)
 })
 
 test('link rollout fails closed until secure OneDrive upload is enabled', () => {
@@ -192,7 +192,7 @@ test('upload adapter rejects files that are empty, too large, or executable', ()
   assert.match(api, /upload_init/)
   assert.match(api, /upload_complete/)
   assert.match(api, /upload_cancel/)
-  assert.match(api, /uploadFileToSession/)
+  assert.match(api, /uploadFileToGraphSession/)
 })
 
 test('upload init validates category, filename, size, and mime before creating a session', () => {
@@ -208,6 +208,8 @@ test('upload complete verifies DriveItem from Graph before marking received', ()
   assert.match(edge, /File verification failed/)
   assert.match(edge, /storage_item_id: verifiedItem\.id/)
   assert.match(edge, /storage_web_url: verifiedItem\.webUrl/)
+  assert.match(edge, /original_filename: verifiedItem\.name/)
+  assert.match(edge, /mime_type: verifiedItem\.mimeType/)
 })
 
 test('upload cancel deletes pending uploads only', () => {
@@ -254,10 +256,11 @@ test('upload adapter resolves exact-client Brand Identity folder from drive mapp
   assert.match(adapter, /folder_item_id/)
 })
 
-test('upload adapter creates resumable upload session and proxies downloads', () => {
+test('upload adapter creates a resumable session, verifies the exact item, and proxies downloads', () => {
   assert.match(adapter, /createUploadSession/)
   assert.match(adapter, /createUploadSession/)
   assert.match(adapter, /downloadFile/)
+  assert.match(adapter, /parentReference/)
   assert.match(adapter, /\/content/)
 })
 
@@ -265,7 +268,7 @@ test('client upload API replaces the foundation stub with real upload, cancel, a
   assert.match(api, /initOnboardingUpload/)
   assert.match(api, /completeOnboardingUpload/)
   assert.match(api, /cancelOnboardingUpload/)
-  assert.match(api, /uploadFileToSession/)
+  assert.match(api, /uploadFileToGraphSession/)
   assert.match(api, /downloadOnboardingFile/)
   assert.doesNotMatch(api, /Secure file transfer is not connected yet\. Your file was not uploaded\./)
 })

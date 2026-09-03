@@ -13,22 +13,25 @@ const api = read('../src/features/client-onboarding/api.ts')
 const welcome = read('../src/features/client-onboarding/WelcomeToCgPage.tsx')
 const perfPage = read('../src/pages/admin/ClientPerformancePage.tsx')
 const types = read('../src/features/client-onboarding/types.ts')
+const uploadSession = read('../src/features/client-onboarding/upload-session.ts')
 
-// ── Adapter: uploadFileChunked completion ────────────────────────────────────
-test('adapter: uploadFileChunked captures DriveItem from final chunk', () => {
-  assert.ok(adapter.includes('graphItemToResult'), 'must have helper to map GraphDriveItem to DriveItemResult')
-  assert.ok(adapter.includes('let lastItem: GraphDriveItem | undefined'), 'must track lastItem')
-  assert.ok(adapter.includes('return lastItem ? graphItemToResult(lastItem) : null'), 'must return mapped DriveItem or null')
+// ── Graph upload session protocol ────────────────────────────────────────────
+test('client uploader uses sequential ranged chunks', () => {
+  assert.ok(uploadSession.includes('GRAPH_UPLOAD_CHUNK_SIZE = 10 * 1024 * 1024'))
+  assert.ok(uploadSession.includes("'Content-Range'"))
+  assert.ok(uploadSession.includes('file.slice(offset'))
 })
 
-test('adapter: uploadChunk returns { ok, body? } not boolean', () => {
-  assert.ok(adapter.includes('Promise<{ ok: boolean; body?: GraphDriveItem }>'), 'must return structured result')
-  assert.ok(adapter.includes('return { ok: true, body }'), 'must return body on success')
-  assert.ok(adapter.includes('return { ok: false }'), 'must return ok:false on failure')
+test('client uploader captures final DriveItem and reports progress', () => {
+  assert.ok(uploadSession.includes('UploadedDriveItem'))
+  assert.ok(uploadSession.includes('onProgress?.'))
+  assert.ok(api.includes('driveItemId: driveItem.id'))
 })
 
-test('adapter: uploadChunk parses response JSON for DriveItem', () => {
-  assert.ok(adapter.includes('await response.json() as GraphDriveItem'), 'must parse JSON response')
+test('adapter verifies the final item parent and size', () => {
+  assert.ok(adapter.includes('parentReference?.driveId !== driveId'))
+  assert.ok(adapter.includes('parentReference?.id !== folderItemId'))
+  assert.ok(adapter.includes('item.size !== expectedSize'))
 })
 
 // ── Edge Function: staff_revoke ─────────────────────────────────────────────
@@ -59,11 +62,18 @@ test('edge: upload actions execute before auth guard', () => {
   assert.ok(uploadCancelPos < authGuardPos, 'upload_cancel before auth')
 })
 
+test('edge: staff upload init enforces a staff role before session lookup', () => {
+  const block = edge.slice(edge.indexOf("action === 'upload_init'"), edge.indexOf('const session = isStaffInit'))
+  assert.ok(block.includes("['admin', 'manager', 'staff', 'team'].includes(staffAuth.profile.role)"))
+  assert.ok(block.includes('Staff access required.'))
+})
+
 test('edge: upload_complete verifies DriveItem before marking received', () => {
   const block = edge.slice(edge.indexOf("action === 'upload_complete'"), edge.indexOf("action === 'upload_cancel'"))
   assert.ok(block.includes('verifyDriveItem'), 'must call verifyDriveItem')
   assert.ok(block.includes('storage_item_id: verifiedItem.id'), 'must persist verified item id')
   assert.ok(block.includes('storage_web_url: verifiedItem.webUrl'), 'must persist webUrl')
+  assert.ok(block.includes('original_filename: verifiedItem.name'), 'must persist actual Graph filename')
 })
 
 // ── Email adapter (disabled stub) ───────────────────────────────────────────

@@ -301,6 +301,9 @@ Deno.serve(async request => {
     if (isStaffInit) {
       const staffAuth = await getAuthorizedUser(service, request)
       if (!staffAuth) return json({ ok: false, error: 'Authentication required.' }, 401)
+      if (!['admin', 'manager', 'staff', 'team'].includes(staffAuth.profile.role)) {
+        return json({ ok: false, error: 'Staff access required.' }, 403)
+      }
     }
 
     const session = isStaffInit
@@ -422,7 +425,7 @@ Deno.serve(async request => {
     // Look up the pending upload row first.
     const { data: pendingUpload, error: lookupError } = await service
       .from('client_onboarding_uploads')
-      .select('id, category, original_filename, storage_drive_id, storage_item_id, upload_status')
+      .select('id, category, original_filename, size_bytes, storage_drive_id, storage_item_id, upload_status')
       .eq('id', uploadId)
       .eq('onboarding_session_id', session.id)
       .eq('upload_status', 'pending')
@@ -432,11 +435,18 @@ Deno.serve(async request => {
 
     // Verify the DriveItem actually landed in OneDrive before marking received.
     if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'File verification is not configured.' }, 503)
+    if (!pendingUpload.storage_drive_id || !pendingUpload.storage_item_id) {
+      return json({ ok: false, error: 'File reference is incomplete.' }, 500)
+    }
+
+    const driveItemId = cleanString(body.driveItemId, 255)
+    if (!driveItemId) return json({ ok: false, error: 'Microsoft did not return a file reference.' }, 400)
 
     const verifiedItem = await verifyDriveItem(
       pendingUpload.storage_drive_id,
+      driveItemId,
       pendingUpload.storage_item_id,
-      pendingUpload.original_filename,
+      Number(pendingUpload.size_bytes),
     )
 
     if (!verifiedItem) return json({ ok: false, error: 'File verification failed. The upload may still be in progress.' }, 409)
@@ -451,9 +461,15 @@ Deno.serve(async request => {
         upload_session_expires_at: null,
         // Persist the real DriveItem metadata from Graph.
         storage_item_id: verifiedItem.id,
+        storage_drive_id: verifiedItem.driveId,
         storage_web_url: verifiedItem.webUrl || null,
+        original_filename: verifiedItem.name,
+        size_bytes: verifiedItem.size,
+        mime_type: verifiedItem.mimeType,
       })
       .eq('id', uploadId)
+      .eq('onboarding_session_id', session.id)
+      .eq('upload_status', 'pending')
       .select('id, category')
       .maybeSingle()
 

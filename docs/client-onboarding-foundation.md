@@ -61,9 +61,10 @@ up a client. The Edge Function:
 3. resolves the target Brand Identity folder from the drive mapping;
 4. creates a Microsoft Graph resumable upload session;
 5. returns the short-lived upload URL to the client;
-6. the client uploads directly to Microsoft Graph;
-7. the client signals completion, and the Edge Function marks the upload as
-   `received`.
+6. the client uploads directly to Microsoft Graph in sequential 10 MB chunks;
+7. the client submits the final Graph DriveItem ID;
+8. the Edge Function fetches that exact item, verifies its parent drive/folder
+   and byte size, then persists Graph's actual metadata and marks it `received`.
 
 ### Environment variables
 

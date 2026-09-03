@@ -89,6 +89,10 @@ export interface UploadSession {
   expiresAt: string
 }
 
+export interface UploadedDriveItemReference {
+  id: string
+}
+
 export interface UploadProgress {
   uploadId: string
   category: UploadCategory
