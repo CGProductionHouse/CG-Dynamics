@@ -90,18 +90,29 @@ export async function uploadOnboardingFile(
 }
 
 export async function downloadOnboardingFile(uploadId: string): Promise<{ data: Blob | null; error: string | null }> {
-  const { data, error } = await supabase.functions.invoke('client-onboarding', {
-    body: { action: 'portal_download', uploadId },
-    // @ts-expect-error responseType is supported at runtime but not in Supabase types
-    responseType: 'blob',
-  })
-  if (error) return { data: null, error: 'Download failed.' }
-  if (data instanceof Blob) return { data, error: null }
-  if (!data?.ok) return { data: null, error: String(data?.error ?? 'Download failed.') }
-  const blobData = data.data
-  if (blobData instanceof Blob) return { data: blobData, error: null }
-  if (typeof blobData === 'string') return { data: new Blob([blobData]), error: null }
-  return { data: new Blob([JSON.stringify(blobData)]), error: null }
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) return { data: null, error: 'Download failed.' }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+    const functionUrl = `${supabaseUrl}/functions/v1/client-onboarding`
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action: 'portal_download', uploadId }),
+    })
+    if (!response.ok) {
+      const err = await response.json().catch(() => null)
+      return { data: null, error: String(err?.error ?? 'Download failed.') }
+    }
+    const blob = await response.blob()
+    return { data: blob, error: null }
+  } catch {
+    return { data: null, error: 'Download failed.' }
+  }
 }
 
 export function loadPortalSetup() {

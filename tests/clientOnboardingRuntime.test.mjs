@@ -498,7 +498,7 @@ test('upload_complete verifies DriveItem before marking received', async () => {
   assert.match(completeBlock, /storage_item_id: verifiedItem\.id/)
 })
 
-test('download uses responseType blob for binary transport', async () => {
+test('download uses fetch with session token for binary transport', async () => {
   const { readFileSync } = await import('node:fs')
   const api = readFileSync(new URL('../src/features/client-onboarding/api.ts', import.meta.url), 'utf8')
 
@@ -507,7 +507,9 @@ test('download uses responseType blob for binary transport', async () => {
     api.indexOf('loadPortalSetup'),
   )
 
-  assert.match(downloadBlock, /responseType: 'blob'/)
+  assert.match(downloadBlock, /session\.access_token/)
+  assert.match(downloadBlock, /response\.blob\(\)/)
+  assert.match(downloadBlock, /\/functions\/v1\/client-onboarding/)
 })
 
 test('file size limit is50 MB not250 MB', async () => {
