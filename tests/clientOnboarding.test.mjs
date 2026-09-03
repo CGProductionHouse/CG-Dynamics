@@ -222,7 +222,9 @@ test('download proxy requires authentication and serves binary content via blob 
   assert.match(edge, /storage_drive_id/)
   assert.match(edge, /storage_item_id/)
   assert.match(edge, /isUploadAdapterConfigured/)
-  assert.match(api, /responseType: 'blob'/)
+  assert.match(api, /downloadOnboardingFile/)
+  assert.match(api, /session\.access_token/)
+  assert.match(api, /response\.blob\(\)/)
 })
 
 test('download proxy enforces client isolation for portal downloads', () => {

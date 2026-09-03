@@ -23,12 +23,13 @@ export function isEmailConfigured(): boolean {
     && Boolean(Deno.env.get('ONBOARDING_SMTP_HOST') || Deno.env.get('ONBOARDING_RESEND_API_KEY'))
 }
 
-export async function sendWelcomeEmail(_params: WelcomeEmailParams): Promise<EmailResult> {
+export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<EmailResult> {
   if (!isEmailConfigured()) {
     return { sent: false, error: 'Email is not configured. Copy the link manually.' }
   }
 
   // TODO: Implement when a mail provider is approved.
+  void params
   // Options considered: Resend, Postmark, SendGrid, SMTP via Deno.
   // All require CA approval for cost, compliance and deliverability.
   return { sent: false, error: 'Email sending is not yet implemented. Copy the link manually.' }
