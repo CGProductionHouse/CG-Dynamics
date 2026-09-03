@@ -28,7 +28,7 @@ POST /drives/{driveId}/items/{folderItemId}:/{filename}:/createUploadSession
 ### DriveItem verification
 
 ```
-GET /drives/{driveId}/items/{folderItemId}/children?$filter=name eq '{filename}'
+GET /drives/{driveId}/items/{itemId}
 ```
 
 **Required application permission:** `Files.ReadWrite.All` (application, not delegated)
@@ -68,7 +68,7 @@ The theoretically narrower model is `Sites.Selected` with an explicit grant to t
 1. **Dedicated app credentials** — the onboarding upload app is separate from the transition sync connector. Compromise of one does not affect the other.
 2. **Drive mapping table** — `client_onboarding_drive_mapping` must have an `active=true` row for the client before any upload session is created.
 3. **File validation** — blocked extensions, size limits (50 MB), mime type whitelist.
-4. **Verification after upload** — `verifyDriveItem` queries the Graph to confirm the file actually landed before marking the upload as `received`.
+4. **Verification after upload** — `verifyDriveItem` fetches the exact final DriveItem and confirms its parent drive/folder and byte size before marking the upload as `received`.
 5. **No write-back to Outlook/Microsoft** — the onboarding adapter writes only to OneDrive. No other Microsoft APIs are modified.
 
 ## What this adapter does NOT do

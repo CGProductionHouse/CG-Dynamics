@@ -7,7 +7,9 @@ import type {
   UploadCandidate,
   UploadCategory,
   UploadSession,
+  UploadedDriveItemReference,
 } from './types'
+import { uploadFileToGraphSession } from './upload-session'
 
 type ApiResult<T> = { data: T | null; error: string | null }
 
@@ -37,8 +39,8 @@ export function initOnboardingUpload(token: string, category: UploadCategory, fi
   return invoke<UploadSession>({ action: 'upload_init', category, filename: file.name, mimeType: file.type, sizeBytes: file.size }, token)
 }
 
-export function completeOnboardingUpload(token: string, uploadId: string) {
-  return invoke<ClientOnboardingState>({ action: 'upload_complete', uploadId }, token)
+export function completeOnboardingUpload(token: string, uploadId: string, driveItem: UploadedDriveItemReference) {
+  return invoke<ClientOnboardingState>({ action: 'upload_complete', uploadId, driveItemId: driveItem.id }, token)
 }
 
 export function cancelOnboardingUpload(token: string, uploadId: string) {
@@ -47,21 +49,6 @@ export function cancelOnboardingUpload(token: string, uploadId: string) {
 
 export function initStaffUpload(sessionId: string, category: UploadCategory, file: UploadCandidate) {
   return invoke<UploadSession>({ action: 'upload_init_staff', sessionId, category, filename: file.name, mimeType: file.type, sizeBytes: file.size })
-}
-
-export async function uploadFileToSession(uploadUrl: string, file: File): Promise<{ error: string | null }> {
-  try {
-    const response = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      body: file,
-      signal: AbortSignal.timeout(120_000),
-    })
-    if (!response.ok) return { error: 'File upload failed. Please try again.' }
-    return { error: null }
-  } catch {
-    return { error: 'File upload failed. Please check your connection and try again.' }
-  }
 }
 
 export async function uploadOnboardingFile(
@@ -79,14 +66,13 @@ export async function uploadOnboardingFile(
 
   const session = initResult.data!
   onProgress?.(0)
-  const uploadError = await uploadFileToSession(session.uploadUrl, file)
-  if (uploadError.error) {
+  const uploadResult = await uploadFileToGraphSession(session.uploadUrl, file, onProgress)
+  if (uploadResult.error || !uploadResult.item) {
     void cancelOnboardingUpload(token, session.uploadId)
-    return { data: null, error: uploadError.error }
+    return { data: null, error: uploadResult.error }
   }
-  onProgress?.(100)
 
-  return completeOnboardingUpload(token, session.uploadId)
+  return completeOnboardingUpload(token, session.uploadId, uploadResult.item)
 }
 
 export async function downloadOnboardingFile(uploadId: string): Promise<{ data: Blob | null; error: string | null }> {
@@ -95,11 +81,13 @@ export async function downloadOnboardingFile(uploadId: string): Promise<{ data: 
     if (!session?.access_token) return { data: null, error: 'Download failed.' }
 
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string
     const functionUrl = `${supabaseUrl}/functions/v1/client-onboarding`
     const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${session.access_token}`,
+        apikey: supabaseKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ action: 'portal_download', uploadId }),
