@@ -1,8 +1,19 @@
 // Microsoft Graph upload adapter for client onboarding.
 // Uses a dedicated least-privilege Microsoft app for upload operations.
 // The existing microsoft-transition-sync connector is read-only and must not be modified.
+//
+// Upload protocol: sequential chunked PUT requests to the Graph resumable
+// upload session URL. Each chunk is sent with Content-Length and Content-Range
+// headers. After the final chunk, Graph returns the completed DriveItem.
 
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
+
+// Default 10 MB chunk size. Graph requires 320 KB–60 MB per chunk.
+export const DEFAULT_CHUNK_SIZE = 10 * 1024 * 1024
+
+// Retry configuration
+const MAX_RETRIES = 3
+const RETRY_DELAY_MS = 2_000
 
 interface UploadSessionParams {
   clientId: string
@@ -11,7 +22,7 @@ interface UploadSessionParams {
   mimeType: string
 }
 
-interface UploadSessionResult {
+export interface UploadSessionResult {
   uploadUrl: string
   expiresAt: string
   driveId: string
@@ -21,6 +32,35 @@ interface UploadSessionResult {
 interface FolderResolution {
   driveId: string
   itemId: string
+}
+
+export interface DriveItemResult {
+  id: string
+  name: string
+  size: number
+  mimeType: string
+  webUrl: string
+}
+
+export interface ChunkedUploadParams {
+  uploadUrl: string
+  fileBuffer: ArrayBuffer
+  fileSize: number
+  mimeType: string
+  onChunkUploaded?: (bytesUploaded: number) => void
+}
+
+interface GraphUploadSessionResponse {
+  uploadUrl: string
+  expirationDateTime: string
+}
+
+interface GraphDriveItem {
+  id: string
+  name: string
+  size: number
+  file?: { mimeType?: string }
+  webUrl?: string
 }
 
 // Read-only optional env vars for the dedicated upload app.
@@ -130,16 +170,132 @@ export async function createUploadSession(
     )
 
     if (!response.ok) return null
-    const session = await response.json() as {
-      uploadUrl: string
-      expirationDateTime: string
-    }
+    const session = await response.json() as GraphUploadSessionResponse
 
     return {
       uploadUrl: session.uploadUrl,
       expiresAt: session.expirationDateTime,
       driveId: folder.driveId,
       itemId: folder.itemId,
+    }
+  } catch {
+    return null
+  }
+}
+
+// Sleep helper for retry delays.
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Upload a single chunk to the Graph upload session URL.
+// Uses PUT with Content-Length and Content-Range headers per the Graph protocol.
+// Returns { ok, body? } — the body is populated on the final chunk with the DriveItem.
+async function uploadChunk(
+  uploadUrl: string,
+  chunk: ArrayBuffer,
+  startByte: number,
+  endByte: number,
+  totalSize: number,
+  retries = MAX_RETRIES,
+): Promise<{ ok: boolean; body?: GraphDriveItem }> {
+  const contentRange = `bytes ${startByte}-${endByte - 1}/${totalSize}`
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Length': String(chunk.byteLength),
+          'Content-Range': contentRange,
+        },
+        body: chunk,
+        signal: AbortSignal.timeout(120_000),
+      })
+      if (response.ok) {
+        const body = await response.json() as GraphDriveItem
+        return { ok: true, body }
+      }
+      if (response.status >= 500 && attempt < retries) {
+        await sleep(RETRY_DELAY_MS * (attempt + 1))
+        continue
+      }
+      return { ok: false }
+    } catch {
+      if (attempt < retries) {
+        await sleep(RETRY_DELAY_MS * (attempt + 1))
+        continue
+      }
+      return { ok: false }
+    }
+  }
+  return { ok: false }
+}
+
+function graphItemToResult(item: GraphDriveItem): DriveItemResult {
+  return {
+    id: item.id,
+    name: item.name,
+    size: item.size,
+    mimeType: item.file?.mimeType ?? 'application/octet-stream',
+    webUrl: item.webUrl ?? '',
+  }
+}
+
+// Upload a file in sequential chunks to the Graph resumable upload session.
+// Returns the DriveItem from the final Graph response, or null on failure.
+export async function uploadFileChunked(
+  params: ChunkedUploadParams,
+  chunkSize = DEFAULT_CHUNK_SIZE,
+): Promise<DriveItemResult | null> {
+  const { uploadUrl, fileBuffer, fileSize, onChunkUploaded } = params
+  let bytesUploaded = 0
+  let lastItem: GraphDriveItem | undefined
+
+  while (bytesUploaded < fileSize) {
+    const endByte = Math.min(bytesUploaded + chunkSize, fileSize)
+    const chunk = fileBuffer.slice(bytesUploaded, endByte)
+    const result = await uploadChunk(uploadUrl, chunk, bytesUploaded, endByte, fileSize)
+    if (!result.ok) return null
+    if (result.body) lastItem = result.body
+    bytesUploaded = endByte
+    onChunkUploaded?.(bytesUploaded)
+  }
+
+  return lastItem ? graphItemToResult(lastItem) : null
+}
+
+// Verify a DriveItem exists in the given folder by querying Graph directly.
+// This is used after upload completion to confirm the file landed.
+export async function verifyDriveItem(
+  driveId: string,
+  folderItemId: string,
+  filename: string,
+): Promise<DriveItemResult | null> {
+  const cfg = uploadAppConfig()
+  if (!isUploadAdapterConfigured()) return null
+
+  const accessToken = await getAccessToken(cfg.tenantId, cfg.clientId, cfg.clientSecret)
+  if (!accessToken) return null
+
+  try {
+    // List children of the folder and find by name
+    const response = await fetch(
+      `${GRAPH_ROOT}/drives/${encodeURIComponent(driveId)}/items/${encodeURIComponent(folderItemId)}/children?$select=id,name,size,file,webUrl&$filter=name eq '${encodeURIComponent(filename)}'`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal: AbortSignal.timeout(30_000),
+      },
+    )
+    if (!response.ok) return null
+    const data = await response.json() as { value?: GraphDriveItem[] }
+    const item = data.value?.[0]
+    if (!item || !item.file) return null
+    return {
+      id: item.id,
+      name: item.name,
+      size: item.size,
+      mimeType: item.file.mimeType ?? 'application/octet-stream',
+      webUrl: item.webUrl ?? '',
     }
   } catch {
     return null

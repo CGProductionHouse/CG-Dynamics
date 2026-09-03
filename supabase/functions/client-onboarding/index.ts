@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient, type User } from 'https://esm.sh/@supabase/supabase-js@2'
-import { createUploadSession, downloadFile, isUploadAdapterConfigured } from './onedrive-adapter.ts'
+import { createUploadSession, downloadFile, isUploadAdapterConfigured, verifyDriveItem } from './onedrive-adapter.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
@@ -16,7 +16,7 @@ const ALLOWED_UPLOAD_MIME_TYPES = new Set([
   'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/plain', 'text/csv',
 ])
-const MAX_ONBOARDING_FILE_BYTES = 250 * 1024 * 1024
+const MAX_ONBOARDING_FILE_BYTES = 50 * 1024 * 1024
 const BLOCKED_EXTENSIONS = new Set([
   'app', 'bat', 'cmd', 'com', 'cpl', 'exe', 'hta', 'js', 'jse', 'msi', 'ps1', 'scr', 'vbs', 'wsf', 'sh', 'bash',
 ])
@@ -86,7 +86,7 @@ function validateUploadFile(file: { name: string; type: string; size: number }):
   const ext = extensionOf(file.name)
   if (!ext || BLOCKED_EXTENSIONS.has(ext)) return 'This file type is not safe to upload.'
   if (file.size <= 0) return 'This file appears to be empty.'
-  if (file.size > MAX_ONBOARDING_FILE_BYTES) return 'This file is larger than 250 MB.'
+  if (file.size > MAX_ONBOARDING_FILE_BYTES) return 'This file is larger than 50 MB.'
   if (!ALLOWED_UPLOAD_MIME_TYPES.has(file.type) && !ext) return 'Could not determine the file type.'
   return null
 }
@@ -290,89 +290,24 @@ Deno.serve(async request => {
     return json({ ok: true, data: responseState })
   }
 
-  const authorized = await getAuthorizedUser(service, request)
-  if (!authorized) return json({ ok: false, error: 'Authentication required.' }, 401)
-
-  if (action === 'portal_load') {
-    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) return json({ ok: false, error: 'Client access required.' }, 403)
-    const { data } = await service
-      .from('client_onboarding_sessions')
-      .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
-      .eq('client_id', authorized.profile.client_id)
-      .order('last_activity_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    if (!data) return json({ ok: false, error: 'Setup is not available yet.' }, 404)
-    const responseState = await safeState(service, data as SessionRow)
-    if (!responseState) return json({ ok: false, error: 'Setup is unavailable.' }, 503)
-    return json({ ok: true, data: responseState })
-  }
-
-  const isStaff = ['admin', 'manager', 'staff', 'team'].includes(authorized.profile.role)
-  if (!isStaff) return json({ ok: false, error: 'Staff access required.' }, 403)
-
-  if (action === 'staff_list') {
-    if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
-    const { data, error } = await service
-      .from('client_onboarding_sessions')
-      .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
-      .order('last_activity_at', { ascending: false })
-    if (error) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
-    const states = await Promise.all((data as SessionRow[]).map(session => safeState(service, session, true)))
-    if (states.some(state => state === null)) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
-    return json({ ok: true, data: states })
-  }
-
-  if (action === 'staff_generate') {
-    if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
-    if (Deno.env.get('CLIENT_ONBOARDING_UPLOADS_ENABLED') !== 'true') {
-      return json({ ok: false, error: 'Onboarding links stay disabled until secure file transfer is connected.' }, 409)
-    }
-    const clientId = cleanString(body.clientId, 50)
-    const platforms = [...new Set(cleanStringArray(body.platforms, 8, 30).filter(platform => PLATFORMS.has(platform)))]
-    const { data: client } = await service.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle()
-    if (!client) return json({ ok: false, error: 'Select an active client.' }, 400)
-    const token = randomToken()
-    const tokenHash = await sha256(token)
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    const { data: sessionId, error: reissueError } = await service.rpc('reissue_client_onboarding_session', {
-      p_client_id: clientId,
-      p_token_hash: tokenHash,
-      p_token_expires_at: expiresAt,
-      p_enabled_platforms: platforms,
-      p_actor_id: authorized.user.id,
-    })
-    if (reissueError || !sessionId) return json({ ok: false, error: 'Could not generate the link.' }, 503)
-    return json({ ok: true, data: { token, expiresAt } })
-  }
-
-  if (action === 'staff_update_access') {
-    if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
-    const sessionId = cleanString(body.sessionId, 50)
-    const platform = cleanString(body.platform, 30)
-    const state = cleanString(body.state, 20)
-    if (!PLATFORMS.has(platform) || !['verified', 'failed'].includes(state)) return json({ ok: false, error: 'Invalid access update.' }, 400)
-    const now = new Date().toISOString()
-    const update = state === 'verified'
-      ? { connection_state: state, verified_at: now, verified_by: authorized.user.id, updated_at: now }
-      : { connection_state: state, verified_at: null, verified_by: null, updated_at: now }
-    const { data: updated, error } = await service.from('client_platform_access').update(update).eq('onboarding_session_id', sessionId).eq('platform', platform).select('id').maybeSingle()
-    if (error || !updated) return json({ ok: false, error: 'Could not update access status.' }, error ? 503 : 404)
-    const current = await refreshedSession(service, sessionId)
-    if (!current) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
-    const responseState = await safeState(service, current, true)
-    if (!responseState) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
-    return json({ ok: true, data: responseState })
-  }
-
   // ── Upload actions (public token + staff portal) ──────────────────────
+  // These MUST execute before the authenticated-user guard so public
+  // magic-link users can upload with only a valid token.
 
   if (action === 'upload_init' || action === 'upload_init_staff') {
-    const session = action === 'upload_init_staff'
-      ? null // staff uses staff_session_id below
+    const isStaffInit = action === 'upload_init_staff'
+
+    // Staff variant requires Bearer auth; resolve before using.
+    if (isStaffInit) {
+      const staffAuth = await getAuthorizedUser(service, request)
+      if (!staffAuth) return json({ ok: false, error: 'Authentication required.' }, 401)
+    }
+
+    const session = isStaffInit
+      ? null
       : await getTokenSession(service, request)
 
-    if (action === 'upload_init_staff') {
+    if (isStaffInit) {
       const sessionId = cleanString(body.sessionId, 50)
       const { data: staffSession } = await service
         .from('client_onboarding_sessions')
@@ -484,6 +419,28 @@ Deno.serve(async request => {
     const uploadId = cleanString(body.uploadId, 50)
     if (!uploadId) return json({ ok: false, error: 'Missing upload reference.' }, 400)
 
+    // Look up the pending upload row first.
+    const { data: pendingUpload, error: lookupError } = await service
+      .from('client_onboarding_uploads')
+      .select('id, category, original_filename, storage_drive_id, storage_item_id, upload_status')
+      .eq('id', uploadId)
+      .eq('onboarding_session_id', session.id)
+      .eq('upload_status', 'pending')
+      .maybeSingle()
+
+    if (lookupError || !pendingUpload) return json({ ok: false, error: 'Upload not found or already processed.' }, lookupError ? 503 : 404)
+
+    // Verify the DriveItem actually landed in OneDrive before marking received.
+    if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'File verification is not configured.' }, 503)
+
+    const verifiedItem = await verifyDriveItem(
+      pendingUpload.storage_drive_id,
+      pendingUpload.storage_item_id,
+      pendingUpload.original_filename,
+    )
+
+    if (!verifiedItem) return json({ ok: false, error: 'File verification failed. The upload may still be in progress.' }, 409)
+
     const now = new Date().toISOString()
     const { data: updated, error } = await service
       .from('client_onboarding_uploads')
@@ -492,10 +449,11 @@ Deno.serve(async request => {
         uploaded_at: now,
         upload_session_id: null,
         upload_session_expires_at: null,
+        // Persist the real DriveItem metadata from Graph.
+        storage_item_id: verifiedItem.id,
+        storage_web_url: verifiedItem.webUrl || null,
       })
       .eq('id', uploadId)
-      .eq('onboarding_session_id', session.id)
-      .eq('upload_status', 'pending')
       .select('id, category')
       .maybeSingle()
 
@@ -526,6 +484,103 @@ Deno.serve(async request => {
 
     if (error || !deleted) return json({ ok: false, error: 'Could not cancel the upload.' }, error ? 503 : 404)
     return json({ ok: true, data: null })
+  }
+
+  // ── Authenticated actions ────────────────────────────────────────────
+
+  const authorized = await getAuthorizedUser(service, request)
+  if (!authorized) return json({ ok: false, error: 'Authentication required.' }, 401)
+
+  if (action === 'portal_load') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) return json({ ok: false, error: 'Client access required.' }, 403)
+    const { data } = await service
+      .from('client_onboarding_sessions')
+      .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
+      .eq('client_id', authorized.profile.client_id)
+      .order('last_activity_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (!data) return json({ ok: false, error: 'Setup is not available yet.' }, 404)
+    const responseState = await safeState(service, data as SessionRow)
+    if (!responseState) return json({ ok: false, error: 'Setup is unavailable.' }, 503)
+    return json({ ok: true, data: responseState })
+  }
+
+  const isStaff = ['admin', 'manager', 'staff', 'team'].includes(authorized.profile.role)
+  if (!isStaff) return json({ ok: false, error: 'Staff access required.' }, 403)
+
+  if (action === 'staff_list') {
+    if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
+    const { data, error } = await service
+      .from('client_onboarding_sessions')
+      .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
+      .order('last_activity_at', { ascending: false })
+    if (error) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    const states = await Promise.all((data as SessionRow[]).map(session => safeState(service, session, true)))
+    if (states.some(state => state === null)) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    return json({ ok: true, data: states })
+  }
+
+  if (action === 'staff_generate') {
+    if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
+    if (Deno.env.get('CLIENT_ONBOARDING_UPLOADS_ENABLED') !== 'true') {
+      return json({ ok: false, error: 'Onboarding links stay disabled until secure file transfer is connected.' }, 409)
+    }
+    const clientId = cleanString(body.clientId, 50)
+    const platforms = [...new Set(cleanStringArray(body.platforms, 8, 30).filter(platform => PLATFORMS.has(platform)))]
+    const { data: client } = await service.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle()
+    if (!client) return json({ ok: false, error: 'Select an active client.' }, 400)
+    const token = randomToken()
+    const tokenHash = await sha256(token)
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    const { data: sessionId, error: reissueError } = await service.rpc('reissue_client_onboarding_session', {
+      p_client_id: clientId,
+      p_token_hash: tokenHash,
+      p_token_expires_at: expiresAt,
+      p_enabled_platforms: platforms,
+      p_actor_id: authorized.user.id,
+    })
+    if (reissueError || !sessionId) return json({ ok: false, error: 'Could not generate the link.' }, 503)
+    return json({ ok: true, data: { token, expiresAt } })
+  }
+
+  if (action === 'staff_update_access') {
+    if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
+    const sessionId = cleanString(body.sessionId, 50)
+    const platform = cleanString(body.platform, 30)
+    const state = cleanString(body.state, 20)
+    if (!PLATFORMS.has(platform) || !['verified', 'failed'].includes(state)) return json({ ok: false, error: 'Invalid access update.' }, 400)
+    const now = new Date().toISOString()
+    const update = state === 'verified'
+      ? { connection_state: state, verified_at: now, verified_by: authorized.user.id, updated_at: now }
+      : { connection_state: state, verified_at: null, verified_by: null, updated_at: now }
+    const { data: updated, error } = await service.from('client_platform_access').update(update).eq('onboarding_session_id', sessionId).eq('platform', platform).select('id').maybeSingle()
+    if (error || !updated) return json({ ok: false, error: 'Could not update access status.' }, error ? 503 : 404)
+    const current = await refreshedSession(service, sessionId)
+    if (!current) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    const responseState = await safeState(service, current, true)
+    if (!responseState) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    return json({ ok: true, data: responseState })
+  }
+
+  if (action === 'staff_revoke') {
+    if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
+    const sessionId = cleanString(body.sessionId, 50)
+    if (!sessionId) return json({ ok: false, error: 'Missing session reference.' }, 400)
+    const now = new Date().toISOString()
+    const { data: revoked, error } = await service
+      .from('client_onboarding_sessions')
+      .update({ revoked_at: now, last_activity_at: now })
+      .eq('id', sessionId)
+      .is('revoked_at', null)
+      .select('id')
+      .maybeSingle()
+    if (error || !revoked) return json({ ok: false, error: error ? 'Could not revoke the link.' : 'Link is already revoked.' }, error ? 503 : 409)
+    const current = await refreshedSession(service, sessionId)
+    if (!current) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    const responseState = await safeState(service, current, true)
+    if (!responseState) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    return json({ ok: true, data: responseState })
   }
 
   // ── Download actions (server-mediated proxy) ──────────────────────────
