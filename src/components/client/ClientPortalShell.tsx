@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/client/campaigns', label: 'Campaigns', end: false },
   { to: '/client/content-calendar', label: 'Content calendar', end: false },
   { to: '/client/content-guides', label: 'Content guides', end: false },
+  { to: '/client/setup', label: 'Setup', end: false },
 ] as const
 
 export function ClientPortalShell({

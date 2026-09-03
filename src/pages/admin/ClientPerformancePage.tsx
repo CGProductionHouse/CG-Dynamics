@@ -13,6 +13,7 @@ import {
 } from '../../lib/reportPeriod'
 import { readStrategyData, strategyRequiredComplete } from '../../lib/strategyEngine'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 
 type ReportState = 'published' | 'ready-to-publish' | 'needs-strategy' | 'internal-draft' | 'needs-repair'
 
@@ -26,6 +27,17 @@ interface AttentionItem {
 }
 
 const LINKS = [
+  {
+    title: 'Client onboarding',
+    description: 'Welcome links, setup intake and access status.',
+    to: '/admin/client-onboarding',
+    icon: (
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 3v18M3 12h18" />
+        <path d="M5.25 5.25l13.5 13.5M18.75 5.25l-13.5 13.5" opacity=".35" />
+      </svg>
+    ),
+  },
   {
     title: 'Clients',
     description: 'Profiles, tiers and packages.',
@@ -120,6 +132,7 @@ function formatDate(value: string | null | undefined) {
 }
 
 export default function ClientPerformancePage() {
+  const { profile } = useAuth()
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [linkedMetaClients, setLinkedMetaClients] = useState<number | null>(null)
@@ -306,6 +319,8 @@ export default function ClientPerformancePage() {
             />
           </section>
 
+          <OnboardingStatusCard clients={clients} />
+
           <section className="mt-6">
             <PremiumCard padding="lg" className="bg-white/[0.035]">
               <PremiumCardHeader
@@ -350,8 +365,8 @@ export default function ClientPerformancePage() {
                 title="Performance workspaces"
               />
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                {LINKS.map((link) => (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                {LINKS.filter(link => link.to !== '/admin/client-onboarding' || profile?.role === 'admin' || profile?.role === 'manager').map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
@@ -415,5 +430,68 @@ function SnapshotCard({
       <p className="mt-3 text-3xl font-black tracking-tight text-white">{value}</p>
       <p className="mt-2 text-xs leading-relaxed text-brand-primary/70">{helper}</p>
     </PremiumCard>
+  )
+}
+
+function OnboardingStatusCard({ clients }: { clients: Client[] }) {
+  const [sessions, setSessions] = useState<{ client_id: string; status: string }[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    async function load() {
+      const { data, error } = await supabase
+        .from('client_onboarding_sessions')
+        .select('client_id, status')
+      if (!active) return
+      if (!error && data) setSessions(data)
+      setLoading(false)
+    }
+    void load()
+    return () => { active = false }
+  }, [])
+
+  const activeClients = clients.filter(c => c.active)
+  const sessionMap = new Map(sessions.map(s => [s.client_id, s.status]))
+  const completed = activeClients.filter(c => sessionMap.get(c.id) === 'completed').length
+  const inProgress = activeClients.filter(c => sessionMap.get(c.id) === 'in_progress').length
+  const notStarted = activeClients.filter(c => !sessionMap.has(c.id) || sessionMap.get(c.id) === 'not_started').length
+
+  return (
+    <section className="mt-6">
+      <PremiumCard padding="lg" className="bg-white/[0.025]">
+        <PremiumCardHeader title="Client onboarding status" />
+        {loading ? (
+          <p className="text-sm text-brand-primary/65">Loading onboarding status...</p>
+        ) : (
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-brand-teal/20 bg-brand-teal/[0.06] p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-teal">Completed</p>
+              <p className="mt-2 text-2xl font-black text-white">{completed}</p>
+              <p className="mt-1 text-xs text-brand-primary/65">of {activeClients.length} active clients</p>
+            </div>
+            <div className="rounded-xl border border-brand-accent/20 bg-brand-accent/[0.06] p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-accent">In progress</p>
+              <p className="mt-2 text-2xl font-black text-white">{inProgress}</p>
+              <p className="mt-1 text-xs text-brand-primary/65">clients with open onboarding</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-primary/65">Not started</p>
+              <p className="mt-2 text-2xl font-black text-white">{notStarted}</p>
+              <p className="mt-1 text-xs text-brand-primary/65">clients without onboarding</p>
+            </div>
+          </div>
+        )}
+        <Link
+          to="/admin/client-onboarding"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-teal hover:underline"
+        >
+          View onboarding workspace
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </PremiumCard>
+    </section>
   )
 }
