@@ -92,8 +92,11 @@ export async function uploadOnboardingFile(
 export async function downloadOnboardingFile(uploadId: string): Promise<{ data: Blob | null; error: string | null }> {
   const { data, error } = await supabase.functions.invoke('client-onboarding', {
     body: { action: 'portal_download', uploadId },
+    // @ts-expect-error responseType is supported at runtime but not in Supabase types
+    responseType: 'blob',
   })
   if (error) return { data: null, error: 'Download failed.' }
+  if (data instanceof Blob) return { data, error: null }
   if (!data?.ok) return { data: null, error: String(data?.error ?? 'Download failed.') }
   const blobData = data.data
   if (blobData instanceof Blob) return { data: blobData, error: null }
@@ -115,4 +118,8 @@ export function generateOnboardingLink(clientId: string, platforms: OnboardingPl
 
 export function updateStaffAccess(sessionId: string, platform: OnboardingPlatform, state: 'verified' | 'failed') {
   return invoke<StaffOnboardingSummary>({ action: 'staff_update_access', sessionId, platform, state })
+}
+
+export function revokeOnboardingLink(sessionId: string) {
+  return invoke<StaffOnboardingSummary>({ action: 'staff_revoke', sessionId })
 }

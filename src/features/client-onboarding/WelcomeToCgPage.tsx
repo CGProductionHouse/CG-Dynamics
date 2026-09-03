@@ -3,8 +3,11 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { completePublicOnboarding, loadPublicOnboarding, savePublicOnboarding, uploadOnboardingFile } from './api'
 import { OnboardingShell } from './OnboardingShell'
 import { PlatformAccessCard } from './PlatformAccessCard'
+import { VideoWalkthrough } from './VideoWalkthrough'
 import type { ClientAccessChoice, ClientOnboardingState, OnboardingPlatform, UploadCategory } from './types'
 import { coreOnboardingComplete, logoRequirementSatisfied, servicesRequirementSatisfied, validateLogoCandidate, validateServicesCandidate } from './validation'
+
+const WALKTHROUGH_VIDEO_URL = import.meta.env.VITE_ONBOARDING_WALKTHROUGH_URL as string | undefined
 
 const fieldClass = 'min-h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none placeholder:text-report-faint focus:border-report-accent/60'
 
@@ -144,6 +147,7 @@ export default function WelcomeToCgPage() {
             <p>We're excited to get started.</p>
             <p>We just need a few things from you first. Don't worry about getting everything perfect. Send us what you have and we'll take it from there.</p>
           </div>
+          <VideoWalkthrough videoUrl={WALKTHROUGH_VIDEO_URL} />
           <ActionButton size="lg" className="mt-8 min-h-14" onClick={() => void save({ currentStep: 1 })} loading={saving}>Let's get started</ActionButton>
         </div>
       )}

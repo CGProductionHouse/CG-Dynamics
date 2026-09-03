@@ -187,6 +187,8 @@ test('upload adapter rejects files that are empty, too large, or executable', ()
   assert.match(edge, /BLOCKED_EXTENSIONS/)
   assert.match(edge, /validateUploadFile/)
   assert.match(edge, /size > MAX_ONBOARDING_FILE_BYTES/)
+  assert.match(edge, /MAX_ONBOARDING_FILE_BYTES = 50 \* 1024 \* 1024/)
+  assert.doesNotMatch(edge, /250 \* 1024 \* 1024/)
   assert.match(api, /upload_init/)
   assert.match(api, /upload_complete/)
   assert.match(api, /upload_cancel/)
@@ -201,10 +203,11 @@ test('upload init validates category, filename, size, and mime before creating a
   assert.match(edge, /sanitizeFilename/)
 })
 
-test('upload complete moves pending uploads to received and clears the upload session', () => {
-  assert.match(edge, /upload_status: 'received'/)
-  assert.match(edge, /upload_session_id: null/)
-  assert.match(edge, /upload_session_expires_at: null/)
+test('upload complete verifies DriveItem from Graph before marking received', () => {
+  assert.match(edge, /verifyDriveItem/)
+  assert.match(edge, /File verification failed/)
+  assert.match(edge, /storage_item_id: verifiedItem\.id/)
+  assert.match(edge, /storage_web_url: verifiedItem\.webUrl/)
 })
 
 test('upload cancel deletes pending uploads only', () => {
@@ -212,13 +215,14 @@ test('upload cancel deletes pending uploads only', () => {
   assert.match(edge, /\.delete\(\)/)
 })
 
-test('download proxy requires authentication and serves only received uploads', () => {
+test('download proxy requires authentication and serves binary content via blob transport', () => {
   assert.match(edge, /download_file/)
   assert.match(edge, /portal_download/)
   assert.match(edge, /upload_status !== 'received'/)
   assert.match(edge, /storage_drive_id/)
   assert.match(edge, /storage_item_id/)
   assert.match(edge, /isUploadAdapterConfigured/)
+  assert.match(api, /responseType: 'blob'/)
 })
 
 test('download proxy enforces client isolation for portal downloads', () => {
