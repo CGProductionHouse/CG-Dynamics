@@ -132,6 +132,55 @@ export function classifyContentOps(
   }
 }
 
+export interface OpsFilters {
+  query?: string
+  clientName?: string // 'all' or an exact client name
+  deliverableType?: string // 'all' or an exact type
+  risksOnly?: boolean
+}
+
+const hasRisk = (i: OpsItem) => i.flags.overdue || i.flags.missingCreativeLink || i.flags.missingSchedule
+
+// Pure filter over an already-classified summary; rebuilds buckets/counts/risks
+// from the surviving items so the dashboard columns stay consistent.
+export function applyOpsFilters(summary: OpsSummary, filters: OpsFilters): OpsSummary {
+  const q = (filters.query ?? '').trim().toLowerCase()
+  const items = summary.items.filter(i => {
+    if (filters.clientName && filters.clientName !== 'all' && i.clientName !== filters.clientName) return false
+    if (filters.deliverableType && filters.deliverableType !== 'all' && i.deliverableType !== filters.deliverableType) return false
+    if (filters.risksOnly && !hasRisk(i)) return false
+    if (q) {
+      const hay = `${i.title} ${i.clientName} ${i.assignee ?? ''}`.toLowerCase()
+      if (!hay.includes(q)) return false
+    }
+    return true
+  })
+  const buckets: Record<OpsBucket, OpsItem[]> = {
+    in_progress: [], awaiting_internal: [], awaiting_client: [], changes: [],
+    ready_to_schedule: [], scheduled: [], posted: [], future_draft: [],
+  }
+  for (const i of items) buckets[i.bucket].push(i)
+  const counts = Object.fromEntries(OPS_BUCKET_ORDER.map(b => [b, buckets[b].length])) as Record<OpsBucket, number>
+  return {
+    items,
+    buckets,
+    counts,
+    risks: {
+      missingCreativeLink: items.filter(i => i.flags.missingCreativeLink),
+      missingSchedule: items.filter(i => i.flags.missingSchedule),
+      overdue: items.filter(i => i.flags.overdue),
+    },
+  }
+}
+
+// Distinct client names / deliverable types present, for filter dropdowns.
+export function opsFilterOptions(summary: OpsSummary): { clients: string[]; types: string[] } {
+  return {
+    clients: [...new Set(summary.items.map(i => i.clientName))].sort(),
+    types: [...new Set(summary.items.map(i => i.deliverableType))].sort(),
+  }
+}
+
 function monthKey(offset: number): string {
   const d = new Date()
   d.setUTCDate(1)
