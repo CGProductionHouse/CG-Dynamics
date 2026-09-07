@@ -1,3 +1,4 @@
+import { businessDateKey } from '../../lib/businessTime'
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type { ClientOption } from '../../lib/commandCentre'
@@ -132,7 +133,15 @@ export default function ContentOverview({ clients, staff, runs, documents, onOpe
   }), [runs, documentByRun, clientId, from, to, selectedPerson, status])
 
   const filteredDocuments = useMemo(() => documents.filter(document => filteredRuns.some(run => run.id === document.run.id)), [documents, filteredRuns])
-  const activeRuns = filteredRuns.filter(run => !['completed', 'cancelled'].includes(run.status)).sort((left, right) => (left.run_date ?? '9999').localeCompare(right.run_date ?? '9999'))
+  const today = businessDateKey()
+  const activeRuns = filteredRuns.filter(run => !['completed', 'cancelled'].includes(run.status)).sort((left, right) => {
+    const group = (date: string | null) => date ? (date >= today ? 0 : 2) : 1
+    const groupOrder = group(left.run_date) - group(right.run_date)
+    if (groupOrder) return groupOrder
+    return group(left.run_date) === 2
+      ? (right.run_date ?? '').localeCompare(left.run_date ?? '')
+      : (left.run_date ?? '').localeCompare(right.run_date ?? '')
+  })
   const draftDocuments = filteredDocuments.filter(document => document.guideline.status === 'draft' || document.guideline.status === 'ready')
   const publishedDocuments = filteredDocuments.filter(document => document.guideline.status === 'published' && Boolean(document.guideline.client_published_at)).sort((left, right) => (right.guideline.client_published_at ?? '').localeCompare(left.guideline.client_published_at ?? ''))
   const completedRuns = filteredRuns.filter(run => run.status === 'completed').sort((left, right) => right.updated_at.localeCompare(left.updated_at))
