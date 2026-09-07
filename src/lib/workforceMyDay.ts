@@ -405,7 +405,18 @@ export function sourceAccent(source: MyDaySource) {
   return 'border-white/10 bg-white/[0.04] text-brand-primary'
 }
 
-export async function getMyDayContext(profile: Profile | null, baseDate = new Date()): Promise<MyDayContext> {
+export interface MyDayPrefetchData {
+  tasks: CommandCentreTask[]
+  clients: Array<{ id: string; name: string }>
+  deliverables: MonthlyDeliverable[]
+  events: CompanyCalendarEvent[]
+}
+
+export async function getMyDayContext(
+  profile: Profile | null,
+  baseDate = new Date(),
+  prefetched?: MyDayPrefetchData,
+): Promise<MyDayContext> {
   const today = businessDateKey(baseDate)
   const weekEnd = addBusinessDays(today, 7)
   const userName = profile?.full_name?.trim() || null
@@ -414,24 +425,43 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
   const currentMonth = businessMonthKey(baseDate)
   const currentYear = Number(currentMonth.slice(0, 4))
 
-  const [tasksResult, clientsResult, deliverablesResult] = await Promise.all([
-    listTasks({ activeOnly: true }),
-    listActiveClients(),
-    listMonthlyDeliverablesByYear(currentYear),
-  ])
+  let tasks: CommandCentreTask[]
+  let clientNameById: Map<string, string>
+  let rawDeliverables: MonthlyDeliverable[]
+  let rawEvents: CompanyCalendarEvent[]
 
-  if (tasksResult.error) errors.push(tasksResult.error.message)
-  if (clientsResult.error) errors.push(clientsResult.error.message)
+  if (prefetched) {
+    tasks = prefetched.tasks
+    clientNameById = new Map(prefetched.clients.map(c => [c.id, c.name]))
+    rawDeliverables = prefetched.deliverables
+    rawEvents = prefetched.events
+  } else {
+    const [tasksResult, clientsResult, deliverablesResult] = await Promise.all([
+      listTasks({ activeOnly: true }),
+      listActiveClients(),
+      listMonthlyDeliverablesByYear(currentYear),
+    ])
 
-  const tasks = ((tasksResult.data ?? []) as CommandCentreTask[])
+    if (tasksResult.error) errors.push(tasksResult.error.message)
+    if (clientsResult.error) errors.push(clientsResult.error.message)
+    if (deliverablesResult.error) errors.push(deliverablesResult.error.message)
+
+    tasks = (tasksResult.data ?? []) as CommandCentreTask[]
+    clientNameById = new Map((clientsResult.data ?? []).map(c => [c.id, c.name]))
+    rawDeliverables = (deliverablesResult.data ?? []) as MonthlyDeliverable[]
+
+    const eventsResult = await listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 8))
+    if (eventsResult.error) errors.push(eventsResult.error.message)
+    rawEvents = (eventsResult.data ?? []) as CompanyCalendarEvent[]
+  }
+
+  const filteredTasks = tasks
     .filter(task => isActiveForToday(task))
     .filter(task => userMatches(task.assigned_to_user_id, task.assignee_user_ids, profile, task.assignment_review_state))
     .filter(task => !task.due_date || task.due_date <= weekEnd)
     .map(task => toTaskItem(task, today))
 
-  const clientNameById = new Map((clientsResult.data ?? []).map(client => [client.id, client.name]))
-  if (deliverablesResult.error) errors.push(deliverablesResult.error.message)
-  const deliverables = ((deliverablesResult.data ?? []) as MonthlyDeliverable[])
+  const filteredDeliverables = rawDeliverables
     .filter(deliverable => {
       const status = normalizeScheduleStatus(deliverable.production_status)
       return status !== 'scheduled_posted' && status !== 'meta_drafts' && deliverable.production_status !== 'moved'
@@ -444,10 +474,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     })
     .map(deliverable => toDeliverableItem(deliverable, clientNameById, today))
 
-  const eventsResult = await listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 8))
-  if (eventsResult.error) errors.push(eventsResult.error.message)
-
-  const events = ((eventsResult.data ?? []) as CompanyCalendarEvent[])
+  const filteredEvents = rawEvents
     .filter(event => event.status !== 'cancelled' && event.status !== 'completed')
     .filter(event => {
       const eventDate = localDateKeyFromIso(event.start_at)
@@ -457,7 +484,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     })
     .map(event => toEventItem(event, today))
 
-  const allItems = [...events, ...tasks, ...deliverables].sort((a, b) => {
+  const allItems = [...filteredEvents, ...filteredTasks, ...filteredDeliverables].sort((a, b) => {
     if (a.sortRank !== b.sortRank) return a.sortRank - b.sortRank
     const dateCompare = (a.date ?? '9999-99-99').localeCompare(b.date ?? '9999-99-99')
     if (dateCompare !== 0) return dateCompare
@@ -475,9 +502,9 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     today,
     todayLabel: formatBusinessDate(baseDate, { weekday: 'long', day: 'numeric', month: 'long' }),
     userName,
-    tasks,
-    events,
-    deliverables,
+    tasks: filteredTasks,
+    events: filteredEvents,
+    deliverables: filteredDeliverables,
     timeline,
     timelineBlocks,
     summary,
@@ -486,7 +513,7 @@ export async function getMyDayContext(profile: Profile | null, baseDate = new Da
     upcoming: allItems.filter(item => item.date === null || (item.date > today && item.date <= weekEnd)),
     diagnostics: {
       profileNameMissing: !userName,
-      companyEventsMissing: eventsResult.tableMissing,
+      companyEventsMissing: false,
       errors,
     },
   }

@@ -117,19 +117,31 @@ export default function CgHubPage() {
     setLoadingData(true)
     setLoadErrors([])
     try {
-      const [tasksRes, clientsRes, delRes, companyRes, myDay] = await Promise.all([
+      const [tasksRes, clientsRes, delRes, companyRes] = await Promise.all([
         listTasks({ activeOnly: true }),
         listActiveClients(),
         listMonthlyDeliverablesByMonth(currentMonth),
         listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 31)),
-        getMyDayContext(profile),
       ])
+      const rawTasks = (tasksRes.data ?? []) as CommandCentreTask[]
+      const rawClients = (clientsRes.data ?? []) as ClientOption[]
+      const rawDeliverables = (delRes.data ?? []) as MonthlyDeliverable[]
+      const rawEvents = (companyRes.data ?? []) as CompanyCalendarEvent[]
+
       setLoadErrors([tasksRes.error?.message, clientsRes.error?.message, delRes.error?.message, companyRes.error?.message].filter(Boolean) as string[])
-      setTasks((tasksRes.data ?? []) as CommandCentreTask[])
-      setClients((clientsRes.data ?? []) as ClientOption[])
-      setDeliverables((delRes.data ?? []) as MonthlyDeliverable[])
+      setTasks(rawTasks)
+      setClients(rawClients)
+      setDeliverables(rawDeliverables)
       setCompanyEventsMissing(companyRes.tableMissing)
-      setCompanyEvents((companyRes.data ?? []) as CompanyCalendarEvent[])
+      setCompanyEvents(rawEvents)
+
+      // Build My Day context from already-fetched data — no duplicate queries.
+      const myDay = await getMyDayContext(profile, new Date(), {
+        tasks: rawTasks,
+        clients: rawClients,
+        deliverables: rawDeliverables,
+        events: rawEvents,
+      })
       setMyDayContext(myDay)
       setLoadingData(false)
       // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block

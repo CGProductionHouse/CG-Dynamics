@@ -447,22 +447,25 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
   }, [profileId])
 
   // Load the signed-in user's live work context once (best-effort; the assistant
-  // still works without it).
+  // still works without it). Deferred to avoid competing with Hub initial load.
   useEffect(() => {
     let active = true
     const requestedProfileId = profileId
-    getMyDayContext(profile ?? null)
-      .then(async ctx => {
-        const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
-        if (active && profileIdRef.current === requestedProfileId) {
-          const work = buildAssistantLocalWorkContext(ctx)
-          if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
-          workContextRef.current = work
-        }
-      })
-      .catch(() => {})
+    const timer = window.setTimeout(() => {
+      getMyDayContext(profile ?? null)
+        .then(async ctx => {
+          const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
+          if (active && profileIdRef.current === requestedProfileId) {
+            const work = buildAssistantLocalWorkContext(ctx)
+            if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
+            workContextRef.current = work
+          }
+        })
+        .catch(() => {})
+    }, 2000)
     return () => {
       active = false
+      window.clearTimeout(timer)
     }
   }, [profile, profileId])
 
