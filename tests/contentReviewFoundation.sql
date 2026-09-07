@@ -69,3 +69,30 @@ do $$ begin
  if (select state from public.content_review_versions limit 1) <> 'superseded' then raise exception 'Stale approval survived schedule change'; end if;
 end $$;
 select 'PASS: manager/client flow, exact-client isolation, client projection, immutable content, stale invalidation, staff approval guard' as verification;
+
+-- Source edits must reset the canonical approval state as well as the revision.
+insert into public.content_guide_ideas(id,client_id,title,script,deliverable_id)
+values('00000000-0000-4000-8000-000000000031','00000000-0000-4000-8000-000000000011','Video fixture','Original script','00000000-0000-4000-8000-000000000021');
+update public.content_review_versions set state='approved';
+update public.monthly_deliverables set production_status='approved',internal_approved_at=now(),client_approved_at=now()
+where id='00000000-0000-4000-8000-000000000021';
+update public.content_guide_ideas set script='Changed script' where id='00000000-0000-4000-8000-000000000031';
+do $$ begin
+ if exists(select 1 from public.content_review_versions where state <> 'superseded') then raise exception 'Video source retained approval'; end if;
+ if exists(select 1 from public.monthly_deliverables where id='00000000-0000-4000-8000-000000000021'
+ and (production_status <> 'in_progress' or internal_approved_at is not null or client_approved_at is not null)) then raise exception 'Canonical approval survived source edit'; end if;
+end $$;
+update public.content_review_versions set state='approved';
+update public.monthly_deliverables set production_status='scheduled' where id='00000000-0000-4000-8000-000000000021';
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',true);
+do $$ begin
+ begin
+ perform public.save_content_creative_source('00000000-0000-4000-8000-000000000021','OTHERDESIGN','PAGE2',false);
+ raise exception 'Scheduled Canva source changed';
+ exception when raise_exception then if sqlerrm <> 'Resolve published or scheduled content through Client Schedule before changing its source' then raise; end if; end;
+ begin
+ update public.content_guide_ideas set script='Unsafe change' where id='00000000-0000-4000-8000-000000000031';
+ raise exception 'Scheduled video source changed';
+ exception when raise_exception then if sqlerrm <> 'Resolve published or scheduled content through Client Schedule before changing its source' then raise; end if; end;
+end $$;
+select 'PASS: source approval reset and scheduled source preservation' as verification;
