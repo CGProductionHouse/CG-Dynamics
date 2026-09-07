@@ -12,6 +12,36 @@ import type { Profile } from './db/profiles'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMinutes, businessMonthKey, formatBusinessDate, formatBusinessTime } from './businessTime'
 import { isActiveForToday, isActuallyInProgressTask } from './taskLifecycle'
 
+const MY_DAY_CACHE_TTL_MS = 30_000
+
+interface MyDayCacheEntry {
+  context: MyDayContext
+  timestamp: number
+}
+
+const myDayCache = new Map<string, MyDayCacheEntry>()
+
+function getCacheKey(profileId: string | null | undefined, baseDate: Date): string {
+  const dateKey = businessDateKey(baseDate)
+  return `${profileId ?? 'anonymous'}:${dateKey}`
+}
+
+function getCachedMyDayContext(profileId: string | null | undefined, baseDate: Date): MyDayContext | null {
+  const key = getCacheKey(profileId, baseDate)
+  const entry = myDayCache.get(key)
+  if (!entry) return null
+  if (Date.now() - entry.timestamp > MY_DAY_CACHE_TTL_MS) {
+    myDayCache.delete(key)
+    return null
+  }
+  return entry.context
+}
+
+function setCachedMyDayContext(profileId: string | null | undefined, baseDate: Date, context: MyDayContext): void {
+  const key = getCacheKey(profileId, baseDate)
+  myDayCache.set(key, { context, timestamp: Date.now() })
+}
+
 export type MyDaySource = 'daily_task' | 'planner_task' | 'calendar_event' | 'client_deliverable'
 
 export interface MyDayItem {
@@ -417,6 +447,13 @@ export async function getMyDayContext(
   baseDate = new Date(),
   prefetched?: MyDayPrefetchData,
 ): Promise<MyDayContext> {
+  const profileId = profile?.id ?? null
+
+  if (!prefetched) {
+    const cached = getCachedMyDayContext(profileId, baseDate)
+    if (cached) return cached
+  }
+
   const today = businessDateKey(baseDate)
   const weekEnd = addBusinessDays(today, 7)
   const userName = profile?.full_name?.trim() || null
@@ -498,7 +535,7 @@ export async function getMyDayContext(
   const timelineBlocks = buildTimelineBlocks(timeline, baseDate)
   const summary = buildSummary(timelineBlocks, focusItems, baseDate)
 
-  return {
+  const result = {
     today,
     todayLabel: formatBusinessDate(baseDate, { weekday: 'long', day: 'numeric', month: 'long' }),
     userName,
@@ -517,6 +554,12 @@ export async function getMyDayContext(
       errors,
     },
   }
+
+  if (!prefetched) {
+    setCachedMyDayContext(profileId, baseDate, result)
+  }
+
+  return result
 }
 
 export function myDayDateLabel(item: MyDayItem, today: string) {
