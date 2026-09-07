@@ -536,6 +536,23 @@ Deno.serve(async request => {
   const isStaff = ['admin', 'manager', 'staff', 'team'].includes(authorized.profile.role)
   if (!isStaff) return json({ ok: false, error: 'Staff access required.' }, 403)
 
+  if (action === 'staff_preview_setup') {
+    const clientId = cleanString(body.clientId, 50)
+    if (!clientId) return json({ ok: false, error: 'Select a client.' }, 400)
+    const { data, error } = await service
+      .from('client_onboarding_sessions')
+      .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
+      .eq('client_id', clientId)
+      .order('last_activity_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) return json({ ok: false, error: 'Setup preview is unavailable.' }, 503)
+    if (!data) return json({ ok: false, error: 'Setup is not available yet.' }, 404)
+    const responseState = await safeState(service, data as SessionRow)
+    if (!responseState) return json({ ok: false, error: 'Setup preview is unavailable.' }, 503)
+    return json({ ok: true, data: responseState })
+  }
+
   if (action === 'staff_list') {
     if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
     const { data, error } = await service

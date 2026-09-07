@@ -4,7 +4,7 @@ import type { ClientOnboardingState } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
 import { logoRequirementSatisfied, servicesRequirementSatisfied } from './validation'
 
-export function SetupSummary({ state }: { state: ClientOnboardingState }) {
+export function SetupSummary({ state, audience = 'client' }: { state: ClientOnboardingState; audience?: 'client' | 'staff' }) {
   return (
     <div className="space-y-5">
       <header>
@@ -14,12 +14,12 @@ export function SetupSummary({ state }: { state: ClientOnboardingState }) {
       </header>
       <div className="grid gap-4 sm:grid-cols-2">
         <SummaryCard title="Logo & brand files" ready={logoRequirementSatisfied(state)}>
-          {state.uploads.filter(upload => upload.category === 'logo').map(upload => <p key={upload.id} className="flex items-center justify-between gap-2"><span>{upload.originalFilename}</span>{upload.uploadStatus === 'received' && <DownloadButton uploadId={upload.id} />}</p>)}
+          {state.uploads.filter(upload => upload.category === 'logo').map(upload => <p key={upload.id} className="flex items-center justify-between gap-2"><span>{upload.originalFilename}</span>{upload.uploadStatus === 'received' && <DownloadButton uploadId={upload.id} audience={audience} />}</p>)}
         </SummaryCard>
         <SummaryCard title="Services" ready={servicesRequirementSatisfied(state)}>
           {state.typedDescription && <p>{state.typedDescription}</p>}
           {state.serviceItems.length > 0 && <p>{state.serviceItems.join(', ')}</p>}
-          {state.uploads.filter(upload => upload.category === 'services').map(upload => <p key={upload.id} className="flex items-center justify-between gap-2"><span>{upload.originalFilename}</span>{upload.uploadStatus === 'received' && <DownloadButton uploadId={upload.id} />}</p>)}
+          {state.uploads.filter(upload => upload.category === 'services').map(upload => <p key={upload.id} className="flex items-center justify-between gap-2"><span>{upload.originalFilename}</span>{upload.uploadStatus === 'received' && <DownloadButton uploadId={upload.id} audience={audience} />}</p>)}
         </SummaryCard>
       </div>
       <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
@@ -44,12 +44,12 @@ function SummaryCard({ title, ready, children }: { title: string; ready: boolean
   return <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-bold text-white">{title}</h2><span className={`rounded-full px-3 py-1 text-xs font-semibold ${ready ? 'bg-report-accent/15 text-report-accent' : 'bg-white/[0.06] text-report-faint'}`}>{ready ? 'Received' : 'Still needed'}</span></div><div className="mt-4 space-y-2 text-sm leading-relaxed text-report-muted">{children || <p>Nothing shared yet.</p>}</div></section>
 }
 
-function DownloadButton({ uploadId }: { uploadId: string }) {
+function DownloadButton({ uploadId, audience }: { uploadId: string; audience: 'client' | 'staff' }) {
   const [downloading, setDownloading] = useState(false)
 
   async function download() {
     setDownloading(true)
-    const { data, error } = await downloadOnboardingFile(uploadId)
+    const { data, error } = await downloadOnboardingFile(uploadId, audience)
     if (data) {
       const blob = data as Blob
       const url = URL.createObjectURL(blob)

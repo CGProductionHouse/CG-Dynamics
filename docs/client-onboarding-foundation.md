@@ -9,6 +9,12 @@ Welcome to CG is the initial account-free intake for the existing client-facing
 Performance experience. Authenticated clients revisit the same safe state as
 `Setup` at `/client/setup`. It is not a second portal.
 
+Staff manage onboarding from the first-class `Client Onboarding` destination in
+the Performance zone. The Performance dashboard surfaces its status, and both
+Clients and Client Preview provide an exact selected-client `Setup` preview.
+That preview uses the same presentation as `/client/setup`, but authenticates as
+staff and never broadens the selected client's data scope.
+
 The core completion contract is deliberately small:
 
 - at least one logo file has been received securely;
@@ -117,7 +123,7 @@ with one-way submission semantics and tightly audited access.
 - voice-note retention and transcription;
 - client-package-driven platform defaults beyond staff selection;
 - screenshots and centrally maintained current third-party guide details;
-- authenticated browser/device acceptance and production rollout.
+- production-authenticated browser/device acceptance and production rollout.
 
 The migration is proposal-only and must not be applied to production without
 explicit CA approval.

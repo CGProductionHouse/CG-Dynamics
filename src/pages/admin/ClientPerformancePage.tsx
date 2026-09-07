@@ -14,6 +14,9 @@ import {
 import { readStrategyData, strategyRequiredComplete } from '../../lib/strategyEngine'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { listStaffOnboarding } from '../../features/client-onboarding/api'
+import type { StaffOnboardingSummary } from '../../features/client-onboarding/types'
+import { isManagerRole } from '../../lib/roles'
 
 type ReportState = 'published' | 'ready-to-publish' | 'needs-strategy' | 'internal-draft' | 'needs-repair'
 
@@ -133,6 +136,7 @@ function formatDate(value: string | null | undefined) {
 
 export default function ClientPerformancePage() {
   const { profile } = useAuth()
+  const canManageOnboarding = isManagerRole(profile?.role)
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [linkedMetaClients, setLinkedMetaClients] = useState<number | null>(null)
@@ -319,7 +323,7 @@ export default function ClientPerformancePage() {
             />
           </section>
 
-          <OnboardingStatusCard clients={clients} />
+          {canManageOnboarding && <OnboardingStatusCard clients={clients} />}
 
           <section className="mt-6">
             <PremiumCard padding="lg" className="bg-white/[0.035]">
@@ -366,7 +370,7 @@ export default function ClientPerformancePage() {
               />
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                {LINKS.filter(link => link.to !== '/admin/client-onboarding' || profile?.role === 'admin' || profile?.role === 'manager').map((link) => (
+                {LINKS.filter(link => link.to !== '/admin/client-onboarding' || canManageOnboarding).map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
@@ -434,17 +438,17 @@ function SnapshotCard({
 }
 
 function OnboardingStatusCard({ clients }: { clients: Client[] }) {
-  const [sessions, setSessions] = useState<{ client_id: string; status: string }[]>([])
+  const [sessions, setSessions] = useState<StaffOnboardingSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     let active = true
     async function load() {
-      const { data, error } = await supabase
-        .from('client_onboarding_sessions')
-        .select('client_id, status')
+      const result = await listStaffOnboarding()
       if (!active) return
-      if (!error && data) setSessions(data)
+      if (result.data) setSessions(result.data)
+      setError(Boolean(result.error))
       setLoading(false)
     }
     void load()
@@ -452,7 +456,10 @@ function OnboardingStatusCard({ clients }: { clients: Client[] }) {
   }, [])
 
   const activeClients = clients.filter(c => c.active)
-  const sessionMap = new Map(sessions.map(s => [s.client_id, s.status]))
+  const sessionMap = new Map<string, StaffOnboardingSummary['status']>()
+  for (const session of sessions) {
+    if (!session.revokedAt && !sessionMap.has(session.clientId)) sessionMap.set(session.clientId, session.status)
+  }
   const completed = activeClients.filter(c => sessionMap.get(c.id) === 'completed').length
   const inProgress = activeClients.filter(c => sessionMap.get(c.id) === 'in_progress').length
   const notStarted = activeClients.filter(c => !sessionMap.has(c.id) || sessionMap.get(c.id) === 'not_started').length
@@ -463,6 +470,8 @@ function OnboardingStatusCard({ clients }: { clients: Client[] }) {
         <PremiumCardHeader title="Client onboarding status" />
         {loading ? (
           <p className="text-sm text-brand-primary/65">Loading onboarding status...</p>
+        ) : error ? (
+          <p className="text-sm text-brand-primary/65">Onboarding status is unavailable right now.</p>
         ) : (
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-brand-teal/20 bg-brand-teal/[0.06] p-4">

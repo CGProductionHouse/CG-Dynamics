@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { listClients, type Client } from '../../lib/db/clients'
@@ -186,9 +187,13 @@ export default function InternalOnboardingPage() {
                   </div>
 
                   {/* Progress bar */}
-                  <div className="mt-4">
-                    <ProgressStrip session={session} />
-                  </div>
+                    <div className="mt-4">
+                      <ProgressStrip session={session} />
+                    </div>
+
+                    <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
+                      Preview client Setup
+                    </Link>
 
                   {/* Quick status */}
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">

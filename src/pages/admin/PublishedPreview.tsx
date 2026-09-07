@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { listClients, type Client } from '../../lib/db/clients'
@@ -33,6 +33,9 @@ import {
 import type { PlatformFact } from '../../lib/overviewModel'
 import type { ReportStatsPost } from '../../lib/reportStats'
 import { isStaffRole } from '../../lib/roles'
+import { loadStaffSetupPreview } from '../../features/client-onboarding/api'
+import { ClientSetupContent } from '../../features/client-onboarding/ClientSetupPage'
+import type { ClientOnboardingState } from '../../features/client-onboarding/types'
 
 function errorMessage(_error: unknown, fallback: string) {
   return fallback
@@ -43,6 +46,7 @@ function reportLabel(report: Report) {
 }
 
 type DashboardMode = 'client' | 'editor'
+type PreviewSurface = 'dashboard' | 'setup'
 
 function statusLabel(status: Report['status']) {
   return status === 'published' ? 'Published' : 'Draft'
@@ -57,6 +61,7 @@ export default function PublishedPreview() {
   const [initialReportId] = useState(searchParams.get('reportId') ?? '')
   const [initialClientId] = useState(searchParams.get('client') ?? '')
   const [initialMonth] = useState(searchParams.get('month') ?? '')
+  const [surface, setSurface] = useState<PreviewSurface>(searchParams.get('view') === 'setup' ? 'setup' : 'dashboard')
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [selectedClientId, setSelectedClientId] = useState('')
@@ -78,6 +83,10 @@ export default function PublishedPreview() {
   const [mode, setMode] = useState<DashboardMode>('client')
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
+  const [setup, setSetup] = useState<ClientOnboardingState | null>(null)
+  const [setupClientId, setSetupClientId] = useState<string | null>(null)
+  const [setupLoading, setSetupLoading] = useState(false)
+  const [setupError, setSetupError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -99,54 +108,70 @@ export default function PublishedPreview() {
     () => clients.find(client => client.id === selectedClientId) ?? null,
     [clients, selectedClientId]
   )
+  const loadedRef = useRef(false)
   useEffect(() => {
+    let active = true
+
     async function loadOptions() {
       setLoading(true)
       setError(null)
       try {
-        const [clientsRes, reportsRes] = await Promise.all([listClients(), listReports()])
+        const [clientsRes, reportsRes] = await Promise.all([
+          listClients(),
+          surface === 'dashboard' ? listReports() : Promise.resolve({ data: [] as Report[], error: null }),
+        ])
+        if (!active) return
         const loadError = clientsRes.error ?? reportsRes.error
         if (loadError) {
-          setError('Could not load dashboard options.')
+          setError(surface === 'setup' ? 'Could not load client options.' : 'Could not load dashboard options.')
           return
         }
         setClients(clientsRes.data)
         setReports(reportsRes.data)
 
-        const queryClientId = clientsRes.data.some(client => client.id === initialClientId) ? initialClientId : ''
-        const queryClientReports = queryClientId
-          ? selectMonthlyReports(reportsRes.data.filter(report => report.client_id === queryClientId))
-          : []
-        const exactMonthReport = queryClientId && initialMonth
-          ? reportsRes.data.find(report => report.client_id === queryClientId && getReportMonthFromPeriod(report) === initialMonth)
-          : undefined
-        const selectedReport = initialReportId
-          ? reportsRes.data.find(report => report.id === initialReportId)
-          : queryClientId
-            ? initialMonth
-              ? exactMonthReport
-              : queryClientReports.find(report => report.status === 'published')
-                ?? queryClientReports[0]
-                ?? reportsRes.data.find(report => report.client_id === queryClientId)
-            : reportsRes.data.find(report => report.status === 'published') ?? reportsRes.data[0]
-        const nextClientId = ((selectedReport?.client_id ?? queryClientId) || clientsRes.data[0]?.id) ?? ''
-        const nextReportId = selectedReport?.id ?? ''
-        setSelectedClientId(nextClientId)
-        setSelectedReportId(nextReportId)
+        if (!loadedRef.current) {
+          loadedRef.current = true
+          const queryClientId = clientsRes.data.some(client => client.id === initialClientId) ? initialClientId : ''
+          if (surface === 'setup') {
+            setSelectedClientId(queryClientId || clientsRes.data[0]?.id || '')
+            setSelectedReportId('')
+            return
+          }
+          const queryClientReports = queryClientId
+            ? selectMonthlyReports(reportsRes.data.filter(report => report.client_id === queryClientId))
+            : []
+          const exactMonthReport = queryClientId && initialMonth
+            ? reportsRes.data.find(report => report.client_id === queryClientId && getReportMonthFromPeriod(report) === initialMonth)
+            : undefined
+          const selectedReport = initialReportId
+            ? reportsRes.data.find(report => report.id === initialReportId)
+            : queryClientId
+              ? initialMonth
+                ? exactMonthReport
+                : queryClientReports.find(report => report.status === 'published')
+                  ?? queryClientReports[0]
+                  ?? reportsRes.data.find(report => report.client_id === queryClientId)
+              : reportsRes.data.find(report => report.status === 'published') ?? reportsRes.data[0]
+          const nextClientId = ((selectedReport?.client_id ?? queryClientId) || clientsRes.data[0]?.id) ?? ''
+          const nextReportId = selectedReport?.id ?? ''
+          setSelectedClientId(nextClientId)
+          setSelectedReportId(nextReportId)
+        }
       } catch (error) {
-        setError(errorMessage(error, 'Could not load preview options.'))
+        if (active) setError(errorMessage(error, 'Could not load preview options.'))
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
 
     void loadOptions()
-  }, [initialClientId, initialMonth, initialReportId])
+    return () => { active = false }
+  }, [initialClientId, initialMonth, initialReportId, surface])
 
   useEffect(() => {
     let active = true
 
-    if (!selectedReportId) {
+    if (surface !== 'dashboard' || !selectedReportId) {
       return () => { active = false }
     }
 
@@ -174,7 +199,7 @@ export default function PublishedPreview() {
           return
         }
         setReport(data)
-        setSearchParams({ reportId: selectedReportId }, { replace: true })
+        setSearchParams({ client: data?.client_id ?? selectedClientId, reportId: selectedReportId }, { replace: true })
         if (data) {
           const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
@@ -221,13 +246,44 @@ export default function PublishedPreview() {
 
     void loadReport()
     return () => { active = false }
-  }, [reports, selectedReportId, setSearchParams])
+  }, [reports, selectedClientId, selectedReportId, setSearchParams, surface])
+
+  useEffect(() => {
+    let active = true
+    if (surface !== 'setup' || !selectedClientId) {
+      return () => { active = false }
+    }
+
+    async function loadSetup() {
+      setSetupLoading(true)
+      setSetup(null)
+      setSetupClientId(null)
+      setSetupError(null)
+      const result = await loadStaffSetupPreview(selectedClientId)
+      if (!active) return
+      setSetup(result.data)
+      setSetupClientId(result.data ? selectedClientId : null)
+      setSetupError(result.error)
+      setSetupLoading(false)
+      setSearchParams({ client: selectedClientId, view: 'setup' }, { replace: true })
+    }
+
+    void loadSetup()
+    return () => { active = false }
+  }, [selectedClientId, setSearchParams, surface])
 
   function handleClientChange(clientId: string) {
+    setSetup(null)
+    setSetupClientId(null)
+    setSetupError(null)
+    if (surface === 'setup') setSetupLoading(true)
     setSelectedClientId(clientId)
     const eligible = selectMonthlyReports(reports.filter(report => report.client_id === clientId))
     const nextReport = eligible.find(report => report.status === 'published') ?? eligible[0]
     setSelectedReportId(nextReport?.id ?? '')
+    setSearchParams(surface === 'setup'
+      ? { client: clientId, view: 'setup' }
+      : { client: clientId, ...(nextReport ? { reportId: nextReport.id } : {}) }, { replace: true })
     if (!nextReport) {
       setReport(null)
       setManualMetrics([])
@@ -243,6 +299,14 @@ export default function PublishedPreview() {
       setDataHealth([])
       setContentExclusions([])
     }
+  }
+
+  function selectSurface(nextSurface: PreviewSurface) {
+    setSurface(nextSurface)
+    setMode('client')
+    setSearchParams(nextSurface === 'setup'
+      ? { client: selectedClientId, view: 'setup' }
+      : { client: selectedClientId, ...(selectedReportId ? { reportId: selectedReportId } : {}) }, { replace: true })
   }
 
   async function handleContentExcluded(post: ReportStatsPost, excluded: boolean) {
@@ -310,15 +374,15 @@ export default function PublishedPreview() {
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white sm:text-3xl">Client Dashboard Preview</h1>
-        <p className="mt-2 text-sm text-brand-primary">Staff preview and publishing controls.</p>
+        <h1 className="text-2xl font-semibold text-white sm:text-3xl">Client Preview</h1>
+        <p className="mt-2 text-sm text-brand-primary">See the selected client's dashboard or permanent Setup view.</p>
       </div>
 
       {error && <Message tone="error" text={error} />}
       {success && <Message tone="success" text={success} />}
 
       <section className="mb-6 rounded-xl border border-brand-muted bg-brand-surface p-4 sm:p-5">
-        <div className="grid gap-4 md:grid-cols-[1fr_1.4fr_auto] md:items-end">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-end">
           <label className="block">
             <span className="block text-sm font-medium text-brand-accent mb-1.5">Client</span>
             <select
@@ -333,7 +397,15 @@ export default function PublishedPreview() {
             </select>
           </label>
 
-          <label className="block">
+          <div>
+            <span className="mb-1.5 block text-sm font-medium text-brand-accent">Preview</span>
+            <div className="grid grid-cols-2 rounded-lg border border-brand-muted bg-brand-bg p-1">
+              <button type="button" onClick={() => selectSurface('dashboard')} className={`min-h-11 rounded-md px-3 text-sm font-semibold transition ${surface === 'dashboard' ? 'bg-brand-accent text-black' : 'text-brand-primary hover:text-white'}`}>Dashboard</button>
+              <button type="button" onClick={() => selectSurface('setup')} className={`min-h-11 rounded-md px-3 text-sm font-semibold transition ${surface === 'setup' ? 'bg-brand-accent text-black' : 'text-brand-primary hover:text-white'}`}>Setup</button>
+            </div>
+          </div>
+
+          {surface === 'dashboard' && <label className="block">
             <span className="block text-sm font-medium text-brand-accent mb-1.5">Report period</span>
             <select
               value={selectedReportId}
@@ -347,9 +419,9 @@ export default function PublishedPreview() {
                 </option>
               ))}
             </select>
-          </label>
+          </label>}
 
-          <div className="flex rounded-lg border border-brand-muted bg-brand-bg p-1">
+          {surface === 'dashboard' && <div className="grid grid-cols-2 rounded-lg border border-brand-muted bg-brand-bg p-1">
             <button
               type="button"
               onClick={() => setMode('client')}
@@ -364,11 +436,23 @@ export default function PublishedPreview() {
             >
               Editor
             </button>
-          </div>
+          </div>}
         </div>
       </section>
 
-      {reportLoading ? (
+      {surface === 'setup' ? (
+        setupLoading ? (
+          <p className="text-sm text-brand-primary">Loading Setup preview...</p>
+        ) : setup && setupClientId === selectedClientId ? (
+          <div className="overflow-hidden rounded-xl border border-brand-muted">
+            <ClientDashboardShell action={<span className="rounded-full bg-report-elevated px-3 py-1 text-xs font-medium text-report-accent">Setup preview</span>} client={selectedClient}>
+              <ClientSetupContent state={setup} audience="staff" />
+            </ClientDashboardShell>
+          </div>
+        ) : (
+          <EmptyState title="Setup not available" message={setupError ?? 'This client does not have onboarding setup yet.'} compact />
+        )
+      ) : reportLoading ? (
         <p className="text-sm text-brand-primary">Loading dashboard...</p>
       ) : report && mode === 'editor' ? (
         <EditorPanel

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/AuthContext'
@@ -5,53 +6,54 @@ import { RequireStaff } from './components/guards/RequireStaff'
 import { RequireAdmin } from './components/guards/RequireAdmin'
 import { RequireManager } from './components/guards/RequireManager'
 import { RequireClient } from './components/guards/RequireClient'
-import LandingPage from './pages/LandingPage'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
-import ClientPerformancePage from './pages/admin/ClientPerformancePage'
-import CgHubPage from './pages/admin/CgHubPage'
-import ClientsList from './pages/admin/ClientsList'
-import ImportMetaCsv from './pages/admin/ImportMetaCsv'
-import ImportsManagement from './pages/admin/ImportsManagement'
-import ImportHub from './pages/admin/ImportHub'
-import UsersHub from './pages/admin/UsersHub'
-import NewReport from './pages/admin/NewReport'
-import ReportsManagement from './pages/admin/ReportsManagement'
-import ManualMetricsAdmin from './pages/admin/ManualMetricsAdmin'
-import PublishedPreview from './pages/admin/PublishedPreview'
-import IntegrationsPage from './pages/admin/IntegrationsPage'
-import MetaIntegrationPage from './pages/admin/MetaIntegrationPage'
-import GoogleAdsIntegrationPage from './pages/admin/GoogleAdsIntegrationPage'
-import AssistantPage from './pages/admin/AssistantPage'
-import PackageMasterPage from './pages/admin/PackageMasterPage'
-import ClientSchedulePage from './pages/admin/ClientSchedulePage'
-import ClientContentCalendarPage from './pages/admin/ClientContentCalendarPage'
-import PlannerImportPage from './pages/admin/PlannerImportPage'
-import ImportHealthPage from './pages/admin/ImportHealthPage'
-import AiUsageHealthPage from './pages/admin/AiUsageHealthPage'
-import CompanyCalendarPage from './pages/admin/CompanyCalendarPage'
-import MicrosoftImportPage from './pages/admin/MicrosoftImportPage'
-import MarketingLibraryPage from './pages/admin/MarketingLibraryPage'
-import MarketingAiDepartmentPage from './pages/admin/MarketingAiDepartmentPage'
-import MarketingWorkspacePage from './pages/admin/MarketingWorkspacePage'
-import SystemHubPage from './pages/admin/SystemHubPage'
-import SkillCardReviewPage from './pages/admin/SkillCardReviewPage'
-import ContentWorkflowPage from './pages/admin/ContentWorkflowPage'
-import MyWorkPage from './pages/admin/MyWorkPage'
-import CommandCentrePage from './pages/admin/CommandCentrePage'
-import OpsHubPage from './pages/admin/OpsHubPage'
-import Dashboard from './pages/client/Dashboard'
-import ClientPortalHome from './pages/client/ClientPortalHome'
-import ClientCampaignsPage from './pages/client/ClientCampaignsPage'
-import ClientPortalCalendarPage from './pages/client/ClientContentCalendarPage'
-import ClientContentGuidesPage from './pages/client/ClientContentGuidesPage'
-import ClientStrategyPage from './pages/client/ClientStrategyPage'
-import WelcomeToCgPage from './features/client-onboarding/WelcomeToCgPage'
-import ClientSetupPage from './features/client-onboarding/ClientSetupPage'
-import InternalOnboardingPage from './features/client-onboarding/InternalOnboardingPage'
+
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const ClientPerformancePage = lazy(() => import('./pages/admin/ClientPerformancePage'))
+const CgHubPage = lazy(() => import('./pages/admin/CgHubPage'))
+const ClientsList = lazy(() => import('./pages/admin/ClientsList'))
+const ImportMetaCsv = lazy(() => import('./pages/admin/ImportMetaCsv'))
+const ImportsManagement = lazy(() => import('./pages/admin/ImportsManagement'))
+const ImportHub = lazy(() => import('./pages/admin/ImportHub'))
+const UsersHub = lazy(() => import('./pages/admin/UsersHub'))
+const NewReport = lazy(() => import('./pages/admin/NewReport'))
+const ReportsManagement = lazy(() => import('./pages/admin/ReportsManagement'))
+const ManualMetricsAdmin = lazy(() => import('./pages/admin/ManualMetricsAdmin'))
+const PublishedPreview = lazy(() => import('./pages/admin/PublishedPreview'))
+const IntegrationsPage = lazy(() => import('./pages/admin/IntegrationsPage'))
+const MetaIntegrationPage = lazy(() => import('./pages/admin/MetaIntegrationPage'))
+const GoogleAdsIntegrationPage = lazy(() => import('./pages/admin/GoogleAdsIntegrationPage'))
+const AssistantPage = lazy(() => import('./pages/admin/AssistantPage'))
+const PackageMasterPage = lazy(() => import('./pages/admin/PackageMasterPage'))
+const ClientSchedulePage = lazy(() => import('./pages/admin/ClientSchedulePage'))
+const ClientContentCalendarPage = lazy(() => import('./pages/admin/ClientContentCalendarPage'))
+const PlannerImportPage = lazy(() => import('./pages/admin/PlannerImportPage'))
+const ImportHealthPage = lazy(() => import('./pages/admin/ImportHealthPage'))
+const AiUsageHealthPage = lazy(() => import('./pages/admin/AiUsageHealthPage'))
+const CompanyCalendarPage = lazy(() => import('./pages/admin/CompanyCalendarPage'))
+const MicrosoftImportPage = lazy(() => import('./pages/admin/MicrosoftImportPage'))
+const MarketingLibraryPage = lazy(() => import('./pages/admin/MarketingLibraryPage'))
+const MarketingAiDepartmentPage = lazy(() => import('./pages/admin/MarketingAiDepartmentPage'))
+const MarketingWorkspacePage = lazy(() => import('./pages/admin/MarketingWorkspacePage'))
+const SystemHubPage = lazy(() => import('./pages/admin/SystemHubPage'))
+const SkillCardReviewPage = lazy(() => import('./pages/admin/SkillCardReviewPage'))
+const ContentWorkflowPage = lazy(() => import('./pages/admin/ContentWorkflowPage'))
+const MyWorkPage = lazy(() => import('./pages/admin/MyWorkPage'))
+const CommandCentrePage = lazy(() => import('./pages/admin/CommandCentrePage'))
+const OpsHubPage = lazy(() => import('./pages/admin/OpsHubPage'))
+const Dashboard = lazy(() => import('./pages/client/Dashboard'))
+const ClientPortalHome = lazy(() => import('./pages/client/ClientPortalHome'))
+const ClientCampaignsPage = lazy(() => import('./pages/client/ClientCampaignsPage'))
+const ClientPortalCalendarPage = lazy(() => import('./pages/client/ClientContentCalendarPage'))
+const ClientContentGuidesPage = lazy(() => import('./pages/client/ClientContentGuidesPage'))
+const ClientStrategyPage = lazy(() => import('./pages/client/ClientStrategyPage'))
+const WelcomeToCgPage = lazy(() => import('./features/client-onboarding/WelcomeToCgPage'))
+const ClientSetupPage = lazy(() => import('./features/client-onboarding/ClientSetupPage'))
+const InternalOnboardingPage = lazy(() => import('./features/client-onboarding/InternalOnboardingPage'))
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -79,7 +81,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
+        <Suspense fallback={<div className="min-h-screen bg-brand-bg" aria-label="Opening CG Dynamics" />}>
+          <Routes>
           <Route path="/" element={<HomeRedirect />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
@@ -175,7 +178,8 @@ export default function App() {
             <Route path="/dashboard" element={<Navigate to="/client" replace />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   )

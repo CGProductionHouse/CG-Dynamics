@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { downloadOnboardingFile } from './api'
 import type { ClientOnboardingState, SafeOnboardingUpload } from './types'
 
-export function BrandAssetLibrary({ state }: { state: ClientOnboardingState }) {
+export function BrandAssetLibrary({ state, audience = 'client' }: { state: ClientOnboardingState; audience?: 'client' | 'staff' }) {
   const logoUploads = state.uploads.filter(u => u.category === 'logo' && u.uploadStatus === 'received')
   const servicesUploads = state.uploads.filter(u => u.category === 'services' && u.uploadStatus === 'received')
   const optionalUploads = state.uploads.filter(u => u.category === 'optional' && u.uploadStatus === 'received')
@@ -17,38 +17,38 @@ export function BrandAssetLibrary({ state }: { state: ClientOnboardingState }) {
 
       <div className="mt-4 space-y-2">
         {logoUploads.length > 0 && (
-          <AssetGroup label="Logo & brand" uploads={logoUploads} />
+          <AssetGroup label="Logo & brand" uploads={logoUploads} audience={audience} />
         )}
         {servicesUploads.length > 0 && (
-          <AssetGroup label="Services" uploads={servicesUploads} />
+          <AssetGroup label="Services" uploads={servicesUploads} audience={audience} />
         )}
         {optionalUploads.length > 0 && (
-          <AssetGroup label="Additional files" uploads={optionalUploads} />
+          <AssetGroup label="Additional files" uploads={optionalUploads} audience={audience} />
         )}
       </div>
     </section>
   )
 }
 
-function AssetGroup({ label, uploads }: { label: string; uploads: SafeOnboardingUpload[] }) {
+function AssetGroup({ label, uploads, audience }: { label: string; uploads: SafeOnboardingUpload[]; audience: 'client' | 'staff' }) {
   return (
     <div>
       <p className="text-xs font-bold uppercase tracking-[0.16em] text-report-faint">{label}</p>
       <div className="mt-2 divide-y divide-white/[0.06]">
         {uploads.map(upload => (
-          <AssetRow key={upload.id} upload={upload} />
+          <AssetRow key={upload.id} upload={upload} audience={audience} />
         ))}
       </div>
     </div>
   )
 }
 
-function AssetRow({ upload }: { upload: SafeOnboardingUpload }) {
+function AssetRow({ upload, audience }: { upload: SafeOnboardingUpload; audience: 'client' | 'staff' }) {
   const [downloading, setDownloading] = useState(false)
 
   async function download() {
     setDownloading(true)
-    const { data } = await downloadOnboardingFile(upload.id)
+    const { data } = await downloadOnboardingFile(upload.id, audience)
     if (data) {
       const blob = data as Blob
       const url = URL.createObjectURL(blob)

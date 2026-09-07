@@ -75,7 +75,7 @@ export async function uploadOnboardingFile(
   return completeOnboardingUpload(token, session.uploadId, uploadResult.item)
 }
 
-export async function downloadOnboardingFile(uploadId: string): Promise<{ data: Blob | null; error: string | null }> {
+export async function downloadOnboardingFile(uploadId: string, audience: 'client' | 'staff' = 'client'): Promise<{ data: Blob | null; error: string | null }> {
   try {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) return { data: null, error: 'Download failed.' }
@@ -90,7 +90,7 @@ export async function downloadOnboardingFile(uploadId: string): Promise<{ data: 
         apikey: supabaseKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ action: 'portal_download', uploadId }),
+      body: JSON.stringify({ action: audience === 'staff' ? 'download_file' : 'portal_download', uploadId }),
     })
     if (!response.ok) {
       const err = await response.json().catch(() => null)
@@ -109,6 +109,10 @@ export function loadPortalSetup() {
 
 export function listStaffOnboarding() {
   return invoke<StaffOnboardingSummary[]>({ action: 'staff_list' })
+}
+
+export function loadStaffSetupPreview(clientId: string) {
+  return invoke<ClientOnboardingState>({ action: 'staff_preview_setup', clientId })
 }
 
 export function generateOnboardingLink(clientId: string, platforms: OnboardingPlatform[]) {

@@ -24,6 +24,11 @@ test('mobile bottom bar is role-stable: Hub, Work, Calendar, Schedule, More', ()
   assert.doesNotMatch(layout, /MOBILE_QUICK_PATHS = \[[^\]]*morning-import[^\]]*\]/)
 })
 
+test('manager Performance bottom bar exposes Onboarding without opening More', () => {
+  assert.match(layout, /zone === 'performance'[\s\S]*zoneItems\.slice\(0, 4\)/)
+  assert.match(layout, /performanceNavItems/)
+})
+
 test('staff mobile controls meet touch target and safe-area requirements', () => {
   assert.match(layout, /grid grid-cols-5/)
   assert.match(layout, /min-h-11 min-w-11/)

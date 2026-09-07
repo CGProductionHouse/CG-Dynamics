@@ -45,6 +45,7 @@ test('all portal routes sit behind the existing client-only guard and legacy das
   assert.ok(clientRoutes.includes('path="/client/content-calendar"'))
   assert.ok(clientRoutes.includes('path="/client/content-guides"'))
   assert.ok(clientRoutes.includes('path="/client/strategy"'))
+  assert.ok(clientRoutes.includes('path="/client/setup"'))
   assert.ok(clientRoutes.includes('path="/dashboard" element={<Navigate to="/client" replace />}'))
   assert.ok(APP_SOURCE.includes(`profile.role === 'client') return <Navigate to="/client" replace />`))
 })
@@ -57,6 +58,7 @@ test('shared portal navigation links every client area and keeps sign out availa
     '/client/campaigns',
     '/client/content-calendar',
     '/client/content-guides',
+    '/client/setup',
   ]) {
     assert.ok(SHELL_SOURCE.includes(`to: '${route}'`))
   }

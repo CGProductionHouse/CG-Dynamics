@@ -105,6 +105,9 @@ test('ClientSetupPage: renders components in correct order', () => {
 test('ClientPerformancePage: includes OnboardingStatusCard', () => {
   assert.ok(perfPage.includes('OnboardingStatusCard'), 'must import OnboardingStatusCard')
   assert.ok(perfPage.includes('Client onboarding status'), 'must have onboarding status section')
+  assert.ok(perfPage.includes('listStaffOnboarding'), 'must use the manager Edge API')
+  assert.ok(perfPage.includes('canManageOnboarding && <OnboardingStatusCard'), 'must not show a dead manager link to ordinary staff')
+  assert.ok(!perfPage.includes(".from('client_onboarding_sessions')"), 'must not query the locked onboarding table from the browser')
 })
 
 test('ClientPerformancePage: onboarding status shows counts', () => {

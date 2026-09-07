@@ -68,6 +68,17 @@ test('edge: staff upload init enforces a staff role before session lookup', () =
   assert.ok(block.includes('Staff access required.'))
 })
 
+test('edge: staff Setup preview is authenticated, exact-client, and client-safe', () => {
+  const staffGuardPos = edge.indexOf("const isStaff = ['admin', 'manager', 'staff', 'team']")
+  const previewPos = edge.indexOf("action === 'staff_preview_setup'")
+  const previewBlock = edge.slice(previewPos, edge.indexOf("action === 'staff_list'"))
+  assert.ok(staffGuardPos < previewPos, 'staff guard must run before preview lookup')
+  assert.ok(previewBlock.includes(".eq('client_id', clientId)"), 'preview must select one explicit client')
+  assert.ok(previewBlock.includes('safeState(service, data as SessionRow)'), 'preview must use the client-safe projection')
+  assert.ok(!previewBlock.includes('safeState(service, data as SessionRow, true)'), 'preview must not expose internal staff fields')
+  assert.ok(api.includes("action: 'staff_preview_setup', clientId"), 'client API must request exact-client preview')
+})
+
 test('edge: upload_complete verifies DriveItem before marking received', () => {
   const block = edge.slice(edge.indexOf("action === 'upload_complete'"), edge.indexOf("action === 'upload_cancel'"))
   assert.ok(block.includes('verifyDriveItem'), 'must call verifyDriveItem')
@@ -204,7 +215,8 @@ test('types.ts: StaffOnboardingSummary has revokedAt', () => {
 // ── ClientPerformancePage: onboarding status ────────────────────────────────
 test('ClientPerformancePage: includes OnboardingStatusCard', () => {
   assert.ok(perfPage.includes('OnboardingStatusCard'), 'must have onboarding status')
-  assert.ok(perfPage.includes('client_onboarding_sessions'), 'must query sessions table')
+  assert.ok(perfPage.includes('listStaffOnboarding'), 'must use the manager-safe onboarding API')
+  assert.ok(!perfPage.includes(".from('client_onboarding_sessions')"), 'must not bypass onboarding table access controls')
 })
 
 // ── Permission doc exists ───────────────────────────────────────────────────
