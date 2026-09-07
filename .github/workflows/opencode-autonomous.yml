@@ -48,16 +48,16 @@ jobs:
 
             If #216 is launch-ready or only true external blockers remain, make no code changes and leave a concise status update instead.
 
-      - name: Run OpenCode — GPT 5.6 Sol fallback
+      - name: Run OpenCode — configured quality fallback
         id: sol
-        if: steps.primary.outcome == 'failure'
+        if: steps.primary.outcome == 'failure' && vars.OPENCODE_FALLBACK_MODEL_1 != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: ${{ vars.OPENCODE_FALLBACK_MODEL_1 || 'opencode/gpt-5.6-sol' }}
+          model: ${{ vars.OPENCODE_FALLBACK_MODEL_1 }}
           prompt: |
             Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Run OpenCode — NVIDIA fallback
         id: nvidia
-        if: steps.primary.outcome == 'failure' && steps.sol.outcome == 'failure' && vars.OPENCODE_NVIDIA_MODEL != ''
+        if: steps.primary.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && vars.OPENCODE_NVIDIA_MODEL != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -79,7 +79,7 @@ jobs:
             Pick the highest-priority safe unowned task, implement and verify it, open/update a focused PR, and update GitHub with evidence. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, record the real gate and continue another independent safe task if one exists.
 
       - name: Report unavailable model lanes
-        if: steps.primary.outcome == 'failure' && steps.sol.outcome == 'failure' && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
+        if: steps.primary.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
         run: |
           echo "All configured OpenCode model lanes were unavailable or failed."
           exit 1
