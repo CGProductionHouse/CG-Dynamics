@@ -178,12 +178,12 @@ test('a specialist only counts as available when it has approved knowledge route
   assert.match(chatFn, /normaliseAgentKey\(String\(raw\)\)/)
 })
 
-test('Marketing AI is a real registry entry and a non-contradictable prompt fact', () => {
+test('Marketing AI is a real registry entry and is grounded only for relevant chat', () => {
   const entry = chatFn.slice(chatFn.indexOf("key: 'marketing-ai'"), chatFn.indexOf("key: 'cg-hours'"))
   assert.match(entry, /status: 'available'/)
   assert.doesNotMatch(entry, /Future connection/)
-  assert.match(chatFn, /Integrations \(live facts — do not contradict\)/)
-  assert.match(chatFn, /function buildMarketingAiStatusLine/)
+  assert.match(chatFn, /const marketingFacts = \/\\b\(marketing\|content\|caption\|copy\|brand\)\\b\/i\.test\(userMessage\) && marketingAiState/)
+  assert.match(chatFn, /Marketing AI: \$\{marketingAiState\.live \? 'live with '/)
 })
 
 test('the prompt states the safety posture the workflow actually enforces', () => {

@@ -108,9 +108,9 @@ test('desktop keeps the docked panel and is never locked or made full-screen', (
 
 // ── Recently completed mobile work is preserved ──────────────────────────────
 test('the simplified mobile start screen is unchanged', () => {
-  assert.match(composer, /What do you need help with\?/)
+  assert.match(composer, /What do you need\?/)
   assert.match(composer, /Record my update/)
-  assert.match(composer, /What should I do next\?/)
+  assert.match(composer, /Sort me out for today/)
   assert.match(composer, /mobileSuggestionAreaHidden/)
 })
 

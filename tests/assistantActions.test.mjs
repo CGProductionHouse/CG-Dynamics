@@ -17,6 +17,7 @@ const CTX = {
     { id: 'c-cape', name: 'Cape Lumber' },
     { id: 'c-red-oak', name: 'Red Oak' },
     { id: 'c-mimosa', name: 'Mimosa Mall' },
+    { id: 'c-germoparts', name: 'Germoparts' },
   ],
   staffNames: ['Franco Nel', 'Amonique Fourie', 'Chris'],
   role: 'team',
@@ -128,6 +129,34 @@ test('production prompt: create and assign new Red Oak work without an open Plan
   assert.equal(r.clientId, 'c-red-oak')
   assert.equal(r.fields.assignee, 'Franco Nel')
   assert.match(r.fields.task, /rugby table league poster design/i)
+})
+
+test('P0 mobile prompt: add-to-Planner wording reaches the canonical task proposal', () => {
+  const r = parseAssistantAction('Add to planner that Franco should send managing requests to all Germoparts Google Business Profiles.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(r.type, 'task.create', JSON.stringify(r))
+  assert.equal(r.clientId, 'c-germoparts')
+  assert.equal(r.fields.assignee, 'Franco Nel')
+  assert.equal(r.fields.task, 'send managing requests to all Germoparts Google Business Profiles')
+})
+
+test('natural task creation variants route semantically without an exact phrase whitelist', () => {
+  const make = parseAssistantAction('Make Franco a task to finish the Germoparts poster by Thursday.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(make.type, 'task.create', JSON.stringify(make))
+  assert.equal(make.fields.assignee, 'Franco Nel')
+  assert.equal(make.fields.due_date, '2026-07-02')
+  assert.match(make.fields.task, /finish the Germoparts poster/i)
+
+  const remind = parseAssistantAction('Remind me to phone Red Oak tomorrow.', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+  })
+  assert.equal(remind.type, 'task.create', JSON.stringify(remind))
+  assert.equal(remind.clientId, 'c-red-oak')
+  assert.equal(remind.fields.due_date, '2026-07-02')
+  assert.equal(remind.fields.task, 'phone Red Oak')
 })
 
 test('production prompt: create + client + assignee + relative due date', () => {
@@ -253,4 +282,37 @@ test('plain question / non-action returns null (falls through to chat)', () => {
 test('meeting with no resolvable day asks for the day', () => {
   const r = parseAssistantAction('Add a Dulux meeting at 10', CTX)
   assert.ok(r.clarify)
+})
+
+test('"Move the due date to Friday" → task.due_date with resolved date', () => {
+  const r = parseAssistantAction('Move the due date to Friday', CTX)
+  assert.equal(r.type, 'task.due_date')
+  assert.equal(r.fields.due_date, '2026-07-03')
+  assert.equal(r.target.id, 'task-1')
+})
+
+test('"Change deadline to next Tuesday" → task.due_date', () => {
+  const r = parseAssistantAction('Change deadline to next Tuesday', CTX)
+  assert.equal(r.type, 'task.due_date')
+  assert.equal(r.fields.due_date, '2026-07-07')
+})
+
+test('"What\'s on today?" falls through to server (no client proposal)', () => {
+  const r = parseAssistantAction("What's on today?", CTX)
+  assert.equal(r, null)
+})
+
+test('"Show me this week\'s meetings" falls through to server', () => {
+  const r = parseAssistantAction("Show me this week's meetings", CTX)
+  assert.equal(r, null)
+})
+
+test('"What schedule items are overdue?" falls through to server', () => {
+  const r = parseAssistantAction('What schedule items are overdue?', CTX)
+  assert.equal(r, null)
+})
+
+test('"Any missing posts?" falls through to server', () => {
+  const r = parseAssistantAction('Any missing posts?', CTX)
+  assert.equal(r, null)
 })

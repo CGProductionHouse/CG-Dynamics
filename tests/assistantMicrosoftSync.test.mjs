@@ -103,13 +103,13 @@ test('chat function reads REAL Microsoft state from the same truth as Integratio
   assert.match(chatFn, /MICROSOFT_SYNC_SOURCES_JSON/)
 })
 
-test('Microsoft state is injected into the system prompt as non-contradictable fact', () => {
-  assert.match(chatFn, /Live Microsoft 365 integration state \(from diagnostics, do not contradict it\)/)
-  assert.match(chatFn, /never say it is not connected/)
+test('Microsoft state is injected only for a relevant question and remains grounded', () => {
+  assert.match(chatFn, /const microsoftFacts = \/\\b\(microsoft\|outlook\|planner sync\|sync status\|sync microsoft\)\\b\/i\.test\(userMessage\) && microsoftState/)
+  assert.match(chatFn, /Microsoft 365: \$\{microsoftState\.connected \? 'connected/)
 })
 
-test('the blanket not-connected instruction can no longer swallow Microsoft or Meta', () => {
-  assert.match(chatFn, /This never applies to Meta Business or Microsoft 365 — for those, use the live state above/)
+test('ordinary chat is not polluted with unsolicited Microsoft or ownership-review status', () => {
+  assert.match(chatFn, /Do not mention or recommend Microsoft sync or assignment-review backlog unless the user explicitly asks/)
 })
 
 test('Microsoft is a real registry entry, not a "future connection"', () => {
@@ -119,8 +119,8 @@ test('Microsoft is a real registry entry, not a "future connection"', () => {
 })
 
 test('capabilities answer reports the live Microsoft line', () => {
-  assert.match(chatFn, /buildMicrosoftStatusLine\(microsoftState\)/)
-  assert.match(chatFn, /Microsoft 365: connected/)
+  assert.match(chatFn, /buildCapabilitiesResponse\(role, metaState, microsoftState, marketingAiState\)/)
+  assert.match(chatFn, /Microsoft 365 is \$\{microsoftState\?\.connected \? 'connected' : 'not available for sync'\}/)
 })
 
 test('integration state is ALWAYS real — never conditional on naming the integration', () => {

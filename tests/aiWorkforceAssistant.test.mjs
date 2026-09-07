@@ -141,18 +141,17 @@ test('chat reads real Meta integration state from the status tables', () => {
   assert.match(INDEX, /META_REQUIRED_SCOPES/)
 })
 
-test('system prompt never claims Meta is disconnected when live state says connected', () => {
+test('system prompt grounds Meta status only when the user asks about it', () => {
   // The blanket "Meta ... not connected yet" claim is removed from the default
-  // instruction, and the model is bound to the live state instead.
-  assert.match(INDEX, /Live Meta Business integration state \(from diagnostics, do not contradict it\)/)
+  // instruction, and relevant turns are bound to the live state instead.
+  assert.match(INDEX, /const metaFacts = \/\\b\(meta\|facebook\|instagram\)\\b\/i\.test\(userMessage\) && metaState/)
   assert.doesNotMatch(INDEX, /client task details, approvals, Meta, or CG Hours data, say the integration is not connected yet/)
-  assert.match(INDEX, /When asked whether Meta is connected, reply based ONLY on the live Meta integration state above/)
+  assert.match(INDEX, /Meta Business: \$\{metaState\.connected \? 'connected/)
 })
 
 test('capabilities response reflects the real Meta state line', () => {
-  assert.match(INDEX, /buildMetaStatusLine\(metaState\)/)
-  assert.match(INDEX, /Meta Business: connected \(\$\{metaState\.linkedAssetsCount\}/)
-  assert.match(INDEX, /Meta Business: not connected\. \$\{metaState\.message\}/)
+  assert.match(INDEX, /buildCapabilitiesResponse\(role, metaState, microsoftState, marketingAiState\)/)
+  assert.match(INDEX, /Meta is \$\{metaState\?\.connected \? 'connected' : 'not connected'\}/)
 })
 
 test('integration state is always real, never conditional on naming the integration', () => {
