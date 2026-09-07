@@ -1,11 +1,12 @@
-import { useEffect, useEffectEvent, useState } from 'react'
+import { lazy, Suspense, useEffect, useEffectEvent, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BrandMark from '../../components/BrandMark'
 import { roleLabel } from '../../lib/roles'
 import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'
-import { GlobalAssistantComposer } from '../../components/assistant/GlobalAssistantComposer'
 import { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from '../../lib/notifications'
+
+const GlobalAssistantComposer = lazy(() => import('../../components/assistant/GlobalAssistantComposer').then(module => ({ default: module.GlobalAssistantComposer })))
 
 const NOTIFICATION_POLL_MS = 30_000
 const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
@@ -14,6 +15,19 @@ const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
 // Schedule / More. Manager-only work entries (Team Work, Morning List Import)
 // live in the More drawer instead of displacing Calendar or Schedule.
 const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/cg-calendar', '/admin/client-schedule']
+
+function scheduleWhenIdle(callback: () => void) {
+  const idleWindow = window as Window & {
+    requestIdleCallback?: (handler: () => void, options?: { timeout: number }) => number
+    cancelIdleCallback?: (id: number) => void
+  }
+  if (idleWindow.requestIdleCallback) {
+    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })
+    return () => idleWindow.cancelIdleCallback?.(id)
+  }
+  const id = window.setTimeout(callback, 250)
+  return () => window.clearTimeout(id)
+}
 
 function notificationTime(value: string) {
   const date = new Date(value)
@@ -108,12 +122,20 @@ export default function AdminLayout() {
   // stands down and the page behind leaves the accessibility tree, so the
   // assistant is a single focused surface rather than another floating layer.
   const [assistantFullscreen, setAssistantFullscreen] = useState(false)
-  const [zone, setZone] = useState<NavZone>(() => {
+  const [backgroundReady, setBackgroundReady] = useState(false)
+  const [selectedZone, setSelectedZone] = useState<NavZone>(() => {
     const routeZone = resolveNavZone(location.pathname)
     if (!isSharedNavZonePath(location.pathname)) return routeZone
     const stored = window.localStorage.getItem(ZONE_STORAGE_KEY)
     return stored === 'performance' || stored === 'hub' ? stored : routeZone
   })
+  const [previousPath, setPreviousPath] = useState(location.pathname)
+  const routeZone = resolveNavZone(location.pathname)
+  if (previousPath !== location.pathname) {
+    setPreviousPath(location.pathname)
+    if (!isSharedNavZonePath(location.pathname) && selectedZone !== routeZone) setSelectedZone(routeZone)
+  }
+  const zone = isSharedNavZonePath(location.pathname) ? selectedZone : routeZone
   const currentRole = profile?.role ?? 'team'
   const displayRole = roleLabel(profile?.role)
   const primaryItems = primaryNavItems.filter(item => canShowNavItem(item, currentRole))
@@ -125,10 +147,6 @@ export default function AdminLayout() {
     : primaryItems.filter(item => MOBILE_QUICK_PATHS.includes(item.to))
   const assistantVisible = location.pathname !== '/admin/assistant'
   const closeMobile = () => setMobileMenuOpen(false)
-
-  useEffect(() => {
-    if (!isSharedNavZonePath(location.pathname)) setZone(resolveNavZone(location.pathname))
-  }, [location.pathname])
 
   useEffect(() => {
     window.localStorage.setItem(ZONE_STORAGE_KEY, zone)
@@ -154,16 +172,20 @@ export default function AdminLayout() {
   })
 
   useEffect(() => {
-    const initial = window.setTimeout(pollNotifications, 0)
-    const poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)
+    let poll: number | null = null
+    const cancelIdle = scheduleWhenIdle(() => {
+      setBackgroundReady(true)
+      pollNotifications()
+      poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)
+    })
     const refreshWhenVisible = () => {
-      if (document.visibilityState === 'visible') pollNotifications()
+      if (poll !== null && document.visibilityState === 'visible') pollNotifications()
     }
     window.addEventListener('focus', refreshWhenVisible)
     document.addEventListener('visibilitychange', refreshWhenVisible)
     return () => {
-      window.clearTimeout(initial)
-      window.clearInterval(poll)
+      cancelIdle()
+      if (poll !== null) window.clearInterval(poll)
       window.removeEventListener('focus', refreshWhenVisible)
       document.removeEventListener('visibilitychange', refreshWhenVisible)
     }
@@ -237,7 +259,7 @@ export default function AdminLayout() {
   }
 
   function changeZone(nextZone: NavZone) {
-    setZone(nextZone)
+    setSelectedZone(nextZone)
     navigate(nextZone === 'performance' ? '/admin/client-performance' : '/admin/cg-hub')
     closeMobile()
   }
@@ -247,7 +269,7 @@ export default function AdminLayout() {
       <>
         {!collapsed && <ZoneSwitcher zone={zone} onChange={changeZone} className="mb-2" />}
         <NavSection label={zone === 'performance' ? 'Client performance' : 'Daily work'} collapsed={collapsed} />
-        {zoneItems.map(item => <NavigationLink key={item.to} item={item} active={isNavItemActive(location.pathname, item)} collapsed={collapsed} onClick={onClick} />)}
+        {zoneItems.map(item => <NavigationLink key={item.to} item={item} active={isNavItemActive(location.pathname, item)} collapsed={collapsed} onClick={() => { setSelectedZone(zone); onClick?.() }} />)}
         <div className={`${collapsed ? 'my-2' : 'mt-2'} border-t border-white/10 pt-2`}>
           <ExternalHoursLink collapsed={collapsed} onClick={onClick} />
         </div>
@@ -313,7 +335,7 @@ export default function AdminLayout() {
         aria-hidden={assistantFullscreen || undefined}
         inert={assistantFullscreen || undefined}
       >
-        <Outlet />
+        <Suspense fallback={<div className="min-h-[40vh]" aria-label="Loading page" />}><Outlet /></Suspense>
       </main>
 
       {/* The bottom navigation is removed — not merely covered — while the
@@ -396,7 +418,7 @@ export default function AdminLayout() {
         </section>
       )}
 
-      <GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} />
+      {backgroundReady && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} /></Suspense>}
     </div>
   )
 }

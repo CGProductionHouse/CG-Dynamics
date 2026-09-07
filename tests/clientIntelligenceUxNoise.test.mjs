@@ -12,6 +12,8 @@ const preview = read('../src/pages/admin/PublishedPreview.tsx')
 const packages = read('../src/pages/admin/PackageMasterPage.tsx')
 
 test('Clients removes duplicate summaries while preserving identity and actions', () => {
+  assert.match(clients, /Setup preview/)
+  assert.match(clients, /view=setup/)
   assert.doesNotMatch(clients, /Total clients/)
   assert.doesNotMatch(clients, /ClientOpsChips/)
   assert.doesNotMatch(clients, /Loading production summary/)
@@ -53,9 +55,15 @@ test('Report editor keeps reporting evidence and publication gates with concise 
   assert.match(reportEditor, /<StrategyChecklist data=\{strategyData\}/)
 })
 
-test('Staff preview stays explicit and keeps report truth and publishing controls', () => {
-  assert.match(preview, /Client Dashboard Preview/)
-  assert.match(preview, /Staff preview and publishing controls/)
+test('Staff preview keeps report truth and reuses the permanent Setup experience', () => {
+  assert.match(preview, /Client Preview/)
+  assert.match(preview, /loadStaffSetupPreview/)
+  assert.match(preview, /ClientSetupContent/)
+  assert.match(preview, /setup && setupClientId === selectedClientId/)
+  assert.match(preview, /surface === 'dashboard' \? listReports\(\) : Promise\.resolve/)
+  assert.match(preview, /const loadedRef = useRef\(false\)/)
+  assert.match(preview, /if \(!loadedRef\.current\)/)
+  assert.doesNotMatch(preview, /<ClientPortalShell/)
   assert.doesNotMatch(preview, /CG's working view/)
   assert.doesNotMatch(preview, /Legacy reports/)
   assert.doesNotMatch(preview, /setError\((?:loadError|error)\.message\)/)
