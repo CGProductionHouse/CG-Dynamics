@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchContentOps, OPS_BUCKET_LABELS, OPS_BUCKET_ORDER, type OpsItem, type OpsSummary } from '../../lib/contentOps'
+import { applyOpsFilters, fetchContentOps, opsFilterOptions, OPS_BUCKET_LABELS, OPS_BUCKET_ORDER, type OpsFilters, type OpsItem, type OpsSummary } from '../../lib/contentOps'
 
 // #220 — Cross-client content operations dashboard. Read-only monitoring so
 // approved content does not slip past scheduling/posting. Staff see only the
@@ -33,18 +33,24 @@ function ItemRow({ item }: { item: OpsItem }) {
   )
 }
 
+const INPUT = 'min-h-11 rounded-lg border border-white/12 bg-black/30 px-3 text-sm text-white'
+
 export default function ContentOperationsPage() {
-  const [summary, setSummary] = useState<OpsSummary | null>(null)
+  const [raw, setRaw] = useState<OpsSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [revision, setRevision] = useState(0)
+  const [filters, setFilters] = useState<OpsFilters>({ query: '', clientName: 'all', deliverableType: 'all', risksOnly: false })
+  const setFilter = <K extends keyof OpsFilters>(k: K, v: OpsFilters[K]) => setFilters(p => ({ ...p, [k]: v }))
+  const options = useMemo(() => raw ? opsFilterOptions(raw) : { clients: [], types: [] }, [raw])
+  const summary = useMemo(() => raw ? applyOpsFilters(raw, filters) : null, [raw, filters])
 
   useEffect(() => {
     let active = true
     const load = async () => {
       const result = await fetchContentOps(today())
       if (!active) return
-      setSummary(result.data)
+      setRaw(result.data)
       setError(result.error)
       setLoading(false)
     }
@@ -69,6 +75,13 @@ export default function ContentOperationsPage() {
         </div>
       </div>
       <p className="text-sm text-white/55">Every content item from planning to posted, across the clients you can see. Nothing here posts to a platform — it makes sure nothing is forgotten.</p>
+
+      {!loading && !error && raw && <div className="flex flex-wrap items-center gap-2">
+        <input className={`${INPUT} min-w-[12rem] flex-1`} placeholder="Search title, client or assignee" value={filters.query ?? ''} onChange={e => setFilter('query', e.target.value)} />
+        <select className={INPUT} value={filters.clientName} onChange={e => setFilter('clientName', e.target.value)}><option value="all">All clients</option>{options.clients.map(c => <option key={c} value={c}>{c}</option>)}</select>
+        <select className={INPUT} value={filters.deliverableType} onChange={e => setFilter('deliverableType', e.target.value)}><option value="all">All types</option>{options.types.map(t => <option key={t} value={t}>{t}</option>)}</select>
+        <label className="flex min-h-11 items-center gap-2 text-sm text-white/70"><input type="checkbox" className="h-4 w-4 accent-teal-400" checked={filters.risksOnly ?? false} onChange={e => setFilter('risksOnly', e.target.checked)} />Needs attention only</label>
+      </div>}
 
       {loading ? <p className="text-white/60">Loading…</p>
         : error ? <p role="alert" className="text-red-300">{error}</p>

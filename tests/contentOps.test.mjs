@@ -69,3 +69,32 @@ test('channels come from the current review version', () => {
   assert.deepEqual(s.items[0].channels, ['facebook', 'instagram'])
   assert.equal(s.items[0].hasCurrentReview, true)
 })
+
+test('applyOpsFilters filters by client, type, search and risk, rebuilding buckets', () => {
+  const rows = [
+    d({ id: 'a', title: 'Red Oak poster', client_name: 'Red Oak', deliverable_type: 'design', production_status: 'approved', scheduled_date: '2026-09-20' }),
+    d({ id: 'b', title: 'Piek reel', client_name: 'Piek Group', deliverable_type: 'reel', production_status: 'in_progress', scheduled_date: '2026-09-01' }),
+  ]
+  const s = ops.classifyContentOps(rows, new Set(['a']), new Map(), TODAY)
+  // Client filter
+  assert.deepEqual(ops.applyOpsFilters(s, { clientName: 'Red Oak' }).items.map(i => i.id), ['a'])
+  // Type filter
+  assert.deepEqual(ops.applyOpsFilters(s, { deliverableType: 'reel' }).items.map(i => i.id), ['b'])
+  // Search across title/client/assignee
+  assert.deepEqual(ops.applyOpsFilters(s, { query: 'piek' }).items.map(i => i.id), ['b'])
+  // Risks-only keeps the overdue in-progress item (b), drops the healthy approved one (a)
+  assert.deepEqual(ops.applyOpsFilters(s, { risksOnly: true }).items.map(i => i.id), ['b'])
+  // Buckets are rebuilt from the filtered set
+  const filtered = ops.applyOpsFilters(s, { clientName: 'Red Oak' })
+  assert.equal(filtered.buckets.ready_to_schedule.length, 1)
+  assert.equal(filtered.buckets.in_progress.length, 0)
+  assert.equal(filtered.counts.ready_to_schedule, 1)
+})
+
+test('opsFilterOptions lists distinct sorted clients and types', () => {
+  const rows = [d({ id: 'a', client_name: 'Zed', deliverable_type: 'reel' }), d({ id: 'b', client_name: 'Ace', deliverable_type: 'design' })]
+  const s = ops.classifyContentOps(rows, new Set(), new Map(), TODAY)
+  const o = ops.opsFilterOptions(s)
+  assert.deepEqual(o.clients, ['Ace', 'Zed'])
+  assert.deepEqual(o.types, ['design', 'reel'])
+})
