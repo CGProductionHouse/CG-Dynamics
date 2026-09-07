@@ -1148,6 +1148,8 @@ export async function listPlannerTaskRows(options: PlannerTaskReadOptions = {}) 
         // from src/lib/taskLifecycle after the bounded fetch instead of
         // duplicating a competing status list.
         .not('status', 'in', '(done,completed)')
+        // Microsoft-removed tasks are no longer current operational work (#217).
+        .is('microsoft_source_removed_at', null)
     }
 
     query = options.order === 'due'

@@ -47,6 +47,8 @@ export interface CommandCentreTask {
   superseded_by_task_id?: string | null
   /** Durable Planner evidence, shown in the manager conflict section. */
   microsoft_task_id?: string | null
+  /** Non-null means Microsoft confirmed the source task was removed. */
+  microsoft_source_removed_at?: string | null
   bucket: TaskBucket
   priority: TaskPriority
   status: TaskStatus
@@ -163,6 +165,7 @@ type PlannerTaskRow = {
   assignment_review_state?: string | null
   superseded_by_task_id?: string | null
   microsoft_task_id?: string | null
+  microsoft_source_removed_at?: string | null
   archived_at?: string | null
   archived_by_name?: string | null
   archive_reason?: string | null
@@ -296,6 +299,7 @@ function plannerTaskToCommandTask(
     assignment_review_state: row.assignment_review_state ?? 'ok',
     superseded_by_task_id: row.superseded_by_task_id ?? null,
     microsoft_task_id: row.microsoft_task_id ?? null,
+    microsoft_source_removed_at: row.microsoft_source_removed_at ?? null,
   }
 }
 
@@ -331,7 +335,7 @@ export async function listTasks(options: ListTaskOptions = {}) {
   }
 
   const plannerRows = ((plannerResult.data ?? []) as PlannerTaskRow[])
-    .filter(row => !row.archived_at && !row.recurrence_rule)
+    .filter(row => !row.archived_at && !row.recurrence_rule && !row.microsoft_source_removed_at)
   const bucketIds = unique(plannerRows.map(row => row.bucket_id))
   const bucketNames = new Map<string, string>()
   const assigneeIdsByTask = new Map<string, string[]>()

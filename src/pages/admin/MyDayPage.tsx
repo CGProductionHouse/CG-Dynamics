@@ -315,7 +315,7 @@ function WorkItemCard({
             <span className="text-xs font-semibold text-brand-primary/55">{myDayDateLabel(item, context.today)}</span>
             {item.timeLabel && <span className="text-xs font-semibold text-brand-primary/55">{item.timeLabel}</span>}
           </div>
-          <h3 className="text-base font-semibold text-white">{item.title}</h3>
+          <h3 className="truncate text-base font-semibold text-white">{item.title}</h3>
           <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-semibold">
             {item.clientName && <span className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2 py-0.5 text-[#2dd4bf]">{item.clientName}</span>}
             <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-brand-primary/70">{item.statusLabel}</span>
