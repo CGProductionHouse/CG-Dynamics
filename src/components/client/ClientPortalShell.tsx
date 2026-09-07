@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { to: '/client/performance', label: 'Performance', end: false },
   { to: '/client/campaigns', label: 'Campaigns', end: false },
   { to: '/client/content-calendar', label: 'Content calendar', end: false },
+  { to: '/client/approvals', label: 'Approvals', end: false },
   { to: '/client/content-guides', label: 'Content guides', end: false },
   { to: '/client/setup', label: 'Setup', end: false },
 ] as const

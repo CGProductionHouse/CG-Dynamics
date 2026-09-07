@@ -25,3 +25,9 @@ backed up. Storage backups are a separate operational responsibility.
    for Ops Hub attachments).
 4. Document Storage backup procedure (separate from pg_dump).
 5. Enable object-level security on private buckets.
+
+## Content review snapshots (#220)
+
+`content-review-snapshots` is private, limited to 50 MB and JPG/PNG/WebP/MP4. Assigned staff or managers upload a new unique path beneath the exact schedule item ID. Authenticated UPDATE/DELETE are restrictively denied, including when another permissive policy exists. Active staff can read; a client can read only a snapshot for their exact client after internal approval and while awaiting client approval or approved. Client UI receives no internal source metadata or review comments. Signed preview URLs expire after ten minutes.
+
+Review revisions are children of `monthly_deliverables`, not a second schedule. RPC-only writes enforce assignment/manager permissions, capture canonical client/date and actual stored media, and audit decisions. Changes require a new immutable revision. Schedule date/title/archive changes invalidate review state; client reassignment with review history is blocked. No existing content is auto-approved or auto-published by the migration. Application-owned Canva OAuth/export refresh and publishing credentials remain separate rollout prerequisites.
