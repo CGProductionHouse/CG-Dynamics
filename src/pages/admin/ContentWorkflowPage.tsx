@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
@@ -539,6 +539,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
       <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.14),transparent_40%),linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 sm:p-8">
         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Content production</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Content</h1>
+        <Link to="/admin/content-reviews" className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-brand-teal/30 px-3 text-sm font-bold text-brand-teal">Review content</Link>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
           Plan Content Runs, use each canonical guideline during the shoot, and track ordered videos through production.
         </p>

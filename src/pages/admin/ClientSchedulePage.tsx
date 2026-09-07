@@ -1,3 +1,4 @@
+import { ContentProductionPanel } from '../../components/content/ContentProductionPanel'
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -254,6 +255,8 @@ export default function ClientSchedulePage() {
     }
     setClients(clientResult.data ?? [])
     setDeliverables(scheduleResult.data ?? [])
+    const requestedId = searchParams.get('id')
+    if (requestedId) setDrawerDeliverable((scheduleResult.data ?? []).find(item => item.id === requestedId) ?? null)
   }
 
   const loadEvent = useEffectEvent(load)
@@ -1040,6 +1043,7 @@ function DeliverableDrawer({ deliverable, clientDisplay, canManage, onClose, onS
           {canManage && <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Schedule date</label><input type="date" value={date} onChange={event => setDate(event.target.value)} className={inputCls} /></div>}
           <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Production status</label><select value={status} onChange={event => setStatus(event.target.value as SimplifiedProductionStatus)} className={inputCls}>{(canManage ? SIMPLIFIED_STATUS_OPTIONS : SIMPLIFIED_STATUS_OPTIONS.slice(0, 4)).map(option => <option key={option} value={option}>{SIMPLIFIED_STATUS_LABELS[option]}</option>)}</select></div>
           {canManage ? <div><label className="mb-1.5 block text-xs font-medium text-brand-primary">Assigned to</label><input value={assigned} onChange={event => setAssigned(event.target.value)} className={inputCls} /></div> : <p className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-white/55">Staff can update production status only. Schedule date, client and assignment changes require a manager.</p>}
+          <ContentProductionPanel key={deliverable.id} deliverable={deliverable} canManage={canManage} />
           {(deliverable.helper_names ?? []).length > 0 && <div><p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">Helpers</p><div className="flex flex-wrap gap-1.5">{(deliverable.helper_names ?? []).map(name => <span key={name} className="rounded-full border border-brand-teal/20 bg-brand-teal/[0.06] px-2.5 py-0.5 text-[11px] text-[#2dd4bf]">{name}</span>)}</div></div>}
         </div>
         <div className="border-t border-white/[0.08] px-5 py-4" style={{ paddingBottom: keyboardInset > 0 ? `calc(1rem + ${keyboardInset}px)` : undefined }}>

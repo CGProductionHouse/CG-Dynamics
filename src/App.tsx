@@ -23,6 +23,7 @@ const UsersHub = lazy(() => import('./pages/admin/UsersHub'))
 const NewReport = lazy(() => import('./pages/admin/NewReport'))
 const ReportsManagement = lazy(() => import('./pages/admin/ReportsManagement'))
 const ManualMetricsAdmin = lazy(() => import('./pages/admin/ManualMetricsAdmin'))
+const ContentReviewsPage = lazy(() => import('./pages/admin/ContentReviewsPage'))
 const PublishedPreview = lazy(() => import('./pages/admin/PublishedPreview'))
 const IntegrationsPage = lazy(() => import('./pages/admin/IntegrationsPage'))
 const MetaIntegrationPage = lazy(() => import('./pages/admin/MetaIntegrationPage'))
@@ -106,6 +107,7 @@ export default function App() {
               <Route path="/admin/planner" element={<Navigate to="/admin/work?tab=board" replace />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
+              <Route path="/admin/content-reviews" element={<ContentReviewsPage />} />
               <Route path="/admin/content" element={<ContentWorkflowPage defaultTab="overview" />} />
               <Route path="/admin/content-workflow" element={<ContentWorkflowPage defaultTab="library" />} />
               <Route path="/admin/full-content-guide" element={<ContentWorkflowPage defaultTab="guidelines" />} />
@@ -173,6 +175,7 @@ export default function App() {
             <Route path="/client/performance" element={<Dashboard />} />
             <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
             <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
+            <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
             <Route path="/client/content-guides" element={<ClientContentGuidesPage />} />
             <Route path="/client/strategy" element={<ClientStrategyPage />} />
             <Route path="/client/setup" element={<ClientSetupPage />} />
