@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import {
   addGuidelineVideo,
@@ -32,6 +34,9 @@ interface VideoDraft {
   script: string
   targetMonth: string
   deliverableId: string
+  shotBreakdown: string
+  requirements: string
+  visualNotes: string
 }
 
 function toMonthOption(date: string | null): string {
@@ -67,6 +72,8 @@ export default function ContentGuidelineDocumentEditor({
   currentUserId,
   onChanged,
 }: Props) {
+  const navigate = useNavigate()
+  const { profile } = useAuth()
   const [documentTitle, setDocumentTitle] = useState(guideline.title)
   const [coverageStart, setCoverageStart] = useState(toMonthOption(guideline.coverage_start ?? guideline.month))
   const [coverageEnd, setCoverageEnd] = useState(toMonthOption(guideline.coverage_end ?? guideline.coverage_start ?? guideline.month))
@@ -92,11 +99,14 @@ export default function ContentGuidelineDocumentEditor({
       setDocumentTitle(guideline.title)
       setCoverageStart(toMonthOption(guideline.coverage_start ?? guideline.month))
       setCoverageEnd(toMonthOption(guideline.coverage_end ?? guideline.coverage_start ?? guideline.month))
-      setDrafts(Object.fromEntries(videos.map(video => [video.id, {
+      setDrafts(current => Object.fromEntries(videos.map(video => [video.id, current[video.id] ?? {
         title: video.title,
         script: video.script ?? '',
         targetMonth: video.month?.slice(0, 7) ?? '',
         deliverableId: video.deliverable_id ?? '',
+        shotBreakdown: video.shot_breakdown ?? '',
+        requirements: video.requirements ?? '',
+        visualNotes: video.visual_notes ?? '',
       }])))
     }, 0)
     return () => window.clearTimeout(timer)
@@ -106,9 +116,11 @@ export default function ContentGuidelineDocumentEditor({
   useEffect(() => {
     let current = true
     if (!guideline.client_id) {
-      setScheduleDeliverables([])
-      setScheduleError(null)
-      return
+      const timer = window.setTimeout(() => {
+        setScheduleDeliverables([])
+        setScheduleError(null)
+      }, 0)
+      return () => window.clearTimeout(timer)
     }
 
     const monthsToFetch = new Set<string>()
@@ -246,9 +258,18 @@ export default function ContentGuidelineDocumentEditor({
       script: draft.script.trim(),
       month: draft.targetMonth || null,
       deliverable_id: draft.deliverableId || null,
+      shot_breakdown: draft.shotBreakdown.trim() || null,
+      requirements: draft.requirements.trim() || null,
+      visual_notes: draft.visualNotes.trim() || null,
     })
     setBusy(null)
     if (result.error) { setError(result.error); return }
+    setDrafts(current => {
+      if (current[video.id] !== draft) return current
+      const next = { ...current }
+      delete next[video.id]
+      return next
+    })
     await onChanged()
   }
 
@@ -267,6 +288,29 @@ export default function ContentGuidelineDocumentEditor({
 
   async function togglePublication() {
     const publish = !guideline.client_published_at
+    if (publish) {
+      if (videos.some(video => {
+        const draft = drafts[video.id]
+        return draft && (draft.title !== video.title || draft.script !== (video.script ?? '')
+          || draft.targetMonth !== (video.month?.slice(0, 7) ?? '')
+          || draft.deliverableId !== (video.deliverable_id ?? '')
+          || draft.shotBreakdown !== (video.shot_breakdown ?? '')
+          || draft.requirements !== (video.requirements ?? '')
+          || draft.visualNotes !== (video.visual_notes ?? ''))
+      })) {
+        setError('Save your video changes before publishing the guideline.')
+        return
+      }
+      const incomplete = videos.filter(v => !v.script?.trim())
+      if (incomplete.length > 0) {
+        setError(`Cannot publish: ${incomplete.length} video${incomplete.length === 1 ? '' : 's'} ${incomplete.length === 1 ? 'is' : 'are'} missing a complete script.`)
+        return
+      }
+      if (videos.length === 0) {
+        setError('Cannot publish: add at least one video with a complete script before publishing.')
+        return
+      }
+    }
     setBusy('publish')
     setError(null)
     const result = await setGuidelinePublication(guideline.id, publish)
@@ -344,6 +388,18 @@ export default function ContentGuidelineDocumentEditor({
             <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${guideline.client_published_at ? 'border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-200' : 'border-white/10 text-white/45'}`}>
               {guideline.client_published_at ? 'Published' : 'Draft'}
             </span>
+            {guideline.client_published_at && run.client_id && (profile?.role === 'admin' || profile?.role === 'manager') && (
+              <ActionButton
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  const month = guideline.coverage_start ? guideline.coverage_start.slice(0, 7) : guideline.month?.slice(0, 7)
+                  navigate(`/admin/content-guide-preview?client=${encodeURIComponent(run.client_id!)}${month ? `&month=${month}` : ''}`)
+                }}
+              >
+                Preview as client
+              </ActionButton>
+            )}
             <ActionButton
               size="sm"
               variant={guideline.client_published_at ? 'secondary' : 'primary'}
@@ -479,11 +535,17 @@ export default function ContentGuidelineDocumentEditor({
                 script: video.script ?? '',
                 targetMonth: video.month?.slice(0, 7) ?? '',
                 deliverableId: video.deliverable_id ?? '',
+                shotBreakdown: video.shot_breakdown ?? '',
+                requirements: video.requirements ?? '',
+                visualNotes: video.visual_notes ?? '',
               }
               const changed = draft.title !== video.title
                 || draft.script !== (video.script ?? '')
                 || draft.targetMonth !== (video.month?.slice(0, 7) ?? '')
                 || draft.deliverableId !== (video.deliverable_id ?? '')
+                || draft.shotBreakdown !== (video.shot_breakdown ?? '')
+                || draft.requirements !== (video.requirements ?? '')
+                || draft.visualNotes !== (video.visual_notes ?? '')
               return (
                 <li key={video.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -525,12 +587,24 @@ export default function ContentGuidelineDocumentEditor({
                   <label className="mt-3 block space-y-1.5">
                     <span className={LABEL_CLS}>Complete script</span>
                     <textarea
-                      className={`${INPUT_CLS} min-h-40 resize-y leading-relaxed`}
+                      className={`${INPUT_CLS} min-h-24 resize-y leading-relaxed`}
                       value={draft.script}
                       onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, script: event.target.value } }))}
                       placeholder="Enter the complete spoken and on-screen script..."
                     />
                   </label>
+                  {([
+                    ['shotBreakdown', 'Shot-by-shot breakdown'],
+                    ['requirements', 'People, products & props'],
+                    ['visualNotes', 'Visual / filming notes'],
+                  ] as const).map(([field, label]) => (
+                    <label key={field} className="mt-3 block space-y-1.5">
+                      <span className={LABEL_CLS}>{label}</span>
+                      <textarea className={`${INPUT_CLS} min-h-24 resize-y leading-relaxed`}
+                        value={draft[field]}
+                        onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, [field]: event.target.value } }))} />
+                    </label>
+                  ))}
                   <label className="mt-3 block space-y-1.5">
                     <span className={LABEL_CLS}>Client Schedule video</span>
                     <select

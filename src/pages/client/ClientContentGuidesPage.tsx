@@ -6,7 +6,7 @@ import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/
 import { getClient, type Client } from '../../lib/db/clients'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 
-export default function ClientContentGuidesPage() {
+export default function ClientContentGuidesPage({ preview = false }: { preview?: boolean }) {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [client, setClient] = useState<Client | null>(null)
@@ -19,16 +19,18 @@ export default function ClientContentGuidesPage() {
   const requestedMonth = searchParams.get('month')
   const currentMonth = requestedMonth && /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : fallbackMonth
   const selectedGuideKey = searchParams.get('guide')
+  const canPreview = preview && (profile?.role === 'admin' || profile?.role === 'manager')
+  const clientId = canPreview ? searchParams.get('client') : profile?.client_id
 
   useEffect(() => {
     let active = true
     async function load() {
-      if (!profile?.client_id) { setLoading(false); return }
+      if (!clientId) { setLoading(false); return }
       setLoading(true)
       setError(null)
       const [clientResult, guidelineResult] = await Promise.all([
-        getClient(profile.client_id),
-        fetchPublishedGuides(profile.client_id, currentMonth),
+        getClient(clientId),
+        fetchPublishedGuides(clientId, currentMonth),
       ])
       if (!active) return
       if (clientResult.error) { setError('Could not load client data.'); setLoading(false); return }
@@ -39,10 +41,10 @@ export default function ClientContentGuidesPage() {
     }
     void load()
     return () => { active = false }
-  }, [profile?.client_id, currentMonth])
+  }, [clientId, currentMonth])
 
-  return (
-    <ClientPortalShell client={client}>
+  const content = (
+    <>
       <section className="max-w-5xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Content production</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-5xl">Content Guidelines</h1>
@@ -52,14 +54,14 @@ export default function ClientContentGuidesPage() {
         <div className="mt-5 flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setSearchParams({ month: shiftMonth(currentMonth, -1) })}
+            onClick={() => setSearchParams(current => { current.set('month', shiftMonth(currentMonth, -1)); return current })}
             className="rounded-full border border-white/10 px-4 py-2 text-sm text-report-muted transition hover:border-report-accent/35 hover:text-white"
           >
             Previous
           </button>
           <button
             type="button"
-            onClick={() => setSearchParams({ month: shiftMonth(currentMonth, 1) })}
+            onClick={() => setSearchParams(current => { current.set('month', shiftMonth(currentMonth, 1)); return current })}
             className="rounded-full border border-white/10 px-4 py-2 text-sm text-report-muted transition hover:border-report-accent/35 hover:text-white"
           >
             Next
@@ -123,8 +125,12 @@ export default function ClientContentGuidesPage() {
           ))}
         </div>
       )}
-    </ClientPortalShell>
+    </>
   )
+  if (preview) return canPreview
+    ? <div className="min-w-0 p-4 sm:p-6"><p className="mb-4 text-sm text-report-muted">Client preview · Published content only</p>{content}</div>
+    : <Message error>Only managers and admins can preview client guides.</Message>
+  return <ClientPortalShell client={client}>{content}</ClientPortalShell>
 }
 
 function shiftMonth(month: string, amount: number): string {

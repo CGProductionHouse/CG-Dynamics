@@ -117,6 +117,7 @@ export default function App() {
               <Route path="/admin/assistant" element={<AssistantPage />} />
               <Route path="/admin/client-dashboard" element={<PublishedPreview />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
+              <Route path="/admin/content-guide-preview" element={<ClientContentGuidesPage preview />} />
               <Route path="/admin/cg-calendar" element={<CompanyCalendarPage />} />
               <Route path="/admin/company-calendar" element={<Navigate to="/admin/cg-calendar" replace />} />
               {/* Marketing/Knowledge workspace — staff may search approved shared
