@@ -1,0 +1,85 @@
+name: OpenCode autonomous worker
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: opencode-autonomous-cg-dynamics
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  autonomous:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Run OpenCode — primary
+        id: primary
+        continue-on-error: true
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
+          prompt: |
+            Operate as the autonomous CG Dynamics engineering worker.
+
+            GitHub is source of truth. First read current main, Issue #216 and its latest comments, current open PRs, and the linked launch issues. Do not rely on stale summaries.
+
+            If another active PR/worker already owns a task, do not duplicate it. Pick the highest-priority safe unowned launch task that can materially advance the product. Prefer finishing existing work over creating new architecture.
+
+            Work end to end: inspect, implement, test, build/lint where relevant, and open or update a focused PR. Update the relevant GitHub issue with concise evidence and blockers. If the current task reaches a genuine external credential/provider/CA gate, record that gate and continue to another independent safe task when possible.
+
+            Preserve the canonical architecture and security boundaries recorded in GitHub. Never invent credentials, weaken auth/RLS/client isolation, make destructive production guesses, or expose secrets. Do not merge PRs, deploy production, apply production migrations, change provider permissions/secrets, or perform external publishing from this unattended worker. Leave verified work at a clean PR/review gate for the supervisor.
+
+            If #216 is launch-ready or only true external blockers remain, make no code changes and leave a concise status update instead.
+
+      - name: Run OpenCode — configured quality fallback
+        id: sol
+        if: steps.primary.outcome == 'failure' && vars.OPENCODE_FALLBACK_MODEL_1 != ''
+        continue-on-error: true
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ vars.OPENCODE_FALLBACK_MODEL_1 }}
+          prompt: |
+            Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
+
+            Pick the highest-priority safe unowned task, implement and verify it, open/update a focused PR, and update GitHub with evidence. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, record the real gate and continue another independent safe task if one exists.
+
+      - name: Run OpenCode — NVIDIA fallback
+        id: nvidia
+        if: steps.primary.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && vars.OPENCODE_NVIDIA_MODEL != ''
+        continue-on-error: true
+        uses: anomalyco/opencode/github@latest
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ vars.OPENCODE_NVIDIA_MODEL }}
+          prompt: |
+            Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
+
+            Pick the highest-priority safe unowned task, implement and verify it, open/update a focused PR, and update GitHub with evidence. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, record the real gate and continue another independent safe task if one exists.
+
+      - name: Report unavailable model lanes
+        if: steps.primary.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
+        run: |
+          echo "All configured OpenCode model lanes were unavailable or failed."
+          exit 1
