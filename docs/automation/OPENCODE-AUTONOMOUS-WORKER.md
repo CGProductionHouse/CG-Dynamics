@@ -27,17 +27,17 @@ The scheduled worker uses an explicit ordered fallback at the GitHub workflow le
    - repo variable;
    - default: `opencode/nemotron-3-ultra-free`.
 2. `OPENCODE_FALLBACK_MODEL_1`
-   - repo variable;
-   - default: `opencode/gpt-5.6-sol`.
+   - optional repo variable;
+   - set to `opencode/gpt-5.6-sol` if CA explicitly wants the paid Zen quality fallback enabled.
 3. `OPENCODE_NVIDIA_MODEL`
-   - repo variable;
-   - optional exact NVIDIA model ID from OpenCode's current `/models` catalog.
+   - optional repo variable;
+   - exact NVIDIA model ID from OpenCode's current `/models` catalog.
 
 If a lane fails, the next configured lane starts from GitHub truth. This is deliberate: GitHub state is the durable memory, not the previous model session.
 
 ### Important billing/auth boundary
 
-On a GitHub-hosted runner, `opencode/gpt-5.6-sol` uses the configured OpenCode Zen credential/balance. It does **not** consume CA's ChatGPT Plus/Pro subscription session.
+On a GitHub-hosted runner, `opencode/gpt-5.6-sol` uses the configured OpenCode Zen credential/balance. It does **not** consume CA's ChatGPT Plus/Pro subscription session. The workflow therefore does not enable Sol by default; paid fallback is opt-in.
 
 OpenCode locally supports ChatGPT Plus/Pro browser authentication. If we want scheduled work to consume that local subscription instead, the next phase is an official GitHub **self-hosted runner** on CA's Windows machine using the existing local OpenCode auth state. That only runs while the PC/runner is online and should not copy OAuth credentials into GitHub Secrets.
 
@@ -45,7 +45,7 @@ OpenCode locally supports ChatGPT Plus/Pro browser authentication. If we want sc
 
 GitHub Actions secrets:
 
-- `OPENCODE_API_KEY` — OpenCode Zen key used by the primary/free Zen lane and Zen fallback.
+- `OPENCODE_API_KEY` — OpenCode Zen key used by the primary/free Zen lane and any configured Zen fallback.
 - `NVIDIA_API_KEY` — optional; required only for the independent NVIDIA fallback lane.
 
 GitHub Actions variables (optional):
