@@ -138,7 +138,7 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
       {error && <p className="mt-5 rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-4 text-sm text-red-100">{error}</p>}
 
       {!selectedClientId ? (
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center text-sm text-white/50">Select a client and month.</div>
+        <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center text-sm text-white/50">Select a client.</div>
       ) : loading ? (
         <LoadingState message="Loading Content Guidelines..." />
       ) : documents.length === 0 ? (
@@ -166,6 +166,7 @@ export default function FullContentGuidePage({ embedded = false }: { embedded?: 
                 <Link to={selectedDocument.run.calendar_event_id ? `/admin/content?tab=runs&event=${selectedDocument.run.calendar_event_id}` : `/admin/content?tab=runs&run=${selectedDocument.run.id}`} className="rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-white/60 hover:text-white">Open Content Run</Link>
               </div>
               <ContentGuidelineDocumentEditor
+                key={selectedDocument.guideline.id}
                 guideline={selectedDocument.guideline}
                 run={selectedDocument.run}
                 videos={selectedDocument.videos}

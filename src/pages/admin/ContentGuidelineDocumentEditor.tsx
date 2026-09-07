@@ -74,6 +74,11 @@ export default function ContentGuidelineDocumentEditor({
 }: Props) {
   const navigate = useNavigate()
   const { profile } = useAuth()
+  const monthOptions = [...new Set([
+    ...MONTH_OPTIONS.map(option => option.value),
+    guideline.month?.slice(0, 7), guideline.coverage_start?.slice(0, 7), guideline.coverage_end?.slice(0, 7),
+    ...videos.map(video => video.month?.slice(0, 7)),
+  ].filter((value): value is string => Boolean(value)))].sort().map(value => ({ value, label: monthDisplayLabel(value) }))
   const [documentTitle, setDocumentTitle] = useState(guideline.title)
   const [coverageStart, setCoverageStart] = useState(toMonthOption(guideline.coverage_start ?? guideline.month))
   const [coverageEnd, setCoverageEnd] = useState(toMonthOption(guideline.coverage_end ?? guideline.coverage_start ?? guideline.month))
@@ -416,7 +421,7 @@ export default function ContentGuidelineDocumentEditor({
             <span className={LABEL_CLS}>Coverage start month</span>
             <select className={INPUT_CLS} value={coverageStart} onChange={event => setCoverageStart(event.target.value)}>
               <option value="">Select start month</option>
-              {MONTH_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+              {monthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
             <span className="block text-[10px] text-white/40">First month this shoot plans content for.</span>
           </label>
@@ -424,7 +429,7 @@ export default function ContentGuidelineDocumentEditor({
             <span className={LABEL_CLS}>Coverage end month</span>
             <select className={INPUT_CLS} value={coverageEnd} onChange={event => setCoverageEnd(event.target.value)}>
               <option value="">Select end month</option>
-              {MONTH_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+              {monthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
             <span className="block text-[10px] text-white/40">Last month this shoot plans content for.</span>
           </label>
@@ -580,7 +585,7 @@ export default function ContentGuidelineDocumentEditor({
                       onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, targetMonth: event.target.value } }))}
                     >
                       <option value="">Unallocated — planned content</option>
-                      {MONTH_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                      {monthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
                     </select>
                     <span className="block text-[10px] text-white/40">The publication month this video targets. Leave unallocated while scheduling is confirmed.</span>
                   </label>
@@ -650,7 +655,7 @@ export default function ContentGuidelineDocumentEditor({
             <span className={LABEL_CLS}>Target month</span>
             <select className={INPUT_CLS} value={newTargetMonth} onChange={event => setNewTargetMonth(event.target.value)}>
               <option value="">Unallocated — planned content</option>
-              {MONTH_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+              {monthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
           <label className="mt-3 block space-y-1.5">
