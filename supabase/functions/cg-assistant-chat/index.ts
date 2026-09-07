@@ -1,6 +1,6 @@
 import { describeGoogleAdsStatus, type GoogleAdsSavedStatus } from './googleAdsStatus.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'npm:@supabase/supabase-js@2.106.2'
 import {
   getProviderDiagnostics,
   routeAiChat,
