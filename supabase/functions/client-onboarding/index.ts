@@ -5,11 +5,19 @@ const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin',
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
 
 const UPLOAD_CATEGORIES = new Set(['logo', 'services', 'optional'])
+type UploadCategory = 'logo' | 'services' | 'optional'
+const ALLOWED_UPLOAD_EXTENSIONS: Record<UploadCategory, Set<string>> = {
+  logo: new Set(['pdf', 'png', 'jpg', 'jpeg', 'svg', 'ai', 'eps', 'webp', 'tif', 'tiff', 'psd', 'zip']),
+  services: new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'csv', 'png', 'jpg', 'jpeg', 'zip']),
+  optional: new Set(['pdf', 'png', 'jpg', 'jpeg', 'zip', 'txt', 'csv']),
+}
 const ALLOWED_UPLOAD_MIME_TYPES = new Set([
+  '', 'application/octet-stream',
   'application/pdf',
   'image/png', 'image/jpeg', 'image/svg+xml', 'image/webp', 'image/tiff',
-  'application/postscript', 'application/illustrator',
-  'application/vnd.adobe.photoshop', 'application/x-photoshop',
+  'application/postscript', 'application/eps', 'application/x-eps', 'image/x-eps',
+  'application/illustrator', 'application/x-illustrator',
+  'application/vnd.adobe.photoshop', 'application/x-photoshop', 'image/vnd.adobe.photoshop',
   'application/zip', 'application/x-zip-compressed',
   'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
@@ -82,12 +90,13 @@ function sanitizeFilename(raw: string) {
   return base || 'upload'
 }
 
-function validateUploadFile(file: { name: string; type: string; size: number }): string | null {
+function validateUploadFile(category: UploadCategory, file: { name: string; type: string; size: number }): string | null {
   const ext = extensionOf(file.name)
   if (!ext || BLOCKED_EXTENSIONS.has(ext)) return 'This file type is not safe to upload.'
+  if (!ALLOWED_UPLOAD_EXTENSIONS[category].has(ext)) return 'This file type is not supported for this upload.'
   if (file.size <= 0) return 'This file appears to be empty.'
   if (file.size > MAX_ONBOARDING_FILE_BYTES) return 'This file is larger than 50 MB.'
-  if (!ALLOWED_UPLOAD_MIME_TYPES.has(file.type) && !ext) return 'Could not determine the file type.'
+  if (!ALLOWED_UPLOAD_MIME_TYPES.has(file.type)) return 'This file type is not supported for this upload.'
   return null
 }
 
@@ -328,7 +337,7 @@ Deno.serve(async request => {
       const sizeBytes = Number(body.sizeBytes)
       if (!originalFilename || !Number.isFinite(sizeBytes) || sizeBytes <= 0) return json({ ok: false, error: 'Missing file details.' }, 400)
 
-      const validationError = validateUploadFile({ name: originalFilename, type: mimeType, size: sizeBytes })
+      const validationError = validateUploadFile(category as UploadCategory, { name: originalFilename, type: mimeType, size: sizeBytes })
       if (validationError) return json({ ok: false, error: validationError }, 400)
 
       if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'Secure file transfer is not configured yet.' }, 503)
@@ -336,11 +345,12 @@ Deno.serve(async request => {
       const safeFilename = sanitizeFilename(originalFilename)
       const sessionResult = await createUploadSession({
         clientId: staffState.client_id,
+        category: category as 'logo' | 'services' | 'optional',
         filename: safeFilename,
         fileSize: sizeBytes,
         mimeType,
       })
-      if (!sessionResult) return json({ ok: false, error: 'Could not prepare the upload. Check that the client has a mapped Brand Identity folder.' }, 503)
+      if (!sessionResult) return json({ ok: false, error: `Could not prepare the upload. Check the client's ${category} folder mapping.` }, 503)
 
       const { data: uploadRow, error: insertError } = await service.from('client_onboarding_uploads').insert({
         client_id: staffState.client_id,
@@ -354,7 +364,7 @@ Deno.serve(async request => {
         storage_drive_id: sessionResult.driveId,
         storage_item_id: sessionResult.itemId,
         storage_web_url: null,
-        storage_original_reference: `Brand Identity/${safeFilename}`,
+        storage_original_reference: `${sessionResult.folderName}/${safeFilename}`,
         source: 'staff',
         upload_session_id: sessionResult.uploadUrl,
         upload_session_expires_at: sessionResult.expiresAt,
@@ -375,7 +385,7 @@ Deno.serve(async request => {
     const sizeBytes = Number(body.sizeBytes)
     if (!originalFilename || !Number.isFinite(sizeBytes) || sizeBytes <= 0) return json({ ok: false, error: 'Missing file details.' }, 400)
 
-    const validationError = validateUploadFile({ name: originalFilename, type: mimeType, size: sizeBytes })
+    const validationError = validateUploadFile(category as UploadCategory, { name: originalFilename, type: mimeType, size: sizeBytes })
     if (validationError) return json({ ok: false, error: validationError }, 400)
 
     if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'Secure file transfer is not configured yet. Your file was not uploaded.' }, 503)
@@ -383,6 +393,7 @@ Deno.serve(async request => {
     const safeFilename = sanitizeFilename(originalFilename)
     const sessionResult = await createUploadSession({
       clientId: session.client_id,
+      category: category as 'logo' | 'services' | 'optional',
       filename: safeFilename,
       fileSize: sizeBytes,
       mimeType,
@@ -401,7 +412,7 @@ Deno.serve(async request => {
       storage_drive_id: sessionResult.driveId,
       storage_item_id: sessionResult.itemId,
       storage_web_url: null,
-      storage_original_reference: `Brand Identity/${safeFilename}`,
+      storage_original_reference: `${sessionResult.folderName}/${safeFilename}`,
       source: 'welcome_link',
       upload_session_id: sessionResult.uploadUrl,
       upload_session_expires_at: sessionResult.expiresAt,

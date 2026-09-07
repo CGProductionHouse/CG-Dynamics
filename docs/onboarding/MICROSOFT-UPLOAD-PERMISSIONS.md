@@ -9,8 +9,8 @@ This document is the canonical audit record for the narrowest valid Microsoft Gr
 | Dedicated Microsoft app | Required | Separate from the read-only transition sync connector |
 | Environment credentials | Required | `ONBOARDING_MS_TENANT_ID`, `ONBOARDING_MS_CLIENT_ID`, `ONBOARDING_MS_CLIENT_SECRET` |
 | Uploads feature flag | Required | `CLIENT_ONBOARDING_UPLOADS_ENABLED=true` in Edge Function env |
-| Drive mapping | Required | `client_onboarding_drive_mapping` row must exist for the client |
-| Migration applied | Required | Phase 2 migration maps clients to Brand Identity drive folders |
+| Drive mapping | Required | An active `client_onboarding_drive_mapping` row must exist for the exact client and upload category |
+| Migration applied | Required | Phase 2 migration maps each client upload category to an exact existing drive folder |
 | Runtime verification | Required | `verifyDriveItem` confirms file landed before marking received |
 
 **All gates must be satisfied before any upload executes.** If any gate is missing, uploads return 503 and the client sees a clear error.
@@ -66,8 +66,8 @@ The theoretically narrower model is `Sites.Selected` with an explicit grant to t
 ## Runtime safeguards
 
 1. **Dedicated app credentials** — the onboarding upload app is separate from the transition sync connector. Compromise of one does not affect the other.
-2. **Drive mapping table** — `client_onboarding_drive_mapping` must have an `active=true` row for the client before any upload session is created.
-3. **File validation** — blocked extensions, size limits (50 MB), mime type whitelist.
+2. **Drive mapping table** — `client_onboarding_drive_mapping` must have an `active=true` row for the exact client and upload category before any upload session is created.
+3. **File validation** — category-specific extension allowlists, blocked executable extensions, a 50 MB limit, and a MIME type allowlist.
 4. **Verification after upload** — `verifyDriveItem` fetches the exact final DriveItem and confirms its parent drive/folder and byte size before marking the upload as `received`.
 5. **No write-back to Outlook/Microsoft** — the onboarding adapter writes only to OneDrive. No other Microsoft APIs are modified.
 
@@ -76,7 +76,7 @@ The theoretically narrower model is `Sites.Selected` with an explicit grant to t
 - Does not read Outlook mail, calendar, or contacts
 - Does not modify any file other than the specific uploaded brand asset
 - Does not grant or modify permissions on the OneDrive drive
-- Does not access any client's personal OneDrive — only the CG-managed Brand Identity folder mapped via `client_onboarding_drive_mapping`
+- Does not access any client's personal OneDrive — uploads target only the exact CG-managed client/category folders mapped via `client_onboarding_drive_mapping`
 
 ## Re-audit date
 

@@ -185,6 +185,7 @@ test('mobile flow uses touch targets, sticky actions, and bounded responsive lay
 
 test('upload adapter rejects files that are empty, too large, or executable', () => {
   assert.match(edge, /BLOCKED_EXTENSIONS/)
+  assert.match(edge, /ALLOWED_UPLOAD_EXTENSIONS\[category\]/)
   assert.match(edge, /validateUploadFile/)
   assert.match(edge, /size > MAX_ONBOARDING_FILE_BYTES/)
   assert.match(edge, /MAX_ONBOARDING_FILE_BYTES = 50 \* 1024 \* 1024/)
@@ -249,7 +250,7 @@ test('upload adapter uses a separate Microsoft app from the read-only transition
   assert.doesNotMatch(adapter, /MICROSOFT_CLIENT_SECRET/)
 })
 
-test('upload adapter resolves exact-client Brand Identity folder from drive mapping table', () => {
+test('upload adapter resolves the exact client and category folder from the drive mapping table', () => {
   assert.match(adapter, /client_onboarding_drive_mapping/)
   assert.match(adapter, /resolveClientFolder/)
   assert.match(adapter, /drive_id/)
@@ -273,15 +274,17 @@ test('client upload API replaces the foundation stub with real upload, cancel, a
   assert.doesNotMatch(api, /Secure file transfer is not connected yet\. Your file was not uploaded\./)
 })
 
-test('welcome page drives real upload with progress, category tracking, and retry-safe cancellation', () => {
-  assert.match(page, /handleFileUpload/)
+test('welcome page drives real multi-file upload with progress, category tracking, and retry-safe cancellation', () => {
+  assert.match(page, /handleFiles/)
   assert.match(page, /uploadingCategory/)
-  assert.match(page, /uploadProgress/)
-  assert.match(page, /UploadProgressBar/)
+  assert.match(page, /uploadQueue/)
+  assert.match(page, /UploadQueue/)
+  assert.match(page, /Array\.from\(event\.target\.files \?\? \[\]\)/)
+  assert.doesNotMatch(page, /files\?\.\[0\]/)
   assert.match(page, /validateServicesCandidate/)
-  assert.match(page, /handleFileUpload\('logo', file\)/)
-  assert.match(page, /handleFileUpload\('services', file\)/)
-  assert.match(page, /handleFileUpload\('optional', file\)/)
+  assert.match(page, /handleFiles\('logo', files/)
+  assert.match(page, /handleFiles\('services', files/)
+  assert.match(page, /handleFiles\('optional', files/)
   assert.doesNotMatch(page, /Secure OneDrive file transfer is not connected in this foundation build\. No file selected here will be treated as received\./)
 })
 
@@ -292,11 +295,12 @@ test('setup summary exposes received uploads with mediated download and never ex
   assert.doesNotMatch(setupSummary, /storage_drive_id|storage_item_id|storage_web_url/)
 })
 
-test('upload phase2 migration maps clients to a Brand Identity drive folder and extends upload metadata', () => {
+test('upload phase2 migration maps each client category to an exact drive folder and extends upload metadata', () => {
   assert.match(uploadMigration, /client_onboarding_drive_mapping/)
   assert.match(uploadMigration, /drive_id/)
   assert.match(uploadMigration, /folder_item_id/)
-  assert.match(uploadMigration, /Brand Identity/)
+  assert.match(uploadMigration, /upload_category/)
+  assert.match(uploadMigration, /unique \(client_id, upload_category\)/)
   assert.match(uploadMigration, /revoke all on public\.client_onboarding_drive_mapping from anon, authenticated/)
   assert.match(uploadMigration, /storage_original_reference/)
   assert.match(uploadMigration, /upload_session_id/)

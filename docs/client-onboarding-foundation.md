@@ -52,13 +52,14 @@ The upload adapter (`supabase/functions/client-onboarding/onedrive-adapter.ts`)
 uses a dedicated least-privilege Microsoft app for onboarding uploads. It must
 never share credentials with the existing `microsoft-transition-sync` connector.
 
-The adapter resolves the exact client's Brand Identity folder through a
-`client_onboarding_drive_mapping` table that staff populate when they first set
-up a client. The Edge Function:
+The adapter resolves an exact existing destination for each upload category
+through `client_onboarding_drive_mapping`. Staff populate separate `logo`,
+`services`, and `optional` mappings when they set up a client; CG Dynamics does
+not invent or create OneDrive folders. The Edge Function:
 
 1. validates file metadata (MIME, extension, size, executable blocking);
 2. generates a safe server-side filename;
-3. resolves the target Brand Identity folder from the drive mapping;
+3. resolves the category's target folder from the exact-client drive mapping;
 4. creates a Microsoft Graph resumable upload session;
 5. returns the short-lived upload URL to the client;
 6. the client uploads directly to Microsoft Graph in sequential 10 MB chunks;
@@ -77,7 +78,8 @@ The dedicated upload app requires:
 These MUST be a separate app from `MICROSOFT_TENANT_ID` / `MICROSOFT_CLIENT_ID`
 used by `microsoft-transition-sync`. The upload app needs only:
 
-- `Files.ReadWrite.All` (application) scoped to the Brand Identity folder;
+- `Files.ReadWrite.All` (application), which is tenant-wide and constrained at
+  runtime to the exact mapped client/category destinations;
 - no user delegation; client credentials flow only.
 
 ### Server-mediated download

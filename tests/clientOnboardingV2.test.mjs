@@ -215,3 +215,10 @@ test('Microsoft upload permissions doc: exists and is accurate', () => {
   assert.ok(doc.includes('Sites.Selected'), 'must document narrower alternative')
   assert.ok(doc.includes('fail-closed'), 'must document fail-closed model')
 })
+
+test('upload destinations resolve by exact client and category', () => {
+  assert.ok(adapter.includes(".eq('client_id', clientId)"))
+  assert.ok(adapter.includes(".eq('upload_category', category)"))
+  assert.ok(adapter.includes('folderName: data.folder_name'))
+  assert.ok(edge.includes('storage_original_reference: `${sessionResult.folderName}/${safeFilename}`'))
+})

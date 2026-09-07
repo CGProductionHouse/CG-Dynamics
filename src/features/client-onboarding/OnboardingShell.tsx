@@ -8,14 +8,14 @@ export function OnboardingShell({ children, step }: { children: ReactNode; step?
       <header className="relative z-10 border-b border-white/[0.07] bg-[#030706]/88 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <BrandMark compact subtitle="Welcome to CG" />
-          {step !== undefined && step > 0 && step < 5 && (
+          {step !== undefined && step > 0 && step < 4 && (
             <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-report-muted">
-              {step} of 4
+              {step} of 3
             </span>
           )}
         </div>
       </header>
-      <main className="relative z-[1] mx-auto w-full max-w-3xl px-4 py-8 pb-28 sm:px-6 sm:py-12">
+      <main className="relative z-[1] mx-auto w-full max-w-3xl px-4 py-7 pb-32 sm:px-6 sm:py-12">
         {children}
       </main>
     </div>

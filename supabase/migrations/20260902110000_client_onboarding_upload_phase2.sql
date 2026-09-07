@@ -7,18 +7,19 @@ begin;
 create table public.client_onboarding_drive_mapping (
   id uuid primary key default gen_random_uuid(),
   client_id uuid not null references public.clients(id) on delete cascade,
+  upload_category text not null check (upload_category in ('logo', 'services', 'optional')),
   drive_id text not null check (char_length(drive_id) between 1 and 255),
   folder_item_id text not null check (char_length(folder_item_id) between 1 and 255),
-  folder_name text not null default 'Brand Identity',
+  folder_name text not null check (char_length(folder_name) between 1 and 255),
   active boolean not null default true,
   created_by uuid not null references public.profiles(id) on delete restrict,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (client_id, drive_id, folder_item_id)
+  unique (client_id, upload_category)
 );
 
 comment on table public.client_onboarding_drive_mapping is
-  'Maps one canonical client to the exact OneDrive Brand Identity folder used for onboarding uploads.';
+  'Maps each onboarding upload category to an exact existing OneDrive folder for one canonical client.';
 
 alter table public.client_onboarding_drive_mapping enable row level security;
 

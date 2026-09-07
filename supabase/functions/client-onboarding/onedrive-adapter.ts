@@ -9,6 +9,7 @@ const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
 
 interface UploadSessionParams {
   clientId: string
+  category: 'logo' | 'services' | 'optional'
   filename: string
   fileSize: number
   mimeType: string
@@ -19,11 +20,13 @@ export interface UploadSessionResult {
   expiresAt: string
   driveId: string
   itemId: string
+  folderName: string
 }
 
 interface FolderResolution {
   driveId: string
   itemId: string
+  folderName: string
 }
 
 export interface DriveItemResult {
@@ -90,12 +93,11 @@ async function getAccessToken(tenantId: string, clientId: string, clientSecret: 
   }
 }
 
-// Resolve the client's Brand Identity folder from the CG OneDrive structure.
-// This queries a mapping table that staff populate when they first set up a client.
-// The table must store the exact driveId + itemId of the existing "Brand Identity" folder.
+// Resolve the existing destination that staff mapped for this client and category.
 async function resolveClientFolder(
   token: string,
   clientId: string,
+  category: UploadSessionParams['category'],
 ): Promise<FolderResolution | null> {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -110,13 +112,14 @@ async function resolveClientFolder(
     // Query the existing client_onboarding_drive_mapping table (created by staff)
     const { data, error } = await service
       .from('client_onboarding_drive_mapping')
-      .select('drive_id, folder_item_id')
+      .select('drive_id, folder_item_id, folder_name')
       .eq('client_id', clientId)
+      .eq('upload_category', category)
       .eq('active', true)
       .maybeSingle()
 
     if (error || !data) return null
-    return { driveId: data.drive_id, itemId: data.folder_item_id }
+    return { driveId: data.drive_id, itemId: data.folder_item_id, folderName: data.folder_name }
   } catch {
     return null
   }
@@ -134,7 +137,7 @@ export async function createUploadSession(
   const accessToken = await getAccessToken(cfg.tenantId, cfg.clientId, cfg.clientSecret)
   if (!accessToken) return null
 
-  const folder = await resolveClientFolder(accessToken, params.clientId)
+  const folder = await resolveClientFolder(accessToken, params.clientId, params.category)
   if (!folder) return null
 
   try {
@@ -164,6 +167,7 @@ export async function createUploadSession(
       expiresAt: session.expirationDateTime,
       driveId: folder.driveId,
       itemId: folder.itemId,
+      folderName: folder.folderName,
     }
   } catch {
     return null
