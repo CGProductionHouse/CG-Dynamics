@@ -162,25 +162,29 @@ export default function InternalOnboardingPage() {
         {loading ? (
           <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
         ) : filteredSessions.length === 0 ? (
-          <EmptyState className="mt-4" title="No onboarding sessions" message={sessions.length === 0 ? 'Generate a client-specific link to get started.' : 'No sessions match your filters.'} />
+          <EmptyState className="mt-4" title="No clients found" message={sessions.length === 0 ? 'No active clients available.' : 'No sessions match your filters.'} />
         ) : (
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
-              const isExpanded = expandedId === session.sessionId
+              const isExpanded = expandedId === session.clientId
               return (
-                <article key={session.sessionId} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                <article key={session.clientId} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <button type="button" onClick={() => setExpandedId(isExpanded ? null : session.sessionId)} className="text-left">
+                      <button type="button" onClick={() => setExpandedId(isExpanded ? null : session.clientId)} className="text-left">
                         <h3 className="font-bold text-white hover:text-brand-teal transition-colors">{clientNames.get(session.clientId) ?? session.clientName}</h3>
                       </button>
                       <p className="mt-1 text-xs text-brand-primary/70">
-                        Started {formatDate(session.startedAt)} · Completed {formatDate(session.completedAt)} · Last activity {formatDate(session.lastActivityAt)}
+                        {session.sessionId ? (
+                          <>Started {formatDate(session.startedAt)} · Completed {formatDate(session.completedAt)} · Last activity {formatDate(session.lastActivityAt)}</>
+                        ) : (
+                          <span className="text-brand-primary/50">Not started</span>
+                        )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <SessionStatusBadge status={session.status} expiresAt={session.expiresAt} revokedAt={session.revokedAt} />
-                      {!session.revokedAt && session.status !== 'completed' && (
+                      {session.sessionId && !session.revokedAt && session.status !== 'completed' && (
                         <ActionButton variant="secondary" className="min-h-9 text-xs" onClick={() => void revoke(session.sessionId)}>Revoke</ActionButton>
                       )}
                     </div>
@@ -192,7 +196,7 @@ export default function InternalOnboardingPage() {
                     </div>
 
                     <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
-                      Preview client Setup
+                      Preview onboarding
                     </Link>
 
                   {/* Quick status */}

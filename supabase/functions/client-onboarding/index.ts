@@ -547,22 +547,81 @@ Deno.serve(async request => {
       .limit(1)
       .maybeSingle()
     if (error) return json({ ok: false, error: 'Setup preview is unavailable.' }, 503)
-    if (!data) return json({ ok: false, error: 'Setup is not available yet.' }, 404)
-    const responseState = await safeState(service, data as SessionRow)
-    if (!responseState) return json({ ok: false, error: 'Setup preview is unavailable.' }, 503)
-    return json({ ok: true, data: responseState })
+    if (data) {
+      const responseState = await safeState(service, data as SessionRow)
+      if (!responseState) return json({ ok: false, error: 'Setup preview is unavailable.' }, 503)
+      return json({ ok: true, data: responseState })
+    }
+    // No session exists — return a synthetic preview state from the client record.
+    const { data: client, error: clientError } = await service
+      .from('clients')
+      .select('name, logo_url')
+      .eq('id', clientId)
+      .maybeSingle()
+    if (clientError || !client) return json({ ok: false, error: 'Client not found.' }, 404)
+    return json({
+      ok: true,
+      data: {
+        clientName: client.name,
+        clientLogoUrl: client.logo_url,
+        status: 'not_started',
+        currentStep: 0,
+        startedAt: null,
+        completedAt: null,
+        lastActivityAt: new Date().toISOString(),
+        expiresAt: null,
+        vectorUnavailable: false,
+        uploads: [],
+        typedDescription: '',
+        serviceItems: [],
+        platformAccess: [],
+        additionalNotes: '',
+      },
+    })
   }
 
   if (action === 'staff_list') {
     if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
-    const { data, error } = await service
-      .from('client_onboarding_sessions')
-      .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
-      .order('last_activity_at', { ascending: false })
-    if (error) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
-    const states = await Promise.all((data as SessionRow[]).map(session => safeState(service, session, true)))
-    if (states.some(state => state === null)) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
-    return json({ ok: true, data: states })
+    const [sessionsResult, clientsResult] = await Promise.all([
+      service
+        .from('client_onboarding_sessions')
+        .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
+        .order('last_activity_at', { ascending: false }),
+      service
+        .from('clients')
+        .select('id, name, logo_url')
+        .eq('active', true)
+        .order('name'),
+    ])
+    if (sessionsResult.error) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    const sessionClientIds = new Set((sessionsResult.data ?? []).map((s: SessionRow) => s.client_id))
+    const sessions = await Promise.all((sessionsResult.data as SessionRow[]).map(session => safeState(service, session, true)))
+    if (sessions.some(state => state === null)) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    // Add synthetic "not started" entries for active clients without sessions.
+    const clientRows = (clientsResult.data ?? []) as Array<{ id: string; name: string; logo_url: string | null }>
+    for (const client of clientRows) {
+      if (sessionClientIds.has(client.id)) continue
+      sessions.push({
+        clientName: client.name,
+        clientLogoUrl: client.logo_url,
+        status: 'not_started',
+        currentStep: 0,
+        startedAt: null,
+        completedAt: null,
+        lastActivityAt: new Date().toISOString(),
+        expiresAt: null,
+        vectorUnavailable: false,
+        uploads: [],
+        typedDescription: '',
+        serviceItems: [],
+        platformAccess: [],
+        additionalNotes: '',
+        sessionId: '',
+        clientId: client.id,
+        revokedAt: null,
+      })
+    }
+    return json({ ok: true, data: sessions })
   }
 
   if (action === 'staff_generate') {
