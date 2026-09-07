@@ -478,7 +478,7 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">My Day</p>
-          <h2 className="mt-1 font-display text-2xl font-black uppercase tracking-wide text-white">
+          <h2 className="mt-1 truncate font-display text-2xl font-black uppercase tracking-wide text-white">
             {currentItem ? currentItem.title : focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
           </h2>
           {nextItem && (
@@ -912,7 +912,7 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
       <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-white">{task.title}</p>
-        {meta && <p className="mt-0.5 text-xs text-brand-primary/45">{meta}</p>}
+        {meta && <p className="mt-0.5 truncate text-xs text-brand-primary/45">{meta}</p>}
       </div>
       <span className="shrink-0 text-xs font-semibold text-brand-primary/40">
         {taskStatusDisplayLabel(task)}
