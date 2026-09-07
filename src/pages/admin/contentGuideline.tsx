@@ -43,12 +43,13 @@ export function CopyFolderButton({ name, size = 'sm' }: { name: string; size?: '
 }
 
 // A brief section that preserves line breaks and hides itself when empty.
-export function Section({ label, value }: { label: string; value: string | null }) {
+export function Section({ label, value, size = 'sm' }: { label: string; value: string | null; size?: 'sm' | 'md' }) {
   if (!value) return null
+  const textClass = size === 'md' ? 'text-base leading-relaxed' : 'text-sm leading-relaxed'
   return (
     <div>
       <p className={LABEL_CLS}>{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-white/80">{value}</p>
+      <p className={`mt-1 whitespace-pre-wrap ${textClass} text-white/80`}>{value}</p>
     </div>
   )
 }
@@ -460,7 +461,7 @@ export function ShootMode({
   const idea = guidelines[Math.min(index, Math.max(0, total - 1))] ?? null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0b0b0b]">
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#0b0b0b]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-black text-white">{runName}</p>
@@ -484,14 +485,17 @@ export function ShootMode({
               </div>
             </div>
 
-            <Section label="People, products & props" value={idea.requirements} />
-            <Section label="Script / dialogue" value={idea.script} />
-            <Section label="Shot-by-shot breakdown" value={idea.shot_breakdown} />
-            <Section label="Hook / opening" value={idea.hook} />
-            <Section label="Visual / filming notes" value={idea.visual_notes} />
+            <Section label="People, products & props" value={idea.requirements} size="md" />
+            <Section label="Script / dialogue" value={idea.script} size="md" />
+            <Section label="Shot-by-shot breakdown" value={idea.shot_breakdown} size="md" />
+            <Section label="Hook / opening" value={idea.hook} size="md" />
+            <Section label="Visual / filming notes" value={idea.visual_notes} size="md" />
 
             {idea.production_status === 'not_shot' && (
               <ActionButton className="w-full" loading={marking} disabled={marking} onClick={() => onMarkShot(idea)}>Mark video shot</ActionButton>
+            )}
+            {idea.production_status === 'shot' && (
+              <div className="rounded-lg border border-emerald-300/25 bg-emerald-300/[0.07] px-4 py-3 text-center text-sm font-bold text-emerald-200">Video marked shot</div>
             )}
             {error && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
           </div>
@@ -502,7 +506,19 @@ export function ShootMode({
 
       <div className="flex items-center justify-between gap-3 border-t border-white/10 px-4 py-3">
         <ActionButton size="sm" variant="secondary" disabled={index <= 0} onClick={() => setIndex(prev => Math.max(0, prev - 1))}>← Previous</ActionButton>
-        <span className="text-xs font-bold text-white/50">{total === 0 ? '0 / 0' : `${Math.min(index + 1, total)} / ${total}`}</span>
+        <select
+          className="min-h-11 min-w-0 flex-1 rounded-lg border border-white/10 bg-transparent px-2 py-1 text-xs font-bold text-white/70"
+          value={Math.min(index, Math.max(0, total - 1))}
+          disabled={total === 0}
+          onChange={event => setIndex(Number(event.target.value))}
+          aria-label="Jump to video"
+        >
+          {guidelines.map((g, i) => (
+            <option key={g.id} value={i} className="bg-[#1a1a1a] text-white">
+              {i + 1}. {g.title}
+            </option>
+          ))}
+        </select>
         <ActionButton size="sm" variant="secondary" disabled={index >= total - 1} onClick={() => setIndex(prev => Math.min(total - 1, prev + 1))}>Next →</ActionButton>
       </div>
     </div>

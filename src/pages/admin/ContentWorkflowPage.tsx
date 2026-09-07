@@ -712,17 +712,17 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
                                 Date, name and location come from Microsoft/Outlook and are read-only here. Crew, the Content Guideline and extra shots stay editable.
                               </p>
                             )}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-[11px] font-black uppercase tracking-[0.12em] text-white/40">Set status:</span>
-                              {CONTENT_RUN_STATUSES.map(status => (
-                                <button key={status} type="button" onClick={() => void setRunStatus(status)} className={`min-h-8 rounded-full border px-3 py-1 text-[11px] font-bold transition-colors ${selectedRun.status === status ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/50 hover:text-white/80'}`}>{humanizeStatus(status)}</button>
-                              ))}
-                            </div>
+
                             {/* One canonical Content Guideline document per Content Run */}
                             <div className="space-y-3">
                               {cardError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{cardError}</p>}
                               {runGuideline ? (
                                 <>
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-px flex-1 bg-brand-teal/20" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-teal">Content Guideline — Working Document</span>
+                                    <div className="h-px flex-1 bg-brand-teal/20" />
+                                  </div>
                                   <ContentGuidelineDocumentEditor
                                     guideline={runGuideline}
                                     run={selectedRun}
@@ -755,6 +755,14 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
                                   )}
                                 </div>
                               )}
+                            </div>
+
+                            {/* Run status buttons */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-[11px] font-black uppercase tracking-[0.12em] text-white/40">Set status:</span>
+                              {CONTENT_RUN_STATUSES.map(status => (
+                                <button key={status} type="button" onClick={() => void setRunStatus(status)} className={`min-h-8 rounded-full border px-3 py-1 text-[11px] font-bold transition-colors ${selectedRun.status === status ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/50 hover:text-white/80'}`}>{humanizeStatus(status)}</button>
+                              ))}
                             </div>
 
                             {/* Extra shots / run notes — secondary standalone items */}
