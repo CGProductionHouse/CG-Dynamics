@@ -885,9 +885,6 @@ async function handleCalendarQuery(
   message: string,
   localWorkContext: LocalWorkContext | null,
 ): Promise<{ answer: string } | null> {
-  const lower = message.toLowerCase()
-  const isWeek = /\bweek\b/i.test(lower)
-
   const now = new Date()
   const today = now.toISOString().slice(0, 10)
 
@@ -947,7 +944,6 @@ async function handleCalendarQuery(
 async function handleScheduleOverdueQuery(
   sb: ReturnType<typeof createClient>,
   message: string,
-  localWorkContext: LocalWorkContext | null,
 ): Promise<{ answer: string } | null> {
   const lower = message.toLowerCase()
 
@@ -1341,7 +1337,7 @@ async function extractSemanticIntent(
       const actions: Record<string, unknown>[] = []
       for (const intent of parsed.actions) {
         if (intent.action_type === 'none') continue
-        const action = buildActionFromIntent(intent, clientList, staffNames, taskList, localWorkContext, today)
+        const action = buildActionFromIntent(intent, clientList, staffNames, taskList, localWorkContext)
         if (action) actions.push(action)
       }
       if (actions.length === 0) return null
@@ -1366,7 +1362,7 @@ async function extractSemanticIntent(
     if (parsed.action_type === 'none') return null
 
     // Build ActionProposal from validated intent.
-    const action = buildActionFromIntent(parsed, clientList, staffNames, taskList, localWorkContext, today)
+    const action = buildActionFromIntent(parsed, clientList, staffNames, taskList, localWorkContext)
     if (!action) return null
 
     return { action, model: `${result.provider}:${result.model}` }
@@ -1384,7 +1380,6 @@ function buildActionFromIntent(
   staffNames: string[],
   tasks: Array<{ id: string; title: string; clientName: string | null; dueDate: string | null }>,
   localWorkContext: LocalWorkContext | null,
-  today: string,
 ): Record<string, unknown> | null {
   // Resolve client name to ID.
   const resolveClient = (name: string | null): { id: string; name: string } | null => {
@@ -1430,20 +1425,6 @@ function buildActionFromIntent(
     return null
   }
 
-  // Resolve calendar event from follow-up reference or title match.
-  const resolveCalendarEvent = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
-    if (followUp === 'last_calendar_event' && localWorkContext?.todayCalendarEventSummaries?.[0]) {
-      const event = localWorkContext.todayCalendarEventSummaries[0]
-      return { id: event.id, title: event.title }
-    }
-    if (title && localWorkContext?.todayCalendarEventSummaries) {
-      const lower = title.toLowerCase()
-      const event = localWorkContext.todayCalendarEventSummaries.find(e => e.title.toLowerCase().includes(lower))
-      return event ? { id: event.id, title: event.title } : null
-    }
-    return null
-  }
-
   // Resolve content run from follow-up reference or title match.
   const resolveContentRun = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
     if (followUp === 'last_content_run' && localWorkContext?.upcomingDeliverableSummaries?.[0]) {
@@ -1462,7 +1443,6 @@ function buildActionFromIntent(
   const assignee = resolveStaff(intent.assignee)
   const task = resolveTask(intent.task_title, intent.follow_up_reference)
   const scheduleItem = resolveScheduleItem(intent.schedule_item_title, intent.follow_up_reference)
-  const calendarEvent = resolveCalendarEvent(intent.calendar_title, intent.follow_up_reference)
   const contentRun = resolveContentRun(null, intent.follow_up_reference)
 
   switch (intent.action_type) {
@@ -2275,7 +2255,7 @@ Deno.serve(async (req) => {
 
   // Schedule overdue query: "What's overdue?", "Any missing posts?" etc.
   if (isScheduleOverdueQuery(message)) {
-    const overdueResult = await handleScheduleOverdueQuery(sb, message, localWorkContext)
+    const overdueResult = await handleScheduleOverdueQuery(sb, message)
     if (overdueResult) {
       await auditAssistantRequest(sb, {
         userId: user.id,

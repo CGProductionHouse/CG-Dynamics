@@ -481,8 +481,8 @@ test('semantic intent: resolveScheduleItem function exists', () => {
   assert.ok(edge.includes('const resolveScheduleItem'))
 })
 
-test('semantic intent: resolveCalendarEvent function exists', () => {
-  assert.ok(edge.includes('const resolveCalendarEvent'))
+test('semantic intent: resolveCalendarEvent was removed (unused dead code)', () => {
+  assert.ok(!edge.includes('const resolveCalendarEvent'), 'resolveCalendarEvent should be removed — calendar follow-ups use follow_up_reference only')
 })
 
 test('semantic intent: resolveContentRun function exists', () => {

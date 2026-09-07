@@ -1159,7 +1159,6 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
       const succeeded = results.filter(r => r.success)
       const failed = results.filter(r => !r.success)
       const unsupported = results.filter(r => r.unsupported)
-      
       if (failed.length === 0 && unsupported.length === 0) {
         setCompoundProposal(null)
         const actionList = succeeded.map(r => r.title).join(', ')
