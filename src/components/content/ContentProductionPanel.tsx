@@ -60,7 +60,7 @@ export function ContentProductionPanel({ deliverable, canManage }: { deliverable
     {!isVideo && <div className="space-y-2">
       <label className="block text-xs text-white/60">Canva design ID<input className={input} value={design} onChange={event => setDesign(event.target.value)} /></label>
       <label className="block text-xs text-white/60">Exact Canva page ID<input className={input} value={page} onChange={event => setPage(event.target.value)} /></label>
-      {canManage && <label className="flex min-h-11 items-center gap-2 text-xs text-white/60"><input type="checkbox" checked={setWorkspace} onChange={event => setSetWorkspace(event.target.checked)} />Use as the client’s primary Canva design</label>}
+      {canManage && <label className="flex min-h-11 items-center gap-2 text-xs text-white/60"><input type="checkbox" checked={setWorkspace} onChange={event => setSetWorkspace(event.target.checked)} />Use as the client's primary Canva design</label>}
       <button type="button" disabled={busy || !design.trim() || !page.trim()} onClick={() => void saveSource()} className="min-h-11 rounded-lg border border-white/20 px-3 text-sm text-white disabled:opacity-40">Save Canva page link</button>
       {/^[A-Za-z0-9_-]{6,100}$/.test(design) && <a href={`https://www.canva.com/design/${design}/edit`} target="_blank" rel="noreferrer" className="ml-3 text-sm text-brand-teal">Open Canva design</a>}
     </div>}
