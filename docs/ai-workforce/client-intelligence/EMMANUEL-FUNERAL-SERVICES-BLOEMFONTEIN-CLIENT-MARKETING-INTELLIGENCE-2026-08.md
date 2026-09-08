@@ -1,657 +1,539 @@
-# Emmanuel Funeral Services Bloemfontein — Client Marketing Intelligence
+# Emmanuel Funerals — Client Marketing Intelligence
 
-Last updated: 2026-08-07
-Status: Current-source client intelligence. Keep isolated to Emmanuel Funeral Services Bloemfontein. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
+Last updated: 2026-09-08
+Status: Current reviewed client intelligence, migrated to the exact-client / human-creative architecture. Keep isolated to Emmanuel Funerals. Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
 
-## Executive direction
+Canonical client: **Emmanuel Funerals**  
+Exact CG Dynamics client ID: `d53d8e62-9e6a-4bb9-be3f-554f40942d45`  
+Canonical governed GitHub representation: `docs/ai-workforce/client-intelligence/EMMANUEL-FUNERAL-SERVICES-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
 
-Emmanuel Funeral Services should not be marketed like an ordinary local service business.
+`Emmanuel Funeral Services`, `Emmanuel Funeral Services Bloemfontein` and the older filename are public/history aliases and location context only. They do **not** create another CG client identity.
 
-The strongest commercial territory is:
+## Architecture rule
 
-> **A trusted family funeral business that takes over the difficult practical work with dignity, compassion and reliability when families are least able to carry it themselves.**
+CG Dynamics is the permanent source of truth. This Markdown file is the governed repository representation and audit/handoff view of the client intelligence; it is not a manually maintained ChatGPT Project truth store.
 
-The marketing job is therefore not to make death look beautiful or sentimental. It is to reduce uncertainty, make the service feel dependable, and show families that Emmanuel understands both the emotional and practical burden of arranging a funeral.
+For routine work, retrieve the exact current Emmanuel context by:
 
-The strongest differentiators currently supported by evidence are:
+`client_id d53d8e62-9e6a-4bb9-be3f-554f40942d45 + task type + supplied creative/context`
 
-- family-business legacy;
-- current leadership by Jeanette Ball;
-- compassionate, hands-on care;
-- personalised services across cultures and beliefs;
-- broad practical funeral coordination;
-- 24-hour standby;
-- clear local Bloemfontein presence;
-- a service philosophy built around dignity, integrity and reliability.
+Do not fuzzy-match another funeral business, crawl unrelated client packs, or silently fall back to stale Project material.
 
-## Verified current identity
+A lightweight request such as `caption please` should need only the compact current packet: exact Emmanuel voice/caption rules, the service or subject shown in the creative, sensitivity and claim guardrails, the correct CTA/footer convention, unresolved facts that affect the post, and current SEO/hashtag guidance.
 
-Current official and current-source evidence supports:
+## Evidence hierarchy and provenance
 
-- Business: Emmanuel Funeral Services / Emmanuel Funerals.
-- Location: 16 Falck Street, Oranjesig, Bloemfontein.
-- Office: 051 448 8566.
-- After-hours: 076 784 8131.
-- Email: `jeanette@emmanuelfuneralsbfn.co.za`.
+Use the freshness protocol. For mutable facts, prefer:
+
+1. current direct Emmanuel / CG-confirmed information;
+2. current official Emmanuel website and first-party material;
+3. current official Emmanuel social / Google Business material;
+4. reliable current regulatory or partner evidence where the claim is regulated;
+5. reviewed Project/source material;
+6. reviewed historical intelligence in this pack.
+
+Project history is strong evidence for durable creative preferences and CG corrections. Old captions, funeral notices, memorial messages, prices, campaign dates, staff roles, policy terms and contact details are not automatically current business facts.
+
+Reusable funeral-sector and human-marketing research remains in the existing Emmanuel supplement and shared Human Marketing Goldmine packs. Do not duplicate generic theory here.
+
+## Canonical identity and current public facts
+
+### Identity
+
+- Canonical CG Dynamics client: **Emmanuel Funerals**.
+- Current live Dynamics row: `d53d8e62-9e6a-4bb9-be3f-554f40942d45`, name `Emmanuel Funerals`, active as checked 2026-09-08.
+- Current official website uses **Emmanuel Funeral Services** publicly.
+- Treat both names as the same exact client, not separate identities.
 - Current official website: `https://emmanuelfunerals.com/`.
-- Current leader: Jeanette Ball.
-- Jeanette took over leadership after her mother, the founder, stepped back.
-- The business is family-rooted and community-oriented.
+- Current physical address: **16 Falck Street, Oranjesig, Bloemfontein, 9301**.
+- Office: **051 448 8566**.
+- After-hours / 24-hour contact: **076 784 8131**.
+- Current website WhatsApp: **072 268 2333**.
+- Email: **jeanette@emmanuelfuneralsbfn.co.za**.
 
-### Current leadership story
+These contact facts were rechecked against the current official website on 2026-09-08. Recheck before time-sensitive campaigns or when a new client brief conflicts.
 
-A current 2025 Bloemfontein profile of Jeanette Ball describes her as the owner of Emmanuel Funerals and explicitly frames the business as a family legacy. Jeanette says she grew up seeing the impact funeral services had in the community and describes her leadership as hands-on, heart-led and centred on meaning, trust and being there when it counts.
+### Hours / branches
 
-This is commercially valuable because it gives Emmanuel a real human leadership story rather than anonymous funeral-home advertising.
+The current website supports **24-hour standby / after-hours assistance**, but a complete current office-hours schedule was not recovered in this migration.
 
-Do not overuse the founder/family story as sentimental branding. Use it as proof that care and continuity are embedded in the business.
+No additional Emmanuel branch roster was verified. Do not invent branches or office hours.
 
-## Verified current services
+### Current public team evidence
 
-The official website currently lists or describes:
+The current official site lists:
+
+- Jeanette Ball — Owner;
+- Alta Rossouw — Co-Founder;
+- Susan Ehlers — Funeral Director;
+- Louis van Jaarsveld — Funeral Director;
+- Kgosi Goliath — Funeral Manager;
+- Sonja Vorster — Policy Assistant / Receptionist;
+- Hazel van Heerden — Policy Assistant;
+- Morvine van Heerden — Funeral Assistant.
+
+Staff roles are mutable. Recheck the current site or direct client confirmation before staff-specific campaigns, biographies or contact routing.
+
+### Family-business story
+
+Current and reviewed first-party/public evidence supports a family-rooted, locally accountable business with Jeanette Ball in visible leadership. Use this as real trust evidence, not sentimental decoration. The story should show continuity, responsibility and human involvement rather than turn every post into a founder tribute.
+
+## Current service truth
+
+### Current official website — verified 2026-09-08
+
+The current official services/product pages support the following categories.
+
+#### Immediate care and preparation
+
+- 24-hour standby;
+- free consultation;
+- removal of the deceased;
+- transportation of the deceased countrywide;
+- free transport within a 25 km radius;
+- cold storage;
+- preparation;
+- embalming.
+
+#### Funeral / cremation coordination
 
 - funeral services;
-- cremations;
-- coffins;
-- tombstones;
-- transportation of the deceased;
-- facebrick grave building;
-- cemetery and crematorium services;
-- 24-hour standby;
+- conducting cremation services;
+- cemetery and crematorium arrangements;
+- burial of ashes;
+- family car(s);
+- rental of grave tents and chairs;
+- coffins.
+
+#### Documentation / programme support
+
 - registration of death;
-- personal funeral programmes;
-- grief support.
+- doctors' documentation;
+- colour funeral programmes.
 
-The website also states that Emmanuel aims to respect all cultures and beliefs and provide personalised services.
+#### Memorial / tribute services
 
-### Important operational distinction
+- tombstones;
+- tombstone engraving;
+- facebrick grave building;
+- fresh flowers;
+- artificial wreaths;
+- ash urns;
+- exhumations.
 
-The website does **not** currently provide enough verified evidence for CG Dynamics to assume:
+The website also presents `Insurance` as a current product/category.
 
-- funeral insurance / funeral-policy products;
-- monthly funeral plans;
-- exact funeral-package prices;
-- exact coffin/tombstone ranges and prices;
-- repatriation beyond normal deceased transport;
-- catering;
-- tents/chairs/toilets;
-- livestreaming;
-- flowers;
-- church/venue hire;
-- grave-opening municipal fees;
-- exact geographic service radius.
+### Current Project Source — client-supplied evidence
 
-These may exist, but they must be confirmed directly with Emmanuel before marketing them.
+The accessible `Emmanuel Funerals.pdf` supplied in the ChatGPT Project additionally states that Emmanuel offers:
 
-## Core customer reality
+- full funeral and cremation arrangements;
+- newspaper death notices;
+- hearse and family-car hire;
+- temporary grave markers;
+- custom grave finishes;
+- funeral cover / funeral plans;
+- cover described for ages 18–95;
+- extended-family and dependent-child cover;
+- Clientèle Life Limited as underwriter, FSP 15268;
+- Emmanuel Funeral Services as an authorised FSP, FSP 53119.
 
-Families usually approach a funeral home under severe time pressure and emotional stress.
+Treat these as **client-confirmed Project-source facts**, but regulated policy/FSP claims require a fresh compliance check before a material public financial-services campaign.
 
-Their actual questions are practical:
+### Insurance / policy claim state
 
-- What do we do first?
-- Who collects the deceased?
-- What paperwork is needed?
-- How quickly can arrangements happen?
-- What are the options for burial or cremation?
-- What does everything cost?
-- Who contacts the cemetery or crematorium?
-- What must the family arrange themselves?
-- Can the service reflect our religion, culture and family wishes?
-- Who can I call after hours?
+The August intelligence's blanket `insurance unsupported` warning is now superseded: the current official Emmanuel website explicitly advertises **Insurance**, and the current Project Source contains policy/FSP detail.
 
-This means the most valuable marketing asset Emmanuel can create is **clarity**.
+However:
 
-## Positioning architecture
+- Clientèle Life Assurance Company Limited's FSP number **15268** is independently corroborated by current Clientèle compliance information;
+- this migration did **not** independently resolve an FSCA record for Emmanuel's stated FSP **53119** through the available search surface;
+- ages, beneficiaries, waiting periods, exclusions, premiums, benefits, claims processes and exact product names were not independently verified;
+- no policy amount, premium or benefit value should be invented or reused from old creative.
 
-### Primary position
+Before regulated cover content, recheck the current approved product disclosure, legal entity/FSP status, underwriter wording and exact terms. Simplify only after the facts are verified; do not simplify away required disclosures.
 
-**Compassionate practical support when families need someone dependable.**
+### Service claims that remain freshness-gated
 
-### Supporting pillars
+Project creative history refers to **livestreaming** and **memorial plaques**, but neither the current official website nor the accessible current Project PDF establishes them as a current operational service. Treat both as `possible_change` and confirm before public use.
 
-1. **We take care of the practical details.**
-2. **Your family and beliefs are respected.**
-3. **You can reach us when it matters.**
-4. **Real people, local family business, accountable service.**
-5. **One team coordinating the farewell from collection through the funeral or cremation and memorial needs.**
+Also reconfirm before asserting:
 
-### Avoid
+- exact prices, savings or package inclusions;
+- current coffin/tombstone catalogues or ranges;
+- exact flower/wreath options and availability;
+- exact grave-finish range;
+- municipal / cemetery / crematorium fees;
+- specific church, venue or catering arrangements;
+- current certificates/accreditations;
+- any service geography beyond the website's specific deceased-transport statements;
+- any guarantee or turnaround time.
 
-- generic `celebrating life` slogans with no useful information;
-- excessive angels, doves, candles and sunset imagery;
-- making grief visually decorative;
-- fear-based funeral advertising;
-- pressure-driven sales language;
-- `best funeral service` claims without evidence;
-- fake testimonials;
-- language that assumes one culture, faith or mourning practice.
+## Core customer reality and positioning
 
-## Highest-value buyer journeys
+Families often contact Emmanuel under time pressure, with practical questions and limited capacity for complexity. The strongest marketing territory is therefore not decorative grief or generic reassurance. It is **calm, human clarity backed by real practical support**.
 
-## 1. Immediate bereavement / emergency family
+Emmanuel should feel like a real local team that knows what needs to happen next and handles the practical work with care.
 
-Situation:
+### Primary positioning
 
-A death has just occurred and the family needs urgent help.
+**Clear practical guidance, respectful service and accountable local care from the first call through the farewell.**
 
-Need:
+### Supporting proof
 
-One obvious phone number and one clear first step.
+- visible local team and family-business continuity;
+- 24-hour standby;
+- current practical funeral / cremation coordination;
+- transport, preparation, documentation and memorial services;
+- respect for different cultures and beliefs;
+- real current facilities, vehicles, flowers, grave work and service preparation where shown truthfully.
 
-Best message:
+### Do not position Emmanuel as
 
-`Call us. We will guide you through what happens next.`
+- the biggest, cheapest or `best` without evidence;
+- a generic luxury funeral brand;
+- a grief-content page;
+- a policy seller first;
+- a one-size-fits-all faith or cultural service.
 
-Marketing priorities:
+## Human creative standard — Emmanuel Funerals
 
-- 24-hour number prominent everywhere;
-- Google Business Profile call button;
-- website emergency strip;
-- simple `what happens after someone passes away` page;
-- no lead forms that delay urgent contact.
+Correct facts are the floor. Emmanuel copy must feel like it comes from real people in the room with the family, not an outsourced funeral-industry template.
 
-## 2. Funeral arrangement family
+### Brand feel
 
-Situation:
+Keep the voice:
 
-The deceased has already been collected or transferred and the family is choosing the service structure.
+- warm and dignified;
+- compassionate without emotional performance;
+- faith-aware where the actual post supports it;
+- respectful of different cultures and beliefs;
+- calm and professionally capable;
+- community-minded;
+- sincere, natural and human;
+- specific to the service, tribute, person or practical moment shown.
 
-Needs:
+Do not turn every service post into a condolence message. A transport, floral, grave-setup, documentation or team-preparation post can simply be calm, practical and respectful.
 
-- burial vs cremation;
-- coffin options;
-- programme;
-- cemetery/crematorium coordination;
-- grave preparation;
-- memorialisation;
-- timing;
-- costs;
-- cultural/religious needs.
+### Caption construction
 
-Marketing priority:
+- **Captions add to the artwork/video; they do not repeat it.**
+- Start from what the audience can already see/read.
+- Add one useful second layer: why the service matters, what Emmanuel handles, a human observation, a quiet detail of care, a relevant next step or context not already on the artwork.
+- Keep ordinary social captions concise when the artwork carries the information.
+- Use longer copy only for education, a real family/community story, a policy explainer or a meaningful service explanation.
+- Vary sentence length, openings and CTA. Do not use a fixed template.
+- Avoid stacked three-benefit slogans and catalogue-style service dumping.
+- No durable fixed option count was recovered. Default to one strong finished answer; provide clearly different options when the brief asks for them or creative exploration is useful.
 
-Create a simple arrangement guide showing what Emmanuel handles and what decisions the family needs to make.
+### Practical versus emotional tone
 
-## 3. Pre-planning family
+Match the emotional weight of the post.
 
-Situation:
+**Practical service content:** direct, calm, useful.  
+**Behind-the-scenes/logistics:** quiet competence and detail.  
+**Memorial/tombstone/tribute content:** softer and reflective, without clichés.  
+**Community/faith content:** sincere and context-specific.  
+**Family memorial/condolence content:** only as sensitive as the supplied situation requires; never use grief as marketing leverage.  
+**Policy/cover education:** clear, regulated and factual rather than sentimental.
 
-A family wants to understand funeral options before a death occurs, but may not necessarily be buying a financial product.
+### Language
 
-Need:
+- English and Afrikaans are supported by Project evidence depending on the brief.
+- Afrikaans should sound natural and everyday, not stiff or translated.
+- Gentle English/Afrikaans phrasing can work when it is emotionally natural, e.g. a short line such as `'n Mooi afskeid. Met sorg.`
+- Do not force language mixing for effect.
+- No durable evidence in this migration supports claiming a Sesotho or other-language service capability. Use another language when explicitly requested/provided, but do not market language capability without confirmation.
 
-Peace of mind and documentation.
+### Faith and culture
 
-Potential content:
+The brand may sound rooted in faith, respect and community care, but the official site also states that Emmanuel respects all cultures and beliefs.
 
-- what information family members should know;
-- where ID and policy documents are kept;
-- burial vs cremation preferences;
-- memorial preferences;
-- contact person information.
+Therefore:
 
-Do not market insurance or financial products unless Emmanuel confirms and provides the relevant regulated product details.
+- faith language is welcome when the post, family or occasion supports it;
+- do not assume a deceased person's religion, scripture preference or mourning practice;
+- do not make every funeral message Christian by default;
+- keep culturally specific content accurate and family-led.
 
-## 4. Tombstone / memorial customer
+## Rejected / overused wording and patterns
 
-Situation:
+Avoid by default:
 
-The funeral has already happened and the family is arranging a lasting memorial.
+- generic `we're here for you in your time of need`;
+- repeating `we're here for you` across routine posts;
+- `dignity and compassion` as empty filler rather than demonstrated care;
+- generic `celebrating a life` / `celebration of life` slogans with no specific idea;
+- `Today we...` / `Today we celebrate...` openings as a routine template;
+- `A lasting tribute, chosen with care` as an overused tombstone line;
+- vague `when it matters most` / `it matters most` language;
+- generic `your trusted partner`, `experience excellence`, `where quality meets...` or similar corporate AI filler;
+- grief-heavy sentimental paragraphs under practical service posts;
+- fear, guilt, pressure or manipulative urgency;
+- influencer language, slangy hype, memes or forced humour;
+- reducing funeral services to salesy `packages` unless the client explicitly needs formal package terminology and the exact current contents/pricing are verified.
 
-Needs:
+If feedback says a line feels generic, change the idea rather than swapping one generic synonym for another.
 
-- design options;
-- material and size options;
-- inscription guidance;
-- timing;
-- installation process;
-- cemetery requirements;
-- pricing.
+## CTA / footer / contact conventions
 
-Opportunity:
+Do not append every contact channel to every post.
 
-This is a separate conversion path from urgent funeral arrangements and should not be buried inside emergency content.
+Project operating convention:
 
-## 5. Cremation family
+- **event or direct-service posts:** phone + email when a contact footer is needed;
+- default office phone for ordinary direct-service contact: `051 448 8566`;
+- email: `jeanette@emmanuelfuneralsbfn.co.za`;
+- **urgent / 24-hour assistance content:** use the verified after-hours number `076 784 8131` and/or current website WhatsApp `072 268 2333` when that exact contact path is useful;
+- **general service overviews, team tributes, floral/tombstone/visual posts:** website-only footer is the normal default: `emmanuelfunerals.com`;
+- a CTA is optional when the post does not need one.
 
-Situation:
+Never reuse stale contact details because they appeared in an old caption.
 
-Family is considering cremation but may not understand the process.
+## Content system
 
-Opportunity:
+### 1. Practical service highlights
 
-Create a calm, factual cremation explainer:
+Use real visuals and explain one service clearly at a time. Strong recurring subjects include:
 
-- what Emmanuel coordinates;
-- where choices occur;
-- how a memorial service can still be personalised;
-- what happens to ashes afterward, only where confirmed and accurate.
+- deceased transport;
+- grave tents/chairs;
+- flowers/wreaths;
+- documentation and registration support;
+- funeral / cremation coordination;
+- family transport;
+- cold storage / preparation only with suitably respectful visuals;
+- ash urns / burial of ashes;
+- exhumation information only with appropriate sensitivity and factual context.
 
-Avoid trying to persuade people toward cremation or burial. The role is to explain options respectfully.
+### 2. Visual tributes / memorial work
 
-## Content strategy
-
-The best Emmanuel content should answer real questions rather than manufacture emotional engagement.
-
-Recommended mix:
-
-### 1. `What happens next?`
-
-Short practical explainers.
-
-Examples:
-
-- `Someone passed away at home. What do we do first?`
-- `What documents do you need to register a death?`
-- `What does a funeral home handle for you?`
-- `Burial or cremation: what decisions need to be made?`
-- `Why does the funeral home need certain documents?`
-
-These posts can become evergreen Google/search assets too.
-
-### 2. `Jeanette explains`
-
-Owner-led trust content.
-
-Jeanette's current public profile supports a compassionate and hands-on leadership position.
-
-Use her for calm, direct explanations such as:
-
-- why the first phone call matters;
-- what families usually forget;
-- what makes a funeral personal;
-- what respectful service means to Emmanuel;
-- what families can prepare beforehand.
-
-Avoid over-scripted motivational monologues.
+Use real tombstones, engraving, facebrick grave work, grave-site preparation, urns and confirmed custom finishes. Talk about what families actually choose or need to know rather than relying on generic `lasting tribute` copy.
 
 ### 3. Behind the service
 
-Show professional care without intruding on families.
+Strong safe subjects:
 
-Possible subjects:
-
-- preparing funeral programmes;
-- vehicles being prepared;
-- coffin showroom/detail work where dignified;
-- tombstone design process;
 - staff preparing for a service;
-- grave-building workmanship;
-- administrative coordination.
+- vehicles being prepared;
+- floral delivery / arrangement preparation;
+- programme preparation;
+- grave/tent setup;
+- respectful logistics and admin;
+- clean, calm facility/process details.
 
-Do not film deceased persons, grieving families or private documents without explicit informed permission.
+Do not expose private family paperwork, deceased persons or grieving people without explicit informed permission.
 
-### 4. Culture and personalisation
+### 4. `What happens next?` education
 
-The current official site says Emmanuel respects all cultures and beliefs.
+Answer real questions simply:
 
-Turn that into useful content rather than vague inclusivity copy:
+- who to call first;
+- what documents families should locate;
+- what Emmanuel handles after collection;
+- burial versus cremation process questions;
+- death registration;
+- cemetery/crematorium coordination;
+- what the family needs to decide.
 
-- `Tell us what matters to your family.`
-- explain that service structure can differ;
-- show respectful examples only with explicit consent;
-- invite families to discuss faith, cultural practices and family traditions during arrangements.
+Be useful before promotional.
 
-### 5. Memorial education
+### 5. Team / real-person trust
 
-Tombstone and remembrance content can be less urgent and more visual.
+Jeanette and the current team are strong trust assets. Use real people for calm explanations, service walkthroughs and short Q&A. Recheck roles before named staff content.
 
-Examples:
+### 6. Testimonial / community acknowledgement
 
-- choosing wording for a tombstone;
-- what families should decide before ordering;
-- differences in finish/design only if current options are confirmed;
-- installation timelines;
-- caring for memorials.
+Use only genuine, permissioned feedback. Anonymous wording is appropriate where privacy matters. Never fabricate praise or turn a family's grief into promotional storytelling.
 
-## Video strategy
+### 7. Calm atmosphere / service readiness
 
-Video should feel calm, human and useful.
+Visuals such as maroon drapes, soft lighting, flowers, seating, vehicles and a completed setup can communicate care without showing grieving faces. The point is the readiness and detail, not staged sadness.
 
-### Best formats
+### 8. Policy / cover education
 
-- Jeanette speaking directly to camera;
-- short Q&A;
-- quiet documentary-style team footage;
-- process explainers;
-- memorial craftsmanship;
-- testimonial-style stories only with genuine consent;
-- `one thing families should know` series.
+Explain verified cover information in plain language. Do not use amounts unless the brief/client supplies current approved values. Never invent eligibility, benefits, waiting periods, exclusions, premiums or claims promises. Regulated disclosure wins over copy neatness.
 
-### Visual language
+### 9. Community / faith-sensitive content
 
-Use:
+Appropriate church, community, remembrance and support content can feel warm and locally rooted when the relationship/event is real. Do not manufacture community affiliations or over-spiritualise neutral service content.
 
-- clean natural lighting;
-- muted, respectful environments;
-- real people;
-- hands and process details;
-- strong audio;
-- restrained movement;
-- readable titles.
+## Video / Reel direction
+
+Strong Emmanuel short-form work includes:
+
+- a calm Jeanette/team explainer;
+- one practical question answered clearly;
+- behind-the-scenes service preparation;
+- transport/logistics footage;
+- floral/tent/grave setup;
+- tombstone or engraving process;
+- a respectful service overview;
+- policy education with exact approved facts;
+- a quiet visual sequence showing care in the details.
 
 Avoid:
 
-- dramatic sad piano on every video;
-- excessive slow motion;
-- black-and-white cliché;
-- cinematic grief reenactments;
+- grief reenactments;
 - actors pretending to mourn;
-- fake phone-call emergencies.
+- fake emergency calls;
+- dramatic sad music as the default;
+- excessive slow motion or black-and-white funeral clichés;
+- using a deceased person or grieving family as generic marketing footage.
 
-## Website diagnosis
+## Visual and image-edit rules
 
-The current site contains valuable service information but its structure can be improved substantially for high-stress users.
+When editing real Emmanuel assets, preserve by default:
 
-### Recommended hierarchy
+- real people's identity, facial features and body proportions;
+- real vehicles and their markings;
+- facilities and recognisable layouts;
+- Emmanuel logos and maroon branding;
+- flowers, caskets/coffins, urns, tombstones, plaques if supplied, grave finishes and other real service items;
+- factual text on branded items;
+- colours, scale and important composition/crop relationships.
 
-Top of home page:
+Change only what was requested unless a broader redesign is explicitly requested.
 
-1. `24-hour assistance` + direct call button.
-2. `A loved one has passed away — what happens now?`
-3. core services;
-4. why families choose Emmanuel;
-5. Jeanette/family leadership proof;
-6. burial / cremation / tombstone paths;
-7. address and contact.
+Do not `improve` a real person, vehicle, casket, tombstone, flower arrangement or facility by materially changing what it is. Do not add fictional service equipment or facilities to imply capability.
 
-### Dedicated pages required
+For sensitive imagery:
 
-- Funeral services Bloemfontein.
-- Cremation services Bloemfontein.
-- 24-hour deceased collection / funeral assistance.
-- Tombstones Bloemfontein.
-- What to do when someone dies.
-- Registration of death.
-- About Emmanuel / Jeanette Ball.
-- Contact / emergency assistance.
+- do not add or expose deceased persons;
+- do not make grieving faces the default visual device;
+- do not expose private documents or personal information;
+- obtain explicit consent for identifiable family/deceased material where required;
+- use calm atmosphere/process detail instead of manufactured grief.
 
-### Conversion rule
+## Dynamic SEO / hashtags
 
-A bereaved family should never have to hunt for the phone number.
+Default CG rule: **maximum 5 hashtags**.
 
-Use persistent mobile call/WhatsApp actions if Emmanuel confirms WhatsApp as an official contact channel.
+Do not maintain a frozen Emmanuel hashtag bank. At task time choose the strongest current set from:
 
-## Google Business Profile
+- exact brand/client identity;
+- actual service/topic in the post;
+- Bloemfontein / Free State / relevant service geography only where accurate;
+- funeral / cremation / tombstone / memorial / service category as appropriate;
+- target platform;
+- current reliable search/trend evidence when available.
 
-This is one of the highest-value channels because funeral-service demand is often urgent and local.
+Historical hashtags such as `#EmmanuelFunerals`, `#FuneralServicesSA`, `#RespectfulFarewell`, `#FaithAndDignity` and similar Project examples are **seeds only**, not a mandatory bank.
 
-Profile should keep current:
+Never label a hashtag `trending` without current evidence. Do not let SEO wording flatten the human tone.
 
-- exact business name;
-- 16 Falck Street address;
-- office number;
-- after-hours number where platform policy allows;
-- accurate hours;
-- website;
-- funeral service / cremation / funeral home categories as appropriate;
-- current service-area settings;
-- real facility/team photos;
-- service descriptions.
+## Factual and claim guardrails
 
-### Review strategy
+Never invent or infer current:
 
-Reviews are extremely sensitive in funeral services.
+- funeral packages, prices or savings;
+- insurance product names, premiums, benefits, waiting periods, exclusions or payout promises;
+- FSP / insurer / intermediary claims beyond current verified disclosures;
+- branch locations or office hours;
+- mortuary/facility/certificate/accreditation claims not currently evidenced;
+- livestreaming or memorial-plaque capability;
+- coffin/tombstone/flower ranges or availability;
+- municipal/cemetery/crematorium fees;
+- turnaround times or guarantees;
+- current staff roles;
+- social handles;
+- cultural/religious capability beyond verified/current context;
+- family testimonials, relationships or service stories.
 
-Do not ask families for a review immediately after a funeral in a transactional way.
+When a supplied creative contains a new factual claim, treat the creative as context, not automatic proof. Verify material mutable claims before repeating them.
 
-A more respectful system:
+## Privacy / grief boundaries
 
-- follow up after an appropriate period;
-- ask whether the family was satisfied with the care received;
-- only then gently offer the review link;
-- never incentivise grief-related reviews.
+Funeral marketing handles unusually sensitive personal context.
 
-Best review themes to monitor:
+- Do not store or surface cause of death, medical details or unnecessary family grief information in general marketing intelligence.
+- Do not publish names, faces, documents or family stories beyond the supplied/approved context.
+- Do not ask for reviews in a transactional way immediately after a funeral.
+- Do not use bereavement, illness or inferred grief for predatory targeting.
+- Keep memorial notices and once-off family messages out of permanent client intelligence unless they establish a durable operating rule.
 
-- compassion;
-- responsiveness;
-- organisation;
-- dignity;
-- communication;
-- reliability;
-- handling difficult arrangements;
-- cultural respect.
+## Commercial / search strategy retained from prior intelligence
 
-## Local SEO
+The durable strategic conclusions from the August intelligence remain useful:
 
-Priority search intents:
+- clarity is a primary marketing asset;
+- urgent local search / Google Business visibility matters;
+- the website should make the first contact step obvious;
+- burial, cremation and memorial/tombstone enquiries deserve clear paths;
+- real team/process imagery builds trust better than stock grief imagery;
+- reviews and testimonials require unusually careful timing and privacy;
+- community relationships should never turn vulnerable families into referral commodities;
+- measurement should focus on meaningful enquiries, response and service outcomes rather than follower growth.
 
-- funeral services Bloemfontein;
-- funeral home Bloemfontein;
-- undertakers Bloemfontein;
-- cremation Bloemfontein;
-- funeral parlour Bloemfontein;
-- tombstones Bloemfontein;
-- 24 hour funeral service Bloemfontein;
-- deceased transport Bloemfontein;
-- what to do when someone dies Bloemfontein.
+The detailed funeral-sector research remains in:
 
-Do not create thin suburb pages containing duplicated copy.
+`docs/ai-workforce/client-intelligence/EMMANUEL-FUNERAL-SERVICES-MARKETING-RESEARCH-SUPPLEMENT-2026-08.md`
 
-## Paid media
+Read that supplement as research authority, but use this current primary intelligence for Emmanuel-specific mutable facts.
 
-### Google Search
+## Task-specific retrieval contract
 
-Most useful paid channel for immediate-intent enquiries.
+Use exact client ID `d53d8e62-9e6a-4bb9-be3f-554f40942d45`.
 
-Campaign groups:
+For `caption`: retrieve voice + exact service/post context + sensitivity/claim guardrails + contact/footer rule + unresolved facts + current SEO packet.  
+For `poster_copy`: retrieve short-copy tone + exact current service facts + contact/claim rules.  
+For `video_script`: retrieve voice + service/education context + visual sensitivity + factual guardrails.  
+For `content_idea`: retrieve positioning + current service/content lanes + sensitivity + current platform/search opportunity.  
+For `image_edit`: retrieve preservation/privacy rules + exact requested edit only.  
+For `factual_lookup`: retrieve current value + provenance/freshness state; never silently use a stale Project fact.  
+For `policy_content`: retrieve current approved regulated evidence only; flag missing terms/disclosures.  
+For `campaign`: retrieve audience/task context + current verified commercial facts + platform evidence + sensitivity boundaries.
 
-- urgent funeral service;
-- funeral home / undertaker;
-- cremation;
-- tombstones;
-- brand name.
+No fuzzy client search and no unrelated-client context.
 
-Landing page should match the query and show the phone number immediately.
+## Current provenance register — 2026-09-08
 
-### Meta
+### Exact Dynamics truth
 
-Meta should build trust and awareness rather than aggressively retarget bereavement.
+- CG Dynamics production read-only check: exact client ID `d53d8e62-9e6a-4bb9-be3f-554f40942d45`, canonical name `Emmanuel Funerals`, active.
 
-Best uses:
+### First-party current sources
 
-- Jeanette-led educational content;
-- community presence;
-- memorial/tombstone services;
-- funeral-preparation information;
-- service explainers.
+- Emmanuel official website: `https://emmanuelfunerals.com/`.
+- Current Services page: immediate care, transport, preparation, funeral/cremation coordination, documentation, memorial/tribute services and 25 km/countrywide transport statements.
+- Current Products page: funeral services, coffins, cremations, tombstones, insurance, wreaths, flowers, programmes.
+- Current Contact page: address, office, after-hours, WhatsApp, email.
+- Current Team page: current public staff names/roles as observed 2026-09-08.
 
-Avoid invasive audience strategies based on inferred grief, health conditions or recent bereavement.
+### Direct Project/client evidence
 
-## Competitor context
+- `Emmanuel Funerals.pdf` — business/service/contact/FSP/funeral-cover source supplied in the ChatGPT Project; reviewed 2026-09-08. Retain as source evidence, not sole live grounding.
+- Accessible Emmanuel Project conversation/history and current Project operating instructions — durable creative, contact/footer and sensitivity rules.
 
-Current Bloemfontein search results show a crowded local market including:
+### Existing CG research
 
-- Jaco Smith Elite Funeral Group;
-- AVBOB;
-- Twilight Funeral Home;
-- Bloemfontein Funerals / Martin's-related listings;
-- Brothers Mortuary & Crematory;
-- multiple independent funeral parlours and burial services.
+- `EMMANUEL-FUNERAL-SERVICES-MARKETING-RESEARCH-SUPPLEMENT-2026-08.md` — regulatory, funeral-sector, competitor and channel research.
+- `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`.
+- Issue #248 Human Creative Standard.
+- Relevant shared Human Marketing Goldmine research, applied as reusable theory rather than duplicated client fact.
 
-The market therefore contains:
+## Unresolved / freshness-gated
 
-- major national trust brands;
-- premium/private funeral groups;
-- community/local operators;
-- low-cost and quote-driven providers.
+Confirm before use where material:
 
-Emmanuel should **not** try to out-national AVBOB or out-corporate premium groups.
+- exact current office trading hours;
+- exact official Facebook, Instagram and TikTok handles/ownership;
+- any additional branches;
+- current Certificate of Competence / premises / other licences or accreditations Emmanuel wants marketed;
+- independent current verification of Emmanuel's stated FSP 53119 and the exact regulated legal entity/disclosure wording;
+- current funeral-cover product name(s), approved disclosures, eligibility, beneficiaries, premiums, benefits, waiting periods, exclusions and claims route;
+- exact current coffin/tombstone/flower/wreath/urn ranges and prices;
+- exact funeral/service pricing and any formally named service bundles;
+- livestreaming capability;
+- memorial-plaque capability;
+- exact current church/venue/catering relationships if any;
+- current team roles before named-staff campaigns;
+- current CG service/deliverable scope where operationally relevant.
 
-Its strongest territory is:
-
-> **local family accountability + compassionate leadership + practical full-service guidance.**
-
-## Community strategy
-
-Funeral businesses can build trust before a family needs them without marketing death aggressively.
-
-Appropriate community activities:
-
-- grief-support education;
-- estate/document-preparedness talks with suitable professionals;
-- church and faith-community relationships;
-- elder-care and retirement-community information sessions;
-- community bereavement resources;
-- respectful sponsorship of memorial/community events;
-- partnerships with counsellors, clergy and relevant support organisations.
-
-Avoid referral arrangements that could feel exploitative or create conflicts around vulnerable families.
-
-## Referral ecosystem
-
-Potential relationship groups:
-
-- churches and clergy;
-- hospitals and care facilities, subject to policy and ethics;
-- hospice and palliative-care organisations;
-- grief counsellors;
-- retirement communities;
-- estate administrators / attorneys for general information partnerships;
-- tombstone and cemetery-related suppliers where not already internal.
-
-Any commercial referral arrangement must be reviewed for legal, ethical and institutional policy compliance before implementation.
-
-## Commercial measurement
-
-Do not judge funeral marketing by follower growth.
-
-Track:
-
-- urgent phone enquiries;
-- standard funeral enquiries;
-- cremation enquiries;
-- tombstone enquiries;
-- enquiry source;
-- Google Business calls;
-- website calls;
-- search campaigns;
-- conversion to arranged funeral/service;
-- average response time;
-- review volume and themes;
-- repeat family/referral source where ethically recorded;
-- service mix.
-
-Do not store sensitive bereavement details in marketing analytics unless operationally required and properly protected.
-
-## CRM / CG Dynamics requirements
-
-A marketing-intelligence record should distinguish:
-
-- enquiry type;
-- source;
-- date;
-- emergency vs non-emergency;
-- service requested;
-- outcome;
-- marketing channel.
-
-Do **not** put detailed family grief information, cause of death, medical information or unnecessary deceased-person data into general marketing records.
-
-## 90-day implementation plan
-
-### Days 1–30 — Trust and emergency clarity
-
-- verify all current contact details and hours;
-- audit Google Business Profile;
-- make 24-hour help prominent online;
-- create `what to do when someone dies` content;
-- record Jeanette introduction / leadership video;
-- capture professional facility/team/process photo and video library;
-- ensure funeral / cremation / tombstone services have dedicated landing paths.
-
-### Days 31–60 — Search and service education
-
-- launch/update local SEO pages;
-- publish practical question-answer content;
-- test high-intent Google Search campaigns;
-- introduce `Jeanette explains` series;
-- build tombstone/memorial content;
-- create respectful review follow-up process.
-
-### Days 61–90 — Community authority and measurement
-
-- review enquiry-source data;
-- identify top search intents;
-- build appropriate church/community/referral relationships;
-- create grief-support/preparation educational initiative;
-- review website conversion and call tracking;
-- refine content around real family questions;
-- report on enquiries and service outcomes, not vanity reach.
-
-## Tone guide
-
-### Should feel
-
-- calm;
-- warm;
-- competent;
-- direct;
-- reassuring;
-- respectful;
-- human;
-- local.
-
-### Should not feel
-
-- salesy;
-- dramatic;
-- morbid;
-- sentimental for the sake of sentiment;
-- corporate and cold;
-- religiously presumptive;
-- culturally narrow;
-- opportunistic.
-
-## Example strategic message territories
-
-These are internal direction examples, not approved public copy:
-
-- `When you don't know what happens next, call someone who does.`
-- `We take care of the arrangements so your family can focus on each other.`
-- `One call. Clear guidance. Respectful care.`
-- `Every family is different. The farewell should reflect that.`
-- `Local people. Real responsibility. Care when it matters.`
-
-## Evidence gaps requiring client confirmation
-
-Before operational use, confirm:
-
-- exact current trading hours;
-- official WhatsApp number, if any;
-- exact current service radius;
-- whether funeral policies/insurance are sold;
-- funeral package structures and prices;
-- burial-package inclusions;
-- cremation-package inclusions;
-- tombstone catalogue/pricing;
-- coffin catalogue/pricing;
-- catering/tents/chairs/flowers/venue services;
-- repatriation services;
-- livestream/recording services;
-- current social handles;
-- language capabilities;
-- current team members allowed in public marketing;
-- current church/cemetery/crematorium relationships;
-- review-request policy;
-- any regulatory licences/accreditations Emmanuel wants publicly referenced.
-
-## Source register
-
-Current sources reviewed 2026-08-07:
-
-1. Emmanuel Funeral Services official website — `https://emmanuelfunerals.com/` — current services, address, contacts, mission and positioning.
-2. Get It Bloemfontein, `SHE MEANS BUSINESS: Jeanette Ball — Emmanuel Funerals`, 15 Aug 2025 — current owner/leadership and family-business legacy.
-3. Samba retailer listing — corroborates 16 Falck Street and office number.
-4. Current Bloemfontein funeral-service directories/search results — competitor and local-market context only.
-5. Procompare current Bloemfontein funeral-service listings — market/competitor context only; ratings are third-party and should not be presented as official Emmanuel performance data.
+Flag conflicts instead of guessing.
 
 ## Final operating principle
 
-Emmanuel's marketing should reduce the emotional and practical friction around one of the hardest moments a family faces.
+Emmanuel's strongest marketing does not manufacture emotion around grief. It makes a difficult process feel clearer, more human and more manageable while showing the real care in the work.
 
-The creative standard is:
-
-> **Be useful before being beautiful. Be reassuring before being promotional. Show that Emmanuel knows what to do when the family does not.**
+> **Be specific enough to be useful, gentle enough for the moment, and factual enough to be trusted.**
