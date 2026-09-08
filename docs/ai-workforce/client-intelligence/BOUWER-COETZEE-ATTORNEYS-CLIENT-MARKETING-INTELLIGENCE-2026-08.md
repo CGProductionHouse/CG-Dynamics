@@ -1,516 +1,477 @@
 # Bouwer & Coetzee Attorneys — Client Marketing Intelligence
 
-Last updated: 2026-08-06
-Status: Review-state client intelligence. Keep isolated to Bouwer & Coetzee Attorneys. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before using mutable facts.
+Last reconciled: 2026-09-08
+Status: Canonical exact-client intelligence for Bouwer & Coetzee Attorneys. Current mutable facts remain freshness-gated under `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`.
+Canonical Dynamics client: **Bouwer & Coetzee Attorneys**
+Exact Dynamics client ID: `8e448cf9-1534-4ba1-89a4-93e4c8b83d2f`
+Creative authority: Issue #248 human creative standard
+Migration authority: Issue #267
 
-## Identity and freshness status
+## 1. Source-of-truth rule
 
-Correct client identity retained from prior CG project context:
+CG Dynamics is the permanent client source of truth. This file evolves the existing August intelligence rather than creating a parallel client record.
 
-- firm: Bouwer & Coetzee Attorneys;
-- location previously confirmed publicly: 8 Louw Wepener, Dan Pienaar, Bloemfontein;
-- telephone previously confirmed publicly: 083 266 5507;
-- email previously used: `luane@bouwercoetzee.co.za`;
-- Instagram handle previously identified: `bouwer_coetzee_attorneys`;
-- public professional description: Attorney | Conveyancer | Notary.
+Use source priority in this order:
 
-Public services previously identified:
+1. explicit current client / CG Production House correction;
+2. current client-supplied first-party evidence;
+3. current official website and official social profiles;
+4. current verified professional/public listings where needed;
+5. this reconciled Dynamics intelligence;
+6. older Project chats, historical captions and older research snapshots.
 
-- property transfers and conveyancing;
+Stored information is not automatically current. For a legal client, re-check people, professional status, contact details, service scope and claims before a material public campaign.
+
+## 2. Identity and current evidence
+
+### Current verified / reviewed evidence
+
+From the 2026-08-06 first-party source update and the current Project company-profile source:
+
+- canonical CG client: **Bouwer & Coetzee Attorneys**;
+- current client-facing source material also uses **Bouwer Coetzee Attorneys** without an ampersand; treat this as a display-name conflict, not a second client;
+- lead attorney: **Luané Bouwer-Coetzee**;
+- publicly stated professional description: **Attorney, Conveyancer and Notary**;
+- address: **8 Louw Wepener, Dan Pienaar, Bloemfontein**;
+- telephone: **083 266 5507**;
+- email: `luane@bouwercoetzee.co.za`;
+- Instagram previously verified: `bouwer_coetzee_attorneys`;
+- the 2026-08-06 CG-built Wix Studio URL was a temporary project-domain site, not proof of a final branded domain;
+- current Project company profile still records website status as `Coming soon`.
+
+The 2026-08-06 client-supplied website evidence also stated that Luané has more than eight years in the legal industry, holds BCom Law and LLB qualifications from the University of the Free State, and completed articles at McIntyre & van der Post. Treat those as first-party review-state professional claims and re-check before campaigns materially centred on credentials.
+
+### Current supported service set
+
+Current first-party evidence supports:
+
+- conveyancing and property transfers;
+- correspondent-attorney services in Bloemfontein;
+- Bloemfontein Deeds Office lodgements;
+- registrations and withdrawals;
+- document follow-ups and general Deeds Office matters;
 - antenuptial contracts;
-- notarial services;
-- divorce and family law;
-- estates and wills;
-- litigation;
-- commercial and banking law;
-- labour and employment matters;
-- landlord and tenant disputes;
-- general legal consultations.
+- notarial bonds and notarial services;
+- family law and divorce guidance;
+- civil matters and disputes;
+- contracts and agreements;
+- general legal consultation and guidance;
+- personal injury matters, with exact scope still confirmation-gated.
 
-Freshness note: the firm's own website and social content were not reliably crawlable during the 2026-08-06 research pass. The address, telephone, email, current team, active service list and social handles must therefore be revalidated against the live official profiles before publication or operational use. Do not present them as newly verified merely because they exist in stored memory.
+### Superseded / do-not-foreground service claims
 
-## Strategic position
+The older August intelligence mentioned wills, estates, labour/employment law, banking law and landlord/tenant work. The later verified source update explicitly said these must **not** be foregrounded as current public core services unless Luané separately confirms that they are actively accepted.
 
-Bouwer & Coetzee should not market itself as a generic firm that "handles all legal matters". That language is indistinguishable from dozens of firms and gives prospective clients no clear reason to act.
+Do not infer a current service simply because a historical chat, generic legal source pack or old research document mentions it.
 
-The strongest practical position is:
+## 3. Commercial position
 
-> A highly accessible Bloemfontein legal practice helping people and businesses move through property, family and notarial decisions with clarity, professionalism and personal attention.
+The firm should not sound like a generic practice that `handles all legal matters`.
 
-This position is supported by the firm's conveyancing and notarial identity and creates three strong commercial pillars:
+Current evidence supports a boutique, founder-led position built around:
 
-1. **Property and conveyancing** — transfers, property transactions, landlord/tenant matters and related guidance.
-2. **Life and family legal work** — antenuptial contracts, divorce, family arrangements, wills and estates.
-3. **Business and dispute support** — commercial agreements, employment issues, litigation and general legal consultations.
+- direct personal access to Luané;
+- plain-language explanation;
+- approachable but professional service;
+- property/conveyancing process clarity;
+- reliable Bloemfontein correspondent and Deeds Office support;
+- practical legal guidance without theatre or intimidation.
 
-## Core audiences
+Strong current strategic order:
+
+1. **Conveyancing and property transfers**.
+2. **Bloemfontein correspondent and Deeds Office services for attorneys**.
+3. **Antenuptial contracts and notarial services**.
+4. **Civil matters, contracts and legal consultation**.
+5. **Family law**.
+6. **Personal injury matters**, subject to exact scope confirmation.
+
+Do not turn this priority order into a claim of specialist status.
+
+## 4. Audience modes
 
 ### Property buyers and sellers
 
-They need:
+They need the process made understandable: what happens next, what documents are needed, what can delay a transfer, what the attorney does, and what they should prepare. Do not promise a registration date or outcome.
 
-- a clear explanation of the transfer process;
-- realistic timeframes without guarantees;
-- document checklists;
-- plain-language cost explanations;
-- regular communication;
-- confidence that deadlines and lodgement steps are managed.
+### Other attorneys / correspondent work
 
-### Engaged and newly married couples
+This is a distinct B2B mode. Be more concise and professionally operational than consumer-facing content. Useful themes are Bloemfontein Deeds Office availability, lodgements, registrations, withdrawals, document follow-ups and correspondent support. Never imply authority or availability beyond the verified service scope.
 
-They need:
+### Engaged / marrying couples
 
-- an understandable explanation of matrimonial property systems;
-- clear antenuptial-contract timing;
-- a respectful, non-alarmist tone;
-- quick consultation access;
-- content that frames the ANC as responsible planning, not mistrust.
+ANC content should frame legal planning as practical preparation, not mistrust or doom. Explain concepts simply, but attorney review is required for material South African matrimonial-property explanations.
 
-### Families facing divorce or separation
+### Families facing separation or divorce
 
-They need:
+Use a calm, confidential, process-led tone. No jokes about the client’s situation, no combative `fight` language, no sensational hooks and no implication that a social post can predict an individual outcome.
 
-- calm, confidential guidance;
-- clarity on process, children, maintenance and property consequences;
-- no sensational or combative marketing;
-- a realistic understanding that outcomes depend on facts and law.
+### Civil / contracts / general consultation
 
-### Wills and estate clients
+Use relatable situations such as unsigned understandings, unclear terms and agreements people have not read. This mode can carry the firm’s sharper legal humour when the topic is not sensitive.
 
-They need:
+### Personal injury
 
-- a simple reason to act now;
-- understandable estate-planning basics;
-- practical checklists;
-- trust and continuity;
-- clear differentiation between drafting a will and administering an estate.
+Treat as serious. Do not use a person’s disability, injury or trauma as a punchline or visual gimmick. Do not promise compensation, liability or success. Exact service and claims scope remains confirmation-gated.
 
-### Small businesses and employers
+## 5. Human creative standard for Bouwer & Coetzee
 
-They need:
+Correct facts are only the starting point. Future work should feel observably like this firm rather than generic legal AI copy.
 
-- contracts and commercial advice in plain language;
-- help resolving disputes early;
-- labour-process guidance;
-- predictable access to a legal professional;
-- clear scope and fees before work begins.
+### Desired voice
 
-### Referral partners
+- clear and human;
+- approachable without becoming casual about legal consequences;
+- clever enough to stop the scroll where the subject allows it;
+- trustworthy enough for real legal work;
+- relatable to everyday legal situations;
+- founder-led, with Luané’s personality visible;
+- calm and respectful on sensitive matters;
+- practical rather than jargon-heavy.
 
-Important referral partners include:
+A useful summary from current first-party Project material is: **funny enough to stand out, helpful enough to build trust and professional enough to convert**.
 
-- estate agents;
-- bond originators;
-- mortgage consultants;
-- accountants and tax practitioners;
-- financial advisers;
-- wedding venues and planners;
-- marriage officers;
-- HR consultants;
-- property managers;
-- developers and builders;
-- other attorneys requiring correspondent or specialist support.
+### Humour boundary
 
-## Human decision barriers
+Humour is a tool, not the brand’s entire personality.
 
-Prospective clients often delay because they fear:
+Good places for wit:
 
-- legal fees they do not understand;
-- being judged;
-- losing control of the situation;
-- complicated language;
-- slow communication;
-- an aggressive legal process;
-- selecting the wrong attorney;
-- committing before knowing the likely next steps.
+- contracts people did not read;
+- `we do not need it in writing` moments;
+- common signing mistakes;
+- broad property-transfer frustrations without mocking a client;
+- legal-word translations;
+- office / behind-the-scenes moments;
+- light community or event content.
 
-Marketing should reduce uncertainty without pretending to give a legal opinion online.
+Do **not** joke about:
 
-Useful communication principles:
+- divorce pain;
+- children or maintenance disputes;
+- injury/trauma;
+- confidential client situations;
+- legal outcomes;
+- a client being uninformed or making a mistake.
 
-- explain the process before selling the service;
-- state what documents to prepare;
-- distinguish an initial enquiry from formal legal advice;
-- clarify consultation and next-step expectations;
-- use plain language;
-- show the people behind the firm;
-- avoid guarantees and fear-based urgency.
+Never make the client the joke.
 
-## Competitor landscape
+### Generic legal filler to avoid
 
-### Large established Bloemfontein firms
+Avoid interchangeable phrases such as:
 
-These firms often compete through:
+- `your trusted legal partner`;
+- `protecting your rights` as empty filler;
+- `legal solutions tailored to you`;
+- `excellence, integrity, results`;
+- `fight for your rights`;
+- `we've got you covered` where no concrete point follows;
+- unsupported `best`, `leading`, `specialist` or guaranteed-result claims;
+- fear-based urgency.
 
-- long operating histories;
-- broad departments;
-- strong commercial and institutional networks;
-- conveyancing panels;
-- extensive professional teams;
-- established search visibility.
+Prefer a real situation, useful warning, process point or human observation.
 
-Bouwer & Coetzee should not try to imitate a large corporate firm. Its advantage can be direct access, personal continuity, fast explanation and a more human client experience.
+## 6. Caption standard
 
-### Specialist family-law practices
+### Core rule
 
-They compete through narrow expertise and emotionally focused content.
+**Add to the creative. Do not repeat it.**
 
-Bouwer & Coetzee's opportunity:
+Before writing, inspect what is already on the artwork/video and use the caption to add one useful layer: context, a practical implication, a human observation, the next step, or a reason to contact the firm.
 
-- create calm, useful family-law guidance;
-- avoid dramatic social content;
-- explain process and preparation;
-- show discretion and professional care.
+### Normal shape
 
-### Conveyancing-heavy firms
+Current Project evidence favours compact captions rather than legal essays.
 
-They compete through estate-agent relationships, bond panels, process efficiency and property education.
+A strong default is:
 
-Bouwer & Coetzee's opportunity:
+- one human hook or observation;
+- one concise supporting point;
+- one relevant next step / contact cue when needed;
+- disclaimer only where the content risks being read as advice;
+- maximum 5 dynamic hashtags by default.
 
-- become a highly useful educational partner for local estate agents;
-- provide transfer-stage updates and client guides;
-- build referral loyalty through communication quality;
-- publish property-law content tied to real buyer and seller questions.
+Do not force this structure when the supplied creative needs something else.
 
-### Low-cost online legal services
+### Serious subjects
 
-They compete on templates, convenience and price.
+For divorce, injury and other sensitive topics:
 
-Bouwer & Coetzee should compete on:
+- keep copy calm and practical;
+- use no more information than the post needs;
+- when poster side-points are useful, prefer **2–3 short points** rather than dense paragraphs;
+- focus on what the firm can guide the person through, not on drama.
 
-- proper legal context;
-- personal consultation;
-- execution and follow-through;
-- local accessibility;
-- professional accountability;
-- tailored documents instead of generic downloads.
+### Punchier non-sensitive work
 
-## Brand direction
+Project history supports bold hooks such as `Don't risk it`-style framing for contracts/documentation when the follow-through is specific and legally responsible. The hook must lead to a concrete point, not generic fear.
 
-The brand should feel:
+### Language
 
-- clear;
-- composed;
-- professional;
-- modern but not trendy;
-- human;
-- confidential;
-- locally grounded;
-- competent without arrogance.
+No durable firm-wide Afrikaans/English rule was established in the accessible Bouwer Project history. Default to the language of the brief/creative and use natural everyday language. Do not force Afrikaans, slang or mixed language for personality. Flag a firm-wide language preference if CG Production House wants one made permanent.
 
-Avoid:
+### Emojis
 
-- gavels, scales and generic courthouse stock imagery;
-- aggressive "fight for your rights" language;
-- legal jargon as authority theatre;
+No durable mandatory emoji pattern is established. Use sparingly and only when the platform/occasion supports it; serious legal guidance does not need decorative emojis.
+
+### Footer / contact block
+
+Do not mechanically add contact details to every caption unless the brief/current publishing convention calls for them. When contacts are needed, use only freshly verified details. Current review-state contacts are listed above.
+
+## 7. Dynamic SEO and hashtags
+
+Default maximum: **5 hashtags**.
+
+The company profile contains example tags such as `#BouwerCoetzeeAttorneys`, `#BloemfonteinAttorney`, `#LegalAdviceSouthAfrica`, `#LawTokSouthAfrica`, `#LegalTipsSouthAfrica` and `#LegalHumourSouthAfrica`. These are **seed/reference material only**, not a fixed bank.
+
+At generation time choose the strongest relevant set for the exact:
+
+- firm/entity;
+- verified legal topic/service;
+- platform;
+- Bloemfontein/local intent where relevant;
+- reliable current search/trend context.
+
+Do not label a tag `trending` without current evidence. Do not use a hashtag that implies an unverified service, authority, qualification or specialisation. Natural searchable wording in the caption matters too.
+
+## 8. Poster / text-on-post standard
+
+Bouwer content works best when a person can understand the point immediately.
+
+Preferred patterns:
+
+- short heading + short supporting line;
+- a real client situation rather than an abstract slogan;
+- 2–3 short side-points where explanation is needed;
+- one legal red flag or one myth/fact per post;
+- `Before you sign` as a recurring series;
+- plain-language process explanations;
+- service-specific copy that says what the firm actually helps with.
+
+Do not crowd a legal poster with mini-essays. Do not make the heading and subheading repeat the same thought.
+
+## 9. Content formats
+
+Current Project source material and historical CG work support:
+
+1. **Funny legal skits** for non-sensitive, relatable mistakes.
+2. **Legal red flags** that warn without fearmongering.
+3. **Founder-led videos** with Luané explaining one topic clearly.
+4. **Myth vs fact** posts.
+5. **Before you sign** content for agreements, property and other relevant documents.
+6. **Service explainers** for current verified service lines.
+7. **Behind the scenes** showing the human office/process without exposing client data.
+8. **What happens next?** process content.
+9. **Legal word, normal language** short-form videos.
+10. **Correspondent / Deeds Office** B2B content for external attorneys.
+
+Use one clear concept per short-form video. Legal education should help the viewer understand whether they need a consultation, not try to complete the consultation online.
+
+## 10. Visual and image-edit direction
+
+Current verified visual direction includes black with purple/pink and orange accents, founder visibility and real professional photography.
+
+Prefer:
+
+- Luané and real team/office photography;
+- actual explanation and working moments;
+- clean, readable layouts;
+- human/process proof;
+- real Bloemfontein context where useful.
+
+Reduce reliance on:
+
+- gavels;
+- justice scales;
+- fake courthouse imagery;
 - staged handshakes;
-- unsupported "best attorneys" claims;
-- fear-based divorce or estate messaging;
-- social posts that amount to unqualified individual legal advice.
+- synthetic `law office` stock scenes;
+- obviously AI-generated people where real firm photography is available.
 
-## Website and conversion system
+For edits to real Bouwer images:
 
-Recommended core pages:
+- preserve the real person’s identity and recognisable face;
+- preserve firm branding, logos and actual office context;
+- preserve composition unless the requested edit requires a change;
+- change only what was requested unless a broader redesign is explicitly requested;
+- do not over-retouch or silently alter a person’s appearance;
+- never create a visual that implies a legal outcome or client relationship that did not exist.
 
-1. Home
-2. Property and conveyancing
-3. Antenuptial contracts and notarial work
-4. Divorce and family law
-5. Wills and estates
-6. Commercial and employment matters
-7. Litigation and dispute resolution
-8. About the firm and professionals
-9. Fees and consultation process
-10. Resources and FAQs
-11. Contact
+## 11. Legal information and claim safety
 
-Each service page should include:
+All material legal information should be reviewed by the responsible attorney before publication.
 
-- who the service is for;
-- common situations;
-- what the firm can assist with;
-- what the first consultation covers;
-- documents to prepare;
-- process overview;
-- clear but non-promissory next action;
-- professional disclaimer.
+Never:
 
-### Lead pathways
+- promise or imply a win, settlement, registration date or legal outcome;
+- present general information as personalised legal advice;
+- invent fees, consultation arrangements, authority, court/jurisdiction coverage or service scope;
+- call the firm a `specialist` unless currently verified and supportable;
+- disclose or imply a client relationship or confidential matter without explicit informed consent;
+- infer professional registrations/standing from a marketing title when a material campaign requires current verification;
+- use testimonials without confirming continuing publication consent;
+- use fear to manufacture urgency.
 
-Use separate enquiry types:
+Advice-style content should make clear that circumstances differ and individual advice requires consultation where that distinction is material.
 
-- property transfer enquiry;
-- antenuptial-contract enquiry;
-- family-law consultation;
-- will or estate enquiry;
-- business/legal dispute enquiry;
-- general consultation.
+## 12. Search, referrals and commercial growth
 
-Do not use one vague contact form for every legal need.
+Preserve the useful strategy from the original August intelligence without treating it as mutable fact.
 
-Form fields should remain limited and privacy-conscious. Do not ask people to submit highly sensitive case details through an insecure public form.
+### High-intent search themes
 
-## Content system
-
-### Property and conveyancing
-
-- What happens after an offer to purchase is signed?
-- Who appoints the transferring attorney?
-- What documents should a seller prepare?
-- Why can a transfer be delayed?
-- Transfer attorney, bond attorney and cancellation attorney explained.
-- Buying property together: what should be discussed first?
-- Landlord and tenant issues that should be documented properly.
-
-### Antenuptial contracts
-
-- When must an ANC be signed?
-- In community of property versus out of community explained simply.
-- Accrual in plain language.
-- Why discussing an ANC is responsible planning.
-- What to bring to the consultation.
-
-All matrimonial-property explanations require attorney review before publishing.
-
-### Family law
-
-- What an initial divorce consultation usually covers.
-- Preparing documents before a family-law consultation.
-- Mediation versus litigation: high-level differences.
-- Why children should not become social-media content during disputes.
-- Common process questions without commenting on individual outcomes.
-
-### Wills and estates
-
-- When a will should be reviewed.
-- What happens when someone dies without a valid will.
-- Executor, beneficiary and witness roles.
-- Life changes that should trigger an estate-plan review.
-- A practical document checklist for families.
-
-### Commercial and employment
-
-- Why verbal agreements create avoidable risk.
-- Contract clauses business owners often overlook.
-- Early dispute intervention.
-- Basic document hygiene for employers.
-- The difference between information, consultation and formal legal representation.
-
-### Human authority
-
-- professional introductions;
-- why the attorneys chose their practice areas;
-- behind-the-scenes document preparation without exposing client data;
-- explanations of professional roles: attorney, conveyancer and notary;
-- community and referral-partner education.
-
-## Short-form video formats
-
-### "One legal question in 45 seconds"
-
-Answer one broad public-information question, reviewed by the responsible attorney. End by explaining that facts differ and individual advice requires consultation.
-
-### "Before you sign"
-
-Cover one preparation point for property, marriage or commercial agreements. Never imply the video replaces document review.
-
-### "What happens next?"
-
-Explain the next stage in a transfer, ANC, estate or litigation process.
-
-### "Legal word, normal language"
-
-Translate one legal term into understandable language without oversimplifying its consequences.
-
-## Search and local visibility
-
-Priority search themes should be matched to dedicated pages:
+Prioritise only verified current services, including:
 
 - conveyancing attorney Bloemfontein;
 - property transfer attorney Bloemfontein;
 - antenuptial contract Bloemfontein;
 - notary Bloemfontein;
-- divorce attorney Bloemfontein;
-- family law attorney Bloemfontein;
-- wills and estates attorney Bloemfontein;
-- commercial attorney Bloemfontein;
-- landlord tenant attorney Bloemfontein.
+- family / divorce attorney Bloemfontein;
+- correspondent attorney Bloemfontein;
+- Bloemfontein Deeds Office correspondent services;
+- contract / civil legal consultation Bloemfontein.
 
-Google Business Profile priorities:
+Do not target old service categories until they are reconfirmed.
 
-- verify current name, address, phone, website and hours;
-- use accurate primary and secondary categories;
-- add current professional photographs;
-- publish service descriptions;
-- answer general FAQs without giving case-specific advice;
-- request reviews ethically after completed service stages;
-- respond without confirming confidential client relationships or facts.
+### Referral growth
 
-## Paid media
+Strong relationship audiences include:
 
-### Google Search
+- estate agents and property professionals;
+- bond originators and mortgage consultants;
+- marriage officers / wedding ecosystem for ANC education;
+- accountants and financial advisers where the verified matter overlaps;
+- other attorneys needing Bloemfontein correspondent / Deeds Office support.
 
-Best suited to high-intent needs:
+Referral marketing should emphasise clarity, communication and reliable process rather than inducements or unsupported results.
 
-- ANC and notarial enquiries;
-- conveyancing and property-transfer searches;
-- divorce/family-law consultations;
-- wills and estates;
-- commercial consultation searches.
+### Reputation
 
-Use separate landing pages and conversion tracking for calls, forms and booked consultations. Do not send all ads to the homepage.
+Review requests should focus on service/process — clarity, communication, professionalism, responsiveness — rather than inviting confidential case detail or outcome-based claims.
 
-### Meta
+## 13. Website and conversion priorities
 
-Use primarily for:
+The 2026-08-06 source audit identified durable website priorities:
 
-- public education;
-- brand familiarity;
-- retargeting;
-- Wills Week or verified educational campaigns;
-- ANC planning content;
-- professional introductions.
+- final branded domain and launch status still need confirmation;
+- remove temporary Wix project branding at final launch;
+- correct any service-label typos;
+- create clear service pathways rather than one vague `all legal matters` message;
+- make correspondent / Deeds Office services easy to find;
+- verify every call/email button;
+- include privacy and professional disclaimers;
+- prefer real firm photography;
+- avoid public forms that solicit unnecessary confidential case detail.
 
-Avoid targeting that appears to infer or expose sensitive legal circumstances.
+Do not present the temporary Wix URL as the final domain.
 
-### LinkedIn
+## 14. Compact task packets for #241 runtime
 
-Use for:
+This client record is prepared for exact-client retrieval by `client_id + task type + supplied creative/context`. The shared runtime implementation remains owned by #241 and is not modified here.
 
-- commercial legal education;
-- employment and contract topics;
-- professional referrals;
-- property-sector relationships;
-- firm authority and team updates.
+### `caption please`
 
-## Referral growth
+Retrieve only:
 
-### Estate agents and property professionals
+- exact Bouwer client identity;
+- supplied asset/video and text already on it;
+- relevant audience/service mode;
+- current voice + humour boundary;
+- `add, do not repeat` rule;
+- only the verified service facts needed for the post;
+- legal claim/advice guardrails;
+- current contact details only if the task needs them;
+- max-5 dynamic SEO/hashtag rule;
+- unresolved facts that materially affect this post.
 
-Create:
+### `text-on-post`
 
-- buyer and seller transfer guides;
-- agent-ready FAQ sheets;
-- short property-law training sessions;
-- a reliable referral and progress-communication process;
-- co-branded educational events where ethically appropriate.
+Retrieve:
 
-### Wedding ecosystem
+- exact service/topic;
+- desired human hook range;
+- short heading/supporting line pattern;
+- 2–3 point limit when side-points are needed;
+- sensitive-topic humour restrictions;
+- legal accuracy/review guardrail.
 
-Build relationships with:
+### `content ideas`
 
-- venues;
-- planners;
-- marriage officers;
-- photographers;
-- financial advisers.
+Retrieve:
 
-Provide an ANC timing guide that helps engaged couples act before deadlines become urgent.
+- current strategic service priorities;
+- audience mode;
+- recurring formats;
+- recent/repeated themes to avoid duplicating;
+- legal and factual guardrails.
 
-### Accountants and financial advisers
+### `image edit`
 
-Relevant for:
+Retrieve:
 
-- wills;
-- estates;
-- commercial agreements;
-- succession planning;
-- property ownership structures.
+- real-person identity preservation;
+- branding/logo/office preservation;
+- change-only-what-was-requested rule;
+- preference for real founder/office proof over synthetic legal stock.
 
-Partnerships must never involve prohibited fee-sharing or misleading endorsement structures.
+## 15. Project-history lessons preserved
 
-## Reputation and reviews
+Durable lessons from accessible Bouwer Project work include:
 
-Request reviews around process and service rather than legal outcome.
+- ANC content performs as practical life planning rather than doom/mistrust framing;
+- the user prefers service copy that is specific to what the firm actually offers;
+- divorce guidance should use concise, practical support points rather than dramatic copy;
+- personal injury content requires special sensitivity and factual restraint;
+- witty legal language works for light/community/non-sensitive themes when it still supports the purpose;
+- bold `risk` hooks can work for contracts/documentation if the actual legal point follows immediately;
+- the user repeatedly asks for relevant hashtags, not the same bank on every post;
+- legal claims must be checked rather than casually repeated because they sound plausible.
 
-Useful prompts:
+Historical output is evidence of judgement and workflow, not a permanent caption library.
 
-- Was the process explained clearly?
-- Did communication help you understand the next step?
-- Was the team professional and responsive?
-- Did you feel prepared for the consultation or transaction?
+## 16. Current Project Source decision
 
-Never encourage clients to disclose confidential case facts publicly.
+Accessible Bouwer Project source:
 
-## Measurement
+- `Bouwer Coetzee Attorneys Company profile.pdf` — **KEEP** as useful original first-party evidence.
 
-Track:
+Its role after migration:
 
-- enquiries by service type;
-- qualified consultations booked;
-- consultation-to-instruction conversion;
-- source of instruction;
-- property and ANC referral partners;
-- enquiry response time;
-- call and form conversion by landing page;
-- review growth and themes;
-- content saves, shares and website clicks;
-- cost per qualified enquiry;
-- matters opened by campaign and service line;
-- repeat and referral instructions.
+- retain original business/tone/content evidence;
+- do not treat its example hashtag set as a fixed output bank;
+- treat `Website: Coming soon` as time-stamped evidence, not a permanent fact;
+- current Dynamics/Client Guide wins any later mutable conflict.
 
-Do not report reach or engagement as legal-service growth without linking it to qualified consultations or instructions.
+No Bouwer-specific source surfaced in the accessible Project/File Library evidence that warrants pure removal.
 
-## 90-day priority plan
+## 17. Unresolved / freshness-gated facts
 
-### Days 1–30: truth and conversion foundation
+Do not guess:
 
-- revalidate all contact details, professionals, services, locations and handles;
-- audit website and Google Business Profile consistency;
-- separate service landing pages and enquiry pathways;
-- create attorney-approved content and disclaimer workflow;
-- establish baseline enquiry sources and response times;
-- prepare ANC, transfer and consultation checklists.
+- preferred public display name with or without `&`;
+- final branded website domain and launch status;
+- current office hours;
+- full current team/support structure;
+- current consultation fee model;
+- booking method and whether online consultations are offered;
+- exact current personal-injury scope;
+- whether wills, estates, labour, banking and landlord/tenant work are currently accepted;
+- current Facebook, LinkedIn and Google Business Profile status;
+- current testimonial publication consent;
+- firm-wide language preference for English/Afrikaans;
+- any professional-status claim that needs current regulator-level verification for a material campaign.
 
-### Days 31–60: authority and referrals
+## 18. Ten-second preflight
 
-- launch property-transfer education series;
-- launch ANC planning series;
-- publish professional introductions;
-- begin estate-agent and wedding-partner outreach;
-- implement ethical review requests;
-- test tightly scoped Google Search campaigns.
+Before sending Bouwer work, check:
 
-### Days 61–90: optimise commercial outcomes
-
-- compare enquiries, consultations and instructions by service line;
-- improve high-intent landing pages;
-- expand winning search themes;
-- create one referrer education session;
-- build wills/estates and business-law content from real FAQs;
-- stop content that attracts attention but no suitable enquiries.
-
-## Compliance and professional boundaries
-
-All public legal content must be reviewed by a responsible attorney.
-
-Do not:
-
-- guarantee outcomes;
-- describe the firm as the best or a specialist unless legally and factually supportable;
-- disclose client identities or matter details without explicit informed consent;
-- create urgency through fear;
-- present general posts as individual legal advice;
-- use misleading testimonials;
-- compare firms through unsupported superiority claims;
-- publish outdated addresses, contacts, people or service claims.
-
-## Current verification gaps
-
-Before operational use, confirm directly from the firm's current official sources:
-
-- exact legal entity and trading name;
-- current attorneys and support team;
-- current physical and postal address;
-- current telephone and WhatsApp number;
-- current email addresses;
-- active website domain;
-- current Facebook, Instagram and LinkedIn profiles;
-- exact practice areas currently accepted;
-- consultation model and fees;
-- office hours;
-- conveyancing/notarial registrations and professional profile details;
-- whether online consultations are offered.
-
-Until confirmed, use stored details only as review-state context.
+1. exact Bouwer client only?
+2. current supported service, not an old generic legal category?
+3. sensitive or non-sensitive topic?
+4. caption adds instead of repeating artwork?
+5. line sounds human and client-specific rather than generic legal AI?
+6. humour helps rather than trivialises?
+7. legal information is general and review-safe?
+8. no invented outcome, fee, authority, credential or contact fact?
+9. no more than 5 relevant dynamic hashtags by default?
+10. real people/branding/composition preserved in image edits?
