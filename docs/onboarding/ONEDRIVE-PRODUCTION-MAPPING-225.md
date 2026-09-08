@@ -1,173 +1,42 @@
-# OneDrive Production Mapping — Least-Privilege Permission Decision (Issue #225)
+# OneDrive Production Mapping — Graph Auth Model (Issue #225)
 
-**Status:** Proposal (not applied to production)
-**Date:** 2026-09-08
+**Status:** Proposal (not applied to production). No Microsoft app/consent/secret/grant. No secrets written.
+**Date:** 2026-09-09 (supersedes the 2026-09-08 app-only revision)
 **Related:** Issue #225, #224 (Content Run), #219 (Content workflow)
 
----
+> **CORRECTION (2026-09-09): the source-of-truth OneDrive is a PERSONAL Microsoft account, not an Entra tenant.**
+> An earlier revision of this doc (and the `client-onboarding` upload adapter) assumed OneDrive **for Business** in the
+> `cgproductionhouse.com` Entra tenant, reachable **app-only / client-credentials** with `Files.ReadWrite.All` or
+> `Files.SelectedOperations.Selected`. That is WRONG for this storage. The email `info@cgproductionhouse.com` is used
+> across **two** Microsoft identity contexts; the CG Dynamics file authority is the **personal Microsoft account** at
+> `onedrive.live.com`. Public domain discovery showing that `cgproductionhouse.com` has a managed Entra tenant does
+> **not** mean the personal OneDrive lives there — it does not.
 
-## Goal
+## 1. Account type (proven 2026-09-09, read-only)
+- Owner: **personal Microsoft account (consumer MSA)**, display name "CG Production House", email `info@cgproductionhouse.com`.
+- Endpoint `onedrive.live.com`; CID **`a2ac9fe4b255f52f`** (16-hex consumer CID); path `/personal/a2ac9fe4b255f52f/Documents/Clients`; Microsoft 365 personal (~11 TB). Account-manager flyout shows the consumer "Microsoft account / View account" chrome.
+- Unrelated same-email contexts (NOT the OneDrive owner): work tenant **CG Production House** `7268f625-…` (initial domain `cgproductionhouse365.onmicrosoft.com`); separate **Econofoods** tenant `7fc5acca-…` (`econofoods.co.za`).
 
-Establish the narrowest valid Microsoft Graph application permission model that covers the **exact CG Production House OneDrive for Business "Clients" tree** and the required CG Dynamics operations:
+## 2. Supported Microsoft Graph auth model (official docs, verified)
+- **App-only / client-credentials is NOT supported.** `GET /me/drive` permissions: **Application = "Not supported."** Personal Microsoft accounts have no Entra tenant, admin consent, or application permissions.
+- **`Files.SelectedOperations.Selected` and `Sites.Selected` are SharePoint/OneDrive-for-Business (Entra Sites-model, admin-consent) permissions — NOT applicable to a personal Microsoft account.**
+- **Correct route: delegated OAuth 2.0 authorization-code flow** with the personal Microsoft identity, plus a **refresh token** for unattended server-side operation (CG Dynamics has no interactive user at runtime).
+  - Authority: `https://login.microsoftonline.com/consumers`.
+  - App registration **Supported account types: Personal Microsoft accounts** (personal-only, or "any org directory + personal"). **Redirect URI required** (web/server auth-code flow). Confidential server web app ⇒ client secret/certificate; **no admin consent** — `info@` (personal) self-consents once.
 
-- Durable Graph drive/item ID resolution for `Clients` root + per-client `Videos` folders
-- Read/list folder contents (inventory, naming drift detection)
-- Explicit future canonical folder creation (year/month/video folders) **on explicit staff action only**
-- No tenant-wide access; no delegated OAuth; no rename/move/delete without explicit approval
+## 3. Exact delegated scopes (least privilege) — list / read / create folders
+- **`Files.ReadWrite`** — read + create/modify the user's own OneDrive items. Covers list children (`GET /me/drive/items/{id}/children`), read metadata/content, **create folders** (`POST /me/drive/items/{id}/children`), upload. Verified: create-folder Delegated (personal Microsoft account) least-privileged = `Files.ReadWrite`.
+- **`offline_access`** — required for the refresh token (unattended server-side use).
+- `openid`, `profile` (optionally `User.Read`) — sign-in / identity.
+- NOT `Files.ReadWrite.All` (broader; includes items shared with the user). `Files.Read` alone cannot create folders.
 
----
+## 4. Impact on existing code (flagged; not changed in this PR)
+- `supabase/functions/client-onboarding/onedrive-adapter.ts` (client-credentials, `.default`, tenant GUID) **cannot work against this personal OneDrive** and must be re-architected to delegated auth-code + stored/refreshed refresh token. Code change, onboarding/#216 scope — a required follow-up, not done here.
+- `docs/onboarding/MICROSOFT-UPLOAD-PERMISSIONS.md` and `docs/client-onboarding-foundation.md` describe the wrong model for this storage and need the same correction.
+- Env/secret shape changes: instead of an app-only `ONBOARDING_MS_CLIENT_SECRET` used with `.default`, the model needs app client id + secret + redirect URI + a securely stored (encrypted) **refresh token** minted by a one-time interactive `info@` (personal) sign-in.
 
-## Environment Context (Verified)
+## 5. Schema (proposal) — `20260908130000_client_onedrive_production_mapping.sql`
+**Unaffected by the auth correction** — durable Graph `driveId` + `itemId` exist for personal OneDrive too (via `/me/drive/items/{id}`), so the mapping model holds as written in this branch: `clients.short_code`; `client_onedrive_mappings` (durable IDs, one per client); `content_run_onedrive_folders` (durable month/shoot folder id); RLS on, revoked from anon/authenticated, service-role read helpers + admin-only write helpers. No fuzzy runtime matching; no rename/move/delete. (Note: `videos_folder_item_id`/`month_folder_item_id` are currently `NOT NULL` — consider nullable-until-verified if a client folder has no `Videos` yet.)
 
-- **Account:** `info@cgproductionhouse.com` (personal OneDrive for Business)
-- **Tenant:** `cgproductionhouse.com` → **Managed Microsoft Entra ID tenant** (not consumer MSA)
-- **Tenant ID:** `7268f625-c8e9-42b9-b51e-60d4aa926f2d` (region AF; `NameSpaceType: Managed`)
-- **OneDrive Path:** `/personal/a2ac9fe4b255f52f/Documents/Clients` (drive path)
-- **Current App Model:** Client credentials (application-only), `scope=.default`, **no redirect URI**, no interactive login
-- **Existing Connector:** `microsoft-transition-sync` (read-only, separate `MICROSOFT_*` env vars) — **must not be modified**
-
----
-
-## Required Operations (App-Only)
-
-| Operation | Graph Endpoint | Purpose |
-|-----------|----------------|---------|
-| Resolve `Clients` root folder | `GET /drives/{driveId}/root:/Clients` | Get durable `driveId` + `client_folder_item_id` |
-| List client folders under `Clients` | `GET /drives/{driveId}/items/{clientFolderId}/children` | Inventory 86 folders, match to 55 active clients |
-| Resolve per-client `Videos` folder | `GET /drives/{driveId}/items/{clientFolderId}/children` (filter `name='Videos'`) | Get `videos_folder_item_id` |
-| List year/month folders | `GET /drives/{driveId}/items/{videosFolderId}/children` | Naming drift detection, inventory |
-| Create future year/month/video folder | `POST /drives/{driveId}/items/{parentId}/children` (folder facet) | Explicit staff action only |
-| Deep link (`webUrl`) | Returned by above calls | `Open production folder` button |
-
----
-
-## Permission Models Evaluated (Least-Privilege First)
-
-### 1. PREFERRED — `Files.SelectedOperations.Selected` (Application) + `write` role on `Clients` folder
-
-**Verification against Microsoft Graph v1.0 docs (2026-09-08):**
-
-- ✅ **GA in Graph v1.0** — `Files.SelectedOperations.Selected` is Generally Available
-- ✅ **Supports application (app-only) mode** — `POST /drives/{driveId}/items/{itemId}/permissions` with `grantedToIdentities:[{application:{id}}]`
-- ✅ **Granted per resource** — One grant on the `Clients` folder `driveItem`; **inherits to descendants** (folder grant covers entire production tree)
-- ✅ **Meets every #225 need** with no tenant-wide access:
-  - App-only ✓
-  - This exact personal site ✓
-  - Read/write the `Clients` tree ✓
-  - Durable drive/item ID resolution ✓
-  - List folders/files ✓
-  - Create future canonical folders on explicit request ✓
-
-**Setup Note (one-time admin action):**
-Creating the grant requires a high permission on the parent (`Sites.FullControl.All`, or `Sites.Selected` + `FullControl`/`Owner` on the site). The **runtime app only ever holds `Files.SelectedOperations.Selected`**.
-
-**Honest Caveats (to prove at grant time):**
-- MS docs are file-centric with an open Q&A on folder→descendant inheritance edges
-- OneDrive-for-Business **personal-site** app-only folder grants + `createUploadSession` on descendants should be validated during setup
-- Granting `Selected` **breaks inheritance** on that folder (unique-scope limits — negligible for one folder)
-
-**Grant API:**
-```http
-POST /drives/{driveId}/items/{clientsFolderItemId}/permissions
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "roles": ["write"],
-  "grantedToIdentities": [{ "application": { "id": "<onboarding_app_client_id>" } }]
-}
-```
-
----
-
-### 2. FALLBACK — `Sites.Selected` (Application) on this personal OneDrive site only
-
-- **Site:** `.../personal/a2ac9fe4b255f52f` (the exact personal OneDrive site)
-- ✅ Well-trodden GA app-only path; definitely works on a personal site
-- ✅ Scopes to `info@`'s OneDrive only
-- ⚠️ Grants entire site access (not folder-scoped), but still narrower than tenant-wide
-- Use if **folder-level Selected proves insufficient on the personal site**
-
----
-
-### 3. LAST RESORT — `Files.ReadWrite.All` (Application)
-
-- ❌ Tenant-wide; what the current onboarding upload adapter/docs assume
-- Recommend **ONLY if neither Selected model supports the required app-only ops here**
-- **Must document the exact Graph limitation first**
-
----
-
-## Code Impact: **None to Token Logic**
-
-All three models keep:
-- `client_credentials` flow
-- `scope=https://graph.microsoft.com/.default`
-- `ONBOARDING_MS_TENANT_ID`, `ONBOARDING_MS_CLIENT_ID`, `ONBOARDING_MS_CLIENT_SECRET`
-
-Only the **consented permission** (and for Selected, the one-time per-resource grant) changes.
-`createUploadSession` / `verifyDriveItem` / `downloadFile` / `createFolder` operate under whatever the token grants.
-
----
-
-## Additive Schema (Proposal-Only — Branch `feat/225-onedrive-mapping`)
-
-**File:** `supabase/migrations/20260908130000_client_onedrive_production_mapping.sql`
-
-| Table / Column | Purpose |
-|----------------|---------|
-| `clients.short_code` | Nullable, unique-when-set, manager-assigned (e.g., `ECONO`). Used **only to derive expected future names**, never to fuzzy-match existing folders. |
-| `client_onedrive_mappings` | One per active client: `drive_id`, `client_folder_item_id`, `videos_folder_item_id`, `web_url`, `folder_name` (display/audit only), `mapped_by/at`, `last_verified_at`. `unique(client_id)`. |
-| `content_run_onedrive_folders` | Per Content Run durable month/shoot folder itemId (#224/#225). |
-
-**Security:**
-- RLS enabled on both tables
-- `revoke all from anon, authenticated`
-- Service-role/Edge Function access via security-definer helpers (`get_client_onedrive_mapping`, `get_content_run_onedrive_folder`)
-- Admin-only write helpers (`upsert_client_onedrive_mapping`, `upsert_content_run_onedrive_folder`)
-
-**No fuzzy runtime matching. No rename/move/delete logic. No duplicate file store.**
-
----
-
-## ⛔ Unchanged Gate (Now Narrower in Scope)
-
-Resolving the real durable Graph IDs still needs an authenticated app token → requires:
-
-1. **Register** the dedicated single-tenant Entra app in tenant `7268f625-…` (no redirect URI)
-2. **Consent** the chosen **Selected** permission (`Files.SelectedOperations.Selected` recommended)
-3. **Perform the one-time folder grant** on the `Clients` folder `driveItem` (admin action)
-4. **Create one client secret** and write `ONBOARDING_MS_*` + `CLIENT_ONBOARDING_UPLOADS_ENABLED=true` into the `client-onboarding` Edge Function env (production secrets)
-
-**Not yet done:**
-- No app registered
-- No consent granted
-- No folder grant performed
-- No secret created
-- No production SQL applied
-- No OneDrive content changed
-- Meta #240 / Google #270 / TikTok #273 / client-intelligence worktrees untouched
-
----
-
-## To Proceed
-
-**Confirm which permission model** (recommend **Option 1: `Files.SelectedOperations.Selected` (write) on `Clients`**) **and** whether you'll:
-
-- Register the app + secret yourself (hand me the three env values), **or**
-- Authorise me to prepare the registration up to the secret/consent/grant step
-
-On authorisation, I will:
-1. Resolve the real `driveId` + `Clients` folder `itemId`
-2. Populate durable IDs for the 55 active clients
-3. Confirm the 7 missing + 1 ambiguous client folders
-4. Produce the proposal-only cleanup mapping
-5. **Still no rename/move/delete without a further explicit approval**
-
----
-
-## References
-
-- Microsoft Graph `Files.SelectedOperations.Selected` docs: `https://learn.microsoft.com/en-us/graph/permissions-reference#files-selectedoperations-selected`
-- Microsoft Graph `driveItem` permissions API: `https://learn.microsoft.com/en-us/graph/api/driveitem-post-permissions`
-- OneDrive for Business personal site structure: `https://learn.microsoft.com/en-us/onedrive/developer/rest-api/concepts/special-folders-app`
+## 6. Gate (nothing performed)
+No app registered, no consent, no secret, no grant, no SQL, no OneDrive change. Next step once approved: register a **personal-account** app (redirect URI), have `info@` (personal) interactively consent `Files.ReadWrite offline_access`, store the refresh token server-side, then resolve durable IDs via `/me/drive` and populate `client_onedrive_mappings` for the 55 active clients.
