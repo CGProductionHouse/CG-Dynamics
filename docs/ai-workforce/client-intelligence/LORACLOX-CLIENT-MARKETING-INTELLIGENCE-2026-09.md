@@ -23,6 +23,7 @@ It reconciles:
 - CG Dynamics Issue #287 and current repository truth;
 - live read-only Dynamics client row `21300630-6755-4591-9a49-e22abbaf7e3d`;
 - the accessible Project Source `CHAT GPT.pdf`;
+- accessible Loraclox-specific Project chat history and CG copy corrections;
 - current public evidence identifying Loraclox/Loraclox (Pty) Ltd as a Bloemfontein CCTV/electronic-security supplier/service provider;
 - current public procurement evidence for CCTV work;
 - current/recent trade evidence associated with CCTV/security-system equipment;
@@ -36,7 +37,7 @@ It is **not**:
 - a health-product record;
 - evidence that Loraclox provides armed response, guarding, investigations or control-room monitoring;
 - proof of any PSiRA registration number, installer registration, accreditation, certification, manufacturer authorisation, warranty or licence;
-- proof that every service listed in the older Project PDF is still currently offered;
+- proof that every service listed in the older Project PDF or historic Project copy is still currently offered;
 - a product catalogue or technical-specification database;
 - a permanent hashtag bank;
 - a caption archive.
@@ -76,6 +77,7 @@ When sources conflict, keep the conflict visible. Never silently combine phone n
 - `CA_CG_confirmed` — direct/repeated current CG or client instruction;
 - `dynamics_read_only` — read-only live Dynamics row evidence;
 - `project_source` — supplied in `CHAT GPT.pdf`;
+- `project_chat_history` — accessible Loraclox-specific Project chat/copy history;
 - `public_procurement` — government/public-entity procurement or annual-report evidence;
 - `public_directory` — current business-directory evidence;
 - `trade_corrob` — recent trade/shipment evidence;
@@ -103,6 +105,8 @@ When sources conflict, keep the conflict visible. Never silently combine phone n
 
 Loraclox should be treated as a **technology-led electronic-security systems business**. Current evidence strongly supports CCTV/security-system work and supports an access-control association. The older Project Source also lists electric fencing, EVAC systems, time-management systems and intruder alarm systems, but those items were not all independently reverified from a current first-party source during this audit.
 
+Accessible Project chat history additionally shows **biometric access systems** being used as a Loraclox-specific service/post topic. Treat that as historical client/CG evidence only: it supports the access-control history, but it does not establish current biometric hardware, integrations, specifications, certifications or present-day availability.
+
 ## 4. Current evidence table
 
 | Fact | Reviewed value | Provenance | State | Notes |
@@ -110,6 +114,7 @@ Loraclox should be treated as a **technology-led electronic-security systems bus
 | City | Bloemfontein | `project_source` + `public_directory` | `current_verified` | No current street address was reliably verified. |
 | CCTV work | provision/service/installation of CCTV systems | `project_source` + National Museum annual reports + PACOFS procurement evidence | `current_verified` | Strongest exact-service evidence. |
 | Access control | access-control systems association | `project_source` + current directory-category result | `current_supported` | Recheck exact current scope before detailed technical claims. |
+| Biometric access systems | used as a Loraclox-specific Project copy/service topic | `project_chat_history` | `stale_unverified` | Historical support only. Reverify before presenting as a current service and never infer biometric specs/integrations. |
 | Electric fencing | listed in Project Source | `project_source` | `stale_unverified` | Do not expand into compliance/certification claims without current evidence. |
 | EVAC systems | listed in Project Source | `project_source` | `stale_unverified` | Exact meaning/scope is not independently current-verified. |
 | Time management systems | listed in Project Source | `project_source` | `stale_unverified` | Do not infer HR/payroll/biometric functionality beyond evidence. |
@@ -183,14 +188,17 @@ The PDF conflicts with itself:
 - page 1 says **always include contact details in regular posts** and **always include location**;
 - later posting rules say **add contact info only when booking or branch-specific CTA is required**.
 
-Because the phone route is also unresolved, do **not** freeze either footer rule as permanent truth. For now:
+Accessible Loraclox Project chat history adds a useful signal: caption batches were explicitly requested with **contact details and hashtags**. This supports a practical caption pattern, but it does not resolve which current phone/contact route is correct and is not strong enough by itself to override every future brief.
+
+For now:
 
 1. include **Bloemfontein** when location is useful/required;
-2. use contact details only when the live brief needs them and the exact current route has been verified;
-3. do not combine both phone numbers;
-4. do not invent a website.
+2. where the brief calls for a normal caption footer, include contact details only after the exact current route has been verified;
+3. use up to 5 dynamic hashtags rather than the old frozen bank;
+4. do not combine both phone numbers;
+5. do not invent a website.
 
-This is an explicit unresolved CG/client decision for manual confirmation.
+Whether contacts are mandatory on every regular post remains a CG/client confirmation item, but recent Project practice leans toward including them in caption batches.
 
 ## 7. Service-scope guardrails
 
@@ -201,14 +209,15 @@ This is an explicit unresolved CG/client decision for manual confirmation.
 - electronic security systems;
 - access control at a general level, with current verification when technical detail matters.
 
-### Project-source services requiring freshness recheck before strong claims
+### Historical/Project services requiring freshness recheck before strong claims
 
+- biometric access systems;
 - electric fencing;
 - EVAC systems;
 - time management systems;
 - intruder alarm systems.
 
-Do not turn a category label into detailed capabilities such as:
+Do not turn a category label or historic post topic into detailed capabilities such as:
 
 - specific camera analytics or AI features;
 - facial recognition;
@@ -285,7 +294,9 @@ Use:
 - technical specificity only when verified and useful;
 - a local Bloemfontein context when relevant;
 - calm, grounded language rather than fear;
-- English by default, with natural Afrikaans when the actual brief/audience supports it.
+- English by default, with natural Afrikaans when the actual brief/audience supports it;
+- short, direct copy that still clearly says what the service does;
+- fresh wording when an angle has already been used before.
 
 Avoid:
 
@@ -297,11 +308,20 @@ Avoid:
 - `innovation you can rely on`, `experience the difference`, `your safety is our priority` and similar interchangeable claims;
 - fake technical authority;
 - workshop language copied from Supa Quick;
-- repetitive `protect what matters` hooks unless a specific brief genuinely earns them.
+- repetitive `protect what matters` hooks unless a specific brief genuinely earns them;
+- overused constructions beginning with **`Keeping...`**;
+- the generic phrase **`matters most`**;
+- recycling wording the user has already flagged as used before.
+
+### Durable Project-chat corrections
+
+Accessible Loraclox Project history repeatedly pushes creative work toward **specific service value rather than generic security language**. When text-on-post is requested, make it about the real verified service shown or being promoted, not an interchangeable slogan. Keep it concise enough for the design, but not so short that the meaning becomes vague.
 
 ## 11. Captions
 
 **Captions must add to the artwork/video, not repeat it.**
+
+For straightforward Loraclox social posts, accessible Project history supports a default rhythm of **one sentence, straight to the point**, followed by the appropriate verified contact/footer details when required and up to 5 dynamic hashtags.
 
 Good Loraclox captions should:
 
@@ -310,6 +330,7 @@ Good Loraclox captions should:
 - make technical work understandable without dumbing it down;
 - show process/workmanship when the creative supports it;
 - keep the first line specific rather than generic;
+- stay concise instead of expanding into a multi-paragraph technical explanation unless the brief asks for depth;
 - use CTA/contact detail only when the brief and verified contact route support it;
 - avoid promising crime prevention or guaranteed outcomes.
 
@@ -322,9 +343,11 @@ Prefer:
 - one clear technical/customer problem;
 - one concise benefit or verified function;
 - a short supporting line that helps a non-technical customer understand the value;
-- multiple genuinely different creative options when requested.
+- wording tied directly to the actual verified service shown;
+- short copy that still makes complete sense on the visual;
+- multiple genuinely different, fresh creative options when requested.
 
-Avoid turning the artwork into a list of every security service.
+Avoid turning the artwork into a list of every security service. Do not fall back to generic security slogans when a specific service-led line can be written.
 
 Do not use unsupported superlatives such as `best`, `most secure`, `fail-safe`, `complete protection`, `zero blind spots` or `guaranteed safety`.
 
@@ -347,7 +370,7 @@ The old PDF’s `30 sec max`, subtitle and calm-instructional voice-over prefere
 
 ## 14. Image generation/editing rules
 
-No Loraclox-specific historic image-edit lesson was recovered beyond the current Project Source.
+No Loraclox-specific historic image-edit lesson was recovered beyond the current Project Source/history.
 
 Apply the shared #248 standard:
 
@@ -415,7 +438,7 @@ The following evidence was not reliably accessible in this migration:
 - current product brands/models/specifications;
 - current warranties/pricing/stock;
 - a separate current Project Instructions text outside the supplied PDF;
-- additional Loraclox-specific Project chat history/corrections beyond what was recoverable through available Project/user context.
+- additional Loraclox-specific Project chat history/corrections beyond the accessible history now incorporated here.
 
 These gaps must remain unresolved rather than filled from generic security knowledge.
 
@@ -423,9 +446,9 @@ These gaps must remain unresolved rather than filled from generic security knowl
 
 1. **Which phone is current for public marketing?** Project Source: `+27 74 119 0819`; current directory: `+27 51 430 8968`.
 2. **Is `welda@loraclox.co.za` still the preferred public email?**
-3. **Should regular posts always carry contact details, or only CTA/booking posts?** The PDF contradicts itself.
+3. **Should regular posts always carry contact details, or only CTA/booking posts?** The PDF contradicts itself; accessible Project caption history leans toward including contacts, but the exact permanent rule still needs confirmation.
 4. **Is there a current public website?** None was verified.
-5. **Which of electric fencing, EVAC, time management and intruder alarms are still active/current service lines?**
+5. **Which of biometric access, electric fencing, EVAC, time management and intruder alarms are still active/current service lines?**
 6. **What is the current PSiRA registration/advertising wording, if applicable to Loraclox’s current services?**
 7. **What are the official current social profiles?**
 
@@ -437,18 +460,19 @@ Future task grounding should use:
 
 For `caption please`, retrieve only:
 
-- Loraclox voice/human-copy rules;
+- Loraclox voice/human-copy rules, including one-sentence/straight-to-the-point preference for simple social captions;
 - current verified service/topic facts for the creative;
 - current verified CTA/contact route when needed;
 - technical/privacy/regulatory claim guardrails relevant to that topic;
 - dynamic max-5 SEO/hashtag instruction;
+- rejected/reused wording where relevant, especially `Keeping...` and `matters most`;
 - unresolved facts that affect the exact task.
 
 Do not retrieve unrelated clients or the entire shared security research pack for a simple caption.
 
 ## 20. Final short Project Instructions
 
-Work only on Loraclox. Before factual, caption, poster, video or strategy work, retrieve current exact-client CG Dynamics/GitHub context for client ID `21300630-6755-4591-9a49-e22abbaf7e3d` and check mutable facts against current evidence. Treat Loraclox as an electronic-security/CCTV systems client, not a health product. Keep copy human, specific, useful and evidence-led; captions add to the creative instead of repeating it. Use max 5 dynamic hashtags. Preserve real equipment, labels, branding, people, proportions and composition in edits. Never invent services, technical specs, efficacy/safety claims, PSiRA status, certifications, supplier rights, stock, prices, warranties, contacts, hours, website/social profiles or capabilities. Do not imply armed response/guarding unless verified. Flag contact/service conflicts instead of guessing.
+Work only on Loraclox. Before factual, caption, poster, video or strategy work, retrieve current exact-client CG Dynamics/GitHub context for client ID `21300630-6755-4591-9a49-e22abbaf7e3d` and check mutable facts against current evidence. Treat Loraclox as an electronic-security/CCTV systems client, not a health product. Keep copy human, specific, useful, concise and evidence-led; simple captions are one sentence, straight to the point and add to rather than repeat the creative. Avoid recycled generic lines such as `Keeping...` and `matters most`. Use max 5 dynamic hashtags. Preserve real equipment, labels, branding, people, proportions and composition in edits. Never invent services, technical specs, PSiRA status, certifications, supplier rights, stock, prices, warranties, contacts, hours, website/social profiles or capabilities. Do not imply armed response/guarding unless verified. Flag contact/service conflicts instead of guessing.
 
 ## 21. Working rule
 
