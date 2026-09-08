@@ -38,6 +38,18 @@ Both branches are already present and active in **both CG Hours and CG Dynamics*
 
 No changes were required.
 
+## Wiseman Group billing relationship
+
+CA confirmed on 2026-09-08 that CG sends **one invoice to Wiseman Group** which covers the related brands/accounts, including:
+
+- `Supa Quick BFN`
+- `Supa Quick Centurion`
+- `WiseRide`
+
+These must **remain separate operational/content clients** because each has its own Facebook presence and therefore needs its own content ideas, planning, reporting context and client intelligence. The shared billing relationship must not collapse or merge their client identities.
+
+`Wiseman Group` remains a separate canonical client/entity for billing/account relationship purposes.
+
 ## Database safety rule applied
 
 The live updates changed only existing client names where a rename was required, or inserted new client records where CA explicitly confirmed a genuinely new/missing client. Existing client UUIDs and historical linked rows were not replaced or deleted.
