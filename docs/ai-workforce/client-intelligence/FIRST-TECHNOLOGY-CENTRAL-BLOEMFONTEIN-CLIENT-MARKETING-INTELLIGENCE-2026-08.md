@@ -1,1045 +1,566 @@
 # First Technology Central — Bloemfontein Client Marketing Intelligence
 
-Last updated: 2026-08-07
-Status: Current-source client intelligence. Scope is **First Technology Central / Bloemfontein only**. Do not generalise national First Technology Group claims into local delivery claims unless the Bloemfontein team confirms they are available locally. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
+Last reconciled: 2026-09-08
+Canonical status: **Current reviewed client-intelligence record for First Technology Central / Bloemfontein.**
+Dynamics client ID: `c8d34a97-8400-4f52-8b0d-843491fe3d3b`
+Migration authority: Issue #252, read with #241, #248 and `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`.
 
-## Executive direction
+CG Dynamics is the permanent source of truth. This record is the governed GitHub representation for the exact client. A generated Client Guide may exist as an export/debug view, but it is not a second maintained truth store and is not required as a ChatGPT Project Source.
 
-First Technology Central should not market itself as another computer shop or generic IT-support company.
+## Scope and identity lock
 
-Its strongest local commercial territory is:
+Canonical CG client: **First Technology Central**.
 
-> **Enterprise-grade technology capability with a Bloemfontein team that can assess, supply, implement, secure and support business IT locally.**
+Accepted public/history aliases for matching only:
+- First Technology (Central)
+- First Technology Central
+- First Technology Bloemfontein
+- First Tech, when used casually by the local team
 
-The local advantage is the combination of:
+Do **not** create a duplicate CG client for these labels. Do not collapse this client into First Technology Group nationally or FirstShop.
 
-- a real Bloemfontein office and team;
-- First Technology Group scale and national specialist access;
-- broad vendor relationships;
-- hardware, cloud, cyber security, networking, modern workplace, managed services and professional services under one ecosystem;
-- local relationship/account management rather than remote-only support;
-- the ability to serve SMEs through to larger institutions and enterprises.
+This record is scoped to the **Central / Bloemfontein operation**. National First Technology Group scale, vendor relationships, services, awards or partner claims are strategic context only unless current local evidence proves that the Central team supplies or implements the exact capability being discussed.
 
-The marketing challenge is that broad capability can easily become vague corporate technology language. The job of CG marketing should be to turn that depth into specific business problems, measurable outcomes and local proof.
+## Source-of-truth and freshness order
 
-## Verified current identity
+For mutable First Technology Central facts use the strongest current evidence in this order:
+1. explicit current client/CG Production House correction or client-supplied current information;
+2. current official First Technology / First Technology Central owned sources;
+3. current local First Technology Central social content;
+4. current verified business/listing evidence;
+5. current official FirstShop evidence where the task is specifically about FirstShop;
+6. older CG intelligence and historical posts.
 
-Current official and current-source evidence supports:
+Never treat an old caption, poster, uploaded PDF or group-level webpage as automatically current merely because it exists. Preserve conflicts and freshness states instead of silently normalising them.
 
-- Current public name: **First Technology Central**.
-- Industry: IT Services and IT Consulting.
-- Local headquarters/primary location: **87 General Hertzog Street, Dan Pienaar, Bloemfontein, Free State, 9301**.
-- Main phone: **051 430 4455**.
-- Current official group website: `https://www.firsttech.co.za/`.
-- Current official location email: `info@firsttechfs.co.za`.
-- Current local LinkedIn content also publishes `tech@firsttechfs.co.za` and `sales@firsttechfs.co.za`.
-- Local LinkedIn company page: `First Technology Central`.
-- Current LinkedIn page describes the operation as offering end-to-end technology solutions and a broad range of tailored technology solutions.
-- Current local page says First Technology Central supplies and implements hardware and software, complemented by support services and solutions.
+## Verified current identity and contact facts
 
-### Current location freshness
+### Primary Bloemfontein office
 
-Current First Technology Group locations page and current First Technology Central LinkedIn both place the Bloemfontein operation at **87 General Hertzog Street, Dan Pienaar**.
+`current_verified` — verified again 2026-09-08 from First Technology's current official locations page and the current First Technology Central LinkedIn company page:
 
-Older third-party and shopping-centre sources reference previous addresses including Zastron Street, Preller Square and Dan Pienaar Mall.
+- **87 General Hertzog Street, Dan Pienaar, Bloemfontein, 9301**
+- Main office phone: **051 430 4455**
+- Official location email: **info@firsttechfs.co.za**
+- Canonical group website: **https://www.firsttech.co.za/**
+- Public local identity: **First Technology Central**
+- Industry/public positioning: IT Services and IT Consulting; hardware/software supply and implementation with associated support services and solutions.
+
+Operational rule: use 87 General Hertzog Street as the primary First Technology Bloemfontein/Central office unless the exact task is specifically about the stationery/retail point below.
+
+### Dan Pienaar Mall stationery / office-essentials point
+
+`current_verified` — a recent First Technology Central LinkedIn post observed 2026-09-08 explicitly promotes office essentials at:
+
+- **Shop 4, Dan Pienaar Mall, Bloemfontein**
+- **sales@firsttechfs.co.za**
+- **051 430 4455**
+- **www.firsttech.co.za**
+
+The current client-supplied Project PDF also identifies Shop 4, Dan Pienaar Mall and the same sales contact.
+
+This changes the August 2026 interpretation. The mall location must **not** be treated as fully historical. Current evidence supports two distinct local contexts:
+- General Hertzog Street = primary Central/Bloemfontein office;
+- Shop 4, Dan Pienaar Mall = current stationery / office-essentials retail context.
+
+Do not claim the mall is the main enterprise IT office or that every Central technology service is delivered from the mall unless current evidence says so.
+
+### Current local sales / technical contact routes
+
+`current_verified` from recent First Technology Central posts:
+- **tech@firsttechfs.co.za** — current local technical/service marketing contact route.
+- **sales@firsttechfs.co.za** — current local sales/stationery marketing contact route.
+- **051 430 4455** — current recurring local main/sales phone.
+- **087 095 3337** — current recurring technical/cyber/service marketing phone in recent local posts.
+
+Contact-use guardrail:
+- use the exact route that fits the post or supplied brief;
+- do not stack every phone/email into every caption;
+- do not infer a formal department title, SLA, after-hours function or escalation path from the address/number alone.
+
+### FirstShop relationship
+
+`current_verified` at group/ecommerce level: **FirstShop is an eCommerce and B2B online resource powered by First Technology** and currently sells business IT products online.
 
 Operational rule:
+- `www.firsttech.co.za` is the normal First Technology service/company route;
+- `www.firstshop.co.za` may be used when the creative is explicitly FirstShop/ecommerce/product-shopping content;
+- do not infer local Bloemfontein collection, local stock, local pricing, delivery timing or a local FirstShop branch from national FirstShop pages;
+- FirstShop's national ecommerce contacts are not automatically First Technology Central's local contacts.
 
-Use **87 General Hertzog Street** as the current local office address. Treat older locations as historical unless the client confirms an additional active retail point.
+## Current locally evidenced capability
 
-## First Technology Group capability available as strategic context
+The following are supported by current/recent First Technology Central local content, the current company page and current client-supplied information. They may be used as local service/category context when relevant, while exact package, product, stock, price, implementation scope and support terms remain mutable:
 
-Current official group sources describe First Technology as one of the largest IT integration groups in EMEA, with more than 30 offices, operations across five global regions, 2,200+ employees, 100+ vendor partnerships and group turnover of R12 billion in 2024.
-
-These are **group-level proof points**, not Bloemfontein branch performance metrics.
-
-Use them to support the proposition that the local Central team can access broad expertise and vendor ecosystems, but do not imply that all group employees or all capabilities sit physically in Bloemfontein.
-
-## Verified current group technology pillars relevant to Central
-
-Official First Technology sources currently present:
-
-- Hybrid Data Centre & Cloud;
+- hardware and software supply/implementation;
+- ongoing IT support / managed-service context;
 - Cyber Security;
-- Networking Solutions;
-- Modern Workplace;
-- Managed Services;
-- Professional Services;
-- Microsoft Services;
-- software procurement / marketplace;
-- cloud cost optimisation / FinOps;
-- hardware procurement;
-- IT financing and flexible procurement models.
+- Endpoint Protection / endpoint-security context;
+- network security;
+- structured cabling;
+- Microsoft 365 licensing/productivity support context;
+- Microsoft 365 backup / data-protection context;
+- cloud solutions / backup context;
+- digital/business technology solutions;
+- servers, networking equipment and business IT infrastructure where supported by the exact brief/source;
+- stationery, office essentials and school-supply orders through the local retail/sales context.
 
-Current local LinkedIn content specifically references:
+### Capabilities that require task-time verification before a local claim
 
-- hardware;
-- secure networks;
-- cloud solutions;
-- ongoing IT support;
-- Managed Services;
-- Cyber Security;
-- Endpoint Protection;
-- Digital Solutions.
-
-A current local-team professional profile also shows certifications or experience around:
-
-- Microsoft Azure;
-- Acronis Cyber Protect / backup;
-- Cisco Meraki;
-- HPE networking.
-
-Use individual certifications only as proof of local expertise when current employment and permission for public use are confirmed.
-
-## Verified vendor ecosystem
-
-Current official First Technology partner material visibly includes major vendors such as:
-
-- Microsoft;
-- Dell Technologies;
-- Cisco;
-- Hewlett Packard Enterprise;
-- HP;
-- Apple;
-- VMware;
-- Palo Alto Networks;
-- Mimecast;
-- AWS;
-- Fortinet;
-- Sophos;
-- APC;
-- Lenovo and others across current group pages.
-
-This vendor breadth is commercially important because First Technology can position itself as **solution-led and vendor-agnostic**, rather than forcing every client into one technology stack.
-
-Do not publish vendor-tier labels, accreditations or partner levels without current verification for the exact First Technology entity and period.
-
-## Current local proof signal
-
-A current 2025/2026 industry LinkedIn activity source shows First Technology Central participating with Electrosonic at the **Free State Department of Education GIS Day at the University of the Free State**, showcasing MAXHUB and Kramer education technology for interactive learning spaces.
-
-This is useful local proof that Central participates in institutional and education technology activity in the Free State.
-
-Do not turn third-party event references into claims of a formal long-term Department of Education contract unless separately proven.
-
-## Core commercial problem
-
-Most businesses do not buy `hybrid IT`, `modern workplace` or `managed services` because those labels sound exciting.
-
-They buy because something hurts:
-
-- staff lose time to slow or unreliable systems;
-- Wi-Fi/network performance is poor;
-- backups are uncertain;
-- cybersecurity risk is rising;
-- Microsoft licensing is confusing or expensive;
-- hardware is ageing;
-- cloud spend is uncontrolled;
-- internal IT teams are overloaded;
-- branches/sites need standardisation;
-- remote work is inconsistent;
-- support response is too slow;
-- procurement is fragmented;
-- the business has no clear technology roadmap.
-
-Marketing should therefore start with **business pain and outcome**, then map into technology.
-
-## Positioning architecture
-
-### Primary local position
-
-**Your local technology partner with national-scale capability.**
-
-### Supporting pillars
-
-1. **One accountable technology relationship**
-   - hardware, cloud, networking, security, Microsoft and support across one ecosystem.
-
-2. **Local people, national specialist depth**
-   - Central relationship and service backed by First Technology Group expertise.
-
-3. **Business outcomes before product boxes**
-   - productivity, uptime, security, cost control and scalability.
-
-4. **Lifecycle support**
-   - assess, design, procure, implement, support, manage and optimise.
-
-5. **Multi-vendor choice**
-   - the right technology rather than one forced vendor stack.
-
-## Audience architecture — Bloemfontein / Free State
-
-## 1. SMEs without a full internal IT department
-
-Typical pain:
-
-- reactive fixes;
-- owner becomes accidental IT manager;
-- no documented environment;
-- weak backup/security discipline;
-- unpredictable IT spend.
-
-Offer direction:
-
-- IT health assessment;
-- managed support;
-- Microsoft 365 optimisation;
-- endpoint security;
-- backup;
-- network standardisation;
-- hardware lifecycle plan.
-
-Message:
-
-`Stop running your business around IT problems.`
-
-## 2. Mid-market companies with internal IT staff
-
-Typical pain:
-
-- small internal team stretched across support, security and projects;
-- no time for strategic work;
-- specialist skills needed only occasionally;
-- vendor/procurement complexity.
-
-Position First Technology Central as **augmentation**, not a threat to the internal team.
-
-Message:
-
-`Give your IT team specialists and capacity when they need it.`
-
-## 3. Professional services
-
-Relevant local verticals:
-
-- attorneys;
-- accountants;
-- financial services;
-- medical practices;
-- architects/engineers;
-- consultancies.
-
-Key concerns:
-
-- data confidentiality;
-- secure Microsoft environments;
-- backup;
-- access control;
-- device management;
-- downtime;
-- remote work.
-
-## 4. Education
-
-Relevant clients:
-
-- schools;
-- tertiary institutions;
-- training organisations;
-- public education environments.
-
-Current local market evidence supports activity around education technology.
-
-Potential solution stories:
-
-- interactive classroom/board technology;
-- networks and Wi-Fi;
-- device management;
-- Microsoft education environments;
-- security;
-- AV and collaboration;
-- infrastructure lifecycle.
-
-## 5. Agriculture and agri-business
-
-Free State opportunity:
-
-- distributed farms/offices;
-- unreliable connectivity;
-- remote sites;
-- backup/power resilience;
-- device management;
-- cyber risk in admin/finance systems;
-- cloud collaboration.
-
-Avoid generic `technology for farmers` fluff. Build around specific operational problems.
-
-## 6. Retail / multi-site businesses
-
-Needs:
-
-- standardised endpoints;
-- branch connectivity;
-- central management;
-- security;
-- support;
-- hardware rollouts;
-- uptime;
-- payment/retail technology where First Technology currently supports the relevant product stack.
-
-## 7. Public sector / institutional buyers
-
-Marketing must support long procurement cycles and multiple decision-makers.
-
-Focus on:
-
-- capability proof;
-- certifications;
-- implementation methodology;
-- vendor partnerships;
-- governance;
-- local support;
-- case studies where approval exists.
-
-Do not publish public-sector client claims unless confirmed and authorised.
-
-## The B2B buying reality
-
-Technology purchases are usually buying-group decisions, not one-person decisions.
-
-The 2025 Edelman–LinkedIn B2B Thought Leadership Impact research found that more than 40% of B2B deals can stall because of internal misalignment in buying groups, and that `hidden buyers` consume and evaluate thought leadership alongside obvious decision-makers.
-
-For Central, this means content cannot speak only to `the IT manager`.
-
-A single project may need to reassure:
-
-- IT;
-- finance;
-- procurement;
-- operations;
-- management;
-- compliance/security;
-- end-user leadership.
-
-Content should therefore include business-language proof around risk, cost, continuity, staff productivity and governance, not only technical specs.
-
-## Marketing system
-
-## 1. Local authority content
-
-The current local page is small relative to the capability behind it. That is an opportunity.
-
-Central should become the account Bloemfontein business owners and IT managers follow for **useful local business technology guidance**.
-
-Core series:
-
-### `Central Tech Check`
-
-One practical issue at a time:
-
-- `Would your backup actually restore today?`
-- `Three signs your Wi-Fi problem is actually a network-design problem.`
-- `What happens to Microsoft 365 access when an employee leaves?`
-- `When should a business replace laptops instead of repairing them?`
-- `Who is watching your endpoints after hours?`
-
-The point is diagnosis, not fear.
-
-### `One Business Problem`
-
-Take one pain and show the solution architecture.
-
-Example:
-
-`50 staff. Two sites. Constant login issues. Here's how we would assess it.`
-
-Do not invent client details. Use anonymised/hypothetical scenarios clearly labelled as such.
-
-### `Ask Central`
-
-Local expert answers a real question in 30–60 seconds.
-
-Best topics:
-
-- Microsoft licensing;
-- cyber hygiene;
-- backup;
-- hardware refresh;
-- Wi-Fi;
-- cloud migration;
-- multi-site support;
-- AI readiness.
-
-Real technical staff are more credible than generic voiceover.
-
-## 2. Cybersecurity as a business issue
-
-Avoid only posting hooded-hacker graphics.
-
-Content should translate security into:
-
-- business interruption;
-- email compromise;
-- identity access;
-- ransomware readiness;
-- restore capability;
+The August record captured strong First Technology Group capability across Hybrid Data Centre & Cloud, Modern Workplace, Professional Services, Microsoft Services, software marketplace, FinOps, IT financing and a broad vendor ecosystem. These remain useful **group-level strategic context**, but do not automatically become local Central delivery claims.
+
+Before publishing a local claim about any of the following, retrieve current exact-client evidence:
+- a specific managed-service package or SLA;
+- 24/7 or after-hours support;
+- response times or guaranteed recovery times;
+- specific cloud migration/FinOps delivery;
+- financing terms;
+- named vendor tier/accreditation/partner status;
+- local stock or permanent availability;
+- local implementation capability for a particular specialist product;
+- named customer/public-sector contract;
+- staff certification/current role used as public proof.
+
+## Group-vs-local proof rule
+
+First Technology Group has substantial national/international scale and a broad vendor ecosystem. The August research recorded group-level scale and major vendor relationships as useful strategic proof.
+
+Use this carefully:
+- acceptable framing: the local Central team operates within / can draw on the wider First Technology ecosystem where current evidence supports that relationship;
+- not acceptable: turning group employee counts, offices, turnover, vendor tiers, awards, specialist teams or service catalogue into a Bloemfontein branch performance claim;
+- reverify any number, award, accreditation or vendor-tier claim immediately before public use.
+
+Do not use `national capability` as a substitute for local proof.
+
+## Positioning
+
+First Technology Central should not sound like a generic computer shop or faceless enterprise integrator.
+
+Durable commercial territory:
+
+> **Local Bloemfontein technology accountability backed by broader First Technology capability, explained through real business problems and outcomes.**
+
+The communication order should usually be:
+1. the business problem or moment;
+2. the practical consequence for people/operations;
+3. the relevant technology/service;
+4. the useful next step or proof.
+
+Prefer outcomes such as uptime, security, support capacity, simpler procurement, staff productivity, continuity, cost control and a better user experience where factually supported. Do not lead with acronyms merely because the service is technical.
+
+## Audience and buying context
+
+Durable local audiences from the reviewed August intelligence remain relevant:
+- SMEs without a full internal IT department;
+- mid-market organisations with stretched internal IT teams;
+- professional-services firms;
+- schools, tertiary/training and education environments;
+- agriculture/agri-business where current use-case evidence fits;
+- retail and multi-site businesses;
+- public-sector/institutional buyers where claims and references are authorised.
+
+Technology buying is usually multi-stakeholder. Content can speak to owners, management, IT, operations, finance/procurement and end users without pretending every reader is an IT specialist.
+
+## Human creative standard — client-specific
+
+Correct facts are only the starting point. First Technology Central copy must feel like the local team understands real business technology problems and can explain them without corporate fog.
+
+### What feels right
+
+- professional, clear and confident;
+- calm, useful and technically literate;
+- business-first rather than product-spec-first;
+- human and locally accountable;
+- specific enough that the line could not be pasted under ten unrelated IT companies;
+- occasionally relaxed for stationery, team, behind-the-scenes or lighter community content;
+- soft local English/Afrikaans phrasing is allowed when it sounds natural, never forced for effect.
+
+### Caption construction
+
+- Start from the actual image/video/poster and identify what it already says.
+- **Add, do not repeat.** A caption must contribute a second layer: practical consequence, useful explanation, local observation, human context, proof, or reason to act.
+- Change the wording rather than paraphrasing the artwork line-for-line.
+- For simple organic posts, default to compact copy: usually a strong opening plus one useful follow-through sentence, then a CTA/footer only where it earns its place.
+- For technical education, a slightly longer explanation is acceptable if it improves understanding.
+- Prefer one clear benefit/problem per sentence over dense corporate feature stacking.
+- Use normal human sentence rhythm. Vary openings and CTA structures across posts.
+- Do not overuse questions, `Here’s to...`, `built for...`, or other repeated structures simply because they worked once.
+- Do not use an old published caption as a copy template. Historical posts prove facts/format conventions, not the future creative ceiling.
+
+### Language
+
+- Default public language is **English** based on current local posting evidence.
+- Natural Afrikaans or light English/Afrikaans mixing may be used when the brief, audience or supplied creative supports it.
+- Never force Afrikaans slang, translations or `local flavour` into a serious technical/cyber message.
+
+### Humour
+
+- Light, human humour is suitable for stationery, team/BTS and selected everyday-office moments.
+- Keep cyber, risk, outage, data-loss and serious business continuity content calm and credible rather than jokey or fear-driven.
+- No forced memes or trend-speak.
+
+### Avoid / rejected patterns
+
+Do not default to:
+- influencer-style hype;
+- exaggerated emotion;
+- robotic corporate jargon;
+- fear-only cybersecurity language;
+- meaningless `digital transformation` claims;
+- unexplained acronym soup;
+- vendor-brochure copy pasted into the local feed;
+- generic `future-proof your business` language;
+- `empowering your digital transformation`;
+- `technology that works for you`;
+- `innovative solutions for every need`;
+- `unlock your potential`;
+- `your trusted technology partner` as interchangeable filler;
+- `elevate your experience`, `discover the difference`, `where quality meets...`, or similar AI slop;
+- unsupported `best`, `leading`, `guaranteed`, `secure from every threat`, `zero downtime` or equivalent superiority/security promises.
+
+## CTA, contact and footer rules
+
+Current CG Project rule remains durable:
+- phone/email details are not mandatory on every organic caption;
+- include them for event-specific posts, paid service promotions, cybersecurity alerts/sales outreach, and posters/carousels where a direct CTA is operationally useful;
+- product/service posts should include the current relevant website route;
+- use **www.firsttech.co.za** for normal First Technology service/company posts;
+- use **www.firstshop.co.za** only when the exact post is genuinely FirstShop/ecommerce-led;
+- do not repeat contact information already prominent on the artwork unless the CTA needs it in caption text too.
+
+Contact selection should be context-specific:
+- general office/company route: `051 430 4455`, `info@firsttechfs.co.za`;
+- current technical/service marketing route evidenced in recent posts: `tech@firsttechfs.co.za`, `087 095 3337` or `051 430 4455` where the brief/source uses it;
+- stationery/sales context: `sales@firsttechfs.co.za`, `051 430 4455`.
+
+Do not invent which individual monitors a mailbox/number or whether a route is available after hours.
+
+## Poster / text-on-post guidance
+
+- Keep the title concise and specific.
+- Supporting text should explain the practical relevance, not simply restate the title.
+- Service posters should translate the technology into a business problem/outcome.
+- Product/stationery posters can be more direct and retail-friendly without becoming influencer copy.
+- Avoid cramming a whole service catalogue onto one artwork.
+- Avoid copy that sounds like a national vendor brochure if the creative is meant to feel local.
+- When the design already carries the offer, service or product name, use the caption to add context rather than repeating the poster.
+
+## Content, post and video guidance
+
+Existing August strategy remains useful as an idea bank, not a mandatory calendar.
+
+Strong repeatable formats include:
+- **Central Tech Check** — one practical business technology issue at a time;
+- **Ask Central** — a local specialist answers one real question in plain language;
+- **One Business Problem** — show how the team would assess a clearly hypothetical/anonymised scenario;
+- **Fix the problem** — show diagnosis/process rather than a magical before/after claim;
+- local implementation/process proof where customer data is protected;
+- staff/team expertise and behind-the-scenes work;
+- approved local case studies with real measurable proof;
+- vendor/product developments translated into local business meaning;
+- cyber resilience, backup/recovery, M365, networking/Wi-Fi, endpoint/security and hardware lifecycle education;
+- stationery, school-supply and office-essentials content with a practical local retail angle.
+
+### Content hierarchy
+
+For enterprise/service content:
+- problem/outcome first;
+- clear explanation second;
+- service/vendor terminology only as needed;
+- local proof or useful CTA when available.
+
+For product/stationery content:
+- use the actual product/use case;
+- keep it practical and easy to shop/enquire about;
+- never invent stock, price, school list, brand, pack size or promotion.
+
+### LinkedIn
+
+LinkedIn remains the strongest evidenced local B2B organic surface. Prioritise useful expert education, local proof, team expertise and business interpretation of technology rather than generic vendor reposts.
+
+Recent public captions are often operationally clear but generic. Treat them as evidence for current services/contact/footer patterns, **not** as the desired future writing quality.
+
+## Cybersecurity messaging
+
+Cybersecurity should be framed as a business issue, not a stock-photo hacker genre.
+
+Useful angles:
+- email/phishing risk;
 - endpoint visibility;
-- staff risk;
-- supplier/customer trust.
+- identity/access;
+- backup and tested recovery;
+- business interruption;
+- staff/user risk;
+- incident readiness;
+- customer/supplier trust.
 
-Strong campaign territory:
+Do not promise prevention of all attacks. Do not manufacture breach statistics or response guarantees. Claims should be technically checked when they go beyond general awareness.
 
-### `Could your business recover?`
+## Microsoft / cloud / backup messaging
 
-Assessment-led campaign around:
+Current local evidence supports Microsoft 365 and M365 backup content.
 
-- backup;
-- endpoint protection;
-- identity security;
-- incident readiness.
-
-CTA:
-
-`Book a technology/security assessment.`
-
-Do not promise prevention of all cyberattacks.
-
-## 3. Microsoft / Modern Workplace
-
-A major local commercial opportunity because most businesses already use Microsoft but often underuse or misconfigure it.
-
-Content:
-
-- Teams/SharePoint workflow;
-- licensing clarity;
+Good content explains:
+- licence/tool fit;
 - secure access;
-- device management;
-- onboarding/offboarding;
-- collaboration;
-- Copilot / AI readiness only where current expertise and licensing are confirmed.
+- onboarding/offboarding implications;
+- collaboration/workflow value;
+- backup/recovery distinction;
+- data protection and continuity.
 
-The message should be:
+Do not promise a specific recovery time, migration duration, savings percentage or licence outcome without the exact current service/assessment evidence.
 
-`You already pay for technology. Are you getting the value from it?`
+## Hardware and procurement messaging
 
-## 4. Hardware lifecycle and procurement
+Do not reduce business hardware marketing to endless isolated laptop posters.
 
-Do not reduce hardware marketing to laptop model posters.
-
-Better business narratives:
-
-- cost of ageing hardware;
-- standardising devices;
+Useful durable narratives from the August research:
+- ageing hardware and staff productivity;
 - lifecycle planning;
-- warranty/support;
-- financing/consumption models;
+- standardised devices;
+- warranty/support context;
 - onboarding kits;
-- multi-site rollout.
+- multi-site rollout;
+- procurement simplicity.
 
-Use group vendor relationships as proof of breadth, but local pricing and stock remain mutable.
+For any specific SKU, stock, price, warranty, finance or availability claim, use current exact-source evidence at task time.
 
-## 5. Managed Services
+## Visual and image-generation/editing rules
 
-Sell **certainty and capacity**, not `outsourced IT` alone.
+The visual standard is **real-world professional technology**, not over-saturated sci-fi decoration.
 
-Content should show:
+### Preserve in edits
 
-- what proactive monitoring means;
-- what gets documented;
-- how support works;
-- service-desk process;
-- escalation;
-- specialist access;
-- reporting;
-- business reviews.
+When editing a supplied real image:
+- preserve real people and facial identity;
+- preserve product geometry, proportions and distinguishing details;
+- preserve First Technology / FirstShop / vendor logos and branding exactly unless the user explicitly asks to change/remove them;
+- preserve readable product/vendor labels rather than hallucinating replacement text;
+- preserve composition and camera perspective unless a broader redesign is requested;
+- change only what the brief asks for.
 
-The strongest CTA is often an environment assessment rather than `sign a support contract`.
+### Generate with
 
-## 6. Local proof and case studies
-
-This is the single biggest trust opportunity.
-
-Build approved case studies around:
-
-- problem;
-- environment;
-- intervention;
-- measurable change;
-- customer quote;
-- ongoing support.
-
-Metrics might include:
-
-- reduction in support incidents;
-- faster onboarding;
-- reduced downtime;
-- improved Wi-Fi coverage;
-- licensing savings;
-- deployment time;
-- backup recovery proof;
-- security coverage.
-
-Never manufacture performance numbers.
-
-## Website / landing-page strategy
-
-The national First Technology website is strong for group capability but naturally broad.
-
-Central needs local conversion paths that answer:
-
-- Is there a Bloemfontein team?
-- What can they solve locally?
-- Who do I contact?
-- Do they support SMEs as well as enterprise?
-- Can they assess my current environment?
-- Can they supply and support hardware?
-- What happens after I submit an enquiry?
-
-Recommended local landing architecture:
-
-- First Technology Bloemfontein / Central;
-- Managed IT Services Bloemfontein;
-- Cyber Security Bloemfontein;
-- Microsoft 365 / Modern Workplace Bloemfontein;
-- Business Networking & Wi-Fi Bloemfontein;
-- Business Hardware Procurement Bloemfontein;
-- Cloud & Backup Bloemfontein;
-- Education Technology Free State;
-- Contact Central.
-
-Avoid thin duplicate pages. Each page should have actual local context, proof and contact ownership.
-
-## Local SEO
-
-Priority search intents:
-
-- IT support Bloemfontein;
-- managed IT services Bloemfontein;
-- IT company Bloemfontein;
-- cybersecurity Bloemfontein;
-- Microsoft 365 support Bloemfontein;
-- business IT support Bloemfontein;
-- network support Bloemfontein;
-- cloud services Bloemfontein;
-- business laptops Bloemfontein;
-- IT infrastructure Free State.
-
-Google Business Profile should reflect the current General Hertzog Street address and current contact details.
-
-## LinkedIn strategy
-
-LinkedIn should be Central's highest-priority organic social platform for decision-maker trust.
-
-Recommended mix:
-
-- 35% expert education;
-- 25% local customer/project proof;
-- 15% local team expertise;
-- 10% vendor/technology developments translated into business meaning;
-- 10% events/partnerships;
-- 5% recruitment/culture.
-
-Do not simply repost national vendor graphics without local interpretation.
-
-### Executive / technical employee amplification
-
-First Technology Central has named local professionals visible on LinkedIn.
-
-A stronger model is:
-
-- company page publishes the core insight;
-- relevant local specialist adds their perspective;
-- sales/account staff share with a real local comment;
-- CG turns the best technical points into short video and carousel content.
-
-This creates more human trust than a faceless corporate feed.
-
-## Video strategy
-
-B2B IT can be visually dead if CG films only people at laptops.
-
-Recommended formats:
-
-### `Fix the problem`
-
-Start with the business pain:
-
-- dead Wi-Fi zone;
-- endless password resets;
-- server room chaos;
-- ageing laptop fleet;
-- backup uncertainty.
-
-Then show the assessment/process, not a fake magical fix.
-
-### Local expert shorts
-
-One specialist, one question, one answer.
-
-Keep technical language understandable to business decision-makers.
-
-### Implementation proof
-
-Film:
-
-- rack/network preparation;
-- device staging;
-- installation;
-- testing;
-- dashboards where customer data is not exposed;
-- handover/training.
-
-### `What businesses get wrong`
-
-Examples:
-
-- backup is not the same as tested recovery;
-- Wi-Fi extenders are not a network strategy;
-- buying laptops one by one creates lifecycle chaos;
-- giving every user admin rights is not convenience.
-
-Claims should be technically reviewed by Central before posting.
-
-## Paid media
-
-## Google Search
-
-High-intent service campaigns:
-
-- IT support;
-- managed IT;
-- cybersecurity;
-- Microsoft services;
-- business hardware;
-- network/Wi-Fi;
-- backup/cloud.
-
-Use local landing pages and direct Central contact details.
-
-## LinkedIn paid
-
-Best for higher-value services and account-based targeting.
-
-Potential audiences:
-
-- owners/MDs;
-- finance directors;
-- IT managers;
-- operations managers;
-- school/institution leadership;
-- procurement;
-- Free State companies by headcount/industry.
-
-Best assets:
-
-- assessment offer;
-- local case study;
-- cyber readiness guide;
-- technology roadmap session;
-- Microsoft optimisation workshop.
-
-Avoid broad `brand awareness` campaigns with no commercial next step.
-
-## Meta
-
-Useful for:
-
-- local awareness;
-- recruiting;
-- small-business hardware/service offers;
-- event promotion;
-- retargeting website visitors where lawful and configured.
-
-It is generally weaker than Google Search/LinkedIn for complex enterprise buying intent.
-
-## Lead-generation engines
-
-## 1. IT Health Check
-
-Structured assessment covering:
-
-- devices;
-- network;
-- Microsoft/cloud;
-- backup;
-- security;
-- support model;
-- lifecycle risk.
-
-Output:
-
-one-page risk/opportunity map and next-step roadmap.
-
-## 2. Cyber Readiness Review
-
-Lead with resilience, not fear.
-
-Potential areas:
-
-- identity;
-- endpoint;
-- backup/restore;
-- patching;
-- MFA;
-- privileged access;
-- response readiness.
-
-Exact technical scope must be defined by First Technology Central.
-
-## 3. Microsoft Cost & Licence Review
-
-Commercially useful where Central is authorised to assess current licensing.
-
-Goal:
-
-- eliminate obvious waste;
-- align licence type to user need;
-- identify security/productivity gaps.
-
-Do not guarantee savings before assessment.
-
-## 4. Hardware Lifecycle Workshop
-
-For companies with 20+ devices:
-
-- inventory age;
-- warranty state;
-- standard models;
-- replacement windows;
-- budget forecast;
-- financing options.
-
-## 5. Wi-Fi / Network Assessment
-
-Strong local service because the pain is visible and understandable.
-
-## Competitive landscape — Bloemfontein
-
-### IPT Bloemfontein
-
-Current official site markets:
-
-- cybersecurity;
-- outsourced IT;
-- vCIO;
-- Microsoft cloud;
-- service management;
-- IT projects;
-- infrastructure;
-- free cyber-security risk assessment.
-
-Competitive strength:
-
-Clear MSP proposition and assessment-led funnel.
-
-Implication for Central:
-
-Central needs equally clear local conversion offers rather than relying only on group scale.
-
-### SciBit / Scientific Bitware
-
-Current official site positions a long-established Bloemfontein technology company with:
-
-- managed IT;
-- engineering/software;
-- security/infrastructure;
-- hardware;
-- power backup;
-- web/digital services;
-- strong quantified operational proof.
-
-Competitive strength:
-
-Very local, broad and proof-led.
-
-Implication for Central:
-
-Central should counter with **group specialist depth + major vendor ecosystem + local team + enterprise delivery** and publish more measurable proof.
-
-### Lesedi ICT
-
-Current search visibility positions Lesedi around Bloemfontein IT support and infrastructure.
-
-Competitive pressure:
-
-Local search capture and practical support messaging.
-
-### Small local IT-support firms
-
-Numerous smaller providers compete on:
-
-- fast onsite support;
-- hourly rates;
-- personal service;
-- hardware repairs;
-- simple managed support.
-
-Central should not enter a race to look like the cheapest break/fix shop.
-
-## Competitive positioning map
-
-| Competitor type | Typical strength | Central response |
-| --- | --- | --- |
-| Small local IT shop | Personal, cheap, fast | Local relationship + far deeper capability and vendor ecosystem |
-| Local MSP | Proactive support, assessments | Managed services + national specialist depth + enterprise delivery |
-| National integrator | Scale and capability | Same group scale with a real Bloemfontein team |
-| Retail/ecommerce | Product pricing | Solution design, lifecycle, implementation and support |
-| Single-vendor specialist | Deep niche expertise | Vendor-agnostic architecture and broader accountability |
-
-## Partnerships / local ecosystem
-
-Commercial partnership opportunities:
-
-- business chambers / local business networks;
-- accountants and compliance advisors for cyber-awareness education;
-- property developers / office fit-out partners;
-- AV specialists;
-- education technology partners;
-- telecom/connectivity providers;
-- managed print / office technology where not already internal;
-- Free State agriculture groups;
-- universities and training providers;
-- cyber insurance brokers for education only, subject to proper boundaries.
-
-The goal is co-created customer value, not logo swapping.
-
-## Event strategy
-
-Strong event formats:
-
-### `Business Technology Breakfast`
-
-One pain-led topic:
-
-- cyber resilience;
-- Microsoft cost/control;
-- AI readiness;
-- backup recovery;
-- modern meeting spaces.
-
-Keep it practical and small enough for discussion.
-
-### Vendor technology days
-
-Use major vendor partners but translate product launches into local business outcomes.
-
-### Education technology demo day
-
-Current local event evidence supports this vertical.
-
-## AI marketing opportunity
-
-AI is a valuable current topic but should not become generic hype.
-
-Content should distinguish:
-
-- where AI genuinely improves workflows;
-- security and governance requirements;
-- data readiness;
-- Microsoft Copilot readiness where appropriate;
-- infrastructure implications;
-- licensing/cost.
-
-Best lead asset:
-
-`Is your business actually ready for AI?`
-
-Assessment before implementation.
-
-## Trust architecture
-
-A B2B technology supplier needs proof in layers:
-
-1. **Local presence** — people and address.
-2. **Group scale** — broad expert access.
-3. **Vendor credibility** — current partnerships/accreditations.
-4. **Technical credentials** — current certifications.
-5. **Customer proof** — approved local case studies.
-6. **Process proof** — how assessment, implementation and support work.
-7. **Commercial proof** — outcomes and measurable improvement.
-
-The current public footprint is strongest in layers 1–4. CG should help build layers 5–7.
-
-## Review and reputation strategy
-
-For B2B IT, Google reviews still matter for local reassurance, but case studies and direct references often carry more weight for enterprise sales.
-
-Review themes to cultivate naturally:
-
-- response;
-- technical expertise;
-- reliability;
-- communication;
-- project delivery;
-- after-sales support;
-- problem resolution.
-
-Do not incentivise reviews or expose confidential client environments.
-
-## Sales-content alignment
-
-Marketing should support actual sales conversations.
-
-Every major service should have:
-
-- one-page overview;
-- discovery questions;
-- proof/case study;
-- short explainer video;
-- objections/FAQ;
-- clear assessment or meeting CTA.
-
-Marketing success means sales staff actually use the material.
-
-## Measurement
-
-Do not judge Central marketing by follower count.
-
-Track:
-
-- qualified enquiries;
-- enquiry source;
-- assessment bookings;
-- proposals generated;
-- pipeline value;
-- win rate;
-- sales cycle length;
-- service category;
-- company size/vertical;
-- cost per qualified lead;
-- content-assisted opportunities;
-- local landing-page conversion;
-- Google Business calls/directions;
-- LinkedIn engagement from target job functions;
-- event registrations-to-meetings;
-- marketing-sourced and marketing-influenced revenue where CRM data permits.
-
-## CG Dynamics data structure
-
-For each lead/opportunity track:
-
-- organisation;
-- industry;
-- staff/company-size band;
-- contact role;
-- problem category;
-- service interest;
-- source;
-- campaign/content touchpoint;
-- assessment booked;
-- proposal status;
-- opportunity value where authorised;
-- outcome;
-- lost reason;
-- next follow-up.
-
-Do not place credentials, passwords, security vulnerabilities or confidential infrastructure diagrams in general marketing records.
-
-## 90-day local growth plan
-
-### Days 1–30 — Clarity and local proof
-
-- verify local services and team roster;
-- audit current LinkedIn and Google Business Profile;
-- update all legacy address references to 87 General Hertzog Street;
-- define 4–6 priority commercial services;
-- create local landing page/contact path;
-- photograph/video current local team and office;
-- capture local certifications/skills with permission;
-- build first `Central Tech Check` posts;
-- define IT Health Check offer;
-- identify three customers suitable for case-study permission.
-
-### Days 31–60 — Lead engines
-
-- publish local problem-led SEO pages;
-- launch Google Search for high-intent services;
-- run LinkedIn content consistently;
-- record local expert video series;
-- launch Cyber Readiness or IT Health Check campaign;
-- publish first approved local case study;
-- create sales one-pagers around priority services;
-- hold one small business-technology event/webinar.
-
-### Days 61–90 — Account growth and optimisation
-
-- analyse qualified lead source and sales quality;
-- retarget engaged decision-makers with case-study/assessment content;
-- build vertical campaigns for education, professional services and selected Free State industries;
-- expand employee advocacy;
-- create second/third case study;
-- optimise paid keywords and landing pages;
-- connect campaign activity to CRM opportunity stages;
-- report pipeline impact rather than vanity metrics.
-
-## Content ideas ready for development
-
-- `Your backup says successful. When last did you test a restore?`
-- `5 warning signs your office Wi-Fi needs redesign, not another extender.`
-- `What actually happens when an employee leaves your Microsoft environment?`
-- `The hidden cost of buying business laptops one at a time.`
-- `Internal IT team stretched? Here's what co-managed IT actually means.`
-- `What a cyber readiness review should look at.`
-- `Three questions to ask before moving another workload to the cloud.`
-- `What does “managed services” actually mean after you sign?`
-- `AI-ready does not start with buying AI licences.`
-- `Local support, national specialists: when that matters.`
-
-## Tone
-
-Should feel:
-
-- expert;
-- clear;
-- practical;
-- calm;
-- locally accountable;
-- business-first;
-- credible;
-- technically literate without jargon overload.
+For new visuals:
+- believable business workspaces, server/network environments, meeting spaces, devices, local-team situations or clean product/stationery setups;
+- realistic materials and lighting;
+- clean negative space where copy/design will be added later;
+- First Technology's professional blue/corporate visual territory where relevant;
+- credible network/cloud/cyber visual metaphors rather than implausible interfaces.
 
 Avoid:
+- random fake dashboards containing sensitive-looking data;
+- hooded-hacker clichés as the default cyber visual;
+- invented vendor logos or corrupted brand marks;
+- fake product models/specs;
+- over-saturated gaming/sci-fi styling for ordinary business IT;
+- casual/influencer aesthetics that undermine enterprise credibility.
 
-- meaningless `digital transformation` copy;
-- generic stock-photo tech posts;
-- fear-only cybersecurity marketing;
-- unexplained acronyms;
-- vendor brochure copy pasted into local feeds;
-- pretending every business needs the most expensive stack;
-- AI hype;
-- unsupported security guarantees.
+## Dynamic social SEO and hashtags
 
-## Evidence gaps requiring direct client confirmation
+Default CG rule: **maximum 5 hashtags**.
 
-Before operational use, confirm:
+The current Project's stored hashtag list is useful as **seed/history only**, not as a fixed output bank. Historic/local seeds include terms such as:
+- `#FirstTechnology`
+- `#CyberSecurity`
+- `#ManagedServices`
+- `#ITSupport`
+- `#EndpointProtection`
+- `#DigitalSolutions`
+- `#StationerySupplies`
+- `#OfficeEssentials`
+- `#BloemfonteinBusiness`
+- `#TechForBusiness`
+- `#WorkSmart`
+- `#SecureYourBusiness`
 
-- exact current Central team and public-facing roles;
-- whether the Dan Pienaar Mall / Preller retail presence is fully closed or remains a separate point;
-- correct function of `tech@firsttechfs.co.za`, `sales@firsttechfs.co.za` and `info@firsttechfs.co.za`;
-- current local support hours and after-hours SLA availability;
-- current local managed-service packages;
-- assessment offerings and whether any are free/paid;
-- local service radius across Free State/Northern Cape/Lesotho if applicable;
-- local case studies and reference customers allowed for marketing;
-- current public-sector/education contracts allowed for reference;
-- current local vendor certifications and partner status;
-- current financing options available through Central;
-- FirstShop relationship and local procurement/collection flow;
-- active Google Business Profile details;
-- exact social handles beyond LinkedIn;
-- current campaign priorities.
+At publication time choose the strongest 3–5 for the exact:
+- client/entity;
+- post topic/service/product/vendor;
+- platform;
+- Bloemfontein/Free State relevance where useful;
+- current search intent/trend evidence when reliable.
 
-## Source register
+Rules:
+- never mechanically paste the same five tags;
+- do not call a tag `trending` without current evidence;
+- do not create a false local service/vendor/location claim through hashtags;
+- platform behaviour matters: LinkedIn, Facebook, Instagram and TikTok should not blindly receive identical tags or copy;
+- use natural searchable terms in the caption itself; hashtags do not replace readable copy.
 
-Current sources reviewed 2026-08-07:
+## Recent social/content audit — 2026-09-08
 
-1. First Technology Central LinkedIn company page — current local identity, location, positioning and current local posts.
-2. First Technology Group official website — current group capability, scale, services and positioning.
-3. First Technology official locations page — current Bloemfontein address, phone and email.
-4. First Technology official partner page — current visible vendor ecosystem.
-5. First Technology official software-services pages — Microsoft, software marketplace and FinOps positioning.
-6. FirstShop official about page — First Technology B2B procurement/ecommerce context.
-7. Electrosonic / current LinkedIn activity around Free State GIS Day — current local education-tech participation signal.
-8. IPT official Bloemfontein and managed-services pages — local competitor research.
-9. SciBit official website/about pages — local competitor research and proof architecture.
-10. Lesedi ICT current local-search presence — local competitor context.
-11. 2025 Edelman–LinkedIn B2B Thought Leadership Impact research — buying-group and hidden-buyer marketing context; global B2B benchmark, not South Africa-specific behaviour.
-12. Older Preller Square / third-party listings — historical location/retail context only; overridden by current official location evidence.
+### Accessible
+
+Current First Technology Central LinkedIn/company evidence was accessible and showed:
+- primary location at 87 General Hertzog Street;
+- current public company identity and website;
+- Back-to-School / bulk and individual stationery supply messaging;
+- current cybersecurity messaging;
+- Microsoft 365 licensing/productivity messaging;
+- Microsoft 365 backup messaging;
+- network security messaging;
+- structured-cabling messaging;
+- current local technical/sales contact routes;
+- the current Shop 4, Dan Pienaar Mall stationery/office-essentials location;
+- recent use of five topic-specific hashtags on some posts.
+
+### Durable observations
+
+- B2B technical/service copy is predominantly English.
+- Current posts are usually short and direct, with functional contact lines.
+- Cyber, M365, backup/network and stationery are active current content territories.
+- Local content sometimes uses a clear sales/footer block, but this should not override CG's explicit rule to add contacts only where operationally useful.
+- Recent posts contain generic phrases such as `stay ahead`, `work smarter`, `future-proof` and broad solution language. These are current historical evidence, not the creative-quality target under #248.
+- Five hashtags in recent posts supports the max-five standard, but the exact five must remain dynamic.
+
+### Not confidently accessible in this migration
+
+- a verified current local Facebook page/feed;
+- a verified current local Instagram account/feed;
+- a current local TikTok identity/feed;
+- the active Google Business Profile interface/details beyond evidence already held in prior research.
+
+Do not invent these identities or claim a cross-platform pattern from LinkedIn alone.
+
+## Current ChatGPT Project instruction reconciliation
+
+The existing First Technology Project instructions were reviewed against current Project evidence, #241 and #248.
+
+### Preserve
+
+- professional, clear, confident tone;
+- helpful rather than hype;
+- occasional natural human-casual wording where suitable;
+- human local-team voice;
+- core content types: cybersecurity awareness, services, products/FirstShop, BTS/team, client-facing proof, education/FAQ and mini-campaigns;
+- contact-details-only-when-useful rule;
+- website on product/service content;
+- clean, real-world professional visual standard;
+- no influencer language, forced humour/memes, corporate jargon or exaggerated emotion.
+
+### Supersede / refine
+
+- the static `SEO Hashtags` list is no longer an automatic output bank; it is seed/history only, with max 5 chosen dynamically at task time;
+- `FirstShop` is not an automatic website/footer for every product post; use it only when the exact content is genuinely FirstShop/ecommerce-led;
+- old one-location assumptions are replaced by the current two-context location model: General Hertzog primary office + Dan Pienaar Mall stationery/office-essentials point;
+- old captions are not quality templates; captions must add beyond the artwork/video and vary wording/openings.
+
+## Project Source audit — 2026-09-08
+
+### `First Tech business info.pdf` — KEEP
+
+Reason:
+- useful client-supplied evidence for business identity, phone, local technical/sales contacts, service categories and the Dan Pienaar Mall retail/stationery context;
+- recent first-party LinkedIn evidence supports the mall stationery location rather than disproving it.
+
+Guardrail:
+- the PDF is not standalone current operational truth for every service/location claim;
+- its `physical location` framing does not include the current primary General Hertzog Street office;
+- use the live/canonical exact-client context when location/service role matters;
+- do not infer that all enterprise IT services are delivered from the mall or that all broad group service claims are locally available merely from this PDF.
+
+No other current Project Source file was directly observable in the accessible Project source context for this migration. Do not invent source names or removal actions.
+
+## Runtime / task-specific retrieval readiness
+
+The canonical task key is:
+
+`client_id=c8d34a97-8400-4f52-8b0d-843491fe3d3b + task_type + supplied creative/context`
+
+Routine ChatGPT/CG Dynamics work should retrieve a compact slice rather than this whole record.
+
+### `caption`
+Return only:
+- exact First Technology Central identity/entity context;
+- current relevant service/product facts;
+- human caption/voice rules;
+- current relevant CTA/contact/footer rule;
+- group-vs-local claim guardrail;
+- dynamic SEO/hashtag instruction;
+- task-relevant unresolved facts.
+
+### `content_ideas`
+Return only:
+- current local content territories;
+- business-problem/outcome positioning;
+- suitable formats;
+- relevant current service categories;
+- current opportunity/trend evidence where available;
+- claim guardrails.
+
+### `poster_copy` / `script`
+Return only:
+- concise human creative rules;
+- exact relevant service/product facts;
+- technical-language boundary;
+- CTA/fact guardrails;
+- current entity/location context.
+
+### `image_edit`
+Return only:
+- exact brand/product/vendor preservation rules;
+- real-person/product/composition preservation rules;
+- requested-change boundary;
+- task-specific factual/logo constraints.
+
+### `factual_lookup`
+Return current value + provenance/freshness state + conflict status; never substitute old project-source text when current canonical evidence conflicts.
+
+## Durable strategic direction retained from August 2026
+
+The prior reviewed strategy remains useful where it is clearly a recommendation rather than a mutable business fact:
+- lead with business pain and outcomes;
+- build local authority through useful technical education;
+- make managed services about certainty/capacity, not vague outsourcing;
+- translate cyber into business interruption/resilience rather than fear;
+- show real process and implementation proof;
+- build approved local case studies rather than invented metrics;
+- use local SEO/search intent around business IT, cyber, Microsoft, networking, cloud/backup and hardware where relevant;
+- use assessment-led conversion offers only when the exact current Central offer/scope is confirmed;
+- sell fewer acronyms and show more local expertise, process and proof.
+
+Prior competitor research and broader B2B buying-group research remain background strategy, not mutable client facts and not something to duplicate during routine client tasks.
+
+## Unresolved / must not be guessed
+
+The following remain `possible_change` / `stale_unverified` / `needs direct confirmation` depending on the task:
+- exact current Central staff roster and which people may be named publicly;
+- formal role/scope of `tech@firsttechfs.co.za`, `sales@firsttechfs.co.za` and `info@firsttechfs.co.za` beyond their current observed usage;
+- whether `087 095 3337` is a dedicated technical line, a campaign line or another exact function;
+- exact current support hours and any after-hours/24-7 SLA availability;
+- exact local managed-service packages and assessment products, including free/paid status;
+- exact local service radius beyond Bloemfontein / Free State;
+- approved current local case studies, customer names and measurable outcomes;
+- public-sector/education customer or contract claims allowed for marketing;
+- exact current local vendor tiers/accreditations and staff certifications approved for public use;
+- current local financing terms/options;
+- local FirstShop procurement/collection relationship beyond the verified national ecommerce relationship;
+- current local Facebook, Instagram, TikTok and Google Business Profile identities/details;
+- exact campaign priorities after this migration;
+- stock, pricing, availability, delivery/lead time, promotions, vendor model/SKU facts and school-list specifics at any given time.
+
+If any of these are required for a live task, retrieve current evidence or flag the gap. Never fill it from national/group assumptions.
+
+## Source register and provenance — reconciled 2026-09-08
+
+### Current authoritative / first-party evidence
+
+1. Current First Technology official locations page — Bloemfontein office at 87 General Hertzog Street, `051 430 4455`, `info@firsttechfs.co.za`.
+2. Current First Technology Central LinkedIn company page and recent updates — local identity, primary office, company positioning, current service/content topics, current contact routes, current stationery retail location and recent hashtag patterns.
+3. Current First Technology official website — current group capability/context; group claims are not automatically local claims.
+4. Current FirstShop official site/about/contact material — confirms FirstShop as a First Technology-powered ecommerce/B2B resource; local Central collection/stock/service is not inferred.
+5. Current client-supplied `First Tech business info.pdf` — local business/service/contact evidence and Dan Pienaar Mall retail/stationery context, used with the location/service-role guardrails above.
+6. Current First Technology ChatGPT Project instructions and accessible CG Project conversation context — durable human voice, CTA, visual and anti-generic corrections.
+
+### Prior reviewed evidence retained as background
+
+The 2026-08-07 intelligence review included First Technology group service/partner pages, FirstShop, current local professional profiles, an Electrosonic/Free State education-tech activity signal, local competitor research and B2B thought-leadership research. These remain useful provenance/background where their observation date is material, but current mutable claims must be refreshed at task time.
 
 ## Final operating principle
 
-First Technology Central already has access to enormous technology breadth. The marketing opportunity is not to shout about more products.
+First Technology Central has access to broad technology capability, but broad capability is not the marketing idea by itself.
 
-It is to make Bloemfontein and Free State businesses understand **which problems Central can solve, why the local team is credible, what working with them looks like and what business outcome the technology creates.**
+Make the local audience understand **the real business problem, why the Central team is relevant, what can be evidenced locally, and what useful next step follows**.
 
-> **Sell fewer acronyms. Show more business outcomes, local expertise and proof.**
+> **Sell fewer acronyms. Show more useful local proof, human expertise and business outcomes.**
