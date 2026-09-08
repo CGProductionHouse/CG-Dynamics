@@ -5,6 +5,7 @@ Historical/working aliases: **Dulux Bloemfontein**, **Dulux**, **Dulux Paint n P
 Record purpose: **Permanent human CG source of truth for future Dulux Paint & Paper Bloemfontein marketing/content work**  
 Human Project knowledge last reviewed: **2026-09-08**  
 Project Instructions last audited: **2026-09-08**  
+Recent social/content audit last reviewed: **2026-09-08**  
 Mutable public facts last verified: **2026-09-08**  
 Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
@@ -22,6 +23,7 @@ It reconciles:
 - the client-supplied `Dulux Business profile.pdf`;
 - the client-supplied `Dulux Tone of Voice.pdf`;
 - repeated CA/CG corrections, approvals and preferences from historical Dulux work;
+- recent accessible CG-produced social/content work;
 - current public verification available on 2026-09-08;
 - the national Dulux South Africa website where it is the correct authority for brand/product facts.
 
@@ -35,6 +37,7 @@ Use it to answer:
 - how colour should be spoken about;
 - what makes a Dulux video feel like CG rather than generic paint advertising;
 - what wording has repeatedly been corrected or rejected;
+- which recent content patterns are durable and which are merely campaign execution;
 - which facts are current, historical, client-confirmed or still uncertain.
 
 ## 2. Source and authority rules
@@ -46,10 +49,27 @@ For voice, wording, visual/content preferences and production conventions, use t
 1. newest explicit client/CA/CG instruction;
 2. repeated Dulux Project corrections and approvals;
 3. current client-supplied source files;
-4. this canonical record;
-5. older CG strategy material.
+4. recent published or post-ready CG content **only as supporting evidence**;
+5. this canonical record;
+6. older CG strategy material.
 
 **Human CG judgement outranks generic marketing language.** A sentence can be technically correct and still be wrong for Dulux if it sounds generic, outsourced, corporate or AI-written.
+
+### Published-content evidence rule
+
+A Facebook post, Instagram post, Reel, poster or caption is evidence of how the client was marketed at that moment. It is **not automatically a permanent rule**.
+
+When recent published/post-ready content conflicts with an explicit CA/CG/client correction:
+
+- the explicit correction wins;
+- preserve the post only as historical execution evidence;
+- do not reproduce a mistake merely because it went live once.
+
+Promote a social/content pattern into durable knowledge only when it:
+
+- recurs across multiple pieces of work; or
+- matches an explicit correction/approval; or
+- clearly reflects a stable store process, audience need or publishing convention.
 
 ### Mutable facts
 
@@ -69,6 +89,7 @@ Do not convert a national Dulux product page into proof that the Bloemfontein st
 - `CA_CG_confirmed` — explicit/repeated CG correction or approved working rule;
 - `public_verified` — checked against a current first-party public source;
 - `public_corrob_secondary` — corroborated by a current public listing but not first-party store publishing;
+- `CG_content_evidence` — visible in accessible recent CG-produced/post-ready content but not automatically a permanent rule;
 - `historical` — previously true/useful but not current by default;
 - `possible_change` — conflicting or incomplete evidence exists;
 - `stale_unverified` — not recently confirmed;
@@ -83,10 +104,10 @@ Do not convert a national Dulux product page into proof that the Bloemfontein st
 | Main store phone | 051 430 3699 | `client_confirmed` + `public_corrob_secondary` | current_verified | Client business profile and current public listings agree. |
 | Website | https://www.dulux.co.za/en | `client_confirmed` + `public_verified` | current_verified | This is the official Dulux South Africa consumer website; it is not a dedicated local-store website. |
 | Store email | not available in the accessible current source set | — | `stale_unverified` | The client business-profile PDF leaves email blank. Historical CG memory indicates an Irene/store email was supplied at some point, but the exact value is not available in the reviewed accessible evidence. Never guess it. |
-| WhatsApp | exact current number not available in the accessible current source set | — | `stale_unverified` | Historical CG context indicates a WhatsApp contact existed; re-confirm before publishing. |
+| WhatsApp | historical CG output used `+27 82 305 7371`, but no current direct confirmation was recovered | `CG_content_evidence` | `stale_unverified` | Do not publish this number until re-confirmed by the client/current authoritative source. |
 | Opening hours | Mon–Fri 08:00–17:00; Sat 08:00–13:00 | `public_corrob_secondary` | possible_change | Current business-result data showed these hours on 2026-09-08, but no first-party local Dulux source was found. Recheck before publishing hours/holiday trading. |
 | Sunday/public-holiday hours | not first-party verified | — | `stale_unverified` | Do not infer from ordinary-week listing data. |
-| Facebook/Instagram handles | exact first-party local handles not confidently verified in this review | — | `stale_unverified` | Project evidence confirms an active Instagram presence, but search did not produce a first-party local profile URL that could be safely stored as current. |
+| Facebook/Instagram handles | exact first-party local handles not confidently verified in this review | — | `stale_unverified` | Project evidence confirms an active Instagram presence, but current public search did not produce a first-party local profile URL that could be safely stored as current. |
 | Local email domain/site | none verified beyond national Dulux website | — | `stale_unverified` | Do not invent a local web domain. |
 
 ### Public verification notes — 2026-09-08
@@ -268,6 +289,21 @@ A line naming the product/surface problem is better than a heading that merely s
 
 When CA/CG says a post is generic, the usual fix is **not** adding more adjectives. It is making the line about the actual shade, product, service, surface or customer decision.
 
+### Premium/refined language — use with evidence
+
+Recent CG work confirms that a more premium/refined tone can fit Dulux, especially in editorial, product-range or finish-led creative.
+
+But “premium” must be earned by something visible or specific, such as:
+
+- a particular finish;
+- product/range quality;
+- expert advice;
+- colour sophistication;
+- a completed room/result;
+- a current supported Dulux quality claim.
+
+Do not turn “premium” into vague luxury language.
+
 ## 8. How CG should speak about colour
 
 This is one of the clearest historical approval patterns.
@@ -442,15 +478,18 @@ Preferred:
 - tied to the visual;
 - based on a real colour/product/service/project.
 
+Recent Project history reinforces that short, readable one-liners often outperform longer polished copy.
+
 Rejected pattern:
 
 - generic inspirational headline + equally generic subtitle;
 - headline/subtitle that repeat each other;
-- clever wording that loses the actual paint message.
+- clever wording that loses the actual paint message;
+- awkward wording added only to sound premium or creative.
 
 ### Voting/award-style content
 
-Historical Dulux Project work included voting content.
+Historical and mid-2026 Dulux Project work included voting/Best of Bloemfontein content.
 
 A strong approved direction was **“EXPERTISE WORTH VOTING FOR”** because it gives the audience a real reason to support the store rather than only saying “vote for us”.
 
@@ -461,6 +500,7 @@ Durable judgement:
 - thank/support the audience;
 - give the vote a clear reason connected to store expertise/service;
 - keep it direct;
+- expertise, product/range depth and supported quality evidence are stronger reasons than empty popularity language;
 - avoid repeatedly using “bring the win home” / “bring the title home” type wording; CA/CG explicitly flagged that family of phrases as overused across posters.
 
 Do not preserve old closing dates, award names or voting instructions as permanent facts.
@@ -473,7 +513,9 @@ Standing Dulux/CG rules:
 - default to natural English unless another language is requested;
 - do **not** mix Afrikaans and English unless specifically requested;
 - be specific and concise;
+- a short one-liner is often enough when the post already carries the detail;
 - do not repeat the poster text word-for-word;
+- add context, one useful point or a meaningful CTA instead;
 - include the relevant contact details in caption requests;
 - include the address, phone and website as the stable default contact block while they remain current;
 - use a maximum of **5 focused, relevant hashtags** for Dulux;
@@ -498,7 +540,7 @@ The Tone of Voice PDF supplied examples such as:
 - `#InteriorAndExteriorPaint`
 - `#TrustedPaint`
 
-Treat these as **source examples**, not a mandatory repeated block. Prefer more specific/local/search-relevant tags when they fit the post, while keeping the count to 5 or fewer.
+Recent CG history also used this exact SEO-oriented set. Treat that as evidence of an established Dulux hashtag style, but not a requirement to paste the identical five on every post. Keep the count to 5 or fewer and rotate when a more specific/local tag better matches the post.
 
 ## 15. Calls to action that fit Dulux
 
@@ -511,7 +553,9 @@ Good Dulux CTAs reduce paint uncertainty or lead naturally to the store:
 - ask the team which primer/finish makes sense;
 - phone the store for current stock/price;
 - ask Irene when her role/availability is current and confirmed;
-- come see the colour/finish in person.
+- come see the colour/finish in person;
+- vote/support when a current award campaign is genuinely live;
+- download/use a current Dulux tool or app only when the current official link/platform availability has been checked.
 
 Avoid generic CTAs such as:
 
@@ -543,6 +587,17 @@ When a sale/promotion is current:
 - state dates where needed;
 - do not hide conditions in decorative copy;
 - do not make “sale” the only content pillar month after month.
+
+### Delivery wording
+
+Mid-2026 CG work referenced quality/delivery evidence in promotional/editorial messaging. Treat that as `CG_content_evidence`, not proof of current delivery service or area.
+
+Before publishing delivery wording, confirm:
+
+- whether delivery/transport is currently offered;
+- which products/orders qualify;
+- area/radius;
+- fees/conditions where relevant.
 
 ## 17. Client/source contamination to reject
 
@@ -583,8 +638,10 @@ The instruction “no forced humour or memes” should be read literally as **no
 14. **Do not make every caption repeat the artwork.**
 15. **Do not mix Afrikaans and English unless specifically requested.**
 16. **Do not repeat overused “bring the win/title home” voting language.**
-17. **Do not create another dated Dulux intelligence file for routine updates. Update this record.**
-18. **Do not modify client IDs, CG Hours, billing, package or historical time data as part of client-knowledge work.**
+17. **Do not assume a post that was once published is automatically a permanent brand rule.**
+18. **Do not invent a current social handle because a public search or old directory suggests one.**
+19. **Do not create another dated Dulux intelligence file for routine updates. Update this record.**
+20. **Do not modify client IDs, CG Hours, billing, package or historical time data as part of client-knowledge work.**
 
 ## 19. Content-development test before a Dulux idea is approved
 
@@ -600,6 +657,7 @@ A strong future Dulux idea should pass most of these questions:
 8. Is local stock/current price confirmed if mentioned?
 9. Does the CTA tell the customer what to do next?
 10. Does it feel like CG and the people in the Bloemfontein store, not a generic AI campaign?
+11. Am I treating one old/published execution as a rule when there is no explicit or repeated evidence for it?
 
 ## 20. Durable content lanes
 
@@ -661,7 +719,88 @@ These are not a mandatory content calendar. They are the recurring lanes that fi
 - current confirmation;
 - a useful reason beyond “sale now on”.
 
-## 21. Operational/freshness checklist before publishing factual content
+### H. Expertise / editorial / award proof
+
+- staff expertise;
+- product/range depth;
+- finish/quality evidence;
+- concise editorial-style copy;
+- current awards/voting only while live;
+- premium/refined tone only when tied to evidence.
+
+## 21. Recent social/content audit — 2026-09-08
+
+### Public Facebook/Instagram retrieval result
+
+A fresh public search was run for the exact client name, common name variants, phone number, address, Facebook, Instagram, Reels, voting, sale and colour terms.
+
+Result:
+
+- the current store identity, address and phone are readily corroborated publicly;
+- no trustworthy first-party Facebook or Instagram profile URL/post stream for this exact branch was surfaced through the accessible public web index;
+- search/image results that did appear were largely unrelated Dulux retailers, national/generic paint imagery or third-party directories;
+- a legacy social-directory result and older business aggregators were too indirect/stale to use for post-level voice analysis.
+
+Therefore:
+
+- **no specific current Facebook/Instagram post is labelled `public_verified` in this audit**;
+- do not pretend that national Dulux posts or another Dulux retailer represent this branch's current voice;
+- do not invent current handles;
+- future agents should re-run a direct post-level audit when the official local profiles become retrievable or a connected social source is available.
+
+### Most recent accessible CG-produced content evidence
+
+The strongest recent content evidence available for this audit comes from the Dulux Project/CG history rather than a directly retrievable public post stream.
+
+Durable observations:
+
+1. **Short, readable copy wins.**  
+   June 2026 feedback preferred short one-liners, rejected awkward/generic phrasing and did not want captions repeating the text already on the artwork.
+
+2. **Premium/refined wording is conditional.**  
+   It is suitable for product/range/editorial work when tied to real finishes, quality or expertise; it is not permission for vague luxury copy.
+
+3. **Colour copy must explain room effect.**  
+   July 2026 feedback explicitly rejected generic colour wording and accepted the direction **“Sage Green softens the room.”** This strengthens the existing colour-effect rule.
+
+4. **Expertise-led proof is stronger than generic popularity.**  
+   July 2026 Best of Bloemfontein/Courant/Get It work pushed toward expertise, provided paints/ranges and supported quality/service evidence rather than vague “vote for us” wording.
+
+5. **Voting/award content is campaign-specific.**  
+   Direct voting CTAs and thank-you lines can recur when a campaign is live, but they are not a permanent feed identity and old award language/dates should not leak into ordinary content.
+
+6. **The feed/content mix should stay varied.**  
+   Accessible Project/social-grid history supports product, colour, staff, process/mixing, transformation, practical education, promotion and campaign/award content rather than one repetitive format.
+
+7. **Humour is episodic, not the default voice.**  
+   Staff/process humour fits the brand when natural. It should not dominate product education, technical advice or premium editorial posts.
+
+8. **Captions should add something the artwork does not already say.**  
+   A short practical line or CTA is often enough.
+
+9. **Hashtag behaviour is focused and SEO-led.**  
+   Five hashtags remain the ceiling. The established brand SEO set can be used when appropriate, but post-specific/local relevance is preferable to mechanical repetition.
+
+10. **Utility CTAs can fit when genuinely current.**  
+    A July CG example used a Dulux app/download CTA. Treat app/download messaging as campaign/tool-specific and verify the current official app/platform before reusing it.
+
+### Social/content patterns not promoted to permanent rules
+
+Do **not** treat the following as permanent simply because they appeared in historical/post-ready content:
+
+- a specific voting headline;
+- a specific award name;
+- a one-off thank-you line;
+- a specific promo price;
+- one CTA such as an app download;
+- a single editorial “luxury” phrasing style;
+- one visual layout/grid;
+- one historical hashtag combination;
+- one campaign colour treatment.
+
+Use them as execution references only.
+
+## 22. Operational/freshness checklist before publishing factual content
 
 Recheck when relevant:
 
@@ -680,11 +819,12 @@ Recheck when relevant:
 - delivery/transport availability and area;
 - contractor/trade arrangements;
 - technical product claims;
-- current Dulux colour-of-the-year campaign.
+- current Dulux colour-of-the-year campaign;
+- current app/tool/download availability when used in a CTA.
 
 If a mutable fact cannot be verified, label it and ask/verify rather than filling the gap with an assumption.
 
-## 22. Source register and provenance
+## 23. Source register and provenance
 
 ### Internal/client sources reviewed
 
@@ -703,8 +843,11 @@ If a mutable fact cannot be verified, label it and ask/verify rather than fillin
    - current Project Instructions audited line-by-line on 2026-09-08;
    - January 2026 store-only 20–30 second video briefs, including one-VO/two-no-VO mix and later fun/out-of-the-box request;
    - March 2026 copy/grammar refinement history;
-   - historical CG rules on non-generic expertise-led copy, colour-effect wording, voting wording, contact block and staff-led content;
-   - May/July 2026 durable corrections surfaced through accessible conversation context.
+   - June 2026 durable preference for short readable one-liners, non-repetition, non-generic wording, meaningful CTAs and evidence-based premium/refined tone;
+   - July 2026 colour correction accepting “Sage Green softens the room” as the right direction;
+   - July 2026 expertise/range/quality-led Best of Bloemfontein and editorial poster refinement;
+   - July 2026 established five-tag SEO behaviour and a campaign-specific Dulux app CTA;
+   - historical CG rules on non-generic expertise-led copy, colour-effect wording, voting wording, contact block and staff-led content.
 
 4. Previous CG Dynamics file
    - `docs/ai-workforce/client-intelligence/DULUX-PAINT-PAPER-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`;
@@ -728,13 +871,29 @@ Secondary/current local corroboration:
 - current business/map listing for Dulux Paint n Paper Bloemfontein;
 - supporting current retailer/stockist directory results.
 
-## 23. Evidence gaps intentionally left unresolved
+### Public social/content search checked 2026-09-08
+
+Searches covered:
+
+- exact client name and common name variants;
+- Facebook;
+- Instagram;
+- Reels;
+- phone/address matching;
+- voting/award wording;
+- sale/product/colour wording;
+- image search.
+
+No reliable first-party local post stream was retrievable. This is an access/evidence limitation, **not proof that the accounts or posts do not exist**.
+
+## 24. Evidence gaps intentionally left unresolved
 
 The 2026-09-08 review could **not** safely establish from accessible first-party local evidence:
 
 - exact current store email;
 - exact current WhatsApp number;
 - first-party local social-profile URLs/handles;
+- recent first-party local Facebook/Instagram post stream;
 - first-party store opening hours;
 - Sunday/public-holiday hours;
 - delivery/transport area or exact service terms;
@@ -746,7 +905,7 @@ The 2026-09-08 review could **not** safely establish from accessible first-party
 
 These are not invitations to guess. They are explicit future verification tasks.
 
-## 24. Bottom-line CG rule
+## 25. Bottom-line CG rule
 
 **Make Dulux content useful enough that a Bloemfontein customer can picture the colour, understand the product decision or recognise the person/process that will help them in store.**
 
