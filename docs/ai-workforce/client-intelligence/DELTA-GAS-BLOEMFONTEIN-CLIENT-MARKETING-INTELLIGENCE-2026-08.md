@@ -1,817 +1,443 @@
-# Delta Gas Bloemfontein — Client Marketing Intelligence
-
-Last updated: 2026-08-06
-Status: Current-source client intelligence. Keep isolated to Delta Gas Bloemfontein. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
-
-## Why this pack exists
-
-Delta Gas operates in a high-frequency, practical category where customers care about availability, price, speed, safety and convenience more than brand storytelling alone.
+# Delta Gas — Client Marketing Intelligence
 
-The commercial opportunity is to become Bloemfontein's most dependable local LPG refill, exchange and delivery brand for households and small businesses, while using safety education and repeat-purchase systems to increase retention.
+Last reconciled: 2026-09-08  
+Canonical CG Dynamics client: **Delta Gas**  
+Exact client_id: `06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba`  
+Status: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**  
+Derived working guide: `DELTA-GAS-CG-DYNAMICS-CLIENT-GUIDE.md`
 
-This pack is based on:
+CG Dynamics is the permanent source of truth. This file is the canonical reviewed client-intelligence record in the repository and must remain exact-client isolated. The older title “Delta Gas Bloemfontein” is a public/historical alias, not a second CG client.
 
-- current public business listings for Delta Gas Bloemfontein;
-- current customer-review evidence;
-- current local competitor websites and positioning;
-- current South African LPG safety and compliance guidance;
-- current evidence that the business trades from 36 General Dan Pienaar Drive, Dan Pienaar, Bloemfontein;
-- public evidence of delivery, same-day delivery, in-store shopping and gas-related consumables.
+## 1. Identity and current client-confirmed facts
 
-## Exact verified identity
+Current client-provided Delta Gas source reviewed on 2026-09-08 confirms:
 
-### Business
+- Business name: **Delta Gas**.
+- Public/historical alias: **Delta Gas Bloemfontein**.
+- Business type/relationship: **Delta Gas is the ORYX agent for Bloemfontein and surrounding areas**.
+- Physical address: **36 General Dan Pienaar Dr, Dan Pienaar, Bloemfontein, 9301**.
+- Phone: **079 559 3734**.
+- Email: **deltagasbloem@gmail.com**.
+- Website: **https://www.deltagasbloem.co.za/**.
+- Owners named in the client source: **Gysie Pienaar, Marius van Vuuren and Gys Botes**.
+- The client describes the offer as LPG gas plus gas appliances, with friendly, customer-focused service.
 
-- Trading name: Delta Gas Bloemfontein.
-- Category: LPG gas shop and retailer.
-- Current public address: 36 General Dan Pienaar Drive, Dan Pienaar, Bloemfontein, 9301.
-- Current public phone: +27 79 559 3734.
-- Historical/current website reference found in directories: `http://www.deltagasbloem.co.za/`.
-- The business must not be confused with:
-  - the unrelated national Delta Gas geyser supplier at `deltagas.co.za`;
-  - overseas Delta Gas or Delta Gases utilities/suppliers;
-  - Delta Service Station or Delta Bottle Store in Bloemfontein.
+The exact phone/address and the “Delta Gas Bloemfontein” public identity are also corroborated by recent public listings. Historical ORYX campaign material lists Delta Gas Bloemfontein as an ORYX Gas South Africa distributor. A 2024 local newspaper article independently names the same three owners.
 
-### Current public service evidence
+### Important interpretation
 
-Public listings and reviews currently support:
+- “ORYX agent for Bloemfontein and surrounding areas” is client-confirmed relationship/territory wording. It does **not** by itself prove every current delivery suburb, delivery fee, delivery time, stock item or cylinder size.
+- “Gas appliances” is a confirmed broad category. It does **not** prove that a specific heater, stove, braai, regulator, hose, fitting, geyser or accessory is currently stocked.
+- The client source uses “competitive” to describe the offer. Do not turn this into “cheapest”, “best price in Bloemfontein” or another comparative claim without current evidence.
+- Historical ORYX corporate/acquisition text supplied in the Project is background context, not a current Delta Gas marketing claim that needs repeating in ordinary content.
 
-- LPG cylinder refills or exchange;
-- in-store shopping;
-- delivery;
-- same-day delivery in at least some cases;
-- gas-related consumables and accessories;
-- practical customer advice;
-- business accounts;
-- staff assistance with handling cylinders.
+## 2. Current required contact/footer rule
 
-Do not publish a full product list until Delta confirms the exact current range.
+The client source explicitly requires full contact information in **every caption and poster**.
 
-### Current public reputation evidence
+Current contact values:
 
-Review themes repeatedly mention:
+36 General Dan Pienaar Dr, Dan Pienaar, Bloemfontein, 9301  
+079 559 3734  
+deltagasbloem@gmail.com  
+www.deltagasbloem.co.za
 
-- fast service;
-- friendly and helpful staff;
-- competitive pricing;
-- convenient location;
-- staff carrying cylinders from or to vehicles;
-- fast delivery;
-- broader gas-related product availability;
-- owner involvement and personal service.
+Formatting may adapt to the platform/layout, but the values must not be shortened, substituted or invented when the brief requires the standard footer.
 
-There are also isolated negative signals around inconsistent attention and perceived dismissiveness toward a female customer. This should be treated as a service-training and reputation-management risk rather than ignored.
+Do not infer that the phone number is a WhatsApp number unless Delta confirms that usage for the task.
 
-## Facts requiring direct client confirmation
+## 3. Brand voice
 
-Before operational use, confirm:
+Delta Gas should sound:
 
-- exact current opening hours;
-- exact delivery area and delivery fee structure;
-- whether delivery is available after hours or only during trading hours;
-- cylinder sizes stocked and accepted;
-- whether Delta refills, exchanges, or offers both depending on cylinder ownership/brand;
-- whether appliances, regulators, hoses, fittings, heaters, stoves, braais or geysers are currently sold;
-- whether Delta performs installations or only refers customers to registered installers;
-- whether Delta issues any certificates or does not provide installation services;
-- current website status;
-- current Facebook and Instagram handles;
-- current owner and staff names;
-- current pricing and whether prices track regulated maximum retail pricing;
-- commercial account terms;
-- whether subscription or scheduled delivery is operationally possible.
+- informative and educational;
+- safety-first and responsible;
+- trustworthy and professional;
+- supportive and customer-focused;
+- clear and straightforward;
+- warm without hype.
 
-## Market context
+Default language is **simple, direct English**. Use active sentences that feel like a business owner speaking helpfully to a customer.
 
-LPG purchases are usually triggered by one of five conditions:
+Do not force Afrikaans or language mixing for local flavour. If Afrikaans is specifically requested, use natural everyday Afrikaans and keep safety/product terminology clear. No Delta-specific default Afrikaans/English mix has been verified.
 
-1. the cylinder is empty now;
-2. winter or cold weather increases heater demand;
-3. load shedding or electricity unreliability raises cooking and hot-water demand;
-4. a household or business wants a cheaper or more resilient energy mix;
-5. a customer needs safety, installation or appliance guidance.
+### Voice difference by audience
 
-This means marketing should prioritise:
+For household/customer-facing work:
+- be practical and easy to understand;
+- lead with the real use case or customer question;
+- reduce uncertainty around what the customer should confirm before visiting or ordering;
+- keep technical detail bounded and safety-conscious.
 
-- immediate availability;
-- speed;
-- convenience;
-- current price clarity;
-- delivery reliability;
-- safety confidence;
-- repeat reminders;
-- emergency or after-hours boundaries;
-- trusted local service.
+For business/commercial work:
+- be more operational and direct;
+- focus on continuity, ordering convenience, current availability and supply planning only where verified;
+- avoid broad “business solutions” jargon;
+- never promise priority delivery, account terms, stock or service levels without current confirmation.
 
-## Core buyer groups
+## 4. Human creative standard
 
-## A. Household refill and exchange customers
+Correct facts are only the floor. Delta copy must sound recognisably useful in the LPG/gas category rather than like generic energy marketing.
 
-Typical needs:
+Strong Delta content starts from a real situation, for example:
 
-- quick refill or exchange;
-- competitive price;
-- help lifting cylinders;
-- confidence that the cylinder is safe and accepted;
-- clear opening hours;
-- easy delivery;
-- guidance on regulators, hoses and fittings.
+- a customer wants to know whether a cylinder/product is currently available;
+- a household needs practical gas information;
+- someone needs help understanding cylinder weight or labels;
+- a customer wants to know what to check before buying or using gas;
+- a business needs to confirm its supply/order requirements;
+- a braai, camping, cooking, heating or power-interruption use case is genuinely relevant;
+- staff or owners can demonstrate a real process without exposing unsafe handling;
+- a current market/stock/price update genuinely needs communicating.
 
-Best promise:
+Prefer specific usefulness over slogans.
 
-> Fast, friendly local gas service without the hassle.
+Avoid by default:
+- “fuel your life”;
+- “energy you can trust”;
+- “your reliable gas partner”;
+- “we keep you going”;
+- “quality you can trust” as a stand-alone claim;
+- “discover the difference”;
+- “experience excellence”;
+- forced humour, slang or influencer-style enthusiasm;
+- fake urgency or scarcity;
+- corporate energy language that could belong to any supplier.
 
-## B. Heater and winter-demand households
+The client-provided source explicitly rejects influencer-style captions, fake enthusiasm, forced humour/slang, generic templates and exaggerated emoji use.
 
-Typical needs:
+### Source contamination rejected
 
-- gas before or during a cold spell;
-- heater-related accessories;
-- same-day or next-day delivery;
-- refill reminders;
-- practical safety advice.
+The supplied Delta Gas PDF contains the line “Do not refer to Central Canvas as ‘they’”. That instruction belongs to another client and is **rejected for Delta Gas**. It must never enter Delta Gas grounding.
 
-Best promise:
+## 5. Caption rules
 
-> Do not wait until the cylinder is empty on the coldest night.
+- Keep the body copy concise and useful. The mandatory full contact footer already makes captions longer, so do not pad the opening paragraph.
+- Captions must **add to the artwork/video rather than repeat it**.
+- Add one useful second layer: a practical use case, a customer question, a verified detail, a reason to contact Delta, or a safety-aware clarification.
+- Start from what the supplied creative actually shows.
+- Use simple direct English by default.
+- Use warmth, not fake excitement.
+- Avoid repetitive caption templates and interchangeable hooks.
+- Do not invent a service/product detail to make the caption more interesting.
+- If artwork carries a price, stock claim, cylinder size, exchange brand, promotion, delivery promise or safety statement, treat that creative as task context but still flag an obvious conflict with current client intelligence.
+- Contact footer is required in every caption.
+- Hashtags are required by the client source, but the old hashtag list is a seed bank only.
 
-## C. Restaurants, takeaways, caterers and hospitality businesses
+No Delta-specific default option count is verified. Give the number of options the brief requests; if options are requested, make them meaningfully different rather than slight rewrites.
 
-Typical needs:
+## 6. Dynamic SEO and hashtags
 
-- reliable supply;
-- predictable delivery;
-- backup cylinders;
-- business invoicing;
-- low downtime;
-- scheduled replenishment;
-- fast emergency response during trading hours.
+Shared CG creative standard overrides any frozen hashtag bank.
 
-Best promise:
+Default: **maximum 5 hashtags**.
 
-> Gas supply that keeps the kitchen trading.
+Choose hashtags dynamically from:
+- Delta Gas identity;
+- the exact LPG/product/safety/use-case topic;
+- Bloemfontein/local intent where relevant;
+- the platform and actual search context.
 
-## D. Offices, churches, schools, events and community organisations
+Client-provided seed/reference terms include:
+`#DeltaGas`, `#LPGGas`, `#GasCylinder`, `#GasSafety`, `#GasSupply`, `#LPGSouthAfrica`, `#GasSolutions`.
 
-Typical needs:
+Do not paste the same five on every post. Do not call a hashtag trending without current evidence. Hashtags must not imply an unverified location, product, service, partner, stock position or safety certification.
 
-- heaters;
-- catering gas;
-- multiple cylinders;
-- delivery and collection planning;
-- invoice and account support;
-- safety guidance.
+## 7. Content pillars and formats
 
-## E. Installers, plumbers and appliance partners
+Client-provided durable content types:
 
-Potential relationship value:
+1. Educational content — gas cylinders, products and how gas works at a safe consumer level.
+2. Safety awareness — responsible handling/storage/use based on verified guidance.
+3. Product information — exact current cylinders, appliances or gas equipment when verified.
+4. Myth vs fact — correct real misunderstandings without sensationalising risk.
+5. Tips and advice — practical customer help.
+6. Behind the scenes — operations, staff/owners and real processes.
+7. Supply and market updates — current stock, shortage or price information only when freshly confirmed.
+8. Customer awareness — what to check when buying or using gas.
+9. Seasonal/use-case content — braais, camping, heating, cooking or electricity interruptions when contextually relevant.
+10. Quick-tip video — short, useful gas knowledge.
 
-- referrals;
-- regulator, fitting and accessory sales;
-- cylinder supply;
-- customer handoff;
-- compliance education;
-- co-marketing.
+Existing August research remains useful for:
+- refill/exchange convenience;
+- repeat ordering/retention thinking;
+- delivery/customer-convenience proof where current facts support it;
+- business supply/account opportunities where current terms support them;
+- review/customer-service proof;
+- local search intent;
+- safety authority and installer/compliance boundaries.
 
-Delta must never imply that it performs regulated installation work unless a currently registered SAQCC Gas practitioner is directly responsible and the service scope is verified.
+Do not restart generic retail/B2B research for Delta. Reuse the reviewed CG retail, B2B industrial-supplier, local-marketing and human-creative research as supporting strategy, while exact Delta facts remain client-specific and freshness-gated.
 
-## Competitor landscape
+## 8. Refill, exchange, cylinder and weighing content
 
-## 1. Gas Market Bloemfontein
+Historical CG work contains useful educational patterns around:
+- the difference between cylinder tare and gas contents;
+- weighing a full cylinder;
+- multi-brand exchange questions;
+- avoiding underfilled/unsafe supply;
+- checking real cylinder/brand information.
 
-Current strengths:
+Durable rule: **the nominal gas size is the contents, not the full combined cylinder weight**. The correct full weight depends on the specific cylinder’s marked tare plus its contents.
 
-- one-stop-shop positioning;
-- refills and exchanges;
-- gas stoves, heaters, braais, geysers and accessories;
-- delivery and installations;
-- strong product-category clarity;
-- visible physical store at Bloemgate Centre.
+Do not turn one historical 9 kg example into a universal tare value. Different historical Delta/press examples use different tare weights, which is exactly why the marked tare on the actual cylinder matters.
 
-Delta opportunity:
+Current exact cylinder sizes stocked, refill versus exchange rules, accepted exchange brands, rental rules and the current brand roster are **not safe as permanent assertions** from the available 2026-09-08 evidence. Historical CG notes conflict on parts of the exchange-brand list. Reconfirm them for any factual post.
 
-- win through speed, personal service, Dan Pienaar convenience and repeat delivery;
-- make pricing and delivery friction lower;
-- use real customer proof more aggressively;
-- build a simpler refill-first customer journey.
+## 9. ORYX and supplier/brand relationships
 
-## 2. Gasco Bloemfontein
+Current client-provided truth:
+- Delta Gas is the **ORYX agent for Bloemfontein and surrounding areas**.
 
-Current strengths:
+Historical/public ORYX material supports an ORYX distributor relationship.
 
-- premium fireplace, braai, geyser and heating showroom;
-- registered installation positioning;
-- design-led and higher-value project process;
-- strong showroom and installation narrative.
+Do not infer:
+- ORYX exclusivity;
+- that Delta sells only ORYX;
+- a current list of exchangeable competitor cylinders;
+- a rental arrangement;
+- a current promotion;
+- supplier pricing;
+- a current ORYX campaign;
+- current branch/location coverage beyond the supplied wording.
 
-Delta opportunity:
+Any named-brand exchange/sale claim must be task-current and verified.
 
-- avoid competing as a premium design showroom;
-- own everyday LPG convenience and practical supply;
-- partner with installers and appliance specialists rather than trying to imitate them.
+## 10. Delivery, collection and business supply
 
-## 3. The Gasman Bloemfontein
+The August public-evidence pack and recent listings contain evidence of delivery, including historical/review references to fast or same-day service, and business-account use.
 
-Current strengths:
+These are useful proof/history, but operational details are mutable.
 
-- SAQCC practitioner-led domestic installation expertise;
-- compliance and Certificate of Conformity positioning;
-- gas stove, hob, geyser, fireplace and braai installations;
-- maintenance and repairs.
-
-Delta opportunity:
-
-- form a trusted referral relationship where appropriate;
-- separate supply, accessories and delivery from regulated installation work;
-- use installer partnerships to increase accessory and refill retention.
-
-## 4. Afrox Gas & Gear
-
-Current strengths:
-
-- recognised national brand;
-- industrial gas and equipment capability;
-- formal branch systems;
-- account and payment infrastructure.
-
-Delta opportunity:
-
-- faster and more personal consumer service;
-- easier neighbourhood access;
-- delivery convenience;
-- local relationship and practical household focus.
-
-## 5. Mzaca Gas and Paraffin
-
-Current strengths:
-
-- explicit delivery-first positioning;
-- household, restaurant and industrial messaging;
-- business continuity promise;
-- paraffin plus LPG offer;
-- regional fleet narrative.
-
-Delta opportunity:
-
-- prove its established local reputation;
-- formalise repeat customer systems;
-- publish real delivery service standards;
-- avoid losing the convenience category to a newer, more digitally organised competitor.
-
-## Positioning recommendation
-
-Recommended primary position:
-
-> Bloemfontein's fast, friendly and dependable local LPG refill and delivery service.
-
-Supporting proof points:
-
-- Dan Pienaar location;
-- consistently praised fast service;
-- friendly staff and personal assistance;
-- competitive pricing reputation;
-- same-day delivery evidence;
-- gas-related accessories and advice;
-- business-account experience.
-
-Avoid unsupported claims such as:
-
-- cheapest in Bloemfontein;
-- fastest delivery in Bloemfontein;
-- safest supplier;
-- certified installer;
-- guaranteed emergency delivery.
-
-Use comparative claims only when measured and documented.
-
-## Commercial diagnosis
-
-## 1. The business appears stronger operationally than digitally
-
-Public review evidence suggests Delta already has useful strengths:
-
-- repeat customers;
-- fast delivery;
-- good pricing;
-- staff helpfulness;
-- owner involvement;
-- commercial-account experience.
-
-The marketing gap is that these strengths are not structured into a visible, trackable customer-acquisition and retention system.
-
-## 2. Gas is a repeat-purchase category, but most marketing treats it like a once-off sale
-
-A household, restaurant or office that buys LPG once is likely to need it again.
-
-Delta should therefore capture:
-
-- customer name;
-- mobile number;
-- cylinder size;
-- household or business type;
-- collection or delivery preference;
-- approximate refill interval;
-- suburb;
-- consent for reminders and promotions.
-
-The highest-value growth opportunity is not only acquiring new customers. It is making existing customers buy from Delta every time.
-
-## 3. Winter demand should be planned before the cold front
-
-Most gas pages post reactively when it is already cold.
-
-Delta should run a weather-triggered operating rhythm:
-
-- pre-cold-front stock reminder;
-- refill-before-the-rush message;
-- delivery cut-off communication;
-- heater and accessory checks;
-- backup-cylinder prompts;
-- business continuity reminders.
-
-Weather must not be used to create fake scarcity. Stock and delivery claims must be current and truthful.
-
-## 4. Safety can build authority, but inaccurate advice creates risk
-
-South African LPG guidance requires careful separation between:
-
-- general consumer safety education;
-- cylinder handling;
-- appliance use;
-- regulated installation work;
-- certification and compliance.
-
-Only approved, current sources should be used. Delta should not improvise measurements or installation rules in social captions.
-
-## Growth systems
-
-## System 1: Refill and exchange convenience
-
-Core messages:
-
-- refill or exchange availability;
-- cylinder sizes accepted;
-- current hours;
-- current price or price-confirmation route;
-- parking and handling assistance;
+Before public use, confirm:
+- whether delivery is currently offered;
+- exact delivery/service area;
+- fees/minimums;
+- same-day availability;
+- cut-off times;
+- after-hours boundaries;
 - collection process;
-- current stock status.
+- business account terms;
+- scheduled/repeat delivery capability.
 
-Conversion:
+Never guarantee delivery or business continuity from old reviews/listings.
 
-- WhatsApp to confirm size and price;
-- call to confirm stock;
-- map directions;
-- delivery request.
+## 11. Safety and compliance guardrails
 
-## System 2: Delivery and repeat ordering
+Gas safety content can build trust only when it is accurate.
 
-Build a structured order flow:
-
-1. customer selects cylinder size;
-2. confirms exchange/refill requirements;
-3. supplies address and suburb;
-4. receives delivery fee and time window;
-5. confirms payment method;
-6. receives order confirmation;
-7. receives proof of delivery;
-8. receives opt-in refill reminder later.
-
-Do not promise real-time delivery tracking unless the operation supports it.
-
-Potential offers:
-
-- scheduled business delivery;
-- two-cylinder rotation plan;
-- household refill reminder;
-- winter backup-cylinder campaign;
-- restaurant priority ordering during business hours.
-
-## System 3: Business continuity accounts
-
-Audience:
-
-- restaurants;
-- caterers;
-- guesthouses;
-- offices;
-- churches;
-- schools;
-- events;
-- workshops.
-
-Lead magnet:
-
-> Request a gas-supply review for your normal usage, backup quantity and delivery rhythm.
-
-This is not an installation inspection unless performed by a qualified practitioner.
-
-Account offer can include:
-
-- agreed billing process;
-- named order contacts;
-- delivery windows;
-- standard cylinder list;
-- reorder reminders;
-- emergency escalation during operating hours;
-- monthly usage summary where feasible.
-
-## System 4: Accessories and basket growth
-
-Subject to current stock confirmation, market:
-
-- approved regulators;
-- hoses;
-- clamps and fittings;
-- seals and washers;
-- heater accessories;
-- stove and braai accessories;
-- cylinder stands or cages;
-- approved appliances.
-
-Each product post should state:
-
-- exact item;
-- intended use;
-- compatibility boundaries;
-- price or quote route;
-- safety limitation;
-- whether professional installation is required.
-
-## System 5: Safety and trust authority
-
-Use only current sources from:
-
+Use current authoritative/client-approved guidance such as:
 - LPGSA;
 - SAQCC Gas;
-- Department of Employment and Labour;
-- appliance manufacturer documentation;
-- verified registered installers.
+- relevant South African government/Department of Employment and Labour guidance;
+- manufacturer instructions for the exact appliance/product;
+- verified registered practitioners where installation work is involved.
 
-Safe recurring themes:
+Do not improvise:
+- installation distances or measurements;
+- leak-test procedures;
+- appliance compatibility;
+- cylinder filling tolerances;
+- certification/CoC claims;
+- emergency handling steps;
+- transport/storage rules;
+- legal requirements.
 
-- what to do if gas is suspected;
-- checking seals and accepting cylinders;
-- safe cylinder transport basics;
-- when to stop using damaged equipment;
-- why registered installers and a valid CoC matter;
-- safe appliance operation;
-- emergency contacts and clear boundaries.
+Do not imply Delta performs regulated gas installation, certification or CoC work unless that exact current service and responsible registered practitioner are verified.
 
-Never turn safety content into fear-based clickbait.
+Safety content must be calm, practical and non-sensational. No fear-based clickbait.
 
-## Website and digital presence
+## 12. Product and appliance guardrails
 
-## Immediate actions
+The client source confirms the broad categories “LPG Gas” and “Gas Appliances”.
 
-1. Confirm whether `deltagasbloem.co.za` is active and controlled by the client.
-2. Ensure Google Business Profile has current:
-   - name;
-   - address;
-   - phone;
-   - hours;
-   - website;
-   - delivery area;
-   - product/service categories;
-   - photos;
-   - holiday hours.
-3. Prevent confusion with unrelated Delta Gas brands.
-4. Create a simple mobile-first landing page with:
-   - call;
-   - WhatsApp;
-   - directions;
-   - current hours;
-   - cylinder sizes;
-   - delivery instructions;
-   - service area;
-   - price-confirmation action;
-   - safety disclaimer;
-   - review proof.
-5. Add structured delivery and business-account enquiry forms.
-6. Add UTM tracking to all social, Google and campaign links.
+Before naming or promoting a specific item, verify:
+- exact product/appliance;
+- model/size;
+- current stock;
+- compatibility/use;
+- price;
+- warranty;
+- brand/supplier;
+- whether professional installation is required;
+- any technical claim.
 
-## Local SEO priorities
+A generic category or old post is not proof of current stock.
 
-Core search topics:
+## 13. Video/Reels and visual storytelling
 
-- gas refill Bloemfontein;
-- LPG gas Bloemfontein;
-- gas delivery Bloemfontein;
-- gas exchange Bloemfontein;
-- gas refill Dan Pienaar;
-- gas cylinders Bloemfontein;
-- heater gas Bloemfontein;
-- restaurant gas delivery Bloemfontein;
-- gas accessories Bloemfontein;
-- same-day gas delivery Bloemfontein, only if operationally true.
+Good Delta short-form content should show something real and useful:
+- the actual cylinder/product;
+- a real label or tare marking;
+- an owner/staff member explaining one customer question;
+- a behind-the-scenes process that can be shown safely;
+- a real appliance/product use case;
+- an order/collection/delivery moment only when current operations support it;
+- customer-service proof;
+- a current market/supply update.
 
-Landing pages should not be created for services Delta does not provide.
+Historical Project work shows that visual-first/no-voice-over execution has been explicitly preferred for at least some Delta concepts. Do not assume every reel needs a voice-over; make concepts understandable through strong visuals and concise on-screen text when appropriate.
 
-## Content architecture
+Seasonal content is valid, but do not default every gas concept to winter merely because the category allows it. Use the actual brief, weather/event/use case and current operating truth.
 
-## 1. Current utility content
+Historical creative direction also valued owner-led/local personality. **Gysie Pienaar** is client-confirmed as an owner. Historical CG correction says **Ruan Pienaar must not be portrayed as Delta Gas staff** when he appears; treat him as a visitor/ambassador unless a newer brief states otherwise.
 
-Examples:
+## 14. Visual and image-edit preservation
 
-- current hours;
-- stock updates;
+For image generation/editing:
+- preserve real cylinders/products and their proportions;
+- preserve real brand colours, labels, safety markings and logos;
+- preserve identifiable vehicles and their branding;
+- preserve real people and key appearance unless the requested edit specifically changes them;
+- preserve composition/crop/product placement unless a broader redesign is requested;
+- change only what the brief asks to change;
+- do not fabricate cylinder labels, inspection marks, supplier logos, stock, prices, promotions or safety claims;
+- do not recolour a cylinder in a way that changes or implies a brand/exchange relationship;
+- do not alter product scale so capacity/size is misleading;
+- do not add a person, vehicle or branch context that implies a false relationship/location.
+
+Commercial retouching may clean distractions, lighting or finish while keeping the real product and scene believable.
+
+## 15. Customer proof and local service
+
+Recent public review evidence repeatedly supports themes such as:
+- fast/efficient service;
+- friendly/helpful staff;
+- staff assisting customers with cylinders;
+- owner involvement/personal service;
+- price/value satisfaction;
+- business-account use.
+
+Use these as customer/reputation themes, not as guaranteed service-level claims.
+
+Avoid unsupported superlatives such as:
+- best gas price in Bloemfontein;
+- cheapest;
+- fastest;
+- safest supplier;
+- guaranteed same-day delivery.
+
+One historical public review also raised a concern about dismissive treatment of a female customer. Keep this as internal reputation/service-awareness context, not a marketing talking point.
+
+## 16. Current location/branch evidence
+
+Canonical supplied address:
+**36 General Dan Pienaar Dr, Dan Pienaar, Bloemfontein, 9301**.
+
+A recent Project brief used the creative direction **“3 locations, 1 Delta team.”** The three location names/addresses were not available in the accessible Project source or current repository evidence reviewed during this migration.
+
+Therefore:
+- retain “3 locations, 1 Delta team” only as recent creative/history context;
+- do not publish three branch names, addresses or service areas until the exact current roster is supplied/verified;
+- do not create separate CG client identities for locations without explicit Dynamics authority.
+
+## 17. Mutable facts requiring freshness checks
+
+Always recheck when relevant:
+- opening and holiday hours;
+- current social profiles/handles;
+- WhatsApp availability;
+- exact branch/location roster;
+- delivery availability, service area, fees and cut-offs;
 - cylinder sizes;
-- delivery cut-off;
-- price updates;
-- holiday trading;
-- cold-front reminders.
-
-## 2. Convenience proof
-
-Examples:
-
-- delivery turnaround stories;
-- staff helping with cylinders;
-- how collection works;
-- order-to-door process;
-- repeat business customer stories.
-
-## 3. Safety authority
-
-Examples:
-
-- approved seal checks;
-- when to replace a hose;
-- why installation work needs a registered practitioner;
-- what a gas CoC confirms;
-- what to do if gas is smelled.
-
-## 4. Product and accessory education
-
-Examples:
-
-- regulator compatibility;
-- hose and fitting basics;
-- heater preparation;
-- backup-cylinder planning;
-- household versus business use cases.
-
-## 5. Local personality and community
-
-The business has public evidence of involvement in a childhood-cancer fundraising golf day.
-
-Community content should focus on real participation, not generic corporate-social-responsibility claims.
-
-## Paid media
-
-## Google Search
-
-Priority campaign groups:
-
-- gas refill;
-- gas delivery;
-- LPG near me;
-- gas exchange;
-- gas cylinder Bloemfontein;
-- winter heater gas;
-- business gas delivery.
-
-Ads should lead directly to:
-
-- call;
-- WhatsApp;
-- directions;
-- delivery form.
-
-Do not send urgent-intent traffic to a generic social homepage.
-
-## Meta
-
-Best campaign types:
-
-- local awareness before cold fronts;
-- WhatsApp delivery enquiries;
-- refill reminder retargeting;
-- business-account lead generation;
-- review-led trust ads;
-- neighbourhood radius campaigns.
-
-Use operationally current creative. Do not advertise unavailable sizes, outdated prices or impossible delivery times.
-
-## Customer retention
-
-Create consent-based customer segments:
-
-- household collection;
-- household delivery;
-- heater-season customer;
-- restaurant/catering;
-- business account;
-- installer/referral partner;
-- accessory buyer.
-
-Retention campaigns:
-
-- likely refill reminder;
-- pre-winter check-in;
-- cold-front preparation;
-- business backup supply review;
-- holiday hours;
-- accessory replacement reminders where appropriate.
-
-## Review strategy
-
-Ask for reviews after:
-
-- a fast delivery;
-- a smooth first purchase;
-- staff assistance;
-- resolving a problem;
-- repeated business service.
-
-Review prompts should request specifics:
-
-- speed;
-- friendliness;
-- price clarity;
-- delivery reliability;
-- advice;
-- convenience.
-
-Negative reviews must receive a calm operational response and internal follow-up.
-
-## Partnerships
-
-Potential partners:
-
-- registered gas installers;
-- plumbers;
-- appliance stores;
-- fireplace and heater suppliers;
-- restaurants and caterers;
-- guesthouses;
-- estate agents and property managers;
-- body corporates;
-- churches and schools;
-- event suppliers;
-- security and neighbourhood groups for local awareness.
-
-Partnerships must define referral ownership, customer communication and safety responsibility clearly.
-
-## Promotions and activations
-
-Useful concepts:
-
-### Refill Before the Rush
-
-Run ahead of forecast cold periods with truthful stock and delivery messaging.
-
-### Business Backup Week
-
-Help restaurants and caterers review cylinder rotation and reorder contacts.
-
-### Gas Safety Checkpoint
-
-Host an educational day with a verified registered installer. Do not imply Delta itself certifies installations unless verified.
-
-### Neighbourhood Delivery Day
-
-Test clustered suburb delivery windows to improve route economics.
-
-### Community fundraiser
-
-Build on genuine prior community involvement where the client wishes to continue.
-
-## Measurement framework
-
-## Primary commercial KPIs
-
-- refill/exchange transactions;
-- kilograms or cylinder units sold by size;
-- delivery orders;
-- delivery revenue and cost;
-- gross margin by product/service;
-- repeat purchase rate;
-- days between purchases;
-- active business accounts;
-- business-account revenue;
-- accessory basket value;
-- customer retention;
-- lost sales due to stock or operating hours.
-
-## Marketing KPIs
-
-- Google Business Profile calls;
-- direction requests;
-- website visits;
-- WhatsApp starts;
-- delivery enquiries;
-- cost per qualified delivery enquiry;
-- cost per first purchase;
-- review volume and rating;
-- conversion by campaign;
-- campaign-attributed revenue.
-
-Follower count and likes are secondary.
-
-## Meta and CG Dynamics data model
-
-Where data access exists, CG Dynamics should combine:
-
-- Meta reach, spend, messages and campaign data;
-- Google calls, directions and search queries;
-- delivery orders;
-- in-store transactions;
-- customer phone and consent records;
-- cylinder size;
-- purchase date;
-- revenue and margin;
-- repeat interval;
-- customer segment;
-- source campaign;
-- review status.
-
-The system should be able to answer:
-
-- which campaign produces first-time buyers;
-- which customers are due for a likely refill;
-- whether delivery ads generate profitable routes;
-- which suburbs produce repeat demand;
-- which cylinder sizes drive margin;
-- whether winter ads increase revenue or only shift existing demand;
-- which business accounts are at risk of lapsing.
-
-## 90-day plan
-
-## Days 1–30: Truth and conversion foundation
-
-- confirm identity, hours, contacts, delivery rules and product range;
-- claim and clean Google Business Profile;
-- confirm social handles and website ownership;
-- create call/WhatsApp/directions landing page;
-- implement UTM and enquiry-source tracking;
-- build customer consent and refill-history capture;
-- collect verified price, size and product data;
-- train staff on consistent service and inclusive customer treatment;
-- create approved safety-content source list.
-
-## Days 31–60: Repeat-purchase engine
-
-- launch refill reminder pilot;
-- segment household and business customers;
-- test suburb-based delivery routes;
-- launch business continuity account offer;
-- collect review and delivery proof;
-- publish product and safety education;
-- start Google Search and local Meta tests;
-- track enquiry-to-sale and first-to-second-purchase conversion.
-
-## Days 61–90: Scale what pays
-
-- compare collection versus delivery profitability;
-- scale highest-converting suburbs and search terms;
-- formalise installer and business partnerships;
-- launch weather-triggered winter campaigns;
-- improve accessory cross-sell;
-- build lapsed-customer reactivation;
-- produce management report linked to revenue, margin and repeat rate;
-- remove campaigns that create attention without profitable sales.
-
-## Guardrails
-
-- Never publish stale LPG prices.
-- Never claim an installation or certification service without current proof.
-- Never provide improvised legal or technical installation measurements.
-- Never promote unsafe cylinder handling.
-- Never guarantee delivery without capacity confirmation.
-- Never confuse Delta Gas Bloemfontein with unrelated Delta brands.
-- Never use customer phone data for marketing without lawful consent.
-- Never measure success only through followers and engagement.
-
-## Source register
-
-### Client identity and public evidence
-
-- Delta Gas Bloemfontein directory listing and public review compilation, accessed 2026-08-06.
-- Open-hours listing referencing 36 General Dan Pienaar Drive, phone and historical website, accessed 2026-08-06.
-- Snupit Bloemfontein gas-supplier listing, accessed 2026-08-06.
-- OFM community-calendar listing for the 2024 Scramble for Childhood Cancer Golf Day hosted by JRB Trust and Delta Gas, accessed 2026-08-06.
-
-### Competitors
-
-- Gas Market Bloemfontein official website, accessed 2026-08-06.
-- Gasco Bloemfontein official website, accessed 2026-08-06.
-- The Gasman Bloemfontein official website, accessed 2026-08-06.
-- Afrox Free State branch listing, accessed 2026-08-06.
-- Mzaca Gas and Paraffin official website, accessed 2026-08-06.
-
-### Safety and compliance
-
-- LPG South Africa safety tips, regulations, cylinder and appliance resources, accessed 2026-08-06.
-- SAQCC Gas guidance on Certificates of Conformity, accessed 2026-08-06.
-- Department of Employment and Labour and South African Government Free State LPG inspection guidance, accessed 2026-08-06.
-
-## Final strategic direction
-
-Delta Gas should not market itself merely as another place that sells gas.
-
-It should become the easiest local habit for Bloemfontein customers who need LPG repeatedly:
-
-> clear availability, quick service, reliable delivery, friendly help and responsible safety guidance.
-
-The growth engine is not endless generic posting. It is converting every first purchase into a repeat customer, every delivery into proof, and every business account into a predictable supply relationship.
+- refill/exchange/sales/rental model;
+- accepted cylinder brands;
+- current ORYX/supplier campaign relationships;
+- exact appliance/accessory range;
+- stock;
+- prices/promotions;
+- commercial account terms;
+- installation/referral/CoC scope;
+- staff roles beyond currently client-confirmed ownership;
+- safety/compliance claims.
+
+Third-party directories currently disagree on trading hours. Hours therefore remain **unresolved**, not current_verified.
+
+## 18. Provenance and review states
+
+### Current verified / client-confirmed
+Source: client-provided `Delta Gas.pdf`, reviewed 2026-09-08.
+- canonical business name Delta Gas;
+- address;
+- phone;
+- email;
+- website;
+- ORYX-agent wording;
+- owner names;
+- broad LPG gas/gas-appliance scope;
+- full-contact footer requirement;
+- tone/voice;
+- content-type guidance;
+- anti-hype/anti-template rules;
+- always include hashtags.
+
+### Current architecture authority
+- CG Dynamics Issue #276 — exact client identity/id, isolation and migration requirements.
+- Issue #248 — human creative standard and max-five dynamic hashtag rule.
+- Issue #241 — exact-client retrieval/derived-guide architecture; **not modified by this migration**.
+- `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`.
+
+### Existing reviewed Delta intelligence
+`DELTA-GAS-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`, researched 2026-08-06 and reconciled here rather than duplicated.
+
+### Supporting public evidence
+Recent public listings corroborate the Dan Pienaar address, phone and local gas-shop identity and contain customer-review/service evidence. Historical ORYX material supports the distributor relationship. A 2024 Bloemfontein Courant article independently names the three owners and demonstrates why cylinder tare must be treated per-cylinder.
+
+### CG Project/history evidence
+Accessible Project history contributes creative/copy lessons such as:
+- “3 locations, 1 Delta team” as a recent campaign direction;
+- visual-first/no-VO preference in at least one prior video;
+- avoid incorrectly portraying Ruan Pienaar as staff;
+- owner-led/local-personality storytelling.
+
+These are durable creative lessons only where stated above; they do not override current operational facts.
+
+## 19. Project Source audit
+
+Actually accessible Project Source:
+- `Delta Gas.pdf` — **KEEP** as original client-provided evidence. It contains current identity, contacts, ORYX relationship, ownership, tone and posting rules.
+
+No other Project Source was actually accessible in this migration session, so no unseen source is assigned a KEEP/REMOVE/REPLACE decision.
+
+The PDF contains one obvious unrelated Central Canvas instruction; reject that line at retrieval time rather than deleting or rewriting the original evidence.
+
+The derived CG Dynamics Client Guide is an auditable/export/handoff view, not a second permanent truth store and not a replacement for Dynamics.
+
+## 20. Unresolved facts — never guess
+
+- Exact names/addresses of the “3 locations”.
+- Opening/holiday hours.
+- Current Facebook/Instagram/TikTok handles.
+- Whether 079 559 3734 is officially used for WhatsApp.
+- Current delivery area, fee, cut-off, same-day and after-hours rules.
+- Exact cylinder sizes currently stocked/refilled/exchanged.
+- Current refill/exchange/sale/rental rules and accepted exchange-brand roster.
+- Whether ORYX is the only LPG brand sold.
+- Exact current gas-appliance/accessory range and stock.
+- Current prices/promotions.
+- Business-account/commercial supply terms.
+- Installation, referral and CoC/certification service scope.
+- Any current supplier/brand relationship beyond the client-confirmed ORYX-agent wording.
+
+## 21. Exact-client task retrieval target
+
+For future #241-ready task grounding, resolve:
+
+`client_id 06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba + task type + supplied creative/context`
+
+For a quick caption task, return only the compact relevant packet:
+- Delta voice/caption rules;
+- exact verified facts needed for that creative;
+- mandatory contact footer;
+- safety/claim guardrails;
+- unresolved facts that affect the post;
+- max-five dynamic SEO/hashtag instruction.
+
+For image edits, prioritise preservation rules.  
+For content ideas, prioritise human use cases, current product/service evidence and safety boundaries.
+
+Never load unrelated client intelligence or infer facts from another gas/energy business.
+
+## Bottom line
+
+Delta Gas marketing should make gas buying/use feel easier to understand and easier to act on without pretending that mutable operational facts are permanent. Be local, practical, clear and human. Use real Delta evidence, add value beyond the artwork, preserve safety boundaries, and flag what must be confirmed.
