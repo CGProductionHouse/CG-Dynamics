@@ -1,706 +1,617 @@
-# C&L Innovations — Furniture Sales Recovery and Client Marketing Intelligence
+# C&L Innovations — Client Marketing, Product and Creative Intelligence
 
-Last updated: 2026-08-06
-Status: Review-state recovery pack. Keep isolated to C&L Innovations. Apply the client memory freshness protocol before using mutable facts.
+Last updated: 2026-09-08
+Status: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**
+Canonical client: **C&L Innovations**
+Canonical Dynamics client ID: `afb62c53-d6d3-4ef8-9393-def88ed899d8`
 
-## Executive diagnosis
+CG Dynamics is the permanent source of truth. This file reconciles the August 2026 furniture-sales recovery work with the accessible C&L ChatGPT Project evidence, the current human creative standard and current freshness/provenance rules. Historical recovery recommendations remain strategy evidence, not automatically current product, price, service or operational facts.
 
-C&L Innovations has produced regular visual content but has not sold a table.
+Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before using mutable facts.
 
-The visible Instagram feed is attractive and consistent, but it behaves more like an interior-design mood board than a working furniture sales system. It communicates atmosphere, natural texture and craftsmanship, yet does not answer the commercial questions a buyer needs before spending thousands of rand:
+## Migration scope and isolation
 
-- What exact table can I buy?
-- Is this a real finished C&L product?
-- What wood is it?
-- What size is it?
-- How many people does it seat?
-- What does it cost or roughly cost?
-- Is it available now or custom made?
-- Where is C&L based?
-- Can I view it in person?
-- What is the lead time?
-- Is delivery included?
-- What finish protects the wood?
-- What warranty or workmanship support exists?
-- How do I get a quote without a long back-and-forth conversation?
+This migration is isolated to **C&L Innovations**.
 
-The problem is therefore not simply insufficient posting. It is a combination of:
+Do not use this intelligence to modify or infer facts for another furniture, timber, interiors, building-material or B2B client.
 
-1. weak product-market definition;
-2. insufficient proof;
-3. unclear pricing and buying process;
-4. no obvious entry product;
-5. low audience reach;
-6. unclear location and trust signals;
-7. a feed that creates appreciation but not buying urgency;
-8. no visible sales follow-up system.
+Do not mutate CG Hours, billing, package/time history, UUIDs or production client data from this document.
 
-The priority is to stop producing more generic luxury content until C&L can present a small number of real, buyable products with proof, dimensions, price anchors and a clear conversion path.
+Shared #241 runtime architecture remains outside this client migration branch.
 
-## Verified current public identity
+## Exact identity and production checkpoint
 
-Evidence supplied directly by CA on 2026-08-06:
+Read-only production verification on 2026-09-08 confirmed:
 
-- Instagram: `c.linnovations`;
-- display name: C&L Innovations;
-- profile established in 2024;
-- visible product direction: live-edge and natural wood tables and furniture;
-- current feed focuses on coffee tables, dining or statement tables, timber shaping, sanding, workshop craftsmanship and styled interiors;
-- the account had approximately 44 followers and 63 posts at the time of capture.
+- client name: **C&L Innovations**;
+- client ID: `afb62c53-d6d3-4ef8-9393-def88ed899d8`;
+- active: `true`;
+- tier: `standard`.
 
-The screenshot also shows two public contact names/numbers in post footers, but they are too small to treat as accurately verified in this research pass. Confirm exact names, numbers, location, workshop address, email and WhatsApp before operational use.
+Read-only production checks also found no C&L-specific `skill_cards` linked through `active_client_id` and no obvious C&L-named `marketing_library_sources` at the time of inspection.
 
-## What the market already offers
+This means the permanent client intelligence can be prepared here without pretending that #241 runtime registration is already live for C&L.
 
-Current South African competitors make the buying decision easier through a combination of visible pricing, dimensions, lead times, delivery information and clear quote forms.
+### Naming
 
-Examples observed in August 2026:
+Use **C&L Innovations** as the canonical client name.
 
-- KleiKrafts lists live-edge products with visible retail pricing, including a live-edge dining table at R17,000, coffee tables around R3,800–R5,800, consoles around R4,300 and benches around R3,900.
-- Pringle Sawmills publicly lists a 3 m live-edge and steel table at R24,000, a classic 2.7 m table at R12,644 and a centre coffee table at R9,999.
-- Greg Bespoke Furniture lists a live-edge dining table from R35,950, with sizes from 6 to 16 seats, 2–4 week lead times, finish details, delivery terms and return information.
-- Designer Tables and Resin Works gives entry price signals, including custom resin furniture from around R9,800 and certain smaller resin-table concepts from around R4,500.
-- River Table gives a general starting point of R25,000 for epoxy tables and explains the made-to-order process.
-- Miles Official shows specific high-end products from approximately R33,000 to R61,500 and uses a detailed custom quote form covering dimensions, wood, resin, legs, usage, finish and delivery address.
+The Project source uses the variant **C & L Innovation**. Treat that as a source/historical naming variant, not a separate client.
 
-C&L currently appears to offer less buying clarity than both affordable and premium competitors.
+Do not invent another trading or legal name.
 
-## Critical strategic decision
+## Evidence and provenance reviewed
 
-C&L must decide which business it actually wants to be.
+### 1. Client-supplied Project source
 
-### Option A: accessible local statement furniture
+Accessible source: `C&L INNOVATIONS business info.pdf`.
 
-Typical customer:
+File Library metadata shows the file was created on 2025-09-10. It remains useful first-party/client-supplied evidence, but mutable facts must still be freshness-checked because the source itself is not newly authored in September 2026.
 
-- Bloemfontein homeowners;
-- first-home buyers;
-- families upgrading a lounge or dining area;
-- customers wanting a unique coffee, console or dining table without national luxury pricing.
+It supplies:
 
-Commercial requirements:
+- business type: premium/custom wood-furniture manufacturer;
+- contact names/numbers: Chris `082 553 0356`, Lize `079 497 1741`;
+- no website publicly listed at source time;
+- no exact public physical address;
+- Bloemfontein operating context, with explicit instruction to confirm exact address for deliveries/appointments;
+- bespoke/handcrafted wooden-furniture positioning;
+- range examples including dining sets, bedroom furniture, display units, shelving, coffee tables and statement décor pieces;
+- modern/rustic aesthetic direction;
+- contact-usage rules for product, commission and promotional posts;
+- natural tone and one-on-one craftsmanship/service emphasis.
 
-- visible entry prices;
-- standard sizes;
-- short lead times;
-- a small ready-made range;
-- local delivery or collection;
-- WhatsApp-first quoting;
-- real product photography.
+### 2. Existing C&L recovery intelligence
 
-### Option B: bespoke premium furniture studio
+The prior 2026-08-06 recovery pack remains important historical strategy evidence.
 
-Typical customer:
+It captured CA-supplied visual/social evidence at that time:
 
-- architects;
-- interior designers;
-- luxury homeowners;
-- lodges, offices, restaurants and developers;
-- clients ordering unique large-scale pieces.
+- Instagram handle observed then: `c.linnovations`;
+- visible direction: live-edge/natural-wood tables and furniture;
+- feed content included coffee tables, dining/statement tables, timber shaping, sanding, workshop craftsmanship and styled interiors;
+- approximately 44 followers / 63 posts at that capture.
 
-Commercial requirements:
+These social facts are **historical 2026-08 evidence**, not permanent current stats or a guaranteed current handle.
 
-- exceptional craftsmanship proof;
-- named wood species;
-- highly professional project photography;
-- detailed consultation and sample process;
-- premium finishing and guarantees;
-- design drawings and technical confidence;
-- strong trade relationships;
-- clear premium price anchors.
+### 3. Accessible C&L Project history
 
-### Recommended direction
+Durable creative evidence available in the Project includes:
 
-Use a hybrid model, but do not market both as one vague offer.
+- furniture copy should not be generic luxury filler;
+- different posts should carry genuinely different angles rather than paraphrases;
+- useful angles include the exact practical benefit of a table, the feeling/use of the piece in a home and visible evidence of carpentry/care;
+- copy was repeatedly pushed toward a more human, natural tone;
+- image work must preserve the real table's scale and proportions;
+- unrealistic placement, duplicated support surfaces or impossible furniture context is unacceptable;
+- close-up product framing is useful when the item itself is the subject;
+- when an edit requests one change, unrelated parts of the image should remain unchanged;
+- lifestyle people should look believable in the South African context and should not default to a visibly homogeneous cast where people are part of the scene.
 
-Create:
+One-off scene details from historical image tasks are not permanent product facts.
 
-1. **C&L Ready Collection** — a limited range of repeatable coffee tables, consoles, benches and compact dining tables with visible prices.
-2. **C&L Bespoke** — custom live-edge dining, boardroom, hospitality and statement furniture quoted by size, slab, base and finish.
+### 4. Shared reusable marketing research
 
-The Ready Collection is the fastest path to the first sale. The Bespoke range builds long-term value and higher margins.
+Applied as reusable foundation rather than duplicated client research:
 
-## First-sale product architecture
+- `RETAIL-ECOMMERCE-HUMAN-MARKETING-GOLDMINE-2026-08.md` — reduce purchase uncertainty; show the product clearly; explain the offer honestly; connect content to a real buying action;
+- `BUILDING-MATERIALS-HUMAN-MARKETING-GOLDMINE-2026-08.md` — home/project buyers need help avoiding expensive mistakes and choosing confidently;
+- `B2B-MANUFACTURING-INDUSTRIAL-SUPPLIERS-HUMAN-MARKETING-GOLDMINE-2026-08.md` — designer/trade/business buyers need proof, specifications, reliability and a defensible buying decision;
+- #248 human creative standard — specific human copy, add rather than repeat, dynamic SEO/hashtags, no invented facts;
+- #241 architecture — exact-client task retrieval, provenance/freshness gating and derived ChatGPT guide rather than a second truth store.
 
-Do not begin with only expensive large dining tables. Introduce a price ladder.
+### 5. Public-source verification attempt — 2026-09-08
 
-### Entry range
+Current web search did not produce a trustworthy first-party C&L website or current indexed social page that could independently verify all mutable facts. A direct Instagram fetch was unavailable to the agent.
 
-Products that can create first-time buyers and proof:
+Therefore:
 
-- live-edge side table;
-- compact coffee table;
-- serving board or desk riser;
-- small bench;
-- narrow console table.
+- do not convert absence from search into a claim that no website/social account exists;
+- retain the historical Instagram handle only as revalidation-required evidence;
+- treat direct Project-source contacts and product information according to their provenance and age;
+- flag unresolved public identities rather than guessing.
 
-These should be standardised enough to publish exact prices.
+## Current safe client facts
 
-### Core range
+### High-confidence exact-client facts
 
-- live-edge coffee table;
-- two-piece nesting coffee-table set;
-- console table;
-- six-seater dining table;
-- matching bench option;
-- desk or boardroom table in standard sizes.
+- Canonical client identity is **C&L Innovations**.
+- C&L is a wood-furniture brand/business in CG's client system.
+- Current Project evidence supports handcrafted/bespoke wooden-furniture positioning.
+- Real table/furniture products and workshop/carpentry process are central to the brand's content history.
+- Chris: `082 553 0356`.
+- Lize: `079 497 1741`.
+- The Project source explicitly instructs CG not to list a website unless one is officially provided.
+- The Project source explicitly instructs CG not to use contact details on every inspiration/mood/behind-the-scenes post unless actively selling.
 
-### Bespoke range
+### Source-supported but freshness-sensitive facts
 
-- eight- to twelve-seater dining tables;
-- boardroom tables;
-- restaurant or lodge tables;
-- large organic slab pieces;
-- matching furniture sets;
-- custom bases and finishes.
+Use only with provenance awareness and recheck for material campaigns/web/quotes:
 
-## Price strategy
+- custom/bespoke manufacture;
+- full range examples: dining sets, bedroom furniture, display units, shelving, coffee tables and statement décor;
+- modern/rustic aesthetic language;
+- Bloemfontein operating context;
+- historical `c.linnovations` Instagram identity;
+- live-edge/natural-wood direction observed in August 2026.
 
-C&L does not need to publish every bespoke final price, but it must provide useful anchors.
+### Not verified as current
 
-Recommended display structure:
+Never silently assert:
 
-- exact price for ready-made stock;
-- `from` price for repeatable products;
-- size-based guide for common dining tables;
-- clear statement that slab, thickness, species, base and finish affect final cost;
-- delivery quoted separately or clearly included within a stated area;
-- deposit and payment stages shown before enquiry.
+- exact workshop, showroom or viewing address;
+- public opening/viewing hours;
+- email address;
+- current website/domain;
+- exact current Instagram/Facebook URLs/handles;
+- exact wood species;
+- solid-wood composition for a specific item unless supplied;
+- current finishes, sealers or coatings;
+- dimensions or seating capacity;
+- current stock or ready-made availability;
+- current lead times;
+- delivery or installation availability, radius or fees;
+- warranties or workmanship guarantees;
+- care/maintenance instructions;
+- current prices, deposits or payment stages;
+- supplier/brand relationships;
+- trade pricing/referral arrangements;
+- commercial project capability beyond an exact current brief;
+- current sales performance or whether the business has now sold tables;
+- maximum production capacity.
 
-Example structure only, requiring internal cost and margin verification:
+## Contact and footer rules
 
-- side table: from R1,500–R2,500;
-- coffee table: from R3,500–R6,500;
-- console: from R4,000–R7,500;
-- bench: from R3,000–R5,500;
-- six-seater table: from R12,000–R20,000;
-- eight-seater table: from R18,000–R28,000;
-- premium or very large bespoke work: quoted individually.
+Use these contacts when a contact block is appropriate:
 
-These are market-informed planning bands, not approved C&L prices. Final prices must be built from actual timber, steel, labour, consumables, transport, finishing, overhead and margin.
+- Chris — `082 553 0356`
+- Lize — `079 497 1741`
 
-## Why the current feed is not converting
+Do not invent titles for either person beyond what the source actually supports.
 
-### 1. Too much synthetic or generic imagery
+Include contact details in:
 
-The feed contains multiple images that look like AI-generated lifestyle scenes or stock-style mock-ups. That can make a young furniture business look visually polished while weakening belief that the products actually exist.
+- product-specific sales posts;
+- commission/custom-enquiry posts;
+- promotional campaigns;
+- seasonal/limited-offer posts when the offer itself is verified.
 
-High-ticket furniture buyers need to see:
+Contact details are normally unnecessary in:
 
-- the real slab;
-- real hands working on it;
-- close-up finish quality;
-- underside and base construction;
-- actual workshop conditions;
-- the finished item in a real local space;
-- the maker standing next to the product for scale;
-- delivery and installation.
+- inspiration/mood content;
+- pure craftsmanship/process storytelling;
+- behind-the-scenes posts not trying to sell;
+- brand-feel posts with no immediate enquiry action.
 
-### 2. No hero product
+Do not list a website unless an official current website has been confirmed.
 
-A visitor cannot immediately identify the one table C&L is known for.
+Recheck contacts before major paid media, website publication, print runs or long-lived sales material when practical.
 
-Create one signature, repeatable model with:
+## Product and claim guardrails
 
-- a name;
-- fixed size options;
-- fixed base options;
-- a starting price;
-- a clear lead time;
-- a full photo/video set;
-- a direct WhatsApp order button.
+### What copy can safely focus on
 
-### 3. No social proof
+When the exact item/creative supports it, focus on:
 
-With no sold tables, C&L lacks client homes, reviews and delivery proof.
+- the table or furniture item actually shown;
+- visible wood character, edge profile, grain, proportions or shape;
+- visible joinery/carpentry/process details;
+- sanding, shaping, finishing or workshop care shown in real footage;
+- room fit, scale and intended use when dimensions/use are supplied;
+- custom/bespoke decision-making when the current brief confirms it;
+- practical customer choices such as size, shape, base or finish only when those choices are actually offered for that item.
 
-The solution is not to fake testimonials. It is to create controlled proof:
+### Never infer from appearance alone
 
-- place one or two pieces in a designer's home, office, lodge, coffee shop or showroom;
-- offer a launch collaboration or styled-space loan under written terms;
-- photograph and film the complete project;
-- collect an honest review after use;
-- document installation and scale.
+A photo is not enough to claim:
 
-### 4. Too little buyer information
-
-Posts should include more than mood captions. Every product post should include:
-
-- product name;
-- exact or approximate dimensions;
-- seats or intended use;
-- wood species where known;
-- finish;
-- base material;
-- price or starting price;
-- ready-made or made-to-order status;
-- lead time;
-- location;
-- delivery area;
-- direct CTA.
-
-### 5. Tiny audience and no distribution engine
-
-At roughly 44 followers, organic posting alone cannot reasonably be expected to sell high-ticket furniture consistently.
-
-C&L needs:
-
-- local partnerships;
-- Marketplace and classified distribution;
-- Google Business Profile;
-- paid local lead campaigns only after the offer is credible;
-- architect/interior-designer outreach;
-- referral rewards or trade terms;
-- showroom or pop-up exposure;
-- content collaborations with local properties and renovation accounts.
-
-## Ideal audiences
-
-### Homeowners upgrading one focal space
-
-They want:
-
-- a statement piece;
-- assurance it fits;
-- a price they can plan around;
-- help choosing size and finish;
-- local delivery;
-- confidence in durability.
-
-### Interior designers and architects
-
-They want:
-
-- reliable dimensions;
-- material samples;
-- trade pricing or referral arrangements;
-- drawings and lead times;
-- consistent communication;
-- ability to customise without production chaos.
-
-### Restaurants, lodges and offices
-
-They want:
-
-- durability;
-- commercial suitability;
-- multiple units or large pieces;
-- installation planning;
-- invoicing and project timelines;
-- maintenance guidance.
-
-### Gift and lifestyle buyers
-
-They may not be ready for a dining table but can buy:
-
-- boards;
-- side tables;
-- benches;
-- smaller homeware;
-- branded corporate gifts.
-
-This group can create early sales and reviews.
-
-## Offer and positioning
-
-Replace vague luxury statements with a practical value proposition:
-
-> Locally made live-edge furniture, shaped from real timber and built to fit your space.
-
-Supporting messages:
-
-- choose your size, slab, base and finish;
-- made in Bloemfontein;
-- real craftsmanship, not mass production;
-- ready-made pieces and custom commissions;
-- clear lead times and direct maker communication.
-
-Do not use unsupported sustainability, heirloom, premium-grade or lifetime claims without proof.
-
-## Signature product concept
-
-Create a named hero model, for example:
-
-**The Free State Table**
-
-Possible structure:
-
-- 1.8 m six-seater;
-- 2.4 m eight-seater;
-- natural live edge;
-- two standard base choices;
-- two approved finish tones;
-- visible starting prices;
-- optional matching bench;
-- local delivery option;
-- made-to-order in a stated timeframe.
-
-The final name and specification must reflect the real material and production capability.
-
-## The first-sale campaign
-
-### Campaign objective
-
-Sell the first table and create a complete real-world case study.
-
-### Campaign offer
-
-Build one finished signature table before advertising it.
-
-Advertise it as:
-
-- one exact table;
-- one exact size;
-- one exact price;
-- photographed from every angle;
-- available to view;
-- available now or with an honest completion date;
-- local delivery terms explained.
-
-Avoid a vague "contact us for your dream table" campaign.
-
-### Required assets
-
-- hero room image in a real space;
-- clean product image on a neutral background;
-- maker next to table for scale;
-- underside and base close-ups;
-- edge and finish close-ups;
-- 15-second reveal video;
-- 30–45 second build story;
-- exact product card;
-- FAQ carousel;
-- delivery/installation video after sale.
-
-### Launch channels
-
-- Instagram and Facebook;
-- Facebook Marketplace;
-- local home and decor groups where permitted;
-- WhatsApp status and direct referral network;
-- Google Business Profile product post;
-- partner showroom or interior designer;
-- a small local Meta campaign only after the product page is complete.
-
-## Sales funnel
-
-### Product post CTA
-
-Use one CTA:
-
-> WhatsApp us the word TABLE for the full dimensions, price and viewing details.
-
-### WhatsApp response
-
-First response should include:
-
-1. product photo;
-2. exact dimensions;
-3. wood and finish;
-4. price;
-5. availability or lead time;
-6. delivery conditions;
-7. viewing option;
-8. payment/deposit terms;
-9. one simple question: "Is this for a dining room, lounge, office or another space?"
-
-Do not begin with a long questionnaire before giving the price.
-
-### Bespoke quote pathway
-
-Collect:
-
-- product type;
-- approximate dimensions;
-- number of seats;
-- location;
-- preferred style/reference;
-- wood preference if known;
-- base preference;
-- budget band;
-- required date;
-- delivery access.
-
-Then provide a structured quote with:
-
-- approved specification;
-- exclusions;
+- wood species;
+- solid wood vs veneer/engineered composition;
+- finish chemistry;
+- moisture resistance;
+- scratch/heat/water resistance;
+- weight capacity;
+- commercial-grade suitability;
+- handcrafted process steps not shown or confirmed;
+- in-house steel fabrication;
+- sustainability/fsc/local sourcing;
+- lifetime/heirloom durability;
+- warranty;
+- exact dimensions;
 - price;
-- deposit;
-- payment stages;
+- stock status;
 - lead time;
-- delivery;
-- care guidance;
-- variation process.
+- delivery/installation.
 
-## Website or landing page
+“Premium”, “durable”, “meticulous” and similar source language can guide tone, but measurable superiority claims need real proof.
 
-C&L needs at least one conversion-ready landing page with:
+## Audience and buying context
 
-- real hero product;
-- Ready Collection;
-- Bespoke service;
-- price anchors;
-- real workshop and maker story;
-- product dimensions;
-- lead times;
-- delivery area;
-- care and finish information;
-- quote form;
-- WhatsApp button;
-- terms, deposit and warranty summary;
-- current contact details and location.
+C&L can speak to more than one buying context without turning them into separate client identities.
 
-A social-only presence is too weak for a high-consideration purchase.
+### Home/customer-facing mode
 
-## Google and local discovery
+Likely useful when the creative is a dining table, coffee table, bedroom/display piece or styled room.
 
-Create and verify a Google Business Profile once the current workshop/showroom setup is suitable for public listing.
+Focus on:
 
-Priority search themes:
+- how the item lives in a real room;
+- scale and fit;
+- what detail the customer will notice every day;
+- how the shape/edge/finish changes the feel of the space;
+- what information helps someone decide whether the piece is right for them.
 
-- live edge tables Bloemfontein;
-- custom furniture Bloemfontein;
-- wooden dining tables Bloemfontein;
-- custom coffee tables Bloemfontein;
-- solid wood furniture Free State;
-- boardroom tables Bloemfontein;
-- live edge furniture South Africa.
+Do not reduce this mode to vague “luxury home” language.
 
-Do not create location pages for areas C&L cannot genuinely serve.
+### Designer/trade/business mode
 
-## Content system after the reset
+Use only when the exact task supports a designer, architect, hospitality, office or project audience.
 
-### Product proof — 40%
+Shift toward:
 
-- exact table with price and dimensions;
-- available stock;
-- product walk-around;
-- finish close-up;
-- comparison of sizes;
-- table in a real room.
+- exact dimensions/specifications supplied for the job;
+- finish/material decisions;
+- consistency and communication;
+- drawings/samples/proof where available;
+- delivery/installation/project scheduling only when confirmed;
+- decision risk and practical fit.
 
-### Craft and trust — 25%
+Do not invent trade terms, project capacity or commercial suitability.
 
-- slab selection;
-- moisture and preparation process where accurate;
-- base fabrication;
+## Human creative standard for C&L
+
+C&L should sound like a real furniture maker/studio with an eye for material, proportion, use and detail.
+
+A strong line should make the reader notice something specific about the item or understand why it matters in a room.
+
+If the line could be pasted under any interior/furniture account unchanged, rewrite it.
+
+### Generic phrasing to avoid by default
+
+Avoid interchangeable furniture/interiors AI copy such as:
+
+- “elevate your space”;
+- “transform your home”;
+- “timeless elegance”;
+- “where style meets comfort”;
+- “crafted for every lifestyle”;
+- “where quality meets…”;
+- “discover the difference”;
+- “a statement piece for every home” without a real detail;
+- vague “luxury” or “premium” claims that say nothing about the item.
+
+Premium/refined language is acceptable when it is earned by a visible or verified detail.
+
+Better starting points include:
+
+- the exact edge, shape, grain, base, proportion or finish shown;
+- the room/use decision the customer is making;
+- the hands/process behind the piece;
+- what makes this item different from mass-produced furniture, when the evidence supports that contrast;
+- one tactile or functional detail the viewer can actually see.
+
+## Caption rules
+
+- Default to natural English because the accessible Project evidence is predominantly English.
+- Do not force Afrikaans or language mixing for effect.
+- If Afrikaans is requested, use natural everyday Afrikaans rather than stiff/formal wording.
+- Keep the opening useful and human.
+- Add to the artwork/video instead of repeating its headline or on-screen wording.
+- One clear idea is better than a paragraph of luxury adjectives.
+- Short-to-medium captions are the normal default: often 1–4 useful sentences before any contact block/hashtags.
+- Longer copy is justified for a real build story, material explanation, commission journey or buyer education post.
+- Do not turn every caption into a sales pitch.
+- When options are requested, make them materially different in angle rather than paraphrasing the same sentence.
+- Proven useful angle variation: practical benefit; how the piece feels/works in the home; craftsmanship/process proof.
+- Do not claim a product is custom, available, made to order or ready to deliver unless the exact task/source confirms it.
+
+### Captions should add something the creative does not already say
+
+Possible additions:
+
+- a visible workmanship detail;
+- why the proportions suit a use case;
+- a room-placement consideration;
+- what part of the process the viewer is seeing;
+- a useful buying question;
+- a clear commission/product enquiry action;
+- a human observation about living with the piece.
+
+## Text-on-post / poster rules
+
+Text-on-post should be short, specific and visually legible.
+
+Prefer:
+
+- one exact product truth;
+- one practical benefit;
+- one material/craftsmanship detail;
+- one room/use feeling grounded in the visual;
+- one clear sales/commission action when relevant.
+
+Avoid:
+
+- heading + subheading saying the same thing;
+- generic luxury slogans;
+- unsupported superlatives;
+- long paragraphs on a product image;
+- filling every post with “handcrafted”, “bespoke”, “premium” and “timeless” without a new point.
+
+## Content formats that fit C&L
+
+Use the exact real product/context available. Strong recurring formats include:
+
+### Product proof
+
+- full product reveal;
+- close-up edge/grain/joinery detail;
+- underside/base/construction proof where useful;
+- scale in a real room;
+- exact product card when dimensions/material/price are supplied;
+- side-by-side size/finish choices only when they actually exist.
+
+### Craft/process
+
+- shaping;
 - sanding progression;
-- finish application;
-- quality inspection;
-- packaging and delivery.
+- joinery or assembly step;
+- finish application when the finish is known;
+- hands/tools/process close-ups;
+- before/process/after;
+- maker explaining one real decision.
 
-### Buyer education — 20%
+### Lifestyle/home
 
-- choosing table size;
-- how many people fit around common dimensions;
-- live edge versus straight edge;
-- care guidance;
-- wood movement explained honestly;
-- choosing base styles;
-- measuring doors and access routes.
+Lifestyle content should make the real product easier to imagine in use, not replace proof with synthetic décor scenes.
 
-### Human and local — 15%
+Show:
 
-- meet the makers;
-- workshop story;
-- why C&L was started;
-- local suppliers and collaborations;
-- client delivery stories;
-- honest mistakes and refinements where appropriate.
+- believable room scale;
+- how people move around/use the table;
+- table height/size in context;
+- serving/dining/working/living use when appropriate;
+- details that keep the furniture as the hero.
 
-## Partnerships
+### Commission/project story
 
-Priority partners:
+When a real brief exists, show:
 
-- interior designers;
-- architects;
-- kitchen companies;
-- estate agents staging premium properties;
-- boutique lodges and guesthouses;
-- coffee shops and restaurants;
-- property developers;
-- office designers;
-- wedding venues;
-- photographers and home-content creators;
-- Bloem Marble & Granite where mixed-material furniture opportunities make sense.
+- client need;
+- design/material decision;
+- process;
+- finished piece;
+- installation/delivery only if real;
+- client proof/testimonial only if authentic.
 
-Offer partners:
+### Buyer education
 
-- material/sample pack;
-- clear trade process;
-- reliable lead times;
-- referral or trade pricing reviewed for margin and compliance;
-- professional product sheets;
-- project photography after installation.
+Useful topics include:
 
-## Paid media
+- how to measure a room before ordering a table;
+- choosing table proportions for the room;
+- what to look at in edge/profile/base design;
+- how finish changes the look, only when exact finishes are known;
+- why real product scale matters;
+- what information is needed for a clean commission enquiry.
 
-Do not run broad awareness ads to the current feed.
+## Visual and image-edit rules
 
-First fix:
+C&L visuals must protect trust in the real product.
 
-- product;
-- proof;
-- price anchor;
-- landing page;
-- WhatsApp response;
-- delivery terms.
+### Preserve the furniture
 
-Then test:
+Unless the user explicitly requests a product redesign, preserve:
 
-### Campaign 1: ready-made hero table
+- real table/furniture proportions;
+- tabletop size and thickness;
+- edge/profile shape;
+- wood grain/texture;
+- finish colour/tone;
+- base/legs;
+- joinery/construction details;
+- logos/branding;
+- product placement and important crop/composition.
 
-- local radius around Bloemfontein;
-- exact product and price;
-- message objective;
-- strong product photo;
-- retarget video viewers and page visitors.
+Do not silently make a table larger, smaller, thicker, thinner or structurally different to suit an AI scene.
 
-### Campaign 2: custom dining table leads
+### Physical realism is mandatory
 
-- homeowners, renovation and interior interests;
-- qualification form with size, location, timing and budget;
-- exclude people outside service capacity.
+Avoid:
 
-### Campaign 3: B2B trade outreach
+- furniture appearing to sit on another table/surface unnaturally;
+- impossible support/leg geometry;
+- unrealistic scale compared with hands, chairs, people or room architecture;
+- plastic-looking wood;
+- duplicated product parts;
+- decorative objects that obscure the product when the product is the point.
 
-Use direct email, LinkedIn and personal outreach rather than broad social ads.
+A close-up of the hand/product is better than a wide synthetic scene when realism cannot be maintained.
 
-## Production and commercial controls
+### Edit only what was requested
 
-Before scaling marketing, C&L must prove:
+For edits:
 
-- repeatable costing;
-- realistic lead times;
-- dependable timber supply;
-- moisture and movement management;
-- finish suitability;
-- base stability;
-- delivery and installation method;
-- damage and remake policy;
-- deposit protection and cash-flow planning;
-- ability to communicate delays;
-- margin after transport and rework.
+- change the requested object/area;
+- preserve everything else unless the brief explicitly asks for broader redesign;
+- do not add/remove furniture, food, people, décor or background elements without instruction;
+- preserve already-approved elements;
+- keep the original composition/crop where the request is a single-object change.
 
-Marketing should never sell faster than production can safely deliver.
+### People and lifestyle scenes
 
-## Measurement
+When people are included:
 
-Track weekly:
+- make them believable and naturally posed;
+- keep skin, hands and body proportions realistic;
+- avoid a visibly homogeneous cast by default when the scene represents a broader South African lifestyle audience;
+- do not let people become more visually dominant than the furniture unless the brief calls for it.
 
-- qualified enquiries;
-- product requested;
-- enquiry source;
-- stated budget;
-- quote value;
-- quote turnaround time;
-- quote acceptance;
-- objections;
-- deposits paid;
-- sales value;
-- gross margin;
-- lead time promised versus delivered;
-- content clicks to WhatsApp;
-- Marketplace enquiries;
-- partner referrals;
-- lost reasons.
+## Dynamic SEO and hashtags
 
-Do not use likes or aesthetic approval as the primary success measure.
+Default maximum: **5 hashtags**.
 
-## 30-day emergency recovery plan
+There is no permanent C&L hashtag bank.
 
-### Week 1: commercial truth
+Choose hashtags dynamically from:
 
-- confirm exact business details and location;
-- calculate costs and margins;
-- define Ready Collection and Bespoke offer;
-- choose one hero table;
-- determine exact price, lead time and delivery terms;
-- stop publishing generic AI-styled lifestyle posts.
+- exact C&L identity;
+- exact product/item;
+- verified material or craft detail;
+- use case/room;
+- location only when current reliable evidence supports it;
+- platform/search context.
 
-### Week 2: build proof
+Possible seed terms, not automatic outputs:
 
-- complete or fully prepare the hero piece;
-- photograph it professionally in a real setting;
-- film real workshop footage;
-- create product sheet and WhatsApp response;
-- create simple landing page or catalogue.
+- `#CLInnovations`;
+- `#CustomFurniture` when custom capability is current/relevant;
+- `#WoodFurniture`;
+- exact item tags such as `#DiningTable` or `#CoffeeTable`;
+- `#LiveEdgeFurniture` only when the exact item/source verifies live edge;
+- `#Bloemfontein` only when the current task reliably confirms location relevance.
 
-### Week 3: launch
+Never call a tag “trending” without current evidence.
 
-- launch one-table campaign;
-- publish to Marketplace and local channels;
-- contact 20 suitable local trade partners personally;
-- arrange one physical viewing or display collaboration;
-- track every enquiry and objection.
+## CTA guidance
 
-### Week 4: convert and learn
+A CTA should match the post.
 
-- follow up all qualified leads;
-- refine offer based on actual objections;
-- test a smaller entry product if dining-table budgets block sales;
-- secure the first honest installation case study;
-- only then expand the range.
+Good sales/commission actions include:
 
-## 90-day growth plan
+- contact Chris or Lize for the exact item/commission;
+- ask for dimensions/price/details when those are available to provide;
+- send the room size/reference when starting a confirmed commission pathway;
+- request current availability when the post is product-specific.
 
-### Days 1–30
+Do not default to empty CTAs such as “elevate your space today”.
 
-- first-sale recovery plan;
-- real product proof;
-- visible price anchors;
-- sales process and landing page;
-- local partnership outreach.
+For inspiration/process content, no CTA may be better than a forced sales line.
 
-### Days 31–60
+## Historical recovery strategy — retained, not current fact
 
-- launch Ready Collection;
-- add Google Business Profile;
-- publish real case studies;
-- test local paid lead generation;
-- create designer/architect trade pack;
-- introduce smaller products for faster sales and reviews.
+The August 2026 pack diagnosed a conversion problem at that time: attractive furniture content was creating atmosphere but not enough buying clarity or proof.
 
-### Days 61–90
+Durable strategic lessons worth retaining:
 
-- compare product margins and conversion;
-- remove products that attract interest but no deposits;
-- expand only proven sizes and finishes;
-- build B2B project pipeline;
-- improve delivery and after-sales proof;
-- create referral system from first customers and partners.
+- show real finished furniture, not only mood imagery;
+- answer buyer uncertainty with real dimensions, material, price, availability, lead time, location/viewing and delivery information **when those facts are verified**;
+- build social proof honestly rather than invent testimonials;
+- document real workshop process and finished pieces;
+- use clear enquiry pathways;
+- a conversion-ready landing page/catalogue can reduce friction for a high-consideration purchase;
+- local/trade partnerships may help distribution once the offer and capacity are real;
+- measure qualified enquiries, quotes, deposits/sales and objections rather than likes alone.
 
-## Non-negotiable rule
+### Historical proposals that are NOT approved current offers
 
-For the next phase, every piece of content must do at least one of these:
+Do not promote the following as current C&L facts unless the client has since confirmed them:
 
-- sell a specific product;
-- prove a specific capability;
-- answer a real buying objection;
-- show a real maker or workshop;
-- move a qualified person into a clear enquiry path.
+- a “C&L Ready Collection”;
+- a separate “C&L Bespoke” range architecture;
+- the proposed “Free State Table” hero model;
+- example side-table/coffee-table/console/bench/dining-table price bands;
+- standard sizes or seating options;
+- visible `from` prices;
+- 2–4 week or any other lead-time assumption;
+- local delivery/collection promises;
+- a current showroom/viewing option;
+- trade/referral pricing;
+- product sheets/samples as an existing service;
+- Google Business Profile status;
+- paid-media readiness;
+- current zero-sales status.
 
-Pure aesthetic filler should not consume the limited monthly content capacity while the business has zero sales.
+These remain historical strategy candidates only.
 
-## Current information still required from C&L
+## Task-specific retrieval packet for #241 readiness
 
-- exact workshop and viewing location;
-- correct contact names and numbers;
-- email and WhatsApp;
-- current legal entity and payment details;
-- timber species currently available;
-- exact production capability;
-- existing completed physical pieces;
-- current cost sheets;
-- target margins;
-- delivery radius and costs;
-- warranty/workmanship policy;
-- finish products and care instructions;
+A simple `caption please` should retrieve only:
+
+1. exact client: C&L Innovations / `afb62c53-d6d3-4ef8-9393-def88ed899d8`;
+2. exact supplied product/creative/context;
+3. compact voice rules: human, specific, material/product-aware, non-generic;
+4. caption rule: add rather than repeat;
+5. relevant contact/footer rule;
+6. claim guardrails for material, dimensions, stock, custom capability, delivery, price, warranty and lead time;
+7. max-5 dynamic SEO/hashtag rule;
+8. unresolved facts that affect that exact post.
+
+An `image edit` task should retrieve only:
+
+1. real-product preservation rules;
+2. proportions/material/finish/base/branding preservation;
+3. edit-only-what-was-requested rule;
+4. realism/composition constraints;
+5. supplied scene change.
+
+A `content ideas` task should retrieve:
+
+1. current verified product/context;
+2. product-proof/process/lifestyle/education/project formats;
+3. recovery lesson that proof and buying clarity matter;
+4. unresolved operational claims to avoid.
+
+Do not load the historical competitor pricing or full recovery plan into a simple caption task.
+
+## Unresolved CG decisions and freshness gates
+
+Current decisions/facts requiring client or newer authoritative confirmation:
+
+- exact current workshop/studio/viewing address;
+- whether Bloemfontein should be used as a public location/service-area claim;
+- current official website/domain, if any;
+- current official Instagram/Facebook identities;
+- current email and preferred WhatsApp channel;
+- whether Chris/Lize contact details remain unchanged for all campaigns;
+- current public/business hours or appointment process;
+- exact current product categories and which are actively offered now;
+- exact current custom/bespoke capability and boundaries;
+- current wood species/materials;
+- current finishes;
+- current completed products/stock;
+- dimensions/specifications;
+- prices/deposits/payment terms;
 - lead times;
-- whether steel bases are made internally;
-- whether any past enquiries or quotes exist;
-- reasons those enquiries did not convert;
-- maximum monthly production capacity.
+- delivery/installation/service area;
+- warranty/workmanship/care terms;
+- supplier/brand/trade relationships;
+- commercial/designer/architect service process;
+- current production capacity;
+- current sales/proof/testimonials after the August 2026 recovery diagnosis.
 
-Without these facts, CG should not invent luxury claims or run aggressive paid campaigns.
+If any of these affect a live deliverable, retrieve current evidence or ask CG/client for the exact fact instead of guessing.
+
+## Project Source audit — 2026-09-08
+
+Actually accessible C&L Project Source:
+
+### KEEP — `C&L INNOVATIONS business info.pdf`
+
+Reason:
+
+- original client-supplied evidence;
+- contains the only accessible first-party contact block and posting/contact usage rules;
+- contains useful product/category and tone evidence;
+- should remain as auditable source material even though mutable facts require freshness checks.
+
+### REMOVE
+
+- none among actually accessible C&L Project Sources.
+
+### REPLACE
+
+- none among actually accessible C&L Project Sources.
+
+The derived everyday working guide should be `C-L-INNOVATIONS-CG-DYNAMICS-CLIENT-GUIDE.md`. It does not erase the useful original client evidence above.
+
+## Migration handoff state
+
+Permanent intelligence: this file.
+
+Derived everyday ChatGPT guide: `docs/ai-workforce/client-intelligence/C-L-INNOVATIONS-CG-DYNAMICS-CLIENT-GUIDE.md`.
+
+Manual handoff is still required. Keep status:
+
+**MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**
+
+until CG physically applies the final short Instructions in the C&L Innovations ChatGPT Project and confirms them.
