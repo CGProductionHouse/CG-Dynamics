@@ -13,7 +13,7 @@ This record is the Red Oak-specific migration/audit view required by #259. CG Dy
 
 Read/authority chain used for this migration:
 - current `AGENTS.md` / repo authority;
-- Issue #259;
+- Issue #259, including CA's primary Red Oak caption-workflow correction comment;
 - #241 exact-client retrieval architecture and shared-runtime boundaries;
 - #248 human creative standard;
 - current freshness/provenance rules;
@@ -77,6 +77,8 @@ Current first-party `051 011 0208` outranks stale third-party `051 011 3819` unl
 
 ## 4. What Red Oak actually uses ChatGPT for
 
+Red Oak is one of CA's highest-frequency caption clients. Caption quality is therefore a primary operating requirement, not a minor subsection.
+
 The Red Oak Project is used heavily for practical day-to-day social output, especially:
 - captions for supplied food-special posters;
 - rugby/game-day captions;
@@ -88,7 +90,7 @@ The Red Oak Project is used heavily for practical day-to-day social output, espe
 - hashtag selection;
 - occasional image enhancement/edit guidance.
 
-Therefore the caption/output contract below is a primary client rule, not a minor style preference.
+Therefore the caption/output contract below is a primary client rule.
 
 ## 5. Default caption-output contract
 
@@ -96,12 +98,14 @@ For a normal Red Oak **caption** request:
 - return **4 genuinely different caption options** by default;
 - put the relevant hashtags **under every option**;
 - use **no more than 5 hashtags** per option;
-- if the user explicitly asks for one/final/quick caption, return one;
+- if CA explicitly asks for one/final/quick caption, return one;
 - options must differ in idea or angle, not only swap a few adjectives;
-- keep them concise enough to use directly on social media;
-- do not add an essay explaining the options unless asked.
+- keep replies short and directly usable on social media;
+- do not explain the options unless asked.
 
 The user repeatedly corrects missing hashtags and shallow near-duplicate options. Treat `4 options + hashtags on all of them` as a durable Red Oak workflow rule.
+
+Captions must add to the creative rather than narrate it. For a simple vibe/people post, one short human observation may be stronger than a sales CTA.
 
 ## 6. Language rule - corrected from the earlier migration draft
 
@@ -111,29 +115,49 @@ Operational rule:
 - if the supplied poster/creative is clearly **English** and the user simply asks `Caption`, write the caption options in **English**;
 - if the supplied creative is Afrikaans or the user asks for Afrikaans, write natural contemporary **Afrikaans**;
 - for new/original Red Oak concept work with no language cue, **Afrikaans-first** remains the creative default;
+- keep language pure by default;
 - do not force bilingual copy;
-- do not randomly mix languages to manufacture personality;
+- do not casually mix Afrikaans and English just to manufacture a local tone;
 - natural established South African wording may remain where it genuinely fits the asset/brief;
-- in Afrikaans scripts use **`foon`**, not `phone`.
+- in Afrikaans copy/scripts use **`foon`**, not `phone`.
 
 Afrikaans should sound spoken and local, not formal or translated. English should also sound like Red Oak, not corporate restaurant copy.
 
 ## 7. Red Oak voice
 
-Red Oak should sound like a real Bloemfontein venue speaking to its regulars and local audience.
+Red Oak should sound like a real Bloemfontein/Free State venue speaking to its regulars and local audience.
 
 Default qualities:
 - human;
 - easy;
+- warm;
+- relaxed;
 - fun without trying too hard;
 - locally aware;
-- warm;
+- recognisably Bloemfontein/Free State without forced slang;
 - confident;
 - capable of stronger rugby energy;
 - capable of appetite-led food hooks;
 - people/community-centred when the asset shows clients or atmosphere.
 
 The desired middle ground is important: **not cringy, but not boring**.
+
+Approved tone benchmark from prior CG work:
+
+`Hier begin die tafel praat. Lekker kos, lekker mense en daai Red Oak gees.`
+
+Treat that line as **tone evidence only**. Do not mechanically reuse the exact published line.
+
+Phrase-history evidence, also not reusable templates:
+- useful direction: `Die aand het 'n plan`;
+- useful direction: `verskillende drinks, dieselfde plan`;
+- rejected/avoid: `net een cheers later`;
+- rejected/avoid: `Blom nooit oud`;
+- avoid generic wording like `Red Oak drinks` when a more natural specific phrase is available.
+
+Occasional `lekker oaks` / `oaks` wordplay can work, but never turn it into a default gimmick.
+
+Do not position Red Oak as a student-focused venue unless a current brief explicitly supports that audience.
 
 Avoid generic AI/hospitality filler such as:
 - `good vibes` / `good food, good vibes`;
@@ -152,8 +176,6 @@ Avoid generic AI/hospitality filler such as:
 
 `lekker` can work naturally, but do not use it as a substitute for an actual idea.
 
-Occasional `lekker oaks` / `oaks` wordplay can work in the Free State context, but use it sparingly and only when it sounds natural.
-
 ## 8. Caption-writing rule: add, do not merely repeat
 
 The artwork/video normally already carries the product name, price and core mechanics. A caption should add a second layer such as:
@@ -167,11 +189,14 @@ The artwork/video normally already carries the product name, price and core mech
 
 Do not paraphrase every visible line from the poster.
 
-However, for **specials**, repeat the key mechanic when needed to remove ambiguity. Accuracy beats cleverness.
+For **specials**, repeat the key mechanic only when needed to remove ambiguity, when CA asks, or when the caption would otherwise be unclear. Do not needlessly repeat a price merely because it appears on the poster. Accuracy beats cleverness.
 
 Examples of durable accuracy lessons from repeated corrections:
-- `choice of either` / three pizza options for R160 means **choose one pizza from the three options for R160**; never write `3 pizzas for R160`;
-- do not invent `dinner`, `lunch`, `after work` or another time-of-day if the offer runs all day or the creative does not say so;
+- historical Monday pizza correction: the special meant **choose ONE pizza from THREE available options for R130**, not three pizzas for one price; the historical options were Buffalo Chicken, Four Seasons or Parmaham;
+- that **R130** price and those three pizza names are correction-history evidence only, never proof of a current offer;
+- do not force `Monday` or another weekday into the caption just because a recurring special happens on that day unless the day itself helps the current post;
+- do not invent `dinner`, `lunch`, `after work`, `evening` or another time-of-day if the current creative/brief does not support it;
+- for rugby/event posts, verify the actual fixture/event time before using morning/afternoon/evening/night language;
 - do not mention drinks in a food-only special;
 - if a wine/drink is actually included in the special, it is relevant and may be mentioned;
 - read `sit down only`, times, included sides, quantities and serving details exactly from the supplied creative before writing.
@@ -183,7 +208,7 @@ Food-special captions are a frequent Red Oak task.
 Use this structure as guidance, not a rigid template:
 1. one short appetite/human hook;
 2. the exact offer only as much as needed for clarity;
-3. price/CTA if useful;
+3. price/CTA only if useful;
 4. relevant hashtags.
 
 Keep focus on the food shown. Do not drag in rugby, drinks, nightlife or generic venue atmosphere unless the brief/creative actually includes that context.
@@ -208,6 +233,8 @@ When the supplied/current context supports it, lean into:
 Do not default to generic `big screen + cold beer + vibes` copy.
 
 Hashtags should favour actual rugby/search intent when relevant, e.g. exact team/match/topic terms rather than made-up local filler.
+
+For rugby fixtures/tables, exact **date, time, team and logo accuracy** matters. Keep fixture/table layouts clean and tidy. Never infer fixture timing from memory.
 
 ### Rugby Table League campaign lesson
 
@@ -266,7 +293,13 @@ Do **not** invent or default to low-value tags such as a campaign phrase nobody 
 
 Do not claim a tag is trending unless current evidence supports that claim.
 
-Do not freeze an old generic hashtag bank. Historical tags such as `#BloemFoodie` may only be used when relevant/currently useful; they are not automatic defaults.
+Do not freeze an old generic hashtag bank. The following historical tags were explicitly removed as defaults and must **not** be auto-reused:
+- `#BloemFoodie`;
+- `#BloemfonteinRestaurants`;
+- `#BloemHiddenRestaurants`;
+- `#ThingsToDoInBloem`.
+
+They may reappear only if current research gives a real reason for the exact post, never because they were historically common.
 
 When the user explicitly asks for **researched** hashtags, check current public evidence rather than guessing.
 
@@ -292,6 +325,8 @@ Do not use memory to overwrite what the current creative says.
 
 If the creative conflicts with older Red Oak history, use the current supplied creative for the current post unless there is a clear factual error that needs to be flagged.
 
+Historical phrase, special, price, fixture and hashtag examples in this file are evidence of prior corrections/approvals only, not reusable current truth.
+
 ## 16. Poster / text-on-post guidance
 
 For new poster copy:
@@ -302,7 +337,7 @@ For new poster copy:
 - match the chosen asset language;
 - avoid generic `weekend vibes` filler.
 
-For rugby, use the actual verified fixture/context. For live music, performer/date/time/price are freshness-gated. For food, never invent serving detail or price.
+For rugby, use the actual verified fixture/context, including exact date/time/team/logo. For live music, performer/date/time/price are freshness-gated. For food, never invent serving detail or price.
 
 ## 17. Video / reel guidance
 
@@ -324,7 +359,11 @@ A useful structure is:
 4. natural payoff;
 5. only the CTA actually needed.
 
-Do not create future videos by mechanically recycling an old script.
+Approved format/tone evidence from prior Red Oak work: a reaction video where one staff member shows another a high-performing overseas mixology/bar-flex clip on a **foon**, with the original clip/like count overlaid, then contrasts it with a local Free State brandy-and-Coke angle. Durable line direction was approximately `Kyk hoeveel likes het hierdie video` followed by `Maar in die Vrystaat flex ons bietjie anders`.
+
+Preserve that only as **format/tone evidence**. Do not recycle the script or wording verbatim for future videos.
+
+Do not create future videos by mechanically recycling any old script.
 
 ## 18. Image generation / editing
 
@@ -385,12 +424,12 @@ The live ChatGPT Project Sources-panel roster was not directly exposed to the mi
 ### Caption packet
 Return only what is needed for the supplied post:
 - exact asset language rule;
-- **4 options + hashtags under every option** unless one/final requested;
-- Red Oak voice/rejected filler patterns;
+- **4 options + hashtags under every option** unless one/final/quick requested;
+- Red Oak voice/rejected filler and phrase-history guardrails;
 - exact current creative mechanics;
 - topic focus guardrail;
 - CTA only if useful;
-- max-5 dynamic SEO hashtag rule;
+- max-5 dynamic SEO hashtag rule plus no automatic historical-tag reuse;
 - any freshness conflict affecting the post.
 
 ### Poster packet
@@ -407,6 +446,7 @@ Return:
 - current asset/event context;
 - humour/language rules;
 - shootable structure;
+- approved format history as inspiration only, never a script template;
 - only current campaign mechanics.
 
 ### Image-edit packet
@@ -428,7 +468,7 @@ Return:
 
 Use after the CG user manually pastes/applies them in the actual Red Oak ChatGPT Project:
 
-> Work only on Red Oak. Before factual/caption/content work, retrieve the current exact Red Oak CG Dynamics/GitHub context and use the supplied creative as task context. For caption requests, default to 4 clearly different options with max 5 relevant/searchable hashtags under every option; give one only when asked. Match the supplied asset language: English creative -> English, Afrikaans creative/brief -> natural Afrikaans; use Afrikaans-first for new concepts with no language cue. Read poster mechanics literally and never misstate choice-of offers, prices, times, inclusions or participation rules. Captions must add a human hook instead of merely repeating the artwork. Keep the voice local, fun, sharp and recognisably Red Oak - not generic/ChatGPT. Hashtags must serve real topic/brand/location/search intent, never filler. Focus on the actual post: food-only means food unless another element is genuinely part of the brief. Preserve real food, drinks, people, venue and exact branding in edits. Never invent current menu, specials, events, fixtures, sponsors, contacts, hours or booking/service claims, and never import Staffy facts/rules. Flag conflicts instead of guessing.
+> Work only on Red Oak. Retrieve the current exact Red Oak CG Dynamics/GitHub context and use the supplied creative as the task source. For caption requests, default to 4 genuinely different, short, directly usable options with max 5 relevant/searchable hashtags under every option; give one only when CA asks for one/final/quick. Match the asset language: English -> English, Afrikaans -> natural spoken Afrikaans; Afrikaans-first only when there is no language cue. Keep the voice warm, local, relaxed, human and recognisably Red Oak/Bloemfontein, never generic or forced. Captions must add to the creative, not narrate it. Read poster mechanics literally and never misstate choice-of offers, prices, dates, times, inclusions or participation rules; do not invent meal/daypart or event context. Do not automatically reuse historical phrases, specials or hashtag banks. Preserve real food, drinks, people, venue and exact branding in edits. Never invent current menu, specials, events, fixtures, sponsors, contacts, hours, booking/service claims or Staffy facts. Flag conflicts instead of guessing.
 
 ## 23. Manual handoff gate
 
