@@ -4,6 +4,7 @@ Canonical CG client: **Dulux Paint & Paper Bloemfontein**
 Historical/working aliases: **Dulux Bloemfontein**, **Dulux**, **Dulux Paint n Paper Bloemfontein**  
 Record purpose: **Permanent human CG source of truth for future Dulux Paint & Paper Bloemfontein marketing/content work**  
 Human Project knowledge last reviewed: **2026-09-08**  
+Project Instructions last audited: **2026-09-08**  
 Mutable public facts last verified: **2026-09-08**  
 Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
@@ -17,6 +18,7 @@ It reconciles:
 
 - the previous CG Dynamics Dulux research pack;
 - accessible Dulux ChatGPT Project conversations;
+- the current Dulux ChatGPT Project Instructions;
 - the client-supplied `Dulux Business profile.pdf`;
 - the client-supplied `Dulux Tone of Voice.pdf`;
 - repeated CA/CG corrections, approvals and preferences from historical Dulux work;
@@ -468,12 +470,13 @@ Do not preserve old closing dates, award names or voting instructions as permane
 Standing Dulux/CG rules:
 
 - captions should feel like real store staff wrote them;
-- use natural English;
+- default to natural English unless another language is requested;
+- do **not** mix Afrikaans and English unless specifically requested;
 - be specific and concise;
 - do not repeat the poster text word-for-word;
 - include the relevant contact details in caption requests;
 - include the address, phone and website as the stable default contact block while they remain current;
-- default to **5 focused hashtags** for Dulux; never exceed the broader CG ceiling of **6** unless CA changes the rule;
+- use a maximum of **5 focused, relevant hashtags** for Dulux;
 - rotate hashtags by post topic rather than pasting the same five mechanically;
 - no em dashes in client-facing copy unless CA explicitly asks otherwise.
 
@@ -495,7 +498,7 @@ The Tone of Voice PDF supplied examples such as:
 - `#InteriorAndExteriorPaint`
 - `#TrustedPaint`
 
-Treat these as **source examples**, not a mandatory repeated block. Prefer more specific/local/search-relevant tags when they fit the post, while keeping the count focused.
+Treat these as **source examples**, not a mandatory repeated block. Prefer more specific/local/search-relevant tags when they fit the post, while keeping the count to 5 or fewer.
 
 ## 15. Calls to action that fit Dulux
 
@@ -578,9 +581,10 @@ The instruction “no forced humour or memes” should be read literally as **no
 12. **Do not ban humour because of that contaminated line; use natural staff/store humour when appropriate.**
 13. **Do not make every video a static product explanation. Show action, process and personality.**
 14. **Do not make every caption repeat the artwork.**
-15. **Do not repeat overused “bring the win/title home” voting language.**
-16. **Do not create another dated Dulux intelligence file for routine updates. Update this record.**
-17. **Do not modify client IDs, CG Hours, billing, package or historical time data as part of client-knowledge work.**
+15. **Do not mix Afrikaans and English unless specifically requested.**
+16. **Do not repeat overused “bring the win/title home” voting language.**
+17. **Do not create another dated Dulux intelligence file for routine updates. Update this record.**
+18. **Do not modify client IDs, CG Hours, billing, package or historical time data as part of client-knowledge work.**
 
 ## 19. Content-development test before a Dulux idea is approved
 
@@ -695,7 +699,8 @@ If a mutable fact cannot be verified, label it and ask/verify rather than fillin
    - useful paint-specific tone/content guidance;
    - contains obvious grief/funeral contamination that is explicitly rejected above.
 
-3. Accessible Dulux ChatGPT Project/history through 2026-09-08
+3. Current ChatGPT Project Instructions and accessible Dulux ChatGPT Project/history through 2026-09-08
+   - current Project Instructions audited line-by-line on 2026-09-08;
    - January 2026 store-only 20–30 second video briefs, including one-VO/two-no-VO mix and later fun/out-of-the-box request;
    - March 2026 copy/grammar refinement history;
    - historical CG rules on non-generic expertise-led copy, colour-effect wording, voting wording, contact block and staff-led content;
