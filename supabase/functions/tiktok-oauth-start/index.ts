@@ -7,7 +7,6 @@ const SCOPES = [
   'user.info.profile',
   'user.info.stats',
   'video.list',
-  'video.upload',
   'video.publish',
 ]
 

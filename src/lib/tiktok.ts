@@ -90,7 +90,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     meaning: 'Cumulative video plays including replays. Snapshot at sync time — not a period total.',
     aggregation: 'sum',
     clientSafe: true,
-    crossPlatformAdditive: true,
+    crossPlatformAdditive: false,
   },
   {
     key: 'likes',
@@ -99,7 +99,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     meaning: 'Cumulative likes on videos published in period. Snapshot at sync time.',
     aggregation: 'sum',
     clientSafe: true,
-    crossPlatformAdditive: true,
+    crossPlatformAdditive: false,
   },
   {
     key: 'comments',
@@ -108,7 +108,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     meaning: 'Cumulative comments on videos published in period. Snapshot at sync time.',
     aggregation: 'sum',
     clientSafe: true,
-    crossPlatformAdditive: true,
+    crossPlatformAdditive: false,
   },
   {
     key: 'shares',
@@ -117,7 +117,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     meaning: 'Cumulative shares of videos published in period. Snapshot at sync time.',
     aggregation: 'sum',
     clientSafe: true,
-    crossPlatformAdditive: true,
+    crossPlatformAdditive: false,
   },
   {
     key: 'current_followers',
@@ -192,10 +192,10 @@ export async function initTiktokPublish(options: {
   contentReviewVersionId: string
   publishNowConfirmed: true
   title?: string
-  privacyLevel?: string
-  disableDuet?: boolean
-  disableStitch?: boolean
-  disableComment?: boolean
+  privacyLevel: string
+  disableDuet: boolean
+  disableStitch: boolean
+  disableComment: boolean
   brandContentToggle?: boolean
   brandOrganicToggle?: boolean
 }): Promise<TiktokPublishResult> {

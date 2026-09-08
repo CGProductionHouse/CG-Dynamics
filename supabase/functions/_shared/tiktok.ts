@@ -445,10 +445,10 @@ export async function initTiktokDirectPost(
   videoUrl: string,
   postInfo: {
     title?: string
-    privacy_level?: string
-    disable_duet?: boolean
-    disable_stitch?: boolean
-    disable_comment?: boolean
+    privacy_level: string
+    disable_duet: boolean
+    disable_stitch: boolean
+    disable_comment: boolean
     brand_content_toggle?: boolean
     brand_organic_toggle?: boolean
   },
@@ -464,10 +464,10 @@ export async function initTiktokDirectPost(
       body: JSON.stringify({
         post_info: {
           title: postInfo.title ?? '',
-          privacy_level: postInfo.privacy_level ?? 'PUBLIC_TO_EVERYONE',
-          disable_duet: postInfo.disable_duet ?? false,
-          disable_stitch: postInfo.disable_stitch ?? false,
-          disable_comment: postInfo.disable_comment ?? false,
+          privacy_level: postInfo.privacy_level,
+          disable_duet: postInfo.disable_duet,
+          disable_stitch: postInfo.disable_stitch,
+          disable_comment: postInfo.disable_comment,
           brand_content_toggle: postInfo.brand_content_toggle ?? false,
           brand_organic_toggle: postInfo.brand_organic_toggle ?? false,
         },

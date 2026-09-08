@@ -34,12 +34,18 @@ function formatDateTime(value: string | null): string {
 export default function TikTokIntegrationPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const oauthResult = searchParams.get('tiktok')
   const [clients, setClients] = useState<Client[]>([])
   const [status, setStatus] = useState<TiktokConnectionStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [notice, setNotice] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(() => {
+    if (oauthResult === 'permissions_missing') return 'Some TikTok permissions were not granted. Reconnect to grant all required scopes.'
+    if (oauthResult === 'error') return 'TikTok connection failed. Please try again.'
+    if (oauthResult === 'config_error') return 'TikTok is not configured. Ask an admin to set Edge Function secrets.'
+    return null
+  })
+  const [notice, setNotice] = useState<string | null>(() => oauthResult === 'connected' ? 'TikTok connected successfully.' : null)
   const [syncMonth, setSyncMonth] = useState(currentMonth())
   const [syncClientId, setSyncClientId] = useState('')
   const [syncResult, setSyncResult] = useState<TiktokSyncResult | null>(null)
@@ -47,18 +53,10 @@ export default function TikTokIntegrationPage() {
   // Handle OAuth callback params — reload status for the selected client
   useEffect(() => {
     const tiktokParam = searchParams.get('tiktok')
-    if (tiktokParam === 'connected') {
-      setNotice('TikTok connected successfully.')
-    } else if (tiktokParam === 'permissions_missing') {
-      setError('Some TikTok permissions were not granted. Reconnect to grant all required scopes.')
-    } else if (tiktokParam === 'error') {
-      setError('TikTok connection failed. Please try again.')
-    } else if (tiktokParam === 'config_error') {
-      setError('TikTok is not configured. Ask an admin to set Edge Function secrets.')
-    }
     if (tiktokParam) {
-      searchParams.delete('tiktok')
-      setSearchParams(searchParams, { replace: true })
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('tiktok')
+      setSearchParams(nextParams, { replace: true })
       // Reload connection status after OAuth completes
       if (syncClientId) {
         getTiktokConnectionStatus(syncClientId).then(setStatus)
@@ -101,7 +99,7 @@ export default function TikTokIntegrationPage() {
 
   // Load connection status whenever the selected client changes
   useEffect(() => {
-    if (!syncClientId) { setStatus(null); return }
+    if (!syncClientId) return
     let active = true
     getTiktokConnectionStatus(syncClientId).then(s => { if (active) setStatus(s) })
     return () => { active = false }
@@ -224,7 +222,7 @@ export default function TikTokIntegrationPage() {
                 <ul className="mt-2 space-y-1.5 text-sm text-brand-primary">
                   <li>Register an app on TikTok for Developers and add the Content Posting API product.</li>
                   <li>Enable Login Kit and configure a redirect URI for your Supabase Edge Function callback.</li>
-                  <li>Request scopes: user.info.basic, user.info.profile, user.info.stats, video.list, video.upload, video.publish.</li>
+                  <li>Request scopes: user.info.basic, user.info.profile, user.info.stats, video.list, and video.publish.</li>
                   <li>Pass TikTok&apos;s app audit before content can be posted publicly.</li>
                 </ul>
               </div>
@@ -256,7 +254,10 @@ export default function TikTokIntegrationPage() {
               <select
                 className={INPUT_CLASS}
                 value={syncClientId}
-                onChange={event => setSyncClientId(event.target.value)}
+                onChange={event => {
+                  setStatus(null)
+                  setSyncClientId(event.target.value)
+                }}
               >
                 <option value="">Select a client</option>
                 {clients.map(client => (
@@ -342,7 +343,7 @@ export default function TikTokIntegrationPage() {
           />
           <div className="space-y-3 text-sm text-brand-primary">
             <p>
-              The Content Posting API supports direct posting (video.publish scope) and draft uploads (video.upload scope).
+              This integration uses Direct Post with the video.publish scope. It does not request video.upload because CG Dynamics does not send drafts to the TikTok inbox.
               Videos are posted asynchronously — poll status until PUBLISH_COMPLETE.
             </p>
             <div className="rounded-lg border border-white/8 bg-black/20 p-4">
@@ -353,6 +354,7 @@ export default function TikTokIntegrationPage() {
                 <li>Unaudited apps can only post to private/self-only accounts.</li>
                 <li>Privacy level must match creator&apos;s available options from creator_info/query.</li>
                 <li>Daily post cap per user applies.</li>
+                <li>Provider writes remain disabled until app review, URL ownership, and the final publish UX are approved.</li>
               </ul>
             </div>
           </div>

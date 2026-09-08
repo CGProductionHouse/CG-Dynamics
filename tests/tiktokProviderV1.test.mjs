@@ -10,7 +10,43 @@
 //   6. Publishing gate (requires canonical content items)
 // ============================================================================
 
-import { describe, it, expect } from 'vitest'
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+
+const testDir = dirname(fileURLToPath(import.meta.url))
+const readSource = path => readFileSync(resolve(testDir, '..', path), 'utf8')
+const OAUTH_START_SOURCE = readSource('supabase/functions/tiktok-oauth-start/index.ts')
+const OAUTH_CALLBACK_SOURCE = readSource('supabase/functions/tiktok-oauth-callback/index.ts')
+const CONNECTION_STATUS_SOURCE = readSource('supabase/functions/tiktok-connection-status/index.ts')
+const POST_INIT_SOURCE = readSource('supabase/functions/tiktok-post-init/index.ts')
+const SHARED_TIKTOK_SOURCE = readSource('supabase/functions/_shared/tiktok.ts')
+const METRIC_REGISTRY_SOURCE = readSource('supabase/phase-5b-tiktok-metric-registry.sql')
+const FRONTEND_TIKTOK_SOURCE = readSource('src/lib/tiktok.ts')
+
+function expect(actual) {
+  const matchers = {
+    toBe: expected => assert.equal(actual, expected),
+    toEqual: expected => assert.deepEqual(actual, expected),
+    toContain: expected => assert.ok(actual.includes(expected)),
+    toMatch: expected => assert.match(actual, expected),
+    toHaveLength: expected => assert.equal(actual.length, expected),
+    toBeTruthy: () => assert.ok(actual),
+    toBeFalsy: () => assert.ok(!actual),
+    toBeNull: () => assert.equal(actual, null),
+    toBeUndefined: () => assert.equal(actual, undefined),
+  }
+  return {
+    ...matchers,
+    not: {
+      toBe: expected => assert.notEqual(actual, expected),
+      toContain: expected => assert.ok(!actual.includes(expected)),
+      toMatch: expected => assert.doesNotMatch(actual, expected),
+    },
+  }
+}
 
 // ── 1. OAuth token response parsing ────────────────────────────────────────
 describe('TikTok OAuth token response parsing', () => {
@@ -328,22 +364,12 @@ describe('TikTok publish status mapping', () => {
 
 // ── 6. Publishing gate ───────────────────────────────────────────────────
 describe('TikTok publishing gate', () => {
-  it('post-init requires contentGuidelineId and monthlyDeliverableId', () => {
-    const requiredFields = ['clientId', 'videoUrl', 'contentGuidelineId', 'monthlyDeliverableId', 'approvedBy']
-
-    const incompleteBody = {
-      clientId: 'client-a',
-      videoUrl: 'https://example.com/video.mp4',
-      // Missing contentGuidelineId and monthlyDeliverableId
-    }
-
-    // These specific fields must be present but are missing
-    expect(incompleteBody.contentGuidelineId).toBeFalsy()
-    expect(incompleteBody.monthlyDeliverableId).toBeFalsy()
-    expect(incompleteBody.approvedBy).toBeFalsy()
-    // These are present
-    expect(incompleteBody.clientId).toBeTruthy()
-    expect(incompleteBody.videoUrl).toBeTruthy()
+  it('post-init derives guideline, media URL and approver instead of trusting caller fields', () => {
+    expect(POST_INIT_SOURCE).not.toMatch(/body\.contentGuidelineId/)
+    expect(POST_INIT_SOURCE).not.toMatch(/body\.videoUrl/)
+    expect(POST_INIT_SOURCE).not.toMatch(/body\.approvedBy/)
+    expect(POST_INIT_SOURCE).toContain('body.monthlyDeliverableId')
+    expect(POST_INIT_SOURCE).toContain('body.contentReviewVersionId')
   })
 
   it('monthly_deliverable must belong to the specified client', () => {
@@ -360,7 +386,7 @@ describe('TikTok publishing gate', () => {
     expect(deliverable.client_id).not.toBe(requestedClientId)
   })
 
-  it('publish receipt starts with approval_status=pending', () => {
+  it('publish receipt records the already-proven canonical approval', () => {
     const receipt = {
       status: 'pending',
       approval_status: 'approved',
@@ -823,14 +849,14 @@ describe('Contract: frontend ↔ tiktok-post-init body shape', () => {
     'monthlyDeliverableId',
     'contentReviewVersionId',
     'publishNowConfirmed',
-  ]
-
-  const edgeFunctionOptionalFields = [
-    'title',
     'privacyLevel',
     'disableDuet',
     'disableStitch',
     'disableComment',
+  ]
+
+  const edgeFunctionOptionalFields = [
+    'title',
     'brandContentToggle',
     'brandOrganicToggle',
   ]
@@ -920,12 +946,12 @@ describe('Contract: TikTok metric comparability flags', () => {
 
   const tiktokMetrics = [
     { key: 'current_followers', crossPlatformAdditive: false, aggregation: 'snapshot' },
-    { key: 'total_views', crossPlatformAdditive: true, aggregation: 'cumulative' },
-    { key: 'total_likes', crossPlatformAdditive: true, aggregation: 'cumulative' },
-    { key: 'total_comments', crossPlatformAdditive: true, aggregation: 'cumulative' },
-    { key: 'total_shares', crossPlatformAdditive: true, aggregation: 'cumulative' },
-    { key: 'total_favorites', crossPlatformAdditive: true, aggregation: 'cumulative' },
-    { key: 'videos_published', crossPlatformAdditive: true, aggregation: 'count' },
+    { key: 'total_views', crossPlatformAdditive: false, aggregation: 'cumulative' },
+    { key: 'total_likes', crossPlatformAdditive: false, aggregation: 'cumulative' },
+    { key: 'total_comments', crossPlatformAdditive: false, aggregation: 'cumulative' },
+    { key: 'total_shares', crossPlatformAdditive: false, aggregation: 'cumulative' },
+    { key: 'total_favorites', crossPlatformAdditive: false, aggregation: 'cumulative' },
+    { key: 'videos_published', crossPlatformAdditive: false, aggregation: 'count' },
   ]
 
   it('current_followers is NOT cross-platform additive (point-in-time snapshot)', () => {
@@ -934,15 +960,41 @@ describe('Contract: TikTok metric comparability flags', () => {
     expect(m.aggregation).toBe('snapshot')
   })
 
-  it('engagement metrics ARE cross-platform additive', () => {
+  it('provider-native TikTok metrics are not cross-platform additive', () => {
     const additive = tiktokMetrics.filter(m => m.crossPlatformAdditive)
-    expect(additive.map(m => m.key)).toEqual([
-      'total_views', 'total_likes', 'total_comments', 'total_shares', 'total_favorites', 'videos_published',
-    ])
+    expect(additive).toEqual([])
   })
 })
 
-// ── 21. Contract: tiktok-post-init approval gate structure ──────────────
+// ── 21. Provider rollout contract ───────────────────────────────────────
+describe('TikTok provider rollout contract', () => {
+  it('requests only scopes used by the implemented read and Direct Post paths', () => {
+    for (const source of [OAUTH_START_SOURCE, OAUTH_CALLBACK_SOURCE, CONNECTION_STATUS_SOURCE]) {
+      expect(source).toContain("'video.publish'")
+      expect(source).not.toContain("'video.upload'")
+    }
+  })
+
+  it('keeps every TikTok registry metric provider-specific and repairs existing rows on conflict', () => {
+    expect(METRIC_REGISTRY_SOURCE).not.toMatch(/'(?:sum|snapshot)', '[^']+', true, true,/)
+    expect(METRIC_REGISTRY_SOURCE).toContain('cross_platform_additive = excluded.cross_platform_additive')
+    expect(METRIC_REGISTRY_SOURCE).toContain('comparable_group = excluded.comparable_group')
+    expect(FRONTEND_TIKTOK_SOURCE).not.toContain('crossPlatformAdditive: true')
+  })
+
+  it('fails closed until publishing is deliberately enabled', () => {
+    expect(POST_INIT_SOURCE).toContain("Deno.env.get('TIKTOK_PUBLISHING_ENABLED') !== 'true'")
+  })
+
+  it('requires explicit privacy and interaction selections with no provider defaults', () => {
+    expect(POST_INIT_SOURCE).toContain('!body.privacyLevel')
+    expect(POST_INIT_SOURCE).toContain("typeof body.disableDuet !== 'boolean'")
+    expect(SHARED_TIKTOK_SOURCE).not.toContain("privacy_level: postInfo.privacy_level ?? 'PUBLIC_TO_EVERYONE'")
+    expect(SHARED_TIKTOK_SOURCE).not.toContain('disable_duet: postInfo.disable_duet ?? false')
+  })
+})
+
+// ── 22. Contract: tiktok-post-init approval gate structure ──────────────
 describe('Contract: tiktok-post-init publishing gate structure', () => {
   it('deliverable statuses that constitute approval', () => {
     const APPROVED_DELIVERABLE_STATUSES = new Set(['approved', 'scheduled'])

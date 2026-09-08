@@ -41,10 +41,10 @@ import {
 //   contentReviewVersionId: string,
 //   publishNowConfirmed: true,           // explicit "publish now" consent
 //   title?: string,
-//   privacyLevel?: string,
-//   disableDuet?: boolean,
-//   disableStitch?: boolean,
-//   disableComment?: boolean,
+//   privacyLevel: string,              // explicit creator selection; no default
+//   disableDuet: boolean,
+//   disableStitch: boolean,
+//   disableComment: boolean,
 //   brandContentToggle?: boolean,
 //   brandOrganicToggle?: boolean,
 // }
@@ -56,10 +56,10 @@ interface PostInitBody {
   contentReviewVersionId: string
   publishNowConfirmed: boolean
   title?: string
-  privacyLevel?: string
-  disableDuet?: boolean
-  disableStitch?: boolean
-  disableComment?: boolean
+  privacyLevel: string
+  disableDuet: boolean
+  disableStitch: boolean
+  disableComment: boolean
   brandContentToggle?: boolean
   brandOrganicToggle?: boolean
 }
@@ -77,6 +77,15 @@ Deno.serve(async (req) => {
 
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405)
+  }
+
+  // Direct Post remains unavailable until CA deliberately enables the rollout
+  // after TikTok app review, URL ownership, and compliant publish UX are proven.
+  if (Deno.env.get('TIKTOK_PUBLISHING_ENABLED') !== 'true') {
+    return jsonResponse({
+      ok: false,
+      error: 'TikTok publishing is not enabled for this environment.',
+    }, 503)
   }
 
   const authHeader = req.headers.get('Authorization') ?? ''
@@ -123,6 +132,18 @@ Deno.serve(async (req) => {
     return jsonResponse({
       ok: false,
       error: 'publishNowConfirmed must be true. An approved item is not publishable without explicit "publish now" consent.',
+    }, 400)
+  }
+
+  if (
+    !body.privacyLevel ||
+    typeof body.disableDuet !== 'boolean' ||
+    typeof body.disableStitch !== 'boolean' ||
+    typeof body.disableComment !== 'boolean'
+  ) {
+    return jsonResponse({
+      ok: false,
+      error: 'Choose a privacy level and explicitly confirm Comment, Duet, and Stitch settings before publishing.',
     }, 400)
   }
 
@@ -294,7 +315,7 @@ Deno.serve(async (req) => {
   }
 
   // Validate privacy level against creator's allowed options
-  const privacyLevel = body.privacyLevel ?? 'PUBLIC_TO_EVERYONE'
+  const privacyLevel = body.privacyLevel
   if (!creator.privacy_level_options.includes(privacyLevel)) {
     return jsonResponse({
       ok: false,
