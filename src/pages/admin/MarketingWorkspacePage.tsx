@@ -44,6 +44,7 @@ import {
   openChatgptProject,
   type ClientProjectMapping,
 } from '../../lib/clientProjectMapping'
+import { listAllClientContacts, type ClientContact } from '../../lib/clientContacts'
 import { listClients, type Client } from '../../lib/db/clients'
 
 // ── Marketing / Knowledge workspace (#183/#184) ──────────────────────────────
@@ -323,6 +324,7 @@ function RegistrationSection() {
 function ClientGuidesSection() {
   const [guides, setGuides] = useState<ClientGuide[]>([])
   const [mappings, setMappings] = useState<ClientProjectMapping[]>([])
+  const [contacts, setContacts] = useState<ClientContact[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -332,16 +334,18 @@ function ClientGuidesSection() {
     let cancelled = false
     async function load() {
       setLoading(true)
-      const [guideResult, clientResult, mappingResult] = await Promise.all([
+      const [guideResult, clientResult, mappingResult, contactResult] = await Promise.all([
         listClientGuides(),
         listClients('active'),
         listClientProjectMappings(),
+        listAllClientContacts(),
       ])
       if (cancelled) return
       setGuides(guideResult.data)
       setClients(clientResult.data ?? [])
       setMappings(mappingResult.data ?? [])
-      setError(guideResult.error?.message ?? clientResult.error?.message ?? mappingResult.error?.message ?? null)
+      setContacts(contactResult.data ?? [])
+      setError(guideResult.error?.message ?? clientResult.error?.message ?? mappingResult.error?.message ?? contactResult.error?.message ?? null)
       setLoading(false)
     }
     void load()
@@ -354,6 +358,22 @@ function ClientGuidesSection() {
 
   function getMapping(clientId: string): ClientProjectMapping | undefined {
     return mappings.find(m => m.client_id === clientId)
+  }
+
+  function contactState(clientId: string) {
+    const clientContacts = contacts.filter(contact => contact.client_id === clientId)
+    return {
+      approved: clientContacts.filter(contact =>
+        contact.lifecycle_state === 'active' &&
+        contact.visibility === 'public_marketing' &&
+        contact.approved_for_caption &&
+        contact.freshness_state === 'current_verified',
+      ).length,
+      blocked: clientContacts.filter(contact =>
+        contact.lifecycle_state === 'active' &&
+        (contact.visibility === 'unverified_hold' || ['possible_change', 'stale_unverified'].includes(contact.freshness_state)),
+      ).length,
+    }
   }
 
   async function handleCopy(guide: ClientGuide) {
@@ -398,6 +418,7 @@ function ClientGuidesSection() {
         <ul className="space-y-3">
           {guides.map(guide => {
             const mapping = getMapping(guide.client_id)
+            const contactStatus = contactState(guide.client_id)
             return (
               <li key={guide.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -420,6 +441,10 @@ function ClientGuidesSection() {
                         )}
                       </div>
                     )}
+                    <p className="mt-1 text-[11px] text-white/40">
+                      Caption contacts: {contactStatus.approved} approved
+                      {contactStatus.blocked > 0 ? ` · ${contactStatus.blocked} on hold` : ''}
+                    </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {mapping?.chatgpt_project_url && (

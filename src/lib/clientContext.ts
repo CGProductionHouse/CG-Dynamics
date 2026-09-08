@@ -9,6 +9,8 @@ export type TaskType = 'caption' | 'content_idea' | 'poster_copy' | 'image_edit'
 export interface TaskContextRequest {
   client_id: string
   task_type: TaskType
+  scope_key?: string
+  content_mode?: string
   topic?: string
   platform?: string
 }
@@ -17,6 +19,7 @@ export interface TaskContextResponse {
   client_id: string
   client_name: string
   task_type: TaskType
+  scope_key?: string
   topic?: string
   platform?: string
   generated_at: string

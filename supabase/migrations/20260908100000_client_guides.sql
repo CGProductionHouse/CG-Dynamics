@@ -28,14 +28,23 @@ alter table public.client_guides enable row level security;
 create policy client_guides_admin_manager_all
   on public.client_guides
   for all
-  using (public.is_admin_or_manager())
-  with check (public.is_admin_or_manager());
+  using (exists (
+    select 1 from public.profiles profile
+    where profile.id = auth.uid() and profile.is_active and profile.role in ('admin', 'manager')
+  ))
+  with check (exists (
+    select 1 from public.profiles profile
+    where profile.id = auth.uid() and profile.is_active and profile.role in ('admin', 'manager')
+  ));
 
 -- Staff: read only
 create policy client_guides_staff_read
   on public.client_guides
   for select
-  using (true);
+  using (exists (
+    select 1 from public.profiles profile
+    where profile.id = auth.uid() and profile.is_active and profile.role in ('admin', 'manager', 'staff', 'team')
+  ));
 
 -- Updated_at trigger
 create or replace function public.update_client_guides_updated_at()

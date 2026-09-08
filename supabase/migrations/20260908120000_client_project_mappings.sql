@@ -38,13 +38,22 @@ alter table public.client_project_mappings enable row level security;
 create policy client_project_mappings_admin_manager_all
   on public.client_project_mappings
   for all
-  using (public.is_admin_or_manager())
-  with check (public.is_admin_or_manager());
+  using (exists (
+    select 1 from public.profiles profile
+    where profile.id = auth.uid() and profile.is_active and profile.role in ('admin', 'manager')
+  ))
+  with check (exists (
+    select 1 from public.profiles profile
+    where profile.id = auth.uid() and profile.is_active and profile.role in ('admin', 'manager')
+  ));
 
 create policy client_project_mappings_staff_read
   on public.client_project_mappings
   for select
-  using (true);
+  using (exists (
+    select 1 from public.profiles profile
+    where profile.id = auth.uid() and profile.is_active and profile.role in ('admin', 'manager', 'staff', 'team')
+  ));
 
 -- Updated_at trigger
 create or replace function public.update_client_project_mappings_updated_at()

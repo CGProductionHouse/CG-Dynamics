@@ -7,7 +7,7 @@ import { createServer } from 'vite'
 // stale/excluded knowledge grounding, Client Guide derivation correctness,
 // Project Instructions boundedness, and client-role access denial.
 
-let server, skilled, guideGenerator, agent
+let server, skilled, guideGenerator, contactPolicy, agent
 
 const today = '2026-09-08'
 
@@ -24,6 +24,7 @@ before(async () => {
   })
   skilled = await server.ssrLoadModule('/supabase/functions/cg-assistant-chat/skilledAgents.ts')
   guideGenerator = await server.ssrLoadModule('/src/lib/clientGuideGenerator.ts')
+  contactPolicy = await server.ssrLoadModule('/src/lib/clientContactPolicy.ts')
   agent = skilled.AGENT_CONTRACTS.copywriting_agent
 })
 after(async () => { await server?.close() })
@@ -35,9 +36,12 @@ const APP = read('../src/App.tsx')
 const MIGRATION_REGISTRATION = read('../supabase/migrations/20260908110000_client_intelligence_registration.sql')
 const MIGRATION_GUIDES = read('../supabase/migrations/20260908100000_client_guides.sql')
 const MIGRATION_PROJECT_MAPPINGS = read('../supabase/migrations/20260908120000_client_project_mappings.sql')
+const MIGRATION_CONTACTS = read('../supabase/migrations/20260909100000_client_contacts.sql')
+const MIGRATION_CONTACT_BACKFILL = read('../supabase/migrations/20260909110000_client_contact_pilot_backfill.sql')
 const CLIENT_GUIDES_TS = read('../src/lib/clientGuides.ts')
 const CLIENT_PROJECT_MAPPING_TS = read('../src/lib/clientProjectMapping.ts')
 const CLIENT_CONTEXT_TS = read('../src/lib/clientContext.ts')
+const CLIENT_CONTACTS_TS = read('../src/lib/clientContacts.ts')
 const GET_CLIENT_CONTEXT_FN = read('../supabase/functions/get-client-context/index.ts')
 
 const capeCard = {
@@ -213,6 +217,13 @@ test('Project Instructions include max 5 hashtags rule', () => {
   assert.ok(projectInstructions.includes('Max 5 hashtags'), 'includes max 5 hashtags rule')
 })
 
+test('Project Instructions exclude mutable contact values and require exact entity scope', () => {
+  const { projectInstructions } = guideGenerator.generateClientGuide('# Client', 'Test Client')
+  assert.ok(projectInstructions.includes('Never hardcode phone numbers'))
+  assert.ok(projectInstructions.includes('exact scope'))
+  assert.ok(projectInstructions.includes('current approved contact/footer policy'))
+})
+
 test('Project Instructions do not duplicate the full guide content', () => {
   const pack = `# Client
 
@@ -294,7 +305,8 @@ test('client-guides section is admin/manager scoped in the workspace', () => {
 
 test('client_guides table has no client-role read policy', () => {
   assert.doesNotMatch(MIGRATION_GUIDES, /role = 'client'/, 'no client-role access to client_guides')
-  assert.match(MIGRATION_GUIDES, /is_admin_or_manager\(\)/, 'admin/manager write access')
+  assert.match(MIGRATION_GUIDES, /profile\.role in \('admin', 'manager'\)/, 'admin/manager write access')
+  assert.match(MIGRATION_GUIDES, /profile\.is_active/, 'inactive profiles are denied')
 })
 
 test('clientGuides.ts uses the canonical data layer', () => {
@@ -330,6 +342,124 @@ test('client_project_mappings migration creates the mapping table', () => {
 test('client_project_mappings migration enforces RLS', () => {
   assert.match(MIGRATION_PROJECT_MAPPINGS, /alter table public\.client_project_mappings enable row level security/)
   assert.match(MIGRATION_PROJECT_MAPPINGS, /client_project_mappings_admin_manager/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /profile\.role in \('admin', 'manager', 'staff', 'team'\)/, 'client users cannot read Project mappings')
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /profile\.is_active/, 'inactive profiles are denied')
+  assert.doesNotMatch(MIGRATION_PROJECT_MAPPINGS, /using \(true\)/, 'no blanket authenticated read')
+})
+
+test('canonical client contact migration includes classification, provenance, freshness and exact scope', () => {
+  assert.match(MIGRATION_CONTACTS, /create table if not exists public\.client_contacts/)
+  assert.match(MIGRATION_CONTACTS, /scope_key text/)
+  assert.match(MIGRATION_CONTACTS, /approved_for_caption boolean/)
+  assert.match(MIGRATION_CONTACTS, /blocks_caption boolean/)
+  assert.match(MIGRATION_CONTACTS, /public_marketing.*internal_only.*client_portal_only.*unverified_hold/s)
+  assert.match(MIGRATION_CONTACTS, /provenance_summary text not null/)
+  assert.match(MIGRATION_CONTACTS, /current_verified.*possible_change.*stale_unverified.*historical.*rejected/s)
+  assert.match(MIGRATION_CONTACTS, /superseded_by_contact_id/)
+  assert.match(MIGRATION_CONTACTS, /footer_order integer/)
+  assert.match(MIGRATION_CONTACTS, /preserve_client_contact_history/)
+  assert.match(MIGRATION_CONTACTS, /Contact identity\/value is immutable/)
+  assert.doesNotMatch(MIGRATION_CONTACTS, /grant insert, update, delete on table public\.client_contacts/)
+})
+
+test('canonical footer policy supports mandatory, optional and omitted modes', () => {
+  assert.match(MIGRATION_CONTACTS, /create table if not exists public\.client_contact_footer_policies/)
+  assert.match(MIGRATION_CONTACTS, /requirement in \('mandatory','optional','omitted'\)/)
+  assert.match(MIGRATION_CONTACTS, /content_mode text not null/)
+  assert.match(MIGRATION_CONTACTS, /platform text/)
+})
+
+test('pilot contact backfill is exact, idempotent and conflict-preserving', () => {
+  assert.match(MIGRATION_CONTACT_BACKFILL, /where name = 'Cape Lumber'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /where name = 'Action Sport'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /where name = 'Dulux Bloemfontein'/)
+  assert.doesNotMatch(MIGRATION_CONTACT_BACKFILL, /\blike\b/i)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /on conflict do nothing/g)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /'historical','superseded'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /'unverified_hold'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /Expected exactly one/)
+})
+
+test('contact tables deny client-role direct access while staff reads remain RLS-gated', () => {
+  assert.match(MIGRATION_CONTACTS, /client_contacts_staff_read/)
+  assert.match(MIGRATION_CONTACTS, /profile\.role in \('admin', 'manager', 'staff', 'team'\)/)
+  assert.match(MIGRATION_CONTACTS, /profile\.is_active/)
+  assert.doesNotMatch(MIGRATION_CONTACTS, /my_client_id\(\)/)
+  assert.doesNotMatch(MIGRATION_CONTACTS, /role\s*=\s*'client'/)
+})
+
+test('clientContacts typed service uses canonical contact and footer tables', () => {
+  assert.match(CLIENT_CONTACTS_TS, /export async function listClientContacts/)
+  assert.match(CLIENT_CONTACTS_TS, /export async function upsertClientContact/)
+  assert.match(CLIENT_CONTACTS_TS, /client_contact_footer_policies/)
+})
+
+const currentPublicContact = {
+  id: 'red-oak-public', client_id: 'red-oak', scope_key: null,
+  contact_type: 'phone', display_label: 'Bookings', person_name: 'Public Person', person_role: 'Bookings',
+  value: 'PUBLIC-VALUE', approved_for_caption: true, visibility: 'public_marketing',
+  blocks_caption: false,
+  freshness_state: 'current_verified', lifecycle_state: 'active', platforms: [], content_modes: ['caption'],
+  footer_order: 10, last_verified_at: today, provenance_summary: 'Client-approved footer',
+}
+
+const optionalCaptionPolicy = {
+  client_id: 'red-oak', scope_key: null, content_mode: 'caption', platform: null,
+  requirement: 'optional', format_template: '{contact}', review_state: 'current_verified',
+}
+
+test('caption contact resolver includes exact current approved public contact', () => {
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts.length, 1)
+  assert.equal(result.contacts[0].value, 'PUBLIC-VALUE')
+  assert.equal(result.can_generate_footer, true)
+})
+
+test('caption contact resolver excludes internal, stale, superseded and other-client contacts', () => {
+  const contacts = [
+    currentPublicContact,
+    { ...currentPublicContact, id: 'internal', value: 'PRIVATE', visibility: 'internal_only', approved_for_caption: false },
+    { ...currentPublicContact, id: 'stale', value: 'STALE', freshness_state: 'historical' },
+    { ...currentPublicContact, id: 'superseded', value: 'OLD', lifecycle_state: 'superseded' },
+    { ...currentPublicContact, id: 'other', client_id: 'staffordshire', value: 'OTHER' },
+  ]
+  const result = contactPolicy.resolveCaptionContacts({ clientId: 'red-oak', contacts, policies: [optionalCaptionPolicy] })
+  assert.deepEqual(result.contacts.map(contact => contact.value), ['PUBLIC-VALUE'])
+})
+
+test('named direct contact remains eligible when explicitly public-marketing approved', () => {
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts[0].person_name, 'Public Person')
+})
+
+test('unverified conflict fails closed instead of returning an approved alternative', () => {
+  const conflict = {
+    ...currentPublicContact, id: 'conflict', value: 'CONFLICT', approved_for_caption: false,
+    blocks_caption: true, visibility: 'unverified_hold', freshness_state: 'possible_change',
+  }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact, conflict], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts.length, 0)
+  assert.equal(result.can_generate_footer, false)
+  assert.equal(result.unresolved.length, 1)
+})
+
+test('entity scope never falls back to sibling or client-wide contacts', () => {
+  const contacts = [
+    currentPublicContact,
+    { ...currentPublicContact, id: 'bfn', scope_key: 'bloemfontein', value: 'BFN' },
+    { ...currentPublicContact, id: 'centurion', scope_key: 'centurion', value: 'CENTURION' },
+  ]
+  const policy = { ...optionalCaptionPolicy, scope_key: 'bloemfontein' }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', scopeKey: 'bloemfontein', contacts, policies: [policy],
+  })
+  assert.deepEqual(result.contacts.map(contact => contact.value), ['BFN'])
 })
 
 test('client_project_mappings migration creates one-to-one unique constraint', () => {
@@ -358,6 +488,16 @@ test('get-client-context Edge Function is correctly structured', () => {
   assert.match(GET_CLIENT_CONTEXT_FN, /client_id/, 'accepts client_id parameter')
   assert.match(GET_CLIENT_CONTEXT_FN, /task_type/, 'accepts task_type parameter')
   assert.match(GET_CLIENT_CONTEXT_FN, /client_specific/, 'filters by client_specific')
+})
+
+test('get-client-context uses exact scope and canonical contact policy', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /client_scope_key/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /\.eq\('scope_key', scopeKey\)/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /visibility === 'public_marketing'/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /approved_for_caption === true/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /freshness_state === 'current_verified'/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /Contact conflict or freshness hold must be resolved before use/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /callerProfile\?\.is_active !== true/, 'inactive staff are denied')
 })
 
 test('get-client-context Edge Function supports all 7 task types', () => {

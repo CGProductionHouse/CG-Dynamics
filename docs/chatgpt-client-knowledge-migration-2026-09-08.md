@@ -20,6 +20,9 @@ Purpose: migrate durable client knowledge from existing ChatGPT Projects into CG
 12. Do not change CG Hours billing/history, client UUIDs, time entries or financial records during this knowledge migration.
 13. Do not merge billing umbrellas with content identities. Example: Wiseman Group may be the invoice umbrella, while WiseRide, Supa Quick BFN and Supa Quick Centurion remain separate content/client intelligence identities.
 14. Use branch `client-directory-reconciliation-2026-09-08` as the migration base. Individual client migrations may be completed in their own clean child branch/worktree and merged back only after review.
+15. Classify every discovered contact into the private canonical contact model: public marketing, internal only, client-portal only, unverified hold, or historical/superseded. Record exact client and optional entity/branch scope, provenance, freshness, allowed purpose, platform/content-mode applicability, and footer order.
+16. Project Instructions are recoverable behaviour artifacts only. Never hardcode mutable phone/email/address/website values, prices, stock, hours, promotions, daily tasks, or named current contact people. Retrieve current approved values from exact-client Dynamics at task time.
+17. When a client has entities, sub-brands, offices, dealerships, or branches, assign an exact `scope_key`. Scoped retrieval must never silently fall back to an unscoped, group, national, or sibling record.
 
 ## Durable knowledge to capture
 
@@ -37,6 +40,7 @@ Purpose: migrate durable client knowledge from existing ChatGPT Projects into CG
 - Known sensitivities, compliance constraints or mistakes to avoid
 - Useful historical lessons
 - Mutable facts requiring future freshness checks
+- Caption/footer requirement (`mandatory`, `optional`, or `omitted`) by content mode/platform and the ordered canonical contacts it may use
 
 Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dates or unverified guesses as permanent client memory.
 
@@ -73,6 +77,8 @@ A client is `COMPLETE` under the final architecture only when:
 - Project Instructions are reduced to short operating instructions that point staff/ChatGPT to the canonical guide;
 - unresolved facts are explicitly freshness-gated instead of guessed;
 - documentation changes are committed on the isolated client migration branch.
+- canonical contact/footer records are prepared for private Dynamics backfill, with conflicts held unresolved rather than guessed;
+- final Project Instructions contain no mutable contact values or named current contacts.
 
 ### Cape Lumber final architecture — 2026-09-08
 
