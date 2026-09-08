@@ -1,0 +1,203 @@
+// ============================================================================
+// src/lib/tiktok.ts — TikTok provider frontend client library
+//
+// Wraps Edge Function invocations for TikTok OAuth, connection status,
+// analytics sync, and content posting. Mirrors the pattern of googleAds.ts
+// and metaIntegration patterns.
+// ============================================================================
+
+import { supabase } from './supabase'
+
+// ── Types ──────────────────────────────────────────────────────────────────
+
+export interface TiktokConnection {
+  id: string
+  tiktokOpenId: string | null
+  displayName: string | null
+  avatarUrl: string | null
+  lastConnectedAt: string | null
+  grantedScopes: string[]
+  tokenExpiresAt: string | null
+  tokenExpired: boolean
+}
+
+export interface TiktokConnectionStatus {
+  ok: boolean
+  connected: boolean
+  status: string
+  message: string
+  missingScopes: string[]
+  schemaReady: boolean
+  connection?: TiktokConnection
+}
+
+export interface TiktokSyncResult {
+  ok: boolean
+  periodMonth: string
+  videosSynced: number
+  metrics: {
+    views: number
+    likes: number
+    comments: number
+    shares: number
+    followers: number | null
+  }
+  error?: string
+}
+
+export interface TiktokPublishResult {
+  ok: boolean
+  publishId: string
+  creatorInfo: {
+    privacyLevelOptions: string[]
+    maxVideoDuration: number | null
+  }
+  error?: string
+}
+
+export interface TiktokPublishStatusResult {
+  ok: boolean
+  status: string
+  tiktokStatus: string
+  videoId: string | null
+  failReason: string | null
+  error?: string
+}
+
+export interface TiktokMetricDefinition {
+  key: string
+  label: string
+  sourceMetric: string
+  meaning: string
+  aggregation: 'sum' | 'snapshot'
+  clientSafe: boolean
+  crossPlatformAdditive: boolean
+}
+
+// TikTok-native metric definitions — preserving TikTok's exact metric names
+// and semantics. No invented or relabeled metrics.
+export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
+  {
+    key: 'views',
+    label: 'Views',
+    sourceMetric: 'view_count',
+    meaning: 'Total video plays including replays. TikTok native view_count.',
+    aggregation: 'sum',
+    clientSafe: true,
+    crossPlatformAdditive: true,
+  },
+  {
+    key: 'likes',
+    label: 'Likes',
+    sourceMetric: 'like_count',
+    meaning: 'Total likes across videos in the period. TikTok native like_count.',
+    aggregation: 'sum',
+    clientSafe: true,
+    crossPlatformAdditive: true,
+  },
+  {
+    key: 'comments',
+    label: 'Comments',
+    sourceMetric: 'comment_count',
+    meaning: 'Total comments across videos in the period. TikTok native comment_count.',
+    aggregation: 'sum',
+    clientSafe: true,
+    crossPlatformAdditive: true,
+  },
+  {
+    key: 'shares',
+    label: 'Shares',
+    sourceMetric: 'share_count',
+    meaning: 'Total shares across videos in the period. TikTok native share_count.',
+    aggregation: 'sum',
+    clientSafe: true,
+    crossPlatformAdditive: true,
+  },
+  {
+    key: 'current_followers',
+    label: 'Current followers',
+    sourceMetric: 'follower_count',
+    meaning: 'Follower count at time of sync. Point-in-time snapshot.',
+    aggregation: 'snapshot',
+    clientSafe: true,
+    crossPlatformAdditive: true,
+  },
+  {
+    key: 'following_count',
+    label: 'Following',
+    sourceMetric: 'following_count',
+    meaning: 'Number of accounts the user follows. Snapshot.',
+    aggregation: 'snapshot',
+    clientSafe: true,
+    crossPlatformAdditive: false,
+  },
+  {
+    key: 'total_likes',
+    label: 'Total likes',
+    sourceMetric: 'likes_count',
+    meaning: 'Cumulative likes across all videos on the account. Snapshot.',
+    aggregation: 'snapshot',
+    clientSafe: true,
+    crossPlatformAdditive: false,
+  },
+  {
+    key: 'video_count',
+    label: 'Videos',
+    sourceMetric: 'video_count',
+    meaning: 'Total number of videos on the account. Snapshot.',
+    aggregation: 'snapshot',
+    clientSafe: true,
+    crossPlatformAdditive: false,
+  },
+]
+
+// ── Edge Function invocations ──────────────────────────────────────────────
+
+export async function startTiktokOAuth(): Promise<{ ok: boolean; url?: string; error?: string }> {
+  const { data, error } = await supabase.functions.invoke('tiktok-oauth-start', { method: 'POST' })
+  if (error) return { ok: false, error: error.message }
+  return data
+}
+
+export async function getTiktokConnectionStatus(): Promise<TiktokConnectionStatus> {
+  const { data, error } = await supabase.functions.invoke('tiktok-connection-status', { method: 'POST' })
+  if (error) return { ok: false, connected: false, status: 'error', message: error.message, missingScopes: [], schemaReady: false }
+  return data
+}
+
+export async function syncTiktokAnalytics(clientId: string, periodMonth?: string): Promise<TiktokSyncResult> {
+  const { data, error } = await supabase.functions.invoke('tiktok-sync', {
+    method: 'POST',
+    body: { clientId, periodMonth },
+  })
+  if (error) return { ok: false, periodMonth: periodMonth ?? '', videosSynced: 0, metrics: { views: 0, likes: 0, comments: 0, shares: 0, followers: null }, error: error.message }
+  return data
+}
+
+export async function initTiktokPublish(options: {
+  clientId: string
+  videoUrl: string
+  title?: string
+  privacyLevel?: string
+  disableDuet?: boolean
+  disableStitch?: boolean
+  disableComment?: boolean
+  brandContentToggle?: boolean
+  brandOrganicToggle?: boolean
+}): Promise<TiktokPublishResult> {
+  const { data, error } = await supabase.functions.invoke('tiktok-post-init', {
+    method: 'POST',
+    body: options,
+  })
+  if (error) return { ok: false, publishId: '', creatorInfo: { privacyLevelOptions: [], maxVideoDuration: null }, error: error.message }
+  return data
+}
+
+export async function getTiktokPublishStatus(publishId: string): Promise<TiktokPublishStatusResult> {
+  const { data, error } = await supabase.functions.invoke('tiktok-post-status', {
+    method: 'POST',
+    body: { publishId },
+  })
+  if (error) return { ok: false, status: 'error', tiktokStatus: '', videoId: null, failReason: null, error: error.message }
+  return data
+}
