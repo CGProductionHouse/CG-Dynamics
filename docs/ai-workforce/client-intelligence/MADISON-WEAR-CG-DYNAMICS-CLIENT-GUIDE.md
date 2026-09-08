@@ -1,7 +1,7 @@
 # Madison Wear — CG Dynamics Client Guide
 
 Last updated: 2026-09-08  
-Status: **DERIVED / EXPORT-ONLY VIEW — PROJECT INSTRUCTIONS NOT YET CONFIRMED**  
+Status: **DERIVED / EXPORT-ONLY VIEW — PROJECT INSTRUCTIONS CONFIRMED 2026-09-08**  
 Canonical CG Dynamics client: **Madison Wear**  
 Exact client ID: `7b47afb0-fa55-4916-85f6-09c57e5905b9`  
 Canonical intelligence: `docs/ai-workforce/client-intelligence/MADISON-WEAR-CLIENT-OPERATIONAL-INTELLIGENCE-2026-09.md`
@@ -26,6 +26,8 @@ Madisons Menswear is a men's clothing and footwear retailer. Safe durable catego
 - in-store customer shopping assistance.
 
 Do not freeze a permanent brand list. A brand shown in old content, a generated image or a historical product page does not prove current stock or supplier status.
+
+Older Project chats also contain historical Lay-Buy / PayJustNow messaging and kids clothing/footwear promotions. Treat those as evidence of older work only, not proof of current payment acceptance or a current permanent kids range.
 
 ## 3. Current routine contact/footer
 
@@ -57,6 +59,8 @@ Therefore do not currently claim:
 
 Reverify those at task time before using them.
 
+Historical Project payment messaging does not override this rule. Verify current Lay-Buy / PayJustNow acceptance and terms before publishing them as live options.
+
 The current site social icons do not establish exact business handles; do not invent them.
 
 ## 5. Human voice
@@ -68,9 +72,12 @@ Madisons copy should be:
 - local when relevant;
 - natural and human;
 - product-aware;
-- commercially useful without hype.
+- commercially useful without hype;
+- polished/classy when the actual garment, outfit, occasion or service experience supports it.
 
 Avoid influencer language, forced jokes, forced slang, overhype and generic fashion-AI copy.
+
+Refined or professional language is welcome when it is specific. Do not turn `premium`, `luxury`, `timeless` or similar labels into substitutes for a real product/customer point.
 
 Avoid default filler such as:
 
@@ -112,7 +119,7 @@ Keep it short and specific.
 - Avoid generic `style`, `quality` or `comfort` filler without a product-specific point.
 - Do not claim fabric/material/performance unless verified.
 
-## 8. Product, brand and promotion guardrails
+## 8. Product, brand, payment and promotion guardrails
 
 Treat these as task-time facts:
 
@@ -126,9 +133,13 @@ Treat these as task-time facts:
 - validity dates;
 - participating branches;
 - supplier/reseller status;
-- new-arrival status.
+- new-arrival status;
+- payment methods and terms;
+- kids-range availability.
 
 Recent CG content has included Polo, Cutty, Dickies and Levi's products, while older/recent web evidence had surfaced other brand product pages. These are historical/task examples, not a permanent current roster.
+
+Historical Project chats also used Lay-Buy in-store / PayJustNow messaging and kids clothing/footwear promotions. Reverify those before using them as current commercial facts.
 
 A generated/edit image is never proof that an item is sold, stocked or available in that exact colour/size.
 
@@ -191,6 +202,8 @@ Recheck when a task depends on:
 - brand/product availability;
 - stock/size/colour/material;
 - price/promotion;
+- payment method/terms;
+- current kids-range availability;
 - delivery/collection;
 - returns/exchanges;
 - heritage/anniversary wording;
@@ -228,6 +241,8 @@ Do not guess:
 - non-Loch-Logan branch contacts/hours;
 - exact official social handles;
 - current ecommerce/order/delivery/collection/returns capability;
+- current Lay-Buy / PayJustNow acceptance and terms;
+- whether the historical kids clothing/footwear range is currently active;
 - permanent current brand roster;
 - exact current heritage duration for anniversary claims.
 
@@ -244,7 +259,9 @@ Mutable values in it must not override current CG/Dynamics/official truth. Its s
 **REMOVE:** none.  
 **REPLACE:** none with another static file. Live exact-client retrieval is the intended replacement for stale operational dependence.
 
-## 16. Final short Project Instructions — pending manual confirmation
+## 16. Final short Project Instructions — confirmed/applied 2026-09-08
+
+Issue #288 records that CA physically applied these Instructions in the Madison Wear ChatGPT Project on 2026-09-08. The manual handoff gate is satisfied.
 
 Work only on Madison Wear (Dynamics client ID `7b47afb0-fa55-4916-85f6-09c57e5905b9`). Public/historical `Madisons` / `Madisons Menswear` aliases belong to this client only where provenance confirms them; never fuzzy-match unrelated Madison Wear entities. Before factual, caption, content or image work, retrieve current exact-client CG Dynamics/GitHub context for this ID + task type + supplied creative. Write human, confident, clean, local and specific copy; captions add to, not repeat, artwork/video. Use the current Madisons contact/footer rules and max 5 dynamic hashtags based on verified topic/platform/search intent. In edits preserve real garments/products, colours, logos/branding, people, proportions and composition; change only what was requested. Never invent brands, products, stock, sizes, materials, pricing, promotions, delivery/returns, contacts, hours or locations. Flag conflicts/freshness gaps instead of guessing.
 
@@ -256,7 +273,7 @@ Work only on Madison Wear (Dynamics client ID `7b47afb0-fa55-4916-85f6-09c57e590
 4. Copy specific instead of generic fashion filler?
 5. Brand/product fact verified?
 6. Current Loch Logan footer used unless branch-specific evidence says otherwise?
-7. No stock/price/material/offer/ecommerce guessing?
+7. No stock/price/material/offer/ecommerce/payment/kids-range guessing?
 8. Max 5 dynamic hashtags?
 9. Real garment/product/branding/person/composition preserved in edits?
 10. Conflicts surfaced rather than guessed?
