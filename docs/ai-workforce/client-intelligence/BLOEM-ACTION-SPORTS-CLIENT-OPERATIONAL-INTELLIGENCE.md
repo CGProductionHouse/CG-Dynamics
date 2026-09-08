@@ -4,34 +4,42 @@ Canonical CG client: **Bloem Action Sports**
 Historical CG/client aliases: **Action Sport**, **Bloem Action Sport**, **Action Sports**, **Actio Sports**  
 Record purpose: **Permanent human CG source of truth for future Bloem Action Sports marketing/content work**  
 Human Project knowledge last reviewed: **2026-09-08**  
+Recent public/social-content audit last reviewed: **2026-09-08**  
 Mutable public facts last verified: **2026-09-08**  
 Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
-> **Permanent-record rule:** this is the evolving Bloem Action Sports client record. Update this same file when durable client knowledge changes. Do not create monthly Bloem Action Sports snapshots. The older `ACTION-SPORT-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` remains a historical research foundation; where it conflicts with this record, this record is the client-specific authority.
+> **Permanent-record rule:** update this same record when durable Bloem Action Sports knowledge changes. Do not create monthly client snapshots. The older `ACTION-SPORT-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` remains a historical research foundation; where it conflicts with this record, this record is the client-specific authority.
 
 ## 1. What this record is
 
-This file preserves the durable human judgement CG has learned from the Bloem Action Sports ChatGPT Project, the client business-information source, repeated CA/CG corrections, historical content work and current public verification.
+This file preserves the durable human judgement CG has learned from:
+
+- the Bloem Action Sports ChatGPT Project;
+- the client business-information PDF;
+- repeated CA/CG corrections and approvals;
+- recent CG-produced content visible in Project history;
+- current official Bloem Action Sports and Action Sports public sources;
+- recent accessible public/social evidence where available.
 
 It is **not**:
 
 - a caption archive;
 - a monthly campaign plan;
-- a list of every past fixture, promotion or tournament;
+- a list of every past fixture, final or promotion;
 - a generic AI marketing strategy;
-- permission to reuse stale prices, dates, staff contacts or service claims.
+- permission to reuse stale prices, dates, hours or old contacts.
 
 Use it to answer:
 
-- what the client is and how the canonical name should be written;
+- what the client is and how the name should be written;
 - what is currently safe to say publicly;
 - which contact details CG must use in marketing;
-- how captions and text-on-post should sound;
+- how captions and poster copy should sound;
 - what “non-generic” means for this client in practice;
-- how cricket, netball and hockey wording should differ;
-- which recurring content and event patterns matter;
-- which wording, visual treatment and production mistakes future agents must not repeat;
-- which facts must be freshness-checked before publication.
+- how cricket, netball, hockey and soccer wording should differ;
+- which recurring content formats matter;
+- what visual and production mistakes future agents must avoid;
+- which facts require freshness checks before publication.
 
 ## 2. Authority and provenance
 
@@ -41,11 +49,14 @@ For tone, copy, content style, production preferences and caption conventions, u
 
 1. newest explicit client/CA/CG instruction;
 2. repeated corrections and approvals in the Bloem Action Sports Project;
-3. client-supplied Project source material;
-4. this canonical record;
-5. the older August 2026 research pack.
+3. recent CG-produced content patterns where they do not conflict with explicit instructions;
+4. client-supplied Project source material;
+5. this canonical record;
+6. the older August 2026 research pack.
 
-Public research may verify facts. It must **not** be used to invent generic strategy or override repeated human marketing judgement.
+A published post does **not** automatically become a permanent rule. Explicit CG/client corrections and repeated approvals outrank one-off published content.
+
+Public research may verify facts. It must not be used to invent generic marketing strategy or override human CG judgement.
 
 ### Mutable public facts
 
@@ -53,21 +64,22 @@ For address, hours, phone, email, staff, social profiles, current sports, league
 
 1. newest direct client confirmation;
 2. current official Bloem Action Sports website/system;
-3. current official Action Sports source where it clearly applies to Bloem;
+3. current official Action Sports registration/league source where it clearly identifies Bloem;
 4. current official social profile or verified listing;
 5. older Project sources and historical research.
 
-If a newer official public source conflicts with an older Project file, preserve the conflict and do not silently combine the values.
+If authoritative sources conflict, preserve the conflict and classify it. Do not silently merge values.
 
-### Provenance labels
+### Provenance/state labels
 
 - `client_confirmed` — supplied in client/Project source material or direct client instruction;
 - `CA_CG_confirmed` — explicit or repeated CA/CG correction in Project work;
 - `public_verified` — checked against a current authoritative public source;
 - `historical` — previously true/useful context but not current by default;
+- `superseded` — replaced by newer client/CG/public truth;
 - `possible_change` — evidence conflicts or availability can change; confirm before publishing;
 - `stale_unverified` — no recent authoritative confirmation found;
-- `rejected` — wrong identity, unsupported claim, stale default or wording/approach CG should not repeat.
+- `rejected` — wrong identity, unsupported claim or wording/approach CG should not repeat.
 
 ## 3. Canonical identity
 
@@ -75,18 +87,18 @@ If a newer official public source conflicts with an older Project file, preserve
 
 Use **Bloem Action Sports** in CG Dynamics and future client work.
 
-`CA_CG_confirmed` / `current_verified`
+State: `CA_CG_confirmed` + `public_verified` + `current_verified`.
 
-The 2026-09-08 client-directory reconciliation explicitly changed the canonical CG name from **Action Sport** to **Bloem Action Sports** while preserving the existing client identity and historical records.
+The 2026-09-08 client-directory reconciliation changed the canonical CG name from **Action Sport** to **Bloem Action Sports** while preserving the existing client identity and historical records.
 
 ### Public naming
 
-Current official local pages use both:
+Current official local pages use:
 
 - **Bloem Action Sports** in body copy; and
 - **Bloem Action Sports Arena** in page titles/site framing.
 
-Use **Bloem Action Sports** as the normal public/client name. “Arena” is a descriptor, not a reason to rename the CG client.
+Use **Bloem Action Sports** as the normal public/client name. “Arena” is a descriptor, not a separate client identity.
 
 ### Historical aliases
 
@@ -103,32 +115,61 @@ Do not create a second client record for an alias.
 
 | Fact | Reviewed value | Provenance | State | Production rule |
 |---|---|---|---|---|
-| Website | `https://www.bloemactionsports.co.za/` | `public_verified` + `client_confirmed` | `current_verified` | Always include `www.bloemactionsports.co.za` in normal social captions unless CA explicitly changes the standing rule. |
-| Primary current street address | Bloemfontein Show Grounds, 32 Curie Avenue, Hospitaalpark, Bloemfontein, 9301 | `public_verified` | `current_verified` | Use this as the formal address. |
-| Marketing/bookings contact | Stella | `client_confirmed` + `CA_CG_confirmed` | `current_verified` for CG content use | Use Stella for normal bookings/queries in CG marketing. |
-| Marketing/bookings email | `stella@actionsports.co.za` | `client_confirmed` + `CA_CG_confirmed` | `current_verified` for CG content use | Preferred caption display is lowercase. |
-| Marketing/bookings phone | `+27 82 307 6257` | `client_confirmed` + `CA_CG_confirmed` | `current_verified` for CG content use | Preferred local caption display: `082 307 6257`. |
-| Venue/general phone | `+27 82 499 0072` | `public_verified` + `client_confirmed` | `current_verified` | Add for time-sensitive/event-day posts and on-site/general assistance. Preferred local display: `082 499 0072`. |
-| Public website email | `info@bloemactionsports.co.za` | `public_verified` | `current_verified` | This remains the current official website email; do not silently replace the CG marketing contact with it. |
-| Facebook | `https://www.facebook.com/BloemAction` | `public_verified` via official local contact page | `current_verified` | Official local website points to this Facebook profile. |
+| Website | `https://www.bloemactionsports.co.za/` | `public_verified` + `client_confirmed` | `current_verified` | Standing website for CG marketing. |
+| Formal street address | Bloemfontein Show Grounds, 32 Curie Avenue, Hospitaalpark, Bloemfontein, 9301 | `public_verified` | `current_verified` | Use as current formal address. |
+| CG marketing/bookings contact | Stella | `client_confirmed` + `CA_CG_confirmed` | `current_verified` for CG content | Use Stella for normal bookings/league/general marketing enquiries. |
+| CG marketing/bookings email | `stella@actionsports.co.za` | `client_confirmed` + `CA_CG_confirmed` | `current_verified` for CG content | Preferred caption display: lowercase. |
+| CG marketing/bookings phone | `+27 82 307 6257` | `client_confirmed` + `CA_CG_confirmed` | `current_verified` for CG content | Preferred local caption display: `082 307 6257`. |
+| Public venue/general phone | `+27 82 499 0072` | `public_verified` + `client_confirmed` | `current_verified` | Add for time-sensitive/event-day/on-site assistance. |
+| Public website email | `info@bloemactionsports.co.za` | `public_verified` | `current_verified` | Keep separate from Stella’s CG marketing contact. |
+| Facebook | `https://www.facebook.com/BloemAction` | `public_verified` via official local contact page | `current_verified` | Official local website points here. |
 | Instagram | no authoritative local handle verified on 2026-09-08 | — | `stale_unverified` | Do not invent or assume a handle. |
 
-### Important contact-rule reconciliation
+### Stella vs public venue contact
 
-The Project business-information PDF contains the line “Always include Debbie’s contact info” but immediately gives **Stella’s** email and phone. Repeated Project use also identifies Stella as the bookings contact.
+Do **not** collapse these into one contact identity.
 
-Treat **“Debbie” in that instruction as a source-label error**. Do not address or label the contact as Debbie unless a later client instruction explicitly changes the person.
+- **Stella** is the client/CG-confirmed marketing and bookings contact used in CG captions.
+- **082 499 0072 / info@bloemactionsports.co.za** is the current official public venue contact shown on the website.
 
-### Address history that must not become the primary address
+Both can be true at the same time because they serve different content/operational purposes.
 
-Older Project/third-party material also uses:
+## 5. The “Debbie” instruction: historical and superseded, not invented
 
-- “Daisy Hall, Show Grounds, 1 Curie Avenue”; and
-- local variants such as “Saal Daizy / Skougronde”.
+The Project business-information PDF says:
 
-These can be useful historical/local wayfinding aliases, but the current official local contact page gives **32 Curie Avenue**. Do not publish `1 Curie Avenue` as the formal address without fresh client confirmation.
+> “Always include Debbie’s contact info for bookings or queries”
 
-## 5. Trading hours: active conflict, do not guess
+but immediately supplies **Stella’s** email and phone.
+
+An older third-party Bloem Action Sports listing also preserves a historical `debbie@actionsports.co.za` contact together with old phone/address information. This confirms that **Debbie was a real historical Bloem Action Sports contact**, not an invented name.
+
+Classification:
+
+- historical Debbie contact: `historical`;
+- “Debbie” label inside the current Project posting rule: `superseded label/carry-over error`;
+- Stella’s supplied contact details in that same rule: `client_confirmed` + `CA_CG_confirmed` + current for CG marketing use.
+
+**Production rule:** use Stella. Do not label Stella’s details as Debbie unless the client explicitly changes the contact again.
+
+## 6. Address history
+
+Current official address:
+
+**Bloemfontein Show Grounds, 32 Curie Avenue, Hospitaalpark, Bloemfontein, 9301**
+
+State: `public_verified` / `current_verified`.
+
+Older sources include:
+
+- Daisy Hall / Show Grounds / `1 Curie Avenue`;
+- historical local wording such as `Saal Daizy / Skougronde`.
+
+State: `historical` / `superseded` as the formal address.
+
+These can be useful wayfinding/history context but must not replace 32 Curie Avenue in current formal marketing unless the client reconfirms them.
+
+## 7. Trading hours
 
 Current official local contact page on 2026-09-08 states:
 
@@ -136,156 +177,214 @@ Current official local contact page on 2026-09-08 states:
 - Saturday: `Open for Bookings`
 - Sunday: `Closed`
 
-`public_verified` / `current_verified` as the website value.
+State: `public_verified` / `current_verified` as the current website value.
 
-The older Project business-information source states:
+The Project business-information PDF states:
 
 - Monday-Thursday: `09:30 - 16:00` and `17:30 - 02:00`
 - Friday: `09:30 - 16:00`
 - Saturday: `09:00 - 15:00`
-- Sunday: closed
-- hours may vary for special events or league matches.
+- Sunday: closed.
 
-`client_confirmed` historical source / `possible_change`.
+State: `historical` / `superseded` for normal current publication.
 
-**Production rule:** hours are freshness-gated. Before publishing hours in a post, advert, event listing or website update, re-confirm with the client or current official source. Do not merge the two schedules.
+Third-party listings may still show approximately 10:00-23:30 weekdays and 09:00-22:00 Saturdays. Those are not stronger than the current official site.
 
-## 6. What the business currently offers
+**Production rule:** if a post is specifically about opening hours, a final, tournament, late closing or special event, re-confirm the relevant date’s hours rather than relying on permanent memory.
 
-### Core local sports — safe current public truth
+## 8. Current sports and league truth
 
-Current local homepage/about pages and current Action Sports league system support:
+### Current live Bloem sports
+
+The current Action Sports league/registration system on 2026-09-08 confirms **four currently active Bloem sports**:
 
 - **Action Cricket**
 - **Action Netball**
 - **Action Hockey**
+- **Action Soccer**
 
-`public_verified` / `current_verified`.
+State: `public_verified` / `current_verified`.
 
-The current public league system on 2026-09-08 shows active Winter 2026 competition across cricket, hockey and netball, including multiple cricket divisions/mix formats and multiple ladies/mix/elite netball formats. Exact league names, divisions and standings are dynamic and must not be frozen into permanent marketing memory.
+### Action Soccer correction
 
-### Recurring league pattern
+The earlier migration record incorrectly downgraded Action Soccer to `possible_change` because the local homepage foregrounds cricket, netball and hockey.
 
-Project history confirms Bloem Action Sports regularly markets **winter and summer league cycles** for cricket, netball and hockey, with season registration pushes and finals periods.
+That conclusion is now **superseded**.
 
-`CA_CG_confirmed` / durable operational pattern.
+The live Action Sports system currently lists:
 
-Do not store one season’s dates as a permanent fact. Re-check:
+- `5 a side Soccer - Winter '26`
+- venue: `Bloem Action Sports`
+- season start: `18/05/2026`
+- Monday play
+- team and individual registration routes.
 
-- sport;
-- division;
-- registration closing date;
-- finals dates;
-- match times;
-- team availability;
-- fees;
-- prizes/entertainment;
-- sponsor/bar/food promotions.
+This is sufficient authoritative current evidence that Action Soccer is active at Bloem Action Sports.
 
-### Sport availability that must be re-confirmed
+**Production rule:** Action Soccer may be marketed as a current sport. Exact season names, prices, available capacity and registration terms remain freshness-gated.
 
-**Action Soccer** appears in the older client Project source and older public/third-party material, but the current local homepage/about and current Bloem league list foreground cricket, netball and hockey rather than soccer.
+### Current league examples are not permanent facts
+
+The live system currently shows Winter 2026 cricket, hockey, netball and soccer activity, with multiple cricket/netball divisions and formats.
+
+Do not freeze one season’s:
+
+- division names;
+- dates;
+- prices;
+- registration fees;
+- match days;
+- capacity;
+- standings;
+- tournament labels
+
+into permanent copy instructions.
+
+### Price evidence
+
+Current live registration pages on 2026-09-08 show different prices by sport/format, including current Bloem cricket, netball, six-a-side netball, elite netball and soccer rates.
+
+These observations prove that **prices are dynamic and sport-specific**. They are verification evidence, not permanent client-memory values.
+
+Never pull current pricing from an old 2023 price PDF or an old caption.
+
+## 9. Other sport/activity availability
+
+### Action Golf
+
+The current official Arena Facilities page lists `Action Cricket/Netball/Hockey and Golf` and the local site continues to expose Action Golf navigation/pages.
+
+State: `public_verified` as a currently listed facility/activity.
+
+No current Bloem Action Golf league was observed in the live league list on 2026-09-08.
+
+**Production rule:** it is safe to say Golf is currently listed by the venue, but confirm the exact format, booking method, package and availability before building a campaign around it.
+
+### Paddle Tennis
+
+A Paddle Tennis link remains on the local site, but current active programme/league evidence was not established in this audit.
+
+State: `stale_unverified` / `possible_change`.
+
+### Action Rugby
+
+National Action Sports news historically references Action Rugby activity at Bloem Action Sports.
+
+State: `historical` unless a current event/format is reconfirmed.
+
+### Bubble Soccer
+
+The wider Action Sports network offers Bubble Soccer, and older research connected it to Bloem.
+
+State: `possible_change`; confirm locally before advertising.
+
+## 10. Current facilities
+
+Current official local pages confirm:
+
+- three international indoor sports courts;
+- fair/competitive grading systems;
+- structured leagues;
+- qualified umpires;
+- electronic scoring and team/individual statistics;
+- automatically generated fixtures / Action Sports app context;
+- Action Sports Bar;
+- large TVs;
+- braai facilities;
+- kiosk and coffee shop;
+- ladies’ and men’s change rooms;
+- kids play area.
+
+State: `public_verified` / `current_verified` as facility categories.
+
+### Wording preference
+
+Use **kiosk / coffee shop** when referring to the current public facility wording. “Tuck shop” is understandable local language and appears in the client source, but it should not replace the verified facility name by default.
+
+Do not use **“clean courts”** as a permanent factual marketing claim merely because an old instruction suggested facility-cleanliness content. A post may describe cleanliness when the actual content/client brief supports it.
+
+Do not call the bar **licensed** unless the client or current authoritative licensing evidence confirms that exact claim.
+
+## 11. Current event and booking products
+
+Current official local site confirms:
+
+- birthday parties;
+- corporate events;
+- corporate team building;
+- socials;
+- private functions;
+- venue hire.
+
+State: `public_verified` / `current_verified`.
+
+The current Action Cricket page also confirms casual/private social games and privately organised/inter-company competitions for cricket.
+
+### Bachelor/bachelorette parties
+
+These appear in the client business-information PDF but are not currently named on the official local booking navigation reviewed in this audit.
+
+State: `client_confirmed historical source` + `possible_change`.
+
+**Production rule:** do not discard the category, but confirm it before running a current named bachelor/bachelorette campaign.
+
+### Fundraisers
+
+The client source mentions fundraisers, but current package/format evidence was not established in this audit.
 
 State: `possible_change`.
 
-Do **not** advertise Action Soccer as a currently available Bloem league/product without fresh client confirmation.
+## 12. How CG should understand the client
 
-### Legacy/occasional formats
+Bloem Action Sports is not just “an indoor sports venue”. The real customer experience combines:
 
-Older or secondary public material also references:
-
-- Action Rugby at a Bloem event in 2023;
-- Bubble Soccer through the wider Action Sports network;
-- Action Golf and Paddle Tennis links/pages on the local site.
-
-These are not standing current Bloem content products for CG by default.
-
-State: `historical` / `stale_unverified` / `possible_change` depending on format.
-
-Future agents must not resurrect them simply because an old page still exists.
-
-## 7. Current facilities and event products
-
-Current local site confirms:
-
-- three indoor sports courts;
-- structured/graded leagues;
-- qualified umpires;
-- electronic scoring and team/individual statistics;
-- automatically generated fixtures / Action Sports system/app context;
-- birthday parties;
-- corporate events and corporate team building;
-- socials;
-- private functions;
-- venue hire;
-- kiosk/tuck-shop-style drinks, snacks and coffee;
-- bar area;
-- large-screen TVs;
-- outdoor braai area;
-- change rooms.
-
-`public_verified` / `current_verified` as high-level service/facility categories.
-
-The Project source additionally references:
-
-- bachelor/bachelorette parties;
-- fundraisers;
-- casual play;
-- spectator seating;
-- licensed sports bar.
-
-Treat specific event format/package availability, licensing claims, inclusions and pricing as `possible_change` unless current client confirmation is available.
-
-## 8. How CG should understand the client
-
-Bloem Action Sports is not just “an indoor sports venue”. The useful customer reality is a mix of:
-
-- regular after-work/weeknight team competition;
+- regular weeknight team competition;
 - social participation;
-- real team identity and rivalries;
+- team identity and rivalries;
 - structured seasons, standings and finals;
-- a place where spectators stay for the game and social side;
-- parties and team-building where the activity is already organised;
-- a local Bloem sports community where the venue handles much of the league structure and match administration.
+- organised fixtures/umpiring/scoring;
+- a spectator/social side around games;
+- parties and team-building where the activity is already structured;
+- a local Bloem sports community.
 
 The marketing should feel like it comes from **inside that environment**, not from an agency describing sport from a distance.
 
 ### Core audiences
 
-Durable audience groups are:
+Durable audience groups include:
 
 - existing teams and captains;
 - players looking for regular social/competitive sport;
-- individuals who may not yet have a full team;
+- individuals looking to join where individual registration/placement is actually available;
 - junior players and parents where a current junior format exists;
 - corporate organisers and work teams;
 - birthday/event organisers;
 - schools/clubs where a current programme exists;
 - spectators, friends and families around league/finals nights;
-- aspiring umpires when a current qualification/recruitment drive is running.
+- aspiring umpires when a current qualification/recruitment drive is active.
 
-Do not assume every audience is active in every season. The content brief/current league inventory controls.
+Do not assume every audience is active in every season.
 
-## 9. The core human copy rule
+## 13. Core human copy rule
 
 **If the line could be pasted onto any sport, it is probably too generic for Bloem Action Sports.**
 
 The Project repeatedly rejected broad motivational wording even when it sounded energetic.
 
-The copy must be:
+Copy should be:
 
 - specific to the sport shown;
 - specific to a real game moment, role or decision where possible;
 - short;
 - easy to read quickly on artwork;
 - relatable to people who actually play;
-- energetic without becoming hype;
+- energetic without hype;
 - clear before clever;
 - local/human rather than agency-polished.
 
-### What “non-generic” means here
+### What “non-generic” means in practice
 
-Do not merely insert the word “hockey”, “netball” or “cricket” into a generic sentence.
+Do not merely insert “hockey”, “netball”, “cricket” or “soccer” into a generic sentence.
 
 Weak pattern:
 
@@ -298,79 +397,56 @@ Better pattern:
 - title names a real pressure point/action in the sport;
 - subtitle says what the player is trying to do next.
 
-Historical Project example of the **better direction**:
+Historical Project example of the better direction:
 
 - `BREAK THE HOCKEY PRESS`
 - `Move the ball before the gap closes.`
 
-This works better than a line such as:
+This was stronger than:
 
 - `START THE HOCKEY PLAY`
 - `Make the first pass count.`
 
-The second version was repeatedly pushed back as generic because it does not say enough about the actual play.
+because the second pair was still too generic.
 
-## 10. Text-on-post structure
+## 14. Text-on-post structure
 
 For normal sports artwork, the repeatedly requested structure is:
 
 1. **short title**;
 2. **short supporting subtitle**.
 
-The subtitle must add meaning; it should not repeat the title in different words.
-
-### Length
+The subtitle must add meaning, not repeat the title.
 
 Keep both lines short enough for poster hierarchy.
 
-CA/CG repeatedly asked for shorter options when titles/subtitles became explanatory sentences.
+Write to the person playing the sport. Prefer the pressure, timing, movement, read or decision they recognise from a match.
 
-### Relatability
-
-Write to the person playing the sport.
-
-Prefer the pressure, timing, movement, read or decision they recognise from a match.
-
-Avoid talking about sport as a vague lifestyle concept.
-
-## 11. Sport-specific language standard
+## 15. Sport-specific language standard
 
 ### Hockey
 
-Use real indoor-hockey moments and language where accurate:
+Use real indoor-hockey situations where accurate:
 
 - press;
 - first pass;
-- gap;
-- movement off the ball;
-- quick release;
 - passing lane;
 - turnover;
-- shot;
-- space closing;
-- defensive pressure.
+- gap closing;
+- quick release;
+- off-ball movement;
+- defensive pressure;
+- shot opportunity.
 
-Do not default to vague wording such as:
-
-- “stay in control”;
-- “start the play”;
-- “make it count”;
-- “own the moment”.
-
-The line should show why the moment matters.
+Avoid vague defaults such as “stay in control”, “start the play”, “make it count” or “own the moment”.
 
 ### Netball
 
-Project feedback rejected abstract development language such as “creating strong foundations in netball” when the brief was about the sport itself.
+Project feedback rejected abstract development language such as “creating strong foundations in netball” when the brief was simply about the sport.
 
-Unless the content is specifically about youth development/coaching, avoid turning netball posts into:
+Unless the post is specifically about coaching/youth development, avoid generic “building foundations”, “developing the future” and “young talent” framing.
 
-- “building foundations”;
-- “developing the future”;
-- “young talent”;
-- generic teamwork/motivation.
-
-Use actual netball play instead:
+Use actual netball play:
 
 - movement into space;
 - feed timing;
@@ -379,82 +455,108 @@ Use actual netball play instead:
 - defensive read;
 - quick release;
 - reset;
-- shot opportunity;
-- court positioning;
-- mixed/ladies/team context where the post requires it.
+- shooting opportunity;
+- court positioning.
 
 ### Cricket
 
-Use actual indoor-cricket moments rather than broad “play hard” copy:
+Use actual indoor-cricket moments:
 
 - batting partnership;
 - running pressure;
-- third-ball pressure where relevant/accurate;
+- third-ball pressure where accurate;
 - bowling spell;
 - fielding reaction;
 - catching;
 - scoring zones;
 - overs;
 - defending a total;
-- chasing a target;
-- partnership momentum.
+- chasing a target.
 
-Do not write generic “hit harder / play stronger / give it your all” lines unless the image/brief genuinely supports them.
+Avoid generic “hit harder”, “play stronger” and “give it your all” filler.
+
+### Soccer
+
+Now that Action Soccer is verified current, future copy should receive the same sport-specific treatment.
+
+Use real five-a-side moments where accurate:
+
+- pressure on the ball;
+- passing option;
+- quick combination;
+- space opening/closing;
+- defensive recovery;
+- finishing chance;
+- movement off the ball;
+- transition after a turnover.
+
+Do not simply reuse hockey/netball/cricket wording with “soccer” swapped in.
 
 ### Separate sports when the creative is separate
 
-When CG is given different cricket/netball/hockey artworks, captions or text-on-post should be sport-specific rather than forcing one umbrella line across all of them.
+When CG is given different cricket/netball/hockey/soccer artworks, use sport-specific copy rather than forcing one umbrella line across all of them.
 
-Historical Project correction: unrelated competition labels such as “FS Mix” must not be added to general sport posts unless they genuinely apply to that artwork/team/event.
+Do not add competition labels such as `FS Mix`, `Super League` or a specific division unless they genuinely apply to that artwork/event.
 
-## 12. Tone of voice
+## 16. Tone of voice
 
-The client source and Project corrections converge on:
+The original staff-written Project Instructions remain high-value and are preserved as the foundation:
 
-- **confident** — knows indoor sport and events without boasting;
-- **clean** — direct, no fluff;
-- **local and friendly** — sounds Bloem-based and familiar;
-- **energetic but professional** — pace of sport without ad-agency hype;
-- **human** — team-behind-the-counter / people-on-the-court voice.
+- **Confident** — knows indoor sport and events without boasting.
+- **Clean** — clear, straight to the point, no fluff.
+- **Local & Friendly** — Bloem-based, familiar and welcoming.
+- **Energetic yet Professional** — reflects the pace of sport while staying grounded.
+- **Human** — sounds like people behind the counter or on the court, not a scripted ad agency.
 
-### Default language
+These are not generic boilerplate. They are client-specific CG-authored rules and remain current.
 
-Default to **English** for general social copy unless the brief/audience calls for Afrikaans.
+### Language
 
-Occasional casual Afrikaans or local expressions can work when natural, for example a simple “maak ’n span” or “ons sien julle op die baan”.
+Default to **English** for general social copy.
 
-Do not force bilingual copy into every post.
+The original instruction allows occasional casual Afrikaans/local expressions when they fit the audience. Later Project work has also requested English-only execution in specific contexts.
 
-When Afrikaans is used, use natural everyday Afrikaans, not stiff/formal translation language.
+Classification: `unresolved as an absolute universal rule`, but no evidence shows that all Afrikaans has been permanently banned.
 
-### Punctuation/style
+Current safest durable rule:
 
-Project preference: **do not use em dashes** in captions/copy.
+- default to English;
+- use Afrikaans when the brief asks for it or when a short local phrase genuinely fits;
+- do not force bilingual copy;
+- when Afrikaans is used, use natural everyday spoken Afrikaans.
 
-## 13. Humour standard
+### Punctuation
 
-Funny is welcome **when it comes from real sport behaviour**.
+CA/CG correction: **never use em dashes in captions/copy**.
+
+State: `CA_CG_confirmed` / current.
+
+## 17. Humour standard
+
+Funny is welcome when it comes from real indoor-sport behaviour.
 
 Good humour territory:
 
-- a player reaction everyone recognises;
+- player reactions;
 - team rituals;
-- a missed chance/recovery;
+- familiar match frustrations;
+- misses and recoveries;
 - umpire/player moments;
 - bench or spectator reactions;
-- familiar indoor-sport frustrations;
-- team-name/personality content.
+- team names/personalities.
 
 Avoid:
 
 - influencer slang;
 - meme-chasing;
 - forced jokes;
-- sarcasm that makes a player/team look stupid;
-- humour that requires exaggerating the service/product;
+- sarcasm that humiliates a player/team;
+- exaggeration;
 - generic “tag your squad” engagement bait.
 
-## 14. Generic/corporate wording to reject by default
+Recent CG-produced Bloem content is not humour-heavy by default. Humour should remain an option, not a requirement for every post.
+
+## 18. Generic/corporate wording to reject by default
 
 Do not default to:
 
@@ -467,15 +569,15 @@ Do not default to:
 - “something for everyone”;
 - “unforgettable fun”;
 - “where champions are made”;
-- vague “build / grow / develop / foundations” wording when the post is simply about playing the sport;
-- empty “make every moment count” style motivation;
+- vague “build / grow / develop / foundations” wording when the post is simply about playing;
+- empty “make every moment count” motivation;
 - vague teaser copy such as “Something exciting is coming”.
 
 The client offering is concrete. Say the concrete thing.
 
-## 15. Captions and posting rules
+## 19. Captions and posting rules
 
-### Standing contact footer
+### Standing CG contact footer
 
 Normal CG caption convention:
 
@@ -483,7 +585,7 @@ Normal CG caption convention:
 - `📧 stella@actionsports.co.za`
 - `📞 082 307 6257`
 
-The exact line-break/separator treatment can follow the artwork/platform, but these are the standing values.
+The exact layout can follow the platform/creative, but these are the standing values.
 
 For time-sensitive/event-day/finals/tournament posts also include:
 
@@ -496,43 +598,53 @@ Do not use:
 - “DM us”;
 - “Inbox for more”.
 
-Use the website, email or phone/WhatsApp route instead.
+Use the website, email or phone/WhatsApp route.
 
-### Hashtags
+### Caption relationship to artwork
 
-Project preference is to include relevant SEO hashtags with captions.
+Recent Project history repeatedly shows CA/CG asking captions **not to repeat what is already written on the poster**.
 
-Useful standing pool from the client source:
+Current durable rule:
+
+- poster carries the main visual message;
+- caption adds context, useful detail, date/booking information or CTA;
+- do not restate the artwork line-for-line.
+
+## 20. Hashtags
+
+Use a **relevant subset**, not a mechanical full block on every post.
+
+Useful standing pool:
 
 - `#BloemActionSports`
 - `#IndoorSportsBloemfontein`
 - `#ActionCricket`
 - `#ActionNetball`
+- `#ActionHockey`
+- `#ActionSoccer`
 - `#TeamBuildingBloem`
 - `#BloemfonteinEvents`
 - `#KidsPartiesBloem`
 - `#SportsVenueBloemfontein`
 - `#PlayInBloem`
 
-Use a **relevant subset**, not the entire pool mechanically.
+`#ActionSoccer` is current and valid because Action Soccer is now authoritatively verified active at Bloem.
 
-`#ActionSoccer` was in the older source list but should not be used as a standing current hashtag until current Bloem soccer availability is confirmed.
+Do not infer that every published post must use the same number or exact hashtag set unless CA later creates a stricter rule.
 
-Add sport-specific tags such as `#ActionHockey` when relevant rather than forcing unrelated tags.
-
-## 16. Recurring content needs
-
-The durable Project/content-source mix is:
+## 21. Recurring content needs
 
 ### League registration
 
+Recurring current content pattern:
+
 - new season/team registration;
 - winter/summer league turnover;
-- cricket, netball and hockey;
-- current divisions/remaining space when confirmed;
-- direct “get your team in” information.
+- cricket, netball, hockey and soccer where included in the current season;
+- divisions/remaining space when confirmed;
+- direct registration information.
 
-Avoid vague countdown hype. Give the sport, season/deadline and booking route.
+Recent CG Project work also includes an October 2026 summer-league registration push for hockey, netball and cricket. That is a current campaign example, not a permanent list of all sports in every future summer season.
 
 ### Fixtures, results and highlights
 
@@ -544,34 +656,31 @@ Avoid vague countdown hype. Give the sport, season/deadline and booking route.
 
 ### Finals and event days
 
-Finals periods are bigger than a fixture graphic. Historical Project work shows that event-day content can also include, where actually confirmed:
+Recent CG Project work includes winter-finals promotion with event extras such as food stalls, bar specials/promotions, prizes and entertainment.
 
-- food stalls;
-- bar specials/promotions;
-- prizes;
-- entertainment;
-- family/spectator atmosphere.
+Durable lesson:
 
-These add-ons are **not permanent inclusions**. Confirm each event.
+- finals can be marketed as a bigger venue occasion, not only a fixture list;
+- **but** food stalls, bar specials, prizes and entertainment are event-specific and must be reconfirmed each time.
 
 ### Umpire recruitment/qualification
 
 The Project has run content for aspiring netball umpires to get qualified and gain practical court experience.
 
-This is a useful recurring content category, but individual application contacts and dates are programme-specific.
+This is a useful recurring content category, but dates and contacts are programme-specific.
 
-Historical example contact: Gerhard Steyn (“Pikkewyn”), `+27 72 425 5189`.
+Historical example: Gerhard Steyn (“Pikkewyn”), `+27 72 425 5189`.
 
-State: `historical` / re-confirm before reuse.
+State: `historical`; re-confirm before reuse.
 
 ### Parties and team building
 
 Use real organiser benefits:
 
 - indoor/weather-safe activity;
-- courts and organised play;
+- organised play;
 - group participation;
-- venue/facility add-ons that are currently available.
+- current venue/facility add-ons.
 
 Do not use generic “create unforgettable memories” language.
 
@@ -579,47 +688,79 @@ Do not use generic “create unforgettable memories” language.
 
 Useful real scenes:
 
-- team arrivals;
+- arrivals;
 - warm-up;
 - bench/umpire moments;
 - big plays;
-- crowd/spectator reactions;
+- spectator reactions;
 - bar/kiosk/after-game moments where appropriate;
 - finals atmosphere.
 
-### Facility features
+### Facility content
 
 Show the actual facility/service:
 
 - courts;
 - scoring;
-- kiosk/tuck shop;
+- kiosk/coffee shop;
 - bar;
 - TVs;
 - braai area;
 - change rooms;
+- kids play area;
 - event setup.
 
 Do not turn literal facility content into abstract “experience” copy.
 
-### Quick reels
+## 22. Recent social/content audit — 2026-09-08
 
-Client source preference:
+### Access scope
 
-- real clips;
-- slow-motion hits/saves/catches where useful;
-- team cheers;
-- umpire calls/reactions;
-- authentic court moments;
-- minimal gimmicky filtering.
+The official local website currently verifies the Facebook profile `facebook.com/BloemAction`.
 
-## 17. Visual and image-production rules
+Direct recent Facebook post pages were **not reliably retrievable** in the available browsing environment, so no claim below pretends that every latest Facebook post was opened directly.
+
+No authoritative local Instagram handle was verified in the current official site/search audit. Therefore recent Instagram posts could not be authoritatively audited and no Instagram convention is invented.
+
+The most recent **CG-produced content** available in the Bloem Action Sports Project was reviewed and used as the strongest current content-production evidence alongside the official site/live league system.
+
+### Durable recent content patterns
+
+Recent CG-produced Project work shows these patterns repeatedly:
+
+1. **Sport-specific poster copy** rather than generic sport motivation.
+2. **Short title + short supporting subtitle** on action imagery.
+3. **Separate cricket/netball/hockey treatments** where creatives differ.
+4. **Direct league/finals information** when the post is operational.
+5. **Captions that add context rather than repeat poster text.**
+6. **Website + Stella contact CTA** as the normal professional route.
+7. **Venue phone added when timing/event-day relevance requires it.**
+8. **Real court/player imagery and precise image edits** rather than stock-heavy or over-AI treatment.
+9. **Humour used selectively**, not as a compulsory style.
+10. **Promotions/event extras treated as date-specific**, not standing venue promises.
+
+### What is observation, not a permanent rule
+
+Do not promote the following to permanent rules merely because they appear in recent content:
+
+- one finals date;
+- one summer-league start month;
+- one food stall/bar special;
+- one prize/entertainment inclusion;
+- one division label;
+- one poster layout;
+- one temporary competition contact;
+- one price.
+
+Explicit CA/CG instructions and corrected client facts remain higher authority.
+
+## 23. Visual and image-production rules
 
 Project image-editing corrections establish a strong production rule:
 
 **When CA asks for one visual change, make that change only.**
 
-Examples from Project history include:
+Examples from Project history:
 
 - remove the net only;
 - make the image clearer without changing the scene;
@@ -627,15 +768,27 @@ Examples from Project history include:
 - correct one letter only;
 - do not redesign or reinterpret the artwork when the instruction is precise.
 
-Durable visual preference:
+Durable preference:
 
-- preserve the original subject, composition and recognisable real-sport feel;
-- favour natural/photographic realism;
-- avoid over-smoothing, invented details and obvious AI texture;
+- preserve original subject/composition where possible;
+- favour natural photographic realism;
+- avoid over-smoothing, invented detail and obvious AI texture;
 - use genuine player/court footage over generic stock where possible;
 - do not add objects, branding, text or court elements that were not requested.
 
-## 18. Proofing/workflow preference
+### “No filters” instruction refinement
+
+The original Project source says quick reels should be real clips with “no filters”.
+
+Preserve the **human intent**, not an overly literal technical ban.
+
+Current rule:
+
+- real footage first;
+- clean/natural commercial editing is fine;
+- avoid gimmicky filters, excessive effects and processing that makes the venue/players look artificial.
+
+## 24. Proofing/workflow preference
 
 The Project contains repeated spelling/grammar checks.
 
@@ -644,124 +797,135 @@ When asked only to proof a Bloem Action Sports post:
 - check properly;
 - give the correction directly;
 - keep the answer concise;
-- do not turn a simple proofreading request into a long copy rewrite unless asked.
+- do not turn a simple proofreading request into a long rewrite unless asked.
 
-## 19. Historical lessons from the August research pack worth preserving
+## 25. Historical strategic lessons worth preserving
 
-The older research pack remains useful for broader commercial context, especially these durable lessons:
+The older August research pack remains useful for these durable human/commercial lessons:
 
 - league participation is recurring revenue, not a one-off event;
-- “find a team / join as an individual” can remove a real entry barrier, but do not promise placement unless the venue confirms the process/capacity;
-- organised fixtures, grading, umpiring and scoring are practical reasons to choose Action Sports and can be marketed more concretely than vague “fun” claims;
-- finals, team identity and recurring rivalries create natural retention/content loops;
-- party and corporate organisers need clear practical information, not just energetic imagery;
-- the after-game/social/spectator side is part of the venue experience;
-- prices/packages/league details from old PDFs/pages must never be reused without a freshness check.
+- “join as an individual / find a team” can reduce an entry barrier, but do not promise placement unless the current process/capacity supports it;
+- organised fixtures, grading, umpiring and scoring are practical selling points;
+- finals, team identity and rivalries create natural retention/content loops;
+- party/corporate organisers need practical information, not just energetic imagery;
+- the after-game/spectator side is part of the venue experience;
+- old prices/packages/league details must never be reused without a freshness check.
 
-These are supporting human insights, not automatic campaign instructions.
+These are supporting insights, not automatic campaign instructions.
 
-## 20. Current public digital footprint and freshness notes
+## 26. Current public digital footprint
 
 ### Local website
 
-Current official site:
-
 `https://www.bloemactionsports.co.za/`
 
-Current useful official pages:
+Useful official pages verified in this audit:
 
 - homepage: `https://www.bloemactionsports.co.za/`
-- about/facilities: `https://www.bloemactionsports.co.za/about`
+- about: `https://www.bloemactionsports.co.za/about`
 - contact: `https://www.bloemactionsports.co.za/contact`
+- arena facilities: `https://www.bloemactionsports.co.za/cp/39216/arena-facilities`
 - Action Cricket page: `https://www.bloemactionsports.co.za/p/1029978/action-cricket`
 
-### Current league system
+### Current league/registration system
 
-`https://actionsport.spawtz.com/ActionController/LeagueList`
+- league list: `https://actionsport.spawtz.com/ActionController/LeagueList`
+- registration: `https://actionsport.spawtz.com/Registration/Leagues`
 
-On 2026-09-08 this lists Bloem Action Sports current Winter 2026 leagues for Action Cricket, Action Hockey and Action Netball.
+On 2026-09-08 these provide current Bloem evidence for Action Cricket, Action Hockey, Action Netball and Action Soccer.
 
-League names/standings are dynamic; freshness-check before content.
+### Facebook
 
-### National Action Sports context
+Official local website points to:
 
-`https://actionsports.co.za/`
+`https://www.facebook.com/BloemAction`
 
-Useful for rule/system/franchise context, but national sport availability is **not proof** that every format is currently offered at Bloem.
+Direct recent post retrieval was unavailable during this audit; future agents with direct Facebook access should review the newest published posts before major content planning.
 
-## 21. Public-source conflicts and stale material to guard against
+### Instagram
 
-### Old price list
+No authoritative local Instagram handle verified on 2026-09-08.
 
-A 2023 Bloem price-list PDF remains indexed on the local site.
+Do not invent one from search noise or third-party embedded media.
+
+## 27. Public-source conflicts/stale material to guard against
+
+### Old price lists
+
+Old Bloem price material remains indexed online.
 
 State: `historical` / `rejected` for current pricing use.
 
-Never publish its rates without current client confirmation.
+### Historical Debbie/old venue listing
 
-### Old sport/product pages
+Older third-party listing preserves:
 
-Reachable legacy pages can make a format appear current when it may no longer be actively marketed.
+- Debbie contact;
+- old landline/mobile values;
+- `1 Curie Avenue / Daisy Hall` wording.
 
-Production rule: homepage/current league inventory + fresh client confirmation beats an old standalone page.
+This is useful historical provenance but not current operational truth.
 
-### Action Soccer
+### Current public site vs live league system
 
-Older client source says it is offered; current core local pages/current league list do not establish an active current soccer league.
+The local homepage/about pages mainly foreground cricket, netball and hockey, while the live Action Sports registration system proves soccer is also currently active.
 
-State: `possible_change`.
+Classification: **not a contradiction about soccer availability**; it is a difference in what the homepage foregrounds versus what the live league system currently offers.
 
-### Historical venue contact variants
+### Golf vs active league
 
-Older sources include a landline and `leon@actionsports.co.za` in programme-specific/historical contexts.
+Current facilities page lists Golf, but no current Golf league was observed.
 
-Do not replace current CG marketing/venue contacts with those values.
+Do not turn “listed facility/activity” into an invented active league.
 
-## 22. Before publishing any time-sensitive Bloem Action Sports content
+## 28. Before publishing time-sensitive content
 
 Re-check all that apply:
 
 - current league/competition name;
 - sport and division;
-- registration closing date;
+- registration closing/start date;
 - finals/event date and times;
-- current fee/package price;
-- number of team/player spaces;
+- fee/package price;
+- team/player availability;
 - current organiser/umpire contact;
 - bar/food/prize/entertainment inclusions;
 - operating hours if mentioned;
-- current availability of soccer, golf, bubble soccer, rugby or other non-core formats;
+- exact availability/package for Golf, Paddle Tennis, Bubble Soccer or Rugby;
 - venue phone if event-day assistance is relevant.
 
-## 23. Project migration coverage — 2026-09-08
+Soccer is currently verified active and does **not** require special “is soccer offered at all?” revalidation beyond the normal season/availability freshness check applied to every sport.
 
-All Bloem Action Sports Project chats exposed to this migration were reviewed, including the accessible Project threads covering:
+## 29. Project migration coverage
+
+All Bloem Action Sports Project chats exposed to this migration were reviewed, including accessible threads covering:
 
 - caption creation/contact/hashtag conventions;
 - spelling and grammar corrections;
 - repeated text-on-post iteration for cricket, netball and hockey;
+- recent league/finals content planning;
 - precise image-editing requests and visual correction preferences.
 
-Durable prior-conversation context available through the Project/history retrieval was also reconciled, including January-March 2026 caption/contact preferences and June-July 2026 sport-specific text-on-post corrections.
+Durable Project-history context was reconciled, including January-March 2026 caption/contact preferences and June-July 2026 sport-specific text-on-post corrections.
 
 ### Project source/file coverage
 
-The directly relevant Project/File Library source found and reviewed in full was:
+Directly relevant Project/File Library source reviewed:
 
 - `Bloem Action Sport business info.pdf`
 
-The source provided identity, address variants, Stella/venue contacts, sports/events/facilities, historical hours, tone, posting rules and hashtag guidance.
+It supplied identity, old/current contact context, sport/event/facility claims, historical hours, tone, posting rules and hashtag guidance.
 
-Other File Library search results were unrelated image-generation/reference assets and were not imported into this client record merely because semantic search surfaced them.
+Other File Library results were unrelated client/image assets and were not imported merely because search surfaced them.
 
-Historical chat-uploaded images were not all available as standalone source files in this migration environment; where their durable edit instructions were present in accessible Project conversation history, those instructions were captured above.
+Historical chat-uploaded images were not all available as standalone source files; durable edit instructions present in accessible Project history were preserved.
 
-## 24. Source register
+## 30. Source register
 
-### Client/Project sources
+### Client/CG sources
 
 - Bloem Action Sport business info PDF — Project/File Library source, reviewed 2026-09-08.
-- Bloem Action Sports Project conversation history — accessible captions, proofing, text-on-post and image-editing threads reviewed 2026-09-08.
+- Bloem Action Sports Project conversation history — accessible caption, proofing, text-on-post, recent league/finals and image-editing threads reviewed 2026-09-08.
 - CG canonical naming decision — `docs/client-directory-canonical-decisions-2026-09-08.md`.
 - Historical research foundation — `ACTION-SPORT-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`.
 
@@ -770,26 +934,34 @@ Historical chat-uploaded images were not all available as standalone source file
 - `https://www.bloemactionsports.co.za/`
 - `https://www.bloemactionsports.co.za/about`
 - `https://www.bloemactionsports.co.za/contact`
+- `https://www.bloemactionsports.co.za/cp/39216/arena-facilities`
 - `https://www.bloemactionsports.co.za/p/1029978/action-cricket`
 - `https://actionsport.spawtz.com/ActionController/LeagueList`
+- `https://actionsport.spawtz.com/Registration/Leagues`
 - `https://actionsports.co.za/`
-- `https://actionsports.co.za/about-us/`
+- `https://actionsports.co.za/action-news/`
 
-## 25. Final future-agent rule
+### Historical provenance source used only to classify old Debbie/address context
+
+- older third-party Bloem Action Sports team-building listing containing `debbie@actionsports.co.za`, old phone numbers and `1 Curie Avenue / Daisy Hall` wording.
+
+Do not use that listing as current contact truth.
+
+## 31. Final future-agent rule
 
 Bloem Action Sports content should sound like someone who knows what happens **inside an indoor game in Bloemfontein**.
 
 Before writing, ask:
 
-- Is this clearly cricket, netball or hockey — or could it be any sport?
+- Is the sport clearly identifiable from the wording?
 - Does the title describe a real moment/action?
 - Does the subtitle add something useful?
 - Would a real player recognise the situation?
 - Is the wording short enough for the artwork?
 - Am I using the standing website/Stella contact block?
-- Is the venue phone needed because this is event-day/time-sensitive?
+- Is the venue number needed because this is event-day/time-sensitive?
 - Did I avoid generic AI/corporate filler?
-- Did I avoid stale sport/price/hour claims?
+- Did I verify prices, dates, divisions and promotions?
 - If I edited an image, did I change only what CA asked me to change?
 
 If those answers are right, the content is much closer to the established Bloem Action Sports standard.

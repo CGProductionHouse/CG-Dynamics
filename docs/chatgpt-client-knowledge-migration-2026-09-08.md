@@ -46,7 +46,7 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 |---|---|---|---|
 | WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
 | Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
-| Bloem Action Sports | Bloem Action Sport | **SYNCED** | Canonical name corrected from historical `Action Sport`; accessible Project chats and the Bloem business-information source were reviewed; current official website/contact/league facts were reconciled against CA/CG contact and copy rules. Permanent record: `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`. |
+| Bloem Action Sports | Bloem Action Sport | **SYNCED** | Corrected migration audited again on 2026-09-08. Canonical name remains `Bloem Action Sports`; Action Soccer is verified current through the live Bloem registration/league system; Stella remains the CG/client-confirmed marketing/bookings contact while the public venue contact is preserved separately; the historical Debbie label/contact lineage is retained and classified as superseded rather than invented; current address/hours/facilities/services and recent accessible social/CG-content patterns were reconciled with explicit provenance and access limitations. Permanent record: `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`. |
 
 ## Completion standard
 
