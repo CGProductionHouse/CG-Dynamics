@@ -16,16 +16,20 @@ Use this guide for everyday ChatGPT and staff work. For disputed facts, provenan
 
 ## 2. Current local facts
 
-Verified 2026-09-08 unless stated otherwise.
+Verified/reviewed 2026-09-08 unless stated otherwise.
 
 **Address:** Cnr Nelson Mandela Drive & Muller Street, Langenhoven Park, Bloemfontein, 9300  
-**Primary dealer page:** `https://www.cfaomobility.co.za/find-a-dealer/bloemfontein-toyota`  
+**Canonical dealer page:** `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`  
 **Facebook:** `facebook.com/CFAOMobilityToyotaBloemfontein`  
 **Instagram:** `@cfaomobilitytoyotabloemfontein`
 
+**Standard social/video caption footer phone:** `051 406 3172`
+
+This number is direct client/CG-confirmed on 8 September 2026 and is the default for normal Toyota Bloemfontein social/video caption footers unless a live brief explicitly supplies a different department-specific route. Other Toyota numbers such as `051 406 3199`, `051 406 3000` and `051 406 3170` remain contextual department/listing/history evidence only; do not substitute them for `051 406 3172` by default.
+
 **Regular hours on the current CFAO page:** Mon–Fri 07:30–17:30; Sat 08:30–12:00; Sun closed. Recheck holiday, event and service-specific hours before publishing.
 
-Current official/public surfaces use different valid phone routes for the dealership. **Do not guess a permanent caption number.** Use the number supplied/approved for the live brief or verify the intended current marketing/department route before publishing. No general dealership email or WhatsApp is currently safe to publish from this guide. Do not use individual staff contact details without explicit clearance.
+No general dealership email or WhatsApp is currently safe to publish from this guide. Do not use individual staff contact details without explicit clearance.
 
 ## 3. Verified local scope
 
@@ -59,8 +63,8 @@ Avoid influencer hype, forced slang, forced jokes, generic dealership language, 
 - Use the full current location when a customer-facing footer is appropriate.
 - For staff/culture content, personal team wording is preferred.
 - Let a funny clip carry the joke instead of explaining it.
-- Customer-facing videos, service posts, vehicle promotions and events should include an approved usable contact route when action is required.
-- Use the current CFAO dealer/service URL for brand, service and promotional content when a website is useful; do not blindly recycle the legacy Toyota URL.
+- For normal customer-facing videos, service posts, vehicle promotions and events, use `051 406 3172` in the footer unless a live brief explicitly supplies a different department-specific route.
+- Use the canonical CFAO dealer URL for brand, service and promotional content when a website is useful; do not blindly recycle the legacy Toyota URL.
 
 ### Hashtags
 
@@ -98,7 +102,7 @@ Strong recurring formats:
 - seasonal team moments;
 - clean trends that fit the real content.
 
-Write from the actual clip. Do not copy dialogue. Use `we/our/us` when the team is the subject. Keep humour natural. Add a commercial CTA only when the content needs one. Use the approved current contact route for customer-action videos.
+Write from the actual clip. Do not copy dialogue. Use `we/our/us` when the team is the subject. Keep humour natural. Add a commercial CTA only when the content needs one. For a normal social/video footer use `051 406 3172`; only use another route when the live brief explicitly supplies it for that department/campaign.
 
 ## 8. Vehicle content
 
@@ -163,7 +167,9 @@ Recent accessible Project/public work reinforces:
 - local offer posts can be exact and commercial, but their numbers expire;
 - current social commonly uses focused five-hashtag sets;
 - local events and team culture add personality;
-- old post hours, prices and contact numbers are evidence of that moment, not evergreen truth.
+- old post hours, prices and contact numbers are evidence of that moment, not evergreen truth;
+- direct Toyota Marketing/CG confirmation now establishes `051 406 3172` as the normal social/video footer route, overriding the earlier public-number ambiguity;
+- the current client-supplied dealer URL is `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`.
 
 A June 2026 Saturday Service post showed different hours from the current official dealer page. That is the working example of why old social details must be rechecked.
 
@@ -178,18 +184,19 @@ Do not:
 5. use more than five hashtags;
 6. use excessive emojis;
 7. force humour or influencer slang;
-8. invent/guess contact details;
-9. publish personal staff contacts without clearance;
-10. reuse old hours, offers or finance figures;
-11. infer local stock/spec/price from Toyota South Africa;
-12. treat every used unit as Toyota Certified/Automark;
-13. blur warranty/service-plan/maintenance-plan terms;
-14. claim unverified local services;
-15. alter a real vehicle/person/brand unnecessarily in an image edit.
+8. replace the standard `051 406 3172` footer with `051 406 3199`, `051 406 3000` or `051 406 3170` unless a live brief explicitly supplies that route;
+9. invent/guess other contact details;
+10. publish personal staff contacts without clearance;
+11. reuse old hours, offers or finance figures;
+12. infer local stock/spec/price from Toyota South Africa;
+13. treat every used unit as Toyota Certified/Automark;
+14. blur warranty/service-plan/maintenance-plan terms;
+15. claim unverified local services;
+16. alter a real vehicle/person/brand unnecessarily in an image edit.
 
 ## 14. Freshness checklist
 
-Recheck before publishing when relevant: phone/department route, website/service URL, special hours, staff roles, model/variant/local stock, new/used/demo status, vehicle specs, price/saving, finance assumptions, warranty/service-plan terms, trade-in terms, promotion dates, local service availability, awards and campaign details.
+Recheck before publishing when relevant: whether a live brief specifies a department-specific phone route instead of the standard `051 406 3172`, website/service URL, special hours, staff roles, model/variant/local stock, new/used/demo status, vehicle specs, price/saving, finance assumptions, warranty/service-plan terms, trade-in terms, promotion dates, local service availability, awards and campaign details.
 
 If current evidence is missing or conflicts, **flag it instead of guessing**.
 
@@ -197,7 +204,6 @@ If current evidence is missing or conflicts, **flag it instead of guessing**.
 
 Do not resolve these from memory:
 
-- the single phone number CG should standardise for normal social/video caption footers;
 - general dealership/marketing email;
 - general WhatsApp;
 - holiday/event/service-specific hours;
@@ -206,6 +212,8 @@ Do not resolve these from memory:
 - first-party confirmation of EV charging;
 - current 2026 local award/accreditation claims;
 - all live stock, prices, finance and warranty/service-plan terms.
+
+The standard social/video caption footer phone is **resolved**: use `051 406 3172` unless a live brief explicitly supplies a different department-specific route.
 
 ## 16. Working rule
 

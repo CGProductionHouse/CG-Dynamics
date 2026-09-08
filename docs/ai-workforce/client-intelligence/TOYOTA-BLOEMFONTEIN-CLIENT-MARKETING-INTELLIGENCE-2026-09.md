@@ -8,6 +8,7 @@ Human Project knowledge last reviewed: **2026-09-08**
 Project Instructions last audited: **2026-09-08**  
 Recent social/content audit last reviewed: **2026-09-08**  
 Mutable public facts last verified: **2026-09-08**  
+Latest direct client/CG correction applied: **2026-09-08**  
 Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
 > **Permanent-record note:** this file is the detailed exact-client record created by Issue #244. Future durable Toyota Bloemfontein updates should modify this same record and update the review dates above rather than creating monthly caption archives or parallel client manuals.
@@ -28,6 +29,7 @@ It reconciles:
 - current official CFAO Mobility dealer information;
 - current public Toyota Bloemfontein social identities and observed posts;
 - current public staff-role evidence where relevant;
+- the direct Toyota Marketing/CG correction recorded in Issue #244 on 2026-09-08 establishing the standard social/video footer phone and canonical dealer URL;
 - freshness conflicts that must stay visible instead of being silently resolved.
 
 It is **not**:
@@ -76,13 +78,14 @@ Never use national Toyota South Africa material as proof of a Toyota Bloemfontei
 
 ### Provenance labels used below
 
-- `CA_CG_confirmed` — explicit/repeated CG or user instruction in Toyota work;
+- `CA_CG_confirmed` — explicit/repeated CG or user instruction in Toyota work, including direct client-operation evidence recorded by CG;
 - `project_source` — supplied in `Toyota Business Info.pdf`;
 - `project_history` — repeated Toyota Project conversation evidence;
 - `public_verified` — checked against a current first-party local/dealer/CFAO source;
 - `public_social_observed` — observed on the current official local social identity/post surface;
 - `public_corrob_secondary` — corroborated by a current third-party listing/source;
 - `industry_foundation` — reusable automotive research, not local proof;
+- `contextual_evidence` — useful current/historical department, listing or social-routing evidence that must not override a stronger direct client/CG standard;
 - `historical` — previously true/useful but superseded or time-bound;
 - `possible_change` — current evidence conflicts or the exact publishing route needs CG confirmation;
 - `stale_unverified` — no sufficiently current confirmation;
@@ -95,25 +98,26 @@ Never use national Toyota South Africa material as proof of a Toyota Bloemfontei
 | Canonical CG/client-facing name | **Toyota Bloemfontein** | `CA_CG_confirmed` + repository client identity | `current_verified` | This is the exact name CG must use. Never rename the client to “Oranje Toyota Bloemfontein”. |
 | Current public dealer label | **CFAO Mobility Toyota Bloemfontein** | `public_verified` | `current_verified` | Current CFAO dealer page and current public profiles use this trading label. It may be used when the CFAO relationship is contextually relevant, but the CG canonical client remains Toyota Bloemfontein. |
 | Historical alias | Oranje Toyota Bloemfontein / Oranje Toyota | legacy URLs, old page metadata, historical records | `historical` | Preserve only for source matching, URLs and history. Do not use as current CG-facing naming. `#OranjeToyota` is also rejected as a default hashtag. |
-| Physical address | **Corner of Nelson Mandela Drive and Muller Street, Langenhoven Park, Bloemfontein, 9300, Free State** | `public_verified` | `current_verified` | Current official CFAO dealer page. Older Project copy used “Muller Road” and “Langenhovenpark”; use the current official formal address when a full address is required. |
-| Current primary dealer page | `https://www.cfaomobility.co.za/find-a-dealer/bloemfontein-toyota` | `public_verified` | `current_verified` | Best current first-party local landing page found. |
+| Physical address | **Corner of Nelson Mandela Drive and Muller Street, Langenhoven Park, Bloemfontein, 9300, Free State** | `public_verified` | `current_verified` | Current official CFAO dealer information. Older Project copy used “Muller Road” and “Langenhovenpark”; use the current official formal address when a full address is required. |
+| Canonical dealer page | `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/` | `CA_CG_confirmed` | `current_verified` | Direct Toyota Marketing/CG correction on 2026-09-08. This is the current client-supplied website route and outranks the previously stored CFAO route. |
 | Legacy Toyota dealer URL | `https://www.toyota.co.za/dealership/oranje-toyota-bloemfontein` → redirects to `/dealers/oranje-toyota-bloemfontein/home` | `project_source` + current redirect check | `historical` | Useful as a legacy source/redirect only. Do not treat the legacy “Oranje” URL slug as naming authority. |
 | Facebook | `https://www.facebook.com/CFAOMobilityToyotaBloemfontein/` | `public_social_observed` | `current_verified` | Current public local page. Its profile metadata still contains legacy “Oranje” wording; do not copy that stale naming into CG content. |
 | Instagram | `https://www.instagram.com/cfaomobilitytoyotabloemfontein/` | `public_social_observed` | `current_verified` | Current local handle: `@cfaomobilitytoyotabloemfontein`. |
-| Official dealer-page phone | **051 406 3199** | `public_verified` | `current_verified` | Current CFAO dealer page and CFAO Toyota used-car directory route New Sales, Used Sales, Service, Parts and Finance through this number. |
-| Current office/listing phone | **051 406 3000** | `project_source` + current CFAO vehicle/staff pages | `current_verified_secondary` | Still appears on current staff business cards and current local vehicle listings; it was also the 2025 Project Source number. Do not assume it is the preferred social-marketing CTA. |
-| Current social CTA numbers | **051 406 3170** and **051 406 3172** both appear in current official local social content | `public_social_observed` | `possible_change` | The social account currently uses different numbers by post/context. Do not hard-code one as the permanent marketing number until CG/client confirms the intended routing rule. |
+| Standard social/video caption footer phone | **051 406 3172** | `CA_CG_confirmed` | `current_verified` | Direct Toyota Marketing/CG correction on 2026-09-08. Use for normal Toyota Bloemfontein social/video caption footers unless a live brief explicitly supplies a different department-specific route. |
+| Dealer-page/department phone | **051 406 3199** | `public_verified` | `contextual_evidence` | Appears on current CFAO dealer/directory routes. Keep as department/listing context only; do not replace the standard `051 406 3172` footer unless a live brief explicitly uses this route. |
+| Office/listing/history phone | **051 406 3000** | `project_source` + current CFAO vehicle/staff pages | `contextual_evidence` | Appears in the 2025 Project Source and current staff/vehicle contexts. It is not the standard social/video footer number. |
+| Other social/department phone evidence | **051 406 3170** | `public_social_observed` | `contextual_evidence` | Appears in current official social/service context. It remains contextual evidence only unless a live brief explicitly supplies it for that department/campaign. |
 | General/marketing email | none verified | — | `stale_unverified` | The Project Source explicitly says to confirm the email. Current public evidence exposes individual staff emails, but Project rules prohibit using personal contacts without clearance. |
 | General WhatsApp | none verified | — | `stale_unverified` | Do not invent one or treat an individual staff mobile as the dealership WhatsApp. |
-| Regular opening hours | Mon–Fri **07:30–17:30**; Sat **08:30–12:00**; Sun **Closed** | `public_verified` | `current_verified` | Current official CFAO dealer page. Recheck holiday/event/service-specific hours before publishing. |
+| Regular opening hours | Mon–Fri **07:30–17:30**; Sat **08:30–12:00**; Sun **Closed** | `public_verified` | `current_verified` | Current official CFAO dealer information. Recheck holiday/event/service-specific hours before publishing. |
 | Dealer Principal | **Jonathan Stephenson** | current CFAO digital business card + current AutoTrader dealer response | `current_verified` | Mutable staff fact. Public role is current as of review, but personal mobile/email must not be copied into content without clearance. |
 | Current public sales roles recovered | Heino Meyer — New Car Sales Executive; John Vorster — New Car Sales Executive; Leon De Vries — New & Used Sales Executive | current CFAO digital business cards | `current_verified` | Staff roles are mutable. Confirm before featuring/naming staff in future scheduled content. |
-| New vehicle sales | available | `public_verified` | `current_verified` | Current dealer page exposes New Stock and Offer routes. Exact local model/trim availability is dynamic. |
+| New vehicle sales | available | `public_verified` | `current_verified` | Current dealer information exposes New Stock and Offer routes. Exact local model/trim availability is dynamic. |
 | Used/pre-owned sales | available | `public_verified` + `public_corrob_secondary` | `current_verified` | Current CFAO and AutoTrader evidence. Local used inventory includes Toyota and other makes; stock changes continuously. |
-| Service/workshop booking | available | `public_verified` | `current_verified` | Current dealer page exposes “Book a service” and a Toyota Bloemfontein service booking page. |
-| Parts enquiries | available | `public_verified` | `current_verified` | Current dealer page exposes Parts Enquire and CFAO directory lists Parts. |
+| Service/workshop booking | available | `public_verified` | `current_verified` | Current dealer information exposes a service booking route. |
+| Parts enquiries | available | `public_verified` | `current_verified` | Current dealer information exposes Parts Enquire and CFAO directory lists Parts. |
 | Finance route | available | `public_verified` | `current_verified` | CFAO Toyota directory lists Finance for Toyota Bloemfontein. Exact products/rates/terms remain campaign- and customer-specific. |
-| Sell/value vehicle route | available | `public_verified` | `current_verified` | Current dealer page exposes “Sell Your Car”; trade-in/valuation wording may be used only with current route/terms. |
+| Sell/value vehicle route | available | `public_verified` | `current_verified` | Current dealer information exposes “Sell Your Car”; trade-in/valuation wording may be used only with current route/terms. |
 | Body repair / panel beating | no current exact local first-party proof recovered | — | `stale_unverified` | Never advertise this as a Toyota Bloemfontein service without new confirmation. |
 | Dedicated fleet-management service | social content shows fleet-vehicle selling/business messaging, but exact local managed-service scope is not established | `public_social_observed` | `possible_change` | Fleet vehicle sales/content may be used when the live brief supports it. Do not infer national/CFAO fleet-management products as local dealer scope. |
 | EV charging | current third-party charging directories list a station at the dealership | `public_corrob_secondary` | `possible_change` | Not promoted to current client truth because no first-party local confirmation was recovered. |
@@ -319,17 +323,17 @@ The current Project history contains two useful principles:
 - video/customer-facing/promotional/service content should carry a usable contact route;
 - personal staff contact details must never be added without clearance.
 
-Because current official evidence shows **four legitimate Toyota Bloemfontein numbers in different contexts** (`3199`, `3000`, `3170`, `3172` endings), future content must not guess which one belongs in the caption.
+**Standard operational rule:** use **051 406 3172** for normal Toyota Bloemfontein social/video caption footers. This is direct Toyota Marketing/CG-confirmed on 2026-09-08 and resolves the earlier public-number ambiguity.
 
-**Operational rule:** use the number supplied in the current approved brief/campaign. If none is supplied, verify the intended current marketing/department number before publishing. The current official dealer page’s general route is `051 406 3199`, but do not silently replace a current client-approved social number with it.
+Only replace `051 406 3172` when a live brief explicitly supplies a different department-specific route. `051 406 3199`, `051 406 3000` and `051 406 3170` remain contextual department/listing/history evidence and are not standard footer substitutes.
 
 ### Website rule
 
-For dealership-brand, service and promotional posts, use the current official CFAO dealer/service route rather than blindly recycling the legacy Toyota URL.
+For dealership-brand, service and promotional posts, use the current client-supplied canonical CFAO dealer route rather than blindly recycling the legacy Toyota URL.
 
-Primary current page:
+Canonical current page:
 
-`https://www.cfaomobility.co.za/find-a-dealer/bloemfontein-toyota`
+`https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`
 
 For service content, use the current official service-booking route if the exact URL is required and has been rechecked.
 
@@ -395,7 +399,7 @@ Toyota Bloemfontein’s strongest short-form content is grounded in real staff, 
 - for team/personality content, first-person plural makes it feel internal (`we`, `our`, `us`);
 - let the funny moment carry the humour rather than explaining the joke;
 - keep commercial CTAs out of a purely human moment unless the brief asks for one;
-- add the approved current contact/footer when the video has a sales/service/customer-action purpose.
+- for normal sales/service/customer-action videos, use `051 406 3172` in the footer unless a live brief explicitly supplies another department-specific route.
 
 ## 12. Service and parts content
 
@@ -515,7 +519,7 @@ Useful directions:
 - ask about the current local offer;
 - request a trade-in/vehicle valuation;
 - visit the Bloemfontein dealership to view the actual vehicle;
-- call the current approved department/contact route.
+- call `051 406 3172` for the standard social/video route, or the explicitly supplied department-specific route when the live brief requires one.
 
 Avoid empty CTAs such as:
 
@@ -547,7 +551,7 @@ Observed hook: working with the “giant of the workshop”. Durable lesson: ser
 
 **June 2026 — Saturday Service post**  
 `https://www.instagram.com/p/DZt2Zf9FXVK/`  
-The indexed post advertised Saturday Service 08:00–13:00 at that time. The current official dealer page now shows regular Saturday hours 08:30–12:00. Therefore the June hours are **historical campaign/operational evidence**, not a reusable current schedule.
+The indexed post advertised Saturday Service 08:00–13:00 at that time. The current official dealer information now shows regular Saturday hours 08:30–12:00. Therefore the June hours are **historical campaign/operational evidence**, not a reusable current schedule.
 
 **5 March 2026 — Corolla Cross offer**  
 `https://www.instagram.com/p/DVfsnnYD3I_/`  
@@ -566,11 +570,15 @@ Indexed current content includes “Just looking? No problem…” and “our cl
 **Community/team**  
 Recent indexed/public evidence includes Round Table Golf Day sponsorship and Toyota Family Day/Padel-style content. Durable lesson: local participation and team culture are valid content pillars, but each event is temporary.
 
-### Contact inconsistency discovered through social audit
+### Contact routing correction — resolved 2026-09-08
 
-Current official social content visibly uses both `051 406 3170` and `051 406 3172`. The current official dealer page uses `051 406 3199`; current staff/vehicle sources also use `051 406 3000`.
+Public social/dealer evidence had shown `051 406 3170`, `051 406 3172`, `051 406 3199` and `051 406 3000` in different contexts. That public-source ambiguity is now superseded for normal caption-footer use by stronger direct client/CG evidence.
 
-This is not a reason to choose whichever number appears first. It is a reason to keep contact routing freshness-gated.
+Toyota Marketing/CG confirmed on 2026-09-08 that **051 406 3172** is the standard normal social/video caption footer number unless a live brief explicitly supplies a different department-specific route. The other numbers remain contextual department/listing/history evidence only.
+
+The same direct correction establishes the canonical dealer URL as:
+
+`https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`
 
 ## 18. Project chat/history audit — durable lessons
 
@@ -581,6 +589,8 @@ Accessible Toyota Project history includes repeated caption/content work through
 - Canonical name is **Toyota Bloemfontein**; never call the client **Oranje Toyota Bloemfontein**.
 - Include the **full location** in captions where the Toyota footer is used.
 - Customer-facing/video work has repeatedly required full contact details.
+- Use **051 406 3172** as the standard social/video caption footer number unless a live brief explicitly supplies a different department-specific route.
+- Use `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/` as the canonical current dealer URL.
 - A June 2026 correction requires **only five hashtags**.
 - The caption must match the actual video, not default to generic Toyota copy.
 - Fun content should feel personal and use words such as `we`, `our` and `us` where appropriate.
@@ -609,6 +619,8 @@ Durable:
 - specific video-led captions;
 - real vehicle/dealership content;
 - Bloemfontein grounding;
+- standard normal social/video footer `051 406 3172` unless a live brief gives a different department route;
+- canonical dealer URL `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`;
 - five focused hashtags;
 - useful contact/footer discipline;
 - natural Afrikaans when requested;
@@ -622,6 +634,7 @@ Temporary:
 - one event/sponsorship;
 - one service-hour post;
 - one seasonal CTA;
+- one department-specific phone route supplied for a single live brief;
 - one staff feature unless the role remains current.
 
 ## 19. Line-by-line audit of the current Project Instructions
@@ -651,15 +664,15 @@ Temporary:
 | Use SEO/local/Toyota hashtags on posts | **KEEP WITH CHANGE** | Use up to five focused tags. Do not paste a long fixed bank. |
 | Hashtag bank includes `#OranjeToyota` | **REJECT / REMOVE** | Conflicts with canonical naming correction. Prefer `#ToyotaBloemfontein`. |
 | Contact details only on event/promo/customer/service posts | **KEEP AS CONTEXT RULE** | Do not force a heavy footer onto every human/team moment unless the brief requires it. |
-| Website on service/brand posts | **KEEP + UPDATE** | Use current CFAO dealer/service route; do not blindly reuse legacy Toyota URL. |
+| Website on service/brand posts | **KEEP + UPDATE** | Use `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/` as the canonical dealer URL; use a rechecked service-booking route when a service-specific URL is needed. |
 | Mention Bloemfontein in nearly every caption | **KEEP** | Durable local anchor. |
 | No personal contact unless cleared | **KEEP** | Critical; current public staff cards do not override this. |
 | Friendly/professional/confident/community wording in duplicate voice section | **MERGE** | Already covered by canonical voice; no need to repeat in short Project Instructions. |
 | Humour/trends appropriate | **KEEP** | Same as above. |
 | Highlight customer service/product reliability/team culture | **KEEP WITH EVIDENCE RULE** | Show reliability/service through real vehicle/process facts rather than unsupported praise. |
-| Include contact number in video captions | **KEEP WITH FRESHNESS GATE** | Use the current approved video/campaign number; do not guess among 3199/3000/3170/3172. |
+| Include contact number in video captions | **KEEP WITH STANDARD RULE** | Use `051 406 3172` for normal social/video caption footers unless a live brief explicitly supplies a different department-specific route. |
 | Generic captions with no personality are prohibited | **KEEP** | Strong durable rule. |
-| Promotional posts need contact/location | **KEEP** | Use current verified/approved details. |
+| Promotional posts need contact/location | **KEEP** | Use `051 406 3172` as the normal footer number plus current location unless a live brief supplies another department-specific contact. |
 | Do not copy video dialogue | **KEEP / DEDUPLICATE** | One canonical rule. |
 | Content pillars: vehicles, BTS/team, customer care/service, local Bloem pride, clean trends | **KEEP / MERGE** | Canonical content architecture. |
 
@@ -678,8 +691,8 @@ Why it remains useful:
 
 What is stale or superseded inside it:
 
-- the website is now better represented by the current CFAO dealer page;
-- `051 406 3000` is not the only current contact route and cannot be assumed to be the current social CTA;
+- the website is superseded for current publishing by the direct client-supplied canonical route `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`;
+- `051 406 3000` remains useful contextual/history evidence but is superseded as the standard social/video footer by direct client/CG-confirmed `051 406 3172`;
 - the email field was always a placeholder and must remain unverified;
 - any implication that the legacy “Oranje” URL slug controls the current client name is rejected;
 - mutable service/contact facts still require current verification.
@@ -704,19 +717,18 @@ No other Toyota-specific Project Source was found in the accessible File Library
 
 - canonical CG client name: Toyota Bloemfontein;
 - current public dealer label: CFAO Mobility Toyota Bloemfontein;
-- physical location/address from current CFAO page;
-- current CFAO dealer page;
+- physical location/address from current CFAO information;
+- canonical dealer URL: `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`;
+- standard normal social/video caption footer phone: `051 406 3172`, unless a live brief explicitly supplies a different department-specific route;
 - current Facebook/Instagram identities;
-- regular dealer hours shown on current CFAO page;
-- current general department route `051 406 3199` on the CFAO dealer/directories;
-- current public evidence that `051 406 3000` remains in use on staff/vehicle pages;
+- regular dealer hours shown on current CFAO information;
+- `051 406 3199`, `051 406 3000` and `051 406 3170` as contextual department/listing/history evidence only, not standard footer substitutes;
 - new sales, used sales, service booking, parts enquiry, finance route and sell-your-car route;
 - Jonathan Stephenson’s current public Dealer Principal role;
 - public sales-role evidence listed in the fact table.
 
 ### Genuinely unresolved / freshness-gated
 
-- **Which phone number CG should standardise in social/video caption footers:** current public sources use 051 406 3199, 051 406 3000, 051 406 3170 and 051 406 3172 for different surfaces. This requires a CG/client routing decision before one number becomes a permanent caption rule.
 - **General dealership/marketing email:** none currently verified.
 - **General WhatsApp:** none currently verified.
 - **Holiday/event/service-specific opening hours:** recheck each time.
@@ -741,7 +753,7 @@ Do not:
 5. infer a local special from a national Toyota/CFAO campaign;
 6. reuse an old price, instalment or saving;
 7. reuse June 2026 Saturday Service hours as current regular hours;
-8. choose a phone number from memory when current sources conflict;
+8. replace the standard `051 406 3172` social/video footer with `051 406 3199`, `051 406 3000` or `051 406 3170` unless a live brief explicitly supplies that route;
 9. publish an individual salesperson’s mobile/email without clearance;
 10. invent a general email or WhatsApp;
 11. claim body repair, EV charging or full fleet-management scope without confirmation;
@@ -763,12 +775,13 @@ For normal Toyota Bloemfontein content:
 2. Use the derived Client Guide for daily voice, caption, footer, visual and guardrail rules.
 3. Recheck mutable local facts before publishing.
 4. If a model/offer is involved, verify the exact local unit/variant and exact commercial terms.
-5. If contact details are needed, use the number approved for that current campaign/department; do not resolve the current number split by guesswork.
-6. If a staff member is named, confirm the current role/permission.
-7. Make the copy specific to what the audience can actually see/do.
-8. Keep five or fewer relevant hashtags.
-9. Review the final caption against the visual so it adds value rather than repeats it.
-10. If evidence conflicts, surface the conflict to CG instead of publishing a confident guess.
+5. Use `051 406 3172` as the standard normal social/video caption footer number. Only use another phone when the live brief explicitly supplies a different department-specific route.
+6. Use `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/` as the canonical dealer URL unless a current task specifically requires a rechecked department/service route.
+7. If a staff member is named, confirm the current role/permission.
+8. Make the copy specific to what the audience can actually see/do.
+9. Keep five or fewer relevant hashtags.
+10. Review the final caption against the visual so it adds value rather than repeats it.
+11. If evidence conflicts, surface the conflict to CG instead of publishing a confident guess.
 
 ## 24. Source register used for this migration
 
@@ -781,8 +794,8 @@ For normal Toyota Bloemfontein content:
 - `docs/master-knowledge-framework.md`
 - `docs/ai-workforce/INDUSTRY-AUTOMOTIVE-DEALERSHIP-AFTERMARKET.md`
 - current continuity/product docs required by `AGENTS.md`
-- current Issue #244
-- current repository client identity/test references for Toyota Bloemfontein
+- current Issue #244, including the 2026-09-08 Toyota Marketing/CG correction comment establishing `051 406 3172` and the canonical dealer URL;
+- current repository client identity/test references for Toyota Bloemfontein.
 
 ### ChatGPT Project
 
@@ -790,9 +803,15 @@ For normal Toyota Bloemfontein content:
 - accessible Toyota Project conversation/history surfaced to the current Project/session, including June–August 2026 caption/video work and older repeated Toyota-specific corrections;
 - `Toyota Business Info.pdf` (created 2025-09-05).
 
+### Current direct client/CG operational evidence
+
+- standard social/video caption footer: `051 406 3172`;
+- canonical dealer URL: `https://www.cfaomobility.co.za/toyota/find-a-dealer/bloemfontein-toyota/`;
+- recorded in Issue #244 from Toyota Marketing WhatsApp evidence on 2026-09-08.
+
 ### Current public / first-party local evidence
 
-- `https://www.cfaomobility.co.za/find-a-dealer/bloemfontein-toyota`
+- current CFAO Mobility Toyota Bloemfontein dealer/directory information used in the original 2026-09-08 verification;
 - `https://www.cfaomobility.co.za/toyota/used-cars/`
 - `https://www.cfaomobility.co.za/toyota/book-a-service-oranje-toyota-bloemfontein/`
 - `https://www.facebook.com/CFAOMobilityToyotaBloemfontein/`
@@ -826,4 +845,4 @@ Use the following as the compact Project Instructions after the Client Guide is 
 
 Toyota Bloemfontein should feel **local, capable and human because the content is specific**, not because the caption says those adjectives.
 
-The permanent rule is simple: show the real vehicle, person, process or customer need; write from the real Bloemfontein context; verify every mutable commercial fact; and never let national Toyota material or legacy “Oranje” naming overwrite exact local truth.
+The permanent rule is simple: show the real vehicle, person, process or customer need; write from the real Bloemfontein context; use the direct client/CG-confirmed footer and dealer route; verify every other mutable commercial fact; and never let national Toyota material or legacy “Oranje” naming overwrite exact local truth.
