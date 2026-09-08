@@ -34,7 +34,11 @@ const MARKETING_PAGE = read('../src/pages/admin/MarketingWorkspacePage.tsx')
 const APP = read('../src/App.tsx')
 const MIGRATION_REGISTRATION = read('../supabase/migrations/20260908110000_client_intelligence_registration.sql')
 const MIGRATION_GUIDES = read('../supabase/migrations/20260908100000_client_guides.sql')
+const MIGRATION_PROJECT_MAPPINGS = read('../supabase/migrations/20260908120000_client_project_mappings.sql')
 const CLIENT_GUIDES_TS = read('../src/lib/clientGuides.ts')
+const CLIENT_PROJECT_MAPPING_TS = read('../src/lib/clientProjectMapping.ts')
+const CLIENT_CONTEXT_TS = read('../src/lib/clientContext.ts')
+const GET_CLIENT_CONTEXT_FN = read('../supabase/functions/get-client-context/index.ts')
 
 const capeCard = {
   id: 'cape-1', slug: 'cape-lumber-positioning', title: 'Cape Lumber: supplier, not contractor',
@@ -160,7 +164,7 @@ Never present as a contractor.
   assert.ok(guideMarkdown.includes('# Cape Lumber — CG Dynamics Client Guide'), 'title includes client name')
   assert.ok(guideMarkdown.includes('CG Dynamics is the permanent client source of truth'), 'states CG Dynamics is source of truth')
   assert.ok(guideMarkdown.includes('## Working rule'), 'includes working rule section')
-  assert.ok(guideMarkdown.includes('Update CG Dynamics before refreshing this guide'), 'working rule says update Dynamics first')
+  assert.ok(guideMarkdown.includes('Update CG Dynamics as the single source of truth'), 'working rule says update Dynamics first')
   assert.ok(guideMarkdown.includes('Cape Lumber sounds professional'), 'extracts voice section')
   assert.ok(guideMarkdown.includes('Never present as a contractor'), 'extracts guardrail section')
 })
@@ -177,6 +181,12 @@ Professional, trade-focused.
   assert.ok(guideMarkdown.includes('timber and building-material supplier'), 'identity section extracted')
 })
 
+test('Client Guide .md is marked as export-only artifact', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { guideMarkdown } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(guideMarkdown.includes('**This is an export-only artifact.**'), '.md is explicitly marked export-only')
+})
+
 test('Project Instructions are short and bounded', () => {
   const pack = `# Test Client\n\n## Voice\nTest voice.\n`
   const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
@@ -185,8 +195,22 @@ test('Project Instructions are short and bounded', () => {
   assert.ok(lines.length <= 20, `Project Instructions are bounded (${lines.length} lines)`)
   assert.ok(projectInstructions.includes('Test Client'), 'includes client name')
   assert.ok(projectInstructions.includes('CG Dynamics'), 'references CG Dynamics as source of truth')
-  assert.ok(projectInstructions.includes('Never invent'), 'includes freshness guardrail')
-  assert.ok(projectInstructions.includes('When unsure, say so'), 'includes uncertainty instruction')
+  assert.ok(projectInstructions.includes('retrieve current canonical intelligence'), 'includes live retrieval path')
+})
+
+test('Project Instructions include task-specific retrieval rules', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('Caption/content →'), 'has caption retrieval rule')
+  assert.ok(projectInstructions.includes('Image editing →'), 'has image retrieval rule')
+  assert.ok(projectInstructions.includes('Factual claims →'), 'has factual lookup retrieval rule')
+  assert.ok(projectInstructions.includes('SEO/hashtags →'), 'has SEO/hashtag retrieval rule')
+})
+
+test('Project Instructions include max 5 hashtags rule', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('Max 5 hashtags'), 'includes max 5 hashtags rule')
 })
 
 test('Project Instructions do not duplicate the full guide content', () => {
@@ -213,7 +237,7 @@ Audio selection criteria and trending sound usage rules.
 Duration recommendations and hook strategies for different content types.
 `
   const { guideMarkdown, projectInstructions } = guideGenerator.generateClientGuide(pack, 'Client')
-  assert.ok(projectInstructions.length < guideMarkdown.length, 'instructions are shorter than the guide')
+  assert.ok(projectInstructions.length < guideMarkdown.length, `instructions (${projectInstructions.length}) should be shorter than guide (${guideMarkdown.length})`)
   assert.ok(!projectInstructions.includes('Caption rules here'), 'instructions do not include full guide sections')
 })
 
@@ -290,4 +314,100 @@ test('no root phase-30a SQL file exists (data registration moved to timestamped 
     exists = true
   } catch { /* expected: file should not exist */ }
   assert.equal(exists, false, 'phase-30a legacy file should be deleted')
+})
+
+// ── Direct CG Dynamics ↔ ChatGPT bridge ─────────────────────────────────────
+
+test('client_project_mappings migration creates the mapping table', () => {
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /create table if not exists public\.client_project_mappings/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /client_id\s+uuid\s+not null references public\.clients\(id\) on delete cascade/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /chatgpt_project_url\s+text/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /project_name\s+text/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /sync_state\s+text not null default 'needs_setup'/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /last_context_retrieved_at\s+timestamptz/)
+})
+
+test('client_project_mappings migration enforces RLS', () => {
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /alter table public\.client_project_mappings enable row level security/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /client_project_mappings_admin_manager/)
+})
+
+test('client_project_mappings migration creates one-to-one unique constraint', () => {
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /client_id\s+uuid.*on delete cascade\s+unique/)
+})
+
+test('clientProjectMapping.ts exports required functions', () => {
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export async function listClientProjectMappings/)
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export async function getClientProjectMapping/)
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export async function upsertClientProjectMapping/)
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export function openChatgptProject/)
+})
+
+test('clientProjectMapping.ts queries the correct table', () => {
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /client_project_mappings/, 'queries client_project_mappings table')
+})
+
+test('clientContext.ts exports the context retrieval function', () => {
+  assert.match(CLIENT_CONTEXT_TS, /export async function getClientContext/)
+  assert.match(CLIENT_CONTEXT_TS, /get-client-context/, 'calls the Edge Function')
+})
+
+test('get-client-context Edge Function is correctly structured', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /Deno\.serve/, 'is a Deno serve function')
+  assert.match(GET_CLIENT_CONTEXT_FN, /requireAdminOrManager/, 'requires admin/manager auth')
+  assert.match(GET_CLIENT_CONTEXT_FN, /client_id/, 'accepts client_id parameter')
+  assert.match(GET_CLIENT_CONTEXT_FN, /task_type/, 'accepts task_type parameter')
+  assert.match(GET_CLIENT_CONTEXT_FN, /client_specific/, 'filters by client_specific')
+})
+
+test('get-client-context Edge Function supports all 7 task types', () => {
+  const expectedTasks = ['caption', 'content_idea', 'poster_copy', 'image_edit', 'factual_lookup', 'campaign', 'seo_hashtags']
+  for (const task of expectedTasks) {
+    assert.ok(GET_CLIENT_CONTEXT_FN.includes(`'${task}'`), `supports task type: ${task}`)
+  }
+})
+
+test('get-client-context Edge Function returns JSON with client isolation', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /active_client_id/, 'filters cards by active_client_id')
+  assert.match(GET_CLIENT_CONTEXT_FN, /jsonResponse/, 'returns JSON response')
+})
+
+test('Marketing page includes Open ChatGPT Project action', () => {
+  assert.match(MARKETING_PAGE, /Open ChatGPT Project/, 'has Open ChatGPT Project button')
+  assert.match(MARKETING_PAGE, /openChatgptProject/, 'calls openChatgptProject function')
+})
+
+test('Marketing page shows sync state for project mappings', () => {
+  assert.match(MARKETING_PAGE, /sync_state/, 'reads sync_state from mapping')
+  assert.match(MARKETING_PAGE, /syncStateLabel/, 'displays sync state label')
+  assert.match(MARKETING_PAGE, /syncStateTone/, 'applies tone to sync state')
+})
+
+test('Marketing page loads project mappings alongside guides', () => {
+  assert.match(MARKETING_PAGE, /listClientProjectMappings/, 'loads project mappings')
+  assert.match(MARKETING_PAGE, /ClientProjectMapping/, 'imports ClientProjectMapping type')
+})
+
+test('Bridge contract: static .md is export-only, not a runtime dependency', () => {
+  assert.ok(guideGenerator.generateClientGuide, 'generateClientGuide exists')
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { guideMarkdown } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(guideMarkdown.includes('export-only artifact'), '.md is explicitly marked as export-only')
+  assert.ok(guideMarkdown.includes('not a runtime dependency'), '.md states it is not a runtime dependency')
+})
+
+test('Bridge contract: Project Instructions use live retrieval, not static file', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('retrieve current canonical intelligence from CG Dynamics at task time'), 'uses live retrieval')
+  assert.ok(projectInstructions.includes('Never rely on a previously uploaded .md file'), 'does not rely on static .md')
+})
+
+test('Bridge contract: task-specific retrieval rules are present', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('Caption/content → fetch voice rules'), 'caption retrieval specified')
+  assert.ok(projectInstructions.includes('Image editing → fetch visual/image rules'), 'image retrieval specified')
+  assert.ok(projectInstructions.includes('Factual claims → fetch verified facts'), 'factual lookup retrieval specified')
+  assert.ok(projectInstructions.includes('SEO/hashtags → choose 3-5 dynamically'), 'SEO/hashtag retrieval specified')
 })

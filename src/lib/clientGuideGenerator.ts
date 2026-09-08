@@ -1,11 +1,14 @@
 // clientGuideGenerator.ts
-// Generates Client Guide .md and short Project Instructions from canonical Dynamics intelligence.
+// Generates Client Guide .md (export-only) and short Project Instructions
+// from canonical Dynamics intelligence.
 //
-// This is a CLIENT-SIDE generation function that reads the intelligence pack
-// markdown content (passed in) and extracts the key sections.
+// The generated .md is an EXPORT/DEBUG artifact, NOT a runtime dependency.
+// ChatGPT Projects retrieve current intelligence at task time via the
+// get-client-context Edge Function. The .md exists for human handoff and
+// debugging only.
 //
 // The intelligence packs are stored in docs/ai-workforce/client-intelligence/.
-// The generation extracts 10 common section types that appear across all clients.
+// The generation extracts common section types that appear across all clients.
 
 /** Sections common to all client guides. */
 const COMMON_SECTIONS = [
@@ -93,11 +96,16 @@ export interface GeneratedGuide {
 }
 
 /**
- * Generate a Client Guide and Project Instructions from a canonical intelligence pack.
+ * Generate a Client Guide .md (export-only) and Project Instructions
+ * from a canonical intelligence pack.
+ *
+ * The .md is a human-readable export artifact. The Project Instructions
+ * include the live retrieval path so ChatGPT Projects retrieve current
+ * intelligence at task time instead of relying on a static .md snapshot.
  *
  * @param packContent - The full markdown content of the intelligence pack
  * @param clientName - The canonical client name
- * @returns Generated guide markdown and short project instructions
+ * @returns Generated guide markdown (export-only) and short project instructions
  */
 export function generateClientGuide(
   packContent: string,
@@ -105,10 +113,10 @@ export function generateClientGuide(
 ): GeneratedGuide {
   const sections: string[] = []
 
-  // 1. Title and intro
+  // 1. Title and intro — mark as export-only artifact
   sections.push(`# ${clientName} — CG Dynamics Client Guide`)
   sections.push('')
-  sections.push('CG Dynamics is the permanent client source of truth. This document is the current ChatGPT working guide derived from that intelligence. When durable client information changes, update CG Dynamics first and then refresh this guide.')
+  sections.push('**This is an export-only artifact.** CG Dynamics is the permanent client source of truth. ChatGPT Projects retrieve current intelligence at task time via the CG Dynamics bridge — this .md file is for human handoff and debugging only.')
   sections.push('')
 
   // 2. Extract identity section
@@ -128,41 +136,50 @@ export function generateClientGuide(
   // 4. Working rule (closing)
   sections.push('## Working rule')
   sections.push('')
-  sections.push('Use this guide first for everyday client work. Consult CG Dynamics for deeper provenance or historical context. Update CG Dynamics before refreshing this guide.')
+  sections.push('This .md is an export-only artifact, not a runtime dependency. For runtime work, use the CG Dynamics ChatGPT Project bridge (live retrieval at task time). Update CG Dynamics as the single source of truth.')
   sections.push('')
 
   const guideMarkdown = sections.join('\n')
 
-  // Generate short Project Instructions
-  const projectInstructions = generateProjectInstructions(clientName, packContent)
+  // Generate short Project Instructions with live retrieval path
+  const projectInstructions = generateProjectInstructions(clientName)
 
   return { guideMarkdown, projectInstructions }
 }
 
-/** Generate short ChatGPT Project Instructions from the intelligence pack. */
-function generateProjectInstructions(clientName: string, _packContent: string): string {
+/**
+ * Generate short ChatGPT Project Instructions with live retrieval path.
+ *
+ * These instructions contain durable, low-drift rules plus the canonical
+ * client intelligence location. They do NOT require a static .md upload.
+ * ChatGPT retrieves current intelligence at task time.
+ */
+function generateProjectInstructions(clientName: string): string {
   const lines = [
     `# ${clientName} — ChatGPT Project Instructions`,
     '',
     '## Your role',
-    `You are the CG Production House marketing AI for ${clientName}.`,
-    'CG Dynamics is the permanent source of truth for all client intelligence.',
+    `You are the CG Production House marketing AI for ${clientName}. CG Dynamics is the permanent source of truth.`,
     '',
-    '## How to work',
-    `1. Read the Client Guide first — it contains the current voice, rules, guardrails and fresh facts.`,
-    '2. When durable client information changes, update CG Dynamics first.',
-    '3. Never present stale or superseded information as current truth.',
-    '4. Never fuzzy-match this client to another client.',
+    '## How to retrieve current client intelligence',
+    `For any task that depends on client knowledge, retrieve current canonical intelligence from CG Dynamics at task time.`,
+    'Never rely on a previously uploaded .md file — the CG Dynamics record is always fresher.',
     '',
-    '## Key rules',
+    '## Durable rules (low-drift)',
     `- Client name: ${clientName}`,
     '- Source of truth: CG Dynamics (not this Project)',
-    '- Never invent prices, stock, contact details or operational facts',
-    '- When unsure, say so — do not guess',
+    '- Human, non-generic writing — never sound like AI',
+    '- Captions add to artwork/video rather than repeat it',
+    '- Max 5 hashtags, dynamically chosen for current topic/platform/search intent',
+    '- Image editing preserves real people/products/branding/proportions',
+    '- Never invent mutable facts; flag conflicts/gaps, never guess',
+    '- Never fuzzy-match this client to another client',
     '',
-    '## Freshness',
-    'Mutable facts (prices, contacts, hours, stock, specials) must be confirmed before use.',
-    'If a fact cannot be confirmed, label it as unverified.',
+    '## Task-time retrieval rules',
+    '- Caption/content → fetch voice rules, caption rules, factual guardrails, dynamic SEO/hashtag guidance',
+    '- Image editing → fetch visual/image rules, exact client branding/product constraints',
+    '- Factual claims → fetch verified facts, provenance, freshness state',
+    '- SEO/hashtags → choose 3-5 dynamically for exact topic/platform; do not reuse a saved bank',
   ]
 
   return lines.join('\n')

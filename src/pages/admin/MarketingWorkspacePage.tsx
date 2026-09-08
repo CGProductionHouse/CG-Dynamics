@@ -39,6 +39,11 @@ import {
   copyProjectInstructions,
   type ClientGuide,
 } from '../../lib/clientGuides'
+import {
+  listClientProjectMappings,
+  openChatgptProject,
+  type ClientProjectMapping,
+} from '../../lib/clientProjectMapping'
 import { listClients, type Client } from '../../lib/db/clients'
 
 // ── Marketing / Knowledge workspace (#183/#184) ──────────────────────────────
@@ -313,10 +318,11 @@ function RegistrationSection() {
   )
 }
 
-// ── Client Guides (derived/exportable documents) ────────────────────────────
+// ── Client Guides (derived/exportable documents + ChatGPT Project bridge) ──
 
 function ClientGuidesSection() {
   const [guides, setGuides] = useState<ClientGuide[]>([])
+  const [mappings, setMappings] = useState<ClientProjectMapping[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -326,11 +332,16 @@ function ClientGuidesSection() {
     let cancelled = false
     async function load() {
       setLoading(true)
-      const [guideResult, clientResult] = await Promise.all([listClientGuides(), listClients('active')])
+      const [guideResult, clientResult, mappingResult] = await Promise.all([
+        listClientGuides(),
+        listClients('active'),
+        listClientProjectMappings(),
+      ])
       if (cancelled) return
       setGuides(guideResult.data)
       setClients(clientResult.data ?? [])
-      setError(guideResult.error?.message ?? clientResult.error?.message ?? null)
+      setMappings(mappingResult.data ?? [])
+      setError(guideResult.error?.message ?? clientResult.error?.message ?? mappingResult.error?.message ?? null)
       setLoading(false)
     }
     void load()
@@ -341,6 +352,10 @@ function ClientGuidesSection() {
     return clients.find(c => c.id === clientId)?.name ?? clientId
   }
 
+  function getMapping(clientId: string): ClientProjectMapping | undefined {
+    return mappings.find(m => m.client_id === clientId)
+  }
+
   async function handleCopy(guide: ClientGuide) {
     const ok = await copyProjectInstructions(guide.project_instructions)
     if (ok) {
@@ -349,16 +364,31 @@ function ClientGuidesSection() {
     }
   }
 
+  function syncStateLabel(state: string): string {
+    switch (state) {
+      case 'connected': return 'Connected'
+      case 'stale': return 'Needs refresh'
+      case 'disconnected': return 'Disconnected'
+      default: return 'Not set up'
+    }
+  }
+
+  function syncStateTone(state: string): 'teal' | 'amber' | 'neutral' {
+    if (state === 'connected') return 'teal'
+    if (state === 'stale' || state === 'disconnected') return 'amber'
+    return 'neutral'
+  }
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-white/50">
-        Derived Client Guide documents — one per client. Generated from canonical Dynamics intelligence,
-        not manually maintained. The <span className="font-bold text-white/70">CG Dynamics record is the source of truth</span>;
-        these guides are exportable working artifacts for ChatGPT Projects and staff handoff.
+        Client intelligence bridge — maps each client to a ChatGPT Project for direct retrieval.
+        The <span className="font-bold text-white/70">CG Dynamics record is the source of truth</span>;
+        ChatGPT Projects retrieve current intelligence at task time. Derived Client Guides are export-only artifacts.
       </p>
 
-      {loading ? <LoadingState message="Loading client guides…" />
-        : error ? <EmptyState title="Could not load client guides" message={error} />
+      {loading ? <LoadingState message="Loading client intelligence…" />
+        : error ? <EmptyState title="Could not load client intelligence" message={error} />
         : guides.length === 0 ? (
         <EmptyState
           title="No client guides yet"
@@ -366,40 +396,61 @@ function ClientGuidesSection() {
         />
       ) : (
         <ul className="space-y-3">
-          {guides.map(guide => (
-            <li key={guide.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="text-sm font-black text-white">{clientName(guide.client_id)}</h3>
-                  <p className="mt-0.5 text-xs text-white/45">
-                    Version {guide.version} · Generated {new Date(guide.generated_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    {guide.source_pack_path && <> · Source: {guide.source_pack_path.split('/').pop()}</>}
-                  </p>
+          {guides.map(guide => {
+            const mapping = getMapping(guide.client_id)
+            return (
+              <li key={guide.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-black text-white">{clientName(guide.client_id)}</h3>
+                    <p className="mt-0.5 text-xs text-white/45">
+                      Version {guide.version} · Generated {new Date(guide.generated_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {guide.source_pack_path && <> · Source: {guide.source_pack_path.split('/').pop()}</>}
+                    </p>
+                    {mapping && (
+                      <div className="mt-1 flex items-center gap-2">
+                        <Pill tone={syncStateTone(mapping.sync_state)}>{syncStateLabel(mapping.sync_state)}</Pill>
+                        {mapping.project_name && (
+                          <span className="text-[11px] text-white/40">{mapping.project_name}</span>
+                        )}
+                        {mapping.last_context_retrieved_at && (
+                          <span className="text-[11px] text-white/30">
+                            Last retrieved {new Date(mapping.last_context_retrieved_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {mapping?.chatgpt_project_url && (
+                      <ActionButton size="sm" variant="primary" onClick={() => openChatgptProject(mapping)}>
+                        Open ChatGPT Project
+                      </ActionButton>
+                    )}
+                    <ActionButton size="sm" variant="secondary" onClick={() => downloadClientGuide(guide, clientName(guide.client_id))}>
+                      Download .md
+                    </ActionButton>
+                    <ActionButton size="sm" variant={copiedId === guide.id ? 'primary' : 'secondary'} onClick={() => void handleCopy(guide)}>
+                      {copiedId === guide.id ? 'Copied!' : 'Copy Project Instructions'}
+                    </ActionButton>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <ActionButton size="sm" variant="secondary" onClick={() => downloadClientGuide(guide, clientName(guide.client_id))}>
-                    Download .md
-                  </ActionButton>
-                  <ActionButton size="sm" variant={copiedId === guide.id ? 'primary' : 'secondary'} onClick={() => void handleCopy(guide)}>
-                    {copiedId === guide.id ? 'Copied!' : 'Copy Project Instructions'}
-                  </ActionButton>
-                </div>
-              </div>
-              {guide.project_instructions && (
-                <details className="mt-3 group">
-                  <summary className="cursor-pointer text-xs font-bold text-white/50 hover:text-white/70">Preview Project Instructions</summary>
-                  <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-white/70 whitespace-pre-wrap">{guide.project_instructions}</pre>
-                </details>
-              )}
-            </li>
-          ))}
+                {guide.project_instructions && (
+                  <details className="mt-3 group">
+                    <summary className="cursor-pointer text-xs font-bold text-white/50 hover:text-white/70">Preview Project Instructions</summary>
+                    <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-white/70 whitespace-pre-wrap">{guide.project_instructions}</pre>
+                  </details>
+                )}
+              </li>
+            )
+          })}
         </ul>
       )}
 
       <p className="text-[11px] text-white/35">
-        CG Dynamics is the permanent source of truth. When durable client information changes,
-        update Dynamics first and then regenerate the guide. The guide is a derived/export working artifact,
-        not an independent manually maintained truth store.
+        CG Dynamics is the permanent source of truth. ChatGPT Projects retrieve current intelligence at task time.
+        Derived Client Guides are export-only artifacts, not runtime dependencies.
+        No static .md upload is required — the bridge is live retrieval, not file replacement.
       </p>
     </div>
   )
