@@ -28,12 +28,12 @@ For future runtime retrieval use:
 
 ## 2. Approved marketing footer
 
-Use this standard Centurion block when contact details are required:
+Use this standard Centurion block when contact details are required, **without emojis/icons in the contact details**:
 
-📍 Corner of Lenchen and Clarinet Street, Lifestyle Shopping Centre, Centurion  
-📧 jurgensw@wisemangroup.co.za  
-📞 012 003 0430  
-🌐 wisemangroup.co.za
+Corner of Lenchen and Clarinet Street, Lifestyle Shopping Centre, Centurion  
+jurgensw@wisemangroup.co.za  
+012 003 0430  
+wisemangroup.co.za
 
 Current public exact-branch sources expose other email/address forms:
 
@@ -82,7 +82,10 @@ Supa Quick Centurion copy should feel useful to a real motorist and specific to 
 - one useful explanation;
 - a real branch-local next step;
 - a specific service/process detail;
-- what the driver should know before asking for a quote or fitment.
+- what the driver should know before asking for a quote or fitment;
+- practical prevention when supported by the brief, for example fixing a small fitment issue before it contributes to a bigger bill later.
+
+That prevention/cost angle is a useful Centurion pattern, but do not turn it into fear-based copy or invent a fault, diagnosis or guaranteed saving.
 
 Avoid generic tyre-shop filler such as:
 
@@ -110,9 +113,11 @@ Before writing, check what is already on the artwork/video. The caption should a
 
 Do not paraphrase the poster headline or transcribe Reel dialogue.
 
-Keep captions natural and specific. A human workshop observation is stronger than interchangeable automotive motivation.
+Keep captions natural, specific and impactful. For simple poster batches, **a strong one-sentence caption is often preferred** when it can carry the idea cleanly. Do not force every task into one sentence when the brief needs more information.
 
-Use the approved branch footer when the post needs contact details.
+Across a batch, vary the opening and sentence structure. Do not start multiple captions with the same phrasing or recycle the same idea with synonyms.
+
+Use the approved branch footer when the post needs contact details, and keep that footer free of emojis/icons.
 
 ## 7. Text-on-post / poster copy
 
@@ -125,7 +130,8 @@ For Centurion posters:
 - vary the construction across a batch;
 - do not rely on repeated question templates;
 - do not use “we’ve got you covered” or generic road-language filler;
-- supporting text should clarify the benefit or action instead of repeating the headline.
+- supporting text should clarify the benefit or action instead of repeating the headline;
+- prevention/cost wording can work when it is naturally tied to fitment or maintenance, but do not exaggerate consequences.
 
 Historical artwork such as “PRECISION WHEEL FITMENT EVERY TIME” may show an earlier direction, but it is not a permanent slogan or measurable guarantee.
 
@@ -238,12 +244,13 @@ Before sending or publishing Centurion work:
 3. verify any mutable fact used;
 4. ensure the caption adds rather than repeats;
 5. remove generic tyre-shop language;
-6. confirm branch-specific service/product claims;
-7. use the approved footer when needed;
-8. use five or fewer relevant hashtags;
-9. preserve real products/vehicles/people/branding in edits;
-10. flag conflicts or missing facts instead of filling gaps.
+6. vary openings across a batch;
+7. confirm branch-specific service/product claims;
+8. use the approved footer without emojis/icons when needed;
+9. use five or fewer relevant hashtags;
+10. preserve real products/vehicles/people/branding in edits;
+11. flag conflicts or missing facts instead of filling gaps.
 
 ## 16. Final short Project Instructions
 
-> Work only on Supa Quick Centurion. Retrieve current exact-client CG Dynamics/GitHub context before factual, caption or content work, using client ID `e2870110-930c-4e63-b2fe-c858030f7258`. Keep Centurion completely separate from Supa Quick BFN, Wiseman Group, WiseRide, Wiseman Midas and other branches. Write for real motorists: specific, useful, local and human, never generic tyre-shop filler. Captions must add beyond artwork/video instead of repeating it. Use the approved Centurion contact/footer rules and a maximum of 5 dynamically relevant hashtags by default. In edits, preserve real vehicles, products, logos, people, proportions and composition unless the brief asks for a change. Never invent or infer stock, tyre/service specs, prices, promos, warranties, contacts, hours or branch services. Recheck mutable facts and flag conflicts instead of guessing.
+> Work only on Supa Quick Centurion. Retrieve current exact-client CG Dynamics/GitHub context before factual, caption or content work, using client ID `e2870110-930c-4e63-b2fe-c858030f7258`. Keep Centurion completely separate from Supa Quick BFN, Wiseman Group, WiseRide, Wiseman Midas and other branches. Write for real motorists: specific, useful, local and human, never generic tyre-shop filler. Captions must add beyond artwork/video instead of repeating it; keep simple poster captions short and vary openings across a batch. Use the approved Centurion contact/footer rules with no emojis/icons in the contact details and a maximum of 5 dynamically relevant hashtags by default. In edits, preserve real vehicles, products, logos, people, proportions and composition unless the brief asks for a change. Never invent or infer stock, tyre/service specs, prices, promos, warranties, contacts, hours or branch services. Recheck mutable facts and flag conflicts instead of guessing.
