@@ -13,6 +13,10 @@ import {
   type TiktokConnectionStatus,
   type TiktokSyncResult,
 } from '../../lib/tiktok'
+import {
+  getTiktokBusinessConnectionStatus,
+  type TiktokBusinessConnectionStatus,
+} from '../../lib/tiktokBusiness'
 
 const INPUT_CLASS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-accent/60 disabled:cursor-not-allowed disabled:opacity-60'
 
@@ -49,6 +53,7 @@ export default function TikTokIntegrationPage() {
   const [syncMonth, setSyncMonth] = useState(currentMonth())
   const [syncClientId, setSyncClientId] = useState('')
   const [syncResult, setSyncResult] = useState<TiktokSyncResult | null>(null)
+  const [businessStatus, setBusinessStatus] = useState<TiktokBusinessConnectionStatus | null>(null)
 
   // Handle OAuth callback params — reload status for the selected client
   useEffect(() => {
@@ -102,6 +107,8 @@ export default function TikTokIntegrationPage() {
     if (!syncClientId) return
     let active = true
     getTiktokConnectionStatus(syncClientId).then(s => { if (active) setStatus(s) })
+    getTiktokBusinessConnectionStatus(syncClientId)
+      .then(s => { if (active) setBusinessStatus(s) })
     return () => { active = false }
   }, [syncClientId])
 
@@ -232,6 +239,64 @@ export default function TikTokIntegrationPage() {
           )}
         </PremiumCard>
 
+        <PremiumCard>
+          <PremiumCardHeader
+            eyebrow="Agency publishing"
+            title="TikTok Business authorization"
+            subtitle="A separate TikTok API for Business / Organic Accounts API connection will authorize approved Client Schedule publishing for this exact client."
+            action={
+              <StatusBadge
+                label={syncClientId && !businessStatus
+                  ? 'Checking...'
+                  : businessStatus?.publishingEnabled
+                    ? 'Ready to publish'
+                    : businessStatus?.connected
+                      ? 'Connected — rollout off'
+                      : 'Not connected'}
+                variant={businessStatus?.publishingEnabled ? 'published' : 'internal-draft'}
+                size="sm"
+              />
+            }
+          />
+
+          {!syncClientId ? (
+            <p className="mt-4 text-sm text-brand-primary">Select a client to inspect its separate agency publishing authorization.</p>
+          ) : businessStatus?.connected && businessStatus.authorization ? (
+            <div className="mt-4 space-y-3">
+              <div className="rounded-lg border border-white/8 bg-black/20 p-4">
+                <p className="font-semibold text-white">
+                  {businessStatus.authorization.displayName
+                    ?? businessStatus.authorization.accountHandle
+                    ?? 'Authorized TikTok Business account'}
+                </p>
+                <p className="mt-1 text-xs text-brand-primary">
+                  Provider eligibility: {businessStatus.authorization.publishingEligibility.replaceAll('_', ' ')}
+                  {' · '}Last verified: {formatDateTime(businessStatus.authorization.lastVerifiedAt)}
+                </p>
+                {businessStatus.authorization.grantedPermissions.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {businessStatus.authorization.grantedPermissions.map(permission => (
+                      <Pill key={permission} tone="neutral">{permission}</Pill>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {!businessStatus.publishingEnabled && (
+                <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">
+                  This account cannot publish from Dynamics yet. Provider approval, healthy refresh credentials, and the server rollout flag must all be active.
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-lg border border-white/8 bg-black/20 p-4 text-sm text-brand-primary">
+              <p>{businessStatus?.message ?? 'No agency publishing authorization is available for this client.'}</p>
+              <p className="mt-2 text-xs">
+                The client account holder will use TikTok&apos;s official one-time Accounts API authorization after CG Dynamics&apos; Business API application is approved. Dynamics never stores TikTok passwords.
+              </p>
+            </div>
+          )}
+        </PremiumCard>
+
         {/* Analytics sync */}
         <PremiumCard>
           <PremiumCardHeader
@@ -255,6 +320,7 @@ export default function TikTokIntegrationPage() {
                 value={syncClientId}
                 onChange={event => {
                   setStatus(null)
+                  setBusinessStatus(null)
                   setSyncClientId(event.target.value)
                 }}
               >
@@ -337,17 +403,17 @@ export default function TikTokIntegrationPage() {
         <PremiumCard>
           <PremiumCardHeader
             eyebrow="Publishing"
-            title="Not enabled"
-            subtitle="This connection is limited to read-only account and video analytics."
+            title="Consumer publishing not enabled"
+            subtitle="The Login Kit connection remains limited to read-only account and video analytics."
           />
           <div className="space-y-3 text-sm text-brand-primary">
             <p>
-              The current TikTok for Developers sandbox does not include Content Posting API and CG Dynamics does not request video.publish or video.upload.
+              The TikTok for Developers connection does not include Content Posting API and CG Dynamics does not request video.publish or video.upload from that consumer app.
             </p>
             <div className="rounded-lg border border-white/8 bg-black/20 p-4">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-white">Future publishing gate</h4>
               <ul className="mt-2 space-y-1 text-xs text-brand-primary">
-                <li>Agency publishing requires a separately approved provider route that fits CG&apos;s managed-client use case.</li>
+                <li>Agency publishing uses the separate TikTok API for Business / Organic Accounts API authorization shown above.</li>
                 <li>Media delivery must use a CG-controlled hostname or URL prefix accepted by that provider.</li>
                 <li>Provider writes remain disabled until provider review and CA approval are complete.</li>
               </ul>
