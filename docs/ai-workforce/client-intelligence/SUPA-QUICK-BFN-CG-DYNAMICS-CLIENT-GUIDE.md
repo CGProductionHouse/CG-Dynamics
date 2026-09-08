@@ -5,9 +5,9 @@ CG Dynamics is the permanent source of truth. This is a derived working guide fo
 Canonical client: **Supa Quick BFN**  
 Exact Dynamics client ID: **`a60b4d07-0a30-4f1c-8d48-7bd9ea649c97`**  
 Public/marketing identity: **Supa Quick Bloemfontein**  
-Shared ChatGPT Project container: **Wiseman Group**
+Dedicated ChatGPT Project: **Supa Quick BFN**
 
-> This guide is **exact-client BFN context**, not a BFN-only Project-level override. The shared Wiseman Group Project must use umbrella-safe Instructions and resolve the exact child client per task.
+> This guide is exact-client working context for the dedicated Supa Quick BFN Project. Never use Supa Quick Centurion, WiseRide, Wiseman Group or Wiseman Midas material as BFN grounding unless the exact BFN evidence independently supports the fact.
 
 For provenance, conflicts and historical reasoning, consult `SUPA-QUICK-BFN-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`.
 
@@ -184,17 +184,23 @@ Flag conflicts instead of guessing.
 
 ## 12. Project/source handling
 
-The BFN chat lives inside the shared **Wiseman Group** Project. Source isolation must happen by exact client, not by deleting every non-BFN source from the container.
+The handoff target is now a dedicated **Supa Quick BFN** ChatGPT Project. Project Sources must be curated for exact BFN relevance; sibling-client material from the former mixed Wiseman Group Project must not remain as BFN grounding.
 
 Accessible source recommendations:
 
-- `WISEMAN GROUP 12.png` — **KEEP** as visual provenance; never use umbrella facts as BFN facts.
+- `WISEMAN GROUP 12.png` — **KEEP only as BFN visual provenance if it directly depicts/references Supa Quick BFN; otherwise REMOVE from the dedicated BFN Project**. Never use umbrella facts as BFN facts.
 - `wisemangroup.co_.za-Supaquick-out.jpg` — **KEEP** as storefront/brand visual provenance only.
-- `Supa Quick Centurion73.png` — **KEEP only if needed for Centurion in the shared Project; always EXCLUDE from BFN retrieval**.
-- `Need quick service? Flat orange perspective.png` — **REVIEW**; do not promote to BFN factual grounding unless the shared Project UI confirms exact BFN relevance.
+- `Supa Quick Centurion73.png` — **REMOVE from the dedicated Supa Quick BFN Project**. It is explicitly Centurion and must never ground BFN copy or claims.
+- `Need quick service? Flat orange perspective.png` — **REVIEW**. Keep only if exact BFN relevance is confirmed; otherwise REMOVE from the dedicated BFN Project. Do not promote it to factual grounding without provenance.
 
-No Project Source was physically removed by Issue #260.
+No Project Source was physically removed by the #260 repository migration. Source cleanup remains a manual Project action.
 
-## 13. Working rule
+## 13. Final Project Instructions
 
-Make BFN content useful by starting with the actual motorist need, real service/process and supplied creative. Keep BFN separate from every other Wiseman child client. Recheck mutable facts. When current evidence conflicts, flag it rather than filling the gap from memory.
+Work only on Supa Quick BFN. For every factual, caption, content or image task, retrieve current exact-client CG Dynamics context for client_id `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97` plus the supplied creative/task. Never mix BFN with Supa Quick Centurion, WiseRide, Wiseman Group or Wiseman Midas. Keep marketing human, specific and useful to Bloemfontein motorists; captions must add to the artwork/video, not repeat it. Use a maximum of 5 dynamically relevant hashtags by default. Preserve real vehicles, tyres/products, branding, people and requested composition in edits. Never invent stock, tyre sizes/specs, service availability, prices, promos, guarantees/warranties, contacts, hours or branch claims. Recheck mutable facts and flag conflicts instead of guessing. CG Dynamics is the source of truth.
+
+## 14. Working rule
+
+Make BFN content useful by starting with the actual motorist need, real service/process and supplied creative. Keep BFN separate from Centurion, WiseRide, Wiseman Group and other sibling identities. Recheck mutable facts. When current evidence conflicts, flag it rather than filling the gap from memory.
+
+**Handoff status:** `MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED` until CA pastes/applies the Project Instructions above in the dedicated Supa Quick BFN Project and confirms them.

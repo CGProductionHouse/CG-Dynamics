@@ -3,7 +3,7 @@
 Canonical CG client: **Supa Quick BFN**  
 Exact Dynamics client ID: **`a60b4d07-0a30-4f1c-8d48-7bd9ea649c97`**  
 Public/marketing identity: **Supa Quick Bloemfontein**  
-Shared ChatGPT Project container: **Wiseman Group** — container only, never the BFN client identity  
+Dedicated ChatGPT Project: **Supa Quick BFN**  
 Record purpose: **Permanent exact-client source of truth for Supa Quick BFN marketing/content work**  
 Human Project knowledge last reviewed: **2026-09-08**  
 Project/runtime rules last audited: **2026-09-08**  
@@ -20,9 +20,9 @@ This record is for **Supa Quick BFN only**. It reconciles:
 - current GitHub truth and Issues #260, #248 and the current #241 architecture contract;
 - read-only verification of the exact existing Dynamics client row;
 - accessible Supa Quick BFN Project/chat history surfaced to the migration session;
-- accessible File Library evidence associated with the shared Wiseman Project;
+- accessible File Library evidence encountered while BFN was still housed in the former mixed Wiseman Group Project, retained only as provenance where relevant to BFN;
 - reusable automotive/tyre-fitment research already in Dynamics;
-- current Wiseman Group first-party branch/contact information;
+- current Wiseman Group first-party branch/contact information where it specifically evidences Supa Quick BFN;
 - current Supa Quick first-party Free State/store information;
 - repeated CG corrections and creative preferences from BFN work;
 - current source conflicts that must remain visible instead of being guessed away.
@@ -37,20 +37,20 @@ It is **not**:
 - proof of live tyre stock, a tyre size, a current promotion, a price or a warranty entitlement;
 - a caption archive.
 
-The shared ChatGPT Project may contain several related business chats. That shared container does **not** permit cross-client grounding.
+The current handoff target is a dedicated **Supa Quick BFN** ChatGPT Project. Evidence inherited from the former mixed Wiseman Group Project remains historical/source provenance only and does not authorise sibling-client grounding.
 
-## 2. Exact identity and shared-container safety
+## 2. Exact identity and sibling-client separation
 
-Current exact Dynamics identities relevant to the shared Project architecture:
+Current exact Dynamics identities relevant to strict BFN separation:
 
 | Entity | Exact Dynamics identity | Use in BFN work |
 |---|---|---|
-| Supa Quick BFN | `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97` | **Only canonical client ID for this record** |
+| Supa Quick BFN | `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97` | **Only canonical client ID for this record and dedicated Project** |
 | Supa Quick Centurion | `e2870110-930c-4e63-b2fe-c858030f7258` | Never import contacts, offers, services or creative rules into BFN |
 | WiseRide | `504113ee-fba9-4993-807e-a86066615212` | Separate client; never use as BFN proof |
-| Wiseman Group | `899c9988-8207-4e45-a8fc-a7446dfcf96b` | Ownership/shared-container context only unless the task is explicitly group-level |
+| Wiseman Group | `899c9988-8207-4e45-a8fc-a7446dfcf96b` | Ownership/provenance context only; never substitute group facts for exact BFN facts |
 
-`Wiseman Midas` appears historically/in the shared container. Do not infer a current Dynamics identity or use Midas facts for BFN without exact verification.
+`Wiseman Midas` appears historically in prior mixed-Project evidence. Do not infer a current Dynamics identity or use Midas facts for BFN without exact verification.
 
 ### Runtime identity rule
 
@@ -58,7 +58,7 @@ Every BFN task must resolve:
 
 `client_id = a60b4d07-0a30-4f1c-8d48-7bd9ea649c97 + task type + supplied creative/context`
 
-A vague label such as `Supa Quick`, `Wiseman`, `tyres` or a shared-Project file is never enough to transfer another branch/client's facts.
+A vague label such as `Supa Quick`, `Wiseman`, `tyres` or a source inherited from the former mixed Project is never enough to transfer another branch/client's facts.
 
 ## 3. Authority and provenance
 
@@ -340,18 +340,16 @@ Recent national/syndicated Supa Quick content may show live national campaigns, 
 
 ## 14. Accessible Project/File evidence audit
 
-The shared Wiseman Project's **Project Source UI inventory was not exposed to this migration runtime**, so no unseen source is invented and no Project Source was deleted.
+The dedicated Supa Quick BFN Project's **Project Source UI inventory was not exposed to this migration runtime**, so no unseen source is invented and no Project Source was deleted by the repository migration. The accessible File Library evidence below was encountered while BFN was still in the former mixed Wiseman Group Project; preserve that provenance while curating the dedicated BFN Project by exact-client relevance.
 
-Accessible File Library evidence relevant to this shared container:
-
-| Accessible item | Recommendation | BFN grounding rule |
+| Accessible item | Recommendation for dedicated BFN Project | BFN grounding rule |
 |---|---|---|
-| `WISEMAN GROUP 12.png` | **KEEP** as original visual provenance | May evidence co-branded/umbrella visual context only; never import another Wiseman business's contacts/services into BFN |
+| `WISEMAN GROUP 12.png` | **KEEP only if it directly depicts/references Supa Quick BFN; otherwise REMOVE from the dedicated BFN Project** | May evidence co-branded visual context only; never import another Wiseman business's contacts/services into BFN |
 | `wisemangroup.co_.za-Supaquick-out.jpg` | **KEEP** as original storefront/brand visual provenance | Useful for Supa Quick visual identity; not proof of a branch contact, service or current offer by itself |
-| `Supa Quick Centurion73.png` | **KEEP in the shared Project only if Centurion still needs it; EXCLUDE from every BFN retrieval packet** | Explicitly Centurion; never use to ground BFN copy or claims |
-| `Need quick service? Flat orange perspective.png` | **REVIEW / DO NOT PROMOTE TO BFN FACTUAL GROUNDING** | Accessible history does not establish exact BFN ownership or durable facts; retain only if the Project UI confirms its creative relevance |
+| `Supa Quick Centurion73.png` | **REMOVE from the dedicated Supa Quick BFN Project** | Explicitly Centurion; never use to ground BFN copy or claims. Preserve only the historical audit note that it was encountered in the former mixed Project |
+| `Need quick service? Flat orange perspective.png` | **REVIEW; KEEP only if exact BFN relevance is confirmed, otherwise REMOVE from the dedicated BFN Project** | Accessible history does not establish exact BFN ownership or durable facts; never promote it to factual grounding without provenance |
 
-Because the container is shared, removing a Centurion/WiseRide/Wiseman source merely because it is not BFN would be destructive to another child client. Isolation must happen at exact-client retrieval, not by deleting shared-container evidence.
+Because the Project is now dedicated to Supa Quick BFN, sibling-only sources should not remain in that Project. Removing a sibling source from the BFN Project does not delete or invalidate that source in the correct sibling Project or historical audit trail.
 
 ## 15. Unresolved / freshness-gated facts
 
@@ -384,10 +382,16 @@ Future task retrieval should request only the compact BFN packet relevant to the
 - image edit → BFN brand/vehicle/product/person preservation rules;
 - factual service/offer work → exact branch facts + freshness/provenance + unresolved conflicts.
 
-The shared `Wiseman Group` Project must use umbrella-safe Project-level Instructions. A BFN-only `work only on Supa Quick BFN` instruction must **not** overwrite the shared container.
+The dedicated **Supa Quick BFN** Project must use BFN-only Project Instructions and resolve `client_id = a60b4d07-0a30-4f1c-8d48-7bd9ea649c97`. It must not load sibling-client facts simply because they share Wiseman ownership/history.
 
 ## 17. Migration handoff state
 
-The BFN child migration may be complete while the shared Project handoff remains unconfirmed. Manual confirmation of the shared-container Instructions is a separate gate.
+The project-structure correction from Issue #260 is now represented in both BFN documents: the handoff target is a dedicated Supa Quick BFN Project, not a shared Wiseman Group container.
+
+Repository migration status after this correction: **`MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED`**. Manual completion still requires CA to paste/apply the final Project Instructions below in the dedicated Supa Quick BFN Project and confirm them.
 
 CG Dynamics remains the permanent source of truth. This record changes first; any derived guide or Project handoff text is refreshed from it.
+
+## 18. Final Supa Quick BFN Project Instructions
+
+Work only on Supa Quick BFN. For every factual, caption, content or image task, retrieve current exact-client CG Dynamics context for client_id `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97` plus the supplied creative/task. Never mix BFN with Supa Quick Centurion, WiseRide, Wiseman Group or Wiseman Midas. Keep marketing human, specific and useful to Bloemfontein motorists; captions must add to the artwork/video, not repeat it. Use a maximum of 5 dynamically relevant hashtags by default. Preserve real vehicles, tyres/products, branding, people and requested composition in edits. Never invent stock, tyre sizes/specs, service availability, prices, promos, guarantees/warranties, contacts, hours or branch claims. Recheck mutable facts and flag conflicts instead of guessing. CG Dynamics is the source of truth.
