@@ -1,936 +1,503 @@
-# Daisy & Co Bloemfontein — Client Marketing Intelligence
+# Daisy & Co — Client Marketing Intelligence
 
-Last updated: 2026-08-06
-Status: Current-source client intelligence. Keep isolated to Daisy & Co Bloemfontein. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
+Last updated: 2026-09-08
+Status: Current reviewed client intelligence, migrated to the exact-client / human-creative architecture. Keep isolated to Daisy & Co. Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
 
-## Why this pack exists
+Canonical client: **Daisy & Co**  
+Exact CG Dynamics client ID: `3404f726-a693-4b2d-8c13-c9d3dfd17bbc`  
+Canonical governed GitHub representation: `docs/ai-workforce/client-intelligence/DAISY-CO-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
 
-Daisy & Co is a local destination retail business with several overlapping reasons to visit: gifts, homeware, fresh baked goods, treats, flowers and convenient occasion shopping. Its marketing opportunity is not to become another generic gift page. It is to become Bloemfontein's most dependable answer to the recurring customer problem:
+`Bloemfontein` in this filename is location/history context only. It does not create a second Daisy & Co identity.
 
-> I need a thoughtful gift, something fresh, or a small spoil today, and I do not want to drive all over town.
+## Architecture rule
 
-This pack is based on:
+CG Dynamics is the permanent source of truth. This Markdown file is the governed repository representation and audit/handoff view of that intelligence; it is not a manually maintained ChatGPT Project truth store.
 
-- the current Preller Square tenant listing;
-- current location and trading-hour evidence from map and retail-directory sources;
-- current public evidence that Tal Florals supplies Daisy & Co as a Bloemfontein stockist;
-- current public review and category evidence;
-- the store's historic local positioning around freshly baked treats and gifts for the home;
-- current Preller Square context and neighbouring retail traffic;
-- current local gift, bakery, florist and convenience-gifting competition.
+For routine work, retrieve the exact current Daisy & Co context by:
 
-Because the public footprint is fragmented, mutable facts such as current staff, exact product lines, social handles, delivery availability and daily bake range must be confirmed directly with the client before operational use.
+`client_id 3404f726-a693-4b2d-8c13-c9d3dfd17bbc + task type + supplied creative/context`
 
-## Verified identity
+Do not fuzzy-match another Daisy-named business, crawl unrelated client packs, or silently fall back to stale Project material.
 
-### Business
+A lightweight request such as `caption please` should need only the compact current Daisy & Co packet: voice/caption rules, task-relevant product/service facts, CTA/contact rules, claim guardrails, unresolved facts affecting the post, and current SEO/hashtag guidance.
 
-- Trading name: Daisy & Co.
-- Location: Shop 8A, Preller Square Shopping Centre, Graaff-Reinet Street, Dan Pienaar, Bloemfontein.
-- Telephone: 051 436 6230.
-- Category evidence: gift shop, bakery/cafe-style treats, homeware and occasion retail.
-- Historic public positioning: freshly baked treats and a wide range of gifts to turn a house into a home.
-- Historic tagline: `Baking the difference`.
-- Current centre listing confirms Daisy & Co remains a tenant at Preller Square.
+## Evidence hierarchy and provenance
 
-### Current trading-hour evidence
+Use the freshness protocol. For mutable facts, prefer:
 
-Current map evidence lists approximately:
+1. direct current client/CG confirmation;
+2. current first-party Daisy & Co material;
+3. current Preller Square/official centre evidence;
+4. current official social/listing evidence;
+5. reliable current directories;
+6. reviewed historical evidence in this pack.
 
-- Monday to Wednesday: 08:30–17:30;
-- Thursday and Friday: 08:00–17:30;
+Project history is strong evidence for durable creative preferences and direct CG corrections, but old captions, campaign details, products, prices, dates and contacts are not automatically current business facts.
+
+## Canonical identity and current public facts
+
+### Identity
+
+- Canonical client-facing name: **Daisy & Co**.
+- Current centre/directory evidence continues to identify the store as Daisy & Co at Preller Square.
+- Do not create a duplicate client called `Daisy & Co Bloemfontein` merely because the existing intelligence filename uses that wording.
+- Historic `Crazy Daisy` references are identity-history evidence only. Do not use that name as current branding without direct client confirmation.
+- Do not conflate this business with unrelated South African or international Daisy & Co ecommerce/lifestyle businesses.
+
+### Location and telephone
+
+Current directory/centre evidence supports:
+
+- **Shop 8A, Preller Square Shopping Centre, Graaff-Reinet Street, Dan Pienaar, Bloemfontein**.
+- **051 436 6230**.
+
+These are `current_verified` against current/recent public listing evidence as reviewed on 2026-09-08. Recheck immediately if a live client brief supplies a different value.
+
+### Trading hours
+
+Recent current map/listing evidence reviewed on 2026-09-08 shows:
+
+- Monday: 08:30–17:30;
+- Tuesday: 08:30–17:30;
+- Wednesday: 08:30–17:30;
+- Thursday: 08:00–17:30;
+- Friday: 08:00–17:30;
 - Saturday: 08:30–15:00;
 - Sunday: 09:00–13:00.
 
-The older Preller Square tenant page lists different hours and Sunday closed. Therefore hours must be treated as `possible_change` until confirmed directly with the store and Google Business Profile.
+Older Preller Square material contains conflicting hours. Treat the recent hours as the strongest current public evidence, but recheck before any time-sensitive `open today`, public-holiday or special-hours post.
 
-### Current product and experience evidence
+### Email and social identities
 
-Public evidence supports:
+Project history has used `sandripiek@gmail.com`, but a current first-party public verification was not recovered in this migration. Treat it as `stale_unverified` until Daisy & Co/CG reconfirms it.
 
-- freshly baked cakes and treats;
-- pies and milk tart;
-- takeaway food/treat purchases;
+An older Preller Square tenant page references `facebook.com/daisycobloem`. That is historical evidence, not sufficient proof of the current official Facebook identity. A current official Instagram identity was not safely verified.
+
+Never invent a social handle, WhatsApp number or email.
+
+## Current offer and category truth
+
+Current/recent public evidence plus the reviewed August 2026 intelligence supports Daisy & Co as a local destination retail business associated with:
+
 - gifts and homeware;
-- personal-care and small inspirational gifts;
-- fresh flowers from Tal Florals as a current Bloemfontein stockist;
-- event-ticket retail participation in past local events;
-- in-store pickup and card payments.
+- freshly baked treats/cakes;
+- pies and milk tart in public review/category evidence;
+- takeaway treat purchases;
+- small personal-care/inspirational gifting items in historical/current category evidence;
+- flowers through previously verified Tal Florals stockist evidence;
+- occasion-led shopping at Preller Square.
 
-Do not assume every historic product remains available. The current daily range, flower schedule, cake ordering, gift-wrapping, delivery and event-ticket services require direct confirmation.
+The hybrid is commercially useful because one visit can solve a gift, a treat or a small home/occasion need. Marketing should organise that range around real customer needs rather than post disconnected product shots.
 
-## Strategic diagnosis
+### Stock/service freshness guardrail
 
-## 1. Daisy & Co has a useful hybrid offer but risks looking commercially unclear
+Do not assume any specific item, bake, flower, supplier, bundle or service is currently available merely because it appeared before.
 
-The hybrid is the advantage:
+The following remain freshness-gated unless the current brief/client confirms them:
 
-- a customer can buy a quick treat;
-- add flowers;
-- find a gift;
-- purchase something for the home;
-- solve an occasion at the last minute.
-
-However, hybrid stores often underperform online because customers cannot quickly understand:
-
-- what is fresh today;
-- what gifts are currently available;
-- what price range the shop serves;
-- whether flowers can be reserved;
-- whether cakes or platters can be ordered;
-- whether gift wrapping is available;
-- whether the store can assemble a full gift bundle;
-- whether collection or delivery is possible.
-
-The marketing must organise the assortment around customer occasions rather than post random individual products.
-
-## 2. The strongest commercial territory is convenience plus thoughtfulness
-
-Daisy & Co should not compete only on product uniqueness. Many gift products can be bought elsewhere or online.
-
-The stronger promise is:
-
-> Thoughtful gifting, fresh treats and small spoils, ready in one stop at Preller Square.
-
-This combines:
-
-- convenience;
-- local curation;
-- emotional usefulness;
-- same-day urgency;
-- personal service;
-- physical browsing;
-- ready-to-give presentation.
-
-## 3. The business needs to own high-frequency gifting occasions
-
-A gift store can become too dependent on Christmas, Mother's Day and Valentine's Day. Daisy & Co should create regular reasons to buy:
-
-- birthdays;
-- teacher gifts;
-- hostess gifts;
-- thank-you gifts;
-- new-home gifts;
-- new-baby gifts;
-- sympathy and thinking-of-you gifts;
-- employee appreciation;
-- client gifts;
-- get-well gifts;
-- small weekend spoils;
-- flowers and cake for visits;
-- last-minute celebration needs.
-
-The customer should learn that Daisy & Co solves these occasions quickly.
-
-## Primary audiences and buying journeys
-
-## A. Last-minute local gift buyer
-
-Typical trigger:
-
-- birthday today;
-- dinner invitation tonight;
-- forgotten thank-you;
-- school or teacher gift;
-- visit to a friend or family member.
-
-Needs:
-
-- fast decision;
-- visible price points;
+- exact daily baked range;
+- current cake-order/preorder capability;
+- platter/bulk-bake capability;
 - gift wrapping;
-- certainty that something suitable is in stock;
-- easy parking and collection;
-- help choosing.
+- ready-made gift bundles;
+- delivery;
+- flower arrival days, bouquet range and prices;
+- current Tal Florals supply schedule/relationship;
+- corporate-gifting fulfilment/invoicing;
+- ticket sales;
+- collection/reservation process beyond ordinary in-store purchase;
+- current suppliers/brands;
+- stock quantities;
+- current prices and promotions.
 
-Best conversion path:
+Never turn a marketing idea in this intelligence into an asserted live service without confirmation.
 
-1. sees current occasion post or searches Google;
-2. taps WhatsApp/call;
-3. sends occasion and budget;
-4. receives two or three current options;
-5. reserves for collection;
-6. adds flowers, card or treat;
-7. purchase recorded by occasion and price band.
+## Commercial positioning
 
-## B. Fresh treat and convenience customer
+Daisy & Co should not sound like a generic lifestyle shop. Its strongest practical territory is **thoughtful, convenient local gifting and treats with a real shop experience**.
 
-Typical trigger:
+The recurring customer problem is closer to:
 
-- wants cake, milk tart, pie or fresh treat;
-- wants something to take to work or a visit;
-- passes through Preller Square.
+> I need something thoughtful, useful or delicious, and I want to sort it without driving all over town.
 
-Needs:
+That can include a birthday, thank-you, teacher gift, hostess gift, visit, new-home occasion, small spoil, flowers, something for the table/home, or a treat to take along.
 
-- today's availability;
-- freshness proof;
-- price clarity;
-- quick collection;
-- preorder option for larger quantities.
+The commercial advantage is the combination of curation, immediacy and personal browsing/help. Do not overstate it with unsupported `one-stop destination` or `something for everyone` language.
 
-Best content:
+## Audience and occasion system
 
-- fresh-from-the-oven morning posts;
-- daily counter videos;
-- sold-out urgency;
-- customer favourites;
-- Friday/weekend take-home bundles.
+High-value recurring content situations include:
 
-## C. Flower and occasion buyer
+- last-minute local gifting;
+- birthdays and thank-yous;
+- teacher/end-of-term gifts;
+- hostess/dinner-visit gifts;
+- new-home and housewarming gifts;
+- flowers/treats for visits and celebrations;
+- small self-gifting/home spoils;
+- fresh take-home treats;
+- staff/customer favourites;
+- seasonal gifting;
+- corporate/professional gifting only where operational capacity is confirmed.
 
-Current evidence supports Tal Florals as a Daisy & Co stockist.
+The useful content question is usually: **what real situation is this product solving or making nicer?**
 
-Needs:
+## Human creative standard — Daisy & Co
 
-- current bouquet availability;
-- flower-arrival days;
-- bouquet price range;
-- reservation;
-- flowers combined with treats or gifts.
+Correct facts are the floor. Daisy & Co copy must feel like a person who knows the shop, the product in front of them and the customer occasion actually wrote it.
 
-Commercial opportunity:
+### Brand feel
 
-Create `Flowers + Something` bundles, subject to current stock and client approval:
+Keep the voice:
 
-- flowers + cake;
-- flowers + candle/home gift;
-- flowers + thank-you card;
-- flowers + small self-care gift;
-- flowers + birthday treat.
+- warm and cheerful;
+- local and familiar;
+- tasteful without sounding precious;
+- playful when the post earns it;
+- commercially useful without sounding pushy;
+- specific to the actual product, person, season or visual;
+- human rather than polished into generic lifestyle copy.
 
-## D. Homeware and self-gifting customer
+Daisy & Co can be feminine where the real product/occasion supports it, but should not be written so narrowly that men, families or professional gift buyers feel excluded.
 
-Needs:
+### Caption construction
 
-- curation and inspiration;
-- visual merchandising;
-- new-arrival discovery;
-- products shown in context;
-- affordable small luxuries.
+- **Captions add to the artwork/video; they do not repeat it.**
+- Start from what is actually shown and what the artwork already says.
+- Add a second layer: customer situation, product detail, personality, reason to care, useful context or clear next action.
+- Keep normal social captions fairly short and easy to scan when the artwork already carries the information.
+- Use longer copy only when the story, explanation or occasion needs it.
+- Vary openings, rhythm and CTA rather than using a fixed caption template.
+- Do not mechanically list three generic benefits in one sentence.
+- One sharp, recognisable idea is usually stronger than a catalogue paragraph.
+- No durable fixed option count was recovered from Project history. Default to one strong finished answer; provide clearly different options when the brief asks for options or creative exploration.
 
-Content should avoid isolated shelf photos. Show:
+### Text-on-post / poster copy
 
-- a complete table or coffee-corner moment;
-- gift-ready combinations;
-- how a product changes a small part of the home;
-- staff favourites and why they chose them.
+Project history repeatedly favours:
 
-## E. Corporate and professional buyer
+- a short heading;
+- a short supporting line when needed;
+- clear meaning at first read;
+- wording tied to the real product/occasion;
+- cleverness or wordplay that still makes sense;
+- customer-facing usefulness rather than abstract lifestyle language.
 
-Target:
+If the user says the line feels generic, do not lightly rephrase the same concept. Change the angle.
 
-- estate agents;
-- attorneys;
-- medical practices;
-- financial advisers;
-- architects;
-- dealerships;
-- schools;
-- small offices;
-- guesthouses;
-- event organisers.
+### Language
 
-Needs:
+- English and Afrikaans are both valid depending on the brief.
+- When writing Afrikaans, use **natural everyday spoken Afrikaans**, not stiff, technically correct but uncommon wording.
+- Project correction: in Heritage Day context, `tradisies` is preferred over the stiffer `gebruike` when talking about the traditions that shape South Africans.
+- Do not force English/Afrikaans mixing merely to sound local.
+- Preserve culturally natural phrasing and the actual emotional tone of the post.
 
-- dependable gift bundles;
-- budget tiers;
-- branding/card insertion;
-- invoice and collection arrangements;
-- repeat ordering;
-- reliable deadlines.
+## Durable Project-history creative lessons
 
-Commercial opportunity:
+### Heritage Day
 
-Create a simple corporate gifting service with internal-confirmed price bands, for example:
+Heritage Day creative should celebrate South African people, cultures and traditions, not fall back to a generic flag/rainbow slogan or a product-only message.
 
-- small thank-you;
-- standard client gift;
-- premium client gift;
-- staff appreciation;
-- seasonal order.
+The history shows repeated rejection of copy that felt generic or merely `South African` without a human point of view. A colourful tableware/product image can support heritage through the idea of different traditions/people sharing a South African home or table, but the line must still feel celebratory and natural.
 
-No prices should be published until the client confirms product cost, margin and fulfilment capacity.
+Avoid generic filler such as:
 
-## F. Preller Square shopper
+- `A South African favourite, ready to share.`
+- vague `Different roots...` style language when it has already been overused or says nothing specific;
+- abstract unity copy that could sit under any brand.
 
-This audience may not follow Daisy & Co but is already physically nearby.
+### Women's Month / Women's Day
 
-The shop must convert centre traffic through:
+Do not collapse Women's Day into Mother's Day.
 
-- strong storefront communication;
-- visible fresh-product cues;
-- clear gift-solution signage;
-- small impulse items near the entrance and till;
-- cross-promotions with neighbouring tenants;
-- centre-event participation.
+Project history supports womanhood, sisterhood, friendship, work/life roles and flowers/gifting as a celebration of women broadly. Keep it warm and human rather than a generic empowerment quote.
 
-## Competitive landscape
+### Spring content
 
-Daisy & Co competes across several categories rather than against one identical business.
+Spring content should feel fresh, fun and a little unexpected. The user explicitly pushed away from standard seasonal store montages and wanted more personality around new things in the shop.
 
-### Gift and homeware competitors
+### Product posts
 
-Competition includes:
+Talk about the product and why it is appealing/useful. Do not hide a product behind vague lifestyle copy.
 
-- independent Bloemfontein gift stores;
-- boutique decor retailers;
-- bookstores with gift ranges;
-- florist gift add-ons;
-- large retailers such as Woolworths, Checkers, Dis-Chem, The Crazy Store and other Preller Square tenants;
-- online personalised-gift businesses;
-- local makers selling directly on social media.
+Project history rejected lines that sounded generic, did not make sense in context, or used decorative verbs without saying anything concrete.
 
-Their advantages may include:
+### Closing dates / interactive posts
 
-- broader selection;
-- stronger online catalogues;
-- lower prices;
-- national delivery;
-- aggressive seasonal promotions.
+When a closing date matters, make the interaction clear and fun. Avoid generic urgency such as `last chance` unless the brief specifically wants it. The audience should immediately understand what to do and by when.
 
-Daisy & Co's defendable advantages should be:
+## Generic/overused wording to avoid by default
 
-- local convenience;
-- human curation;
-- fresh treats plus gifts in one stop;
-- flowers plus gifts in one stop;
-- same-day reservation;
-- gift wrapping;
-- personal assistance by budget and occasion;
-- trusted Preller Square location.
+Avoid interchangeable AI/lifestyle filler unless the exact concept genuinely earns it:
 
-### Bakery and treat competitors
+- `treat yourself`;
+- `elevate your look` / `elevate your space`;
+- `something for everyone`;
+- `your one-stop destination`;
+- `discover the difference`;
+- `where quality meets...`;
+- `the perfect touch` as a default product line;
+- vague `make every moment special` wording;
+- generic `South African favourite` phrasing with no specific idea;
+- repetitive `from ... to ...` constructions when a more direct sentence works.
 
-Competition includes:
+Do not replace one banned phrase with another equally generic synonym.
 
-- dedicated bakeries;
-- coffee shops;
-- supermarkets;
-- home bakers;
-- neighbouring cafes and restaurants.
+## CTA and contact conventions
 
-Daisy & Co should not try to beat every bakery on range. It should own portable, giftable and visit-ready treats.
+A CTA is not mandatory on every post. Use one when it helps the customer act.
 
-### Florist competition
+Good CTA behaviour:
 
-Daisy & Co is not necessarily a full florist. Its opportunity is convenience and combination:
-
-- current local flowers;
-- easy pickup;
-- flowers paired with gifts or baked goods.
-
-All floral claims must stay aligned with Tal Florals' actual supply and stock schedule.
-
-## Positioning recommendation
-
-### Primary position
-
-> Bloemfontein's easy one-stop destination for thoughtful gifts, fresh treats and little spoils.
-
-### Supporting promise
-
-> Tell us the occasion and budget. We will help you find something ready to give.
-
-### Brand personality
-
-- warm;
-- cheerful;
-- local;
-- thoughtful;
-- practical;
-- abundant without being cluttered;
-- feminine where natural, but not so narrow that men or corporate buyers feel excluded.
-
-### Avoid
-
-- generic `something for everyone` copy;
-- endless product dumps;
-- overly childish design;
-- constant discounting;
-- vague lifestyle captions without availability or next step;
-- implying products or services are available when stock has not been confirmed.
-
-## Offer architecture
-
-## 1. Occasion-led gift help
-
-Create a repeatable service:
-
-> Send us the occasion, the person's age/interests and your budget. We will send current options.
-
-This can work through WhatsApp and in store.
-
-Capture:
-
-- occasion;
-- budget;
-- recipient;
-- chosen bundle;
-- add-ons;
-- source of enquiry;
-- repeat-customer permission.
-
-## 2. Ready-to-give bundles
-
-Build a controlled bundle system from current stock:
-
-- thank-you bundle;
-- birthday spoil;
-- hostess bundle;
-- teacher gift;
-- get-well bundle;
-- new-home bundle;
-- new-mom bundle;
-- flowers-and-treat bundle;
-- corporate thank-you.
-
-Each bundle needs:
-
-- current contents;
-- internal cost and margin;
-- approved selling price;
-- substitution rule;
-- packaging standard;
-- stock limit;
-- photo;
-- fulfilment time.
-
-## 3. Fresh today
-
-A daily or selected-day content system showing actual current availability:
-
-- cakes;
-- milk tart;
-- pies;
-- baked treats;
-- flowers;
-- weekend specials.
-
-Every post must include a capture time or `while available` disclaimer where appropriate.
-
-## 4. Corporate gifting
-
-Create a simple enquiry landing page or WhatsApp flow:
-
-- number of recipients;
-- budget per person;
-- occasion/date;
-- branding/card requirement;
-- collection/delivery requirement;
-- invoice details.
-
-Start with existing CG and professional-network relationships before broad advertising.
-
-## 5. Preorder and celebration support
-
-Directly confirm whether Daisy & Co currently accepts:
-
-- full cake orders;
-- treat platters;
-- bulk pies;
-- flower reservations;
-- gift-bundle preorders;
-- delivery.
-
-Only market services confirmed operationally.
+- make the action match the post: visit, call, ask about availability, reserve/confirm only when that process is current, or come browse;
+- keep the CTA natural rather than tacking on `Shop now!` to every caption;
+- use **051 436 6230** when a current phone CTA is appropriate;
+- use the Preller Square location when the post benefits from physical-shopping context;
+- do not publish `sandripiek@gmail.com` as current until reconfirmed;
+- do not invent WhatsApp, website or social handles.
 
 ## Content system
 
-The page should balance urgency, emotion, utility and proof.
+### 1. Current product / new-in-store
 
-### Content pillar 1: What is fresh today
+Show the real product clearly and say something specific about it: material, use, recipient, room/table moment, colour/shape, gift situation or why staff picked it.
 
-Examples:
+### 2. Fresh today
 
-- morning counter reveal;
-- today's cake slices;
-- milk tart arrival;
-- flower delivery;
-- Friday take-home treats;
-- limited-quantity weekend items.
+Use real same-day visuals when the store supplies them. State availability honestly and use `while available`/capture-time context where appropriate.
 
-Goal: foot traffic and reservations.
+Never fabricate freshness or quantity.
 
-### Content pillar 2: Solve the occasion
+### 3. Solve the occasion
 
-Examples:
+Useful hooks come from the customer's actual situation: dinner invitation, birthday today, thank-you, teacher gift, visit, new home or weekend treat.
 
-- `Invited to dinner tonight?`;
-- `Forgot the teacher gift?`;
-- `Need a birthday gift under R300?`;
-- `Visiting someone in hospital?`;
-- `A quick thank-you that does not feel rushed`.
+### 4. Gift by budget
 
-Goal: same-day purchases.
+Useful only with current approved price/stock evidence. Never recycle an old price band into a current post.
 
-### Content pillar 3: Gift by budget
+### 5. Staff curation / behind the scenes
 
-Only use approved current prices.
+Show real staff picks, product unpacking, arranging shelves/tables, baking/treat preparation where approved, wrapping only if the service is current, and the thinking behind a display.
 
-Formats:
+### 6. Seasonal / cultural moments
 
-- under R150;
-- under R300;
-- under R500;
-- small luxury;
-- premium bundle.
+Connect the season to the real Daisy & Co visual/product and to how people actually celebrate. Do not paste a generic holiday quote onto a store image.
 
-Goal: reduce decision anxiety and qualify buyers.
+### 7. Customer/community proof
 
-### Content pillar 4: Local products and makers
+Real customer choices, local events and shop moments can make the feed feel lived-in. Use permission and do not invent a customer's story.
 
-Show:
+### 8. Retail interaction
 
-- Tal Florals and other confirmed local suppliers;
-- maker story;
-- product origin;
-- why Daisy & Co selected it;
-- limited local availability.
+Polls, choose-between-two products, `what would you pick?`, vote/closing-date mechanics and small product dilemmas suit the brand when they are easy to understand and not engagement bait for its own sake.
 
-Goal: differentiation and local pride.
+## Video / Reel direction
 
-### Content pillar 5: Staff curation
+Strong Daisy & Co short-form ideas are grounded in the actual shop:
 
-Examples:
+- staff choosing between two real products;
+- `new in the shop` with one human observation per item;
+- quick occasion challenge: find a gift for a real brief/budget;
+- fresh-counter reveal;
+- product styling/table moment;
+- behind-the-scenes unpacking/display reset;
+- seasonal store personality;
+- light staff humour;
+- direct-to-camera `need a gift / home spoil / something for yourself?` style service framing, written naturally rather than as a stock ad script.
 
-- staff pick of the week;
-- three gifts for a new homeowner;
-- what Daisy would take to a dinner invitation;
-- pair this with flowers;
-- customer favourite and why.
+Fun concepts should still reveal something real about Daisy & Co. Do not make the store a background for an unrelated trend.
 
-Goal: human authority.
+## Visual and image-edit rules
 
-### Content pillar 6: Customer proof
+Project image-edit history establishes a strict preservation rule.
 
-Capture:
+When editing a real Daisy & Co image, preserve by default:
 
-- gift bundles leaving the shop;
-- repeat buyers;
-- office orders;
-- celebration collections;
-- customer messages and reviews;
-- sold-out fresh items.
+- the exact product appearance;
+- food/baked-item shape, texture and decoration;
+- packaging and labels;
+- logos/branding;
+- real people and recognisable features;
+- product colours;
+- proportions and scale;
+- important composition/crop relationships.
 
-Never publish customer details without permission.
+Change only what was requested unless the user explicitly asks for a broader redesign.
 
-### Content pillar 7: Preller Square life
+Examples of safe requested changes include:
 
-Use:
+- straighten the image/product;
+- remove glare;
+- clean the background;
+- zoom out/reframe while preserving the subject;
+- place existing real cookies/products together without changing how they look;
+- isolate or provide a clean wood/background surface.
 
-- centre events;
-- neighbour collaborations;
-- seasonal shopping routes;
-- `while you are at Preller Square` convenience;
-- in-front-of-store activations where approved by centre management.
+Do not `beautify` a real product by changing its icing, shape, print, packaging, colour, logo or proportions.
 
-## Social content formats
+## Dynamic SEO / hashtags
 
-### Reels
+Default CG rule: **maximum 5 hashtags**.
 
-- build a gift bundle from a budget;
-- 15-second fresh counter reveal;
-- flower delivery unpacking;
-- three gifts for one occasion;
-- wrap an order;
-- shop walkthrough by price point;
-- `what came in this week`;
-- one-minute corporate gift assembly;
-- staff recommendation.
-
-### Carousels
-
-- gift guide by recipient;
-- gift guide by budget;
-- current bundle menu;
-- hostess-gift guide;
-- teacher appreciation;
-- flowers plus add-ons;
-- corporate-order process;
-- fresh-product preorder guide.
-
-### Stories
-
-- real-time stock;
-- polls between two gift options;
-- sold-out notices;
-- reservations;
-- delivery/collection reminders;
-- reposted customer tags;
-- countdowns to seasonal cutoffs.
-
-## Website and digital presence
-
-## Current risk
-
-Search results surface unrelated international and South African online businesses using similar names. Daisy & Co Bloemfontein does not currently have a clearly dominant official standalone website in search evidence.
+Do not keep a frozen five-tag Daisy bank. At task time choose the strongest current set from:
 
-This creates identity and conversion risk.
+- exact brand/client identity;
+- actual product/service/topic in the post;
+- Bloemfontein/Preller Square context where relevant;
+- retail/gifting/bakery/homeware category where it genuinely fits;
+- the target platform;
+- current reliable search/trend evidence when available.
 
-## Immediate digital priorities
+A stored hashtag is a seed, not proof it is currently useful or trending.
 
-1. Confirm and standardise the official business name everywhere.
-2. Confirm the official Facebook and Instagram handles.
-3. Claim or fully audit Google Business Profile.
-4. Standardise address, phone and hours.
-5. Add current storefront, interior, team, gift and treat photos.
-6. Add categories that accurately represent the business without keyword stuffing.
-7. Create a simple mobile-first page on an owned domain or CG-managed client page.
-8. Include:
-   - current offer;
-   - location/map;
-   - live hours;
-   - call/WhatsApp;
-   - gift-help form;
-   - corporate gifting;
-   - fresh-order information;
-   - flower availability terms;
-   - parking/collection guidance.
-9. Use local schema and accurate business data.
-10. Distinguish the Bloemfontein store from unrelated Daisy & Co online brands.
+Never label a tag `trending` without current evidence. If current trend evidence is unavailable, use verified evergreen/search-relevant terms honestly.
 
-## Google Business Profile
+Natural searchable wording in the caption matters too; do not keyword-stuff the human copy.
 
-Priority actions:
+## Paid/strategic use of the intelligence
 
-- verify primary category;
-- verify secondary categories;
-- correct hours including public holidays;
-- add current product and shop photos;
-- add gift, bakery/treat and flower descriptions only where accurate;
-- post seasonal deadlines;
-- use direct call or message actions;
-- request reviews after successful orders;
-- answer all reviews naturally;
-- monitor duplicate or incorrect listings such as `Crazy Daisy Preller` versus `Daisy & Co`.
+The durable strategic directions from the August pack remain useful:
 
-A duplicate-name audit is important because search evidence shows both Daisy & Co and Crazy Daisy naming in public sources.
+- organise marketing around occasions rather than random product dumps;
+- make current availability and price clear when confirmed;
+- use real product demonstrations/context;
+- reduce customer decision friction;
+- use local Preller Square convenience honestly;
+- build repeatable gifting/seasonal systems only after operational capacity is confirmed;
+- measure enquiries, reservations/orders where tracked, basket/add-on behaviour and repeat purchase rather than follower growth alone.
 
-## Local SEO
+Reusable retail theory lives in the shared Human Marketing Goldmine packs. Do not duplicate that research inside Daisy & Co; apply only the client-specific lessons here.
 
-Target practical search intent such as:
+## Factual and claim guardrails
 
-- gift shop Bloemfontein;
-- gifts Preller Square;
-- last-minute gifts Bloemfontein;
-- teacher gifts Bloemfontein;
-- birthday gifts Bloemfontein;
-- corporate gifts Bloemfontein;
-- fresh cakes Preller Square;
-- milk tart Bloemfontein;
-- flowers Preller Square;
-- homeware gifts Bloemfontein;
-- hostess gifts Bloemfontein.
+Never invent or infer current:
 
-Do not create thin duplicate pages. Build useful occasion guides, current availability pages and local landing content.
+- products or brands;
+- supplier relationships;
+- stock/quantity;
+- price or saving;
+- promotion dates/terms;
+- cake/preorder capability;
+- flower availability/schedule;
+- gift wrapping;
+- delivery;
+- corporate-gift capacity;
+- booking/reservation method;
+- staff names/roles;
+- contact details;
+- hours/public-holiday hours;
+- branches/locations;
+- website/social identities.
 
-## Paid media
+Do not use `daisyandco.co.za` or any similarly named ecommerce catalogue as this client's catalogue without direct confirmation.
 
-Paid activity should be narrow and commercially attributable.
+Do not turn historic public event-ticket participation into a current service.
 
-### Meta local awareness and message campaigns
+## Task-specific retrieval contract
 
-Best uses:
+For future #241 runtime projection, use exact client ID only.
 
-- seasonal gift deadlines;
-- current bundles;
-- Mother's Day, Father's Day, Valentine's Day, Christmas and teacher gifts;
-- local flower-and-treat bundles;
-- corporate gifting lead generation;
-- same-day Preller Square convenience.
+### `caption`
 
-Geo-focus:
+Return only:
 
-- Bloemfontein and realistic collection/delivery radius;
-- exclude irrelevant national reach unless ecommerce or national fulfilment is proven.
+- Daisy & Co voice/caption rules;
+- artwork/video non-repetition rule;
+- relevant current product/service facts supplied/verified for the post;
+- phone/location/footer rules if needed;
+- factual guardrails;
+- relevant unresolved facts;
+- dynamic max-five SEO/hashtag instruction.
 
-Creative:
+### `poster_copy`
 
-- real current products;
-- visible price or approved starting price;
-- occasion hook;
-- quantity/deadline;
-- call/message/reserve action.
+Return:
 
-### Google Search
+- short human product/occasion copy rules;
+- language preference;
+- approved/rejected phrasing lessons;
+- exact current facts needed for the artwork.
 
-Useful once a strong landing page and tracking exist:
+### `content_idea`
 
-- local gift searches;
-- corporate gifting;
-- occasion-specific urgent searches;
-- branded search protection.
+Return:
 
-Avoid broad national gift keywords without fulfilment capacity.
+- occasion-led strategy;
+- relevant proven Daisy formats;
+- current products/season/context supplied for the brief;
+- current platform/trend evidence where useful.
 
-## Partnerships and activations
+### `image_edit`
 
-## 1. Tal Florals
+Return:
 
-Build a formal content and stock-calendar relationship:
+- strict product/person/brand/packaging/colour/proportion/composition preservation rules;
+- exact requested edit;
+- relevant visual brand constraints only.
 
-- confirm delivery days;
-- photograph current bouquets;
-- align availability messages;
-- cross-tag correctly;
-- create bundles;
-- run flower-picking or seasonal story collaborations where commercially appropriate.
+### `factual_lookup`
 
-## 2. Preller Square tenants
+Return current reviewed value + provenance/freshness state. If the current source cannot be reached or evidence conflicts, surface the gap instead of guessing.
 
-Potential collaborations:
+### `campaign`
 
-- restaurants: hostess or celebration bundles;
-- bookstores: reader gifts;
-- beauty businesses: self-care bundles;
-- medical practices: get-well and thank-you gifts;
-- banks/professional services: corporate orders;
-- centre events: sampling, gift stations or seasonal displays.
+Return the relevant positioning/audience/occasion context plus only current verified commercial facts and current platform/SEO evidence.
 
-All centre activations require management approval.
+## Current unresolved facts / CG decisions
 
-## 3. Schools and teachers
+Do not silently resolve:
 
-Build ethical, practical seasonal campaigns:
+1. current owner/store-manager identity and roles;
+2. current official Facebook identity;
+3. current official Instagram identity;
+4. whether `Crazy Daisy` has any current approved public-brand use;
+5. whether `sandripiek@gmail.com` remains the approved marketing/customer email;
+6. current WhatsApp number, if any;
+7. current public-holiday/special trading hours;
+8. exact current product categories, brands and suppliers;
+9. current baked range and whether production is in-house/external;
+10. cake/platter/bulk-order capability;
+11. current Tal Florals relationship, delivery schedule and pricing;
+12. gift wrapping/bundle fulfilment;
+13. delivery and reservation/collection process;
+14. corporate-gifting capacity/invoicing;
+15. owned website/domain and Google Business Profile ownership/duplicate status;
+16. current CG package/deliverable scope.
 
-- teacher appreciation;
-- end-of-term gifts;
-- admin and coach gifts;
-- group-order collection windows.
+## Project Source audit — 2026-09-08
 
-Avoid encouraging inappropriate gifting or school-policy conflicts.
+No Daisy & Co Project Source/file was actually accessible to the migration agent through the available Project/File Library surface during this migration.
 
-## 4. Estate agents and property professionals
-
-Offer:
-
-- new-home gifts;
-- seller thank-you gifts;
-- referral gifts;
-- repeat branded card insertion.
+Therefore no source can responsibly be labelled KEEP, REMOVE or REPLACE by filename. Do not invent unseen sources and do not physically delete anything.
 
-## 5. Medical and professional practices
+When staff opens the Daisy & Co Project, apply this rule source-by-source:
 
-Offer:
+- **KEEP** original client-supplied evidence that remains useful and clearly identified as evidence, especially brand/product/reference material that is not pretending to be live operational truth;
+- **REMOVE** clearly unrelated, duplicate or unsafe material only after manual review;
+- **REPLACE** stale manually maintained `business info`/client-guide snapshots as grounding dependencies with the exact live Dynamics retrieval path, while retaining originals only if they have audit value.
 
-- staff recognition;
-- referral thank-you;
-- client appreciation;
-- sympathy and get-well bundles.
-
-## Seasonal commercial calendar
-
-Plan at least six weeks ahead for:
-
-- Valentine's Day;
-- Easter;
-- Mother's Day;
-- Father's Day;
-- Teacher Appreciation and school term ends;
-- Women's Month;
-- Administrative Professionals occasions where relevant;
-- spring and garden season;
-- year-end corporate gifting;
-- Christmas;
-- local festivals and Preller Square events.
-
-Each campaign needs:
-
-- approved products;
-- price and margin;
-- quantity capacity;
-- photography date;
-- order opening date;
-- cutoff date;
-- collection/delivery terms;
-- sold-out process;
-- source tracking.
-
-## Sales and CRM system
-
-The current marketing will be difficult to improve unless enquiries and sales are tagged.
-
-Minimum capture:
-
-- date;
-- customer name/contact with consent;
-- enquiry source;
-- occasion;
-- budget band;
-- products/bundle;
-- order value;
-- add-ons;
-- new or repeat customer;
-- collection/delivery;
-- outcome;
-- reason lost;
-- permission for future updates.
-
-Customer segments:
-
-- fresh-treat regular;
-- gift buyer;
-- flower buyer;
-- corporate buyer;
-- seasonal buyer;
-- high-value repeat buyer.
-
-Use POPIA-compliant consent and do not add customers to marketing lists without permission.
-
-## Performance measurement
-
-Primary KPIs:
-
-- enquiries by source;
-- same-day reservations;
-- gift-help conversion rate;
-- average basket value;
-- attachment rate: card, flowers, treat, wrapping;
-- fresh-product sell-through;
-- bundle sell-through;
-- repeat purchase rate;
-- corporate leads and order value;
-- seasonal preorder value;
-- Google calls/directions/messages;
-- revenue and gross margin by campaign.
-
-Secondary KPIs:
-
-- local reach;
-- saves and shares;
-- story replies;
-- profile actions;
-- follower growth;
-- review count and rating;
-- user-generated content.
-
-Follower growth should never be reported without commercial context.
-
-## 90-day plan
-
-## Days 1–14: Truth and conversion foundation
-
-1. Confirm current ownership/management contact.
-2. Confirm official social handles.
-3. Confirm address, phone and actual hours.
-4. Audit Google Business Profile and duplicate names.
-5. Confirm every current service:
-   - fresh bake range;
-   - cake/preorder capability;
-   - flowers;
-   - gift wrapping;
-   - delivery;
-   - corporate gifting;
-   - ticket sales.
-6. Photograph the real store and current products.
-7. Set up WhatsApp gift-help flow.
-8. Create occasion and budget tags in the sales tracker.
-9. Define bundle costing and substitution controls.
-10. Establish weekly stock/content handover from the store to CG.
-
-## Days 15–30: Launch the useful content system
-
-1. Begin `Fresh Today` content.
-2. Launch `Tell us the occasion and budget`.
-3. Publish first gift-by-budget guide.
-4. Build and photograph three approved bundles.
-5. Publish flower-stock process with Tal Florals.
-6. Request reviews from recent verified customers.
-7. Improve storefront signage for gift help and current fresh stock.
-8. Start tracking all message and phone enquiries.
-
-## Days 31–60: Build repeat purchase and partnerships
-
-1. Launch opt-in WhatsApp updates.
-2. Approach ten local professional or property partners.
-3. Pilot a corporate gift menu.
-4. Run one Preller Square collaboration.
-5. Test a small local Meta message campaign.
-6. Create occasion landing content.
-7. Measure basket value and add-on rate.
-8. Identify the top five repeatable products or bundles.
-
-## Days 61–90: Optimise and scale proven demand
-
-1. Compare content against reservations and sales.
-2. Cut formats that generate attention without store action.
-3. Scale the best bundle or occasion campaign.
-4. Build the next seasonal campaign six weeks early.
-5. Formalise repeat corporate ordering.
-6. Improve local search content from real customer questions.
-7. Publish real customer proof.
-8. Produce a 90-day commercial report with:
-   - sales attributed;
-   - enquiry sources;
-   - top occasions;
-   - average basket;
-   - repeat rate;
-   - campaign margin;
-   - recommended next tests.
-
-## CG Dynamics integration requirements
-
-When client intelligence and live performance are connected, CG Dynamics should support:
-
-- current verified client identity;
-- official handles and listing URLs;
-- store hours with freshness state;
-- product/service confirmation status;
-- seasonal campaign calendar;
-- stock-sensitive content approval;
-- offer and bundle records;
-- Meta post/ad performance;
-- Google Business Profile actions;
-- enquiry source and occasion;
-- order value and margin;
-- repeat-customer segments;
-- review requests and outcomes;
-- client-confirmed operational changes;
-- approved-only AI grounding.
-
-The AI must never claim stock, prices, hours, delivery, flowers or baked availability from stale memory. It must request current confirmation or use the latest verified operational source.
-
-## Guardrails
-
-- Do not conflate Daisy & Co Bloemfontein with unrelated online or international businesses of the same name.
-- Do not use the `daisyandco.co.za` Shopify catalogue as this client's catalogue without direct client confirmation; current public evidence does not prove it belongs to the Preller Square store.
-- Do not use old branch-manager or staff names operationally without confirmation.
-- Do not publish historic hours as current.
-- Do not promise daily flowers, cake orders, delivery or gift wrapping without confirmation.
-- Do not publish prices until stock, margin and validity are confirmed.
-- Do not present Tal Florals' farm claims as Daisy & Co claims.
-- Do not use customer information or images without consent.
-- Do not judge marketing primarily by followers.
-
-## Verification gaps requiring client confirmation
-
-1. Current owner and store manager.
-2. Official Facebook and Instagram handles.
-3. Whether the business uses `Daisy & Co`, `Crazy Daisy`, or both.
-4. Current trading hours and public-holiday hours.
-5. Current product categories and suppliers.
-6. Current baked range and production source.
-7. Cake, platter and preorder capability.
-8. Current Tal Florals delivery schedule and bouquet pricing.
-9. Gift wrapping and bundle fulfilment.
-10. Delivery and collection process.
-11. Corporate-gifting capacity and invoicing.
-12. Website/domain ownership.
-13. Current Google Business Profile ownership and duplicate listings.
-14. Current customer and sales data.
-15. Current package scope with CG Production House.
-
-## Source register
-
-Current-source evidence reviewed on 2026-08-06:
-
-1. Preller Square tenant page for Daisy & Co — identity, telephone, historic description, historic hours and Facebook reference.
-2. Preller Square current store directory — confirms current centre tenancy.
-3. Waze current place listing — Shop 8A address, telephone and current visible hours.
-4. Tal Florals official website — Daisy and Co Preller Square listed as a Bloemfontein stockist.
-5. Restaurant Guru current listing — public review themes around cakes, milk tart, pies, gifts and takeaway; use as secondary evidence only.
-6. Samba retailer directory — address and telephone corroboration.
-7. Preller Square news and local event articles — historical evidence of event-ticket sales and centre participation; not proof of current service.
-
-All mutable facts must be rechecked before campaign execution.
+The generated Daisy client guide is export/debug/handoff only and is **not** a required Project Source.
+
+## Source register and freshness notes
+
+Evidence reconciled in this migration:
+
+- existing reviewed Daisy & Co intelligence pack, originally researched 2026-08-06;
+- current Preller Square store/tenant evidence confirming Daisy & Co remains present;
+- current/recent directory evidence confirming Shop 8A / Preller Square and 051 436 6230;
+- recent map/listing evidence for the current visible weekly hours;
+- current/recent category/review evidence around bakery/treat/gift use, used as secondary corroboration only;
+- historic Preller Square Daisy tenant page for earlier tagline, Facebook reference and legacy hours;
+- existing reviewed Tal Florals stockist evidence from the August pack, now freshness-gated for current operational use;
+- accessible Daisy & Co ChatGPT Project conversation history and durable CG corrections/approvals/rejections;
+- #241 exact-client live retrieval architecture;
+- #248 Human Creative Standard;
+- `RETAIL-ECOMMERCE-HUMAN-MARKETING-GOLDMINE-2026-08.md` as reusable research authority rather than duplicated client research.
+
+## Migration status
+
+**MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**
+
+The repository migration can be complete before the ChatGPT Project handoff is complete. Staff must still manually paste/apply the final short Project Instructions in the Daisy & Co Project and confirm them. Do not mark the Project handoff complete before that confirmation.
