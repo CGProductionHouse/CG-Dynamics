@@ -5,618 +5,443 @@ Issue: #259
 Branch: `client-migration-red-oak-2026-09-08`  
 Canonical client: **Red Oak**  
 Exact client ID: `cdb11a82-339e-4b46-9b09-bde1a23efeaf`  
-Scope: Red Oak client-specific audit/intelligence only. No #241 runtime/shared architecture, Supa Quick migration work, provider/launch lane, CG Hours, billing, UUID, package/time-history or production-data mutation.
+Scope: Red Oak client-specific intelligence only. No #241 shared runtime, unrelated clients, CG Hours, billing, UUID/package/time history or production-data mutation.
 
-## 1. Current authority and isolation reviewed
+## 1. Authority and isolation
 
-Reviewed before writing:
-- `AGENTS.md` from current `main`;
-- Issue #259 in full;
-- Issue #241 and its current architecture/ownership history only for exact-client retrieval and shared-runtime boundaries;
-- Issue #248 human creative standard;
-- current client freshness/provenance protocol;
-- current Red Oak references on `main`;
-- current reusable hospitality/restaurant/bar/event human-marketing research already present in CG Dynamics;
-- the completed The Staffordshire migration only as a structural migration precedent, never as Red Oak client evidence;
-- authorised read-only production identity truth;
-- accessible Red Oak ChatGPT/CG history and uploaded visual/document evidence;
-- current first-party Red Oak website, contact, menu, specials and event surfaces;
-- accessible current public/search evidence where first-party social feeds were not retrievable.
+This record is the Red Oak-specific migration/audit view required by #259. CG Dynamics remains the permanent source of truth; this Markdown file is an auditable client-specific representation and handoff aid.
 
-Current `main` base used for this branch:
-`c72431efc30687ecd950bb4d6b277b6dda06c11c`.
+Read/authority chain used for this migration:
+- current `AGENTS.md` / repo authority;
+- Issue #259;
+- #241 exact-client retrieval architecture and shared-runtime boundaries;
+- #248 human creative standard;
+- current freshness/provenance rules;
+- existing reusable hospitality/restaurant/bar/event research;
+- accessible Red Oak ChatGPT Project/CG working history, including repeated caption corrections and approvals;
+- Red Oak visual/source evidence;
+- current first-party Red Oak website/contact/menu/specials/event surfaces.
 
-Current #241 work owns shared runtime, exact-client retrieval, registration/readiness, guide generation and common architecture. This migration does not modify those files.
+Red Oak must remain completely separate from The Staffordshire and every other client. Shared research may inform method only. Never import another client's menu facts, specials, contacts, events, language rules, banned phrases, caption patterns or venue claims.
 
-The alphabetical #210/#184 research sequence is not advanced or restarted. Issue #259 is explicitly out of sequence.
+## 2. Exact identity
 
-Red Oak must remain completely separate from The Staffordshire and every other hospitality client. Shared hospitality research may inform creative method, but no other venue's contacts, menu facts, specials, performers, tone rules, banned words or campaign details may fill a Red Oak gap.
-
-## 2. Exact live Dynamics identity
-
-Authorised read-only production reconciliation on 2026-09-08 resolved one exact active client row:
+Verified read-only Dynamics identity on 2026-09-08:
 - canonical name: **Red Oak**;
 - exact client ID: `cdb11a82-339e-4b46-9b09-bde1a23efeaf`;
 - active: `true`.
 
-No production row, UUID, package, time-history, source, Skill Card or client record was mutated.
+Retrieval key:
 
-Retrieval identity rule:
-- resolve **Red Oak** by the exact client ID above;
-- do not fuzzy-map it to The Staffordshire, another Bloemfontein restaurant/bar, a Red Oak campaign microsite, or a similarly named business;
-- historical public labels such as `Red Oak Bar & Lounge` may be matching/context evidence only where the identity is clearly the same venue;
-- public-facing current name should follow the current first-party Red Oak identity unless a supplied campaign uses a specific approved variant.
+`cdb11a82-339e-4b46-9b09-bde1a23efeaf + exact task type + supplied creative/context`
 
-## 3. Existing repo intelligence and reusable research
+Do not fuzzy-map Red Oak to another Bloemfontein venue or hospitality client.
 
-No completed exact Red Oak client-intelligence record was found on current `main` before this migration.
+## 3. Current verified first-party business facts
 
-Current repo references to Red Oak are mostly examples, historical client/task references and generic system/test material. They are not a sufficient client manual and must not be treated as current business truth.
-
-Relevant existing reusable research includes:
-- `docs/ai-workforce/HOSPITALITY-RESTAURANTS-BARS-EVENTS-HUMAN-MARKETING-GOLDMINE-2026-08.md`;
-- related hospitality/local-event/rugby/human-marketing packs already indexed in CG Dynamics;
-- Issue #248's human-copy quality contract.
-
-Useful shared principles that survive client-specific review:
-- show the real human occasion rather than relying on generic hospitality claims;
-- captions must add beyond the artwork/video;
-- local language must sound natural, never forced;
-- event/special copy must preserve exact current mechanics;
-- real people, reactions, serving moments, match-day build-up and venue behaviour can be stronger than staged generic product montages;
-- avoid generic `good food, good vibes`, `where memories are made`, `something for everyone` and other interchangeable hospitality filler;
-- SEO/search intent should be validated to the exact client and location rather than copied from a generic national list.
-
-These are method-level inputs only. Red Oak's exact voice below is client-specific authority.
-
-## 4. Accessible Red Oak Project / CG evidence reviewed
-
-The accessible Red Oak working history and retained CG corrections establish a recurring body of work around:
-- restaurant/bar hospitality;
-- food and drink posts;
-- rugby and sports-viewing content;
-- live events/performers;
-- weekend/community atmosphere;
-- promotions/specials;
-- local Bloemfontein audience behaviour;
-- table/venue participation mechanics;
-- image enhancement and venue-preserving edits.
-
-### Durable client/CG corrections
-
-Strong durable lessons from repeated CG corrections include:
-- **Afrikaans is the normal Red Oak marketing default.** A direct Red Oak correction required captions, videos, poster wording and hashtags to be Afrikaans.
-- A later explicit brief requested a specific asset in English. Therefore the durable rule is not `English is forbidden forever`; it is: **default to coherent Afrikaans, but follow an explicit asset-level English request.**
-- Do not casually mix Afrikaans and English just to sound local. Keep one coherent language unless the supplied creative or real phrase earns a switch.
-- Red Oak copy should be fun, quirky, human and Bloem-local where appropriate.
-- The user explicitly rejected recurring/generic `good vibes` style wording for Red Oak. Do not rebuild that pattern under slightly different wording.
-- When asked for an alternative, substantially change the idea rather than swapping a few adjectives around the same generic hospitality sentence.
-- Hashtags must relate to the actual post and should support the exact topic, especially rugby/event context when that is what the content shows.
-- Captions should add something beyond the poster/video rather than simply restating the visible copy.
-- Website/contact/footer material is contextual, not a compulsory boilerplate block for every caption.
-- Red Oak's people/community identity is important. Prior CG positioning such as `Red Oak isn't Red Oak without the people` / `And Bloem always shows up` is useful evidence of that community emphasis, not a slogan that must be repeated mechanically.
-
-### Temporary historical campaign evidence
-
-Accessible historical/recent campaign work includes rugby promotions, performer/event announcements, food features, weekend recaps and the Red Oak Rugby Table League.
-
-The Rugby Table League PDF is strong evidence of the venue's ability to run participatory match-day activations. It includes a four-fixture Springboks vs New Zealand series, table registration, score prediction, challenges, leaderboard mechanics and prizes. Those exact dates, prizes, sponsors and rules are **temporary 2026 campaign facts only** and must never become evergreen Red Oak intelligence.
-
-Likewise, old performers, match fixtures, food prices, special names, competition rules and one-off slogans are creative/campaign history, not permanent offers.
-
-## 5. Accessible uploaded/source evidence
-
-The accessible File Library surfaced Red Oak-specific material including:
-- `RedOak_RTL_TableTalker_08_26.pdf`;
-- `Friends gathered under string lights.png`;
-- `Friendship and fun at the bar.png`;
-- `Smiling Rugby Fans at a Beer Garden.png`;
-- `Warm Nights at Red Oak Patio.png`;
-- `Cheers at Red Oak Pub.png`;
-- `Celebrating connections at Red Oak.png`;
-- `Red Oak Pavilion Under String Lights.png`;
-- `NEW RED OAK ADS 2025(1).png`;
-- `NEW RED OAK ADS 2025(2).png`;
-- various generated/edited derivatives tied to Red Oak image work.
-
-Durable visual patterns supported across the strongest real/reference evidence:
-- circular Red Oak logo treatment with tree mark;
-- current first-party site supports **Est. 2018**;
-- warm indoor/outdoor restaurant/bar atmosphere;
-- string-light and pavilion/patio context;
-- people/social groups as a major part of the venue story;
-- rugby/sports viewing as a recurring visual/content territory;
-- real food/drink and bar-service context;
-- warm red/black/dark venue branding and recognisable Red Oak signage.
-
-A generated/derived file surfaced a conflicting `EST 2006` visual description. That conflicts with current first-party `Est. 2018` and must be treated as **rejected factual grounding**. Generated text/logo details never outrank the real logo or current first-party business evidence.
-
-Image-edit history also includes direct requests such as:
-- upscale / remove noise and blur;
-- remove people and focus on the bar;
-- preserve the exact Red Oak logo rather than recreating an approximation.
-
-## 6. Current first-party evidence - verified 2026-09-08
-
-Canonical first-party website:
-- `https://www.redoakgroup.co.za/`
-
-Current first-party site positions the venue as:
-- **Red Oak Restaurant**;
-- Langenhoven Park, Bloemfontein;
-- `Est. 2018`;
-- current brand line: **Where the Good Times Grow**.
-
-Current first-party site supports these high-level live business territories:
-- restaurant food/menu discovery;
-- food and drink specials;
-- match-day / rugby viewing;
-- live shows/events;
-- bookings;
-- year-end functions/bookings;
-- real customer/community atmosphere.
-
-Current menu categories visible on 2026-09-08 include breakfast, quesadillas, snacks/light meals, burgers, ribs/related mains, chicken/combos/sauces, steaks, platters/loaded fries, pizza and a wine collection. Exact dishes, portion descriptions and prices are mutable and must be rechecked at task time.
-
-Current specials page contains live food and drink offers. These prove `specials` is a current content/business category, not that any particular price or special remains valid tomorrow.
-
-Current homepage also exposes a current live-show promotion and match-day positioning. Performer, event date, ticket price, table requirements and current match/special details remain temporary task-time facts.
-
-### Current verified contact facts
-
-First-party contact page, observed 2026-09-08:
+Observed from current first-party Red Oak surfaces on 2026-09-08:
+- public brand: **Red Oak** / Red Oak Restaurant;
+- location: **Langenhoven Park, Bloemfontein**;
+- establishment line: **Est. 2018**;
+- website: `https://www.redoakgroup.co.za/`;
+- current brand line: **Where the Good Times Grow**;
 - general enquiries: **051 011 0208**;
 - bookings: **079 240 1307**;
-- booking contact: **Niki Ferns**;
-- emails: **niki@redoakgroup.co.za** and **events@redoakgroup.co.za**;
-- location shown by first-party site: **Langenhoven Park, Bloemfontein**.
+- booking/function contact: **Niki Ferns**;
+- email: **niki@redoakgroup.co.za**;
+- events email: **events@redoakgroup.co.za**.
 
-Contact usage rules:
-- use these only when the task actually needs a contact/footer or booking CTA;
-- `079 240 1307` is the current first-party booking/function route associated with Niki Ferns;
-- `051 011 0208` is the current first-party general-enquiries number;
-- do not automatically paste every contact into every caption;
-- an earlier CG working rule omitted the website from routine Red Oak captions. Preserve that as a caption convention: **do not auto-append the website.** Use the current website only when the brief explicitly benefits from menu/site/specials navigation or asks for it.
+Current live business/content territories include:
+- restaurant food/menu;
+- food and drink specials;
+- rugby/match-day viewing;
+- live shows/events;
+- bookings/functions;
+- real customer/community atmosphere.
 
-### Current website language is evidence, not a caption template
+Do not append contacts or the website to routine captions unless the brief actually needs them.
 
-The current site uses lines such as `Where the Good Times Grow`, `Bloem's favourite local spot`, and a food/drink/company phrase. These are first-party positioning evidence, but they must not make every social caption read like the website hero. In particular, do not reintroduce the rejected generic `good vibes` pattern through lookalike wording.
+### Unresolved / freshness-gated
 
-## 7. Mutable-fact conflicts and unresolved items
-
-### Exact street address
-
-Current first-party site confirms only `Langenhoven Park, Bloemfontein` in accessible text.
-
-Recent third-party listings show:
-- `31A Old Kimberley Rd, Langenhoven Park, Bloemfontein, 9301`.
-
-That street address is plausible historical/current listing evidence but was not exposed as text on the accessible first-party contact page during this audit. Therefore:
-- location `Langenhoven Park, Bloemfontein` = `current_verified`;
-- exact street address `31A Old Kimberley Rd...` = `stale_unverified` / awaiting first-party or direct client confirmation before high-confidence publication.
-
-### Phone conflict
-
-Recent third-party listings still show **051 011 3819**.
-
-Current first-party site shows **051 011 0208**.
-
-Use:
-- `051 011 0208` = `current_verified` first-party general-enquiries number;
-- `051 011 3819` = historical/stale third-party listing evidence; do not publish it as current unless directly reverified.
-
-### Opening hours
-
-Accessible first-party text did not expose a complete current operating-hours schedule.
-
-Third-party listings expose hours, but those are not strong enough to overwrite the first-party gap. Therefore hours are `stale_unverified` and must be rechecked before a caption/post/site statement relies on them.
-
-### Social identities
-
-Search access did not reliably resolve a complete current official Facebook/Instagram/TikTok handle set, and direct recent-feed review was not available through the current path.
-
-Do not invent social handles. Treat current platform identities as unresolved until retrieved from a trusted first-party/client source.
-
-### Delivery/takeaway, facilities and partner claims
-
-Do not infer:
+Do not guess:
+- exact street address unless freshly first-party/client confirmed;
+- complete operating hours;
+- current official social handles;
 - delivery/takeaway method;
-- private-room capacity;
-- child facilities;
-- parking guarantees;
-- accessibility claims;
-- exact number/size of screens;
-- alcohol supplier/partner relationships;
-- permanent sponsor relationships;
-- event production capabilities;
-- seating capacity;
-- venue hire inclusions.
+- seating/screen counts;
+- facility/accessibility/parking claims;
+- permanent sponsor or alcohol-partner relationships;
+- venue-hire inclusions.
 
-A current campaign or website line can support a task-specific statement only after freshness verification.
+Current first-party `051 011 0208` outranks stale third-party `051 011 3819` unless the latter is directly reverified.
 
-## 8. Human Red Oak voice
+## 4. What Red Oak actually uses ChatGPT for
 
-Red Oak should sound like a Bloemfontein local venue speaking to people who genuinely know the place, not like a hospitality copy template.
+The Red Oak Project is used heavily for practical day-to-day social output, especially:
+- captions for supplied food-special posters;
+- rugby/game-day captions;
+- weekend/client-highlight captions;
+- live-music/event captions;
+- short video/reel copy and hooks;
+- campaign CTAs such as Rugby Table League participation;
+- quick one-line social replies/comments;
+- hashtag selection;
+- occasional image enhancement/edit guidance.
 
-Default voice:
+Therefore the caption/output contract below is a primary client rule, not a minor style preference.
+
+## 5. Default caption-output contract
+
+For a normal Red Oak **caption** request:
+- return **4 genuinely different caption options** by default;
+- put the relevant hashtags **under every option**;
+- use **no more than 5 hashtags** per option;
+- if the user explicitly asks for one/final/quick caption, return one;
+- options must differ in idea or angle, not only swap a few adjectives;
+- keep them concise enough to use directly on social media;
+- do not add an essay explaining the options unless asked.
+
+The user repeatedly corrects missing hashtags and shallow near-duplicate options. Treat `4 options + hashtags on all of them` as a durable Red Oak workflow rule.
+
+## 6. Language rule - corrected from the earlier migration draft
+
+Do **not** blindly force every Red Oak caption into Afrikaans.
+
+Operational rule:
+- if the supplied poster/creative is clearly **English** and the user simply asks `Caption`, write the caption options in **English**;
+- if the supplied creative is Afrikaans or the user asks for Afrikaans, write natural contemporary **Afrikaans**;
+- for new/original Red Oak concept work with no language cue, **Afrikaans-first** remains the creative default;
+- do not force bilingual copy;
+- do not randomly mix languages to manufacture personality;
+- natural established South African wording may remain where it genuinely fits the asset/brief;
+- in Afrikaans scripts use **`foon`**, not `phone`.
+
+Afrikaans should sound spoken and local, not formal or translated. English should also sound like Red Oak, not corporate restaurant copy.
+
+## 7. Red Oak voice
+
+Red Oak should sound like a real Bloemfontein venue speaking to its regulars and local audience.
+
+Default qualities:
 - human;
-- playful when the occasion earns it;
+- easy;
+- fun without trying too hard;
 - locally aware;
-- warm without becoming sentimental filler;
-- commercially useful;
-- confident but not over-written;
-- capable of quick rugby/event banter;
-- capable of sharper food hooks;
-- people/community-centred when the asset is about the crowd.
+- warm;
+- confident;
+- capable of stronger rugby energy;
+- capable of appetite-led food hooks;
+- people/community-centred when the asset shows clients or atmosphere.
 
-Good Red Oak creative often starts from one recognisable human truth:
-- the table that turns into the plan for the night;
-- the person who arrives `just for the game` and stays;
-- the local habit around match day;
-- a food decision people actually debate;
-- a real reaction from the venue;
-- the crowd itself;
-- the reason this specific special/event is worth leaving home for.
+The desired middle ground is important: **not cringy, but not boring**.
 
-Avoid:
-- `good vibes`;
-- `good food, good vibes`;
+Avoid generic AI/hospitality filler such as:
+- `good vibes` / `good food, good vibes`;
 - `something for everyone`;
 - `the perfect place to unwind`;
 - `where memories are made` as filler;
 - `unforgettable experience`;
 - `your local favourite` as an empty claim;
-- generic three-part lists of food + drinks + atmosphere;
-- fake slang;
-- forced Free State/Afrikaans phrases inserted only to sound local;
-- borrowed Staffy wording;
-- replacing one rejected generic caption with the same sentence structure and new adjectives.
+- `Friday calls for...` as a repeated template;
+- `Wednesday sorted` / `Tuesday sorted` as a repeated template;
+- `this one needs no convincing`;
+- `a proper plate for a proper appetite`;
+- repeated `comfort food` clichés;
+- generic three-part lists used only to fill space;
+- fake slang or forced Free State wording.
 
-Official brand language such as **Where the Good Times Grow** may be used intentionally when it serves the concept, but it should not become an obligatory closing line.
+`lekker` can work naturally, but do not use it as a substitute for an actual idea.
 
-## 9. Language rules
+Occasional `lekker oaks` / `oaks` wordplay can work in the Free State context, but use it sparingly and only when it sounds natural.
 
-Default operational rule:
-- **Afrikaans first** for normal Red Oak social captions, poster wording, video copy and hashtags.
+## 8. Caption-writing rule: add, do not merely repeat
 
-Exception:
-- if the supplied brief/creative explicitly asks for English for that asset, write the piece cleanly in English.
-
-Do not:
-- default to English because the current website contains English copy;
-- force bilingual captions without a reason;
-- sprinkle English slang into Afrikaans to manufacture personality;
-- translate natural Afrikaans into stiff/formal wording.
-
-Afrikaans must sound like ordinary contemporary social language. Prefer what a real Red Oak customer/staff member would naturally say over technically correct but formal wording.
-
-Hashtags should normally follow the language of the actual post unless a strong exact search term/brand identity justifies otherwise.
-
-## 10. Caption standard
-
-A Red Oak caption should usually be relatively concise and get to the human point quickly.
-
-It must add at least one useful second layer beyond the visible artwork/video, for example:
-- a reaction;
+The artwork/video normally already carries the product name, price and core mechanics. A caption should add a second layer such as:
+- a human hook;
 - a reason to come;
-- one extra useful detail;
-- contextual humour;
-- a booking action;
-- an event tension/occasion;
-- a crowd/community observation;
-- the actual use case of the food or match-day moment.
+- a specific use-case;
+- light humour;
+- the match/event tension;
+- a people/community observation;
+- a concise CTA.
 
-Rules:
-- do not paraphrase the poster line-for-line;
-- do not open every caption with a generic scene-setting sentence;
-- use questions only when the question itself is interesting, not as an automatic engagement trick;
-- short punchy captions are valid when the creative already contains the details;
-- event captions can be fuller when practical details are needed;
-- avoid repetitive three-item lists and template rhythms;
-- do not make every post sales-heavy;
-- do not append the same contact/footer/site block mechanically;
-- emojis are optional and selective, not mandatory decoration;
-- if the post already carries the booking details clearly, caption CTA may be conversational rather than duplicated;
-- if a current booking route is needed, use freshly verified Red Oak details only.
+Do not paraphrase every visible line from the poster.
 
-### CTA patterns
+However, for **specials**, repeat the key mechanic when needed to remove ambiguity. Accuracy beats cleverness.
 
-Valid current CTA families, when relevant:
-- book a table / make a booking;
-- contact Niki for a current booking/function where that is the right first-party route;
-- call general enquiries;
-- check the current menu/specials on the current site when the brief benefits from it;
-- come watch a current verified match;
-- attend/book a current verified live event;
-- comment/participate only when the campaign genuinely asks for it.
+Examples of durable accuracy lessons from repeated corrections:
+- `choice of either` / three pizza options for R160 means **choose one pizza from the three options for R160**; never write `3 pizzas for R160`;
+- do not invent `dinner`, `lunch`, `after work` or another time-of-day if the offer runs all day or the creative does not say so;
+- do not mention drinks in a food-only special;
+- if a wine/drink is actually included in the special, it is relevant and may be mentioned;
+- read `sit down only`, times, included sides, quantities and serving details exactly from the supplied creative before writing.
 
-Never invent WhatsApp, DM-only, ticket-link, deposit, table-size or entry instructions.
+## 9. Food-special caption rules
 
-## 11. Poster / text-on-post guidance
+Food-special captions are a frequent Red Oak task.
 
-Red Oak poster copy should feel like a real hook, not a headline generated from a category label.
+Use this structure as guidance, not a rigid template:
+1. one short appetite/human hook;
+2. the exact offer only as much as needed for clarity;
+3. price/CTA if useful;
+4. relevant hashtags.
 
-Prefer:
-- short, readable headline;
-- one useful supporting line;
-- event/product mechanics separated cleanly;
-- humour tied to the actual food, fixture, performer or customer behaviour;
-- Afrikaans by default unless the brief explicitly calls for English;
-- strong specificity over `weekend vibes` filler.
+Keep focus on the food shown. Do not drag in rugby, drinks, nightlife or generic venue atmosphere unless the brief/creative actually includes that context.
 
-For food:
-- lead on the real appetite/use-case/product distinction supplied by the brief;
-- never invent serving detail, ingredient, portion or price;
-- do not make every headline a generic `lekker` statement.
+Do not over-describe the dish if the poster already does it. Do not invent texture, ingredients, portion size, cooking method or serving detail not visible/supplied.
 
-For rugby:
-- use the actual verified fixture/context;
-- lean into recognisable supporter behaviour, rivalry or table interaction when appropriate;
-- never reuse expired Table League rules/prizes as current;
-- avoid generic `big screen + cold beer + vibes` formulas.
+For food-choice posts, the decision itself can be the hook (`which one are you having?`, `pick your favourite`) when natural, but do not repeat the same choice-question pattern every week.
 
-For live music/events:
-- performer/date/time/price/table/ticket details are freshness-gated;
-- hook the reason the night matters, then present facts clearly;
-- one year's artist/event language is not a permanent template.
+## 10. Rugby / game-day voice
 
-## 12. Reels / video / content ideas
+Rugby is a major Red Oak content territory and should carry more energy than a routine food special.
 
-A strong Red Oak short-form structure is:
-1. immediate real venue/customer/food hook;
-2. one clear point;
-3. specific proof/action;
-4. natural pay-off;
-5. only the CTA the viewer actually needs.
+When the supplied/current context supports it, lean into:
+- Bokke / Springboks;
+- the rivalry;
+- the crowd/table atmosphere;
+- the big-game occasion;
+- being at Red Oak for the match;
+- food/drinks only when actually part of the asset/brief;
+- table participation when a live campaign requires it.
 
-Useful recurring content territories:
-- real match-day build-up;
-- crowd reactions;
-- food reveal with a real human angle;
-- kitchen/bar/service moments;
-- event setup vs full venue;
-- weekend recap driven by people rather than generic montage;
-- staff/customer moments;
-- special explained through the use case rather than only a price card;
-- quick Bloem-local observations;
-- participatory table/game/event mechanics when a live campaign supports them.
+Do not default to generic `big screen + cold beer + vibes` copy.
 
-Do not create a permanent concept bank from old scripts. Every new concept must fit the current asset, season, event and client need.
+Hashtags should favour actual rugby/search intent when relevant, e.g. exact team/match/topic terms rather than made-up local filler.
 
-## 13. Image generation / editing rules
+### Rugby Table League campaign lesson
 
-When editing supplied Red Oak imagery:
-- preserve the exact real Red Oak logo geometry, tree mark and current visible brand treatment;
-- never replace the logo with a generated approximation;
-- preserve real people unless removal is explicitly requested;
-- preserve real food/drinks unless replacement is explicitly requested;
-- preserve recognisable venue architecture, signage and composition unless the brief requests a redesign;
-- change only what was requested where the instruction is a bounded edit;
-- improve sharpness/noise/clarity without smoothing faces, food, timber, glass or signage into synthetic textures;
-- maintain believable lighting, shadows, reflections, scale and contact points;
-- do not invent menu items, labels, sponsors, performer signage, crowd branding or alcohol partnerships;
-- do not use generated text as factual branding;
-- if a generated derivative conflicts with a real reference or current first-party fact, the real reference/current fact wins.
+The 2026 Red Oak Rugby Table League is temporary campaign history, not evergreen venue truth.
 
-For generated venue/event imagery:
-- do not present a fictional generic bar as the actual Red Oak venue;
-- use real venue references when factual recognisability matters;
-- preserve the people/community/social character rather than defaulting to empty premium restaurant stock imagery;
-- avoid fabricated event boards, sponsor logos or product labels;
-- do not encode `Est. 2006`; current first-party evidence is `Est. 2018`.
+A critical CTA lesson from the campaign:
+- app participation may technically happen online, but if the mechanic requires a **Red Oak table / in-venue registration**, the caption must make that physical attendance requirement clear;
+- never word a CTA so it sounds as if a person can enter remotely when they cannot.
 
-## 14. Dynamic SEO / hashtags
+For the final Rivalry-game prediction content, the intended structure was essentially: come watch the game at Red Oak, get your table, make the prediction on the Rugby Table League app, then stand a chance to win. This exact mechanic expires with the campaign.
+
+## 11. Weekend / people / atmosphere posts
+
+When the asset is a weekend recap or photos of clients:
+- centre the people and actual Red Oak occasion;
+- rugby, food and drinks may all be mentioned when the photos genuinely show them;
+- keep it warm and local without falling into generic `good vibes` copy;
+- do not over-market a simple thank-you/highlight post.
+
+Prior useful territory includes the idea that Red Oak is made by its people/community, but do not turn any one sentence into a compulsory slogan.
+
+## 12. Live music / events
+
+For performer/event captions:
+- verify performer/date/time/price/current booking mechanics at task time;
+- use the actual performer as search/hashtag intent;
+- build excitement without sounding desperate;
+- if the user supplies set times, preserve them exactly;
+- a short `sien julle daar`-style CTA can work when the video itself already carries the message;
+- never invent ticketing, table, deposit or entry terms.
+
+## 13. Quick comments / community replies
+
+When Red Oak is replying to a customer/creator post, default to a **short natural one-liner**, not a marketing caption.
+
+The user prefers these replies to feel like a person from Red Oak joined the conversation. Light rugby/local humour is useful when earned. Avoid a sales CTA unless the reply naturally calls for one.
+
+## 14. Hashtags / SEO - high-priority correction
 
 Default maximum: **5 hashtags**.
 
-Do not maintain a frozen Red Oak hashtag bank.
+Hashtags are not decoration. They must have a plausible discovery/search purpose for the exact post.
 
-Choose dynamically from:
-1. exact Red Oak identity where useful;
-2. exact content topic/product/event;
-3. Bloemfontein/Langenhoven Park/local discovery where genuinely relevant;
-4. rugby/live-music/function/restaurant intent only when that exact post supports it;
-5. platform/current-search context where reliable evidence exists.
+The user has repeatedly rejected filler or invented hashtags. Do not create weak tags simply because they describe the sentence.
 
-Rules:
-- hashtags must match what is actually shown or promoted;
-- Afrikaans post -> normally use natural Afrikaans/search-relevant tags where useful;
-- current artist/fixture/special tags expire with the campaign;
-- do not call a hashtag `trending` without current evidence;
-- natural searchable wording in the caption matters more than stuffing keywords;
-- do not invent `sports bar`, `family venue`, `late-night`, `live music every week` or similar discovery claims unless currently evidenced;
-- do not import Staffy hashtag rules or event terms.
+Selection logic:
+1. exact Red Oak identity when useful, e.g. `#RedOakBloem`;
+2. exact high-intent topic/product, e.g. pizza/steak/eisbein/lamb/rugby/performer terms;
+3. exact current event/team/competition intent when relevant, e.g. Springboks/All Blacks/rugby terms;
+4. useful local discovery such as Bloemfontein when it meaningfully helps;
+5. a current researched/search-relevant term when there is evidence for it.
 
-Potential search-intent territories to validate at task time include Red Oak Bloemfontein, Red Oak menu, Red Oak specials, restaurant/bar in Langenhoven Park, rugby viewing in Bloemfontein and current live-event queries. Treat these as research directions, not fixed output tags.
+Do **not** automatically hashtag every location variant. One useful location term is usually enough.
 
-## 15. Durable business scope and factual guardrails
+Do **not** invent or default to low-value tags such as a campaign phrase nobody searches (`#LimitedMenu`, `#KitchenUpdate`, etc.) merely because the words appear in the caption.
 
-Safe high-level current positioning:
-- Red Oak is a restaurant/local hospitality venue in Langenhoven Park, Bloemfontein;
-- Est. 2018 is current first-party branding;
-- food/menu content is core;
-- current food/drink specials are a live business/content category;
-- match-day/rugby viewing is a current first-party content territory;
-- live shows/events are a current first-party content territory;
-- bookings are supported;
-- year-end functions/bookings are currently promoted;
-- the people/community/venue atmosphere is central to how current Red Oak presents itself.
+Do not claim a tag is trending unless current evidence supports that claim.
 
-Never freeze without fresh evidence:
-- a menu item or price;
-- a daily/weekly special;
-- a drink brand or promo;
-- stock/availability;
-- a performer;
-- an event date/time/ticket price;
-- a fixture;
-- Table League rules/prizes;
+Do not freeze an old generic hashtag bank. Historical tags such as `#BloemFoodie` may only be used when relevant/currently useful; they are not automatic defaults.
+
+When the user explicitly asks for **researched** hashtags, check current public evidence rather than guessing.
+
+Natural searchable wording in the caption matters too; hashtags are only one discovery layer.
+
+## 15. Poster / supplied-creative parsing
+
+Before writing a caption, read the supplied creative carefully.
+
+Extract exactly:
+- day/date if present;
+- dish/product;
+- price;
+- quantity/portion;
+- included sides/drinks;
+- `choice of` mechanics;
+- sit-down/takeaway restrictions;
+- time window;
+- performer/match names and times;
+- sponsor/campaign mechanics when present.
+
+Do not use memory to overwrite what the current creative says.
+
+If the creative conflicts with older Red Oak history, use the current supplied creative for the current post unless there is a clear factual error that needs to be flagged.
+
+## 16. Poster / text-on-post guidance
+
+For new poster copy:
+- short readable headline;
+- one useful supporting line;
+- exact product/event mechanics separated cleanly;
+- humour tied to the actual food, fixture, performer or customer behaviour;
+- match the chosen asset language;
+- avoid generic `weekend vibes` filler.
+
+For rugby, use the actual verified fixture/context. For live music, performer/date/time/price are freshness-gated. For food, never invent serving detail or price.
+
+## 17. Video / reel guidance
+
+Useful Red Oak short-form territories:
+- real match-day build-up and reactions;
+- crowd moments;
+- food reveal with a human angle;
+- bar/service moments;
+- performer/event hype;
+- weekend recap;
+- staff/customer reactions;
+- quick Bloem-local observations;
+- participatory game/table mechanics when a live campaign supports them.
+
+A useful structure is:
+1. immediate hook;
+2. one clear point;
+3. specific proof/action;
+4. natural payoff;
+5. only the CTA actually needed.
+
+Do not create future videos by mechanically recycling an old script.
+
+## 18. Image generation / editing
+
+When editing supplied Red Oak imagery:
+- preserve the exact real Red Oak logo/branding;
+- preserve real people unless removal is explicitly requested;
+- preserve real food and drinks unless change is explicitly requested;
+- preserve recognisable venue architecture and composition unless redesign is requested;
+- change only what was asked for in a bounded edit;
+- improve quality without smoothing the image into synthetic-looking textures;
+- keep believable lighting, reflections, shadows, scale and contact points;
+- never invent sponsor logos, menu labels, event boards or partner branding.
+
+Generated/derived `EST 2006` is rejected factual grounding. Current first-party evidence is **Est. 2018**.
+
+Do not present a fictional generic bar as the real Red Oak venue.
+
+## 19. Mutable facts that must never be frozen
+
+Freshly verify when relevant:
+- menu items;
+- prices;
+- daily/weekly specials;
+- drink brands/promotions;
+- performer/date/time/ticket price;
+- rugby fixtures;
+- Rugby Table League rules/prizes;
 - sponsor relationships;
-- operating hours;
-- full street address;
-- exact facility/screen count;
-- table capacity;
-- delivery/takeaway method;
-- partner brand status;
-- staff role beyond currently verified contact usage;
-- booking/deposit/entry terms.
+- booking/deposit/entry terms;
+- hours;
+- social handles;
+- exact address;
+- delivery/takeaway;
+- facilities/screen counts;
+- stock/availability.
 
-## 16. Freshness and provenance states
+Historical posters and captions are creative evidence, not proof of a current offer.
 
-### `current_verified` - 2026-09-08 first-party
-- canonical public brand: Red Oak;
-- current website: `https://www.redoakgroup.co.za/`;
-- Langenhoven Park, Bloemfontein;
-- Est. 2018;
-- general enquiries: 051 011 0208;
-- bookings: 079 240 1307;
-- Niki Ferns as the current booking/function contact on the site;
-- `niki@redoakgroup.co.za`;
-- `events@redoakgroup.co.za`;
-- restaurant/menu/specials positioning;
-- match-day/rugby content territory;
-- live-show/event content territory;
-- year-end functions/bookings currently promoted.
+## 20. Project Source audit - accessible evidence only
 
-### `possible_change` / `stale_unverified`
-- exact street address: third-party `31A Old Kimberley Rd...` pending stronger direct confirmation;
-- complete current operating hours;
-- current official social handles;
-- delivery/takeaway methods;
-- detailed venue/facility/service claims not exposed clearly by first-party text.
-
-### `historical`
-- old campaigns, performers, fixture dates, poster prices, specials and competition mechanics;
-- older third-party phone `051 011 3819` unless reverified;
-- Rugby Table League 2026 dates/prizes/sponsor mechanics after their campaign window.
-
-### `rejected`
-- generated/derived `EST 2006` as factual Red Oak grounding;
-- generic `good vibes` style as normal future Red Oak caption language;
-- cross-client Staffy facts/rules;
-- unsupported fixed hashtag banks;
-- invented current offers/hours/partner claims.
-
-## 17. Project Source audit - accessible evidence only
-
-The actual ChatGPT Project **Sources panel roster and current Project Instructions panel were not directly exposed to this migration runtime**. No unseen Source name is invented and no source deletion is performed.
-
-For the Red Oak-specific uploaded evidence that was actually accessible:
+The live ChatGPT Project Sources-panel roster was not directly exposed to the migration runtime. Do not invent unseen source membership and do not delete any source without user approval.
 
 ### KEEP
-- `RedOak_RTL_TableTalker_08_26.pdf` - keep as original historical campaign evidence. It is useful proof of campaign mechanics/creative history, but must be marked temporary/expired by date and never used as a standing current offer.
-- `Friends gathered under string lights.png` - keep as real/venue visual evidence where the original is authentic.
-- `Friendship and fun at the bar.png` - keep as real/venue visual evidence where the original is authentic.
-- `Smiling Rugby Fans at a Beer Garden.png` - keep as rugby/venue visual evidence where authentic; brand/products visible in a photograph are not automatic permanent partnership claims.
-- `Warm Nights at Red Oak Patio.png` - keep as venue/people atmosphere evidence where it derives from real Red Oak imagery.
-- `Cheers at Red Oak Pub.png` - keep as venue/customer atmosphere evidence where authentic.
-- `Celebrating connections at Red Oak.png` - keep as visual/edit history; its instruction to improve noise/blur is a useful edit lesson.
-- `NEW RED OAK ADS 2025(1).png` and `NEW RED OAK ADS 2025(2).png` - keep as historical real social/venue visual evidence if these are original client photos.
+- `RedOak_RTL_TableTalker_08_26.pdf` as dated historical campaign evidence;
+- authentic Red Oak venue/customer/rugby photos and original creative evidence;
+- original brand/logo evidence.
 
 ### REPLACE as everyday factual grounding, not delete
-- `Red Oak Pavilion Under String Lights.png` and other image-generation/edited derivatives: retain as creative history if useful, but replace their **factual grounding role** with original real venue photographs/current first-party site evidence. Generated architecture/logo/text details must not define current reality.
-- any derivative that surfaces `EST 2006`: replace its factual role with current first-party `Est. 2018` and authentic logo references.
-- any old campaign asset that contains fixed prices/events/sponsors: keep only as historical creative evidence; use current first-party/client brief for live claims.
+- generated/edited derivatives where original current photographs exist;
+- any derivative showing conflicting `EST 2006`;
+- old campaign creatives containing fixed prices/events/sponsors, which remain useful only as historical creative evidence.
 
 ### REMOVE
-- none recommended from the actually accessible evidence without seeing the live Project Sources panel and exact source membership.
+- none recommended without seeing the live Sources-panel membership.
 
-No Project Source was deleted, removed, uploaded or mutated.
-
-## 18. Current Project Instructions audit result
-
-Because the live Project Instructions field itself was not directly accessible, a literal line-by-line comparison of the current UI field could not be completed without inventing text.
-
-The migration instead reconciles all accessible durable Red Oak working rules into the short replacement instructions below.
-
-If the live Project currently contains older rules, the short instructions should supersede any conflicting generic/stale instruction after the user manually pastes and confirms them.
-
-Do not require a static Client Guide upload. Under current #241 architecture, exact current Dynamics/GitHub context should be retrieved live and the `.md` record is an auditable client-specific repository representation, not a second manually maintained Project truth.
-
-## 19. #241 task-specific retrieval readiness
-
-Required runtime key:
-
-`cdb11a82-339e-4b46-9b09-bde1a23efeaf + exact task type + supplied creative/context`
+## 21. #241 task-specific retrieval packets
 
 ### Caption packet
-Return only:
-- Afrikaans-default / explicit-English-exception rule;
-- Red Oak human/quirky/Bloem-local voice;
-- rejected `good vibes` / generic hospitality patterns;
-- caption adds rather than repeats;
-- exact current fact(s) relevant to the supplied creative;
-- task-relevant CTA/contact only when needed;
-- mutable-fact guardrails;
-- dynamic max-5 hashtag instruction;
-- unresolved conflicts that affect the post.
+Return only what is needed for the supplied post:
+- exact asset language rule;
+- **4 options + hashtags under every option** unless one/final requested;
+- Red Oak voice/rejected filler patterns;
+- exact current creative mechanics;
+- topic focus guardrail;
+- CTA only if useful;
+- max-5 dynamic SEO hashtag rule;
+- any freshness conflict affecting the post.
 
-### Poster/text packet
-Return only:
-- exact language for this asset;
-- short sharp Red Oak hook guidance;
-- supplied/verified product/event mechanics;
-- price/event freshness guardrails;
-- branding/format constraints.
+### Poster packet
+Return:
+- exact language;
+- short sharp hook guidance;
+- supplied/verified mechanics;
+- factual freshness guardrails;
+- Red Oak branding constraints.
 
-### Video/content-idea packet
-Return only:
-- Red Oak people/food/rugby/event human truths relevant to the current brief;
-- current season/event/asset context;
-- client-specific humour/language rules;
+### Video packet
+Return:
+- current people/food/rugby/event truth relevant to the brief;
+- current asset/event context;
+- humour/language rules;
 - shootable structure;
-- no stale campaign mechanics unless explicitly supplied/current.
+- only current campaign mechanics.
 
 ### Image-edit packet
-Return only:
-- preserve exact Red Oak logo/branding;
-- preserve real people/food/drinks/venue/composition unless requested otherwise;
-- bounded requested edit;
-- photorealistic texture/lighting/scale guardrails;
-- no invented sponsor/menu/event text;
-- current `Est. 2018` if establishment text is relevant.
+Return:
+- preserve exact Red Oak identity/logo;
+- preserve real people/food/drinks/venue/composition unless asked otherwise;
+- bounded edit;
+- photorealistic lighting/texture guardrails;
+- no invented sponsor/menu/event text.
 
 ### Factual lookup packet
 Return:
 - newest authoritative first-party/client-confirmed value;
-- provenance/observed date;
+- provenance/date;
 - conflict state;
-- no stale third-party substitution when the first-party value differs.
+- no stale substitution.
 
-## 20. Final short Project Instructions
+## 22. Final short Project Instructions
 
-Use these only after the CG user manually pastes/applies them in the Red Oak ChatGPT Project:
+Use after the CG user manually pastes/applies them in the actual Red Oak ChatGPT Project:
 
-> Work only on Red Oak. Before factual, caption or content work, retrieve the current exact Red Oak CG Dynamics/GitHub context and use the supplied creative as task context. Default Red Oak social copy to natural Afrikaans; use English only when the specific brief asks for it, and do not force language mixing. Keep the voice human, fun, locally aware and recognisably Red Oak; avoid generic `good vibes`/hospitality filler. Captions must add to the artwork or video, not repeat it. Use no more than 5 dynamically relevant hashtags by default. Preserve real food, drinks, people, venue details, logo/branding and composition in edits unless a change is explicitly requested. Never invent or freeze menu items, prices, specials, events, performers, fixtures, sponsors/partners, contacts, hours, booking terms or facility claims. Never transfer Staffy facts or rules into Red Oak. Flag conflicts instead of guessing.
+> Work only on Red Oak. Before factual/caption/content work, retrieve the current exact Red Oak CG Dynamics/GitHub context and use the supplied creative as task context. For caption requests, default to 4 clearly different options with max 5 relevant/searchable hashtags under every option; give one only when asked. Match the supplied asset language: English creative -> English, Afrikaans creative/brief -> natural Afrikaans; use Afrikaans-first for new concepts with no language cue. Read poster mechanics literally and never misstate choice-of offers, prices, times, inclusions or participation rules. Captions must add a human hook instead of merely repeating the artwork. Keep the voice local, fun, sharp and recognisably Red Oak - not generic/ChatGPT. Hashtags must serve real topic/brand/location/search intent, never filler. Focus on the actual post: food-only means food unless another element is genuinely part of the brief. Preserve real food, drinks, people, venue and exact branding in edits. Never invent current menu, specials, events, fixtures, sponsors, contacts, hours or booking/service claims, and never import Staffy facts/rules. Flag conflicts instead of guessing.
 
-## 21. Manual Project handoff gate
+## 23. Manual handoff gate
 
-Migration work may be complete in GitHub while Project handoff remains unconfirmed.
+Do not mark the Project handoff complete merely because these instructions exist in GitHub.
 
-Do not mark Red Oak Project-ready merely because the instructions above exist.
+Completion requires:
+1. the CG user pastes/applies the final short Instructions in the actual Red Oak ChatGPT Project;
+2. the CG user confirms they are applied.
 
-Handoff requires:
-1. CG user pastes/applies the final short instructions in the actual Red Oak Project;
-2. CG user confirms they are applied;
-3. only then may Project handoff be marked complete.
-
-Until that confirmation, required status is:
+Until then:
 
 `MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED`
 
-## 22. Isolation proof
+## 24. Isolation confirmation
 
-This branch intentionally contains only Red Oak client-specific migration intelligence.
-
-No edits are authorised or intended to:
-- #241 shared runtime/retrieval files;
-- shared migration/control ledgers;
-- The Staffordshire intelligence;
-- Supa Quick migrations;
-- provider/launch lanes;
-- CG Hours;
-- billing;
-- UUIDs;
-- package/time-history;
-- production data;
-- unrelated client records.
+This branch remains Red Oak client-specific. No #241 shared runtime, The Staffordshire, Supa Quick, CG Hours, billing, UUID/package/time-history or production data is intentionally modified by this refinement.
