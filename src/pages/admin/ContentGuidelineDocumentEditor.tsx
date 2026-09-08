@@ -7,6 +7,7 @@ import {
   guidelineScheduleCandidates,
   importGuidelineVideosFromSchedule,
   reorderGuidelineVideos,
+  runGuideAction,
   setGuidelinePublication,
   suggestContentVideos,
   suggestionToVideoInput,
@@ -17,6 +18,7 @@ import {
   type ContentRun,
   type ContentVideoSuggestion,
 } from '../../lib/contentWorkflow'
+import type { ContentGuideAction } from '../../lib/contentWorkflowRules'
 import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../lib/planner'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { humanizeStatus, INPUT_CLS, LABEL_CLS } from './contentGuidelineHelpers'
@@ -92,6 +94,7 @@ export default function ContentGuidelineDocumentEditor({
   const [error, setError] = useState<string | null>(null)
   const [scheduleError, setScheduleError] = useState<string | null>(null)
   const [importMessage, setImportMessage] = useState<string | null>(null)
+  const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null)
   // AI suggestions
   const [suggestions, setSuggestions] = useState<Array<ContentVideoSuggestion & { _localId: string }>>([])
   const [suggestionsLoading, setSuggestionsLoading] = useState(false)
@@ -288,6 +291,17 @@ export default function ContentGuidelineDocumentEditor({
     const result = await reorderGuidelineVideos(guideline.id, nextIds)
     setBusy(null)
     if (result.error) { setError(result.error); return }
+    await onChanged()
+  }
+
+  async function archiveVideo(video: ContentGuidelineVideo) {
+    if (video.status === 'archived') return
+    setBusy(`archive-${video.id}`)
+    setError(null)
+    const result = await runGuideAction(video.id, 'archive' as ContentGuideAction)
+    setBusy(null)
+    if (result.error) { setError(result.error); return }
+    setConfirmArchiveId(null)
     await onChanged()
   }
 
@@ -558,6 +572,18 @@ export default function ContentGuidelineDocumentEditor({
                     <div className="flex items-center gap-1">
                       <button type="button" title="Move video up" disabled={index === 0 || busy === 'reorder'} onClick={() => void moveVideo(index, -1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8593;</button>
                       <button type="button" title="Move video down" disabled={index === videos.length - 1 || busy === 'reorder'} onClick={() => void moveVideo(index, 1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8595;</button>
+                      {video.status !== 'archived' && (
+                        <>
+                          {confirmArchiveId === video.id ? (
+                            <div className="flex items-center gap-1">
+                              <button type="button" title="Confirm archive" onClick={() => void archiveVideo(video)} className="h-8 w-8 rounded-lg border border-red-400/40 bg-red-400/10 text-red-300 hover:bg-red-400/20" aria-label="Confirm archive">&#10003;</button>
+                              <button type="button" title="Cancel" onClick={() => setConfirmArchiveId(null)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white" aria-label="Cancel archive">&#10005;</button>
+                            </div>
+                          ) : (
+                            <button type="button" title="Archive video" onClick={() => setConfirmArchiveId(video.id)} className="h-8 w-8 rounded-lg border border-white/10 text-white/40 hover:text-red-300" aria-label="Archive video">&#128465;</button>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap items-start gap-2">

@@ -36,6 +36,14 @@ test('guide actions are only available from sensible states', () => {
   assert.equal(rules.canRunGuideAction('completed', 'archive'), true)
 })
 
+// Archive is available from every non-archived status (non-destructive retire)
+test('archive action is available from all non-archived guide states', () => {
+  for (const status of ['idea', 'needs_review', 'approved', 'added_to_run', 'in_production', 'completed']) {
+    assert.equal(rules.canRunGuideAction(status, 'archive'), true, `archive must be available from ${status}`)
+  }
+  assert.equal(rules.canRunGuideAction('archived', 'archive'), false, 'archive not available from archived')
+})
+
 // ── Approved-only add-to-run rule ─────────────────────────────────────────────
 
 test('only an approved idea can be added to a run', () => {
