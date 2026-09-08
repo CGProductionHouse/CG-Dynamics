@@ -76,7 +76,8 @@ Recent exact Project conversation evidence on 2026-08-24 supports a **WiseRide L
 - suspension;
 - wheel alignment;
 - general vehicle checks;
-- vehicle repairs/service work at a practical automotive level.
+- vehicle repairs/service work at a practical automotive level;
+- Auto Armor protection as part of the newer branch offer.
 
 A current third-party signage case study dated 2026-08-17 independently confirms a **new WiseRide branch in Langenhovenpark, Bloemfontein**.
 
@@ -278,6 +279,8 @@ Explicitly avoid generic automotive AI phrases such as:
 - `peace of mind` as a substitute for explaining the real benefit;
 - `discover the difference`, `elevate your experience`, `where quality meets...` and other CG anti-slop.
 
+**Direct Project correction:** do not use `start here`, `starts here`, or the same generic heading/subtext construction in WiseRide copy. The objection is to the formula itself, not only the example `your next adventure starts here`.
+
 The generic five Auto Armor caption options produced in the Project on 2026-06-08 are historical evidence of the previous baseline, **not** future quality templates. They are too interchangeable to meet #248 without more exact human context.
 
 ### Caption construction
@@ -290,7 +293,7 @@ For normal organic posts:
 5. add the useful CTA/footer only where needed;
 6. include `wisemangroup.co.za` for general posts/promotions.
 
-Default length: short to medium. A strong opening plus one useful explanation is usually better than a long service list.
+Default caption body: **one short, direct sentence** where the creative supplies the main context. Expand only when the exact service or factual context genuinely needs explanation; do not pad a simple post into a generic paragraph.
 
 Do not repeat the artwork headline, full product list or spoken video script in the caption.
 
@@ -337,6 +340,8 @@ Useful structures:
 - seasonal condition → what to inspect/protect.
 
 Do not turn the poster into a brochure. If the design already names `Smash & Grab`, `Paint Protection`, `Wheel Alignment` or another service, use supporting copy to explain the practical value rather than repeating the same service name again.
+
+Reject generic text-on-post that could be pasted unchanged onto several unrelated WiseRide services. If a heading/subtext works equally well for tyres, tint, PPF and tracking, it is not specific enough.
 
 ## 11. Content and video guidance
 
@@ -453,7 +458,9 @@ Rules:
 
 - the old static SEO hashtag list is no longer an automatic output bank; max 5 are chosen dynamically;
 - future captions must add beyond the creative instead of merely describing it;
-- current business context is not limited to one Auto Armor description: preserve the newer Langenhoven Park tyre/service evidence as a separate branch/service context;
+- normal caption bodies should stay one short, direct sentence unless the exact task genuinely needs more explanation;
+- `start here` / `starts here` is a directly rejected generic text-on-post formula and should not be recycled;
+- current business context is not limited to one Auto Armor description: preserve the newer Langenhoven Park tyre/service evidence, including its Auto Armor-protection context, as a separate branch/service context;
 - do not assume vehicle sales, finance, trade-ins or used-car stock;
 - do not assume the Nelson Mandela Project contact set is universally current because the current official Wiseman page publishes a conflicting set;
 - contact/branch-sensitive tasks must flag/reverify the conflict instead of silently choosing;
@@ -467,6 +474,7 @@ Accessible WiseRide Project history includes:
 - 2026-06-08 Auto Armor caption work;
 - 2026-08-17 recent WiseRide caption patterns and footer use;
 - 2026-08-24 WiseRide Langenhoven Park tyre/service concept work;
+- earlier direct corrections against generic `start here` text-on-post phrasing and padded caption copy;
 - older image-edit correction around applied film and preserving the supplied person;
 - current Project business-information source and Project Instructions.
 
@@ -474,9 +482,9 @@ Durable observations:
 - recent content is service-led rather than vehicle-stock-led;
 - current CG work has used the `80 Nelson Mandela / 073 340 5302 / sonja@wisemangroup.co.za / wisemangroup.co.za` footer set;
 - strong topics include safety film, glare/comfort, paint protection, fitment process and tracking;
-- the newer Langenhoven Park context brings tyre/alignment/suspension/check/repair content into the WiseRide brand;
+- the newer Langenhoven Park context brings tyre/alignment/suspension/check/repair and Auto Armor-protection content into the WiseRide brand;
 - generic motivational automotive lines are weaker than practical local moments and process detail;
-- no-emojis / no-hype remains the stronger exact Project standard.
+- short direct captions, no-emojis and no-hype remain the stronger exact Project standard.
 
 ### Current public / first-party evidence accessible
 
@@ -539,7 +547,7 @@ Return only:
 - exact WiseRide identity and relevant branch/service mode;
 - supplied/current service/product facts;
 - no-hype/no-emoji human voice rules;
-- add-don't-repeat rule;
+- one-short-sentence default and add-don't-repeat rule;
 - relevant current CTA/footer rule;
 - contact-conflict warning when material;
 - claim guardrails;
@@ -558,7 +566,7 @@ Return only:
 - exact service/product context;
 - practical human hook rules;
 - short grounded tone;
-- no generic automotive filler;
+- reject `start here`/`starts here` and interchangeable generic automotive filler;
 - current CTA/fact guardrails.
 
 ### `image_edit`
@@ -603,7 +611,7 @@ If any unresolved fact is required for a live task, recheck or flag the gap. Do 
 1. Exact live CG Dynamics `clients` row, read-only verification 2026-09-08 — WiseRide ID `504113ee-fba9-4993-807e-a86066615212`, active standard client; separate Wiseman Group row proves identity separation.
 2. `WiseRide Business Info.pdf` — Project/client-supplied identity, Auto Armor centre scope, service categories, contact set and mandatory website rule.
 3. Current WiseRide ChatGPT Project Instructions — exact tone, language, content-type, no-hype/no-emoji and website rules.
-4. Accessible WiseRide Project conversation history — 2026 caption, Langenhoven Park service and image-edit lessons described above.
+4. Accessible WiseRide Project conversation history — 2026 caption, Langenhoven Park service, direct creative corrections and image-edit lessons described above.
 
 ### Tier 2 — current first-party public evidence
 
