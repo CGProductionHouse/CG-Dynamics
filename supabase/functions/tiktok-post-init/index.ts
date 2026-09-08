@@ -6,7 +6,6 @@ import {
   queryTiktokCreatorInfo,
   initTiktokDirectPost,
   resolveTiktokConnectionForClient,
-  type TiktokCreatorInfo,
 } from '../_shared/tiktok.ts'
 
 // ── TikTok Publish Init ────────────────────────────────────────────────────
