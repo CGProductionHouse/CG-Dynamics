@@ -1,6 +1,6 @@
 # Client Marketing Intelligence — Progress Ledger
 
-Last updated: 2026-08-07
+Last updated: 2026-09-08
 Status: Canonical client-by-client research progress for Issue #184.
 
 ## Workflow
@@ -59,6 +59,15 @@ Each completed pack should cover exact services, audiences, buying journeys, com
    - File: `HMH-ATTORNEYS-LYDENBURG-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`
    - Commit: `fb661a0c79f706b36ee990cc843d5c8608fa72ef`
 
+## Out-of-sequence ChatGPT Project migration completions
+
+- **Piek Group** — completed 2026-09-08 as an explicitly authorised Project-to-Dynamics knowledge migration on `client-directory-reconciliation-2026-09-08`.
+  - Canonical CG client remains `Piek Group`.
+  - Engen, Sasol, Get Together and their named branches/partner entities remain distinct operational/content identities inside the Piek client intelligence; they were not collapsed into new/merged client IDs.
+  - Current public facts, stale public-site data, Project PDFs and CA/CG corrections were reconciled under the freshness protocol.
+  - File: `PIEK-GROUP-CLIENT-OPERATIONAL-INTELLIGENCE-2026-09.md`
+  - This out-of-sequence migration does **not** advance or alter the Issue #184 alphabetical research workflow. `Human Auto` remains its exact next client.
+
 ## System rule added during this sequence
 
 Client memory freshness protocol:
@@ -78,6 +87,6 @@ Ask CA: `Human Auto — skip or go?`
 
 ## Remaining order after Human Auto
 
-Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; Piek Group; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
+Jenkor; Kundedienste; Local Deli; Local Meat Deli; Loraclox; Madison Wear; Madisons; My City; NCNA; Net Nine Nine; Nikan Solar; Novus Steel; Once Off; Peyper Bonds; PSG; RC-Polypipe; Red Oak; Rusoord Farmstay; Securiforce; Supa Quick BFN; Supa Quick Centurion; TBS; The Staffy; Tobich Optics; Toyota Bloemfontein; Van Pie; Vryfees; Watch Addict; We Ar Fuels; Wiseman Group; Zooz Lifestyle WFF.
 
 The directory includes records that may be once-off, paused or inactive. CA decides skip/go one client at a time.

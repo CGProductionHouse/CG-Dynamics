@@ -45,6 +45,7 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 | Client | ChatGPT Project | Status | Notes |
 |---|---|---|---|
 | WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
+| Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
 
 ## Completion standard
 
