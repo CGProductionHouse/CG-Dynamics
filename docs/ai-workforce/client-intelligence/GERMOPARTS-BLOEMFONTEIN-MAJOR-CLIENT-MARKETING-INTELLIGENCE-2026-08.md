@@ -1,52 +1,106 @@
-# Germoparts Bloemfontein — Major Client Marketing Intelligence
+# Germoparts — Major Client Marketing Intelligence
 
-Last updated: 2026-08-07
-Status: Major-client deep research pack. Current-source, review-gated. Keep isolated to Germoparts Bloemfontein and use the client-memory freshness protocol before operational use.
+Last updated: 2026-09-08 SAST  
+Canonical client: **Germoparts**  
+CG Dynamics client ID: `b6052710-417d-4b3b-8348-0f126bfea671`  
+Legacy filename retained for continuity: `GERMOPARTS-BLOEMFONTEIN-MAJOR-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`  
+Status: Current-source exact-client intelligence. Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
 
-## Executive direction
+## Scope and isolation contract
+
+This record is for **Germoparts** only.
+
+Keep four evidence layers separate:
+
+1. **Exact Germoparts business truth**: facts directly attributable to Germoparts and still current enough for the task.
+2. **Branch-specific Germoparts truth**: contacts, addresses, opening hours, delivery details, stock and staff that belong to one exact branch only.
+3. **Product/application evidence supplied for a specific brief**: part number, vehicle application, price, supplier campaign, stock statement or product marking supplied by CG/client or current first-party evidence for that exact task.
+4. **Generic manufacturer / automotive-aftermarket context**: useful research, terminology and manufacturer information that does not prove Germoparts stock, fitment, distributor rights, warranty, application or local availability.
+
+Never turn a manufacturer catalogue, supplier post, old Germoparts campaign, another branch's post or generic automotive fact into current Germoparts truth without exact evidence.
+
+## What the 2026-09 migration changed
+
+The August deep pack already contained strong commercial strategy around parts accuracy, workshop downtime, specialist range, enquiry quality, trade relationships, search intent and product education. This migration keeps that useful strategy and upgrades the grounding model:
+
+- canonical identity is now **Germoparts**, not only Germoparts Bloemfontein;
+- the existing filename is retained to avoid a duplicate competing intelligence pack;
+- branch facts are isolated rather than silently treated as national Germoparts facts;
+- the current seven-branch roster is refreshed from the official Germoparts website;
+- the current website's vehicle-make wording is captured exactly without inferring every model or part;
+- current website-displayed supplier/brand logos are recorded only as site associations, not as automatic stock or distributor-right claims;
+- durable CG Project corrections for captions, technical copy, staff content and image edits are now first-class operating rules;
+- temporary stock, prices, promotions, part numbers and vehicle applications remain task-level evidence rather than permanent memory;
+- mutable delivery, hours, warranties, returns, trade terms, staff contacts and stock claims remain freshness-gated;
+- dynamic SEO/hashtags follow the current max-five rule instead of a frozen hashtag bank.
+
+## Commercial position
 
 Germoparts should not be marketed like a generic motor-spares shop.
 
-The stronger commercial territory is:
+The strongest recurring territory remains:
 
-> **The parts specialist that helps workshops and vehicle owners get the right replacement part, fast, with real automotive knowledge behind the counter.**
+> Help workshops and vehicle owners identify and source the right replacement part with useful product knowledge and practical service behind the enquiry.
 
-The business already has a strong factual foundation: more than 20 years in the automotive industry, a multi-branch footprint, broad replacement-part coverage, direct local delivery capability and a Bloemfontein branch positioned inside one of the city's established automotive-service corridors.
+The marketing should repeatedly prove useful things rather than rely on broad promises:
 
-The marketing job is therefore not to shout `we sell car parts`.
+- the range goes beyond obvious service items;
+- exact application and part identification matter;
+- workshops care about avoiding unnecessary waiting and wrong-part delays;
+- ordinary vehicle owners can ask for help without knowing every technical term;
+- real parts, packaging, labels and product detail are stronger proof than generic car imagery.
 
-It is to prove four things repeatedly:
+Avoid making `fast`, `same day`, `in stock`, `OEM`, `dealer quality`, `nationwide`, `direct distributor`, `fits`, `suitable for`, `warranty` or similar claims broader than the evidence actually supports.
 
-1. **Range** — Germoparts can source or supply much more than filters and brake pads.
-2. **Accuracy** — the right part for the right vehicle matters more than a cheap wrong part.
-3. **Speed** — workshops lose money when a vehicle waits for parts.
-4. **Technical confidence** — customers need someone who understands compatibility, symptoms, part categories and replacement options without making them feel stupid.
+## Current verified identity and business facts
 
-For Bloemfontein specifically, the branch should become the default local answer for specialist replacement parts, trade/workshop relationships and parts enquiries that need more help than a supermarket-style parts counter can provide.
+### Company identity
 
-## Verified current business facts
+Current official website evidence observed 2026-09-08 supports:
 
-Official Germoparts evidence reviewed 2026-08-07 supports:
+- official website: `https://germoparts.co.za/`;
+- Germoparts states it was founded in **2005** by father-and-son duo **Hein and Neville Joerdens**;
+- the website describes the business as having **20+ years of automotive industry experience**;
+- the website presents a multi-branch replacement-parts business and a current seven-branch roster;
+- the current service-area page says parts may be delivered through a nationwide courier service or a Germoparts delivery vehicle.
 
-- Official website: `https://germoparts.co.za/`
-- Germoparts states that it was founded in 2005 by father-and-son duo Hein and Neville Joerdens.
-- The business described itself as approaching its 20th anniversary in 2025.
-- Current branches listed by Germoparts:
-  - Vereeniging;
-  - Sandton;
-  - Bloemfontein;
-  - Nelspruit / Mbombela;
-  - Brits;
-  - Strydompark.
-- Current Bloemfontein address: **66A Harvey Road, Oranjesig, Bloemfontein**.
-- Current Bloemfontein phone: **051 430 0401**.
-- Current public map/business evidence lists the branch as an auto-parts store with delivery and in-store shopping.
-- Current public business data shows weekday opening from 07:30 and Saturday trading from 08:00–13:00. Reverify directly before publishing hours because third-party platform hours are mutable.
-- Germoparts states that parts can reach customers via nationwide courier delivery or Germoparts delivery vehicles.
+Source state: `current_verified` from Germoparts first-party website, observed 2026-09-08.
 
-## Verified current parts architecture
+Do not convert the website's delivery wording into a guaranteed delivery radius, turnaround, free-delivery rule, Saturday-delivery promise or same-day SLA without task-time confirmation.
 
-The official website currently lists a substantial replacement-parts range.
+### Current branch roster
+
+Official Germoparts pages observed 2026-09-08 list:
+
+| Branch | Current published address | Current published phone | State |
+|---|---|---|---|
+| Vereeniging | 13 Old Johannesburg Rd, Duncanville, Vereeniging | 011 262 0331 | `current_verified` |
+| Sandton | Unit 13, Eastgate Business Park, Marlboro Dr, Sandton | 011 262 0188 | `current_verified` |
+| Bloemfontein | 66A Harvey Road, Oranjesig, Bloemfontein | 051 430 0401 | `current_verified` |
+| Nelspruit / Mbombela | 1 Plankie St, Mbombela 312-JT, Mbombela | 013 752 2189 | `current_verified` |
+| Brits | 9 Rutgers Street, Brits | 012 252 0426 | `current_verified` |
+| Strydompark | Unit G10, Malibongwe Exchange, 123 Malibongwe Dr, Strydompark, Randburg, 2195 | 010 140 4569 | `current_verified` |
+| Kimberley | 25A Landbou Rd, Kimberley, 8301 | 053 050 1866 | `current_verified` |
+
+Kimberley is a material change from the August pack, which listed six branches. The current official site now includes Kimberley.
+
+Branch addresses and numbers are still mutable. Recheck the exact branch before publishing a contact footer, map, paid campaign or branch-specific service post.
+
+### Branch-hours rule
+
+The current Germoparts website pages reviewed in this migration do not provide a complete authoritative hours table for every branch.
+
+Historical/third-party hours must therefore remain `stale_unverified` unless rechecked for the exact branch. Do not reuse an old weekday/Saturday schedule as current national truth.
+
+### WhatsApp, email and staff contacts
+
+No single current official national WhatsApp, public email or current branch staff roster was established from the website pages reviewed here.
+
+Use a directly supplied current contact when the brief provides one. Otherwise retrieve fresh first-party/approved evidence before publishing it.
+
+## Current replacement-parts scope
+
+The official Germoparts website currently presents the following broad categories. These are useful category-level truths, not proof that every listed item is in stock at every branch.
 
 ### Service parts
 
@@ -118,7 +172,7 @@ The official website currently lists a substantial replacement-parts range.
 - expansion tanks and caps;
 - radiator fans.
 
-### Electronics
+### Electronic parts
 
 - alternators;
 - starters;
@@ -149,976 +203,421 @@ The official website currently lists a substantial replacement-parts range.
 
 ### Oils and consumables
 
-- brake cleaner;
-- diesel-system cleaners;
-- oil stop leak;
-- injector cleaner;
-- radiator sealer;
-- engine cleaner;
-- ATF cleaner;
-- AdBlue;
-- Rat Ban;
-- engine silicone sealer;
-- transmission oils;
-- differential oils;
-- engine oils from 500 ml through 200 L.
+The website currently includes cleaners, sealers, AdBlue, Rat Ban, transmission/differential oils and engine oils from 500 ml to 200 L among its consumable range.
 
-The current website also explicitly shows Land Rover and Toyota among vehicle applications. Other vehicle logos are image-based and should not be converted into text claims unless confirmed directly from the underlying brand/application list.
+The website wording includes some category typos/variant terminology. Use clean customer-facing language, but do not silently turn ambiguous source wording into a new technical specification.
 
-## Business model and commercial reality
+## Current vehicle-make application wording
 
-Germoparts participates in a market where `having parts` is not enough.
+The current official replacement-parts page observed 2026-09-08 states:
 
-Current South African aftermarket research consistently points to several commercial drivers:
+> Suitable for: Mercedes, BMW, Volkswagen, Audi, Nissan, Renault, Porsche, Land Rover, Toyota and Mini.
 
-- older vehicles require more maintenance and replacement parts;
-- millions of vehicles operate outside manufacturer warranty;
-- workshops and consumers increasingly compare independent aftermarket options against dealer pricing;
-- availability, technical matching and delivery speed influence workshop loyalty;
-- online and remote ordering are growing, but customers still need confidence that the supplied part is correct;
-- national chains compete through scale and branch density while specialists can win through deeper category knowledge, faster problem solving and better trade relationships.
+Treat this as **site-level make coverage wording only**.
 
-This is exactly where Germoparts can be stronger than a broad generic spares retailer.
+It does not prove:
 
-## Primary buyer segments
+- every Germoparts category is available for every make;
+- a specific part fits a specific model/year/engine;
+- a current branch has stock;
+- a supplied OE/part number is correct;
+- a Germoparts item is OEM/OE-equivalent;
+- fitment is performed by Germoparts.
 
-## 1. Independent workshops
+For a product post, the exact supplied part description, application and part number must remain tied to that exact brief and should be checked against authoritative current evidence where required.
 
-This should be one of the highest-priority segments.
+## Current website-displayed supplier / product-brand associations
 
-Their pain is not merely part price.
+The official Germoparts website currently displays logos for:
 
-They care about:
+- MAHLE;
+- MANN+HUMMEL;
+- VAICO;
+- SKF;
+- Valeo Service;
+- ROWE;
+- Trucktec.
 
-- whether the part is correct the first time;
-- whether it is in stock;
-- how quickly it can arrive;
-- whether the supplier answers the phone/WhatsApp;
-- whether there is a useful alternative when the exact item is unavailable;
-- returns and warranty handling;
-- whether they can rely on the same supplier repeatedly;
-- whether the supplier understands workshop urgency.
+State: `current_verified` only for **website display/association** observed 2026-09-08.
 
-Commercial positioning:
+Do not upgrade logo display into claims such as:
 
-> **Less workshop downtime. Fewer wrong-part headaches. One knowledgeable parts partner.**
+- `official distributor`;
+- `exclusive distributor`;
+- `authorised dealer`;
+- `we stock the full range`;
+- `available at every branch`;
+- `OEM supplier`;
+- `genuine OE`;
 
-Marketing actions:
+unless current first-party Germoparts/supplier evidence or direct client confirmation supports the exact claim.
 
-- named trade-account relationship manager if operationally available;
-- rapid quote/availability channel;
-- VIN/registration/vehicle-detail capture;
-- workshop delivery proof;
-- trade-specific promotions;
-- monthly fast-moving category reminders;
-- technical cross-reference content;
-- workshop customer stories where consent exists.
+Historical Germoparts Project work has featured supplier/product brands such as SKF and ROWE. Those examples are useful creative evidence but are not blanket current-rights or stock proof.
 
-## 2. Specialist German / European repair workshops
+## Buyer and audience logic
 
-The `Germo` name and current product/application cues can naturally create a European-specialist association, but this must not be overclaimed if the actual range is broader.
+### Independent workshops and trade buyers
 
-The opportunity is to position Germoparts as particularly useful where the part request is more specialist than a simple oil filter.
+This remains a priority audience because the real commercial pain is usually not only price. Useful messages focus on:
 
-Content examples:
+- correct part identification;
+- useful cross-reference/product knowledge where verified;
+- getting complete vehicle details early;
+- minimising wrong-part back-and-forth;
+- delivery/supply convenience only to the level actually verified;
+- repeat relationship and practical counter support.
 
-- suspension air systems;
-- sensors;
-- timing-chain kits;
-- cooling-system failures;
-- engine internals;
-- clutch/flywheel combinations;
-- model-specific service kits.
+Tone: direct, knowledgeable, commercially aware. Do not patronise technicians or pretend a simple social caption can diagnose a vehicle.
 
-Do not state an exclusive focus on German marques unless the client confirms it.
+### General mechanical workshops
 
-## 3. General mechanical workshops
+Strong recurring categories include service parts, brakes, suspension, cooling, belts, clutches, oils and sensors.
 
-These customers buy the high-frequency categories that keep volume moving:
+Lead with the workshop problem or application, not a generic quality statement.
 
-- filters;
-- brakes;
-- suspension;
-- cooling;
-- belts;
-- clutches;
-- oils;
-- sensors;
-- service items.
+### Fleet/business-vehicle buyers
 
-Marketing should emphasise ordering speed, stock confidence and `send us the vehicle details` simplicity.
+Downtime is a relevant general buyer concern, but do not invent Germoparts fleet programmes, saved vehicle profiles, account terms, bulk pricing or SLAs unless the client confirms them.
 
-## 4. Fleet operators and business vehicles
+Potential content can speak to planned maintenance and repeat vehicle applications when the exact service/offer exists.
 
-Potential customers:
+### DIY / knowledgeable vehicle owners
 
-- courier fleets;
-- security companies;
-- construction businesses;
-- farms;
-- sales fleets;
-- small logistics businesses;
-- tradespeople with bakkies/vans;
-- rental/transport operators.
+These buyers may arrive with a model/year, photo, old part, part number or mechanic's description.
 
-Their real pain is downtime.
+Copy should make the enquiry feel approachable. Explain what information helps identify a part without implying the customer must already know technical terminology.
 
-Offer direction:
+### Price-sensitive out-of-warranty owners
 
-- repeat vehicle profiles;
-- saved fleet application data;
-- preventative service-part bundles;
-- bulk oils/consumables;
-- delivery;
-- recurring account management.
+Avoid framing Germoparts as merely `cheap parts`.
 
-## 5. DIY / knowledgeable vehicle owners
+A more useful angle is a properly matched replacement option with exact product/application evidence where available. Never imply dealer equivalence or OEM status without substantiation.
 
-These customers often arrive with:
+## Human creative standard for Germoparts
 
-- a model/year;
-- a photo;
-- a part number;
-- a mechanic's description;
-- a dashboard symptom;
-- an old part in hand.
+### Core voice
 
-They value patient technical help and confidence that the part will fit.
+Write human, practical, specific automotive-parts marketing.
 
-The marketing should never imply that a customer must understand technical language before asking for help.
+The copy should sound like a useful parts specialist speaking to a real owner or workshop, not a generic corporate automotive brand.
 
-## 6. Price-sensitive out-of-warranty vehicle owners
+Prefer:
 
-South Africa's ageing vehicle parc creates a large audience looking for sensible replacement alternatives without dealer pricing.
+- a clear part/application point;
+- one useful reason the customer should care;
+- practical maintenance or workshop relevance;
+- exact supplied product detail when verified;
+- natural language rather than specification dumping;
+- staff/branch personality when the content is human-led;
+- short sentences and clean rhythm.
 
-The strongest message is not `cheap parts`.
+Avoid default filler such as:
 
-It is:
+- `keep your vehicle running`;
+- `quality parts you can trust`;
+- `performance you can rely on`;
+- `your one-stop parts shop`;
+- `we've got you covered`;
+- `drive with confidence`;
+- generic `reliability/performance/quality` adjective stacks;
+- unsupported superiority claims;
+- captions that simply repeat the poster/product card.
 
-> **A practical replacement option matched properly to your vehicle.**
+### Caption rhythm and length
 
-Price-only positioning is dangerous because it can destroy trust in quality.
+Durable Project evidence supports a concise default:
 
-## Competitive landscape — Bloemfontein
+- usually 2-4 short sentences before the footer/hashtags;
+- one clear hook or product/use-case point is better than several generic claims;
+- technical explanation may run slightly longer when it genuinely helps the buyer understand the part;
+- do not force multiple options unless the user asks for options or the brief benefits from distinct creative directions.
 
-## Goldwagen Bloemfontein
+The artwork often already contains description, vehicle, OE/part number, price and validity. The caption should add a reason to care, a use case, maintenance relevance, branch/service context or an enquiry angle rather than copying those lines again.
 
-Current local official evidence confirms Goldwagen at 62 Krause Street, Oranjesig, plus a second Hilton Bloemfontein store at 71 Glen Way.
+### Language
 
-Strengths:
+Project history is predominantly English.
 
-- strong national brand recognition;
-- sophisticated parts finder / quote journey;
-- workshop familiarity;
-- broad European-vehicle aftermarket association;
-- two visible Bloemfontein locations;
-- strong customer-language themes around availability, knowledge and correct parts.
+Default to natural English unless the supplied brief, branch audience or user request supports Afrikaans or another language. Do not force language mixing or slang simply to sound local.
 
-Germoparts response:
+### Audience-mode tone
 
-Do not try to out-Goldwagen Goldwagen.
+- **Workshop/trade:** direct, technical enough to be useful, no unnecessary explanation, no inflated sales language.
+- **DIY/owner:** approachable and clear; explain the part's purpose or relevance without talking down to the reader.
+- **Fleet/business:** practical and downtime-aware only where the service/offer is verified.
+- **Staff/branch/event:** warmer, more personal and less product-catalogue-like.
 
-Win on:
+### Technical-depth rule
 
-- specialist problem solving;
-- wider category/application opportunities where proven;
-- local branch relationships;
-- workshop account service;
-- delivery speed;
-- advanced technical categories;
-- personal continuity at branch level.
+Technical detail is valuable when it comes from supplied/current evidence.
 
-## AutoZone Bloemfontein
+Good detail includes:
 
-Current official store locator lists AutoZone at 9 McKenzie Street, Old East End.
+- exact part name;
+- exact supplied OE/part number;
+- exact supplied vehicle application;
+- a simple explanation of what the component does;
+- a buyer-friendly reason the component matters;
+- what vehicle information is needed to confirm the enquiry.
 
-Strengths:
+Do not infer fitment, failure diagnosis, torque/specification, compatibility, engine codes or OEM status from appearance alone.
 
-- major national footprint;
-- extremely broad consumer awareness;
-- consumer accessories and automotive retail range;
-- scale and brand confidence.
+### Contact/footer convention
 
-Germoparts response:
+Durable CG correction: **do not use emojis for contact details** in Germoparts captions/contact blocks.
 
-Compete on specialist expertise and workshop usefulness, not retail-store breadth.
+Use plain, readable contact details. Use the exact branch phone/address only when that branch is relevant and current. The website may be included when useful:
 
-## Midas / Scotty's Midas Bloemfontein
+`germoparts.co.za`
 
-Midas positions nationally as a large automotive aftermarket franchise with wide multi-make range, DIY customers and strong workshop presence.
+Do not default to the Brits number for every Germoparts post simply because it appears in the website header or previous Brits work.
 
-Strengths:
+### Hashtags
 
-- strong national franchise recognition;
-- wide range;
-- DIY and workshop familiarity;
-- promotions/accessories.
+Default maximum: **5 hashtags**.
 
-Germoparts response:
+Choose them dynamically at task time from the exact:
 
-Own the serious replacement-parts enquiry where the customer wants someone to identify, source and solve rather than browse shelves.
+- Germoparts identity;
+- part/product/category;
+- verified vehicle application;
+- branch/location where relevant;
+- platform/search context;
+- current reliable trend/search evidence when genuinely useful.
 
-## Local Harvey Road parts and workshop ecosystem
+Stored/history tags are seed material only. Do not paste the same five under every post and do not call a tag `trending` without current evidence.
 
-Harvey Road is itself an automotive competitive cluster. Current local search evidence shows multiple mechanics, parts sellers, brake/clutch businesses and vehicle-related operators around the same corridor.
+## Durable Project content patterns
 
-That is both a threat and an advantage.
+### 1. Product-specific part posts
 
-Germoparts should exploit the cluster through:
+A strong Germoparts post can centre on a real part with:
 
-- stronger Google/map visibility;
-- exact parking/entrance photography;
-- local signage;
-- workshop delivery routes;
-- direct local trade relationships;
-- content that explicitly anchors `Harvey Road, Bloemfontein`.
+- exact product name;
+- exact vehicle application supplied for the creative;
+- exact OE/part number where supplied;
+- price/validity only from current campaign evidence;
+- one practical use/maintenance point;
+- concise CTA.
 
-## Competitive strategic conclusion
+Historic examples have included steering racks, brake-light switches, ABS sensors, filters and SKF belt-kit content. These examples establish format and technical-detail expectations, not current stock or pricing.
 
-The local market already has large, recognisable parts chains.
+### 2. `What part is this?` / product education
 
-Germoparts should therefore avoid generic claims such as:
+Show a real component and explain what it does or why it matters.
 
-- `best prices`;
-- `all your car parts`;
-- `quality you can trust`;
-- `one-stop shop`.
+Useful subjects include sensors, steering/suspension parts, cooling components, service items and less-obvious specialist parts.
 
-These are not defensible.
+Avoid remote diagnosis. Use phrases such as `can be associated with` only when technically substantiated and appropriate.
 
-A stronger territory is:
+### 3. `Send us the details`
 
-> **Parts knowledge + correct matching + specialist range + fast local supply.**
+Teach customers what helps a parts enquiry:
 
-## The biggest marketing opportunity: own the parts enquiry
+- make/model/year;
+- VIN/chassis where appropriate;
+- engine details when relevant;
+- old-part photo;
+- part/OE number;
+- mechanic's description.
 
-In automotive parts, the customer often does not know the exact product name.
+This is useful content because it reduces uncertainty without overpromising identification capability.
 
-The digital funnel must accept uncertainty.
+### 4. Parts people may not know Germoparts carries
 
-A strong enquiry should allow the customer to send:
+Use currently verified categories to reveal breadth. Specialist examples from the current site include valve blocks, air compressors, auxiliary water pumps, gearbox service kits, flywheels, fuel sender units and oil-pump kits.
 
-- registration number where useful;
-- VIN/chassis number;
-- make;
-- model;
-- year;
+Check actual branch/product availability before using `in stock` or a specific local offer.
+
+### 5. Workshop / delivery proof
+
+Real picking, checking, packing and delivery footage can communicate workshop usefulness well.
+
+Only state an exact delivery schedule, radius, cutoff or Saturday service if that current branch/service claim is verified. Historical Bloemfontein Saturday-delivery creative is not permanent national truth.
+
+### 6. Staff and branch content
+
+Branch openings, staff moments and service anniversaries can be warmer and personal.
+
+Keep staff recognition separate from unrelated supplier promotions. A prior Project correction around a long-service recognition post establishes that a staff milestone must not be accidentally framed as part of an SKF prize/promotion when it is a different event.
+
+### 7. Branch growth/openings
+
+Kimberley is now on the official branch list and therefore part of current Germoparts footprint evidence. Any `new branch`, opening date, delivery territory or launch-offer wording remains campaign-specific unless directly confirmed for the task.
+
+### 8. Supplier/product feature content
+
+Supplier brands can support strong product-led content where the exact product and relationship are evidenced.
+
+Do not borrow a manufacturer specification or global product page and present it as Germoparts stock/fitment/distributor truth.
+
+## Video strategy
+
+Project history supports location-filmed Germoparts content rather than generic stock-footage automotive reels.
+
+Useful recurring formats:
+
+- short branch walk-throughs;
+- a part moving from shelf/counter to collection or verified delivery;
+- close-up product education;
+- `you may not know we carry this` reveals;
+- staff explaining one practical part/application point;
+- new-branch/location introductions;
+- customer/workshop-use context where permission exists;
+- supplier/product feature with exact current evidence.
+
+When scripts are requested, use clear scene structure and short spoken lines. Some concepts can use voice-over; a deliberately cinematic execution may work better without narration when the visual sequence carries the idea.
+
+## Image generation/editing rules
+
+Germoparts social work frequently uses real product photography and packaging. Identity preservation is therefore critical.
+
+When editing a supplied product image:
+
+- preserve the real part geometry and proportions;
+- preserve packaging shape, colour and layout unless explicitly asked to change it;
+- preserve labels, model/part numbers, printed markings and readable text;
+- preserve actual Germoparts and product-brand marks unless explicitly asked to remove/replace them;
+- preserve vehicles, people and product relationships unless the requested edit changes them;
+- change only the requested background/object/lighting/crop where possible;
+- do not hallucinate extra packaging labels, certifications, part numbers or compatibility text;
+- do not distort logos or technical markings;
+- do not turn a real part into a visually similar but technically different component;
+- keep perspective believable and product scale intentional;
+- allow portrait/social crops and negative space when design copy needs room;
+- close-up/cinematic backgrounds are acceptable when they do not imply an unsupported product use/fitment claim.
+
+When the user asks to remove unrelated shelf products or unrelated branding, remove only those requested elements and protect the Germoparts/product subject.
+
+Reference imagery may guide setting/composition, but do not copy unrelated text, brands or products into the final image.
+
+## Enquiry and conversion logic
+
+The strongest digital behaviour remains to make a parts enquiry easy even when the customer does not know the exact technical name.
+
+Useful enquiry inputs can include:
+
+- make/model/year;
+- VIN/chassis number when relevant;
 - engine size/code if known;
 - gearbox if relevant;
 - part description;
 - old-part photo;
-- dashboard/symptom note;
-- mechanic's part number;
+- OE/part number;
+- mechanic's description;
 - preferred branch;
 - urgency.
 
-The marketing promise should be:
+Do not promise that every enquiry can be resolved from a photo or registration number alone.
+
+## Website, local search and paid-media direction
 
-> **Send the details. We will help identify the part.**
+The August pack's durable strategy remains valid:
 
-Do not make ordinary buyers navigate a giant catalogue alone.
+- branch pages should behave as conversion surfaces, not only address lists;
+- product/category pages should answer real search intent;
+- paid search should land users on the relevant category/application/enquiry path rather than always the homepage;
+- Google/local profiles should keep exact branch address, phone, hours and imagery current;
+- search content should use verified category/application language and avoid thin pages that imply unsupported stock.
 
-## Website diagnosis and rebuild priorities
+Potential search-intent clusters include exact Germoparts branch terms plus real categories such as brakes, suspension, sensors, cooling, clutch/flywheel, filters/service parts and replacement parts. Vehicle-specific search pages should only be built from verified application coverage and current commercial evidence.
 
-The current site contains valuable product information and branch details, but it behaves more like a brochure than a high-performance parts enquiry engine.
+## Workshop/trade growth direction
 
-### Current strengths
+The August pack's workshop focus remains strategically useful, but proposed programmes must not be mistaken for existing Germoparts services.
 
-- clear company history;
-- broad category list;
-- branch network;
-- local contact details;
-- service-area/delivery message.
+Potential ideas such as dedicated trade routes, saved fleet details, account terms, stock bulletins, delivery thresholds, technical mornings and workshop activations are **strategy proposals** until the client confirms them.
 
-### Major opportunities
+Content may safely show real workshop usefulness through current, observable service and product evidence.
 
-## 1. Build application-led landing pages
+## Measurement
 
-Create useful pages around real search intent:
+Do not judge Germoparts primarily by followers/likes.
 
-- brake pads Bloemfontein;
-- brake discs Bloemfontein;
-- suspension parts Bloemfontein;
-- wheel bearings Bloemfontein;
-- timing-chain kits Bloemfontein;
-- water pumps Bloemfontein;
-- radiators Bloemfontein;
-- clutch kits Bloemfontein;
-- flywheels Bloemfontein;
-- sensors Bloemfontein;
-- engine parts Bloemfontein;
-- filters/service kits Bloemfontein;
-- Land Rover replacement parts Bloemfontein where supported;
-- Toyota replacement parts Bloemfontein where supported.
+Useful commercial measures include:
 
-These should not be thin SEO pages. Each page should include:
+- parts enquiries by branch/channel/category;
+- quote turnaround and quote-to-sale conversion where data exists;
+- lost/unavailable enquiry reasons;
+- repeat workshop/customer rate;
+- delivery-order share where operationally defined;
+- top verified vehicle applications/categories;
+- Google Business calls/directions;
+- website quote/enquiry starts;
+- paid-search cost per qualified enquiry;
+- content/category contribution to actual enquiries.
 
-- what Germoparts stocks/sources;
-- common use cases;
-- vehicle details needed to quote;
-- branch contact;
-- enquiry CTA;
-- delivery information;
-- technical caution that fitment must be matched to exact vehicle application.
+Never infer revenue, stock demand or lead quality from social engagement alone.
 
-## 2. Give every branch a real page
+## Provenance and freshness register
 
-Bloemfontein page should include:
+| Fact / evidence | State | Authority | Observed | Operational rule |
+|---|---|---|---|---|
+| Canonical client = Germoparts | `current_verified` | Issue #280 / Dynamics ID | 2026-09-08 | Exact-client retrieval only |
+| Dynamics client ID | `current_verified` | Issue #280 | 2026-09-08 | Never fuzzy-match/guess |
+| Founded 2005 by Hein & Neville Joerdens | `current_verified` | official Germoparts website | 2026-09-08 | Stable company-history fact unless contradicted |
+| 20+ years experience | `current_verified` | official Germoparts website | 2026-09-08 | Current public wording |
+| Seven current branches | `current_verified` | official service/contact pages | 2026-09-08 | Recheck before branch campaign |
+| Branch addresses/phones above | `current_verified` | official service/contact pages | 2026-09-08 | Use exact branch only |
+| Nationwide courier / Germoparts vehicle wording | `current_verified` | official service-area page | 2026-09-08 | Does not prove SLA/radius/free delivery |
+| Broad parts categories above | `current_verified` | official website/replacement-parts page | 2026-09-08 | Does not prove branch stock |
+| Mercedes/BMW/VW/Audi/Nissan/Renault/Porsche/Land Rover/Toyota/Mini wording | `current_verified` | official replacement-parts page | 2026-09-08 | Make-level site wording only |
+| MAHLE/MANN+HUMMEL/VAICO/SKF/Valeo/ROWE/Trucktec logos | `current_verified` for website display only | official website | 2026-09-08 | No distributor/stock/OEM inference |
+| Exact branch hours | `stale_unverified` unless task-rechecked | mixed historical/third-party evidence | 2026-09-08 | Verify before publishing |
+| WhatsApp/email/staff roles | `stale_unverified` / unresolved | no complete current first-party set found | 2026-09-08 | Do not guess |
+| Prices/promotions/part numbers/stock | task-level only | supplied campaign/current product evidence | varies | Never freeze into permanent truth |
+| Bloemfontein Saturday delivery | `historical` Project campaign evidence | prior CG work | pre-2026-09-08 | Reverify before reuse |
+| SKF/ROWE/etc supplier campaigns | `historical` unless task/current-source verified | Project history/current site display | varies | Relationship/right claims require evidence |
 
-- branch address;
-- phone;
-- current hours;
-- map;
-- entrance/store photos;
-- branch contact names only if current/approved;
-- delivery area;
-- enquiry CTA;
-- top local categories;
-- workshop/trade enquiry.
+## Current unresolved facts requiring CG/client confirmation or task-time verification
 
-## 3. Add a proper quote/enquiry workflow
+- exact opening hours for each branch;
+- current WhatsApp numbers and public email routes;
+- branch managers/current public staff contacts;
+- exact local delivery radii, schedules, cutoffs, fees and Saturday-delivery rules;
+- ordering/collection workflow by branch;
+- current stock by branch;
+- exact current supplier/distributor/authorised-dealer relationships;
+- approved terminology for `OE`, `OEM`, `OE-equivalent`, `aftermarket`, `premium aftermarket` and similar product-quality claims;
+- fitment/workshop capability, if any, by branch;
+- warranty and returns policy, especially electronic parts;
+- trade-account terms and account eligibility;
+- current pricing/promotions;
+- exact product compatibility beyond supplied/current application evidence;
+- current official Facebook/Instagram/TikTok identities and publishing ownership;
+- current advertising/account history and website analytics;
+- top revenue/margin categories and workshop/customer segments.
 
-CTA hierarchy:
+## Source hierarchy for future Germoparts work
 
-- `Get a parts quote`;
-- `Send vehicle details`;
-- `Call Bloemfontein`;
-- `WhatsApp Bloemfontein` if a current approved WhatsApp exists.
+Use the newest trustworthy evidence in this order:
 
-Do not make `Contact Us` the only conversion action.
+1. direct current client/CG-supplied evidence for the exact Germoparts task;
+2. current Germoparts official website and current branch/contact/service pages;
+3. current official Germoparts social/profile evidence when exact identity is verified;
+4. current supplier/manufacturer evidence for product facts only, localised through Germoparts evidence before making a Germoparts claim;
+5. current reliable business listings for unresolved local details, clearly freshness-gated;
+6. this canonical intelligence record and historical CG Project evidence;
+7. reusable automotive-aftermarket research for strategy only.
 
-## 4. Make the website searchable by problem/category
+Generic automotive/manufacturer facts never outrank exact current Germoparts evidence.
 
-A customer searching `BMW water pump` or `air suspension compressor` should not have to read the whole parts gallery.
+## Task-time retrieval target
 
-## 5. Add confidence content
+Routine ChatGPT/CG Dynamics work should retrieve a compact exact-client packet using:
 
-Examples:
+`client_id=b6052710-417d-4b3b-8348-0f126bfea671 + task_type + supplied creative/context`
 
-- how Germoparts identifies the correct part;
-- replacement-part quality approach;
-- what information customers should send;
-- returns/warranty process only after the actual policy is confirmed;
-- delivery/sourcing process.
+For `caption`, return only the relevant current voice/caption rules, exact product/application evidence, branch/footer facts, claim guardrails, unresolved task-relevant items and dynamic SEO/hashtag instruction.
 
-## Google Business Profile — major priority
+For `image_edit`, return product/packaging/label/branding/person/composition preservation rules plus any exact supplied part identity.
 
-The current public profile data already shows delivery and local retail functionality.
+For `content_idea`, return the relevant buyer/content patterns and current verified business/product scope without flooding the task with the full historical research pack.
 
-For a major local client, the Bloemfontein profile should be treated as a conversion surface.
-
-Keep current:
-
-- exact name;
-- 66A Harvey Road;
-- 051 430 0401;
-- current trading hours;
-- website;
-- category;
-- delivery attribute;
-- current store photos;
-- parts-counter photos;
-- staff/team where approved;
-- branch exterior and parking;
-- product-category imagery.
-
-### Google Posts
-
-Useful recurring subjects:
-
-- new stock;
-- seasonal service items;
-- brakes;
-- cooling before summer travel;
-- wipers/visibility in rainy periods;
-- suspension/steering;
-- trade delivery;
-- engine oils/AdBlue;
-- hard-to-find specialist parts.
-
-## Local SEO architecture
-
-Priority intent clusters:
-
-### Brand + location
-
-- Germoparts Bloemfontein;
-- Germoparts Harvey Road;
-- Germoparts contact Bloemfontein.
-
-### Category + location
-
-- car parts Bloemfontein;
-- automotive parts Bloemfontein;
-- brake parts Bloemfontein;
-- suspension parts Bloemfontein;
-- engine parts Bloemfontein;
-- replacement parts Bloemfontein;
-- clutch kit Bloemfontein;
-- flywheel Bloemfontein;
-- water pump Bloemfontein;
-- radiator Bloemfontein;
-- timing chain kit Bloemfontein;
-- vehicle sensors Bloemfontein;
-- service kit Bloemfontein.
-
-### Vehicle-specific
-
-Only build these around verified application coverage and actual search demand.
-
-## Paid Search — highest-intent media opportunity
-
-Google Search should be a core performance channel because parts demand is often immediate.
-
-Campaign structure:
-
-### Campaign 1 — brand
-
-Protect Germoparts searches and route users directly to the correct branch.
-
-### Campaign 2 — core maintenance
-
-- filters;
-- brakes;
-- water pumps;
-- belts;
-- clutches;
-- oils.
-
-### Campaign 3 — specialist/high-value
-
-- air suspension;
-- engine parts;
-- timing-chain kits;
-- flywheels;
-- gearbox service kits;
-- sensors/electronics.
-
-### Campaign 4 — vehicle application
-
-Only where verified and commercially important.
-
-### Campaign 5 — trade/workshop
-
-Keywords around parts suppliers, workshop parts delivery and trade automotive spares.
-
-### Landing-page rule
-
-Search ad → relevant product/category page → vehicle-details enquiry.
-
-Do not send all paid traffic to the homepage.
-
-## Meta / social strategy
-
-Meta should not try to replace Google Search for urgent parts demand.
-
-Its role is:
-
-- build familiarity;
-- demonstrate expertise;
-- keep Germoparts top of mind with workshops and owners;
-- retarget visitors/enquirers;
-- show range people did not know existed;
-- humanise the branch and staff;
-- promote commercial/seasonal categories.
-
-## Content architecture
-
-## 1. `What part is this?`
-
-Show a real component and explain:
-
-- what it does;
-- common symptoms;
-- why exact fitment matters.
-
-Avoid diagnosing vehicles remotely from social-media comments.
-
-## 2. `Send us this`
-
-Teach buyers what Germoparts needs to identify a part:
-
-- VIN;
-- model/year;
-- engine details;
-- old-part photo;
-- part number.
-
-This content directly improves enquiry quality.
-
-## 3. `Behind the counter`
-
-Real staff solving real parts enquiries.
-
-Good subject matter:
-
-- cross-referencing;
-- unpacking stock;
-- identifying a sensor;
-- checking an application;
-- preparing workshop deliveries.
-
-Never expose customer personal data, VINs, invoices or trade pricing.
-
-## 4. `This is why it matters`
-
-Translate technical parts into human consequence.
-
-Examples:
-
-- worn engine mounting → vibration;
-- thermostat issue → cooling problems;
-- wheel bearing → noise/safety;
-- brake wear sensor → warning logic;
-- failed air suspension component → vehicle sitting low.
-
-Keep claims technically reviewed.
-
-## 5. `Parts people forget we sell`
-
-Strong discovery series for the broad current range:
-
-- valve blocks;
-- air compressors;
-- auxiliary water pumps;
-- gearbox service kits;
-- flywheels;
-- fuel sender units;
-- oil-pump kits;
-- AdBlue;
-- engine oils in large-volume packs.
-
-## 6. Workshop delivery proof
-
-Show:
-
-- route preparation;
-- parts leaving the branch;
-- workshop handover where permitted;
-- time-sensitive delivery stories.
-
-The visual message should be `we understand downtime`.
-
-## 7. `20 years of Germoparts`
-
-The 2005 founder story is valuable.
-
-Create:
-
-- old photos;
-- first box-of-parts story;
-- branch growth timeline;
-- long-serving staff;
-- customer/workshop relationships;
-- father-and-son origin.
-
-This is trust proof, not nostalgia for its own sake.
-
-## Video strategy
-
-Germoparts has better video potential than generic catalogue graphics.
-
-### Short-form commercial structures
-
-#### `The wrong part`
-
-Hook: two visually similar parts.
-
-Story: explain why exact application matters.
-
-CTA: send vehicle details.
-
-#### `Workshop waiting`
-
-Hook: vehicle on lift / empty bay / mechanic checking time.
-
-Story: downtime costs time and money.
-
-Reveal: correct part sourced/delivered.
-
-#### `What failed?`
-
-Hook: symptom or component close-up.
-
-Show the actual part category and explain what it does.
-
-#### `From shelf to workshop`
-
-Fast logistics video:
-
-- enquiry;
-- pick;
-- check;
-- pack;
-- delivery;
-- fitment partner/workshop.
-
-#### `You thought we only sold...`
-
-Rapid reveal of unexpected specialist categories.
-
-### Visual direction
-
-Use:
-
-- clean macro component shots;
-- counter interaction;
-- stock shelves;
-- genuine branded packaging where approved;
-- delivery vehicles;
-- workshop partner environments;
-- hands/technical process;
-- vehicle detail shots.
-
-Avoid:
-
-- endless poster videos;
-- stock-image cars;
-- generic spinning brake disc 3D graphics;
-- fake mechanic acting;
-- technical jargon with no consequence.
-
-## Workshop/trade marketing system
-
-A major Germoparts growth engine should be a structured workshop relationship programme.
-
-Potential framework:
-
-### Germoparts Trade Network
-
-Not necessarily a public brand name yet.
-
-Offer components if commercially supported:
-
-- dedicated enquiry route;
-- delivery;
-- saved workshop/fleet details;
-- high-frequency order lists;
-- monthly stock/category bulletin;
-- technical support/cross-reference help;
-- account terms only where formally approved;
-- workshop events/product mornings;
-- referral/customer education content.
-
-### Workshop segmentation
-
-Track:
-
-- general mechanical;
-- European specialist;
-- fleet workshop;
-- panel/body where relevant;
-- diesel specialist;
-- gearbox specialist;
-- suspension/brake specialist;
-- farm/LDV workshop.
-
-Then market relevant parts rather than blasting every workshop with every category.
-
-## B2B outreach
-
-Build a local workshop prospect list ethically from public business data and existing commercial contacts.
-
-Outreach should lead with a useful offer:
-
-- `Send us three parts you struggle to source.`
-- trade delivery;
-- specialist range;
-- stock/quote responsiveness.
-
-Avoid generic `we would like to introduce our company` emails.
-
-## Promotions that make commercial sense
-
-Avoid discounting everything.
-
-Better promotion structures:
-
-- complete service-kit bundles;
-- brake pad + disc bundle where vehicle application and pricing are correct;
-- cooling-system seasonal campaign;
-- workshop consumable bundle;
-- fleet oil volume pricing;
-- trade-category focus month;
-- technician/product training morning with supplier support;
-- free local delivery threshold if margin supports it.
-
-Every promotion needs margin review and stock confidence first.
-
-## Seasonal campaign calendar
-
-### January / return to work
-
-- neglected service items;
-- fleet readiness;
-- school-run vehicle maintenance.
-
-### Autumn / winter
-
-- batteries if stocked/confirmed;
-- glow plugs;
-- wipers;
-- cooling/thermostat misconceptions;
-- visibility and service items.
-
-### Easter / school holidays
-
-- road-trip service parts;
-- brakes;
-- belts;
-- cooling;
-- wipers.
-
-### Mid-year
-
-- workshop trade drive;
-- suspension and steering;
-- high-mileage maintenance.
-
-### Spring/summer
-
-- cooling systems;
-- aircon filters;
-- water pumps;
-- radiator fans;
-- long-distance readiness.
-
-### November/December
-
-- road-trip parts;
-- workshop delivery urgency;
-- pre-holiday stock reminders;
-- emergency contact/trading-hour clarity.
-
-Do not use breakdown fear excessively. Make the preventive action clear.
-
-## Customer proof and reviews
-
-The current Bloemfontein Google/business footprint appears relatively light in review volume compared with major chain competitors.
-
-That is an opportunity.
-
-Ask customers for reviews after:
-
-- successful hard-to-find part sourcing;
-- fast workshop delivery;
-- helpful technical assistance;
-- repeat trade service.
-
-Best themes to earn naturally:
-
-- correct part;
-- knowledgeable staff;
-- fast service;
-- availability;
-- delivery;
-- helpful sourcing;
-- value.
-
-Never script fake review language.
-
-## Reputation and trust rules
-
-Parts businesses have four recurring trust risks:
-
-1. wrong part supplied;
-2. poor-quality replacement part;
-3. unclear return/warranty process;
-4. price comparison without understanding brand/specification differences.
-
-Marketing should reduce these risks through clarity.
-
-Potential educational content:
-
-- why two visually identical parts can differ;
-- OE / OE-equivalent / aftermarket terminology only after Germoparts confirms its approved product-language framework;
-- why VIN/application checking matters;
-- what to keep before returning a part;
-- what warranty information is required.
-
-Do not publish blanket `OEM quality` or `same as dealer` claims without supplier/product substantiation.
-
-## Right-to-repair / independent aftermarket opportunity
-
-South Africa's independent aftermarket has benefited from stronger consumer choice around servicing and repair outside dealer networks.
-
-This creates a broad education opportunity, but Germoparts should not position itself as a legal authority.
-
-Safe content direction:
-
-- explain that independent repair and replacement-part options exist;
-- encourage customers to understand warranty and service requirements;
-- refer legal/warranty-specific questions to official current guidance rather than making absolute social-media claims.
-
-## Commercial measurement — major client standard
-
-Do not report primarily on followers, reach or likes.
-
-The dashboard should connect marketing to parts demand.
-
-### Enquiry KPIs
-
-- total parts enquiries;
-- enquiries by branch;
-- enquiries by channel;
-- quote turnaround time;
-- quote-to-sale conversion;
-- unavailable/lost enquiries;
-- wrong/insufficient vehicle information rate;
-- average response time.
-
-### Sales/category KPIs
-
-- revenue by category;
-- gross margin by category where available;
-- average basket value;
-- units/order;
-- repeat customer rate;
-- workshop vs retail mix;
-- delivery-order share;
-- top vehicle applications;
-- slow/fast-moving campaign categories.
-
-### Trade KPIs
-
-- active workshop accounts;
-- new workshop accounts;
-- repeat workshop order rate;
-- average workshop revenue;
-- dormant workshop reactivation;
-- delivery frequency;
-- quote win rate.
-
-### Digital KPIs
-
-- Google Business calls;
-- directions;
-- website quote starts;
-- completed quote forms;
-- WhatsApp/call clicks if available;
-- paid search cost per qualified enquiry;
-- organic search landing pages;
-- category-page conversion;
-- retargeting-assisted enquiry.
-
-## CG Dynamics integration target
-
-For a major client such as Germoparts, CG Dynamics should eventually maintain a performance view combining:
-
-- Meta content/ad data;
-- Google Ads;
-- Google Business Profile;
-- website sessions and enquiries;
-- lead source;
-- branch;
-- part category;
-- quote status;
-- sale outcome;
-- value/margin where the client supplies it.
-
-This allows the system to answer questions such as:
-
-- Which category content actually creates quotes?
-- Which campaigns bring workshops rather than once-off retail enquiries?
-- Which search terms create high-value sales?
-- Which parts categories get attention but do not convert?
-- Which branches respond fastest?
-- Which workshop customers are becoming dormant?
-
-Do not infer revenue or lead quality from Meta engagement alone.
-
-## 90-day major-client programme
-
-## Days 1–30 — commercial truth and conversion foundation
-
-- verify current Bloemfontein hours;
-- verify current WhatsApp/direct enquiry channels;
-- confirm exact supported vehicle applications/brands;
-- confirm replacement-part brand/quality language;
-- confirm trade-account, warranty and return policies;
-- audit Google Business Profile;
-- rebuild/upgrade Bloemfontein branch landing page;
-- add structured parts quote form;
-- establish call/WhatsApp tracking;
-- photograph branch, team, parts counter, delivery and key categories;
-- establish current workshop-customer baseline.
-
-## Days 31–60 — search and trade growth
-
-- launch high-intent Google Search campaigns;
-- publish category landing pages;
-- launch `Send us the vehicle details` content system;
-- build workshop prospect/re-engagement list;
-- start workshop delivery/technical proof content;
-- implement review-request process;
-- test one seasonal/category offer with full quote-to-sale tracking.
-
-## Days 61–90 — performance and authority
-
-- compare enquiry quality by channel;
-- identify highest-converting categories;
-- identify lost-sales reasons;
-- expand best-performing search groups;
-- create first workshop case study;
-- launch specialist component video series;
-- test workshop breakfast/product morning or supplier activation;
-- build repeat-customer/workshop retention reporting;
-- refine media around sales outcomes rather than content engagement.
-
-## Evidence gaps requiring direct client confirmation
-
-Before operational use, confirm:
-
-- current Bloemfontein branch manager and public staff contacts;
-- approved WhatsApp number;
-- precise opening hours;
-- actual delivery radius and delivery rules;
-- all supported vehicle makes and applications;
-- all replacement-part brands stocked/sourced;
-- whether Germoparts uses `OE`, `OEM`, `OE-equivalent`, `aftermarket`, `premium aftermarket` or another approved quality framework;
-- warranty policy;
-- return policy, especially electronic parts;
-- trade-account terms;
-- workshop delivery SLAs;
-- same-day/nationwide sourcing commitments;
-- stock availability by branch;
-- e-commerce/online-order roadmap;
-- current Facebook, Instagram, TikTok, LinkedIn and WhatsApp identities;
-- current Google Ads / Meta Ads history;
-- website analytics;
-- top revenue categories;
-- top workshop/customer segments;
-- margin-sensitive categories;
-- current supplier campaign opportunities.
-
-## Source hierarchy
-
-### Tier 1 — official/current
-
-1. Germoparts official website — company history, product categories, branch network, Bloemfontein address/phone, delivery/service-area positioning.
-2. Germoparts official service-area and contact pages.
-3. Current Google/local-business profile evidence for Bloemfontein branch.
-
-### Tier 2 — current competitor sources
-
-4. Goldwagen official Bloemfontein and Hilton Bloemfontein store pages.
-5. AutoZone South Africa official site and Bloemfontein store locator.
-6. Midas official brand/company information.
-
-### Tier 3 — market and industry research
-
-7. `docs/ai-workforce/AUTOMOTIVE-HUMAN-MARKETING-GOLDMINE-2026-08.md` — CG's current sourced automotive marketing library, including South African and international automotive campaign evidence.
-8. `docs/ai-workforce/INDUSTRY-AUTOMOTIVE-DEALERSHIP-AFTERMARKET.md` — reusable automotive/aftermarket industry knowledge.
-9. Current South African aftermarket research reviewed 2026-08-07 indicating ageing vehicle parc, strong independent aftermarket demand, importance of availability/technical support, and fast growth in online parts channels. Treat third-party market-size estimates as directional rather than audited Germoparts facts.
-
-### Tier 4 — customer language
-
-10. Current South African automotive community discussions about sourcing parts, compatibility and online ordering — directional customer-language evidence only, never treated as representative market statistics.
+For `factual_lookup`, prioritise provenance/freshness and return unresolved conflicts explicitly.
 
 ## Final strategic principle
 
-Germoparts should not try to win because it posts more car graphics than competitors.
+Germoparts should earn attention by being useful and specific about real parts, real applications and real customer/workshop problems.
 
-It should win because workshops and vehicle owners come to believe:
-
-> **When the part is important, the application is tricky, or the car cannot sit waiting, Germoparts is where you send the details and get the problem moving.**
+The durable advantage in the marketing is not `we sell car parts`. It is showing that a customer can bring a serious parts enquiry, provide the right vehicle/product detail and get knowledgeable help without the copy pretending to know more than the evidence proves.
