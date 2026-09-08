@@ -6,7 +6,7 @@ GitHub lane: Issue #238 / draft PR #239, branch `feat/tiktok-v1-provider`
 
 ## Current code checkpoint
 
-- Current pushed head before this rollout checkpoint: `3e36fe67`.
+- Accepted implementation: `fe724df`; preview acceptance checkpoint: `03d19133`. Final closeout changes are documentation only.
 - Read-only OAuth requests `user.info.basic`, `user.info.profile`, `user.info.stats`, and `video.list`.
 - `video.publish` is added to OAuth and connection-health requirements only when `TIKTOK_PUBLISHING_ENABLED=true`.
 - Provider writes remain fail-closed unless that flag is exactly `true`.
@@ -107,7 +107,7 @@ Authenticated PR preview checked at `/admin/integrations/tiktok`:
 
 - TikTok integration route renders under the Performance workspace.
 - The client selector lists real clients.
-- Selecting **CG Production House** resolves its own `Not connected` state.
+- Selecting **CG Production House** resolves `Connected as CGPRODUCTIONHOUSE`, with a valid token and exactly the four read scopes.
 - Switching to **Cape Lumber** preserves a separate `Not connected` state.
 - Sync stays disabled without a connected exact-client account.
 - The current PR preview built successfully at `fe724df` and renders the final read-only integration copy.
@@ -133,9 +133,14 @@ Authenticated sandbox rollout acceptance completed on the current PR preview:
 - Selecting **Cape Lumber** after OAuth still renders `Not connected` and keeps sync disabled, confirming exact-client isolation in the live preview.
 - OAuth callback currently returns to `APP_PUBLIC_URL` (the production app host). Because main does not yet contain PR #239's TikTok route, that host falls back to the hub; preview acceptance continued by reopening the PR route. After merge, the same callback target will resolve normally.
 
-## Exact continuation order
+## Final acceptance decision and release gate
 
-1. Keep the live rollout read-only; do not deploy publishing functions or set `TIKTOK_PUBLISHING_ENABLED`.
-2. Verify the production domain and prepare a sandbox demonstration video.
-3. Confirm the appropriate agency publishing path with TikTok API for Business before changing the production app or enabling `TIKTOK_PUBLISHING_ENABLED`.
-4. Prepare review evidence, then stop for explicit CA approval before any production review submission.
+Read-only TikTok integration acceptance is complete for the authorized sandbox account using the production Supabase backend and PR preview. Final closeout found no unpushed local edits at `03d19133`.
+
+Authenticated Chrome reverified both public legal routes, the read-only admin screen, CG Production House connected with the four scopes, and Cape Lumber disconnected with sync disabled and no metric results or invented zeros. Production database reads confirmed the existing successful, verified run and all eight facts listed above; OAuth and sync were not rerun. This live account returned all eight metrics, so a provider-null response was not separately exercised in browser acceptance.
+
+CG Dynamics Vercel preview check passed at `03d19133`. The separate `dev-bridge` check remains failed; this is recorded, not represented as an all-checks-green result. Existing implementation validation remains 80/80 focused tests, clean production build, focused ESLint, and diff checks. No executable code changed during final closeout.
+
+Stop at the **PR merge/release decision gate**. PR #239 remains unmerged. The production frontend release must include the TikTok and legal routes; the current OAuth return host otherwise falls back to the hub as documented above.
+
+TikTok production app review, domain verification, review demonstration, production credentials, and agency publishing are separate subsequent gates. Keep publishing functions undeployed and `TIKTOK_PUBLISHING_ENABLED` unset. Do not restart the completed read-only rollout to investigate those future lanes.
