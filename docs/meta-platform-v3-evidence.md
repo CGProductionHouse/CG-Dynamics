@@ -106,3 +106,24 @@ Verified in the user's signed-in Chrome session against Meta Results and the PR
 The staff connector table exposed one new wording defect: complete facts inherited
 the platform run's partial state as the vague phrase “Partial, error or stale”.
 The next checkpoint replaces it with the exact run and health states.
+
+## Connection diagnostics checkpoint
+
+- Meta tokens are introspected server-side through Meta's documented
+  `/debug_token` endpoint at connection time and at most once per 24 hours when
+  staff open connection health.
+- Token type, token expiry, data-access expiry, validation state and last check
+  are stored beside the server-only credential. Only sanitized lifecycle status
+  reaches the manager UI; token/app-secret values remain server-side and are
+  redacted from failures.
+- An invalid token, expired token or expired data access becomes an explicit
+  reconnect state. A transient validation failure remains `unverified` instead
+  of being falsely called revoked.
+- Linked client rows now report the last Facebook and Instagram run separately,
+  including run type, period and current/stale/attention state. A missing run is
+  displayed as never synced.
+- Meta connection, asset linking and sync mutations now use the current
+  admin/manager role contract consistently.
+- Migration `20260908130000_meta_token_lifecycle_diagnostics.sql` was syntax
+  checked in a rolled-back local database transaction. It has not been applied
+  to production, and no token, secret, permission or production data changed.

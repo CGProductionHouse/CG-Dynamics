@@ -43,8 +43,8 @@ async function requireStaff(req: Request, sb: ReturnType<typeof createClient>) {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return { userId: null, error: jsonResponse({ ok: false, error: 'Staff access required.' }, 403) }
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return { userId: null, error: jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403) }
   }
 
   return { userId: user.id as string, error: null }

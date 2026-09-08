@@ -9,6 +9,8 @@ const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8')
 const SHARED_META = read('../supabase/functions/_shared/meta.ts')
 const META_POST_MERGE = read('../supabase/functions/_shared/metaPostMerge.ts')
 const META_FENCING = read('../supabase/migrations/20260908120000_meta_sync_fencing_and_idempotency.sql')
+const META_TOKEN_LIFECYCLE = read('../supabase/migrations/20260908130000_meta_token_lifecycle_diagnostics.sql')
+const META_TOKEN_DIAGNOSTICS = read('../supabase/functions/_shared/metaTokenDiagnostics.ts')
 const META_SYNC = read('../supabase/functions/meta-sync/index.ts')
 const META_WORKER = read('../supabase/functions/meta-sync-worker/index.ts')
 const REPORT_STATS = read('../src/lib/reportStats.ts')
@@ -25,6 +27,13 @@ const META_OAUTH_START = read('../supabase/functions/meta-oauth-start/index.ts')
 const META_OAUTH_CALLBACK = read('../supabase/functions/meta-oauth-callback/index.ts')
 const META_CONNECTION_STATUS = read('../supabase/functions/meta-connection-status/index.ts')
 const META_LIST_ASSETS = read('../supabase/functions/meta-list-assets/index.ts')
+const META_MANAGER_FUNCTIONS = [
+  '../supabase/functions/meta-oauth-start/index.ts',
+  '../supabase/functions/meta-list-assets/index.ts',
+  '../supabase/functions/meta-link-assets/index.ts',
+  '../supabase/functions/meta-sync/index.ts',
+  '../supabase/functions/meta-sync-enqueue/index.ts',
+].map(read)
 
 let server
 let ov
@@ -470,6 +479,26 @@ test('Meta connection health uses live permissions, schema and verified insight 
   assert.match(META_INTEGRATION_PAGE, /OAuth permissions/)
   assert.match(META_INTEGRATION_PAGE, /Last verified insight/)
   assert.doesNotMatch(META_INTEGRATION_PAGE, /Confirm phase-4b SQL is applied/)
+})
+
+test('Meta token lifecycle is validated server-side without exposing credentials', () => {
+  assert.match(META_TOKEN_DIAGNOSTICS, /\/debug_token\?input_token=/)
+  assert.match(META_TOKEN_DIAGNOSTICS, /Authorization: `Bearer \$\{appToken\}`/)
+  assert.match(META_TOKEN_DIAGNOSTICS, /data_access_expires_at/)
+  assert.match(META_TOKEN_LIFECYCLE, /validation_state in \('valid', 'invalid', 'unverified'\)/)
+  assert.match(META_CONNECTION_STATUS, /validationAge >= 24 \* 60 \* 60 \* 1000/)
+  assert.match(META_CONNECTION_STATUS, /tokenExpired/)
+  assert.match(META_CONNECTION_STATUS, /dataAccessExpired/)
+  assert.match(META_CONNECTION_STATUS, /assetHealth/)
+  assert.doesNotMatch(META_INTEGRATION_PAGE, /encrypted_access_token/)
+  assert.match(META_INTEGRATION_PAGE, /Token validity/)
+  assert.match(META_INTEGRATION_PAGE, /Token\/data access expiry/)
+  assert.match(META_INTEGRATION_PAGE, /never synced/)
+  assert.match(META_INTEGRATION_PAGE, /refresh diagnostics unavailable/)
+  for (const source of META_MANAGER_FUNCTIONS) {
+    assert.match(source, /\['admin', 'manager'\]/)
+    assert.doesNotMatch(source, /\['admin', 'team'\]/)
+  }
 })
 
 test('rendered report includes methodology and curation controls without CG-generated wording', () => {

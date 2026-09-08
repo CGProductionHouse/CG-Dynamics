@@ -75,8 +75,8 @@ Deno.serve(async (req) => {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
   // Read the connected token.

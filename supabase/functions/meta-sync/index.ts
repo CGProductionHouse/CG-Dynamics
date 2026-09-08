@@ -344,8 +344,8 @@ async function handleRequest(req: Request): Promise<Response> {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return failureResponse('auth', 'Staff access required.', 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return failureResponse('auth', 'Admin or manager access required.', 403)
   }
   steps.push('auth ok')
 

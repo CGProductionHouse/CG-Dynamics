@@ -85,12 +85,35 @@ interface ConnectionInfo {
   grantedScopes: string[]
   schemaReady: boolean
   tokenEncryptedAtRest: boolean
+  tokenLifecycle: {
+    state: 'valid' | 'invalid' | 'unverified' | 'expired' | 'data_access_expired'
+    tokenType: string | null
+    expiresAt: string | null
+    dataAccessExpiresAt: string | null
+    lastValidatedAt: string | null
+    validationErrorCode: string | null
+  } | null
+  assetHealthAvailable: boolean
+  assetHealth: Array<{
+    clientId: string
+    facebook: MetaAssetRun | null
+    instagram: MetaAssetRun | null
+  }>
   lastVerifiedInsight: {
     platform: string
     periodMonth: string
     healthState: string
     finishedAt: string | null
   } | null
+}
+
+interface MetaAssetRun {
+  run_type: string
+  period_month: string | null
+  status: string
+  health_state: string
+  finished_at: string | null
+  created_at: string
 }
 
 type ReadinessFilter = 'none' | 'active' | 'linked' | 'missingFacebook' | 'missingInstagram' | 'missingAdAccount' | 'noInstagram'
@@ -213,6 +236,37 @@ function redactForDisplay(text: string): string {
     .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
     .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
     .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
+}
+
+function tokenStateLabel(info: ConnectionInfo | null): string {
+  const lifecycle = info?.tokenLifecycle
+  if (!lifecycle) return 'Validation metadata unavailable'
+  if (lifecycle.state === 'valid') return lifecycle.lastValidatedAt
+    ? `Valid · checked ${formatDateTime(lifecycle.lastValidatedAt)}`
+    : 'Valid'
+  if (lifecycle.state === 'expired') return 'Expired · reconnect required'
+  if (lifecycle.state === 'data_access_expired') return 'Data access expired · reconnect required'
+  if (lifecycle.state === 'invalid') return 'Invalid · reconnect required'
+  return lifecycle.validationErrorCode === 'migration_required' ? 'Migration required' : 'Validation pending'
+}
+
+function tokenExpiryLabel(info: ConnectionInfo | null): string {
+  const lifecycle = info?.tokenLifecycle
+  if (!lifecycle) return 'Not reported'
+  const values = [lifecycle.expiresAt, lifecycle.dataAccessExpiresAt].filter((value): value is string => Boolean(value))
+  if (values.length === 0) return 'No expiry reported by Meta'
+  const earliest = values.sort()[0]
+  return formatDateTime(earliest)
+}
+
+function assetRunLabel(platform: 'Facebook' | 'Instagram', run: MetaAssetRun | null): string {
+  if (!run) return `${platform}: never synced`
+  const timestamp = run.finished_at ?? run.created_at
+  const ageMs = Date.now() - new Date(timestamp).getTime()
+  const failure = run.status === 'failed' || ['sync_error', 'permission_blocked', 'reconnection_required'].includes(run.health_state)
+  const freshness = failure ? 'needs attention' : ageMs > 48 * 60 * 60 * 1000 ? 'stale' : 'current'
+  const kind = run.run_type === 'scheduled' ? 'incremental' : run.run_type.replaceAll('_', ' ')
+  return `${platform}: ${formatDateTime(timestamp)} · ${kind} · ${freshness}${run.period_month ? ` · ${run.period_month}` : ''}`
 }
 
 function applyAliases(value: string): string {
@@ -940,6 +994,9 @@ export default function MetaIntegrationPage() {
           grantedScopes: Array.isArray(data.connection?.grantedScopes) ? data.connection.grantedScopes : [],
           schemaReady: data.schemaReady === true,
           tokenEncryptedAtRest: data.tokenSecurity?.encryptedAtRest === true,
+          tokenLifecycle: data.tokenLifecycle ?? null,
+          assetHealthAvailable: Array.isArray(data.assetHealth),
+          assetHealth: Array.isArray(data.assetHealth) ? data.assetHealth : [],
           lastVerifiedInsight: data.connection?.lastVerifiedInsight ?? null,
         })
         setConnectMsg(null)
@@ -1670,6 +1727,16 @@ export default function MetaIntegrationPage() {
             label="Token storage"
             value={connectionInfo?.tokenEncryptedAtRest ? 'Encrypted at rest' : 'Server-only; encryption hardening required'}
             tone={connectionInfo?.tokenEncryptedAtRest ? 'ok' : 'warn'}
+          />
+          <HealthTile
+            label="Token validity"
+            value={tokenStateLabel(connectionInfo)}
+            tone={connectionInfo?.tokenLifecycle?.state === 'valid' ? 'ok' : 'warn'}
+          />
+          <HealthTile
+            label="Token/data access expiry"
+            value={tokenExpiryLabel(connectionInfo)}
+            tone={connectionInfo?.tokenLifecycle?.state === 'expired' || connectionInfo?.tokenLifecycle?.state === 'data_access_expired' ? 'warn' : 'neutral'}
           />
           <HealthTile
             label="Last verified insight"
@@ -2432,6 +2499,8 @@ export default function MetaIntegrationPage() {
           <div className="space-y-2">
             {linkedAssets.map(asset => {
               const client = clients.find(c => c.id === asset.client_id)
+              const health = connectionInfo?.assetHealth.find(item => item.clientId === asset.client_id)
+              const healthAvailable = connectionInfo?.assetHealthAvailable === true
               return (
                 <div key={asset.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-muted bg-brand-bg/50 p-4">
                   <div className="min-w-0 flex-1 text-sm">
@@ -2439,6 +2508,8 @@ export default function MetaIntegrationPage() {
                     <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
                     <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : asset.instagram_not_applicable ? 'Instagram not applicable' : 'No Instagram account linked'}</p>
                     <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
+                    {asset.facebook_page_id && <p className="mt-2 text-xs text-brand-primary/65">{healthAvailable ? assetRunLabel('Facebook', health?.facebook ?? null) : 'Facebook: refresh diagnostics unavailable'}</p>}
+                    {asset.instagram_account_id && <p className="text-xs text-brand-primary/65">{healthAvailable ? assetRunLabel('Instagram', health?.instagram ?? null) : 'Instagram: refresh diagnostics unavailable'}</p>}
                   </div>
                   <ActionButton variant="danger" size="sm" onClick={() => handleDeactivate(asset)}>
                     Deactivate

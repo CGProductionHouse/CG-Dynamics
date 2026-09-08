@@ -1,5 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
+import { resolveMetaGraphConfig } from '../_shared/meta.ts'
 
 const REQUIRED_SCOPES = [
   'pages_show_list',
@@ -43,8 +45,8 @@ Deno.serve(async (req) => {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
   // Count active linked assets (independent of connection status).
@@ -55,7 +57,7 @@ Deno.serve(async (req) => {
 
   const [{ error: oauthStateSchemaError }, { error: tokenSchemaError }] = await Promise.all([
     sb.from('meta_oauth_states').select('id', { head: true }).limit(1),
-    sb.from('meta_connection_tokens').select('id', { head: true }).limit(1),
+    sb.from('meta_connection_tokens').select('id, validation_state, last_validated_at', { head: true }).limit(1),
   ])
   const schemaReady = !oauthStateSchemaError && !tokenSchemaError
 
@@ -123,14 +125,34 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Status is 'connected' — verify a token row exists (but don't return its value).
-  const { data: tokenRows } = await sb
+  // Status is 'connected' — validate lifecycle metadata server-side. The token
+  // value and app secret are never returned to the browser.
+  let { data: tokenRows, error: tokenReadError } = await sb
     .from('meta_connection_tokens')
-    .select('id')
+    .select('id, encrypted_access_token, token_type, token_expires_at, data_access_expires_at, last_validated_at, validation_state, validation_error_code, validation_error_reason')
     .eq('connection_id', latest.id)
     .limit(1)
 
-  if (!tokenRows || tokenRows.length === 0) {
+  // Keep the status endpoint deploy-safe when code lands before the migration.
+  // The UI will say migration required and validation remains unverified.
+  if (tokenReadError && !schemaReady) {
+    const fallback = await sb.from('meta_connection_tokens')
+      .select('id, encrypted_access_token, token_expires_at')
+      .eq('connection_id', latest.id)
+      .limit(1)
+    tokenRows = fallback.data?.map(row => ({
+      ...row,
+      token_type: null,
+      data_access_expires_at: null,
+      last_validated_at: null,
+      validation_state: 'unverified',
+      validation_error_code: 'migration_required',
+      validation_error_reason: null,
+    })) ?? null
+    tokenReadError = fallback.error
+  }
+
+  if (tokenReadError || !tokenRows || tokenRows.length === 0) {
     return jsonResponse({
       ok: true,
       connected: false,
@@ -139,6 +161,101 @@ Deno.serve(async (req) => {
       linkedAssetsCount: linkedAssetsCount ?? 0,
     })
   }
+
+  const tokenRow = tokenRows[0]
+  const validationAge = tokenRow.last_validated_at ? Date.now() - new Date(tokenRow.last_validated_at).getTime() : Number.POSITIVE_INFINITY
+  const appId = Deno.env.get('META_APP_ID')
+  const appSecret = Deno.env.get('META_APP_SECRET')
+  if (schemaReady && tokenRow.encrypted_access_token && appId && appSecret && validationAge >= 24 * 60 * 60 * 1000) {
+    let diagnostics
+    try {
+      diagnostics = await inspectMetaAccessToken({
+        graphBaseUrl: resolveMetaGraphConfig().baseUrl,
+        appId,
+        appSecret,
+        accessToken: tokenRow.encrypted_access_token,
+      })
+    } catch {
+      diagnostics = {
+        state: 'unverified' as const,
+        tokenType: null,
+        expiresAt: null,
+        dataAccessExpiresAt: null,
+        validatedAt: new Date().toISOString(),
+        grantedScopes: [],
+        errorCode: 'configuration_error',
+        errorReason: 'Meta token validation is unavailable because server configuration is incomplete.',
+      }
+    }
+    Object.assign(tokenRow, {
+      token_type: diagnostics.tokenType,
+      token_expires_at: diagnostics.expiresAt ?? tokenRow.token_expires_at,
+      data_access_expires_at: diagnostics.dataAccessExpiresAt,
+      last_validated_at: diagnostics.validatedAt,
+      validation_state: diagnostics.state,
+      validation_error_code: diagnostics.errorCode,
+      validation_error_reason: diagnostics.errorReason,
+    })
+    await sb.from('meta_connection_tokens').update({
+      token_type: tokenRow.token_type,
+      token_expires_at: tokenRow.token_expires_at,
+      data_access_expires_at: tokenRow.data_access_expires_at,
+      last_validated_at: tokenRow.last_validated_at,
+      validation_state: tokenRow.validation_state,
+      validation_error_code: tokenRow.validation_error_code,
+      validation_error_reason: tokenRow.validation_error_reason,
+    }).eq('id', tokenRow.id)
+  }
+
+  const now = Date.now()
+  const tokenExpired = Boolean(tokenRow.token_expires_at && new Date(tokenRow.token_expires_at).getTime() <= now)
+  const dataAccessExpired = Boolean(tokenRow.data_access_expires_at && new Date(tokenRow.data_access_expires_at).getTime() <= now)
+  const tokenInvalid = tokenRow.validation_state === 'invalid' || tokenExpired || dataAccessExpired
+  const tokenState = tokenExpired ? 'expired'
+    : dataAccessExpired ? 'data_access_expired'
+    : tokenRow.validation_state ?? 'unverified'
+
+  if (tokenInvalid) {
+    const reason = tokenExpired
+      ? 'The Meta access token expired. Reconnect Meta.'
+      : dataAccessExpired
+        ? 'Meta data access expired. Reconnect Meta.'
+        : tokenRow.validation_error_reason || 'Meta reports that this token is invalid. Reconnect Meta.'
+    await sb.from('meta_connections').update({ status: 'needs_reauth', last_error: reason }).eq('id', latest.id)
+    return jsonResponse({
+      ok: true, connected: false, status: 'needs_reauth', message: reason,
+      missingScopes: [], schemaReady, linkedAssetsCount: linkedAssetsCount ?? 0,
+      tokenLifecycle: {
+        state: tokenState, tokenType: tokenRow.token_type, expiresAt: tokenRow.token_expires_at,
+        dataAccessExpiresAt: tokenRow.data_access_expires_at, lastValidatedAt: tokenRow.last_validated_at,
+        validationErrorCode: tokenRow.validation_error_code,
+      },
+    })
+  }
+
+  const { data: activeAssets } = await sb
+    .from('meta_client_assets')
+    .select('client_id, facebook_page_id, instagram_account_id')
+    .eq('is_active', true)
+  const clientIds = [...new Set((activeAssets ?? []).map(asset => asset.client_id))]
+  const { data: recentRuns } = clientIds.length > 0
+    ? await sb.from('platform_sync_runs')
+      .select('client_id, platform, run_type, period_month, status, health_state, finished_at, created_at')
+      .in('client_id', clientIds)
+      .in('platform', ['facebook', 'instagram'])
+      .order('created_at', { ascending: false })
+      .limit(2000)
+    : { data: [] }
+  const latestRuns = new Map<string, Record<string, unknown>>()
+  for (const run of recentRuns ?? []) {
+    const key = `${run.client_id}:${run.platform}`
+    if (!latestRuns.has(key)) latestRuns.set(key, run)
+  }
+  const assetHealth = (activeAssets ?? []).map(asset => ({
+    clientId: asset.client_id,
+    facebook: asset.facebook_page_id ? latestRuns.get(`${asset.client_id}:facebook`) ?? null : null,
+    instagram: asset.instagram_account_id ? latestRuns.get(`${asset.client_id}:instagram`) ?? null : null,
+  }))
 
   return jsonResponse({
     ok: true,
@@ -150,6 +267,14 @@ Deno.serve(async (req) => {
     tokenSecurity: {
       encryptedAtRest: false,
       state: 'server_only_plaintext',
+    },
+    tokenLifecycle: {
+      state: tokenState,
+      tokenType: tokenRow.token_type,
+      expiresAt: tokenRow.token_expires_at,
+      dataAccessExpiresAt: tokenRow.data_access_expires_at,
+      lastValidatedAt: tokenRow.last_validated_at,
+      validationErrorCode: tokenRow.validation_error_code,
     },
     connection: {
       id: latest.id,
@@ -165,5 +290,6 @@ Deno.serve(async (req) => {
       } : null,
     },
     linkedAssetsCount: linkedAssetsCount ?? 0,
+    assetHealth,
   })
 })
