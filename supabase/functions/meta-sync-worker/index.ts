@@ -571,13 +571,18 @@ Deno.serve(async (req) => {
         reportsReused = reportResult.created === true ? 0 : 1
 
         // ── Get linked assets for this client ──
-        const { data: linkedAssets } = await sb
+        let linkedAssetQuery = sb
           .from('meta_client_assets')
           .select('id, facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, instagram_not_applicable')
           .eq('client_id', item.client_id)
           .eq('is_active', true)
+        linkedAssetQuery = item.asset_id ? linkedAssetQuery.eq('id', item.asset_id) : linkedAssetQuery
+        const { data: linkedAssets } = await linkedAssetQuery
 
-        if ((linkedAssets?.length ?? 0) > 1) {
+        if (item.asset_id && (linkedAssets?.length ?? 0) !== 1) {
+          throw new Error('The queued Meta asset is no longer active for this client. Relink it before retrying.')
+        }
+        if (!item.asset_id && (linkedAssets?.length ?? 0) > 1) {
           throw new Error('Multiple active Meta asset mappings require review. Configure one active Page/Instagram mapping row for this client.')
         }
 
@@ -613,8 +618,24 @@ Deno.serve(async (req) => {
           completedPagePosts = 0,
           instagramOldestTimestamp: string | null = null,
           instagramOrderingMalformed: boolean | null = null,
+          terminalHealthState: string | null = null,
         ): Promise<void> => {
-          const { data, error } = await sb.rpc('meta_sync_checkpoint_item', {
+          const terminal = state === 'complete' || state === 'failed'
+          const checkpointRpc = item.asset_id && terminal
+            ? 'meta_sync_checkpoint_platform_terminal'
+            : 'meta_sync_checkpoint_item'
+          const checkpointArgs = item.asset_id && terminal ? {
+            p_item_id: item.id,
+            p_lease_generation: leaseGeneration,
+            p_platform: platform,
+            p_state: state,
+            p_completed_page_posts: completedPagePosts,
+            p_window_end: new Date(Math.min(Number(postBounds.until) * 1000, Date.now())).toISOString(),
+            p_api_version: graphVersion,
+            p_connector_version: META_CONNECTOR_VERSION,
+            p_health_state: terminalHealthState,
+            p_error_code: state === 'failed' ? 'provider_error' : null,
+          } : {
             p_item_id: item.id,
             p_lease_generation: leaseGeneration,
             p_platform: platform,
@@ -623,7 +644,8 @@ Deno.serve(async (req) => {
             p_completed_page_posts: completedPagePosts,
             p_instagram_oldest_timestamp: instagramOldestTimestamp,
             p_instagram_ordering_malformed: instagramOrderingMalformed,
-          })
+          }
+          const { data, error } = await sb.rpc(checkpointRpc, checkpointArgs)
           if (error) throw new Error(`Could not checkpoint ${platform} sync: ${error.message}`)
           const nextPostsSynced = Number(Array.isArray(data) ? data[0] : data)
           if (!Number.isFinite(nextPostsSynced)) throw new Error(`Could not checkpoint ${platform} sync: invalid post count`)
@@ -832,14 +854,14 @@ Deno.serve(async (req) => {
                 clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
                 platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
                 baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
-                tokens: allTokens, tokenClass: 'page', runType: 'scheduled',
+                tokens: allTokens, tokenClass: 'page', runType: item.sync_kind === 'incremental' ? 'scheduled' : item.sync_kind === 'targeted_backfill' ? 'historical_resync' : 'manual',
                 deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
                 checkpoint: { itemId: item.id, leaseGeneration },
               })
               if (factsResult.healthState === 'permission_blocked' || factsResult.healthState === 'sync_error') {
                 throw new Error(`Facebook account facts ended in ${factsResult.healthState}.`)
               }
-              await savePlatformState('facebook', 'complete', null)
+              await savePlatformState('facebook', 'complete', null, 0, null, null, factsResult.healthState)
             } catch (e) {
               if (e instanceof MetaSyncDeadlineError) {
                 throw new RetryableIncompleteError(e.message, true)
@@ -865,14 +887,14 @@ Deno.serve(async (req) => {
               platform: 'instagram', objectId: instagramAccountId, token: igToken,
               baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
               tokens: allTokens, tokenClass: facebookPageId && pageTokenMap.get(facebookPageId) ? 'page' : 'user',
-              runType: 'scheduled',
+              runType: item.sync_kind === 'incremental' ? 'scheduled' : item.sync_kind === 'targeted_backfill' ? 'historical_resync' : 'manual',
               deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
               checkpoint: { itemId: item.id, leaseGeneration },
             })
             if (factsResult.healthState === 'permission_blocked' || factsResult.healthState === 'sync_error') {
               throw new Error(`Instagram account facts ended in ${factsResult.healthState}.`)
             }
-            await savePlatformState('instagram', 'complete', null)
+            await savePlatformState('instagram', 'complete', null, 0, null, null, factsResult.healthState)
           } catch (e) {
             if (e instanceof MetaSyncDeadlineError) {
               throw new RetryableIncompleteError(e.message, true)

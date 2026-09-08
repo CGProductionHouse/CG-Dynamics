@@ -114,6 +114,9 @@ interface MetaAssetRun {
   health_state: string
   finished_at: string | null
   created_at: string
+  high_watermark_at?: string | null
+  next_due_at?: string | null
+  last_error_code?: string | null
 }
 
 type ReadinessFilter = 'none' | 'active' | 'linked' | 'missingFacebook' | 'missingInstagram' | 'missingAdAccount' | 'noInstagram'
@@ -260,13 +263,14 @@ function tokenExpiryLabel(info: ConnectionInfo | null): string {
 }
 
 function assetRunLabel(platform: 'Facebook' | 'Instagram', run: MetaAssetRun | null): string {
-  if (!run) return `${platform}: never synced`
+  if (!run) return `${platform}: no durable checkpoint recorded`
   const timestamp = run.finished_at ?? run.created_at
   const ageMs = Date.now() - new Date(timestamp).getTime()
   const failure = run.status === 'failed' || ['sync_error', 'permission_blocked', 'reconnection_required'].includes(run.health_state)
   const freshness = failure ? 'needs attention' : ageMs > 48 * 60 * 60 * 1000 ? 'stale' : 'current'
   const kind = run.run_type === 'scheduled' ? 'incremental' : run.run_type.replaceAll('_', ' ')
-  return `${platform}: ${formatDateTime(timestamp)} · ${kind} · ${freshness}${run.period_month ? ` · ${run.period_month}` : ''}`
+  const health = run.health_state.replaceAll('_', ' ')
+  return `${platform}: ${formatDateTime(timestamp)} · ${kind} · ${health} · ${freshness}${run.period_month ? ` · ${run.period_month}` : ''}`
 }
 
 function applyAliases(value: string): string {
@@ -952,7 +956,7 @@ export default function MetaIntegrationPage() {
       }
 
       const months = getCompletedMonths(syncMonthCount)
-      const items = syncableAssets.map(a => ({ clientId: a.client_id, clientName: clientNameForAsset(a) }))
+      const items = syncableAssets.map(a => ({ assetId: a.id, clientId: a.client_id, clientName: clientNameForAsset(a) }))
 
       const { data, error } = await supabase.functions.invoke('meta-sync-enqueue', {
         method: 'POST',

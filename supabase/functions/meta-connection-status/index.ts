@@ -55,11 +55,12 @@ Deno.serve(async (req) => {
     .select('*', { head: true, count: 'exact' })
     .eq('is_active', true)
 
-  const [{ error: oauthStateSchemaError }, { error: tokenSchemaError }] = await Promise.all([
+  const [{ error: oauthStateSchemaError }, { error: tokenSchemaError }, { error: checkpointSchemaError }] = await Promise.all([
     sb.from('meta_oauth_states').select('id', { head: true }).limit(1),
     sb.from('meta_connection_tokens').select('id, validation_state, last_validated_at', { head: true }).limit(1),
+    sb.from('meta_asset_sync_checkpoints').select('asset_id, platform', { head: true }).limit(1),
   ])
-  const schemaReady = !oauthStateSchemaError && !tokenSchemaError
+  const schemaReady = !oauthStateSchemaError && !tokenSchemaError && !checkpointSchemaError
 
   const { data: verifiedRuns } = await sb
     .from('platform_sync_runs')
@@ -235,27 +236,34 @@ Deno.serve(async (req) => {
 
   const { data: activeAssets } = await sb
     .from('meta_client_assets')
-    .select('client_id, facebook_page_id, instagram_account_id')
+    .select('id, client_id, facebook_page_id, instagram_account_id')
     .eq('is_active', true)
-  const clientIds = [...new Set((activeAssets ?? []).map(asset => asset.client_id))]
-  const { data: recentRuns } = clientIds.length > 0
-    ? await sb.from('platform_sync_runs')
-      .select('client_id, platform, run_type, period_month, status, health_state, finished_at, created_at')
-      .in('client_id', clientIds)
-      .in('platform', ['facebook', 'instagram'])
-      .order('created_at', { ascending: false })
-      .limit(2000)
+  const assetIds = (activeAssets ?? []).map(asset => asset.id).filter(Boolean)
+  const { data: checkpoints } = schemaReady && assetIds.length > 0
+    ? await sb.from('meta_asset_sync_checkpoints')
+      .select('asset_id, client_id, platform, last_sync_kind, last_status, last_health_state, last_attempted_at, last_successful_at, last_successful_month, high_watermark_at, next_due_at, api_version, connector_version, last_error_code')
+      .in('asset_id', assetIds)
     : { data: [] }
-  const latestRuns = new Map<string, Record<string, unknown>>()
-  for (const run of recentRuns ?? []) {
-    const key = `${run.client_id}:${run.platform}`
-    if (!latestRuns.has(key)) latestRuns.set(key, run)
+  const checkpointByAsset = new Map<string, Record<string, unknown>>()
+  for (const checkpoint of checkpoints ?? []) {
+    checkpointByAsset.set(`${checkpoint.asset_id}:${checkpoint.platform}`, checkpoint)
   }
-  const assetHealth = (activeAssets ?? []).map(asset => ({
+  const asRun = (checkpoint: Record<string, unknown> | undefined) => checkpoint ? {
+    run_type: checkpoint.last_sync_kind === 'incremental' ? 'scheduled' : checkpoint.last_sync_kind === 'targeted_backfill' ? 'historical_resync' : 'manual',
+    period_month: checkpoint.last_successful_month,
+    status: checkpoint.last_status === 'complete' ? 'success' : 'failed',
+    health_state: checkpoint.last_health_state,
+    finished_at: checkpoint.last_status === 'failed' ? checkpoint.last_attempted_at : (checkpoint.last_successful_at ?? checkpoint.last_attempted_at),
+    created_at: checkpoint.last_attempted_at,
+    high_watermark_at: checkpoint.high_watermark_at,
+    next_due_at: checkpoint.next_due_at,
+    last_error_code: checkpoint.last_error_code,
+  } : null
+  const assetHealth = schemaReady ? (activeAssets ?? []).map(asset => ({
     clientId: asset.client_id,
-    facebook: asset.facebook_page_id ? latestRuns.get(`${asset.client_id}:facebook`) ?? null : null,
-    instagram: asset.instagram_account_id ? latestRuns.get(`${asset.client_id}:instagram`) ?? null : null,
-  }))
+    facebook: asset.facebook_page_id ? asRun(checkpointByAsset.get(`${asset.id}:facebook`)) : null,
+    instagram: asset.instagram_account_id ? asRun(checkpointByAsset.get(`${asset.id}:instagram`)) : null,
+  })) : null
 
   return jsonResponse({
     ok: true,

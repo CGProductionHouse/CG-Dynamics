@@ -229,7 +229,8 @@ test('scheduled worker uses the shared connector, not a competing one', () => {
   assert.match(META_WORKER, /syncAccountFacts/)
   // Shares the network layer (no private retry loop competing with the shared one).
   assert.match(META_WORKER, /\bmetaFetch\b/)
-  assert.match(META_WORKER, /runType: 'scheduled'/)
+  assert.match(META_WORKER, /runType: item\.sync_kind === 'incremental' \? 'scheduled'/)
+  assert.match(META_WORKER, /item\.sync_kind === 'targeted_backfill' \? 'historical_resync' : 'manual'/)
 })
 
 test('manual and scheduled sync share conservative post reconciliation', () => {
@@ -493,7 +494,7 @@ test('Meta token lifecycle is validated server-side without exposing credentials
   assert.doesNotMatch(META_INTEGRATION_PAGE, /encrypted_access_token/)
   assert.match(META_INTEGRATION_PAGE, /Token validity/)
   assert.match(META_INTEGRATION_PAGE, /Token\/data access expiry/)
-  assert.match(META_INTEGRATION_PAGE, /never synced/)
+  assert.match(META_INTEGRATION_PAGE, /no durable checkpoint recorded/)
   assert.match(META_INTEGRATION_PAGE, /refresh diagnostics unavailable/)
   for (const source of META_MANAGER_FUNCTIONS) {
     assert.match(source, /\['admin', 'manager'\]/)
