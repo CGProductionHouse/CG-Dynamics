@@ -19,7 +19,7 @@ Purpose: migrate durable client knowledge from existing ChatGPT Projects into CG
 11. Update/create the appropriate client intelligence / operational memory in CG Dynamics and retain the repo's freshness protocol.
 12. Do not change CG Hours billing/history, client UUIDs, time entries or financial records during this knowledge migration.
 13. Do not merge billing umbrellas with content identities. Example: Wiseman Group may be the invoice umbrella, while WiseRide, Supa Quick BFN and Supa Quick Centurion remain separate content/client intelligence identities.
-14. Use branch `client-directory-reconciliation-2026-09-08` for this migration until CA approves final merge to main.
+14. Use branch `client-directory-reconciliation-2026-09-08` for this migration until CA approves final merge to main. Client-specific migration branches may be based on that branch when CA explicitly requests isolated work.
 
 ## Durable knowledge to capture
 
@@ -46,6 +46,7 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 |---|---|---|---|
 | WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
 | Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
+| Cape Lumber | Cape Lumber | **SYNCED** | Canonical CG name remains Cape Lumber; public trading style is Cape Lumber Marketing. Existing August intelligence was converted into one permanent evolving human record, with accessible Project chats/source file, CG corrections, supplier-only boundaries, current product/service verification and unresolved phone/email/location/social freshness issues explicitly reconciled. |
 
 ## Completion standard
 
