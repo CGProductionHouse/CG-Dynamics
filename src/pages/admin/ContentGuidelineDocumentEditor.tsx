@@ -7,6 +7,7 @@ import {
   guidelineScheduleCandidates,
   importGuidelineVideosFromSchedule,
   reorderGuidelineVideos,
+  runGuideAction,
   setGuidelinePublication,
   suggestContentVideos,
   suggestionToVideoInput,
@@ -324,6 +325,16 @@ export default function ContentGuidelineDocumentEditor({
     await onChanged()
   }
 
+  async function archiveVideo(video: ContentGuidelineVideo) {
+    if (!window.confirm(`Archive "${video.title}"? This removes it from the guideline but keeps the record.`)) return
+    setBusy(`archive-${video.id}`)
+    setError(null)
+    const result = await runGuideAction(video.id, 'archive')
+    setBusy(null)
+    if (result.error) { setError(result.error); return }
+    await onChanged()
+  }
+
   // AI suggestions
   async function loadSuggestions() {
     if (!guideline.client_id || !coverageStart || !coverageEnd) {
@@ -558,6 +569,7 @@ export default function ContentGuidelineDocumentEditor({
                     <div className="flex items-center gap-1">
                       <button type="button" title="Move video up" disabled={index === 0 || busy === 'reorder'} onClick={() => void moveVideo(index, -1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8593;</button>
                       <button type="button" title="Move video down" disabled={index === videos.length - 1 || busy === 'reorder'} onClick={() => void moveVideo(index, 1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8595;</button>
+                      <button type="button" title="Archive video" disabled={busy?.startsWith('archive-')} onClick={() => void archiveVideo(video)} className="h-8 w-8 rounded-lg border border-amber-300/25 text-amber-200 hover:bg-amber-300/10 disabled:opacity-25" aria-label="Archive video">&#9745;</button>
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap items-start gap-2">

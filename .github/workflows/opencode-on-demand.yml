@@ -31,6 +31,7 @@ jobs:
           persist-credentials: false
 
       - name: Run OpenCode
+        continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
@@ -51,6 +52,7 @@ jobs:
           persist-credentials: false
 
       - name: Run OpenCode
+        continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}

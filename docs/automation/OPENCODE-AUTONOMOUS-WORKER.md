@@ -11,13 +11,18 @@ Use GitHub as the persistent control plane so OpenCode can keep CG Dynamics movi
   - can also be run manually from GitHub Actions;
   - reads current `main`, Issue #216, latest comments and open PR ownership before choosing work;
   - works only on safe unowned engineering work;
-  - opens/updates PRs and GitHub evidence;
+  - opens/updates PRs for real code changes;
+  - is notification-silent by default: routine progress, status and evidence stay in workflow logs, commits and PR bodies instead of issue/PR comments that email subscribed team members;
+  - genuine blockers are surfaced by the supervisor rather than repeated bot comments;
   - does not merge, production-deploy, apply production migrations, change credentials/provider permissions, or publish externally;
-  - concurrency guard prevents overlapping autonomous runs.
+  - concurrency guard prevents overlapping autonomous runs;
+  - model-lane exhaustion is recorded in the workflow log without deliberately failing the run just to generate notification mail.
 
 - `.github/workflows/opencode-on-demand.yml`
   - `/oc ...` or `/opencode ...` in an issue/PR comment wakes OpenCode on that exact thread;
-  - manual `workflow_dispatch` supports a direct prompt from GitHub Actions.
+  - manual `workflow_dispatch` supports a direct prompt from GitHub Actions;
+  - comment-triggered mode inherently creates/updates a GitHub bot comment, so it is reserved for deliberate ad-hoc use rather than routine supervisor dispatch;
+  - OpenCode action-step failures are allowed to conclude without turning the whole workflow into a notification-generating failed run; supervisors inspect logs directly.
 
 ## Model routing
 
@@ -62,9 +67,10 @@ Install/authorize the official OpenCode GitHub app for this repository if it is 
 - Do not duplicate an active Claude/Codex/Crestodian/OpenCode-owned PR or mission.
 - Prefer finishing existing launch work over starting new architecture.
 - Safe unattended output stops at a verified PR/review gate.
+- Routine agent progress must not be posted as repetitive issue/PR comments. The supervisor reads GitHub state, workflow logs and PRs directly.
 - Production authority stays with the supervisor until the autonomous lane has proven reliable.
-- If all model lanes fail or are rate-limited, the hourly schedule tries again on the next wake-up.
+- If all model lanes fail or are rate-limited, the hourly schedule tries again on the next wake-up without deliberately generating email noise.
 
 ## Supervisor integration
 
-ChatGPT/Crestodian can wake the worker by adding `/oc <instruction>` to the relevant GitHub issue or PR, inspect the resulting workflow/PR, and redirect the next run by updating GitHub truth. This removes CA from the normal dispatch loop while preserving a durable audit trail.
+ChatGPT/Crestodian should prefer the scheduled autonomous worker and inspect its workflow/PR output directly. `/oc <instruction>` on an issue or PR remains available for a deliberate thread-specific intervention, but it is not the normal dispatch path because OpenCode's GitHub action creates a bot progress/result comment and GitHub may email subscribed team members. This keeps CA and the broader CG team out of routine agent progress noise while preserving a durable audit trail in GitHub.
