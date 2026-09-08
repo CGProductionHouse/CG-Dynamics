@@ -46,7 +46,7 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 |---|---|---|---|
 | WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
 | Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
-| Cape Lumber | Cape Lumber | **SYNCED** | Canonical CG name remains Cape Lumber; public trading style is Cape Lumber Marketing. Existing August intelligence was converted into one permanent evolving human record, with accessible Project chats/source file, CG corrections, supplier-only boundaries, current product/service verification and unresolved phone/email/location/social freshness issues explicitly reconciled. |
+| Cape Lumber | Cape Lumber | **SYNCED — PROJECT-READY** | Permanent Dynamics intelligence is reconciled; recent social/content audit is incorporated; `CAPE-LUMBER-CG-DYNAMICS-CLIENT-GUIDE.md` is the canonical ChatGPT working guide; current Project Sources were audited with a replace decision for the stale-risk business PDF; short staff-facing Project Instructions were supplied. |
 
 ## Completion standard
 
@@ -58,5 +58,17 @@ A client is `SYNCED` only when:
 - contradictions/stale facts have been resolved or explicitly flagged;
 - durable knowledge has been committed to this branch;
 - the final response states exactly what files/records changed and the commit SHA.
+
+### Cape Lumber Project-ready architecture
+
+Cape Lumber is only considered fully complete under the current ChatGPT Project architecture when all of the following are true:
+
+- the permanent Cape Lumber Dynamics intelligence remains the detailed source of truth;
+- the completed social/content audit is incorporated into that permanent intelligence;
+- `docs/ai-workforce/client-intelligence/CAPE-LUMBER-CG-DYNAMICS-CLIENT-GUIDE.md` exists as the practical Project working guide derived from Dynamics;
+- every current Cape Lumber Project Source has an explicit KEEP / REMOVE / REPLACE decision;
+- the final staff-facing Project Instructions are short and point ChatGPT to the canonical guide first.
+
+As of 2026-09-08, Cape Lumber meets this completion standard on branch `client-migration-cape-lumber-2026-09-08`.
 
 Only after all important current-client Projects are `SYNCED` should ChatGPT conversation history be wiped.
