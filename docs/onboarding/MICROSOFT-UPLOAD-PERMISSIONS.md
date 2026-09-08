@@ -23,7 +23,7 @@ This document is the canonical audit record for the narrowest valid Microsoft Gr
 POST /drives/{driveId}/items/{folderItemId}:/{filename}:/createUploadSession
 ```
 
-**Required application permission:** `Files.ReadWrite.All` (application, not delegated)
+**Required application permission:** `Files.ReadWrite.All` (application, not delegated) — *current production assumption; see least-privilege analysis below*
 
 ### DriveItem verification
 
@@ -31,7 +31,7 @@ POST /drives/{driveId}/items/{folderItemId}:/{filename}:/createUploadSession
 GET /drives/{driveId}/items/{itemId}
 ```
 
-**Required application permission:** `Files.ReadWrite.All` (application, not delegated)
+**Required application permission:** `Files.ReadWrite.All` (application, not delegated) — *current production assumption; see least-privilege analysis below*
 
 ### File download (server-mediated proxy)
 
@@ -40,30 +40,61 @@ GET /drives/{driveId}/items/{itemId}
 GET /drives/{driveId}/items/{itemId}/content
 ```
 
-**Required application permission:** `Files.ReadWrite.All` (application, not delegated)
+**Required application permission:** `Files.ReadWrite.All` (application, not delegated) — *current production assumption; see least-privilege analysis below*
 
-## Why Files.ReadWrite.All and not a narrower scope
+## Least-privilege analysis (independently verified 2026-09-08)
 
-Microsoft Graph does not offer folder-scoped application permissions for OneDrive for Business. The available application permissions are:
+Microsoft Graph now supports **Selected-permissions scopes in application (app-only) mode** per the official documentation (updated 2024-11-07, confirmed 2026-02-26). The three relevant scopes are:
 
-- `Files.ReadWrite.All` — read/write all files in all OneDrive accounts in the organisation
-- `Files.ReadWrite` — read/write files the app has access to (delegated only, not application)
-- `Sites.Selected` — read/write sites explicitly granted via Sites.Selected permission grant
+| Scope | Level | App-only support | Inheritance |
+|-------|-------|------------------|-------------|
+| `Sites.Selected` | Site collection | Yes | Site → child sites |
+| `Lists.SelectedOperations.Selected` | List/library | Yes | List → items |
+| `Files.SelectedOperations.Selected` | File or library folder | Yes | Folder → descendant files |
+| `ListItems.SelectedOperations.Selected` | List item / folder | Yes | Item → children |
 
-**`Files.ReadWrite.All` is not folder-scoped.** It grants access to every OneDrive file in the tenant. This is the current production reality for any daemon/Background app accessing OneDrive for Business.
+**Key official statement:** *"Now, lists, list items, folders, and files are also supported, and all Selected scopes now support delegated and application modes."* (Microsoft Graph docs, permissions-selected-overview)
 
-### Narrowest valid alternative: Sites.Selected
+### Option 1 — PREFERRED: `Files.SelectedOperations.Selected` (application) with `write` role on the `Clients` folder driveItem
 
-The theoretically narrower model is `Sites.Selected` with an explicit grant to the specific SharePoint site that hosts the CG OneDrive library. However:
+- **GA in Graph v1.0**; supports application (app-only) mode.
+- Grant via `POST /drives/{driveId}/items/{clientsFolderItemId}/permissions` with `roles:["write"]`, `grantedToIdentities:[{application:{id}}]`.
+- The grant on the `Clients` folder **inherits to descendants** (all client subfolders, Videos, year, month, shoot folders).
+- Meets every #225 requirement with no tenant-wide access:
+  - App-only ✓
+  - This exact personal site ✓
+  - Read/write the `Clients` tree ✓
+  - Durable drive/item ID resolution ✓
+  - List folders/files ✓
+  - Create future canonical folders on explicit request ✓
+  - Create upload sessions (write operation on folder) ✓
+- **Setup caveat (one-time admin action):** Creating the grant requires `Sites.FullControl.All` or `Sites.Selected`+`FullControl`/`Owner` on the parent site. The **runtime app only ever holds `Files.SelectedOperations.Selected`**.
+- **Honest limitations to prove at grant time:**
+  - MS docs are file-centric with an open Q&A on folder→descendant inheritance edges.
+  - OneDrive-for-Business **personal-site** app-only folder grants + `createUploadSession` on descendants should be validated during setup.
+  - Granting Selected **breaks inheritance** on that folder (unique-scope limits — negligible for one folder).
+  - The `createUploadSession` API reference currently only documents `Sites.ReadWrite.All` for application permissions; `Files.SelectedOperations.Selected` is newer and the API docs may not yet reflect it. Runtime testing required.
 
-1. **OneDrive for Business sites are per-user.** Each user has their own SharePoint site (`{tenant}.sharepoint.com/personal/{user}`). To target a shared library, you must know the exact site URL.
-2. **Sites.Selected grant requires an additional API call** (`POST /admin/permissions/{id}/resourceAccess`) to grant the app access to a specific site.
-3. **Folder-level scoping is still not supported.** `Sites.Selected` grants access to an entire site, not a specific folder within it.
-4. **The shared drive mapping** (`client_onboarding_drive_mapping`) resolves to a specific drive + folder at runtime, but the Graph permission itself covers the entire site.
+### Option 2 — FALLBACK: `Sites.Selected` (application) on the personal OneDrive site only
 
-**Recommendation for future:** When CG Dynamics migrates to a dedicated SharePoint document library (not personal OneDrive), adopt `Sites.Selected` scoped to that library site. Until then, `Files.ReadWrite.All` with the fail-closed runtime gates is the narrowest operationally valid model.
+- Well-trodden GA app-only path; definitely works on a personal site.
+- Scopes to `info@cgproductionhouse.com`'s OneDrive only (`.../personal/a2ac9fe4b255f52f`).
+- Grants access to the entire personal site (all libraries, not just `Clients`).
+- Use if folder-level Selected proves insufficient on the personal site.
 
-## Runtime safeguards
+### Option 3 — LAST RESORT: `Files.ReadWrite.All` (application)
+
+- Tenant-wide; what the current adapter/docs assume.
+- Recommend **ONLY if neither Selected model supports the required app-only ops here**, and document the exact Graph limitation first.
+- Current production reality for any daemon app accessing OneDrive for Business without Selected permissions.
+
+**Code impact: none to token logic** — all three keep `client_credentials` + `.default`; only the consented permission (and, for Selected, the one-time per-resource grant) changes. `createUploadSession`/`verifyDriveItem`/`downloadFile` operate under whatever the token grants.
+
+## Why the current model uses Files.ReadWrite.All (historical context)
+
+When the onboarding adapter was implemented (2026-09-02), the Selected-permissions model for application mode was either not GA or not widely documented for OneDrive for Business personal sites. The documentation at that time stated: *"Microsoft Graph does not offer folder-scoped application permissions for OneDrive for Business."* This has since changed.
+
+## Runtime safeguards (unchanged)
 
 1. **Dedicated app credentials** — the onboarding upload app is separate from the transition sync connector. Compromise of one does not affect the other.
 2. **Drive mapping table** — `client_onboarding_drive_mapping` must have an `active=true` row for the exact client and upload category before any upload session is created.
@@ -80,4 +111,4 @@ The theoretically narrower model is `Sites.Selected` with an explicit grant to t
 
 ## Re-audit date
 
-This document was re-audited on 2026-09-02 against the current Microsoft Graph API documentation. Next re-audit is recommended when the upload adapter changes or when CG Dynamics migrates to a dedicated SharePoint document library.
+This document was re-audited on **2026-09-08** against the current Microsoft Graph API documentation (permissions-selected-overview, updated 2026-02-26). The least-privilege recommendation has been updated from `Sites.Selected` to `Files.SelectedOperations.Selected` as the preferred model. Next re-audit is recommended when the upload adapter changes, when CG Dynamics migrates to a dedicated SharePoint document library, or when the Selected-permissions GA status for personal-site app-only folder grants is confirmed in production.
