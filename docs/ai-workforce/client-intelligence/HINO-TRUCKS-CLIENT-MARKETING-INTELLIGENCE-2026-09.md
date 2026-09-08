@@ -224,6 +224,20 @@ Hino Trucks copy should feel like it came from people who understand trucks and 
 
 Prior Project work consistently favoured concise English copy. English is therefore the default. Afrikaans may be used when explicitly requested or when the real local context/client brief supports it; use natural everyday Afrikaans, not translated corporate wording.
 
+### Humour is an approved secondary lane, not the default voice
+
+Accessible Hino Project history shows repeated requests to make dealership videos more fun, more out-of-the-box and more scene-driven, including Sales-specific concepts. This means the contaminated Project Source line `No forced humour or memes` must **not** be interpreted as `Hino should never be funny`.
+
+Use humour when the brief calls for it, especially in short staff-led dealership reels, but keep it:
+
+- rooted in real Sales, Workshop, Parts, truck or dealership situations;
+- recognisable to the actual truck/customer context rather than borrowed from generic internet trends;
+- respectful of customers, drivers and staff;
+- concise and visually paced;
+- physically accurate to the real truck and location.
+
+Do not manufacture a joke around a trailer, body, attachment, feature or setup that is not actually present. Project history specifically shows creative concepts being corrected when a truck did not have the trailer assumed by the script.
+
 ### Do not inherit contaminated tone rules
 
 The Project Source contains unrelated lines about:
@@ -233,6 +247,8 @@ The Project Source contains unrelated lines about:
 - captions feeling like real staff at **Dulux**.
 
 These are `rejected` for Hino Trucks. They are cross-client contamination, not Hino tone evidence.
+
+The source's blanket no-humour sentence is also contaminated by the funeral/grief context. Keep the useful principle `avoid generic forced/meme humour`, but do not suppress Hino's proven playful dealership content lane.
 
 ### Avoid generic truck AI filler
 
@@ -311,7 +327,12 @@ Prior Project evidence includes:
 - department overview content: Sales / Workshop / Parts;
 - Hino range content;
 - Hino 200 and Hino 300 walk-around work;
-- a preference for faster visual pacing and confident professional English.
+- a preference for faster visual pacing and confident professional English;
+- repeated requests for fun, out-of-the-box dealership videos of roughly 30–40 seconds;
+- iterative preference for more scenes rather than one-note concepts;
+- Sales-specific playful concepts;
+- a Hino 700 product-identity challenge built around selling the truck without saying `Hino`;
+- practical vehicle-care education covering coolant level, oil level and tyres through what/where/when checks.
 
 Strong recurring video formats:
 
@@ -323,9 +344,14 @@ Strong recurring video formats:
 - customer/operator story;
 - body/application breakdown;
 - handover with business context;
-- route/readiness/maintenance tip.
+- route/readiness/maintenance tip;
+- short multi-scene Sales/dealership challenge with a truck-specific payoff;
+- cross-department stories where Sales, Workshop and Parts each contribute a different part of the same real customer/truck outcome;
+- three-point care explainers that answer what to check, where to check it and when to check it.
 
-Avoid slow feature dumping, long scripted brochure speech and cinematic truck footage with no operator point.
+For coolant/oil/tyre or other maintenance explainers, verify the exact vehicle/manual before showing component locations, pressures, intervals, fluid types or technical procedures. The educational format is durable; the technical detail must be vehicle-specific and current.
+
+Avoid slow feature dumping, long scripted brochure speech and cinematic truck footage with no operator point. Fun content should still have a truck/dealership point rather than existing only for the joke.
 
 ## 11. Hino range and model claim safety
 
@@ -386,7 +412,7 @@ For any case study verify:
 
 Never invent kilometres, payload, fuel economy, savings, downtime reduction or customer satisfaction quotes.
 
-## 14. Image generation and editing rules
+## 14. Image generation, editing and scene fidelity rules
 
 Prefer real Hino Bloemfontein and customer truck assets where available.
 
@@ -401,6 +427,8 @@ When editing a real truck image:
 - preserve load/operating context unless the requested edit changes it;
 - preserve perspective and composition unless a redesign is requested;
 - change only the requested element when the brief is a targeted edit.
+
+The same physical-truth rule applies before filming. Script and shot-list concepts must match the truck actually available. Do not invent a trailer, body, attachment, feature, staff role or physical action because it makes a concept easier.
 
 Do not:
 
@@ -440,7 +468,7 @@ Current Instructions contain useful Hino-specific rules but also contamination a
 
 - confident, professional, reliable tone;
 - information without overwhelm;
-- no influencer hype or forced humour;
+- no influencer hype or generic meme/trend humour; Hino-specific playful dealership content is allowed when the brief supports it;
 - content priority on downtime, cost control, workshop credibility, fleet-specific education, regional relevance, customer proof and maintenance tips;
 - `Run by Real People` intention;
 - natural English;
@@ -452,11 +480,12 @@ Current Instructions contain useful Hino-specific rules but also contamination a
 - funeral/grief/remembrance wording;
 - Dulux references;
 - `Dulux Promise` quality section;
+- treating the funeral-contaminated `no forced humour` wording as a blanket Hino prohibition;
 - wording that overpromises `prevents breakdowns`, `reduces downtime` or `saves fleets money` unless the post has actual proof;
 - frozen hashtag bank behaviour;
 - any claim that generic Hino/global material proves Hino Bloemfontein service scope or results.
 
-### ADD from #248/#281
+### ADD from #248/#281 and accessible Project history
 
 - captions add instead of repeat;
 - task-specific compact retrieval;
@@ -464,6 +493,10 @@ Current Instructions contain useful Hino-specific rules but also contamination a
 - Hino vs Toyota vs national/global boundary;
 - dynamic max-five SEO;
 - visual preservation of real trucks/bodies/markings/people;
+- script/scene fidelity to the real available truck, including trailer/body/attachment truth;
+- approved short playful Sales/dealership reel lane when requested;
+- 30–40 second multi-scene pacing as a useful fun-video pattern, not a universal duration rule;
+- practical what/where/when vehicle-care explainer format with technical verification;
 - never invent stock/spec/capacity/finance/warranty/service/coverage facts;
 - flag conflicts instead of guessing.
 
@@ -480,14 +513,17 @@ Reason:
 - contains unrelated **Dulux Promise** content;
 - contains unrelated funeral/grief language;
 - contains `real staff at Dulux` contamination;
+- contains a blanket no-humour line tied to the unrelated grief/funeral contamination, which conflicts with actual Hino Project creative history;
 - freezes one five-hashtag bank, conflicting with #248 dynamic SEO;
 - contains operational claims such as downtime/cost saving that need evidence per post.
 
 Replacement working source: `HINO-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md`.
 
-Do not physically delete the Project Source during this migration. Replace it manually in the ChatGPT Project only after CG confirms the handoff.
+Issue #281 later records that the final Hino Project Instructions were physically applied on 2026-09-08. However, the Project Source visible in this audit is still `Hino Bloemfontein.pdf`, and no separate evidence was recovered that the source replacement itself was completed. Treat **Instructions handoff as confirmed** and **Project Source replacement as still requiring confirmation**.
 
-No other Project Source was actually accessible to this migration; do not invent source decisions for unseen files.
+Do not physically delete the old Project Source during repo migration. Replace it manually in the ChatGPT Project with the derived guide, then confirm the source swap.
+
+No other Hino Project Source was actually accessible to this audit; do not invent source decisions for unseen files.
 
 ## 18. #241 exact-client retrieval readiness
 
@@ -523,6 +559,8 @@ Return only:
 - fleet/operator audience context;
 - exact application/season/local opportunity if supplied/verified;
 - creative anti-slop rules;
+- the approved human/humour lane when the brief asks for fun, out-of-the-box or Sales-led content;
+- real truck/body/attachment constraints for the concept;
 - claim boundaries.
 
 Stale, rejected and unresolved facts must never be silently asserted as current grounding.
@@ -562,7 +600,7 @@ These verify national 200/300/500/700 series pages and manufacturer support conc
 `Hino Bloemfontein.pdf`  
 Useful exact-client items: Hino Bloemfontein naming, 051 406 3000, Bloemfontein address, CFAO/Hino website, fleet/service/parts/diagnostics positioning, professional/confident tone, English preference, workshop/fleet/maintenance priorities, contact+website+location caption rule.
 
-Rejected contamination: Dulux Promise, Dulux staff wording, funeral/grief wording.
+Rejected contamination: Dulux Promise, Dulux staff wording, funeral/grief wording, and the blanket no-humour instruction insofar as it is justified by that unrelated funeral/grief context.
 
 ### Accessible Project history
 
@@ -575,6 +613,12 @@ Recovered durable Hino working evidence includes:
 - Sales/Workshop/Parts department overview;
 - Hino 200 and 300 walk-around content;
 - faster visual pacing for walk-arounds;
+- repeated short fun/out-of-the-box dealership-video requests, typically around 30–40 seconds;
+- preference for adding more scenes when a fun concept is too thin;
+- Sales-specific playful video concepts;
+- correction of a creative concept because the featured truck did not have a trailer, establishing script-to-real-truck fidelity as a durable rule;
+- a Hino 700 `sell the truck without saying Hino` challenge concept;
+- a coolant/oil/tyres explainer structured around how/what to check, where to check it and when;
 - footer use of branch address/phone and SEO hashtags.
 
 No complete historical Project chat export was accessible, so these are the recovered durable lessons rather than a claim that every past Hino conversation was inspected verbatim.
@@ -598,10 +642,11 @@ Recheck before publishing when relevant:
 - roadside/emergency support;
 - local service turnaround;
 - geographic/fleet support coverage;
-- customer/fleet result claims.
+- customer/fleet result claims;
+- whether the derived `HINO-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md` has physically replaced the old PDF as the Project Source.
 
 If current evidence is missing or conflicts, **flag it instead of guessing**.
 
 ## 21. Working rule
 
-Make Hino Trucks content human by being specific to the real truck, body/application, operator problem, workshop process or customer use case. Keep Hino Bloemfontein separate from Toyota Bloemfontein and from national/global Hino assumptions. Recheck mutable commercial facts before publishing. CG Dynamics is the permanent truth; the working guide is a derived handoff, not a second manually maintained memory store.
+Make Hino Trucks content human by being specific to the real truck, body/application, operator problem, workshop process or customer use case. When the brief asks for fun, use the proven Hino dealership/Sales humour lane without abandoning physical truth or claim safety. Keep Hino Bloemfontein separate from Toyota Bloemfontein and from national/global Hino assumptions. Recheck mutable commercial facts before publishing. CG Dynamics is the permanent truth; the working guide is a derived handoff, not a second manually maintained memory store.
