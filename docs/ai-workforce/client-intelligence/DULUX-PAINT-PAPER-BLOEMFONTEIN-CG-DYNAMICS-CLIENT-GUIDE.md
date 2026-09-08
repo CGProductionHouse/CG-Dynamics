@@ -207,7 +207,10 @@ When generating or editing client visuals:
 - do not invent new product claims, prices, promotions, labels, signage, staff details or store information inside an image;
 - do not alter product colours or paint shades in a way that could imply an inaccurate real-world match unless the task specifically requires a conceptual colour visual;
 - for clean-up work, remove distractions or improve lighting/finish without unnecessarily redesigning the scene;
-- for commercial retouching, keep products and people recognisable and believable.
+- for commercial retouching, keep products and people recognisable and believable;
+- when a generated or conceptual Dulux visual is meant to feel premium, aim for polished commercial realism with cinematic lighting and a sophisticated finish rather than a gimmicky or obviously AI-styled result;
+- make painting action physically believable: body position, brush or roller placement, contact with the wall/surface and the direction of the painted area should make visual sense;
+- when removing or simplifying buildings, banners, blur or background clutter, leave a clean, structurally believable wall/background with no obvious edit artefacts.
 
 ## Current social/content lessons
 
