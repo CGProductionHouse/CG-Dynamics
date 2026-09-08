@@ -39,11 +39,20 @@ content counts and Facebook unfollows/net follows remain unverified.
   removed as an account interaction substitute. Page likes no longer substitute
   for follower count.
 - Client overview groups by Facebook/Instagram; normal admin preview shares it.
+- Unavailable facts remain visible with an em dash and a source/permission/error
+  explanation. Facebook viewers therefore no longer disappears or becomes zero.
 - Cooldown/heartbeat-aware progress replaces false stall inference.
+- Scheduled sync resolves only the client-mapped Page token and verifies the
+  returned Page and linked Instagram identities before using it. Global Page
+  discovery remains an onboarding operation.
+- Lease-generation fencing, atomic report/post/fact writes, per-metric resume
+  checkpoints and scoped rate-limit cooldowns are prepared with one worker lane
+  by default until live acceptance proves safe capacity.
 - Native metric registry migration prepared, not applied. No historical facts
   rewritten and no production deployment or sync performed in this lane yet.
-- First build and 62 tests passed before the additional coverage/registry work;
-  rerun required before committing those additions.
+- Production build and 90 focused Meta/reporting tests pass. The fencing SQL test
+  passes against the isolated local Supabase database; the two new migrations
+  also execute successfully inside a rolled-back local transaction.
 
 ## Remaining full mission
 

@@ -19,6 +19,8 @@ const page = read('../src/pages/admin/MetaIntegrationPage.tsx')
 const durable = read('../supabase/migrations/20260804130000_meta_sync_durable_recovery.sql')
 const watermark = read('../supabase/migrations/20260804140000_meta_sync_recovery_progress_watermark.sql')
 const cooldown = read('../supabase/migrations/20260804150000_meta_sync_rate_limit_cooldown.sql')
+const fencing = read('../supabase/migrations/20260908120000_meta_sync_fencing_and_idempotency.sql')
+const assetIdentity = read('../supabase/functions/_shared/metaAssetIdentity.ts')
 
 // ── Root cause 1: the only durable driver could die permanently ──────────────
 test('a stalled batch is driven by the per-minute cron worker, not only by background_jobs', () => {
@@ -40,10 +42,10 @@ test('the reaper only wakes batches with real work and no live worker', () => {
 })
 
 test('the worker heartbeats durably so a live batch is never double-driven', () => {
-  assert.match(durable, /create or replace function public\.meta_sync_touch_batch/)
-  assert.match(worker, /async function touchBatch/)
-  // Heartbeat on claim AND after each item, so a long item cannot look dead.
-  assert.ok((worker.match(/await touchBatch\(sb,/g) ?? []).length >= 2)
+  assert.match(fencing, /create or replace function public\.meta_sync_touch_item_lease/)
+  assert.match(worker, /async function touchItemLease/)
+  assert.match(worker, /await touchItemLease\(sb, item\.id, leaseGeneration\)/)
+  assert.match(worker, /meta_sync_touch_lane/)
 })
 
 // ── Root cause 2: the self-continuation chain collapsed ─────────────────────
@@ -51,23 +53,25 @@ test('the worker hands off without holding the whole chain open', () => {
   // waitUntil kept every generation alive until all its descendants finished.
   // The nesting hit the platform ceiling after a couple of hops and the chain
   // died mid-flight, stranding the queue.
-  const handoff = stripComments(worker).slice(stripComments(worker).indexOf('const workerUrl'))
+  const handoff = stripComments(worker).slice(stripComments(worker).lastIndexOf('const workerUrl'))
   assert.doesNotMatch(handoff, /EdgeRuntime\.waitUntil/, 'must not keep ancestors alive for the whole chain')
-  assert.match(handoff, /AbortSignal\.timeout\(2_000\)/)
-  assert.match(handoff, /selfTriggered = true/)
+  assert.match(handoff, /dispatchMetaWorker/)
+  assert.match(handoff, /selfTriggered = await/)
 })
 
 test('correctness does not depend on the hand-off surviving', () => {
-  // Even with every hand-off lost, the cron reaper must finish the batch.
-  assert.match(worker, /the per-minute cron reaper in\s*\/\/ background-worker revives any batch whose heartbeat goes stale/)
+  // Even with every hand-off lost, the cron recovery paths must finish the batch.
+  assert.match(background, /reapStalledMetaSyncBatches/)
+  assert.match(background, /recoverMetaSyncLanes/)
+  assert.match(background, /dispatchMetaWorker/)
 })
 
 // ── Root cause 3: abandoned claims burned real retry attempts ───────────────
 test('items claimed but never processed are released without consuming an attempt', () => {
-  assert.match(durable, /create or replace function public\.meta_sync_release_items/)
-  assert.match(durable, /attempts = greatest\(0, item\.attempts - 1\)/)
-  assert.match(worker, /const abandoned = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
-  assert.match(worker, /meta_sync_release_items/)
+  assert.match(fencing, /create or replace function public\.meta_sync_release_claims/)
+  assert.match(fencing, /attempts = greatest\(0, item\.attempts - 1\)/)
+  assert.match(worker, /const abandoned = \[\.\.\.claimedLeases\.entries\(\)\]/)
+  assert.match(worker, /meta_sync_release_claims/)
 })
 
 test('supabase query builders are never given a .catch() handler', () => {
@@ -103,12 +107,15 @@ test('a Meta rate limit backs off instead of failing the remaining clients', () 
   // Waiting must not spend the no-progress budget.
   assert.match(cooldown, /recovery_attempts = 0/)
   assert.match(worker, /const rateLimited = processed\.some/)
-  assert.match(worker, /meta_sync_begin_cooldown/)
+  assert.match(worker, /meta_sync_settle_item/)
+  assert.match(worker, /itemRateLimitScope/)
+  assert.match(fencing, /cooldown_until = case/)
 })
 
 test('a client failed only because of throttling is requeued, not left failed', () => {
-  assert.match(worker, /p\.status === 'failed' && \/rate\.\?limit\/i\.test/)
-  assert.match(worker, /has not really\s*\/\/ failed/)
+  assert.match(worker, /const itemRateLimited = isMetaRateLimitError/)
+  assert.match(worker, /itemRateLimited \|\| refundAttempt/)
+  assert.match(worker, /A client that only failed because Meta throttled us has not really/)
 })
 
 // ── Restart must confirm a worker actually ran ──────────────────────────────
@@ -138,7 +145,8 @@ test('recovery resumes the existing batch and never creates another', () => {
   // The reaper only ever POSTs an existing batchId; it has no insert path.
   const start = background.indexOf('async function reapStalledMetaSyncBatches')
   const reaper = background.slice(start, background.lastIndexOf('return out'))
-  assert.match(reaper, /body: JSON\.stringify\(\{ batchId: row\.batch_id \}\)/)
+  assert.match(reaper, /dispatchMetaWorker/)
+  assert.match(reaper, /\{ batchId: row\.batch_id \}/)
   assert.doesNotMatch(reaper, /\.insert\(/, 'the reaper must never create a batch')
 })
 
@@ -160,16 +168,13 @@ test('a missing worker secret surfaces on the batch instead of failing silently'
 })
 
 // ── The original trigger: an abort escaping as a bare platform 500 ──────────
-test('a page-token fetch timeout is handled, not fatal', () => {
-  // metaFetch aborts on its own timeout and an abort THROWS. Nothing caught it,
-  // so when Meta was slow — exactly what it is while throttling — the whole
-  // invocation died as a bare 500. Three of those exhausted the driver job's
-  // attempts and stranded 70 items. Reproduced live: HTTP 500,
-  // "The signal has been aborted"; after the fix, HTTP 200 + rateLimited.
-  const block = worker.slice(worker.indexOf('Fetch page token map once per invocation'), worker.indexOf('Process items in chunks'))
-  assert.match(block, /try \{\s*res = await metaFetch\(url, requestTimeoutMs\)/)
-  assert.match(block, /\['TimeoutError', 'AbortError'\]\.includes\(error\.name\)/)
-  assert.match(block, /pageTokenRateLimited = true/)
+test('page-token resolution uses the exact mapped Page and validates linked Instagram identity', () => {
+  assert.match(worker, /fetchMappedPageToken/)
+  assert.doesNotMatch(worker, /\/me\/accounts/)
+  assert.match(assetIdentity, /new URL\(`\$\{baseUrl\}\/\$\{pageId\}`\)/)
+  assert.match(assetIdentity, /body\.id !== pageId/)
+  assert.match(assetIdentity, /body\.instagram_business_account\?\.id !== instagramAccountId/)
+  assert.match(assetIdentity, /MetaFactRetryableError/)
 })
 
 test('the handler can never return a bare 500 with no diagnostics', () => {
@@ -177,21 +182,15 @@ test('the handler can never return a bare 500 with no diagnostics', () => {
   assert.match(handler, /\} catch \(error\) \{/)
   assert.match(handler, /Meta sync worker failed: \$\{detail\}/)
   // A crash must hand back whatever it was holding, or the items are stranded.
-  assert.match(handler, /const stranded = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
-  assert.match(handler, /crashClient\.rpc\('meta_sync_release_items'/)
+  assert.match(handler, /const stranded = \[\.\.\.claimedLeases\.entries\(\)\]/)
+  assert.match(handler, /crashClient\.rpc\('meta_sync_release_claims'/)
 })
 
-test('a throttled page-token request processes NOTHING rather than failing every client', () => {
-  // When the page-token request is throttled the token map is empty, so every
-  // client's Facebook stage fails for want of a token. Without this guard the
-  // worker chewed through the queue marking clients failed — 25 were wrongly
-  // failed this way in production for what was only a temporary throttle.
-  const guard = worker.slice(worker.indexOf('Do not process anything without page tokens'), worker.indexOf('Process items in chunks'))
-  assert.match(guard, /if \(pageTokenRateLimited\) \{/)
-  assert.match(guard, /meta_sync_begin_cooldown/)
-  assert.match(guard, /waitingForRateLimit: true/)
-  assert.match(guard, /workerRan: false/)
-  // Crucially it returns BEFORE the claim loop, so nothing is claimed at all.
-  assert.ok(worker.indexOf('waitingForRateLimit') < worker.indexOf('claim_sync_batch_items'),
-    'the guard must return before any item is claimed')
+test('a throttled mapped-token request cools down only the appropriate scope', () => {
+  assert.match(worker, /itemRateLimitScope = metaRateLimitScope/)
+  assert.match(worker, /itemRateLimited \|\| refundAttempt/)
+  assert.match(worker, /itemRateLimitScope,/)
+  assert.match(worker, /meta_sync_settle_item/)
+  assert.match(fencing, /p_cooldown_scope = 'item'/)
+  assert.match(fencing, /p_cooldown_scope = 'batch'/)
 })

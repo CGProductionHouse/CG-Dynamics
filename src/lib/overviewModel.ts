@@ -223,7 +223,9 @@ export function buildOverviewSections(
     const lines: OverviewLine[] = []
     for (const metricKey of SECTION_METRICS[key]) {
       const facts = current
-        .filter(f => f.metricKey === metricKey && hasRenderableFact(f))
+        // A provider fact with no verified value is still part of the platform
+        // result. Render it as unavailable instead of silently removing it.
+        .filter(f => f.metricKey === metricKey)
         .sort((a, b) => {
           const ai = PLATFORM_ORDER.indexOf(a.platform); const bi = PLATFORM_ORDER.indexOf(b.platform)
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)

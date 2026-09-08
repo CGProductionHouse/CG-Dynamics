@@ -546,6 +546,13 @@ function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabe
 
 function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
   const showMovement = line.comparable && typeof line.changePercent === 'number'
+  const unavailableMessage = line.availability === 'unavailable'
+    ? 'Unavailable from the connected Meta source'
+    : line.availability === 'permission_blocked'
+      ? 'Unavailable with the current Meta permissions'
+      : line.availability === 'error' || line.availability === 'stale'
+        ? 'Not currently verified from Meta'
+        : null
   const up = (line.changePercent ?? 0) > 0
   const down = (line.changePercent ?? 0) < 0
   return (
@@ -561,7 +568,9 @@ function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
         {line.availability === 'partial' && !line.reconstructed && (
           <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-amber-200">Partial platform coverage</span>
         )}
-        {line.isSnapshot ? (
+        {unavailableMessage ? (
+          <span className="text-slate-500">{unavailableMessage}</span>
+        ) : line.isSnapshot ? (
           <span className="text-slate-500">Current followers snapshot at the latest sync</span>
         ) : showMovement ? (
           <span className={up ? 'text-emerald-300' : down ? 'text-amber-300' : 'text-slate-400'}>
