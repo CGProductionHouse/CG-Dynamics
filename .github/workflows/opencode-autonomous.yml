@@ -42,11 +42,11 @@ jobs:
 
             If another active PR/worker already owns a task, do not duplicate it. Pick the highest-priority safe unowned launch task that can materially advance the product. Prefer finishing existing work over creating new architecture.
 
-            Work end to end: inspect, implement, test, build/lint where relevant, and open or update a focused PR. Update the relevant GitHub issue with concise evidence and blockers. If the current task reaches a genuine external credential/provider/CA gate, record that gate and continue to another independent safe task when possible.
+            Work end to end: inspect, implement, test, build/lint where relevant, and open or update a focused PR when there is a real code change. Do not post routine progress comments, status comments, or repeated evidence updates on issues or PRs. Keep routine progress in the workflow run, commits, and PR body so subscribed team members are not emailed for every agent step. If a genuine external credential/provider/CA gate exists, leave the code at a clean review gate and let the supervisor surface that blocker to CA rather than posting repetitive notification comments.
 
             Preserve the canonical architecture and security boundaries recorded in GitHub. Never invent credentials, weaken auth/RLS/client isolation, make destructive production guesses, or expose secrets. Do not merge PRs, deploy production, apply production migrations, change provider permissions/secrets, or perform external publishing from this unattended worker. Leave verified work at a clean PR/review gate for the supervisor.
 
-            If #216 is launch-ready or only true external blockers remain, make no code changes and leave a concise status update instead.
+            If #216 is launch-ready or only true external blockers remain, make no code changes and exit quietly without posting a routine status update.
 
       - name: Run OpenCode — configured quality fallback
         id: sol
@@ -61,7 +61,7 @@ jobs:
           prompt: |
             Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
 
-            Pick the highest-priority safe unowned task, implement and verify it, open/update a focused PR, and update GitHub with evidence. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, record the real gate and continue another independent safe task if one exists.
+            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
 
       - name: Run OpenCode — NVIDIA fallback
         id: nvidia
@@ -76,10 +76,9 @@ jobs:
           prompt: |
             Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
 
-            Pick the highest-priority safe unowned task, implement and verify it, open/update a focused PR, and update GitHub with evidence. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, record the real gate and continue another independent safe task if one exists.
+            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
 
-      - name: Report unavailable model lanes
+      - name: Record unavailable model lanes
         if: steps.primary.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
         run: |
-          echo "All configured OpenCode model lanes were unavailable or failed."
-          exit 1
+          echo "All configured OpenCode model lanes were unavailable or failed. The supervisor can inspect this run; no email-worthy failure is raised here."

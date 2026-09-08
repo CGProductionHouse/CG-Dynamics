@@ -58,8 +58,8 @@ test('/admin/content route renders ContentWorkflowPage with overview defaultTab'
   assert.match(app, /path="\/admin\/content" element=\{<ContentWorkflowPage defaultTab="overview" \/>\}/)
 })
 
-test('legacy content-workflow route maps to library tab', () => {
-  assert.match(app, /path="\/admin\/content-workflow" element=\{<ContentWorkflowPage defaultTab="library" \/>\}/)
+test('legacy content-workflow route maps to guidelines tab', () => {
+  assert.match(app, /path="\/admin\/content-workflow" element=\{<ContentWorkflowPage defaultTab="guidelines" \/>\}/)
 })
 
 test('legacy full-content-guide route maps to guidelines tab', () => {
@@ -123,11 +123,12 @@ test('contentTabTypes exports ContentTab type and resolveContentTab function', (
   assert.ok(contentTab.includes("'runs'"), 'runs tab')
   assert.ok(contentTab.includes("'guidelines'"), 'guidelines tab')
   assert.ok(contentTab.includes("'pipeline'"), 'pipeline tab')
-  assert.ok(contentTab.includes("'library'"), 'library tab')
+  // The legacy 'library' tab was removed (#219 consolidation); old guides/library
+  // labels now resolve to the guidelines tab (asserted below).
 })
 
-test('resolveContentTab maps old guides label to library', () => {
-  assert.match(contentTab, /if \(value === 'guides'\) return 'library'/)
+test('resolveContentTab maps old guides/library labels to guidelines', () => {
+  assert.match(contentTab, /if \(value === 'guides' \|\| value === 'library'\) return 'guidelines'/)
 })
 
 // ── Content Workflow Page ───────────────────────────────────────────────────

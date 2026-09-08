@@ -116,7 +116,7 @@ export default function App() {
               <Route path="/admin/content-reviews" element={<ContentReviewsPage />} />
               <Route path="/admin/content-ops" element={<ContentOperationsPage />} />
               <Route path="/admin/content" element={<ContentWorkflowPage defaultTab="overview" />} />
-              <Route path="/admin/content-workflow" element={<ContentWorkflowPage defaultTab="library" />} />
+              <Route path="/admin/content-workflow" element={<ContentWorkflowPage defaultTab="guidelines" />} />
               <Route path="/admin/full-content-guide" element={<ContentWorkflowPage defaultTab="guidelines" />} />
               <Route path="/admin/client-calendar" element={<ClientContentCalendarPage />} />
               <Route path="/admin/monthly-planner" element={<Navigate to="/admin/client-schedule?view=calendar" replace />} />

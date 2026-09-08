@@ -6,56 +6,40 @@ import { Pill } from '../../components/ui/Badges'
 import { EmptyState, LoadingState } from '../../components/ui/States'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 import {
-  CONTENT_GUIDE_STATUSES,
   CONTENT_RUN_STATUSES,
-  canRunGuideAction,
-  deliverableHasActiveGuideline,
   isBlankExtraShot,
   isMicrosoftOwnedEvent,
   splitRunItems,
-  type ContentGuideStatus,
   type ContentRunStatus,
 } from '../../lib/contentWorkflowRules'
 import {
   addRunItem,
-  createGuideIdea,
   createRunWithCalendarEvent,
   ensureGuidelineForRun,
   getGuidelineForRun,
-  listDeliverableLabels,
   listContentGuidelineDocuments,
   listGuidelineVideos,
-  listGuideIdeas,
   listRunItems,
   listRuns,
   listStaffProfiles,
   removeRunItem,
-  runGuideAction,
   transitionVideo,
-  updateGuideIdea,
   updateRunLinked,
   updateRunItem,
-  type ContentGuideIdea,
-  type ContentGuideInput,
   type ContentGuideline,
   type ContentGuidelineDocument,
   type ContentGuidelineVideo,
   type ContentRun,
   type ContentRunInput,
   type ContentRunItem,
-  type DeliverableLabel,
   type StaffProfileOption,
 } from '../../lib/contentWorkflow'
 import { listCompanyEventsByIds, type CompanyCalendarEvent } from '../../lib/companyCalendar'
 import {
-  GuidelineBrief,
-  GuidelineForm,
   ShootMode,
 } from './contentGuideline'
 import {
   clientName,
-  deliverableLabelText,
-  guideStatusTone,
   humanizeStatus,
   INPUT_CLS,
   LABEL_CLS,
@@ -186,20 +170,11 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
 
   const [clients, setClients] = useState<ClientOption[]>([])
   const [staff, setStaff] = useState<StaffProfileOption[]>([])
-  const [guides, setGuides] = useState<ContentGuideIdea[]>([])
   const [runs, setRuns] = useState<ContentRun[]>([])
   const [documents, setDocuments] = useState<ContentGuidelineDocument[]>([])
-  const [labels, setLabels] = useState<Map<string, DeliverableLabel>>(new Map())
   // Linked CG Calendar events for the loaded runs, keyed by event id — used to
   // detect Microsoft-owned (source-controlled) runs in the UI.
   const [linkedEvents, setLinkedEvents] = useState<Record<string, CompanyCalendarEvent>>({})
-
-  const [guideSearch, setGuideSearch] = useState('')
-  const [guideStatusFilter, setGuideStatusFilter] = useState<ContentGuideStatus | 'all'>('all')
-  const [selectedGuideId, setSelectedGuideId] = useState<string | null>(null)
-  const [guideMode, setGuideMode] = useState<'view' | 'edit' | 'create'>('view')
-  const [guideSaving, setGuideSaving] = useState(false)
-  const [guideError, setGuideError] = useState<string | null>(null)
 
   const [runSearch, setRunSearch] = useState('')
   const [runStatusFilter, setRunStatusFilter] = useState<ContentRunStatus | 'all'>('all')
@@ -228,21 +203,16 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
   async function loadAll() {
     setLoading(true)
     setLoadError(null)
-    const [clientResult, staffResult, guideResult, runResult, documentResult] = await Promise.all([listActiveClients(), listStaffProfiles(), listGuideIdeas(), listRuns(), listContentGuidelineDocuments()])
-    if (guideResult.migrationNeeded || runResult.migrationNeeded || documentResult.migrationNeeded) {
+    const [clientResult, staffResult, runResult, documentResult] = await Promise.all([listActiveClients(), listStaffProfiles(), listRuns(), listContentGuidelineDocuments()])
+    if (runResult.migrationNeeded || documentResult.migrationNeeded) {
       setMigrationNeeded(true); setLoading(false); return
     }
     setMigrationNeeded(false)
-    setLoadError(guideResult.error ?? runResult.error ?? documentResult.error ?? clientResult.error?.message ?? null)
+    setLoadError(runResult.error ?? documentResult.error ?? clientResult.error?.message ?? null)
     setClients((clientResult.data ?? []) as ClientOption[])
     setStaff(staffResult.migrationNeeded ? [] : staffResult.data)
-    setGuides(guideResult.data)
     setRuns(runResult.data)
     setDocuments(documentResult.data)
-    // Read-only Client Schedule labels for linked guidelines (display only).
-    const deliverableIds = [...new Set(guideResult.data.map(guide => guide.deliverable_id).filter((id): id is string => Boolean(id)))]
-    const labelResult = await listDeliverableLabels(deliverableIds)
-    setLabels(new Map((labelResult.error ? [] : labelResult.data).map(label => [label.id, label])))
     // Best-effort: fetch the calendar events linked to these runs so the UI can
     // mark Microsoft-owned runs read-only. Silent if the calendar layer is absent.
     const linkedIds = runResult.data.map(run => run.calendar_event_id).filter((id): id is string => Boolean(id))
@@ -291,18 +261,6 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
     const timer = window.setTimeout(() => openFromRunParam(runId, Boolean(legacyRunId)), 0)
     return () => window.clearTimeout(timer)
   }, [searchParams, runs])
-  // Direct guideline deep link: ?tab=guides&guide=<guide-id>.
-  const openFromGuideParam = useEffectEvent((guideId: string) => {
-    const match = guides.find(guide => guide.id === guideId)
-    if (match) { setSelectedGuideId(match.id); setGuideMode('view') }
-    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('tab', 'library'); next.delete('guide'); return next }, { replace: true })
-  })
-  useEffect(() => {
-    const guideId = searchParams.get('guide')
-    if (!guideId || guides.length === 0) return
-    const timer = window.setTimeout(() => openFromGuideParam(guideId), 0)
-    return () => window.clearTimeout(timer)
-  }, [searchParams, guides])
 
   async function loadRunItems(runId: string) {
     const result = await listRunItems(runId)
@@ -339,24 +297,9 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
     return () => window.clearTimeout(timer)
   }, [selectedRunId])
 
-  const selectedGuide = guides.find(guide => guide.id === selectedGuideId) ?? null
   const selectedRun = runs.find(run => run.id === selectedRunId) ?? null
   const selectedRunEvent = selectedRun?.calendar_event_id ? (linkedEvents[selectedRun.calendar_event_id] ?? null) : null
   const selectedRunMicrosoftOwned = isMicrosoftOwnedEvent(selectedRunEvent)
-
-  function guideLabel(guide: ContentGuideIdea | null): string | null {
-    if (!guide?.deliverable_id) return null
-    return deliverableLabelText(labels.get(guide.deliverable_id))
-  }
-
-  const filteredGuides = useMemo(() => {
-    const query = guideSearch.trim().toLowerCase()
-    return guides.filter(guide => {
-      if (guideStatusFilter !== 'all' && guide.status !== guideStatusFilter) return false
-      if (!query) return true
-      return [guide.title, guide.canonical_name ?? '', guide.objective ?? '', clientName(clients, guide.client_id)].some(field => field.toLowerCase().includes(query))
-    })
-  }, [guides, guideSearch, guideStatusFilter, clients])
 
   const filteredRuns = useMemo(() => {
     const query = runSearch.trim().toLowerCase()
@@ -369,34 +312,8 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
 
   const { extra: extraItems } = useMemo(() => splitRunItems(runItems), [runItems])
 
-  async function submitGuide(input: ContentGuideInput) {
-    // One active guideline per Client Schedule deliverable.
-    if (input.deliverable_id && deliverableHasActiveGuideline(guides, input.deliverable_id, guideMode === 'edit' ? selectedGuideId : null)) {
-      setGuideError('Another active guideline is already linked to that Client Schedule deliverable.')
-      return
-    }
-    setGuideSaving(true); setGuideError(null)
-    const withCreator = guideMode === 'create' ? { ...input, created_by: profile?.id ?? null } : input
-    const response = guideMode === 'create' ? await createGuideIdea(withCreator) : await updateGuideIdea(selectedGuideId as string, input)
-    setGuideSaving(false)
-    if (response.error) { setGuideError(response.error); return }
-    if (response.migrationNeeded) { setMigrationNeeded(true); return }
-    await loadAll()
-    if (response.data) setSelectedGuideId(response.data.id)
-    setGuideMode('view')
-  }
-
-  async function guideAction(action: 'submit_review' | 'approve' | 'return_to_review' | 'archive') {
-    if (!selectedGuide) return
-    setGuideError(null)
-    const response = await runGuideAction(selectedGuide.id, action)
-    if (response.error) { setGuideError(response.error); return }
-    await loadAll()
-  }
-
-
   // Mark a Content Guideline video as shot through the guarded transition.
-  async function markGuideShot(guide: ContentGuideIdea) {
+  async function markGuideShot(guide: ContentGuidelineVideo) {
     setCardBusyId(guide.id); setCardError(null)
     const response = await transitionVideo(guide, 'mark_shot', {
       footageUrl: guide.onedrive_footage_url,
@@ -548,7 +465,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
         </p>
       </header>
 
-      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2" aria-label="Content sections">{tabButton('overview', 'Overview', 0)}{tabButton('runs', 'Content Runs', runs.length)}{tabButton('guidelines', 'Guidelines', documents.length)}{tabButton('pipeline', 'Video Pipeline', 0)}{tabButton('library', 'Video Library', guides.length)}</div>}
+      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2" aria-label="Content sections">{tabButton('overview', 'Overview', 0)}{tabButton('runs', 'Content Runs', runs.length)}{tabButton('guidelines', 'Guidelines', documents.length)}{tabButton('pipeline', 'Video Pipeline', 0)}</div>}
 
       {migrationNeeded ? (
         <div className="mt-6 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5 sm:p-6">
@@ -566,65 +483,6 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
         <ContentOverview clients={clients} staff={staff} runs={runs} documents={documents} onOpenRun={openOverviewRun} onOpenGuideline={openOverviewGuideline} onOpenPipeline={() => switchTab('pipeline')} />
       ) : tab === 'guidelines' ? (
         <FullContentGuidePage embedded />
-      ) : tab === 'library' ? (
-        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-          <section className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <input className={`${INPUT_CLS} flex-1`} placeholder="Search legacy videos" value={guideSearch} onChange={event => setGuideSearch(event.target.value)} />
-              <span className="text-xs text-white/45">Add videos inside a Content Run.</span>
-            </div>
-            <select className={`${INPUT_CLS} w-auto`} value={guideStatusFilter} onChange={event => setGuideStatusFilter(event.target.value as ContentGuideStatus | 'all')}>
-              <option value="all">All statuses</option>
-              {CONTENT_GUIDE_STATUSES.map(status => <option key={status} value={status}>{humanizeStatus(status)}</option>)}
-            </select>
-            {filteredGuides.length === 0 ? (
-              <EmptyState title={guides.length === 0 ? 'No videos yet' : 'No videos match'} message={guides.length === 0 ? 'Open a Content Run and create its Content Guideline, then add videos there.' : 'Adjust search or status.'} />
-            ) : (
-              <ul className="space-y-2">
-                {filteredGuides.map(guide => (
-                  <li key={guide.id}>
-                    <button type="button" onClick={() => { setSelectedGuideId(guide.id); setGuideMode('view');  }} className={`w-full rounded-xl border p-3 text-left transition-colors ${selectedGuideId === guide.id && guideMode !== 'create' ? 'border-brand-teal/45 bg-brand-teal/[0.07]' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}>
-                      <p className="break-all font-mono text-[11px] text-white/45">{guide.canonical_name ?? '(no canonical name)'}</p>
-                      <div className="mt-1 flex items-start justify-between gap-2">
-                        <p className="min-w-0 break-words text-sm font-black text-white">{guide.title}</p>
-                        <Pill tone={guideStatusTone(guide.status)}>{humanizeStatus(guide.status)}</Pill>
-                      </div>
-                      <p className="mt-1 text-xs text-white/45">{clientName(clients, guide.client_id)}{guide.month ? ` · ${guide.month.slice(0, 7)}` : ''}</p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-            {guideMode === 'create' ? (
-              <><h2 className="mb-4 text-lg font-black text-white">New content guideline</h2><GuidelineForm initial={null} clients={clients} staff={staff} saving={guideSaving} error={guideError} onCancel={() => setGuideMode('view')} onSubmit={submitGuide} /></>
-            ) : guideMode === 'edit' && selectedGuide ? (
-              <><h2 className="mb-4 text-lg font-black text-white">Edit guideline</h2><GuidelineForm initial={selectedGuide} clients={clients} staff={staff} saving={guideSaving} error={guideError} onCancel={() => setGuideMode('view')} onSubmit={submitGuide} /></>
-            ) : selectedGuide ? (
-              <GuidelineBrief
-                idea={selectedGuide}
-                clients={clients}
-                deliverableLabel={guideLabel(selectedGuide)}
-                onEdit={() => { setGuideMode('edit'); setGuideError(null) }}
-                footer={
-                  <div className="space-y-3">
-                    {guideError && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{guideError}</p>}
-                    <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
-                      {canRunGuideAction(selectedGuide.status, 'submit_review') && <ActionButton size="sm" variant="secondary" onClick={() => void guideAction('submit_review')}>Submit for review</ActionButton>}
-                      {canRunGuideAction(selectedGuide.status, 'approve') && <ActionButton size="sm" onClick={() => void guideAction('approve')}>Approve</ActionButton>}
-                      {canRunGuideAction(selectedGuide.status, 'return_to_review') && <ActionButton size="sm" variant="secondary" onClick={() => void guideAction('return_to_review')}>Return to review</ActionButton>}
-                      {canRunGuideAction(selectedGuide.status, 'archive') && <ActionButton size="sm" variant="ghost" onClick={() => void guideAction('archive')}>Archive</ActionButton>}
-                    </div>
-                  </div>
-                }
-              />
-            ) : (
-              <EmptyState title="Select a content guideline" message="Choose a guideline to view its full brief, or create a new one." />
-            )}
-          </section>
-        </div>
       ) : tab === 'pipeline' ? (
         <VideoPipelineTab clients={clients} staff={staff} />
       ) : (
