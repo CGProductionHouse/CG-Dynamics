@@ -1,1005 +1,1204 @@
-# Cape Lumber Marketing — Performance and Growth Intelligence
+# Cape Lumber — Canonical Client Record
 
-Last updated: 2026-08-06
-Status: Current-source client intelligence. Keep isolated to Cape Lumber Marketing. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
+Canonical CG client: **Cape Lumber**  
+Public trading style: **Cape Lumber Marketing**  
+Record purpose: **Permanent human CG source of truth for future Cape Lumber marketing/content work**  
+Human Project knowledge last reviewed: **2026-09-08**  
+Recent public/social content last audited: **2026-09-08**  
+Mutable public facts last verified: **2026-09-08**  
+Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
-## Why this pack exists
+> **Permanent-record note:** the dated `2026-08` filename is retained for repository/reference continuity because this file began as the August performance/growth pack. This is **not** an August 2026 snapshot. Future Cape Lumber updates must modify this same canonical record and update the review/verification dates above rather than creating another Cape Lumber intelligence file.
 
-Cape Lumber is highly sensitive to page performance and needs a strategy that can be defended with evidence and tied to enquiries, quotations, orders and trade relationships.
+## 1. What this record is
 
-This pack is not a generic content plan. It is a current-source commercial diagnosis and operating strategy built from:
+This is the durable human operating record for Cape Lumber. It reconciles:
 
-- the current official website and product catalogue;
-- current public social evidence supplied directly by CA on 2026-08-06;
-- current visible pricing and product specifications;
-- current delivery, machining, treatment and procurement capabilities;
-- current Cape Town and Western Cape competitor positioning;
-- current search visibility opportunities;
-- the actual difference between retail DIY, professional trade and architectural/project buyers.
+- existing CG Dynamics Cape Lumber intelligence;
+- the accessible Cape Lumber ChatGPT Project history;
+- the Cape Lumber business-information Project source;
+- repeated CA/CG wording corrections and approvals;
+- recent CG-produced content patterns recoverable from Project history;
+- current public Cape Lumber/Denis Coyne social activity;
+- current official/public business verification as at 2026-09-08.
 
-## Current verified identity
+It is not a caption archive, a monthly content plan or a generic AI marketing strategy.
 
-### Business
+Use it to understand:
 
-- Trading name: Cape Lumber Marketing.
-- Industry: timber merchants, lumberyard, timber and building-supply business.
-- Website: `https://capelumbermarketing.co.za`.
-- Instagram handle shown by CA: `deniscoyne`.
-- Current Instagram profile name: Cape Lumber Marketing.
-- Current profile category: Lumberyard.
-- Public website positioning: timber suppliers in Cape Town servicing the Western Cape.
-- Published industry experience claim: 38 years.
+- what Cape Lumber actually supplies;
+- who CG is speaking to;
+- how products and services should be spoken about;
+- how Cape Lumber should sound;
+- which published social patterns are useful evidence and which are not permanent rules;
+- which wording and approaches CG has accepted or rejected;
+- which contact/CTA conventions are current;
+- which mutable facts must be freshly verified before publication.
 
-### Current official contact details
+## 2. Source and authority rules
 
-Verified from the official website on 2026-08-06:
+### Human marketing judgement
 
-- Address: 8 Richard Road, Sunnydale, Noordhoek, Western Cape, 7975.
-- Telephone: +27 (0) 21 879 5042.
-- Email: `info@capelumbermarketing.co.za`.
+For tone, wording, creative direction and production conventions, use this order:
 
-### Current service area
+1. newest explicit client/CA/CG instruction or correction;
+2. repeated approvals/corrections in the Cape Lumber Project;
+3. client/Project source documents;
+4. recent public Cape Lumber content as evidence of current product/activity priorities;
+5. this canonical record;
+6. older strategy recommendations.
 
-The official services page states:
+A published post is **not automatically a permanent rule**. Recent social content is useful for understanding current products, current CTA behaviour and what Cape Lumber is actually talking about, but explicit CG/client corrections outrank one-off published wording.
+
+### Mutable public facts
+
+For address, phone, email, website, social profiles, hours, service areas, products, stock, treatment options, prices and current availability:
+
+1. newest direct client confirmation;
+2. current official Cape Lumber website or official account;
+3. current verified/local business listing;
+4. current public activity from the business owner/representative;
+5. older Project source material;
+6. stored memory.
+
+### Provenance labels
+
+- `client_confirmed` — supplied directly by the client or in a client business-information source;
+- `CA_CG_confirmed` — explicit or repeated CG Production House instruction/correction;
+- `public_verified` — checked against a current reachable authoritative public source;
+- `recent_public_pattern` — observed repeatedly in current public content, but not automatically a permanent brand rule;
+- `historical` — useful prior context, not automatically current;
+- `possible_change` — conflicting evidence exists and must be resolved before operational use;
+- `stale_unverified` — not recently confirmed;
+- `rejected` — wrong identity, unsupported claim or an approach CG should not repeat.
+
+## 3. Identity
+
+### Canonical CG identity
+
+- Canonical client name: **Cape Lumber**. `CA_CG_confirmed` via the 2026-09-08 canonical client-directory decision.
+- Do not rename the CG client record to Cape Lumber Marketing.
+
+### Public trading identity
+
+- Public website style: **Cape Lumber Marketing**. `public_verified` 2026-09-08.
+- Industry: timber merchant / timber and building-material supplier. `public_verified` and `client_confirmed`.
+- Official website: `https://capelumbermarketing.co.za/`. `public_verified` 2026-09-08.
+- The website is live. The old Project instruction not to include a website until one is officially launched is `historical` and superseded.
+
+### Core business position
+
+Cape Lumber is a **supplier, not a contractor**.
+
+Cape Lumber supplies timber, boards and related building materials and can offer/arrange sourcing, treatment, machining and delivery capabilities around those materials.
+
+Do not market Cape Lumber as providing:
+
+- carpentry;
+- joinery as a contracting service;
+- installation;
+- on-site fitting;
+- deck construction;
+- pergola construction;
+- structural engineering;
+- fireproofing/fire-retardant services.
+
+Product copy may explain common uses, but must not imply Cape Lumber performs the installation or construction work.
+
+## 4. Current contact and location truth
+
+### Address
+
+`public_verified` 2026-09-08:
+
+**8 Richard Road, Sunnydale, Noordhoek, Western Cape, 7975**
+
+The official website labels this address **“Office Only.”**
+
+A current local listing also resolves Cape Lumber Marketing at the same address and includes pickup/appointment-related tags. Because that conflicts with the website wording, do not invite customers to a yard, showroom or collection point there unless Cape Lumber confirms the operating setup.
+
+### Primary CG marketing phone
+
+**+27 71 353 4261**
+
+Authority:
+
+- `client_confirmed` in the Cape Lumber business-information Project source;
+- `CA_CG_confirmed` in recent CG content conventions;
+- `public_verified` on a current local business listing;
+- `public_verified` repeatedly in recent Denis Coyne/Cape Lumber business posts.
+
+This is the current phone CG should use in marketing content unless the client gives a newer instruction.
+
+### Website office landline
+
+**+27 (0) 21 879 5042**
+
+- `public_verified` on the official website 2026-09-08.
+
+Keep this as a current public office contact, but do not substitute it for the CG-approved marketing mobile in captions unless instructed.
+
+### Primary CG marketing email — resolved by later CG history
+
+**info@capelumbermarketing.co.za**
+
+Authority:
+
+- `client_confirmed` in the Cape Lumber business-information Project source;
+- `CA_CG_confirmed` in later July/August 2026 approved CG contact blocks;
+- `public_verified` on the official website;
+- `public_verified` repeatedly in recent Denis Coyne/Cape Lumber business posts.
+
+The older Project Instruction using `info@capelumber.co.za` is now `historical/rejected_for_current_use` because later CG-approved content and current public/client sources consistently use `info@capelumbermarketing.co.za`.
+
+Do not revert to `info@capelumber.co.za` unless Cape Lumber explicitly instructs CG to change back.
+
+### Contact block convention
+
+Recent CG-approved content uses a simple commercial contact block with:
+
+1. email;
+2. mobile phone;
+3. spacing before hashtags.
+
+A July/August approved pattern is therefore:
+
+- `info@capelumbermarketing.co.za`
+- `+27 71 353 4261`
+
+Do not treat emojis as mandatory. Public owner-led posts sometimes use email/phone emojis, but CG content can keep the footer clean and professional unless the creative calls for them.
+
+### Hours
+
+No authoritative current opening-hours schedule was verified on the official website or current public listing on 2026-09-08. `stale_unverified`.
+
+Do not invent hours.
+
+## 5. Delivery and service-area truth
+
+### Publicly verified service area
+
+The official services page currently states delivery across:
 
 - Cape Town;
-- Cape Peninsula;
+- the Cape Peninsula;
 - Stellenbosch;
 - Paarl;
 - Somerset West;
-- surrounding Western Cape areas;
-- outlying and provincial deliveries through negotiated private transport.
+- surrounding Western Cape areas.
 
-### Current Instagram footprint supplied by CA
+It also states that outlying/provincial delivery can be arranged through a private contractor/transporter at a negotiated rate.
 
-Observed on 2026-08-06:
+### Client/CG delivery-area examples
 
-- 863 posts;
-- 895 followers;
-- 1,015 following.
+Project guidance has also used:
 
-This is a large content volume relative to follower scale. The page therefore has enough historical activity to diagnose format performance, but its commercial value must be judged through quote and order attribution, not follower count alone.
+- Cape Town;
+- Somerset West;
+- Paarl;
+- Blouberg Strand;
+- Hermanus;
+- Langebaan.
 
-## Verified product architecture
+Treat Blouberg Strand, Hermanus and Langebaan as client/CG examples that should still be freshness-checked before a location-specific campaign because the current website does not enumerate all three.
 
-Cape Lumber is broader than a decking page or a simple pine supplier. The current official catalogue includes:
+### Copy rule
 
-### Structural and industrial timber
+Mention delivery areas when they help the buyer understand whether Cape Lumber can service the project. Do not mechanically paste a long place list into every caption.
 
-- structural SA pine;
-- industrial-grade pine;
-- treated pine;
-- SABS/SATAS S5 structural timber;
-- S7 by request where specified by an architect or structural engineer;
-- H2 interior treatment;
-- H3 exterior treatment;
-- Vacsol Azure clear treatment;
-- planed-all-round and machined timber by request.
+Delivery content should be practical:
 
-Current website price range for treated pine: approximately R37.08 to R1,750.21 including VAT, depending on section and length.
+- project quantities;
+- destination/region;
+- bulky or long materials;
+- load preparation;
+- delivery arrangement;
+- quote/availability confirmation.
+
+Do not imply Cape Lumber owns the transport used for every outlying/provincial order.
+
+## 6. Current product architecture
+
+Product availability, stock, dimensions, treatment and price are mutable. Verify the exact item before publication.
+
+### Structural and industrial Pine
+
+`public_verified` 2026-09-08:
+
+- SA Pine structural timber;
+- S5 structural Pine;
+- industrial-grade Pine;
+- treated and untreated Pine;
+- CCA H2 treatment;
+- CCA H3 treatment;
+- Vacsol Azure clear treatment for relevant interior/exposed products;
+- PAR / planed-all-round options and moulded profiles by request.
+
+The official site references SABS/SATAS-approved structural Pine. Do not turn this into a blanket certification claim for every timber item.
+
+### Hazard classes
+
+Current public Cape Lumber pages verified on 2026-09-08 specifically evidence **H2 and H3**, plus Vacsol Azure H2.
+
+Rule:
+
+- H2/H3 can be discussed when relevant to the product;
+- H4/H5 may be used in general educational planning only when accurate to the context;
+- do not claim Cape Lumber currently stocks, treats or supplies a specific H4/H5 product without confirmation.
 
 ### Laminated beams and posts
 
-- laminated pine beams;
-- laminated pine posts;
-- Saligna beams made to order;
-- spruce beams;
-- curved beams made to order;
-- long-span structural applications;
-- exposed architectural beams and columns.
+`public_verified` 2026-09-08:
 
-Current website price range for laminated pine beams: approximately R1,680 to R12,176.40 including VAT.
+- laminated Pine beams;
+- laminated Pine posts;
+- glulam / glue-laminated timber;
+- long lengths, with the current product page listing beam lengths up to 12 m;
+- Pine treatment options shown on the product page;
+- Saligna and imported Spruce referenced as laminated-timber options.
 
-The site publishes sections from 46 x 231 mm through 106 x 363 mm, with lengths up to 12 m, plus post sizes.
+Spruce is a **softwood**, not an imported hardwood.
 
-### Decking and outdoor timber
+Do not present span/load suitability as Cape Lumber engineering advice. Final structural specification belongs with the relevant professional.
 
-- treated pine decking;
-- Garapa decking;
-- Yellow Balau decking;
-- Massaranduba decking;
-- ThermoWood;
-- Saligna subject to stock;
-- composite decking by request;
-- other hardwoods such as Jatoba and Ipe referenced in category information.
+### Timber species and hardwoods
 
-Current website examples:
+Current official pages/public activity reference:
 
-- Pine decking: approximately R45.05 to R251.65 including VAT.
-- Garapa decking: approximately R95.42 to R923.05 including VAT.
-- Yellow Balau decking: approximately R144 to R408 including VAT.
-- Massaranduba decking: approximately R148 to R531.68 including VAT.
+- Pine;
+- Saligna / Eucalyptus;
+- Meranti;
+- Garapa;
+- Balau;
+- Spruce;
+- Massaranduba;
+- Jatoba;
+- other imported hardwood sourcing.
 
-### Boards and sheet materials
+Treat any current-stock statement as freshness-gated.
 
-- exterior pine plywood BB and BC;
-- marine plywood BS1088;
-- WBP exterior commercial plywood;
+### Decking
+
+Important categories include:
+
+- treated Pine decking;
+- Garapa;
+- Yellow Balau;
+- Massaranduba;
+- Jatoba where available;
+- other hardwood/exterior timber as available or sourced.
+
+When comparing species, talk about real buyer decisions such as appearance, density, maintenance, exposure and availability. Do not promise maintenance-free natural timber or universal durability.
+
+### Boards, sheet materials and insulation
+
+Current/public and Project-source categories include:
+
+- exterior/commercial plywood;
+- Marine Ply BS1088;
 - shutterply;
-- OSB 3;
-- MDF, chipboard and hardboard referenced in the business range;
-- magnesium oxide board;
+- Birch plywood;
+- OSB/OSB3;
+- MDF/chipboard/hardboard where available;
 - fibre-cement products;
-- Nutec planks, ceiling boards and flat sheets;
-- insulation and IsoBoard.
+- Nutec boards/planks/ceiling products;
+- magnesium oxide (MgO) board;
+- gypsum/Rhino-board categories;
+- IsoBoard and related insulation products.
 
-### Mouldings and finishing timber
+Recent public content strongly confirms that **boards and insulation are active current content categories**, not secondary footnotes. Public posts in the last month have covered IsoBoard, MgO board, exterior Pine plywood, Birch plywood and OSB3.
 
-- pine skirting;
-- pine mouldings;
-- Meranti mouldings by request;
-- tongue-and-groove flooring and ceiling boards;
+### Mouldings, flooring and finishing timber
+
+Current/public and Project-source categories include:
+
+- Pine skirting;
+- Pine mouldings;
+- tongue-and-groove flooring/ceiling boards;
+- Meranti profiles/mouldings by request;
 - handrails and custom profiles;
-- custom machining and planing.
+- machined/PAR timber.
 
-### Procurement capability
+### Procurement and hard-to-source supply
 
-The official services page states that Cape Lumber can source most commercially available timber species and finished timber products in South Africa.
+The official services page says Cape Lumber can source most commercially available timber species and finished timber products in South Africa.
 
-This is commercially important. Procurement should be marketed as a problem-solving capability for architects, builders, joiners and clients with unusual specifications, not hidden as a minor service.
+This is a strong commercial differentiator for:
 
-## Verified service capabilities
+- architects;
+- builders;
+- contractors;
+- joiners;
+- manufacturers;
+- project buyers with unusual specifications.
 
-### Delivery
+Do not oversell this as unlimited sourcing. Specific species, profile, quantity and lead time still need confirmation.
 
-- local delivery in Cape Town and the Peninsula;
-- Western Cape delivery coverage;
-- negotiated private transport for outlying and provincial orders.
+## 7. Service capabilities and how to phrase them
+
+### Sourcing/procurement
+
+Good framing:
+
+- “Send the specification/material list.”
+- “Need a specific product, species or profile? Ask Cape Lumber to check sourcing options.”
+- short service-led lines such as **“NEED IT? WE SOURCE IT.”** are consistent with recent CG-approved style when supported by the post.
+
+Avoid:
+
+- “We can get anything.”
+- guaranteed lead-time wording before confirmation.
 
 ### Machining
 
-- planing all round;
-- stocked pine mouldings;
-- mouldings available by request in pine, Meranti and other hardwoods;
-- structural pine is sized/regularised;
-- custom product sourcing and local machining are possible.
+Project source says specialised machining may be outsourced; the official site says Cape Lumber can plane structural Pine all round on request and arrange moulded products.
+
+Safe wording:
+
+- machining available/arranged on request;
+- PAR and custom profiles can be quoted depending on timber/specification.
+
+Do not call machining “in-house” unless confirmed.
 
 ### Treatment
 
-- H2 for interior structural use;
-- H3 for external above-ground use;
-- Vacsol Azure for exposed interior beams and moulded products.
+Safe wording:
+
+- H2/H3 and Vacsol Azure where relevant and current;
+- explain treatment as a buyer/specification decision.
+
+Do not claim weatherproofing, fireproofing or fire-retardant services unless separately confirmed.
+
+### Delivery
+
+Recent CG content approves short, commercially direct wording such as **“WE DELIVER. YOU BUILD.”** when the post is clearly about supply delivery.
+
+This is useful because it reinforces the supplier/contractor boundary: Cape Lumber delivers the material; the customer/builder does the building.
+
+Use sparingly. Do not repeat the same hook across every delivery post.
 
 ### Advice and quotations
 
-The official site explicitly offers no-obligation quotations and advice.
+Convert “contact us” into a useful buying action:
 
-This should become a stronger public promise with a structured quote path rather than remaining generic website copy.
+- send the timber/material list;
+- send dimensions/lengths;
+- include grade/treatment if known;
+- include delivery destination;
+- include required date where relevant.
 
-## Commercial diagnosis
+## 8. Audience — who CG is actually writing for
 
-## 1. Cape Lumber has a strong business but an unclear social conversion system
+### Primary audience: B2B / B2Pro
 
-The product range is deep, technically credible and commercially valuable. The visible social feed shows stock, projects, staff and promotional graphics, but the page does not consistently tell viewers:
-
-- exactly what is available now;
-- which customer type the post is for;
-- the decision a buyer needs to make;
-- what information to send for a quote;
-- why Cape Lumber is better suited than a broad hardware retailer or specialist competitor;
-- whether the item is stocked, sourced or made to order;
-- the delivery area and likely next step;
-- the live price or useful price anchor where suitable.
-
-The problem is not lack of posting. It is weak commercial architecture between content and quotation.
-
-## 2. The website contains genuine purchase signals but also trust and usability friction
-
-Strengths:
-
-- real products;
-- visible pricing on many items;
-- technical specifications;
-- dimensional options;
-- clear service capability;
-- e-commerce/cart structure;
-- long-tail search content;
-- product categories that cover trade and DIY needs.
-
-Weaknesses requiring correction or monitoring:
-
-- the catalogue includes an `Example Product – Pine Timber`, which weakens trust and suggests unfinished store setup;
-- some products display R0.00 variants, which can confuse buyers and distort perceived pricing;
-- several pages contain grammar, spelling and formatting problems;
-- product pages sometimes rely on dense technical text without quick buyer guidance;
-- stock warnings appear inside body text rather than a consistent stock-status system;
-- the phrase `Office Only` beside the address may create confusion about whether customers can view or collect stock there;
-- the website does not clearly separate trade, homeowner, architect and manufacturer journeys;
-- cart purchase may not be the best conversion route for complex timber orders where lengths, grades, treatment, delivery and wastage need confirmation;
-- delivery calculations and regional fulfilment are not presented clearly enough for complex orders.
-
-## 3. Social follower complaints need to be reframed around commercial performance
-
-At 895 followers after 863 posts, the page may feel underperforming if judged only by follower growth. That is not enough to conclude the marketing is failing.
-
-Cape Lumber sells high-consideration, irregular-purchase products. A contractor, architect or installer may follow silently, save technical posts, visit the website or enquire months later.
-
-The correct performance model is:
-
-1. content reach by audience type;
-2. website product/category visits;
-3. WhatsApp, call and email quote enquiries;
-4. trade-account or repeat-buyer identification;
-5. quotation value;
-6. quote-to-order conversion;
-7. revenue and margin by campaign/product category;
-8. repeat order rate;
-9. project-photo and testimonial acquisition.
-
-Follower growth remains useful, but it is secondary.
-
-## Core buyer groups
-
-## A. Builders and contractors
-
-High-value needs:
-
-- stock certainty;
-- correct grade and treatment;
-- reliable dimensions;
-- large or repeated quantities;
-- delivery timing;
-- quick quotation turnaround;
-- fewer site delays;
-- one supplier capable of sourcing unusual products.
-
-Best commercial promise:
-
-> Send the timber list. Cape Lumber will help confirm grade, treatment, availability and delivery.
-
-Content should prove:
-
-- stock depth;
-- accurate picking;
-- long-length capability;
-- project deliveries;
-- bulk-order handling;
-- treatment knowledge;
-- fast problem resolution.
-
-## B. Decking, pergola and outdoor-living installers
-
-High-value needs:
-
-- species comparison;
-- stable supply;
-- substructure and fixing guidance;
-- suitable exterior treatment;
-- project-consistent colour and dimensions;
-- lead-time clarity;
-- repeat access to hardwoods and pine.
-
-Best commercial promise:
-
-> One source for substructure, decking species and project-specific advice.
-
-## C. Architects, engineers and designers
-
-High-value needs:
-
-- structural grades;
-- long spans;
-- treatment specification;
-- exposed-beam quality;
-- species and finish options;
-- procurement support;
-- technical documents and dimensional certainty;
-- honest separation between stocked and made-to-order products.
-
-Best commercial promise:
-
-> Specification-aware timber support from early design through procurement.
-
-Cape Lumber should avoid presenting itself as an engineer. Structural claims and final selection must remain subject to professional specification.
-
-## D. Joiners, furniture manufacturers and fabricators
-
-High-value needs:
-
-- rough-sawn or machined timber;
-- consistent dimensions;
-- mouldings;
-- plywood and boards;
-- species sourcing;
-- repeat supply;
-- reliable pricing and stock communication.
-
-## E. Homeowners and DIY customers
-
-High-value needs:
-
-- plain-language explanations;
-- project calculators or material lists;
-- realistic price guidance;
-- confidence that the timber is suitable;
-- delivery or collection clarity;
-- maintenance education;
-- help avoiding incorrect treatment or species choices.
-
-## Competitor landscape
-
-## 1. Rare Woods
-
-Current strength:
-
-- premium and exotic timber authority;
-- extensive species range;
-- visible stock and e-commerce depth;
-- strong decking and structural categories;
-- national shipping and destination reach;
-- inspiration for specialist makers and premium customers.
-
-Cape Lumber advantage:
-
-- broader practical construction mix;
-- structural pine, treated timber, boards, Nutec and building products;
-- local procurement and delivery problem-solving;
-- potentially more accessible contractor relationship.
-
-## 2. Saplings Timber Trading
-
-Current strength:
-
-- wholesale positioning;
-- merchant and manufacturer focus;
-- broad local and imported timber range;
-- decking manufacturing and product depth;
-- strong B2B clarity.
-
-Cape Lumber opportunity:
-
-- become visibly easier for mixed project orders and smaller contractors;
-- show more direct advice and flexible sourcing;
-- use Denis's experience and personal authority.
-
-## 3. Ticktin Timbers
-
-Current strength:
-
-- premium custom-machined timber;
-- building and contracting focus;
-- strong manufacturing credibility;
-- decking and structural timber positioning.
-
-Cape Lumber opportunity:
-
-- own the space between specialist machining and full project supply;
-- communicate stock, sourcing, treatment and delivery as one solution.
-
-## 4. Timbercity
-
-Current strength:
-
-- retail visibility;
-- multiple stores;
-- broad DIY and board-product awareness;
-- cutting services;
-- educational content and project inspiration.
-
-Cape Lumber advantage:
-
-- deeper specialist timber knowledge;
-- procurement flexibility;
-- hardwood decking and glulam capability;
-- more personal technical guidance;
-- contractor relationship potential.
-
-## 5. Cape Town Timber Suppliers and similar regional merchants
-
-Current strength:
-
-- explicit product-category clarity;
-- project and decking supplier positioning;
-- local trade familiarity.
-
-Cape Lumber must differentiate with evidence, not slogans:
-
-- 38 years of industry experience;
-- current live product catalogue;
-- treatment and machining knowledge;
-- long-length laminated beams;
-- broad delivery area;
-- unusual-product procurement;
-- real completed projects and client proof.
-
-## 6. Deck installers and design-build companies
-
-Companies such as Master Decks compete indirectly because homeowners may prefer an installed solution rather than buying material separately.
-
-Cape Lumber should turn selected installers into partners rather than treat all of them as competitors.
-
-## Positioning recommendation
-
-Current generic territory such as `supplying strength, delivering quality` is serviceable but not sufficiently ownable.
-
-Recommended primary position:
-
-> Cape Lumber helps builders, installers, manufacturers and homeowners source the right timber, in the right specification, and keep the project moving.
-
-Supporting proof points:
-
-- 38 years of timber-industry experience;
-- structural, industrial, exterior and architectural product depth;
-- timber treatment and machining options;
-- long-length laminated beams;
-- hardwood and pine decking options;
-- procurement of unusual commercially available products;
-- local and regional delivery;
-- no-obligation quotations and advice.
-
-## Marketing architecture
-
-Cape Lumber should run five linked marketing systems, not one undifferentiated page.
-
-## System 1: Trade supply and stock confidence
-
-Audience:
+The permanent default audience is professional and commercial:
 
 - builders;
 - contractors;
-- installers;
-- manufacturers;
-- joiners.
-
-Content and campaigns:
-
-- verified weekly stock highlights;
-- long-length and bulk-order capability;
-- order-picking and delivery proof;
-- treatment and grade explainers;
-- `send your material list` campaigns;
-- project-delay prevention;
-- repeat-client stories;
-- trade email or WhatsApp updates.
-
-Conversion:
-
-- upload or send a timber list;
-- request a trade quotation;
-- request availability confirmation;
-- enquire about delivery.
-
-## System 2: Decking and outdoor living
-
-Audience:
-
-- homeowners;
-- decking installers;
 - architects;
-- landscapers;
-- hospitality venues.
-
-Content and campaigns:
-
-- pine vs Garapa vs Balau vs Massaranduba;
-- realistic maintenance guidance;
-- finished-project proof;
-- colour and weathering comparisons;
-- substructure and treatment basics;
-- species-specific product pages;
-- installer partnerships;
-- project estimate enquiry flow.
-
-Conversion:
-
-- submit approximate deck dimensions;
-- select preferred timber or request advice;
-- request supply-only quote;
-- request installer referral where available.
-
-## System 3: Structural and architectural timber
-
-Audience:
-
-- architects;
-- engineers;
-- builders;
-- developers;
-- churches, schools and commercial project teams.
-
-Content and campaigns:
-
-- glulam spans and applications;
-- exposed truss and beam projects;
-- H2, H3 and clear-treatment education;
-- long-length capability;
-- made-to-order beams;
-- project case studies;
-- specification support boundaries;
-- CAD/specification resource concept.
-
-Conversion:
-
-- submit drawings or beam schedule;
-- request availability and lead time;
-- request quote subject to professional specification.
-
-## System 4: Boards, mouldings and workshop supply
-
-Audience:
-
+- developers/project teams;
 - joiners;
-- shopfitters;
-- furniture makers;
-- DIY customers;
-- renovators.
+- furniture/manufacturing businesses;
+- shopfitters/fabricators;
+- independent tradespeople;
+- specialist installers who buy material from Cape Lumber.
 
-Content:
+They care about:
 
-- plywood grade comparisons;
-- marine ply use cases;
-- OSB, MgO and fibre-cement education;
-- moulding and machining capability;
-- workshop-client case studies;
-- cut-list or specification enquiry.
+- exact product;
+- grade/treatment;
+- dimensions and lengths;
+- stock/availability;
+- quantity;
+- sourcing;
+- lead time;
+- delivery;
+- reliable quotation information.
 
-## System 5: Procurement and hard-to-source products
+### Secondary audience: project-focused homeowners
 
-Audience:
+Homeowners are legitimate buyers, especially for decking, boards, renovations and larger home projects.
 
-- professional buyers;
-- architects;
-- specialist contractors;
-- manufacturers.
+However, Cape Lumber content must **not** become Pinterest/DIY tutorial content.
 
-Positioning:
+Speak to the purchase/project requirement, not step-by-step installation.
 
-> Cannot find the timber product or profile? Send the specification and let Cape Lumber investigate sourcing and machining options.
+### Historical July/August 2026 DIY/project campaign lens
 
-This is a valuable differentiator and should have its own landing page and campaign.
+A July 2026 brief deliberately broadened the audience around “DIY Home Projects,” men, small businesses, independent workers, delivery and project-scale value. Later CG feedback accepted a more premium version of that approach.
 
-## Website recommendations
+Durable lesson:
 
-## Immediate fixes
+- Cape Lumber is not only for huge corporate orders;
+- smaller contractors, independent tradespeople and serious project buyers are legitimate targets;
+- show the value of supply, sourcing, bulk/project quantities and delivery;
+- keep wording premium/practical rather than amateur-DIY;
+- do not make blanket “cheaper than Builders/retail” claims unless proven.
 
-1. Remove the example product.
-2. Remove or correct R0.00 variants.
-3. Audit all prices against current ERP/stock reality.
-4. Standardise stock status:
-   - in stock;
-   - limited stock;
-   - confirm availability;
-   - made to order;
-   - sourced on request.
-5. Correct spelling, grammar and duplicate category text.
-6. Clarify whether 8 Richard Road is office-only, collection, showroom, yard or appointment-only.
-7. Add clear delivery-area and transport explanations.
-8. Place phone, WhatsApp and quote actions prominently on every product page.
-9. Separate direct online purchase from quote-required products.
-10. Add current product photography and scale references.
+## 9. Tone of voice — the core human rule
 
-## Recommended buyer pathways
+Cape Lumber should sound like a supplier who understands timber and has worked with builders for years.
 
-Homepage entry choices:
+### Use
 
-- Builders and contractors;
-- Decking and outdoor projects;
-- Architects and structural timber;
-- Joinery, boards and mouldings;
-- DIY and home projects;
-- Hard-to-source timber request.
+- confident and knowledgeable;
+- clean and practical;
+- product-first;
+- technical when useful, but understandable;
+- local and approachable;
+- professional but personable;
+- premium through precision, not through luxury adjectives;
+- specific rather than broad;
+- useful rather than inspirational;
+- concise when the post is simple;
+- grounded commercial language.
 
-## Quote forms
+### The copy should feel like
 
-### Trade material-list form
+A reliable timber supplier explaining what is available, what it is for, what needs to be specified and how Cape Lumber can help get the order moving.
 
-- company or buyer name;
-- project location;
-- product list upload;
-- grade/treatment if known;
-- required date;
-- delivery or collection;
-- contact preference.
+### Avoid
 
-### Decking estimate form
+- influencer-style hype;
+- fake excitement;
+- empty premium/luxury language;
+- corporate filler;
+- overblown promises;
+- Pinterest-style DIY enthusiasm;
+- overly poetic timber copy;
+- forced humour;
+- generic slogans that could fit any building-material brand.
 
-- location;
-- approximate area;
-- preferred species or `need advice`;
-- supply only or installer referral;
-- timeframe;
-- project photo or drawing.
+### Generic AI/corporate wording to reject
 
-### Structural/glulam form
+Do not default to:
 
-- professional/contact role;
-- project location;
-- beam schedule/drawing upload;
-- required treatment;
-- required date;
-- disclaimer that final structural selection remains with the appointed professional.
+- “elevate your experience”;
+- “discover the difference”;
+- “where quality meets…”;
+- “bringing your vision to life”;
+- “strength meets style”;
+- “quality you can trust” without proof;
+- “solutions for every need”;
+- vague “premium quality” lines;
+- generic “built for every project” wording.
 
-## Search strategy
+If a line could be pasted onto a paint, steel, tile or furniture company unchanged, it is too generic for Cape Lumber.
 
-High-intent category pages should target current local searches such as:
+## 10. Recent social/content audit — 2026-09-08
+
+### Scope and limitation
+
+Recent public Facebook/Instagram pages were not reliably indexable through the available public web surfaces on 2026-09-08. No unsupported claim is made about their exact current handles, posting frequency or visual feed layout.
+
+The audit therefore uses:
+
+- current publicly indexed Denis Coyne/Cape Lumber LinkedIn activity from the last month;
+- recent Cape Lumber CG Project work and recovered CG-approved captions/text from July-August 2026;
+- current official product/service information;
+- Project history and explicit corrections.
+
+Some historical Project image/video attachments remain available only as chat placeholders in this migration context; the written creative direction is usable, but no invented image-level findings are added.
+
+### Current public content topics
+
+Recent public activity has focused heavily on **specific product education**, especially:
+
+- Jatoba decking, including a 19 x 140 mm availability mention;
+- glulam/laminated beams and exposed architectural applications;
+- Massaranduba decking characteristics;
+- IsoBoard tongue-and-groove profile/application information;
+- MgO board uses;
+- exterior Pine plywood;
+- Birch plywood;
+- OSB3.
+
+Durable conclusion:
+
+Cape Lumber’s live product conversation is broader than timber alone. **Decking, glulam, sheet materials and insulation/board products are all active current content pillars.**
+
+### Public caption pattern
+
+Recent public owner/business posts tend to:
+
+1. name the product immediately;
+2. explain technical properties or applications in one fairly dense paragraph;
+3. sometimes mention an exact size or “now available” stock signal;
+4. add the mobile and/or email;
+5. add product/category hashtags.
+
+This is useful evidence of what Cape Lumber wants to sell and explain, but the public wording itself is often longer and less polished than CG’s preferred social copy. It sometimes includes grammar/spelling issues and broad claims that CG should not automatically repeat.
+
+**Durable CG lesson:** use the public feed for product priority and technical subject matter, not as a style template that overrides CG corrections.
+
+### Recent CG-produced/approved pattern
+
+Recovered recent CG Project work shows a clearer commercial house style:
+
+- short, non-generic lines;
+- service-led wording;
+- a slightly premium tone achieved through confidence and specificity;
+- direct emphasis on supply, sourcing, delivery and bulk/project value;
+- short poster hooks rather than explanatory paragraphs;
+- contact block beneath the caption;
+- approximately five relevant hashtags in approved examples;
+- captions that do not repeat the artwork.
+
+Approved-style examples from recent CG history include:
+
+- **“Reliable supply keeps projects moving.”**
+- **“WE DELIVER. YOU BUILD.”**
+- **“NEED IT? WE SOURCE IT.”**
+
+These examples are not mandatory templates. The durable rule is the structure: concise, useful, commercially direct and anchored in a real supplier capability.
+
+### Poster/text-on-post convention
+
+Recent CG corrections consistently prefer:
+
+- short heading;
+- short support line;
+- actual service/product shown in the visual;
+- no generic filler;
+- no long technical explanation on the artwork.
+
+If the visual is delivery, talk delivery. If it is a beam, talk beam supply/length/specification. If it is a board, talk about that board.
+
+### Caption convention
+
+A Cape Lumber caption should normally:
+
+- add context rather than repeat the post text;
+- remain reasonably short;
+- mention a practical buyer reason, product fact, sourcing/delivery point or quote action;
+- use a clean contact block when contact details are included;
+- separate hashtags from the main copy.
+
+### CTA behaviour
+
+Both recent public activity and recent CG work converge on a commercial CTA pattern:
+
+- email;
+- phone;
+- request a quote;
+- send a list/specification;
+- enquire about stock, sourcing or delivery.
+
+“DM us” is not the preferred Cape Lumber conversion behaviour.
+
+### Hashtag behaviour
+
+Recent public/CG examples typically use a **small relevant set rather than the entire hashtag bank**.
+
+Repeated useful tags include:
+
+- `#CapeLumberMarketing`
+- `#CapeLumber`
+- `#TimberSupplierCapeTown`
+- `#BuildingMaterialsSA`
+- `#BulkTimberSA`
+- `#CapeConstructionSupply`
+- product-specific tags such as `#Isoboard` or `#OSB3`.
+
+A five-hashtag block is a proven CG pattern, but not an absolute maximum unless a later instruction sets one. Relevance matters more than count.
+
+### Humour/promotions
+
+Recent public activity is overwhelmingly product/information-led rather than humour-led or discount-led.
+
+No durable recent pattern supports turning Cape Lumber into a joke-heavy brand or a constant promotion/discount account.
+
+Humour should therefore remain occasional, dry and trade-aware.
+
+“Now available”/stock messages are useful when freshly confirmed. Price promotions or comparative “cheapest” claims require evidence.
+
+### Visual/content pattern
+
+The accessible public text index does not expose enough current Facebook/Instagram imagery to establish a new visual system from public posts alone.
+
+The durable visual direction therefore remains grounded in CG Project history:
+
+- real products/materials;
+- stock stacks;
+- beams at visible scale;
+- sheet materials shown clearly;
+- delivery/load preparation;
+- sourcing/yard/material detail;
+- people only when they add real supplier context;
+- avoid visuals that imply installation/construction service.
+
+## 11. Caption and text-on-post rules from Project history
+
+### Do not repeat the artwork
+
+A repeated CG instruction is that the caption should **not simply repeat what is already on the post**.
+
+Instead add one of:
+
+- useful product detail;
+- buyer context;
+- sourcing/delivery information;
+- availability/quote prompt;
+- reason the product matters to the project.
+
+### Keep poster wording short
+
+Cape Lumber text-on-post should usually have:
+
+- a short product/service-led heading;
+- a short support line with a concrete buyer benefit or specification point.
+
+Do not make the poster do the job of a datasheet.
+
+### Service-based, not generic
+
+Project corrections repeatedly pushed copy toward the actual service shown:
+
+- delivery visual → write about delivery;
+- material stack → write about the actual material/product;
+- beam → write about beam length/specification/sourcing;
+- sheet material → write about the board/product and buying context.
+
+### Contact language
+
+Do not use “DM us” as the primary CTA.
+
+Prefer:
+
+- email;
+- call;
+- request a quote;
+- send the material list/specification;
+- enquire about stock, treatment, machining, sourcing or delivery.
+
+## 12. Content patterns that fit Cape Lumber
+
+### Product spotlights
+
+Strong recurring categories:
+
+- laminated beams/glulam;
+- structural/treated Pine;
+- hardwood decking;
+- Jatoba/Massaranduba/Garapa/Balau when current;
+- fibre cement/Nutec;
+- IsoBoard;
+- MgO board;
+- plywood/Birch/exterior ply;
+- OSB3;
+- Meranti;
+- Spruce;
+- mouldings/finishing timber.
+
+The post should answer a buyer question, not merely name the product.
+
+Useful angles:
+
+- what grade/treatment applies;
+- available size/length range once confirmed;
+- stocked vs sourced/made-to-order;
+- common professional use;
+- why one material differs from another;
+- what information is needed for a quote.
+
+### Bulk-order and supply logistics
+
+Good topics:
+
+- bulk order preparation;
+- delivery regions;
+- sourcing process;
+- long-length material handling;
+- stock arrival/preparation;
+- material-list quotations;
+- lead times only when current;
+- warehousing/supply flow only when known.
+
+### Architect/builder-focused technical content
+
+Good topics:
+
+- S5 structural Pine;
+- H2 vs H3;
+- Vacsol Azure;
+- laminated beam dimensions/lengths;
+- exposed beam options;
+- Pine vs Saligna vs Spruce where relevant;
+- Marine vs exterior plywood;
+- board/product comparisons;
+- stocked vs made-to-order/sourced products.
+
+Stay within supplier expertise.
+
+### Procurement/problem-solving content
+
+High-value territory:
+
+- send the timber list;
+- need a specific profile/species/length;
+- hard-to-source product;
+- mixed project order;
+- sourcing and machining options.
+
+### Delivery content
+
+Delivery posts work when they show real commercial usefulness rather than generic “we deliver” wording.
+
+Show/mention:
+
+- real load preparation;
+- long/bulky materials;
+- project region;
+- order scale;
+- delivery arrangement;
+- quote information.
+
+### Behind-the-scenes content
+
+Use real operations when available:
+
+- timber/board stock;
+- loading and delivery prep;
+- material selection;
+- mill/import/sourcing relationships where permission exists;
+- machining partner process;
+- product arrival/unpacking;
+- long beams/boards shown at scale.
+
+## 13. Video patterns
+
+### Proven Project format
+
+A Cape Lumber Project request on 2026-08-18 used a **25-second information video with no voice-over**.
+
+Durable format:
+
+- approximately 20-30 seconds;
+- no voice-over when the product can carry the visual;
+- strong first-screen hook;
+- short on-screen product/service facts;
+- stock/material/delivery movement;
+- end on a commercial CTA.
+
+Voice-over is not permanently banned.
+
+### Expert/person-led video
+
+Denis can be a useful human expert when footage/client availability supports it.
+
+Best tone:
+
+- direct;
+- experienced;
+- lightly scripted;
+- product specific;
+- one clear buyer question per video.
+
+Useful topics:
+
+- H2 vs H3;
+- what to send for a timber quote;
+- why length and grade matter;
+- laminated beams;
+- hardwood/decking differences;
+- boards/insulation choices;
+- sourcing an unusual product.
+
+## 14. Humour style
+
+Humour is welcome when it helps the post feel human, but Cape Lumber should never become cheeky, meme-led or unserious.
+
+Best humour:
+
+- dry;
+- trade-aware;
+- situational;
+- based on purchasing, sourcing, delivery, quantity or specification frustrations.
+
+Avoid:
+
+- memes;
+- slang;
+- forced jokes;
+- influencer hype;
+- making technical requirements sound trivial.
+
+Recent public content provides no evidence that humour should dominate the brand.
+
+## 15. Visual direction
+
+Prefer visuals that prove the supply story:
+
+- real timber/board product photography;
+- stacked stock with visible scale;
+- edges, grain, profiles and surface detail;
+- long beams shown with perspective/scale;
+- sheet materials presented clearly;
+- labelled/organised order preparation;
+- loading and delivery scenes;
+- yard/stock/mill sourcing when available;
+- architects/builders/project imagery only when it clearly relates to what Cape Lumber supplied.
+
+Use people when they add supplier context, not as generic stock-photo decoration.
+
+Avoid visual concepts that imply Cape Lumber is the installer/contractor.
+
+## 16. Seasonal and brand posts
+
+Cape Lumber can participate in relevant South African calendar moments, but seasonal copy must still feel human rather than corporate.
+
+### Heritage content lesson
+
+Project work pushed Heritage wording toward **unity, people and South Africa's shared/different heritage**, rather than generic celebration copy.
+
+Durable rule:
+
+- connect to people, shared identity and communities;
+- keep it restrained and brand-appropriate;
+- do not force timber puns into meaningful national occasions.
+
+### Mandela/community content lesson
+
+Earlier CG work also preferred community-centred wording and brand/service-relevant wordplay over generic corporate Mandela Day copy.
+
+## 17. Contact/footer rules
+
+### Email
+
+Current CG marketing email:
+
+**info@capelumbermarketing.co.za**
+
+Include it where the content brief/footer convention requires contact details.
+
+### Phone
+
+Current CG marketing phone:
+
+**+27 71 353 4261**
+
+### Contact block order
+
+Recent approved CG convention:
+
+1. email;
+2. phone;
+3. blank line;
+4. relevant hashtags.
+
+### Website
+
+The official website is live and verified. It is not mandatory in every caption unless relevant or requested.
+
+### Delivery areas
+
+Include only when relevant to the content/campaign.
+
+## 18. SEO and hashtag guidance
+
+Suggested hashtag bank:
+
+- `#CapeLumberMarketing`
+- `#CapeLumber`
+- `#TimberSupplierCapeTown`
+- `#FibreCementBoards`
+- `#TreatedTimber`
+- `#LaminatedBeams`
+- `#BuildingMaterialsSA`
+- `#CapeConstructionSupply`
+- `#BulkTimberSA`
+- `#ImportedHardwood`
+- `#WoodForBuilders`
+- `#ConstructionMaterialsSA`
+- product-specific tags such as `#Isoboard`, `#OSB3`, `#Jatoba`, `#Decking` when relevant.
+
+Use only the subset relevant to the post. Recent CG examples commonly use about five relevant hashtags.
+
+High-intent search/product language remains useful:
 
 - timber suppliers Cape Town;
-- treated pine Cape Town;
-- structural pine suppliers Cape Town;
-- laminated beams Cape Town;
-- glulam beams South Africa;
-- Garapa decking Cape Town;
-- Balau decking Cape Town;
-- pine decking Cape Town;
-- decking timber suppliers Cape Town;
-- marine plywood Cape Town;
-- shutterply Cape Town;
-- timber mouldings Cape Town;
-- Nutec suppliers Cape Town;
-- timber delivery Cape Town;
-- timber suppliers Stellenbosch;
-- timber suppliers Somerset West;
-- timber suppliers Paarl.
-
-Each page should include current sizes, treatment, common uses, stock state, delivery areas, buyer FAQs and a quote CTA.
-
-## Social strategy
+- treated Pine Cape Town;
+- structural Pine;
+- laminated/glulam beams;
+- timber decking;
+- Garapa/Balau/Jatoba/Massaranduba decking;
+- marine plywood;
+- OSB3;
+- IsoBoard;
+- MgO board;
+- Nutec/fibre cement;
+- timber delivery;
+- timber sourcing/procurement.
 
-## Performance rule
+## 19. Performance, Google Ads and Google Business Profile
 
-No social post should be approved unless it does at least one of the following:
+### Reporting judgement
 
-- proves stock or supply capability;
-- answers a buyer's technical or commercial question;
-- shows a real completed project;
-- explains a product choice;
-- creates a direct quotation opportunity;
-- strengthens trade trust;
-- shows delivery, machining, treatment or procurement proof.
+The accessible 2026-09-07 Project chat shows Cape Lumber Google Ads and Google Business Profile reporting at an **early stage**, with the explicit instruction that Google Ads had not been running for long.
 
-## Content formats with highest commercial potential
+Durable rule:
 
-### 1. Real stock intelligence
+- do not overstate success or failure from a short runtime;
+- present early results as baseline/learning signals;
+- distinguish Google Ads from Google Business Profile performance;
+- avoid hard conclusions until enough conversion evidence exists.
 
-Examples:
+### Commercial performance model
 
-- current treated-pine sizes available;
-- laminated-beam lengths available this week;
-- current hardwood-decking stock;
-- board arrivals;
-- limited stock notices;
-- `what can ship this week`.
+Do not judge Cape Lumber mainly on follower growth.
 
-Every stock post needs:
+Prioritise where data is available:
 
-- product;
-- sizes/lengths;
-- treatment/grade;
-- use case;
-- date checked;
-- quote CTA.
+1. qualified enquiries;
+2. quote requests/material lists;
+3. calls and email enquiries;
+4. quotation value;
+5. orders/revenue if supplied;
+6. repeat trade buyers;
+7. product/category search demand;
+8. delivery-region demand;
+9. campaign cost per qualified enquiry/order;
+10. reach/followers as supporting context.
 
-### 2. Denis explains
+Do not invent unavailable sales attribution.
 
-Use Denis as the human expert.
+## 20. Strong hook logic — principles, not templates
 
-Video topics:
+Build hooks from a real buyer problem.
 
-- H2 vs H3;
-- S5 vs industrial pine;
-- when to use Vacsol Azure;
-- pine vs hardwood decking;
-- what a laminated beam is;
-- what information speeds up a timber quote;
-- why stock length matters;
-- common purchasing mistakes.
+Good territories:
 
-This should feel direct and experienced, not over-scripted.
+- send the material/timber list;
+- need a specific grade/treatment/length;
+- need long laminated beams;
+- need bulk quantities;
+- need delivery to a project area;
+- cannot find a species/profile/product;
+- choosing between two material options;
+- project needs more than a standard retail shelf can conveniently solve.
 
-### 3. Project specification stories
+Recent approved short forms like **“WE DELIVER. YOU BUILD.”** and **“NEED IT? WE SOURCE IT.”** show the preferred economy and supplier focus, but should not become repeated slogans.
 
-Structure:
+## 21. Rejected or risky approaches
 
-- project problem;
-- timber/specification needed;
-- what Cape Lumber supplied or sourced;
-- delivery or machining challenge;
-- finished result;
-- partner credits;
-- quote or procurement CTA.
+### Rejected marketing style
 
-### 4. Buyer comparison carousels
+Do not use:
 
-Examples:
+- vague corporate inspiration;
+- influencer hype;
+- empty quality/strength/style slogans;
+- forced cleverness;
+- generic luxury wording;
+- generic copy that could belong to any supplier;
+- captions that merely repeat the artwork.
 
-- Pine vs Garapa vs Balau;
-- H2 vs H3;
-- marine ply vs exterior ply;
-- glulam vs ordinary structural timber;
-- stocked vs made-to-order beams;
-- supply-only vs installer-led deck project.
+### Rejected service claims
 
-### 5. Trade proof
+Do not say Cape Lumber offers:
 
-Show:
+- installation;
+- carpentry;
+- joinery contracting;
+- fitting;
+- deck/pergola construction;
+- structural engineering;
+- fireproofing.
 
-- truck loading;
-- labelled orders;
-- bulk stock;
-- long beams;
-- delivery arrivals;
-- repeat customers;
-- project timelines;
-- unusual sourcing wins.
+### Risky material claims
 
-### 6. Direct quotation campaigns
-
-Examples:
-
-- `Send the timber list`;
-- `Planning a deck? Send the dimensions`;
-- `Need long laminated beams? Send the schedule`;
-- `Cannot find the product? Send the specification`.
-
-## Paid media plan
-
-## Google Search
-
-Highest-priority campaign groups:
-
-1. Timber supplier and structural pine.
-2. Laminated beams and glulam.
-3. Decking species.
-4. Marine ply, shutterply and boards.
-5. Local-area searches: Cape Town, Noordhoek, Peninsula, Stellenbosch, Paarl, Somerset West.
-
-Landing pages must match the query. Do not send all traffic to the homepage.
-
-Track:
-
-- calls;
-- WhatsApp clicks;
-- quote submissions;
-- material-list uploads;
-- product-page assisted conversions;
-- quoted value;
-- order value.
-
-## Meta
-
-Use Meta for:
-
-- project inspiration with real supply proof;
-- deck-planning lead generation;
-- remarketing website visitors;
-- trade awareness;
-- new stock and category campaigns;
-- expert video distribution.
-
-Avoid broad traffic campaigns with no quote event.
-
-## LinkedIn
-
-Use for:
-
-- architect and contractor authority;
-- glulam and structural timber projects;
-- procurement capability;
-- commercial supply and delivery case studies;
-- professional network growth.
-
-## Partnerships
-
-Priority partners:
-
-- decking installers;
-- pergola contractors;
-- builders;
-- architects;
-- engineers;
-- landscapers;
-- joiners;
-- furniture manufacturers;
-- shopfitters;
-- developers;
-- building inspectors and technical educators where appropriate;
-- hospitality and wine-estate project teams.
-
-Build a verified partner directory rather than giving random referrals.
-
-Partner content should identify:
-
-- who designed;
-- who installed;
-- what Cape Lumber supplied;
-- timber species and treatment;
-- region;
-- project constraints;
-- permission to publish.
-
-## Review and reputation system
-
-Request reviews after:
-
-- successful delivery;
-- completed special procurement;
-- repeat trade order;
-- resolved stock challenge;
-- major deck or beam project.
-
-Useful prompts:
-
-- Was the correct timber supplied?
-- Was the advice useful?
-- Was communication clear?
-- Did delivery meet the agreed expectation?
-- Would the buyer use Cape Lumber again?
-
-Do not generate artificial testimonials.
-
-## Measurement framework
-
-## Primary commercial KPIs
-
-- qualified quote enquiries;
-- quotation value;
-- quote-to-order conversion;
-- revenue attributed to campaign/source;
-- gross margin by product category;
-- repeat trade orders;
-- new trade buyers;
-- average response time;
-- average quote turnaround time;
-- delivery-region demand;
-- lost-order reason.
-
-## Marketing KPIs
-
-- product/category page traffic;
-- material-list uploads;
-- WhatsApp clicks;
-- phone calls;
-- saved product-education posts;
-- high-intent search rankings;
-- reel completion for expert content;
-- remarketing conversion;
-- cost per qualified quote;
-- cost per acquired order.
-
-## Reporting rule
-
-Monthly reporting should not lead with follower growth.
-
-Recommended order:
-
-1. enquiries;
-2. quote value;
-3. orders/revenue where supplied;
-4. highest-value buyer segments;
-5. top converting products/categories;
-6. content that assisted enquiries;
-7. follower/reach context;
-8. next commercial tests.
-
-## 90-day performance recovery plan
-
-## Days 1–30: fix truth, tracking and conversion
-
-- verify address, yard/collection status, phone, email and service area;
-- audit all live product prices and remove R0.00/example items;
-- create standard stock-status labels;
-- install reliable call, form, WhatsApp and e-commerce tracking;
-- create separate trade, decking and structural quote forms;
-- identify top 20 revenue/margin products;
-- interview Denis on buyer questions and lost sales;
-- record current quote volume and conversion baseline;
-- photograph actual stock, long beams, deliveries and real projects;
-- request at least five credible trade/project reviews.
-
-## Days 31–60: launch focused commercial campaigns
-
-Launch three campaigns only:
-
-### Campaign A — Send the timber list
-
-Audience: contractors and builders.
-
-Offer: quick structured quotation and stock/grade/treatment confirmation.
-
-### Campaign B — Plan the deck properly
-
-Audience: homeowners and installers.
-
-Offer: species comparison and supply quote from dimensions.
-
-### Campaign C — Long beams and hard-to-source timber
-
-Audience: architects, engineers and specialist contractors.
-
-Offer: schedule/specification review for availability, sourcing and quote.
-
-Supporting content:
-
-- Denis explainers;
-- real product/specification posts;
-- delivery and project proof;
-- search ads;
-- remarketing.
-
-## Days 61–90: optimise from real sales evidence
-
-- compare lead quality and quote value by campaign;
-- stop low-intent formats;
-- improve quote response time;
-- publish the strongest real case studies;
-- build trade-email/WhatsApp updates with consent;
-- create partner pages for installers and professional audiences;
-- improve product pages receiving traffic but no enquiries;
-- report follower growth only as supporting context;
-- agree the next quarter around revenue categories, not posting volume.
-
-## Immediate high-priority content slate
-
-1. Denis: H2 vs H3 in plain language.
-2. Current laminated-beam stock and maximum lengths.
-3. Real delivery case study.
-4. Pine vs Garapa vs Balau comparison.
-5. `Send your timber list` campaign.
-6. Current treated-pine sizes and grades.
-7. Procurement story: a product Cape Lumber sourced when it was hard to find.
-8. Real completed deck with supplied species and installer credit.
-9. Marine ply vs exterior ply.
-10. What buyers should send for a faster quote.
-11. Workshop/machining capability proof.
-12. Service-area and delivery explainer.
-
-## Claims and risk controls
-
-Do not claim:
+Do not claim without fresh confirmation:
 
 - every product is in stock;
-- guaranteed delivery dates without operational confirmation;
+- a specific price is current;
+- exact lead times;
+- guaranteed delivery dates;
+- H4/H5 availability;
+- waterproof timber/boards where technically inaccurate;
 - maintenance-free natural timber;
-- structural suitability without professional specification;
-- universal durability without species, treatment and exposure context;
-- sustainability certification unless documented for the specific product/source;
-- lowest prices without current comparative evidence.
+- sustainability certification;
+- structural suitability beyond professional specification;
+- “lowest price” or “cheaper than major retailers” as a blanket claim.
 
-Every product, price, stock, treatment, grade and delivery claim must be freshly checked before publication.
+### Public social copy is not automatic CG copy
 
-## Current verification gaps
+Recent public owner-led posts sometimes use dense technical paragraphs, DIY language, broad superlatives or rough grammar. These posts are useful evidence of product activity, but CG should polish and commercialise the message rather than mechanically copying it.
 
-Confirm internally before implementation:
+## 22. Specific mistakes future agents must not repeat
 
-- whether 8 Richard Road is office-only, collection, yard, showroom or appointment-only;
-- current WhatsApp number and whether it differs from the office number;
-- active Facebook and LinkedIn accounts;
-- e-commerce fulfilment and payment workflow;
-- current stock system and price-update frequency;
-- delivery fleet versus private transport model;
-- current trade-account or credit offering;
-- top revenue and margin categories;
-- quote volume and conversion rate;
-- whether customer lists may be used for consent-based updates;
-- available installer referral network;
-- current professional/specification documents;
-- actual marketing and ad performance history.
+1. Do not rename the canonical CG client from **Cape Lumber** to Cape Lumber Marketing.
+2. Do not treat Cape Lumber as an installer/contractor.
+3. Do not turn homeowner content into step-by-step DIY tutorials.
+4. Do not repeat the exact text-on-post again in the caption.
+5. Do not use generic premium/quality filler where a product/service fact would be stronger.
+6. Do not state H4/H5 availability just because older guidance mentioned those hazard classes.
+7. Do not publish price, stock state, lead time or delivery promises without a current check.
+8. Do not tell customers that 8 Richard Road is a yard/showroom; the official site says “Office Only.”
+9. Do not use the stale email `info@capelumber.co.za`; current CG/public/client evidence supports `info@capelumbermarketing.co.za`.
+10. Do not revert the marketing phone to an older number; use `+27 71 353 4261` unless the client updates it.
+11. Do not imply machining is in-house when specialised machining may be outsourced.
+12. Do not over-interpret early Google Ads performance.
+13. Do not judge the account primarily by follower count.
+14. Do not use “cheaper than mainstream stores” as a permanent claim without proof.
+15. Do not copy verbose public captions simply because they are published; explicit CG corrections take priority.
+16. Do not create another monthly Cape Lumber intelligence file. Update this record.
 
-## Source register
+## 23. Useful historical judgement retained from the August strategy
 
-### Official Cape Lumber sources reviewed on 2026-08-06
+Keep these commercial principles:
 
-- `https://capelumbermarketing.co.za/about-us/`
-- `https://capelumbermarketing.co.za/our-services/`
-- `https://capelumbermarketing.co.za/products/`
-- `https://capelumbermarketing.co.za/product-category/timber/`
-- `https://capelumbermarketing.co.za/product-category/timber-decking/`
-- `https://capelumbermarketing.co.za/product/treated-pine/` or current treated-pine route
-- `https://capelumbermarketing.co.za/product/pine-decking/`
-- `https://capelumbermarketing.co.za/product/laminated-pine-beams/`
-- `https://capelumbermarketing.co.za/product-category/laminated-beams-posts-glue-laminated-timber-glulam/`
-- `https://capelumbermarketing.co.za/product/thermowood/`
+- Cape Lumber's range is broader than decking alone;
+- sourcing/procurement is a genuine differentiator;
+- builders and professional buyers want certainty on grade, treatment, size, stock and delivery;
+- technical product education can create quote intent;
+- real stock/delivery/project proof is more useful than generic brand graphics;
+- “send the timber list/specification” is a strong conversion behaviour;
+- architects and engineers need specification-aware supply support without Cape Lumber pretending to be the engineer;
+- reporting should connect marketing to enquiries/quotes/orders where data exists.
 
-### Competitor/reference sources reviewed
+Do not preserve old price ranges, temporary social metrics or dated campaign plans as permanent truth.
 
-- Rare Woods South Africa;
-- Saplings Timber Trading;
-- Ticktin Timbers;
-- Timbercity;
-- Cape Timber & Mouldings;
-- Cape Town Timber Suppliers;
-- Master Decks and regional deck-supply/install references.
+## 24. Current mutable facts requiring future freshness checks
 
-### Direct client evidence
+Before public use, re-check:
 
-CA supplied current Instagram screenshots on 2026-08-06 confirming the live account identity, profile metrics, website link, visible product categories and current content direction.
+- office/collection/yard status at 8 Richard Road;
+- opening hours;
+- current Facebook page and handle;
+- current Instagram page and handle;
+- LinkedIn company/profile relationship;
+- Google Business Profile data;
+- active delivery areas and transport model;
+- exact product stock;
+- prices;
+- beam sizes/lengths;
+- treatment availability;
+- H4/H5 capability;
+- machining workflow;
+- warehouse/stock-location claims;
+- current brands/mills/import sources;
+- current lead times;
+- active ad campaigns and conversion tracking.
+
+Phone and email are currently resolved for CG marketing use as `+27 71 353 4261` and `info@capelumbermarketing.co.za`, subject to future freshness checks.
+
+## 25. Public verification snapshot — 2026-09-08
+
+### `public_verified`
+
+Official website currently supports:
+
+- Cape Lumber Marketing trading identity;
+- `https://capelumbermarketing.co.za/`;
+- 8 Richard Road, Sunnydale, Noordhoek, Western Cape, 7975;
+- “Office Only” wording;
+- landline `+27 (0) 21 879 5042`;
+- email `info@capelumbermarketing.co.za`;
+- Cape Town/Cape Peninsula delivery plus Stellenbosch, Paarl and Somerset West;
+- private-transporter arrangement for outlying/provincial deliveries;
+- procurement/sourcing;
+- machining/planing and mouldings;
+- H2/H3 treatment and Vacsol Azure;
+- structural/industrial Pine;
+- laminated/glulam beams/posts;
+- timber/decking/hardwoods;
+- plywood/boards;
+- fibre cement;
+- insulation;
+- gypsum categories;
+- 38 years' timber-industry experience claim.
+
+Current local listing supports:
+
+- Cape Lumber Marketing at 8 Richard Road;
+- mobile `+27 71 353 4261`;
+- delivery;
+- pickup/appointment-related tags.
+
+Recent Denis Coyne/Cape Lumber public activity supports:
+
+- current mobile `+27 71 353 4261`;
+- current email `info@capelumbermarketing.co.za`;
+- current product promotion across glulam, Jatoba, Massaranduba, IsoBoard, MgO board, exterior Pine plywood, Birch plywood and OSB3;
+- product-first educational captions;
+- product/category hashtags;
+- occasional “now available” stock messaging.
+
+### `stale_unverified` / unresolved
+
+- official current Instagram URL/handle;
+- official current Facebook URL/handle;
+- public opening hours;
+- whether the office address is a customer collection point despite pickup tags;
+- current warehouse location/capacity;
+- H4/H5 capability.
+
+## 26. Accessible ChatGPT Project review — completed 2026-09-08
+
+All Cape Lumber Project history exposed to this migration session was reviewed, including recovered recent CG content conventions.
+
+Accessible/recovered Project history includes:
+
+1. **2026-04-17** — spelling/grammar and Heritage wording; lesson: natural, non-repetitive people-focused seasonal language.
+2. **2026-07-07** — Cape Lumber service/brand wordplay preference; Mandela Day centred on community rather than generic corporate copy.
+3. **2026-07-17** — DIY Home Projects/service-led poster ideation; lesson: smaller project buyers, delivery, product/service specificity and shorter poster wording.
+4. **2026-07-17 later feedback** — generic caption wording rejected; user wanted distinctive supplier voice and then a slightly more premium treatment.
+5. **2026-07-20/21** — approved caption/contact convention using email then phone plus a small relevant hashtag set; current email/mobile pairing confirmed in CG work.
+6. **2026-07-27** — captions must not repeat artwork; Heritage copy should focus on unity/people rather than generic celebration wording.
+7. **2026-08-18** — approximately 25-second no-voice-over information video; approved-style caption emphasised reliable supply and used current email/mobile plus five relevant hashtags.
+8. **2026-08-21** — non-generic, service-based short wording reinforced; supply, delivery, sourcing and bulk value accepted; short forms such as “WE DELIVER. YOU BUILD.” and “NEED IT? WE SOURCE IT.” fit the approved direction.
+9. **2026-09-07** — Google Ads and Google Business Profile client summary; Ads still new, so reporting must remain cautious and contextual.
+
+Accessible Project source:
+
+- `Cape Lumber business.pdf` — business identity, address, mobile contact, product range, delivery areas, supplier-only boundary, machining/source relationships and posting rules.
+
+Historical media limitation:
+
+- some earlier Project messages contain image/video attachments represented only as chat-history placeholders in this migration context; their full pixels/video streams were not independently retrievable here. Durable written instructions around those assets were reviewed and retained.
+
+## 27. Source register
+
+### CG Dynamics sources reviewed
+
+- `AGENTS.md`
+- `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`
+- `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md`
+- `CONTINUE-HERE.md`
+- `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
+- `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md`
+- `docs/client-directory-canonical-decisions-2026-09-08.md`
+- `docs/chatgpt-client-knowledge-migration-2026-09-08.md`
+- this Cape Lumber intelligence file in its pre-migration and first canonical forms.
+
+### Project source reviewed
+
+- `Cape Lumber business.pdf`.
+
+### Current public sources checked on 2026-09-08
+
+- official Cape Lumber Marketing website and product/services pages;
+- current Cape Lumber Marketing local business listing;
+- current publicly indexed Denis Coyne/Cape Lumber LinkedIn activity from the last month.
+
+Facebook/Instagram-specific current public posts were searched, but the available public index did not expose reliable current page/post results. Do not invent findings from that gap.
+
+## 28. Final operating principle
+
+Future Cape Lumber marketing should make a professional buyer think:
+
+**These people understand the material, can tell me what I need to specify, can source or supply it, and can help get the order moving.**
+
+Get there through:
+
+- concrete products;
+- useful specifications;
+- sourcing;
+- treatment;
+- dimensions;
+- delivery;
+- quote guidance;
+- concise supplier-led creative;
+- human commercial experience.
+
+Do not get there through generic marketing language.
