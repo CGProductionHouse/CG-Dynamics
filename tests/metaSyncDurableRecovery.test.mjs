@@ -15,10 +15,17 @@ const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\
 const stripComments = src => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const worker = read('../supabase/functions/meta-sync-worker/index.ts')
 const background = read('../supabase/functions/background-worker/index.ts')
+const enqueue = read('../supabase/functions/meta-sync-enqueue/index.ts')
 const page = read('../src/pages/admin/MetaIntegrationPage.tsx')
 const durable = read('../supabase/migrations/20260804130000_meta_sync_durable_recovery.sql')
+const hardening = read('../supabase/migrations/20260801170000_backend_acceptance_hardening.sql')
 const watermark = read('../supabase/migrations/20260804140000_meta_sync_recovery_progress_watermark.sql')
 const cooldown = read('../supabase/migrations/20260804150000_meta_sync_rate_limit_cooldown.sql')
+const parallelSafety = read('../supabase/migrations/20260825180000_meta_sync_parallel_lane_safety.sql')
+const fencing = read('../supabase/migrations/20260825190000_meta_sync_fencing_and_idempotency.sql')
+const lanes = read('../supabase/functions/_shared/metaWorkerLanes.ts')
+const dispatch = read('../supabase/functions/_shared/metaWorkerDispatch.ts')
+const sharedMeta = read('../supabase/functions/_shared/meta.ts')
 
 // ── Root cause 1: the only durable driver could die permanently ──────────────
 test('a stalled batch is driven by the per-minute cron worker, not only by background_jobs', () => {
@@ -40,10 +47,9 @@ test('the reaper only wakes batches with real work and no live worker', () => {
 })
 
 test('the worker heartbeats durably so a live batch is never double-driven', () => {
-  assert.match(durable, /create or replace function public\.meta_sync_touch_batch/)
-  assert.match(worker, /async function touchBatch/)
-  // Heartbeat on claim AND after each item, so a long item cannot look dead.
-  assert.ok((worker.match(/await touchBatch\(sb,/g) ?? []).length >= 2)
+  assert.match(fencing, /create or replace function public\.meta_sync_touch_item_lease/)
+  assert.match(worker, /async function touchItemLease/)
+  assert.match(worker, /await touchItemLease\(sb, item\.id, leaseGeneration\)/)
 })
 
 // ── Root cause 2: the self-continuation chain collapsed ─────────────────────
@@ -53,21 +59,22 @@ test('the worker hands off without holding the whole chain open', () => {
   // died mid-flight, stranding the queue.
   const handoff = stripComments(worker).slice(stripComments(worker).indexOf('const workerUrl'))
   assert.doesNotMatch(handoff, /EdgeRuntime\.waitUntil/, 'must not keep ancestors alive for the whole chain')
-  assert.match(handoff, /AbortSignal\.timeout\(2_000\)/)
-  assert.match(handoff, /selfTriggered = true/)
+  assert.match(dispatch, /AbortSignal\.timeout\(timeoutMs\)/)
+  assert.match(worker, /selfTriggered = await dispatchMetaWorker/)
 })
 
 test('correctness does not depend on the hand-off surviving', () => {
   // Even with every hand-off lost, the cron reaper must finish the batch.
-  assert.match(worker, /the per-minute cron reaper in\s*\/\/ background-worker revives any batch whose heartbeat goes stale/)
+  assert.match(background, /reapStalledMetaSyncBatches/)
+  assert.match(background, /meta_sync_stalled_batches/)
 })
 
 // ── Root cause 3: abandoned claims burned real retry attempts ───────────────
 test('items claimed but never processed are released without consuming an attempt', () => {
-  assert.match(durable, /create or replace function public\.meta_sync_release_items/)
-  assert.match(durable, /attempts = greatest\(0, item\.attempts - 1\)/)
-  assert.match(worker, /const abandoned = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
-  assert.match(worker, /meta_sync_release_items/)
+  assert.match(fencing, /create or replace function public\.meta_sync_release_claims/)
+  assert.match(fencing, /attempts = greatest\(0, item\.attempts - 1\)/)
+  assert.match(worker, /const abandoned = \[\.\.\.claimedLeases\.entries\(\)\]/)
+  assert.match(worker, /meta_sync_release_claims/)
 })
 
 test('supabase query builders are never given a .catch() handler', () => {
@@ -103,12 +110,13 @@ test('a Meta rate limit backs off instead of failing the remaining clients', () 
   // Waiting must not spend the no-progress budget.
   assert.match(cooldown, /recovery_attempts = 0/)
   assert.match(worker, /const rateLimited = processed\.some/)
-  assert.match(worker, /meta_sync_begin_cooldown/)
+  assert.match(worker, /meta_sync_begin_lane_cooldown/)
 })
 
 test('a client failed only because of throttling is requeued, not left failed', () => {
-  assert.match(worker, /p\.status === 'failed' && \/rate\.\?limit\/i\.test/)
-  assert.match(worker, /has not really\s*\/\/ failed/)
+  assert.match(worker, /isMetaRateLimitError/)
+  assert.match(worker, /p_refund_attempt: refundAttempt/)
+  assert.match(fencing, /p_refund_attempt then greatest\(0, attempts - 1\)/)
 })
 
 // ── Restart must confirm a worker actually ran ──────────────────────────────
@@ -138,7 +146,7 @@ test('recovery resumes the existing batch and never creates another', () => {
   // The reaper only ever POSTs an existing batchId; it has no insert path.
   const start = background.indexOf('async function reapStalledMetaSyncBatches')
   const reaper = background.slice(start, background.lastIndexOf('return out'))
-  assert.match(reaper, /body: JSON\.stringify\(\{ batchId: row\.batch_id \}\)/)
+  assert.match(reaper, /dispatchMetaWorker[\s\S]*batchId: row\.batch_id/)
   assert.doesNotMatch(reaper, /\.insert\(/, 'the reaper must never create a batch')
 })
 
@@ -147,6 +155,60 @@ test('claiming stays atomic so two workers cannot take the same item', () => {
   // The claim RPC locks with FOR UPDATE SKIP LOCKED — the guarantee against
   // duplicate reports when the reaper and a hand-off overlap.
   assert.match(worker, /p_batch_id: body\.batchId \?\? null/)
+})
+
+test('healthy batches use bounded flat worker lanes instead of serial or recursive fan-out', () => {
+  assert.match(lanes, /DEFAULT_META_WORKER_LANES = 4/)
+  assert.match(lanes, /MAX_META_WORKER_LANES = 6/)
+  assert.match(worker, /startsLaneSet/)
+  assert.match(worker, /Array\.from\(\{ length: workerLanes - 1 \}/)
+  assert.match(worker, /dispatchMetaWorker\(workerUrl, workerSecret/)
+  assert.match(lanes, /Math\.min\(requested, MAX_META_WORKER_LANES\)/)
+  // Atomic SKIP LOCKED claiming remains the duplicate-protection boundary.
+  assert.match(hardening, /for update skip locked/i)
+})
+
+test('only initial durable drivers create a lane set', () => {
+  assert.match(enqueue, /JSON\.stringify\(\{ batchId, maxItems: 1, startLanes: true \}\)/)
+  assert.match(background, /JSON\.stringify\(\{ batchId, startLanes: true \}\)/)
+  assert.match(background, /dispatchMetaWorker[\s\S]*batchId: row\.batch_id/)
+  assert.doesNotMatch(worker, /startLanes:\s*true/, 'child continuations must never start another lane set')
+  assert.match(worker, /meta_sync_begin_lane_set/)
+  assert.match(worker, /batchLaneSetAlreadyStarted/)
+  assert.match(worker, /if \(!mayStartLaneSet\) \{[\s\S]*laneSetAlreadyStarted: true/)
+  assert.ok(worker.indexOf('laneSetAlreadyStarted: true') < worker.indexOf('while (claimCount < MAX_CHUNKS)'),
+    'a denied repeated root must return before claiming work')
+  assert.ok(worker.indexOf('await batchLaneSetAlreadyStarted') < worker.indexOf('Fetch page token map once per invocation'),
+    'already-started roots must return before repeating page-token discovery')
+  assert.match(parallelSafety, /parallel_lanes_started_at/)
+  assert.match(parallelSafety, /not \(coalesce\(batch\.summary, '\{\}'::jsonb\) \? 'parallel_lanes_started_at'\)/)
+})
+
+test('lane inputs, missing secrets, and child responses fail closed', () => {
+  assert.match(lanes, /workerLane must be an integer when provided/)
+  assert.match(lanes, /workerLanes must be an integer when provided/)
+  assert.match(lanes, /A child lane cannot start another lane set/)
+  assert.match(dispatch, /if \(!workerSecret\.trim\(\)\) return false/)
+  assert.match(dispatch, /return response\.ok/)
+})
+
+test('active cooldown stops new claims and lane handoffs', () => {
+  assert.match(worker, /await batchIsCoolingDown\(sb, body\.batchId\)/)
+  assert.match(worker, /workRemaining && !waitingForRateLimit/)
+  assert.match(worker, /waitingForRateLimit,/)
+})
+
+test('rate-limited facts stay resumable without resetting unrelated platform failures', () => {
+  assert.match(sharedMeta, /MetaFactRetryableError/)
+  assert.match(sharedMeta, /p_terminal: terminal/)
+  assert.match(fencing, /completed_metric_keys/)
+  assert.doesNotMatch(fencing.slice(fencing.indexOf('create or replace function public.meta_sync_settle_item')),
+    /facebook_sync_state\s*=|instagram_sync_state\s*=/)
+})
+
+test('parallel batch recalculation is serialized on the parent row', () => {
+  assert.match(parallelSafety, /from public\.meta_sync_batches[\s\S]*for update/)
+  assert.match(parallelSafety, /create or replace function public\.recalculate_batch_status/)
 })
 
 test('the reaper cannot stampede: it is bounded and skips live batches', () => {
@@ -177,8 +239,8 @@ test('the handler can never return a bare 500 with no diagnostics', () => {
   assert.match(handler, /\} catch \(error\) \{/)
   assert.match(handler, /Meta sync worker failed: \$\{detail\}/)
   // A crash must hand back whatever it was holding, or the items are stranded.
-  assert.match(handler, /const stranded = \[\.\.\.claimedIds\]\.filter\(id => !settledIds\.has\(id\)\)/)
-  assert.match(handler, /crashClient\.rpc\('meta_sync_release_items'/)
+  assert.match(handler, /const stranded = \[\.\.\.claimedLeases\.entries\(\)\]/)
+  assert.match(handler, /crashClient\.rpc\('meta_sync_release_claims'/)
 })
 
 test('a throttled page-token request processes NOTHING rather than failing every client', () => {
@@ -188,7 +250,8 @@ test('a throttled page-token request processes NOTHING rather than failing every
   // failed this way in production for what was only a temporary throttle.
   const guard = worker.slice(worker.indexOf('Do not process anything without page tokens'), worker.indexOf('Process items in chunks'))
   assert.match(guard, /if \(pageTokenRateLimited\) \{/)
-  assert.match(guard, /meta_sync_begin_cooldown/)
+  assert.match(guard, /meta_sync_begin_lane_cooldown/)
+  assert.match(worker, /res\.status === 429/)
   assert.match(guard, /waitingForRateLimit: true/)
   assert.match(guard, /workerRan: false/)
   // Crucially it returns BEFORE the claim loop, so nothing is claimed at all.

@@ -1,2 +1,6 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+.gitignore text eol=lf
+*.sql text eol=lf
+*.json text eol=lf
+*.ts text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf

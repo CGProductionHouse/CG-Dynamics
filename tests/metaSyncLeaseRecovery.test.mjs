@@ -22,6 +22,10 @@ const hardeningMigration = readFileSync(
   new URL('../supabase/migrations/20260801170000_backend_acceptance_hardening.sql', import.meta.url),
   'utf8',
 )
+const fencingMigration = readFileSync(
+  new URL('../supabase/migrations/20260825190000_meta_sync_fencing_and_idempotency.sql', import.meta.url),
+  'utf8',
+)
 
 test('claim RPC requeues expired worker leases before claiming rows', () => {
   assert.match(migration, /i\.status = 'running'/)
@@ -90,8 +94,8 @@ test('shared account facts stop resumably between probes and cap every retry to 
 
 test('worker passes its safe deadline and requeues the distinct connector deadline', () => {
   assert.match(worker, /deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS/g)
-  assert.match(worker, /e instanceof MetaSyncDeadlineError[\s\S]*throw new RetryableIncompleteError\(e\.message\)/)
-  assert.match(worker, /e instanceof RetryableIncompleteError && item\.attempts < 3[\s\S]*itemStatus = 'queued'/)
+  assert.match(worker, /e instanceof MetaSyncDeadlineError[\s\S]*throw new RetryableIncompleteError\(e\.message, true\)/)
+  assert.match(worker, /e instanceof RetryableIncompleteError && \(item\.attempts < 3 \|\| isMetaRateLimitError[\s\S]*itemStatus = 'queued'/)
 })
 
 test('worker resumes from safe per-platform cursors and clears them on page completion', () => {
@@ -100,14 +104,14 @@ test('worker resumes from safe per-platform cursors and clears them on page comp
   assert.match(hardeningMigration, /length\(facebook_next_cursor\) between 1 and 4096/)
   assert.match(worker, /requestUrl\.searchParams\.set\('after', nextCursor\)/)
   assert.match(worker, /savePlatformState\('facebook', complete \? 'facts_pending' : 'pending', cursor, pagePostsSynced\)/)
-  assert.match(worker, /savePlatformState\('instagram', complete \? 'facts_pending' : 'pending', cursor, pagePostsSynced\)/)
-  assert.match(worker, /processPage[\s\S]*checkpoint\(candidateCursor, !nextUrl, pagePostsSynced\)/)
+  assert.match(worker, /'instagram', complete \? 'facts_pending' : 'pending', cursor,[\s\S]*instagramOldestTimestamp/)
+  assert.match(worker, /processPage[\s\S]*checkpoint\(stopAfterPage \? null : candidateCursor, !nextUrl \|\| stopAfterPage, pagePostsSynced\)/)
 })
 
 test('posts_synced advances atomically only with a completed page checkpoint', () => {
-  assert.match(worker, /const pagePostsSynced = await processPage[\s\S]*await checkpoint\(candidateCursor, !nextUrl, pagePostsSynced\)/)
-  assert.match(worker, /const checkpointedPostsSynced = postsSynced \+ completedPagePosts[\s\S]*posts_synced: checkpointedPostsSynced/)
-  assert.match(worker, /if \(error\) throw new Error[\s\S]*postsSynced = checkpointedPostsSynced/)
+  assert.match(worker, /const processedPage = await processPage[\s\S]*await checkpoint\(stopAfterPage \? null : candidateCursor/)
+  assert.match(worker, /meta_sync_checkpoint_item/)
+  assert.match(fencingMigration, /posts_synced = posts_synced \+ greatest/)
   assert.doesNotMatch(worker, /postsSynced\+\+/)
 })
 

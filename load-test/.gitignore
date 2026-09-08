@@ -1,0 +1,8 @@
+# Local-only environment file (copy from local.env.example)
+local.env
+
+# Interim result files
+results-*.json
+
+# Temp query files
+tmp-*.sql

@@ -63,14 +63,6 @@ function describeDbError(err: DbErrorLike | null | undefined): string {
   return parts.length > 0 ? parts.join(' — ') : 'unknown database error'
 }
 
-// First day of the month AFTER the given YYYY-MM (used for an exclusive upper
-// bound when matching reports by period_end within a calendar month).
-function nextMonthStart(month: string): string {
-  const year = Number(month.slice(0, 4))
-  const monthIndex = Number(month.slice(5, 7)) // 1-12
-  return new Date(Date.UTC(year, monthIndex, 1)).toISOString().slice(0, 10)
-}
-
 function getPreviousMonthBounds(): { periodStart: string; periodEnd: string; month: string } {
   const now = new Date()
   const year = now.getUTCFullYear()
@@ -559,75 +551,23 @@ async function handleRequest(req: Request): Promise<Response> {
     const igToken = pageToken
 
     try {
-      // ── Find or create the monthly master report ───────
-      // Find an existing MASTER report (platform IS NULL) for this client whose
-      // period END falls inside the target calendar month, and reuse it.
-      //
-      // Meta-integrated reports must stay separate from old CSV/import reports,
-      // so we deliberately only reuse the platform-null master. Legacy
-      // per-platform reports (e.g. Facebook/Instagram CSV imports) are never
-      // reused — if no master exists we create a fresh platform-null master.
-      //
-      // NOTE: PostgREST `.eq('platform', null)` does NOT match NULL — it must be
-      // `.is('platform', null)`. The previous `.eq` always missed the existing
-      // master report and then hit the reports_master_unique constraint on
-      // insert, surfacing as the generic "Failed to create report".
-      const monthEndExclusive = nextMonthStart(month)
-      const { data: monthReports, error: findError } = await sb
-        .from('reports')
-        .select('id, platform, status, period_start, period_end, created_at')
-        .eq('client_id', client.clientId)
-        .is('platform', null)
-        .gte('period_end', periodStart)
-        .lt('period_end', monthEndExclusive)
-        .order('created_at', { ascending: false })
-
-      if (findError) {
-        throw new Error(
-          `Failed to look up existing report for ${client.clientName} (${client.clientId}) ` +
-          `${periodStart}..${periodEnd}: ${describeDbError(findError)}`,
-        )
-      }
-
-      // Reuse only a platform-null master report; ignore any legacy
-      // per-platform reports for the same month.
-      const existing = (monthReports ?? []).find(r => r.platform === null) ?? null
-
-      let reportId: string
-
-      if (existing) {
-        // Reuse — never overwrite strategy_data and never change status, so a
-        // published report stays published and a draft stays an internal draft.
-        reportId = existing.id
-        result.reportReused = true
-        reportsReused++
-      } else {
-        const reportTitle = `${client.clientName} ${monthLabel(month)} Report`
-        // Always full calendar-month bounds (e.g. 2026-05-01 .. 2026-05-31).
-        const { data: newReport, error: insertError } = await sb
-          .from('reports')
-          .insert({
-            client_id: client.clientId,
-            platform: null,
-            period_start: periodStart,
-            period_end: periodEnd,
-            status: 'draft',
-            report_title: reportTitle,
-            created_by: user.id,
-          })
-          .select('id')
-          .single()
-
-        if (insertError || !newReport) {
-          throw new Error(
-            `Failed to create report for ${client.clientName} (${client.clientId}) ` +
-            `${periodStart}..${periodEnd}: ${describeDbError(insertError)}`,
-          )
-        }
-        reportId = newReport.id
-        result.reportCreated = true
-        reportsCreated++
-      }
+      // ── Atomically acquire the monthly master report ───────
+      const { data: reportRows, error: reportError } = await sb.rpc('meta_sync_get_or_create_report', {
+        p_item_id: null,
+        p_lease_generation: null,
+        p_client_id: client.clientId,
+        p_month: periodStart,
+        p_report_title: `${client.clientName} ${monthLabel(month)} Report`,
+        p_created_by: user.id,
+      })
+      if (reportError) throw new Error(`Failed to acquire report for ${client.clientName}: ${describeDbError(reportError)}`)
+      const reportResult = Array.isArray(reportRows) ? reportRows[0] : reportRows
+      const reportId = reportResult?.report_id ? String(reportResult.report_id) : ''
+      if (!reportId) throw new Error(`Failed to acquire report for ${client.clientName}: missing report id`)
+      result.reportCreated = reportResult.created === true
+      result.reportReused = !result.reportCreated
+      if (result.reportCreated) reportsCreated++
+      else reportsReused++
 
       result.reportId = reportId
       steps.push(`${client.clientName}: report ${result.reportCreated ? 'created' : 'reused'}`)

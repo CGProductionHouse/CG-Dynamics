@@ -4,6 +4,7 @@ import test from 'node:test'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const sql = read('../supabase/migrations/20260801170000_backend_acceptance_hardening.sql')
+const fencing = read('../supabase/migrations/20260825190000_meta_sync_fencing_and_idempotency.sql')
 const backgroundWorker = read('../supabase/functions/background-worker/index.ts')
 const metaWorker = read('../supabase/functions/meta-sync-worker/index.ts')
 const assistantChat = read('../supabase/functions/cg-assistant-chat/index.ts')
@@ -120,7 +121,7 @@ test('Meta worker checkpoints safe cursors and resumes both platforms within its
   assert.match(metaWorker, /requestTimeoutMs/)
   assert.match(metaWorker, /requestUrl\.searchParams\.set\('after', nextCursor\)/)
   assert.match(metaWorker, /safePagingCursor\(page\.paging\?\.cursors\?\.after\)/)
-  assert.match(metaWorker, /await processPage[\s\S]*await checkpoint\(candidateCursor, !nextUrl, pagePostsSynced\)/)
+  assert.match(metaWorker, /await processPage[\s\S]*await checkpoint\(stopAfterPage \? null : candidateCursor, !nextUrl \|\| stopAfterPage, pagePostsSynced\)/)
   assert.match(metaWorker, /fetchMetaCollection\([\s\S]*Facebook posts fetch/)
   assert.match(metaWorker, /fetchMetaCollection\([\s\S]*Instagram media fetch/)
   assert.match(metaWorker, /facebookCursor,[\s\S]*'Facebook posts fetch'/)
@@ -129,7 +130,7 @@ test('Meta worker checkpoints safe cursors and resumes both platforms within its
   assert.match(metaWorker, /providerPaging\.facebook/)
   assert.match(metaWorker, /providerPaging\.instagram/)
   assert.match(metaWorker, /RetryableIncompleteError/)
-  assert.match(metaWorker, /e instanceof RetryableIncompleteError && item\.attempts < 3/)
+  assert.match(metaWorker, /e instanceof RetryableIncompleteError && \(item\.attempts < 3 \|\| isMetaRateLimitError/)
   assert.match(metaWorker, /itemStatus = 'queued'/)
   assert.match(metaWorker, /Incomplete pagination exhausted 3 bounded attempts/)
   assert.match(metaWorker, /assertWorkBudget\(invocationDeadline, 'Facebook post upserts'\)/)
@@ -137,6 +138,8 @@ test('Meta worker checkpoints safe cursors and resumes both platforms within its
   assert.match(metaWorker, /assertWorkBudget\(invocationDeadline, 'Facebook account facts'\)/)
   assert.match(metaWorker, /assertWorkBudget\(invocationDeadline, 'Instagram account facts'\)/)
   assert.match(metaWorker, /!TERMINAL_META_STATES\.has\(facebookState\) \|\| !TERMINAL_META_STATES\.has\(instagramState\)/)
+  assert.match(fencing, /lease_generation = item\.lease_generation \+ 1/)
+  assert.match(fencing, /create or replace function public\.meta_sync_checkpoint_item/)
 })
 
 test('service-role Edge Functions reject inactive profiles and manual Meta sync is manager-only', () => {

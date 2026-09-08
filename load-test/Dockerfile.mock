@@ -1,0 +1,8 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY mock-meta-server.cjs ./
+RUN mkdir -p /data
+VOLUME ["/data"]
+ENV MOCK_DIR=/data
+EXPOSE 54325
+CMD ["node", "mock-meta-server.cjs"]
