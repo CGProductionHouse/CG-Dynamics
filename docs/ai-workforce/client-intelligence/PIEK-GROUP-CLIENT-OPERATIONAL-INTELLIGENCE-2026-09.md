@@ -1,573 +1,1153 @@
-# Piek Group — Client Operational Intelligence
+# Piek Group — Canonical Client Record
 
-Last updated: 2026-09-08
-Canonical CG client: **Piek Group**
-Public/company style observed: **Piek Group of Companies**
-Status: **Reviewed ChatGPT Project migration source of truth. Mutable facts remain freshness-gated under `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`.**
-Scope: Piek Group only, including its Engen-, Sasol- and Get Together-related operating/content entities. This file does not create separate CG client IDs and does not merge distinct public brands, sites or branch identities.
+Canonical CG client: **Piek Group**  
+Public/company style: **Piek Group of Companies**  
+Record purpose: **Permanent human CG source of truth for future Piek Group marketing/content work**  
+Human Project knowledge last reviewed: **2026-09-08**  
+Mutable public facts last verified: **2026-09-08**  
+Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
-## 1. Provenance and freshness legend
+> **Permanent-record note:** the dated `2026-09` filename is retained for repository/reference continuity from the original migration. This file is **not** a September 2026 snapshot. Future Piek updates should modify this same canonical record and update the review/verification dates above rather than creating a new dated Piek file.
 
-Provenance used below:
+## 1. What this record is
 
-- `public_verified` — verified against a current/reachable official website, official brand locator, official partner page or strong current public listing on 2026-09-08;
-- `client_confirmed` — supplied in the Piek Group ChatGPT Project, Project business-information PDFs or standing client content instructions;
-- `CA_CG_confirmed_internal` — explicit correction or durable operating preference given by CA/CG in Project conversation history;
-- `historical` — previously documented or still visible on an older source, but not safe to treat as the current operating truth without revalidation;
-- `uncertain_inferred` — plausible relationship or third-party evidence exists, but no sufficient Piek-specific confirmation was found.
+This is the durable human operating record for Piek Group. It captures what CG has learned from the Piek ChatGPT Project, client-supplied business-information files, repeated CA/CG corrections and current public verification.
 
-Freshness states follow the canonical protocol:
+It is **not** an AI marketing strategy, campaign plan, caption archive or promotion log.
 
-- `current_verified`
-- `possible_change`
-- `stale_unverified`
-- `historical`
-- `rejected`
+Use it to answer:
 
-Do not flatten these categories. A client-confirmed production convention may coexist with a public-source conflict and must remain auditable.
+- what the client is;
+- which brands and branches belong in the Piek content ecosystem;
+- how each brand should sound;
+- what wording and visual approaches the client repeatedly accepts or rejects;
+- what details must be included in captions;
+- which branches have different partners/services;
+- what historical context matters;
+- which public facts can change and must be rechecked.
 
-## 2. Canonical identity and operating model
+Do not migrate every old caption, temporary competition, expired promotion, old menu price or one-off image-edit instruction into permanent knowledge.
 
-### Canonical client identity
+## 2. Source and authority rules
 
-- CG canonical client name: **Piek Group** — `client_confirmed`, current for this migration.
-- Public/company website style: **Piek Group of Companies** — `public_verified` at `https://www.piekgroup.co.za/`.
-- Historical/alternate matching forms include `PIEK GROUP` and `Piek Group of Companies`.
-- Do **not** use `https://www.piekgroup.com/` as this client's website. That domain currently presents a separate property/financial-technology/software/investment group and is not proven to be the fuel/retail Piek Group represented by this client.
+### Human knowledge authority
 
-### Operating model
+For tone, wording, layout/content preferences and production conventions, use this order:
 
-Piek Group is a family-led fuel, convenience, food and property/service-station operating group whose service stations sit within the national Engen and Sasol networks. The official site describes national oil-company promotions as one layer of marketing, with site-specific local-community marketing and ancillary convenience/food partners as another layer.
+1. newest explicit client/CA/CG instruction;
+2. repeated corrections in the Piek Project;
+3. client-provided Piek business-information source files;
+4. this canonical record.
 
-Durable positioning:
+### Mutable public facts
 
-> A multi-site operator built around dependable forecourt service, fuel, convenience retail, food/coffee partnerships and local community relevance.
+For addresses, phone numbers, emails, hours, partners, branch status and current services:
 
-Marketing must distinguish:
+1. newest direct client confirmation;
+2. current official Piek/Get Together/Engen/Sasol/partner source;
+3. current official social or verified business listing;
+4. older Piek website pages;
+5. old Project files.
 
-1. the **Piek Group** umbrella;
-2. individual **Engen** sites;
-3. individual **Sasol** sites;
-4. **Get Together** as its own restaurant/coffee-shop brand with multiple branches;
-5. site-specific partner brands such as Steers, Woolworths Foodstop, Corner Bakery, KAUAI, Wimpy and Col'Cacchio GO;
-6. PGC Convenience where publicly confirmed.
+Do not treat a fact as current merely because it appears in an old official Piek page. The Piek site still contains older location/site information and a 2015 copyright footer.
 
-Never imply that every site has the same food partner, convenience format, operating hours or service mix.
+### Provenance labels
 
-## 3. Group-level contact truth
+- `client_confirmed` — supplied directly in Project instructions or client source files;
+- `CA_CG_confirmed` — repeated or explicit CA/CG correction in Project work;
+- `public_verified` — checked against a current/reachable authoritative public source;
+- `historical` — previously true or useful historical context, but not current by default;
+- `possible_change` — conflicting evidence exists and a future freshness check is required;
+- `stale_unverified` — not recently confirmed;
+- `rejected` — wrong identity, unsupported claim or wording/approach CG should not repeat.
 
-| Fact | Reviewed value | Provenance | State | Notes |
-|---|---|---|---|---|
-| Website | `https://www.piekgroup.co.za/` | `public_verified` + `client_confirmed` | `current_verified` | Official Piek Group of Companies website reachable on 2026-09-08. |
-| Head-office address | c/o Nelson Mandela & Melville Drive, Bloemfontein, Free State, South Africa | `public_verified` + `client_confirmed` | `current_verified` | Official contact page and Project PDF agree. |
-| Main phone | `+27 51 444 3178` | `public_verified` + `client_confirmed` | `current_verified` | Official site shows `+27 (0)51 444 3178/9`; Project production rule uses `+27 51 444 3178`. |
-| Public website email | `admin@piekgroup.co.za` | `public_verified` | `current_verified` | Official contact page. |
-| Client-approved caption email | `info@piekgroup.com` | `client_confirmed` | `possible_change` | Repeated in Project PDFs and standing content rules, but the `.com` domain currently resolves to an apparently unrelated Piek Group and also advertises `info@piekgroup.com`. Do not silently replace this client-approved string, but re-confirm ownership before operational email use or any future rule change. |
-| Website-domain lookalike | `https://www.piekgroup.com/` | `public_verified` | `rejected` | Separate property/FinTech/software/investment group; do not use as this client's website. |
-| Head-office hours | not verified | — | `stale_unverified` | No authoritative current hours found. |
-| Piek Group Facebook/Instagram | not authoritatively verified | — | `stale_unverified` | Search did not produce a first-party Piek Group social profile that could be confidently matched to this client. Do not invent handles. |
+## 3. Client structure: keep the identities separate
 
-### Current production contact convention
+Piek Group is the canonical CG client umbrella. It operates and markets multiple customer-facing fuel, convenience and food entities.
 
-The standing Project posting rule is:
-
-`info@piekgroup.com` · `+27 51 444 3178` · `www.piekgroup.co.za`
-
-This remains **client-confirmed content guidance**, but the email conflict above must remain visible to future agents. Never convert the website to `.com` merely because the caption email uses `.com`.
-
-## 4. Current client-confirmed fuel-site roster
-
-The 2026 Project instructions define the active content roster as six Engen sites and four Sasol sites. This roster overrides the visibly old/incomplete site directory on the Piek website for content planning, while each branch's mutable public facts still require branch-level verification.
-
-### Engen content entities
-
-1. **Engen Northridge**
-2. **Engen Crossing**
-3. **Engen Batho**
-4. **Engen Oliver Road Kimberley**
-5. **Engen Paarl Village**
-6. **Engen One Stop De Doorns**
-
-### Sasol content entities
-
-1. **Sasol Langenhoven Park**
-2. **Sasol Technikon**
-3. **Sasol 1st Avenue**
-4. **Sasol Kroonstad**
-
-Do not add old Piek-site names to current caption location lists unless the client confirms them again.
-
-## 5. Engen branch matrix
-
-### Engen Northridge
-
-- Client-facing name: **Engen Northridge** — `client_confirmed`, current.
-- Public locator variant: **Engen North Ridge Convenience Centre / Engen Bloemfontein North Ridge** — `public_verified`.
-- Address: Cnr Kenneth Kaunda Road & Christo Groenewald Street, Helicon Heights, Bloemfontein, 9301 — `public_verified`.
-- Phone: `051 433 1357` — `public_verified`.
-- Steers at North Ridge — `public_verified` through current Steers location data.
-- Woolworths Foodstop has current supporting marketplace evidence and historical local opening evidence, but a first-party Woolworths locator was not independently verified in this migration — treat branch-specific Woolworths wording as `possible_change` unless client confirmation is being relied on.
-- Project history states the site was newly/recently renovated in August 2026 — `CA_CG_confirmed_internal`, useful 2026 historical context; re-check before using “newly renovated” later.
-- Hours: station listings indicate continuous operation, but malformed `00:00–00:00` directory formatting means exact 24-hour wording should still be checked immediately before an hours claim.
-
-### Engen Crossing
-
-- Public name: **Engen Crossing / Engen Crossing Quick Stop** — `public_verified`.
-- Address: c/o Nelson Mandela & Melville Drive, Brandwag, Bloemfontein — `public_verified`.
-- Phone: `051 444 3178` (official Piek page also shows `/9`) — `public_verified`.
-- Piek-site facilities include fuel, convenience store, Woolworths Food Stop, Corner Bakery, Steers, Get Together and ATM — `public_verified` from official Piek page, observed 2026-09-08 but page architecture is old.
-- Steers Engen Crossing is independently current and listed open 24 hours — `public_verified` through current Steers locator.
-- Get Together Crossing is independently current on the Get Together website — `public_verified`.
-- This is the strongest multi-brand example for fuel + food + convenience umbrella content.
-
-### Engen Batho
-
-- Public name: **Engen Batho / Engen Batho Convenience Centre** — `public_verified`.
-- Address: c/o Fort Hare Road & Hamilton Road, Batho, Bloemfontein — `public_verified`.
-- Phone: `051 432 2115` — `public_verified`.
-- Official Piek page lists Corner Bakery and Steers, but **not Woolworths Foodstop** — important correction to the old blanket Engen PDF statement.
-- Current Steers location directory confirms Engen Bloemfontein Batho and 24-hour Steers trading — `public_verified`.
-
-### Engen Oliver Road Kimberley
-
-- Public name: **Engen Oliver Road / Engen Oliver Road Convenience** — `public_verified`.
-- Address: Corner Oliver Road & Ashe Street, Klisserville, Kimberley, Northern Cape — `public_verified`.
-- Phone: `053 492 3268` — `public_verified`.
-- Email: `oliverroad@piekgroup.co.za` — official Piek page, `public_verified` but mutable.
-- Official Piek page lists PGC Convenience Store, Get Together Coffee Shop, Steers, KAUAI and ABSA ATM — `public_verified` from the Piek site, with normal freshness caution because the page is old in design/content maintenance.
-- **Col'Cacchio GO Oliver Road** opened at Engen Oliver Road Convenience, with an official launch on **23 May 2026**. Col'Cacchio identifies Philip Piek, Retail & Property Development Manager, Piek Group of Companies, as the new franchise partner — `public_verified` from current Col'Cacchio company communication.
-- Col'Cacchio GO is site-specific. Do not generalise it to other Piek locations.
-- Get Together Oliver Road/Kimberley is a current third Get Together branch — `public_verified`.
-
-### Engen Paarl Village
-
-- Public name: **Engen Paarl Village / Engen Paarl Village Convenience Centre** — `public_verified`.
-- Address: c/o Brug & Dorp Street, Paarl, Western Cape — `public_verified`.
-- Phone: `021 863 0071` — `public_verified`.
-- Official Piek page lists Woolworths Food Stop and Corner Bakery; it does **not** list Steers — branch-specific correction to the old blanket Engen rule.
-
-### Engen One Stop De Doorns
-
-- Client-facing current content name: **Engen One Stop De Doorns** — `client_confirmed`.
-- Current public aliases: **Engen 1 Stop** and **Engen Grape Valley Convenience Centre** — `public_verified`.
-- These aliases refer to the De Doorns site and should not be treated as two separate Piek locations.
-- Address: Voortrekker Road, De Doorns, Western Cape, 6875 — `public_verified`; some current restaurant data specifies `3 Voortrekker St`.
-- Phone: `023 356 2172` — `public_verified`.
-- Current official Wimpy location data verifies **Wimpy Engen De Doorns / Engen Grape Valley Convenience Centre**, with Wimpy hours 06:00–22:00 daily — `public_verified`.
-- No evidence in this migration supports a blanket Steers + Woolworths claim for this branch.
-- Station hours remain `stale_unverified`; do not infer the station's trading hours from the restaurant's hours.
-
-### Engen network rule correction
-
-The January 2026 `ENGEN_BUSINESS_INFO.pdf` says each Piek Engen station provides 24/7 access to Woolworths and Steers. That wording is **not safe as a universal branch fact**. Current branch evidence shows materially different partner mixes.
-
-Production rule:
-
-> Mention Steers, Woolworths, Get Together, KAUAI, Wimpy, Corner Bakery, PGC Convenience or Col'Cacchio only where the specific branch relationship is verified or the client has explicitly confirmed that exact site.
-
-The older instruction “mention Steers and Woolworths are available at the stations” remains historical client content guidance but must not override verified branch differences.
-
-## 6. Sasol branch matrix
-
-### Sasol Langenhoven Park
-
-- Address: Jan Spies / Cnr Jan Spies & Maretha Maartens Street, Langenhoven Park, Bloemfontein — `public_verified`.
-- Current public phone: **`051 446 2872`** — current public listings, including Samba and fresh local listing data.
-- Old Piek-site phone: `051 446 3025` — `possible_change`; the Piek page is reachable but conflicts with newer public data.
-- Official Piek page lists fuel, Sasol Delight, Sasol Bakery, car wash and ATM; it does **not** list KAUAI.
-- Current public listings indicate 24-hour station operation, but re-check before publishing exact hours.
-
-### Sasol Technikon
-
-- Public name variants include **Sasol Technikon** and `SASOL TECHNICON` in a current retailer directory.
-- Address: President Boshoff Street / c/o President Boshoff Street & Park Road, Parkwest/Willows, Bloemfontein — `public_verified`.
-- Phone: `051 448 4553` — `public_verified`.
-- Email: `technikon@piekgroup.co.za` — official Piek page, mutable.
-- Official Piek page lists Sasol Delight, Sasol Bakery, Europcar, Get Together Coffee Shop, car wash and ABSA ATM.
-- **Get Together Technikon** is independently current on the Get Together website.
-- No current authoritative evidence found in this migration proves KAUAI at Sasol Technikon.
-
-### Sasol 1st Avenue
-
-- Public name: **Sasol First Avenue Service Station / Sasol 1st Avenue**.
-- Address: 6 First Avenue, Willows, Bloemfontein — current retailer directory; old Piek page describes First Avenue, Westdene. Treat locality formatting as mutable and prefer the current geocoded/retailer address for navigation.
-- Phone: `051 430 3492` — `public_verified` and consistent with the older Piek page.
-- Old Piek page lists Sasol Delight, Sasol Bakery, car wash, ATM and E-Fuel.
-- No current authoritative evidence found in this migration proves KAUAI at Sasol 1st Avenue.
-
-### Sasol Kroonstad
-
-- Client-confirmed current Piek content entity: **Sasol Kroonstad**.
-- Current address evidence: Corner Du Toit & Van Zyl Street, Kroonheuwel/Noordhoek, Kroonstad; KAUAI's current locator also formats the site as Sasol Kroonstad, R76, Kroonstad Rural, 9500. Preserve this address discrepancy as `possible_change` for exact map/postal use.
-- Phone: `056 492 0999` — `public_verified` across current KAUAI/Steers/retailer sources.
-- **KAUAI Sasol Kroonstad** — `public_verified`; current KAUAI hours 07:00–21:00 daily as observed 2026-09-08.
-- **Steers Sasol Kroonstad** — `public_verified`; current Steers listings show 08:00–21:00 daily.
-- Do not use KAUAI/Steers restaurant hours as proof of the entire Sasol station's hours.
-
-### Sasol network rule correction
-
-The standing Project rule says “always mention Kauai is available at Sasol.” Public verification in this migration supports KAUAI at **Sasol Kroonstad**, but the older official Piek pages for Langenhoven Park, Technikon and First Avenue do not list KAUAI and no newer first-party evidence was found for those three branches.
-
-Production rule:
-
-> Treat “KAUAI at Sasol” as a brand-level/client content theme, not a branch-universal fact. When naming a specific Sasol location, verify KAUAI at that location first.
-
-## 7. Get Together — separate restaurant/coffee-shop brand
-
-### Identity and current branch structure
-
-Get Together must not be reduced to a generic convenience counter. CA/CG explicitly corrected it as a **restaurant**, and the official Get Together website describes it as both a coffee shop/eatery and a special restaurant/gathering place that hosts functions.
-
-Current official website says there are **three branches**:
-
-1. **Get Together Crossing** — at/associated with Engen Crossing, Bloemfontein;
-2. **Get Together Technikon** — at/associated with Sasol Technikon, Bloemfontein;
-3. **Get Together Oliver Road Kimberley / Get Together Kimberley** — at Engen Oliver Road, Kimberley.
-
-The January 2026 `GET_TOGETHER_BUSINESS_INFO.pdf` lists only Crossing and Technikon. Preserve that two-branch roster as `historical`; the current official website supersedes it with three branches.
-
-### Current public contacts
-
-| Branch | Phone | Public email | Address | State |
-|---|---|---|---|---|
-| Get Together Crossing | `051 444 3178` | `gettogethercs@gmail.com` | Nelson Mandela Drive, Brandwag, Bloemfontein | `current_verified` |
-| Get Together Technikon | `051 448 5877` on current Get Together contact page; older Piek/Sasol site uses `051 448 4553` for the Sasol site | page body shows `gettogethercs@gmail.com`; footer shows `gettogethertech@gmail.com` | c/o Park Road & President Boshoff Street, Willows, Bloemfontein | `possible_change` for direct phone/email details because Get Together's own page is internally inconsistent |
-| Get Together Oliver Road Kimberley | `053 492 3268` | page body shows `gettogethercs@gmail.com`; footer shows `gettogetherkimberley@gmail.com` | c/o Oliver Road & Ashe Street, Klisserville, Kimberley 8301 | `possible_change` for branch-specific email; phone/address current verified |
-
-Official site: `https://gettogethercs.co.za/` — `current_verified`.
-
-### Social profiles
-
-- The official Get Together site links to a Facebook page under the **GetTogetherCoffeeShop** identity, but direct Facebook content could not be reliably fetched in this environment. Store as `stale_unverified` until direct first-party profile verification.
-- Current third-party web embeds reference Instagram **`@gettogethercoffee`**. This is useful supporting evidence but not enough to promote the handle to `current_verified` without direct profile access.
-
-### Durable positioning
-
-Official/client-confirmed positioning:
-
-- warm Free State hospitality;
-- restaurant/coffee-shop gathering place, not only a grab-and-go stop;
-- coffee, food and social connection;
-- family/friends/community;
-- functions and group occasions;
-- relaxed, farm-like/homey atmosphere;
-- traditional South African food cues alongside modern everyday meals;
-- current Project content also includes restaurant meals, coffee/rusks and client-confirmed wine/liqueur content; exact drinks/menu availability remains mutable and should be checked before specific claims.
-
-Do not use the old website menu PDF for current pricing or menu truth.
-
-## 8. Café365 and Brazmata
-
-### Café365
-
-Engen currently presents **Café365** as its own national “foodvenience” concept focused on convenient food/coffee and everyday service. This relationship to Engen is `public_verified`.
-
-However, this migration found **no authoritative Piek-specific evidence that Café365 is currently installed at any of the six Piek Engen branches**.
-
-Piek relationship state: `uncertain_inferred` / `stale_unverified`.
-
-### Brazmata
-
-Engen historical/current brand material shows **Brazmata coffee** as part of Engen's wider convenience/coffee ecosystem. This is evidence of an Engen-network relationship, not proof of a Piek-site relationship.
-
-This migration found **no authoritative Piek-specific evidence that Brazmata is currently operating at a named Piek Engen branch**.
-
-Piek relationship state: `uncertain_inferred` / `stale_unverified`.
-
-### Agent rule
-
-Do not write “Piek Group offers Café365/Brazmata” or include either in a branch caption until a named Piek site is client-confirmed or publicly verified.
-
-## 9. Other current, legacy and historical entities
-
-### PGC Convenience
-
-- Public Piek brand page describes **PGC Convenience** as a one-stop-shop concept.
-- Engen Oliver Road's Piek page lists **PGC Convenience Store**.
-- State: `current_verified` for the Piek brand relationship; branch-level use beyond Oliver Road requires separate verification.
-
-### Col'Cacchio GO
-
-- **Col'Cacchio GO Oliver Road** is a current site-specific partner at Engen Oliver Road Convenience, Kimberley.
-- Official launch: 23 May 2026.
-- State: `current_verified`.
-
-### Wimpy
-
-- Piek's older official “About” material lists Wimpy among partner operations — `historical` at group level.
-- Current official Wimpy location data verifies **Wimpy Engen De Doorns / Grape Valley** — `current_verified` for that branch.
-- Do not make Wimpy a universal Piek partner claim.
-
-### Engen Grape Valley
-
-- Old Piek site name and current Engen/Wimpy locator alias for the De Doorns station.
-- Treat as an alias/historical public name for **Engen One Stop De Doorns**, not a separate current content branch.
-
-### Engen Kollege
-
-- Still appears on the old Piek website, but not in the 2026 client-confirmed six-Engen content roster.
-- State: `historical` / `stale_unverified` for current Piek operations.
-- Do not add to current location lists without client confirmation.
-
-### Sasol Moshoeshoe
-
-- Still appears on the old Piek website, but not in the 2026 client-confirmed four-Sasol content roster.
-- State: `historical` / `stale_unverified` for current Piek operations.
-- Do not add to current location lists without client confirmation.
-
-### Historical Piek website counts
-
-The Piek background page says the group “is currently operating nine sites” and mentions four new outlets in development. Because the site is visibly old and the client-confirmed 2026 content roster alone contains ten fuel sites, **the nine-site count is historical/stale and must never be presented as current**.
-
-## 10. Durable content and tone rules
+Do **not** collapse these identities into one generic “Piek” brand when the public-facing content needs a specific station or restaurant identity.
 
 ### Piek Group umbrella
 
-Tone:
+Use **Piek Group** as the canonical CG client name.
 
-- friendly, welcoming and professional;
-- local/community-driven warmth;
-- trustworthy, consistent and dependable;
-- confident and clean;
-- UK English only;
-- no slang, gimmicky phrasing, exaggerated hype or influencer language;
-- do not mention unverified locations/services.
+Public website style is **Piek Group of Companies**.
 
-Core content pillars:
+Official fuel/retail website: `https://www.piekgroup.co.za/`
 
-- operational highlights;
-- brand/partner spotlights;
-- product assurance and quality standards;
-- community/CSR;
-- fuel + food + convenience ecosystem;
-- service reliability and customer assurance.
+Do **not** use `https://www.piekgroup.com/` for this client. That domain currently presents a separate property, FinTech, software and investment group and is a `rejected` identity match.
 
-Umbrella content should show the **actual operating businesses and customer journey**, not vague corporate statements. A useful historical correction from Project work: avoid abstract claims such as Piek “handled the fuel”; use concrete experiences such as fuel, food, coffee, convenience and service.
+### Current client-confirmed Engen content roster
 
-### Engen content
+1. Engen Northridge
+2. Engen Crossing
+3. Engen Batho
+4. Engen Oliver Road Kimberley
+5. Engen Paarl Village
+6. Engen One Stop De Doorns
 
-Tone:
+### Current client-confirmed Sasol content roster
 
-- friendly, clear and confident;
-- local/community-focused;
-- professional but accessible;
-- subtle CTA;
-- authoritative for fuel/service guidance;
-- lighter for engagement content;
-- reassuring for travel/late-night content.
+1. Sasol Langenhoven Park
+2. Sasol Technikon
+3. Sasol 1st Avenue
+4. Sasol Kroonstad
 
-Content pillars:
+### Current Get Together business roster
 
-- forecourt service and attendants;
-- windscreen cleaning and practical service moments;
-- fuel/convenience stops;
-- site-specific food/convenience partners;
-- local community support;
-- road-trip/quick-stop utility;
-- station improvements/renovations when current.
+Current official Get Together site confirms three branches:
 
-Project correction: **never mix Sasol branding into Engen creative**. A prior Engen design was explicitly corrected when Sasol was mentioned.
+1. Get Together Crossing
+2. Get Together Technikon
+3. Get Together Kimberley / Get Together Oliver Road Kimberley
 
-### Sasol content
+The January 2026 Get Together PDF lists only Crossing and Technikon. That two-branch list is `historical` and must not be used as the current business roster.
 
-Tone:
+### Other Piek-related entities
 
-- professional, friendly, community-focused;
-- modern optimism without hype;
-- helpful, reliable and educational;
-- UK English;
-- short, meaningful captions, historically capped at three short paragraphs.
+- PGC Convenience — confirmed Piek brand relationship; branch-level use is especially clear at Oliver Road.
+- Col'Cacchio GO Oliver Road — current site-specific partner at Engen Oliver Road.
+- Wimpy Engen De Doorns — current site-specific partner at Engen Grape Valley/One Stop De Doorns.
+- KAUAI Sasol Kroonstad — current site-specific partner.
+- Steers — present at several Piek sites, but not every Engen/Sasol branch.
+- Woolworths Foodstop — present at selected Engen branches, not universal.
+- Corner Bakery — present at selected Engen sites.
+- Café365 — Engen-network brand; no Piek-specific branch relationship verified on 2026-09-08.
+- Brazmata — Engen-network coffee brand; no Piek-specific branch relationship verified on 2026-09-08.
 
-Content pillars:
+Do not say Piek Group operates Café365 or Brazmata until a named Piek branch is confirmed.
 
-- fuel-saving and car-care education;
-- forecourt/service moments;
-- clean-site/visual storytelling;
-- current specials or loyalty only after freshness checks;
-- community/staff/customer content;
-- KAUAI/food partner content only where branch relationship is verified;
-- announcements and current hours/offer changes after verification.
+## 4. How CG should understand the client
 
-### Get Together content
+Piek Group is a local, multi-site operator in fuel, convenience, food and service.
 
-Tone:
+The client is not looking for detached corporate language. Their content repeatedly works best when it shows a real customer experience:
 
-- warm, welcoming and natural;
-- like inviting someone to a favourite local place;
-- clear and confident, not dramatic;
-- friendly without cheesy or influencer-style language;
-- inclusive use of “we”, “you” and “us”.
+- arriving at a station;
+- being helped by staff;
+- refuelling;
+- having a windscreen cleaned;
+- getting food or coffee;
+- using a convenience store;
+- stopping during a commute or road trip;
+- meeting at Get Together;
+- seeing a branch improvement, service or partner that is actually present.
 
-Visual/content preferences:
+The public-facing value is practical, everyday service rather than abstract corporate claims.
 
-- cinematic walkthroughs;
-- day-in-the-life moments;
-- coffee-pouring shots;
-- crisp food/snack/fridge/product shots;
-- short real staff/customer testimonial moments;
-- smooth, slower/cinematic transitions;
-- avoid excessive text overlays, stock footage, forced trend audio and flashy edits.
+### Audience
 
-## 11. Copy preferences and rejected approaches from Project history
-
-Durable CA/CG corrections:
-
-- Copy must feel **human, specific and natural**, not generic/corporate.
-- Keep social captions **short and straight to the point** when asked; avoid breaking one simple message into unnecessary sections.
-- Do **not** merely repeat the text already printed on the poster.
-- Avoid recycling overused generic words/phrases simply because they are grammatically safe.
-- If the instruction says remove all emojis, that includes contact-detail icons.
-- Use actual service detail instead of generic “quality service” filler.
-- Do not force branch-wide claims from umbrella-level brand relationships.
-- Do not assume every Engen has both Steers and Woolworths.
-- Do not assume every Sasol has KAUAI.
-- Do not call Get Together only a convenience coffee stop; it is also a restaurant/gathering/function brand.
-- Do not use stale promotion dates, old menu prices or historical branch counts as current.
-
-## 12. Audience model
-
-### Piek Group / fuel sites
-
-Primary audiences:
+Piek/Engen/Sasol content mainly speaks to:
 
 - everyday motorists and commuters;
-- long-distance travellers;
 - local neighbourhood customers;
+- long-distance travellers;
+- families and people combining fuel with food/convenience;
 - students and university/CUT communities around relevant Bloemfontein sites;
-- families and people combining fuel with food/convenience stops;
-- business/fleet users where fuel/service utility is relevant.
+- business/fleet customers where the content is specifically relevant.
 
-Buying/visit drivers:
-
-- reliable refuelling;
-- speed and convenience;
-- friendly attendant service;
-- clean and safe-feeling stops;
-- food/coffee while travelling;
-- trusted partner brands;
-- practical one-stop errands;
-- local familiarity.
-
-### Get Together
-
-Primary audiences:
+Get Together additionally speaks to:
 
 - local diners;
 - coffee customers;
-- friends/families meeting socially;
-- students around Technikon/CUT;
-- travellers at Crossing/Oliver Road;
-- function/group customers;
-- customers looking for a familiar, relaxed South African restaurant atmosphere.
+- friends and families meeting socially;
+- students around the Technikon/CUT area;
+- travellers at Crossing and Oliver Road;
+- group/function customers;
+- people looking for a relaxed restaurant/coffee-shop meeting place.
 
-## 13. Operational rhythms and planning lessons
+## 5. Cross-brand copy standard — the most important human lesson
 
-Durable patterns rather than temporary campaigns:
+### The copy must feel human
 
-- Multi-brand content requires **branch mapping before ideation**: first choose Piek/Engen/Sasol/Get Together, then exact location, then verify partner/service availability.
-- Piek's own public positioning supports combining national oil-company programmes with local site-specific community content.
-- Partner promotions are mutable and should be freshness-checked at campaign time.
-- Engen/Sasol location lists are standing content requirements, but the underlying operational roster can change; re-check before major campaigns or after openings/closures.
-- Renovations/new partner launches are valuable content moments but become historical quickly.
-- Current example: Col'Cacchio GO Oliver Road is a 2026 launch, useful as a current partnership story but not a permanent “new opening” claim.
-- Exact monthly package quantities/deliverable counts were **not verified in the accessible Piek Project sources**. Do not invent quantities from posting history.
+The strongest repeated CA/CG instruction is that Piek copy must not read like generic advertising.
 
-## 14. Mutable facts requiring a freshness check before use
+Prefer:
 
-Always re-check before publishing or acting on:
+- clear everyday wording;
+- a specific service or product;
+- a line that sounds like something a real person would say;
+- short, confident phrasing;
+- local relevance where it genuinely exists;
+- a natural supporting subtitle.
 
-- every branch's opening hours;
-- current branch phone/email where a conflict exists;
-- current manager/staff names and mobile numbers;
-- current fuel grades and product naming;
-- partner presence at each branch;
-- current Steers/Woolworths/KAUAI/Wimpy/Col'Cacchio/Get Together availability;
-- Sasol Langenhoven Park phone number until client/official Sasol confirmation resolves the old Piek-page conflict;
-- Get Together Technikon direct phone/email because its own site conflicts with older Piek data and with its own footer;
-- Get Together branch-specific email addresses;
-- `info@piekgroup.com` ownership/use because the `.com` domain belongs to an apparently separate Piek Group;
-- Piek/branch Facebook and Instagram handles;
-- alcohol/wine/liqueur availability at Get Together;
-- current menu items/prices;
-- any “24/7” claim;
+Avoid:
+
+- broad “service excellence” filler without a concrete service;
+- vague “care” language;
+- wording that could belong to any petrol station;
+- forced corporate language;
+- influencer-style hype;
+- gimmicks for the sake of sounding clever.
+
+### Poster text structure
+
+For service-led posters, the preferred pattern is:
+
+- **title:** name or clearly describe the actual service shown;
+- **subtitle:** support the service with one useful human detail.
+
+The title and subtitle should not say the same thing twice.
+
+If the image shows:
+
+- a windscreen being cleaned, write about windscreen cleaning;
+- an attendant assisting at the car, write about the assistance;
+- Quickshop/convenience products, write about the products/quick-stop use;
+- coffee and rusks, call them coffee and rusks — do not misidentify the food as bread;
+- restaurant wine/liqueur options, write about the restaurant offering accurately.
+
+Do not force an abstract brand statement onto a literal service photo.
+
+### Captions
+
+Recurring CG preference:
+
+- captions should normally be short and direct;
+- do not simply repeat the text already printed on the artwork;
+- add context, a useful detail or a simple CTA instead;
+- one sentence is often enough when the brief is simple;
+- do not over-explain a straightforward post.
+
+If CA asks for “no emojis”, remove **all** emojis, including contact-detail icons.
+
+### UK English
+
+Always use UK English.
+
+## 6. Repeated wording corrections and phrases to stop defaulting to
+
+These are not all permanently banned words. The problem is that they became repetitive, generic or awkward in Piek work. Future writers should not default to them.
+
+### Repeatedly overused or rejected in Piek work
+
+- “make it count” — especially overused in voting content;
+- “bring the title home” / “bring the win home” — overused in nomination/voting campaigns;
+- “last chance” — specifically rejected for voting/closing-date copy;
+- “Driving towards a sustainable future” — explicitly said to have been used too much;
+- “handled with care” — rejected as vague and meaningless to the customer;
+- “moving” — called overused/generic;
+- “face to face” — rejected in service copy because the implication felt wrong;
+- generic “quality fuel for every journey” style wording;
+- generic “friendly help at every pump” style wording;
+- “we are the best” / “best in town” style claims.
+
+### Words that have been repeatedly asked to change because of repetition
+
+In service posters, CA/CG has repeatedly asked for alternatives to:
+
+- pump;
+- forecourt;
+- station;
+- refuel;
+- attendant;
+- care;
+- complete;
+- handles/handled.
+
+This does **not** mean those words can never appear. It means the writer must avoid repeating them across a run of posters and must choose the most natural service wording for the image.
+
+### Formulaic structures to avoid
+
+Avoid mechanical constructions such as “from X to Y” when a plain natural sentence is stronger.
+
+Do not chase novelty so hard that the line stops making sense. The user repeatedly prefers understandable wording over clever-but-awkward wording.
+
+## 7. Voting, nomination and engagement copy lesson
+
+Piek/Engen has recurring local voting/nomination content, including Engen Northridge Best of Bloemfontein work.
+
+The durable lesson is not the old campaign date. It is the style:
+
+- fun and interactive;
+- human;
+- easy to understand;
+- slightly witty where appropriate;
+- never generic;
+- closing date can be included clearly;
+- do not use “last chance” by default;
+- do not recycle “make it count” or “bring the title/win home”.
+
+When explaining how to vote, conversational phrasing works better than formal instructions. A previous direction was along the lines of “You aren’t sure…” / “If you didn’t know yet, here’s how you can vote.”
+
+## 8. Piek Group umbrella content rules
+
+### Tone
+
+- friendly;
+- welcoming;
+- professional;
+- local/community-driven;
+- trustworthy;
+- consistent;
+- dependable;
+- confident and clean;
+- never forced or overly playful.
+
+### Avoid
+
+- slang;
+- exaggerated hype;
+- influencer-style wording;
+- stock slogans;
+- unverified locations or services;
+- mixing branch details that belong to different station brands.
+
+### Recurring content needs
+
+- operational/service highlights;
+- partner spotlights;
+- product assurance/quality standards;
+- CSR/community work;
+- customer-service reassurance;
+- real fuel + food + convenience experiences.
+
+### Standing publishing contact block
+
+Current client-confirmed CG caption convention:
+
+- `info@piekgroup.com`
+- `+27 51 444 3178`
+- `www.piekgroup.co.za`
+
+This is the internal publishing convention captured repeatedly in the Project/PDFs.
+
+Public verification conflict:
+
+- the official Piek website currently lists `admin@piekgroup.co.za`;
+- the `.com` website is an unrelated-looking Piek Group;
+- therefore `info@piekgroup.com` must remain labelled `client_confirmed / possible_change`, not converted into proof that the `.com` website belongs to this client.
+
+Never change the website to `piekgroup.com`.
+
+## 9. Engen human content record
+
+### Approved voice
+
+- friendly, clear and confident;
+- local and community-focused;
+- professional but accessible;
+- informative;
+- subtle CTA;
+- reassuring for travel/late-night content;
+- lighter and more playful for engagement content.
+
+### Recurring Engen content
+
+- attendant/service moments;
+- windscreen cleaning;
+- refuelling assistance;
+- quick-stop/convenience products;
+- fuel + food combinations;
+- road-trip convenience;
+- clean service environment;
+- local community activity;
+- station improvements;
+- service videos;
+- branch nominations/awards when current.
+
+### Engen caption/location rule
+
+Standing Project rule: include all six Engen locations in Engen captions:
+
+- Engen Northridge
+- Engen Crossing
+- Engen Batho
+- Engen Oliver Road Kimberley
+- Engen Paarl Village
+- Engen One Stop De Doorns
+
+The Project also historically instructed CG to mention Steers and Woolworths in Engen captions. Public branch verification shows they are **not present at every branch**.
+
+Human reconciliation:
+
+- they may be mentioned as part of the wider Piek Engen network where appropriate;
+- do not say or imply that every one of the six branches has both;
+- for branch-specific copy, use the verified branch partner list.
+
+### Brand separation
+
+Never mix Sasol branding into Engen creative.
+
+A previous Engen design was explicitly corrected because Sasol was mentioned.
+
+## 10. Engen branch differences
+
+Public facts below were last checked 2026-09-08. Recheck before a branch-specific factual campaign.
+
+### Engen Northridge
+
+Client-facing name: **Engen Northridge**
+
+Public name variants: Engen North Ridge Convenience Centre / Engen Bloemfontein North Ridge.
+
+Current public address:
+Cnr Kenneth Kaunda Road & Christo Groenewald Street, Helicon Heights, Bloemfontein, 9301.
+
+Current public phone:
+`051 433 1357`
+
+Partner/service notes:
+
+- Steers currently verified;
+- Woolworths Foodstop has supporting evidence but was not independently verified from a current first-party Woolworths locator in this review.
+
+Historical CG context:
+
+- the branch was promoted as newly/recently renovated in August 2026;
+- do not keep calling it “newly renovated” indefinitely.
+
+### Engen Crossing
+
+Address:
+c/o Nelson Mandela & Melville Drive, Brandwag, Bloemfontein.
+
+Phone:
+`051 444 3178` (older official Piek page shows `3178/9`).
+
+Older official Piek page lists:
+
+- convenience store;
+- Woolworths Food Stop;
+- Corner Bakery;
+- Steers;
+- Get Together;
+- ATM.
+
+Steers Engen Crossing and Get Together Crossing were independently current in the 2026 verification.
+
+Crossing is the clearest Piek example of fuel + food + convenience content in one location.
+
+### Engen Batho
+
+Address:
+c/o Fort Hare Road & Hamilton Road, Batho, Bloemfontein.
+
+Phone:
+`051 432 2115`
+
+Older official Piek page lists:
+
+- convenience store;
+- Corner Bakery;
+- Steers;
+- ATM.
+
+Important difference:
+
+- the Piek page does **not** list Woolworths Foodstop at Batho.
+
+### Engen Oliver Road Kimberley
+
+Address:
+Corner Oliver Road & Ashe Street, Klisserville, Kimberley.
+
+Phone:
+`053 492 3268`
+
+Older official Piek branch page lists:
+
+- PGC Convenience Store;
+- Get Together;
+- Steers;
+- KAUAI;
+- ABSA ATM.
+
+Current 2026 additional partner:
+
+- Col'Cacchio GO Oliver Road.
+
+Historical lesson:
+
+- Col'Cacchio GO's Oliver Road launch was 23 May 2026;
+- it is a branch-specific partner story, not a group-wide partner claim.
+
+### Engen Paarl Village
+
+Address:
+c/o Brug & Dorp Street, Paarl, Western Cape.
+
+Phone:
+`021 863 0071`
+
+Older official Piek page lists:
+
+- Woolworths Food Stop;
+- Corner Bakery;
+- convenience store;
+- ATM.
+
+Important difference:
+
+- the Piek page does **not** list Steers at Paarl Village.
+
+### Engen One Stop De Doorns
+
+Client-facing CG name:
+**Engen One Stop De Doorns**
+
+Public alias:
+**Engen Grape Valley Convenience Centre / Engen 1 Stop**
+
+Treat these as the same De Doorns location, not separate Piek branches.
+
+Address:
+Voortrekker Road, De Doorns, Western Cape, 6875.
+
+Phone:
+`023 356 2172`
+
+Current verified partner:
+
+- Wimpy Engen De Doorns / Engen Grape Valley.
+
+Wimpy hours are not proof of the petrol station's operating hours.
+
+## 11. Sasol human content record
+
+### Approved voice
+
+- professional;
+- friendly;
+- community-focused;
+- clear;
+- welcoming;
+- useful/helpful rather than preachy;
+- modern without hype.
+
+### Recurring Sasol content
+
+- fuel-saving tips;
+- car-care advice;
+- sustainability education when it is genuinely useful;
+- service/attendant moments;
+- clean-site visual storytelling;
+- current promotions and loyalty updates only after freshness checks;
+- local staff/community content;
+- customer engagement;
+- public-holiday/hours announcements;
+- KAUAI/food content where the exact branch relationship is valid.
+
+### Caption/location rule
+
+Standing Project rule: always list all four Sasol locations in Sasol captions:
+
+- Sasol Langenhoven Park
+- Sasol Technikon
+- Sasol 1st Avenue
+- Sasol Kroonstad
+
+Standing Project copy also says “Kauai is available at Sasol”.
+
+Public verification does **not** support KAUAI as a universal four-branch fact.
+
+Human reconciliation:
+
+- KAUAI is a valid Piek/Sasol content relationship;
+- it is currently strongly verified at Sasol Kroonstad;
+- branch-specific captions must not imply KAUAI is at Langenhoven Park, Technikon or 1st Avenue unless reverified/client-confirmed.
+
+### Sasol caption format
+
+- UK English;
+- short but meaningful;
+- maximum three short paragraphs is the existing Project standard;
+- include `info@piekgroup.com` and `+27 51 444 3178`.
+
+## 12. Sasol branch differences
+
+Public facts below were last checked 2026-09-08.
+
+### Sasol Langenhoven Park
+
+Address:
+Jan Spies Avenue / c/o Jan Spies & Maretha Maartens Street, Langenhoven Park, Bloemfontein.
+
+Phone conflict:
+
+- older official Piek page: `051 446 3025`;
+- newer public listing evidence: `051 446 2872`.
+
+State:
+`possible_change` — reverify before operational use.
+
+Older official Piek page lists:
+
+- Sasol Delight;
+- Sasol Bakery;
+- car wash;
+- ATM.
+
+It does not list KAUAI.
+
+### Sasol Technikon
+
+Address:
+President Boshoff Street / c/o President Boshoff Street & Park Road, Willows/Parkwest, Bloemfontein.
+
+Phone:
+`051 448 4553`
+
+Older official Piek page lists:
+
+- Sasol Delight;
+- Sasol Bakery;
+- Europcar;
+- Get Together;
+- car wash;
+- ABSA ATM.
+
+Get Together Technikon is current.
+
+No current authoritative KAUAI evidence was found for this branch during the 2026 verification.
+
+### Sasol 1st Avenue
+
+Public naming:
+Sasol 1st Avenue / Sasol First Avenue Service Station.
+
+Address evidence:
+6 First Avenue, Willows, Bloemfontein; older Piek page describes First Avenue, Westdene.
+
+Phone:
+`051 430 3492`
+
+Older official Piek page lists:
+
+- Sasol Delight;
+- Sasol Bakery;
+- car wash;
+- ATM;
+- E-Fuel.
+
+No current authoritative KAUAI evidence was found for this branch during the 2026 verification.
+
+### Sasol Kroonstad
+
+Phone:
+`056 492 0999`
+
+Current verified partners:
+
+- KAUAI Sasol Kroonstad;
+- Steers Sasol Kroonstad.
+
+Current KAUAI locator address:
+Sasol Kroonstad, R76, Kroonstad Rural, Kroonstad, Free State, 9500.
+
+Other current address evidence uses the Du Toit / Van Zyl Street area. Reverify exact address formatting before map/postal use.
+
+Do not treat restaurant hours as the whole station's operating hours.
+
+## 13. Get Together human content record
+
+### Identity correction
+
+Get Together is **not merely a grab-and-go convenience coffee counter**.
+
+CA/CG explicitly corrected this in Project work: **Get Together is a restaurant**.
+
+The brand can also legitimately be described as a coffee shop/gathering place, but restaurant food, sit-down visits, meeting/social use and functions are part of its identity.
+
+### Approved voice
+
+- warm;
+- welcoming;
+- natural;
+- friendly;
+- community-focused;
+- clear and confident;
+- not dramatic;
+- not cheesy;
+- use inclusive wording such as “we”, “you” and “us”.
+
+The tone should feel like someone inviting you to a favourite local place.
+
+### Visual preferences
+
+Preferred:
+
+- cinematic walkthroughs;
+- day-in-the-life clips;
+- coffee pouring;
+- crisp food/product shots;
+- snack shelves and fridge items;
+- real staff/customer testimonial moments;
+- slow/smooth/cinematic edits;
+- natural restaurant atmosphere.
+
+Avoid:
+
+- excessive text overlays;
+- generic stock footage;
+- flashy/rapid transitions;
+- forced TikTok trends/audio;
+- influencer-style exaggeration;
+- cringe humour;
+- unnecessary competitor comparisons.
+
+### Recurring product/content notes from Project work
+
+Get Together content has included:
+
+- coffee;
+- meals/restaurant food;
+- snacks;
+- fridge items;
+- rusks;
+- wine;
+- liqueur options;
+- relaxed table/social scenes.
+
+Important historical corrections:
+
+- when the image showed a rusk, CA corrected it from “bread” to **rusk**;
+- “Get Together is a restaurant” was an explicit correction;
+- use product-specific wording instead of vague hospitality copy.
+
+Exact menu items, alcohol availability and prices are mutable. Recheck before making a specific offer/stock claim.
+
+### Standing caption wording quirk
+
+The existing Project rule has required the phrases:
+
+- “Get Together”
+- “Get Together coffee shop”
+- “Get Together technikon”
+
+in Get Together captions.
+
+This is a **CG publishing convention**, not the current business branch roster.
+
+The current public website now confirms Kimberley as the third branch. Future agents must not erase Kimberley from business knowledge simply because the older caption template only names the Bloemfontein locations.
+
+### Contact formatting conflict
+
+Client/Piek PDFs use:
+`info@piekgroup.com`
+
+One standing Get Together prompt line contains:
+`info@piekgroup.co`
+
+That `.co` form is unsupported by the PDFs and public sites and should be treated as a likely typo / `rejected` operational contact unless the client reconfirms it.
+
+The current Get Together website uses Gmail branch contacts, not a Piek-domain email.
+
+## 14. Current Get Together branch facts
+
+Public facts last checked 2026-09-08.
+
+### Get Together Crossing
+
+Phone:
+`051 444 3178`
+
+Public email:
+`gettogethercs@gmail.com`
+
+Address:
+Nelson Mandela Drive, Brandwag, Bloemfontein.
+
+Associated site:
+Engen Crossing.
+
+### Get Together Technikon
+
+Phone:
+`051 448 5877` on current Get Together contact page.
+
+Address:
+c/o Park Road & President Boshoff Street, Willows, Bloemfontein.
+
+Associated site:
+Sasol Technikon.
+
+Email conflict on Get Together's own page:
+
+- page body: `gettogethercs@gmail.com`;
+- footer: `gettogethertech@gmail.com`.
+
+Do not guess which direct branch email is preferred without rechecking.
+
+### Get Together Kimberley / Oliver Road
+
+Phone:
+`053 492 3268`
+
+Address:
+c/o Oliver Road & Ashe Street, Klisserville, Kimberley 8301.
+
+Associated site:
+Engen Oliver Road.
+
+Email conflict on Get Together's own page:
+
+- page body: `gettogethercs@gmail.com`;
+- footer: `gettogetherkimberley@gmail.com`.
+
+## 15. Social profile truth
+
+Do not invent Piek or branch social handles.
+
+### Piek Group
+
+No authoritative first-party Piek Group Facebook/Instagram profile was confidently verified in this review.
+
+State:
+`stale_unverified`.
+
+### Get Together
+
+The official Get Together website links to a Facebook identity under `GetTogetherCoffeeShop`, but direct Facebook retrieval was not reliable in this environment.
+
+Third-party/current embeds have referenced Instagram `@gettogethercoffee`, but the direct profile was not authoritatively verified.
+
+State:
+`possible_change / stale_unverified`.
+
+Future agents should reverify before printing a handle.
+
+## 16. Visual and brand separation rules
+
+### Across Piek fuel content
+
+- keep layouts clean and service-led;
+- make the visual subject and copy agree;
+- do not paste generic slogans over an unrelated service photo;
+- use real branch/partner branding only when it belongs to that branch;
+- do not mix Engen and Sasol identities in the same branch creative unless the post is explicitly a Piek Group umbrella post comparing/showing the network;
+- avoid cluttered text overlays.
+
+### For service posters
+
+The customer should understand the service at a glance.
+
+Use concrete visual/service language, especially for:
+
+- fuel assistance;
+- windscreen cleaning;
+- Quickshop/convenience items;
+- food/coffee;
+- branch features.
+
+### For Get Together
+
+Food and atmosphere matter as much as logo/branding.
+
+Show:
+
+- people using the space;
+- coffee being made/poured;
+- meals/products clearly;
+- relaxed table moments;
+- recognisable restaurant environment.
+
+## 17. Recurring operational quirks future agents must know
+
+### The Piek website is useful but stale in places
+
+The official Piek website is real, but it still includes older branch rosters and old manager/site detail.
+
+Examples:
+
+- Engen Kollege still appears publicly;
+- Sasol Moshoeshoe still appears publicly;
+- an old background page refers to nine operating sites;
+- the client-confirmed 2026 content roster already contains ten fuel sites before Get Together is counted.
+
+Do not use the old website site count as current truth.
+
+### Old Project PDFs are client evidence, not perfect public fact sheets
+
+The January 2026 PDFs are useful for:
+
+- the content roster;
+- client contact convention;
+- client view of the business structure.
+
+But they also contain:
+
+- duplicated/mismatched Google links;
+- broad “every Engen has Woolworths + Steers” wording that branch evidence contradicts;
+- the old two-branch Get Together roster.
+
+Use them as client-provided evidence, not as an unquestioned live directory.
+
+### Branch partner mixes differ
+
+This is a major recurring risk.
+
+Do not universalise:
+
+- Steers;
+- Woolworths;
+- KAUAI;
+- Wimpy;
+- Get Together;
+- Corner Bakery;
+- Col'Cacchio GO;
+- PGC Convenience.
+
+Map the exact branch before writing branch-specific copy.
+
+### De Doorns naming
+
+Engen One Stop De Doorns and Engen Grape Valley refer to the same De Doorns location in the Piek/public ecosystem.
+
+Do not create two branches from the aliases.
+
+### Get Together's own website has inconsistent email presentation
+
+The contact page body uses the general `gettogethercs@gmail.com` for all three branches, while the footer shows branch-specific Gmail addresses for Technikon and Kimberley.
+
+Recheck before sending operational correspondence.
+
+## 18. Historical lessons worth retaining
+
+These are useful context, not permanent “current” claims.
+
+### Engen Northridge renovation
+
+In August 2026, CG content referred to the newly renovated Engen Northridge.
+
+Use the renovation as history and before/after context if useful, but do not keep calling it “newly renovated” as time passes.
+
+### Engen Northridge nomination/voting work
+
+The branch had recurring Best of Bloemfontein nomination/voting content.
+
+Durable lesson:
+
+- engagement copy must be fresh, playful and understandable;
+- avoid repeating the same voting catchphrases across multiple posters.
+
+### Col'Cacchio GO Oliver Road
+
+Col'Cacchio GO Oliver Road was launched in May 2026 at Engen Oliver Road.
+
+Useful as a Piek branch/partner history point. Do not call it “new” indefinitely.
+
+### Get Together branch growth
+
+January 2026 client PDF: two branches.
+Current official site in September 2026: three branches.
+
+This is a clear example of why branch rosters require freshness checks.
+
+### Seasonal/community posts
+
+Piek work often includes South African seasonal/community moments.
+
+When doing Heritage Day or similar content, CA/CG repeatedly prefers:
+
+- wording about real people, traditions and South African identity;
+- celebratory but human copy;
+- no generic corporate “today we celebrate” style message.
+
+## 19. Approved content-type reference
+
+### Piek Group
+
+Use:
+
+- operational highlights;
+- partner spotlights;
+- quality/product assurance;
+- CSR/community;
+- customer reassurance;
+- network/location content when accurate.
+
+### Engen
+
+Use:
+
+- services/convenience;
+- fuel + food;
+- travel/quick-stop utility;
+- attendants/service moments;
+- community contributions;
+- light engagement/trend videos when natural;
+- branch improvements;
+- verified food/convenience partners.
+
+### Sasol
+
+Use:
+
+- educational fuel/car-care content;
+- service moments;
+- clean-site storytelling;
+- verified current promotions;
+- community/staff/customer features;
+- engagement questions/polls;
+- branch/hours announcements;
+- verified KAUAI/partner content.
+
+### Get Together
+
+Use:
+
+- restaurant walkthroughs;
+- coffee visuals;
+- meals/products;
+- day-in-the-life;
+- shelves/fridges/snacks;
+- testimonials;
+- social/table moments;
+- functions/group hospitality;
+- current wine/liqueur/rusk/food content where verified.
+
+## 20. Hashtag and caption-rule reference
+
+These are working banks/rules from the Project, not facts about the business.
+
+### Piek Group bank
+
+`#PiekGroup #TrustedService #SouthAfricaFuel #ServiceExcellence #CorporateFuelSolutions #WoolworthsFoodstop #SteersAtEngen #ReliableRetail #ConvenienceDelivered #OperationalExcellence #CustomerFirstZA #KauaiSA #GetTogetherCoffee #SasolSouthAfrica`
+
+Use relevant tags rather than forcing an irrelevant partner tag into a branch post.
+
+### Engen bank
+
+`#EngenSA #FuelUpFast #RoadTripStops #SteersAtEngen #WoolworthsOnTheGo #PiekGroup #EngenServiceStations #AlwaysOpen #PetrolStationSouthAfrica`
+
+Do not use `#AlwaysOpen` if 24-hour operation has not been verified for the exact claim.
+
+### Sasol bank
+
+`#SasolLangenhovenPark #SasolTechnikon #Sasol1stAvenue #SasolKroonstad #FuelYourJourney #KauaiAtSasol #ConvenienceRedefined #DriveWithSasol #SasolSouthAfrica #PiekGroup #ForecourtService #BloemfonteinPetrol #SAFuelStops`
+
+Use branch/partner tags accurately.
+
+### Get Together bank
+
+`#gettogethercoffee #gettogethercoffeeshop #gettogethertechnikon #bloemfonteincafes #coffeetimebloem #bloemstudyspots #snackstopbloem #bloemfonteinvibes #coffeewithfriends #bloemlocalflavours`
+
+Place SEO hashtags at the end of the caption.
+
+## 21. Current contact/business fact table
+
+Verified/public facts as at 2026-09-08 unless otherwise stated.
+
+| Entity | Current working fact | State |
+|---|---|---|
+| Piek Group website | `https://www.piekgroup.co.za/` | `public_verified` |
+| Piek head office | c/o Nelson Mandela & Melville Drive, Bloemfontein, Free State | `public_verified` |
+| Piek public phone | `+27 (0)51 444 3178/9` | `public_verified` |
+| Piek public website email | `admin@piekgroup.co.za` | `public_verified` |
+| CG publishing phone | `+27 51 444 3178` | `client_confirmed` |
+| CG publishing email | `info@piekgroup.com` | `client_confirmed / possible_change` |
+| Piek `.com` website | unrelated-looking Piek Group; do not use | `rejected` |
+| Get Together website | `https://gettogethercs.co.za/` | `public_verified` |
+| Get Together current branch count | 3 | `public_verified` |
+| Café365 Piek branch | none verified | `stale_unverified` |
+| Brazmata Piek branch | none verified | `stale_unverified` |
+
+## 22. Facts that always require a freshness check
+
+Before a factual campaign, recheck:
+
+- branch opening hours;
+- branch phone/email if used operationally;
+- station manager/staff names;
+- fuel grade/product naming;
+- exact store/restaurant partner mix;
+- Woolworths/Steers/KAUAI/Wimpy/Get Together/Col'Cacchio presence;
+- menu items and food/drink availability;
+- alcohol/wine/liqueur availability;
+- promotions and prices;
+- social handles;
 - current active-site count;
-- any old Piek website locations not in the client-confirmed 2026 roster.
+- old Piek branches not in the client-confirmed roster;
+- “24/7” or “always open” claims;
+- Sasol Langenhoven Park phone;
+- Get Together Technikon/Kimberley preferred email;
+- use/ownership of `info@piekgroup.com`.
 
-## 15. Conflict register
+## 23. Things future agents must not do
 
-| Conflict | Resolution for Dynamics |
-|---|---|
-| Piek PDF/client rule uses `info@piekgroup.com`; official fuel-group website uses `admin@piekgroup.co.za`; `.com` website is a different-looking Piek Group | Preserve `info@piekgroup.com` as client-confirmed production convention but mark `possible_change`; official public contact remains `admin@piekgroup.co.za`; never use `.com` as website. |
-| Old Piek website lists Engen Kollege and Sasol Moshoeshoe; 2026 Project content roster does not | Keep as historical/stale, exclude from current content location lists. |
-| Old Piek website calls De Doorns site Engen Grape Valley; Project calls it Engen One Stop De Doorns | Preserve both as aliases for the same De Doorns location; use client-facing Project name unless public locator context requires the Grape Valley name. |
-| Get Together PDF lists two branches; official Get Together site lists three | Current model uses three branches; old two-branch PDF retained as historical. |
-| Engen PDF implies Steers + Woolworths at every Piek Engen | Rejected as universal branch fact; use branch-specific partner matrix. |
-| Sasol Project rule implies KAUAI at all Sasol locations | Do not universalise; current public verification is strong at Sasol Kroonstad only. |
-| Piek page shows Sasol Langenhoven Park `051 446 3025`; newer public listings show `051 446 2872` | Store `051 446 2872` as current public value and older number as `possible_change`/historical pending direct client/Sasol confirmation. |
-| Get Together site body/footer use different branch emails | Keep branch emails `possible_change`; do not invent a single branch-specific email truth. |
-| Piek background page says nine sites | Treat as stale historical count; do not use publicly as current. |
-| Café365/Brazmata are Engen brands but no Piek-site link was verified | Keep relationship uncertain; do not migrate as active Piek operational brands. |
+- Do not turn Piek Group into one generic petrol-station identity.
+- Do not merge Engen and Sasol branch branding.
+- Do not claim every Engen has Steers and Woolworths.
+- Do not claim every Sasol has KAUAI.
+- Do not omit current Kimberley/Get Together business knowledge because an old PDF lists only two branches.
+- Do not use `piekgroup.com` as the client website.
+- Do not use `info@piekgroup.co` as an accepted contact unless reconfirmed.
+- Do not invent social handles.
+- Do not repeat poster wording in the caption.
+- Do not default to generic service copy.
+- Do not identify a product incorrectly from the image.
+- Do not keep calling historical openings/renovations “new”.
+- Do not use stale promotion dates or old menu prices.
+- Do not keep recycling “make it count”, “bring the win/title home” or “last chance”.
+- Do not use the same service noun in every poster just because it is technically correct.
+- Do not sacrifice clarity for wordplay.
 
-## 16. Source register
+## 24. Fast brief for future CG writers/designers
 
-### Client/Project sources reviewed
+Before creating Piek work, answer these in order:
 
-- `PIEK GROUP OF COMPANIES_BUSINESS_INFO.pdf` — client-provided snapshot, created 2026-01-22.
-- `ENGEN_BUSINESS_INFO.pdf` — client-provided snapshot, created 2026-01-22; useful branch roster but over-broad partner claim.
-- `SASOL_BUSINESS_INFO.pdf` — client-provided snapshot, created 2026-01-22; branch roster useful, copied Google links not reliable branch evidence.
-- `GET_TOGETHER_BUSINESS_INFO.pdf` — client-provided snapshot, created 2026-01-22; two-branch state now superseded by current official three-branch site.
-- Accessible Piek Group ChatGPT Project conversation history and standing Project instructions, including CA/CG copy, brand, branch, contact and correction rules.
+1. Is this Piek Group umbrella, Engen, Sasol or Get Together?
+2. Which exact branch is shown or being promoted?
+3. Which service/product/partner is actually visible and valid there?
+4. Is the copy saying something specific, human and natural?
+5. Does the title describe the service and the subtitle support it without repetition?
+6. Does the caption add something instead of repeating the artwork?
+7. Are the correct location/contact rules included?
+8. Are branch-specific partner claims verified?
+9. Have overused phrases from this record been avoided?
+10. Are mutable facts current?
 
-### Official/public sources reviewed on 2026-09-08
+## 25. Source register
+
+### Piek Project material reviewed
+
+- `PIEK GROUP OF COMPANIES_BUSINESS_INFO.pdf` — client-provided, 2026-01-22.
+- `ENGEN_BUSINESS_INFO.pdf` — client-provided, 2026-01-22.
+- `SASOL_BUSINESS_INFO.pdf` — client-provided, 2026-01-22.
+- `GET_TOGETHER_BUSINESS_INFO.pdf` — client-provided, 2026-01-22.
+- Accessible Piek Group Project conversation history and standing Project instructions, including recurring CA/CG corrections for Engen, Sasol, Get Together and Piek umbrella work.
+
+### Public verification sources checked 2026-09-08
 
 Piek Group:
 
-- `https://www.piekgroup.co.za/`
 - `https://www.piekgroup.co.za/contact.php`
-- `https://www.piekgroup.co.za/about.php`
-- `https://www.piekgroup.co.za/background.php`
-- `https://piekgroup.co.za/brands.php`
 - `https://www.piekgroup.co.za/engencrossing.php`
 - `https://www.piekgroup.co.za/engenbatho.php`
-- `https://piekgroup.co.za/engenpaarlvillage.php`
 - `https://www.piekgroup.co.za/Engen_Oliver_Road.php`
-- `https://www.piekgroup.co.za/sasoltechnikon.php`
+- `https://piekgroup.co.za/engenpaarlvillage.php`
 - `https://www.piekgroup.co.za/sasollangenhovenpark.php`
+- `https://www.piekgroup.co.za/sasoltechnikon.php`
 - `https://www.piekgroup.co.za/sasolfirstavenue.php`
 
 Get Together:
 
-- `https://gettogethercs.co.za/`
-- `https://gettogethercs.co.za/about-us/`
 - `https://gettogethercs.co.za/contact-us/`
 
-Partner/brand verification:
+Current partner verification:
 
-- current Engen store locators for Crossing, Batho, Oliver Road, Paarl Village, North Ridge and Grape Valley/De Doorns where indexable;
-- `https://location.steers.co.za/free-state/bloemfontein`
-- current Steers Engen Crossing locator;
-- current Wimpy Engen De Doorns / Grape Valley locator;
-- `https://locations.kauai.co.za/HealthyFood-Kroonstad-KAUAISasolKroonstad`
-- Col'Cacchio company communication confirming Col'Cacchio GO Oliver Road and the 23 May 2026 launch;
-- `https://www.engen.co.za/motorists/cafe-365`
-- Engen integrated-report evidence for Café365/Brazmata as Engen-network concepts;
-- current Samba retailer directory for Sasol First Avenue, Kroonstad, Langenhoven and Technikon.
+- current Steers location data for relevant Piek/Engen/Sasol sites;
+- current Wimpy Engen De Doorns / Engen Grape Valley listing;
+- current KAUAI Sasol Kroonstad listing;
+- current Col'Cacchio company communication for Oliver Road;
+- current Engen Café365 material.
 
-Rejected lookalike domain checked:
+Rejected identity check:
 
-- `https://www.piekgroup.com/` — separate-looking Piek Group focused on investments, FinTech, software and property; not used as this client's public website.
+- `https://www.piekgroup.com/`
 
-## 17. Agent execution summary
+## 26. Change discipline
 
-When generating Piek Group work:
+This file is permanent. **Do not create a new dated Piek intelligence file every time one phone number, branch partner or campaign changes.**
 
-1. Anchor the client as **Piek Group**.
-2. Identify the exact operational brand/entity before writing.
-3. Identify the exact branch where branch-specific services/partners are mentioned.
-4. Apply that entity's tone/content rules.
-5. Re-check mutable branch facts before a material campaign.
-6. Keep copy human, specific, short where appropriate and non-generic.
-7. Never repeat poster text unnecessarily.
-8. Preserve UK English.
-9. Never merge all Engen/Sasol/Get Together partner offerings into one universal list.
-10. Never use stale branch lists, old menu prices or unsupported social handles as current truth.
+Update this same canonical record.
+
+When updating:
+
+- preserve useful historical facts;
+- change the `Mutable public facts last verified` date;
+- update only the affected facts;
+- mark superseded facts as historical where useful;
+- keep CA/CG tone/copy corrections unless explicitly reversed by the client;
+- do not turn temporary campaigns into permanent rules.
