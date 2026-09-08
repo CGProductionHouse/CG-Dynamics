@@ -521,13 +521,15 @@ function VerifiedFactsUnavailable() {
 
 // ── Verified Overview (facts-driven, per-platform, comparability-gated) ───────
 function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabel: string }) {
+  const lines = sections.flatMap(section => section.lines)
+  const platforms = [...new Set(lines.map(line => line.platform))]
   return (
     <div className="mb-14 space-y-10">
-      {sections.map(section => (
-        <section key={section.key}>
-          <SectionHeading eyebrow="Verified performance" title={section.title} />
+      {platforms.map(platform => (
+        <section key={platform}>
+          <SectionHeading eyebrow="Meta insights" title={platform === 'facebook' ? 'Facebook' : 'Instagram'} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {section.lines.map(line => (
+            {lines.filter(line => line.platform === platform).map(line => (
               <VerifiedMetricCard key={`${line.platform}:${line.metricKey}`} line={line} />
             ))}
           </div>

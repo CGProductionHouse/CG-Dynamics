@@ -9,6 +9,8 @@
 // Generic: no client IDs, page IDs, IG IDs, asset names or per-client values are
 // encoded. The same contract runs for every linked client.
 // ============================================================================
+import { parseMetaInsight } from './metaInsightResponse.ts'
+import { readMetaUsage, type MetaUsage } from './metaUsage.ts'
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // ── Graph API version resolution ─────────────────────────────────────────────
@@ -112,7 +114,10 @@ export async function metaFetch(
       const res = await fetch(url, { ...init, signal: controller.signal })
       clearTimeout(timer)
       assertMetaSyncActive(control, `request attempt ${attempt + 1}`)
-      if (res.ok || !RETRYABLE.has(res.status)) return res
+      // Throttles belong to the durable scheduler. Preserve status, error body
+      // and Retry-After instead of hiding them behind a generic HTTP exception.
+      if (res.ok || res.status === 429 || !RETRYABLE.has(res.status) || attempt === backoff.length) return res
+      await res.body?.cancel()
       lastErr = new Error(`HTTP ${res.status}`)
     } catch (e) {
       clearTimeout(timer)
@@ -134,6 +139,8 @@ export async function metaFetch(
 }
 
 export interface MetaErrorInfo {
+  httpStatus?: number
+  usage?: MetaUsage
   code: string | null
   subcode: string | null
   message: string
@@ -149,6 +156,8 @@ export async function readMetaError(
     const body = await res.json()
     const e = body?.error ?? {}
     return {
+      httpStatus: res.status,
+      usage: readMetaUsage(res.headers),
       code: e.code !== undefined ? String(e.code) : null,
       subcode: e.error_subcode !== undefined && e.error_subcode !== null ? String(e.error_subcode) : null,
       message: redact(String(e.message ?? `HTTP ${res.status}`), tokens),
@@ -156,7 +165,7 @@ export async function readMetaError(
       trace: e.fbtrace_id ? String(e.fbtrace_id) : null,
     }
   } catch {
-    return { code: null, subcode: null, message: `HTTP ${res.status}`, type: null, trace: null }
+    return { httpStatus: res.status, usage: readMetaUsage(res.headers), code: null, subcode: null, message: `HTTP ${res.status}`, type: null, trace: null }
   }
 }
 
@@ -192,49 +201,6 @@ function classifyValue(value: number | null): Availability {
   if (value === null) return 'unavailable'
   if (value === 0) return 'valid_zero'
   return 'complete'
-}
-
-// Parses an insight response array into a single summed/total number, or null
-// when the provider returned no numeric value. For unique metrics the caller
-// must use total_value (summing a daily-unique series over-counts people).
-function parseInsight(
-  data: Array<Record<string, unknown>>,
-  valueKey?: string,
-  allowDailySum = true,
-): number | null {
-  if (!Array.isArray(data) || data.length === 0) return null
-  const d = data[0]
-  const total = d.total_value as {
-    value?: unknown
-    breakdowns?: Array<{
-      results?: Array<{ dimension_values?: unknown[]; value?: unknown }>
-    }>
-  } | undefined
-  if (total && typeof total.value === 'number') return total.value
-  if (total && valueKey && total.value && typeof total.value === 'object') {
-    const entries = Object.entries(total.value as Record<string, unknown>)
-    const match = entries.find(([key, value]) => key.toLowerCase() === valueKey.toLowerCase() && typeof value === 'number')
-    if (match && typeof match[1] === 'number') return match[1]
-  }
-  if (total && valueKey && Array.isArray(total.breakdowns)) {
-    const wanted = valueKey.toLowerCase()
-    for (const breakdown of total.breakdowns) {
-      for (const result of breakdown.results ?? []) {
-        const labels = (result.dimension_values ?? []).map(value => String(value).toLowerCase().replace(/[^a-z]/g, ''))
-        const positiveFollow = wanted === 'follows'
-          && labels.some(label => ['follow', 'follows', 'follower'].includes(label))
-          && labels.every(label => !label.includes('unfollow') && !label.includes('nonfollower'))
-        if ((labels.includes(wanted) || positiveFollow) && typeof result.value === 'number') return result.value
-      }
-    }
-  }
-  const values = d.values as Array<{ value?: unknown }> | undefined
-  if (allowDailySum && values && values.length > 0) {
-    let sum = 0, any = false
-    for (const v of values) if (typeof v.value === 'number') { sum += v.value; any = true }
-    return any ? sum : null
-  }
-  return null
 }
 
 // ── Page access tokens (in-memory only, never stored/logged) ─────────────────
@@ -275,10 +241,10 @@ export interface MetricSpec {
 export const FB_ACCOUNT_METRICS: MetricSpec[] = [
   { metricKey: 'brand_views', sourceMetric: 'page_media_view', mode: 'total_value', allowPeriodDayFallback: true, includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_media_views_v2' },
   { metricKey: 'unique_viewers', sourceMetric: 'page_total_media_view_unique', mode: 'total_value', includesPaid: 'both', aggregation: 'unique', comparableGroup: 'fb_media_viewers_v2' },
-  { metricKey: 'content_interactions', sourceMetric: 'page_post_engagements', mode: 'total_value', allowPeriodDayFallback: true, includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_interactions_v1' },
+  { metricKey: 'post_engagements', sourceMetric: 'page_post_engagements', mode: 'total_value', allowPeriodDayFallback: true, includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_interactions_v1' },
   { metricKey: 'follows_gained', sourceMetric: 'page_daily_follows', mode: 'period_day_sum', includesPaid: 'organic', aggregation: 'sum', comparableGroup: 'fb_follows_gained_v2' },
   { metricKey: 'page_visits', sourceMetric: 'page_views_total', mode: 'period_day_sum', includesPaid: 'both', aggregation: 'sum', comparableGroup: 'fb_page_visits_v1' },
-  { metricKey: 'current_followers', sourceMetric: 'followers_count', fallbackField: 'fan_count', mode: 'page_field', includesPaid: 'organic', aggregation: 'snapshot', comparableGroup: 'fb_followers_snapshot_v1' },
+  { metricKey: 'current_followers', sourceMetric: 'followers_count', mode: 'page_field', includesPaid: 'organic', aggregation: 'snapshot', comparableGroup: 'fb_followers_snapshot_v1' },
 ]
 
 // Instagram professional account candidates.
@@ -289,6 +255,7 @@ export const IG_ACCOUNT_METRICS: MetricSpec[] = [
   { metricKey: 'profile_visits', sourceMetric: 'profile_views', mode: 'total_value', includesPaid: 'both', aggregation: 'sum', comparableGroup: 'ig_profile_visits_v1' },
   { metricKey: 'website_clicks', sourceMetric: 'website_clicks', mode: 'total_value', includesPaid: 'both', aggregation: 'sum', comparableGroup: 'ig_website_clicks_v1' },
   { metricKey: 'follows_gained', sourceMetric: 'follows_and_unfollows', mode: 'total_value', includesPaid: 'organic', aggregation: 'sum', comparableGroup: 'ig_follows_gained_v2', breakdown: 'follow_type', valueKey: 'follows' },
+  { metricKey: 'unfollows', sourceMetric: 'follows_and_unfollows', mode: 'total_value', includesPaid: 'organic', aggregation: 'sum', comparableGroup: 'ig_unfollows_v1', breakdown: 'follow_type', valueKey: 'unfollows' },
   { metricKey: 'current_followers', sourceMetric: 'followers_count', mode: 'ig_field', includesPaid: 'organic', aggregation: 'snapshot', comparableGroup: 'ig_followers_snapshot_v1' },
 ]
 
@@ -338,7 +305,22 @@ export function metaPostBounds(periodStart: string, periodEnd: string): { since:
   }
 }
 
+// Each requested Pacific calendar day must have exactly one ending bucket.
+// Calendar arithmetic preserves 23/25-hour days across daylight-saving changes.
+export function expectedMetaDailyEnds(since: string, until: string): number[] {
+  const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: META_INSIGHTS_TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' })
+  let day = formatter.format(new Date(Number(since) * 1000))
+  const last = formatter.format(new Date(Number(until) * 1000))
+  const ends: number[] = []
+  while (day <= last && ends.length < 367) {
+    day = addUtcDays(day, 1)
+    ends.push(zonedStartEpoch(day, META_INSIGHTS_TIMEZONE) * 1000)
+  }
+  return ends
+}
+
 export interface MetricProbe {
+  usage?: MetaUsage
   metricKey: string
   sourceMetric: string
   platform: string
@@ -394,7 +376,7 @@ export async function probeMetric(
       const sourceMetric = typeof primaryValue === 'number'
         ? spec.sourceMetric
         : (typeof fallbackValue === 'number' && spec.fallbackField ? spec.fallbackField : spec.sourceMetric)
-      return { ...base, sourceMetric, value: v, availability: classifyValue(v), responseShape: 'field', metricType: 'field', rawSnapshot: tokenSafeSnapshot(body, tokens) }
+      return { ...base, usage: readMetaUsage(res.headers), sourceMetric, value: v, availability: classifyValue(v), responseShape: 'field', metricType: 'field', rawSnapshot: tokenSafeSnapshot(body, tokens) }
     } catch (e) {
       if (e instanceof MetaSyncDeadlineError) throw e
       return { ...base, value: null, availability: 'error', responseShape: 'error', metricType: 'field', error: { code: null, subcode: null, message: redact(String(e), tokens), type: null, trace: null } }
@@ -414,6 +396,9 @@ export async function probeMetric(
   }
 
   let lastErr: MetaErrorInfo | undefined
+  let lastSnapshot: unknown
+  let lastShape = 'error'
+  let lastReason: string | null = null
   for (const attempt of attempts) {
     assertMetaSyncActive(control, `${platform}/${spec.metricKey} ${attempt.metricType} probe`)
     try {
@@ -431,15 +416,14 @@ export async function probeMetric(
       }
       const body = await res.json()
       assertMetaSyncActive(control, `${platform}/${spec.metricKey} ${attempt.metricType} parse`)
-      const value = parseInsight(
-        body.data as Array<Record<string, unknown>>,
-        spec.valueKey,
-        spec.aggregation !== 'unique',
-      )
+      const parsed = parseMetaInsight(body.data, spec.sourceMetric, spec.aggregation !== 'unique', spec.valueKey, expectedMetaDailyEnds(since, until))
+      const value = parsed.value
       if (value !== null) {
-        return { ...base, value, availability: classifyValue(value), responseShape: attempt.metricType, metricType: attempt.metricType, rawSnapshot: tokenSafeSnapshot(body, tokens) }
+        return { ...base, usage: readMetaUsage(res.headers), value, availability: classifyValue(value), responseShape: parsed.responseShape, metricType: parsed.responseShape, rawSnapshot: tokenSafeSnapshot(body, tokens) }
       }
-      // ok but empty → try next shape
+      lastSnapshot = tokenSafeSnapshot(body, tokens)
+      lastShape = parsed.responseShape
+      lastReason = parsed.reason
     } catch (e) {
       if (e instanceof MetaSyncDeadlineError) throw e
       lastErr = { code: null, subcode: null, message: redact(String(e), tokens), type: null, trace: null }
@@ -447,7 +431,7 @@ export async function probeMetric(
   }
 
   const availability = lastErr ? classifyError(lastErr) : 'unavailable'
-  return { ...base, value: null, availability, responseShape: 'error', metricType: attempts[0]?.metricType ?? 'total_value', error: lastErr }
+  return { ...base, value: null, availability, responseShape: lastShape, metricType: attempts[0]?.metricType ?? 'total_value', rawSnapshot: lastSnapshot, error: lastErr ?? (lastReason ? { code: null, subcode: null, message: lastReason, type: 'metric_contract', trace: null } : undefined) }
 }
 
 // ── Fact persistence with preserve-verified-on-failure ───────────────────────
@@ -539,7 +523,7 @@ export async function syncAccountFacts(
     platform: args.platform, run_type: args.runType, period_month: args.periodMonth,
     period_start: args.periodStart, period_end: args.periodEnd,
     api_version: args.apiVersion, connector_version: META_CONNECTOR_VERSION,
-    token_class: args.tokenClass, requested_bounds: { since: args.periodStart, until: args.periodEnd },
+    token_class: args.tokenClass, requested_bounds: { ...insightBounds, period_start: args.periodStart, period_end: args.periodEnd, timezone: META_INSIGHTS_TIMEZONE }, source_timezone: META_INSIGHTS_TIMEZONE,
     business_timezone: 'Africa/Johannesburg', status: 'running', health_state: 'sync_error',
     started_at: new Date().toISOString(),
   }).select('id').single()
@@ -555,20 +539,11 @@ export async function syncAccountFacts(
     assertMetaSyncActive(control, `${args.platform} sync-run creation`)
     for (const spec of specs) {
     assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} metric`)
-    let probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, insightBounds.since, insightBounds.until, args.tokens, control)
+    const probe = await probeMetric(args.baseUrl, args.objectId, args.token, args.platform, spec, insightBounds.since, insightBounds.until, args.tokens, control)
     assertMetaSyncActive(control, `${args.platform}/${spec.metricKey} probe completion`)
 
-    // FB content interactions fallback: reconstruct from post engagement sums when
-    // the Page metric is unavailable. Stored as reconstructed, never claimed as
-    // Business Suite parity.
-    let sourceMetric = probe.sourceMetric
-    let aggregation = spec.aggregation
-    if (args.platform === 'facebook' && spec.metricKey === 'content_interactions'
-        && probe.availability !== 'complete' && typeof args.reconstructInteractions === 'number' && args.reconstructInteractions > 0) {
-      probe = { ...probe, sourceMetric: 'reconstructed_post_engagements', value: args.reconstructInteractions, availability: 'partial', responseShape: 'reconstructed_sum', metricType: 'reconstructed' }
-      sourceMetric = 'reconstructed_post_engagements'
-      aggregation = 'reconstructed'
-    }
+    const sourceMetric = probe.sourceMetric
+    const aggregation = spec.aggregation
 
     probes.push(probe)
     // 2. Provenance snapshot for every attempt (definitive or not).
@@ -581,7 +556,9 @@ export async function syncAccountFacts(
       metric_type: probe.metricType,
       availability: probe.availability,
       value: probe.value,
+      provider_usage: probe.usage ?? probe.error?.usage ?? null,
       error: probe.error ? {
+        http_status: probe.error.httpStatus ?? null,
         code: probe.error.code,
         subcode: probe.error.subcode,
         message: redact(probe.error.message, args.tokens),

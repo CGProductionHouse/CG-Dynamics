@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { metaBatchHealth } from '../../lib/metaSyncHealth'
 import { supabase } from '../../lib/supabase'
 import { listClients, type Client } from '../../lib/db/clients'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
@@ -442,6 +443,9 @@ export default function MetaIntegrationPage() {
     failed_items: number
     running_items: number
     queued_items: number
+    cooldown_until?: string | null
+    worker_heartbeat_at?: string | null
+    last_worker_error?: string | null
   } | null>(null)
   const [batchStalled, setBatchStalled] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -709,7 +713,7 @@ export default function MetaIntegrationPage() {
       const [{ data: batchData }, { data: itemRows }] = await Promise.all([
         supabase
           .from('meta_sync_batches')
-          .select('id, status, total_items, completed_items, failed_items')
+          .select('id, status, total_items, completed_items, failed_items, cooldown_until, worker_heartbeat_at, last_worker_error')
           .eq('id', batchIdValue)
           .single(),
         supabase
@@ -739,6 +743,9 @@ export default function MetaIntegrationPage() {
         failed_items: rows.length > 0 ? failedCount : Number(batchData?.failed_items ?? 0),
         running_items: runningCount,
         queued_items: queuedCount,
+        cooldown_until: batchData?.cooldown_until,
+        worker_heartbeat_at: batchData?.worker_heartbeat_at,
+        last_worker_error: batchData?.last_worker_error,
       })
 
       // Restoration is finished the moment we have real counts — replace the
@@ -766,7 +773,8 @@ export default function MetaIntegrationPage() {
         if (
           stallRef.current >= 10
           && (runningCount === 0 || staleRunningCount === runningCount)
-        ) setBatchStalled(true)
+        ) setBatchStalled(metaBatchHealth(batchData, Date.now(), true).stalled)
+        else setBatchStalled(false)
       }
 
       const parentFinished = batchData?.status === 'completed' || batchData?.status === 'failed'
@@ -1004,7 +1012,7 @@ export default function MetaIntegrationPage() {
       if (savedBatchId) {
         const { data } = await supabase
           .from('meta_sync_batches')
-          .select('id, status, total_items, completed_items, failed_items')
+          .select('id, status, total_items, completed_items, failed_items, cooldown_until, worker_heartbeat_at, last_worker_error')
           .eq('id', savedBatchId)
           .single()
 
@@ -1025,7 +1033,7 @@ export default function MetaIntegrationPage() {
 
       const { data: activeBatches } = await supabase
         .from('meta_sync_batches')
-        .select('id, status, total_items, completed_items, failed_items')
+        .select('id, status, total_items, completed_items, failed_items, cooldown_until, worker_heartbeat_at, last_worker_error')
         .in('status', ['queued', 'running'])
         .order('created_at', { ascending: false })
         .limit(1)
@@ -2119,7 +2127,7 @@ export default function MetaIntegrationPage() {
             <div className="mt-3 rounded-xl border border-brand-accent/20 bg-brand-accent/10 p-4">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-sm font-semibold text-brand-accent">
-                  {batchStalled ? 'Sync is not moving' : 'Syncing in background...'}
+                  {metaBatchHealth(batch, Date.now(), false).coolingDown ? 'Waiting for Meta' : batchStalled ? 'Sync needs attention' : 'Syncing in background...'}
                 </p>
                 <span className="text-xs text-brand-primary/60">
                   {(batch.completed_items ?? 0) + (batch.failed_items ?? 0)} / {batch.total_items ?? 0}
@@ -2138,6 +2146,11 @@ export default function MetaIntegrationPage() {
                 <span>Queued: {batch.queued_items ?? 0}</span>
                 <span className="ml-auto">{batch.total_items > 0 ? Math.round((((batch.completed_items ?? 0) + (batch.failed_items ?? 0)) / batch.total_items) * 100) : 0}%</span>
               </div>
+              {metaBatchHealth(batch, Date.now(), false).coolingDown && (
+                <p className="mt-3 text-xs text-brand-primary" role="status">
+                  {batch.last_worker_error || 'Meta requested a pause.'} Next retry: {new Date(batch.cooldown_until!).toLocaleString('en-ZA')}. Sync resumes automatically.
+                </p>
+              )}
               {/* A restart is safe when nothing is running or every running item
                   has exceeded the worker lease. The claim RPC requeues stale rows
                   atomically before locking the next item. */}
