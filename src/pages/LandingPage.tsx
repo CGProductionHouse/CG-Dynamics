@@ -52,6 +52,10 @@ export default function LandingPage() {
           )}
         </div>
       )}
+      <nav aria-label="Legal" className="flex gap-4 text-xs text-brand-primary">
+        <Link to="/privacy-policy" className="hover:text-brand-accent transition">Privacy Policy</Link>
+        <Link to="/terms-of-service" className="hover:text-brand-accent transition">Terms of Service</Link>
+      </nav>
     </div>
   )
 }
