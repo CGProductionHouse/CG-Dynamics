@@ -6,12 +6,13 @@ GitHub lane: Issue #238 / draft PR #239, branch `feat/tiktok-v1-provider`
 
 ## Current code checkpoint
 
-- Current pushed head before this legal-page checkpoint: `192c79b` (`docs(tiktok): record provider rollout handoff`).
+- Current pushed head before this provider-state checkpoint: `d421e29` (`docs(tiktok): record preview rollout gate`).
 - Read-only OAuth requests `user.info.basic`, `user.info.profile`, `user.info.stats`, and `video.list`.
 - `video.publish` is added to OAuth and connection-health requirements only when `TIKTOK_PUBLISHING_ENABLED=true`.
 - Provider writes remain fail-closed unless that flag is exactly `true`.
+- The integration page describes the active rollout as read-only and no longer tells staff that Content Posting API or publishing is part of the configured sandbox.
 - Public, unauthenticated `/privacy-policy` and `/terms-of-service` routes are implemented locally for the provider application and linked from the landing and sign-in pages.
-- Validation with these changes: 77/77 focused tests passed; `npm run build`, focused ESLint, and `git diff --check` passed.
+- Validation with these changes: 78/78 focused tests passed; `npm run build`, focused ESLint, and `git diff --check` passed.
 - The Vercel build for `2858f1e` was refused by the project build-rate limit. The preceding PR preview is healthy and authenticated browser QA was completed against it.
 
 ## Live TikTok Developer Portal truth
@@ -28,9 +29,9 @@ GitHub lane: Issue #238 / draft PR #239, branch `feat/tiktok-v1-provider`
 - Sandbox was created on 2026-09-08 with explicit CA approval.
 - Never copy client keys or secrets into this document or GitHub.
 
-## Sandbox configuration prepared in the live portal
+## Sandbox configuration saved in the live portal
 
-These values are entered in the browser but still require **Apply changes** to persist. TikTok currently reports only the missing app-icon requirement:
+Verified again in the authenticated TikTok Developer Portal after CA completed the browser actions:
 
 - Category: Business.
 - Description: `CG Dynamics manages client social performance, content approvals, analytics, and approved publishing workflows.`
@@ -42,9 +43,28 @@ These values are entered in the browser but still require **Apply changes** to p
 - Content Posting API is intentionally absent from the read-only sandbox.
 - Terms URL: `https://www.cgdynamics.co.za/terms-of-service`.
 - Privacy URL: `https://www.cgdynamics.co.za/privacy-policy`.
-- Target-account authorization was opened for the intended `@cgproductionhouse` account, but the sandbox authorization window requires a separate TikTok login before it can be added.
+- Target user: `cgproductionhouse`, added 2026-09-08 at 17:14 portal time.
 
-The Chrome integration could not transfer a local image into TikTok's file picker. The remaining browser steps are to upload a compliant square app icon, apply the prepared sandbox changes, then sign in as `@cgproductionhouse` in the already-open authorization window and approve the sandbox connection.
+The sandbox form shows no validation error. The app icon is present, the configuration is saved, and the target account is authorized. Provider-side read-only sandbox setup is complete.
+
+## Live Supabase deployment preflight
+
+Read-only inspection of project `ehtjfntukiwbgptqgbzy` on 2026-09-08 established:
+
+- No `tiktok-*` Edge Function is deployed.
+- `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, and `TIKTOK_REDIRECT_URI` are not configured as Edge Function secrets.
+- REST schema checks return `PGRST205`/missing-table responses for the TikTok provider tables, so phases 5a, 5b, and 5c have not been applied.
+- No production data, schema, function, or secret was changed during this inspection.
+
+Real OAuth cannot start safely until this deployment gate is approved and completed. The minimal read-only rollout is:
+
+1. Apply `supabase/phase-5a-tiktok-provider-foundation.sql`.
+2. Apply `supabase/phase-5b-tiktok-metric-registry.sql`.
+3. Apply `supabase/phase-5c-tiktok-client-mapping.sql`.
+4. Configure the sandbox client key, sandbox client secret, and exact callback as the three TikTok Edge Function secrets. Leave `TIKTOK_PUBLISHING_ENABLED` unset/false.
+5. Deploy only `tiktok-oauth-start`, `tiktok-oauth-callback`, `tiktok-connection-status`, and `tiktok-sync`. The callback must allow the provider's unauthenticated redirect; the other functions retain authenticated admin/manager checks.
+6. Run OAuth from the PR preview for the exact **CG Production House** client, then verify granted scopes and exact TikTok identity before syncing.
+7. Run a read-only sync and compare the returned profile and public-video facts against the authenticated `@cgproductionhouse` account. Confirm missing values remain unavailable and the connection remains isolated from Cape Lumber.
 
 ## Production draft state
 
@@ -58,12 +78,11 @@ The production browser tab contains unsaved exploratory values. Treat these as u
 
 Production prerequisites still missing:
 
-1. Deploy the implemented public, unauthenticated CG Dynamics Terms of Service and Privacy Policy pages before the provider URLs are relied on outside sandbox setup.
-2. A compliant 1024x1024 app icon. Existing assets are 1254x1254 and 1080x1080; TikTok's browser field still needs a file upload.
-3. Domain ownership verification for `cgdynamics.co.za`, normally using TikTok's DNS-record method.
-4. Sandbox demonstration video showing the real integration and every requested production product/scope.
-5. Explicit CA approval before production review submission.
-6. Explicit CA approval before storing production credentials, applying migrations, deploying Edge Functions, enabling publishing, or publishing content.
+1. Deploy the implemented public, unauthenticated CG Dynamics Terms of Service and Privacy Policy pages before the provider URLs are relied on for production review.
+2. Domain ownership verification for `cgdynamics.co.za`, normally using TikTok's DNS-record method.
+3. Sandbox demonstration video showing the real integration and every requested production product/scope.
+4. Explicit CA approval before production review submission.
+5. Explicit CA approval before production credentials, production app changes, enabling publishing, or publishing content.
 
 ## Provider architecture decision
 
@@ -107,12 +126,10 @@ Local unauthenticated acceptance for the provider legal routes:
 
 ## Exact continuation order
 
-1. Upload a compliant app icon in the open sandbox tab and click **Apply changes**.
-2. In the already-open target-account authorization tab, sign in as `@cgproductionhouse` and approve the sandbox connection.
-3. Deploy the public legal routes and the PR's Edge Functions and migration only after explicit CA approval.
-4. Store the sandbox client key/secret as secrets only after explicit CA approval; never paste them into chat, GitHub, logs, or repository files.
-5. Run exact-client OAuth for **CG Production House**, inspect granted scopes, connection status, and a read-only sync.
-6. Compare synced profile/video facts against the native authenticated TikTok account.
-7. Verify the production domain and prepare a sandbox demonstration video.
-8. Confirm the appropriate agency publishing path with TikTok API for Business before changing the production app or enabling `TIKTOK_PUBLISHING_ENABLED`.
-9. Prepare review evidence, then stop for explicit CA approval before any submission.
+1. Obtain CA approval for the exact read-only Supabase gate documented above: three migration phases, three sandbox secrets, and four read-only Edge Functions.
+2. Run exact-client OAuth for **CG Production House**, inspect granted scopes, connection status, and a read-only sync.
+3. Compare synced profile/video facts against the native authenticated TikTok account and verify Cape Lumber remains isolated.
+4. Wait for a fresh Vercel PR deployment and browser-verify the public legal routes and updated read-only integration copy.
+5. Verify the production domain and prepare a sandbox demonstration video.
+6. Confirm the appropriate agency publishing path with TikTok API for Business before changing the production app or enabling `TIKTOK_PUBLISHING_ENABLED`.
+7. Prepare review evidence, then stop for explicit CA approval before any submission.

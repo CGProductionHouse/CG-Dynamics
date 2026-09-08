@@ -162,7 +162,7 @@ export default function TikTokIntegrationPage() {
           <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Integrations</p>
           <h1 className="mt-2 text-2xl font-semibold text-white">TikTok connection</h1>
           <p className="mt-1 max-w-3xl text-sm text-brand-primary">
-            Connect a TikTok account for organic analytics and content publishing. Uses TikTok&apos;s official Display API and Content Posting API.
+            Connect an exact TikTok account for read-only organic analytics through TikTok&apos;s official Login Kit and Display API.
           </p>
         </div>
         <ActionButton variant="ghost" onClick={() => navigate('/admin/integrations')}>Back to integrations</ActionButton>
@@ -179,7 +179,7 @@ export default function TikTokIntegrationPage() {
             title="TikTok account"
             subtitle={connected && status?.connection
               ? `Connected as ${status.connection.displayName ?? 'TikTok user'}. Token ${status.connection.tokenExpired ? 'needs refresh' : 'valid'}.`
-              : 'Connect a TikTok account to enable analytics sync and content publishing.'}
+              : 'Connect a TikTok account to enable read-only analytics sync.'}
             action={
               <div className="flex items-center gap-3">
                 <StatusBadge label={statusLabel} variant={statusVariant} size="sm" />
@@ -220,14 +220,13 @@ export default function TikTokIntegrationPage() {
               <div className="rounded-lg border border-white/8 bg-black/20 p-4">
                 <h3 className="text-sm font-semibold text-white">Prerequisites</h3>
                 <ul className="mt-2 space-y-1.5 text-sm text-brand-primary">
-                  <li>Register an app on TikTok for Developers and add the Content Posting API product.</li>
+                  <li>Register an app on TikTok for Developers and authorize the exact account as a sandbox target user.</li>
                   <li>Enable Login Kit and configure a redirect URI for your Supabase Edge Function callback.</li>
-                  <li>Read-only rollout requests user.info.basic, user.info.profile, user.info.stats, and video.list. video.publish is added only when publishing is explicitly enabled.</li>
-                  <li>Pass TikTok&apos;s app audit before content can be posted publicly.</li>
+                  <li>Read-only rollout requests user.info.basic, user.info.profile, user.info.stats, and video.list.</li>
                 </ul>
               </div>
               <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">
-                Until your TikTok app is audited and approved, all posts are restricted to private/self-only visibility.
+                Publishing is unavailable in this rollout. CG Dynamics does not request video.publish or send content to TikTok.
               </div>
             </div>
           )}
@@ -334,27 +333,23 @@ export default function TikTokIntegrationPage() {
           </div>
         </PremiumCard>
 
-        {/* Publishing foundation info */}
+        {/* Publishing rollout boundary */}
         <PremiumCard>
           <PremiumCardHeader
             eyebrow="Publishing"
-            title="Content Posting API"
-            subtitle="Publish videos directly to TikTok. Requires app audit approval before public posting."
+            title="Not enabled"
+            subtitle="This connection is limited to read-only account and video analytics."
           />
           <div className="space-y-3 text-sm text-brand-primary">
             <p>
-              This integration uses Direct Post with the video.publish scope. It does not request video.upload because CG Dynamics does not send drafts to the TikTok inbox.
-              Videos are posted asynchronously — poll status until PUBLISH_COMPLETE.
+              The current TikTok for Developers sandbox does not include Content Posting API and CG Dynamics does not request video.publish or video.upload.
             </p>
             <div className="rounded-lg border border-white/8 bg-black/20 p-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-white">Key limitations</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-white">Future publishing gate</h4>
               <ul className="mt-2 space-y-1 text-xs text-brand-primary">
-                <li>6 requests per minute per user token on posting endpoints.</li>
-                <li>Upload URLs expire after 1 hour.</li>
-                <li>Unaudited apps can only post to private/self-only accounts.</li>
-                <li>Privacy level must match creator&apos;s available options from creator_info/query.</li>
-                <li>Daily post cap per user applies.</li>
-                <li>Provider writes remain disabled until app review, URL ownership, and the final publish UX are approved.</li>
+                <li>Agency publishing requires a separately approved provider route that fits CG&apos;s managed-client use case.</li>
+                <li>Media delivery must use a CG-controlled hostname or URL prefix accepted by that provider.</li>
+                <li>Provider writes remain disabled until provider review and CA approval are complete.</li>
               </ul>
             </div>
           </div>

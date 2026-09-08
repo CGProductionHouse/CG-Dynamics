@@ -25,6 +25,7 @@ const POST_INIT_SOURCE = readSource('supabase/functions/tiktok-post-init/index.t
 const SHARED_TIKTOK_SOURCE = readSource('supabase/functions/_shared/tiktok.ts')
 const METRIC_REGISTRY_SOURCE = readSource('supabase/phase-5b-tiktok-metric-registry.sql')
 const FRONTEND_TIKTOK_SOURCE = readSource('src/lib/tiktok.ts')
+const TIKTOK_INTEGRATION_PAGE_SOURCE = readSource('src/pages/admin/TikTokIntegrationPage.tsx')
 
 function expect(actual) {
   const matchers = {
@@ -986,6 +987,12 @@ describe('TikTok provider rollout contract', () => {
 
   it('fails closed until publishing is deliberately enabled', () => {
     expect(POST_INIT_SOURCE).toContain("Deno.env.get('TIKTOK_PUBLISHING_ENABLED') !== 'true'")
+  })
+
+  it('describes the active browser rollout as read-only', () => {
+    expect(TIKTOK_INTEGRATION_PAGE_SOURCE).toContain('Publishing is unavailable in this rollout.')
+    expect(TIKTOK_INTEGRATION_PAGE_SOURCE).toContain('does not request video.publish or video.upload')
+    expect(TIKTOK_INTEGRATION_PAGE_SOURCE).not.toContain('Connect a TikTok account for organic analytics and content publishing')
   })
 
   it('requires explicit privacy and interaction selections with no provider defaults', () => {
