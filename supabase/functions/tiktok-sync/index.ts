@@ -108,6 +108,7 @@ Deno.serve(async (req) => {
   }
 
   const periodMonth = body.periodMonth ?? getPreviousMonth()
+  const { periodStart, periodEnd } = getMonthDateBounds(periodMonth)
 
   // EXPLICIT client-account resolution — never use "first connected"
   const { connectionId, error: connError } = await resolveTiktokConnectionForClient(sb, body.clientId)
@@ -148,7 +149,8 @@ Deno.serve(async (req) => {
 
   // Create sync run record — start as 'running', finalize only after sync completes.
   // Interrupted executions must never remain 'success'.
-  const { data: syncRun } = await sb
+  const TIKTOK_CONNECTOR_VERSION = 'tiktok-v1'
+  const { data: syncRun, error: syncRunError } = await sb
     .from('platform_sync_runs')
     .insert({
       client_id: body.clientId,
@@ -156,14 +158,28 @@ Deno.serve(async (req) => {
       platform: 'tiktok',
       run_type: 'manual',
       period_month: periodMonth,
+      period_start: periodStart,
+      period_end: periodEnd,
+      api_version: 'v2',
+      connector_version: TIKTOK_CONNECTOR_VERSION,
+      business_timezone: 'Africa/Johannesburg',
+      token_class: 'user',
+      requested_bounds: { since: periodStart, until: periodEnd },
       status: 'running',
-      health_state: 'partial',
+      health_state: 'sync_error',
       started_at: new Date().toISOString(),
     })
     .select('id')
     .single()
 
-  const syncRunId = syncRun?.id
+  if (syncRunError || !syncRun?.id) {
+    return jsonResponse({
+      ok: false,
+      error: `Could not create TikTok sync checkpoint: ${syncRunError?.message ?? 'missing sync run id'}`,
+    }, 500)
+  }
+
+  const syncRunId = syncRun.id as string
 
   // Fetch user profile
   const { user: profileData, error: profileError } = await getTiktokUserInfo(accessToken)
@@ -221,12 +237,9 @@ Deno.serve(async (req) => {
   const videoMetricNotes = `Cumulative as-of snapshot for ${periodVideos.length} video(s) published in ${periodMonth}. These numbers will change if re-synced later because videos accumulate engagement over time.`
   const profileMetricNotes = `Current snapshot at sync time (${new Date().toISOString().split('T')[0]}). Not attributable to any specific period.`
 
-  const { periodStart, periodEnd } = getMonthDateBounds(periodMonth)
-
   // Upsert monthly facts for each metric
   // Must match the full 19-parameter signature of upsert_platform_metric_fact_preserving_verified
   // (see phase-20e-facts-client-access-and-curation.sql / _shared/meta.ts)
-  const TIKTOK_CONNECTOR_VERSION = 'tiktok-v1'
   const facts = [
     { metricKey: 'views', sourceMetric: 'view_count', value: totals.views, aggregation: 'sum', comparableGroup: 'tiktok_organic' },
     { metricKey: 'likes', sourceMetric: 'like_count', value: totals.likes, aggregation: 'sum', comparableGroup: 'tiktok_organic' },
@@ -262,7 +275,11 @@ Deno.serve(async (req) => {
       p_api_version: 'v2',
       p_connector_version: TIKTOK_CONNECTOR_VERSION,
       p_source_timezone: null,
-      p_provenance: { source: 'tiktok_display_api', sync_date: new Date().toISOString() },
+      p_provenance: {
+        source: 'tiktok_display_api',
+        sync_date: new Date().toISOString(),
+        notes: fact.aggregation === 'sum' ? videoMetricNotes : profileMetricNotes,
+      },
       p_sync_run_id: syncRunId,
       p_verified_at: new Date().toISOString(),
     })
@@ -310,27 +327,31 @@ Deno.serve(async (req) => {
   }
 
   // Determine final status based on actual health
-  const finalStatus = syncHealth === 'sync_error' ? 'failed' : 'success'
+  const finalStatus = syncHealth === 'sync_error' ? 'failed' : syncHealth === 'partial' ? 'partial' : 'success'
+  const finalHealthState = syncHealth === 'partial' ? 'verified_partial' : syncHealth
 
   // Update sync run
-  if (syncRunId) {
-    await sb.from('platform_sync_runs')
-      .update({
-        status: finalStatus,
-        health_state: syncHealth,
-        finished_at: new Date().toISOString(),
-        summary: {
-          periodMonth,
-          videosFound: allVideos.length,
-          videosInPeriod: periodVideos.length,
-          paginationComplete,
-          totalViews: totals.views,
-          totalLikes: totals.likes,
-          followerCount: profileData?.follower_count ?? null,
-          errors: syncErrors.length > 0 ? syncErrors : undefined,
-        },
-      })
-      .eq('id', syncRunId)
+  const { error: syncRunUpdateError } = await sb.from('platform_sync_runs')
+    .update({
+      status: finalStatus,
+      health_state: finalHealthState,
+      finished_at: new Date().toISOString(),
+      summary: {
+        periodMonth,
+        videosFound: allVideos.length,
+        videosInPeriod: periodVideos.length,
+        paginationComplete,
+        totalViews: totals.views,
+        totalLikes: totals.likes,
+        followerCount: profileData?.follower_count ?? null,
+        errors: syncErrors.length > 0 ? syncErrors : undefined,
+      },
+    })
+    .eq('id', syncRunId)
+
+  if (syncRunUpdateError) {
+    syncErrors.push(`Sync checkpoint finalization failed: ${syncRunUpdateError.message}`)
+    syncHealth = 'partial'
   }
 
   return jsonResponse({

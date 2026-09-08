@@ -6,14 +6,14 @@ GitHub lane: Issue #238 / draft PR #239, branch `feat/tiktok-v1-provider`
 
 ## Current code checkpoint
 
-- Current pushed head before this provider-state checkpoint: `d421e29` (`docs(tiktok): record preview rollout gate`).
+- Current pushed head before this rollout checkpoint: `3e36fe67`.
 - Read-only OAuth requests `user.info.basic`, `user.info.profile`, `user.info.stats`, and `video.list`.
 - `video.publish` is added to OAuth and connection-health requirements only when `TIKTOK_PUBLISHING_ENABLED=true`.
 - Provider writes remain fail-closed unless that flag is exactly `true`.
 - The integration page describes the active rollout as read-only and no longer tells staff that Content Posting API or publishing is part of the configured sandbox.
 - Public, unauthenticated `/privacy-policy` and `/terms-of-service` routes are implemented locally for the provider application and linked from the landing and sign-in pages.
-- Validation with these changes: 78/78 focused tests passed; `npm run build`, focused ESLint, and `git diff --check` passed.
-- The Vercel build for `2858f1e` was refused by the project build-rate limit. The preceding PR preview is healthy and authenticated browser QA was completed against it.
+- The live rollout exposed and fixed two contract defects: the metric seed now supplies the live non-null `comparable_group`, and `tiktok-sync` now creates and finalizes a valid canonical `platform_sync_runs` checkpoint before writing facts.
+- Validation after the checkpoint fix: 80/80 focused tests passed; final build, focused ESLint, and diff checks are recorded in the PR checkpoint.
 
 ## Live TikTok Developer Portal truth
 
@@ -47,24 +47,19 @@ Verified again in the authenticated TikTok Developer Portal after CA completed t
 
 The sandbox form shows no validation error. The app icon is present, the configuration is saved, and the target account is authorized. Provider-side read-only sandbox setup is complete.
 
-## Live Supabase deployment preflight
+## Live Supabase read-only rollout
 
-Read-only inspection of project `ehtjfntukiwbgptqgbzy` on 2026-09-08 established:
-
-- No `tiktok-*` Edge Function is deployed.
-- `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, and `TIKTOK_REDIRECT_URI` are not configured as Edge Function secrets.
-- REST schema checks return `PGRST205`/missing-table responses for the TikTok provider tables, so phases 5a, 5b, and 5c have not been applied.
-- No production data, schema, function, or secret was changed during this inspection.
-
-Real OAuth cannot start safely until this deployment gate is approved and completed. The minimal read-only rollout is:
+CA approved the bounded read-only rollout. The following changes were completed in project `ehtjfntukiwbgptqgbzy` on 2026-09-08:
 
 1. Apply `supabase/phase-5a-tiktok-provider-foundation.sql`.
 2. Apply `supabase/phase-5b-tiktok-metric-registry.sql`.
 3. Apply `supabase/phase-5c-tiktok-client-mapping.sql`.
-4. Configure the sandbox client key, sandbox client secret, and exact callback as the three TikTok Edge Function secrets. Leave `TIKTOK_PUBLISHING_ENABLED` unset/false.
-5. Deploy only `tiktok-oauth-start`, `tiktok-oauth-callback`, `tiktok-connection-status`, and `tiktok-sync`. The callback must allow the provider's unauthenticated redirect; the other functions retain authenticated admin/manager checks.
-6. Run OAuth from the PR preview for the exact **CG Production House** client, then verify granted scopes and exact TikTok identity before syncing.
-7. Run a read-only sync and compare the returned profile and public-video facts against the authenticated `@cgproductionhouse` account. Confirm missing values remain unavailable and the connection remains isolated from Cape Lumber.
+4. Configured `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, and `TIKTOK_REDIRECT_URI` as Edge Function secrets. Secret values were never written to the repository or GitHub. `TIKTOK_PUBLISHING_ENABLED` remains unset.
+5. Deployed only `tiktok-oauth-start`, `tiktok-oauth-callback`, `tiktok-connection-status`, and `tiktok-sync`. The first three are version 1; final accepted `tiktok-sync` is version 3. The callback has JWT verification disabled for the provider redirect; the other three have JWT verification enabled and also enforce admin/manager access in function code.
+
+Phase 5a applied successfully. The first phase 5b attempt was rejected atomically because the live `metric_registry.comparable_group` column is non-null while the seed supplied null for some metrics. The branch seed was corrected to use `tiktok_organic` for video facts and `tiktok_profile` for profile snapshots, matching `tiktok-sync`; no partial phase 5b rows were inserted by the failed statement. The corrected phase 5b and phase 5c then applied successfully. All five provider tables have RLS enabled. Token and OAuth-state tables have no client policies; service-role functions are their only access path.
+
+The first real sync exposed a second live-only defect. The TikTok function inserted `health_state='partial'`, which is outside the canonical sync-run constraint, then continued without an id. Supabase-js omitted the undefined `p_sync_run_id`, so PostgREST could not resolve the 19-argument fact RPC. The function now uses the canonical run fields and health values, checks the insert result, fails closed without a durable checkpoint, and stores truthful snapshot notes in fact provenance. Version 3 of `tiktok-sync` was deployed for final acceptance.
 
 ## Production draft state
 
@@ -124,12 +119,24 @@ Local unauthenticated acceptance for the provider legal routes:
 - `/terms-of-service` renders directly without an auth redirect and identifies authorized account use, provider permissions, approval-bound publishing, and contact terms.
 - Both routes were checked at desktop size and at a 390x844 mobile viewport; navigation and content remain available without horizontal page overflow.
 
+Authenticated sandbox rollout acceptance completed on the current PR preview:
+
+- Selected the exact **CG Production House** client before OAuth.
+- TikTok consent identified **CGPRODUCTIONHOUSE** and requested only profile basics, additional profile information, profile statistics, and public-video read access.
+- The stored connection resolves for the exact CG Production House client id `c27d2185-08e4-4c49-be48-2572564ceecf`.
+- Granted scopes rendered as exactly `user.info.basic`, `user.info.profile`, `user.info.stats`, and `video.list`; the access token was valid.
+- September 2026 sync completed successfully with one in-period video and complete pagination.
+- Final CG Dynamics/API result: 816 views, 27 likes, 0 comments, 1 share, 2,282 current followers, 132 following, 10,170 total likes, and 157 videos.
+- Native signed-in TikTok rendered 2,282 followers and 10.2K profile likes. The same September video rendered 816 views, matching the final API result; its detail view rendered 27 likes, 0 comments, and 1 share. The view count advanced from 808 to 816 between acceptance runs and matched TikTok at both observation times, demonstrating that the value is a live cumulative snapshot.
+- Eight TikTok facts persisted with `availability='partial'` because they are cumulative or current snapshots, not period totals. The real zero comment count remained a provider-backed zero; missing values are not synthesized.
+- The final durable sync row is `status='success'`, `health_state='verified'`, with one in-period video and complete pagination.
+- Selecting **Cape Lumber** after OAuth still renders `Not connected` and keeps sync disabled, confirming exact-client isolation in the live preview.
+- OAuth callback currently returns to `APP_PUBLIC_URL` (the production app host). Because main does not yet contain PR #239's TikTok route, that host falls back to the hub; preview acceptance continued by reopening the PR route. After merge, the same callback target will resolve normally.
+
 ## Exact continuation order
 
-1. Obtain CA approval for the exact read-only Supabase gate documented above: three migration phases, three sandbox secrets, and four read-only Edge Functions.
-2. Run exact-client OAuth for **CG Production House**, inspect granted scopes, connection status, and a read-only sync.
-3. Compare synced profile/video facts against the native authenticated TikTok account and verify Cape Lumber remains isolated.
-4. Wait for a fresh Vercel PR deployment and browser-verify the public legal routes and updated read-only integration copy.
-5. Verify the production domain and prepare a sandbox demonstration video.
-6. Confirm the appropriate agency publishing path with TikTok API for Business before changing the production app or enabling `TIKTOK_PUBLISHING_ENABLED`.
-7. Prepare review evidence, then stop for explicit CA approval before any submission.
+1. Keep the live rollout read-only; do not deploy publishing functions or set `TIKTOK_PUBLISHING_ENABLED`.
+2. Wait for a fresh Vercel PR deployment and browser-verify the public legal routes and updated read-only integration copy.
+3. Verify the production domain and prepare a sandbox demonstration video.
+4. Confirm the appropriate agency publishing path with TikTok API for Business before changing the production app or enabling `TIKTOK_PUBLISHING_ENABLED`.
+5. Prepare review evidence, then stop for explicit CA approval before any production review submission.

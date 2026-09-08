@@ -21,6 +21,7 @@ const readSource = path => readFileSync(resolve(testDir, '..', path), 'utf8')
 const OAUTH_START_SOURCE = readSource('supabase/functions/tiktok-oauth-start/index.ts')
 const OAUTH_CALLBACK_SOURCE = readSource('supabase/functions/tiktok-oauth-callback/index.ts')
 const CONNECTION_STATUS_SOURCE = readSource('supabase/functions/tiktok-connection-status/index.ts')
+const SYNC_SOURCE = readSource('supabase/functions/tiktok-sync/index.ts')
 const POST_INIT_SOURCE = readSource('supabase/functions/tiktok-post-init/index.ts')
 const SHARED_TIKTOK_SOURCE = readSource('supabase/functions/_shared/tiktok.ts')
 const METRIC_REGISTRY_SOURCE = readSource('supabase/phase-5b-tiktok-metric-registry.sql')
@@ -459,6 +460,19 @@ describe('TikTok metric labeling truthfulness', () => {
 
 // ── 9. RPC contract match ────────────────────────────────────────────────
 describe('TikTok sync RPC contract', () => {
+  it('creates a valid canonical sync checkpoint and fails closed without its id', () => {
+    expect(SYNC_SOURCE).toMatch(/business_timezone:\s*'Africa\/Johannesburg'/)
+    expect(SYNC_SOURCE).toMatch(/token_class:\s*'user'/)
+    expect(SYNC_SOURCE).toMatch(/health_state:\s*'sync_error'/)
+    expect(SYNC_SOURCE).toMatch(/syncRunError\s*\|\|\s*!syncRun\?\.id/)
+    expect(SYNC_SOURCE).toMatch(/const syncRunId = syncRun\.id as string/)
+  })
+
+  it('maps partial API health to canonical sync-run status values', () => {
+    expect(SYNC_SOURCE).toMatch(/syncHealth === 'partial' \? 'partial' : 'success'/)
+    expect(SYNC_SOURCE).toMatch(/syncHealth === 'partial' \? 'verified_partial' : syncHealth/)
+  })
+
   it('sends all 19 required parameters matching the Meta implementation', () => {
     // The real function signature from phase-20e-facts-client-access-and-curation.sql:
     // p_client_id, p_asset_id, p_platform, p_period_month, p_period_start,
@@ -980,6 +994,9 @@ describe('TikTok provider rollout contract', () => {
 
   it('keeps every TikTok registry metric provider-specific and repairs existing rows on conflict', () => {
     expect(METRIC_REGISTRY_SOURCE).not.toMatch(/'(?:sum|snapshot)', '[^']+', true, true,/)
+    expect(METRIC_REGISTRY_SOURCE).not.toMatch(/'(?:sum|snapshot)', '[^']+', true, false, null,/)
+    expect(METRIC_REGISTRY_SOURCE).toContain("'tiktok_organic'")
+    expect(METRIC_REGISTRY_SOURCE).toContain("'tiktok_profile'")
     expect(METRIC_REGISTRY_SOURCE).toContain('cross_platform_additive = excluded.cross_platform_additive')
     expect(METRIC_REGISTRY_SOURCE).toContain('comparable_group = excluded.comparable_group')
     expect(FRONTEND_TIKTOK_SOURCE).not.toContain('crossPlatformAdditive: true')
