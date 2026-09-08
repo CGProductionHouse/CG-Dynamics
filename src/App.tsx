@@ -13,6 +13,8 @@ const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const PrivacyPolicyPage = lazy(() => import('./pages/LegalPage').then(module => ({ default: module.PrivacyPolicyPage })))
+const TermsOfServicePage = lazy(() => import('./pages/LegalPage').then(module => ({ default: module.TermsOfServicePage })))
 const ClientPerformancePage = lazy(() => import('./pages/admin/ClientPerformancePage'))
 const CgHubPage = lazy(() => import('./pages/admin/CgHubPage'))
 const ClientsList = lazy(() => import('./pages/admin/ClientsList'))
@@ -29,6 +31,7 @@ const PublishedPreview = lazy(() => import('./pages/admin/PublishedPreview'))
 const IntegrationsPage = lazy(() => import('./pages/admin/IntegrationsPage'))
 const MetaIntegrationPage = lazy(() => import('./pages/admin/MetaIntegrationPage'))
 const GoogleAdsIntegrationPage = lazy(() => import('./pages/admin/GoogleAdsIntegrationPage'))
+const TikTokIntegrationPage = lazy(() => import('./pages/admin/TikTokIntegrationPage'))
 const AssistantPage = lazy(() => import('./pages/admin/AssistantPage'))
 const PackageMasterPage = lazy(() => import('./pages/admin/PackageMasterPage'))
 const ClientSchedulePage = lazy(() => import('./pages/admin/ClientSchedulePage'))
@@ -91,6 +94,8 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/welcome" element={<WelcomeToCgPage />} />
 
           {/* Staff routes */}
@@ -141,6 +146,7 @@ export default function App() {
                 <Route path="/admin/integrations" element={<IntegrationsPage />} />
                 <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
                 <Route path="/admin/integrations/google-ads" element={<GoogleAdsIntegrationPage />} />
+                <Route path="/admin/integrations/tiktok" element={<TikTokIntegrationPage />} />
                 <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
