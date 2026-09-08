@@ -187,7 +187,7 @@ export async function initTiktokPublish(options: {
   clientId: string
   contentGuidelineId: string
   monthlyDeliverableId: string
-  videoUrl: string
+  contentReviewVersionId: string
   title?: string
   privacyLevel?: string
   disableDuet?: boolean

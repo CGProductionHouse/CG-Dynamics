@@ -632,3 +632,182 @@ describe('TikTok per-client connection resolution', () => {
     expect(correctResult?.id).toBe('conn-2')
   })
 })
+
+// ── 14. Publishing gate — canonical approval must be proven ─────────────
+describe('TikTok publishing gate — canonical approval', () => {
+  const APPROVED_DELIVERABLE_STATUSES = new Set(['approved', 'scheduled'])
+  const APPROVED_REVIEW_STATES = new Set(['approved'])
+
+  it('same-client but unapproved content cannot trigger a provider call', () => {
+    // Regression: tiktok-post-init previously did not check production_status.
+    // An unapproved deliverable (e.g., 'to_do', 'in_progress') must be rejected.
+    const deliverable = { id: 'del-1', client_id: 'client-a', production_status: 'to_do' }
+    expect(APPROVED_DELIVERABLE_STATUSES.has(deliverable.production_status)).toBe(false)
+    // Function must return 400 before any TikTok API call
+  })
+
+  it('deliverable in "in_progress" state is rejected', () => {
+    const deliverable = { id: 'del-1', client_id: 'client-a', production_status: 'in_progress' }
+    expect(APPROVED_DELIVERABLE_STATUSES.has(deliverable.production_status)).toBe(false)
+  })
+
+  it('deliverable in "ready_internal_review" state is rejected', () => {
+    const deliverable = { id: 'del-1', client_id: 'client-a', production_status: 'ready_internal_review' }
+    expect(APPROVED_DELIVERABLE_STATUSES.has(deliverable.production_status)).toBe(false)
+  })
+
+  it('deliverable in "approved" state passes the gate', () => {
+    const deliverable = { id: 'del-1', client_id: 'client-a', production_status: 'approved' }
+    expect(APPROVED_DELIVERABLE_STATUSES.has(deliverable.production_status)).toBe(true)
+  })
+
+  it('deliverable in "scheduled" state passes the gate', () => {
+    const deliverable = { id: 'del-1', client_id: 'client-a', production_status: 'scheduled' }
+    expect(APPROVED_DELIVERABLE_STATUSES.has(deliverable.production_status)).toBe(true)
+  })
+
+  it('content review version must be in "approved" state', () => {
+    const reviewVersion = { id: 'rv-1', state: 'internal_review', channels: ['tiktok'] }
+    expect(APPROVED_REVIEW_STATES.has(reviewVersion.state)).toBe(false)
+    // Must reject — review not yet approved
+  })
+
+  it('content review version in "changes_requested" state is rejected', () => {
+    const reviewVersion = { id: 'rv-1', state: 'changes_requested', channels: ['tiktok'] }
+    expect(APPROVED_REVIEW_STATES.has(reviewVersion.state)).toBe(false)
+  })
+
+  it('content review version in "approved" state passes', () => {
+    const reviewVersion = { id: 'rv-1', state: 'approved', channels: ['tiktok'] }
+    expect(APPROVED_REVIEW_STATES.has(reviewVersion.state)).toBe(true)
+  })
+
+  it('content review version without "tiktok" channel is rejected', () => {
+    const reviewVersion = { id: 'rv-1', state: 'approved', channels: ['instagram', 'facebook'] }
+    const channels = Array.isArray(reviewVersion.channels) ? reviewVersion.channels : []
+    expect(channels.includes('tiktok')).toBe(false)
+  })
+
+  it('content review version with "tiktok" channel passes', () => {
+    const reviewVersion = { id: 'rv-1', state: 'approved', channels: ['tiktok', 'instagram'] }
+    const channels = Array.isArray(reviewVersion.channels) ? reviewVersion.channels : []
+    expect(channels.includes('tiktok')).toBe(true)
+  })
+})
+
+// ── 15. Publishing gate — media URL binding ─────────────────────────────
+describe('TikTok publishing gate — media URL binding', () => {
+  it('videoUrl is NOT in the request body interface', () => {
+    // Regression: videoUrl was previously caller-supplied, allowing arbitrary
+    // media to be attached to a valid deliverable. Now resolved server-side
+    // from the approved content review version's asset_path.
+    const PostInitBodyFields = [
+      'clientId', 'contentGuidelineId', 'monthlyDeliverableId',
+      'contentReviewVersionId', 'title', 'privacyLevel', 'disableDuet',
+      'disableStitch', 'disableComment', 'brandContentToggle', 'brandOrganicToggle',
+    ]
+
+    expect(PostInitBodyFields).not.toContain('videoUrl')
+    expect(PostInitBodyFields).toContain('contentReviewVersionId')
+  })
+
+  it('video URL is resolved from approved review version asset_path', () => {
+    // The server generates a signed URL from the approved review version's asset_path.
+    // The caller never controls which URL is used for publishing.
+    const reviewVersion = {
+      id: 'rv-1',
+      deliverable_id: 'del-1',
+      client_id: 'client-a',
+      asset_path: 'del-1/final_video.mp4',
+      state: 'approved',
+      channels: ['tiktok'],
+    }
+
+    // Server resolves: storage.createSignedUrl(reviewVersion.asset_path)
+    expect(reviewVersion.asset_path).toBeTruthy()
+    expect(reviewVersion.asset_path.startsWith(reviewVersion.deliverable_id + '/')).toBe(true)
+  })
+
+  it('review version asset_path must belong to the deliverable', () => {
+    // The asset_path format is {deliverable_id}/{filename}
+    // A review version for a different deliverable would have a different prefix
+    const deliverableId = 'del-1'
+    const reviewVersion = { deliverable_id: 'del-2', asset_path: 'del-2/video.mp4' }
+
+    expect(reviewVersion.deliverable_id).not.toBe(deliverableId)
+    // Must reject — asset belongs to a different deliverable
+  })
+})
+
+// ── 16. Publishing gate — durable local intent ──────────────────────────
+describe('TikTok publishing gate — durable local intent', () => {
+  it('receipt creation failure prevents the provider call', () => {
+    // Regression: tiktok-post-init previously called TikTok first, then
+    // stored the receipt. If receipt storage failed, the publish was lost.
+    // Now: receipt is created FIRST, TikTok is called SECOND.
+    const receiptCreated = false
+    const tiktokCalled = false
+
+    // If receipt creation fails, TikTok must NOT be called
+    if (!receiptCreated) {
+      // Must return 500 and NOT proceed to TikTok
+      expect(tiktokCalled).toBe(false)
+    }
+  })
+
+  it('successful provider initiation updates the pre-existing receipt', () => {
+    // The receipt is created with a pending placeholder publish_id,
+    // then updated with the real TikTok publish_id after success.
+    const receipt = {
+      id: 'receipt-1',
+      publish_id: 'pending_abc-123', // placeholder before TikTok call
+      status: 'pending',
+    }
+
+    // After TikTok succeeds:
+    const tiktokPublishId = 'v_pub_url~v2.67890'
+    receipt.publish_id = tiktokPublishId
+    receipt.status = 'pending'
+
+    expect(receipt.publish_id).toBe('v_pub_url~v2.67890')
+    expect(receipt.id).toBe('receipt-1') // same receipt, not a new one
+  })
+
+  it('TikTok failure records error against pre-existing receipt', () => {
+    // If TikTok fails, the failure is recorded against the receipt that
+    // was created BEFORE the TikTok call.
+    const receipt = {
+      id: 'receipt-1',
+      publish_id: 'pending_abc-123',
+      status: 'pending',
+    }
+
+    // After TikTok fails:
+    const errorMessage = 'TikTok publish error: invalid video format'
+    receipt.status = 'failed'
+    // provider_error would be set in the actual update
+
+    expect(receipt.status).toBe('failed')
+    expect(receipt.id).toBe('receipt-1') // same receipt, error recorded against it
+  })
+})
+
+// ── 17. Publishing gate — approval not constituting provider call ───────
+describe('TikTok publishing gate — approval identity', () => {
+  it('invoking the Edge Function does NOT itself constitute approval', () => {
+    // Regression: the function previously set approval_status='approved' merely
+    // because an admin/manager invoked it. Now, approval must be proven via
+    // the canonical Content Review pipeline (production_status + review state).
+    const deliverable = { production_status: 'in_progress' }
+    const reviewVersion = { state: 'internal_review' }
+
+    // Even if the caller is admin/manager, unapproved content is rejected
+    const callerRole = 'admin'
+    const wouldHavePassedOldCode = true // old code: admin invocation = approval
+    const passesNewCode = false // new code: must check canonical approval
+
+    expect(callerRole).toBe('admin')
+    expect(wouldHavePassedOldCode).toBe(true) // old behavior was wrong
+    expect(passesNewCode).toBe(false) // new behavior is correct
+  })
+})

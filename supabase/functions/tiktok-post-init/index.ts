@@ -12,11 +12,20 @@ import {
 // ── TikTok Publish Init ────────────────────────────────────────────────────
 // Initializes a TikTok content publish via Content Posting API.
 //
-// PUBLISHING GATE:
-//   - Requires content_guideline_id + monthly_deliverable_id
-//   - The monthly_deliverable must exist and belong to the specified clientId
-//   - The content_guideline must exist and belong to the same client
-//   - No real external publish occurs without explicit CA-approved content item
+// PUBLISHING GATE (canonical approval must be proven before TikTok is called):
+//   1. Monthly deliverable must exist, belong to the client, and be in an
+//      approved/scheduled production_status (the canonical schedule-level
+//      approval truth from the Content Review pipeline).
+//   2. Content guideline must exist and belong to the same client.
+//   3. An approved content_review_versions record must exist for this
+//      deliverable, with 'tiktok' in its channels array. This is the
+//      canonical content-level approval truth.
+//   4. The publishable media URL is resolved SERVER-SIDE from the approved
+//      review version's asset_path (signed URL). Caller-supplied videoUrl
+//      is NOT trusted.
+//   5. A durable local publish receipt is created BEFORE calling TikTok.
+//      If receipt creation fails, TikTok is NOT called. If TikTok fails,
+//      the failure is recorded against the pre-existing receipt.
 //
 // APPROVAL IDENTITY:
 //   approvedBy is derived from the authenticated JWT (user.id), NEVER from the
@@ -27,7 +36,7 @@ import {
 //   clientId: string,
 //   contentGuidelineId: string,
 //   monthlyDeliverableId: string,
-//   videoUrl: string,
+//   contentReviewVersionId: string,   // links to the approved creative asset
 //   title?: string,
 //   privacyLevel?: string,
 //   disableDuet?: boolean,
@@ -42,7 +51,7 @@ interface PostInitBody {
   clientId: string
   contentGuidelineId: string
   monthlyDeliverableId: string
-  videoUrl: string
+  contentReviewVersionId: string
   title?: string
   privacyLevel?: string
   disableDuet?: boolean
@@ -51,6 +60,12 @@ interface PostInitBody {
   brandContentToggle?: boolean
   brandOrganicToggle?: boolean
 }
+
+/** Deliverable statuses that constitute canonical approval for publishing. */
+const APPROVED_DELIVERABLE_STATUSES = new Set(['approved', 'scheduled'])
+
+/** Content review states that constitute canonical content approval. */
+const APPROVED_REVIEW_STATES = new Set(['approved'])
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -90,27 +105,19 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400)
   }
 
-  // Validate required fields (approvedBy is NOT in the body — derived from JWT below)
-  if (!body.clientId || !body.videoUrl || !body.contentGuidelineId || !body.monthlyDeliverableId) {
+  // Validate required fields (videoUrl is NOT in the body — resolved server-side)
+  if (!body.clientId || !body.contentGuidelineId || !body.monthlyDeliverableId || !body.contentReviewVersionId) {
     return jsonResponse({
       ok: false,
-      error: 'clientId, videoUrl, contentGuidelineId, and monthlyDeliverableId are required.',
+      error: 'clientId, contentGuidelineId, monthlyDeliverableId, and contentReviewVersionId are required.',
     }, 400)
   }
 
-  // Validate URL format
-  try {
-    new URL(body.videoUrl)
-  } catch {
-    return jsonResponse({ ok: false, error: 'Invalid videoUrl format.' }, 400)
-  }
+  // ── PUBLISHING GATE 1: Validate canonical deliverable ──────
 
-  // ── PUBLISHING GATE: Validate canonical content items ──────
-
-  // 1. Monthly deliverable must exist and belong to this client
   const { data: deliverable, error: delError } = await sb
     .from('monthly_deliverables')
-    .select('id, client_id, status')
+    .select('id, client_id, production_status, deliverable_type')
     .eq('id', body.monthlyDeliverableId)
     .single()
 
@@ -121,7 +128,18 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Monthly deliverable does not belong to this client.' }, 400)
   }
 
-  // 2. Content guideline must exist and belong to this client
+  // Verify the deliverable is actually in an approved/ready-to-publish state.
+  // This is the canonical schedule-level approval truth from the Content Review pipeline.
+  // Invoking the provider function does NOT itself constitute approval.
+  if (!APPROVED_DELIVERABLE_STATUSES.has(deliverable.production_status)) {
+    return jsonResponse({
+      ok: false,
+      error: `Deliverable is not approved for publishing (current status: ${deliverable.production_status}). Complete the Content Review approval workflow first.`,
+    }, 400)
+  }
+
+  // ── PUBLISHING GATE 2: Validate content guideline ──────────
+
   const { data: guideline, error: guideError } = await sb
     .from('content_guidelines')
     .select('id, client_id')
@@ -134,6 +152,66 @@ Deno.serve(async (req) => {
   if (guideline.client_id !== body.clientId) {
     return jsonResponse({ ok: false, error: 'Content guideline does not belong to this client.' }, 400)
   }
+
+  // ── PUBLISHING GATE 3: Verify approved content review version ──
+
+  const { data: reviewVersion, error: rvError } = await sb
+    .from('content_review_versions')
+    .select('id, deliverable_id, client_id, asset_path, media_type, channels, state')
+    .eq('id', body.contentReviewVersionId)
+    .single()
+
+  if (rvError || !reviewVersion) {
+    return jsonResponse({ ok: false, error: 'Content review version not found.' }, 400)
+  }
+
+  // Review version must belong to this deliverable
+  if (reviewVersion.deliverable_id !== body.monthlyDeliverableId) {
+    return jsonResponse({ ok: false, error: 'Content review version does not belong to this deliverable.' }, 400)
+  }
+
+  // Review version must belong to this client
+  if (reviewVersion.client_id !== body.clientId) {
+    return jsonResponse({ ok: false, error: 'Content review version does not belong to this client.' }, 400)
+  }
+
+  // Review version must be in an approved state — this is the canonical content-level approval truth
+  if (!APPROVED_REVIEW_STATES.has(reviewVersion.state)) {
+    return jsonResponse({
+      ok: false,
+      error: `Content review is not approved (current state: ${reviewVersion.state}). Complete the Content Review approval workflow first.`,
+    }, 400)
+  }
+
+  // Review version must include 'tiktok' in its channels
+  const channels = Array.isArray(reviewVersion.channels) ? reviewVersion.channels : []
+  if (!channels.includes('tiktok')) {
+    return jsonResponse({
+      ok: false,
+      error: 'Content review was not approved for TikTok publishing. Resubmit with TikTok in the channels list.',
+    }, 400)
+  }
+
+  // ── PUBLISHING GATE 4: Resolve media URL server-side ───────
+
+  // The publishable video URL is resolved from the approved review version's
+  // asset_path. Caller-supplied videoUrl is NOT trusted.
+  const assetPath = reviewVersion.asset_path as string
+  if (!assetPath) {
+    return jsonResponse({ ok: false, error: 'Approved review version has no asset path.' }, 500)
+  }
+
+  // Generate a signed URL for the approved asset (24-hour expiry for publish window)
+  const { data: signedUrlData, error: signedUrlError } = await sb.storage
+    .from('content-review-snapshots')
+    .createSignedUrl(assetPath, 60 * 60 * 24)
+
+  if (signedUrlError || !signedUrlData?.signedUrl) {
+    console.error('Failed to create signed URL for approved asset:', signedUrlError?.message ?? 'unknown')
+    return jsonResponse({ ok: false, error: 'Could not resolve the approved media URL.' }, 500)
+  }
+
+  const resolvedVideoUrl = signedUrlData.signedUrl
 
   // ── EXPLICIT client-account resolution ────────────────────
 
@@ -186,10 +264,43 @@ Deno.serve(async (req) => {
     }, 400)
   }
 
-  // Initialize the direct post
+  // ── DURABLE LOCAL INTENT: Create publish receipt BEFORE TikTok call ──
+
+  // The receipt is the durable local publish intent. If it cannot be created,
+  // TikTok is NOT called. If TikTok fails, the failure is recorded against
+  // this pre-existing receipt.
+  const publishId = `pending_${crypto.randomUUID()}`
+  const { data: receipt, error: receiptCreateError } = await sb
+    .from('tiktok_publish_receipts')
+    .insert({
+      client_id: body.clientId,
+      connection_id: connectionId,
+      publish_id: publishId,
+      post_mode: 'direct_post',
+      source_type: 'pull_from_url',
+      source_url: resolvedVideoUrl,
+      privacy_level: privacyLevel,
+      title: body.title,
+      status: 'pending',
+      content_guideline_id: body.contentGuidelineId,
+      monthly_deliverable_id: body.monthlyDeliverableId,
+      approval_status: 'approved',
+      approved_by: user.id,
+      approved_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single()
+
+  if (receiptCreateError || !receipt) {
+    console.error('Failed to create publish receipt (TikTok NOT called):', receiptCreateError?.code ?? 'unknown')
+    return jsonResponse({ ok: false, error: 'Could not create local publish intent. TikTok was NOT called.' }, 500)
+  }
+
+  // ── CALL TIKTOK: Only after durable local intent exists ────
+
   const { result, error: postError } = await initTiktokDirectPost(
     accessToken,
-    body.videoUrl,
+    resolvedVideoUrl,
     {
       title: body.title,
       privacy_level: privacyLevel,
@@ -201,43 +312,33 @@ Deno.serve(async (req) => {
     },
   )
 
-  if (postError) {
-    return jsonResponse({ ok: false, error: `TikTok publish error: ${postError.message}` }, 502)
+  if (postError || !result?.publish_id) {
+    // TikTok failed — record failure against the pre-existing receipt
+    const errorMessage = postError?.message ?? 'TikTok did not return a publish_id.'
+    await sb
+      .from('tiktok_publish_receipts')
+      .update({
+        status: 'failed',
+        provider_error: errorMessage,
+      })
+      .eq('id', receipt.id)
+
+    return jsonResponse({ ok: false, error: `TikTok publish error: ${errorMessage}` }, 502)
   }
 
-  if (!result?.publish_id) {
-    return jsonResponse({ ok: false, error: 'TikTok did not return a publish_id.' }, 502)
-  }
-
-  // Store publish receipt with canonical content linkage
-  // approval_status starts as 'pending' — no real external publish without approval
-  // approved_by is the authenticated actor from JWT — NOT caller-supplied
-  const { error: receiptError } = await sb
+  // TikTok succeeded — update the pre-existing receipt with the real publish_id
+  await sb
     .from('tiktok_publish_receipts')
-    .insert({
-      client_id: body.clientId,
-      connection_id: connectionId,
+    .update({
       publish_id: result.publish_id,
-      post_mode: 'direct_post',
-      source_type: 'pull_from_url',
-      source_url: body.videoUrl,
-      privacy_level: privacyLevel,
-      title: body.title,
       status: 'pending',
-      content_guideline_id: body.contentGuidelineId,
-      monthly_deliverable_id: body.monthlyDeliverableId,
-      approval_status: 'approved',
-      approved_by: user.id,
-      approved_at: new Date().toISOString(),
     })
-
-  if (receiptError) {
-    console.error('Failed to store publish receipt:', receiptError.code ?? 'unknown')
-  }
+    .eq('id', receipt.id)
 
   return jsonResponse({
     ok: true,
     publishId: result.publish_id,
+    receiptId: receipt.id,
     creatorInfo: {
       privacyLevelOptions: creator.privacy_level_options,
       maxVideoDuration: creator.max_video_post_duration_sec,
