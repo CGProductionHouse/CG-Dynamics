@@ -1,0 +1,120 @@
+# TikTok Business agency rollout handoff
+
+Last verified: 2026-09-08 (Africa/Johannesburg)
+
+GitHub lane: Issue #269, branch `codex/tiktok-business-agency`
+
+## Scope lock
+
+This lane extends the accepted read-only TikTok integration from Issue #238 / merged PR #239. It does not replace that Login Kit and Display API connection.
+
+Agency publishing uses TikTok API for Business v1.3, Organic API, and Accounts API. `monthly_deliverables` remains the only Client Schedule authority. A scheduled publish must be derived from the approved `content_review_versions` row for that deliverable and must write its provider receipt, status, and public post ID back against the same deliverable.
+
+The consumer Content Posting API Direct Post functions from #239 remain disabled and undeployed. They are not the production agency publishing path.
+
+## Official provider contract verified
+
+Official TikTok API for Business documentation was checked on 2026-09-08:
+
+- Base URL: `https://business-api.tiktok.com/open_api/v1.3`.
+- An agency can register as a TikTok API for Business developer and create one reusable application for multiple client authorizations.
+- Accounts API is the Organic API product for TikTok Business Accounts.
+- Account token exchange: `POST /tt_user/oauth2/token/`.
+- Token renewal: `POST /tt_user/oauth2/refresh_token/`.
+- Token revocation: `POST /tt_user/oauth2/revoke/`.
+- Permission inspection: `/tt_user/token_info/get/`.
+- Account profile: `/business/get/`.
+- Account media: `/business/video/list/`.
+- Video privacy settings: `/business/video/settings/`.
+- Video publishing: `/business/video/publish/` with **TikTok Accounts > Account Post Content > Video Publish**.
+- Photo publishing: `/business/photo/publish/` with **TikTok Accounts > Account Post Content > Photo Publish**.
+- Publish polling: `/business/publish/status/`.
+- TikTok account webhook configuration is available in Accounts API and should supplement, not replace, durable polling/reconciliation.
+- Account access tokens expire after one day. Refresh tokens expire after one year. Expired refresh credentials require the account holder to authorize again.
+- The authorization code is single-use. Current Accounts API authentication documentation states a ten-minute lifetime. The callback must exactly match the app's configured TikTok account holder redirect URL.
+- Analytics require the Business Account owner to have published at least one video and enabled Analytics in the TikTok mobile app.
+
+Primary sources:
+
+- [API for Business endpoint reference](https://business-api.tiktok.com/gateway/docs/index?doc_id=1735713875563521&language=ENGLISH)
+- [Accounts API authentication](https://business-api.tiktok.com/gateway/docs/index?doc_id=1738084387220481&language=ENGLISH)
+- [API for Business authorization concepts](https://business-api.tiktok.com/gateway/docs/index?doc_id=1738928364967937&language=ENGLISH)
+- [Accounts API overview](https://business-api.tiktok.com/gateway/docs/index?doc_id=1737944775511041&language=ENGLISH)
+
+The exact TikTok account holder authorization URL and final permission identifiers must be copied from the approved app configuration. They are not guessed in code before TikTok grants the application access.
+
+## Live provider portal evidence
+
+Authenticated Chrome reached `https://business-api.tiktok.com/portal/apps` using the signed-in `@cgproductionhouse` account.
+
+- The API for Business portal is separate from the existing `developers.tiktok.com` consumer app.
+- The account currently has no TikTok API for Business applications.
+- **Become a Developer** opens a two-step developer registration.
+- The first step requires first and last name, verified communication email, verified phone number, and a company classification. The portal defines **Agency** as an organization that plans, creates, and manages advertising for clients, which matches CG Production House.
+- Advancing accepts TikTok for Business Developer Terms. Email/phone verification and the legal declaration are interactive provider gates.
+
+Do not confuse this missing Business developer application with the existing **CG Dynamics** consumer developer app. The consumer app remains the accepted read-only analytics lane.
+
+## Reusable connection model
+
+One approved API for Business application should serve all CG clients. Each client account holder completes TikTok's account authorization once. Dynamics must then:
+
+1. bind the returned `open_id` to one exact `clients.id`;
+2. inspect and store the exact granted permission set;
+3. store access and refresh tokens server-side only;
+4. refresh the one-day access token before use;
+5. mark reauthorization required when refresh fails or expires;
+6. never select a connection by recency or fall back to another client;
+7. expose only safe connection identity and health to staff UI;
+8. keep raw tokens and provider diagnostics inaccessible to browser clients.
+
+## Publishing contract
+
+The due-time worker must fail closed unless all conditions hold:
+
+- agency publishing rollout is enabled server-side;
+- the deliverable is not archived, cancelled, posted, or moved;
+- the exact approved review version still belongs to the deliverable and client;
+- the approved review includes the `tiktok` channel;
+- required internal and client approval evidence is present;
+- the review `scheduled_at` is due and still agrees with the canonical `monthly_deliverables.scheduled_date` in `Africa/Johannesburg`;
+- the exact client has a healthy Accounts API connection with the required publish permission;
+- the media snapshot and caption are the immutable approved values;
+- no successful or in-flight provider intent already exists for the same deliverable, review version, provider, and account.
+
+Dynamics retains future scheduling and calls TikTok only when a row becomes due. A local idempotent intent must exist before the provider call. Provider request ID, publish ID, state, public post ID, errors, attempt timestamps, and reconciliation timestamps remain durable. The worker marks `monthly_deliverables.posted_at` / posted state only after TikTok confirms the public post.
+
+No actual provider publish is permitted in this branch or its tests.
+
+## Media transport
+
+The existing private `content-review-snapshots` object is the immutable approved source. Provider code must not trust a caller-supplied URL.
+
+Before production publishing, confirm the Accounts API upload contract exposed to the approved app. If TikTok fetches media by URL, serve approved snapshots through a CG-controlled, verified HTTPS host or URL prefix for the complete provider processing window. Supabase signed URLs under `supabase.co` are not treated as a verified CG-owned publishing origin. If Accounts API accepts multipart upload from the server, stream the immutable private object from the Edge Function without making it public.
+
+## Current external gates
+
+The live portal cannot progress autonomously past developer enrollment because TikTok requires:
+
+1. verified communication email code;
+2. verified phone number code;
+3. Agency classification and legal acceptance;
+4. developer/application review and requested Accounts API permissions;
+5. application ID/secret and exact account-holder redirect configuration;
+6. production secrets and SQL/Edge Function rollout;
+7. each client account holder's authorization; and
+8. explicit approval for the first controlled external post.
+
+No provider app was created, no review was submitted, no permission expansion was requested for a CG app, no secret was read or changed, no production SQL/function was applied, and no content was published during this checkpoint.
+
+## Resume sequence
+
+1. Complete and validate the code/migration/Edge Function slice in this PR.
+2. CA completes TikTok's email/phone verification and Agency legal enrollment in the open authenticated portal.
+3. Create one **CG Dynamics** API for Business app and inspect the live permission/application form.
+4. Configure the exact account-holder callback from this PR and request the minimum Accounts API permissions needed for account identity, media read, video/photo publish, and publish status/webhooks.
+5. Submit provider review only with explicit approval.
+6. After approval, configure secrets and apply reviewed migrations/functions only with explicit production approval.
+7. Authorize one controlled Business Account, verify exact-client isolation, and run a dry/readiness cycle.
+8. Obtain explicit approval for the first real approved-content post, verify native TikTok output, receipt reconciliation, and duplicate prevention.
+9. Roll the same authorization workflow across the current active-client list; never hardcode client names into the architecture.
