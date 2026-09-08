@@ -1,577 +1,692 @@
 # Ehrlich Park Butchery — Client Marketing Intelligence
 
-Last updated: 2026-08-07
-Status: Current-source client intelligence. Keep isolated to Ehrlich Park Butchery. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
+Last reconciled: 2026-09-08  
+Canonical client: **Ehrlich Park Butchery**  
+Canonical CG Dynamics client ID: `ec643c75-51f5-4839-829f-3f5b7f48829a`  
+Migration state: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**
 
-## Verified current identity
+## Purpose and authority
 
-Exact business: **Ehrlich Park Butchery**, Bloemfontein.
+This is the permanent exact-client intelligence for Ehrlich Park Butchery. It evolves the August research in place rather than creating a duplicate client brain.
 
-Current official-source facts verified on 2026-08-07:
+CG Dynamics is the permanent source of truth. Repository Markdown is an auditable/export/handoff view. Shared runtime, readiness logic, task retrieval, registration and reusable workflow remain owned by Issue #241 and are intentionally not changed on this branch.
 
-- Official website: `https://www.ehpbutchery.co.za/`
-- Family-owned since **1975**.
-- Owner presented on the official website as **Thomas**; independent BSN listing names **Thomas Gianni**.
-- Official store contact: **051 434 2001**.
-- Official owner/mobile number displayed on the website: **081 718 6988**.
-- Official email: **admin@ehpbutchery.co.za**.
-- Official address: **55 De Waal Road, Bloemfontein**.
-- Official hours: Monday–Friday 07:00–17:30; Saturday 07:00–13:30; Sunday closed.
-- Official positioning: quality meat, reasonable pricing, family/community heritage and traditional butchery service.
+Apply:
 
-Third-party directories contain older/conflicting address and phone details. The official website is the authority for current operational use unless the client confirms otherwise.
+- `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`;
+- Issue #248 human creative standard;
+- the current exact-client Project Guide;
+- current authoritative source evidence for mutable facts.
 
-## What the brand already owns
+Do not create duplicate identities from shorthand such as `ehrlich park`, `Ehlrich`, `slaghuis`, or similarly named meat businesses.
 
-Ehrlich Park does **not** need to manufacture heritage. It genuinely has more than five decades of operating history.
+## Evidence reviewed for this reconciliation
 
-Its strongest defensible brand assets are:
+### Current ChatGPT Project instructions
 
-1. **Established neighbourhood trust** — family-owned since 1975.
-2. **Real butchery craft** — a business built around cuts, preparation and service rather than supermarket meat aisles.
-3. **Reasonable value without discount-store positioning**.
-4. **Bloemfontein / Free State meat culture** — braai, biltong, droëwors, family meals, rugby weekends and gifting.
-5. **Human ownership** — Thomas can be visible as a knowledgeable butcher/owner rather than a faceless logo.
+The accessible current Project instructions establish these durable client rules:
 
-The marketing job should be to turn those existing advantages into modern proof and repeat purchase.
+- content types include daily/weekly specials, promo/event announcements, behind-the-counter/product shots, customer favourites/testimonials, food inspiration and staff moments;
+- the brand should sound like real people who care about customers;
+- language should be natural, friendly, local and down-to-earth;
+- English and Afrikaans may be mixed casually when it genuinely fits;
+- copy should feel proudly South African without forced slang or influencer language;
+- daily specials/product highlights should be tight and benefit-driven;
+- captions must add fresh value instead of repeating poster/video wording;
+- promo/event/free-delivery content should carry fuller practical contact detail;
+- avoid fake hype, forced humour, memes and corporate filler;
+- hashtags were historically supplied as a fixed bank, but Issue #248/#277 now supersede that behaviour with dynamic selection and a default maximum of 5;
+- image work must remain believable and product-led.
 
-## Current product evidence and evidence gaps
+### Direct/client-supplied Project Source
 
-The official website says the business carries a wide selection of meat and serves customers with varied dietary requirements, but it does not publish a complete current catalogue.
+Accessible Project Source:
 
-Independent 2025 event evidence directly links Ehrlich Park Butchery with:
+`Ehlrich Park Slaghuis Business Info.pdf`
 
-- biltong and droëwors gift packs;
-- meat gift vouchers;
-- meat processing as an available redemption/use option in an event prize context.
+It supplies first-party/historical evidence for:
 
-These are useful signals but should be treated as `current_verified` only after direct client confirmation before campaign use.
+- canonical business name `Ehrlich Park Butchery`;
+- retail-butchery positioning;
+- address `5 De Waal Road, Ehrlich Park, Bloemfontein`;
+- website `www.ehpbutchery.co.za`;
+- telephone `051 434 2761 / 051 434 2001`;
+- email `admin@ehpbutchery.co.za`;
+- beef, lamb, chicken and pork as product categories;
+- boerewors, steak and braai packs as named favourites;
+- bulk-purchase context;
+- a claim that products are locally sourced;
+- a historical promotional example of free delivery on orders over R400;
+- friendly-service / clean-store positioning.
 
-Before CG promotes specific lines, confirm the current range for:
+This source is useful original client evidence but is old enough that mutable operational facts and product/promotional claims require freshness review before current public use.
 
-- beef cuts;
-- lamb/mutton;
-- pork;
+### Accessible Project/history evidence
+
+The accessible Ehrlich Park Butchery Project history supports these durable CG lessons:
+
+- captions should not repeat what is already written on the artwork;
+- copy should be specific to the meat, service, braai use-case, team or buying moment rather than generic butchery language;
+- premium can mean well-presented and product-focused, not luxury-brand hype;
+- short text-on-post works best when the title and supporting subtitle each have a clear point;
+- generic phrases are repeatedly rejected;
+- overused wording should be varied, including repeated reliance on `cut` as the central copy word;
+- team posts should be about what staff actually do for the customer, not vague `meet the team` filler;
+- braai copy should feel recognisably South African and natural rather than slogan-heavy;
+- image-edit requests frequently require changing exactly one element while preserving everything else;
+- real staff clothing, body proportions, food-safe gloves, meat appearance, counter context and composition matter;
+- angle/zoom/removal edits must not become unintended redesigns.
+
+No complete, independently exportable caption corpus was accessible, so no fixed sentence count or mandatory option count is asserted.
+
+### Current official public source
+
+Official website rechecked 2026-09-08:
+
+- `https://www.ehpbutchery.co.za/`
+- `https://www.ehpbutchery.co.za/contact-us`
+
+Current website supports:
+
+- business identity `Ehrlich Park Butchery`;
+- family-owned since **1975**;
+- wide selection of meat;
+- reasonable-pricing / quality / community positioning;
+- weekly-specials section;
+- email `admin@ehpbutchery.co.za`;
+- telephone `051 434 2001`;
+- address `55 De Waal Road, Bloemfontein`;
+- hours Monday-Friday 07:00-17:30, Saturday 07:00-13:30, Sunday closed.
+
+The current website did **not** surface the former August owner/mobile details `Thomas` / `081 718 6988` during this recheck. Those older facts are therefore not current operational truth without renewed evidence.
+
+### Current GitHub / architecture authority
+
+Reviewed:
+
+- `AGENTS.md`;
+- `CONTINUE-HERE.md`;
+- `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`;
+- Issue #241 and current implementation/anti-overlap state;
+- Issue #248;
+- Issue #277;
+- `docs/chatgpt-client-knowledge-migration-2026-09-08.md` on the current #241 implementation branch;
+- `RETAIL-ECOMMERCE-HUMAN-MARKETING-GOLDMINE-2026-08.md`;
+- `HOSPITALITY-RESTAURANTS-BARS-EVENTS-HUMAN-MARKETING-GOLDMINE-2026-08.md`;
+- current adjacent client-migration patterns.
+
+Reusable retail/hospitality research is reused as shared marketing knowledge rather than copied into a bespoke butchery theory pack.
+
+### Read-only live Dynamics checkpoint
+
+Read-only production inspection on 2026-09-08 confirmed:
+
+- exact client row: `Ehrlich Park Butchery`;
+- exact client ID: `ec643c75-51f5-4839-829f-3f5b7f48829a`;
+- active: `true`;
+- tier: `standard`;
+- client-specific `skill_cards`: `0`;
+- client-specific `ai_marketing_artifacts`: `0`.
+
+No production data was mutated.
+
+## Current fact register and freshness state
+
+### Canonical identity
+
+- **Ehrlich Park Butchery** is the exact canonical client.
+- Exact Dynamics client ID: `ec643c75-51f5-4839-829f-3f5b7f48829a`.
+- `Ehlrich` in the uploaded PDF filename/title is a source typo, not a second identity.
+- `slaghuis` / `ehrlich park` may be search/history shorthand only.
+
+### Heritage and positioning
+
+Current official public evidence supports `family-owned since 1975`.
+
+This is a strong durable brand asset, but heritage should be made useful rather than turned into generic nostalgia. Strong applications include practical butcher knowledge, preparation, service, regular-customer/community stories and real counter craft.
+
+Avoid unsupported superiority language such as `best butcher`, `finest in Bloemfontein`, `premium cuts for every occasion` or similar filler.
+
+### Address conflict — unresolved
+
+Two first-party/current-source values conflict:
+
+- client-supplied Project Source: **5 De Waal Road, Ehrlich Park, Bloemfontein**;
+- current official website: **55 De Waal Road, Bloemfontein**.
+
+State: `possible_change / material conflict`.
+
+Do not silently choose one for directions, maps, paid ads, print, Google Business edits or other operational use. Use the task's explicit client-supplied current instruction when provided; otherwise flag the conflict for CG/client confirmation.
+
+### Telephone / WhatsApp conflict
+
+Evidence currently shows:
+
+- Project Source: `051 434 2761 / 051 434 2001`;
+- current official website: `051 434 2001`;
+- later CG Project chat correction: WhatsApp `+27 78 057 4485` and both telephone numbers as the approved caption contact set at that time.
+
+State:
+
+- `051 434 2001`: `current_verified_public`;
+- `051 434 2761`: `client-supplied / revalidation-needed`;
+- `+27 78 057 4485`: `CG-confirmed historical caption convention / revalidation-needed for operational contact use`.
+
+Do not substitute the older August mobile `081 718 6988` without fresh direct proof.
+
+### Email / website
+
+Current official public evidence supports:
+
+- `admin@ehpbutchery.co.za`;
+- `https://www.ehpbutchery.co.za/`.
+
+These remain mutable and should be rechecked for material campaigns.
+
+### Opening hours
+
+Current official website on 2026-09-08 displays:
+
+- Monday-Friday: 07:00-17:30;
+- Saturday: 07:00-13:30;
+- Sunday: closed.
+
+State: `current_verified_public / mutable`.
+
+Recheck immediately before hours-specific/public-holiday content.
+
+### Product and service scope
+
+The direct Project Source historically names:
+
+- beef;
+- lamb;
 - chicken;
+- pork;
 - boerewors;
-- biltong;
-- droëwors;
-- sosaties / braai packs;
-- prepared or marinated products;
-- freezer/value packs;
-- game or private meat processing;
-- gift packs and vouchers;
-- wholesale, restaurant or catering supply;
-- delivery / collection / WhatsApp ordering.
+- steak;
+- braai packs;
+- bulk-purchase use.
 
-Do not infer these from a generic butcher model.
+The current official website confirms only a wide selection of meat and weekly specials, not a complete live catalogue.
 
-## Core commercial positioning
+Therefore:
 
-Recommended operating position:
+- use a supplied current photo/poster/product brief as task-level proof of the exact product shown;
+- do not assume every historical category/cut is stocked today;
+- never invent stock, weights, prices, pack composition, grades, origin, supplier, availability or ordering terms.
 
-> **Bloemfontein’s trusted family butchery — proper meat, proper service, since 1975.**
+### Sourcing claim
 
-This is stronger than competing only on price.
+The Project Source says products are locally sourced to support regional farmers.
 
-The customer should feel:
+State: `client-supplied historical / freshness-sensitive`.
 
-- the meat is selected and prepared by people who know what they are doing;
-- advice is available;
-- the shop understands the Free State table and braai;
-- value matters, but quality and trust come first;
-- there is a reason generations return.
+Do **not** publish `locally sourced`, farm names, Free State origin, grass-fed/free-range, ethical sourcing or similar origin/supply claims without current exact proof.
 
-## Local competitive landscape
+### Delivery / collection / ordering
 
-Bloemfontein is a strong specialist-butchery market. Customers have many credible alternatives.
+The Project Source gives a historical example of free delivery over R400 during promotional periods. Project instructions also treat free-delivery offers as possible promo content.
 
-### Bester Butchery
+This does not prove a standing delivery service or threshold.
 
-Current official and local-media evidence gives Bester a particularly strong position around **geelvet biltong**, boerewors and specialist-butcher fame. Bloemfontein Courant’s 2024 readers’ awards named Bester Best Butcher, Best place to buy Biltong and Best place to find Boerewors for a Braai. Current social/search evidence also shows highly visual biltong-led content and strong word of mouth.
+State: `promotion-specific / stale unless re-supplied`.
 
-Implication: Ehrlich Park should not attempt to copy Bester’s biltong-ceiling fame. It needs a broader heritage-and-service territory.
+Never invent:
 
-### Daves Meat Market
+- current delivery availability;
+- minimum order;
+- service area;
+- delivery fee;
+- delivery time;
+- collection/preorder process;
+- WhatsApp ordering process.
 
-Current local-directory positioning highlights 30+ years in the industry and supply to public, restaurants and wholesale.
+### Former owner/person detail
 
-Implication: commercial/wholesale credibility matters in the market.
+The August intelligence referenced `Thomas` and `081 718 6988` from then-current evidence. Current website recheck did not surface those details.
 
-### Fauna Meat Market
+State: `stale_unverified`.
 
-Current directory positioning emphasizes retail and wholesale and a long operating history since 1985.
+Do not use the owner name, surname, mobile number or staff roles in current marketing unless reverified or supplied in the current task.
 
-### Baron's Meat Company
+## Human creative standard for Ehrlich Park Butchery
 
-Multi-location specialist butcher presence creates convenience and neighbourhood competition.
+### Core voice
 
-### Ziel Deli
+Ehrlich Park should sound like a real neighbourhood butchery run by people who know their customers.
 
-Current local positioning differentiates through grass-fed/free-range/additive- and hormone-free language.
+Use a voice that is:
 
-Implication: some consumers buy on sourcing and premium-health cues, not price alone.
+- local;
+- warm;
+- honest;
+- grounded;
+- straightforward;
+- product-aware;
+- useful;
+- proudly South African;
+- friendly without trying too hard.
 
-### National/value competition
+It may be lightly cheeky or playful when the post earns it, but humour should never become forced meme copy.
 
-Waltloo and supermarket butcheries compete heavily on price, convenience and specials.
+Avoid influencer-style or generic AI language such as:
 
-## Strategic gap Ehrlich Park can own
+- `obsessed with`;
+- `must-have`;
+- `you won't believe`;
+- `discover the difference`;
+- `where quality meets...`;
+- `your trusted butcher`;
+- `quality you can taste`;
+- `premium cuts for every occasion`;
+- `fire up the flavour`;
+- empty `freshness`, `quality`, `value` or `service` slogans with no specific proof.
 
-The white space is:
+### Captions: add, do not repeat
 
-> **Fifty years of Bloemfontein meat knowledge made useful today.**
+Read the supplied artwork/video first.
 
-Heritage should not be a dusty anniversary story. Turn it into proof:
+Do not paraphrase its headline, product list, price or spoken dialogue underneath it.
 
-- how to choose a cut;
-- what to braai for a specific group size;
-- how much meat to buy per person;
-- what makes one cut different from another;
-- how the butcher prepares it;
-- how to store/freeze it;
-- how to build a braai pack;
-- how traditional processing works where offered;
-- how family recipes and butcher knowledge have evolved.
+Add one useful second layer, such as:
 
-## Primary buyer journeys
+- what the product is good for;
+- a realistic braai/meal use-case;
+- a preparation or serving idea supported by the product shown;
+- why a butcher's preparation/service matters;
+- what the team is doing behind the counter;
+- a local buying moment such as Friday braai, family meal or stock-up;
+- a current promo CTA when terms are supplied;
+- a customer/community angle supported by real evidence.
 
-### 1. Weekly family-meat shopper
+### Caption length and rhythm
 
-Need: reliable meat, fair value, easy meal planning.
+Default to short-to-medium social captions.
 
-Content/offer system:
+For product/special posts:
 
-- weeknight meat picks;
-- freezer-fill packs;
-- family-size portions;
-- `what to cook this week` bundles;
-- simple WhatsApp/preorder where operationally supported.
+- keep the opening tight;
+- focus on one clear customer benefit/use;
+- do not turn the caption into a second poster;
+- vary sentence length and openings;
+- keep the CTA practical.
 
-### 2. Braai buyer
+No fixed sentence count is proven.
 
-Need: confidence, enough food, good cuts, simple choice.
+### Language
 
-High-potential system:
+English, Afrikaans or a natural blend may be used.
 
-- braai packs by headcount;
-- `4 people / 8 people / 12 people` buying guides;
-- steak + wors + side pairing ideas;
-- rugby-weekend bundles;
-- Friday/Saturday urgency.
+Rules:
 
-### 3. Biltong/droëwors buyer
+- follow the language of the creative/brief;
+- mix only when it sounds like normal local speech;
+- use natural everyday Afrikaans, not stiff literal translations;
+- never force slang simply to appear local.
 
-Need: trusted flavour, consistency, giftability.
+Examples of the right principle are conversational phrases such as `Kom maak 'n draai` when they fit the post, not mechanically adding Afrikaans to every caption.
 
-Potential:
+### Text-on-post
 
-- gifting;
-- road-trip packs;
-- rugby packs;
-- corporate gifts;
-- process/craft content.
+Project history repeatedly favours concise, specific title + supporting subtitle structures.
 
-Only activate once current product availability is confirmed.
+Good text-on-post should:
 
-### 4. Premium-cut buyer
+- connect to the exact meat/service/team/braai context;
+- avoid repeating a product name as the whole idea;
+- make sense without a long explanation;
+- give the subtitle a real supporting job;
+- avoid overused words/structures when CG has already used them often.
 
-Need: a butcher who can advise, portion and prepare properly.
+`Cut` is not banned, but repeated reliance on it has been explicitly rejected. Vary the language around preparation, counter service, portions, braai use, freshness proof and buying occasions.
 
-Content:
+### CTA / contact behaviour
 
-- cut education;
-- butcher recommendation;
-- cooking method;
-- thickness/portion explanation;
-- special-order guidance.
+Current Project instructions say:
 
-### 5. Bulk/freezer buyer
+- Daily Specials / Product Highlights: website only by default, no phone numbers unless time-sensitive.
+- Promos / Events / Free Delivery: full contact details including phone numbers, website and physical address.
 
-Need: strong unit value and convenient stocking.
+However, a later Project chat correction instructed CG to use the full contact block in **all** captions at that time:
 
-Marketing:
+- `5 De Waal Road, Ehrlich Park, Bloemfontein`;
+- `051 434 2761 / 051 434 2001`;
+- WhatsApp `+27 78 057 4485`.
 
-- freezer packs;
-- family packs;
-- month-end offers;
-- `how far this pack goes` proof;
-- portioning and freezing guidance.
+These two caption-footer rules conflict.
 
-### 6. Event / corporate / gifting buyer
+State: `unresolved CG instruction conflict`.
 
-Current external evidence supports past biltong/droëwors gifts and vouchers.
+Do not silently rewrite the contact convention into permanent truth. For current production, follow any explicit task/client instruction supplied with the asset; otherwise surface the conflict when it materially changes the caption footer.
 
-Potential:
+### Dynamic SEO / hashtags
 
-- Father's Day;
-- corporate hampers;
-- rugby/event gifts;
-- end-of-year gifting;
-- school/community sponsorship prizes.
+Issue #248/#277 supersede a frozen hashtag bank.
 
-### 7. Processing customer
+Current Project instructions historically require at least 5 hashtags; the shared standard now sets a default maximum of 5. Reconciled working rule for normal social captions: **exactly 5 dynamic, relevant hashtags** unless the platform/brief requires fewer or none.
 
-A 2025 event source refers to an Ehrlich Park voucher usable for meat processing. Confirm the exact current service scope before using this commercially.
+Choose from the exact:
 
-If active, this could be a major seasonal/hunting-market funnel with clear booking, weights, turnaround and collection communication.
+- client identity;
+- product/cut actually shown or supplied;
+- braai/meal/use-case;
+- relevant Bloemfontein/local category intent;
+- platform;
+- current reliable search context where useful.
+
+The old bank — including tags such as `#EhrlichParkButchery`, `#FreshMeat`, `#BloemfonteinButchery`, `#BraaiTime`, `#LocalButchery`, `#MeatSpecials`, `#SupportLocal`, `#QualityCuts`, `#TastyMeals` — is seed/reference material only.
+
+Never use a hashtag that creates an unsupported claim about stock, origin, supplier, location or promotion.
 
 ## Content architecture
 
-The content should feel like a **real Bloem butcher**, not a generic luxury meat brand.
+### 1. Daily / weekly specials
 
-### Pillar A — `Ask the Butcher`
+Strong content:
 
-Thomas or another qualified staff member answers one useful question in 15–30 seconds.
+- supplied current products and exact prices;
+- clear validity period when supplied;
+- practical meal/braai use;
+- value explained without fake scarcity.
 
-Examples:
+Never reuse an old price or special because it appeared in a prior post.
 
-- `Ribeye or rump for the braai?`
-- `How much meat for 10 people?`
-- `Why does thickness matter?`
-- `What should I buy for a potjie?`
-- `Best cut when you don't want to spend steak money?`
+### 2. Product highlights
 
-This builds expertise and gives the owner a recognisable role.
+Make the exact product useful:
 
-### Pillar B — `Since 1975`
+- what meal it suits;
+- how the butcher prepares it;
+- portion/serving context when verified;
+- one simple cooking idea where appropriate.
 
-Use old-versus-new, legacy stories and real business history.
+The product should not become a generic `quality meat` poster.
 
-Avoid generic nostalgia. Each story should connect heritage to a current product or service standard.
+### 3. Behind the counter
 
-Examples:
+Strong visual proof:
 
-- old shop photos if available;
-- family history;
-- tools/traditional methods;
-- long-serving staff;
-- customers who have shopped there for generations.
-
-### Pillar C — `Braai Sorted`
-
-Highly commercial recurring format.
-
-Every piece solves a real braai problem:
-
-- number of people;
-- budget;
-- rugby weekend;
-- steak night;
-- family braai;
-- big group;
-- quick Friday braai.
-
-### Pillar D — Counter Proof
-
-The visual proof of a good butchery is powerful:
-
-- clean cuts;
 - trimming;
 - portioning;
-- sausage making where applicable;
-- slicing biltong;
 - packing orders;
-- full counter abundance;
-- customer-specific preparation.
+- slicing/preparing product where shown;
+- counter care;
+- staff hands-on work.
 
-### Pillar E — `Thomas Recommends`
+Describe only what is actually visible/verified.
 
-One recommendation, one reason, one use.
+### 4. Braai / meal inspiration
 
-This is more credible than a caption simply saying `special this week`.
+High-fit local territory includes:
 
-### Pillar F — Food payoff
+- weekend braai;
+- rugby-day buying moments;
+- family braai;
+- midweek meal decisions;
+- potjie/roast/pan/grill use when the supplied product supports it.
 
-Raw meat alone can become repetitive.
+Do not invent cooking times, food-safety temperatures or cut suitability without reliable support.
 
-Pair butcher footage with finished food:
+### 5. Team / service moments
 
-- steak over coals;
-- boerewors snap;
-- lamb chops;
-- potjie;
-- biltong slice;
-- family table.
+Show what staff do for customers:
 
-The butcher sells an outcome, not only kilograms.
+- prepare to request;
+- weigh/portion/pack;
+- help choose between supplied options;
+- keep orders organised;
+- serve regulars.
 
-## Video strategy
+Avoid vague `our amazing team` copy with no service detail.
 
-Video should balance **craft + appetite + personality + offer**.
+### 6. Customer favourites / testimonials
 
-Recommended short-form structures:
+Use only genuine, permissioned customer material.
 
-### `Butcher says no`
+Never invent a review, quote, regular-customer history or testimonial.
 
-Customer asks for the wrong cut/cooking method; butcher quickly corrects them and gives a better option.
+### 7. Heritage / community
 
-Useful, human and slightly cheeky without insulting the customer.
+Family-owned since 1975 is current official evidence.
 
-### `How much for the braai?`
+Use heritage through real proof:
 
-Fast visual calculator by guest count.
+- old photos;
+- long-serving staff/customer stories;
+- community events;
+- butchery knowledge handed down over time.
 
-Strong save/share value.
+Do not manufacture anecdotes.
 
-### `Cut of the week`
+## Buyer journeys retained from the August strategy
 
-15–20 seconds:
+The existing intelligence remains commercially useful for these audience/use-case lanes, subject to current product/service proof:
 
-1. show cut;
-2. explain what it is best for;
-3. one cooking tip;
-4. current price only if verified.
+1. weekly family-meat shopper;
+2. braai buyer;
+3. premium/specific-cut buyer;
+4. bulk/freezer buyer;
+5. gifting/customer-favourite buyer;
+6. community/event buyer;
+7. processing customer only if the service is freshly confirmed.
 
-### `1975 vs today`
+The job of content is to reduce purchase uncertainty: show the actual product, explain why it suits the occasion, make the offer/terms clear and make the next step easy.
 
-Old-school butcher knowledge meets current meal behaviour.
+## Recurring content formats retained
 
-### `Friday at Ehrlich Park`
+Useful existing concepts, when supported by current product/service evidence:
 
-Fast store energy, cutting, packing, customers, braai stock.
+- `Ask the Butcher` — one practical question;
+- `Braai Sorted` — one real braai decision;
+- `Cut of the Week` — exact supplied product, use and verified price if applicable;
+- `Friday at Ehrlich Park` — real store/counter energy;
+- `Don't ruin this steak` — one verified cooking/preparation tip;
+- `The Butcher's Basket` — one supplied occasion/budget basket;
+- `Since 1975` — heritage tied to present-day proof;
+- counter proof / packing / preparation;
+- finished-food payoff alongside real product footage.
 
-### `Don't ruin this steak`
+Do not lock these into a repetitive weekly template. Freshness, season, current asset quality and actual client brief decide what runs.
 
-Strong hook, then one preparation/cooking mistake to avoid.
+## Promotions / offer guardrails
 
-### `The butcher's basket`
+Potential systems from the August strategy include family/freezer packs, braai-by-headcount, rugby weekends, month-end stock-up, gifting and community-event bundles.
 
-Build one practical meat basket for a fixed occasion or budget.
+These are **ideas**, not current operational facts.
 
-All pricing remains campaign-specific and freshness-controlled.
+For every live promotion verify:
 
-## Promotions and offer systems
+- exact product names;
+- exact pack composition;
+- weights;
+- price;
+- start/end date;
+- stock/while-stocks-last wording if supplied;
+- collection/delivery terms;
+- service area;
+- branch/location;
+- contact/ordering method.
 
-Avoid isolated weekly posters with no buying logic.
+Never invent urgency or stock scarcity.
 
-Better promotional systems:
+## Food and claim safety
 
-### Family freezer packs
+Never invent or infer:
 
-Bundle by household need and number of meals.
+- meat grade;
+- animal origin;
+- farm/supplier relationship;
+- grass-fed/free-range/organic/hormone-free status;
+- halaal/kosher certification;
+- slaughter/process method;
+- food-safety certification;
+- exact freshness age/date;
+- guaranteed tenderness;
+- health/nutrition benefit;
+- storage life;
+- cooking temperature/time as a client claim;
+- stock availability;
+- weights;
+- prices;
+- delivery/collection terms.
 
-### Braai-by-headcount
+Generated or edited imagery is never proof of a real current product, portion, price, promotion or stock position.
 
-Package structure by guest number.
+## Image editing / generation
 
-### Rugby weekends
+### Real-image preservation
 
-Thursday–Saturday meat + biltong/droëwors + braai products where available.
+For edits to real Ehrlich Park assets:
 
-### Month-end stock-up
+- change only what was requested unless a redesign is explicit;
+- preserve real meat/product identity and appearance;
+- preserve packaging, labels, printed prices and supplied branding;
+- preserve staff/person identity where a real person is part of the asset;
+- preserve clothing unless the user asks to change it;
+- preserve body proportions, hand positioning and believable anatomy;
+- preserve counters, tools and composition when they are not part of the requested edit;
+- preserve food-safe working context;
+- never alter a supplied price/label/product into another claim by accident.
 
-Focus on unit value, portions and freezer use.
+Project history specifically shows high sensitivity to `change X and nothing else` edits. Treat that literally.
 
-### Father's Day / gifting
+### Generated creative
 
-Biltong/droëwors gift packs, vouchers and premium braai packs where current stock supports them.
+Generated butchery imagery should look photorealistic, appetising and believable rather than synthetic luxury-food advertising.
 
-### Community-event bundles
+Useful characteristics where the brief supports them:
 
-Ehrlich Park already appears in local sponsorship/auction ecosystems. Turn community participation into structured local visibility rather than ad-hoc logo placement.
+- real working butcher action;
+- natural meat texture/fat/bone structure;
+- hygienic gloves/tools/surfaces;
+- clear negative space for copy;
+- premium presentation without erasing the neighbourhood-butchery character.
 
-## Community marketing
+Never present generated meat/staff/packaging as documentary proof of current stock, staff, suppliers or specials.
 
-The brand's heritage gives it permission to be deeply local.
+## Local search / website notes retained
 
-Potential partnerships:
+The August strategy correctly identifies local search as important for a neighbourhood butchery. The current address conflict makes consistency work especially important.
 
-- schools and reunions;
-- rugby clubs;
-- golf days;
-- local braai competitions;
-- hunting and outdoor communities;
-- local restaurants/caterers where supply relationships exist;
-- wine/brandy pairing events;
-- charity/community auctions.
+Before local SEO/GBP changes, resolve the direct-source `5 De Waal Road` vs official-site `55 De Waal Road` conflict.
 
-Current 2025 event evidence already shows Ehrlich Park participating through vouchers and biltong/droëwors gift packs, so local partnership marketing is not hypothetical.
+Useful search themes only when the underlying fact is supported:
 
-## Google Business Profile and local search
-
-This is critical for a neighbourhood butchery.
-
-Current official website details must be consistent everywhere:
-
-- name;
-- 55 De Waal Road;
-- 051 434 2001;
-- opening hours;
-- website;
-- categories;
-- photos.
-
-Older directories still surface conflicting phone/address information, creating avoidable trust and SEO noise.
-
-Priority search themes:
-
+- Ehrlich Park Butchery;
 - butchery Bloemfontein;
-- butcher Ehrlich Park;
+- butcher Bloemfontein;
 - meat Bloemfontein;
 - braai meat Bloemfontein;
-- biltong Bloemfontein if confirmed;
-- boerewors Bloemfontein if confirmed;
-- meat processing Bloemfontein if confirmed;
-- butcher near me.
+- exact product terms when current;
+- `near me` intent through accurate GBP/location data.
 
-## Website diagnosis
+## Paid / conversion principles retained
 
-The current official site is very light: effectively a home/about/contact presence.
+For current specials and local purchase intent, useful measurement can include calls, messages, directions, redemptions and sales evidence where available.
 
-Strengths:
+Do not judge content only on likes/reach. But do not invent attribution or revenue impact where no tracking exists.
 
-- clear heritage;
-- owner visibility;
-- current official contact details;
-- clean simple trust message.
+## Task-specific retrieval contract
 
-Missing commercial layers:
+### For `caption please`
 
-- current product categories;
-- service pages;
-- biltong/droëwors page if active;
-- processing page if active;
-- specials/current offers;
-- order/preorder CTA;
-- braai packs;
-- gifts/vouchers;
-- FAQs;
-- customer proof;
-- richer local SEO copy;
-- proper conversion tracking.
+Retrieve only:
 
-A full ecommerce store may be unnecessary. A strong local product/service catalogue with WhatsApp/phone/preorder conversion could be much more practical.
+- exact Ehrlich Park identity/client ID;
+- supplied creative/poster/video context;
+- local human voice;
+- add-don't-repeat rule;
+- exact current product/special facts supplied for that post;
+- CTA/contact convention relevant to the task, including any unresolved footer conflict;
+- food/product claim guardrails;
+- exactly-5 dynamic hashtag rule for normal social captions;
+- unresolved facts that affect the post.
 
-## Reputation system
+Do not load the whole client corpus for a simple caption.
 
-Heritage should generate reviews.
+### For `text on post`
 
-Build a steady review loop around:
+Retrieve:
 
-- quality;
-- service;
-- butcher advice;
-- specific products;
-- repeat customer history;
-- value;
-- preparation/processing where applicable.
+- exact product/service/team/braai context;
+- short title + supporting subtitle preference;
+- non-generic / specific language rule;
+- wording already used recently when available to avoid repetition;
+- no invented product/price claims.
 
-Never script review text for customers.
+### For `content ideas`
 
-Use genuine review language in future ads/content once captured and approved.
+Retrieve:
 
-## Paid media
+- current verified/supplied product/service scope;
+- content pillars above;
+- recent CG work to avoid repetition;
+- current season/local moments where verified;
+- image/content production realities;
+- claim guardrails.
 
-### Meta
+### For `image edit`
 
-Best uses:
+Retrieve:
 
-- local radius awareness;
-- Thursday/Friday braai campaigns;
-- promotion videos;
-- product beauty;
-- biltong/gifting;
-- retarget engaged customers.
+- supplied image as primary truth;
+- exact requested change;
+- preserve-all-unrequested-elements rule;
+- real product/packaging/label/price/branding/person/clothing/proportion/composition guardrails;
+- no generated proof of stock/promotion.
 
-Do not judge Meta only on likes. Track calls, messages, directions and promotion redemption where possible.
+## Project Source audit
 
-### Google Search
+Actually accessible Project Source:
 
-High-intent campaigns can cover:
+### KEEP — `Ehlrich Park Slaghuis Business Info.pdf`
 
-- butcher near me;
-- butchery Bloemfontein;
-- braai meat;
-- biltong/droëwors if active;
-- meat processing if active.
+Why keep:
 
-This is likely commercially stronger than broad awareness for urgent local purchase missions.
+- original client/business evidence;
+- useful provenance for historical product categories, contacts, positioning and promo examples;
+- valuable evidence of what CG was originally told.
 
-## Customer data and repeat-purchase opportunity
+Limitations:
 
-A butchery is naturally repeat-driven.
+- address conflicts with the current official website;
+- second telephone and WhatsApp are not confirmed by the current website;
+- `locally sourced` is a freshness-sensitive supply-chain claim;
+- free delivery over R400 is promotion-specific historical evidence;
+- product list is not a live stock catalogue.
 
-CG Dynamics should eventually track, where the client can legally and practically supply it:
+Keep it as evidence, not as the only everyday grounding source.
 
-- promotion;
-- featured product;
-- enquiries/messages;
-- calls;
-- direction requests;
-- voucher redemptions;
-- repeat customers;
-- basket value;
-- bulk/freezer-pack sales;
-- gift-pack sales;
-- processing bookings;
-- campaign period revenue.
+**REMOVE:** none.  
+**REPLACE:** none of the actually accessible existing Project Sources.
 
-The marketing question is not `did the post get reach?`
+Add/refresh `EHRLICH-PARK-BUTCHERY-CG-DYNAMICS-CLIENT-GUIDE.md` as the current practical Project source after migration review.
 
-It is `did the content create more profitable repeat meat buying?`
+No Project Source is physically deleted by this migration.
 
-## 90-day commercial plan
+## Unresolved / freshness-gated decisions
 
-### Days 1–30 — Truth and proof
+1. Physical address: `5 De Waal Road` vs `55 De Waal Road`.
+2. Whether `051 434 2761` is still an active public telephone.
+3. Whether WhatsApp `+27 78 057 4485` is still operational/current.
+4. Caption-footer conflict: current Project instruction split by content type vs later `always use full contact info` correction.
+5. Complete current product/cut catalogue and live stock behaviour.
+6. Whether `locally sourced` remains accurate and what it specifically means.
+7. Current delivery/collection/ordering rules and any free-delivery threshold.
+8. Current owner/staff names and roles; former `Thomas`/`081 718 6988` evidence is not reverified.
+9. Current official Facebook/Instagram identities and handles.
+10. Current processing, wholesale/catering, gift pack/voucher and special-order scope.
+11. Any fixed emoji rule or fixed caption sentence/option count.
 
-- Confirm full current product/service catalogue.
-- Clean all conflicting directory details.
-- Photograph/video core counters, cuts, owner and staff.
-- Capture current Google review baseline.
-- Build `Ask the Butcher` and `Braai Sorted` formats.
-- Set up campaign-level WhatsApp/call tracking where possible.
+These are not blockers because they are explicitly excluded from unverified assertion.
 
-### Days 31–60 — Occasion systems
+## Canonical short Project Instructions
 
-- Launch first braai-by-headcount offer.
-- Test Thursday/Friday local Meta video.
-- Build a family/freezer offer if operationally viable.
-- Start owner-led cut education.
-- Create one community partnership activation.
-- Strengthen Google Business Profile photography and posts.
+Work only on Ehrlich Park Butchery. Before factual, caption, content or image work, retrieve current exact-client CG Dynamics/GitHub context for client ID ec643c75-51f5-4839-829f-3f5b7f48829a and recheck mutable facts. Keep marketing local, warm, down-to-earth, specific and useful; natural English/Afrikaans is welcome when it fits. Captions must add to the artwork/video, not repeat it. Use exactly 5 dynamic relevant hashtags on normal social captions unless the platform/brief requires fewer or none. Preserve real meat/products, packaging, labels, prices, branding, people, clothing, proportions and composition in edits; change only what was requested. Never invent products, cuts, stock, meat grades/origin, weights, prices, specials, suppliers, delivery/collection, contacts, hours or food claims. Flag source conflicts instead of guessing.
 
-### Days 61–90 — Repeat and differentiation
+## Handoff state
 
-- Compare promotional offers by actual enquiries/sales evidence.
-- Formalise gift/voucher system if viable.
-- Formalise processing funnel if current service confirmed.
-- Build customer review/testimonial proof.
-- Create `Since 1975` heritage campaign using real archive material.
-- Identify the two best-performing recurring content formats and keep them.
+**MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**
 
-## Brand guardrails
-
-Do not:
-
-- call products organic, grass-fed, free-range, hormone-free, halaal or ethically sourced without current proof;
-- claim `best butcher in Bloemfontein` without current substantiation;
-- copy Bester's geelvet positioning;
-- use fake farm-to-table claims;
-- use outdated prices or pack details;
-- make food-safety claims beyond approved factual guidance;
-- use hunting/game-processing content unless the service is currently confirmed;
-- turn a 50-year heritage business into generic supermarket-sale creative.
-
-## Source register
-
-Current sources reviewed 2026-08-07:
-
-1. Ehrlich Park Butchery official website — `https://www.ehpbutchery.co.za/`.
-2. Ehrlich Park Butchery official contact page — current address, phone, email and hours.
-3. Business Social Network Bloemfontein / member directory — owner name `Thomas Gianni` and current business profile signal.
-4. Eie Haard 2025 auction/event publication — evidence of Ehrlich Park biltong/droëwors gift packs, meat vouchers and a processing-related voucher use case.
-5. Current Bloemfontein butcher directory landscape — competitor and category mapping.
-6. Bester Butchery official website and current public content.
-7. Bloemfontein Courant Best of Bloemfontein 2024 — Bester Butchery category wins, used as competitor-position evidence.
-8. Current public/community discussion around Bloemfontein biltong and butcheries — directional competitor/customer-language evidence only, not market-size proof.
-
-## Final strategic principle
-
-Ehrlich Park Butchery does not need louder `QUALITY MEAT` advertising.
-
-It needs to demonstrate why five decades of real butcher knowledge still matters every time a Bloemfontein customer chooses what to put on the braai or dinner table.
-
-The commercial direction is:
-
-> **Turn heritage into useful expertise, expertise into trust, and trust into repeat buying.**
+This status remains until a CG Production House user physically applies the short Instructions in the Ehrlich Park Butchery ChatGPT Project and confirms the handoff.
