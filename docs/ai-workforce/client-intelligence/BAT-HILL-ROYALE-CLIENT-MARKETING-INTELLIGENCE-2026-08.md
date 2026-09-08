@@ -1,685 +1,246 @@
-# Bat Hill Royale — Client Marketing Intelligence
+# Bat Hill Royale — Canonical Client Marketing Intelligence
 
-Last updated: 2026-08-06
-Status: Review-state client intelligence. Keep isolated to Bat Hill Royale. Do not promote to approved production knowledge without human review.
+Last reconciled: 2026-09-08  
+Canonical CG Dynamics client: **Bat Hill Royale**  
+Exact client_id: `32bd9db3-5339-4404-825b-5a615cadec6a`  
+Status: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**  
+Derived guide: `BAT-HILL-ROYALE-CG-DYNAMICS-CLIENT-GUIDE.md`  
+Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
-## Verified identity
+CG Dynamics is permanent truth. This file is the reviewed exact-client recovery/export record that reconciles the August research with the accessible Bat Hill Royale ChatGPT Project. Do not create another Bat Hill truth store.
 
-Bat Hill Royale is a Bloemfontein indoor golf centre at the corner of Kenilworth Road and Maluti Avenue, Groenvlei. Its public offer combines indoor golf entertainment, performance training, coaching, club fitting, events, leagues, memberships, a lounge/bar environment, a gaming area and a pro-shop.
+## 1. Exact identity and durable offer
 
-Publicly verified facilities and services:
+Work only on **Bat Hill Royale**.
 
-- five TrackMan simulator bays;
-- indoor driving range with shot data and analytics;
-- short-game area with putting, chipping, rough and sand practice;
-- South Africa-first indoor sand-bunker claim on the website, which must be internally verified before reuse;
-- professional and in-house coaching;
-- driver, iron, wedge, putter, fairway-wood, hybrid and full-bag fitting;
-- club cleaning, repairs and maintenance;
-- pro-shop and apparel/equipment sales;
-- lounge, bar and social space;
-- gaming zone;
-- memberships;
-- leagues for pro/low-handicap, students and businesses;
-- corporate events, team building and private functions;
-- social challenges such as longest drive, closest to the pin and chipping competitions.
+Bat Hill Royale is a Bloemfontein indoor golf centre and sports/entertainment venue. Its durable territory is broader than simulator rental: practice/performance, social play, community/leagues, coaching/club fitting and group/event use in an all-weather indoor setting.
 
-Current public pricing and promotions exist on the website, but they are not fully consistent across pages. Every campaign must confirm live rates before publication.
+Current first-party website evidence continues to support TrackMan simulator golf, indoor practice, short-game practice, coaching, club fitting/club care, memberships, leagues/challenges, corporate/private-event enquiries, lounge/bar/social space, pro-shop activity and gaming/entertainment. Exact counts, prices, inclusions, stock, availability, capacities and promotional claims are mutable and must be rechecked.
 
-Primary public sources:
+## 2. Authority and conflict rules
 
-- `https://bathillroyale.co.za/`
-- `https://bathillroyale.co.za/bookings-memberships/`
-- `https://bathillroyale.co.za/events/`
-- `https://bathillroyale.co.za/leagues/`
+For human creative judgement prefer: newest Bat Hill client/CG correction → current Project Instructions → repeated Bat Hill Project history → this record → Project Sources after conflict checks → recent CG work → reusable CG sport/entertainment research.
 
-## Strategic reading
+For mutable facts use: direct current client/CG confirmation → current official website → current official social → verified business listing → reliable third party → stored history.
 
-Bat Hill Royale should not be marketed as only a simulator venue.
+Never silently combine conflicting contacts, offers, dates or event facts. Use `current_verified`, `current_verified_limited`, `unverified_hold`, `stale_superseded`, `historical_execution` or `rejected` states as appropriate.
 
-Its strongest defendable position is:
+## 3. Contact / booking / footer audit — #294
 
-> Bloemfontein's all-weather golf performance and social club — where people can improve, compete, connect and entertain under one roof.
+| Contact / route | Classification | State | Rule |
+|---|---|---|---|
+| `+27 67 238 2318` | `public_marketing`, caption-approved phone | `current_verified` | Current Bat Hill Project Instructions use it; a historical official Bat Hill page also exposed the same number for call/WhatsApp. Retrieve the current canonical Dynamics value at task time. |
+| `+27 51 011 2297` | historical public booking/enquiry phone | `stale_superseded` | Supplied `BAT HILL ROYALE.pdf` uses it, but it conflicts with newer Project Instructions. Do not auto-publish it. |
+| `admin@bathillroyale.co.za` | `public_marketing`, caption-approved email | `current_verified` | Current Project Instructions and supplied source agree. Retrieve dynamically. |
+| `bathillroyale.co.za` | `public_marketing`, official website | `current_verified` | Current site is live. Current Project rules require the website route in posts. |
+| Cnr Kenilworth/Maluti Ave, Groenvlei, Bloemfontein, 9301 | `public_marketing` address | `current_verified` | Current official site and supplied source agree. Use when location/visit context needs it. |
+| Website/TrackMan booking route | public booking route | `current_verified_limited` | Booking is supported, but exact deep links/app flow are mutable. Verify per task. |
+| WhatsApp use of current phone | public contact capability | `current_verified_limited` | Historical official page labels it WhatsApp, but that page contains stale launch residue. Recheck before making WhatsApp-specific claims. |
 
-The business has four commercially distinct engines:
+No named public contact person, internal-only contact or client-portal-only contact was discovered in the actually accessible Bat Hill Project Source/Instructions.
 
-1. **Practice and performance** — golfers who want measurable improvement.
-2. **Social play and entertainment** — friends, couples, families and beginners.
-3. **Membership and community** — repeat use, leagues, challenges and belonging.
-4. **Corporate and private events** — high-value group bookings and sponsorship.
+### Current footer behaviour
 
-Marketing becomes weak when all four are blended into generic “premium indoor golf” language. Each needs its own proof, audience, landing page, campaign and measurement.
+The newer Project Instructions supersede the old PDF's blanket `contacts in every caption` rule.
 
-## Audience and decision journeys
+- Keep the current official website route in Bat Hill social posts.
+- Event posts, booking posts, promotions and direct invitations to visit/use the venue should carry the current caption-approved contact/footer block.
+- Progress/build/experience teaser posts may omit phone/email when there is no contact CTA, while still following the current website rule.
+- Preserve the current canonical footer ordering/format when used.
+- A campaign-specific verified booking route may override the general route for that post only.
+- If current contact data conflicts, flag it instead of falling back to an old source or another business.
 
-### Serious and improving golfers
+**Final Project Instructions must not hardcode phone, email, address, website/deep link or named contacts.** Retrieve the exact current footer from canonical Dynamics at task time.
 
-They care about:
+## 4. Human creative standard
 
-- reliable TrackMan data;
-- measurable improvement;
-- coaching quality;
-- club fitting credibility;
-- year-round practice;
-- short-game access;
-- clear memberships and practice value;
-- proof that indoor work transfers to the course.
+Bat Hill Royale should feel **confident, clean, local and aspirational**. Speak like people in Bloem who know golf and enjoy the space.
 
-Best content:
+Keep:
+- natural, human wording;
+- short, intentional sentences;
+- direct address when useful (`you`, `your game`, `come see it for yourself`);
+- calm confidence around golf technology/performance;
+- social warmth around people, leagues and events;
+- local Afrikaans/English phrasing only when it genuinely fits;
+- quiet premium quality supported by the real facility or experience.
 
-- before-and-after swing or dispersion data;
-- coach explanations;
-- fitting case studies;
-- challenge benchmarks;
-- practice plans;
-- member progress stories;
-- on-course follow-up results where available.
+Avoid:
+- influencer hype or fake excitement;
+- forced humour, puns or memes;
+- unnatural slang;
+- excessive emojis;
+- copy/paste templates;
+- repeating artwork/video dialogue;
+- generic strings of benefits;
+- unsupported superlatives.
 
-### Social golfers and friend groups
+Avoid generic filler such as `unforgettable moments`, `where memories are made`, `the perfect venue`, `something for everyone`, `experience the magic`, `discover the difference` and `experience excellence` unless the exact brief genuinely earns it.
 
-They care about:
+## 5. Caption rules
 
-- fun;
-- easy booking;
-- pricing clarity;
-- drinks and atmosphere;
-- famous virtual courses;
-- challenges and banter;
-- no weather disruption;
-- whether beginners will feel comfortable.
+**Captions add to the creative; they do not repeat it.** Start from what is actually visible or happening and add one useful second layer: why it matters, a golfer/customer benefit, a local/human observation, a real service detail, community/event context or a reason to act.
 
-Best content:
+Default rhythm:
+- concise;
+- one clear idea at a time;
+- short, punchy, natural sentences;
+- varied openings and CTAs;
+- humour only when rooted in a real golf/staff/venue situation;
+- one or two emojis at most when relevant.
 
-- reactions;
-- team challenges;
-- first-timer experiences;
-- Friday-night and after-work energy;
-- closest-to-pin and longest-drive moments;
-- “golf without the pressure of a golf course” messaging.
+English is the default working language. Natural Afrikaans or light English/Afrikaans mixing is allowed when the brief, speaker or context supports it. Do not force translated/formal Afrikaans for local flavour.
 
-### Beginners, women, juniors and families
+## 6. Dynamic SEO and hashtags
 
-Their biggest barrier is intimidation, not lack of awareness.
+Default maximum: **5 hashtags**.
 
-They need:
+Choose dynamically from exact Bat Hill identity + exact service/event/topic + golf/indoor-golf/TrackMan/club-fitting intent where relevant + Bloemfontein/Free State relevance + platform/current reliable search context.
 
-- visible beginner friendliness;
-- coaches who explain without judgement;
-- rental-club clarity;
-- simple game formats;
-- women and junior participation proof;
-- predictable costs;
-- safe, welcoming social context.
+Historical tags such as `#BatHillRoyale`, `#IndoorGolfBloem`, `#GolfSimulatorsSA`, `#GolfBloemfontein`, `#TrackmanGolf`, `#CustomClubFitting`, `#BloemGolf` and `#CompeteTrainPlay` are seeds only, not a frozen bank.
 
-Avoid treating women, juniors or beginners as a once-a-week discount audience only. Build recurring communities and progression pathways.
+## 7. Durable content lanes
 
-### Corporate organisers
+### Practice / performance
+Use real TrackMan data, coaching, fitting or practice context. Explain one useful metric, practice objective or fitting decision. Never promise guaranteed improvement or fabricate results.
 
-They care about:
+### Social / experience
+Use real people, reactions, friend-group rivalry, golfer-vs-beginner formats, pressure shots and after-work/social play. Fun is allowed; forced hype is not.
 
-- easy coordination;
-- clear capacity and inclusions;
-- team engagement;
-- food and beverage options;
-- branding;
-- scorekeeping;
-- reliable staff support;
-- parking and location;
-- professional invoicing;
-- whether non-golfers can participate.
+### Membership / leagues / community
+Show recurring participation, progress, rivalry and local golf community. School/student/junior/women content is valid when the live brief supports it. Dates, fees, eligibility, prizes and formats are mutable.
 
-The website publicly offers exclusive five-bay packages for 4, 8 and 12 hours, with event coordination, branding, catering and bar options. These are high-value offers and should have dedicated proof, case studies and lead follow-up.
+### Corporate / private events
+Sell the real group experience, not generic `venue` language. Capacity, food/drink, branding, packages, deposits, cancellation rules and availability must be verified for the exact event.
 
-### Sponsors and commercial partners
+### Product / service highlights
+TrackMan, custom club fitting, coaching, memberships, club care, pro-shop and other current services can be strong content when the exact product/service is current. National/manufacturer material is not proof of local stock.
 
-Potential partners care about:
+### People / behind the scenes
+Use real golfers, instructors/team members, fitting/setup moments and event preparation. Use names/roles only when supplied/verified.
 
-- recurring exposure;
-- audience quality;
-- event attendance;
-- league participation;
-- social content;
-- measurable sponsor inventory;
-- credible brand environment.
+### Progress / milestones
+Project history supports `how it started → where we are now` storytelling. Keep the format; do not carry forward one-off anniversary dates or offers as permanent facts.
 
-BHR should sell structured sponsorship assets rather than ad-hoc logo placement.
+### Booking reminders
+Make the action easy and relevant to the post. Retrieve the current booking route, availability, offer and footer dynamically.
 
-## Competitor and substitute analysis
+## 8. Reels / scripts
 
-## Local direct and indirect competition
+Accessible Project history shows these durable lessons:
 
-### Tempe Driving Range
+- visual-first concepts can work without narrator or voice-over;
+- one-person reels can move through venue areas and tell a story through scenes rather than explaining every section;
+- short 30–40 second social concepts work when the brief asks for a fun format;
+- school/league outreach can be clear through on-screen messaging without VO;
+- humour should come from golf/venue reality, not generic internet trends;
+- match scripts to the real available venue areas and current brief.
 
-Public strengths:
+## 9. Visual and image-edit rules
 
-- low-cost outdoor practice;
-- established range behaviour;
-- coaching;
-- multiple practice facilities;
-- price-led value.
+Repeated Project corrections require **change only what was requested**.
 
-BHR advantage:
+For resize/orientation/reformatting:
+- preserve all information;
+- preserve wording unless a correction is requested;
+- preserve fonts/type hierarchy;
+- preserve colours;
+- preserve logos;
+- preserve real people/images;
+- preserve product/venue details and composition as closely as the new format allows;
+- do not silently redesign or crop out required content.
 
-- all-weather use;
-- richer data;
-- virtual-course play;
-- lounge and events;
-- controlled coaching and fitting environment.
+For broader edits/generation, preserve real people, venue areas, food/drink/products, logos, colours and meaningful composition unless the brief explicitly changes them. Never fabricate facilities, equipment, sponsor logos, menus, event setups, crowds, awards or relationships and present them as real.
 
-Risk:
+## 10. Durable positioning retained from August research
 
-- BHR may feel expensive for simple ball-striking practice.
+Bat Hill Royale has four useful marketing engines:
 
-Response:
+1. practice/performance;
+2. social play/entertainment;
+3. membership/community;
+4. corporate/private events.
 
-- clearly separate affordable practice products from premium entertainment and fitting products;
-- show the value of data, climate control and structured improvement.
+Do not flatten all four into generic `premium indoor golf` copy.
 
-### Universitas Driving Range and Golf Shop
+Useful strategic territory: **Bloemfontein's all-weather golf performance and social hub, not merely a simulator-rental venue.** Treat this as internal strategy, not a fixed slogan.
 
-Public strengths:
+Strong proof categories are real data, complete practice, community, entertainment, expert support and indoor reliability. Premium language needs proof. People/reactions/outcomes generally beat endless empty-bay footage. Corporate/fitting content benefits from case-study evidence. Beginner content should reduce uncertainty rather than stereotype audiences.
 
-- local convenience;
-- price positioning;
-- outdoor golf-shop/range familiarity.
+Reusable older concept seeds include one-metric shot improvement, golfer-vs-non-golfer, a one-shot pressure challenge, office rivalry and fitting-to-course follow-up when real evidence exists.
 
-BHR opportunity:
+## 11. Claim / freshness guardrails
 
-- stronger digital booking;
-- measurable performance proof;
-- memberships and leagues;
-- indoor social experience;
-- fitting and club-care credibility.
+Never invent or assume:
+- event dates, artists or performers;
+- promotions, free hours, discounts or prizes;
+- prices/membership terms;
+- booking availability;
+- opening/holiday hours without a fresh check;
+- staff/coaches/credentials;
+- current fitting brands or stock;
+- partner/sponsor relationships;
+- event capacity;
+- catering/menu/bar inclusions or alcohol conditions;
+- accommodation facilities;
+- league/school rules, dates or prizes;
+- exact facility counts when commercially material;
+- guaranteed performance results;
+- `best in South Africa`;
+- `South Africa's first` without current documented approval;
+- `unlimited` access without current terms;
+- old booking deep links.
 
-### Bloemfontein golf clubs and course memberships
+The official site contains current-looking prices, hours, memberships and event/service detail, but these are mutable and must be rechecked for the exact task.
 
-These are not simple competitors. They are also partners and progression destinations.
+## 12. Project Source audit
 
-They offer:
+Actually accessible Project Source:
 
-- real-course play;
-- handicaps and competitions;
-- traditional club community;
-- outdoor practice.
+### `BAT HILL ROYALE.pdf` — **REPLACE as the active ChatGPT Project working source with the derived CG Dynamics Client Guide after manual handoff**
 
-BHR should not claim to replace course golf. It should position as:
+Reason: it contains useful original identity/scope evidence, but freezes an older phone, requires contacts in every caption, predates #248/#294/#301, and lacks the durable caption/reel/image-edit lessons now recovered.
 
-- additional practice;
-- weather-proof social play;
-- preparation before competition;
-- data-led improvement;
-- off-course league and event entertainment.
+**Do not delete the original evidence.** Preserve it for audit/history. No other Project Source was actually accessible, so no decision is assigned to unseen files.
 
-### Emoya Driving Range and other local practice venues
+## 13. Inaccessible evidence warning
 
-These compete on outdoor experience, familiarity and casual accessibility. BHR must make the added value of TrackMan, indoor convenience, coaching, fitting and social atmosphere obvious.
+Accessible Bat Hill Project history, recent caption/script/image-edit work and the one supplied source were reviewed. No independent export of every hidden, archived or unloaded historical ChatGPT message was available.
 
-### Action Sport, INIBOS and event venues
+`inaccessible_history_warning = yes`
 
-For corporate budgets, BHR competes against every team-building and function venue in Bloemfontein, not only golf businesses.
+This migration does **not** declare `SAFE TO DELETE PROJECT CHATS`; #301 must still clear its full deletion gate.
 
-Action Sport offers active indoor team events and functions. INIBOS offers broader team-building programmes. Conference and venue businesses offer capacity and catering.
+## 14. Unresolved facts — never guess
 
-BHR's differentiator:
+- current official social handles;
+- whether the current phone should always be promoted explicitly as WhatsApp;
+- exact current booking deep link / TrackMan app path;
+- current prices, specials and memberships;
+- exact event capacity/package inclusions;
+- current catering/menu/bar terms and alcohol conditions;
+- current staff/coaches/instructors and credentials;
+- current fitting product/brand/stock roster;
+- current sponsor/partner roster;
+- current league/school schedules, rules, prizes and eligibility;
+- campaign-safe evidence for any `South Africa's first indoor sand bunker` claim;
+- holiday/special hours;
+- any current event/artist/competition date not supplied in the live brief.
 
-- premium but relaxed;
-- competitive without requiring high fitness;
-- measurable scoring;
-- usable by golfers and non-golfers;
-- weather-proof;
-- visually strong;
-- suitable for client entertainment.
+## 15. Exact-client retrieval target
 
-## National benchmark competitors
+Resolve:
 
-### Par 72 — Pretoria
+`client_id 32bd9db3-5339-4404-825b-5a615cadec6a + task type + supplied creative/context`
 
-Public strengths:
+For `caption please`, return only current Bat Hill voice, exact post/event/service facts, current caption-approved footer/contact convention and values when required, claim/freshness guardrails, unresolved task blockers and max-five dynamic SEO guidance.
 
-- clear premium TrackMan positioning;
-- eight full-size bays;
-- dedicated putting area;
-- strong functions and events communication;
-- playful TrackMan games for non-golfers and families;
-- clear visual distinction between practice, play and events.
+For image edits, prioritise preservation rules and the exact requested change. For content/scripts, retrieve only the relevant audience/content lane, real current context and visual-first/human rules.
 
-BHR opportunity:
+Never use another golf/venue client as fallback.
 
-- own the Free State market more deeply;
-- foreground local golf culture and community;
-- show its short-game and bunker facilities as a complete training advantage;
-- build stronger event-case-study proof.
+## 16. Recoverable final Project Instructions
 
-### The Tee — Cape Town
+> Work only on Bat Hill Royale (exact CG Dynamics client_id: `32bd9db3-5339-4404-825b-5a615cadec6a`). Before factual, caption, content or image work, retrieve current exact-client Dynamics/GitHub context and the supplied creative. Write confident, clean, human Bloemfontein copy: local, specific and aspirational without influencer hype, forced humour, filler or repeated templates. Captions must add to the artwork/video, not restate it. Use natural English by default; Afrikaans or mixed phrasing only when it genuinely fits. Use max 5 dynamic hashtags. Retrieve the current caption-approved booking/contact/footer convention from exact-client Dynamics at task time; never guess or freeze contact values. Preserve real people, venue areas, food/drink, logos, colours, text and composition in edits unless the brief explicitly changes them. Never invent events, facilities, capacities, availability, prices, hours, services, contacts or claims. Flag conflicts instead of guessing.
 
-Public strengths:
-
-- official TrackMan representation in South Africa;
-- technology authority;
-- product and simulator expertise;
-- premium equipment credibility.
-
-BHR opportunity:
-
-- translate technology into human outcomes rather than technical claims alone;
-- use real Bloemfontein golfer stories, coaching progress and club-fitting results.
-
-### Swing Shack / GetFitted — Johannesburg
-
-Public strengths:
-
-- premium club brands;
-- brand-agnostic fitting;
-- coaching and fitting authority;
-- specialist retail positioning;
-- private TrackMan bays.
-
-BHR risk:
-
-- serious golfers may perceive Johannesburg specialists as more credible for high-ticket fitting.
-
-Response:
-
-- publish fitter credentials;
-- explain fitting methodology;
-- show head/shaft testing process;
-- publish anonymised before/after dispersion and distance results;
-- follow up after purchase to prove on-course value.
-
-## Website and digital conversion audit
-
-### Strengths
-
-- broad service detail;
-- public pricing;
-- event packages;
-- membership and booking paths;
-- Google reviews embedded;
-- FAQ and chat elements;
-- clear facility descriptions;
-- strong location and hours visibility.
-
-### Problems
-
-1. **Pricing conflict** — multiple pages show different prices, specials and membership structures.
-2. **Offer overload** — too many products compete for attention without a clear first choice.
-3. **Generic luxury language** — phrases such as premium, ultimate and unforgettable are not enough without proof.
-4. **Weak segmentation** — a beginner, serious golfer and HR manager should not share one generic path.
-5. **Old campaign residue** — expired launch offers and old dates can remain indexed.
-6. **Limited case-study proof** — especially for coaching, club fitting and corporate events.
-7. **Inconsistent contact details** — public listings show slight telephone variation; one canonical number must be enforced.
-8. **Booking confidence** — the user should know exactly what they are booking, how many players fit, what is included and what happens next.
-
-### Required website structure
-
-- Play socially
-- Practise and improve
-- Coaching
-- Club fitting
-- Memberships
-- Leagues and challenges
-- Corporate events
-- Private functions
-- Juniors and beginners
-- Ladies golf community
-- Pro shop and club care
-- Pricing
-- Book now
-- Results and case studies
-- FAQs
-
-Each page should have a single dominant conversion action.
-
-## Positioning and messaging
-
-### Core line
-
-Indoor golf for better play, better competition and better time together.
-
-### Proof pillars
-
-1. **Data** — TrackMan numbers and measurable progress.
-2. **Complete practice** — full swing, chipping, putting and bunker work.
-3. **Community** — leagues, challenges, memberships and repeat connection.
-4. **Entertainment** — famous courses, games, lounge and group play.
-5. **Expert support** — coaching, fitting, maintenance and advice.
-6. **Reliability** — no rain, heat, darkness or course closure.
-
-### Language to avoid
-
-- best in South Africa;
-- guaranteed improvement;
-- perfect accuracy;
-- tour-level results for everyone;
-- unlimited access where fair-use or booking restrictions apply;
-- “South Africa's first” unless documented;
-- exact savings or prizes without current confirmation.
-
-## Content engine
-
-### Performance content
-
-- one TrackMan number explained simply;
-- why two drives with the same distance can have different outcomes;
-- dispersion before and after coaching;
-- fitting myths;
-- wedge gapping;
-- bunker practice;
-- short-game challenges;
-- “what this number means on the course”;
-- member progress over 30 or 90 days.
-
-### Entertainment content
-
-- beginner reactions to famous courses;
-- office rivalry;
-- longest-drive showdowns;
-- closest-to-pin pressure moments;
-- “golfer vs non-golfer” games;
-- bad-shot humour;
-- Friday-night league energy;
-- couple and friend-group formats;
-- weather contrast: storm outside, golf inside.
-
-### Human and community content
-
-- coach personalities;
-- staff banter;
-- member stories;
-- league rivalries;
-- junior progression;
-- women learning and competing;
-- first hole-in-one or personal-best moments;
-- sponsor activations;
-- local golf personalities.
-
-### Corporate proof content
-
-- room before and after branding;
-- event flow from arrival to prizes;
-- non-golfer participation;
-- live leaderboards;
-- catering and lounge moments;
-- HR or organiser testimonial;
-- event recap with attendance and format;
-- “how to run a 40-person golf event without a golf course”.
-
-## Short-form series
-
-### “The number that changed the shot”
-
-1. Show one swing.
-2. Highlight one TrackMan metric.
-3. Coach explains the issue in one sentence.
-4. Show the adjustment.
-5. Show the new result.
-6. CTA: book an assessment.
-
-### “Can a non-golfer beat a golfer?”
-
-Use accessible TrackMan games, handicaps or target challenges. Make the venue feel inclusive and entertaining.
-
-### “BHR Pressure Shot”
-
-One shot, one target, visible prize or leaderboard. Build recurring participation and user-generated content.
-
-### “Office bragging rights”
-
-Feature corporate teams, live scoring and reactions. End with a corporate-booking CTA.
-
-### “From fitting bay to fairway”
-
-Show the fitting process, chosen setup and later on-course feedback. Avoid claiming every gain is caused solely by equipment.
-
-## Paid-media strategy
-
-### Google Search
-
-High-intent themes:
-
-- indoor golf Bloemfontein;
-- golf simulator Bloemfontein;
-- golf lessons Bloemfontein;
-- golf coaching Bloemfontein;
-- club fitting Bloemfontein;
-- golf driving range Bloemfontein;
-- corporate team building Bloemfontein;
-- corporate events Bloemfontein;
-- birthday venue Bloemfontein;
-- golf shop Bloemfontein;
-- TrackMan Bloemfontein.
-
-Separate landing pages and conversion goals for booking, coaching, fitting and corporate enquiries.
-
-### Meta and Instagram
-
-Campaign groups:
-
-1. Social-play discovery.
-2. Beginner and ladies acquisition.
-3. Coaching and improvement proof.
-4. Corporate lead generation.
-5. League and membership retention.
-6. Retargeting for abandoned bookings and event-page visitors.
-
-Creative should use people, reactions, scoreboards and outcomes. Avoid endless empty-bay footage.
-
-### LinkedIn
-
-Use for:
-
-- corporate events;
-- client entertainment;
-- staff rewards;
-- league sponsorship;
-- venue partnerships;
-- B2B case studies.
-
-## Commercial systems
-
-### Membership ladder
-
-Memberships should make the next best action obvious:
-
-- social starter;
-- practice-focused;
-- committed improver;
-- junior/student;
-- corporate league or company account.
-
-For each membership show:
-
-- exact included sessions;
-- booking rules;
-- short-game access;
-- discounts;
-- league eligibility;
-- guest benefits;
-- pause/cancellation terms;
-- effective value based on realistic use.
-
-### Corporate lead process
-
-Track:
-
-1. enquiry source;
-2. company;
-3. expected guests;
-4. event purpose;
-5. preferred date;
-6. package quoted;
-7. extras requested;
-8. quote sent;
-9. follow-up date;
-10. deposit paid;
-11. event completed;
-12. review/referral requested;
-13. rebooking opportunity.
-
-### Sponsorship inventory
-
-Create defined assets:
-
-- bay naming;
-- league naming;
-- monthly challenge naming;
-- digital leaderboard branding;
-- in-venue screens;
-- prize sponsorship;
-- content-series sponsorship;
-- corporate final event;
-- junior development support;
-- ladies league support.
-
-Report participation, views, leads, event attendance and content delivery.
-
-## Partnerships
-
-Priority categories:
-
-- local golf clubs;
-- schools and universities;
-- golf academies and coaches;
-- corporate HR and client-service teams;
-- hotels and guest houses;
-- restaurants and catering partners;
-- Red Oak and other compatible hospitality partners where commercially appropriate;
-- equipment brands;
-- golf societies;
-- sports medicine and physiotherapy;
-- vehicle dealerships and financial firms seeking client entertainment;
-- Free State golf bodies;
-- local media and golf publications.
-
-## Review and reputation strategy
-
-The website currently shows strong review sentiment around:
-
-- atmosphere;
-- friendly and knowledgeable staff;
-- all-weather use;
-- realistic simulators;
-- after-work relaxation;
-- improvement and coaching;
-- premium but comfortable experience.
-
-These themes should be turned into structured proof.
-
-Review prompts should ask:
-
-- What did you visit for?
-- What was easier or better than expected?
-- How did the staff help?
-- Would you recommend it for practice, social play or an event?
-- What result or moment stood out?
-
-Do not incentivise only positive reviews.
-
-## Measurement framework
-
-### Revenue and sales
-
-- simulator revenue by hour and daypart;
-- occupancy by bay and hour;
-- average revenue per booking;
-- membership recurring revenue;
-- membership utilisation and churn;
-- coaching revenue;
-- fitting revenue and equipment conversion;
-- event enquiries, quotes, deposits and completed-event revenue;
-- pro-shop and club-care revenue;
-- repeat booking rate.
-
-### Marketing
-
-- branded search growth;
-- Google Business Profile actions;
-- website booking conversion;
-- corporate enquiry conversion;
-- cost per booked session;
-- cost per qualified corporate lead;
-- first-time versus repeat visitors;
-- content saves, shares and watch time;
-- league registrations;
-- email/WhatsApp list growth;
-- review volume and sentiment.
-
-### Community
-
-- active members;
-- league participation;
-- junior and women participation;
-- challenge entries;
-- event rebookings;
-- referrals;
-- sponsor renewals.
-
-## 90-day growth plan
-
-### Days 1–30: Fix truth and conversion
-
-- reconcile all prices, memberships, phone numbers and promotions;
-- remove expired launch content;
-- separate play, coaching, fitting and corporate landing pages;
-- confirm tracking on booking and enquiry actions;
-- photograph and film every major facility properly;
-- create three case-study templates;
-- rebuild Google Business Profile services and products;
-- capture baseline occupancy and revenue by daypart.
-
-### Days 31–60: Build proof and recurring formats
-
-- launch one performance series;
-- launch one entertainment challenge series;
-- publish first fitting case study;
-- publish first coaching progress case study;
-- publish first corporate event case study;
-- launch beginner introduction offer with a defined progression path;
-- launch recurring ladies and junior community content;
-- test Google Search for coaching, fitting and corporate intent.
-
-### Days 61–90: Scale community and high-value bookings
-
-- formalise corporate sales outreach;
-- package league sponsorship;
-- build school, university and club partnerships;
-- retarget site visitors and video viewers;
-- create a quarterly member competition;
-- analyse occupancy gaps and build specific off-peak offers;
-- compare acquisition cost, repeat rate and margin by customer type;
-- stop campaigns that generate cheap engagement without bookings.
-
-## Review-state knowledge candidates
-
-Do not approve automatically.
-
-- Bat Hill Royale is positioned strongest as an all-weather golf performance and social club, not only a simulator rental venue.
-- The business has four distinct revenue engines: performance, social play, membership/community and events.
-- Local outdoor ranges compete mainly on price and familiarity; BHR must prove data, convenience, complete practice and entertainment value.
-- National indoor-golf benchmarks outperform through clearer segmentation, stronger fitting authority or stronger event proof.
-- Corporate events and club fitting require evidence-heavy case studies because they are high-value, high-trust purchases.
-- Beginners are blocked mainly by intimidation and uncertainty; inclusive content and simple entry products are required.
-- Occupancy, repeat use and membership utilisation matter more than reach alone.
-
-## Internal facts still required
-
-- canonical current price list;
-- active promotions and expiry dates;
-- current memberships and fair-use rules;
-- correct telephone number and WhatsApp number;
-- official social handles;
-- booking-platform reporting access;
-- actual customer and member counts;
-- current coaches and credentials;
-- fitter credentials and equipment brands;
-- equipment ownership and supplier relationships;
-- event capacity and catering rules;
-- alcohol licence and operating conditions where relevant;
-- sponsor contracts and deliverables;
-- league schedules, formats, entry rules and prizes;
-- evidence supporting any “first in South Africa” claim;
-- package status with CG Production House.
-
-## Source limitations
-
-The website is the strongest public source for Bat Hill Royale’s current offer, but it contains conflicting or old pricing and promotion information. Search-indexed local venue listings are useful for competitor discovery but are lower-confidence than official business pages. Social-performance data was not available in this research pass. All current commercial facts must be confirmed internally before campaigns are published.
+Manual handoff remains pending until CA physically applies these Instructions to the Bat Hill Royale ChatGPT Project and confirms.
