@@ -119,6 +119,10 @@ export default function Login() {
             Complete setup
           </Link>
         </p>
+        <nav aria-label="Legal" className="mt-5 flex justify-center gap-4 text-xs text-brand-primary">
+          <Link to="/privacy-policy" className="hover:text-brand-accent transition">Privacy Policy</Link>
+          <Link to="/terms-of-service" className="hover:text-brand-accent transition">Terms of Service</Link>
+        </nav>
       </div>
     </div>
   )

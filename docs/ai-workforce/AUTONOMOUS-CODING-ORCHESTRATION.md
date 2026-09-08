@@ -1,6 +1,6 @@
 # Autonomous coding orchestration — CG Dynamics
 
-Last updated: 7 September 2026.
+Last updated: 8 September 2026.
 
 This document is the continuity record for the new **wake-and-supervise coding-agent workflow**. Its purpose is to remove CA from being the manual relay between coding agents.
 
@@ -32,7 +32,7 @@ Role:
 
 A ChatGPT automation named **CG Dynamics Supervisor** is configured to inspect the repo hourly and surface only meaningful progress, failed workers, real blockers or safe GitHub-control actions.
 
-ChatGPT can currently wake the OpenCode GitHub worker by placing `/oc ...` or `/opencode ...` on a relevant issue/PR, then inspect the resulting GitHub Actions run and PR output.
+Routine OpenCode dispatch must be notification-silent. Prefer the scheduled autonomous worker and inspect its workflow/PR output directly. The `/oc ...` or `/opencode ...` comment trigger remains available only for deliberate thread-specific interventions because OpenCode's GitHub action creates/updates a bot comment and GitHub can email subscribed team members for those comments.
 
 ### OpenCode — persistent autonomous GitHub worker
 
@@ -45,11 +45,11 @@ Canonical files:
 
 Capabilities:
 - scheduled hourly wake-up;
-- on-demand wake-up from `/oc ...` or `/opencode ...` comments;
+- on-demand wake-up from `/oc ...` or `/opencode ...` comments when explicitly needed;
 - manual GitHub Actions dispatch;
 - GitHub-first continuity: read current `main`, Issue #216/latest control issue, open PR ownership and linked issues before working;
 - implement/test/build/open or update PRs;
-- leave concise evidence/blockers in GitHub;
+- keep routine evidence in workflow logs, commits and PR bodies rather than repetitive progress comments;
 - concurrency guard to prevent overlapping autonomous runs.
 
 Current unattended safety boundary:
@@ -118,7 +118,7 @@ Every autonomous worker must:
 - read the latest relevant control issue/comments;
 - inspect active PR ownership before editing;
 - avoid duplicate architecture/branches;
-- write meaningful progress, decisions and real blockers back to GitHub;
+- write durable progress into code, commits, PR bodies and workflow evidence rather than repetitive bot comments;
 - leave the repository in a state the next worker can understand without the previous chat transcript.
 
 For launch work, Issue #216 remains the control issue until superseded by a newer explicit control issue/comment. Latest comments/current `main` override stale issue-body snapshots.
@@ -127,7 +127,7 @@ For launch work, Issue #216 remains the control issue until superseded by a newe
 
 For capable agents, prefer prompts like:
 
-> Continue Issue #216 from current GitHub truth. Read latest comments/open PR ownership first. Take the highest-priority safe unowned launch task through implementation and verification. Update GitHub as you work. Do not duplicate active work or invent credentials.
+> Continue Issue #216 from current GitHub truth. Read latest comments/open PR ownership first. Take the highest-priority safe unowned launch task through implementation and verification. Keep routine progress in workflow logs/commits/PR body rather than posting progress comments. Do not duplicate active work or invent credentials.
 
 Do not paste the entire architecture into every coding-agent prompt. Put the architecture/spec in GitHub once and keep it current.
 
