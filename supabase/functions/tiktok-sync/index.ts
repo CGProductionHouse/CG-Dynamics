@@ -146,7 +146,8 @@ Deno.serve(async (req) => {
   let syncHealth: 'verified' | 'partial' | 'sync_error' = 'verified'
   const syncErrors: string[] = []
 
-  // Create sync run record — start as partial, upgrade to verified only if everything succeeds
+  // Create sync run record — start as 'running', finalize only after sync completes.
+  // Interrupted executions must never remain 'success'.
   const { data: syncRun } = await sb
     .from('platform_sync_runs')
     .insert({
@@ -155,7 +156,7 @@ Deno.serve(async (req) => {
       platform: 'tiktok',
       run_type: 'manual',
       period_month: periodMonth,
-      status: 'success',
+      status: 'running',
       health_state: 'partial',
       started_at: new Date().toISOString(),
     })

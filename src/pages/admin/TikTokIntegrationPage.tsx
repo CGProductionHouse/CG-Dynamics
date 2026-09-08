@@ -44,7 +44,7 @@ export default function TikTokIntegrationPage() {
   const [syncClientId, setSyncClientId] = useState('')
   const [syncResult, setSyncResult] = useState<TiktokSyncResult | null>(null)
 
-  // Handle OAuth callback params
+  // Handle OAuth callback params — reload status for the selected client
   useEffect(() => {
     const tiktokParam = searchParams.get('tiktok')
     if (tiktokParam === 'connected') {
@@ -59,14 +59,18 @@ export default function TikTokIntegrationPage() {
     if (tiktokParam) {
       searchParams.delete('tiktok')
       setSearchParams(searchParams, { replace: true })
+      // Reload connection status after OAuth completes
+      if (syncClientId) {
+        getTiktokConnectionStatus(syncClientId).then(setStatus)
+      }
     }
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, syncClientId])
 
   async function load(silent = false) {
     try {
       const [clientResult, connectionStatus] = await Promise.all([
         listClients('all'),
-        getTiktokConnectionStatus(),
+        getTiktokConnectionStatus(syncClientId || undefined),
       ])
       if (clientResult.error) throw new Error(clientResult.error.message)
       setClients(clientResult.data.filter(c => c.active))
@@ -78,11 +82,30 @@ export default function TikTokIntegrationPage() {
     }
   }
 
+  // Load clients on mount; connection status loads per-client below
   useEffect(() => {
     let active = true
-    load().finally(() => { if (!active) return })
+    ;(async () => {
+      try {
+        const clientResult = await listClients('all')
+        if (clientResult.error) throw new Error(clientResult.error.message)
+        if (active) setClients(clientResult.data.filter(c => c.active))
+      } catch (loadError) {
+        if (active) setError(messageFrom(loadError, 'Could not load TikTok integration.'))
+      } finally {
+        if (active) setLoading(false)
+      }
+    })()
     return () => { active = false }
   }, [])
+
+  // Load connection status whenever the selected client changes
+  useEffect(() => {
+    if (!syncClientId) { setStatus(null); return }
+    let active = true
+    getTiktokConnectionStatus(syncClientId).then(s => { if (active) setStatus(s) })
+    return () => { active = false }
+  }, [syncClientId])
 
   async function runAction(key: string, task: () => Promise<string | void>) {
     setBusy(key)

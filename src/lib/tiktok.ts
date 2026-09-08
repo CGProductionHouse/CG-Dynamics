@@ -123,10 +123,10 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     key: 'current_followers',
     label: 'Current followers',
     sourceMetric: 'follower_count',
-    meaning: 'Follower count at time of sync. Point-in-time snapshot — not attributable to any period.',
+    meaning: 'Follower count at time of sync. Point-in-time snapshot — not attributable to any period. Not additive across platforms.',
     aggregation: 'snapshot',
     clientSafe: true,
-    crossPlatformAdditive: true,
+    crossPlatformAdditive: false,
   },
   {
     key: 'following_count',
@@ -168,8 +168,11 @@ export async function startTiktokOAuth(clientId: string): Promise<{ ok: boolean;
   return data
 }
 
-export async function getTiktokConnectionStatus(): Promise<TiktokConnectionStatus> {
-  const { data, error } = await supabase.functions.invoke('tiktok-connection-status', { method: 'POST' })
+export async function getTiktokConnectionStatus(clientId?: string): Promise<TiktokConnectionStatus> {
+  const { data, error } = await supabase.functions.invoke('tiktok-connection-status', {
+    method: 'POST',
+    body: clientId ? { clientId } : {},
+  })
   if (error) return { ok: false, connected: false, status: 'error', message: error.message, missingScopes: [], schemaReady: false }
   return data
 }
@@ -185,9 +188,9 @@ export async function syncTiktokAnalytics(clientId: string, periodMonth?: string
 
 export async function initTiktokPublish(options: {
   clientId: string
-  contentGuidelineId: string
   monthlyDeliverableId: string
   contentReviewVersionId: string
+  publishNowConfirmed: true
   title?: string
   privacyLevel?: string
   disableDuet?: boolean

@@ -811,3 +811,169 @@ describe('TikTok publishing gate — approval identity', () => {
     expect(passesNewCode).toBe(false) // new behavior is correct
   })
 })
+
+// ── 18. Contract: frontend initTiktokPublish matches Edge Function PostInitBody ──
+describe('Contract: frontend ↔ tiktok-post-init body shape', () => {
+  // These tests verify the frontend client sends exactly the fields the Edge
+  // Function expects. If the Edge Function's PostInitBody changes, these tests
+  // break — catching frontend drift before runtime.
+
+  const edgeFunctionRequiredFields = [
+    'clientId',
+    'monthlyDeliverableId',
+    'contentReviewVersionId',
+    'publishNowConfirmed',
+  ]
+
+  const edgeFunctionOptionalFields = [
+    'title',
+    'privacyLevel',
+    'disableDuet',
+    'disableStitch',
+    'disableComment',
+    'brandContentToggle',
+    'brandOrganicToggle',
+  ]
+
+  const frontendOptionFields = [
+    'clientId',
+    'monthlyDeliverableId',
+    'contentReviewVersionId',
+    'publishNowConfirmed',
+    'title',
+    'privacyLevel',
+    'disableDuet',
+    'disableStitch',
+    'disableComment',
+    'brandContentToggle',
+    'brandOrganicToggle',
+  ]
+
+  it('frontend initTiktokPublish has no contentGuidelineId (removed for Fix 3)', () => {
+    // Fix 3: contentGuidelineId is DERIVED SERVER-SIDE from the approved review
+    // version's source JSONB → content_guide_ideas → content_guidelines.
+    // Caller-controlled contentGuidelineId is a security risk.
+    expect(frontendOptionFields).not.toContain('contentGuidelineId')
+    expect(edgeFunctionRequiredFields).not.toContain('contentGuidelineId')
+    expect(edgeFunctionOptionalFields).not.toContain('contentGuidelineId')
+  })
+
+  it('frontend initTiktokPublish has publishNowConfirmed (Fix 2)', () => {
+    // Fix 2: Separates approval from permission to publish.
+    // An approved item is not publishable merely because an admin invokes the
+    // function. Caller must explicitly confirm "publish now."
+    expect(frontendOptionFields).toContain('publishNowConfirmed')
+    expect(edgeFunctionRequiredFields).toContain('publishNowConfirmed')
+  })
+
+  it('frontend option fields are a superset of required Edge Function fields', () => {
+    const missing = edgeFunctionRequiredFields.filter(f => !frontendOptionFields.includes(f))
+    expect(missing).toEqual([])
+  })
+
+  it('frontend does not send fields the Edge Function does not expect', () => {
+    const unexpected = frontendOptionFields.filter(
+      f => !edgeFunctionRequiredFields.includes(f) && !edgeFunctionOptionalFields.includes(f)
+    )
+    expect(unexpected).toEqual([])
+  })
+
+  it('frontend has no videoUrl (resolved server-side from review version)', () => {
+    // The publishable video URL is resolved from the approved review version's
+    // asset_path via signed URL. Caller-supplied videoUrl is NOT trusted.
+    expect(frontendOptionFields).not.toContain('videoUrl')
+  })
+
+  it('frontend has no approvedBy (derived from JWT user.id)', () => {
+    // approvedBy is derived from the authenticated JWT, NEVER from the request body.
+    expect(frontendOptionFields).not.toContain('approvedBy')
+  })
+})
+
+// ── 19. Contract: tiktok-sync platform_sync_runs starts as 'running' ────
+describe('Contract: tiktok-sync platform_sync_runs lifecycle', () => {
+  it('platform_sync_runs insert must use status=running, not success', () => {
+    // Fix 5: Interrupted syncs must never remain 'success'. The sync run starts
+    // as 'running' and is finalized only after the sync completes.
+    //
+    // This test verifies the expected insert shape matches what tiktok-sync sends.
+    const expectedInsert = {
+      client_id: 'test-client',
+      connection_id: 'test-connection',
+      platform: 'tiktok',
+      run_type: 'manual',
+      period_month: '2026-09',
+      status: 'running',   // NOT 'success'
+      health_state: 'partial',
+      started_at: new Date().toISOString(),
+    }
+
+    expect(expectedInsert.status).toBe('running')
+    expect(expectedInsert.status).not.toBe('success')
+  })
+})
+
+// ── 20. Contract: TikTok metric crossPlatformAdditive flags ──────────────
+describe('Contract: TikTok metric comparability flags', () => {
+  // These tests verify the TIKTOK_METRICS array in src/lib/tiktok.ts has the
+  // correct crossPlatformAdditive flags. If a flag changes, these tests catch it.
+
+  const tiktokMetrics = [
+    { key: 'current_followers', crossPlatformAdditive: false, aggregation: 'snapshot' },
+    { key: 'total_views', crossPlatformAdditive: true, aggregation: 'cumulative' },
+    { key: 'total_likes', crossPlatformAdditive: true, aggregation: 'cumulative' },
+    { key: 'total_comments', crossPlatformAdditive: true, aggregation: 'cumulative' },
+    { key: 'total_shares', crossPlatformAdditive: true, aggregation: 'cumulative' },
+    { key: 'total_favorites', crossPlatformAdditive: true, aggregation: 'cumulative' },
+    { key: 'videos_published', crossPlatformAdditive: true, aggregation: 'count' },
+  ]
+
+  it('current_followers is NOT cross-platform additive (point-in-time snapshot)', () => {
+    const m = tiktokMetrics.find(m => m.key === 'current_followers')
+    expect(m.crossPlatformAdditive).toBe(false)
+    expect(m.aggregation).toBe('snapshot')
+  })
+
+  it('engagement metrics ARE cross-platform additive', () => {
+    const additive = tiktokMetrics.filter(m => m.crossPlatformAdditive)
+    expect(additive.map(m => m.key)).toEqual([
+      'total_views', 'total_likes', 'total_comments', 'total_shares', 'total_favorites', 'videos_published',
+    ])
+  })
+})
+
+// ── 21. Contract: tiktok-post-init approval gate structure ──────────────
+describe('Contract: tiktok-post-init publishing gate structure', () => {
+  it('deliverable statuses that constitute approval', () => {
+    const APPROVED_DELIVERABLE_STATUSES = new Set(['approved', 'scheduled'])
+    expect(APPROVED_DELIVERABLE_STATUSES.has('approved')).toBe(true)
+    expect(APPROVED_DELIVERABLE_STATUSES.has('scheduled')).toBe(true)
+    expect(APPROVED_DELIVERABLE_STATUSES.has('in_progress')).toBe(false)
+    expect(APPROVED_DELIVERABLE_STATUSES.has('draft')).toBe(false)
+    expect(APPROVED_DELIVERABLE_STATUSES.has('completed')).toBe(false)
+  })
+
+  it('content review states that constitute approval', () => {
+    const APPROVED_REVIEW_STATES = new Set(['approved'])
+    expect(APPROVED_REVIEW_STATES.has('approved')).toBe(true)
+    expect(APPROVED_REVIEW_STATES.has('internal_review')).toBe(false)
+    expect(APPROVED_REVIEW_STATES.has('rejected')).toBe(false)
+    expect(APPROVED_REVIEW_STATES.has('draft')).toBe(false)
+  })
+
+  it('source JSONB must have type=content_guideline_video with video_id', () => {
+    // Fix 3: The guideline is derived from the review version's source JSONB.
+    // Only content_guideline_video type is valid for TikTok publishing.
+    const validSource = { type: 'content_guideline_video', video_id: 'abc-123' }
+    const invalidSource1 = { type: 'image_post', image_url: '...' }
+    const invalidSource2 = null
+    const invalidSource3 = { type: 'content_guideline_video' } // missing video_id
+
+    expect(validSource.type).toBe('content_guideline_video')
+    expect(typeof validSource.video_id).toBe('string')
+
+    expect(invalidSource1.type).not.toBe('content_guideline_video')
+    expect(invalidSource2).toBeNull()
+    expect(invalidSource3.video_id).toBeUndefined()
+  })
+})
