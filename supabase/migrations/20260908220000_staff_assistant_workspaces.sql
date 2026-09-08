@@ -47,18 +47,8 @@ using (
   and exists (
     select 1 from public.profiles p
     where p.id = auth.uid()
-      and coalesce(p.is_active, true)
+      and p.is_active is true
       and p.role in ('admin', 'manager', 'staff', 'team')
-  )
-);
-
-drop policy if exists "Admins read staff assistant profiles" on public.staff_assistant_profiles;
-create policy "Admins read staff assistant profiles"
-on public.staff_assistant_profiles for select
-using (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and coalesce(p.is_active, true) and p.role = 'admin'
   )
 );
 
@@ -81,7 +71,7 @@ create or replace function public.save_my_staff_assistant_profile(
 returns public.staff_assistant_profiles
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   v_profile public.profiles%rowtype;
@@ -93,7 +83,7 @@ declare
   v_version integer := 1;
 begin
   select * into v_profile from public.profiles where id = auth.uid();
-  if v_profile.id is null or not coalesce(v_profile.is_active, true)
+  if v_profile.id is null or v_profile.is_active is not true
      or v_profile.role not in ('admin', 'manager', 'staff', 'team') then
     raise exception 'Active staff profile required';
   end if;
@@ -181,13 +171,13 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 begin
   if not exists (
     select 1 from public.profiles p
     where p.id = auth.uid()
-      and coalesce(p.is_active, true)
+      and p.is_active is true
       and p.role in ('admin', 'manager')
   ) then
     raise exception 'Manager access required';
@@ -198,7 +188,7 @@ begin
     p.id,
     p.full_name,
     p.role::text,
-    coalesce(p.is_active, true),
+    p.is_active,
     sap.chatgpt_project_name,
     sap.chatgpt_project_url,
     case
@@ -218,7 +208,7 @@ begin
     sap.profile_verified_at
   from public.profiles p
   left join public.staff_assistant_profiles sap on sap.profile_id = p.id
-  where coalesce(p.is_active, true)
+  where p.is_active is true
     and p.role in ('admin', 'manager', 'staff', 'team')
   order by lower(coalesce(p.full_name, p.email, p.id::text));
 end;
@@ -226,6 +216,40 @@ $$;
 
 revoke all on function public.list_staff_assistant_setup_health() from public;
 grant execute on function public.list_staff_assistant_setup_health() to authenticated;
+
+create or replace function public.set_staff_assistant_access_scope(
+  p_profile_id uuid,
+  p_approved_access_scope text[]
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager')
+  ) then
+    raise exception 'Manager access required';
+  end if;
+  if not exists (
+    select 1 from public.profiles p
+    where p.id = p_profile_id and p.is_active is true and p.role in ('admin', 'manager', 'staff', 'team')
+  ) then
+    raise exception 'Exact active staff profile required';
+  end if;
+
+  insert into public.staff_assistant_profiles (profile_id, approved_access_scope)
+  values (p_profile_id, coalesce(p_approved_access_scope, '{}'))
+  on conflict (profile_id) do update set
+    approved_access_scope = excluded.approved_access_scope,
+    updated_at = now();
+end;
+$$;
+
+revoke all on function public.set_staff_assistant_access_scope(uuid, text[]) from public;
+grant execute on function public.set_staff_assistant_access_scope(uuid, text[]) to authenticated;
 
 create table if not exists public.business_development_leads (
   id uuid primary key default gen_random_uuid(),
@@ -239,44 +263,48 @@ create table if not exists public.business_development_leads (
   contact_title text,
   contact_email text,
   contact_phone text,
-  stage text not null default 'researching' check (stage in (
-    'researching', 'ready_for_outreach', 'attempted_contact', 'contacted',
-    'engaged', 'qualified', 'proposal_or_quote', 'converted', 'lost',
-    'invalid', 'duplicate', 'do_not_contact'
+  stage text not null default 'to_research' check (stage in (
+    'to_research', 'to_contact', 'contacted_awaiting_response', 'follow_up',
+    'active_opportunity', 'nurture', 'won_converted', 'closed_not_fit',
+    'duplicate', 'do_not_contact'
+  )),
+  qualification text not null default 'unreviewed' check (qualification in (
+    'unreviewed', 'researching', 'qualified', 'not_qualified', 'conflicting'
   )),
   qualification_summary text,
-  next_step text,
-  next_step_at timestamptz,
+  last_action text,
+  last_action_at timestamptz,
+  next_action text,
+  follow_up_at timestamptz,
   source_kind text not null default 'public_research',
   source_url text,
   confidence text not null default 'needs_review' check (confidence in ('needs_review', 'supported', 'verified', 'conflicting')),
   do_not_contact boolean not null default false,
   converted_client_id uuid references public.clients(id) on delete restrict,
   archived_at timestamptz,
+  idempotency_key uuid not null default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint business_development_company_required check (char_length(btrim(company_name)) between 1 and 200),
   constraint business_development_source_url_length check (char_length(coalesce(source_url, '')) <= 1000),
-  constraint business_development_website_url_length check (char_length(coalesce(website_url, '')) <= 500),
-  constraint business_development_conversion_consistent check (
-    (stage = 'converted' and converted_client_id is not null)
-    or (stage <> 'converted' and converted_client_id is null)
-  )
+  constraint business_development_website_url_length check (char_length(coalesce(website_url, '')) <= 500)
 );
 
 comment on table public.business_development_leads is
   'Canonical internal CG business-development prospects. Not a client record, Planner task, Assistant memory item, or client-owned leads CRM.';
 
 create index if not exists business_development_leads_owner_stage_idx
-  on public.business_development_leads (owner_profile_id, stage, next_step_at)
+  on public.business_development_leads (owner_profile_id, stage, follow_up_at)
   where archived_at is null;
+create unique index if not exists business_development_leads_owner_idempotency_idx
+  on public.business_development_leads (owner_profile_id, idempotency_key);
 create index if not exists business_development_leads_company_idx
   on public.business_development_leads (lower(company_name));
 
 create or replace function public.set_business_development_lead_updated_at()
 returns trigger
 language plpgsql
-set search_path = public
+set search_path = ''
 as $$
 begin
   new.updated_at := now();
@@ -289,16 +317,66 @@ create trigger business_development_leads_updated_at
 before update on public.business_development_leads
 for each row execute function public.set_business_development_lead_updated_at();
 
+create table if not exists public.business_development_lead_events (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid not null references public.business_development_leads(id) on delete restrict,
+  actor_profile_id uuid not null references public.profiles(id) on delete restrict,
+  event_type text not null check (event_type in ('created','updated')),
+  state_snapshot jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+comment on table public.business_development_lead_events is
+  'Append-only audit of lead workflow state changes. Contact values are deliberately excluded.';
+
+create index if not exists business_development_lead_events_lead_idx
+  on public.business_development_lead_events (lead_id, created_at desc);
+
+create or replace function public.audit_business_development_lead()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.business_development_lead_events (
+    lead_id, actor_profile_id, event_type, state_snapshot
+  ) values (
+    new.id,
+    auth.uid(),
+    case when tg_op = 'INSERT' then 'created' else 'updated' end,
+    jsonb_build_object(
+      'stage', new.stage,
+      'qualification', new.qualification,
+      'last_action', new.last_action,
+      'last_action_at', new.last_action_at,
+      'next_action', new.next_action,
+      'follow_up_at', new.follow_up_at,
+      'archived_at', new.archived_at
+    )
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists audit_business_development_lead on public.business_development_leads;
+create trigger audit_business_development_lead
+after insert or update on public.business_development_leads
+for each row execute function public.audit_business_development_lead();
+
 alter table public.business_development_leads enable row level security;
 
 drop policy if exists "Lead owner or manager reads leads" on public.business_development_leads;
 create policy "Lead owner or manager reads leads"
 on public.business_development_leads for select
 using (
-  owner_profile_id = auth.uid()
+  (owner_profile_id = auth.uid() and exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager', 'staff', 'team')
+  ))
   or exists (
     select 1 from public.profiles p
-    where p.id = auth.uid() and coalesce(p.is_active, true) and p.role in ('admin', 'manager')
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager')
   )
 );
 
@@ -310,7 +388,7 @@ with check (
   and created_by = auth.uid()
   and exists (
     select 1 from public.profiles p
-    where p.id = auth.uid() and coalesce(p.is_active, true) and p.role in ('admin', 'manager', 'staff', 'team')
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager', 'staff', 'team')
   )
 );
 
@@ -318,30 +396,61 @@ drop policy if exists "Lead owner or manager updates leads" on public.business_d
 create policy "Lead owner or manager updates leads"
 on public.business_development_leads for update
 using (
-  owner_profile_id = auth.uid()
+  (owner_profile_id = auth.uid() and exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager', 'staff', 'team')
+  ))
   or exists (
     select 1 from public.profiles p
-    where p.id = auth.uid() and coalesce(p.is_active, true) and p.role in ('admin', 'manager')
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager')
   )
 )
 with check (
-  owner_profile_id = auth.uid()
+  (owner_profile_id = auth.uid() and exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager', 'staff', 'team')
+  ))
   or exists (
     select 1 from public.profiles p
-    where p.id = auth.uid() and coalesce(p.is_active, true) and p.role in ('admin', 'manager')
+    where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager')
   )
 );
 
 revoke all on public.business_development_leads from anon, authenticated;
 grant select on public.business_development_leads to authenticated;
 grant insert (company_name, website_url, industry, location, contact_name, contact_title,
-  contact_email, contact_phone, stage, qualification_summary, next_step, next_step_at,
-  source_kind, source_url, confidence, do_not_contact)
+  contact_email, contact_phone, stage, qualification, qualification_summary, last_action,
+  last_action_at, next_action, follow_up_at, source_kind, source_url, confidence,
+  do_not_contact, idempotency_key)
 on public.business_development_leads to authenticated;
 grant update (company_name, website_url, industry, location, contact_name, contact_title,
-  contact_email, contact_phone, stage, qualification_summary, next_step, next_step_at,
+  contact_email, contact_phone, stage, qualification, qualification_summary, last_action,
+  last_action_at, next_action, follow_up_at,
   source_kind, source_url, confidence, do_not_contact, archived_at)
 on public.business_development_leads to authenticated;
+
+alter table public.business_development_lead_events enable row level security;
+drop policy if exists "Visible lead events can be read" on public.business_development_lead_events;
+create policy "Visible lead events can be read"
+on public.business_development_lead_events for select
+using (
+  exists (
+    select 1 from public.business_development_leads l
+    where l.id = lead_id and (
+      (l.owner_profile_id = auth.uid() and exists (
+        select 1 from public.profiles owner_profile
+        where owner_profile.id = auth.uid() and owner_profile.is_active is true
+          and owner_profile.role in ('admin', 'manager', 'staff', 'team')
+      ))
+      or exists (
+        select 1 from public.profiles p
+        where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager')
+      )
+    )
+  )
+);
+revoke all on public.business_development_lead_events from anon, authenticated;
+grant select on public.business_development_lead_events to authenticated;
 
 create table if not exists public.business_development_lead_research (
   id uuid primary key default gen_random_uuid(),
@@ -375,10 +484,14 @@ using (
     select 1 from public.business_development_leads l
     where l.id = lead_id
       and (
-        l.owner_profile_id = auth.uid()
+        (l.owner_profile_id = auth.uid() and exists (
+          select 1 from public.profiles owner_profile
+          where owner_profile.id = auth.uid() and owner_profile.is_active is true
+            and owner_profile.role in ('admin', 'manager', 'staff', 'team')
+        ))
         or exists (
           select 1 from public.profiles p
-          where p.id = auth.uid() and coalesce(p.is_active, true) and p.role in ('admin', 'manager')
+          where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager')
         )
       )
   )
@@ -394,10 +507,14 @@ with check (
     where l.id = lead_id
       and l.archived_at is null
       and (
-        l.owner_profile_id = auth.uid()
+        (l.owner_profile_id = auth.uid() and exists (
+          select 1 from public.profiles owner_profile
+          where owner_profile.id = auth.uid() and owner_profile.is_active is true
+            and owner_profile.role in ('admin', 'manager', 'staff', 'team')
+        ))
         or exists (
           select 1 from public.profiles p
-          where p.id = auth.uid() and coalesce(p.is_active, true) and p.role in ('admin', 'manager')
+          where p.id = auth.uid() and p.is_active is true and p.role in ('admin', 'manager')
         )
       )
   )
@@ -408,5 +525,5 @@ grant select on public.business_development_lead_research to authenticated;
 grant insert (lead_id, entry_type, summary, source_url, source_title, observed_at, confidence, supersedes_entry_id)
 on public.business_development_lead_research to authenticated;
 
--- No browser hard-delete grant exists for either lead table. Conversion remains
--- a future explicit manager/admin workflow and cannot be asserted by this UI.
+-- No browser hard-delete grant exists for any lead table. A won lead may be
+-- linked to an exact canonical client later; the UI never invents that link.

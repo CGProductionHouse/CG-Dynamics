@@ -147,3 +147,11 @@ export async function listStaffAssistantSetupHealth() {
   const { data, error } = await supabase.rpc('list_staff_assistant_setup_health')
   return { data: (data ?? []) as StaffAssistantSetupHealth[], error }
 }
+
+export async function setStaffAssistantAccessScope(profileId: string, scopes: string[]) {
+  const { error } = await supabase.rpc('set_staff_assistant_access_scope', {
+    p_profile_id: profileId,
+    p_approved_access_scope: normalizePreferenceList(scopes),
+  })
+  return { error }
+}
