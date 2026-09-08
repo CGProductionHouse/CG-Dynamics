@@ -386,6 +386,21 @@ test('staff health renders only when explicitly enabled', () => {
   assert.match(renderReport({ facts: [fact({ value: 120 })], dataHealth: health, showAdminDiagnostics: true }), /connector health/)
 })
 
+test('staff health names the exact platform run state instead of conflating partial, errors and staleness', () => {
+  const health = [{
+    period_month: '2026-06', platform: 'facebook', attempted: true, successful: false,
+    latest_run_status: 'partial', latest_health_state: 'verified_partial', latest_attempted_at: '2026-07-01T12:00:00Z',
+    last_successful_at: null, api_version: 'v25.0', connector_version: 'meta-connector-v3',
+    metric_key: 'brand_views', fact_value: 120, fact_availability: 'complete', source_metric: 'page_media_view',
+    aggregation: 'sum', comparable_group: 'fb_media_views_v2', includes_paid: 'both', fact_verified_at: '2026-07-01T12:00:00Z',
+    permission_blocked: false, partial_error_or_stale: true, comparison_eligible: true,
+    safe_reference: 'safe-reference', ready_for_client_reporting: true,
+  }]
+  const html = renderReport({ facts: [fact({ value: 120 })], dataHealth: health, showAdminDiagnostics: true })
+  assert.match(html, /Platform run: partial · verified partial/)
+  assert.doesNotMatch(html, /Partial, error or stale/)
+})
+
 test('real admin and client loaders use report-bound current and previous facts', () => {
   assert.match(REPORTING_TRUTH, /supabase\.rpc\('get_report_metric_facts'/)
   assert.match(REPORTING_TRUTH, /period_month === currentMonth/)

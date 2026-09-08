@@ -84,3 +84,25 @@ container publishing and cursor pagination. Instagram result ordering is not
 supported generally; a stop-at-old-item shortcut is not an established guarantee.
 Meta Developers pages returned HTTP 429 during research; verify current Graph
 v25 endpoint requirements before rollout. No new production dependency added.
+
+## Authenticated preview acceptance — checkpoint `af09e1e`
+
+Verified in the user's signed-in Chrome session against Meta Results and the PR
+#240 Vercel preview:
+
+- Both selectors show 1–31 August 2026.
+- Facebook-only and Instagram-only report tabs contain no metrics from the other
+  platform; the overview groups both platforms without combining their totals.
+- Facebook values/labels: Views 20,156; Viewers unavailable; Post engagements
+  1,275; Follows gained 5; Page visits 249.
+- Instagram values/labels: Views 1,408; Reach 305; Content interactions 74;
+  Profile visits 20; Follows gained 9. Meta's 9.1K Views overview was correctly
+  rejected as the Instagram native value because it breaks down to 7,660
+  Facebook views plus 1,408 Instagram views.
+- Instagram link clicks is a provider-confirmed `valid_zero`, so its displayed 0
+  is evidence-backed rather than a missing-value fallback.
+- Admin report and normal client preview render the same canonical fact values.
+
+The staff connector table exposed one new wording defect: complete facts inherited
+the platform run's partial state as the vague phrase “Partial, error or stale”.
+The next checkpoint replaces it with the exact run and health states.

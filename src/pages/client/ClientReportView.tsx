@@ -645,7 +645,15 @@ function ConnectorDataHealth({ rows }: { rows: ReportFactHealth[] }) {
                 <td className="py-1 pr-3">{PLATFORM_LABELS[r.platform as Platform] ?? r.platform}</td>
                 <td className="py-1 pr-3">{r.period_month}</td>
                 <td className="py-1 pr-3">{r.metric_key ?? 'Connector run'}{r.source_metric ? <span className="block text-slate-500">{r.source_metric}</span> : null}</td>
-                <td className="py-1 pr-3">{r.fact_availability ?? r.latest_health_state ?? r.latest_run_status ?? 'Not attempted'}{r.permission_blocked ? <span className="block text-amber-300">Permission blocked</span> : null}{r.partial_error_or_stale ? <span className="block text-amber-300">Partial, error or stale</span> : null}</td>
+                <td className="py-1 pr-3">
+                  {r.fact_availability ?? r.latest_health_state ?? r.latest_run_status ?? 'Not attempted'}
+                  {r.permission_blocked ? <span className="block text-amber-300">Permission blocked</span> : null}
+                  {r.partial_error_or_stale ? (
+                    <span className="block text-amber-300">
+                      Platform run: {formatHealthState(r.latest_run_status, r.latest_health_state)}
+                    </span>
+                  ) : null}
+                </td>
                 <td className="py-1 pr-3">{formatHealthTimestamp(r.latest_attempted_at)}</td>
                 <td className="py-1 pr-3">{formatHealthTimestamp(r.last_successful_at)}</td>
                 <td className="py-1 pr-3">{r.api_version ?? '—'}</td>
@@ -666,6 +674,14 @@ function formatHealthTimestamp(value: string | null): string {
   if (!value) return '—'
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString()
+}
+
+function formatHealthState(runStatus: string | null, healthState: string | null): string {
+  const humanize = (value: string) => value.replaceAll('_', ' ')
+  if (runStatus && healthState && runStatus !== healthState) {
+    return `${humanize(runStatus)} · ${humanize(healthState)}`
+  }
+  return humanize(runStatus ?? healthState ?? 'needs review')
 }
 
 // A. The "all your channels together" moment. Headlines ONLY metrics that are
