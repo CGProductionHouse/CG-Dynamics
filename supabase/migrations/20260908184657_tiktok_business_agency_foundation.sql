@@ -196,7 +196,8 @@ create policy "tiktok business publish job manager read"
 -- Tokens and OAuth states intentionally have no authenticated policies.
 
 create or replace function public.queue_tiktok_business_publish(
-  p_monthly_deliverable_id uuid
+  p_monthly_deliverable_id uuid,
+  p_requested_by uuid
 ) returns uuid
 language plpgsql
 security definer
@@ -209,8 +210,16 @@ declare
   v_job_id uuid;
   v_media_kind text;
 begin
-  if not public.is_manager() then
-    raise exception 'Admin or manager access required';
+  if auth.role() <> 'service_role' then
+    raise exception 'Service role required';
+  end if;
+  if not exists (
+    select 1 from public.profiles profile
+    where profile.id = p_requested_by
+      and profile.is_active
+      and profile.role in ('admin', 'manager')
+  ) then
+    raise exception 'Active admin or manager required';
   end if;
 
   select * into v_deliverable
@@ -284,7 +293,7 @@ begin
     v_review.id,
     v_media_kind,
     v_review.scheduled_at,
-    auth.uid()
+    p_requested_by
   )
   on conflict (authorization_id, monthly_deliverable_id, content_review_version_id)
   do update set due_at = excluded.due_at
@@ -420,13 +429,13 @@ begin
 end;
 $$;
 
-revoke all on function public.queue_tiktok_business_publish(uuid),
+revoke all on function public.queue_tiktok_business_publish(uuid, uuid),
   public.claim_due_tiktok_business_publish_jobs(text, integer),
   public.complete_tiktok_business_publish_job(uuid, text, text, text, text)
   from public, anon, authenticated;
 
-grant execute on function public.queue_tiktok_business_publish(uuid) to authenticated;
-grant execute on function public.claim_due_tiktok_business_publish_jobs(text, integer),
+grant execute on function public.queue_tiktok_business_publish(uuid, uuid),
+  public.claim_due_tiktok_business_publish_jobs(text, integer),
   public.complete_tiktok_business_publish_job(uuid, text, text, text, text)
   to service_role;
 

@@ -50,9 +50,10 @@ Authenticated Chrome reached `https://business-api.tiktok.com/portal/apps` using
 - The API for Business portal is separate from the existing `developers.tiktok.com` consumer app.
 - TikTok API for Business developer registration was completed by CA, including interactive email/phone verification and the Agency declaration. The portal says TikTok may take up to three days to review the developer profile, while app creation is available immediately.
 - The account still has no TikTok API for Business applications.
-- The **CG Dynamics** app form was opened and populated as an unsaved draft with the dedicated callback `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/tiktok-business-oauth-callback`.
+- The **CG Dynamics** app form was reopened after enrollment and populated as an unsaved draft with the dedicated callback `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/tiktok-business-oauth-callback` and an accurate agency use-case description. TikTok does not expose a separate draft-save action; pressing **Submit** would create/request the provider application, so it was deliberately not pressed.
 - The live permission tree confirms the minimum relevant product is **TikTok Accounts**, with the subgroups **Account User**, **Get Account Media**, and **Account Post Content**. The Account Post Content group exposes `/business/video/publish/`, `/business/photo/publish/`, `/business/publish/status/`, `/business/video/settings/`, hashtag suggestions, and location lookup.
-- Selecting draft permission checkboxes triggered a TikTok portal client-side exception. Reload recovery succeeded. No app submission or permission request was sent.
+- TikTok displays a mandatory separate **Accounts API Access Application Form** before it will approve TikTok Accounts permissions. The live form requires matching business/developer-profile name, app name, the developer registration email, company/product website, business verification (an accepted company document or a verified TikTok Business Center ID), a detailed use case, screen recordings of the implemented/prototyped permission flows, estimated authorized-account count, developer type, and an Accounts API usage/revocation acknowledgement.
+- An earlier permission-tree interaction triggered a TikTok portal client-side exception. Reload recovery succeeded. No app submission, Accounts API form submission, or permission request was sent.
 
 Do not confuse this missing Business developer application with the existing **CG Dynamics** consumer developer app. The consumer app remains the accepted read-only analytics lane.
 
@@ -85,6 +86,8 @@ The due-time worker must fail closed unless all conditions hold:
 
 Dynamics retains future scheduling and calls TikTok only when a row becomes due. A local idempotent intent must exist before the provider call. Provider request ID, publish ID, state, public post ID, errors, attempt timestamps, and reconciliation timestamps remain durable. The worker marks `monthly_deliverables.posted_at` / posted state only after TikTok confirms the public post.
 
+The manager scheduling request is authenticated in the Edge Function and forwards the verified user ID to a service-role-only queue RPC. The RPC independently confirms that the actor is still an active admin/manager. Direct browser RPC execution is denied, and the Edge Function refuses to queue anything while `TIKTOK_BUSINESS_PUBLISHING_ENABLED` is off.
+
 No actual provider publish is permitted in this branch or its tests.
 
 ## Media transport
@@ -108,11 +111,11 @@ No provider app was submitted, no permission expansion was requested for a CG ap
 
 ## Resume sequence
 
-1. Complete and validate the code/migration/Edge Function slice in this PR.
-2. After TikTok accepts the developer profile, reopen the **CG Dynamics** API for Business app draft.
-3. Configure the exact account-holder callback from this PR and request the minimum TikTok Accounts permissions: Account User, Get Account Media, and the required video/photo Account Post Content permissions.
-4. Submit provider app review only at the explicit review gate.
-5. After approval, implement the exact authorization URL disclosed by the approved app, then configure secrets and apply reviewed migrations/functions at the production gate.
+1. Wait for TikTok to accept the developer profile; no useful provider submission can bypass this review.
+2. Reopen the **CG Dynamics** API for Business app form, use the callback recorded above, and select only the required TikTok Accounts permissions: Account User, Get Account Media, and the necessary video/photo Account Post Content permissions.
+3. Prepare the required screen recordings from this PR's prototype and the company verification evidence or verified Business Center ID.
+4. Submit both the provider app and mandatory Accounts API access form only at the explicit review gate.
+5. After approval, implement the exact authorization URL and final permission identifiers disclosed by the approved app, then configure secrets and apply reviewed migrations/functions at the production gate.
 6. Authorize one controlled Business Account, verify exact-client isolation, and run a dry/readiness cycle.
 7. Obtain explicit approval for the first real approved-content post, verify native TikTok output, receipt reconciliation, and duplicate prevention.
 8. Roll the same authorization workflow across the current active-client list; never hardcode client names into the architecture.

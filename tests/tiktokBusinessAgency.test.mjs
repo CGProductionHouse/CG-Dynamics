@@ -91,6 +91,16 @@ describe('canonical Client Schedule publishing', () => {
     assert.match(SCHEDULE, /queue_tiktok_business_publish/)
     assert.doesNotMatch(SCHEDULE, /caption|assetPath|videoUrl|clientId/)
   })
+
+  it('queues only through the authenticated manager endpoint while rollout is enabled', () => {
+    assert.match(SCHEDULE, /if \(!tiktokBusinessPublishingEnabled\(\)\)/)
+    assert.match(SCHEDULE, /p_requested_by: auth\.value\.user\.id/)
+    assert.match(MIGRATION, /queue_tiktok_business_publish\(\s*p_monthly_deliverable_id uuid,\s*p_requested_by uuid/)
+    assert.match(MIGRATION, /if auth\.role\(\) <> 'service_role'/)
+    assert.match(MIGRATION, /profile\.id = p_requested_by/)
+    assert.match(MIGRATION, /profile\.role in \('admin', 'manager'\)/)
+    assert.doesNotMatch(MIGRATION, /grant execute on function public\.queue_tiktok_business_publish\(uuid, uuid\) to authenticated/)
+  })
 })
 
 describe('admin rollout truth', () => {
