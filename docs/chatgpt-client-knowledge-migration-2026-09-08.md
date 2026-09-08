@@ -46,7 +46,7 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 |---|---|---|---|
 | WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
 | Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
-| Dulux Paint & Paper Bloemfontein | Dulux | **SYNCED** | Existing Dulux intelligence was reconciled into one permanent evolving human CG record. Accessible Project chats/sources, repeated CA/CG copy decisions, current public facts and the 2026-09-08 recent social/content audit were reviewed. Public search did not expose a trustworthy first-party local Facebook/Instagram post stream, so no post-level facts were invented; recent CG content patterns were captured only where supported by Project history/corrections. Local email/WhatsApp/social handles and first-party store hours remain freshness-gated. |
+| Dulux Paint & Paper Bloemfontein | Dulux | **COMPLETE - FINAL ARCHITECTURE** | Permanent Dynamics intelligence is reconciled and the completed social/content audit is incorporated. Canonical working guide `DULUX-PAINT-PAPER-BLOEMFONTEIN-CG-DYNAMICS-CLIENT-GUIDE.md` created. Project Source decisions: `Dulux Business profile.pdf` REPLACE, `Dulux Tone of Voice.pdf` REMOVE, canonical guide KEEP as the single everyday grounding source. Short Project Instructions supplied. Unverified mutable facts remain explicitly freshness-gated. |
 
 ## Completion standard
 
