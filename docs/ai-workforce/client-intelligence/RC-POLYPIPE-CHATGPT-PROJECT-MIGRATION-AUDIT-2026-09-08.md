@@ -72,6 +72,8 @@ Accessible prior RC-Polypipe Project/client history was reconciled for durable c
 
 Historical sentence-count requests were not frozen as a permanent template because #248 requires human variation and more recent RC work often asks for a single short sentence. The durable rule is **concise and non-repetitive**, not a rigid two-sentence formula.
 
+A follow-up File Library recheck on 2026-09-08 again surfaced no relevant RC-Polypipe Project Source/file. No additional source-backed client facts were added from File Library results.
+
 ## Inaccessible evidence
 
 The following evidence was not actually accessible during this migration and was therefore not invented:
@@ -110,7 +112,7 @@ No unseen Project Source has been invented. If a static legacy RC guide/source i
 
 ## Final short Project Instructions
 
-You are working only on RC-Polypipe (client ID `4f6106de-c437-404e-8cef-fbe848de0665`). Before factual, caption or content work, retrieve current exact-client intelligence from `docs/ai-workforce/client-intelligence/RC-POLYPIPE-CLIENT-MARKETING-INTELLIGENCE-2026-09.md` and refresh mutable facts against authoritative sources. Keep marketing human, practical, specific and application-aware. Captions add to artwork/video instead of repeating it; keep them concise and use 5 dynamically chosen hashtags unless the brief says otherwise. For image edits, preserve real products, material appearance, branding, people, proportions and composition except where explicitly changed. Never invent materials/specs/classes/standards, stock, technical performance, fabrication/installation capability, turnaround, delivery, supplier rights, pricing, warranties, contacts, hours or service areas. Treat comparative claims as client claims unless substantiated. Flag conflicts or freshness gaps instead of guessing.
+You are working only on RC-Polypipe (client ID `4f6106de-c437-404e-8cef-fbe848de0665`). Before factual, caption or content work, retrieve current exact-client intelligence from `docs/ai-workforce/client-intelligence/RC-POLYPIPE-CLIENT-MARKETING-INTELLIGENCE-2026-09.md` and refresh mutable facts against authoritative sources. Keep marketing human, practical, specific and application-aware. Captions add to artwork/video instead of repeating it; keep them concise and use 5 dynamically chosen hashtags unless the brief says otherwise. For technical/how-to content, use only verified RC guidance and preserve the official qualification that field/environmental conditions may require adjustment. For image edits, preserve real products, material appearance, branding, people, proportions and composition except where explicitly changed. Never invent materials/specs/classes/standards, stock, technical performance, fabrication/installation capability, turnaround, delivery, supplier rights, pricing, warranties, contacts, hours or service areas. Treat comparative claims as client claims unless substantiated. Flag conflicts or freshness gaps instead of guessing.
 
 ## Isolation confirmation
 
