@@ -110,8 +110,8 @@ Authenticated PR preview checked at `/admin/integrations/tiktok`:
 - Selecting **CG Production House** resolves its own `Not connected` state.
 - Switching to **Cape Lumber** preserves a separate `Not connected` state.
 - Sync stays disabled without a connected exact-client account.
-- The preview currently reflects the preceding successful deployment; the copy change from `2858f1e` awaits a new Vercel build after the rate limit resets.
-- After pushing legal-page commit `10b8855`, the stable PR preview still served the older deployment: a direct `/privacy-policy` request redirected to `/admin/cg-hub`. GitHub's Vercel checks report the daily build-rate limit, so preview acceptance of the new routes remains pending a fresh deployment.
+- The current PR preview built successfully at `fe724df` and renders the final read-only integration copy.
+- Direct preview requests to `/privacy-policy` and `/terms-of-service` render their public pages without an auth redirect.
 
 Local unauthenticated acceptance for the provider legal routes:
 
@@ -136,7 +136,6 @@ Authenticated sandbox rollout acceptance completed on the current PR preview:
 ## Exact continuation order
 
 1. Keep the live rollout read-only; do not deploy publishing functions or set `TIKTOK_PUBLISHING_ENABLED`.
-2. Wait for a fresh Vercel PR deployment and browser-verify the public legal routes and updated read-only integration copy.
-3. Verify the production domain and prepare a sandbox demonstration video.
-4. Confirm the appropriate agency publishing path with TikTok API for Business before changing the production app or enabling `TIKTOK_PUBLISHING_ENABLED`.
-5. Prepare review evidence, then stop for explicit CA approval before any production review submission.
+2. Verify the production domain and prepare a sandbox demonstration video.
+3. Confirm the appropriate agency publishing path with TikTok API for Business before changing the production app or enabling `TIKTOK_PUBLISHING_ENABLED`.
+4. Prepare review evidence, then stop for explicit CA approval before any production review submission.
