@@ -1,755 +1,238 @@
-# Emoya Driving Range Bloemfontein — Client Marketing Intelligence
+# Emoya Estate Driving Range — Canonical Client Marketing Intelligence
 
-Last updated: 2026-08-07
-Status: Current-source client intelligence. Keep isolated to Emoya Driving Range / Mulligan's Driving Range at Emoya Estate until current trading name is directly confirmed. Apply `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
+Last reconciled: 2026-09-08  
+Canonical CG Dynamics client: **Emoya Estate Driving Range**  
+Exact client_id: `217a547c-7b22-45cc-bf88-9d45a8e93dfe`  
+Retrieval aliases: `Emoya Driving Range`, `Emoya Estate`  
+Status: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**  
+Derived guide: `EMOYA-ESTATE-DRIVING-RANGE-CG-DYNAMICS-CLIENT-GUIDE.md`  
+Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
-## Executive direction
+CG Dynamics is permanent truth. This file is the reviewed exact-client recovery/export record that reconciles the August Emoya Driving Range research, the verified Instagram source update and the accessible ChatGPT Project history. Do not create another Emoya client or another parallel truth store.
 
-The strongest commercial opportunity is not to market this as a serious golfer-only practice facility.
+## 1. Exact identity and scope
 
-The bigger opportunity is:
+Work only on **Emoya Estate Driving Range**.
 
-> **Bloemfontein's easy, social golf hit-out: somewhere golfers can practise, beginners can have a go, friends can compete, families can play and corporate groups can build an outing around a simple golf activity.**
+Current client-supplied Instagram evidence verifies the public-facing profile name **Emoya Estate Driving Range** and handle `@emoyadrivingrange`. The 2026-09-08 identity-correction decision confirms that this public name now overrides older ambiguity in the August research and older `Mulligan's` naming.
 
-The key is to keep real golf credibility while broadening the audience beyond golfers.
+The existing Dynamics/Hours records were corrected in place. Do not create a second Emoya client. `Emoya Driving Range` and the ChatGPT Project name `Emoya Estate` are retrieval aliases/context for this exact client, not separate client identities.
 
-This venue should feel more accessible than a golf club and more active than a passive restaurant or event venue.
+The accessible ChatGPT Project history is consistently about the **Driving Range**: captions, the range, a newly opened green, contact updates, business-profile work, golf videos/scripts, poster proofreading and image work. It does not establish a wider Emoya Estate marketing scope.
 
-## Identity and freshness note
+The wider Emoya Estate may historically include accommodation, spa, restaurants, function/conference facilities, game-reserve/activity context and other hospitality/leisure offers. Those facts are **scope-isolated**. Do not import them into Emoya Estate Driving Range marketing unless current exact-client evidence proves the relationship is relevant to the specific task.
 
-Current evidence is mixed and must remain explicitly separated:
+`Mulligan's Driving Range & Put-Put` is historical identity/context only and must not be used as the current public brand.
 
-- Dun & Bradstreet currently lists `EMOYA DRIVING RANGE (PTY) LTD` in Bloemfontein.
-- Older Emoya Estate corporate material lists `Mulligan's Driving Range & Put-Put` as an Emoya Estate activity.
-- Current local business-directory evidence still lists `Mulligans Golf Drvng Rng` at Emoya Estate, next to the Spookhuis, with phone `076 616 1195`.
-- Historical Emoya material also uses the contact number and positions the driving range and putt-putt as a teambuilding/activity option.
-- Historical golf-professional evidence confirms a driving range operated at Emoya Estate from 2016 to mid-2018.
+## 2. Authority and conflict rules
 
-Do not silently present `Mulligan's` or `Emoya Driving Range` as the current public-facing brand until the client confirms:
+For identity and durable creative judgement prefer:
 
-- current trading name;
-- current phone/WhatsApp;
-- current operating hours;
-- whether putt-putt remains active;
-- whether a pub/grill or food-and-drink offer is currently attached to the range;
-- whether club hire, coaching and equipment sales exist;
-- current price per bucket / session;
-- corporate/group packages;
-- current social handles and booking method.
+1. newest direct client/CG correction;
+2. current Emoya Estate Driving Range Project correction/history;
+3. verified current client-supplied source evidence;
+4. this reconciled canonical record;
+5. older research/history after conflict checks.
 
-## Verified location context
+For mutable facts use the freshness protocol: direct current client/CG confirmation → current official social/website evidence → verified business listing → reliable third party → stored history.
 
-Emoya Estate is currently listed at:
+Never silently merge conflicting contacts, opening hours, offers, facilities, green status, booking routes or estate-wide claims. Use explicit current/stale/unresolved states and flag conflicts instead of guessing.
 
-- 7 Frans Kleinhans Road, Bloemfontein / Groenvlei area.
+## 3. Contact / booking / footer audit — #294
 
-The wider Emoya Estate context has historically combined:
+| Contact / route | Classification | State | Rule |
+|---|---|---|---|
+| `065 081 2405` | `public_marketing`, caption-approved contact number | `current_verified` | Direct durable Project correction says this is the new and **only** number to use in captions and text-on-post. Earlier verified source evidence positioned it for event enquiries, bookings and questions. Retrieve the current canonical value at task time. Do not infer call-vs-WhatsApp capability beyond current evidence. |
+| `073 509 6885` | historical public phone | `stale_superseded` | Appeared in older/current-at-the-time Instagram caption evidence but is superseded by the later explicit Project correction. **Do not use it in captions or text-on-post.** |
+| `7 Frans Kleynhans Ave, Groenvlei, Bloemfontein, 9301` | `public_marketing` address | `current_verified_limited` | Verified from client-supplied Instagram evidence on 2026-08-07. Use when visit/location context needs it, but recheck before high-stakes evergreen use because addresses are mutable. |
+| `@emoyadrivingrange` | official Instagram identity | `current_verified` | Direct client-supplied screenshot evidence and 2026-09-08 identity correction agree. |
+| Current Facebook page supplied by CG | official social identity | `current_verified_limited` | The Project used the current Emoya Estate Driving Range Facebook page as a business-profile source on 2026-09-02. Recheck the exact URL/display state if a publishable link is needed. |
+| Standalone website | public route | `unverified_hold` | No current standalone Driving Range website was established in the accessible Project evidence. Do not invent one or fall back to wider-estate web pages. |
+| Public email | public route | `unverified_hold` | No current caption-approved Driving Range email was established in the accessible Project evidence. |
 
-- accommodation;
-- spa;
-- game reserve / game drives;
-- restaurants;
-- conference and function facilities;
-- driving range / putt-putt.
+No named public contact person, internal-only contact or client-portal-only contact was discovered in the actually accessible Emoya Project history.
 
-This matters because the range can be sold not only as a standalone golf facility but as an activity inside a broader leisure and corporate destination.
+### Current footer behaviour
 
-## Commercial audience architecture
+- Whenever a caption or text-on-post uses a phone/contact number, **only the current canonical caption-approved Emoya Estate Driving Range number may be used**.
+- Event, booking and enquiry CTAs should retrieve the current approved booking/contact route from exact-client Dynamics.
+- Ordinary awareness, golf, challenge or venue-experience captions may omit contact details unless the brief/creative/CTA needs them; the Project correction proves which number is allowed, not that a number must appear under every post.
+- Add the current address/location only when visit/location context benefits the post or the brief requires it.
+- Do not substitute another Emoya Estate, hospitality, staff or historical contact.
+- If the canonical contact record conflicts with a newer direct client correction, stop and reconcile the conflict.
 
-## 1. Existing golfers
+**Final Project Instructions must not hardcode phone, email, address, website/deep link or named contacts.** Retrieve the exact current footer from canonical Dynamics at task time.
 
-Need:
+## 4. Human creative standard
 
-- convenient practice;
-- affordable balls;
-- space to work on driver / irons;
-- easy access without committing to a full round;
-- coaching or practice support if available.
+Emoya Estate Driving Range should feel **human, local, social, active and golf-specific**.
 
-Message territory:
+The brand can be playful because the product naturally creates misses, big hits, reactions, rivalry and beginner moments. Keep the humour rooted in real golf/social situations, not generic internet memes or forced golf puns.
 
-`Get the reps in without losing half your day.`
+Default copy should be:
 
-## 2. Beginner / non-golfer groups
+- concise and easy to read;
+- specific to the image/video/poster;
+- locally grounded without overusing `Bloem` as filler;
+- welcoming to golfers and casual/beginner visitors where the exact offer supports it;
+- energetic enough for challenges/night/social content without influencer hype;
+- direct when a booking, event or range visit is the desired action.
 
-This audience is commercially important because driving ranges are one of the least intimidating ways into golf.
+Avoid generic filler such as `perfect day out`, `fun for everyone`, `tee up the fun`, `take your game to the next level`, `unforgettable experience`, `discover the difference`, `experience excellence` and interchangeable `something for everyone` wording unless the exact brief genuinely earns it.
 
-Need:
+## 5. Caption rules
 
-- no membership anxiety;
-- simple instructions;
-- club availability if offered;
-- permission to be bad at golf;
-- fun targets / challenges;
-- easy social atmosphere.
+**Captions add to the creative; they do not repeat it.**
 
-Positioning:
+Start from what is visible or already written on the artwork/video and add one useful second layer: a human observation, reason to visit, real range benefit, current offer detail, challenge angle, event use-case or direct CTA.
 
-`You do not need a handicap to hit a bucket of balls.`
+Project evidence supports:
 
-## 3. Couples / date activity
+- short, to-the-point captions;
+- an emoji when it genuinely suits the post, without turning every caption into emoji copy;
+- varied openings rather than fixed templates;
+- natural English as the default working language;
+- natural Afrikaans only when requested or when the brief/speaker genuinely supports it;
+- no forced bilingualism for effect.
 
-Use-case:
+Use a maximum of **5 dynamic hashtags**. Choose them from the exact Emoya Estate Driving Range identity + actual activity/post + Bloemfontein/Free State/search intent + platform/current reliable context. Do not paste a frozen hashtag bank.
 
-A low-pressure activity before/after food or drinks.
+## 6. Durable content lanes
 
-Content angle:
+### Practice / improvement
 
-- `Who has the better swing?`;
-- loser buys dinner;
-- first-time-golfer date;
-- nearest-to-target couple challenge.
+Driving-range practice is the core durable offer. Use real swings, ball striking, repetition, progress and range atmosphere. The public profile's `Practice • Play • Improve` language is verified current-at-source evidence, but still treat any detailed coaching/performance claim separately.
 
-If nearby food/drink partnerships are current, package them clearly rather than implying an internal restaurant offer.
+### Social golf / challenges
 
-## 4. Friend groups
+Challenge mechanics fit the brand strongly: target attempts, reactions, golfer-vs-non-golfer, friendly rivalry and simple pressure-shot formats. The current-at-source `Hit the Gong` mechanic proves that gamified range content has existed, but its exact prize/rules must be current before publishing.
 
-Best commercial mechanic:
+### Night / after-work range use
 
-Turn practice into competition.
+Client-supplied Instagram evidence supported day/night range activity. Use the visual atmosphere when current. Do not invent current night hours or availability.
 
-Examples:
+### People / reactions
 
-- longest drive;
-- nearest marker;
-- straightest shot;
-- worst shot;
-- team relay;
-- first to hit a target.
+Real golfers, beginners, friends and group reactions should carry more of the feed than static empty-range imagery. Keep beginners welcomed, not mocked.
 
-This is the audience most likely to create naturally funny social content.
+### Events / groups
 
-## 5. Families
+Event enquiries/bookings are a verified commercial route. Promote real group/event use when the live brief supports it, and retrieve current package/contact details dynamically. Do not infer broader Emoya conference/function packages.
 
-If putt-putt is still operational, this becomes much stronger.
+### Venue progress / new facilities
 
-Potential offer:
+Accessible Project history later asked for a caption saying the **new green is open to the public**. This supersedes the older `under construction` status at a high level, but the accessible chat does **not safely establish whether the opened green is a putting green, chipping green or both**. Use the exact current brief or fresh source before naming the facility.
 
-- adults hit range balls;
-- children / mixed group use putt-putt;
-- combined activity pass;
-- school holiday activation.
+### Offers / packages
 
-Do not market this until the current putt-putt facility is confirmed.
+Bucket pricing, monthly practice packages and promotions appeared in August source evidence. They are mutable. Reverify price, quantity, dates, terms and availability before every public use.
 
-## 6. Corporate / team-building groups
+### Food / drinks
 
-Historical Emoya corporate material explicitly positioned the driving range and putt-putt as activities alongside conferences and teambuilding.
+Beverage promotions and brandy imagery appeared in Project/source history. Do not turn that into an evergreen claim that a bar, restaurant or specific alcohol product/service is currently available. Verify the exact current setup, promotion and compliance before publishing.
 
-The opportunity is to productise this properly:
+## 7. Reels / scripts
 
-- fixed headcount packages;
-- bucket allocation;
-- team competition format;
-- scoring sheet;
-- facilitator / host option;
-- simple prize structure;
-- food / conference add-on via Emoya or partner if currently available.
+Recent Project direction is explicit: Emoya short-form work should be **fun, out of the box and concise**.
 
-Best positioning:
+For Driving Range concepts:
 
-`Corporate golf without needing everyone to play golf.`
+- aim for about 30 seconds or less when the brief asks for short Reels;
+- provide clear scenes plus script/on-screen dialogue when requested;
+- hook quickly with action, a challenge, a surprising miss/hit or a recognisable social situation;
+- build toward a visible payoff/reaction rather than a generic montage;
+- use the actual range, people, balls, clubs, targets and green available in the brief;
+- keep one simple mechanic per Reel so the audience understands it immediately;
+- avoid slow intros and generic `welcome to our venue` filler unless the brief specifically asks for an introduction.
 
-## 7. Schools / junior golf
+## 8. Visual and image-edit rules
 
-If coaching or safe junior sessions are available, create:
+Project image work reinforces **change only what was requested**.
 
-- beginner junior clinics;
-- school holiday golf mornings;
-- inter-school target competitions;
-- parent-and-child sessions.
+- If the user asks for the picture only, remove poster/layout clutter and return the requested subject cleanly rather than redesigning it.
+- If the user asks for a different angle, change the angle while preserving the subject/product identity and realism.
+- If the user asks to clean a glass/object, clean that object without unnecessarily changing the rest of the scene.
+- Preserve real people, venue layout, golf clubs/balls/equipment, logos, colours, signage and meaningful composition unless the brief explicitly changes them.
+- Do not invent facilities, targets, green layouts, crowd size, events, sponsor branding, product labels or venue features and present them as real.
+- Commercial cleanup should remain believable and not look obviously AI-generated.
 
-Needs current operational confirmation before launch.
+## 9. Claim / freshness guardrails
 
-## Competitive landscape
+Never invent or silently assume:
 
-The local market is not empty.
-
-Current evidence supports practice facilities at:
-
-- Schoeman Park Golf Club — current listings confirm a driving range, putting green, chipping green, practice bunker, lessons, club rental and pro-shop environment.
-- Tempe Golf Club — current golf-directory evidence describes a driving range and putting green.
-- Bloemfontein Golf Club — a major traditional club competitor for serious golfers and full-round play; some directories conflict on driving-range availability, so do not use that specific facility claim without direct verification.
-
-### Competitor positioning map
-
-### Traditional clubs
-
-Strengths:
-
-- golf credibility;
-- full course;
-- members;
-- coaching;
-- practice infrastructure;
-- pro-shop ecosystem.
-
-Weakness relative to Emoya opportunity:
-
-- can feel more formal;
-- requires more golf commitment;
-- less obviously positioned as casual entertainment.
-
-### Emoya opportunity
-
-Own the intersection:
-
-> **real golf + casual entertainment + easy groups + Emoya destination context.**
-
-Do not try to beat golf clubs on championship-course credibility.
-
-## Marketing principle
-
-The biggest mistake would be showing only golfers quietly hitting balls down a field.
-
-That communicates `practice facility` but not `reason to go`.
-
-Every month should show at least three of these:
-
-- skill;
-- laughter;
-- competition;
-- beginners;
-- groups;
-- date activity;
-- sunset / outdoor setting;
-- corporate activity;
-- coaching / improvement if current;
-- putt-putt / family activity if current.
-
-## Content pillars
-
-## 1. `Hit It` — simple visual satisfaction
-
-Strong swing.
-
-Ball flight.
-
-Impact sound.
-
-Reaction.
-
-Target/result.
-
-This can be premium and cinematic without becoming serious golf advertising.
-
-## 2. `Can you hit it?`
-
-Recurring target challenge.
-
-Examples:
-
-- hit the 100m marker;
-- hit the tyre / flag / target if safe and physically available;
-- closest to line;
-- three-ball challenge.
-
-The physical challenge must use actual safe range targets; do not invent targets that encourage unsafe shot direction.
-
-## 3. `Golfer vs non-golfer`
-
-A naturally accessible social format.
-
-Mechanic:
-
-Experienced golfer receives one shot; beginner gets three / handicap mechanic.
-
-Could become:
-
-- couple;
-- boss vs employee;
-- dad vs child;
-- rugby player vs golfer;
-- local personality vs coach.
-
-## 4. `Bloem's longest drive`
-
-A leaderboard campaign if the venue can measure or consistently judge distance.
-
-Options:
-
-- monthly longest drive;
-- men's / women's / junior categories;
-- prize partner;
-- weekly social leaderboard.
-
-Do not claim distances without reliable measurement.
-
-## 5. `Bad golf is still golf`
-
-Strong beginner-acquisition platform.
-
-Content:
-
-- topped shots;
-- whiffs;
-- banana slices;
-- surprisingly good beginner shots;
-- laughter and retry.
-
-Tone should make beginners feel welcome, not mocked.
-
-## 6. `Quick bucket after work`
-
-The range can compete against a full round on time.
-
-Content angle:
-
-- laptop shuts;
-- club out;
-- bucket;
-- sunset;
-- done.
-
-Position as a quick decompression activity.
-
-## 7. Golf tips
-
-Only with a qualified / approved coach or knowledgeable current staff member.
-
-Best short formats:
-
-- one swing thought;
-- one drill;
-- one common beginner mistake;
-- club selection;
-- warm-up.
-
-Avoid generic AI-written technical swing advice attributed to the venue.
-
-## 8. `Range games`
-
-Turn the venue into something groups can understand immediately.
-
-Examples:
-
-- five balls, highest points;
-- nearest target;
-- left-handed challenge;
-- one-club challenge;
-- blind club selection;
-- opposite-hand bonus shot.
-
-Each should be simple enough to explain in one on-screen line.
-
-## Video strategy
-
-The venue is naturally video-friendly because golf gives clear anticipation and payoff.
-
-### Best opening shots
-
-- impact sound in first second;
-- ball already in flight;
-- someone screaming after a great/bad shot;
-- target challenge text;
-- club head close-up into swing;
-- split-screen result.
-
-### Avoid
-
-- slow drone introduction before action;
-- exterior-sign shot first;
-- long explanation of golf rules;
-- three people standing around with clubs;
-- generic montage with no competitive idea.
-
-### Ideal short-form structures
-
-#### Challenge
-
-0–2 sec: `Three balls. Hit the marker.`
-
-2–12 sec: attempts.
-
-12–18 sec: result/reaction.
-
-18–22 sec: venue / CTA.
-
-#### Beginner
-
-0–2 sec: `She's never hit a golf ball.`
-
-2–12 sec: first attempts.
-
-12–18 sec: surprisingly good shot / funny result.
-
-18–22 sec: accessible venue CTA.
-
-#### Skill
-
-0–2 sec: clean impact.
-
-2–8 sec: ball / target.
-
-8–14 sec: slow-motion or angle replay.
-
-14–20 sec: practice message / current bucket offer if verified.
-
-## Promotions and activations
-
-## 1. After-work bucket
-
-Possible weekday quiet-time offer.
-
-Needs:
-
-- current capacity;
-- current pricing;
-- defined hours.
-
-## 2. Date-night challenge
-
-Package:
-
-- two buckets / one shared competition;
-- optional nearby food/drink partner;
-- scorecard.
-
-## 3. Friday longest-drive league
-
-Weekly or monthly competition.
-
-Commercial benefit:
-
-Repeat visits + spectator/social energy.
-
-## 4. Corporate range league
-
-Companies enter small teams over several weeks.
-
-Could generate:
-
-- recurring booking revenue;
-- sponsor opportunity;
-- leaderboard content;
-- final event.
-
-## 5. School-holiday beginner sessions
-
-Only if coaching/supervision capacity is confirmed.
-
-## 6. Golf-and-game night
-
-If putt-putt remains active:
-
-- range challenge + putt-putt;
-- couples / teams;
-- simple points system.
-
-## 7. Local sports crossovers
-
-Excellent Bloem opportunity.
-
-Examples:
-
-- rugby player hits driver;
-- cricketer longest drive;
-- padel player vs golfer;
-- athlete crossover challenge.
-
-The audience comes for the personality and discovers the venue.
-
-## Corporate marketing
-
-The historical Emoya relationship to conference / teambuilding activity is commercially useful.
-
-Build a one-page corporate product sheet with:
-
-- minimum / maximum group size;
-- duration;
-- what is included;
-- competition format;
-- equipment included / not included;
-- facilitator;
-- food/drinks partner or Emoya add-on if applicable;
-- price per person;
-- weather policy;
-- booking lead time.
-
-LinkedIn can then target:
-
-- HR managers;
-- office managers;
-- business owners;
-- conference organisers;
-- schools and sports teams.
-
-## Partnerships
-
-Potential local partners:
-
-- golf coaches;
-- golf shops / club fitters;
-- sports clubs;
-- corporate event organisers;
-- nearby restaurants;
-- Emoya Estate businesses;
-- schools;
-- gyms;
-- padel venues;
-- local sports personalities;
-- golf-day organisers.
-
-Partnership must have a concrete customer offer, not logo swapping.
-
-## Google Business Profile / local search
-
-This is currently important because the public naming is inconsistent.
-
-Required cleanup once client confirms current brand:
-
-- one canonical business name;
-- exact pin;
-- correct phone;
-- current hours;
-- current website/social destination;
-- category `Driving range` or closest accurate Google category;
-- real photos of bays/range/putt-putt if active;
-- pricing FAQ where suitable;
-- club-hire / coaching / groups listed only if current.
-
-Search intent:
-
-- driving range Bloemfontein;
-- golf driving range Bloemfontein;
-- golf practice Bloemfontein;
-- things to do Bloemfontein;
-- team building Bloemfontein;
-- golf lessons Bloemfontein if current;
-- putt putt Bloemfontein if current.
-
-The `things to do` search territory is strategically important because the venue should compete for entertainment demand, not only golf demand.
-
-## Meta / Instagram
-
-Best organic content:
-
-- challenges;
-- reaction clips;
-- longest drives;
-- beginner attempts;
-- staff / coach personality;
-- groups;
-- corporate events;
-- sunset practice;
-- local-sports crossover.
-
-Best paid objectives:
-
-- WhatsApp / booking enquiry;
-- corporate enquiry;
-- event-specific traffic;
-- retarget video viewers for current offers.
-
-Avoid running generic awareness ads that show only an empty range.
-
-## TikTok / Reels opportunity
-
-Golf challenge content is naturally suited to short-form video.
-
-The venue should not try to imitate tour-golf accounts.
-
-Better local formats:
-
-- `Can a rugby player hit 250m?`;
-- `First time holding a driver`;
-- `R100 says you can't hit this target` only where legally/operationally appropriate and current prize rules are formalised;
-- `Bloem golfer vs Bloem non-golfer`;
-- `Worst swing / best result`;
-- `Three balls to prove it`.
-
-## Website / landing-page recommendation
-
-If the range has no strong standalone website, a compact landing page is enough initially.
-
-It should answer:
-
-1. What is this?
-2. Can beginners come?
-3. What does a bucket cost?
-4. Do I need clubs?
-5. What are the hours?
-6. Where exactly is it?
-7. Can groups / corporates book?
-8. Is putt-putt available?
-9. Can I get lessons?
-10. How do I contact/book?
-
-For a casual activity business, unanswered practical questions kill visits.
-
-## Review strategy
-
-Ask customers after an enjoyable session, not at random.
-
-Review themes worth building:
-
-- fun;
-- welcoming to beginners;
-- value;
-- condition of range / balls / mats / grass;
-- staff friendliness;
-- group experience;
-- safety;
-- ease of access;
-- family friendliness;
-- corporate event experience.
-
-Negative-review themes should be operationally tagged, not hidden.
-
-## Revenue architecture
-
-Do not measure only bucket sales.
-
-Potential revenue categories, where current operations support them:
-
-- range balls;
-- memberships / prepaid bucket cards;
-- coaching;
+- current phone/WhatsApp modality beyond the canonical contact classification;
+- email, website or booking deep link;
+- opening/holiday hours;
+- bucket/session/monthly-package prices or terms;
+- promotions or prizes;
+- putt-putt availability;
+- whether one or both chipping/putting greens are open;
+- coaching, instructor names or qualifications;
 - club hire;
-- putt-putt;
-- group bookings;
-- corporate packages;
-- events / leagues;
-- food/beverage revenue share or partner package;
-- sponsorship;
-- branded competitions;
-- pro-shop/equipment if applicable.
-
-## Loyalty opportunity
-
-Driving ranges naturally depend on frequency.
-
-Potential systems:
-
-- 10-bucket card;
-- monthly practice pass;
-- corporate prepaid card;
-- junior pass;
-- challenge leaderboard rewards.
-
-Only launch after margin and capacity analysis.
-
-## Measurement
-
-Track:
-
-- walk-ins;
-- bucket transactions;
-- average spend;
-- repeat-visit rate;
-- quiet vs peak periods;
-- group booking enquiries;
-- corporate enquiries;
-- event attendance;
-- first-time visitor source;
-- Google calls/directions;
-- WhatsApp enquiries;
-- paid campaign cost per booking/enquiry;
-- video retention;
-- offer redemption;
-- revenue per activation.
-
-The key question is not `did the Reel get views?`
-
-It is:
-
-> `Did more people come hit balls, book groups or return?`
-
-## 90-day plan
-
-### Days 1–30 — Truth and discoverability
-
-- confirm canonical public brand/name;
-- confirm phone, WhatsApp, hours and prices;
-- verify putt-putt, coaching, clubs, food/drinks and group offer;
-- clean Google Business Profile;
-- capture fresh facility photo/video library;
-- publish beginner FAQ;
-- create simple booking/contact landing page;
-- start `Can you hit it?` and `Bad golf is still golf` formats.
-
-### Days 31–60 — Social entertainment engine
-
-- launch recurring challenge series;
-- test after-work offer;
-- run golfer-vs-non-golfer content;
-- introduce local sports personalities;
-- build date/friend-group package;
-- capture current reviews;
-- test local Meta booking campaign.
-
-### Days 61–90 — Groups and repeat revenue
-
-- productise corporate package;
-- launch corporate outreach;
-- test longest-drive or range league;
-- introduce prepaid/frequency offer if commercially sound;
-- build Emoya Estate cross-sell if current relationship supports it;
-- evaluate traffic by day/time and reshape offers around low-demand periods.
-
-## Critical creative rule
-
-Do not sell golf practice only.
-
-Sell:
-
-- hitting something hard;
-- trying again;
-- competing with your friends;
-- surprising yourself;
-- getting better;
-- laughing when it goes wrong;
-- having an easy thing to do in Bloemfontein.
-
-## Evidence gaps requiring direct client confirmation
-
-Before operational use, confirm:
-
-- current trading name;
-- legal/company relationship to `Emoya Driving Range (Pty) Ltd`;
-- whether `Mulligan's` is historical, current or separate;
-- exact current location/pin;
-- current phone and WhatsApp;
-- current hours;
-- bucket sizes and prices;
+- equipment/pro-shop sales;
+- food/bar/alcohol availability;
+- group/corporate package inclusions, capacity or prices;
+- event dates/availability;
 - payment methods;
-- range-ball quantity;
-- bay / hitting-area setup;
-- natural grass vs mats;
-- lighting / evening operation;
+- weather/cancellation rules;
+- partner/sponsor relationships;
+- wider Emoya Estate accommodation, spa, restaurant, reserve or conference/function claims.
+
+The August verified source recorded normal hours and pricing, but those values are mutable and must be rechecked before operational use.
+
+## 10. Project Source audit
+
+Actually accessible/referenced Project file:
+
+### `TBS Marketing_business_info.pdf` — **REMOVE from the active Emoya Estate Driving Range Project source set if it is currently stored there**
+
+Reason: the user supplied it on 2026-09-02 only as an **example/template** for the desired business-profile structure. It is a different client's material and must not ground Emoya facts, voice, contacts or services. Do not delete the original file from its proper client/history; simply do not use it as Emoya source authority.
+
+No other current Project Source library entry was directly exposed to this migration. The 2026-08-07 client-supplied Instagram screenshots are preserved through `EMOYA-DRIVING-RANGE-VERIFIED-SOURCE-UPDATE-2026-08-07.md`, but their raw Project-source file inventory was not directly accessible here, so no unseen-file KEEP/REMOVE/REPLACE decision is invented.
+
+After manual handoff, the derived `EMOYA-ESTATE-DRIVING-RANGE-CG-DYNAMICS-CLIENT-GUIDE.md` should be the active working guide generated from canonical Dynamics intelligence, not a second independent truth store.
+
+## 11. Inaccessible evidence warning
+
+Accessible recent Emoya Project history and current GitHub evidence were reviewed. The exact prior Project Instructions text, a complete independent export of hidden/archived/unloaded historical Project chats, and the full raw Project Source inventory were not exposed in this session.
+
+`inaccessible_history_warning = yes`
+
+This migration does **not** declare `SAFE TO DELETE PROJECT CHATS`; #301 must still clear its full deletion gate.
+
+## 12. Unresolved facts — never guess
+
+- whether the current approved contact number should be labelled WhatsApp-only, call/WhatsApp or general phone;
+- current opening/holiday hours;
+- current standard bucket pricing and monthly-package conditions;
+- exact identity/status of the newly opened green: putting, chipping or both;
+- current putt-putt availability;
+- coaching and current instructors;
 - club hire;
-- coaching and coach names;
-- putt-putt status and price;
-- food/drink availability;
-- alcohol/licensing context if applicable;
-- corporate/group capacity;
-- school/junior offering;
-- weather policy;
-- current social handles;
-- current website;
-- any current sponsorships;
-- current safety rules.
+- equipment/pro-shop sales;
+- food/bar/alcohol setup and current promotions;
+- event/group package structure, capacity, inclusions and pricing;
+- payment methods;
+- weather/cancellation policy;
+- current Google Business Profile details;
+- current standalone website/booking deep link, if any;
+- exact current Facebook URL/display state;
+- any wider Emoya Estate service relationship not explicitly confirmed for the Driving Range.
 
-## Source register
+## 13. Exact-client retrieval target
 
-Current sources reviewed 2026-08-07:
+Resolve:
 
-1. Bloemfontein Tourism — Emoya Estate current location listing.
-2. Emoya Estate corporate-functions brochure — historical/current estate activity context, including `Mulligan's Driving Range & Put-Put` and teambuilding positioning; prices and contact details in older brochures must be treated as mutable.
-3. Think Local — `Mulligans Golf Drvng Rng`, Emoya Estate, local contact evidence.
-4. Dun & Bradstreet Free State amusement/recreation business directory — current listing of `EMOYA DRIVING RANGE (PTY) LTD`; revenue estimates are not used as verified client financial data.
-5. Helderberg Golf Academy — professional biography confirming operation of a driving range at Emoya Estate from 2016 to mid-2018.
-6. Schoeman Park current golf-directory/listing evidence — driving range and practice facilities.
-7. Tempe Golf Club current golf-directory evidence — practice facilities, including driving range and putting green.
-8. Bloemfontein Golf Club current site/listing context — traditional golf-club competitor.
-9. International driving-range examples such as Mulligan's Driving Range (Canada) were reviewed only as format/business-model inspiration for memberships, beginner access, events and group entertainment; they are not evidence about Emoya's current services or South African pricing.
+`client_id 217a547c-7b22-45cc-bf88-9d45a8e93dfe + task type + supplied creative/context`
 
-## Final operating principle
+For `caption please`, return only current Emoya Estate Driving Range voice, exact post/activity facts, current caption-approved footer/contact convention and values when relevant, claim/freshness guardrails, unresolved task blockers and max-five dynamic SEO guidance.
 
-The venue has a stronger opportunity than `come practise your swing`.
+For image edits, prioritise preservation rules and the exact requested change. For content/scripts, retrieve only the relevant range/social/event lane, current verified facility/offer context and short visual-first rules.
 
-The commercial position should be:
+Never use wider Emoya Estate or another golf/venue client as fallback.
 
-> **A real golf range that is easy enough for beginners, social enough for friends and useful enough for golfers.**
+## 14. Recoverable final Project Instructions
 
-That gives CG far more content, activation and booking territory than traditional golf-only advertising.
+> Work only on Emoya Estate Driving Range (exact CG Dynamics client_id: `217a547c-7b22-45cc-bf88-9d45a8e93dfe`). Treat Emoya Driving Range and Emoya Estate only as aliases/context; never import wider-estate accommodation, spa, restaurant, game-reserve or function facts unless current exact-client evidence proves relevance. Before factual, caption, content or image work, retrieve current exact-client Dynamics/GitHub context and the supplied creative. Write short, human, local, social golf copy with specific hooks; captions add rather than repeat. Default to natural English; use Afrikaans only when requested or it genuinely fits. Keep concepts visual and specific, especially challenges, people/reactions and practice/social play. Use max 5 dynamic hashtags. Retrieve the current caption-approved booking/contact/footer from exact-client Dynamics at task time; never hardcode or guess contacts. Preserve real people, venue, golf equipment, branding and composition in edits unless explicitly changed. Never invent facilities, green status, putt-putt, coaching, club hire, food/drink, prices, hours, packages, events or claims. Flag identity/scope/fact conflicts instead of guessing.
+
+Manual handoff remains pending until CA physically applies these Instructions to the Emoya Estate Driving Range ChatGPT Project and confirms.
