@@ -3,7 +3,7 @@
 Last reconciled: 2026-09-08  
 Canonical CG Dynamics client: **Delta Gas**  
 Exact client_id: `06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba`  
-Status: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**  
+Status: **PROJECT HANDOFF COMPLETE — Instructions manually applied 2026-09-08**  
 Derived working guide: `DELTA-GAS-CG-DYNAMICS-CLIENT-GUIDE.md`
 
 CG Dynamics is the permanent source of truth. This file is the canonical reviewed client-intelligence record in the repository and must remain exact-client isolated. The older title “Delta Gas Bloemfontein” is a public/historical alias, not a second CG client.
@@ -182,7 +182,18 @@ Durable rule: **the nominal gas size is the contents, not the full combined cyli
 
 Do not turn one historical 9 kg example into a universal tare value. Different historical Delta/press examples use different tare weights, which is exactly why the marked tare on the actual cylinder matters.
 
-Current exact cylinder sizes stocked, refill versus exchange rules, accepted exchange brands, rental rules and the current brand roster are **not safe as permanent assertions** from the available 2026-09-08 evidence. Historical CG notes conflict on parts of the exchange-brand list. Reconfirm them for any factual post.
+### Dated historical CG execution evidence — not current operational truth
+
+A CG Project exchange/education execution from **2026-02-19** used this campaign-specific information:
+- Delta was selling **ORYX** cylinders at that time;
+- the post said exchanges were accepted for **ORYX Energies, Easigas, Afrox and TotalEnergies** cylinders;
+- one 9 kg weighing example used **tare 10.3 kg + contents 9 kg = 19.3 kg total**.
+
+Preserve this as evidence of what Delta/CG communicated in that historical execution. It is useful when interpreting or recreating old creative, but it is **not** current proof of the exchange-brand roster, current brand sales policy or a universal 9 kg cylinder tare.
+
+A separate 2024 Bloemfontein Courant example supplied by Delta used **tare 13.10 kg + contents 9 kg = 22.1 kg total**. The different examples reinforce the permanent rule: use the marked tare of the actual cylinder; never infer one standard empty-cylinder weight.
+
+Current exact cylinder sizes stocked, refill versus exchange rules, accepted exchange brands, rental rules and the current brand roster are **not safe as permanent assertions** from the available 2026-09-08 evidence. Reconfirm them for any new factual post.
 
 ## 9. ORYX and supplier/brand relationships
 
@@ -246,6 +257,12 @@ Do not improvise:
 Do not imply Delta performs regulated gas installation, certification or CoC work unless that exact current service and responsible registered practitioner are verified.
 
 Safety content must be calm, practical and non-sensational. No fear-based clickbait.
+
+### Historical Delta safety-education evidence
+
+A 2024 Bloemfontein Courant article quotes Delta owners discussing consumer gas safety, including ventilation, the condition of seals/regulators, buying from a registered distributor with the correct sealed/identified cylinder, and avoiding an open flame when checking for a leak. This is useful evidence that practical consumer education is authentically on-brand for Delta.
+
+Because safety guidance is high-stakes, treat those points as **historical client-public education evidence**, not a standing how-to script. Recheck current authoritative/client-approved guidance before publishing operational safety instructions.
 
 ## 12. Product and appliance guardrails
 
@@ -353,6 +370,8 @@ Always recheck when relevant:
 
 Third-party directories currently disagree on trading hours. Hours therefore remain **unresolved**, not current_verified.
 
+A current third-party listing also presents 079 559 3734 as WhatsApp-enabled, but this is not sufficient to override the client-confirmation rule. Do not publish WhatsApp as an official contact method until Delta/CG confirms it directly.
+
 ## 18. Provenance and review states
 
 ### Current verified / client-confirmed
@@ -373,6 +392,7 @@ Source: client-provided `Delta Gas.pdf`, reviewed 2026-09-08.
 
 ### Current architecture authority
 - CG Dynamics Issue #276 — exact client identity/id, isolation and migration requirements.
+- Issue #276 handoff comment dated 2026-09-08 — CG manually applied the final Project Instructions; **Project handoff is complete**.
 - Issue #248 — human creative standard and max-five dynamic hashtag rule.
 - Issue #241 — exact-client retrieval/derived-guide architecture; **not modified by this migration**.
 - `CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`.
@@ -381,16 +401,17 @@ Source: client-provided `Delta Gas.pdf`, reviewed 2026-09-08.
 `DELTA-GAS-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`, researched 2026-08-06 and reconciled here rather than duplicated.
 
 ### Supporting public evidence
-Recent public listings corroborate the Dan Pienaar address, phone and local gas-shop identity and contain customer-review/service evidence. Historical ORYX material supports the distributor relationship. A 2024 Bloemfontein Courant article independently names the three owners and demonstrates why cylinder tare must be treated per-cylinder.
+Recent public listings corroborate the Dan Pienaar address, phone and local gas-shop identity and contain customer-review/service evidence. Historical ORYX material supports the distributor relationship. A 2024 Bloemfontein Courant article independently names the three owners, records Delta’s consumer-safety education and demonstrates why cylinder tare must be treated per-cylinder.
 
 ### CG Project/history evidence
 Accessible Project history contributes creative/copy lessons such as:
 - “3 locations, 1 Delta team” as a recent campaign direction;
 - visual-first/no-VO preference in at least one prior video;
 - avoid incorrectly portraying Ruan Pienaar as staff;
-- owner-led/local-personality storytelling.
+- owner-led/local-personality storytelling;
+- a dated 2026-02-19 exchange/weighing execution that named ORYX, Easigas, Afrox and TotalEnergies and used one 10.3 kg tare / 9 kg contents example.
 
-These are durable creative lessons only where stated above; they do not override current operational facts.
+These are durable creative/history lessons only where stated above; they do not override current operational facts.
 
 ## 19. Project Source audit
 
@@ -437,7 +458,3 @@ For image edits, prioritise preservation rules.
 For content ideas, prioritise human use cases, current product/service evidence and safety boundaries.
 
 Never load unrelated client intelligence or infer facts from another gas/energy business.
-
-## Bottom line
-
-Delta Gas marketing should make gas buying/use feel easier to understand and easier to act on without pretending that mutable operational facts are permanent. Be local, practical, clear and human. Use real Delta evidence, add value beyond the artwork, preserve safety boundaries, and flag what must be confirmed.
