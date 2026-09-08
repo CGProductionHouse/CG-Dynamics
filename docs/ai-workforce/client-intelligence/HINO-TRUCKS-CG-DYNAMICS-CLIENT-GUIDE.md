@@ -124,11 +124,13 @@ Do not change one Hino series into another, invent a body/application, add unsup
 
 ## Project Source decision
 
-`Hino Bloemfontein.pdf` → **REPLACE** with this guide after manual CG confirmation.
+`Hino Bloemfontein.pdf` → **REPLACE** with this guide.
 
-The PDF contains useful Hino local information, but also unrelated Dulux content, unrelated grief/funeral wording, `real staff at Dulux` contamination, an unverified Toyota-domain email, a frozen hashtag bank and global Hino copy that can be mistaken for local proof.
+The PDF contains useful Hino local information, but also unrelated Dulux content, unrelated grief/funeral wording, `real staff at Dulux` contamination, an unverified Toyota-domain email, a frozen hashtag bank, a funeral-contaminated blanket no-humour rule and global Hino copy that can be mistaken for local proof.
 
-Do not physically delete the old Project Source during this migration.
+Issue #281 records that the final Hino Project Instructions were physically applied on 2026-09-08. In this audit, however, the old `Hino Bloemfontein.pdf` is still the accessible Project Source and no separate source-swap confirmation was found. Treat **Instructions handoff as confirmed** and **Project Source replacement as still requiring confirmation**.
+
+Do not delete the old source from repo history. In the ChatGPT Project, replace the old PDF source with this guide and then confirm that the source swap is complete.
 
 ## Freshness checklist
 
