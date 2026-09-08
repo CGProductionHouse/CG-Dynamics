@@ -19,7 +19,7 @@ Purpose: migrate durable client knowledge from existing ChatGPT Projects into CG
 11. Update/create the appropriate client intelligence / operational memory in CG Dynamics and retain the repo's freshness protocol.
 12. Do not change CG Hours billing/history, client UUIDs, time entries or financial records during this knowledge migration.
 13. Do not merge billing umbrellas with content identities. Example: Wiseman Group may be the invoice umbrella, while WiseRide, Supa Quick BFN and Supa Quick Centurion remain separate content/client intelligence identities.
-14. Use branch `client-directory-reconciliation-2026-09-08` for this migration until CA approves final merge to main.
+14. Use branch `client-directory-reconciliation-2026-09-08` as the migration base. Individual client migrations may be completed in their own clean child branch/worktree and merged back only after review.
 
 ## Durable knowledge to capture
 
@@ -46,6 +46,7 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 |---|---|---|---|
 | WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
 | Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
+| Bloem Action Sports | Bloem Action Sport | **SYNCED** | Canonical name corrected from historical `Action Sport`; accessible Project chats and the Bloem business-information source were reviewed; current official website/contact/league facts were reconciled against CA/CG contact and copy rules. Permanent record: `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`. |
 
 ## Completion standard
 
@@ -55,7 +56,7 @@ A client is `SYNCED` only when:
 - useful ChatGPT Project knowledge has been reviewed;
 - current contact/public facts have been verified where possible;
 - contradictions/stale facts have been resolved or explicitly flagged;
-- durable knowledge has been committed to this branch;
+- durable knowledge has been committed to the client migration branch;
 - the final response states exactly what files/records changed and the commit SHA.
 
 Only after all important current-client Projects are `SYNCED` should ChatGPT conversation history be wiped.
