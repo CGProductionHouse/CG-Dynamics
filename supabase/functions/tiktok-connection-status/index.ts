@@ -1,5 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { resolveTiktokConnectionForClient } from '../_shared/tiktok.ts'
 
 const REQUIRED_SCOPES = [
   'user.info.basic',
@@ -9,6 +10,10 @@ const REQUIRED_SCOPES = [
   'video.upload',
   'video.publish',
 ]
+
+interface StatusBody {
+  clientId?: string
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -47,6 +52,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
+  let body: StatusBody
+  try {
+    body = await req.json()
+  } catch {
+    body = {}
+  }
+
   // Check schema readiness
   const [{ error: oauthStateSchemaError }, { error: tokenSchemaError }] = await Promise.all([
     sb.from('tiktok_oauth_states').select('id', { head: true }).limit(1),
@@ -54,24 +66,45 @@ Deno.serve(async (req) => {
   ])
   const schemaReady = !oauthStateSchemaError && !tokenSchemaError
 
-  // Read latest connection
-  const { data: connections } = await sb
-    .from('tiktok_connections')
-    .select('id, client_id, tiktok_open_id, display_name, avatar_url, status, scopes, last_error, last_connected_at')
-    .order('last_connected_at', { ascending: false, nullsFirst: false })
-    .order('created_at', { ascending: false })
-    .limit(1)
-
-  if (!connections || connections.length === 0) {
+  // Per-client connection resolution — never global/first-connected
+  if (!body.clientId) {
     return jsonResponse({
       ok: true,
       connected: false,
       status: 'not_connected',
-      message: 'TikTok is not connected yet.',
+      message: 'clientId is required.',
+      schemaReady,
     })
   }
 
-  const latest = connections[0]
+  const { connectionId, error: connError } = await resolveTiktokConnectionForClient(sb, body.clientId)
+  if (!connectionId) {
+    return jsonResponse({
+      ok: true,
+      connected: false,
+      status: 'not_connected',
+      message: connError ?? 'TikTok is not connected yet.',
+      schemaReady,
+    })
+  }
+
+  // Read the specific connection for this client
+  const { data: latest } = await sb
+    .from('tiktok_connections')
+    .select('id, client_id, tiktok_open_id, display_name, avatar_url, status, scopes, last_error, last_connected_at')
+    .eq('id', connectionId)
+    .single()
+
+  if (!latest) {
+    return jsonResponse({
+      ok: true,
+      connected: false,
+      status: 'not_connected',
+      message: 'TikTok connection not found.',
+      schemaReady,
+    })
+  }
+
   const grantedScopes = Array.isArray(latest.scopes)
     ? latest.scopes.filter((scope): scope is string => typeof scope === 'string')
     : []

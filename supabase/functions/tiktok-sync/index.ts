@@ -49,16 +49,20 @@ function getMonthBounds(periodMonth: string): { start: number; end: number } {
   return { start, end }
 }
 
+function getMonthDateBounds(periodMonth: string): { periodStart: string; periodEnd: string } {
+  const [year, month] = periodMonth.split('-').map(Number)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return {
+    periodStart: `${year}-${pad(month)}-01`,
+    periodEnd: `${year}-${pad(month)}-${pad(new Date(year, month, 0).getDate())}`,
+  }
+}
+
 function isVideoInPeriod(video: TiktokVideo, periodMonth: string): boolean {
   // create_time is int64 Unix epoch in seconds
   if (!video.create_time) return false
   const { start, end } = getMonthBounds(periodMonth)
   return video.create_time >= start && video.create_time <= end
-}
-
-/** Convert TikTok Unix seconds to ISO string for logging/debugging. */
-function tiktokTimeToISO(unixSeconds: number): string {
-  return new Date(unixSeconds * 1000).toISOString()
 }
 
 Deno.serve(async (req) => {
@@ -216,35 +220,50 @@ Deno.serve(async (req) => {
   const videoMetricNotes = `Cumulative as-of snapshot for ${periodVideos.length} video(s) published in ${periodMonth}. These numbers will change if re-synced later because videos accumulate engagement over time.`
   const profileMetricNotes = `Current snapshot at sync time (${new Date().toISOString().split('T')[0]}). Not attributable to any specific period.`
 
+  const { periodStart, periodEnd } = getMonthDateBounds(periodMonth)
+
   // Upsert monthly facts for each metric
+  // Must match the full 19-parameter signature of upsert_platform_metric_fact_preserving_verified
+  // (see phase-20e-facts-client-access-and-curation.sql / _shared/meta.ts)
+  const TIKTOK_CONNECTOR_VERSION = 'tiktok-v1'
   const facts = [
-    { metricKey: 'views', sourceMetric: 'view_count', value: totals.views, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
-    { metricKey: 'likes', sourceMetric: 'like_count', value: totals.likes, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
-    { metricKey: 'comments', sourceMetric: 'comment_count', value: totals.comments, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
-    { metricKey: 'shares', sourceMetric: 'share_count', value: totals.shares, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
-    { metricKey: 'current_followers', sourceMetric: 'follower_count', value: profileData?.follower_count ?? null, aggregation: 'snapshot', crossPlatform: true, notes: profileMetricNotes },
-    { metricKey: 'following_count', sourceMetric: 'following_count', value: profileData?.following_count ?? null, aggregation: 'snapshot', crossPlatform: false, notes: profileMetricNotes },
-    { metricKey: 'total_likes', sourceMetric: 'likes_count', value: profileData?.likes_count ?? null, aggregation: 'snapshot', crossPlatform: false, notes: profileMetricNotes },
-    { metricKey: 'video_count', sourceMetric: 'video_count', value: profileData?.video_count ?? null, aggregation: 'snapshot', crossPlatform: false, notes: profileMetricNotes },
+    { metricKey: 'views', sourceMetric: 'view_count', value: totals.views, aggregation: 'sum', comparableGroup: 'tiktok_organic' },
+    { metricKey: 'likes', sourceMetric: 'like_count', value: totals.likes, aggregation: 'sum', comparableGroup: 'tiktok_organic' },
+    { metricKey: 'comments', sourceMetric: 'comment_count', value: totals.comments, aggregation: 'sum', comparableGroup: 'tiktok_organic' },
+    { metricKey: 'shares', sourceMetric: 'share_count', value: totals.shares, aggregation: 'sum', comparableGroup: 'tiktok_organic' },
+    { metricKey: 'current_followers', sourceMetric: 'follower_count', value: profileData?.follower_count ?? null, aggregation: 'snapshot', comparableGroup: 'tiktok_profile' },
+    { metricKey: 'following_count', sourceMetric: 'following_count', value: profileData?.following_count ?? null, aggregation: 'snapshot', comparableGroup: 'tiktok_profile' },
+    { metricKey: 'total_likes', sourceMetric: 'likes_count', value: profileData?.likes_count ?? null, aggregation: 'snapshot', comparableGroup: 'tiktok_profile' },
+    { metricKey: 'video_count', sourceMetric: 'video_count', value: profileData?.video_count ?? null, aggregation: 'snapshot', comparableGroup: 'tiktok_profile' },
   ]
 
   let upsertFailures = 0
   for (const fact of facts) {
+    // Cumulative video metrics are 'partial' snapshots; profile metrics that
+    // are null become 'unavailable'; non-null profile snapshots are 'partial'
+    // because they are point-in-time, not period-truth.
+    const availability = fact.value !== null ? 'partial' : 'unavailable'
+
     const { error } = await sb.rpc('upsert_platform_metric_fact_preserving_verified', {
       p_client_id: body.clientId,
+      p_asset_id: null,
       p_platform: 'tiktok',
+      p_period_month: periodMonth,
+      p_period_start: periodStart,
+      p_period_end: periodEnd,
       p_metric_key: fact.metricKey,
       p_source_metric: fact.sourceMetric,
-      p_period_month: periodMonth,
       p_value: fact.value,
-      // Use 'partial' for video metrics (cumulative snapshots, not period truth)
-      // Use 'unavailable' only when value is truly null
-      p_availability: fact.value !== null
-        ? (fact.aggregation === 'snapshot' && fact.metricKey !== 'current_followers' ? 'partial' : 'partial')
-        : 'unavailable',
-      p_sync_run_id: syncRunId,
+      p_availability: availability,
+      p_includes_paid: 'unknown',
       p_aggregation: fact.aggregation,
-      p_cross_platform_additive: fact.crossPlatform,
+      p_comparable_group: fact.comparableGroup,
+      p_api_version: 'v2',
+      p_connector_version: TIKTOK_CONNECTOR_VERSION,
+      p_source_timezone: null,
+      p_provenance: { source: 'tiktok_display_api', sync_date: new Date().toISOString() },
+      p_sync_run_id: syncRunId,
+      p_verified_at: new Date().toISOString(),
     })
 
     if (error) {

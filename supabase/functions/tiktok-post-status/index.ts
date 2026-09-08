@@ -14,6 +14,10 @@ import { getTiktokAccessToken, getTiktokPublishStatus } from '../_shared/tiktok.
 //
 // Public post ID: TikTok returns publicaly_available_post_id[] (note the typo is TikTok's)
 // Only available for recent publishes; for older ones, fall back to /v2/video/list/ lookup.
+//
+// Authorization: admin | manager role required (same as other TikTok provider functions).
+// Client isolation: receipt → connection → client ownership resolved server-side;
+// caller-supplied identifiers are never trusted for authorization decisions.
 // ──────────────────────────────────────────────────────────────────────────
 
 interface StatusBody {
@@ -45,6 +49,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
   }
 
+  // Require admin | manager role (same boundary as tiktok-sync, tiktok-post-init, tiktok-connection-status)
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
+  }
+
   let body: StatusBody
   try {
     body = await req.json()
@@ -56,7 +66,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'publishId is required.' }, 400)
   }
 
-  // Find connection from the publish receipt
+  // Server-side receipt resolution — no caller-supplied client/account identifiers
   const { data: receipt } = await sb
     .from('tiktok_publish_receipts')
     .select('connection_id, client_id')

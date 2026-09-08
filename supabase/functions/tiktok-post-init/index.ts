@@ -16,11 +16,12 @@ import {
 //   - Requires content_guideline_id + monthly_deliverable_id
 //   - The monthly_deliverable must exist and belong to the specified clientId
 //   - The content_guideline must exist and belong to the same client
-//   - Approval is required (approval_status must be 'approved')
 //   - No real external publish occurs without explicit CA-approved content item
 //
-// This function does NOT perform the actual publish — it only creates the
-// receipt with approval_status='pending'. A separate approval step is required.
+// APPROVAL IDENTITY:
+//   approvedBy is derived from the authenticated JWT (user.id), NEVER from the
+//   request body. A caller cannot forge the approval identity. The role check
+//   (admin | manager) runs before any content validation.
 //
 // POST body: {
 //   clientId: string,
@@ -34,7 +35,6 @@ import {
 //   disableComment?: boolean,
 //   brandContentToggle?: boolean,
 //   brandOrganicToggle?: boolean,
-//   approvedBy: string,  // user ID of the approver
 // }
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -50,7 +50,6 @@ interface PostInitBody {
   disableComment?: boolean
   brandContentToggle?: boolean
   brandOrganicToggle?: boolean
-  approvedBy: string
 }
 
 Deno.serve(async (req) => {
@@ -91,11 +90,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400)
   }
 
-  // Validate required fields
-  if (!body.clientId || !body.videoUrl || !body.contentGuidelineId || !body.monthlyDeliverableId || !body.approvedBy) {
+  // Validate required fields (approvedBy is NOT in the body — derived from JWT below)
+  if (!body.clientId || !body.videoUrl || !body.contentGuidelineId || !body.monthlyDeliverableId) {
     return jsonResponse({
       ok: false,
-      error: 'clientId, videoUrl, contentGuidelineId, monthlyDeliverableId, and approvedBy are required.',
+      error: 'clientId, videoUrl, contentGuidelineId, and monthlyDeliverableId are required.',
     }, 400)
   }
 
@@ -212,6 +211,7 @@ Deno.serve(async (req) => {
 
   // Store publish receipt with canonical content linkage
   // approval_status starts as 'pending' — no real external publish without approval
+  // approved_by is the authenticated actor from JWT — NOT caller-supplied
   const { error: receiptError } = await sb
     .from('tiktok_publish_receipts')
     .insert({
@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
       content_guideline_id: body.contentGuidelineId,
       monthly_deliverable_id: body.monthlyDeliverableId,
       approval_status: 'approved',
-      approved_by: body.approvedBy,
+      approved_by: user.id,
       approved_at: new Date().toISOString(),
     })
 

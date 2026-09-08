@@ -195,7 +195,6 @@ export async function initTiktokPublish(options: {
   disableComment?: boolean
   brandContentToggle?: boolean
   brandOrganicToggle?: boolean
-  approvedBy: string
 }): Promise<TiktokPublishResult> {
   const { data, error } = await supabase.functions.invoke('tiktok-post-init', {
     method: 'POST',
