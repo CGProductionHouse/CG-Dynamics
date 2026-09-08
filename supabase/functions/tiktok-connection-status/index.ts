@@ -2,13 +2,16 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveTiktokConnectionForClient } from '../_shared/tiktok.ts'
 
-const REQUIRED_SCOPES = [
+const READ_SCOPES = [
   'user.info.basic',
   'user.info.profile',
   'user.info.stats',
   'video.list',
-  'video.publish',
 ]
+
+const REQUIRED_SCOPES = Deno.env.get('TIKTOK_PUBLISHING_ENABLED') === 'true'
+  ? [...READ_SCOPES, 'video.publish']
+  : READ_SCOPES
 
 interface StatusBody {
   clientId?: string

@@ -968,10 +968,12 @@ describe('Contract: TikTok metric comparability flags', () => {
 
 // ── 21. Provider rollout contract ───────────────────────────────────────
 describe('TikTok provider rollout contract', () => {
-  it('requests only scopes used by the implemented read and Direct Post paths', () => {
+  it('keeps read-only OAuth independent from the gated Direct Post scope', () => {
     for (const source of [OAUTH_START_SOURCE, OAUTH_CALLBACK_SOURCE, CONNECTION_STATUS_SOURCE]) {
       expect(source).toContain("'video.publish'")
       expect(source).not.toContain("'video.upload'")
+      expect(source).toContain("Deno.env.get('TIKTOK_PUBLISHING_ENABLED') === 'true'")
+      expect(source).toContain("? [...READ_SCOPES, 'video.publish']")
     }
   })
 

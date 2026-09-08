@@ -2,13 +2,16 @@ import { corsHeaders } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveTiktokConfig, tiktokFetch, getTiktokUserInfo, redact } from '../_shared/tiktok.ts'
 
-const REQUESTED_SCOPES = [
+const READ_SCOPES = [
   'user.info.basic',
   'user.info.profile',
   'user.info.stats',
   'video.list',
-  'video.publish',
 ]
+
+const REQUESTED_SCOPES = Deno.env.get('TIKTOK_PUBLISHING_ENABLED') === 'true'
+  ? [...READ_SCOPES, 'video.publish']
+  : READ_SCOPES
 
 function redirect(to: string): Response {
   return new Response(null, {

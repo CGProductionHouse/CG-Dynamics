@@ -2,13 +2,16 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveTiktokConfig } from '../_shared/tiktok.ts'
 
-const SCOPES = [
+const READ_SCOPES = [
   'user.info.basic',
   'user.info.profile',
   'user.info.stats',
   'video.list',
-  'video.publish',
 ]
+
+const SCOPES = Deno.env.get('TIKTOK_PUBLISHING_ENABLED') === 'true'
+  ? [...READ_SCOPES, 'video.publish']
+  : READ_SCOPES
 
 function base64Url(bytes: Uint8Array): string {
   const raw = btoa(String.fromCharCode(...bytes))

@@ -222,7 +222,7 @@ export default function TikTokIntegrationPage() {
                 <ul className="mt-2 space-y-1.5 text-sm text-brand-primary">
                   <li>Register an app on TikTok for Developers and add the Content Posting API product.</li>
                   <li>Enable Login Kit and configure a redirect URI for your Supabase Edge Function callback.</li>
-                  <li>Request scopes: user.info.basic, user.info.profile, user.info.stats, video.list, and video.publish.</li>
+                  <li>Read-only rollout requests user.info.basic, user.info.profile, user.info.stats, and video.list. video.publish is added only when publishing is explicitly enabled.</li>
                   <li>Pass TikTok&apos;s app audit before content can be posted publicly.</li>
                 </ul>
               </div>
