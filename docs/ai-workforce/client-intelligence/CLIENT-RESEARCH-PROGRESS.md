@@ -20,7 +20,7 @@ Each completed pack should cover exact services, audiences, buying journeys, com
 
 ## Progress
 
-1. **Action Sport / Bloem Action Sports** — completed. `ACTION-SPORT-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` — `e8b2cd44d9788ac413039d21bd43e6ee0601bbaa`
+1. **Action Sport / Bloem Action Sports** — completed. Historical research foundation: `ACTION-SPORT-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` — `e8b2cd44d9788ac413039d21bd43e6ee0601bbaa`. Canonical client name is now **Bloem Action Sports**; permanent Project-migration record is `BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`.
 2. **Adnitor** — skipped by CA.
 3. **Agri-Secure** — completed. `AGRI-SECURE-FARM-ARMED-RESPONSE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` — `f68e1cdfdc7940999996b8a3a91df001e19c5004`
 4. **AV Event Life** — completed. `AV-EVENT-LIFE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md` — `da5557ad6b35bd010473f228ca8245f00a83942a`
@@ -66,6 +66,14 @@ Each completed pack should cover exact services, audiences, buying journeys, com
   - Engen, Sasol, Get Together and their named branches/partner entities remain distinct operational/content identities inside the Piek client intelligence; they were not collapsed into new/merged client IDs.
   - Current public facts, stale public-site data, Project PDFs and CA/CG corrections were reconciled under the freshness protocol.
   - File: `PIEK-GROUP-CLIENT-OPERATIONAL-INTELLIGENCE-2026-09.md`
+  - This out-of-sequence migration does **not** advance or alter the Issue #184 alphabetical research workflow. `Human Auto` remains its exact next client.
+
+- **Bloem Action Sports** — completed 2026-09-08 as an explicitly authorised Project-to-Dynamics knowledge migration on child branch `client-migration-bloem-action-sports-2026-09-08`, based on `client-directory-reconciliation-2026-09-08`.
+  - Canonical CG client is `Bloem Action Sports`; historical `Action Sport` / `Bloem Action Sport` variants remain matching/history context only.
+  - Accessible Project chats and the Project business-information source were reconciled with the older August research pack and current official website/league sources.
+  - Human copy rules now explicitly preserve sport-specific, short, relatable court language and reject generic AI/corporate sports filler.
+  - Current public contact/address/service truth is separated from CG's standing Stella marketing-contact convention, with hours and Action Soccer explicitly freshness-gated where sources conflict.
+  - File: `BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`
   - This out-of-sequence migration does **not** advance or alter the Issue #184 alphabetical research workflow. `Human Auto` remains its exact next client.
 
 ## System rule added during this sequence
