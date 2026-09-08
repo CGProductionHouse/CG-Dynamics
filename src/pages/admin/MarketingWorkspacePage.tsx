@@ -33,6 +33,13 @@ import {
 } from '../../lib/marketing-library/knowledgeFilters'
 import { REGISTRATION_MANIFEST, classifyRegistrations } from '../../lib/marketing-library/sourceRegistry'
 import type { IndustryTag, KnowledgeLayer, SkillCardStatus, SourceType } from '../../types/skillCards'
+import {
+  listClientGuides,
+  downloadClientGuide,
+  copyProjectInstructions,
+  type ClientGuide,
+} from '../../lib/clientGuides'
+import { listClients, type Client } from '../../lib/db/clients'
 
 // ── Marketing / Knowledge workspace (#183/#184) ──────────────────────────────
 //
@@ -46,7 +53,7 @@ import type { IndustryTag, KnowledgeLayer, SkillCardStatus, SourceType } from '.
 const INPUT_CLS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
 const today = () => new Date().toISOString().slice(0, 10)
 
-type Section = 'library' | 'sources' | 'review' | 'registration' | 'ai'
+type Section = 'library' | 'sources' | 'review' | 'registration' | 'ai' | 'client-guides'
 
 function trustTone(tier: SourceTrustTier): 'teal' | 'amber' | 'neutral' {
   if (tier === 'tier_1_primary' || tier === 'tier_2_trusted_professional') return 'teal'
@@ -306,6 +313,98 @@ function RegistrationSection() {
   )
 }
 
+// ── Client Guides (derived/exportable documents) ────────────────────────────
+
+function ClientGuidesSection() {
+  const [guides, setGuides] = useState<ClientGuide[]>([])
+  const [clients, setClients] = useState<Client[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      const [guideResult, clientResult] = await Promise.all([listClientGuides(), listClients('active')])
+      if (cancelled) return
+      setGuides(guideResult.data)
+      setClients(clientResult.data ?? [])
+      setError(guideResult.error?.message ?? clientResult.error?.message ?? null)
+      setLoading(false)
+    }
+    void load()
+    return () => { cancelled = true }
+  }, [])
+
+  function clientName(clientId: string): string {
+    return clients.find(c => c.id === clientId)?.name ?? clientId
+  }
+
+  async function handleCopy(guide: ClientGuide) {
+    const ok = await copyProjectInstructions(guide.project_instructions)
+    if (ok) {
+      setCopiedId(guide.id)
+      setTimeout(() => setCopiedId(null), 2000)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-white/50">
+        Derived Client Guide documents — one per client. Generated from canonical Dynamics intelligence,
+        not manually maintained. The <span className="font-bold text-white/70">CG Dynamics record is the source of truth</span>;
+        these guides are exportable working artifacts for ChatGPT Projects and staff handoff.
+      </p>
+
+      {loading ? <LoadingState message="Loading client guides…" />
+        : error ? <EmptyState title="Could not load client guides" message={error} />
+        : guides.length === 0 ? (
+        <EmptyState
+          title="No client guides yet"
+          message="Client guides are generated from the canonical intelligence packs after the client intelligence integration migration is applied."
+        />
+      ) : (
+        <ul className="space-y-3">
+          {guides.map(guide => (
+            <li key={guide.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-black text-white">{clientName(guide.client_id)}</h3>
+                  <p className="mt-0.5 text-xs text-white/45">
+                    Version {guide.version} · Generated {new Date(guide.generated_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {guide.source_pack_path && <> · Source: {guide.source_pack_path.split('/').pop()}</>}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <ActionButton size="sm" variant="secondary" onClick={() => downloadClientGuide(guide, clientName(guide.client_id))}>
+                    Download .md
+                  </ActionButton>
+                  <ActionButton size="sm" variant={copiedId === guide.id ? 'primary' : 'secondary'} onClick={() => void handleCopy(guide)}>
+                    {copiedId === guide.id ? 'Copied!' : 'Copy Project Instructions'}
+                  </ActionButton>
+                </div>
+              </div>
+              {guide.project_instructions && (
+                <details className="mt-3 group">
+                  <summary className="cursor-pointer text-xs font-bold text-white/50 hover:text-white/70">Preview Project Instructions</summary>
+                  <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-white/70 whitespace-pre-wrap">{guide.project_instructions}</pre>
+                </details>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="text-[11px] text-white/35">
+        CG Dynamics is the permanent source of truth. When durable client information changes,
+        update Dynamics first and then regenerate the guide. The guide is a derived/export working artifact,
+        not an independent manually maintained truth store.
+      </p>
+    </div>
+  )
+}
+
 function AiSection() {
   return (
     <div className="space-y-3">
@@ -324,7 +423,7 @@ export default function MarketingWorkspacePage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const tabs = useMemo(() => {
-    const list: Array<{ key: Section; label: string }> = [{ key: 'library', label: 'Library' }]
+    const list: Array<{ key: Section; label: string }> = [{ key: 'library', label: 'Library' }, { key: 'client-guides', label: 'Client Guides' }]
     if (isManager) list.push({ key: 'ai', label: 'AI' })
     if (isAdmin) list.push({ key: 'review', label: 'Review' }, { key: 'sources', label: 'Sources' }, { key: 'registration', label: 'Registration' })
     return list
@@ -354,6 +453,7 @@ export default function MarketingWorkspacePage() {
       </div>
 
       {section === 'library' && <LibrarySection isAdmin={isAdmin} />}
+      {section === 'client-guides' && <ClientGuidesSection />}
       {section === 'ai' && isManager && <AiSection />}
       {section === 'review' && isAdmin && <ReviewSection />}
       {section === 'sources' && isAdmin && <SourcesSection />}
