@@ -1,1008 +1,590 @@
 # Case Bloemfontein — Client Marketing Intelligence
 
-Last updated: 2026-08-06
-Status: Current-source client intelligence. Keep isolated to Case Bloemfontein and Case Ladybrand. Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
-
-## Why this pack exists
+Last updated: 2026-09-08 SAST  
+Canonical client: **Case Bloemfontein**  
+CG Dynamics client ID: `079df21e-783a-4648-b3fa-0acae6e68867`  
+Status: Current-source exact-client intelligence. Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
 
-Case Bloemfontein is a high-value machinery dealership where one sale can materially outperform months of ordinary social engagement. Marketing therefore cannot be judged primarily through follower growth, likes or generic reach.
-
-The real commercial system must connect:
-
-- brand attention;
-- demo and sales enquiries;
-- quotations;
-- finance discussions;
-- trade-ins;
-- used-equipment movement;
-- genuine parts demand;
-- workshop and field-service bookings;
-- repeat farm relationships;
-- machine uptime;
-- after-sales retention.
+## Scope and isolation contract
 
-This pack is built from the current official dealership website, current Case IH South Africa product and finance material, current Husqvarna dealer information, current used-equipment listings and current regional competitor positioning.
-
-## Current verified identity
-
-### Trading footprint
-
-- Case Ladybrand was established on 1 July 2015 as a Case IH and CASE Construction dealership.
-- The business acquired the Case Bloemfontein dealership on 1 July 2018.
-- Both branches operate under one team.
-- The dealership supplies agriculture, construction, parts, technical support and Husqvarna outdoor power equipment.
+This record is for **Case Bloemfontein only**.
 
-### Current official product and service divisions
+Keep four evidence layers separate:
 
-1. **Case IH agricultural machinery**
-   - tractors;
-   - harvesters;
-   - planting and seeding;
-   - tillage;
-   - hay and forage;
-   - precision technology and related support where available through the national range.
-
-2. **CASE / CSE construction machinery**
-   - current website positioning confirms construction-equipment capability;
-   - exact stocked and actively supported models must be verified before individual campaigns.
-
-3. **Used equipment**
-   - used tractors;
-   - combines and harvesters;
-   - construction equipment;
-   - multi-brand stock, not only CASE/Case IH.
+1. **Case Bloemfontein local truth** — facts that are directly attributable to the Bloemfontein dealership and may ground ordinary client work when still fresh.
+2. **Shared business/dealer context** — facts the official dealership website states about the combined Bloemfontein/Ladybrand business. Use only when a task genuinely concerns that shared structure.
+3. **National/global CASE / Case IH / Husqvarna context** — manufacturer or national-range information that may support research but does not prove local stock, local eligibility, local dealer rights or local service capability.
+4. **Historical CG/ChatGPT work** — useful evidence for voice, recurring formats and visual rules; not automatic current business truth.
 
-4. **Parts and technical support**
-   - parts division;
-   - workshop support;
-   - technical advice;
-   - after-sales support.
+Never merge Ladybrand, another CASE dealer, Case IH South Africa, CASE Construction global material or Husqvarna national material into a Bloemfontein claim merely because the brands are related.
 
-5. **Husqvarna**
-   - chainsaws;
-   - brushcutters;
-   - blowers;
-   - generators;
-   - lawnmowers;
-   - garden tractors;
-   - robotic mowers;
-   - pressure washers;
-   - pumps;
-   - professional and homeowner outdoor power products;
-   - dedicated workshop and after-sales support at the Bloemfontein branch.
+## What the migration changed
 
-## Current official contact details
+The August 2026 intelligence already contained strong commercial thinking about uptime, parts, workshop support, used machinery, seasonal agriculture and Husqvarna. This migration keeps that useful strategy but corrects the grounding model:
 
-### Bloemfontein dealership
+- Bloemfontein is now the exact canonical client rather than a blended Bloemfontein/Ladybrand record;
+- Ladybrand is retained only as clearly labelled shared-business context;
+- national/global manufacturer material is explicitly non-local supporting evidence;
+- old stock, prices, finance offers and product examples are historical only;
+- durable Case-specific caption, event, image-edit and product-label lessons from Project work are now first-class operating rules;
+- generic machinery slogans are explicitly rejected under Issue #248/#272;
+- all mutable operational facts are freshness-gated.
 
-- Address: 2 Venter Avenue, Bainsvlei, Bloemfontein, Free State, 9301.
-- Main telephone: 051 924 0000, option 1.
-- Published marketing email: `marketing@casebloemfontein.co.za`.
-- The Husqvarna page also publishes `admin@casebloemfontein.co.za`; this channel difference must be reconciled before automation or campaign routing.
-- Business hours: Monday to Friday 07:30–17:00; Saturday 08:00–12:00.
+## Current verified local identity
 
-### Ladybrand dealership
+### Canonical public identity
 
-- Address: 28A Piet Retief Street, Ladybrand, Free State, 9745.
-- Main telephone: 051 924 0000, option 2.
-- Published marketing email: `marketing@caseladybrand.co.za`.
-- Business hours: Monday to Friday 07:30–17:00; Saturday 08:00–12:00.
+- Canonical client: **Case Bloemfontein**.
+- Official local website: `https://casebloemfontein.co.za/`.
+- Local dealership address: **2 Venter Avenue, Bainsvlei, Bloemfontein, Free State, 9301**.
+- Main telephone: **051 924 0000, option 1**.
+- Published marketing email: **marketing@casebloemfontein.co.za**.
+- Published business hours: **Monday–Friday 07:30–17:00; Saturday 08:00–12:00**.
 
-### Current published people
+Source state: `current_verified` from the official dealership website/contact page observed 2026-09-08. Recheck before publishing when the task depends on the details.
 
-The official contact page currently lists:
+### Current published Bloemfontein people
 
-- Charlene Badenhorst — Dealer Principle for Case Bloemfontein and Ladybrand;
-- Muller Joubert — Bloemfontein Sales Representative;
-- Jacques le Roux — Bloemfontein Sales Representative;
-- Wilco van der Spuy — Ladybrand Sales Representative.
+The official contact page observed 2026-09-08 lists:
 
-Names, roles and cellphone numbers are mutable and must be revalidated before public campaigns or automated lead routing.
+- **Muller Joubert** — Bloemfontein Sales Representative;
+- **Jacques le Roux** — Bloemfontein Sales Representative.
 
-## Current used-equipment sales reality
+The same page lists **Charlene Badenhorst** as Dealer Principle for Case Bloemfontein & Ladybrand. That is a shared-business role, not a reason to blend the two branch identities in ordinary Bloemfontein marketing.
 
-The current online shop carries a meaningful used-equipment inventory with visible prices. Examples observed on 2026-08-06 include:
+Names, titles and cellphone numbers are mutable. Revalidate before public campaigns, staff-led content or lead routing.
 
-- 2001 Case IH MX270 — R595,000;
-- 2001 Terex TA35 dump truck — R800,000;
-- 2010 Case IH Steiger 485 — R1,850,000;
-- 2013 Case IH 6088 Axial-Flow harvester — R2,600,000;
-- 2016 Case IH Magnum 310 — R2,300,000;
-- 2018 Case IH Farmall JX110 — R630,000;
-- 2018 Case IH JX95 — R380,000;
-- 2023 Case IH Maxxum 110 — R950,000;
-- other used brands, including Massey Ferguson and Challenger.
+## Current locally supported business scope
 
-Current prices and stock status can change immediately. Every used-unit advertisement must be generated from live inventory and include a last-verified timestamp.
+### 1. Case IH agriculture
 
-## Current Case IH national offer environment
+The official dealership website currently presents agriculture categories including:
 
-The current Case IH South Africa website is actively promoting finance and warranty offers, including examples such as:
-
-- delayed first repayments;
-- variable-rate finance linked below prime;
-- deposit structures;
-- implement finance;
-- cashflow protection positioning;
-- 3-year / 36-month / 1,200-hour Safeguard warranty messaging on qualifying harvest equipment.
-
-These are national promotions, not automatically dealership-specific commitments. Case Bloemfontein marketing must verify availability, qualifying models, dates, deposits, VAT treatment, terms and finance-provider approval before publishing.
-
-## Core commercial diagnosis
-
-## 1. The dealership should market uptime, not only machines
-
-Farmers and contractors do not buy only horsepower, paint or specifications. They buy:
-
-- work completed before weather closes the window;
-- confidence that parts will be available;
-- technical support when a machine stops;
-- lower operational disruption;
-- harvest and planting readiness;
-- dealer accountability;
-- trade-in and resale confidence;
-- financing that matches cashflow;
-- an ongoing relationship.
-
-The central commercial position should therefore be:
-
-> Case Bloemfontein and Ladybrand keep agricultural and construction operations moving through machinery, parts, technical support and accountable local service.
-
-This is stronger than generic machinery advertising because dealer support is often the deciding factor between brands with similar technical capability.
-
-## 2. Agriculture and Husqvarna need separate marketing systems
-
-The current website combines:
-
-- multimillion-rand agricultural machinery;
-- used equipment;
-- construction machinery;
-- parts and service;
-- consumer and professional Husqvarna products.
-
-These audiences have different purchase cycles, budgets and decision logic.
-
-A farmer evaluating a combine should not enter the same enquiry journey as a homeowner buying a chainsaw. CG Dynamics must treat them as separate commercial divisions with shared brand governance.
-
-## 3. The website has strong inventory but weak lead segmentation
-
-Current strengths:
-
-- broad product architecture;
-- visible used-equipment prices;
-- branch details;
-- named sales contacts;
-- current finance and product context through the broader Case IH ecosystem;
-- e-commerce structure;
-- Husqvarna catalogue access.
-
-Current risks and weaknesses:
-
-- a generic contact form does not distinguish sales, demo, finance, trade-in, parts, workshop, field service, used equipment, construction or Husqvarna;
-- product stock and prices may appear live after changing operationally;
-- “add to cart” language is not necessarily appropriate for high-value machinery requiring inspection, finance, trade-in and contracting;
-- national Case IH offers may be copied without local eligibility checks;
-- email addresses differ across pages;
-- the site does not strongly prove workshop response, field support, parts availability or customer outcomes;
-- agriculture, construction and Husqvarna can dilute one another if campaigns are not separated;
-- current social handles and platform performance were not proven in this research pass and must be connected through Meta and CG Dynamics.
-
-## Buyer groups and journeys
-
-## A. Commercial grain farmers
-
-Primary needs:
-
-- high-horsepower tractors;
-- combines and headers;
-- planting and seeding equipment;
-- tillage;
-- precision technology;
-- uptime during narrow seasonal windows;
-- finance and replacement planning;
-- trade-in value;
-- parts and field support.
-
-Best marketing proof:
-
-- real Free State farms;
-- operating-hour and output context where approved;
-- pre-season inspections;
-- field demonstrations;
-- parts readiness;
-- technician profiles;
-- customer stories about uptime and support;
-- machine-to-operation fit, not isolated specification lists.
-
-## B. Mixed, livestock and smaller-scale farmers
-
-Primary needs:
-
-- utility tractors;
-- hay and forage;
-- loading and general farm work;
-- manageable finance;
-- fuel and maintenance considerations;
-- practical attachments;
-- robust used equipment.
-
-Best marketing proof:
-
-- daily versatility;
-- real farm tasks;
-- ownership-cost clarity;
-- used-versus-new guidance;
-- attachment and implement compatibility;
-- service accessibility.
-
-## C. Agricultural contractors
-
-Primary needs:
-
-- equipment productivity;
-- predictable downtime;
-- machine utilisation;
-- finance aligned to revenue cycles;
-- operator comfort;
-- resale and replacement planning;
-- emergency support.
-
-## D. Construction and civil contractors
-
-Primary needs:
-
-- TLBs, loaders, excavators and related plant where stocked;
-- fast written quotations;
-- demos;
-- finance;
-- delivery and commissioning;
-- parts and service;
-- machine suitability for local conditions.
-
-Regional competitors increasingly promise same-day prices, demos, finance pre-approval and local servicing. Case Bloemfontein must match this clarity where operationally possible.
-
-## E. Used-equipment buyers
-
-Primary needs:
-
-- real condition evidence;
-- hours;
-- year and model;
-- service history;
-- tyre or undercarriage condition;
-- known faults;
-- inspection option;
-- VAT status;
-- finance availability;
-- trade-in path;
-- delivery.
-
-A single glamour image and price are insufficient for a high-risk used-equipment purchase.
-
-## F. Existing owners needing parts and service
-
-Primary needs:
-
-- correct parts identification;
-- urgency;
-- confidence that the enquiry reaches the right person;
-- service scheduling;
-- breakdown support boundaries;
-- workshop and field-service availability;
-- clear response expectations.
-
-This audience is commercially critical because after-sales retention protects future equipment replacement sales.
-
-## G. Husqvarna professional buyers
-
-Includes:
-
-- landscapers;
-- tree-felling teams;
-- farms;
-- grounds-maintenance contractors;
-- municipalities;
-- schools, estates and venues.
-
-Primary needs:
-
-- correct product for duty cycle;
-- repair support;
-- parts and consumables;
-- warranty clarity;
-- fleet and repeat-purchase relationships.
-
-## H. Husqvarna homeowners
-
-Primary needs:
-
-- approachable advice;
-- visible prices;
-- product demonstrations;
-- safe-use guidance;
-- service availability;
-- easy collection and repair booking.
-
-## Competitor landscape
-
-## 1. VKB Mechanisation
-
-Strengths:
-
-- deep agricultural relationships;
-- broad mechanisation footprint;
-- workshops and parts departments;
-- strong presence in the eastern Free State and neighbouring regions;
-- agricultural events such as the Bieliemieliefees;
-- multi-brand and used-equipment visibility.
-
-Case Bloemfontein response:
-
-- emphasise local accountability in Bloemfontein and Ladybrand;
-- prove parts and workshop service;
-- use field days and customer evidence;
-- build CRM around replacement cycles and seasonal readiness.
-
-## 2. N1 Tractors
-
-Strengths:
-
-- Bloemfontein location;
-- “one-stop agricultural shop” positioning;
-- Landini agency;
-- multi-brand parts capability;
-- practical accessibility for older and mixed fleets.
-
-Case Bloemfontein response:
-
-- compete through authorised Case IH expertise;
-- genuine parts and diagnostics;
-- full-machine lifecycle support;
-- finance, trade-ins and new/used choice.
-
-## 3. Executive Tractor Hub and independent used dealers
-
-Strengths:
-
-- multi-brand used machinery;
-- buyer flexibility;
-- value positioning;
-- direct availability.
-
-Case Bloemfontein response:
-
-- superior inspection transparency;
-- service and parts relationship;
-- trade-in support;
-- finance where available;
-- stronger proof and follow-through.
-
-## 4. Bestbier SA and local implement manufacturers
-
-Strengths:
-
-- local manufacturing identity;
-- field-relevant equipment;
-- regional relationships;
-- custom or practical solutions.
-
-Case Bloemfontein response:
-
-- partner where appropriate rather than compete unnecessarily;
-- bundle tractor and implement solutions;
-- show compatibility and whole-operation thinking.
-
-## 5. MCM Bloemfontein
-
-Strengths:
-
-- broad construction and industrial equipment range;
-- clear same-day quote and finance language;
-- demos;
-- local commissioning and service;
-- nationwide delivery.
-
-Case Bloemfontein response:
-
-- sharpen construction-equipment product pages;
-- show stock, demo and service proof;
-- clarify response time and finance pathways;
-- use project-specific lead forms.
-
-## 6. BHBW, Massey Ferguson, Fendt, John Deere, New Holland and Valtra networks
-
-These competitors benefit from strong global brands, financing, parts networks and long-standing farmer preference.
-
-Case Bloemfontein cannot win through logo repetition alone. It must prove:
-
-- the quality of the local team;
-- response and support;
-- appropriate machine fit;
-- ownership economics;
-- field performance;
-- relationship continuity.
-
-## Recommended positioning architecture
-
-### Master dealership promise
-
-> Local people. Proven machinery. Support that keeps the work moving.
-
-### Agriculture
-
-> Machinery, parts and support built around the Free State production season.
-
-### Used equipment
-
-> Inspected machinery, clear information and a dealership relationship after the sale.
-
-### Parts and service
-
-> The support behind every working hour.
-
-### Husqvarna
-
-> Professional and home-use equipment backed by a local workshop.
-
-### Construction
-
-> Productive equipment with local sales, parts and technical support.
-
-## Marketing systems
-
-## System 1: Seasonal agriculture command calendar
-
-Marketing must follow the farming year rather than a generic monthly posting rhythm.
-
-Build campaigns around:
-
-- pre-planting readiness;
+- tractors;
+- harvesters;
 - planting and seeding;
-- spraying and in-season support;
-- hay and forage windows;
-- pre-harvest inspections;
-- harvest readiness;
-- post-harvest service;
-- replacement and finance planning;
-- annual field days and agricultural shows.
-
-Each seasonal campaign should combine:
-
-- machine category;
-- parts readiness;
-- service booking;
-- finance or trade-in where verified;
-- real customer proof;
-- clear regional timing.
-
-## System 2: Used-equipment sales engine
-
-Every used unit should have a structured data card:
-
-- make and model;
-- year;
-- hours;
-- engine power;
-- drive and transmission;
-- tyre or undercarriage condition;
-- included implements or headers;
-- service-history status;
-- known repairs or faults;
-- VAT status;
-- price;
-- branch location;
-- demo or inspection availability;
-- finance subject to approval;
-- trade-ins considered or not;
-- last verified date;
-- named salesperson.
-
-Required content:
-
-- full walkaround video;
-- cold start where appropriate;
-- cab and controls;
-- tyres/undercarriage;
-- wear points;
-- honest imperfections;
-- field operation where possible;
-- technician comment where approved.
-
-Campaign measurement:
-
-- qualified enquiries per unit;
-- inspection bookings;
-- finance enquiries;
-- days in stock;
-- price changes;
-- lead source;
-- sale value and margin.
-
-## System 3: Uptime and after-sales authority
-
-Content should prove the invisible value behind the dealership:
-
-- technicians and qualifications;
-- workshop capability;
-- genuine parts;
-- pre-season checks;
-- field support;
-- diagnostic equipment;
-- common maintenance education;
-- turnaround examples without false promises;
-- customer service stories;
-- parts-order preparation.
-
-Do not publish customer breakdown details without consent.
-
-## System 4: Demonstration and field-day engine
-
-High-value machinery needs physical proof.
-
-Build a repeatable demo system:
-
-1. select product and target operation;
-2. identify local host farm or demonstration site;
-3. invite qualified prospects through CRM;
-4. capture registrations and machine interest;
-5. film performance and operator feedback;
-6. assign every attendee to a salesperson;
-7. follow up with quotation, finance and trade-in pathways;
-8. report opportunities and sales, not event attendance only.
-
-## System 5: Farmer relationship and CRM engine
-
-Customer memory should include:
-
-- farm and decision makers;
-- region;
-- crop and livestock mix;
-- current fleet;
-- machine hours where volunteered;
-- replacement cycle;
-- preferred brands;
-- service history;
-- parts demand;
-- finance timing;
-- trade-in interest;
-- seasonal needs;
-- communication preference;
-- last meaningful contact.
-
-Sensitive commercial information must remain permission-controlled and client-isolated.
-
-## System 6: Husqvarna retail and workshop engine
-
-Separate the Husqvarna content and funnel from agriculture.
-
-Campaign categories:
-
-- chainsaw season and forestry/farm use;
-- garden and grounds maintenance;
-- generator and pump needs;
-- professional landscaping;
-- product demonstrations;
-- servicing and repairs;
-- accessories and consumables;
-- homeowner education;
-- robotic mower awareness where locally relevant.
-
-Husqvarna conversion actions:
-
-- check stock and price;
-- compare models;
-- book workshop assessment;
-- request professional-equipment quote;
-- visit the Bloemfontein branch.
-
-## Website and conversion recommendations
-
-## Immediate fixes
-
-1. Reconcile official email addresses across pages.
-2. Replace generic contact-form company choices with exact enquiry types.
-3. Separate:
-   - new agriculture sales;
-   - used equipment;
-   - construction equipment;
-   - parts;
-   - workshop/service;
-   - field support;
-   - finance;
-   - trade-ins;
-   - Husqvarna sales;
-   - Husqvarna repairs.
-4. Replace inappropriate “add to cart” emphasis on major machinery with:
-   - request details;
-   - book inspection;
-   - request quote;
-   - discuss finance;
-   - submit trade-in.
-5. Add last-verified timestamps to used inventory.
-6. Remove sold units promptly or clearly mark them sold.
-7. Add branch and salesperson ownership to every lead.
-8. Add privacy consent and data-retention clarity.
-9. Add current response expectations without making unsupported guarantees.
-10. Add service and parts proof, not only sales products.
-
-## Recommended landing pages
-
-- Case IH tractors in Bloemfontein and Ladybrand;
-- harvesters and harvest support;
-- planting and seeding equipment;
+- tillage;
 - hay and forage;
-- used tractors and farm equipment;
-- used construction equipment;
-- parts and service;
-- pre-season inspection booking;
-- finance and trade-ins;
-- Husqvarna Bloemfontein;
-- Husqvarna workshop and repairs;
-- construction-equipment sales and support.
+- application equipment;
+- precision technology.
 
-## Content strategy
+This confirms the dealership's agriculture marketing scope. It does **not** prove that every national Case IH model, option or specification is locally stocked, currently available or demo-ready.
 
-## Content pillar 1: Real machine, real operation
+### 2. Construction equipment
 
-Show machinery working in real Free State conditions.
+The official dealership website currently presents a construction-equipment range and describes the combined business as offering CSE Construction machinery.
 
-Capture:
+Treat the following as task-time verification items:
 
-- task;
-- crop or operation;
-- terrain;
-- implement;
-- operator perspective;
-- business outcome;
-- support context.
-
-Do not invent fuel, yield or productivity claims. Use measured customer-approved data only.
-
-## Content pillar 2: Uptime behind the machine
-
-- workshop preparation;
-- parts picking;
-- technician stories;
-- seasonal checks;
-- service tips;
-- genuine-parts education;
-- field-support stories.
-
-## Content pillar 3: Used unit of the week
-
-Every feature must be complete enough to qualify a serious buyer.
-
-## Content pillar 4: Finance and ownership planning
-
-Explain:
-
-- deposit;
-- repayment timing;
-- annual versus monthly structures;
-- trade-ins;
-- cashflow logic;
-- qualifying terms;
-- finance approval boundaries.
-
-All offers require current written verification before publication.
-
-## Content pillar 5: Farmer and contractor stories
-
-Focus on:
-
-- operation;
-- machine choice;
-- dealer relationship;
-- service experience;
-- honest ownership context.
-
-Avoid generic praise without commercial substance.
-
-## Content pillar 6: Product education
-
-- choosing tractor horsepower;
-- matching implements;
-- planter and tillage decisions;
-- harvester readiness;
-- used-equipment inspection basics;
-- genuine versus non-genuine parts;
-- maintenance timing;
-- precision-technology basics.
-
-## Content pillar 7: Husqvarna in real use
-
-- chainsaw comparisons;
-- brushcutter selection;
-- generator and pump use;
-- landscaping fleets;
-- workshop repair process;
-- homeowner demonstrations.
-
-## Paid media
-
-## Google Search
-
-Priority intent:
-
-- Case IH dealer Bloemfontein;
-- tractors for sale Free State;
-- used tractors Bloemfontein;
-- combine harvester for sale;
-- agricultural equipment Free State;
-- tractor parts Bloemfontein;
-- tractor service Bloemfontein;
-- construction equipment Bloemfontein;
-- Husqvarna dealer Bloemfontein;
-- chainsaw repairs Bloemfontein.
-
-Use separate landing pages and conversion actions.
-
-## Meta
-
-Best uses:
-
-- used-unit retargeting;
-- field-day and demo registrations;
-- seasonal service campaigns;
-- local farmer awareness;
-- Husqvarna product and workshop campaigns;
-- customer-proof content;
-- remarketing to site visitors and video viewers.
-
-Avoid treating broad reach as a sale.
-
-## YouTube
-
-Useful for:
-
-- full machinery walkarounds;
-- field demos;
-- maintenance education;
-- used-unit condition videos;
-- customer stories;
-- technician authority.
-
-## WhatsApp
-
-Use dedicated routed entry points for:
-
-- sales;
-- used stock;
-- parts;
-- workshop;
-- Husqvarna.
-
-Do not leave all enquiries in one unowned inbox.
-
-## Partnerships and activations
-
-Priority partners:
-
-- agricultural associations;
-- study groups;
-- co-ops;
-- agronomists;
-- finance partners;
-- insurers;
-- implement manufacturers;
-- auction companies;
-- grain and livestock events;
-- training providers;
-- contractors;
-- municipal and grounds-maintenance buyers for Husqvarna;
-- construction associations and civil contractors.
-
-Strong activation formats:
-
-- pre-season inspection days;
-- field demonstrations;
-- used-equipment open days;
-- operator training;
-- parts and maintenance clinics;
-- Husqvarna demo Saturdays;
-- trade-in assessment days;
-- customer harvest or planting stories.
-
-## Reputation system
-
-Request reviews separately for:
-
-- equipment purchase;
-- used-equipment purchase;
-- parts support;
-- workshop service;
-- field support;
-- Husqvarna sales;
-- Husqvarna repairs.
-
-Review prompts should focus on:
-
-- explanation;
-- communication;
-- service support;
-- parts assistance;
-- professionalism;
-- follow-through.
-
-Never ask customers to disclose confidential finance or farm-performance information publicly.
-
-## Performance measurement
-
-## Primary commercial metrics
-
-- qualified machinery enquiries;
-- demo bookings;
-- quotations issued;
-- quotation value;
-- finance applications initiated;
-- trade-in assessments;
-- used-unit inspections;
-- machines sold;
-- gross margin;
-- days in used stock;
-- parts enquiries and sales;
-- workshop bookings;
-- repeat service customers;
-- Husqvarna enquiries and sales;
-- source of every lead and sale.
-
-## Marketing metrics
-
-- cost per qualified enquiry;
-- landing-page conversion;
-- WhatsApp and call starts;
-- video completion;
-- saved and shared technical content;
-- retargeting conversion;
-- lead-to-quote rate;
-- quote-to-sale rate;
-- revenue by campaign;
-- service bookings by campaign.
-
-## Executive reporting rule
-
-Do not report only:
-
-- followers;
-- reach;
-- likes;
-- impressions.
-
-Every monthly report should answer:
-
-1. Which content generated qualified interest?
-2. Which machines or divisions produced enquiries?
-3. Which leads received quotes?
-4. What was the quotation value?
-5. What converted to sales, parts or service work?
-6. What is stuck and why?
-7. Which used units are aging?
-8. Which seasonal opportunities are next?
-
-## 90-day implementation plan
-
-### Days 1–30: truth, routing and measurement
-
-- verify all people, contact details, emails and social handles;
-- audit current Meta pages and permissions;
-- connect Meta, website and lead data to CG Dynamics;
-- reconcile used inventory with the website;
-- define lead categories and ownership;
-- set CRM fields for farms, fleets and replacement cycles;
-- establish baseline enquiry, quote and sales figures;
-- fix contact forms and branch routing;
-- build used-unit data template;
-- capture workshop, technician and parts proof.
-
-### Days 31–60: launch commercial systems
-
-- launch seasonal agriculture campaign;
-- launch weekly used-equipment engine;
-- launch parts/service content;
-- launch separate Husqvarna campaign stream;
-- create first field demo or customer case study;
-- test Google Search for used, parts, service and Husqvarna;
-- implement retargeting;
-- start trade-in and finance lead capture;
-- request structured customer reviews.
-
-### Days 61–90: optimise and scale
-
-- compare lead quality and sales by division;
-- reduce spend on low-intent engagement;
-- expand high-performing search and retargeting;
-- improve slow-moving used-unit campaigns;
-- build replacement-cycle outreach;
-- create service-reminder workflow;
-- establish quarterly farmer and contractor activation calendar;
-- report revenue, quote value and pipeline from marketing.
-
-## AI and CG Dynamics use cases
-
-CG Dynamics should eventually support:
-
-- live used-inventory memory with freshness timestamps;
-- automatic sold/available discrepancy alerts;
-- Meta and website performance summaries;
-- lead routing by branch, division and salesperson;
-- seasonal campaign recommendations;
-- service reminder workflows;
-- parts and workshop enquiry triage;
-- customer/fleet relationship history;
-- finance-offer expiry controls;
-- quote follow-up reminders;
-- salesperson pipeline summaries;
-- content recommendations grounded in approved product and service facts.
-
-The AI must not:
-
-- invent availability;
-- invent prices;
-- guarantee finance;
-- diagnose mechanical faults without technician review;
-- make unsupported fuel, yield or productivity claims;
-- expose customer fleet or finance data;
-- promote sold equipment as available.
-
-## Current verification gaps
-
-Before production use, confirm:
-
-- current Facebook and Instagram handles;
-- current Meta Business and ad-account ownership;
-- branch-level page structure;
-- exact active construction brands and models;
-- current parts and field-service coverage;
-- emergency/breakdown support terms;
-- current workshop team and qualifications;
-- current stock and sold-status workflow;
-- finance partners and local eligibility;
-- trade-in policy;
+- exact active local construction brands;
+- exact current models;
+- local stock;
 - demo availability;
-- used-unit inspection and warranty terms;
-- exact lead response and routing process;
-- which national Case IH promotions are available locally;
-- current Husqvarna stock, pricing and repair terms.
+- local warranty/service terms;
+- delivery or commissioning claims.
 
-## Source register
+A manufacturer product page may explain a model; it does not prove Case Bloemfontein currently has or can supply that model.
 
-### Official dealership sources
+### 3. Used equipment
+
+The dealership website contains a used-equipment category and historically displayed multi-brand stock.
+
+Used stock is highly mutable. Never freeze an old unit, year, hours, price, location or availability into permanent memory. Every used-equipment post must be grounded in current inventory or directly supplied current evidence and should carry a last-verified date internally.
+
+### 4. Parts and technical support
+
+The official dealership website currently describes a parts division and technical/after-sales support.
+
+Good marketing angles include:
+
+- correct-part identification;
+- practical product knowledge;
+- seasonal preparation;
+- workshop process;
+- maintenance education;
+- staff expertise;
+- service support where exact boundaries are verified.
+
+Do not invent field-service coverage, emergency response, turnaround times, stock levels or technician qualifications.
+
+### 5. Husqvarna at Case Bloemfontein
+
+The official dealership website currently states that **Case Bloemfontein is an official supplier of Husqvarna products** and has a **dedicated Husqvarna workshop and after-sales service centre at the Bloemfontein branch**.
+
+The site currently presents categories such as chainsaws, brushcutters, blowers, generators, lawn mowers, garden tractors, robotic lawn mowers, pressure washers, power cutters and water pumps.
+
+These categories support content planning. Exact models, stock, prices, repairs, parts availability, warranties and promotions remain mutable.
+
+Historical Project work has included products such as **Husqvarna K 770** and **Husqvarna TS 222TDF**. Treat those model names as historical creative evidence unless the current task supplies fresh product evidence or current first-party stock confirms them.
+
+## Shared business context — not default Bloemfontein copy
+
+The official dealership site states that:
+
+- the Ladybrand dealership was established on 1 July 2015;
+- the Bloemfontein dealership was acquired on 1 July 2018;
+- both branches operate under one dedicated team.
+
+This may be used for dealership-history or shared-team content. It must not cause:
+
+- Ladybrand contact details to appear in a Bloemfontein caption by default;
+- Ladybrand stock to be described as Bloemfontein stock;
+- Ladybrand staff to be presented as Bloemfontein sales contacts without current evidence;
+- a combined branch claim when the creative/task is explicitly local to Bloemfontein.
+
+## National/global context — research only until localised
+
+Case IH South Africa, CASE Construction and Husqvarna manufacturer material can support:
+
+- model education;
+- terminology;
+- manufacturer-approved specification research;
+- national campaign awareness;
+- general technology/product context.
+
+It does **not** automatically establish:
+
+- local stock or demo status;
+- local finance eligibility;
+- local warranty eligibility;
+- local price;
+- local promotion dates;
+- local service coverage;
+- local dealer rights for every range;
+- exact locally fitted options or attachments.
+
+Historical national Case IH finance/warranty offers recorded in the August pack are now `historical` unless revalidated for the exact campaign and Case Bloemfontein.
+
+## Commercial position
+
+Case Bloemfontein should be marketed as a local machinery and support business whose value is visible in the work around the machine, not as a page that only posts product glamour shots.
+
+Strong proof includes:
+
+- the machine doing a recognisable job;
+- a farmer/operator/contractor explaining a real use case;
+- staff showing product or parts knowledge;
+- workshop or preparation process;
+- seasonal relevance;
+- an honest used-unit walkaround;
+- a specific Husqvarna application;
+- local event participation that feels like people actually being there.
+
+Avoid turning this into a permanent slogan. The positioning should come through in evidence and useful copy.
+
+## Audience logic
+
+### Commercial and mixed farmers
+
+Useful subjects:
+
+- machine-to-job fit;
+- seasonal readiness;
+- planting/harvest pressure;
+- operator experience;
+- implement compatibility when verified;
+- service and parts preparation;
+- replacement or trade-in decisions when current processes are confirmed.
+
+Treat farmers as experienced buyers. Explain why a feature matters in the job rather than simplifying the audience or dumping specifications.
+
+### Agricultural contractors
+
+Useful subjects:
+
+- utilisation;
+- downtime risk;
+- repeatable field work;
+- operator comfort;
+- service planning;
+- replacement decisions.
+
+Never manufacture productivity, fuel-saving or cost-per-hectare claims.
+
+### Construction/civil buyers
+
+Useful subjects:
+
+- exact application;
+- machine suitability;
+- operator view;
+- inspection/demo evidence where current;
+- parts/service pathway where verified.
+
+Current local model availability must be confirmed first.
+
+### Existing owners needing parts/service
+
+Useful subjects:
+
+- getting the correct part;
+- avoiding unnecessary delays through correct identification;
+- maintenance preparation;
+- workshop process;
+- knowledgeable local people.
+
+This is a strong recurring content lane because Project creative has already used the idea of tractor parts backed by product knowledge.
+
+### Husqvarna professional and homeowner buyers
+
+Keep this funnel distinct from high-value agricultural machinery.
+
+Useful professional contexts include farm, landscaping, grounds maintenance and construction applications where the specific product fits. Homeowner content can be more approachable, seasonal and garden-focused.
+
+## Human creative standard for Case Bloemfontein
+
+### Core voice
+
+Use a human, practical, specific voice. The work should sound like people who know machinery and know the local audience, not like a generic equipment catalogue.
+
+Prefer:
+
+- a real job or situation;
+- one clear useful point;
+- ordinary natural language;
+- local relevance when it is real;
+- product knowledge translated into a reason to care;
+- people, field work and workshop context.
+
+Avoid generic machinery filler such as:
+
+- `power your productivity`;
+- `built to perform`;
+- `your trusted partner`;
+- `tough jobs need tough machines`;
+- vague `innovation`, `performance` or `reliability` lines with no specific proof;
+- generic farming hero language that could belong to any dealership.
+
+Do not solve weak copy by stacking more adjectives.
+
+### Captions
+
+Durable Project lessons:
+
+- Keep captions relatively short and direct unless the content genuinely needs explanation.
+- The caption must add something to the poster/reel instead of repeating the text already visible.
+- For product content, add application, service context, a practical reason to consider the product or a clear next action.
+- For event/reel content, it is acceptable and often better to sound personal and participatory: `we`, `us`, what happened, who was met and why the team enjoyed being there.
+- Case's Lamb Champs work specifically benefited from a fun, personal tone rather than formal event-report language.
+- When the user asks for playful or creative copy, provide genuinely different options rather than near-duplicates.
+- Keep each sentence focused on one clear idea; avoid cramming lists of generic benefits into the prose.
+
+### Afrikaans and English
+
+Use the language requested by the task or the supplied creative.
+
+For Afrikaans:
+
+- use natural everyday Afrikaans;
+- farmer/event copy may be conversational and locally flavoured;
+- avoid stiff translations and formal wording that people would not normally say;
+- do not force Afrikaans agricultural slang when the people/creative do not support it.
+
+Historical Lamb Champs work used a natural `boer praat` angle around a real farmer/person. Preserve that human feeling when similar content is supplied; do not turn it into caricature.
+
+### Technical depth
+
+Technical detail is useful when it answers a buyer's real question.
+
+Good:
+
+- exact model name from the supplied/current source;
+- one or two verified features connected to the job;
+- why the attachment/tool/machine suits the shown application;
+- service/parts context where verified.
+
+Bad:
+
+- unsupported spec dumps;
+- copying a manufacturer brochure into a caption;
+- inventing local stock from a global product page;
+- stating performance, fuel, yield, warranty or finance outcomes without current evidence.
+
+### Calls to action and contact footer
+
+Choose the CTA to fit the content. Useful patterns include:
+
+- ask about the exact machine/product;
+- request current availability;
+- speak to the Bloemfontein team;
+- ask about parts/service;
+- visit the branch;
+- book/ask about a demo only when demo availability is verified.
+
+Current local contact block, when a full footer is useful:
+
+`2 Venter Avenue, Bainsvlei, Bloemfontein, Free State, 9301`  
+`051 924 0000 (Option 1)`  
+`marketing@casebloemfontein.co.za`
+
+Do not append Ladybrand details to a Bloemfontein post unless the task intentionally covers both branches.
+
+## Dynamic SEO and hashtag rule
+
+Default maximum: **5 hashtags**.
+
+Do not store a fixed Case hashtag bank as permanent truth. Choose tags at generation time from:
+
+- exact client/brand;
+- verified machine or Husqvarna product/service;
+- real application;
+- relevant platform/search phrasing;
+- relevant location or agriculture/construction category;
+- current reliable search/trend evidence when needed.
+
+Natural searchable wording in the caption is more important than stuffing hashtags.
+
+## Visual and image-edit operating rules
+
+These are unusually important for Case because real machinery identity is part of the value.
+
+### Preserve identity-critical details
+
+When editing a supplied machine/product image:
+
+- preserve the actual machine/product unless replacement is explicitly requested;
+- preserve exact model markings and logo wording;
+- preserve logo colours and placement;
+- preserve people unless removal/replacement is requested;
+- preserve attachments and implements unless specifically changed;
+- preserve realistic proportions and geometry;
+- preserve requested composition/crop elements that the user says must stay fixed.
+
+### Product-label legibility is non-negotiable
+
+Repeated Project corrections show that model/brand text must be crisp and readable.
+
+For example, historical **Husqvarna K 770** creative required the wording to read exactly `Husqvarna K 770`; decorative texture or pseudo-lettering was rejected. When a reference image is supplied to preserve markings, use it as identity evidence rather than approximating the label.
+
+Do not add grain, glare, dirt, perspective distortion or generative texture over branding if it makes the text wrong.
+
+### Change only what was requested
+
+Repeated Case image work required targeted edits such as:
+
+- make an image portrait;
+- zoom out to leave room for text;
+- remove one rear attachment/spray element;
+- keep text on the horizon in the same position;
+- add a person who appears to push a mower while leaving everything else unchanged;
+- increase flowers without redesigning the whole scene.
+
+Treat `do not change anything else` literally.
+
+### Real application and working context
+
+For generated product imagery:
+
+- show the product in a believable use environment;
+- keep the machine/model visually faithful;
+- make the operator interaction physically plausible;
+- leave useful negative space when the design needs text;
+- use portrait framing when requested for social layouts;
+- avoid random accessories or copy from a reference poster unless requested.
+
+Historical Case work preferred realistic action shots for equipment, and top-down seasonal garden context for a mower. The principle is real application, not one fixed visual style.
+
+## Recurring content lanes
+
+### 1. Machine in real application
+
+Show what the machine is doing and why that matters in the operation. Use the real task, field or contractor context. Do not invent output data.
+
+### 2. Parts and support knowledge
+
+Strong formats:
+
+- `what to check before...`;
+- part identification;
+- workshop preparation;
+- staff explaining a practical issue;
+- genuine-parts education where the exact claim is supportable.
+
+### 3. Seasonal agriculture
+
+Build around actual farming timing rather than generic monthly themes:
+
+- pre-planting preparation;
+- planting/seeding;
+- in-season application;
+- hay/forage;
+- pre-harvest checks;
+- harvest support;
+- post-season service.
+
+Weather, crop and timing claims should be current and locally relevant.
+
+### 4. Used-equipment proof
+
+A serious used-unit feature should use current evidence for:
+
+- model/year;
+- hours where supplied;
+- condition;
+- tyres/undercarriage;
+- included equipment;
+- known history/repairs where approved;
+- price/VAT/finance only when current;
+- branch location;
+- inspection/demo availability.
+
+Do not turn old August 2026 inventory examples into current posts.
+
+### 5. Husqvarna in real use
+
+Useful lanes include:
+
+- lawn/garden seasonal use;
+- chainsaw/power-cutter applications;
+- generator/pump needs;
+- grounds maintenance;
+- workshop/service process;
+- model comparison when current stock and specs are known.
+
+### 6. Local people and product knowledge
+
+Use sales staff, technicians or workshop people when their current roles and consent are confirmed. Let them explain one thing clearly rather than scripting generic corporate lines.
+
+### 7. Events and agricultural community
+
+Project evidence from Lamb Champs shows that Case event content should feel present and social. Capture:
+
+- who the team met;
+- a memorable moment;
+- a farmer/operator conversation;
+- product relevance if there was one;
+- genuine excitement about returning where appropriate.
+
+Do not make every event caption sound like a sponsor press release.
+
+### 8. Construction equipment
+
+Use only when the exact local product/service facts are current. Focus on application and buyer questions rather than generic `tough machine` language.
+
+## Commercial systems retained from the August intelligence
+
+### Seasonal agriculture calendar
+
+Keep campaign planning tied to real production windows and combine machinery, preparation, support and practical proof where each fact is verified.
+
+### Used-equipment sales engine
+
+Maintain structured current unit data and measure qualified enquiries, inspections, quote/finance activity and days in stock rather than reach alone.
+
+### Uptime/after-sales proof
+
+Build visibility for the people/process behind ownership. Avoid unsupported response-time promises or customer breakdown details without consent.
+
+### Demo/field-day engine
+
+High-value machinery benefits from physical proof. Treat events as a lead-to-follow-up system, not only event photos. Demo availability and host/customer claims must be current and approved.
+
+### Farmer/contractor relationship memory
+
+Replacement cycles, fleet/farm context and service history can improve marketing when captured through authorised CG Dynamics workflows. Keep sensitive commercial data permission-controlled and exact-client isolated.
+
+### Husqvarna retail/workshop stream
+
+Keep Husqvarna campaigns distinct enough that homeowner/professional-tool needs do not blur the high-value agriculture journey.
+
+## Performance lens
+
+Prioritise commercial outcomes such as:
+
+- qualified machinery/product enquiries;
+- parts/service enquiries;
+- inspection/demo enquiries;
+- quotations and quote value where Dynamics has approved data;
+- used-unit movement;
+- repeat service/parts activity;
+- Husqvarna sales/service leads;
+- attributable sales outcomes.
+
+Reach, likes and impressions are context, not the commercial finish line.
+
+## Freshness rules — recheck before use when relevant
+
+Always recheck mutable facts such as:
+
+- phone/email/address/hours;
+- local social handles;
+- staff names, titles and cellphone numbers;
+- exact local machine/product lines;
+- stock and sold status;
+- prices;
+- current used units;
+- exact Husqvarna models and stock;
+- construction models/brands;
+- parts/service/field-support coverage;
+- demo availability;
+- warranties;
+- finance/promotions;
+- trade-in terms;
+- service area;
+- dealer authorisation/rights;
+- product specs/options/attachments;
+- event dates and participation.
+
+If evidence conflicts, record the conflict and prefer the newest authoritative local source unless direct client/CG confirmation overrides it.
+
+## Current unresolved facts — never guess
+
+As of 2026-09-08, the following remain unresolved or insufficiently verified for permanent public use:
+
+- current official local Facebook/Instagram handles and page structure;
+- current Meta/ad-account ownership;
+- whether `admin@casebloemfontein.co.za` is a current public Husqvarna contact distinct from the main marketing email;
+- exact current local construction brand/model catalogue;
+- exact field-service and breakdown-support boundaries;
+- current workshop team and qualifications;
+- current used stock and sold-status workflow;
+- finance partners and exact local eligibility;
+- trade-in policy;
+- current demo availability;
+- used-unit warranty/inspection terms;
+- exact local eligibility for national Case IH or CASE offers;
+- current Husqvarna stock, model availability, pricing, warranty and repair terms;
+- current local availability of historical Project products such as Husqvarna K 770 and TS 222TDF.
+
+## Provenance register
+
+### Current first-party dealership evidence — `current_verified` where explicitly local
 
 - `https://casebloemfontein.co.za/`
 - `https://casebloemfontein.co.za/contact-us/`
-- `https://casebloemfontein.co.za/shop-2/`
-- `https://casebloemfontein.co.za/product-category/used/`
-- `https://casebloemfontein.co.za/husqvarna/`
 
-### Official brand sources
+Observed/rechecked: 2026-09-08.
+
+These sources support current local contact details, current site-level product/service categories, the official-supplier Husqvarna statement and the dedicated Bloemfontein Husqvarna workshop/after-sales statement. Inventory-level claims remain mutable.
+
+### Manufacturer/national supporting evidence — not local proof
 
 - `https://www.caseih.com/en-za/southafrica`
-- `https://www.caseih.com/en-za/southafrica/case-ih-world/contact/contact-us`
-- `https://www.husqvarna.com/za/dealer-locator/dealer/?id=b4f50701-0fde-4e80-b35b-58cd597b629f`
+- Husqvarna South Africa official material
+- CASE Construction manufacturer/product material
 
-### Competitor and market sources
+Use for model/spec/brand research only after exact task verification. Do not promote national/global claims into local capability automatically.
 
-- `https://verkope.vkb.co.za/`
-- `https://www.n1tractors.co.za/`
-- `https://www.executivetractorhub.co.za/`
-- `https://www.bestbiersa.co.za/`
-- `https://mcmco.co.za/bloemfontein/`
-- `https://bhbwbothaville.co.za/`
-- `https://www.masseyferguson.com/en_za/dealer-list.html`
+### Historical exact-client intelligence
 
-## Final strategic conclusion
+- Previous version of this file, researched 2026-08-06.
 
-Case Bloemfontein should not behave online like a page that merely posts red tractors.
+Retained for durable commercial strategy. August used-unit examples, finance/warranty examples and competitor snapshots are `historical` unless freshly verified.
 
-Its most defensible growth position is a regional operating partner that combines:
+### Accessible ChatGPT Project / CG creative evidence — `historical` for facts, `durable` for demonstrated workflow preferences
 
-- machinery;
-- used equipment;
-- parts;
-- workshop and technical support;
-- finance and trade-in pathways;
-- construction equipment;
-- Husqvarna retail and repairs;
-- real local people who remain accountable after the sale.
+Project evidence reviewed during the 2026-09-08 migration included:
 
-Marketing succeeds when it creates qualified conversations, quotations, demos, service bookings and long-term customer value—not when a machinery post merely receives attention.
+- Case Lamb Champs reel/caption work;
+- Spring Day/product text-on-post work;
+- tractor/product image edits with exact-branding requirements;
+- Husqvarna K 770 image-generation corrections;
+- mower top-down Spring visual work;
+- machinery action-shot and portrait/negative-space edits;
+- Case poster/grid work showing local address/phone and parts/product-knowledge creative.
+
+Use these for voice/visual lessons. Recheck any embedded product, event or contact fact before reusing it.
+
+## Bottom line
+
+Make Case Bloemfontein content feel like it comes from people close to the machine and the work. Show the application, explain the useful point and make the local next step clear. Keep Bloemfontein facts exact. Keep national/global manufacturer context and Ladybrand context in their own lanes. When a machine marking, stock claim or service fact is uncertain, verify it instead of making the creative look more certain than the evidence.
