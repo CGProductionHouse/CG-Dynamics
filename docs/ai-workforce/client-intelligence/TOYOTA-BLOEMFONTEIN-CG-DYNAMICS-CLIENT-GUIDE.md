@@ -213,8 +213,6 @@ Do not resolve these from memory:
 - current 2026 local award/accreditation claims;
 - all live stock, prices, finance and warranty/service-plan terms.
 
-The standard social/video caption footer phone is **resolved**: use `051 406 3172` unless a live brief explicitly supplies a different department-specific route.
-
 ## 16. Working rule
 
 Make the content human by being specific to the real Bloemfontein vehicle, person, process or customer need. Recheck mutable commercial facts. When this guide and an older Project Source conflict, this guide/current CG Dynamics record wins.
