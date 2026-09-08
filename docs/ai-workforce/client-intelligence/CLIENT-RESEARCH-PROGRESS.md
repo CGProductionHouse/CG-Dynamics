@@ -1,7 +1,7 @@
 # Client Marketing Intelligence — Progress Ledger
 
-Last updated: 2026-08-07
-Status: Canonical client-by-client research progress for Issue #184.
+Last updated: 2026-09-08
+Status: Canonical client-by-client research progress for Issue #184, plus separately authorised out-of-sequence final-architecture migrations.
 
 ## Workflow
 
@@ -67,6 +67,12 @@ Client memory freshness protocol:
 - Commit: `2d90705bcaddaa7c78ab8d3c6b27042bbee5c433`
 
 Agents must compare mutable stored facts with the newest authoritative client sources and update review-state memory when addresses, contacts, staff, services, hours, pricing, handles or positioning change.
+
+## Separately authorised out-of-sequence final-architecture migrations
+
+These migrations do **not** advance, restart or otherwise change the alphabetical Issue #184/#210 next-client sequence. They exist because separate client-migration issues explicitly authorised a full ChatGPT Project reconciliation into the final client-intelligence architecture.
+
+- **Toyota Bloemfontein** — completed out of sequence under Issue #244 on 2026-09-08. Canonical permanent record: `TOYOTA-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`. Derived Project guide: `TOYOTA-BLOEMFONTEIN-CG-DYNAMICS-CLIENT-GUIDE.md`. When the alphabetical sequence eventually reaches Toyota Bloemfontein, do not redo the client from scratch; review/refresh the canonical record for freshness instead.
 
 ## Exact next action
 
