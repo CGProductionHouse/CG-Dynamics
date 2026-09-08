@@ -8,7 +8,7 @@ const layout = read('../src/pages/admin/AdminLayout.tsx')
 
 test('non-current route pages are split out of the mobile startup bundle', () => {
   for (const page of ['CgHubPage', 'ClientPerformancePage', 'ClientsList', 'PublishedPreview', 'InternalOnboardingPage', 'ClientSetupPage']) {
-    assert.match(app, new RegExp(`const ${page} = lazy\\(\\(\\) => import\\(`), `${page} must be lazy loaded`)
+    assert.match(app, new RegExp(`const ${page} = lazyRoute\\(\\(\\) => import\\(`), `${page} must be deployment-safe lazy loaded`)
     assert.doesNotMatch(app, new RegExp(`import ${page} from`), `${page} must not be eagerly imported`)
   }
   assert.match(app, /<Suspense fallback=/)
