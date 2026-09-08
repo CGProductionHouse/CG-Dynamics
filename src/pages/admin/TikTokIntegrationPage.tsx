@@ -99,8 +99,12 @@ export default function TikTokIntegrationPage() {
   }
 
   async function handleConnect() {
+    if (!syncClientId) {
+      setError('Select a client first — TikTok connections are bound to a specific client.')
+      return
+    }
     await runAction('connect', async () => {
-      const result = await startTiktokOAuth()
+      const result = await startTiktokOAuth(syncClientId)
       if (!result.ok) throw new Error(result.error ?? 'Could not start TikTok OAuth.')
       if (result.url) window.location.href = result.url
       return undefined
@@ -116,9 +120,11 @@ export default function TikTokIntegrationPage() {
       const result = await syncTiktokAnalytics(syncClientId, syncMonth)
       setSyncResult(result)
       await load(true)
-      return result.ok
-        ? `TikTok sync completed. ${result.videosSynced} video${result.videosSynced === 1 ? '' : 's'} synced.`
-        : `Sync completed with issues. ${result.error ?? ''}`
+      if (!result.ok) {
+        return `Sync failed. ${(result.errors ?? []).join('; ') || result.error || ''}`
+      }
+      const healthNote = result.health === 'partial' ? ' (partial — see notes)' : ''
+      return `TikTok sync completed${healthNote}. ${result.videosSynced} video${result.videosSynced === 1 ? '' : 's'} synced for ${result.periodMonth}.`
     })
   }
 
@@ -211,7 +217,7 @@ export default function TikTokIntegrationPage() {
           <PremiumCardHeader
             eyebrow="Analytics"
             title="Sync TikTok metrics"
-            subtitle="Fetch video performance and profile metrics from TikTok's Display API for a selected month."
+            subtitle="Fetch cumulative video metrics and profile snapshots from TikTok's Display API. Video metrics are snapshots at sync time — not period totals."
           />
           <div className="grid gap-4 md:grid-cols-[220px_1fr_auto] md:items-end">
             <Field label="Month">
@@ -247,18 +253,26 @@ export default function TikTokIntegrationPage() {
           {syncResult && syncResult.ok && (
             <div className="mt-5 rounded-lg border border-white/8 bg-black/20 p-4" aria-live="polite">
               <h4 className="text-sm font-semibold text-white">Sync results — {syncResult.periodMonth}</h4>
+              {syncResult.health === 'partial' && (
+                <p className="mt-1 text-xs text-amber-300">
+                  Partial sync — some data may be incomplete. {syncResult.paginationComplete ? '' : 'Video list was truncated.'}
+                </p>
+              )}
               <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 <MetricCard label="Videos" value={syncResult.videosSynced} />
-                <MetricCard label="Views" value={syncResult.metrics.views} />
-                <MetricCard label="Likes" value={syncResult.metrics.likes} />
-                <MetricCard label="Comments" value={syncResult.metrics.comments} />
-                <MetricCard label="Shares" value={syncResult.metrics.shares} />
+                <MetricCard label="Views (cumulative)" value={syncResult.metrics.views} />
+                <MetricCard label="Likes (cumulative)" value={syncResult.metrics.likes} />
+                <MetricCard label="Comments (cumulative)" value={syncResult.metrics.comments} />
+                <MetricCard label="Shares (cumulative)" value={syncResult.metrics.shares} />
               </div>
               {syncResult.metrics.followers !== null && (
                 <p className="mt-3 text-xs text-brand-primary">
-                  Followers at sync time: {syncResult.metrics.followers.toLocaleString()}
+                  Followers at sync time: {syncResult.metrics.followers.toLocaleString()} (current snapshot, not period-specific)
                 </p>
               )}
+              <p className="mt-2 text-xs text-brand-primary">
+                Note: Video metrics are cumulative snapshots at sync time, not period totals. Re-syncing later will produce different numbers as videos accumulate engagement.
+              </p>
             </div>
           )}
         </PremiumCard>

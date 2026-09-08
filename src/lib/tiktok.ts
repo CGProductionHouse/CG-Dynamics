@@ -12,6 +12,7 @@ import { supabase } from './supabase'
 
 export interface TiktokConnection {
   id: string
+  clientId: string | null
   tiktokOpenId: string | null
   displayName: string | null
   avatarUrl: string | null
@@ -33,8 +34,10 @@ export interface TiktokConnectionStatus {
 
 export interface TiktokSyncResult {
   ok: boolean
+  health: 'verified' | 'partial' | 'sync_error'
   periodMonth: string
   videosSynced: number
+  paginationComplete: boolean
   metrics: {
     views: number
     likes: number
@@ -42,6 +45,7 @@ export interface TiktokSyncResult {
     shares: number
     followers: number | null
   }
+  errors?: string[]
   error?: string
 }
 
@@ -52,6 +56,7 @@ export interface TiktokPublishResult {
     privacyLevelOptions: string[]
     maxVideoDuration: number | null
   }
+  message?: string
   error?: string
 }
 
@@ -59,8 +64,9 @@ export interface TiktokPublishStatusResult {
   ok: boolean
   status: string
   tiktokStatus: string
-  videoId: string | null
+  publicPostIds: string[]
   failReason: string | null
+  uploadedBytes: number | null
   error?: string
 }
 
@@ -81,7 +87,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     key: 'views',
     label: 'Views',
     sourceMetric: 'view_count',
-    meaning: 'Total video plays including replays. TikTok native view_count.',
+    meaning: 'Cumulative video plays including replays. Snapshot at sync time — not a period total.',
     aggregation: 'sum',
     clientSafe: true,
     crossPlatformAdditive: true,
@@ -90,7 +96,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     key: 'likes',
     label: 'Likes',
     sourceMetric: 'like_count',
-    meaning: 'Total likes across videos in the period. TikTok native like_count.',
+    meaning: 'Cumulative likes on videos published in period. Snapshot at sync time.',
     aggregation: 'sum',
     clientSafe: true,
     crossPlatformAdditive: true,
@@ -99,7 +105,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     key: 'comments',
     label: 'Comments',
     sourceMetric: 'comment_count',
-    meaning: 'Total comments across videos in the period. TikTok native comment_count.',
+    meaning: 'Cumulative comments on videos published in period. Snapshot at sync time.',
     aggregation: 'sum',
     clientSafe: true,
     crossPlatformAdditive: true,
@@ -108,7 +114,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     key: 'shares',
     label: 'Shares',
     sourceMetric: 'share_count',
-    meaning: 'Total shares across videos in the period. TikTok native share_count.',
+    meaning: 'Cumulative shares of videos published in period. Snapshot at sync time.',
     aggregation: 'sum',
     clientSafe: true,
     crossPlatformAdditive: true,
@@ -117,7 +123,7 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
     key: 'current_followers',
     label: 'Current followers',
     sourceMetric: 'follower_count',
-    meaning: 'Follower count at time of sync. Point-in-time snapshot.',
+    meaning: 'Follower count at time of sync. Point-in-time snapshot — not attributable to any period.',
     aggregation: 'snapshot',
     clientSafe: true,
     crossPlatformAdditive: true,
@@ -153,8 +159,11 @@ export const TIKTOK_METRICS: TiktokMetricDefinition[] = [
 
 // ── Edge Function invocations ──────────────────────────────────────────────
 
-export async function startTiktokOAuth(): Promise<{ ok: boolean; url?: string; error?: string }> {
-  const { data, error } = await supabase.functions.invoke('tiktok-oauth-start', { method: 'POST' })
+export async function startTiktokOAuth(clientId: string): Promise<{ ok: boolean; url?: string; clientName?: string; error?: string }> {
+  const { data, error } = await supabase.functions.invoke('tiktok-oauth-start', {
+    method: 'POST',
+    body: { clientId },
+  })
   if (error) return { ok: false, error: error.message }
   return data
 }
@@ -170,12 +179,14 @@ export async function syncTiktokAnalytics(clientId: string, periodMonth?: string
     method: 'POST',
     body: { clientId, periodMonth },
   })
-  if (error) return { ok: false, periodMonth: periodMonth ?? '', videosSynced: 0, metrics: { views: 0, likes: 0, comments: 0, shares: 0, followers: null }, error: error.message }
+  if (error) return { ok: false, health: 'sync_error', periodMonth: periodMonth ?? '', videosSynced: 0, paginationComplete: false, metrics: { views: 0, likes: 0, comments: 0, shares: 0, followers: null }, error: error.message }
   return data
 }
 
 export async function initTiktokPublish(options: {
   clientId: string
+  contentGuidelineId: string
+  monthlyDeliverableId: string
   videoUrl: string
   title?: string
   privacyLevel?: string
@@ -184,6 +195,7 @@ export async function initTiktokPublish(options: {
   disableComment?: boolean
   brandContentToggle?: boolean
   brandOrganicToggle?: boolean
+  approvedBy: string
 }): Promise<TiktokPublishResult> {
   const { data, error } = await supabase.functions.invoke('tiktok-post-init', {
     method: 'POST',
@@ -198,6 +210,6 @@ export async function getTiktokPublishStatus(publishId: string): Promise<TiktokP
     method: 'POST',
     body: { publishId },
   })
-  if (error) return { ok: false, status: 'error', tiktokStatus: '', videoId: null, failReason: null, error: error.message }
+  if (error) return { ok: false, status: 'error', tiktokStatus: '', publicPostIds: [], failReason: null, uploadedBytes: null, error: error.message }
   return data
 }

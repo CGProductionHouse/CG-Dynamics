@@ -36,14 +36,15 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
   }
 
+  // Use canonical admin|manager role check for integration management
   const { data: profile } = await sb
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
   // Check schema readiness
@@ -56,7 +57,7 @@ Deno.serve(async (req) => {
   // Read latest connection
   const { data: connections } = await sb
     .from('tiktok_connections')
-    .select('id, tiktok_open_id, display_name, avatar_url, status, scopes, last_error, last_connected_at')
+    .select('id, client_id, tiktok_open_id, display_name, avatar_url, status, scopes, last_error, last_connected_at')
     .order('last_connected_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(1)
@@ -133,6 +134,7 @@ Deno.serve(async (req) => {
     schemaReady,
     connection: {
       id: latest.id,
+      clientId: latest.client_id,
       tiktokOpenId: latest.tiktok_open_id,
       displayName: latest.display_name,
       avatarUrl: latest.avatar_url,

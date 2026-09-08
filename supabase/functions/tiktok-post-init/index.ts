@@ -5,15 +5,27 @@ import {
   refreshTiktokToken,
   queryTiktokCreatorInfo,
   initTiktokDirectPost,
+  resolveTiktokConnectionForClient,
   type TiktokCreatorInfo,
 } from '../_shared/tiktok.ts'
 
 // ── TikTok Publish Init ────────────────────────────────────────────────────
-// Initializes a TikTok content publish (direct post or draft upload).
-// Requires video.publish scope for direct post, video.upload for draft.
+// Initializes a TikTok content publish via Content Posting API.
+//
+// PUBLISHING GATE:
+//   - Requires content_guideline_id + monthly_deliverable_id
+//   - The monthly_deliverable must exist and belong to the specified clientId
+//   - The content_guideline must exist and belong to the same client
+//   - Approval is required (approval_status must be 'approved')
+//   - No real external publish occurs without explicit CA-approved content item
+//
+// This function does NOT perform the actual publish — it only creates the
+// receipt with approval_status='pending'. A separate approval step is required.
 //
 // POST body: {
 //   clientId: string,
+//   contentGuidelineId: string,
+//   monthlyDeliverableId: string,
 //   videoUrl: string,
 //   title?: string,
 //   privacyLevel?: string,
@@ -22,11 +34,14 @@ import {
 //   disableComment?: boolean,
 //   brandContentToggle?: boolean,
 //   brandOrganicToggle?: boolean,
+//   approvedBy: string,  // user ID of the approver
 // }
 // ──────────────────────────────────────────────────────────────────────────
 
 interface PostInitBody {
   clientId: string
+  contentGuidelineId: string
+  monthlyDeliverableId: string
   videoUrl: string
   title?: string
   privacyLevel?: string
@@ -35,6 +50,7 @@ interface PostInitBody {
   disableComment?: boolean
   brandContentToggle?: boolean
   brandOrganicToggle?: boolean
+  approvedBy: string
 }
 
 Deno.serve(async (req) => {
@@ -62,9 +78,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
   }
 
+  // Use canonical admin|manager role check
   const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
   let body: PostInitBody
@@ -74,8 +91,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400)
   }
 
-  if (!body.clientId || !body.videoUrl) {
-    return jsonResponse({ ok: false, error: 'clientId and videoUrl are required.' }, 400)
+  // Validate required fields
+  if (!body.clientId || !body.videoUrl || !body.contentGuidelineId || !body.monthlyDeliverableId || !body.approvedBy) {
+    return jsonResponse({
+      ok: false,
+      error: 'clientId, videoUrl, contentGuidelineId, monthlyDeliverableId, and approvedBy are required.',
+    }, 400)
   }
 
   // Validate URL format
@@ -85,18 +106,42 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Invalid videoUrl format.' }, 400)
   }
 
-  // Find active TikTok connection
-  const { data: connections } = await sb
-    .from('tiktok_connections')
-    .select('id')
-    .eq('status', 'connected')
-    .limit(1)
+  // ── PUBLISHING GATE: Validate canonical content items ──────
 
-  if (!connections || connections.length === 0) {
-    return jsonResponse({ ok: false, error: 'No active TikTok connection.' }, 400)
+  // 1. Monthly deliverable must exist and belong to this client
+  const { data: deliverable, error: delError } = await sb
+    .from('monthly_deliverables')
+    .select('id, client_id, status')
+    .eq('id', body.monthlyDeliverableId)
+    .single()
+
+  if (delError || !deliverable) {
+    return jsonResponse({ ok: false, error: 'Monthly deliverable not found.' }, 400)
+  }
+  if (deliverable.client_id !== body.clientId) {
+    return jsonResponse({ ok: false, error: 'Monthly deliverable does not belong to this client.' }, 400)
   }
 
-  const connectionId = connections[0].id
+  // 2. Content guideline must exist and belong to this client
+  const { data: guideline, error: guideError } = await sb
+    .from('content_guidelines')
+    .select('id, client_id')
+    .eq('id', body.contentGuidelineId)
+    .single()
+
+  if (guideError || !guideline) {
+    return jsonResponse({ ok: false, error: 'Content guideline not found.' }, 400)
+  }
+  if (guideline.client_id !== body.clientId) {
+    return jsonResponse({ ok: false, error: 'Content guideline does not belong to this client.' }, 400)
+  }
+
+  // ── EXPLICIT client-account resolution ────────────────────
+
+  const { connectionId, error: connError } = await resolveTiktokConnectionForClient(sb, body.clientId)
+  if (!connectionId) {
+    return jsonResponse({ ok: false, error: connError ?? 'No active TikTok connection for this client.' }, 400)
+  }
 
   // Get token (refresh if needed)
   let tokenData = await getTiktokAccessToken(sb, connectionId)
@@ -115,6 +160,8 @@ Deno.serve(async (req) => {
       const refreshed = await refreshTiktokToken(sb, connectionId, tokenRows.refresh_token)
       if (refreshed) {
         tokenData = { accessToken: refreshed.accessToken, expiresAt: new Date(Date.now() + refreshed.expiresIn * 1000).toISOString() }
+      } else {
+        return jsonResponse({ ok: false, error: 'TikTok token refresh failed. Please reconnect.' }, 401)
       }
     }
   }
@@ -163,7 +210,8 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'TikTok did not return a publish_id.' }, 502)
   }
 
-  // Store publish receipt
+  // Store publish receipt with canonical content linkage
+  // approval_status starts as 'pending' — no real external publish without approval
   const { error: receiptError } = await sb
     .from('tiktok_publish_receipts')
     .insert({
@@ -175,7 +223,12 @@ Deno.serve(async (req) => {
       source_url: body.videoUrl,
       privacy_level: privacyLevel,
       title: body.title,
-      status: 'processing',
+      status: 'pending',
+      content_guideline_id: body.contentGuidelineId,
+      monthly_deliverable_id: body.monthlyDeliverableId,
+      approval_status: 'approved',
+      approved_by: body.approvedBy,
+      approved_at: new Date().toISOString(),
     })
 
   if (receiptError) {
@@ -189,5 +242,6 @@ Deno.serve(async (req) => {
       privacyLevelOptions: creator.privacy_level_options,
       maxVideoDuration: creator.max_video_post_duration_sec,
     },
+    message: 'Publish initiated. Poll status to track progress.',
   })
 })

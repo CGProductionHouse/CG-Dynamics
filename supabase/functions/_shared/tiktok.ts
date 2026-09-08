@@ -1,14 +1,22 @@
 // ============================================================================
 // _shared/tiktok.ts — TikTok API client helper
 //
+// Verified against current TikTok developer docs (Sep 2026):
+//   - OAuth token: POST /v2/oauth/token/ (top-level response, NOT nested data)
+//   - Refresh token: POST /v2/oauth/token/refresh/ (top-level response)
+//   - Video create_time: int64 Unix epoch in SECONDS
+//   - Publish status: PROCESSING_UPLOAD, PROCESSING_DOWNLOAD, SENDING_TO_USER_INBOX,
+//     FAILED, PUBLISH_COMPLETE; publicaly_available_post_id[] (not video.id)
+//
 // Provides:
-//   - TikTokDisplayConfig, TiktokUserInfo, TiktokVideo types
+//   - Types (TiktokVideo.create_time is number — Unix seconds)
 //   - resolveTiktokConfig() for env var resolution
 //   - tiktokFetch() with timeout + retry/backoff
 //   - redact() for token-safe logging
 //   - getTiktokAccessToken() to read token from DB
 //   - refreshTiktokToken() to refresh expired tokens
 //   - getTiktokUserInfo(), getTiktokVideos(), queryTiktokVideos()
+//   - Content Posting API: queryTiktokCreatorInfo(), initTiktokDirectPost(), getTiktokPublishStatus()
 // ============================================================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -58,7 +66,8 @@ export interface TiktokUserInfo {
 
 export interface TiktokVideo {
   id: string
-  create_time?: string
+  /** UTC Unix epoch in SECONDS (int64 from TikTok). Multiply by 1000 for Date constructor. */
+  create_time: number
   title?: string
   video_description?: string
   duration?: number
@@ -72,6 +81,9 @@ export interface TiktokVideo {
 }
 
 export interface TiktokCreatorInfo {
+  creator_avatar_url?: string
+  creator_username?: string
+  creator_nickname?: string
   privacy_level_options: string[]
   comment_disabled?: boolean
   duet_disabled?: boolean
@@ -84,12 +96,21 @@ export interface TiktokPublishResult {
   upload_url?: string
 }
 
+/** Current TikTok Content Posting API publish status values (Sep 2026). */
+export type TiktokPublishStatusValue =
+  | 'PUBLISH_COMPLETE'
+  | 'FAILED'
+  | 'PROCESSING_UPLOAD'
+  | 'PROCESSING_DOWNLOAD'
+  | 'SENDING_TO_USER_INBOX'
+
 export interface TiktokPublishStatus {
-  status: 'PUBLISH_COMPLETE' | 'PUBLISH_FAILED' | 'PROCESSING' | 'UPLOAD_IN_PROGRESS'
+  status: TiktokPublishStatusValue
   fail_reason?: string
-  video?: {
-    id: string
-  }
+  publish_id?: string
+  uploaded_bytes?: number
+  /** TikTok returns public post IDs here. NOT status.video.id. */
+  publicaly_available_post_id?: string[]
 }
 
 // ── Error classification ───────────────────────────────────────────────────
@@ -184,6 +205,15 @@ export async function getTiktokAccessToken(
   }
 }
 
+/**
+ * Refresh a TikTok access token.
+ *
+ * Current TikTok API (Sep 2026):
+ *   POST https://open.tiktokapis.com/v2/oauth/token/refresh/
+ *   Body: application/x-www-form-urlencoded (client_key, client_secret, grant_type=refresh_token, refresh_token)
+ *   Response: TOP-LEVEL fields (NOT nested under data):
+ *     { access_token, expires_in, open_id, refresh_expires_in, refresh_token, scope, token_type }
+ */
 export async function refreshTiktokToken(
   sb: ReturnType<typeof createClient>,
   connectionId: string,
@@ -198,7 +228,7 @@ export async function refreshTiktokToken(
     refresh_token: refreshToken,
   })
 
-  const res = await tiktokFetch('https://open.tiktokapis.com/oauth/token/', {
+  const res = await tiktokFetch('https://open.tiktokapis.com/v2/oauth/token/refresh/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params.toString(),
@@ -209,17 +239,23 @@ export async function refreshTiktokToken(
     return null
   }
 
+  // TikTok returns token fields at the TOP LEVEL, not nested under data
   const body = await res.json() as {
-    data?: {
-      access_token?: string
-      expires_in?: number
-      refresh_token?: string
-    }
-    error?: { message?: string }
+    access_token?: string
+    expires_in?: number
+    refresh_token?: string
+    open_id?: string
+    scope?: string
+    error?: { message?: string; code?: string }
   }
 
-  if (!body.data?.access_token) {
-    console.error('TikTok token refresh missing access_token:', body.error?.message)
+  if (body.error?.code && body.error.code !== 'ok') {
+    console.error('TikTok token refresh error:', body.error.message)
+    return null
+  }
+
+  if (!body.access_token) {
+    console.error('TikTok token refresh missing access_token')
     return null
   }
 
@@ -227,17 +263,49 @@ export async function refreshTiktokToken(
   await sb
     .from('tiktok_connection_tokens')
     .update({
-      access_token: body.data.access_token,
-      refresh_token: body.data.refresh_token ?? refreshToken,
-      token_expires_at: new Date(Date.now() + (body.data.expires_in ?? 86400) * 1000).toISOString(),
+      access_token: body.access_token,
+      refresh_token: body.refresh_token ?? refreshToken,
+      token_expires_at: new Date(Date.now() + (body.expires_in ?? 86400) * 1000).toISOString(),
     })
     .eq('connection_id', connectionId)
 
   return {
-    accessToken: body.data.access_token,
-    expiresIn: body.data.expires_in ?? 86400,
-    refreshToken: body.data.refresh_token ?? refreshToken,
+    accessToken: body.access_token,
+    expiresIn: body.expires_in ?? 86400,
+    refreshToken: body.refresh_token ?? refreshToken,
   }
+}
+
+// ── Client-account resolution ──────────────────────────────────────────────
+
+/**
+ * Resolve the exact TikTok connection for a given client_id.
+ * NEVER uses "first connected" — returns null if no connection exists for this client.
+ * This prevents Client A's sync/publish from using Client B's TikTok account.
+ */
+export async function resolveTiktokConnectionForClient(
+  sb: ReturnType<typeof createClient>,
+  clientId: string,
+): Promise<{ connectionId: string | null; error: string | null }> {
+  if (!clientId) return { connectionId: null, error: 'clientId is required.' }
+
+  const { data: connections, error } = await sb
+    .from('tiktok_connections')
+    .select('id')
+    .eq('client_id', clientId)
+    .eq('status', 'connected')
+    .limit(1)
+
+  if (error) {
+    console.error('Failed to resolve TikTok connection for client:', error.message)
+    return { connectionId: null, error: 'Could not look up TikTok connection.' }
+  }
+
+  if (!connections || connections.length === 0) {
+    return { connectionId: null, error: 'No active TikTok connection for this client.' }
+  }
+
+  return { connectionId: connections[0].id, error: null }
 }
 
 // ── Display API helpers ────────────────────────────────────────────────────
@@ -296,7 +364,7 @@ export async function getTiktokVideos(
   )
 
   const responseBody = await res.json() as {
-    data?: { videos?: TiktokVideo[]; cursor?: string; has_more?: boolean }
+    data?: { videos?: TiktokVideo[]; cursor?: number; has_more?: boolean }
     error?: { code?: string; message?: string; log_id?: string }
   }
 
@@ -306,7 +374,7 @@ export async function getTiktokVideos(
 
   return {
     videos: responseBody.data?.videos ?? [],
-    cursor: responseBody.data?.cursor ?? null,
+    cursor: responseBody.data?.cursor != null ? String(responseBody.data.cursor) : null,
     hasMore: responseBody.data?.has_more ?? false,
     error: null,
   }
@@ -423,6 +491,25 @@ export async function initTiktokDirectPost(
   return { result: body.data ?? null, error: null }
 }
 
+/**
+ * Fetch TikTok publish status.
+ *
+ * Current TikTok API (Sep 2026):
+ *   POST https://open.tiktokapis.com/v2/post/publish/status/fetch/
+ *   Response:
+ *     {
+ *       data: {
+ *         status: PROCESSING_UPLOAD | PROCESSING_DOWNLOAD | SENDING_TO_USER_INBOX | FAILED | PUBLISH_COMPLETE,
+ *         fail_reason?: string,
+ *         publicaly_available_post_id?: string[],
+ *         publish_id?: string,
+ *         uploaded_bytes?: number
+ *       }
+ *     }
+ *
+ * NOTE: publicaly_available_post_id is ONLY available for recent publishes.
+ * For older publishes, fall back to /v2/video/list/ lookup.
+ */
 export async function getTiktokPublishStatus(
   accessToken: string,
   publishId: string,

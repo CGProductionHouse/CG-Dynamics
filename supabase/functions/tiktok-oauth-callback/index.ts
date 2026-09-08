@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
   }
 
-  // Verify state
+  // Verify state — extract clientId from the state row
   const stateHash = await sha256Hex(state)
   const { data: consumedState, error: stateError } = await sb
     .from('tiktok_oauth_states')
@@ -69,11 +69,17 @@ Deno.serve(async (req) => {
     .eq('state_hash', stateHash)
     .is('used_at', null)
     .gt('expires_at', new Date().toISOString())
-    .select('id, user_id')
+    .select('id, user_id, client_id')
     .single()
 
   if (stateError || !consumedState) {
     console.error('TikTok OAuth invalid, used or expired state')
+    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+  }
+
+  const clientId = consumedState.client_id as string | null
+  if (!clientId) {
+    console.error('TikTok OAuth state missing client_id')
     return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
   }
 
@@ -96,7 +102,8 @@ Deno.serve(async (req) => {
 
   let tokenResponse: Response
   try {
-    tokenResponse = await tiktokFetch('https://open.tiktokapis.com/oauth/token/', {
+    // CORRECT ENDPOINT: /v2/oauth/token/ (not /oauth/token/)
+    tokenResponse = await tiktokFetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: tokenParams.toString(),
@@ -111,26 +118,31 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
   }
 
+  // CORRECT PARSE: TikTok returns token fields at TOP LEVEL, not nested under data
   const tokenData = await tokenResponse.json() as {
-    data?: {
-      access_token?: string
-      refresh_token?: string
-      expires_in?: number
-      open_id?: string
-      scope?: string
-    }
-    error?: { message?: string }
+    access_token?: string
+    refresh_token?: string
+    expires_in?: number
+    open_id?: string
+    scope?: string
+    token_type?: string
+    error?: { message?: string; code?: string }
   }
 
-  const accessToken = tokenData.data?.access_token
-  const refreshToken = tokenData.data?.refresh_token
-  const expiresIn = tokenData.data?.expires_in
-  const openId = tokenData.data?.open_id
-  const grantedScopeStr = tokenData.data?.scope ?? ''
+  if (tokenData.error?.code && tokenData.error.code !== 'ok') {
+    console.error('TikTok token exchange returned error:', tokenData.error.message)
+    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+  }
+
+  const accessToken = tokenData.access_token
+  const refreshToken = tokenData.refresh_token
+  const expiresIn = tokenData.expires_in
+  const openId = tokenData.open_id
+  const grantedScopeStr = tokenData.scope ?? ''
   const grantedScopes = grantedScopeStr.split(',').map(s => s.trim()).filter(Boolean)
 
   if (!accessToken) {
-    console.error('TikTok token exchange missing access_token:', tokenData.error?.message)
+    console.error('TikTok token exchange missing access_token')
     return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
   }
 
@@ -144,10 +156,11 @@ Deno.serve(async (req) => {
   // Fetch user info for display
   const { user: tiktokUser } = await getTiktokUserInfo(accessToken)
 
-  // Upsert connection
+  // Upsert connection — explicitly bound to this clientId
   const { data: existing } = await sb
     .from('tiktok_connections')
     .select('id')
+    .eq('client_id', clientId)
     .limit(1)
 
   let connectionId: string | null = null
@@ -174,6 +187,7 @@ Deno.serve(async (req) => {
       .from('tiktok_connections')
       .insert({
         connected_by: consumedState.user_id,
+        client_id: clientId,
         tiktok_open_id: openId ?? tiktokUser?.open_id,
         display_name: tiktokUser?.display_name,
         avatar_url: tiktokUser?.avatar_url,

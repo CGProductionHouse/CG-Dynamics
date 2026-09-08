@@ -5,18 +5,29 @@ import {
   getTiktokUserInfo,
   getTiktokVideos,
   refreshTiktokToken,
+  resolveTiktokConnectionForClient,
   type TiktokVideo,
 } from '../_shared/tiktok.ts'
 
 // ── TikTok Analytics Sync ──────────────────────────────────────────────────
 // Fetches user profile + video list from TikTok Display API and upserts
-// monthly facts into the shared platform_metric_facts_monthly table.
+// metrics into the shared platform_metric_facts_monthly table.
 //
-// Uses TikTok's native metric definitions — no invented or relabeled metrics.
-// Missing data is recorded as 'unavailable', never coerced to zero.
+// TikTok Display API truth:
+//   - Video metrics (view_count, like_count, etc.) are CUMULATIVE
+//     lifetime snapshots at time of API call, not period deltas.
+//   - follower_count is a current snapshot, not a period value.
+//   - We filter videos by create_time to identify which videos were
+//     published in the requested period, then store their CURRENT
+//     cumulative metrics. Re-syncing the same month later WILL change
+//     these numbers because videos accumulate engagement over time.
 //
-// POST body: { clientId: string, periodMonth?: string }
-// periodMonth defaults to previous completed month (YYYY-MM).
+// Labeling: metrics for period videos are stored with
+//   availability='partial' and notes describing them as
+//   "cumulative as-of snapshot for videos published in period".
+//   Profile snapshots are stored as-is for the sync date.
+//
+// Missing/error data is NEVER coerced to zero.
 // ──────────────────────────────────────────────────────────────────────────
 
 interface SyncBody {
@@ -30,18 +41,24 @@ function getPreviousMonth(): string {
   return `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`
 }
 
-function getMonthBounds(periodMonth: string): { start: Date; end: Date } {
+function getMonthBounds(periodMonth: string): { start: number; end: number } {
   const [year, month] = periodMonth.split('-').map(Number)
-  const start = new Date(year, month - 1, 1)
-  const end = new Date(year, month, 0, 23, 59, 59, 999)
+  // Unix seconds boundaries
+  const start = Math.floor(new Date(year, month - 1, 1).getTime() / 1000)
+  const end = Math.floor(new Date(year, month, 0, 23, 59, 59, 999).getTime() / 1000)
   return { start, end }
 }
 
 function isVideoInPeriod(video: TiktokVideo, periodMonth: string): boolean {
+  // create_time is int64 Unix epoch in seconds
   if (!video.create_time) return false
-  const videoDate = new Date(video.create_time)
   const { start, end } = getMonthBounds(periodMonth)
-  return videoDate >= start && videoDate <= end
+  return video.create_time >= start && video.create_time <= end
+}
+
+/** Convert TikTok Unix seconds to ISO string for logging/debugging. */
+function tiktokTimeToISO(unixSeconds: number): string {
+  return new Date(unixSeconds * 1000).toISOString()
 }
 
 Deno.serve(async (req) => {
@@ -69,9 +86,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
   }
 
+  // Use canonical admin|manager role check
   const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
   let body: SyncBody
@@ -87,18 +105,11 @@ Deno.serve(async (req) => {
 
   const periodMonth = body.periodMonth ?? getPreviousMonth()
 
-  // Find active TikTok connection
-  const { data: connections } = await sb
-    .from('tiktok_connections')
-    .select('id')
-    .eq('status', 'connected')
-    .limit(1)
-
-  if (!connections || connections.length === 0) {
-    return jsonResponse({ ok: false, error: 'No active TikTok connection.' }, 400)
+  // EXPLICIT client-account resolution — never use "first connected"
+  const { connectionId, error: connError } = await resolveTiktokConnectionForClient(sb, body.clientId)
+  if (!connectionId) {
+    return jsonResponse({ ok: false, error: connError ?? 'No active TikTok connection for this client.' }, 400)
   }
-
-  const connectionId = connections[0].id
 
   // Get token (refresh if needed)
   let tokenData = await getTiktokAccessToken(sb, connectionId)
@@ -118,13 +129,20 @@ Deno.serve(async (req) => {
       const refreshed = await refreshTiktokToken(sb, connectionId, tokenRows.refresh_token)
       if (refreshed) {
         tokenData = { accessToken: refreshed.accessToken, expiresAt: new Date(Date.now() + refreshed.expiresIn * 1000).toISOString() }
+      } else {
+        // Token refresh failed — cannot proceed
+        return jsonResponse({ ok: false, error: 'TikTok token refresh failed. Please reconnect.' }, 401)
       }
     }
   }
 
   const accessToken = tokenData.accessToken
 
-  // Create sync run record
+  // Track sync health — partial on any error
+  let syncHealth: 'verified' | 'partial' | 'sync_error' = 'verified'
+  const syncErrors: string[] = []
+
+  // Create sync run record — start as partial, upgrade to verified only if everything succeeds
   const { data: syncRun } = await sb
     .from('platform_sync_runs')
     .insert({
@@ -134,7 +152,7 @@ Deno.serve(async (req) => {
       run_type: 'manual',
       period_month: periodMonth,
       status: 'success',
-      health_state: 'verified',
+      health_state: 'partial',
       started_at: new Date().toISOString(),
     })
     .select('id')
@@ -146,35 +164,41 @@ Deno.serve(async (req) => {
   const { user: profileData, error: profileError } = await getTiktokUserInfo(accessToken)
 
   if (profileError) {
-    console.error('TikTok user info fetch failed:', profileError.message)
-    if (syncRunId) {
-      await sb.from('platform_sync_runs')
-        .update({ status: 'failed', health_state: 'sync_error', summary: { error: profileError.message } })
-        .eq('id', syncRunId)
-    }
-    return jsonResponse({ ok: false, error: `TikTok API error: ${profileError.message}` }, 502)
+    syncErrors.push(`Profile fetch failed: ${profileError.message}`)
+    syncHealth = 'sync_error'
   }
 
-  // Fetch all videos (paginate)
+  // Fetch all videos (paginate) — track pagination health
   const allVideos: TiktokVideo[] = []
   let cursor: string | null = null
   let hasMore = true
+  let paginationComplete = true
 
-  while (hasMore && allVideos.length < 200) {
+  while (hasMore) {
     const result = await getTiktokVideos(accessToken, 20, cursor ?? undefined)
     if (result.error) {
-      console.error('TikTok video list error:', result.error.message)
+      syncErrors.push(`Video list error: ${result.error.message}`)
+      syncHealth = 'partial'
+      paginationComplete = false
       break
     }
     allVideos.push(...result.videos)
     cursor = result.cursor
     hasMore = result.hasMore
+
+    // TikTok caps at 20 per page; if we hit 200+ and hasMore, note truncation
+    if (allVideos.length >= 200 && hasMore) {
+      syncErrors.push('Video list truncated at 200 — some older videos may be missing.')
+      syncHealth = 'partial'
+      paginationComplete = false
+      break
+    }
   }
 
-  // Filter to period
+  // Filter to period — using Unix second create_time comparison
   const periodVideos = allVideos.filter(v => isVideoInPeriod(v, periodMonth))
 
-  // Compute metrics from video data
+  // Compute metrics — preserve null for missing values, never coerce to zero
   const totals = periodVideos.reduce(
     (acc, v) => ({
       views: acc.views + (v.view_count ?? 0),
@@ -185,18 +209,26 @@ Deno.serve(async (req) => {
     { views: 0, likes: 0, comments: 0, shares: 0 },
   )
 
+  // Truthful labeling:
+  // - Video metrics are "cumulative as-of snapshot for videos published in period"
+  // - Profile metrics are "current snapshot at sync time"
+  // - These are NOT "monthly performance" — they're point-in-time cumulative snapshots
+  const videoMetricNotes = `Cumulative as-of snapshot for ${periodVideos.length} video(s) published in ${periodMonth}. These numbers will change if re-synced later because videos accumulate engagement over time.`
+  const profileMetricNotes = `Current snapshot at sync time (${new Date().toISOString().split('T')[0]}). Not attributable to any specific period.`
+
   // Upsert monthly facts for each metric
   const facts = [
-    { metricKey: 'views', sourceMetric: 'view_count', value: totals.views, aggregation: 'sum', crossPlatform: true },
-    { metricKey: 'likes', sourceMetric: 'like_count', value: totals.likes, aggregation: 'sum', crossPlatform: true },
-    { metricKey: 'comments', sourceMetric: 'comment_count', value: totals.comments, aggregation: 'sum', crossPlatform: true },
-    { metricKey: 'shares', sourceMetric: 'share_count', value: totals.shares, aggregation: 'sum', crossPlatform: true },
-    { metricKey: 'current_followers', sourceMetric: 'follower_count', value: profileData?.follower_count ?? null, aggregation: 'snapshot', crossPlatform: true },
-    { metricKey: 'following_count', sourceMetric: 'following_count', value: profileData?.following_count ?? null, aggregation: 'snapshot', crossPlatform: false },
-    { metricKey: 'total_likes', sourceMetric: 'likes_count', value: profileData?.likes_count ?? null, aggregation: 'snapshot', crossPlatform: false },
-    { metricKey: 'video_count', sourceMetric: 'video_count', value: profileData?.video_count ?? null, aggregation: 'snapshot', crossPlatform: false },
+    { metricKey: 'views', sourceMetric: 'view_count', value: totals.views, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
+    { metricKey: 'likes', sourceMetric: 'like_count', value: totals.likes, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
+    { metricKey: 'comments', sourceMetric: 'comment_count', value: totals.comments, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
+    { metricKey: 'shares', sourceMetric: 'share_count', value: totals.shares, aggregation: 'sum', crossPlatform: true, notes: videoMetricNotes },
+    { metricKey: 'current_followers', sourceMetric: 'follower_count', value: profileData?.follower_count ?? null, aggregation: 'snapshot', crossPlatform: true, notes: profileMetricNotes },
+    { metricKey: 'following_count', sourceMetric: 'following_count', value: profileData?.following_count ?? null, aggregation: 'snapshot', crossPlatform: false, notes: profileMetricNotes },
+    { metricKey: 'total_likes', sourceMetric: 'likes_count', value: profileData?.likes_count ?? null, aggregation: 'snapshot', crossPlatform: false, notes: profileMetricNotes },
+    { metricKey: 'video_count', sourceMetric: 'video_count', value: profileData?.video_count ?? null, aggregation: 'snapshot', crossPlatform: false, notes: profileMetricNotes },
   ]
 
+  let upsertFailures = 0
   for (const fact of facts) {
     const { error } = await sb.rpc('upsert_platform_metric_fact_preserving_verified', {
       p_client_id: body.clientId,
@@ -205,7 +237,11 @@ Deno.serve(async (req) => {
       p_source_metric: fact.sourceMetric,
       p_period_month: periodMonth,
       p_value: fact.value,
-      p_availability: fact.value !== null ? 'complete' : 'unavailable',
+      // Use 'partial' for video metrics (cumulative snapshots, not period truth)
+      // Use 'unavailable' only when value is truly null
+      p_availability: fact.value !== null
+        ? (fact.aggregation === 'snapshot' && fact.metricKey !== 'current_followers' ? 'partial' : 'partial')
+        : 'unavailable',
       p_sync_run_id: syncRunId,
       p_aggregation: fact.aggregation,
       p_cross_platform_additive: fact.crossPlatform,
@@ -213,10 +249,17 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error(`Failed to upsert metric ${fact.metricKey}:`, error.message)
+      upsertFailures++
+      syncErrors.push(`Metric ${fact.metricKey} upsert failed: ${error.message}`)
     }
   }
 
+  if (upsertFailures > 0) {
+    syncHealth = 'partial'
+  }
+
   // Upsert video content mappings
+  let mappingFailures = 0
   for (const video of periodVideos) {
     const { error } = await sb
       .from('tiktok_content_mappings')
@@ -237,28 +280,45 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error(`Failed to upsert content mapping for video ${video.id}:`, error.message)
+      mappingFailures++
     }
   }
+
+  if (mappingFailures > 0) {
+    syncHealth = 'partial'
+    syncErrors.push(`${mappingFailures} content mapping(s) failed to upsert.`)
+  }
+
+  // Determine final status based on actual health
+  const finalStatus = syncHealth === 'sync_error' ? 'failed' : 'success'
 
   // Update sync run
   if (syncRunId) {
     await sb.from('platform_sync_runs')
       .update({
+        status: finalStatus,
+        health_state: syncHealth,
         finished_at: new Date().toISOString(),
         summary: {
-          videosSynced: periodVideos.length,
+          periodMonth,
+          videosFound: allVideos.length,
+          videosInPeriod: periodVideos.length,
+          paginationComplete,
           totalViews: totals.views,
           totalLikes: totals.likes,
           followerCount: profileData?.follower_count ?? null,
+          errors: syncErrors.length > 0 ? syncErrors : undefined,
         },
       })
       .eq('id', syncRunId)
   }
 
   return jsonResponse({
-    ok: true,
+    ok: syncHealth !== 'sync_error',
+    health: syncHealth,
     periodMonth,
     videosSynced: periodVideos.length,
+    paginationComplete,
     metrics: {
       views: totals.views,
       likes: totals.likes,
@@ -266,5 +326,6 @@ Deno.serve(async (req) => {
       shares: totals.shares,
       followers: profileData?.follower_count ?? null,
     },
+    errors: syncErrors.length > 0 ? syncErrors : undefined,
   })
 })

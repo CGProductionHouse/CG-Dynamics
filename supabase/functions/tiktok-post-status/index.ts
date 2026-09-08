@@ -5,7 +5,15 @@ import { getTiktokAccessToken, getTiktokPublishStatus } from '../_shared/tiktok.
 // ── TikTok Publish Status ──────────────────────────────────────────────────
 // Polls TikTok for the status of a pending publish.
 //
-// POST body: { publishId: string }
+// Current TikTok status values (Sep 2026):
+//   PROCESSING_UPLOAD   — upload in progress (FILE_UPLOAD source)
+//   PROCESSING_DOWNLOAD — download in progress (PULL_FROM_URL source)
+//   SENDING_TO_USER_INBOX — notification sent to creator's inbox
+//   PUBLISH_COMPLETE    — content posted (direct post) or user posted via inbox
+//   FAILED              — error occurred
+//
+// Public post ID: TikTok returns publicaly_available_post_id[] (note the typo is TikTok's)
+// Only available for recent publishes; for older ones, fall back to /v2/video/list/ lookup.
 // ──────────────────────────────────────────────────────────────────────────
 
 interface StatusBody {
@@ -77,17 +85,19 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Could not fetch publish status.' }, 502)
   }
 
-  // Map TikTok status to our status
+  // Map TikTok status to our internal status
+  // Current TikTok values: PROCESSING_UPLOAD, PROCESSING_DOWNLOAD, SENDING_TO_USER_INBOX, FAILED, PUBLISH_COMPLETE
   let mappedStatus: string
   switch (status.status) {
     case 'PUBLISH_COMPLETE':
       mappedStatus = 'published'
       break
-    case 'PUBLISH_FAILED':
+    case 'FAILED':
       mappedStatus = 'failed'
       break
-    case 'PROCESSING':
-    case 'UPLOAD_IN_PROGRESS':
+    case 'PROCESSING_UPLOAD':
+    case 'PROCESSING_DOWNLOAD':
+    case 'SENDING_TO_USER_INBOX':
       mappedStatus = 'processing'
       break
     default:
@@ -99,20 +109,26 @@ Deno.serve(async (req) => {
     status: mappedStatus,
   }
   if (status.fail_reason) updateFields.provider_error = status.fail_reason
-  if (status.video?.id) updateFields.tiktok_video_id = status.video.id
+
+  // TikTok returns publicaly_available_post_id[] (note: TikTok's actual field name)
+  // NOT status.video.id
+  const publicPostIds = status.publicaly_available_post_id ?? []
+  if (publicPostIds.length > 0) {
+    updateFields.tiktok_video_id = publicPostIds[0]
+  }
 
   await sb
     .from('tiktok_publish_receipts')
     .update(updateFields)
     .eq('publish_id', body.publishId)
 
-  // If published, also create a content mapping
-  if (mappedStatus === 'published' && status.video?.id) {
+  // If published, create content mapping using the public post ID
+  if (mappedStatus === 'published' && publicPostIds.length > 0) {
     await sb
       .from('tiktok_content_mappings')
       .upsert({
         client_id: clientId,
-        tiktok_video_id: status.video.id,
+        tiktok_video_id: publicPostIds[0],
         last_synced_at: new Date().toISOString(),
       }, { onConflict: 'client_id,tiktok_video_id' })
   }
@@ -121,7 +137,8 @@ Deno.serve(async (req) => {
     ok: true,
     status: mappedStatus,
     tiktokStatus: status.status,
-    videoId: status.video?.id ?? null,
+    publicPostIds,
     failReason: status.fail_reason ?? null,
+    uploadedBytes: status.uploaded_bytes ?? null,
   })
 })
