@@ -13,6 +13,8 @@ const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const PrivacyPolicyPage = lazy(() => import('./pages/LegalPage').then(module => ({ default: module.PrivacyPolicyPage })))
+const TermsOfServicePage = lazy(() => import('./pages/LegalPage').then(module => ({ default: module.TermsOfServicePage })))
 const ClientPerformancePage = lazy(() => import('./pages/admin/ClientPerformancePage'))
 const CgHubPage = lazy(() => import('./pages/admin/CgHubPage'))
 const ClientsList = lazy(() => import('./pages/admin/ClientsList'))
@@ -92,6 +94,8 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/welcome" element={<WelcomeToCgPage />} />
 
           {/* Staff routes */}
