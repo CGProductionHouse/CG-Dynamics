@@ -1,843 +1,426 @@
-# Braize — Event Staffing Client Marketing Intelligence
+# Braize — Canonical Event Staffing Client Marketing Intelligence
 
-Last updated: 2026-08-06
-Status: Review-state client intelligence. Keep isolated to Braize. Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before using mutable facts.
+Last updated: 2026-09-08 SAST  
+Status: Current client-specific intelligence with explicit provenance and freshness gates  
+Client isolation: Use only for **Braize**. Do not merge with the inactive `Braize Promotions` Dynamics record or borrow facts from other event, promotions, hospitality or staffing clients.  
+Canonical CG Dynamics client ID: `6b67a2df-e2ab-418b-bcee-03aef5963d37`  
+Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`  
+Creative authority: Issue #248 Human creative standard  
+Migration authority: Issue #268; shared runtime remains Issue #241 / PR #247 ownership
 
-## Verified identity and current public position
+## 1. Canonical identity and inactive-alias safety
 
-Current official Instagram evidence supplied directly by CA on 2026-08-06 confirms:
+- **Canonical active client:** Braize.
+- **Exact active Dynamics row:** `6b67a2df-e2ab-418b-bcee-03aef5963d37`, active and premium tier, verified read-only on 2026-09-08.
+- A separate **inactive `Braize Promotions` Dynamics row** also exists. It must not be renamed, reactivated, merged into Braize or used for exact-client retrieval.
+- Historical/client-supplied wording can call the business `Braize Promotions`. Preserve that wording as source history only when provenance matters; everyday current work resolves to the active **Braize** client.
+- Braize is an event-staffing / promotional-personnel brand. Existing reviewed intelligence explicitly says it is **not a catering company**. Do not market it as catering unless new direct evidence changes that scope.
 
-- brand: Braize;
-- Instagram: `braize_za`;
-- website linked publicly: `www.braize.co.za`;
-- current public promise: "People make the party. We bring the right ones.";
-- current service description: professional waitresses, bartenders and promo girls for events that stand out;
-- current feed direction: event footage, branded team imagery, event posters, staff features and premium black/orange identity.
+## 2. Evidence authority used in this reconciliation
 
-Braize is not a catering company and should not be marketed as one. It is an event-staffing and promotional-personnel business that supplies the human layer that makes events run, feel polished and reflect the client's brand.
+Strongest accessible Braize-specific evidence, newest first where applicable:
 
-## Strategic opportunity
+1. **Current CG Dynamics read-only identity check — 2026-09-08**
+   - active canonical Braize row and exact ID;
+   - distinct inactive Braize Promotions row;
+   - existing Braize `client_industry_profiles` row is still `needs_research` and contains no substantive current business facts;
+   - no Braize-specific Skill Cards currently exist in live production.
+2. **Existing reviewed Dynamics/GitHub intelligence — updated 2026-08-06**
+   - based on a current official Instagram screenshot supplied directly by CA;
+   - confirms brand `Braize`, Instagram `braize_za`, website `www.braize.co.za`, public line `People make the party. We bring the right ones.`, and service wording around waitresses, bartenders and promo girls.
+3. **Accessible Braize ChatGPT Project history / CG corrections — 2026-04 to 2026-09**
+   - repeated caption, text-on-post, event-video and Heritage/Women's Day corrections;
+   - durable lessons around one focused idea, witty/human wording, service relevance, non-repetition, natural Afrikaans and short energetic copy.
+4. **Project Source: `Braize Marketing.pdf` — supplied 2026-02-05**
+   - original business/manifesto/service/contact evidence;
+   - useful for brand language and service architecture;
+   - contains `Braize Promotions` wording that is historical/source wording, not authority to merge the inactive Dynamics row;
+   - contains national-coverage, training, reliability and future mobile-bar language that must not be converted into current operational guarantees without fresh proof.
+5. **Prior competitor / best-practice research in this file**
+   - remains strategic benchmark material only;
+   - it is not evidence that Braize itself provides the same staffing systems, scale, training, replacement model or service guarantees.
 
-Braize should own a sharper position than "staff for events".
+A 2026-09-08 public-web recheck did not surface the correct South African Braize website or Instagram page reliably. Therefore older official/contact values below retain their last known provenance and must not be described as newly reverified on 2026-09-08.
 
-Recommended position:
+## 3. Current business, channel and contact facts
 
-> Braize supplies trained, briefed and brand-fit event staff who help the right events feel organised, energetic and professionally run.
+| Fact | Value | State | Evidence / publication rule |
+|---|---|---|---|
+| Canonical client | Braize | `current_verified` | Exact active CG Dynamics row, read-only 2026-09-08 |
+| Inactive similarly named row | Braize Promotions | `current_verified` as separate inactive record | Exact Dynamics check. Never use as the active client or fuzzy-match target. |
+| Instagram | `braize_za` | last verified 2026-08-06; `stale_unverified` for a new 2026-09-08 public claim | CA-supplied official Instagram screenshot in prior intelligence; live recheck unavailable |
+| Website | `www.braize.co.za` | last verified 2026-08-06; `stale_unverified` for a new 2026-09-08 public claim | Official Instagram evidence + older client PDF agree; live recheck unavailable |
+| Public marketing email | `promotions@braize.co.za` | `client_supplied`, revalidation required for current publication | `Braize Marketing.pdf`, 2026-02-05 |
+| Caption location/footer wording | Bloemfontein | `client_supplied`, revalidation required for current publication | `Braize Marketing.pdf`, 2026-02-05 |
+| Public promise | `People make the party. We bring the right ones.` | last verified 2026-08-06 | Official Instagram screenshot supplied by CA |
+| Manifesto line | `We hit different.` / `Brace yourself. We hit different.` | durable source language, not required in every caption | `Braize Marketing.pdf` |
+| Phone / WhatsApp | not verified in accessible current evidence | `unresolved` | Never invent |
+| Public hours / physical address | not verified | `unresolved` | Never invent |
 
-The commercial value is not only headcount. Braize sells:
+### Contact-footer convention
 
-- reliability;
-- presentation;
-- guest experience;
-- faster service;
-- reduced event-day stress;
-- brand representation;
-- flexible scale;
-- one accountable staffing partner;
-- access to people who fit the tone of the event.
+The client PDF explicitly says captions should include:
 
-The strongest defensible idea is:
+- Location: Bloemfontein
+- Website: `www.braize.co.za`
+- Email: `promotions@braize.co.za`
+
+Treat that as a durable **formatting/conversion preference**, while the mutable values themselves still obey freshness. When task-time exact-client retrieval confirms the set is current, use it. If current retrieval marks a value stale or conflicting, do not silently publish the old value just because the historical PDF said to always include it.
+
+## 4. Current service scope and claim states
+
+### Strongest currently supported core categories
+
+Official Instagram evidence supplied 2026-08-06 supports:
+- waitresses;
+- bartenders;
+- promo girls / promotional staff.
+
+The client-supplied marketing PDF additionally supports these service labels:
+- waitresses and waiters;
+- bartenders and bar support;
+- promoters and brand ambassadors;
+- event hosts and front-of-house staff/teams.
+
+Use the exact role supported by the current brief/creative. Service availability for a specific date, town, team size or event remains mutable and must be checked rather than assumed.
+
+### Event contexts supported by source material
+
+The client PDF explicitly positions Braize for:
+- corporate events;
+- private functions;
+- activations and brand experiences;
+- golf days;
+- product launches;
+- large corporate events.
+
+Existing CG content also includes real regional/agricultural-event activity such as Hoopstad. Use named client/event relationships only when the exact event evidence is supplied or freshly verified. Do not turn one event into a permanent partnership claim.
+
+### Future / strategic language that is NOT a current service fact
+
+The PDF says Braize is **expanding into mobile bar services**. This proves an expansion direction at the time of the source; it does **not** prove that a mobile bar is currently launched, bookable or available nationally. Treat it as `historical_strategy / possible_change` until directly confirmed.
+
+The older research pack also proposed or explored roles such as runners, floor coordinators, supervisors, ushers, registration staff, setup/breakdown teams, VIP staff and similar event-support functions. These remain **recommended service architecture / expansion opportunities** unless current Braize evidence proves they are operational.
+
+## 5. Claim-safety layer: source language vs operational truth
+
+The marketing PDF contains strong brand statements such as:
+- premium event staffing across South Africa;
+- trained and presentable staff;
+- carefully selected brand-fit people;
+- teams arriving prepared and on time;
+- raising the standard.
+
+These are useful **brand-positioning and desired service-standard statements** from client-supplied material. Under Issue #268 they must not automatically become factual guarantees about current training systems, punctuality guarantees, national deployment capacity, vetting, backup/replacement systems or scale.
+
+Before using a concrete operational claim, verify it. In particular never invent or freeze:
+- current staff numbers or roster depth;
+- same-day or last-minute availability;
+- national coverage or travel reach;
+- training, accreditation, certification or bartender qualification;
+- formal vetting/screening process;
+- supervision or team-lead availability;
+- replacement/no-show guarantee;
+- response or quote turnaround time;
+- current client/brand relationships;
+- event capacity or maximum team size;
+- prices, packages, deposits, overtime, travel or accommodation terms;
+- wages, employment/contractor terms or recruitment payment conditions;
+- insurance, legal or labour-compliance claims.
+
+## 6. Human marketing position
+
+Braize should feel like **the human part of an event that actually has to perform**, not a generic promotions agency posting attractive staff photos.
+
+The strongest durable commercial idea from the original research remains:
 
 > The people working your event become part of the event itself.
 
-This is especially important for weddings, corporate events, launches, festivals, agricultural events, hospitality events, VIP spaces and brand activations where staff are visible in person and in content.
+Use that as strategic thinking, not a slogan to repeat mechanically.
 
-## Core service architecture
+Braize content works best when it connects a visible person/team to a real event job:
+- handling a busy bar;
+- serving guests;
+- representing a brand;
+- helping an activation move;
+- showing up prepared for the actual event context.
 
-Braize should organise its offer into clear, bookable categories.
+Correct facts are only the floor. The finished copy should have energy, a point of view and a reason to care.
 
-### Hospitality staff
+## 7. Caption voice and durable CG corrections
 
-- waitresses and waiters;
-- bartenders;
-- cocktail bartenders where skills are verified;
-- runners;
-- floor staff;
-- service assistants;
-- bar-back support;
-- hostess and guest-facing support.
+### Overall voice
 
-### Promotional staff
+Braize should sound:
+- energetic and confident;
+- playful when the event/content allows it;
+- polished without becoming corporate;
+- young and social without sounding immature;
+- specific about the work rather than adjective-heavy.
 
-- promo girls and promo teams;
-- brand ambassadors;
-- product sampling staff;
-- launch and activation staff;
-- exhibition and trade-show support;
-- lead-capture and guest-engagement staff;
-- registration and check-in staff.
+Do not confuse `sexy` branding with over-sexualising staff. Existing reviewed intelligence explicitly warns against reducing women to appearance or making the brand look like it sells models rather than capable event staff.
 
-### Event support
+### One focused thought beats a list
 
-Potential expansion where operationally proven:
+A strong repeated user correction is to **focus on one thing** instead of stacking several traits/services in one sentence. Avoid three-benefit or three-adjective cadence when one clear observation lands harder.
 
-- ushers;
-- guest-list and accreditation staff;
-- VIP-area staff;
-- event runners;
-- setup and breakdown support;
-- floor coordinators;
-- team leaders and supervisors;
-- festival and sporting-event support;
-- golf-day and auction support.
+For example, if the post is about busy bar service, write about what Braize does when the bar gets busy. Do not turn the caption into a list of serving, smiling, pouring, networking and brand representation all at once.
 
-Do not advertise any role until Braize can recruit, brief, supervise and replace that role reliably.
+### Captions add; they do not repeat
 
-## Primary customer groups
+If the artwork/video already states:
+- the service;
+- a headline;
+- an event name;
+- a slogan;
+- the CTA;
 
-### Event planners and coordinators
+the caption must add a second layer: a human observation, event problem, service detail, point of view, local moment or reason the audience should book/care.
 
-They need:
+Repeated user feedback explicitly rejected captions that simply restated the poster.
 
-- one reliable staffing contact;
-- fast quotes;
-- correct headcount;
-- staff who arrive early and correctly dressed;
-- backup staff;
-- clear role allocation;
-- team leads;
-- post-event feedback;
-- no need to chase individual workers.
+### Length and option behaviour
 
-This is one of Braize's highest-value recurring customer groups.
+- Normal social captions should be short to medium and easy to read.
+- One-line or very compact copy is often preferred when the visual already carries the information.
+- When the user asks for ideas/options, give genuinely different creative routes rather than near-duplicate rewrites.
+- Once a direction is chosen, keep the final copy focused instead of preserving every brainstormed idea.
 
-### Venues
+### Language
 
-Wedding venues, conference venues, lodges, farms, clubs and event spaces often need flexible staff without maintaining a large permanent team.
+- English is safe as a default when the brief is in English.
+- Afrikaans is appropriate when requested or when the event/local creative clearly calls for it.
+- Afrikaans must sound natural and spoken, not stiff or translated word-for-word.
+- Do not force bilingual mixing purely to sound local.
 
-They need:
+Prior Braize work supports natural Afrikaans around real event moments, including playful local-event captions. Keep the event/place reference factual.
 
-- recurring availability;
-- consistent service standards;
-- staff familiar with the venue;
-- simple monthly or event-by-event booking;
-- peak-season support;
-- emergency replacement capacity.
+### `Braize girls`
 
-Venue partnerships can create repeat bookings and predictable revenue.
+The user has explicitly approved/asked for `Braize girls` in specific staff-celebration and playful social contexts. It can be used when the creative genuinely features that team identity.
 
-### Caterers and mobile bar operators
+Do not turn `Braize girls` into a universal recruitment, legal, employment or capability label. For broad service architecture, `promotional staff`, `brand ambassadors`, `waitresses/waiters`, `bartenders` or the exact role in the brief may be more accurate.
 
-They need temporary front-of-house and bar support that matches food and beverage service standards.
+## 8. Hook, humour and wording rules
 
-Braize must clarify whether staff work under the caterer's direct operational supervision or under a Braize supervisor.
+### Hooks that suit Braize
 
-### Corporate and brand clients
+Prefer hooks rooted in something visibly happening:
+- the bar getting busy;
+- a crowd arriving;
+- the team stepping into a real event role;
+- an event town or venue being taken on;
+- the difference between merely having staff and having staff who fit the moment;
+- a playful observation about serving/pouring/guest flow when supported by the creative.
 
-They need:
+Past user direction around ideas such as `Serving Looks Good on Us` and `when the bar gets busy...` shows that witty service-led lines can fit Braize when they still say something about the work.
 
-- professional presentation;
-- brand-fit personalities;
-- briefing discipline;
-- product knowledge;
-- punctuality;
-- measurable activation outputs;
-- no reputational surprises.
+### Avoid generic staffing filler
 
-### Private hosts
+Avoid by default:
+- `bringing brands to life`;
+- `making every event memorable`;
+- `professional staff for every occasion`;
+- `elevate your event`;
+- `experience the difference`;
+- `your trusted event partner`;
+- `we've got you covered` with no specific proof;
+- generic `energy, style and professionalism` stacks;
+- generic celebration copy that could belong to any event company;
+- overused `we bring the gees`-style filler unless the exact brief makes it fresh and client-appropriate.
 
-Wedding couples, birthday hosts, families and private-event organisers need a simple explanation of how many staff they require and what those staff will do.
+Do not solve bland copy by adding more adjectives.
 
-They often do not know the difference between waitstaff, bartenders, runners and coordinators. Braize should make the decision easy.
+### Humour / edge
 
-### Festivals, auctions, sporting and agricultural events
-
-These events require:
-
-- larger teams;
-- long shifts;
-- changing guest volumes;
-- strong supervision;
-- bar and crowd flow;
-- staff transport and timing control;
-- clear uniform standards;
-- backup and shift planning.
-
-Braize's recent agricultural-event content gives the brand a credible regional opportunity in this category.
-
-## Customer decision journey
+- Smart, cheeky, slightly bold wording is allowed for normal event/social content.
+- Humour should come from the event/service situation, not from mocking guests or staff.
+- Recruitment, labour, safety or serious client issues should be more direct and respectful.
+- Avoid sexualising working staff or implying drinking on shift.
 
-1. Client realises the event cannot be managed by the host or venue alone.
-2. Searches, asks a planner or sees Braize at another event.
-3. Checks whether Braize looks professional and relevant to the event type.
-4. Wants to know availability, price, number of staff, roles, uniform and supervision.
-5. Sends an incomplete WhatsApp brief.
-6. Braize clarifies date, venue, hours, guest count, service style, roles and dress code.
-7. Braize issues a clear quote and staffing plan.
-8. Client confirms and pays the required deposit.
-9. Staff are selected, briefed and assigned.
-10. Event is supervised and exceptions are handled.
-11. Braize follows up, captures feedback and secures repeat work.
-
-The marketing and booking system should support this entire journey.
-
-## Client objections and trust barriers
-
-Common concerns:
-
-- Will the staff arrive?
-- Will they be sober, presentable and professional?
-- Do they know how to serve?
-- What happens if someone cancels?
-- Who manages them on the day?
-- Can they handle pressure?
-- Will they understand the brand or event tone?
-- Are they properly briefed?
-- Will we receive the people shown in the photos?
-- Is transport included?
-- Are meals, breaks and overtime included?
-- Who is responsible if a staff member is injured or causes damage?
-- How does replacement work?
+## 9. B2B client-facing vs staff/recruitment tone
 
-Braize must answer these questions through systems and evidence, not vague claims.
-
-## Competitor landscape
-
-### National event-staffing agencies
-
-National competitors typically sell:
-
-- large talent databases;
-- national coverage;
-- professional vetting;
-- custom training;
-- account management;
-- backup dispatch;
-- brand ambassadors;
-- hosts, waiters and bartenders;
-- booking forms and talent applications.
-
-ACE Events publicly emphasises vetted staff, briefing, account management and backup dispatch. Fresh People combines hospitality, brand ambassadors, coordinators and event logistics. Forever Staffing promotes flexible on-call staff and cross-training. Thirst differentiates through academy-trained bartenders, early arrival, all-inclusive quoting and a 24-hour quote promise. citeturn436124search0turn436124search1turn436124search2turn436124search6
-
-Braize does not need to imitate their national scale. It can win through:
-
-- regional responsiveness;
-- direct owner access;
-- local event knowledge;
-- recognisable staff;
-- strong Bloemfontein and Free State relationships;
-- agricultural and regional-event experience;
-- a bolder, younger visual identity;
-- practical WhatsApp booking;
-- documented service standards.
-
-### Promotional agencies
-
-Exige, Panther Luxe, Purple Pearl, Student Promoters and similar agencies compete through brand ambassadors, activations, exhibition staff, hostesses and promotional models. Some sell prestige and visual impact; others sell youth networks and activation scale. citeturn436124search3turn436124search4turn436124search8turn436124search11
-
-Braize's opportunity is to combine image with actual event usefulness. The brand should not become only "pretty promo girls". It should prove that its people can serve, engage, follow a brief and solve operational problems.
-
-### Informal staffing
-
-Braize also competes with:
-
-- venues calling casual workers directly;
-- caterers using their own contacts;
-- WhatsApp groups;
-- students hired informally;
-- friends and family helping at events;
-- individual bartenders;
-- low-cost labour brokers.
-
-Braize must justify its margin through:
-
-- screening;
-- briefing;
-- replacement;
-- supervision;
-- professional presentation;
-- payment administration;
-- one accountable contact;
-- quality control.
-
-## Brand direction
-
-Current black, orange and white visual identity is strong and recognisable.
-
-The brand should feel:
-
-- energetic;
-- capable;
-- confident;
-- polished;
-- social;
-- fast-moving;
-- practical;
-- young without being immature;
-- premium without becoming stiff.
-
-Avoid:
-
-- over-sexualised staffing imagery;
-- reducing women to appearance;
-- implying all staff are models rather than workers;
-- generic party slogans without operational proof;
-- chaotic event footage with no context;
-- claims such as "best", "elite" or "fully trained" without a defined standard;
-- content that shows alcohol consumption by working staff;
-- posting staff without permission.
-
-## Website and conversion system
-
-The website should serve two distinct audiences:
-
-1. **Book staff**
-2. **Join the team**
-
-These flows must not be mixed.
-
-### Recommended pages
-
-1. Home
-2. Book event staff
-3. Hospitality staff
-4. Promotional and activation staff
-5. Event support and supervisors
-6. Event types
-7. How Braize works
-8. Service standards
-9. Recent events and case studies
-10. Join the Braize team
-11. Frequently asked questions
-12. Contact and WhatsApp
-
-### Booking form
-
-Required fields:
-
-- event date;
-- venue and town;
-- event type;
-- guest count;
-- start and finish time;
-- roles required;
-- estimated staff count;
-- service style;
-- uniform or dress code;
-- alcohol service involved;
-- supervisor required;
-- transport/accommodation needs;
-- contact person;
-- budget range where appropriate;
-- notes and brief upload.
-
-The form should generate a structured enquiry in CG Dynamics rather than a loose message.
-
-### Quote structure
-
-Quotes should clearly state:
-
-- role and headcount;
-- hours included;
-- hourly or event rate;
-- minimum shift;
-- travel and accommodation;
-- uniform supplied by whom;
-- breaks and meals;
-- supervisor fees;
-- overtime;
-- public-holiday or late-night rates;
-- deposit and cancellation terms;
-- replacement policy;
-- client responsibilities;
-- exclusions.
-
-## Google and local search
-
-Potential search themes:
-
-- event staff Bloemfontein;
-- waiters for hire Bloemfontein;
-- bartenders for hire Bloemfontein;
-- promotional staff Bloemfontein;
-- promo girls Bloemfontein;
-- event waitresses Free State;
-- wedding waiters Bloemfontein;
-- bar staff for events Bloemfontein;
-- brand ambassadors Free State;
-- event staffing South Africa;
-- event staff for agricultural shows;
-- corporate event staff Bloemfontein.
-
-Google Business Profile should include:
-
-- current service area;
-- booking phone and website;
-- real event photographs;
-- service categories;
-- regular updates;
-- review requests from planners, venues and corporate clients;
-- no residential address unless it is genuinely customer-facing.
-
-## Content engine
-
-### Proof of work
-
-- staff arriving and briefing before guests arrive;
-- uniform checks;
-- bar setup;
-- service flow;
-- venue transformation;
-- team leader directing staff;
-- before/during/after event sequence;
-- guest-facing moments with consent;
-- quiet operational details that show professionalism.
-
-### Staff profiles
-
-- name and role;
-- strongest event skill;
-- languages;
-- experience type;
-- what clients can rely on them for;
-- one human detail;
-- no ranking staff by appearance.
-
-### Client education
-
-- how many waiters do you need for 100 guests?;
-- bartender versus bar-back;
-- why a team leader matters;
-- what to include in a staffing brief;
-- when to book event staff;
-- what changes the price;
-- who supplies uniforms?;
-- how overtime works;
-- why backup staff matter;
-- what promotional staff need before an activation.
-
-### Event recaps
-
-Every recap should explain:
-
-- the event type;
-- the Braize roles supplied;
-- team size where approved;
-- the operational challenge;
-- what the staff did;
-- the outcome or client feedback.
-
-Do not only publish attractive faces with no commercial context.
+### Booking / B2B content
+
+Lead with the buyer's real event problem:
+- needing capable people for a visible role;
+- handling a busy service moment;
+- matching staff to the event/brand tone;
+- reducing uncertainty around who will be working the event.
+
+Use proof from the exact event/creative where available. Do not claim operational systems that have not been verified.
+
+### Staff-feature / celebratory content
+
+Can be more personal, playful and personality-led. `Braize girls` may fit here when it reflects the actual team shown. Still connect the person/team to what they do rather than only appearance.
 
 ### Recruitment content
 
-- what Braize looks for;
-- service and conduct expectations;
-- how applications work;
-- training and briefing requirements;
-- transport and availability expectations;
-- how shifts are allocated;
-- what causes removal from the roster;
-- payment process and timing.
-
-## Short-form video structures
-
-### "Before the doors open"
-
-1. Empty venue.
-2. Team arrival.
-3. Briefing and uniform check.
-4. Setup details.
-5. Doors open.
-6. End on Braize booking CTA.
-
-### "What the client sees / what we manage"
-
-Show polished guest service against behind-the-scenes coordination, shift planning, replacement and supervision.
-
-### "One event, five roles"
-
-Follow waiter, bartender, promo staff member, runner and supervisor through the same event.
-
-### "The event brief in 30 seconds"
-
-Teach clients exactly what details Braize needs to quote accurately.
-
-### "When the crowd picks up"
-
-Demonstrate calm service under real pressure, using footage from approved events.
-
-## Paid media strategy
-
-### Google Search
-
-Use for immediate booking intent:
-
-- waiters for hire;
-- bartenders for events;
-- event staffing;
-- promotional staff;
-- wedding staffing;
-- corporate event staff.
-
-Send each search theme to a relevant service page.
-
-### Meta and Instagram
-
-Use separate campaigns for:
-
-- event planners and venues;
-- private-event hosts;
-- corporate and activation clients;
-- staff recruitment.
-
-Do not mix recruitment leads with booking leads in one campaign.
-
-Best booking creatives:
-
-- real event proof;
-- "send us your date, venue, guest count and roles";
-- staffing checklist;
-- venue/planner testimonial;
-- case-study carousel;
-- last-minute availability only when truthful.
-
-### LinkedIn
-
-Use for:
-
-- corporate functions;
-- launches;
-- conferences;
-- exhibitions;
-- year-end events;
-- event agencies;
-- hospitality groups;
-- experiential-marketing partners.
-
-## Partnerships
-
-High-value partnership categories:
-
-- wedding and event planners;
-- venues;
-- caterers;
-- mobile bars;
-- décor companies;
-- AV and production companies;
-- photographers and videographers;
-- exhibition organisers;
-- agricultural associations and auction organisers;
-- sports clubs and golf-day organisers;
-- hotels and lodges;
-- universities and student organisations;
-- alcohol and FMCG brands;
-- experiential-marketing agencies.
-
-Partnership offers could include:
-
-- preferred staffing rates;
-- recurring venue teams;
-- co-branded staffing guides;
-- event-season retainers;
-- emergency backup agreements;
-- activation staffing packages;
-- post-event reporting.
-
-## Staffing operations and talent system
-
-Marketing cannot outgrow operations. Braize needs a reliable internal workforce system.
-
-### Staff records
-
-Each roster member should have:
-
-- verified identity;
-- contact details;
-- location;
-- transport access;
-- languages;
-- roles and skills;
-- experience;
-- training completed;
-- uniform sizes;
-- availability;
-- event history;
-- punctuality record;
-- client/supervisor ratings;
-- incidents and warnings;
-- payment details stored securely;
-- consent for photographs;
-- emergency contact;
-- right-to-work and age checks where required.
-
-### Matching logic
-
-Do not assign only by availability.
-
-Match staff based on:
-
-- role competence;
-- event type;
-- client/brand fit;
-- language;
-- location and transport;
-- prior performance;
-- shift duration;
-- alcohol-service experience;
-- uniform requirements;
-- team chemistry;
-- supervisor recommendation.
-
-### Event brief
-
-Every staff member should receive:
-
-- venue and arrival location;
-- arrival time;
-- responsible supervisor;
-- role and duties;
-- event timeline;
-- uniform and grooming;
-- client and brand context;
-- service standards;
-- meal and break rules;
-- transport plan;
-- payment terms;
-- emergency and escalation process;
-- photography/social-media rules.
-
-### Supervisor system
-
-For larger events, one Braize supervisor should manage:
-
-- check-in;
-- uniform inspection;
-- briefing;
-- role allocation;
-- breaks;
-- client communication;
-- incident handling;
-- overtime authorisation;
-- checkout;
-- post-event scorecards.
-
-### Backup system
-
-Maintain:
-
-- standby staff by role and area;
-- escalation contacts;
-- no-show protocol;
-- transport contingency;
-- replacement threshold;
-- client communication template.
-
-A backup system is one of the clearest reasons to book an agency rather than individuals.
-
-## Recruitment and worker-brand principles
-
-Braize must attract reliable people, not only visible people.
-
-Selection should evaluate:
-
-- punctuality;
-- communication;
-- service mindset;
-- ability to follow instructions;
-- composure;
-- teamwork;
-- presentation appropriate to role;
-- physical ability for the shift;
-- experience or trainability;
-- honesty and accountability.
-
-Avoid discriminatory or exploitative recruitment language. "Promo girls" may be the current market language, but the broader service architecture should allow professional promotional staff of different genders where the client brief legitimately requires it.
-
-Staff should know:
-
-- exact rates before accepting;
-- when payment will happen;
-- what deductions may apply;
-- cancellation rules;
-- transport responsibility;
-- shift and break expectations;
-- conduct and alcohol rules;
-- complaint and incident channels.
-
-## Risk, compliance and reputation
-
-Braize should obtain professional legal and labour advice on its exact employment/independent-contractor model.
-
-Operational controls should cover:
-
-- written terms with clients and staff;
-- worker classification;
-- minimum wage and working-time compliance where applicable;
-- overtime and public-holiday rules;
-- alcohol-service age and conduct;
-- workplace safety;
-- harassment and discrimination;
-- injury and incident reporting;
-- POPIA and staff records;
-- consent for marketing images;
-- transport and late-night safety;
-- cash and stock handling;
-- cancellation and force majeure;
-- liability and insurance;
-- child/minor restrictions;
-- client instructions that conflict with dignity or safety.
-
-Never market unsafe working conditions as glamour or fun.
-
-## Reviews and trust proof
-
-Request structured reviews from:
-
-- event planners;
-- venues;
-- caterers;
-- corporate clients;
-- private hosts;
-- brand managers.
-
-Useful prompts:
-
-- Did the team arrive and prepare on time?
-- Was communication clear before and during the event?
-- Did the staff match the event tone and brief?
-- How did Braize handle pressure or changes?
-- Would you use the team again?
-
-Staff testimonials can support recruitment but should not replace evidence of fair rates and reliable payment.
-
-## Measurement
-
-### Commercial metrics
-
-- qualified booking enquiries;
-- quote turnaround time;
-- quote-to-booking conversion;
-- average booking value;
-- gross margin per event;
-- revenue by role and event type;
-- repeat booking rate;
-- venue/planner referral revenue;
-- cost per qualified lead;
-- cancellation rate;
-- outstanding payments.
-
-### Operational metrics
-
-- fill rate;
-- no-show rate;
-- late-arrival rate;
-- replacement rate;
-- supervisor-to-staff ratio;
-- incidents per event;
-- client rating;
-- staff rating;
-- overtime variance;
-- transport failures;
-- payroll accuracy;
-- staff retention;
-- number of active trained people by role and location.
-
-### Marketing metrics
-
-- enquiries by source;
-- website booking-form completion;
-- WhatsApp enquiry quality;
-- case-study engagement;
-- planner and venue referrals;
-- search ranking for local staffing terms;
-- content that produces bookings rather than only views.
-
-## 90-day growth plan
-
-### Days 1–30: operational truth and conversion
-
-- verify all current public contact details, service areas and booking channels;
-- define exact roles Braize can reliably supply;
-- create client booking form and standard brief;
-- create standard quote, terms and cancellation policy;
-- audit roster records and staff consent;
-- define service, grooming and conduct standards;
-- create supervisor and backup protocols;
-- publish separate Book Staff and Join Braize pages;
-- set baseline commercial and no-show metrics.
-
-### Days 31–60: proof and partnerships
-
-- publish three detailed event case studies;
-- create venue and planner partnership pack;
-- launch "Before the doors open" content series;
-- capture structured testimonials;
-- begin direct outreach to venues, caterers, planners and auction organisers;
-- test Google Search for high-intent local terms;
-- run separate recruitment campaign only for roles with genuine demand;
-- train a first supervisor cohort.
-
-### Days 61–90: scale controlled demand
-
-- analyse quote conversion by event type;
-- identify highest-margin and most repeatable categories;
-- create recurring staffing arrangements with selected venues;
-- expand agricultural, corporate and activation outreach;
-- build event availability and staff-matching workflow into CG Dynamics;
-- implement post-event client and staff scorecards;
-- improve weak roles or stop selling them;
-- publish a high-quality seasonal/event calendar campaign.
-
-## High-value campaign platforms
-
-### "The right people change the whole event"
-
-Show the same event before staff arrival, during setup and in full guest flow.
-
-### "Briefed before booked"
-
-Position Braize as a company that understands the event before assigning people.
-
-### "When the crowd picks up, we step up"
-
-Use real service pressure and team coordination rather than empty hype.
-
-### "One team. One standard. Every guest."
-
-Best for venue and planner partnerships.
-
-### "People make the party"
-
-Keep the current line, but support it with proof of briefing, training, teamwork and reliability.
-
-## Current facts requiring confirmation
-
-Before production use, verify:
-
-- legal entity and directors;
-- current service areas;
-- current website functionality and contact details;
-- exact roles available;
-- current pricing model;
-- minimum shift and overtime rules;
-- transport and accommodation policy;
-- staff employment/contractor model;
-- insurance;
-- training standard;
-- uniform options;
-- supervisor availability;
-- client cancellation and replacement terms;
-- current staff count by role and town;
-- Facebook, LinkedIn and Google Business Profile presence;
-- whether "promo girls" remains the preferred public category or should be broadened to promotional staff/brand ambassadors.
-
-Until confirmed, treat these as review-state questions rather than facts.
-
-## Source notes
-
-Client-specific identity and current positioning were verified from the Instagram screenshot supplied directly by CA on 2026-08-06. The linked website domain was visible in the current Instagram bio but was not reliably indexed by the research browser during this pass.
-
-Competitor and best-practice benchmarks used:
-
-- Fresh People;
-- ACE Events;
-- Forever Staffing Solutions;
-- Panther Luxe Promotions;
-- Exige Promotions;
-- Thirst;
-- Student Promoters;
-- Purple Pearl Agency;
-- other current South African staffing-agency public materials.
-
-These sources are benchmarks only and must not be copied or represented as Braize facts.
+Keep recruitment factual and respectful. Never invent:
+- current vacancies;
+- pay rates/payment timing;
+- shift frequency;
+- transport requirements;
+- age/appearance requirements;
+- employment status;
+- training promises;
+- application channels.
+
+Recruitment content should use the freshest exact instructions supplied for the campaign.
+
+## 10. Text-on-post / poster guidance
+
+Text-on-post should be:
+- short enough to scan instantly;
+- built around one event problem or one service moment;
+- witty or human where appropriate;
+- concrete rather than generic.
+
+Useful territories include:
+- busy-bar service;
+- guest-facing confidence;
+- brand representation at activations;
+- event staff who fit the brief;
+- service pressure and crowd flow;
+- a real event/town moment;
+- one specific reason a planner/venue would book staff.
+
+Do not make every poster a question. Vary sentence structure and creative device.
+
+## 11. Recurring content and video formats
+
+Retain the strongest useful content-engine ideas from the earlier Braize research, but treat them as **creative recommendations**, not proof that every operational system already exists.
+
+Useful formats:
+- real event recap showing what Braize staff actually did;
+- behind-the-scenes arrival/briefing/setup footage where the real process is visible;
+- `when the crowd picks up` service-pressure moments;
+- bartender / waiter / promoter role-focused clips;
+- staff feature with one actual event strength or human detail;
+- client education about what information Braize needs for a staffing enquiry, once the real booking process is confirmed;
+- event-specific proof rather than generic posed staff galleries;
+- planner/venue/client testimonial only with real attributable approval;
+- local/regional event recap with exact town/event context.
+
+Event recaps should add commercial context where approved: event type, role supplied, what the team did and outcome/feedback. Never invent team size, client quotes or results.
+
+## 12. Image generation and editing rules
+
+No separate Braize-specific image-edit correction beyond the accessible Project/history was strong enough to justify a more detailed permanent rule set. Apply Issue #248 plus the client-specific preservation needs below:
+
+- preserve real staff identity and recognisable appearance unless the user explicitly requests a permitted change;
+- preserve actual Braize uniforms, logos, wording and colours;
+- preserve client/event/venue branding visible in the source unless the requested edit specifically changes it;
+- preserve product/drink/service objects and plausible proportions;
+- preserve the composition where the user asked only for cleanup, enhancement or a bounded change;
+- do not fabricate a branded client relationship, event attendance or staff role through an edit;
+- do not add alcohol consumption by working staff;
+- do not turn real event documentary imagery into misleading luxury/scale proof.
+
+When the request is an edit, change only what was requested and keep identity-critical elements stable.
+
+## 13. Dynamic SEO and hashtag rules
+
+Default: **maximum 5 hashtags** unless a verified platform/client exception exists.
+
+Do not maintain a permanent five-tag bank. Choose at generation time using:
+1. exact Braize identity;
+2. exact service/event topic;
+3. platform;
+4. relevant location/industry context only when true;
+5. current reliable search/trend evidence where available.
+
+Stored or historical tags are seed ideas only. Never call a hashtag `trending` without current evidence.
+
+Natural searchable language in the caption matters too. Useful search-intent concepts may include event staff, bartenders for events, promotional staff/brand ambassadors, waitstaff and the relevant verified town/region, but only use the exact terms that match the post and current service truth.
+
+## 14. Calls to action and footer behaviour
+
+Good CTAs should tell the user what to do next without generic filler:
+- send the event brief;
+- enquire about staff for the specific date/event;
+- ask about the exact role shown;
+- contact Braize for current availability;
+- book/plan early when the campaign has current evidence for timing pressure.
+
+Do not promise a quote time, availability or replacement capacity unless current evidence supports it.
+
+When conversion details are appropriate and task-time retrieval confirms they remain current, use the client-supplied footer convention:
+- Bloemfontein
+- `www.braize.co.za`
+- `promotions@braize.co.za`
+
+## 15. Existing strategy retained as recommendations, not facts
+
+The 2026-08 research pack contains useful strategic work on:
+- event-planner, venue, corporate, private-host and activation audiences;
+- trust barriers around punctuality, presentation, briefing, replacement and supervision;
+- website separation between `Book staff` and `Join the team`;
+- structured event-enquiry and quote information;
+- proof-of-work content, staff profiles, client education and event recaps;
+- Google/Search, Meta, LinkedIn and partnership opportunities;
+- staffing records, matching, briefing, supervisor and backup-system recommendations;
+- legal/labour/POPIA/safety controls;
+- commercial, operational and marketing measurement;
+- 90-day growth and partnership ideas.
+
+These remain useful **strategy/operating recommendations** and should not be re-researched merely for this Project migration. They are not evidence that the underlying operational system, policy, team size or capability currently exists.
+
+## 16. Task-scoped retrieval readiness for #241
+
+Future runtime should resolve:
+
+`client_id=6b67a2df-e2ab-418b-bcee-03aef5963d37 + task type + supplied creative/context`
+
+### Caption / poster packet
+Return only the current relevant slice:
+- exact canonical identity and inactive-alias warning;
+- voice/human-copy rules;
+- caption-adds-not-repeats rule;
+- language rule;
+- exact service/event facts needed for the creative;
+- current usable contact/footer convention;
+- claim guardrails and unresolved facts relevant to the brief;
+- max-five dynamic SEO/hashtag rule.
+
+### Content-idea / campaign packet
+Return:
+- current positioning and verified service scope;
+- audience/event context relevant to the task;
+- proven/recommended content patterns;
+- current opportunity/trend evidence where available;
+- claim safety.
+
+### Image-edit packet
+Return preservation rules for real staff, uniforms, Braize/client/event branding, composition and factual visual claims. Do not load the whole strategy pack.
+
+### Factual lookup packet
+Prefer current reviewed facts and their provenance/freshness state. If the exact mutable fact cannot be revalidated, say so rather than falling back silently to an old Project source.
+
+## 17. Unresolved / freshness-gated facts — never guess
+
+Before current public use, confirm where relevant:
+- official website/domain and whether it still resolves to the same business;
+- current Instagram handle and any other official social profiles;
+- current email, phone/WhatsApp and contact person;
+- current physical address/location wording and public service area;
+- whether national coverage is current operational truth or only positioning;
+- exact currently bookable staffing roles;
+- mobile-bar-service launch/status;
+- current event types/industries actively served;
+- recruitment/application pathway;
+- staff training, vetting, briefing and supervision systems;
+- backup/replacement policy;
+- current roster size, availability and geographic coverage;
+- pricing, deposits, overtime, travel/accommodation and cancellation terms;
+- employment/contractor model, wages and payment terms;
+- insurance/accreditation/compliance claims;
+- current named clients/partners/brand relationships;
+- Google Business Profile, Facebook and LinkedIn presence;
+- public hours.
+
+## 18. Working rule
+
+For Braize work, retrieve the current exact-client context first. Use the human creative rules here to make the output recognisably Braize, but never let style turn a strategic recommendation, historical manifesto line or old event post into a current factual claim.
+
+CG Dynamics/current governed GitHub intelligence is the durable source of truth. `Braize Marketing.pdf` remains useful original evidence. A static generated Client Guide is not required as a long-term ChatGPT Project Source under the current #241 architecture.
