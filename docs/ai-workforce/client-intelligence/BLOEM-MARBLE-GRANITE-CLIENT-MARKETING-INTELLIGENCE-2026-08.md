@@ -1,876 +1,504 @@
 # Bloem Marble & Granite — Client Marketing Intelligence
 
-Last updated: 2026-08-06
-Status: Review-state client intelligence. Keep isolated to Bloem Marble & Granite. Do not promote to approved production knowledge without human review.
+Last updated: 2026-09-08  
+Status: **Review-state canonical client intelligence — Issue #265 migration reconciled**  
+Canonical CG client: **Bloem Marble & Granite**  
+Canonical Dynamics client ID: **89e0ad6d-e08c-4a75-8b8e-abea71af581c**  
+Human Project knowledge reviewed: **2026-09-08**  
+Mutable public facts last verified: **2026-09-08**  
+Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
-## Executive position
+## 1. Purpose and scope
 
-Bloem Marble & Granite is a long-established Bloemfontein stone fabricator and installer trading since 2007. Publicly verified core services include kitchen tops, tombstones, custom stone work and a broad surface range covering natural granite, marble, Caesarstone, Eezi Quartz and Infinity porcelain. The company operates from 8 Tannery Road, Hamilton, Bloemfontein.
+This is the durable human operating record for Bloem Marble & Granite. It reconciles the August 2026 strategy/research, the accessible ChatGPT Project source and Project history, current CG creative corrections, Issue #248's human creative standard, the current official Bloem Marble & Granite website, and current supplier evidence.
 
-The immediate commercial opportunity is not merely “more social media”. It is to turn a strong production business into the most trusted and easiest-to-buy premium stone brand in the Free State by combining:
+CG Dynamics is the permanent source of truth. A Project guide or short Project Instructions are derived working views, not independent manually maintained truth stores.
 
-- visible craftsmanship;
-- material education;
-- strong architect, designer, builder and kitchen-company relationships;
-- faster, clearer quotation journeys;
-- project proof;
-- modern showroom and digital buying tools;
-- separate sales systems for kitchens, commercial work, outdoor surfaces and memorials;
-- honest after-sales and care guidance.
+Keep this intelligence isolated to the exact client above. Do not use it to change #241/shared runtime, other clients, CG Hours, billing, UUIDs, package history, time history or production data.
 
-The brand should own this space:
+This record stores durable judgement and current/review-state facts. It is not a caption archive, monthly content plan, slab-stock list, price list, project register or substitute for current supplier technical documents.
 
-> The Free State stone specialist that helps clients choose correctly, fabricates precisely and installs with confidence.
+## 2. Source authority and provenance
 
-## Verified public identity and offer
+### Human marketing judgement
 
-Publicly confirmed:
+For tone, writing, creative direction and production conventions, use this order:
 
-- trading since 2007;
-- address: 8 Tannery Road, Hamilton, Bloemfontein;
-- office number: 087 940 7711;
-- general email: info@bmgk.co.za;
-- additional published contacts: gerber@bmgk.co.za and kitchensales@bmgk.co.za;
-- main services: kitchen tops, tombstones and custom work in granite and marble;
-- surface categories displayed online: granite, Caesarstone, Eezi Quartz and Infinity porcelain;
-- free quotation call to action;
-- an Eezi Quartz cost calculator exists on the website;
-- customers are invited to request personalised designs.
+1. newest explicit client / CA / CG correction or approval;
+2. repeated patterns in the Bloem Marble & Granite ChatGPT Project;
+3. the current client-provided Project source;
+4. this canonical record;
+5. current exact-client public activity where reliable;
+6. older strategy recommendations.
 
-Website source family:
+A published line, old caption, generated render or one-off request is evidence, not automatically a permanent rule.
 
-- `https://bloemmg.co.za/`
-- `https://bloemmg.co.za/product-range/`
-- `https://bloemmg.co.za/granite/`
-- `https://bloemmg.co.za/eezi-quartz/`
-- `https://bloemmg.co.za/tombstones/`
-- `https://bloemmg.co.za/calculator/`
-- `https://bloemmg.co.za/contact/`
+### Mutable public facts
 
-Supplier confirmation:
+For contacts, website, social profiles, product categories, services, supplier relationships, hours, stock, service areas, technical claims, warranties, prices and promotions, follow the freshness protocol. Prefer current client-confirmed evidence, then current authoritative official sources. Mark conflicts rather than silently choosing.
 
-- Infinity Surfaces publicly lists Bloem Marble & Granite as a Free State contact with Gerber as contact person.
+### Provenance labels used here
 
-## Information requiring internal confirmation
+- `client_confirmed` — supplied in the current Bloem Marble & Granite Project source or directly by the client/CG.
+- `CA_CG_confirmed` — repeated or explicit CG Production House correction/approval.
+- `public_verified` — checked against a current reachable authoritative public source on 2026-09-08.
+- `supplier_verified` — confirmed by a current supplier/industry source.
+- `historical` — useful older context that is not automatically current.
+- `possible_change` — conflicting evidence exists and requires review.
+- `stale_unverified` — not freshly confirmed.
+- `rejected_for_current_use` — old, unsupported or unsafe to treat as current truth.
 
-Before any campaign or sales promise goes live, confirm:
+## 3. Canonical identity and current public truth
 
-- exact service radius;
-- whether measuring, templating, delivery and installation are all included;
-- exact brands currently stocked and which are order-only;
-- slab and sample availability;
-- lead times by product category;
-- thicknesses and edge profiles offered;
-- cut-out, sink, hob, drainage-groove and backsplash capabilities;
-- outdoor-rated surfaces;
-- warranty and workmanship policy;
-- repair, polishing, resealing and replacement services;
-- CNC, bridge-saw, waterjet or other manufacturing capabilities;
-- maximum project size;
-- commercial, developer and contractor capacity;
-- memorial range, inscriptions, cemetery coordination and installation process;
-- official social account URLs;
-- current review count and rating;
-- current quotation-to-sale conversion rate;
-- revenue mix between kitchens, tombstones, commercial and other work.
+### Identity
 
-## Strategic business model
+- **Name:** Bloem Marble & Granite. `client_confirmed`, `public_verified`.
+- **Business category:** stone fabrication / custom stone solutions business in Bloemfontein. `client_confirmed`.
+- **Trading history:** website states the business has traded since 2007. `public_verified`.
+- **Official website:** `https://bloemmg.co.za/`. `public_verified`.
 
-Bloem Marble & Granite serves several fundamentally different markets. They should not be mixed into one generic marketing stream.
+### Current general contact details
 
-### 1. Residential kitchens and renovations
+- **Office:** `087 940 7711`. `client_confirmed`, `public_verified`.
+- **General email:** `info@bmgk.co.za`. `client_confirmed`, `public_verified`.
+- **Additional emails shown on official contact page:** `gerber@bmgk.co.za`, `kitchensales@bmgk.co.za`. `public_verified`.
+- **Physical address:** `8 Tannery Road, Hamilton, Bloemfontein, Free State, South Africa, 9301`. `client_confirmed`, `public_verified`.
 
-Primary buyers:
+The Infinity Surfaces listing also publishes Gerber as contact person, cell `072 955 1222`, office `087 940 7711` and `gerber@bmgk.co.za`. Treat the cell as a supplier-list contact, not as the default general marketing number unless CG/client explicitly chooses it. `supplier_verified`.
 
-- homeowners renovating kitchens;
-- new-home clients;
-- kitchen-company clients;
-- interior designers;
-- architects;
-- builders;
-- property investors;
-- landlords upgrading rental properties.
+### Social profiles
 
-Main decision drivers:
+The official Bloem Marble & Granite contact page links to `https://www.facebook.com/bloemmg`. The destination was not fetchable in the 2026-09-08 verification pass, so the URL is `public_verified` as an official-site link but current page content/handle activity is not independently verified.
 
-- appearance;
-- durability;
-- maintenance;
-- stain and heat behaviour;
-- colour consistency;
-- price;
-- installation quality;
-- lead time;
-- trust in measurements and fit;
-- clarity on seams, overhangs and cut-outs.
+No current official Instagram account was verified in this migration. `stale_unverified`.
 
-### 2. Commercial and development work
+### Current website-listed product / material categories
 
-Primary buyers:
+The current website navigation or product range displays:
 
-- developers;
-- architects;
-- quantity surveyors;
-- shopfitters;
-- contractors;
-- hospitality operators;
-- offices;
-- medical practices;
-- retail projects;
-- schools and institutions.
+- Granite;
+- Marble in the site's core range/positioning copy;
+- Caesarstone;
+- Eezi Quartz;
+- Infinity Porcelain;
+- Stratus sintered porcelain on the current homepage navigation.
 
-Main decision drivers:
+These are `public_verified` category references. A category being shown on the website does **not** prove current slab stock, every colour, current supplier authorisation, current price, lead time or availability for a specific job.
 
-- specification compliance;
-- capacity;
-- programme reliability;
-- quality consistency;
-- snagging response;
-- documentation;
-- commercial pricing;
-- project coordination;
-- repeatability across multiple units.
+The official site also links Caesarstone, Eezi Quartz and Rudi's Choice under its supplier area. Record that as current website relationship evidence only; do not convert it into an unsupported authorised-dealer, warranty or stock claim.
 
-### 3. Outdoor and lifestyle applications
+Infinity Surfaces currently lists Bloem Marble & Granite in its Free State installer/contact directory. `supplier_verified`.
 
-Potential products, subject to confirmation:
+### Current core offer
 
-- braai tops;
-- bars;
-- outdoor kitchens;
-- pool surrounds and coping;
-- entertainment counters;
-- patio applications;
-- fireplaces and cladding.
+The official website currently supports:
 
-This category is strategically valuable in the Free State because entertaining, braais, lapa spaces and indoor-outdoor living are highly relevant local lifestyle drivers.
+- kitchen tops;
+- tombstones;
+- personalised/custom design enquiries;
+- granite and marble work.
 
-### 4. Memorials and tombstones
+The current client Project source additionally states that Bloem Marble & Granite offers:
 
-This must remain a separate, respectful communication system.
+- granite, marble, quartz and porcelain countertops;
+- kitchen worktops;
+- bathroom vanities;
+- custom stone fabrication;
+- installations;
+- tombstones.
 
-Primary buyers:
+Treat those Project-source items as `client_confirmed`. Before a campaign promises a specific material, installation scope, fabrication operation or project type, freshness-check the exact requirement when it could have changed.
 
-- bereaved families;
-- funeral homes;
-- churches;
-- burial societies;
-- estate representatives.
+## 4. Conflicts and stale claims resolved in this migration
 
-Main decision drivers:
+### Nationwide installation / service area
 
-- empathy;
-- dignity;
-- design clarity;
-- price transparency;
-- inscription accuracy;
-- timing;
-- cemetery coordination;
-- installation quality;
-- long-term durability.
+Older public advertising referenced installation across South Africa, collection and delivery. That evidence is historical and is not enough under Issue #265 to establish the current service radius or installation coverage.
 
-Do not mix memorial marketing with upbeat kitchen content in the same campaign or landing page.
+**Current rule:** exact service area, delivery scope and installation geography are `stale_unverified` until freshly confirmed. Do not publish “nationwide” / “across SA” as current truth from old advertising.
 
-## Core customer problems
+### Old directory phone numbers
 
-Homeowners often struggle with:
+Older directory pages can surface numbers that do not match the current client source and official website. Do not revive stale directory numbers. Use the current general office number above unless the client supplies a newer operational contact.
 
-- not knowing the difference between granite, quartz, porcelain and marble;
-- choosing from small samples without understanding full-slab movement;
-- fear of stains, cracks, chips and heat damage;
-- uncertainty about seams and joins;
-- unclear quotations;
-- hidden extras for cut-outs, installation or transport;
-- delays between cabinetry and stone installation;
-- poor communication after deposit;
-- choosing colour before cabinetry, flooring and lighting are finalised.
+### Website superlatives
 
-Trade partners struggle with:
+The public site contains language such as “best”, “unmatched”, “best quality” and affordability claims. These are **not** evidentiary proof for CG marketing.
 
-- unreliable measurement and installation dates;
-- inconsistent quality;
-- slow quote turnaround;
-- poor handling of changes;
-- weak documentation;
-- late snag resolution;
-- client confusion about product limitations;
-- blame shifting between cabinetmaker, builder and stone installer.
+**Current rule:** do not repeat unsupported superiority, price or quality superlatives. Use visible project proof, exact process detail or verified product facts instead.
 
-The marketing system should solve these problems before the sales conversation starts.
+### Static hashtag bank
 
-## Material decision framework
+The August Project source includes suggested hashtags. Under Issue #248 those are seed/reference material only.
 
-Bloem Marble & Granite should become the local authority that helps clients choose the right material for the actual use case.
+**Current rule:** default maximum **5 hashtags**, chosen dynamically for the exact client, material/use case, location, platform and current reliable context. Never paste the old bank mechanically or call a tag “trending” without current evidence.
 
-### Granite
+## 5. Brand position and audience structure
 
-Best-fit messaging:
+Bloem Marble & Granite should be marketed as a knowledgeable, visually strong stone specialist that helps people choose appropriately and shows the workmanship behind the finished result.
 
-- natural variation and unique character;
-- strong, durable material;
-- suitable for many kitchen and outdoor applications where the exact stone and finish are appropriate;
-- requires honest discussion of porosity, sealing and natural fissures.
+The tone is:
 
-Do not describe all granite as maintenance-free or stain-proof.
+- professional;
+- premium without empty luxury language;
+- trustworthy;
+- warm and approachable;
+- material- and project-aware;
+- specific rather than generic.
+
+### Residential / homeowner work
+
+Primary creative territory:
+
+- kitchen countertops/worktops;
+- bathroom vanities where confirmed for the exact job;
+- renovation transformations;
+- material choice;
+- colour/veining/finish decisions;
+- care and realistic material trade-offs;
+- visible process and installation proof.
+
+Homeowner copy should reduce uncertainty. It should explain what the customer needs to notice or decide, not merely describe a beautiful room.
+
+### Trade / professional / commercial work
+
+Architects, designers, kitchen companies, builders, developers and commercial buyers are strategically relevant from the August research. For this audience, useful content can focus on drawings, samples, finish detail, project coordination, specification questions and verified completed work.
+
+Do **not** infer commercial capacity, project scale, turnaround, equipment, repeat-unit capability or formal professional programmes from strategy recommendations. These remain proposals until confirmed.
+
+### Memorial / tombstone work
+
+Tombstones are a current public offer and must remain a separate, respectful communication mode.
+
+Rules:
+
+- keep the language dignified and calm;
+- do not use playful kitchen/interior hooks for memorial content;
+- do not use aggressive scarcity or entertainment-style treatment;
+- verify names, dates and inscriptions from client-approved source material before publication;
+- obtain permission before treating a real family's memorial as marketing proof.
+
+## 6. Human creative standard for Bloem Marble & Granite
+
+### What good copy sounds like
+
+A strong Bloem Marble & Granite line should be about the **actual stone, use case, process, choice or result**.
+
+Prefer:
+
+- what the material changes in this exact kitchen/bathroom/project;
+- why a particular surface choice matters to the user;
+- what the team did in the cut/fabrication/install process when verified;
+- one useful comparison or decision point;
+- real craftsmanship visible in the supplied creative;
+- a direct next step such as requesting a quote or discussing a material/project.
+
+Avoid generic interiors/stone filler such as:
+
+- “transform your space”;
+- “timeless elegance” as an empty default;
+- “where quality meets style”;
+- “elevate your home”;
+- “crafted to perfection”;
+- “experience the difference”;
+- unsupported “premium quality” / “unmatched quality” statements;
+- interchangeable luxury wording that could sit under any marble image.
+
+Recent CG work repeatedly rejected bland or repetitive wording. Vary verbs and do not keep recycling “crafted”, “finished”, “built”, “refined finish” or similar formulaic language when a more specific statement is available.
+
+### Captions
+
+Durable Project rule: **the caption must not repeat the wording already on the artwork/poster.**
+
+Instead, add one useful second layer:
+
+- material/application context;
+- a customer decision or benefit;
+- a process detail;
+- the service behind the visual;
+- a real project angle;
+- a team/craftsmanship angle;
+- a quotation/contact prompt.
+
+Keep straightforward captions concise and human. One clear idea is better than several generic claims stacked together.
+
+When the supplied creative already explains the product, use the caption to answer “why should I care?” or “what should I do next?” rather than restating the heading.
+
+### Poster / text-on-post
+
+The recurring preferred structure is:
+
+1. a short heading about the **actual product/service/material/use case**;
+2. one supporting line that makes the relevance clear.
+
+The support line should add a real benefit, decision point or application-specific detail. Never invent a technical benefit to make the copy stronger.
+
+If the artwork shows a named material, use the exact confirmed name. If the material is only visually inferred, do not assign a precise slab/stone name without client or supplier confirmation.
+
+### Options / ideation
+
+When several routes are requested, make them genuinely different in concept and angle rather than shallow synonym swaps. Recent Project work prefers specific, fresh approaches over another variation of the same premium-stone sentence.
+
+### Language and emojis
+
+Most durable Bloem Marble & Granite Project work is English. Default to natural English unless the supplied brief/content asks for another language.
+
+There is no durable rule requiring emojis. Keep them restrained and avoid an overly casual tone. Contact details can be clean text unless a supplied template requires another format.
+
+## 7. Video / reel behaviour
+
+A recurring CG format is short-form video of about **20–30 seconds** with a strong opening and clear scenes.
+
+Useful recurring territories:
+
+- slab/material close-up to finished installation;
+- cutting/fabrication/process to final reveal where the process shown is real;
+- before and after;
+- material comparison/education;
+- team/craftsmanship detail;
+- tombstone/memorial craftsmanship in a respectful treatment;
+- one real project or product focus.
+
+Recent Project direction explicitly preferred more unusual, product-led concepts rather than conventional showroom explainers. Examples of that **creative style**, not permanent scripts, include:
+
+- a multi-stone “guess which material” interaction;
+- a full POV treatment where the camera stays close to the product/process;
+- product/process reveal structures that make the stone itself the visual subject.
+
+Use playful/interactivity only for suitable kitchen/interior/material content. Do not use it for memorial work.
+
+## 8. Image generation and editing rules
+
+Bloem Marble & Granite creative frequently depends on the visual truth of the stone. Preserve it.
+
+When editing a supplied image:
+
+- treat the supplied slab/material reference as source-of-truth for visible colour, veining, movement and overall character;
+- preserve the requested product, edge/shape, finish appearance, proportions, branding, people and key composition unless the brief explicitly changes them;
+- when replacing one stone with another, replace the stone only as requested rather than redesigning unrelated parts of the image;
+- keep renders photorealistic when the brief asks for realism;
+- do not casually invent an alternative marble/granite pattern because it looks more luxurious;
+- do not change an actual product/material into a different one without instruction.
+
+Generated or edited imagery is **never evidence that Bloem Marble & Granite stocked, supplied, fabricated or installed that exact material/project**. It must not be used to create factual claims about a real completed job.
+
+If an exact stone/slab name is not supplied or verified, describe the visual generically rather than guessing a trade name.
+
+## 9. Material and performance guardrails
+
+Material advice must remain product- and application-specific. Current supplier data outranks old generic copy.
+
+### Natural stone / granite
+
+Useful durable framing from the August research:
+
+- natural variation is part of the material character;
+- sample/photograph appearance may not guarantee an identical slab pattern;
+- porosity, sealing and natural fissures should be discussed honestly when relevant.
+
+Do not call all granite stain-proof, maintenance-free or universally suitable for every outdoor/kitchen application.
 
 ### Engineered quartz
 
-Public supplier guidance supports:
+The August supplier research supports a cautious rule:
 
-- non-porous composition;
-- no sealing requirement;
-- low routine maintenance;
-- good stain resistance;
-- scratch resistance, not scratch-proof performance;
-- heat caution and use of trivets.
+- do not call quartz scratch-proof or heat-proof;
+- use cutting boards / heat protection guidance only when consistent with the current supplier's documentation;
+- do not turn generic quartz behaviour into a claim about every brand/colour/product.
 
-Caesarstone explicitly advises cutting boards and heat protection. Marketing must not claim quartz is heat-proof or scratch-proof.
+### Porcelain / sintered surfaces
 
-### Porcelain and sintered surfaces
-
-Best-fit messaging:
-
-- strong design flexibility;
-- thin, refined profiles;
-- low porosity;
-- strong stain and heat performance depending on product and installation;
-- suitable for premium contemporary applications;
-- requires expert fabrication and edge handling.
-
-Infinity is already publicly linked to Bloem Marble & Granite and should be used as a premium design and specification pillar where commercially relevant.
+The current website lists Infinity Porcelain and Stratus sintered porcelain categories, but technical performance, thickness, edge handling, heat/stain claims and application suitability must be checked against the exact current product/supplier documentation.
 
 ### Marble
 
-Best-fit messaging:
+Market marble for its natural appearance and veining without pretending it behaves like every engineered surface. Etching, staining, patina, sealing and maintenance depend on the exact stone and use case.
 
-- natural beauty and prestige;
-- expressive veining;
-- suitable for clients who accept patina and maintenance;
-- vulnerable to etching and staining compared with many alternatives.
+### General technical rule
 
-Do not position marble as the obvious practical choice for every family kitchen.
+Never invent or infer:
 
-## Competitor analysis
-
-### Unique Granite & Marble Bloemfontein
-
-Public strengths:
-
-- clearly lists residential, commercial and outdoor services;
-- speaks directly to homeowners, designers, contractors and developers;
-- covers countertops, fireplaces, vanities, stairs, wall cladding, bars, pools and commercial rooms;
-- communicates competitive pricing and local fabrication.
-
-Bloem Marble & Granite opportunity:
-
-- surpass them with stronger portfolio organisation, project case studies, material guidance and a more sophisticated quotation process;
-- make 2007 operating history and supplier relationships visible proof;
-- build stronger architect and developer resources.
-
-### Kamen Granite and Marble
-
-Public strengths:
-
-- large visible project gallery;
-- clear Bloemfontein address and operating hours;
-- explicit positioning around marble, granite and tombstones;
-- accessible visual proof.
-
-Bloem Marble & Granite opportunity:
-
-- improve recent project volume and categorisation online;
-- show before, fabrication, installation and final photography rather than only finished images;
-- create clearer product and service pages;
-- outperform on educational content and conversion tools.
-
-### Grand Tops and Granite
-
-Public strengths:
-
-- price and affordability messaging;
-- tombstone manufacturing;
-- public-access positioning;
-- strong customer comments on affordability and service in directory listings.
-
-Bloem Marble & Granite opportunity:
-
-- avoid competing only on price;
-- distinguish through material breadth, finish quality, precise installation, design support and supplier-backed products;
-- provide transparent entry, mid and premium routes without becoming a discount brand.
-
-### Union Tiles and broad building-material retailers
-
-Strengths:
-
-- broader foot traffic;
-- natural-stone and tile ranges;
-- convenience and category breadth.
-
-Bloem Marble & Granite opportunity:
-
-- own specialist advice, fabrication and installation;
-- partner where useful rather than treating every retailer as a direct competitor.
-
-### Kitchen companies and cabinetmakers
-
-They can be either competitors, specifiers or high-value lead partners.
-
-Risk:
-
-- some bundle stone into full kitchen quotations and control the client relationship;
-- stone becomes a commodity line item.
-
-Opportunity:
-
-- create preferred-partner programmes;
-- fast trade quotes;
-- co-branded sample consultations;
-- installation scheduling standards;
-- shared photography and case studies;
-- referral incentives where lawful and transparent.
-
-### National premium surface brands and showrooms
-
-Caesarstone and Infinity set the benchmark for:
-
-- material storytelling;
-- visualisation tools;
-- colour catalogues;
-- care and maintenance education;
-- warranties;
-- premium project photography;
-- architect/designer resources.
-
-Bloem Marble & Granite should localise this sophistication around actual Free State homes, budgets and installation realities.
-
-## Website audit
-
-### Current strengths
-
-- website is publicly accessible;
-- free quote call to action;
-- product categories exist;
-- catalogue pages show named colours;
-- contact details and physical address are visible;
-- calculator concept is commercially useful;
-- tombstone category is separated from main product range.
-
-### Current weaknesses
-
-- copy contains spelling and grammar errors;
-- repeated generic claims such as “best quality” and “unmatched” lack evidence;
-- portfolio depth is not strong enough for a high-trust purchase;
-- product pages lack technical and lifestyle guidance;
-- quote form fields appear duplicated or poorly labelled;
-- unclear whether the calculator reflects current prices and complete installed cost;
-- no clear project stages;
-- no trade-professional journey;
-- no strong review proof;
-- no FAQ covering seams, lead time, sealing, maintenance, measurement and installation;
-- no obvious showroom-booking flow;
-- no separate kitchen, commercial, outdoor and memorial funnels;
-- limited local SEO depth.
-
-### Required new website structure
-
-1. Home
-2. Kitchen countertops
-3. Bathroom vanities
-4. Outdoor and braai surfaces
-5. Commercial and development work
-6. Tombstones and memorials
-7. Granite
-8. Quartz
-9. Porcelain and Infinity
-10. Marble
-11. Project portfolio
-12. Trade and professional partners
-13. Showroom and sample consultation
-14. How the process works
-15. Care and maintenance
-16. FAQ
-17. Quote upload page
-18. Contact
-
-### Quote funnel
-
-The quote form should capture:
-
-- project type;
-- city and suburb;
-- new build or renovation;
-- cabinetry status;
-- estimated installation date;
-- rough dimensions or plan upload;
-- preferred material or “help me choose”;
-- colour direction;
-- sink type;
-- hob type;
-- backsplash requirements;
-- edge profile;
-- contact preference;
-- architect, designer, builder or kitchen-company details where relevant.
-
-A client should be able to upload:
-
-- kitchen plan;
-- cabinetry drawing;
-- room photos;
-- inspiration image;
-- slab or colour reference.
-
-### Calculator strategy
-
-The current Eezi Quartz calculator is a strong lead magnet but must not imply a final installed quote unless it includes every relevant cost.
-
-It should show:
-
-- estimate only;
-- VAT status;
-- whether templating, transport, installation, cut-outs, edge profiles, backsplashes and joins are included;
-- lead capture before detailed result;
-- immediate WhatsApp handover;
-- option to upload a plan.
-
-## Local SEO and Google Business Profile
-
-Priority keyword clusters:
-
-- granite tops Bloemfontein;
-- kitchen countertops Bloemfontein;
-- quartz countertops Bloemfontein;
-- Caesarstone Bloemfontein;
-- Eezi Quartz Bloemfontein;
-- Infinity porcelain Bloemfontein;
-- marble suppliers Bloemfontein;
-- stone fabricators Free State;
-- kitchen top installers Bloemfontein;
-- braai tops Bloemfontein;
-- tombstones Bloemfontein;
-- custom tombstones Free State;
-- commercial stone installation Bloemfontein.
-
-Google Business Profile priorities:
-
-- correct primary and secondary categories;
-- full service list;
-- current hours;
-- showroom and factory photos;
-- weekly project uploads;
-- product posts;
-- quote link with UTM tracking;
-- review responses;
-- Q&A covering measurements, lead times, material choice and showroom visits;
-- separate photos for kitchens, commercial, outdoor and memorial work.
-
-## Content strategy
-
-### Pillar 1: Transformation
-
-- empty kitchen to installed surface;
-- old laminate to new quartz or granite;
-- dated braai to premium outdoor counter;
-- commercial reception or bathroom upgrade;
-- respectful memorial design progression.
-
-### Pillar 2: Craft and precision
-
-- templating;
-- slab inspection;
-- cutting;
-- polishing;
-- edge finishing;
-- sink and hob cut-outs;
-- dry fitting;
-- transport protection;
-- installation;
-- seam finishing;
-- final quality check.
-
-This is the strongest authenticity pillar because competitors often show only finished surfaces.
-
-### Pillar 3: Material education
-
-- granite vs quartz vs porcelain;
-- what can stain;
-- heat protection;
-- sealing;
-- how dark colours show marks;
-- full slab vs sample;
+- heat resistance limits;
+- scratch resistance;
+- stain resistance;
+- food-safety claims;
+- structural/load capability;
+- outdoor suitability;
+- sealing intervals;
+- thicknesses;
 - edge profiles;
-- waterfall ends;
-- backsplash choices;
-- indoor vs outdoor suitability;
-- why natural stone varies.
+- cut-out tolerances;
+- warranties;
+- certifications;
+- installation methods;
+- care chemistry.
 
-### Pillar 4: Design authority
+Use current supplier-approved technical/care information for the exact product when the content depends on those claims.
 
-- warm neutrals;
-- dramatic veining;
-- quiet luxury;
-- curved islands;
-- thin porcelain profiles;
-- full-height stone backsplashes;
-- mixed materials;
-- dark stone with timber;
-- Free State farmhouse kitchens;
-- contemporary urban kitchens;
-- hospitality and commercial interiors.
+## 10. Contact and CTA conventions
 
-### Pillar 5: Real people
+For a normal general enquiry, current verified core details are:
 
-- fabricators;
-- installers;
-- showroom consultants;
-- architects;
-- kitchen designers;
-- builders;
-- clients explaining their choice;
-- long-serving staff;
-- supplier visits and training.
+- `087 940 7711`
+- `info@bmgk.co.za`
+- `https://bloemmg.co.za/`
+- `8 Tannery Road, Hamilton, Bloemfontein, Free State, South Africa, 9301`
 
-### Pillar 6: Sales and conversion
+Use full contact detail when the brief/format calls for it. Do not turn every short caption into a long footer when the creative already provides the contact path.
 
-- available slab arrivals;
-- showroom consultation days;
-- plan-upload quotation campaigns;
-- kitchen-company partnership projects;
-- renovation season reminders;
-- limited truthful stock opportunities;
-- installation-slot communication;
-- care kits and warranty registration.
+Useful CTAs include:
 
-## Short-form video concepts
+- request a quote;
+- discuss the material/project;
+- send the plan/dimensions when that workflow is confirmed for the job;
+- visit/contact the team using the current verified contact path.
 
-### “One slab, one kitchen”
-
-1. Show the slab before cutting.
-2. Mark the layout and vein direction.
-3. Show fabrication.
-4. Reveal the installed kitchen.
-5. Explain why that layout was chosen.
-
-### “Do not choose your top before this”
-
-1. Show cabinetry, floor and lighting.
-2. Explain how all three affect stone colour.
-3. Compare two samples in the actual room.
-4. Invite the viewer to a consultation.
-
-### “Granite, quartz or porcelain?”
-
-Use one real family scenario and explain the correct recommendation based on cooking habits, maintenance expectations, sunlight and budget.
-
-### “Why this seam is here”
-
-Explain slab size, transport, structural support and visual planning. This builds trust around a frequent customer concern.
-
-### “From plan to fit”
+Do not invent WhatsApp details, quote turnaround, booking slots, response time, current stock or installation availability.
 
-- plan upload;
-- measurement;
-- template;
-- fabrication;
-- installation;
-- final sign-off.
-
-### “Installer’s eye”
-
-An installer points out cabinet level, wall alignment, sink support and overhang risks before installation.
-
-## Paid-media system
-
-### Google Search
-
-High-intent campaigns:
-
-- kitchen tops;
-- quartz and Caesarstone;
-- granite;
-- porcelain and Infinity;
-- tombstones;
-- commercial stone work;
-- braai and outdoor tops.
-
-Each needs its own landing page and conversion event.
-
-Do not send tombstone enquiries to a cheerful kitchen homepage.
-
-### Meta and Instagram
-
-Campaign sequence:
-
-1. Awareness — finished-project transformations and craft.
-2. Education — material comparison and care.
-3. Consideration — showroom, sample and plan-upload offers.
-4. Conversion — quotation and consultation.
-5. Retargeting — project proof, reviews, process clarity and FAQs.
-
-Audience groups:
-
-- homeowners;
-- renovation and home-design interests;
-- architects and interior designers;
-- property developers;
-- builders and kitchen companies;
-- engaged and newly married audiences planning homes;
-- existing website visitors and video viewers.
-
-### LinkedIn
-
-Use for:
-
-- commercial project capability;
-- architect and designer relationships;
-- developer and contractor proof;
-- manufacturing capacity;
-- project case studies;
-- procurement and trade contact routes.
-
-## Partnership engine
-
-Priority partners:
-
-- architects;
-- interior designers;
-- kitchen companies;
-- cabinetmakers;
-- builders;
-- developers;
-- quantity surveyors;
-- estate agents;
-- home-improvement retailers;
-- appliance showrooms;
-- sink and tap suppliers;
-- tile and flooring businesses;
-- plumbers;
-- funeral homes;
-- churches and burial societies for memorial work;
-- hospitality and retail fit-out specialists.
-
-### Preferred professional programme
-
-Offer:
-
-- dedicated trade contact;
-- 24–48 hour quote target where feasible;
-- sample library;
-- technical product sheets;
-- showroom appointments;
-- project scheduling visibility;
-- co-branded project photography;
-- installation and snagging standards;
-- quarterly professional breakfast or CPD-style product session where appropriate.
-
-## Sales process
-
-Recommended stages:
-
-1. New enquiry
-2. Qualified project
-3. Plan or dimensions received
-4. Material consultation
-5. Estimate issued
-6. Site measure required
-7. Final quote issued
-8. Deposit received
-9. Templating booked
-10. Fabrication
-11. Installation booked
-12. Installed
-13. Snag or care follow-up
-14. Review requested
-15. Referral or trade relationship opportunity
-
-Track kitchens, commercial, outdoor and memorial enquiries separately.
-
-## Reputation and review system
-
-Review prompts should ask about:
-
-- consultation quality;
-- product guidance;
-- communication;
-- measurement accuracy;
-- installation quality;
-- cleanliness;
-- timing;
-- snag resolution;
-- final appearance.
-
-Request reviews only after the client confirms completion or snag resolution.
-
-Create case studies with:
-
-- client problem;
-- material decision;
-- project constraints;
-- fabrication detail;
-- installation solution;
-- final outcome;
-- exact project partners;
-- testimonial with permission.
-
-## Memorial-marketing rules
-
-- use respectful language;
-- never use aggressive scarcity or retargeting during grief;
-- avoid entertainment-style content;
-- explain process, options and timing calmly;
-- obtain family permission before publishing memorials;
-- verify spelling and dates through signed approval;
-- separate memorial leads, consent and reporting from kitchen campaigns.
-
-## Measurement framework
-
-### Commercial outcomes
-
-- qualified enquiries by category;
-- quote value;
-- quote turnaround time;
-- quote-to-deposit conversion;
-- average order value;
-- gross margin by category and material;
-- lead source;
-- installation lead time;
-- cancellation reason;
-- repeat trade revenue;
-- referral revenue;
-- commercial pipeline value.
-
-### Marketing outcomes
-
-- local search visibility;
-- Google Business Profile calls, direction requests and website clicks;
-- plan uploads;
-- showroom bookings;
-- WhatsApp quote starts;
-- material-guide downloads;
-- video completion rate;
-- saved material-comparison content;
-- retargeting conversion;
-- cost per qualified lead;
-- review volume and rating;
-- architect, designer and kitchen-company leads.
-
-Do not optimise toward likes alone.
-
-## 90-day execution plan
-
-### Days 1–30: Build sales truth
-
-- confirm complete service and product matrix;
-- confirm official social accounts;
-- audit current quotations and lead stages;
-- fix website spelling, forms and contact consistency;
-- verify calculator accuracy and disclaimers;
-- photograph showroom, factory, staff and current slabs;
-- create separate kitchen and memorial conversion journeys;
-- fully optimise Google Business Profile;
-- collect recent project and review evidence;
-- build trade-partner database.
-
-### Days 31–60: Launch authority
-
-- publish material comparison guide;
-- launch weekly fabrication and installation series;
-- publish 4–6 detailed project case studies;
-- run showroom and plan-upload campaign;
-- launch Google Search by service category;
-- begin architect, designer and kitchen-company outreach;
-- create after-care and warranty handover pack;
-- establish review request workflow.
-
-### Days 61–90: Scale conversion
-
-- retarget project viewers and guide visitors;
-- introduce professional sample and quote programme;
-- produce one premium kitchen campaign and one outdoor-living campaign;
-- build commercial capability deck;
-- test lead magnet: “Choose the right countertop for your home”;
-- measure quote quality, order value and margin by channel;
-- stop low-quality channels and expand proven ones;
-- create quarterly content and campaign calendar from actual sales seasonality.
-
-## High-value strategic campaign territories
-
-### “Made in Bloem. Built for real homes.”
-
-Show local fabrication, local people and Free State homes without using empty local-pride slogans.
-
-### “Choose once. Choose properly.”
-
-Material education, lifestyle fit and expert consultation.
-
-### “From slab to centrepiece.”
-
-Premium transformation and craft.
-
-### “The work behind the finish.”
-
-Manufacturing and installation authenticity.
-
-### “Send the plan. Start the quote.”
-
-Direct-response campaign for homeowners, designers and kitchen companies.
-
-### “Trade partners who keep projects moving.”
-
-B2B campaign around quote speed, scheduling, communication and snagging.
-
-## Claims and compliance controls
-
-Never claim without evidence:
-
-- lowest prices;
-- best in Bloemfontein;
-- unmatched quality;
-- stain-proof;
-- scratch-proof;
-- heat-proof;
-- maintenance-free across all materials;
-- lifetime warranty;
-- guaranteed lead time;
-- authorised or accredited supplier status;
-- sustainability superiority;
-- commercial capacity beyond proven delivery.
-
-Use supplier-approved care, warranty and performance wording for branded surfaces.
-
-## Strongest immediate opportunities
-
-1. Repair the quote and website conversion journey.
-2. Turn fabrication and installation into visible brand proof.
-3. Build separate funnels for kitchens, trade, commercial, outdoor and memorials.
-4. Become Bloemfontein’s most useful material-education source.
-5. Create a serious architect, designer, builder and kitchen-company partner system.
-6. Use plan upload and showroom consultation as primary conversions.
-7. Organise the portfolio by project type, material and style.
-8. Measure quote value, conversion, margin and lead source—not only engagement.
-9. Build a premium local brand without abandoning affordable product paths.
-10. Use supplier relationships, warranties and exact material guidance as trust assets.
-
-## Source register
-
-Primary client sources:
-
-- Bloem Marble & Granite home, product, granite, Eezi Quartz, tombstone, calculator and contact pages.
-- Infinity Surfaces public Free State listing for Bloem Marble & Granite.
-
-Competitor sources:
-
-- Unique Granite & Marble Bloemfontein.
-- Kamen Granite and Marble.
-- Snupit Bloemfontein marble and granite supplier listings.
-
-Supplier and product sources:
-
-- Caesarstone South Africa quartz, warranty and care guidance.
-- Infinity Surfaces South Africa.
-
-Research limitations:
-
-- social-platform content was not fully crawlable;
-- Google review totals and current ratings were not reliably available in this pass;
-- current pricing, lead times and exact product availability require internal confirmation;
-- competitor quality and market share cannot be inferred from website presence alone.
+## 11. SEO and hashtags
+
+Use natural searchable wording inside the copy as well as hashtags.
+
+Strong evergreen search territories from the reconciled August research include, when the exact task supports them:
+
+- granite countertops Bloemfontein;
+- quartz countertops Bloemfontein;
+- marble / stone countertops Bloemfontein;
+- kitchen countertops Bloemfontein;
+- stone fabrication Bloemfontein;
+- bathroom vanities Bloemfontein;
+- tombstones Bloemfontein;
+- porcelain surfaces Bloemfontein;
+- custom stonework Bloemfontein.
+
+Hashtag rule under Issue #248:
+
+- default maximum **5**;
+- choose dynamically from exact client + subject/material/use case + location + platform + current reliable context;
+- stored/suggested hashtag banks are seeds only;
+- never claim a hashtag is trending without current evidence;
+- do not use a hashtag to imply an unverified supplier relationship, stock item, service area or capability.
+
+## 12. Content territories retained from the August intelligence
+
+These remain useful strategy directions when backed by real current assets:
+
+### Transformation
+
+- before/after kitchens or bathrooms;
+- completed surface installation;
+- real room/project progression;
+- respectful memorial progression with permission.
+
+### Craft and process
+
+- material selection;
+- visible cutting/fabrication steps that are actually happening;
+- polishing/edge/detail work that is actually shown;
+- installation sequence that is actually verified;
+- final quality/detail reveal.
+
+### Material education
+
+- granite vs quartz vs porcelain vs marble by real customer decision;
+- full slab/reference vs small sample;
+- natural variation;
+- care/heat/sealing questions using current supplier facts;
+- finish/edge/style decisions when current offerings are known.
+
+### Design / project proof
+
+- real completed kitchens, bathrooms and verified commercial projects;
+- close-ups that show veining, edge detail and fit;
+- real team/process moments;
+- client/project stories with permission.
+
+### Sales / conversion
+
+- quote prompt;
+- current slab/material arrival only when freshly verified;
+- consultation/sample content only when the current workflow is confirmed;
+- client testimonial or project success story with permission.
+
+### Strategy proposals that are **not current service facts**
+
+The August record proposed outdoor/braai surfaces, architect programmes, developer/commercial systems, showroom/sample initiatives, quote-upload flows, care kits, CPD-style sessions and other growth ideas. Keep those as strategy opportunities only. Do not publish them as current Bloem Marble & Granite services/capabilities unless separately confirmed.
+
+Similarly, historic creative work involving boardroom tables or other custom concepts is not enough on its own to establish a standing current service category.
+
+## 13. Freshness-gated / unresolved facts
+
+Before operational use, re-check:
+
+- current official Facebook activity and current official Instagram account;
+- opening hours;
+- exact current service radius;
+- delivery/collection arrangements;
+- installation geography and scope;
+- whether measuring/templating is offered/included and under what conditions;
+- current slab, colour and sample stock;
+- brands currently stocked vs available to order;
+- exact supplier/dealer/authorised relationships;
+- Stratus/Infinity/Caesarstone/Eezi Quartz current range details;
+- lead times;
+- prices/promotions;
+- thicknesses and edge profiles;
+- sink/hob/cut-out/drainage-groove/backsplash capability;
+- outdoor-rated products and applications;
+- warranty/workmanship terms;
+- repair, polishing, resealing or replacement services;
+- CNC, bridge-saw, waterjet or other equipment/capabilities;
+- maximum project size and commercial/developer capacity;
+- memorial inscription/cemetery coordination process;
+- current review count/rating;
+- quote-to-sale conversion and revenue mix;
+- Eezi Quartz calculator accuracy, inclusions, VAT status and whether it is still operational/current.
+
+If a task depends on one of these, retrieve fresh evidence or flag the unknown. Do not guess.
+
+## 14. Task-specific retrieval shape
+
+For future task grounding, retrieve only the compact exact-client packet needed for the work:
+
+`client_id 89e0ad6d-e08c-4a75-8b8e-abea71af581c + task type + supplied creative/context`
+
+For a caption, the useful packet is:
+
+- current Bloem voice/caption rules;
+- current contact/footer requirements relevant to the post;
+- exact material/project facts needed;
+- claim guardrails;
+- supplied artwork/video context;
+- dynamic hashtag/SEO instruction;
+- unresolved facts that affect the caption.
+
+For image editing, retrieve the visual-preservation rules and the supplied material reference rather than the full marketing corpus.
+
+For content ideas, retrieve the current service/material scope, audience, creative rules and current opportunities rather than old one-off posts.
+
+## 15. Accessible ChatGPT Project source audit — 2026-09-08
+
+Actually accessible Project Source during Issue #265 migration:
+
+### `Bloem Marble Marketing Admin.pdf` — **KEEP**
+
+Reason:
+
+- direct client/CG source for identity, contact details, offer, tone, content priorities and posting rules;
+- still materially useful as provenance;
+- current official website corroborates the core address, phone, email and major stone/tombstone categories;
+- its suggested hashtags are now seed/reference material only and are superseded operationally by the dynamic max-five rule;
+- any mutable service/material detail still follows current Dynamics freshness rules.
+
+**REMOVE:** none recommended from the sources actually accessible in this migration.  
+**REPLACE:** none recommended from the sources actually accessible in this migration.
+
+Do not infer unseen Project Sources or physically delete anything as part of this repo migration.
+
+## 16. Project-ready working rule
+
+For everyday Bloem Marble & Granite work, use the derived `BLOEM-MARBLE-GRANITE-CG-DYNAMICS-CLIENT-GUIDE.md` first and retrieve current exact-client Dynamics/GitHub context for facts that can change.
+
+When a durable client correction arrives, update CG Dynamics first and refresh the guide. Do not maintain two independent truths.
+
+Handoff status after this repo migration: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED** until the final short Project Instructions are manually applied in the ChatGPT Project and confirmed by the user.
