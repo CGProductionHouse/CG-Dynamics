@@ -21,6 +21,17 @@ Authority rule: CG Hours is the primary client naming source. Client IDs and lin
 | Cape Lumber | Cape Lumber | Cape Lumber | Cape Lumber | No database rename required. |
 | PSG Bloemfontein | PSG | PSG | PSG | Canonical confirmed by CA. |
 
+## Newly added canonical clients
+
+| Canonical name | CG Hours | CG Dynamics | ChatGPT Project | Notes |
+|---|---|---|---|---|
+| Ipopeng Office Supplies | Added active 2026-09-08 | Added active 2026-09-08 | Ipopeng Office Supplies | New client added to both live client directories using the exact ChatGPT/client name. No historical rows existed to migrate. |
+
+## Unmatched ChatGPT client-looking projects still requiring confirmation
+
+- `Mimosa Mall` — not currently present in CG Hours or CG Dynamics. Confirm whether this is a current/new client before adding.
+- `WiseRide` / `Wise Ride` — not present in either database and appears in the older/lower project area. Do not add or map to another client without explicit confirmation.
+
 ## Database safety rule applied
 
 The live updates changed only the existing client record names. They did **not** create replacement client records, change client UUIDs, delete client rows, or reassign linked work/time records.
