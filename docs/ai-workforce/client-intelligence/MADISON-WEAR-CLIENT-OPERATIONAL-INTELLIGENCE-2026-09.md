@@ -1,7 +1,7 @@
 # Madison Wear — Client Operational Intelligence
 
 Last updated: 2026-09-08  
-Status: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS NOT YET CONFIRMED**  
+Status: **MIGRATION COMPLETE / PROJECT INSTRUCTIONS CONFIRMED 2026-09-08**  
 Canonical CG Dynamics client: **Madison Wear**  
 Exact Dynamics client ID: `7b47afb0-fa55-4916-85f6-09c57e5905b9`
 
@@ -54,6 +54,8 @@ Do not infer a current brand roster, branch roster, stock position, online order
 
 The client-provided source describes Madisons Menswear as a third-generation family business trading for about 50 years. Treat this as **client-provided heritage evidence** and recheck before a major heritage/anniversary claim because no current official-site text confirming the exact tenure was accessible on 2026-09-08.
 
+Historical Project chats also contain once-current operational/merchandising evidence outside the durable core, including **Lay-Buy in-store / PayJustNow payment messaging** and **kids clothing/footwear promotions**. Preserve those as provenance for older work only. They do **not** establish a current payment method or current kids range without fresh client/official verification.
+
 ## 3. Source and provenance hierarchy
 
 Apply the CG freshness hierarchy:
@@ -99,6 +101,10 @@ The domain remains `madisonswear.co.za`.
 
 This direct CG correction outranks the older PDF telephone for ordinary current social/footer use unless a task is explicitly for another branch and a fresher branch-specific route is verified.
 
+### Manual Project handoff confirmed 2026-09-08
+
+Issue #288 now records that CA physically applied the final Madison Wear Project Instructions in the ChatGPT Project on 2026-09-08. The manual handoff gate is therefore satisfied. Keep the confirmed instructions auditable in the derived guide, but do not treat the static guide as the permanent runtime source.
+
 ### Current official web evidence checked 2026-09-08
 
 `https://madisonswear.co.za/` currently:
@@ -124,6 +130,7 @@ These are useful corroboration, but they do not override direct CG contact instr
 | Canonical CG client | `current_verified` | Madison Wear | Issue #288 / exact client ID |
 | Public trading identity | `current_verified` | Madisons Menswear | Project PDF + current official site |
 | Historical aliases | `current_verified_for_matching_only` | Madisons; Madison | Repo alias/audit + Planner/calendar + logo mapping |
+| Project Instructions handoff | `current_verified_by_CG` | Final short Instructions physically applied 2026-09-08 | Issue #288 handoff confirmation |
 | Website | `current_verified` | `https://madisonswear.co.za/` | Current official site |
 | Website operational state | `current_verified` | Holding / rebuild page | Current official site 2026-09-08 |
 | Default current email | `current_verified` | `sales@madisonswear.co.za` | Direct CG correction + Project PDF |
@@ -141,6 +148,8 @@ These are useful corroboration, but they do not override direct CG contact instr
 | Ecommerce / online ordering | `unresolved_current` | website currently under reconstruction | Do not promise checkout/order capability |
 | Delivery / collection | `unresolved` | none established | Never invent |
 | Returns / exchanges | `unresolved` | none established | Never invent |
+| Lay-Buy / PayJustNow | `historical_project_evidence_reverify` | prior Project copy only | Reverify current acceptance/terms before publication |
+| Kids clothing / footwear range | `historical_project_evidence_reverify` | prior promotions only | Do not infer a current kids range from old posts |
 | Product prices / promotions | `mutable_task_time` | exact current creative/source only | Never carry old specials forward |
 | Stock / sizes / colours / materials | `mutable_task_time` | exact current source only | Images are not stock proof |
 | Brand relationships | `mutable_task_time` | verify exact brand/product before claim | Historical/current creative examples are not a permanent roster |
@@ -206,6 +215,8 @@ These examples prove prior/current content context only. They do **not** prove:
 
 For any brand-led post, use the exact supplied product/creative and recheck current truth if the caption makes a live commercial claim.
 
+Historical kidswear promotions are also task evidence only. Do not broaden the durable business scope to a current kids range unless fresh client/official evidence supports it.
+
 ## 7. Human creative identity
 
 Madisons Menswear should sound like a real menswear retailer with product taste and local customer knowledge, not a generic fashion AI account.
@@ -218,6 +229,7 @@ Madisons Menswear should sound like a real menswear retailer with product taste 
 - **Human:** natural language a staff member could genuinely use.
 - **Product-aware:** specific to the garment, shoe, cap, styling choice or customer need in the supplied creative.
 - **Commercially useful:** give the shopper a reason to notice, try, style or enquire without manufacturing urgency.
+- **Polished/classy when earned:** refined, professional language is welcome when it is tied to the actual garment, outfit, occasion or service experience rather than empty luxury labels.
 
 ### Voice limits
 
@@ -376,6 +388,8 @@ Reusable retail research supports these guardrails but does not create Madison-s
 
 Because the official site is currently under reconstruction, task-time verification is mandatory before any online-shopping or fulfilment claim.
 
+Historical Lay-Buy / PayJustNow references are not proof of current payment acceptance or terms. Treat payment-method claims like any other mutable commercial fact and verify them at task time.
+
 ## 15. Freshness rules before publication
 
 Recheck current authoritative evidence when a task depends on:
@@ -392,6 +406,7 @@ Recheck current authoritative evidence when a task depends on:
 - material/fabric composition;
 - price;
 - promotion/discount/validity;
+- payment method/terms;
 - supplier/reseller relationship;
 - delivery/collection;
 - returns/exchanges;
@@ -460,8 +475,10 @@ Do not retrieve the entire client corpus for a simple routine task.
 6. **Exact official social profiles:** the current website's social links resolve only to generic platform roots; exact handles remain unresolved.
 7. **Website / ecommerce:** official site is currently under reconstruction. Online checkout, ordering, collection, delivery, returns and fulfilment are unresolved.
 8. **Current brand roster:** previous CG content and old indexed pages show several brands, but permanent/current relationships must be verified per task.
-9. **Heritage wording:** third-generation / about 50 years is client-provided but should be refreshed before a major anniversary/heritage claim.
-10. **#210 duplicate directory entry:** the shared research progress file historically lists both `Madison Wear` and `Madisons`. This migration proves the local alias relationship for this exact client, but #288 forbids editing the shared #210 ledger. Reconcile that shared directory later in the lane that owns it.
+9. **Payment methods:** historical Project copy used Lay-Buy in-store / PayJustNow and flexible-payment framing. Current acceptance and terms remain unverified.
+10. **Kids range:** historical Project promotions included kids clothing/footwear. Do not treat that as a current permanent category until freshly confirmed.
+11. **Heritage wording:** third-generation / about 50 years is client-provided but should be refreshed before a major anniversary/heritage claim.
+12. **#210 duplicate directory entry:** the shared research progress file historically lists both `Madison Wear` and `Madisons`. This migration proves the local alias relationship for this exact client, but #288 forbids editing the shared #210 ledger. Reconcile that shared directory later in the lane that owns it.
 
 None of these blocks routine Madison creative work when the exact task does not depend on the unresolved fact.
 
@@ -504,7 +521,7 @@ Before sending routine work:
 5. Is the exact brand/product actually verified for this creative?
 6. Are stock, price, size, material, offer and branch claims current?
 7. Is the current Loch Logan footer/contact rule used unless the task proves another branch route?
-8. Are website/ecommerce claims avoided while unverified?
+8. Are website/ecommerce/payment claims avoided while unverified?
 9. Are hashtags dynamic and no more than 5 by default?
 10. Are real garments/products/colours/logos/people/proportions/composition preserved in image work?
-11. Are naming/contact/branch conflicts surfaced rather than guessed?
+11. Are naming/contact/branch/range conflicts surfaced rather than guessed?
