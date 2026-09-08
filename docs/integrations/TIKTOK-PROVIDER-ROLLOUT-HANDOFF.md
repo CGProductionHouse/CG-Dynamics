@@ -97,6 +97,7 @@ Authenticated PR preview checked at `/admin/integrations/tiktok`:
 - Switching to **Cape Lumber** preserves a separate `Not connected` state.
 - Sync stays disabled without a connected exact-client account.
 - The preview currently reflects the preceding successful deployment; the copy change from `2858f1e` awaits a new Vercel build after the rate limit resets.
+- After pushing legal-page commit `10b8855`, the stable PR preview still served the older deployment: a direct `/privacy-policy` request redirected to `/admin/cg-hub`. GitHub's Vercel checks report the daily build-rate limit, so preview acceptance of the new routes remains pending a fresh deployment.
 
 Local unauthenticated acceptance for the provider legal routes:
 
