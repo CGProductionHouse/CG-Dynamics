@@ -33,7 +33,21 @@ Use confident, professional, practical English. Keep copy concise and specific t
 
 Afrikaans may be used when explicitly requested or when the real local brief supports it; use natural everyday Afrikaans.
 
-Avoid influencer hype, forced humour, brochure filler and generic lines such as `built for the road ahead`, `driving your business forward`, `power meets reliability` or `your trusted truck partner`.
+Avoid influencer hype, generic meme/trend humour, brochure filler and generic lines such as `built for the road ahead`, `driving your business forward`, `power meets reliability` or `your trusted truck partner`.
+
+### Humour and human dealership content
+
+Humour is **allowed**, but it is not the default voice and should never be bolted on as a meme. Accessible Hino Project history shows repeated approval and refinement of short, fun, out-of-the-box dealership videos, especially Sales-led concepts.
+
+Keep humour:
+
+- rooted in real dealership, sales, workshop, parts or truck situations;
+- short and visually driven, normally around 30–40 seconds when the brief calls for a fun reel;
+- based on recognisable staff behaviour, a product challenge or a real truck detail rather than internet trends;
+- respectful of customers, drivers and staff;
+- physically accurate to the actual truck and location.
+
+If a gag depends on a trailer, body, attachment, model feature or other physical setup, confirm that it is actually present. Do not write a trailer-based scene for a truck with no trailer.
 
 ## Captions
 
@@ -86,13 +100,25 @@ Poster copy should be short and specific: one application question, one real fea
 
 Prior Hino Project work supports Sales/Workshop/Parts department videos, range content, Hino 200/300 walk-arounds, faster visual pacing and confident English.
 
+It also supports a distinct short-form human/social lane:
+
+- 30–40 second multi-scene dealership reels with quick visual progression;
+- playful Sales-department concepts that still revolve around the actual truck;
+- product-identity challenges, such as selling a Hino 700 without saying `Hino`;
+- cross-department stories using Sales, Workshop and Parts as different roles contributing to the same customer/truck outcome;
+- practical three-point care explainers, including coolant level, oil level and tyres, structured around what to check, where to check it and when to check it.
+
+For care/maintenance explainers, verify the exact vehicle/manual before showing component locations, intervals, pressures, fluid types or technical procedures. The format is durable; the technical details are not safe to improvise.
+
 Useful recurring video formats include exact model walk-arounds, body/application breakdowns, service-bay process, parts explanation, one fleet question answered by real staff, customer/operator stories and maintenance/readiness tips.
 
-## Image editing
+## Image editing and script/scene fidelity
 
 Prefer real Hino Bloemfontein/customer truck assets.
 
 Preserve the exact truck series/model markings, cab shape, proportions, lights, wheels, axle count, body/trailer/attachment, branding, people, operating context and composition unless the brief explicitly asks for a broader change.
+
+The same rule applies before filming: scripts and shot lists must match the truck that is actually available. Do not invent a trailer, body, attachment, feature, staff role or physical action simply because it makes the concept easier.
 
 Do not change one Hino series into another, invent a body/application, add unsupported equipment, or present generated imagery as proof of local stock or a real customer delivery.
 
@@ -114,6 +140,6 @@ If evidence is missing or conflicts, **flag it instead of guessing**.
 
 Resolve `exact Hino Trucks client_id + task type + supplied creative/context`.
 
-For a quick caption, retrieve only current voice + exact truck/service/application facts + verified footer + claim/SEO guardrails. For image edits, retrieve exact visible truck/body/branding facts + preservation rules. For content ideas, retrieve only relevant current service/application/audience context.
+For a quick caption, retrieve only current voice + exact truck/service/application facts + verified footer + claim/SEO guardrails. For image edits, retrieve exact visible truck/body/branding facts + preservation rules. For content ideas, retrieve only relevant current service/application/audience context plus the approved human/humour lane when the brief asks for fun or out-of-the-box work.
 
 Do not retrieve Toyota Bloemfontein or broad Hino material unless the task truly needs manufacturer context and the provenance is clear.
