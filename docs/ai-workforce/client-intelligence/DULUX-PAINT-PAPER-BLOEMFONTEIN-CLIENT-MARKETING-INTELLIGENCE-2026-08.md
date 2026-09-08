@@ -1,673 +1,748 @@
-# Dulux Paint & Paper Bloemfontein — Client Marketing Intelligence
+# Dulux Paint & Paper Bloemfontein — Canonical Client Record
 
-Last updated: 2026-08-06
-Status: Current client-evidence pack with explicit verification gaps.
-Client isolation: Use only for Dulux Paint & Paper Bloemfontein.
-Freshness rule: Apply `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md` before operational use.
+Canonical CG client: **Dulux Paint & Paper Bloemfontein**  
+Historical/working aliases: **Dulux Bloemfontein**, **Dulux**, **Dulux Paint n Paper Bloemfontein**  
+Record purpose: **Permanent human CG source of truth for future Dulux Paint & Paper Bloemfontein marketing/content work**  
+Human Project knowledge last reviewed: **2026-09-08**  
+Mutable public facts last verified: **2026-09-08**  
+Freshness authority: `docs/ai-workforce/CLIENT-MEMORY-FRESHNESS-AND-VERIFICATION-PROTOCOL.md`
 
-## Why this pack exists
+> **Permanent-record note:** the dated `2026-08` filename is retained for repository/reference continuity because this client already had a researched intelligence pack. This file is **not** an August 2026 snapshot. Future Dulux updates should modify this same canonical record and update the review/verification dates above rather than creating monthly Dulux knowledge files.
 
-Dulux Paint & Paper Bloemfontein is not merely a paint reseller. The strongest commercial opportunity is to become Bloemfontein's most useful local destination for:
+## 1. What this record is
 
-- choosing the right colour;
-- choosing the right coating for the surface and problem;
-- professional tinting and mixing;
-- wallpaper and decorative finishing;
-- practical renovation guidance;
-- dependable supply for homeowners, painters, contractors and property professionals.
+This is the durable human operating record for **Dulux Paint & Paper Bloemfontein only**.
 
-The marketing should make paint feel exciting and achievable while reducing the risk customers feel around colour, quantity, finish, preparation and product choice.
+It reconciles:
 
-## Evidence used
+- the previous CG Dynamics Dulux research pack;
+- accessible Dulux ChatGPT Project conversations;
+- the client-supplied `Dulux Business profile.pdf`;
+- the client-supplied `Dulux Tone of Voice.pdf`;
+- repeated CA/CG corrections, approvals and preferences from historical Dulux work;
+- current public verification available on 2026-09-08;
+- the national Dulux South Africa website where it is the correct authority for brand/product facts.
 
-### Current client evidence supplied by CA
+It is **not** a caption archive, monthly campaign snapshot or generic AI marketing strategy.
 
-- Instagram profile screenshot for `Dulux Paint & Paper Bloemfontein`.
-- Current profile wording: premium Dulux paints, wallpaper and colour expertise.
-- The screenshot displayed approximately 5,000 views in the preceding 30 days when captured in May 2026.
-- Current social-grid evidence shows product, colour, staff and transformation-oriented content.
-- Existing CG Production House Dulux content guideline with four named short-form video concepts:
-  1. The Paint Shake Test — why proper mixing matters.
-  2. Paint Colour Names — colour choice and staff guidance.
-  3. ASMR Mixing Station — precision and professional quality.
-  4. The Paint Smell — emotional room-transformation storytelling.
-- Product evidence supplied by CA includes Dulux Pearlglow Brilliant White 1 L and Dulux EasyCare Brilliant White, with historical shelf prices visible in May 2026. These prices are historical evidence only and must never be published as current without fresh store confirmation.
-- CG Dynamics history confirms Dulux Bloemfontein is connected to the Meta reporting system and has prior May/June reporting records. Normalised live performance must be read from current Meta sync data rather than copied from old screenshots.
+Use it to answer:
 
-### Existing internal industry foundation
+- what this exact store is;
+- how CG actually writes for it;
+- which product/service details make content useful;
+- how colour should be spoken about;
+- what makes a Dulux video feel like CG rather than generic paint advertising;
+- what wording has repeatedly been corrected or rejected;
+- which facts are current, historical, client-confirmed or still uncertain.
 
-This pack should be used together with:
+## 2. Source and authority rules
 
-- `docs/ai-workforce/INDUSTRY-BUILDING-MATERIALS-HOME-IMPROVEMENT.md`;
-- the retail/ecommerce and building-materials research already stored in the Marketing Library;
-- current Meta and website performance data once synced into CG Dynamics.
+### Human marketing judgement
 
-## Identity and facts requiring direct refresh
+For voice, wording, visual/content preferences and production conventions, use this order:
 
-The exact current store address, phone number, email, opening hours, delivery area, wallpaper brands, contractor-account terms, stock range, social handles and Google Business Profile must be refreshed from the client or current official profiles before public use.
+1. newest explicit client/CA/CG instruction;
+2. repeated Dulux Project corrections and approvals;
+3. current client-supplied source files;
+4. this canonical record;
+5. older CG strategy material.
 
-Do not confuse this client with:
+**Human CG judgement outranks generic marketing language.** A sentence can be technically correct and still be wrong for Dulux if it sounds generic, outsourced, corporate or AI-written.
 
-- other Dulux stores;
-- national Dulux South Africa brand channels;
-- general hardware stores that stock Dulux;
-- unrelated paint shops using similar names.
+### Mutable facts
 
-## Commercial diagnosis
+For address, phone, email, WhatsApp, hours, staff, current stock, delivery, current promotions, social handles and services:
 
-## 1. The client has a strong brand but still needs a local reason to choose this store
+1. newest direct client confirmation;
+2. current official local store profile/source where available;
+3. current national Dulux source for national-brand/product facts only;
+4. strong current public business listings;
+5. older Project files and stored CG memory.
 
-Dulux provides national brand trust. That alone does not explain why a Bloemfontein customer should visit this specific store instead of a hardware chain or competing paint centre.
+Do not convert a national Dulux product page into proof that the Bloemfontein store has that exact SKU or size in stock today.
 
-The local store must visibly prove:
+### Provenance labels used below
 
-- expert help rather than shelf-only retail;
-- correct product selection;
-- accurate tinting and mixing;
-- colour confidence;
-- wallpaper and finishing depth;
-- practical quantity guidance;
-- dependable stock and order support;
-- human service before and after purchase.
+- `client_confirmed` — supplied directly in a Dulux Project source or instruction;
+- `CA_CG_confirmed` — explicit/repeated CG correction or approved working rule;
+- `public_verified` — checked against a current first-party public source;
+- `public_corrob_secondary` — corroborated by a current public listing but not first-party store publishing;
+- `historical` — previously true/useful but not current by default;
+- `possible_change` — conflicting or incomplete evidence exists;
+- `stale_unverified` — not recently confirmed;
+- `rejected` — wrong, contaminated, unsupported or a wording/approach future agents should not repeat.
 
-## 2. Paint marketing easily becomes visually attractive but commercially vague
+## 3. Canonical identity and current fact table
 
-Pretty rooms, colour swatches and cans can generate reach without generating store visits or quotes.
+| Fact | Reviewed value | Provenance | State | Notes |
+|---|---|---|---|---|
+| Canonical CG name | Dulux Paint & Paper Bloemfontein | `CA_CG_confirmed` | current | Confirmed in the 2026-09-08 client-directory reconciliation. |
+| Address | 20 2nd Ave, Westdene, Bloemfontein, 9301 | `client_confirmed` + `public_corrob_secondary` | current_verified | Client business profile and multiple current public listings agree. |
+| Main store phone | 051 430 3699 | `client_confirmed` + `public_corrob_secondary` | current_verified | Client business profile and current public listings agree. |
+| Website | https://www.dulux.co.za/en | `client_confirmed` + `public_verified` | current_verified | This is the official Dulux South Africa consumer website; it is not a dedicated local-store website. |
+| Store email | not available in the accessible current source set | — | `stale_unverified` | The client business-profile PDF leaves email blank. Historical CG memory indicates an Irene/store email was supplied at some point, but the exact value is not available in the reviewed accessible evidence. Never guess it. |
+| WhatsApp | exact current number not available in the accessible current source set | — | `stale_unverified` | Historical CG context indicates a WhatsApp contact existed; re-confirm before publishing. |
+| Opening hours | Mon–Fri 08:00–17:00; Sat 08:00–13:00 | `public_corrob_secondary` | possible_change | Current business-result data showed these hours on 2026-09-08, but no first-party local Dulux source was found. Recheck before publishing hours/holiday trading. |
+| Sunday/public-holiday hours | not first-party verified | — | `stale_unverified` | Do not infer from ordinary-week listing data. |
+| Facebook/Instagram handles | exact first-party local handles not confidently verified in this review | — | `stale_unverified` | Project evidence confirms an active Instagram presence, but search did not produce a first-party local profile URL that could be safely stored as current. |
+| Local email domain/site | none verified beyond national Dulux website | — | `stale_unverified` | Do not invent a local web domain. |
 
-Every marketing asset should answer at least one buying question:
+### Public verification notes — 2026-09-08
 
-- Which product is right for my surface?
-- What finish should I choose?
-- How much paint do I need?
-- What preparation is required?
-- Can you match or tint this colour?
-- Is this suitable for kitchens, bathrooms, exteriors, trims or furniture?
-- Can someone help me combine colours and wallpaper?
-- Is the product in stock and what does it cost today?
+Store identity, address and phone were corroborated by current public listing/search evidence, including:
 
-## 3. The strongest content direction is already visible in the existing video guide
+- Samba retailer listing: `https://www.sambakoop.com/Home/RetailerDetails/616?city=Bloemfontein&state=Free+State`
+- current business/map listing returned for **Dulux Paint n Paper Bloemfontein** at 20 2nd Ave, phone `+27 51 430 3699`;
+- additional current retailer/stockist listings that agree on the same address and phone.
 
-The four-video guide shows the correct human direction:
+No searchable first-party Dulux South Africa store-detail page for this exact Bloemfontein branch was found during the 2026-09-08 review. That is why store hours/social details are not promoted to first-party `public_verified` status.
 
-- staff on camera;
-- store processes;
-- humour;
-- tactile and satisfying mixing footage;
-- colour expertise;
-- the emotional result of changing a space.
+## 4. National Dulux facts: useful, but keep them separate from local-stock claims
 
-The next step is to connect that entertaining layer to stronger buying journeys and measurable calls to action.
+The national Dulux South Africa website currently supports the following brand/product facts.
 
-## Strategic position
+### Dulux Promise
 
-Recommended local position:
+`public_verified` on 2026-09-08:
 
-> Bloemfontein's colour and coating experts — helping you choose, mix and finish the job properly.
+Dulux describes the Dulux Promise as outstanding quality underpinned by:
 
-Supporting promise:
+- durability;
+- coverage;
+- finish.
 
-> Bring the room, surface, problem or inspiration. The team helps turn it into the right colour, product and practical plan.
+This is a useful brand-quality framework when the post actually relates to a supported Dulux product or outcome.
 
-This is stronger than presenting the business as a place that merely sells paint and wallpaper.
+Do not turn it into empty copy such as “quality you can trust” with no product, surface or project context.
 
-## Core buyer groups
+### Current national product families visible on the Dulux Promise page
 
-## A. Homeowners repainting one room
+Examples include:
 
-Common triggers:
+- Luxurious Silk;
+- Acrylic PVA;
+- Gloss Enamel;
+- Weatherguard Fine Textured;
+- Weatherguard Ultrasmooth;
+- Wallguard;
+- Roofguard;
+- Pearlglo Water-Based;
+- Pearlglo Solvent-Based;
+- Easycare.
 
-- new home;
-- tired bedroom or living room;
-- nursery;
-- kitchen refresh;
-- bathroom moisture or staining;
-- selling or renting a property;
-- seasonal renovation.
+These are `public_verified` national Dulux ranges, **not proof of current Bloemfontein store stock**.
 
-Needs:
+### 2026 Dulux colour trend
 
-- colour confidence;
-- simple product guidance;
-- quantity estimate;
-- preparation checklist;
-- realistic budget;
-- accessories and add-ons.
+`public_verified`, seasonal/mutable:
 
-Best conversion:
+Dulux South Africa's 2026 Colours of the Year are presented as a family of indigo/blues:
 
-- send a room photo and dimensions;
-- visit with inspiration images;
-- receive a colour/product shortlist;
-- collect or arrange confirmed fulfilment.
+- Free Groove™;
+- Mellow Flow™;
+- Slow Swing™.
 
-## B. Whole-home renovators and new-build clients
+This is useful for current colour-led content in 2026, but it is a time-bound national trend, not a permanent local brand pillar. Recheck once the annual colour cycle changes.
 
-Needs:
+## 5. What CG is actually marketing
 
-- coordinated palette;
-- interior and exterior system;
-- durable finishes;
-- contractor coordination;
-- bulk quantities;
-- phased procurement;
-- colour records for future touch-ups.
+The local store should not be treated as a generic reseller with cans on shelves.
 
-Opportunity:
+The strongest human marketing position is:
 
-Create a structured project consultation and project record with room, surface, colour code, product, finish, quantity and purchase date.
+> **A local place where people can get the colour, product and practical paint advice right before they start the job.**
 
-## C. Painters and contractors
+The store has national Dulux brand recognition behind it, but local content must answer why someone should come to **this** Bloemfontein store:
 
-Needs:
+- staff can help make sense of colour choices;
+- customers can see real swatches/finishes;
+- paint can be mixed/tinted in store;
+- the content can show products by real application, not just pack shots;
+- customers can ask what belongs on a specific surface;
+- the store can help reduce uncertainty around primers, preparation, finishes and paint choice;
+- wallpaper/decorative finishing can be shown as part of the Paint & Paper identity where current stock/service is confirmed.
 
-- stock reliability;
-- fast tinting;
-- trade pricing or account clarity where available;
-- technical product selection;
-- repeat colour accuracy;
-- quick quotation;
-- fewer callbacks and product failures.
+Do not write as if people buy paint because of abstract “lifestyle inspiration”. They often arrive with a practical problem: a room, a wall, a colour reference, a surface, a peeling exterior, a cupboard, tiles, a renovation deadline or uncertainty about what to buy.
 
-Best promise:
+## 6. Core audiences and the buying behaviour CG should write around
 
-> Send the job scope and surface list. We help confirm product, finish, quantity and availability.
+### Homeowners and DIY customers
 
-## D. Architects, interior designers and decorators
+Typical questions:
 
-Needs:
+- What colour will work in this room?
+- Will this shade make the room feel softer, warmer, darker or flatter?
+- What product do I need for this surface?
+- Do I need a primer?
+- Which finish makes sense here?
+- How much paint will I need?
+- Can this colour be mixed/tinted?
 
-- colour samples;
-- accurate specification support;
-- finish and substrate guidance;
-- wallpaper combinations;
-- project continuity;
-- client presentation assistance;
-- reliable supply.
+The content should reduce uncertainty without pretending a social post replaces in-store inspection or technical advice.
 
-Opportunity:
+### Painters and contractors
 
-Build a professional-specifier relationship programme rather than relying only on consumer social media.
+They care more about:
 
-## E. Landlords, agents and property managers
+- the correct coating for the surface;
+- stock/availability;
+- repeatable colour/tinting;
+- speed and practical advice;
+- dependable products;
+- project quantities;
+- avoiding callbacks caused by the wrong system or preparation.
 
-Needs:
+Avoid decorative fluff when the creative is aimed at trade buyers.
 
-- fast turnover;
-- dependable neutral palettes;
-- durable, washable products;
-- repeatable colour records;
-- quick quotes and delivery/collection clarity;
-- maintenance planning.
+### Renovators, landlords and property people
 
-## F. Furniture upcyclers and DIY customers
+Useful themes:
 
-Needs:
+- practical room refreshes;
+- exterior/weather exposure;
+- washable/durable application categories where supported by current product documentation;
+- neutral or repeatable project colours;
+- correct preparation;
+- project-ready product combinations.
 
-- smaller quantities;
-- enamel and specialty product guidance;
-- primer and preparation advice;
-- colour inspiration;
-- tool and accessory bundles.
+### Designers/decorators/specifiers
 
-## Commercial marketing systems
+Useful themes:
 
-Dulux Bloemfontein should run six connected systems.
+- colour comparisons;
+- undertones;
+- physical swatches;
+- finish comparison;
+- wallpaper/paint pairing where current local offering is confirmed;
+- room-specific colour effect;
+- product documentation/specification rather than vague inspiration.
 
-## System 1: Colour confidence
+## 7. The Dulux voice — the most important human rule
 
-Purpose:
+### The voice should be
 
-Turn colour uncertainty into store visits, consultations and purchases.
+- natural;
+- confident;
+- helpful;
+- specific;
+- friendly;
+- expertise-led;
+- visually aware;
+- easy to understand;
+- human enough to sound like the people in the store wrote it.
 
-Content:
+The client-supplied Tone of Voice PDF says confidence, reliability, trustworthiness and support without clichés. Keep those ideas.
 
-- one colour, three rooms;
-- warm white vs cool white;
-- undertone demonstrations;
-- what changes under daylight and artificial light;
-- staff colour-pairing challenges;
-- customer inspiration transformed into a palette;
-- wallpaper and paint combinations;
-- local room makeovers.
+But do **not** let “professional” turn into stiff corporate wording. Historical CG direction is explicitly **not corporate**; Dulux should feel light, helpful and real.
 
-Lead magnet:
+### The copy must sound like a real paint shop, not an AI brand deck
 
-- send a room photo and inspiration image;
-- receive a short in-store colour shortlist, subject to lighting and physical sample verification.
+Prefer:
 
-Guardrail:
+- the actual colour;
+- the actual room/surface;
+- the actual product category;
+- the actual in-store process;
+- one useful observation;
+- one clear reason the customer should care.
 
-Never guarantee digital-screen colour accuracy. Encourage physical sampling and real-light checks.
+Avoid:
 
-## System 2: Right product, right surface
+- “elevate your experience”;
+- “discover the difference”;
+- “where quality meets …” constructions;
+- empty “transform your lifestyle” wording;
+- generic inspiration lines that could advertise any paint brand;
+- filler about “bringing your vision to life” unless the sentence also says something concrete;
+- influencer-style hype;
+- forced trend slang;
+- robotic over-polish;
+- repetitive “you can trust us” claims;
+- unsupported “best” or superiority claims.
 
-Purpose:
+### Specificity beats adjectives
 
-Make technical guidance a visible competitive advantage.
+A line naming the product/surface problem is better than a heading that merely says “Premium quality for every project”.
 
-Content themes:
+When CA/CG says a post is generic, the usual fix is **not** adding more adjectives. It is making the line about the actual shade, product, service, surface or customer decision.
 
-- walls vs ceilings;
-- kitchens and bathrooms;
-- exterior exposure;
-- trims, doors and furniture;
+## 8. How CG should speak about colour
+
+This is one of the clearest historical approval patterns.
+
+Do not only name a shade and call it “beautiful”, “timeless”, “calming” or “perfect”. Explain what the colour **does in the space**.
+
+A historically accepted structure was:
+
+> **SAGE GREEN SOFTENS THE ROOM**  
+> Its muted tone brings calm to the space without making it feel flat.
+
+The durable rule is the structure, not the exact line:
+
+1. name/identify the colour or colour family;
+2. say how it changes the room visually or emotionally;
+3. make the effect concrete enough that a customer can picture it;
+4. avoid generic inspiration language.
+
+Useful questions for colour copy:
+
+- Does it soften the room?
+- Warm it up?
+- Cool it down?
+- Add contrast?
+- Make another finish stand out?
+- Hold its own in a bright room?
+- Feel quieter without feeling flat?
+- Work better as an accent than all four walls?
+
+Guardrail: screens do not reproduce paint colour perfectly. Encourage physical swatches/testers and real-light checks when accuracy matters.
+
+## 9. Product and service content rules
+
+### Show the decision, not only the tin
+
+Every useful product post should ideally connect at least three things:
+
+- **surface/project**;
+- **problem or desired result**;
+- **relevant product/category or preparation step**.
+
+Examples of durable content areas from Dulux work:
+
+- interior wall paint;
+- exterior/weather solutions;
 - primers and preparation;
-- previously painted surfaces;
-- stains, peeling, moisture and chalking;
-- matt, sheen and enamel differences;
-- washable and higher-durability applications.
+- melamine/cupboard primer guidance;
+- tile/special-surface primer guidance where product documentation supports it;
+- paint finish comparisons;
+- colour matching/tinting/mixing;
+- paint variety/ranges;
+- wallpaper and paint pairing where local range/service is current;
+- sales/promotions when current and store-confirmed.
 
-Each post should state:
+### Never infer technical performance
 
-- surface;
-- common problem;
-- decision factors;
-- product category;
-- preparation reminder;
-- store CTA.
+For coverage, durability, washability, UV resistance, moisture suitability, preparation, drying/application, warranty or substrate claims:
 
-Avoid unsupported technical or warranty claims. Use current manufacturer documents for exact product performance.
+- use the current Dulux product page/technical data sheet;
+- state the exact product/application context;
+- do not generalise one range's feature to all Dulux paint;
+- do not publish historical shelf prices as current;
+- do not promise stock without store confirmation.
 
-## System 3: Mixing, tinting and store expertise
+### Paint mixing/tinting is visually valuable because it proves service
 
-Purpose:
+Do not reduce mixing content to “look how satisfying this is”. The best version combines the visual with a useful human idea:
 
-Show why professional service matters.
+- how the chosen colour becomes the mixed tin;
+- why correct mixing matters;
+- repeat colour/code guidance;
+- staff checking the customer's brief;
+- the reveal of the actual colour.
 
-Build from the existing videos:
+## 10. Content formats CG repeatedly uses well for Dulux
 
-- The Paint Shake Test;
-- Paint Colour Names;
-- ASMR Mixing Station;
-- The Paint Smell.
+### In-store short-form video
 
-Add:
+Durable production pattern from the accessible Project/history:
 
-- what happens after a colour is selected;
-- tint formula and repeat-order records;
-- why consistency matters;
-- how staff troubleshoot a customer brief;
-- a day at the mixing station;
-- satisfying lid, tint, shake and reveal content;
-- staff expertise and personality.
+- shootable entirely at the store when the brief requires it;
+- usually about 20–30 seconds;
+- hook immediately, ideally in the first 2–3 seconds;
+- visual action throughout;
+- staff are part of the content rather than anonymous hands only;
+- voice-over is optional, not a default requirement;
+- no-VO concepts should still make complete sense through action + on-screen text;
+- humour can work when it comes from staff, colour names, paint behaviour or a real customer situation;
+- never force a meme/trend onto the brand.
 
-Commercial CTA:
+A January 2026 brief specifically called for three eye-catching store-only videos, one with VO and two without, followed by a request for more fun/out-of-the-box 20-second ideas. Treat this as evidence that CG wants **variety of execution**, not one repetitive educational format.
 
-> Bring the colour code, sample or inspiration and let the team confirm the best available route.
+### Proven format references from earlier CG work
 
-Do not promise that every physical sample can be matched perfectly without technical confirmation.
+These are not scripts to recycle; they show what has already fit the brand:
 
-## System 4: Project-ready baskets
+- **The Paint Shake Test** — a simple physical action that explains why process matters;
+- **Paint Colour Names** — staff personality + colour choice;
+- **ASMR Mixing Station** — tactile process, close sound/visual detail, professional mixing;
+- **The Paint Smell** — playful sensory/room-refresh idea;
+- staff-only funny videos;
+- mixing machine/tint reveal;
+- shade comparison;
+- actual product for actual surface;
+- quick staff advice moments.
 
-Purpose:
+Future ideas should find a fresh mechanic, not just rename these concepts.
 
-Increase average transaction value and reduce incomplete purchases.
+## 11. Visual direction
 
-Create practical bundles by project:
+### Prioritise
 
-- bedroom refresh;
-- bathroom repaint;
-- exterior maintenance;
-- door and trim refresh;
-- rental turnover;
-- feature wall;
-- furniture upcycle;
-- new plaster preparation.
+- colour walls and real swatches;
+- paint being poured/mixed/tinted;
+- close-ups of texture/finish;
+- lids, labels and colour codes when readable;
+- staff using products or advising;
+- staff/customer interaction with permission;
+- one surface or project problem at a time;
+- before/process/after where the job is real;
+- room examples tied to a specific shade or finish;
+- wallpaper books/samples where current;
+- soft, controlled atmosphere for satisfying/ASMR content;
+- movement and hands-on action rather than static talking heads only.
 
-Bundles should account for:
+### Human/store personality
 
-- paint or coating;
-- primer where needed;
-- filler and preparation materials;
-- masking;
-- rollers, brushes and trays;
-- cleaning materials;
-- safety items;
-- quantity and wastage guidance.
+Historical CG context includes:
 
-Prices must be current, dated and store-confirmed.
+- Irene as an in-store advice personality;
+- store-dog visits as a light humanising content opportunity;
+- staff-only humorous concepts.
 
-## System 5: Trade and professional relationships
+Use those only when the people/animals are current and available. Do not turn them into mascots or guarantees without current confirmation.
 
-Purpose:
+### Historical visual cue
 
-Create repeat revenue beyond walk-in homeowners.
+CG previously used Dulux blue `#09377b` and a “splash” social-launch idea (“We’ve splashed on social media”). Treat this as **historical creative context**, not an immutable brand-standard replacement for current Dulux brand guidelines.
 
-Target:
+### Avoid
 
-- painters;
-- builders;
-- architects;
-- interior designers;
-- estate agents;
-- body corporates;
-- schools;
-- churches;
-- guesthouses;
-- offices;
-- maintenance teams.
+- generic stock-room imagery with no link to the product actually being discussed;
+- decorative layouts where the headline says nothing useful;
+- too much text fighting with colour swatches;
+- visuals that imply a digital colour is an exact real-world match;
+- repetitive can-on-counter product shots with no human or project context.
 
-Actions:
+## 12. Irene and staff-led expertise
 
-- verified contractor database;
-- monthly stock/offer update;
-- fast project-quote pathway;
-- colour and product record per project;
-- professional breakfast or product-demo event;
-- referral and co-marketing arrangements with clear rules;
-- before/after project case studies.
+Historical CG direction identifies **Irene** as the in-store advisor associated with strong/best advice and supports an “Ask Irene” style of positioning.
 
-## System 6: Wallpaper and decorative finishing
+Provenance: `CA_CG_confirmed` historical Project context.
 
-Purpose:
+Durable lesson:
 
-Prevent wallpaper from being hidden behind paint content.
+- put a real person behind advice;
+- let expertise feel accessible rather than corporate;
+- a staff name can make a technical topic easier to approach;
+- the staff member should explain the customer decision, not simply pose with a tin.
 
-Content:
+Freshness rule: verify Irene's current role/availability before building a new campaign around her. Do not present historical staff details as current without re-confirmation.
 
-- wallpaper by room and style;
-- feature-wall planning;
-- pattern scale;
-- paint/wallpaper pairing;
-- measuring basics;
-- preparation and installation boundaries;
-- real sample books;
-- completed local installations with permission.
+## 13. Poster/text-on-post judgement
 
-Confirm whether the store supplies only, recommends installers or provides installation before advertising any service.
+### Headings
 
-## Content architecture
+Preferred:
 
-Recommended monthly mix for an active package:
+- short;
+- specific;
+- understandable on first read;
+- tied to the visual;
+- based on a real colour/product/service/project.
 
-- 25% entertaining staff/store videos;
-- 20% colour confidence;
-- 20% product and surface education;
-- 15% transformations and client proof;
-- 10% current offers or stock-led conversion;
-- 10% trade, wallpaper and partnerships.
+Rejected pattern:
 
-## Content series
+- generic inspirational headline + equally generic subtitle;
+- headline/subtitle that repeat each other;
+- clever wording that loses the actual paint message.
 
-### `Colour Clinic`
+### Voting/award-style content
 
-A customer question or room photo becomes a short practical answer.
+Historical Dulux Project work included voting content.
 
-### `Paint Problem of the Week`
+A strong approved direction was **“EXPERTISE WORTH VOTING FOR”** because it gives the audience a real reason to support the store rather than only saying “vote for us”.
 
-Peeling, stains, damp symptoms, cracks, chalking or wrong finish. The content should explain decision points and direct serious substrate or moisture issues to the appropriate professional.
+A later preferred direct line was **“NOW YOUR VOTE COULD HELP US PUT DULUX ON TOP”**.
 
-### `Mixed in Bloem`
+Durable judgement:
 
-Local tinting and reveal content from the mixing station.
+- thank/support the audience;
+- give the vote a clear reason connected to store expertise/service;
+- keep it direct;
+- avoid repeatedly using “bring the win home” / “bring the title home” type wording; CA/CG explicitly flagged that family of phrases as overused across posters.
 
-### `One Room, Three Directions`
+Do not preserve old closing dates, award names or voting instructions as permanent facts.
 
-Show three different palette moods for the same room.
+## 14. Caption rules
 
-### `The Painter's List`
+Standing Dulux/CG rules:
 
-A practical checklist for a defined job.
+- captions should feel like real store staff wrote them;
+- use natural English;
+- be specific and concise;
+- do not repeat the poster text word-for-word;
+- include the relevant contact details in caption requests;
+- include the address, phone and website as the stable default contact block while they remain current;
+- default to **5 focused hashtags** for Dulux; never exceed the broader CG ceiling of **6** unless CA changes the rule;
+- rotate hashtags by post topic rather than pasting the same five mechanically;
+- no em dashes in client-facing copy unless CA explicitly asks otherwise.
 
-### `Finish Friday`
+Current stable public/client-confirmed caption details:
 
-Explain matt, sheen, enamel or specialty finishes through real samples and use cases.
+`20 2nd Ave, Westdene, Bloemfontein, 9301`  
+`051 430 3699`  
+`www.dulux.co.za`
 
-### `Wallpaper Pairing`
+Do not add an email or WhatsApp number until the exact current value is re-confirmed.
 
-Wallpaper plus wall, trim and accent colours.
+### Hashtag guidance
 
-### `Real Bloem Makeovers`
+The Tone of Voice PDF supplied examples such as:
 
-Before, process, product choice, final result and honest project notes.
+- `#PaintBrand`
+- `#QualityPaint`
+- `#ProfessionalPaint`
+- `#InteriorAndExteriorPaint`
+- `#TrustedPaint`
 
-## Store activations
+Treat these as **source examples**, not a mandatory repeated block. Prefer more specific/local/search-relevant tags when they fit the post, while keeping the count focused.
 
-## 1. Colour consultation day
+## 15. Calls to action that fit Dulux
 
-- pre-booked short sessions;
-- room photos and inspiration boards;
-- physical fan decks and samples;
-- purchase incentive only when commercially approved;
-- lead capture and follow-up.
+Good Dulux CTAs reduce paint uncertainty or lead naturally to the store:
 
-## 2. Painter and contractor morning
+- bring your colour code;
+- bring a photo/inspiration reference;
+- bring the surface/problem and ask what product belongs there;
+- visit the store to compare physical swatches;
+- ask the team which primer/finish makes sense;
+- phone the store for current stock/price;
+- ask Irene when her role/availability is current and confirmed;
+- come see the colour/finish in person.
 
-- product demonstration;
-- preparation and application education;
-- project quotation process;
-- contractor database opt-in;
-- current trade offers where approved.
+Avoid generic CTAs such as:
 
-## 3. Mini makeover competition
+- “discover the difference”;
+- “elevate your space”;
+- “unlock endless possibilities”;
+- “transform your lifestyle today”.
 
-Prize should be tightly controlled:
+A useful CTA should tell the customer what to bring, ask, compare, check or do next.
 
-- one defined room size;
-- specified product allowance;
-- clear exclusions;
-- winner-location radius;
-- labour responsibility stated;
-- permission to film the process.
+## 16. Promotions, prices and stock
 
-The campaign should generate:
+### Historical price evidence
 
-- room submissions;
-- audience voting or judged selection;
-- a real transformation case study;
-- remarketing audiences;
-- measurable enquiries.
+The previous CG pack recorded historical May 2026 shelf evidence for products including Dulux Pearlglo/Pearlglow and EasyCare.
 
-## 4. Designer palette evening
+Rule:
 
-Partner with an interior designer, architect or decorator for a practical trend and palette session. Avoid presenting trend opinions as universal rules.
+- historical shelf prices are evidence that the products were promoted/visible then;
+- they are **not current prices**;
+- never carry an old price into a new caption/poster without same-campaign store confirmation.
 
-## Website and local-search priorities
+### Promotion content
 
-Before paid search is scaled, confirm whether the client has a dedicated current website or landing page.
+When a sale/promotion is current:
 
-Minimum local landing-page structure:
+- make the product/size/price/validity legible;
+- confirm stock wording;
+- state dates where needed;
+- do not hide conditions in decorative copy;
+- do not make “sale” the only content pillar month after month.
 
-- exact store name;
-- verified location and hours;
-- click-to-call and WhatsApp;
-- paint, wallpaper, tinting and colour-help services;
-- homeowner, contractor and designer routes;
-- current promotions with dates;
-- map and parking/collection guidance;
-- project quote form;
-- room-photo enquiry option;
-- reviews and local project proof;
-- privacy and consent wording.
+## 17. Client/source contamination to reject
 
-Priority search themes:
+The client-supplied `Dulux Tone of Voice.pdf` contains several lines that clearly belong to a funeral/grief client, including references to:
 
-- Dulux paint Bloemfontein;
-- paint shop Bloemfontein;
-- paint colour matching/tinting Bloemfontein, subject to exact service wording;
-- wallpaper Bloemfontein;
-- exterior paint Bloemfontein;
-- interior paint Bloemfontein;
-- paint supplies Bloemfontein;
-- contractor paint supplier Bloemfontein;
-- colour consultation Bloemfontein, only if offered.
+- “a service that deals with grief, remembrance, and dignity”;
+- not trivialising those services.
 
-Google Business Profile should be the primary local truth source for:
+These are `rejected` as Dulux-specific guidance and must **never** be propagated into the Dulux record or future copy.
+
+The usable parts of that PDF are the paint-specific/human instructions:
+
+- confident/helpful/reliable;
+- avoid clichés;
+- avoid influencer-style writing;
+- do not over-polish;
+- real staff voice;
+- mixing, swatches, finishes, staff and ASMR processes;
+- contact details in captions.
+
+The instruction “no forced humour or memes” should be read literally as **no forced humour**. It is **not** a ban on humour: CA/CG has repeatedly requested fun/out-of-the-box staff/store video concepts for Dulux.
+
+## 18. Mistakes future agents must not repeat
+
+1. **Do not write generic corporate paint copy.**
+2. **Do not use empty lifestyle language when the image shows a specific shade/product/service.**
+3. **Do not solve “generic” by adding more adjectives. Add specificity.**
+4. **Do not say a colour is merely “beautiful”, “calming” or “timeless” without explaining its effect in the room.**
+5. **Do not advertise a national Dulux range as local stock without store confirmation.**
+6. **Do not reuse old sale prices.**
+7. **Do not promise perfect colour matching from every sample/source.**
+8. **Do not guarantee digital colour accuracy.**
+9. **Do not invent email, WhatsApp, social handles, delivery area, wallpaper brands or contractor terms.**
+10. **Do not keep using a staff member as a current campaign face without re-confirming their role/availability.**
+11. **Do not copy the grief/funeral contamination from the Tone of Voice PDF.**
+12. **Do not ban humour because of that contaminated line; use natural staff/store humour when appropriate.**
+13. **Do not make every video a static product explanation. Show action, process and personality.**
+14. **Do not make every caption repeat the artwork.**
+15. **Do not repeat overused “bring the win/title home” voting language.**
+16. **Do not create another dated Dulux intelligence file for routine updates. Update this record.**
+17. **Do not modify client IDs, CG Hours, billing, package or historical time data as part of client-knowledge work.**
+
+## 19. Content-development test before a Dulux idea is approved
+
+A strong future Dulux idea should pass most of these questions:
+
+1. Is it about a real colour, surface, product, process, person or project?
+2. Does it answer a question a paint customer actually has?
+3. Could the wording belong to any random paint shop? If yes, make it more specific.
+4. Does the visual show something happening?
+5. Is the first 2–3 seconds strong enough for video?
+6. Does the colour wording explain the effect in the room?
+7. Is the technical claim supported by current Dulux documentation?
+8. Is local stock/current price confirmed if mentioned?
+9. Does the CTA tell the customer what to do next?
+10. Does it feel like CG and the people in the Bloemfontein store, not a generic AI campaign?
+
+## 20. Durable content lanes
+
+These are not a mandatory content calendar. They are the recurring lanes that fit the historical human work.
+
+### A. Colour that solves a room
+
+- one shade, one room effect;
+- warm/cool comparisons;
+- contrast;
+- accent vs full room;
+- real swatches in different light;
+- current national colour trends translated into local, practical examples.
+
+### B. Right product, right surface
+
+- walls;
+- exterior;
+- doors/trims;
+- cupboards/melamine where supported;
+- tiles/special surfaces where supported;
+- primer/prep;
+- finish choice.
+
+### C. Mixed in store
+
+- tinting/mixing;
+- ASMR;
+- shake/reveal;
+- colour code journey;
+- staff process.
+
+### D. Ask the team
+
+- Irene/staff advice;
+- one customer problem per video;
+- colour names;
+- “what would you use here?”
+- fast myth/decision explanations without unsupported claims.
+
+### E. Real project basket
+
+- not just the paint tin;
+- primer/prep/tool reminders where the store actually supplies them;
+- practical checklist for a room/surface.
+
+### F. Fun store personality
+
+- staff-only concepts;
+- light humour around paint jobs, colour choice or store behaviour;
+- dogs/store moments when current;
+- no forced memes.
+
+### G. Current offers
+
+- clear product;
+- clear validity;
+- clear price/size;
+- current confirmation;
+- a useful reason beyond “sale now on”.
+
+## 21. Operational/freshness checklist before publishing factual content
+
+Recheck when relevant:
 
 - address;
 - phone;
-- hours;
-- holiday changes;
-- store photos;
-- services;
-- review responses;
-- directions and calls.
+- email;
+- WhatsApp;
+- opening/holiday hours;
+- social handles;
+- staff names/roles;
+- current local product stock;
+- exact product name and size;
+- price and promotion dates;
+- tinting/colour-matching capability wording;
+- wallpaper stock/brands/services;
+- delivery/transport availability and area;
+- contractor/trade arrangements;
+- technical product claims;
+- current Dulux colour-of-the-year campaign.
 
-## Paid media
+If a mutable fact cannot be verified, label it and ask/verify rather than filling the gap with an assumption.
 
-## Google Search
+## 22. Source register and provenance
 
-Highest commercial intent:
+### Internal/client sources reviewed
 
-- brand/store searches;
-- local paint-store searches;
-- wallpaper and tinting searches;
-- project and product-category searches;
-- current promotion searches.
+1. `Dulux Business profile.pdf`
+   - client-supplied;
+   - confirms address, phone, national website and Dulux Promise/brand background;
+   - email field blank;
+   - older national award/brand narrative should not automatically be treated as current time-bound proof.
 
-Landing pages must match the search intent. Do not send every click to a generic social profile.
+2. `Dulux Tone of Voice.pdf`
+   - client/Project source;
+   - useful paint-specific tone/content guidance;
+   - contains obvious grief/funeral contamination that is explicitly rejected above.
 
-## Meta
+3. Accessible Dulux ChatGPT Project/history through 2026-09-08
+   - January 2026 store-only 20–30 second video briefs, including one-VO/two-no-VO mix and later fun/out-of-the-box request;
+   - March 2026 copy/grammar refinement history;
+   - historical CG rules on non-generic expertise-led copy, colour-effect wording, voting wording, contact block and staff-led content;
+   - May/July 2026 durable corrections surfaced through accessible conversation context.
 
-Use separate campaign purposes:
+4. Previous CG Dynamics file
+   - `docs/ai-workforce/client-intelligence/DULUX-PAINT-PAPER-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`;
+   - reconciled into this permanent record rather than duplicated.
 
-- local awareness and video reach;
-- room-photo/WhatsApp enquiries;
-- promotion and store-visit campaigns;
-- makeover lead generation;
-- remarketing to engagers and site visitors.
+5. Industry foundation
+   - `docs/ai-workforce/INDUSTRY-BUILDING-MATERIALS-HOME-IMPROVEMENT.md`;
+   - use for general safety/compliance principles, not to overwrite local human brand judgement.
 
-Creative tests:
+### Current public sources checked 2026-09-08
 
-- staff-led vs room-led;
-- problem/solution vs inspiration;
-- product close-up vs completed room;
-- humour vs practical education;
-- price/offer vs consultation.
+First-party Dulux South Africa:
 
-Do not optimise marketing judgement around likes alone. Use current Meta sync and store sales attribution.
+- `https://www.dulux.co.za/en`
+- `https://www.dulux.co.za/en/dulux-promise-guarantee`
+- `https://www.dulux.co.za/en/dulux-colours-of-the-year-2026`
 
-## Performance measurement
+Secondary/current local corroboration:
 
-CG Dynamics should track:
+- Samba retailer listing for Dulux Paint & Paper Bloemfontein;
+- current business/map listing for Dulux Paint n Paper Bloemfontein;
+- supporting current retailer/stockist directory results.
 
-### Marketing
+## 23. Evidence gaps intentionally left unresolved
 
-- reach and frequency;
-- video completion and watch time;
-- saves and shares;
-- profile and website actions;
-- calls, directions and WhatsApp clicks;
-- campaign spend and cost per qualified enquiry;
-- content theme and creative format.
+The 2026-09-08 review could **not** safely establish from accessible first-party local evidence:
 
-### Commercial
+- exact current store email;
+- exact current WhatsApp number;
+- first-party local social-profile URLs/handles;
+- first-party store opening hours;
+- Sunday/public-holiday hours;
+- delivery/transport area or exact service terms;
+- current wallpaper brands/range;
+- contractor/trade-account terms;
+- full current local stock list;
+- Irene's current formal role/title and availability;
+- whether every historical surface-specific primer/service reference remains current.
 
-- source of enquiry;
-- customer type;
-- project type;
-- quoted value;
-- sale value;
-- product category;
-- gross margin where available;
-- repeat purchase;
-- contractor/professional account;
-- promotion code or campaign attribution;
-- lost-sale reason.
+These are not invitations to guess. They are explicit future verification tasks.
 
-### Store-specific questions
+## 24. Bottom-line CG rule
 
-- Did the customer need colour help?
-- Did the customer know the product before arriving?
-- Was the product in stock?
-- Was tinting required?
-- Was the full project basket purchased?
-- Is follow-up or repeat paint likely?
+**Make Dulux content useful enough that a Bloemfontein customer can picture the colour, understand the product decision or recognise the person/process that will help them in store.**
 
-## Reporting truth
-
-Dulux has historical May/June reports and a live Meta connection in CG Dynamics.
-
-Agents must:
-
-- use current normalised Meta records;
-- keep Facebook and Instagram metrics separate where the source does;
-- preserve unavailable metrics as unavailable;
-- never sum unique audiences;
-- identify reporting-period and comparison-period clearly;
-- recommend actions for the upcoming month, not merely restate the reported month;
-- connect social performance to enquiries and store sales wherever possible.
-
-## 90-day implementation plan
-
-## Days 1–30: Truth and conversion foundation
-
-1. Verify current identity, address, contacts, hours, services and social handles.
-2. Audit Google Business Profile and resolve duplicate or outdated listings.
-3. Confirm current product, wallpaper, delivery, consultation and contractor services.
-4. Map Meta data, old reports and current store sales sources.
-5. Create a simple WhatsApp/project-enquiry form.
-6. Build product/surface decision templates.
-7. Capture staff, mixing station, colour wall, wallpaper books and real store processes.
-8. Publish the four existing video-guide concepts with stronger commercial CTAs.
-9. Start source tracking at till/enquiry level.
-
-## Days 31–60: Campaign and proof
-
-1. Launch `Colour Clinic`.
-2. Launch `Mixed in Bloem`.
-3. Build one real room-transformation case study.
-4. Create four project-ready basket posts.
-5. Launch a contractor lead-capture campaign.
-6. Build wallpaper/paint pairing content.
-7. Start Google Search only where landing-page and conversion tracking are ready.
-8. Request reviews after successful consultations and purchases.
-
-## Days 61–90: Scale what converts
-
-1. Compare content against calls, WhatsApp enquiries, quotes and sales.
-2. Scale the strongest buyer journey rather than the highest-liked post.
-3. Run a colour-consultation or makeover activation.
-4. Establish at least one architect/designer/painter partnership system.
-5. Build repeat reminders for renovation phases and contractor purchases.
-6. Publish a commercial report with campaign spend, enquiry quality, sales attribution and next-month actions.
-
-## Immediate high-value actions
-
-1. Turn the existing entertaining video direction into a named recurring store-content system.
-2. Add a clear `send your room photo` enquiry route.
-3. Separate homeowner, contractor and designer messaging.
-4. Show real tinting, mixing, advice and product selection.
-5. Build project baskets rather than promoting isolated cans.
-6. Use real Bloemfontein transformations as the central proof engine.
-7. Track store visits and sales sources so Meta performance can be judged commercially.
-
-## Guardrails
-
-- Never publish old shelf prices as current.
-- Never guarantee screen-to-wall colour accuracy.
-- Never diagnose structural damp, water ingress or hazardous coating problems from social photos alone.
-- Never state technical coverage, durability, preparation or warranty claims without the current product data sheet.
-- Never imply installation, delivery, colour matching, consultation or contractor terms unless currently confirmed.
-- Never use national Dulux campaign material as proof of this store's local performance.
-- Never collapse Facebook and Instagram metrics into misleading totals.
-- Never judge the account only by follower growth or views.
-
-## Source register
-
-### Client-supplied / internal evidence
-
-- Instagram profile screenshot: Dulux Paint & Paper Bloemfontein; premium paints, wallpaper and colour expertise; approximately 5,000 views in the prior 30 days at capture.
-- Social-grid screenshots showing product, colour, staff and campaign content.
-- `Dulux Paint Bloemfontein Content Guide.pdf`, containing four named videos and full timed scripts.
-- Historical product images of Dulux Pearlglow and EasyCare with May 2026 shelf pricing; retained as historical only.
-- CG Dynamics Meta reporting and reconciliation history for Dulux Bloemfontein.
-
-### Internal research foundation
-
-- `docs/ai-workforce/INDUSTRY-BUILDING-MATERIALS-HOME-IMPROVEMENT.md`.
-- Existing Marketing Library retail, building-materials, local-search and paid-media resources.
-
-### Refresh required
-
-External official-source browsing was unavailable during this research session. Before operational deployment, refresh:
-
-- national Dulux product data and technical sheets;
-- official local store details;
-- current Google Business Profile;
-- current store social profiles;
-- current promotions and pricing;
-- local competitor names and offers;
-- current Meta and website analytics.
-
-This limitation must remain visible rather than being silently replaced with assumptions.
+If the copy could be pasted onto another paint brand unchanged, it is not finished.
