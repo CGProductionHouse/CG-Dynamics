@@ -13,8 +13,8 @@ Purpose: migrate durable client knowledge from existing ChatGPT Projects into CG
 5. Review all useful Project chats and Project sources/files available for that client.
 6. Extract durable knowledge, not every historical post/caption/request.
 7. Verify mutable public facts against current authoritative sources before storing them: website, Facebook/Instagram, phone, email, address, hours, services, key contacts and current positioning.
-8. Preserve provenance: public verified, client-confirmed, CA/CG-confirmed internal, historical, inferred/uncertain.
-9. If sources conflict, record the conflict and prefer the newest authoritative source unless CA/client confirmation overrides it.
+8. Preserve provenance: public verified, client-confirmed, CG Production House-confirmed internal, historical, inferred/uncertain.
+9. If sources conflict, record the conflict and prefer the newest authoritative source unless direct client or CG Production House confirmation overrides it.
 10. Keep each client isolated. Do not pull unrelated information from loose chats or other Projects.
 11. Update/create the appropriate client intelligence / operational memory in CG Dynamics and retain the repo's freshness protocol.
 12. Do not change CG Hours billing/history, client UUIDs, time entries or financial records during this knowledge migration.
@@ -32,7 +32,7 @@ Purpose: migrate durable client knowledge from existing ChatGPT Projects into CG
 - Tone/language/caption rules
 - Visual/content preferences
 - Recurring promotions, events or operational requirements
-- Explicit CA/client corrections and rejected approaches
+- Explicit client/CG Production House corrections and rejected approaches
 - Package/deliverable realities that matter operationally
 - Known sensitivities, compliance constraints or mistakes to avoid
 - Useful historical lessons
@@ -46,11 +46,11 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 |---|---|---|---|
 | WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
 | Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
-| Bloem Action Sports | Bloem Action Sport | **SYNCED** | Corrected migration audited again on 2026-09-08. Canonical name remains `Bloem Action Sports`; Action Soccer is verified current through the live Bloem registration/league system; Stella remains the CG/client-confirmed marketing/bookings contact while the public venue contact is preserved separately; the historical Debbie label/contact lineage is retained and classified as superseded rather than invented; current address/hours/facilities/services and recent accessible social/CG-content patterns were reconciled with explicit provenance and access limitations. Permanent record: `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`. |
+| Bloem Action Sports | Bloem Action Sport | **COMPLETE** | Final ChatGPT Project architecture completed on 2026-09-08. Permanent Dynamics intelligence remains `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`; completed social/content audit is incorporated; canonical working guide created at `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CG-DYNAMICS-CLIENT-GUIDE.md`; existing Project Source `Bloem Action Sport business info.pdf` is marked **REPLACE** with the canonical guide because useful historical evidence is already preserved in Dynamics while the PDF contains superseded operational details; final short staff-facing Project Instructions supplied in the completion handoff. |
 
-## Completion standard
+## Base migration completion standard
 
-A client is `SYNCED` only when:
+A client is `SYNCED` when:
 
 - current CG Dynamics material has been read;
 - useful ChatGPT Project knowledge has been reviewed;
@@ -59,4 +59,27 @@ A client is `SYNCED` only when:
 - durable knowledge has been committed to the client migration branch;
 - the final response states exactly what files/records changed and the commit SHA.
 
-Only after all important current-client Projects are `SYNCED` should ChatGPT conversation history be wiped.
+## Final ChatGPT Project architecture completion standard
+
+A client is `COMPLETE` under the final architecture only when:
+
+- permanent detailed CG Dynamics intelligence is correct;
+- the completed social/content audit is incorporated into that intelligence or its derived working guidance;
+- one canonical practical ChatGPT working guide derived from Dynamics exists;
+- every existing client Project Source has an explicit `KEEP`, `REMOVE` or `REPLACE` decision;
+- stale/superseded Project grounding is removed or replaced rather than left beside the canonical guide;
+- Project Instructions are reduced to short operating instructions that point staff/ChatGPT to the canonical guide;
+- unresolved facts are explicitly freshness-gated instead of guessed;
+- documentation changes are committed on the isolated client migration branch.
+
+### Bloem Action Sports final architecture — 2026-09-08
+
+- Permanent source of truth: `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`
+- Canonical ChatGPT working guide: `docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CG-DYNAMICS-CLIENT-GUIDE.md`
+- Project Source decision: `Bloem Action Sport business info.pdf` → **REPLACE** with the canonical working guide.
+- Reason: the PDF contains valuable historical tone/content evidence but also superseded hours/address context and the historical Debbie/Stella label issue. Those historical details remain preserved in Dynamics; they should not remain in everyday ChatGPT grounding beside the corrected guide.
+- Social/content audit: incorporated into the permanent intelligence and canonical working guide, including explicit access limitations.
+- Short Project Instructions: supplied in the final completion handoff and kept staff-facing with no personal shorthand.
+- Permanent Dynamics intelligence was not rewritten during this architecture cleanup because no new factual contradiction was discovered.
+
+Only after all important current-client Projects are `COMPLETE` under the final architecture should ChatGPT conversation history be wiped.
