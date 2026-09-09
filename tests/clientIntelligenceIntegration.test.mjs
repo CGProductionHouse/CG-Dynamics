@@ -7,7 +7,7 @@ import { createServer } from 'vite'
 // stale/excluded knowledge grounding, Client Guide derivation correctness,
 // Project Instructions boundedness, and client-role access denial.
 
-let server, skilled, guideGenerator, contactPolicy, clientScope, creativeStandard, agent
+let server, skilled, guideGenerator, contactPolicy, clientScope, creativeStandard, backfill, agent
 
 const today = '2026-09-08'
 
@@ -27,6 +27,7 @@ before(async () => {
   contactPolicy = await server.ssrLoadModule('/src/lib/clientContactPolicy.ts')
   clientScope = await server.ssrLoadModule('/src/lib/clientScope.ts')
   creativeStandard = await server.ssrLoadModule('/src/lib/humanCreativeStandard.ts')
+  backfill = await server.ssrLoadModule('/src/lib/clientContactBackfill.ts')
   agent = skilled.AGENT_CONTRACTS.copywriting_agent
 })
 after(async () => { await server?.close() })
@@ -49,6 +50,8 @@ const CREATIVE_STANDARD_SHARED = read('../supabase/functions/_shared/humanCreati
 const CREATIVE_STANDARD_APP = read('../src/lib/humanCreativeStandard.ts')
 const CONTEXT_CONTRACT_SHARED = read('../supabase/functions/_shared/clientContextContract.ts')
 const CONTEXT_CONTRACT_APP = read('../src/lib/clientContextContract.ts')
+const MIGRATION_PIEK_BACKFILL = read('../supabase/migrations/20260909120000_client_contact_piek_backfill.sql')
+const MIGRATION_WORKFLOW_DOC = read('../docs/chatgpt-client-knowledge-migration-2026-09-08.md')
 
 const capeCard = {
   id: 'cape-1', slug: 'cape-lumber-positioning', title: 'Cape Lumber: supplier, not contractor',
@@ -689,4 +692,150 @@ test('#247 no longer carries #311-owned private-MCP implementation files', () =>
     try { readFileSync(new URL(p, import.meta.url), 'utf8'); exists = true } catch { /* expected gone */ }
     assert.equal(exists, false, `#311-owned file must not be in #247: ${p}`)
   }
+})
+
+// ── #294 exact-client + entity isolation regression fixtures ─────────────────────
+
+function contact(over) {
+  return {
+    id: 'c', client_id: 'x', scope_key: null, contact_type: 'phone', display_label: 'Phone',
+    person_name: null, person_role: null, value: 'V', approved_for_caption: true, blocks_caption: false,
+    visibility: 'public_marketing', freshness_state: 'current_verified', lifecycle_state: 'active',
+    platforms: [], content_modes: ['caption'], footer_order: 10, last_verified_at: today,
+    provenance_summary: 'x', ...over,
+  }
+}
+const optPolicy = (over = {}) => ({ client_id: 'x', scope_key: null, content_mode: 'caption', platform: null, requirement: 'optional', format_template: null, review_state: 'current_verified', ...over })
+
+test('Red Oak cannot receive Staffordshire contacts and vice versa', () => {
+  const contacts = [
+    contact({ id: 'ro', client_id: 'red-oak', value: 'REDOAK' }),
+    contact({ id: 'st', client_id: 'staffordshire', value: 'STAFF' }),
+  ]
+  const ro = contactPolicy.resolveCaptionContacts({ clientId: 'red-oak', contacts, policies: [optPolicy({ client_id: 'red-oak' })] })
+  const st = contactPolicy.resolveCaptionContacts({ clientId: 'staffordshire', contacts, policies: [optPolicy({ client_id: 'staffordshire' })] })
+  assert.deepEqual(ro.contacts.map(c => c.value), ['REDOAK'])
+  assert.deepEqual(st.contacts.map(c => c.value), ['STAFF'])
+})
+
+test('Supa Quick BFN never receives Centurion / WiseRide / Wiseman Group contacts', () => {
+  const contacts = [
+    contact({ id: 'bfn', client_id: 'supa-quick-bfn', value: 'BFN' }),
+    contact({ id: 'cent', client_id: 'supa-quick-centurion', value: 'CENT' }),
+    contact({ id: 'wr', client_id: 'wiseride', value: 'WR' }),
+    contact({ id: 'wg', client_id: 'wiseman-group', value: 'WG' }),
+  ]
+  const result = contactPolicy.resolveCaptionContacts({ clientId: 'supa-quick-bfn', contacts, policies: [optPolicy({ client_id: 'supa-quick-bfn' })] })
+  assert.deepEqual(result.contacts.map(c => c.value), ['BFN'])
+})
+
+test('Piek Engen/Sasol/Get Together contact scopes never fall back to each other or to group', () => {
+  const contacts = [
+    contact({ id: 'grp', client_id: 'piek', scope_key: null, value: 'GROUP' }),
+    contact({ id: 'eng', client_id: 'piek', scope_key: 'engen', value: 'ENGEN' }),
+    contact({ id: 'sas', client_id: 'piek', scope_key: 'sasol', value: 'SASOL' }),
+  ]
+  const engen = contactPolicy.resolveCaptionContacts({ clientId: 'piek', scopeKey: 'engen', contacts, policies: [optPolicy({ client_id: 'piek', scope_key: 'engen' })] })
+  assert.deepEqual(engen.contacts.map(c => c.value), ['ENGEN'])
+  const getTogether = contactPolicy.resolveCaptionContacts({ clientId: 'piek', scopeKey: 'get-together', contacts, policies: [optPolicy({ client_id: 'piek', scope_key: 'get-together' })] })
+  assert.deepEqual(getTogether.contacts.map(c => c.value), [], 'no contact at get-together scope; never falls back to Engen/Sasol/group')
+})
+
+test('footer ordering and format template are preserved for the exact scope', () => {
+  const contacts = [
+    contact({ id: 'w', client_id: 'x', contact_type: 'website', value: 'W', footer_order: 30 }),
+    contact({ id: 'p', client_id: 'x', contact_type: 'phone', value: 'P', footer_order: 10 }),
+    contact({ id: 'e', client_id: 'x', contact_type: 'email', value: 'E', footer_order: 20 }),
+  ]
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'x', contacts, policies: [optPolicy({ format_template: '{phone}\n{email}\n{website}' })],
+  })
+  assert.deepEqual(result.contacts.map(c => c.value), ['P', 'E', 'W'], 'sorted by footer_order')
+  assert.equal(result.policy.format_template, '{phone}\n{email}\n{website}')
+})
+
+// ── #294 Piek backfill migration (evidence-backed, conflict-preserving) ──────────
+
+test('Piek backfill registers ONE canonical client with exact entity scope separation', () => {
+  assert.match(MIGRATION_PIEK_BACKFILL, /where name = 'Piek Group'/)
+  assert.match(MIGRATION_PIEK_BACKFILL, /Expected exactly one Piek Group client/)
+  assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /\blike\b/i, 'no fuzzy client matching')
+  for (const scope of ["'engen'", "'sasol'", "'get-together'"]) {
+    assert.ok(MIGRATION_PIEK_BACKFILL.includes(scope), `entity scope present: ${scope}`)
+  }
+  assert.match(MIGRATION_PIEK_BACKFILL, /on conflict do nothing/, 'idempotent')
+})
+
+test('Piek group caption-email conflict is preserved unresolved, not guessed', () => {
+  assert.match(MIGRATION_PIEK_BACKFILL, /info@piekgroup\.com/)
+  assert.match(MIGRATION_PIEK_BACKFILL, /admin@piekgroup\.co\.za/)
+  // both email candidates held possible_change so the runtime fails closed on email
+  assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /info@piekgroup\.com'[^\n]*current_verified/, 'client email is not asserted current')
+  assert.match(MIGRATION_PIEK_BACKFILL, /possible_change/)
+  assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /piekgroup\.com'[^\n]*website/i, 'website never changed to .com')
+})
+
+// ── #294 #3 future migration workflow hardening ─────────────────────────────────
+
+test('migration workflow mandates the deterministic 5-part contact audit return', () => {
+  assert.match(MIGRATION_WORKFLOW_DOC, /Mandatory contact audit return/)
+  for (const part of ['Confirmed public-marketing contacts', 'Confirmed internal-only contacts', 'Stale / superseded contacts', 'Unresolved conflicts', 'Exact caption/footer rule']) {
+    assert.ok(MIGRATION_WORKFLOW_DOC.includes(part), `audit return requires: ${part}`)
+  }
+  assert.match(MIGRATION_WORKFLOW_DOC, /not.{0,6}fully runtime-ready if a contact\/footer requirement/i)
+  assert.match(MIGRATION_WORKFLOW_DOC, /preflightContactBackfill/)
+})
+
+// ── #294 deterministic preflight/audit ──────────────────────────────────────────
+
+const propContact = over => ({
+  client_ref: 'Piek Group', client_id: 'piek', scope_key: null, contact_type: 'phone', value: 'V',
+  visibility: 'public_marketing', freshness_state: 'current_verified', lifecycle_state: 'active',
+  approved_for_caption: true, blocks_caption: false, ...over,
+})
+
+test('preflight reports inserts vs records already present (idempotent skip)', () => {
+  const proposed = [propContact({ value: 'NEW' }), propContact({ value: 'EXISTS' })]
+  const report = backfill.preflightContactBackfill({
+    proposedContacts: proposed, proposedPolicies: [],
+    existingContacts: [{ client_id: 'piek', scope_key: null, contact_type: 'phone', value: 'EXISTS' }],
+    existingPolicies: [],
+  })
+  assert.deepEqual(report.contacts_to_insert.map(c => c.value), ['NEW'])
+  assert.deepEqual(report.contacts_skipped_existing.map(c => c.value), ['EXISTS'])
+  assert.equal(report.summary.contacts_insert, 1)
+  assert.equal(report.summary.contacts_skip, 1)
+})
+
+test('preflight surfaces stale/superseded and unresolved conflicts without guessing', () => {
+  const proposed = [
+    propContact({ value: 'CURRENT' }),
+    propContact({ value: 'OLD', lifecycle_state: 'superseded', freshness_state: 'historical' }),
+    propContact({ contact_type: 'email', value: 'info@piekgroup.com', freshness_state: 'possible_change' }),
+    propContact({ contact_type: 'email', value: 'admin@piekgroup.co.za', approved_for_caption: false, freshness_state: 'possible_change' }),
+  ]
+  const report = backfill.preflightContactBackfill({ proposedContacts: proposed, proposedPolicies: [], existingContacts: [], existingPolicies: [] })
+  assert.equal(report.stale_superseded.length, 1)
+  assert.ok(report.unresolved_conflicts.length >= 2, 'both possible_change emails surfaced')
+  assert.ok(report.unresolved_conflicts.every(u => Array.isArray(u.values)))
+})
+
+test('preflight flags an ambiguous same-type same-scope current conflict', () => {
+  const proposed = [
+    propContact({ contact_type: 'phone', value: '051-111-1111' }),
+    propContact({ contact_type: 'phone', value: '051-222-2222' }),
+  ]
+  const report = backfill.preflightContactBackfill({ proposedContacts: proposed, proposedPolicies: [], existingContacts: [], existingPolicies: [] })
+  assert.ok(report.unresolved_conflicts.some(u => /ambiguous/.test(u.reason)), 'same-type ambiguity surfaced')
+})
+
+test('preflight lists clients covered and exact scopes', () => {
+  const report = backfill.preflightContactBackfill({
+    proposedContacts: [propContact({ scope_key: null }), propContact({ scope_key: 'engen' })],
+    proposedPolicies: [], existingContacts: [], existingPolicies: [],
+  })
+  assert.deepEqual(report.clients_covered, ['Piek Group'])
+  const scopeKeys = report.scopes.map(s => s.scope_key)
+  assert.equal(scopeKeys.length, 2)
+  assert.ok(scopeKeys.includes(null) && scopeKeys.includes('engen'), 'both group and engen scopes reported')
 })

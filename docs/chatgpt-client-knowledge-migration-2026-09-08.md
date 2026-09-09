@@ -80,6 +80,25 @@ A client is `COMPLETE` under the final architecture only when:
 - canonical contact/footer records are prepared for private Dynamics backfill, with conflicts held unresolved rather than guessed;
 - final Project Instructions contain no mutable contact values or named current contacts.
 
+## Mandatory contact audit return (#294)
+
+Generic "verify contacts" wording is not sufficient. Every client migration (completed,
+in-progress and future) MUST return a deterministic contact audit with these exact
+sections — an empty section is stated explicitly, never omitted:
+
+1. **Confirmed public-marketing contacts** — exact value, contact type, entity/branch scope, footer order, provenance and freshness.
+2. **Confirmed internal-only contacts** — recorded but never eligible for caption packets.
+3. **Stale / superseded contacts** — retained with `historical`/`superseded` + `superseded_by` provenance, excluded from grounding.
+4. **Unresolved conflicts** — two plausible current values, or an unverified value, held `unverified_hold`/`possible_change` and surfaced for a CA decision. Never guessed.
+5. **Exact caption/footer rule** — the `mandatory`/`optional`/`omitted` requirement per content mode/platform and the ordered canonical contacts it may use, at the exact client/entity scope.
+
+A client is **not** fully runtime-ready if a contact/footer requirement used in normal CG
+captions is unresolved. Before any production apply, run the deterministic preflight
+(`src/lib/clientContactBackfill.ts` → `preflightContactBackfill`) so the operator sees
+clients covered, contacts/policies to insert, records skipped as already present,
+stale/superseded values, unresolved conflicts and the exact entity/branch scopes — with no
+mutation. All backfill migrations are idempotent (`on conflict do nothing`).
+
 ### Cape Lumber final architecture — 2026-09-08
 
 - Permanent source of truth: `docs/ai-workforce/client-intelligence/CAPE-LUMBER-MARKETING-PERFORMANCE-AND-GROWTH-INTELLIGENCE-2026-08.md`
