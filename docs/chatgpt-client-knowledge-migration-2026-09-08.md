@@ -48,7 +48,7 @@ Do **not** treat temporary campaigns, one-off captions, obsolete prices, old dat
 
 | Client | ChatGPT Project | Status | Notes |
 |---|---|---|---|
-| WiseRide | WiseRide | IN PROGRESS | Separate content identity from Wiseman Group billing umbrella. |
+| WiseRide | WiseRide | **COMPLETE** | Separate content identity from Wiseman Group billing umbrella. **#294 contact/footer audit complete** (see WiseRide section below): standalone Dynamics identity confirmed, website mandatory, default address/phone/email held as an unresolved conflict for CA. Contact backfill migration `20260909130000_client_contact_wiseride_backfill.sql`. |
 | Piek Group | Piek Group | **SYNCED** | Canonical Piek umbrella preserved; Engen, Sasol, Get Together and named branches/partners remain distinct operational/content entities. Project PDFs, accessible Project history and current public facts were reconciled with explicit freshness/provenance states. |
 | Cape Lumber | Cape Lumber | **COMPLETE** | Permanent Dynamics intelligence reconciled; social/content audit incorporated; `CAPE-LUMBER-CG-DYNAMICS-CLIENT-GUIDE.md` is the canonical ChatGPT working guide; current Project Sources audited with REPLACE decision for stale-risk business PDF; short staff-facing Project Instructions supplied. |
 | Bloem Action Sports | Bloem Action Sport | **COMPLETE** | Final ChatGPT Project architecture completed on 2026-09-08. Permanent Dynamics intelligence remains `BLOEM-ACTION-SPORTS-CLIENT-OPERATIONAL-INTELLIGENCE.md`; social/content audit incorporated; canonical working guide at `BLOEM-ACTION-SPORTS-CG-DYNAMICS-CLIENT-GUIDE.md`; existing Project Source `Bloem Action Sport business info.pdf` marked **REPLACE** with canonical guide; short staff-facing Project Instructions supplied. |
@@ -98,6 +98,34 @@ captions is unresolved. Before any production apply, run the deterministic prefl
 clients covered, contacts/policies to insert, records skipped as already present,
 stale/superseded values, unresolved conflicts and the exact entity/branch scopes — with no
 mutation. All backfill migrations are idempotent (`on conflict do nothing`).
+
+### WiseRide contact/footer audit — 2026-09-09
+
+Exact canonical identity: WiseRide (`504113ee-fba9-4993-807e-a86066615212`). This is
+a standalone client and never falls back to Wiseman Group, Supa Quick BFN, Supa Quick
+Centurion, another Wiseman business, or a billing umbrella.
+
+1. **Confirmed public-marketing contacts** — general WiseRide captions use only
+   `wisemangroup.co.za` (unscoped client-wide website, footer order 10,
+   `current_verified`). The Project rule, recent CG captions and current official page
+   agree that the website is mandatory. No address, phone or email is approved while
+   the conflicts below remain open.
+2. **Confirmed internal-only contacts** — none evidenced in the recovered WiseRide
+   source material. No private contact is fabricated or inserted.
+3. **Stale / superseded contacts** — none can yet be deterministically classified as
+   superseded. Both plausible contact sets remain active `possible_change` evidence
+   until CA resolves them; neither set is silently demoted or deleted.
+4. **Unresolved conflicts** — address: `80 Nelson Mandela Street, Bloemfontein` versus
+   `88 Nelson Mandela Dr, Bloemfontein Central, Bloemfontein, 9323`; phone:
+   `073 340 5302` versus `051 1011 600`; email: `sonja@wisemangroup.co.za` and
+   `wiseride@wisemangroup.co.za` versus `info@wisemangroup.co.za`. Every candidate is
+   caption-ineligible and stored `possible_change`; the runtime must not choose one.
+   Langenhoven Park has no verified address, phone or email and must not inherit the
+   Nelson Mandela values.
+5. **Exact caption/footer rule** — for unscoped general WiseRide captions, the footer is
+   `mandatory` and its exact template is `{website}`. Address, phone and email remain
+   excluded pending resolution. No Langenhoven Park `scope_key` or fallback policy is
+   created without exact branch evidence.
 
 ### Cape Lumber final architecture — 2026-09-08
 

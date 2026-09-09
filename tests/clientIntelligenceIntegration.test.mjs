@@ -51,6 +51,7 @@ const CREATIVE_STANDARD_APP = read('../src/lib/humanCreativeStandard.ts')
 const CONTEXT_CONTRACT_SHARED = read('../supabase/functions/_shared/clientContextContract.ts')
 const CONTEXT_CONTRACT_APP = read('../src/lib/clientContextContract.ts')
 const MIGRATION_PIEK_BACKFILL = read('../supabase/migrations/20260909120000_client_contact_piek_backfill.sql')
+const MIGRATION_WISERIDE_BACKFILL = read('../supabase/migrations/20260909130000_client_contact_wiseride_backfill.sql')
 const MIGRATION_WORKFLOW_DOC = read('../docs/chatgpt-client-knowledge-migration-2026-09-08.md')
 
 const capeCard = {
@@ -773,6 +774,64 @@ test('Piek group caption-email conflict is preserved unresolved, not guessed', (
   assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /info@piekgroup\.com'[^\n]*current_verified/, 'client email is not asserted current')
   assert.match(MIGRATION_PIEK_BACKFILL, /possible_change/)
   assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /piekgroup\.com'[^\n]*website/i, 'website never changed to .com')
+})
+
+// ── #294 WiseRide backfill (exact identity, mandatory website, held conflicts) ──
+
+test('WiseRide backfill is exact-ID isolated and idempotent', () => {
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /v_wiseride_id constant uuid := '504113ee-fba9-4993-807e-a86066615212'/)
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /where id = v_wiseride_id and name = 'WiseRide'/)
+  assert.doesNotMatch(MIGRATION_WISERIDE_BACKFILL, /\blike\b/i, 'no fuzzy client matching')
+  assert.doesNotMatch(MIGRATION_WISERIDE_BACKFILL, /899c9988-8207-4e45-a8fc-a7446dfcf96b/, 'Wiseman Group id is never a fallback')
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /on conflict do nothing/, 'idempotent')
+})
+
+test('WiseRide migration makes only the website current and holds every contact conflict', () => {
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /'wisemangroup\.co\.za',true,false,'public_marketing'[\s\S]*?'current_verified'/)
+  for (const value of ['80 Nelson Mandela Street', '88 Nelson Mandela Dr', '073 340 5302', '051 1011 600', 'sonja@wisemangroup.co.za', 'wiseride@wisemangroup.co.za', 'info@wisemangroup.co.za']) {
+    assert.ok(MIGRATION_WISERIDE_BACKFILL.includes(value), `conflict candidate preserved: ${value}`)
+  }
+  assert.equal((MIGRATION_WISERIDE_BACKFILL.match(/'possible_change','active'/g) ?? []).length, 7)
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /'mandatory','\{website\}'/)
+})
+
+test('WiseRide resolver returns the mandatory website but never a held address phone or email', () => {
+  const clientId = '504113ee-fba9-4993-807e-a86066615212'
+  const contacts = [
+    contact({ id: 'site', client_id: clientId, contact_type: 'website', value: 'wisemangroup.co.za' }),
+    contact({ id: 'address-a', client_id: clientId, contact_type: 'address', value: '80 Nelson Mandela Street', approved_for_caption: false, freshness_state: 'possible_change' }),
+    contact({ id: 'address-b', client_id: clientId, contact_type: 'address', value: '88 Nelson Mandela Dr', approved_for_caption: false, freshness_state: 'possible_change' }),
+    contact({ id: 'phone-a', client_id: clientId, value: '073 340 5302', approved_for_caption: false, freshness_state: 'possible_change' }),
+    contact({ id: 'email-a', client_id: clientId, contact_type: 'email', value: 'sonja@wisemangroup.co.za', approved_for_caption: false, freshness_state: 'possible_change' }),
+  ]
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId,
+    contacts,
+    policies: [optPolicy({ client_id: clientId, requirement: 'mandatory', format_template: '{website}' })],
+  })
+  assert.deepEqual(result.contacts.map(c => c.value), ['wisemangroup.co.za'])
+  assert.equal(result.can_generate_footer, true)
+  assert.equal(result.unresolved.length, 4)
+})
+
+test('WiseRide and Langenhoven Park never inherit group sibling or unscoped contacts', () => {
+  const clientId = '504113ee-fba9-4993-807e-a86066615212'
+  const contacts = [
+    contact({ id: 'wr', client_id: clientId, contact_type: 'website', value: 'wisemangroup.co.za' }),
+    contact({ id: 'wg', client_id: '899c9988-8207-4e45-a8fc-a7446dfcf96b', value: 'WISEMAN' }),
+    contact({ id: 'bfn', client_id: 'supa-quick-bfn', value: 'SUPA-BFN' }),
+    contact({ id: 'centurion', client_id: 'supa-quick-centurion', value: 'SUPA-CENTURION' }),
+  ]
+  const general = contactPolicy.resolveCaptionContacts({ clientId, contacts, policies: [optPolicy({ client_id: clientId })] })
+  assert.deepEqual(general.contacts.map(c => c.value), ['wisemangroup.co.za'])
+  const langenhoven = contactPolicy.resolveCaptionContacts({
+    clientId,
+    scopeKey: 'langenhoven-park',
+    contacts,
+    policies: [optPolicy({ client_id: clientId, scope_key: 'langenhoven-park', requirement: 'mandatory' })],
+  })
+  assert.deepEqual(langenhoven.contacts, [], 'branch scope cannot inherit Nelson Mandela or client-wide contacts')
+  assert.equal(langenhoven.can_generate_footer, false)
 })
 
 // ── #294 #3 future migration workflow hardening ─────────────────────────────────
