@@ -47,7 +47,8 @@ const CLIENT_CONTACTS_TS = read('../src/lib/clientContacts.ts')
 const GET_CLIENT_CONTEXT_FN = read('../supabase/functions/get-client-context/index.ts')
 const CREATIVE_STANDARD_SHARED = read('../supabase/functions/_shared/humanCreativeStandard.ts')
 const CREATIVE_STANDARD_APP = read('../src/lib/humanCreativeStandard.ts')
-const MCP_TOOL_CATALOG = read('../supabase/functions/cg-dynamics-mcp/toolCatalog.ts')
+const CONTEXT_CONTRACT_SHARED = read('../supabase/functions/_shared/clientContextContract.ts')
+const CONTEXT_CONTRACT_APP = read('../src/lib/clientContextContract.ts')
 
 const capeCard = {
   id: 'cape-1', slug: 'cape-lumber-positioning', title: 'Cape Lumber: supplier, not contractor',
@@ -655,22 +656,37 @@ test('distinct contact types (phone + email) are not treated as a conflict', () 
   assert.equal(result.can_generate_footer, true)
 })
 
-// ── #311 consumes this canonical runtime, not a parallel context store ──────────
+// ── Canonical task-type contract owned by client-intelligence (#241; #311 consumes it) ──
 
-test('#311 MCP get_client_context declares the canonical get-client-context contract', () => {
-  assert.match(MCP_TOOL_CATALOG, /name: 'get_client_context'/)
-  assert.match(MCP_TOOL_CATALOG, /canonicalContract: 'supabase\/functions\/get-client-context'/)
-  assert.match(MCP_TOOL_CATALOG, /dependency: '#241\/#294'/)
-})
-
-test('#311 MCP task_type enum matches the canonical runtime task types (no parallel taxonomy)', () => {
-  // Isolate the get_client_context tool's input schema line.
-  const toolLine = MCP_TOOL_CATALOG.split('\n').find(l => l.includes('task_type') && l.includes('enum'))
-  assert.ok(toolLine, 'get_client_context declares a task_type enum')
+test('client-intelligence exposes a single canonical task-type contract', () => {
+  assert.match(CONTEXT_CONTRACT_SHARED, /export const CLIENT_CONTEXT_TASK_TYPES = \[/)
   for (const task of ['caption', 'content_idea', 'poster_copy', 'image_edit', 'factual_lookup', 'campaign', 'seo_hashtags']) {
-    assert.ok(toolLine.includes(`'${task}'`), `MCP exposes canonical task_type: ${task}`)
+    assert.ok(CONTEXT_CONTRACT_SHARED.includes(`'${task}'`), `contract includes canonical task_type: ${task}`)
   }
   for (const stray of ['script', 'strategy', 'general']) {
-    assert.ok(!toolLine.includes(`'${stray}'`), `no stray task_type '${stray}' in the client-context tool`)
+    assert.ok(!CONTEXT_CONTRACT_SHARED.includes(`'${stray}'`), `contract has no parallel task_type '${stray}'`)
+  }
+})
+
+test('get-client-context consumes the canonical contract rather than a local task list', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /from '\.\.\/_shared\/clientContextContract\.ts'/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /CLIENT_CONTEXT_TASK_TYPES as TASK_TYPES/)
+  assert.doesNotMatch(GET_CLIENT_CONTEXT_FN, /const TASK_TYPES = \[/, 'no inline task list — one canonical source')
+})
+
+test('task-type contract app and Deno copies do not drift', () => {
+  const stripHeader = s => s.split('\n').slice(1).join('\n')
+  assert.equal(stripHeader(CONTEXT_CONTRACT_APP), stripHeader(CONTEXT_CONTRACT_SHARED), 'src/lib and _shared contract must match')
+})
+
+test('#247 no longer carries #311-owned private-MCP implementation files', () => {
+  for (const p of [
+    '../supabase/functions/cg-dynamics-mcp/toolCatalog.ts',
+    '../tests/cgDynamicsMcpToolCatalog.test.mjs',
+    '../docs/ai-workforce/CG-DYNAMICS-PRIVATE-MCP-ROLLOUT.md',
+  ]) {
+    let exists = false
+    try { readFileSync(new URL(p, import.meta.url), 'utf8'); exists = true } catch { /* expected gone */ }
+    assert.equal(exists, false, `#311-owned file must not be in #247: ${p}`)
   }
 })

@@ -26,10 +26,11 @@ import {
   HASHTAG_RULES,
   HUMAN_CREATIVE_STANDARD,
 } from '../_shared/humanCreativeStandard.ts'
+import {
+  CLIENT_CONTEXT_TASK_TYPES as TASK_TYPES,
+  type ClientContextTaskType as TaskType,
+} from '../_shared/clientContextContract.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const TASK_TYPES = ['caption', 'content_idea', 'poster_copy', 'image_edit', 'factual_lookup', 'campaign', 'seo_hashtags'] as const
-type TaskType = typeof TASK_TYPES[number]
 
 interface ContextRequest {
   client_id: string
