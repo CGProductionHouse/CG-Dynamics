@@ -107,6 +107,29 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#305', canonicalContract: 'business_development_lead_research RLS/service',
   },
+  {
+    name: 'get_my_profile', title: 'Get my assistant profile',
+    description: 'Read the exact authenticated staff member\'s durable Assistant profile: working style, preferences, recurring responsibilities, repeated corrections, and approved access scope. Never expose another staff member\'s profile.',
+    inputSchema: objectSchema({}),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#305', canonicalContract: 'staff_assistant_profiles RLS',
+  },
+  {
+    name: 'update_my_preferences', title: 'Update my preferences',
+    description: 'Update one or more durable working-style preferences, recurring responsibilities, repeated corrections, or lead-research criteria for the exact authenticated staff member. Preserves existing values for fields not provided.',
+    inputSchema: objectSchema({
+      responsibilities: { type: 'array', items: { type: 'string', maxLength: 240 }, maxItems: 20 },
+      recurring_duties: { type: 'array', items: { type: 'string', maxLength: 240 }, maxItems: 20 },
+      working_preferences: { type: 'array', items: { type: 'string', maxLength: 240 }, maxItems: 20 },
+      output_preferences: { type: 'array', items: { type: 'string', maxLength: 240 }, maxItems: 20 },
+      lead_research_criteria: { type: 'array', items: { type: 'string', maxLength: 240 }, maxItems: 20 },
+      repeated_corrections: { type: 'array', items: { type: 'string', maxLength: 240 }, maxItems: 20 },
+      common_task_types: { type: 'array', items: { type: 'string', maxLength: 240 }, maxItems: 20 },
+      idempotency_key: uuid,
+    }, ['idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#305', canonicalContract: 'save_my_staff_assistant_profile RPC',
+  },
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =

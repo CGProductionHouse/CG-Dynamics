@@ -26,9 +26,13 @@ test('catalog exposes no infrastructure or arbitrary data tool', () => {
   assert.doesNotMatch(names, /sql|query_table|supabase|database|delete|publish|send/i)
 })
 
-test('read-first release covers exact staff, task, calendar, schedule, lead and client context', () => {
+test('read-first release covers exact staff, task, calendar, schedule, lead, client context and profile', () => {
   const reads = catalog.CG_DYNAMICS_MCP_TOOLS.filter(tool => tool.annotations.readOnlyHint).map(tool => tool.name)
-  assert.deepEqual(reads, ['get_my_day','list_my_tasks','get_task','list_my_calendar','list_client_schedule','get_client_context','list_my_leads','get_lead'])
+  assert.deepEqual(reads, [
+    'get_my_day', 'list_my_tasks', 'get_task', 'list_my_calendar',
+    'list_client_schedule', 'get_client_context', 'list_my_leads', 'get_lead',
+    'get_my_profile',
+  ])
 })
 
 test('every mutation is non-destructive, idempotent and bound to a canonical action contract', () => {
@@ -47,4 +51,77 @@ test('server instruction resolves exact bearer identity and forbids unsafe fallb
   assert.match(instructions, /Never expose SQL/i)
   assert.match(instructions, /cross-client fallbacks/i)
   assert.doesNotMatch(instructions, /Project name.*identity/i)
+})
+
+test('catalog contains exactly 14 tools: 9 read + 5 write', () => {
+  const tools = catalog.CG_DYNAMICS_MCP_TOOLS
+  assert.equal(tools.length, 14)
+  const reads = tools.filter(t => t.annotations.readOnlyHint)
+  const writes = tools.filter(t => !t.annotations.readOnlyHint)
+  assert.equal(reads.length, 9)
+  assert.equal(writes.length, 5)
+})
+
+test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {
+  const validDeps = new Set(['main', '#241/#294', '#305'])
+  for (const tool of catalog.CG_DYNAMICS_MCP_TOOLS) {
+    assert.ok(validDeps.has(tool.dependency), `${tool.name} has unknown dependency: ${tool.dependency}`)
+  }
+})
+
+test('write tools that create tasks accept optional client_id for exact client linkage', () => {
+  const createTask = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'create_task')
+  assert.ok(createTask)
+  assert.ok(createTask.inputSchema.properties.client_id)
+})
+
+test('get_my_day requires no input parameters', () => {
+  const getMyDay = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_day')
+  assert.ok(getMyDay)
+  assert.deepEqual(getMyDay.inputSchema.required, [])
+})
+
+test('update_task actions are limited to safe reversible operations', () => {
+  const updateTask = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'update_task')
+  assert.ok(updateTask)
+  const actions = updateTask.inputSchema.properties.action.enum
+  assert.ok(Array.isArray(actions))
+  assert.doesNotMatch(actions.join(' '), /delete|destroy|drop|remove/i)
+  assert.ok(actions.includes('complete'))
+  assert.ok(actions.includes('block'))
+  assert.ok(actions.includes('comment'))
+})
+
+test('update_lead can set follow_up_at as date-time for scheduling', () => {
+  const updateLead = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'update_lead')
+  assert.ok(updateLead)
+  assert.ok(updateLead.inputSchema.properties.follow_up_at)
+})
+
+test('add_lead_research requires a non-empty summary and idempotency_key', () => {
+  const addResearch = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'add_lead_research')
+  assert.ok(addResearch)
+  assert.ok(addResearch.inputSchema.required.includes('summary'))
+  assert.ok(addResearch.inputSchema.required.includes('idempotency_key'))
+  assert.equal(addResearch.inputSchema.properties.summary.minLength, 1)
+})
+
+test('get_my_profile is a read-only tool with no required parameters', () => {
+  const getProfile = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_profile')
+  assert.ok(getProfile)
+  assert.equal(getProfile.annotations.readOnlyHint, true)
+  assert.deepEqual(getProfile.inputSchema.required, [])
+})
+
+test('update_my_preferences merges with existing values and requires idempotency_key', () => {
+  const updatePrefs = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'update_my_preferences')
+  assert.ok(updatePrefs)
+  assert.equal(updatePrefs.annotations.readOnlyHint, false)
+  assert.equal(updatePrefs.annotations.idempotentHint, true)
+  assert.ok(updatePrefs.inputSchema.required.includes('idempotency_key'))
+  const props = updatePrefs.inputSchema.properties
+  assert.ok(props.responsibilities)
+  assert.ok(props.working_preferences)
+  assert.ok(props.repeated_corrections)
+  assert.ok(props.lead_research_criteria)
 })
