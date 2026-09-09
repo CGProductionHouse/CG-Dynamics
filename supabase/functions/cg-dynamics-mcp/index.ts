@@ -594,11 +594,12 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'Never merge CG Calendar and Client Schedule.',
       'Never retrieve another staff member\'s private assistant profile.',
       'All writes through this MCP are audited and idempotent.',
-      'STAFF EMAIL IS DRAFT-ONLY: never send email directly, even if the connected mail plugin technically supports sending.',
-      'After creating any email draft, explicitly instruct staff to: review content, verify correct CG From identity, verify correct professional signature, then send manually.',
+      'Gmail remains the actual draft/thread system. Dynamics stores only staff mail config, collateral references, lead linkage, follow-up state, provenance and audit metadata — never draft content.',
+      'STAFF EMAIL IS DRAFT-ONLY: never send email directly, even if the connected Gmail/mail plugin technically supports sending.',
+      'After the Gmail plugin creates a draft, explicitly instruct staff to: review content, verify correct CG From identity, verify correct professional signature, then send manually.',
       'Normal staff = owned_threads_only: email only for leads/tasks you own or materially participate in. Not general inbox managers.',
       'Amonique = company_mail_manager: full authorised CG inbox triage, read, reply-draft preparation, but still requires human review + correct From + correct signature + manual send.',
-      'Attach governed collateral by Drive asset reference/version — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
+      'Attach governed collateral by Drive asset key — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
     ],
     message: profile
       ? `Bootstrap ready for ${staff.fullName}. This payload contains your durable profile, mail readiness, capability manifest, MCP tools and operating rules. Use it to initialise a fresh Project.`
@@ -635,6 +636,29 @@ const handleCreateRecurringTask: ToolHandler = async (staff, input) => {
 }
 
 // ── Mail Draft Handler (HARD DRAFT-ONLY GATE) ───────────────────────────────
+//
+// compose_mail_draft does NOT create a Dynamics mail_drafts table.
+// Gmail remains the actual draft/thread system. Dynamics stores only:
+//   - staff mail configuration (preferred_from, signature, setup_status, scope)
+//   - governed collateral references (asset keys, not frozen IDs)
+//   - lead/thread linkage, follow-up state, provenance, audit metadata
+//
+// This handler returns a complete governed Gmail draft payload that ChatGPT
+// passes to the connected Gmail plugin to create the real draft. Staff must
+// then manually review, verify From/identity/signature, and send.
+
+const GOVERNED_COLLATERAL: Record<string, { label: string; drive_asset_key: string; description: string }> = {
+  cg_business_profile: {
+    label: 'CG Business Profile (compressed)',
+    drive_asset_key: 'collateral/cg-business-profile-latest.pdf',
+    description: 'Current approved CG business profile PDF. Attach to new prospective-client lead emails and outreach by default.',
+  },
+  cg_wedding_packages: {
+    label: 'CG Wedding Packages',
+    drive_asset_key: 'collateral/cg-wedding-packages-latest.pdf',
+    description: 'Current approved CG wedding packages PDF. Attach to wedding-related enquiries and responses by default.',
+  },
+}
 
 const handleComposeMailDraft: ToolHandler = async (staff, input) => {
   const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
@@ -675,7 +699,7 @@ const handleComposeMailDraft: ToolHandler = async (staff, input) => {
   if (profile.mail_scope === 'owned_threads_only' && input.lead_id) {
     const { data: lead } = await staff.supabase
       .from('business_development_leads')
-      .select('owner_profile_id')
+      .select('owner_profile_id, company_name, contact_name')
       .eq('id', input.lead_id)
       .maybeSingle()
 
@@ -684,94 +708,75 @@ const handleComposeMailDraft: ToolHandler = async (staff, input) => {
     }
   }
 
-  // Build governed collateral list
-  const collateralRefs: string[] = []
+  // Build governed collateral list with resolved asset references
+  const collateralRefs: Array<{ key: string; label: string; drive_asset_key: string }> = []
   if (input.collateral?.length) {
-    collateralRefs.push(...input.collateral)
+    for (const ref of input.collateral) {
+      const governed = GOVERNED_COLLATERAL[ref]
+      if (governed) {
+        collateralRefs.push({ key: ref, label: governed.label, drive_asset_key: governed.drive_asset_key })
+      } else {
+        collateralRefs.push({ key: ref, label: ref, drive_asset_key: ref })
+      }
+    }
   }
-  if (input.include_business_profile) {
-    collateralRefs.push('cg_business_profile_pdf')
+  if (input.include_business_profile && !collateralRefs.find(c => c.key === 'cg_business_profile')) {
+    collateralRefs.push(GOVERNED_COLLATERAL.cg_business_profile)
   }
-  if (input.include_wedding_packages) {
-    collateralRefs.push('cg_wedding_packages_pdf')
+  if (input.include_wedding_packages && !collateralRefs.find(c => c.key === 'cg_wedding_packages')) {
+    collateralRefs.push(GOVERNED_COLLATERAL.cg_wedding_packages)
   }
 
-  // Compose the draft with signature appended
+  // Compose the draft body with approved signature appended
   const signatureBlock = profile.signature_text
     ? `\n\n--\n${profile.signature_text}`
     : ''
 
   const bodyWithSignature = input.body + signatureBlock
 
-  // Create the draft record (canonical, not sent)
-  const draftRecord = {
-    idempotency_key: input.idempotency_key,
-    to_address: input.to_address,
-    subject: input.subject,
-    body: bodyWithSignature,
-    lead_id: input.lead_id ?? null,
-    draft_id: input.draft_id ?? null,
-    collateral_refs: collateralRefs,
-    sender_from: profile.preferred_company_from,
-    sender_display_name: profile.professional_display_name,
-    sender_role_title: profile.role_title,
-    sender_work_phone: profile.approved_work_phone,
-    signature_asset_ref: profile.signature_asset_reference,
-    status: 'draft',
-    created_by: staff.profileId,
-    created_at: new Date().toISOString(),
-  }
-
-  const { data: draft, error: draftError } = await staff.supabase
-    .from('mail_drafts')
-    .insert(draftRecord)
-    .select('id, status, created_at')
-    .maybeSingle()
-
-  if (draftError) {
-    // If mail_drafts table doesn't exist yet, return the draft record directly
-    // This allows the tool to work even before the mail_drafts table is created
-    return {
-      draft: {
-        ...draftRecord,
-        status: 'draft',
-        id: `local_${input.idempotency_key}`,
-      },
-      sender: {
-        from: profile.preferred_company_from,
-        display_name: profile.professional_display_name,
-        role_title: profile.role_title,
-        work_phone: profile.approved_work_phone,
-      },
-      collateral_attached: collateralRefs,
-      instructions: [
-        'DRAFT CREATED — DO NOT SEND AUTOMATICALLY.',
-        '1. Review the draft content above for accuracy and professionalism.',
-        '2. Verify the correct CG From identity is selected in your mail client.',
-        '3. Verify the correct professional signature/banner is attached.',
-        '4. Send the email manually from your mail client.',
-        'Gmail connector draft-send actions must NOT be used for CG outreach.',
-      ],
-    }
-  }
-
+  // Return governed Gmail draft payload — ChatGPT uses the connected Gmail
+  // plugin to create the real draft. No Dynamics table write for draft content.
   return {
-    draft,
+    gmail_draft_payload: {
+      to: input.to_address,
+      subject: input.subject,
+      body: bodyWithSignature,
+      ...(input.draft_id ? { draft_id: input.draft_id } : {}),
+    },
     sender: {
       from: profile.preferred_company_from,
       display_name: profile.professional_display_name,
       role_title: profile.role_title,
       work_phone: profile.approved_work_phone,
+      signature_asset_ref: profile.signature_asset_reference,
     },
-    collateral_attached: collateralRefs,
-    instructions: [
-      'DRAFT CREATED — DO NOT SEND AUTOMATICALLY.',
-      '1. Review the draft content above for accuracy and professionalism.',
-      '2. Verify the correct CG From identity is selected in your mail client.',
-      '3. Verify the correct professional signature/banner is attached.',
-      '4. Send the email manually from your mail client.',
-      'Gmail connector draft-send actions must NOT be used for CG outreach.',
+    collateral_to_attach: collateralRefs.map(c => ({
+      label: c.label,
+      drive_asset_key: c.drive_asset_key,
+      instruction: `Retrieve the current approved ${c.label} from Google Drive by governed asset key: ${c.drive_asset_key}. Attach to the Gmail draft. Never use a stale or superseded version.`,
+    })),
+    lead_linkage: input.lead_id ? {
+      lead_id: input.lead_id,
+      activity_type: 'outbound_draft',
+      summary: `Draft prepared: ${input.subject}`,
+      thread_reference: input.draft_id ?? null,
+    } : null,
+    manual_send_instructions: [
+      'HARD RULE: DO NOT SEND THIS EMAIL AUTOMATICALLY.',
+      '1. Use the Gmail plugin to create the draft with the payload above.',
+      '2. Retrieve and attach the governed collateral from Google Drive by asset key.',
+      '3. Review the draft content for accuracy and professionalism.',
+      '4. In your Gmail client, verify the correct CG From identity is selected (not the raw Gmail address).',
+      '5. Verify the correct professional signature/banner is visible.',
+      '6. Send the email manually from Gmail.',
+      'Gmail plugin send-email actions must NOT be used for CG outreach. This policy overrides connector capability.',
     ],
+    provenance: {
+      prepared_by_profile_id: staff.profileId,
+      prepared_at: new Date().toISOString(),
+      idempotency_key: input.idempotency_key,
+      mail_scope: profile.mail_scope,
+    },
   }
 }
 

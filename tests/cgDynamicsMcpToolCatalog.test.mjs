@@ -176,9 +176,22 @@ test('compose_mail_draft requires to_address, subject, body and idempotency_key'
   assert.ok(compose.inputSchema.required.includes('idempotency_key'))
   assert.match(compose.description, /DRAFT-ONLY/i)
   assert.match(compose.description, /never send/i)
+  assert.match(compose.description, /Gmail plugin/i)
+  assert.match(compose.description, /Gmail draft payload/i)
 })
 
-test('compose_mail_draft supports governed collateral attachments', () => {
+test('compose_mail_draft returns governed Gmail draft payload, not a Dynamics table write', () => {
+  const compose = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'compose_mail_draft')
+  assert.ok(compose)
+  // Must NOT reference mail_drafts shadow table
+  assert.doesNotMatch(compose.description, /mail_drafts/i)
+  assert.doesNotMatch(compose.canonicalContract, /mail_drafts/i)
+  // Must reference Gmail plugin as the actual draft system
+  assert.match(compose.description, /Gmail plugin/i)
+  assert.match(compose.canonicalContract, /Gmail plugin/i)
+})
+
+test('compose_mail_draft supports governed collateral with asset key references', () => {
   const compose = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'compose_mail_draft')
   assert.ok(compose)
   const props = compose.inputSchema.properties
@@ -187,6 +200,8 @@ test('compose_mail_draft supports governed collateral attachments', () => {
   assert.ok(props.include_wedding_packages)
   assert.ok(props.lead_id)
   assert.ok(props.draft_id)
+  // Description must reference asset key, not frozen IDs
+  assert.match(compose.description, /asset key/i)
 })
 
 test('log_lead_email_activity requires lead_id, activity_type, summary and idempotency_key', () => {
@@ -209,7 +224,8 @@ test('email capability is in manifest with draft-only classification and role-aw
   const compose = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'compose_mail_draft')
   assert.ok(compose)
   assert.match(compose.description, /governed collateral/i)
-  assert.match(compose.description, /professional/i)
+  assert.match(compose.description, /Gmail plugin/i)
+  assert.match(compose.description, /asset key/i)
 })
 
 test('no write tool exposes a send action for email', () => {
