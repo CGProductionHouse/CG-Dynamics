@@ -19,6 +19,12 @@ import {
   type OneDriveInspectionEvidence,
   type OneDriveReadAdapter,
 } from './oneDriveFolderVerification.ts'
+import {
+  buildProtectedResourceMetadata,
+  buildWwwAuthenticateChallenge,
+  deriveMcpOAuthUrls,
+  isProtectedResourceMetadataRequest,
+} from './oauthDiscovery.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -26,8 +32,28 @@ const MCP_PROTOCOL_VERSION = '2025-03-26'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  // GET is allowed for the public OAuth discovery document; MCP tool calls are POST.
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  // Let browser clients read the OAuth challenge on a 401.
+  'Access-Control-Expose-Headers': 'WWW-Authenticate',
   'Content-Type': 'application/json',
+}
+
+// RFC 6750 `WWW-Authenticate` challenge headers pointing an unauthenticated caller at the
+// Protected Resource Metadata document. Falls back to the plain CORS headers if the
+// project origin is unavailable (never guessed).
+function challengeHeaders(opts?: { error?: string; errorDescription?: string }): HeadersInit {
+  const urls = deriveMcpOAuthUrls(Deno.env.get('SUPABASE_URL'))
+  if (!urls) return corsHeaders
+  return {
+    ...corsHeaders,
+    'WWW-Authenticate': buildWwwAuthenticateChallenge(urls.protectedResourceMetadataUrl, opts),
+  }
+}
+
+// 401 with an OAuth Bearer challenge so ChatGPT can discover how to authenticate.
+function unauthorizedResponse(message: string, opts?: { error?: string; errorDescription?: string }) {
+  return new Response(JSON.stringify({ error: message }), { status: 401, headers: challengeHeaders(opts) })
 }
 
 function jsonRpcResponse(id: string | number | null, result: unknown) {
@@ -61,7 +87,7 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; staff: A
 
   const match = /^Bearer\s+(.+)$/i.exec(request.headers.get('Authorization') ?? '')
   if (!match?.[1]) {
-    return { ok: false, response: jsonResponse({ error: 'Authentication required.' }, 401) }
+    return { ok: false, response: unauthorizedResponse('Authentication required.') }
   }
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -70,7 +96,7 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; staff: A
 
   const { data: { user }, error: authError } = await supabase.auth.getUser(match[1])
   if (authError || !user) {
-    return { ok: false, response: jsonResponse({ error: 'Invalid or expired token.' }, 401) }
+    return { ok: false, response: unauthorizedResponse('Invalid or expired token.', { error: 'invalid_token', errorDescription: 'The bearer token is invalid or expired.' }) }
   }
 
   const { data: profile, error: profileError } = await supabase
@@ -1281,6 +1307,16 @@ async function handleToolsCall(
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
+  }
+
+  // Public OAuth discovery: RFC 9728 Protected Resource Metadata. Served WITHOUT a bearer
+  // token so ChatGPT can learn which authorization server (Supabase Auth) protects this
+  // MCP resource and where its Dynamic Client Registration endpoint lives. No tool access.
+  const url = new URL(req.url)
+  if (req.method === 'GET' && isProtectedResourceMetadataRequest(url.pathname)) {
+    const urls = deriveMcpOAuthUrls(Deno.env.get('SUPABASE_URL'))
+    if (!urls) return jsonResponse({ error: 'Server configuration error.' }, 500)
+    return jsonResponse(buildProtectedResourceMetadata(urls), 200)
   }
 
   if (req.method !== 'POST') {
