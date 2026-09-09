@@ -33,3 +33,6 @@ test('operations UI reports checkpoint absence and never infers a successful ref
   assert.match(integration, /refresh diagnostics unavailable/)
 })
 
+test('Meta connection health cannot select another provider as its verified insight', () => {
+  assert.match(status, /\.from\('platform_sync_runs'\)[\s\S]*\.in\('platform', \['facebook', 'instagram'\]\)[\s\S]*\.in\('health_state', \['verified', 'verified_partial'\]\)/)
+})

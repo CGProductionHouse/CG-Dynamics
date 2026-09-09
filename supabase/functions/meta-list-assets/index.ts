@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
   const accessToken = tokens[0].encrypted_access_token
   // ── Fetch Facebook Pages ─────────────────────────────────
   let pages: FbPage[] = []
-  let pagesDiagnostic: Record<string, unknown> = { available: false }
+  let pagesDiagnostic: Record<string, unknown>
 
   try {
     const pageParams = new URLSearchParams({
@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
   // ── Fetch Ad Accounts ─────────────────────────────────────
   let adAccounts: AdAccount[] = []
   let adAccountsError: string | null = null
-  let adAccountsDiagnostic: Record<string, unknown> = { available: false }
+  let adAccountsDiagnostic: Record<string, unknown>
 
   try {
     const adParams = new URLSearchParams({

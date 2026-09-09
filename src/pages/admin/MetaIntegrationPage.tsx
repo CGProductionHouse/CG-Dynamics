@@ -506,11 +506,23 @@ export default function MetaIntegrationPage() {
     last_worker_error?: string | null
   } | null>(null)
   const [batchStalled, setBatchStalled] = useState(false)
+  const [batchHealthNow, setBatchHealthNow] = useState(() => Date.now())
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const stallRef = useRef(0)
   const retryWorkerRef = useRef(false)
   // Signature of the last observed child-item state — ANY movement resets stall.
   const lastProgressSigRef = useRef('')
+
+  const loadLinkedAssets = useCallback(async () => {
+    setLoadingLinked(true)
+    const { data } = await supabase
+      .from('meta_client_assets')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+    if (data) setLinkedAssets(data as LinkedAsset[])
+    setLoadingLinked(false)
+  }, [])
 
   type SyncResponse = Record<string, unknown>
 
@@ -534,7 +546,7 @@ export default function MetaIntegrationPage() {
     try {
       data = text ? JSON.parse(text) : null
     } catch {
-      data = null
+      // Keep the initialized null value when the provider body is not JSON.
     }
 
     return { response, data, text }
@@ -793,6 +805,7 @@ export default function MetaIntegrationPage() {
       ).length
       const totalCount = rows.length > 0 ? rows.length : Number(batchData?.total_items ?? 0)
 
+      setBatchHealthNow(Date.now())
       setBatch({
         id: batchIdValue,
         status: String(batchData?.status ?? 'running'),
@@ -1020,17 +1033,19 @@ export default function MetaIntegrationPage() {
 
   // On mount: load connection status, clients, and linked assets.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial provider hydration belongs to this mount boundary
     checkConnection()
     listClients('active').then(res => {
       if (res.data) setClients(res.data)
     })
     loadLinkedAssets()
-  }, [checkConnection])
+  }, [checkConnection, loadLinkedAssets])
 
   // OAuth result from URL query params.
   useEffect(() => {
     const meta = searchParams.get('meta')
     if (meta === 'connected') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reflect the provider callback encoded in the URL
       setConnectMsg('Meta connected. Next step: link assets to clients.')
       checkConnection()
       window.history.replaceState(null, '', window.location.pathname)
@@ -1052,6 +1067,7 @@ export default function MetaIntegrationPage() {
     const clientParam = searchParams.get('client')
     if (!clientParam) return
     if (linkedAssets.some(asset => asset.client_id === clientParam)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- apply the explicit client deep link once after assets load
       setSyncMode('selected')
       setSelectedSyncClientId(clientParam)
       appliedClientParam.current = true
@@ -1110,17 +1126,8 @@ export default function MetaIntegrationPage() {
     }
 
     restore()
-  }, [])
-
-  const loadLinkedAssets = useCallback(async () => {
-    setLoadingLinked(true)
-    const { data } = await supabase
-      .from('meta_client_assets')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-    if (data) setLinkedAssets(data as LinkedAsset[])
-    setLoadingLinked(false)
+  // Restore callbacks intentionally use the current mount snapshot; polling owns later transitions.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleConnect() {
@@ -1241,7 +1248,7 @@ export default function MetaIntegrationPage() {
   // Per-page IG options for inline row pickers.
   function igOptionsForPage(pageId: string | null | undefined) {
     const filtered = pageId ? igAccounts.filter(a => a.facebookPageId === pageId) : igAccounts
-    let options = filtered
+    const options = filtered
       .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
     // Also add any linked IG entry for this page from linked assets.
     for (const link of linkedAssets) {
@@ -1460,6 +1467,7 @@ export default function MetaIntegrationPage() {
         instagramNotApplicable: Boolean(s.currentLink?.instagram_not_applicable),
       }
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- seed editable rows after provider assets arrive
     setRowSelections(initial)
   }, [assetsLoaded, suggestions])
 
@@ -2198,7 +2206,7 @@ export default function MetaIntegrationPage() {
             <div className="mt-3 rounded-xl border border-brand-accent/20 bg-brand-accent/10 p-4">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-sm font-semibold text-brand-accent">
-                  {metaBatchHealth(batch, Date.now(), false).coolingDown ? 'Waiting for Meta' : batchStalled ? 'Sync needs attention' : 'Syncing in background...'}
+                  {metaBatchHealth(batch, batchHealthNow, false).coolingDown ? 'Waiting for Meta' : batchStalled ? 'Sync needs attention' : 'Syncing in background...'}
                 </p>
                 <span className="text-xs text-brand-primary/60">
                   {(batch.completed_items ?? 0) + (batch.failed_items ?? 0)} / {batch.total_items ?? 0}
@@ -2217,7 +2225,7 @@ export default function MetaIntegrationPage() {
                 <span>Queued: {batch.queued_items ?? 0}</span>
                 <span className="ml-auto">{batch.total_items > 0 ? Math.round((((batch.completed_items ?? 0) + (batch.failed_items ?? 0)) / batch.total_items) * 100) : 0}%</span>
               </div>
-              {metaBatchHealth(batch, Date.now(), false).coolingDown && (
+              {metaBatchHealth(batch, batchHealthNow, false).coolingDown && (
                 <p className="mt-3 text-xs text-brand-primary" role="status">
                   {batch.last_worker_error || 'Meta requested a pause.'} Next retry: {new Date(batch.cooldown_until!).toLocaleString('en-ZA')}. Sync resumes automatically.
                 </p>

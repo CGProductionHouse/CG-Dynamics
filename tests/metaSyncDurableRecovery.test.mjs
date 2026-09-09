@@ -127,7 +127,7 @@ test('the worker reports what it actually did', () => {
 })
 
 test('Restart worker reports honestly when no worker actually ran', () => {
-  const fn = page.slice(page.indexOf('async function handleRetryWorker'), page.indexOf('const loadLinkedAssets'))
+  const fn = page.slice(page.indexOf('async function handleRetryWorker'), page.indexOf('async function handleSync()'))
   assert.match(fn, /const workerRan = data\?\.workerRan === true \|\| Number\(data\?\.chunksProcessed \?\? 0\) > 0/)
   assert.match(fn, /claimed no items/)
   assert.match(fn, /Worker restarted: processed/)

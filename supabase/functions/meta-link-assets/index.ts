@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
   const auth = await requireStaff(req, sb)
   if (auth.error) return auth.error
 
-  let body: { action?: string; link?: LinkInput; links?: LinkInput[]; assetId?: string } = {}
+  let body: { action?: string; link?: LinkInput; links?: LinkInput[]; assetId?: string }
   try {
     body = await req.json()
   } catch {

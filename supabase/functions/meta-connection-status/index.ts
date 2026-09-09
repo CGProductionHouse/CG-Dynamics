@@ -65,6 +65,7 @@ Deno.serve(async (req) => {
   const { data: verifiedRuns } = await sb
     .from('platform_sync_runs')
     .select('platform, period_month, health_state, finished_at')
+    .in('platform', ['facebook', 'instagram'])
     .in('health_state', ['verified', 'verified_partial'])
     .order('finished_at', { ascending: false, nullsFirst: false })
     .limit(1)

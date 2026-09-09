@@ -143,7 +143,7 @@ export function ClientReportView({
       }
     })
     return new Set(keys)
-  }, [contentExclusions, report.posts, statsPosts])
+  }, [contentExclusions, report.posts])
   const master = useMemo(
     () => buildMasterReport(statsPosts, manualMetrics, excludedContentKeys),
     [excludedContentKeys, manualMetrics, statsPosts],
