@@ -308,7 +308,7 @@ export default function AdminLayout() {
             </div>
             <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-3">{renderNav(false, closeMobile)}</nav>
             <div className="border-t border-white/10 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-              <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} />
+              <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} onNavigate={closeMobile} />
             </div>
           </aside>
         </div>
@@ -423,11 +423,12 @@ export default function AdminLayout() {
   )
 }
 
-function UserBlock({ name, role, onSignOut, collapsed = false }: { name: string; role: string; onSignOut: () => void; collapsed?: boolean }) {
+function UserBlock({ name, role, onSignOut, onNavigate, collapsed = false }: { name: string; role: string; onSignOut: () => void; onNavigate?: () => void; collapsed?: boolean }) {
   if (collapsed) {
     return (
       <div className="space-y-1.5 text-center" title={`${name}, ${role}`}>
         <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-brand-teal/10 text-xs font-black text-brand-teal" aria-label={`${name}, ${role}`}>{initials(name)}</div>
+        <Link to="/admin/my-assistant" onClick={onNavigate} className="flex min-h-9 w-full items-center justify-center rounded-md text-[10px] font-black text-brand-teal hover:bg-white/[0.06] hover:text-white" aria-label="Open My Assistant" title="My Assistant">AI</Link>
         <button onClick={onSignOut} className="min-h-9 w-full rounded-md text-xs font-black text-brand-primary hover:bg-white/[0.06] hover:text-white" aria-label="Sign out" title="Sign out">X</button>
       </div>
     )
@@ -438,6 +439,7 @@ function UserBlock({ name, role, onSignOut, collapsed = false }: { name: string;
         <p className="min-w-0 truncate text-sm font-bold text-white">{name}</p>
         <p className="shrink-0 text-xs text-brand-primary/65">{role}</p>
       </div>
+      <Link to="/admin/my-assistant" onClick={onNavigate} className="flex min-h-11 w-full items-center rounded-md px-3 text-sm font-bold text-brand-teal transition-colors hover:bg-white/[0.06] hover:text-white">My Assistant</Link>
       <button onClick={onSignOut} className="min-h-11 w-full rounded-md px-3 text-left text-sm font-semibold text-brand-primary transition-colors hover:bg-white/[0.06] hover:text-white">Sign out</button>
     </div>
   )
