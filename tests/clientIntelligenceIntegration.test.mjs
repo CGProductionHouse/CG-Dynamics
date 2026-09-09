@@ -1,0 +1,900 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { after, before, test } from 'node:test'
+import { createServer } from 'vite'
+
+// Client intelligence integration (#241). Proves exact-client isolation,
+// stale/excluded knowledge grounding, Client Guide derivation correctness,
+// Project Instructions boundedness, and client-role access denial.
+
+let server, skilled, guideGenerator, contactPolicy, clientScope, creativeStandard, backfill, agent
+
+const today = '2026-09-08'
+
+before(async () => {
+  server = await createServer({
+    root: process.cwd(),
+    logLevel: 'error',
+    server: { middlewareMode: true },
+    appType: 'custom',
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('https://example.supabase.co'),
+      'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify('test-key'),
+    },
+  })
+  skilled = await server.ssrLoadModule('/supabase/functions/cg-assistant-chat/skilledAgents.ts')
+  guideGenerator = await server.ssrLoadModule('/src/lib/clientGuideGenerator.ts')
+  contactPolicy = await server.ssrLoadModule('/src/lib/clientContactPolicy.ts')
+  clientScope = await server.ssrLoadModule('/src/lib/clientScope.ts')
+  creativeStandard = await server.ssrLoadModule('/src/lib/humanCreativeStandard.ts')
+  backfill = await server.ssrLoadModule('/src/lib/clientContactBackfill.ts')
+  agent = skilled.AGENT_CONTRACTS.copywriting_agent
+})
+after(async () => { await server?.close() })
+
+const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+
+const MARKETING_PAGE = read('../src/pages/admin/MarketingWorkspacePage.tsx')
+const APP = read('../src/App.tsx')
+const MIGRATION_REGISTRATION = read('../supabase/migrations/20260908110000_client_intelligence_registration.sql')
+const MIGRATION_GUIDES = read('../supabase/migrations/20260908100000_client_guides.sql')
+const MIGRATION_PROJECT_MAPPINGS = read('../supabase/migrations/20260908120000_client_project_mappings.sql')
+const MIGRATION_CONTACTS = read('../supabase/migrations/20260909100000_client_contacts.sql')
+const MIGRATION_CONTACT_BACKFILL = read('../supabase/migrations/20260909110000_client_contact_pilot_backfill.sql')
+const CLIENT_GUIDES_TS = read('../src/lib/clientGuides.ts')
+const CLIENT_PROJECT_MAPPING_TS = read('../src/lib/clientProjectMapping.ts')
+const CLIENT_CONTEXT_TS = read('../src/lib/clientContext.ts')
+const CLIENT_CONTACTS_TS = read('../src/lib/clientContacts.ts')
+const GET_CLIENT_CONTEXT_FN = read('../supabase/functions/get-client-context/index.ts')
+const CREATIVE_STANDARD_SHARED = read('../supabase/functions/_shared/humanCreativeStandard.ts')
+const CREATIVE_STANDARD_APP = read('../src/lib/humanCreativeStandard.ts')
+const CONTEXT_CONTRACT_SHARED = read('../supabase/functions/_shared/clientContextContract.ts')
+const CONTEXT_CONTRACT_APP = read('../src/lib/clientContextContract.ts')
+const MIGRATION_PIEK_BACKFILL = read('../supabase/migrations/20260909120000_client_contact_piek_backfill.sql')
+const MIGRATION_WISERIDE_BACKFILL = read('../supabase/migrations/20260909130000_client_contact_wiseride_backfill.sql')
+const MIGRATION_WORKFLOW_DOC = read('../docs/chatgpt-client-knowledge-migration-2026-09-08.md')
+
+const capeCard = {
+  id: 'cape-1', slug: 'cape-lumber-positioning', title: 'Cape Lumber: supplier, not contractor',
+  status: 'active', knowledge_layer: 'active_client_specific', source_type: 'staff_observation',
+  source_id: 's1', principle: 'Cape Lumber is a supplier', summary: 'Supply-led positioning',
+  client_specific: true, active_client_id: 'cape-uuid-001',
+  relevant_agents: ['copywriting_agent'], review_expires_at: null,
+}
+const bloemCard = {
+  id: 'bloem-1', slug: 'action-sport-voice', title: 'Bloem Action Sports: voice rules',
+  status: 'active', knowledge_layer: 'active_client_specific', source_type: 'staff_observation',
+  source_id: 's2', principle: 'Voice rules', summary: 'Local energetic tone',
+  client_specific: true, active_client_id: 'bloem-uuid-002',
+  relevant_agents: ['copywriting_agent'], review_expires_at: null,
+}
+const duluxCard = {
+  id: 'dulux-1', slug: 'dulux-bfn-colour-copy', title: 'Dulux BFN: colour by room effect',
+  status: 'active', knowledge_layer: 'active_client_specific', source_type: 'staff_observation',
+  source_id: 's3', principle: 'Room-effect language', summary: 'Describe what colour does',
+  client_specific: true, active_client_id: 'dulux-uuid-003',
+  relevant_agents: ['copywriting_agent'], review_expires_at: null,
+}
+
+test('Cape Lumber context retrieves only Cape cards, not Bloem or Dulux', () => {
+  const result = skilled.buildPlan([capeCard, bloemCard, duluxCard], {
+    agent, activeClientId: 'cape-uuid-001', mode: 'production', today,
+  })
+  const ids = result.cards.map(c => c.id)
+  assert.ok(ids.includes('cape-1'), 'Cape card is retrievable for Cape client')
+  assert.ok(!ids.includes('bloem-1'), 'Bloem card is NOT retrievable for Cape client')
+  assert.ok(!ids.includes('dulux-1'), 'Dulux card is NOT retrievable for Cape client')
+})
+
+test('Bloem Action Sports context retrieves only Bloem cards, not Cape or Dulux', () => {
+  const result = skilled.buildPlan([capeCard, bloemCard, duluxCard], {
+    agent, activeClientId: 'bloem-uuid-002', mode: 'production', today,
+  })
+  const ids = result.cards.map(c => c.id)
+  assert.ok(!ids.includes('cape-1'), 'Cape card is NOT retrievable for Bloem client')
+  assert.ok(ids.includes('bloem-1'), 'Bloem card is retrievable for Bloem client')
+  assert.ok(!ids.includes('dulux-1'), 'Dulux card is NOT retrievable for Bloem client')
+})
+
+test('Dulux context retrieves only Dulux cards, not Cape or Bloem', () => {
+  const result = skilled.buildPlan([capeCard, bloemCard, duluxCard], {
+    agent, activeClientId: 'dulux-uuid-003', mode: 'production', today,
+  })
+  const ids = result.cards.map(c => c.id)
+  assert.ok(!ids.includes('cape-1'), 'Cape card is NOT retrievable for Dulux client')
+  assert.ok(!ids.includes('bloem-1'), 'Bloem card is NOT retrievable for Dulux client')
+  assert.ok(ids.includes('dulux-1'), 'Dulux card is retrievable for Dulux client')
+})
+
+test('client_specific cards are excluded when no activeClientId is set', () => {
+  const result = skilled.buildPlan([capeCard, bloemCard, duluxCard], {
+    agent, activeClientId: null, mode: 'production', today,
+  })
+  assert.equal(result.cards.length, 0, 'no client-specific cards ground without an active client')
+  assert.equal(result.insufficient, true)
+})
+
+// ── Stale / rejected / superseded knowledge is excluded from grounding ──────
+
+const baseCard = {
+  id: 'active-1', slug: 'test', title: 'Test card', status: 'active',
+  knowledge_layer: 'universal', source_type: 'book', source_id: 's1',
+  principle: 'Test', summary: 'Test', client_specific: false, active_client_id: null,
+  relevant_agents: ['copywriting_agent'], review_expires_at: null,
+}
+
+test('needs_review cards do not ground production', () => {
+  const card = { ...baseCard, id: 'nr-1', status: 'needs_review' }
+  const result = skilled.buildPlan([card], { agent, activeClientId: null, mode: 'production', today })
+  assert.equal(result.cards.length, 0, 'needs_review card excluded from production')
+})
+
+test('deprecated cards never ground production', () => {
+  const card = { ...baseCard, id: 'dep-1', status: 'deprecated' }
+  const result = skilled.buildPlan([card], { agent, activeClientId: null, mode: 'production', today })
+  assert.equal(result.cards.length, 0, 'deprecated card excluded')
+})
+
+test('expired review cards do not ground production', () => {
+  const card = { ...baseCard, id: 'exp-1', review_expires_at: '2026-09-07' }
+  const result = skilled.buildPlan([card], { agent, activeClientId: null, mode: 'production', today })
+  assert.equal(result.cards.length, 0, 'expired card excluded from production')
+})
+
+test('cards expiring today still ground production', () => {
+  const card = { ...baseCard, id: 'today-1', review_expires_at: '2026-09-08' }
+  const result = skilled.buildPlan([card], { agent, activeClientId: null, mode: 'production', today })
+  assert.equal(result.cards.length, 1, 'card expiring today is still current')
+})
+
+test('AI-generated source type is never authoritative', () => {
+  const card = { ...baseCard, id: 'ai-1', source_type: 'ai_generated' }
+  const result = skilled.buildPlan([card], { agent, activeClientId: null, mode: 'production', today })
+  assert.equal(result.cards.length, 0, 'ai_generated card excluded')
+})
+
+test('unsourced_blog source type is never authoritative', () => {
+  const card = { ...baseCard, id: 'blog-1', source_type: 'unsourced_blog' }
+  const result = skilled.buildPlan([card], { agent, activeClientId: null, mode: 'production', today })
+  assert.equal(result.cards.length, 0, 'unsourced_blog card excluded')
+})
+
+// ── Client Guide is derived from canonical intelligence, not manually maintained ──
+
+test('Client Guide generation produces a guide with the client name and working rule', () => {
+  const pack = `# Cape Lumber
+
+## Voice and tone
+Cape Lumber sounds professional and trade-focused.
+
+## Content idea
+Showcase new timber stock arrivals.
+
+## Guardrail
+Never present as a contractor.
+`
+  const { guideMarkdown, projectInstructions } = guideGenerator.generateClientGuide(pack, 'Cape Lumber')
+
+  assert.ok(guideMarkdown.includes('# Cape Lumber — CG Dynamics Client Guide'), 'title includes client name')
+  assert.ok(guideMarkdown.includes('CG Dynamics is the permanent client source of truth'), 'states CG Dynamics is source of truth')
+  assert.ok(guideMarkdown.includes('## Working rule'), 'includes working rule section')
+  assert.ok(guideMarkdown.includes('Update CG Dynamics as the single source of truth'), 'working rule says update Dynamics first')
+  assert.ok(guideMarkdown.includes('Cape Lumber sounds professional'), 'extracts voice section')
+  assert.ok(guideMarkdown.includes('Never present as a contractor'), 'extracts guardrail section')
+})
+
+test('Client Guide includes identity section from the pack', () => {
+  const pack = `# Cape Lumber
+
+Cape Lumber is a timber and building-material supplier in the Western Cape.
+
+## Voice
+Professional, trade-focused.
+`
+  const { guideMarkdown } = guideGenerator.generateClientGuide(pack, 'Cape Lumber')
+  assert.ok(guideMarkdown.includes('timber and building-material supplier'), 'identity section extracted')
+})
+
+test('Client Guide .md is marked as export-only artifact', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { guideMarkdown } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(guideMarkdown.includes('**This is an export-only artifact.**'), '.md is explicitly marked export-only')
+})
+
+test('Project Instructions are short and bounded', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+
+  const lines = projectInstructions.split('\n').filter(l => l.trim().length > 0)
+  assert.ok(lines.length <= 20, `Project Instructions are bounded (${lines.length} lines)`)
+  assert.ok(projectInstructions.includes('Test Client'), 'includes client name')
+  assert.ok(projectInstructions.includes('CG Dynamics'), 'references CG Dynamics as source of truth')
+  assert.ok(projectInstructions.includes('retrieve current canonical intelligence'), 'includes live retrieval path')
+})
+
+test('Project Instructions include task-specific retrieval rules', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('Caption/content →'), 'has caption retrieval rule')
+  assert.ok(projectInstructions.includes('Image editing →'), 'has image retrieval rule')
+  assert.ok(projectInstructions.includes('Factual claims →'), 'has factual lookup retrieval rule')
+  assert.ok(projectInstructions.includes('SEO/hashtags →'), 'has SEO/hashtag retrieval rule')
+})
+
+test('Project Instructions include max 5 hashtags rule', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('Max 5 hashtags'), 'includes max 5 hashtags rule')
+})
+
+test('Project Instructions exclude mutable contact values and require exact entity scope', () => {
+  const { projectInstructions } = guideGenerator.generateClientGuide('# Client', 'Test Client')
+  assert.ok(projectInstructions.includes('Never hardcode phone numbers'))
+  assert.ok(projectInstructions.includes('exact scope'))
+  assert.ok(projectInstructions.includes('current approved contact/footer policy'))
+})
+
+test('Project Instructions do not duplicate the full guide content', () => {
+  const pack = `# Client
+
+## Voice
+Detailed voice rules here that go on for quite a while to make the guide longer.
+More voice details and specifics about the brand tone and style guidelines.
+Additional context about how the brand should sound across all channels.
+
+## Caption
+Caption rules here with extensive detail about formatting and length requirements.
+Specific rules about hashtag usage and call-to-action placement.
+Guidelines for different platforms like Instagram, Facebook and TikTok.
+
+## Poster
+Poster rules here with design specifications and typography guidelines.
+Colour palette requirements and brand consistency rules.
+Layout principles and visual hierarchy standards.
+
+## Reel
+Reel rules here with pacing and scripting guidelines.
+Audio selection criteria and trending sound usage rules.
+Duration recommendations and hook strategies for different content types.
+`
+  const { guideMarkdown, projectInstructions } = guideGenerator.generateClientGuide(pack, 'Client')
+  assert.ok(projectInstructions.length < guideMarkdown.length, `instructions (${projectInstructions.length}) should be shorter than guide (${guideMarkdown.length})`)
+  assert.ok(!projectInstructions.includes('Caption rules here'), 'instructions do not include full guide sections')
+})
+
+// ── Registration SQL is correctly structured ────────────────────────────────
+
+test('registration migration uses proper timestamped location', () => {
+  assert.match(MIGRATION_REGISTRATION, /20260908110000_client_intelligence_registration/)
+})
+
+test('registration migration resolves clients by exact name only', () => {
+  assert.match(MIGRATION_REGISTRATION, /where name = 'Cape Lumber'/)
+  assert.match(MIGRATION_REGISTRATION, /where name = 'Action Sport'/)
+  assert.match(MIGRATION_REGISTRATION, /where name = 'Dulux Bloemfontein'/)
+  assert.doesNotMatch(MIGRATION_REGISTRATION, /like '%Cape%'/, 'no fuzzy matching')
+})
+
+test('registration migration inserts sources with needs_review trust tier', () => {
+  assert.match(MIGRATION_REGISTRATION, /'needs_review', 'metadata_and_link_only', 'catalogued'/)
+})
+
+test('registration migration inserts skill cards as needs_review', () => {
+  assert.match(MIGRATION_REGISTRATION, /'needs_review'::text, 'active_client_specific'::text/)
+})
+
+test('registration migration uses ON CONFLICT for idempotency', () => {
+  assert.match(MIGRATION_REGISTRATION, /on conflict \(source_identifier\) where source_identifier is not null do nothing/)
+  assert.match(MIGRATION_REGISTRATION, /on conflict \(slug\) do nothing/)
+})
+
+test('client_guides migration creates the derived guide table', () => {
+  assert.match(MIGRATION_GUIDES, /create table if not exists public\.client_guides/)
+  assert.match(MIGRATION_GUIDES, /guide_markdown text not null/)
+  assert.match(MIGRATION_GUIDES, /project_instructions text not null/)
+  assert.match(MIGRATION_GUIDES, /version\s+integer not null default 1/)
+})
+
+test('client_guides migration enforces RLS', () => {
+  assert.match(MIGRATION_GUIDES, /alter table public\.client_guides enable row level security/)
+  assert.match(MIGRATION_GUIDES, /client_guides_admin_manager_all/)
+  assert.match(MIGRATION_GUIDES, /client_guides_staff_read/)
+})
+
+// ── Client-role access cannot read internal Marketing/Knowledge intelligence ──
+
+test('Marketing page is behind RequireStaff route (client users cannot reach it)', () => {
+  assert.match(APP, /<Route element=\{<RequireStaff \/>\}>/)
+  assert.match(APP, /path="\/admin\/marketing" element=\{<MarketingWorkspacePage \/>\}/)
+})
+
+test('client-guides section is admin/manager scoped in the workspace', () => {
+  assert.match(MARKETING_PAGE, /section === 'client-guides'/)
+  assert.match(MARKETING_PAGE, /isAdminRole|isManagerRole/)
+})
+
+test('client_guides table has no client-role read policy', () => {
+  assert.doesNotMatch(MIGRATION_GUIDES, /role = 'client'/, 'no client-role access to client_guides')
+  assert.match(MIGRATION_GUIDES, /profile\.role in \('admin', 'manager'\)/, 'admin/manager write access')
+  assert.match(MIGRATION_GUIDES, /profile\.is_active/, 'inactive profiles are denied')
+})
+
+test('clientGuides.ts uses the canonical data layer', () => {
+  assert.match(CLIENT_GUIDES_TS, /from '\.\/supabase'/, 'imports from supabase')
+  assert.match(CLIENT_GUIDES_TS, /client_guides/, 'queries client_guides table')
+  assert.match(CLIENT_GUIDES_TS, /export async function listClientGuides/)
+  assert.match(CLIENT_GUIDES_TS, /export async function getClientGuide/)
+  assert.match(CLIENT_GUIDES_TS, /export async function upsertClientGuide/)
+})
+
+// ── No legacy phase-30a file ────────────────────────────────────────────────
+
+test('no root phase-30a SQL file exists (data registration moved to timestamped migration)', () => {
+  let exists = false
+  try {
+    readFileSync(new URL('../supabase/phase-30a-client-intelligence-integration.sql', import.meta.url), 'utf8')
+    exists = true
+  } catch { /* expected: file should not exist */ }
+  assert.equal(exists, false, 'phase-30a legacy file should be deleted')
+})
+
+// ── Direct CG Dynamics ↔ ChatGPT bridge ─────────────────────────────────────
+
+test('client_project_mappings migration creates the mapping table', () => {
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /create table if not exists public\.client_project_mappings/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /client_id\s+uuid\s+not null references public\.clients\(id\) on delete cascade/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /chatgpt_project_url\s+text/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /project_name\s+text/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /sync_state\s+text not null default 'needs_setup'/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /last_context_retrieved_at\s+timestamptz/)
+})
+
+test('client_project_mappings migration enforces RLS', () => {
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /alter table public\.client_project_mappings enable row level security/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /client_project_mappings_admin_manager/)
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /profile\.role in \('admin', 'manager', 'staff', 'team'\)/, 'client users cannot read Project mappings')
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /profile\.is_active/, 'inactive profiles are denied')
+  assert.doesNotMatch(MIGRATION_PROJECT_MAPPINGS, /using \(true\)/, 'no blanket authenticated read')
+})
+
+test('canonical client contact migration includes classification, provenance, freshness and exact scope', () => {
+  assert.match(MIGRATION_CONTACTS, /create table if not exists public\.client_contacts/)
+  assert.match(MIGRATION_CONTACTS, /scope_key text/)
+  assert.match(MIGRATION_CONTACTS, /approved_for_caption boolean/)
+  assert.match(MIGRATION_CONTACTS, /blocks_caption boolean/)
+  assert.match(MIGRATION_CONTACTS, /public_marketing.*internal_only.*client_portal_only.*unverified_hold/s)
+  assert.match(MIGRATION_CONTACTS, /provenance_summary text not null/)
+  assert.match(MIGRATION_CONTACTS, /current_verified.*possible_change.*stale_unverified.*historical.*rejected/s)
+  assert.match(MIGRATION_CONTACTS, /superseded_by_contact_id/)
+  assert.match(MIGRATION_CONTACTS, /footer_order integer/)
+  assert.match(MIGRATION_CONTACTS, /preserve_client_contact_history/)
+  assert.match(MIGRATION_CONTACTS, /Contact identity\/value is immutable/)
+  assert.doesNotMatch(MIGRATION_CONTACTS, /grant insert, update, delete on table public\.client_contacts/)
+})
+
+test('canonical footer policy supports mandatory, optional and omitted modes', () => {
+  assert.match(MIGRATION_CONTACTS, /create table if not exists public\.client_contact_footer_policies/)
+  assert.match(MIGRATION_CONTACTS, /requirement in \('mandatory','optional','omitted'\)/)
+  assert.match(MIGRATION_CONTACTS, /content_mode text not null/)
+  assert.match(MIGRATION_CONTACTS, /platform text/)
+})
+
+test('pilot contact backfill is exact, idempotent and conflict-preserving', () => {
+  assert.match(MIGRATION_CONTACT_BACKFILL, /where name = 'Cape Lumber'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /where name = 'Action Sport'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /where name = 'Dulux Bloemfontein'/)
+  assert.doesNotMatch(MIGRATION_CONTACT_BACKFILL, /\blike\b/i)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /on conflict do nothing/g)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /'historical','superseded'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /'unverified_hold'/)
+  assert.match(MIGRATION_CONTACT_BACKFILL, /Expected exactly one/)
+})
+
+test('contact tables deny client-role direct access while staff reads remain RLS-gated', () => {
+  assert.match(MIGRATION_CONTACTS, /client_contacts_staff_read/)
+  assert.match(MIGRATION_CONTACTS, /profile\.role in \('admin', 'manager', 'staff', 'team'\)/)
+  assert.match(MIGRATION_CONTACTS, /profile\.is_active/)
+  assert.doesNotMatch(MIGRATION_CONTACTS, /my_client_id\(\)/)
+  assert.doesNotMatch(MIGRATION_CONTACTS, /role\s*=\s*'client'/)
+})
+
+test('clientContacts typed service uses canonical contact and footer tables', () => {
+  assert.match(CLIENT_CONTACTS_TS, /export async function listClientContacts/)
+  assert.match(CLIENT_CONTACTS_TS, /export async function upsertClientContact/)
+  assert.match(CLIENT_CONTACTS_TS, /client_contact_footer_policies/)
+})
+
+const currentPublicContact = {
+  id: 'red-oak-public', client_id: 'red-oak', scope_key: null,
+  contact_type: 'phone', display_label: 'Bookings', person_name: 'Public Person', person_role: 'Bookings',
+  value: 'PUBLIC-VALUE', approved_for_caption: true, visibility: 'public_marketing',
+  blocks_caption: false,
+  freshness_state: 'current_verified', lifecycle_state: 'active', platforms: [], content_modes: ['caption'],
+  footer_order: 10, last_verified_at: today, provenance_summary: 'Client-approved footer',
+}
+
+const optionalCaptionPolicy = {
+  client_id: 'red-oak', scope_key: null, content_mode: 'caption', platform: null,
+  requirement: 'optional', format_template: '{contact}', review_state: 'current_verified',
+}
+
+test('caption contact resolver includes exact current approved public contact', () => {
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts.length, 1)
+  assert.equal(result.contacts[0].value, 'PUBLIC-VALUE')
+  assert.equal(result.can_generate_footer, true)
+})
+
+test('caption contact resolver excludes internal, stale, superseded and other-client contacts', () => {
+  const contacts = [
+    currentPublicContact,
+    { ...currentPublicContact, id: 'internal', value: 'PRIVATE', visibility: 'internal_only', approved_for_caption: false },
+    { ...currentPublicContact, id: 'stale', value: 'STALE', freshness_state: 'historical' },
+    { ...currentPublicContact, id: 'superseded', value: 'OLD', lifecycle_state: 'superseded' },
+    { ...currentPublicContact, id: 'other', client_id: 'staffordshire', value: 'OTHER' },
+  ]
+  const result = contactPolicy.resolveCaptionContacts({ clientId: 'red-oak', contacts, policies: [optionalCaptionPolicy] })
+  assert.deepEqual(result.contacts.map(contact => contact.value), ['PUBLIC-VALUE'])
+})
+
+test('named direct contact remains eligible when explicitly public-marketing approved', () => {
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts[0].person_name, 'Public Person')
+})
+
+test('unverified conflict fails closed instead of returning an approved alternative', () => {
+  const conflict = {
+    ...currentPublicContact, id: 'conflict', value: 'CONFLICT', approved_for_caption: false,
+    blocks_caption: true, visibility: 'unverified_hold', freshness_state: 'possible_change',
+  }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact, conflict], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts.length, 0)
+  assert.equal(result.can_generate_footer, false)
+  assert.equal(result.unresolved.length, 1)
+})
+
+test('entity scope never falls back to sibling or client-wide contacts', () => {
+  const contacts = [
+    currentPublicContact,
+    { ...currentPublicContact, id: 'bfn', scope_key: 'bloemfontein', value: 'BFN' },
+    { ...currentPublicContact, id: 'centurion', scope_key: 'centurion', value: 'CENTURION' },
+  ]
+  const policy = { ...optionalCaptionPolicy, scope_key: 'bloemfontein' }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', scopeKey: 'bloemfontein', contacts, policies: [policy],
+  })
+  assert.deepEqual(result.contacts.map(contact => contact.value), ['BFN'])
+})
+
+test('client_project_mappings migration creates one-to-one unique constraint', () => {
+  assert.match(MIGRATION_PROJECT_MAPPINGS, /client_id\s+uuid.*on delete cascade\s+unique/)
+})
+
+test('clientProjectMapping.ts exports required functions', () => {
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export async function listClientProjectMappings/)
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export async function getClientProjectMapping/)
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export async function upsertClientProjectMapping/)
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /export function openChatgptProject/)
+})
+
+test('clientProjectMapping.ts queries the correct table', () => {
+  assert.match(CLIENT_PROJECT_MAPPING_TS, /client_project_mappings/, 'queries client_project_mappings table')
+})
+
+test('clientContext.ts exports the context retrieval function', () => {
+  assert.match(CLIENT_CONTEXT_TS, /export async function getClientContext/)
+  assert.match(CLIENT_CONTEXT_TS, /get-client-context/, 'calls the Edge Function')
+})
+
+test('get-client-context Edge Function is correctly structured', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /Deno\.serve/, 'is a Deno serve function')
+  assert.match(GET_CLIENT_CONTEXT_FN, /requireAdminOrManager/, 'requires admin/manager auth')
+  assert.match(GET_CLIENT_CONTEXT_FN, /client_id/, 'accepts client_id parameter')
+  assert.match(GET_CLIENT_CONTEXT_FN, /task_type/, 'accepts task_type parameter')
+  assert.match(GET_CLIENT_CONTEXT_FN, /client_specific/, 'filters by client_specific')
+})
+
+test('get-client-context uses exact scope and canonical contact policy', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /client_scope_key/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /\.eq\('scope_key', scopeKey\)/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /visibility === 'public_marketing'/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /approved_for_caption === true/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /freshness_state === 'current_verified'/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /Contact conflict or freshness hold must be resolved before use/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /callerProfile\?\.is_active !== true/, 'inactive staff are denied')
+})
+
+test('get-client-context Edge Function supports all 7 task types', () => {
+  const expectedTasks = ['caption', 'content_idea', 'poster_copy', 'image_edit', 'factual_lookup', 'campaign', 'seo_hashtags']
+  for (const task of expectedTasks) {
+    assert.ok(GET_CLIENT_CONTEXT_FN.includes(`'${task}'`), `supports task type: ${task}`)
+  }
+})
+
+test('get-client-context Edge Function returns JSON with client isolation', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /active_client_id/, 'filters cards by active_client_id')
+  assert.match(GET_CLIENT_CONTEXT_FN, /jsonResponse/, 'returns JSON response')
+})
+
+test('Marketing page includes Open ChatGPT Project action', () => {
+  assert.match(MARKETING_PAGE, /Open ChatGPT Project/, 'has Open ChatGPT Project button')
+  assert.match(MARKETING_PAGE, /openChatgptProject/, 'calls openChatgptProject function')
+})
+
+test('Marketing page shows sync state for project mappings', () => {
+  assert.match(MARKETING_PAGE, /sync_state/, 'reads sync_state from mapping')
+  assert.match(MARKETING_PAGE, /syncStateLabel/, 'displays sync state label')
+  assert.match(MARKETING_PAGE, /syncStateTone/, 'applies tone to sync state')
+})
+
+test('Marketing page loads project mappings alongside guides', () => {
+  assert.match(MARKETING_PAGE, /listClientProjectMappings/, 'loads project mappings')
+  assert.match(MARKETING_PAGE, /ClientProjectMapping/, 'imports ClientProjectMapping type')
+})
+
+test('Bridge contract: static .md is export-only, not a runtime dependency', () => {
+  assert.ok(guideGenerator.generateClientGuide, 'generateClientGuide exists')
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { guideMarkdown } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(guideMarkdown.includes('export-only artifact'), '.md is explicitly marked as export-only')
+  assert.ok(guideMarkdown.includes('not a runtime dependency'), '.md states it is not a runtime dependency')
+})
+
+test('Bridge contract: Project Instructions use live retrieval, not static file', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('retrieve current canonical intelligence from CG Dynamics at task time'), 'uses live retrieval')
+  assert.ok(projectInstructions.includes('Never rely on a previously uploaded .md file'), 'does not rely on static .md')
+})
+
+test('Bridge contract: task-specific retrieval rules are present', () => {
+  const pack = `# Test Client\n\n## Voice\nTest voice.\n`
+  const { projectInstructions } = guideGenerator.generateClientGuide(pack, 'Test Client')
+  assert.ok(projectInstructions.includes('Caption/content → fetch voice rules'), 'caption retrieval specified')
+  assert.ok(projectInstructions.includes('Image editing → fetch visual/image rules'), 'image retrieval specified')
+  assert.ok(projectInstructions.includes('Factual claims → fetch verified facts'), 'factual lookup retrieval specified')
+  assert.ok(projectInstructions.includes('SEO/hashtags → choose 3-5 dynamically'), 'SEO/hashtag retrieval specified')
+})
+
+// ── #248/#294 Piek entity modes: one canonical client, isolated sub-brand scopes ──
+
+const piek = 'piek-uuid'
+const piekCards = [
+  { id: 'piek-group', active_client_id: piek, client_scope_key: null, client_specific: true, status: 'active' },
+  { id: 'engen-1', active_client_id: piek, client_scope_key: 'engen', client_specific: true, status: 'active' },
+  { id: 'sasol-1', active_client_id: piek, client_scope_key: 'sasol', client_specific: true, status: 'active' },
+  { id: 'get-together-1', active_client_id: piek, client_scope_key: 'get-together', client_specific: true, status: 'active' },
+  { id: 'other-client', active_client_id: 'sasol-national-uuid', client_scope_key: 'sasol', client_specific: true, status: 'active' },
+]
+
+test('Piek entity modes return different context per exact scope (one canonical client)', () => {
+  const engen = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'engen' }).map(c => c.id)
+  const sasol = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'sasol' }).map(c => c.id)
+  const getTogether = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'get-together' }).map(c => c.id)
+  const group = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: null }).map(c => c.id)
+  assert.deepEqual(engen, ['engen-1'])
+  assert.deepEqual(sasol, ['sasol-1'])
+  assert.deepEqual(getTogether, ['get-together-1'])
+  assert.deepEqual(group, ['piek-group'])
+})
+
+test('Piek entity scope never leaks sibling-entity or group facts', () => {
+  const engen = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'engen' }).map(c => c.id)
+  assert.ok(!engen.includes('sasol-1'), 'Engen never sees Sasol')
+  assert.ok(!engen.includes('get-together-1'), 'Engen never sees Get Together')
+  assert.ok(!engen.includes('piek-group'), 'Engen never falls back to group scope')
+  // Group (umbrella) request must not pull entity cards up.
+  const group = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: null }).map(c => c.id)
+  assert.ok(!group.includes('engen-1') && !group.includes('sasol-1'), 'group scope excludes entity cards')
+})
+
+test('Piek Sasol scope never returns a different client sharing the sasol scope_key', () => {
+  const sasol = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'sasol' }).map(c => c.id)
+  assert.ok(!sasol.includes('other-client'), 'exact client_id required — no cross-client scope match')
+})
+
+// ── #248 shared human creative standard + anti-slop ─────────────────────────────
+
+test('human creative standard is a compact non-empty shared contract', () => {
+  assert.ok(Array.isArray(creativeStandard.HUMAN_CREATIVE_STANDARD))
+  assert.ok(creativeStandard.HUMAN_CREATIVE_STANDARD.length >= 8, 'covers the core creative rules')
+  assert.equal(creativeStandard.DEFAULT_MAX_HASHTAGS, 5, 'default max 5 hashtags')
+})
+
+test('anti-slop list rejects the known CG generic filler patterns', () => {
+  const patterns = creativeStandard.ANTI_SLOP_PATTERNS.map(p => p.toLowerCase())
+  for (const banned of ['elevate your experience', 'discover the difference', 'your trusted partner', 'something for everyone', 'experience excellence']) {
+    assert.ok(patterns.includes(banned), `anti-slop list includes: ${banned}`)
+  }
+})
+
+test('flagAntiSlop detects generic filler and passes human copy', () => {
+  assert.deepEqual(creativeStandard.flagAntiSlop('Elevate your experience with us today'), ['elevate your experience'])
+  assert.deepEqual(creativeStandard.flagAntiSlop('Fresh pine just landed — first cut goes to the early birds.'), [])
+})
+
+test('caption packet injects the shared human standard, anti-slop and dynamic hashtag rule', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /human_creative_standard: HUMAN_CREATIVE_STANDARD/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /avoid_filler: ANTI_SLOP_PATTERNS/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /hashtag_max: DEFAULT_MAX_HASHTAGS/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /never paste a fixed bank/)
+})
+
+test('seo_hashtags packet marks stored banks as seed-only, not a permanent output', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /hashtag_bank_is_seed_only: true/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /Stored banks are seed\/reference only/)
+})
+
+test('human creative standard app and Deno copies do not drift', () => {
+  const stripHeader = s => s.split('\n').slice(1).join('\n')
+  assert.equal(stripHeader(CREATIVE_STANDARD_APP), stripHeader(CREATIVE_STANDARD_SHARED), 'src/lib and _shared creative standard must match')
+})
+
+// ── #294 conflict auto-detection fails closed ───────────────────────────────────
+
+test('two different approved contacts of the same type fail closed (no guessing)', () => {
+  const phoneA = { ...currentPublicContact, id: 'a', contact_type: 'phone', value: '051-111-1111' }
+  const phoneB = { ...currentPublicContact, id: 'b', contact_type: 'phone', value: '051-222-2222' }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [phoneA, phoneB], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts.length, 0, 'ambiguous same-type contacts are not returned')
+  assert.equal(result.can_generate_footer, false)
+  assert.ok(result.unresolved.length >= 1, 'conflict is surfaced as unresolved')
+  assert.match(result.reason ?? '', /conflict/i)
+})
+
+test('distinct contact types (phone + email) are not treated as a conflict', () => {
+  const phone = { ...currentPublicContact, id: 'p', contact_type: 'phone', value: '051-111-1111', footer_order: 10 }
+  const email = { ...currentPublicContact, id: 'e', contact_type: 'email', value: 'hi@example.com', footer_order: 20 }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [phone, email], policies: [optionalCaptionPolicy],
+  })
+  assert.deepEqual(result.contacts.map(c => c.contact_type), ['phone', 'email'])
+  assert.equal(result.can_generate_footer, true)
+})
+
+// ── Canonical task-type contract owned by client-intelligence (#241; #311 consumes it) ──
+
+test('client-intelligence exposes a single canonical task-type contract', () => {
+  assert.match(CONTEXT_CONTRACT_SHARED, /export const CLIENT_CONTEXT_TASK_TYPES = \[/)
+  for (const task of ['caption', 'content_idea', 'poster_copy', 'image_edit', 'factual_lookup', 'campaign', 'seo_hashtags']) {
+    assert.ok(CONTEXT_CONTRACT_SHARED.includes(`'${task}'`), `contract includes canonical task_type: ${task}`)
+  }
+  for (const stray of ['script', 'strategy', 'general']) {
+    assert.ok(!CONTEXT_CONTRACT_SHARED.includes(`'${stray}'`), `contract has no parallel task_type '${stray}'`)
+  }
+})
+
+test('get-client-context consumes the canonical contract rather than a local task list', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /from '\.\.\/_shared\/clientContextContract\.ts'/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /CLIENT_CONTEXT_TASK_TYPES as TASK_TYPES/)
+  assert.doesNotMatch(GET_CLIENT_CONTEXT_FN, /const TASK_TYPES = \[/, 'no inline task list — one canonical source')
+})
+
+test('task-type contract app and Deno copies do not drift', () => {
+  const stripHeader = s => s.split('\n').slice(1).join('\n')
+  assert.equal(stripHeader(CONTEXT_CONTRACT_APP), stripHeader(CONTEXT_CONTRACT_SHARED), 'src/lib and _shared contract must match')
+})
+
+test('#247 no longer carries #311-owned private-MCP implementation files', () => {
+  for (const p of [
+    '../supabase/functions/cg-dynamics-mcp/toolCatalog.ts',
+    '../tests/cgDynamicsMcpToolCatalog.test.mjs',
+    '../docs/ai-workforce/CG-DYNAMICS-PRIVATE-MCP-ROLLOUT.md',
+  ]) {
+    let exists = false
+    try { readFileSync(new URL(p, import.meta.url), 'utf8'); exists = true } catch { /* expected gone */ }
+    assert.equal(exists, false, `#311-owned file must not be in #247: ${p}`)
+  }
+})
+
+// ── #294 exact-client + entity isolation regression fixtures ─────────────────────
+
+function contact(over) {
+  return {
+    id: 'c', client_id: 'x', scope_key: null, contact_type: 'phone', display_label: 'Phone',
+    person_name: null, person_role: null, value: 'V', approved_for_caption: true, blocks_caption: false,
+    visibility: 'public_marketing', freshness_state: 'current_verified', lifecycle_state: 'active',
+    platforms: [], content_modes: ['caption'], footer_order: 10, last_verified_at: today,
+    provenance_summary: 'x', ...over,
+  }
+}
+const optPolicy = (over = {}) => ({ client_id: 'x', scope_key: null, content_mode: 'caption', platform: null, requirement: 'optional', format_template: null, review_state: 'current_verified', ...over })
+
+test('Red Oak cannot receive Staffordshire contacts and vice versa', () => {
+  const contacts = [
+    contact({ id: 'ro', client_id: 'red-oak', value: 'REDOAK' }),
+    contact({ id: 'st', client_id: 'staffordshire', value: 'STAFF' }),
+  ]
+  const ro = contactPolicy.resolveCaptionContacts({ clientId: 'red-oak', contacts, policies: [optPolicy({ client_id: 'red-oak' })] })
+  const st = contactPolicy.resolveCaptionContacts({ clientId: 'staffordshire', contacts, policies: [optPolicy({ client_id: 'staffordshire' })] })
+  assert.deepEqual(ro.contacts.map(c => c.value), ['REDOAK'])
+  assert.deepEqual(st.contacts.map(c => c.value), ['STAFF'])
+})
+
+test('Supa Quick BFN never receives Centurion / WiseRide / Wiseman Group contacts', () => {
+  const contacts = [
+    contact({ id: 'bfn', client_id: 'supa-quick-bfn', value: 'BFN' }),
+    contact({ id: 'cent', client_id: 'supa-quick-centurion', value: 'CENT' }),
+    contact({ id: 'wr', client_id: 'wiseride', value: 'WR' }),
+    contact({ id: 'wg', client_id: 'wiseman-group', value: 'WG' }),
+  ]
+  const result = contactPolicy.resolveCaptionContacts({ clientId: 'supa-quick-bfn', contacts, policies: [optPolicy({ client_id: 'supa-quick-bfn' })] })
+  assert.deepEqual(result.contacts.map(c => c.value), ['BFN'])
+})
+
+test('Piek Engen/Sasol/Get Together contact scopes never fall back to each other or to group', () => {
+  const contacts = [
+    contact({ id: 'grp', client_id: 'piek', scope_key: null, value: 'GROUP' }),
+    contact({ id: 'eng', client_id: 'piek', scope_key: 'engen', value: 'ENGEN' }),
+    contact({ id: 'sas', client_id: 'piek', scope_key: 'sasol', value: 'SASOL' }),
+  ]
+  const engen = contactPolicy.resolveCaptionContacts({ clientId: 'piek', scopeKey: 'engen', contacts, policies: [optPolicy({ client_id: 'piek', scope_key: 'engen' })] })
+  assert.deepEqual(engen.contacts.map(c => c.value), ['ENGEN'])
+  const getTogether = contactPolicy.resolveCaptionContacts({ clientId: 'piek', scopeKey: 'get-together', contacts, policies: [optPolicy({ client_id: 'piek', scope_key: 'get-together' })] })
+  assert.deepEqual(getTogether.contacts.map(c => c.value), [], 'no contact at get-together scope; never falls back to Engen/Sasol/group')
+})
+
+test('footer ordering and format template are preserved for the exact scope', () => {
+  const contacts = [
+    contact({ id: 'w', client_id: 'x', contact_type: 'website', value: 'W', footer_order: 30 }),
+    contact({ id: 'p', client_id: 'x', contact_type: 'phone', value: 'P', footer_order: 10 }),
+    contact({ id: 'e', client_id: 'x', contact_type: 'email', value: 'E', footer_order: 20 }),
+  ]
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'x', contacts, policies: [optPolicy({ format_template: '{phone}\n{email}\n{website}' })],
+  })
+  assert.deepEqual(result.contacts.map(c => c.value), ['P', 'E', 'W'], 'sorted by footer_order')
+  assert.equal(result.policy.format_template, '{phone}\n{email}\n{website}')
+})
+
+// ── #294 Piek backfill migration (evidence-backed, conflict-preserving) ──────────
+
+test('Piek backfill registers ONE canonical client with exact entity scope separation', () => {
+  assert.match(MIGRATION_PIEK_BACKFILL, /where name = 'Piek Group'/)
+  assert.match(MIGRATION_PIEK_BACKFILL, /Expected exactly one Piek Group client/)
+  assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /\blike\b/i, 'no fuzzy client matching')
+  for (const scope of ["'engen'", "'sasol'", "'get-together'"]) {
+    assert.ok(MIGRATION_PIEK_BACKFILL.includes(scope), `entity scope present: ${scope}`)
+  }
+  assert.match(MIGRATION_PIEK_BACKFILL, /on conflict do nothing/, 'idempotent')
+})
+
+test('Piek group caption-email conflict is preserved unresolved, not guessed', () => {
+  assert.match(MIGRATION_PIEK_BACKFILL, /info@piekgroup\.com/)
+  assert.match(MIGRATION_PIEK_BACKFILL, /admin@piekgroup\.co\.za/)
+  // both email candidates held possible_change so the runtime fails closed on email
+  assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /info@piekgroup\.com'[^\n]*current_verified/, 'client email is not asserted current')
+  assert.match(MIGRATION_PIEK_BACKFILL, /possible_change/)
+  assert.doesNotMatch(MIGRATION_PIEK_BACKFILL, /piekgroup\.com'[^\n]*website/i, 'website never changed to .com')
+})
+
+// ── #294 WiseRide backfill (exact identity, mandatory website, held conflicts) ──
+
+test('WiseRide backfill is exact-ID isolated and idempotent', () => {
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /v_wiseride_id constant uuid := '504113ee-fba9-4993-807e-a86066615212'/)
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /where id = v_wiseride_id and name = 'WiseRide'/)
+  assert.doesNotMatch(MIGRATION_WISERIDE_BACKFILL, /\blike\b/i, 'no fuzzy client matching')
+  assert.doesNotMatch(MIGRATION_WISERIDE_BACKFILL, /899c9988-8207-4e45-a8fc-a7446dfcf96b/, 'Wiseman Group id is never a fallback')
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /on conflict do nothing/, 'idempotent')
+})
+
+test('WiseRide migration makes only the website current and holds every contact conflict', () => {
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /'wisemangroup\.co\.za',true,false,'public_marketing'[\s\S]*?'current_verified'/)
+  for (const value of ['80 Nelson Mandela Street', '88 Nelson Mandela Dr', '073 340 5302', '051 1011 600', 'sonja@wisemangroup.co.za', 'wiseride@wisemangroup.co.za', 'info@wisemangroup.co.za']) {
+    assert.ok(MIGRATION_WISERIDE_BACKFILL.includes(value), `conflict candidate preserved: ${value}`)
+  }
+  assert.equal((MIGRATION_WISERIDE_BACKFILL.match(/'possible_change','active'/g) ?? []).length, 7)
+  assert.match(MIGRATION_WISERIDE_BACKFILL, /'mandatory','\{website\}'/)
+})
+
+test('WiseRide resolver returns the mandatory website but never a held address phone or email', () => {
+  const clientId = '504113ee-fba9-4993-807e-a86066615212'
+  const contacts = [
+    contact({ id: 'site', client_id: clientId, contact_type: 'website', value: 'wisemangroup.co.za' }),
+    contact({ id: 'address-a', client_id: clientId, contact_type: 'address', value: '80 Nelson Mandela Street', approved_for_caption: false, freshness_state: 'possible_change' }),
+    contact({ id: 'address-b', client_id: clientId, contact_type: 'address', value: '88 Nelson Mandela Dr', approved_for_caption: false, freshness_state: 'possible_change' }),
+    contact({ id: 'phone-a', client_id: clientId, value: '073 340 5302', approved_for_caption: false, freshness_state: 'possible_change' }),
+    contact({ id: 'email-a', client_id: clientId, contact_type: 'email', value: 'sonja@wisemangroup.co.za', approved_for_caption: false, freshness_state: 'possible_change' }),
+  ]
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId,
+    contacts,
+    policies: [optPolicy({ client_id: clientId, requirement: 'mandatory', format_template: '{website}' })],
+  })
+  assert.deepEqual(result.contacts.map(c => c.value), ['wisemangroup.co.za'])
+  assert.equal(result.can_generate_footer, true)
+  assert.equal(result.unresolved.length, 4)
+})
+
+test('WiseRide and Langenhoven Park never inherit group sibling or unscoped contacts', () => {
+  const clientId = '504113ee-fba9-4993-807e-a86066615212'
+  const contacts = [
+    contact({ id: 'wr', client_id: clientId, contact_type: 'website', value: 'wisemangroup.co.za' }),
+    contact({ id: 'wg', client_id: '899c9988-8207-4e45-a8fc-a7446dfcf96b', value: 'WISEMAN' }),
+    contact({ id: 'bfn', client_id: 'supa-quick-bfn', value: 'SUPA-BFN' }),
+    contact({ id: 'centurion', client_id: 'supa-quick-centurion', value: 'SUPA-CENTURION' }),
+  ]
+  const general = contactPolicy.resolveCaptionContacts({ clientId, contacts, policies: [optPolicy({ client_id: clientId })] })
+  assert.deepEqual(general.contacts.map(c => c.value), ['wisemangroup.co.za'])
+  const langenhoven = contactPolicy.resolveCaptionContacts({
+    clientId,
+    scopeKey: 'langenhoven-park',
+    contacts,
+    policies: [optPolicy({ client_id: clientId, scope_key: 'langenhoven-park', requirement: 'mandatory' })],
+  })
+  assert.deepEqual(langenhoven.contacts, [], 'branch scope cannot inherit Nelson Mandela or client-wide contacts')
+  assert.equal(langenhoven.can_generate_footer, false)
+})
+
+// ── #294 #3 future migration workflow hardening ─────────────────────────────────
+
+test('migration workflow mandates the deterministic 5-part contact audit return', () => {
+  assert.match(MIGRATION_WORKFLOW_DOC, /Mandatory contact audit return/)
+  for (const part of ['Confirmed public-marketing contacts', 'Confirmed internal-only contacts', 'Stale / superseded contacts', 'Unresolved conflicts', 'Exact caption/footer rule']) {
+    assert.ok(MIGRATION_WORKFLOW_DOC.includes(part), `audit return requires: ${part}`)
+  }
+  assert.match(MIGRATION_WORKFLOW_DOC, /not.{0,6}fully runtime-ready if a contact\/footer requirement/i)
+  assert.match(MIGRATION_WORKFLOW_DOC, /preflightContactBackfill/)
+})
+
+// ── #294 deterministic preflight/audit ──────────────────────────────────────────
+
+const propContact = over => ({
+  client_ref: 'Piek Group', client_id: 'piek', scope_key: null, contact_type: 'phone', value: 'V',
+  visibility: 'public_marketing', freshness_state: 'current_verified', lifecycle_state: 'active',
+  approved_for_caption: true, blocks_caption: false, ...over,
+})
+
+test('preflight reports inserts vs records already present (idempotent skip)', () => {
+  const proposed = [propContact({ value: 'NEW' }), propContact({ value: 'EXISTS' })]
+  const report = backfill.preflightContactBackfill({
+    proposedContacts: proposed, proposedPolicies: [],
+    existingContacts: [{ client_id: 'piek', scope_key: null, contact_type: 'phone', value: 'EXISTS' }],
+    existingPolicies: [],
+  })
+  assert.deepEqual(report.contacts_to_insert.map(c => c.value), ['NEW'])
+  assert.deepEqual(report.contacts_skipped_existing.map(c => c.value), ['EXISTS'])
+  assert.equal(report.summary.contacts_insert, 1)
+  assert.equal(report.summary.contacts_skip, 1)
+})
+
+test('preflight surfaces stale/superseded and unresolved conflicts without guessing', () => {
+  const proposed = [
+    propContact({ value: 'CURRENT' }),
+    propContact({ value: 'OLD', lifecycle_state: 'superseded', freshness_state: 'historical' }),
+    propContact({ contact_type: 'email', value: 'info@piekgroup.com', freshness_state: 'possible_change' }),
+    propContact({ contact_type: 'email', value: 'admin@piekgroup.co.za', approved_for_caption: false, freshness_state: 'possible_change' }),
+  ]
+  const report = backfill.preflightContactBackfill({ proposedContacts: proposed, proposedPolicies: [], existingContacts: [], existingPolicies: [] })
+  assert.equal(report.stale_superseded.length, 1)
+  assert.ok(report.unresolved_conflicts.length >= 2, 'both possible_change emails surfaced')
+  assert.ok(report.unresolved_conflicts.every(u => Array.isArray(u.values)))
+})
+
+test('preflight flags an ambiguous same-type same-scope current conflict', () => {
+  const proposed = [
+    propContact({ contact_type: 'phone', value: '051-111-1111' }),
+    propContact({ contact_type: 'phone', value: '051-222-2222' }),
+  ]
+  const report = backfill.preflightContactBackfill({ proposedContacts: proposed, proposedPolicies: [], existingContacts: [], existingPolicies: [] })
+  assert.ok(report.unresolved_conflicts.some(u => /ambiguous/.test(u.reason)), 'same-type ambiguity surfaced')
+})
+
+test('preflight lists clients covered and exact scopes', () => {
+  const report = backfill.preflightContactBackfill({
+    proposedContacts: [propContact({ scope_key: null }), propContact({ scope_key: 'engen' })],
+    proposedPolicies: [], existingContacts: [], existingPolicies: [],
+  })
+  assert.deepEqual(report.clients_covered, ['Piek Group'])
+  const scopeKeys = report.scopes.map(s => s.scope_key)
+  assert.equal(scopeKeys.length, 2)
+  assert.ok(scopeKeys.includes(null) && scopeKeys.includes('engen'), 'both group and engen scopes reported')
+})
