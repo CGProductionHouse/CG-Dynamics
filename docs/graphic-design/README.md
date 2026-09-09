@@ -9,7 +9,9 @@ Start future sessions with [`STATUS.md`](./STATUS.md). It records current progre
 Supporting specifications:
 
 - [`poster-onedrive-naming-standard.md`](./poster-onedrive-naming-standard.md) — canonical DP/file/month naming and OneDrive production structure aligned with existing CG video + Dynamics identities.
-- [`launch-now-chat-pack-workflow.md`](./launch-now-chat-pack-workflow.md) — current normal-browser ChatGPT production bridge and amendment doctrine.
+- [`staff-poster-production-sop.md`](./staff-poster-production-sop.md) — dummy-proof monthly staff workflow, including the amendment decision tree that prevents generative decay.
+- [`launch-now-chat-pack-workflow.md`](./launch-now-chat-pack-workflow.md) — current normal-browser ChatGPT production bridge and batch-generation workflow.
+- [`tool-handoff-gaps.md`](./tool-handoff-gaps.md) — real tested limitations between Adobe, OneDrive, Canva and the internal image generator; read this before claiming a handoff is automated.
 - [`social-poster-workflow.md`](./social-poster-workflow.md)
 - [`asset-usage-ledger.md`](./asset-usage-ledger.md)
 - [`creative-strategy-gate.md`](./creative-strategy-gate.md)
