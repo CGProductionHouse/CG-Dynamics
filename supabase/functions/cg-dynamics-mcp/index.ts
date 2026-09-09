@@ -9,7 +9,7 @@
 // Canonical services: same RPCs and tables used by CG Dynamics UI and #208 CG Assistant.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { CG_DYNAMICS_MCP_TOOLS } from './toolCatalog.ts'
+import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
 import {
   inspectExactOneDriveFolder,
@@ -24,6 +24,8 @@ import {
   buildWwwAuthenticateChallenge,
   deriveMcpOAuthUrls,
   isProtectedResourceMetadataRequest,
+  buildMcpAuthChallengeMeta,
+  type McpAuthChallengeError,
 } from './oauthDiscovery.ts'
 import {
   assertRecordClientMatchesContext,
@@ -68,6 +70,37 @@ function unauthorizedResponse(message: string, opts?: { error?: string; errorDes
   return new Response(JSON.stringify({ error: message }), { status: 401, headers: challengeHeaders(opts) })
 }
 
+/**
+ * MCP tool error result for a rejected tool call, carrying `_meta["mcp/www_authenticate"]`
+ * per current OpenAI Plugins auth docs so ChatGPT shows the account-linking UI. Contains no
+ * token, key or internal detail — only the public PRM URL and a clear description.
+ */
+function authChallengeToolResult(challenge: { error: McpAuthChallengeError; description: string }) {
+  const urls = deriveMcpOAuthUrls(Deno.env.get('SUPABASE_URL'))
+  return {
+    content: [{ type: 'text', text: `Authentication required. ${challenge.description}` }],
+    isError: true,
+    ...(urls
+      ? { _meta: buildMcpAuthChallengeMeta(urls.protectedResourceMetadataUrl, challenge.error, challenge.description) }
+      : {}),
+  }
+}
+
+function authChallengeResponse(
+  id: string | number | null,
+  challenge: AuthChallenge,
+  transportResponse: Response,
+) {
+  return new Response(JSON.stringify({
+    jsonrpc: '2.0',
+    id,
+    result: authChallengeToolResult(challenge),
+  }), {
+    status: transportResponse.status,
+    headers: transportResponse.headers,
+  })
+}
+
 function jsonRpcResponse(id: string | number | null, result: unknown) {
   return new Response(JSON.stringify({ jsonrpc: '2.0', id, result }), { status: 200, headers: corsHeaders })
 }
@@ -108,7 +141,12 @@ interface AuthenticatedStaff {
   connection: ConnectionPrincipal
 }
 
-async function authenticateStaff(request: Request): Promise<{ ok: true; connection: ConnectionPrincipal; supabase: ReturnType<typeof createClient> } | { ok: false; response: Response }> {
+interface AuthChallenge {
+  error: McpAuthChallengeError
+  description: string
+}
+
+async function authenticateStaff(request: Request): Promise<{ ok: true; connection: ConnectionPrincipal; supabase: ReturnType<typeof createClient> } | { ok: false; response: Response; challenge?: AuthChallenge }> {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) {
@@ -117,7 +155,11 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; connecti
 
   const match = /^Bearer\s+(.+)$/i.exec(request.headers.get('Authorization') ?? '')
   if (!match?.[1]) {
-    return { ok: false, response: unauthorizedResponse('Authentication required.') }
+    return {
+      ok: false,
+      response: unauthorizedResponse('Authentication required.'),
+      challenge: { error: 'invalid_token', description: 'Sign in to CG Dynamics to use this action.' },
+    }
   }
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -126,7 +168,11 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; connecti
 
   const { data: { user }, error: authError } = await supabase.auth.getUser(match[1])
   if (authError || !user) {
-    return { ok: false, response: unauthorizedResponse('Invalid or expired token.', { error: 'invalid_token', errorDescription: 'The bearer token is invalid or expired.' }) }
+    return {
+      ok: false,
+      response: unauthorizedResponse('Invalid or expired token.', { error: 'invalid_token', errorDescription: 'The bearer token is invalid or expired.' }),
+      challenge: { error: 'invalid_token', description: 'The CG Dynamics connection has expired. Reconnect to continue.' },
+    }
   }
 
   const { data: profile, error: profileError } = await supabase
@@ -139,7 +185,11 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; connecti
     return { ok: false, response: jsonResponse({ error: 'Authorization check unavailable.' }, 503) }
   }
   if (!profile || !STAFF_ROLES.has(profile.role) || profile.is_active !== true) {
-    return { ok: false, response: jsonResponse({ error: 'Active staff access required.' }, 403) }
+    return {
+      ok: false,
+      response: jsonResponse({ error: 'Active staff access required.' }, 403),
+      challenge: { error: 'insufficient_scope', description: 'The connected CG Dynamics account is not an active staff member.' },
+    }
   }
 
   return {
@@ -1473,6 +1523,9 @@ function handleToolsList(id: string | number | null) {
       description: tool.description,
       inputSchema: tool.inputSchema,
       annotations: tool.annotations,
+      // Per-tool OAuth declaration so ChatGPT exposes each action and can trigger the
+      // linking UI (current OpenAI Plugins auth docs).
+      securitySchemes: CG_DYNAMICS_MCP_SECURITY_SCHEMES,
     })),
   })
 }
@@ -1587,18 +1640,37 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'MCP requires POST.' }, 405)
   }
 
-  // Authenticate before parsing JSON-RPC
+  // Authenticate before parsing JSON-RPC. The envelope is parsed once after the auth check
+  // only so a rejected tools/call can preserve its request id in the MCP challenge body.
   const auth = await authenticateStaff(req)
-  if (!auth.ok) return auth.response
+
+  let body: Record<string, unknown> | null
+  try {
+    body = await req.json()
+  } catch {
+    body = null
+  }
+
+  if (!auth.ok) {
+    // A rejected tools/call additionally gets the OpenAI-compatible MCP auth-challenge
+    // result so ChatGPT surfaces the account-linking UI instead of a bare transport error.
+    // Preserve the transport status and headers: rejected bearers remain HTTP 401 and keep
+    // the canonical WWW-Authenticate challenge while the JSON-RPC body carries MCP `_meta`.
+    if (auth.challenge && body && body.method === 'tools/call') {
+      return authChallengeResponse(
+        (body.id as string | number | null) ?? null,
+        auth.challenge,
+        auth.response,
+      )
+    }
+    return auth.response
+  }
 
   // Connection principal only — the communal admin account. The effective Project subject
   // is resolved per tool call from explicit context (#319).
   const { connection, supabase: connectionSupabase } = auth
 
-  let body: Record<string, unknown>
-  try {
-    body = await req.json()
-  } catch {
+  if (!body) {
     return jsonRpcError(null, -32700, 'Parse error.')
   }
 

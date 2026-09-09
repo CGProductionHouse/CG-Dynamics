@@ -129,7 +129,7 @@ test('MCP verification tool is read-only and declares the canonical #307 mapping
   const tool = catalog.CG_DYNAMICS_MCP_TOOLS.find(item => item.name === 'verify_content_run_upload')
   assert.ok(tool)
   assert.equal(tool.annotations.readOnlyHint, true)
-  assert.deepEqual(tool.inputSchema.required, ['content_run_id'])
+  assert.deepEqual(tool.inputSchema.required, ['content_run_id', 'context'])
   assert.equal(tool.dependency, '#307')
   assert.match(tool.canonicalContract, /get_content_run_onedrive_folder RPC/)
   assert.match(tool.description, /Staff self-report never upgrades this result/)
@@ -189,7 +189,7 @@ test('MCP writes cannot promote a staff claim into mapped-folder evidence', () =
   assert.equal(closeout.inputSchema.properties.upload_status, undefined)
   assert.equal(closeout.inputSchema.properties.upload_evidence, undefined)
   assert.equal(closeout.inputSchema.properties.onedrive_folder_ref, undefined)
-  assert.deepEqual(update.inputSchema.required, ['content_run_id', 'idempotency_key'])
+  assert.deepEqual(update.inputSchema.required, ['content_run_id', 'idempotency_key', 'context'])
   assert.equal(update.inputSchema.properties.upload_status, undefined)
   assert.equal(update.inputSchema.properties.upload_evidence, undefined)
 
