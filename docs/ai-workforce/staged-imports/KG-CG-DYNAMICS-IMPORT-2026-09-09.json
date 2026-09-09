@@ -1,0 +1,402 @@
+{
+  "schema_version": "1.0",
+  "generated_on": "2026-09-09",
+  "staff_scope": "KG / Kgomotso Lebone only",
+  "status": "WAITING FOR CG DYNAMICS WRITE-BACK",
+  "canonical_warning": "This file is staging/reference material only. It is not a live CRM, task system or source of mutable status. Reconcile against live CG Dynamics and connected sources before write-back.",
+  "staff": {
+    "display_name": "KG",
+    "full_name": "Kgomotso Lebone",
+    "email": "kg@cgproductionhouse.com",
+    "microsoft_user_id": "f018c00a-6d68-4cf5-b6d8-a3b5688944a5",
+    "identity_status": "VERIFIED",
+    "formal_job_title": null,
+    "formal_job_title_status": "NEEDS CONFIRMATION",
+    "durable_context": [
+      "Historical work shows broad client/content execution across numerous CG accounts.",
+      "Historical July 2026 CG Planner evidence repeatedly assigned KG end-of-day update tasks.",
+      "Historical project work shows KG researching active businesses, checking social media presence and identifying businesses with weak/little/no social media.",
+      "Prospecting research included construction, plant hire, security, industrial and service sectors in Bloemfontein and Johannesburg; Pretoria was explicitly excluded from the Johannesburg pass."
+    ],
+    "do_not_retain_as_profile_facts": [
+      "CG baby",
+      "all smiles",
+      "secret influencer"
+    ]
+  },
+  "canonical_lead_states": [
+    "TO RESEARCH",
+    "TO CONTACT",
+    "CONTACTED / AWAITING RESPONSE",
+    "FOLLOW UP",
+    "PURSUED / ACTIVE OPPORTUNITY",
+    "NOT NOW / NURTURE",
+    "WON / CONVERTED",
+    "CLOSED / NOT A FIT",
+    "STATUS NEEDS CONFIRMATION"
+  ],
+  "lead_summary": {
+    "PURSUED / ACTIVE OPPORTUNITY": 1,
+    "STATUS NEEDS CONFIRMATION": 45,
+    "other_confirmed_states": 0
+  },
+  "leads": [
+    {
+      "company": "Kopano Mothibi Attorneys",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "PURSUED / ACTIVE OPPORTUNITY",
+      "quote_number": "QU-KMA2608",
+      "quote_value_zar": 9947.50,
+      "contact_email": "moalahi@kopanomothibi-attorneys.co.za",
+      "latest_verified_response": "Good day Noted with thanks.",
+      "latest_verified_subject": "RE: Quote QU-KMA2608 from CG Production House - CG Design Solutions (PTY) ltd for Kopano Mothibi Attorneys",
+      "latest_verified_date_note": "2026-08-26/27 depending mailbox timezone rendering",
+      "next_action": "Confirm from live mail / CG Dynamics whether the quote was accepted, declined, remains pending or progressed elsewhere.",
+      "conversion": null,
+      "provenance": "Historical KG-specific context establishes ownership; shared mailbox verifies quote correspondence. Acknowledgement alone is not acceptance."
+    },
+    {
+      "company": "CM Plant Hire Bloemfontein",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "C&N Planthire and Rock Blasting",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Roadmac Surfacing",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "PW’s Electrical & Solar",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "IceBurg Group",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "BC Building Contractors",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "AJ's Roof & Wall Coatings",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Direct Action Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Nissi Risk Management / Nissi Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Bankam Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Invicta Security Solutions",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "ITR Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "SA Tiger Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "The Security Firm",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Belinc Security Services",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "JK Armed Response",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Econogas",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Omega Gas Bloemfontein",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "AD's Ingenieurswerke",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "name_note": "Spelling needs confirmation; original user wording was approximate.",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "SBD Consulting",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "BSD Consulting cc BFN",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "UPS Solution",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Ro-Al Constructions",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Trencon Construction",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Motheo Construction Group",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "GOVARO Africa",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Johachisi Construction",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Gothic Construction",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "JVZ Construction",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "WK Construction",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Mantis Plant Hire",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Talisman Hire Johannesburg",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Coastal Hire Johannesburg",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Mantis Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "24/7 Security Services",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "SSJ Security Services Johannesburg",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Dikwena Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "ADT Johannesburg",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "EC Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "CPS Security",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Interactive Security Gauteng",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "TSU Protection Services Johannesburg",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Beagle Watch Armed Response",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Bradley Construction and Projects",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    },
+    {
+      "company": "Secosa Distribution",
+      "owner": "KG / Kgomotso Lebone",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "provenance": "Historical KG prospect research"
+    }
+  ],
+  "excluded_shared_mail_opportunities": [
+    {
+      "company": "BP / Wild Bean Café",
+      "reason": "Shared mailbox opportunity found, but KG ownership not verified."
+    },
+    {
+      "company": "Roots Colour Studio",
+      "reason": "Shared mailbox opportunity found, but KG ownership not verified."
+    },
+    {
+      "company": "Vrystaat Landbou",
+      "reason": "Shared mailbox opportunity found, but KG ownership not verified."
+    },
+    {
+      "company": "Vasilis",
+      "reason": "Shared mailbox opportunity found, but KG ownership not verified."
+    }
+  ],
+  "capabilities": {
+    "microsoft_teams": {
+      "status": "VERIFIED LIVE",
+      "note": "Connected and working. KG directory resolution succeeded on 2026-09-09. Treat Teams as available unless a future live call fails."
+    },
+    "outlook_email": {
+      "status": "VERIFIED LIVE",
+      "policy": "DRAFT ONLY - NEVER SEND"
+    },
+    "gmail_shared_mail": {
+      "status": "VERIFIED LIVE",
+      "policy": "DRAFT ONLY - NEVER SEND"
+    },
+    "outlook_calendar": {
+      "status": "VERIFIED LIVE",
+      "note": "Shared CG Production House calendar exposed; not a dedicated KG calendar."
+    },
+    "sharepoint_onedrive": {
+      "status": "VERIFIED LIVE"
+    },
+    "canva": {
+      "status": "VERIFIED LIVE"
+    },
+    "microsoft_planner": {
+      "status": "NOT VERIFIED IN THIS SESSION",
+      "note": "Historical Planner evidence exists, but no first-party live Planner action was exposed during the audit."
+    },
+    "adobe": {
+      "status": "PRESENT BUT NOT OPERATIONAL",
+      "note": "Mandatory initialization returned HTTP 403 on 2026-09-09."
+    },
+    "cg_dynamics_private_connector": {
+      "status": "NOT EXPOSED IN THIS SESSION",
+      "next_state": "WAITING FOR CG DYNAMICS WRITE-BACK"
+    }
+  },
+  "assistant_rules": [
+    "Stay strictly scoped to KG/Kgomotso Lebone.",
+    "Do not mix another staff member's leads, tasks, preferences or personal operating context into KG's profile.",
+    "Use live sources for mutable tasks, appointments, messages, client facts and lead status.",
+    "Use Microsoft Teams proactively; Teams access is verified.",
+    "Email is DRAFT ONLY. Never send directly.",
+    "Do not create a second CRM, task system or shadow Dynamics database.",
+    "GitHub is durable documentation/staging, not live operational truth.",
+    "Do not expose GitHub, Supabase, Vercel or development tooling to KG's normal staff workflow.",
+    "Re-check connected capabilities before claiming a tool is unavailable.",
+    "When CG Dynamics becomes available, resolve KG's canonical Dynamics identity first, then reconcile without overwriting newer live information or creating duplicates."
+  ],
+  "setup_gaps": [
+    "Expose/connect the private CG Dynamics connector.",
+    "Verify/connect Microsoft Planner if it is intended as a live KG task source.",
+    "Repair/re-authorize Adobe after HTTP 403.",
+    "Reconcile this staged pack into CG Dynamics once the connector is available."
+  ]
+}
