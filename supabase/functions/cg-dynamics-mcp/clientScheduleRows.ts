@@ -29,6 +29,14 @@ export const CLIENT_SCHEDULE_SELECT = [
   'due_date',
   'production_status',
   'assigned_to_name',
+  // #325 read-only audit provenance. Client Schedule write/approval rules are unchanged.
+  'package_id',
+  'template_id',
+  'microsoft_source_type',
+  'microsoft_plan_id',
+  'microsoft_task_id',
+  'microsoft_last_synced_at',
+  'microsoft_source_removed_at',
   MONTHLY_DELIVERABLE_CLIENT_RELATION,
 ].join(', ')
 

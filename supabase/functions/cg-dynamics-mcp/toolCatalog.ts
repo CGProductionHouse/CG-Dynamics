@@ -73,6 +73,38 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     dependency: 'main', canonicalContract: 'profiles + clients canonical registry (#319)',
   },
   {
+    name: 'get_microsoft_sync_status', title: 'Get Microsoft sync status',
+    description: 'Read the latest Microsoft to Dynamics reconciliation health, status, source completeness and freshness. Call this BEFORE relying on Dynamics task/calendar mirrors in a daily brief; never assume a scheduled job ran. Read-only: it reports state and triggers nothing.',
+    inputSchema: objectSchema({ history_limit: { type: 'integer', minimum: 1, maximum: 20 }, freshness_threshold_minutes: { type: 'integer', minimum: 1 } }),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'microsoft_sync_runs canonical reconciliation history (#325)',
+  },
+  {
+    name: 'list_company_tasks', title: 'List company-wide tasks (admin audit)',
+    description: 'Company-wide read-only Planner task inventory for reconciliation audit. Requires an explicit company_admin Project context. Returns active/completed/archived/source-removed states, assigned staff, and durable Microsoft plan/task identity plus sync freshness so mirrors are reconciled by ID, never by title. Performs no cleanup.',
+    inputSchema: objectSchema({
+      state: { enum: ['active', 'completed', 'archived', 'source_removed', 'all'] },
+      assigned_to_name: { type: 'string' },
+      microsoft_plan_id: { type: 'string' },
+      limit: { type: 'integer', minimum: 1, maximum: 200 },
+      offset: { type: 'integer', minimum: 0 },
+    }),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'planner_tasks + phase-15a/17a Microsoft source tracking (#325)',
+  },
+  {
+    name: 'list_company_recurring_tasks', title: 'List company-wide recurring templates (admin audit)',
+    description: 'Company-wide read-only inventory of Dynamics recurring task templates with ownership and source classification, so legitimate Dynamics-only recurrence is distinguishable from Microsoft-backed recurrence. Requires an explicit company_admin Project context. Performs no cleanup.',
+    inputSchema: objectSchema({
+      assigned_to_name: { type: 'string' },
+      include_archived: { type: 'boolean' },
+      limit: { type: 'integer', minimum: 1, maximum: 200 },
+      offset: { type: 'integer', minimum: 0 },
+    }),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'planner_tasks recurrence templates (#325)',
+  },
+  {
     name: 'get_my_day', title: 'Get my day',
     description: 'Read current priorities for the exact authenticated active staff profile from the canonical Work, Calendar and Client Schedule authorities.',
     inputSchema: objectSchema({}), annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
@@ -180,7 +212,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_my_assistant_bootstrap', title: 'Get my assistant bootstrap',
-    description: 'Retrieve the exact staff member\'s complete operating bootstrap: identity, durable profile, capability manifest, MCP tools and operating standards. Use this to self-brief a fresh ChatGPT Project from canonical Dynamics. Never expose another staff member\'s bootstrap.',
+    description: 'Self-brief for a fresh Project chat: returns the canonical shared Staff Assistant runtime policy (#325 mandatory Microsoft + Dynamics cross-reference, sync-health gate, freshness authority, dual-write/PARTIAL SYNC, active-only queue, Client Schedule protection, content/OneDrive linkage, draft-only mail, degraded-source handling) with its policy version and effective timestamp, plus this exact staff member profile deltas. This runtime policy overrides any stale Project Instruction wording. Supports staff and company_admin contexts.',
     inputSchema: objectSchema({}),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#305', canonicalContract: 'staff_assistant_profiles + capabilityManifest.ts',

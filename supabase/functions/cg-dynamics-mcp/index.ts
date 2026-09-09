@@ -27,6 +27,18 @@ import {
   buildMcpAuthChallengeMeta,
   type McpAuthChallengeError,
 } from './oauthDiscovery.ts'
+import { cgDate, cgDatePlusDays, CG_TIMEZONE } from './cgTime.ts'
+import {
+  buildStaffAssistantPolicy,
+  STAFF_ASSISTANT_POLICY_VERSION,
+  STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
+} from './coexistencePolicy.ts'
+import {
+  CALENDAR_MICROSOFT_FIELDS,
+  PLANNER_MICROSOFT_FIELDS,
+  summarizeSyncHealth,
+  withSourceLinkage,
+} from './microsoftSourceFields.ts'
 import {
   CLIENT_SCHEDULE_SELECT,
   MY_DAY_DELIVERABLE_SELECT,
@@ -437,8 +449,11 @@ type ToolHandler = (
 ) => Promise<unknown>
 
 const handleGetMyDay: ToolHandler = async (staff) => {
-  const today = new Date().toISOString().slice(0, 10)
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10)
+  // CG operates in Africa/Johannesburg (UTC+2). Deriving the day from UTC returned the
+  // PREVIOUS date between 00:00-02:00 SAST (#325/#327 defect: 00:37 SAST on 10 Sep -> 9 Sep).
+  const now = new Date()
+  const today = cgDate(now)
+  const tomorrow = cgDatePlusDays(1, now)
 
   const [tasksResult, calendarResult, scheduleResult] = await Promise.all([
     staff.supabase
@@ -467,6 +482,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
 
   return {
     today,
+    timezone: CG_TIMEZONE,
     staff_name: staff.fullName,
     tasks: tasksResult.data ?? [],
     calendar_events: calendarResult.data ?? [],
@@ -478,7 +494,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
 const handleListMyTasks: ToolHandler = async (staff, input) => {
   const query = staff.supabase
     .from('planner_tasks')
-    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at')
+    .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
     .eq('assigned_to_name', staff.fullName)
     .is('archived_at', null)
     .order('due_date', { ascending: true })
@@ -488,7 +504,8 @@ const handleListMyTasks: ToolHandler = async (staff, input) => {
   if (input.due_before) query.lte('due_date', input.due_before)
 
   const { data, error } = await query
-  return { tasks: data ?? [], error: error?.message ?? null }
+  // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
+  return { tasks: withSourceLinkage(data, 'planner'), error: error?.message ?? null }
 }
 
 const handleGetTask: ToolHandler = async (staff, input) => {
@@ -510,13 +527,14 @@ const handleGetTask: ToolHandler = async (staff, input) => {
 const handleListMyCalendar: ToolHandler = async (staff, input) => {
   const { data, error } = await staff.supabase
     .from('company_calendar_events')
-    .select('id, title, event_type, start_at, end_at, all_day, location, notes, assigned_to_name, status, client_name, client_id')
+    .select(`id, title, event_type, start_at, end_at, all_day, location, notes, assigned_to_name, status, client_name, client_id, linked_deliverable_id, linked_task_id, ${CALENDAR_MICROSOFT_FIELDS.join(', ')}`)
     .gte('start_at', input.from as string)
     .lte('start_at', (input.to as string) + 'T23:59:59')
     .order('start_at', { ascending: true })
     .limit(50)
 
-  return { events: data ?? [], error: error?.message ?? null }
+  // #325: durable Outlook identity + freshness for ID-based dedupe against live Outlook.
+  return { events: withSourceLinkage(data, 'calendar'), error: error?.message ?? null }
 }
 
 const handleListClientSchedule: ToolHandler = async (staff, input) => {
@@ -532,6 +550,142 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
 
   const { data, error } = await query
   return { deliverables: flattenDeliverableClient(data), error: error?.message ?? null }
+}
+
+// ── #325 company-admin observability (read-only) ────────────────────────────
+
+const ACTIVE_TASK_STATES = ['to_do', 'in_progress', 'ready_internal_review']
+
+/**
+ * Company-wide planner task inventory for reconciliation audit. Deliberately a DISTINCT
+ * tool rather than overloading list_my_tasks, which stays scoped to one exact staff member.
+ * Read-only: exposes state + durable Microsoft identity so a later dry run can classify
+ * stale mirrors without title matching. Executes no cleanup.
+ */
+const handleListCompanyTasks: ToolHandler = async (staff, input) => {
+  const state = (input.state as string | undefined) ?? 'active'
+  const limit = Math.min(Math.max(Number(input.limit ?? 100), 1), 200)
+  const offset = Math.max(Number(input.offset ?? 0), 0)
+
+  let query = staff.supabase
+    .from('planner_tasks')
+    .select(`id, title, assigned_to_name, client_name, client_id, status, due_date, start_date, notes, source, original_plan_name, original_bucket_name, recurrence_rule, archived_at, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`, { count: 'exact' })
+    .order('updated_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  // Explicit, non-inferred state selection. Completion is never inferred from age/due date.
+  if (state === 'active') {
+    query = query.is('archived_at', null).is('microsoft_source_removed_at', null).in('status', ACTIVE_TASK_STATES)
+  } else if (state === 'completed') {
+    query = query.is('archived_at', null).not('status', 'in', `(${ACTIVE_TASK_STATES.join(',')})`)
+  } else if (state === 'archived') {
+    query = query.not('archived_at', 'is', null)
+  } else if (state === 'source_removed') {
+    query = query.not('microsoft_source_removed_at', 'is', null)
+  } else if (state !== 'all') {
+    return { error: 'state must be one of: active, completed, archived, source_removed, all.' }
+  }
+
+  if (input.assigned_to_name) query = query.eq('assigned_to_name', input.assigned_to_name)
+  if (input.microsoft_plan_id) query = query.eq('microsoft_plan_id', input.microsoft_plan_id)
+
+  const { data, error, count } = await query
+  if (error) return { error: error.message }
+
+  const tasks = withSourceLinkage(data, 'planner')
+  const classification = { microsoft_backed: 0, dynamics_only: 0, microsoft_source_removed: 0 }
+  for (const t of tasks) {
+    const c = (t.source as { classification: keyof typeof classification }).classification
+    classification[c] = (classification[c] ?? 0) + 1
+  }
+
+  return {
+    state,
+    tasks,
+    counts: { returned: tasks.length, total_matching: count ?? null, by_classification: classification },
+    pagination: { limit, offset, next_offset: count !== null && offset + tasks.length < count ? offset + tasks.length : null },
+    audit_note: 'Read-only inventory. No cleanup, archive or suppression was performed. Reconcile by durable Microsoft IDs only.',
+  }
+}
+
+/**
+ * Company-wide Dynamics recurring-task template inventory with ownership + source
+ * classification, so legitimate Dynamics-only recurrence is distinguishable from
+ * Microsoft-backed recurrence at audit time. Read-only.
+ */
+const handleListCompanyRecurringTasks: ToolHandler = async (staff, input) => {
+  const limit = Math.min(Math.max(Number(input.limit ?? 100), 1), 200)
+  const offset = Math.max(Number(input.offset ?? 0), 0)
+
+  let query = staff.supabase
+    .from('planner_tasks')
+    .select(`id, title, assigned_to_name, client_name, client_id, status, due_date, notes, source, original_plan_name, recurrence_rule, recurrence_until, archived_at, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`, { count: 'exact' })
+    .not('recurrence_rule', 'is', null)
+    .order('updated_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (input.include_archived !== true) query = query.is('archived_at', null)
+  if (input.assigned_to_name) query = query.eq('assigned_to_name', input.assigned_to_name)
+
+  const { data, error, count } = await query
+  if (error) return { error: error.message }
+
+  const templates = withSourceLinkage(data, 'planner')
+  const dynamicsOnly = templates.filter(t => (t.source as { classification: string }).classification === 'dynamics_only')
+
+  return {
+    templates,
+    counts: {
+      returned: templates.length,
+      total_matching: count ?? null,
+      dynamics_only: dynamicsOnly.length,
+      microsoft_backed: templates.length - dynamicsOnly.length,
+    },
+    pagination: { limit, offset, next_offset: count !== null && offset + templates.length < count ? offset + templates.length : null },
+    audit_note: 'Dynamics-only recurrence is legitimate CG-native work and must remain visible even with no Microsoft counterpart.',
+  }
+}
+
+/**
+ * Latest Microsoft -> Dynamics reconciliation health/freshness (#325 §2). Read-only view of
+ * the EXISTING canonical sync-run architecture — no second sync subsystem, and it triggers
+ * nothing. The Assistant must call this before relying on Dynamics mirrors in a daily brief.
+ */
+const handleGetMicrosoftSyncStatus: ToolHandler = async (staff, input) => {
+  const hasTable = await tableExists(staff.supabase, 'microsoft_sync_runs')
+  if (!hasTable) {
+    return {
+      sync_health: summarizeSyncHealth(null, new Date().toISOString()),
+      latest_run: null,
+      error: 'Microsoft reconciliation run history is not available in this environment. Treat Dynamics mirrors as unverified.',
+    }
+  }
+
+  const { data, error } = await staff.supabase
+    .from('microsoft_sync_runs')
+    .select('id, trigger_type, status, snapshot_exported_at, snapshot_exported_by, range_start, range_end, source_completeness, summary, safe_error, started_at, applied_at, finished_at, created_at')
+    .order('created_at', { ascending: false })
+    .limit(Math.min(Math.max(Number(input.history_limit ?? 5), 1), 20))
+
+  if (error) return { error: error.message }
+
+  const runs = data ?? []
+  const latest = runs[0] ?? null
+  const thresholdMinutes = Number(input.freshness_threshold_minutes ?? 0) || undefined
+  const health = summarizeSyncHealth(latest, new Date().toISOString(), thresholdMinutes)
+
+  return {
+    sync_health: health,
+    latest_run: latest,
+    recent_runs: runs.map((r: Record<string, unknown>) => ({
+      id: r.id, status: r.status, trigger_type: r.trigger_type,
+      started_at: r.started_at, finished_at: r.finished_at, safe_error: r.safe_error,
+    })),
+    source_completeness: latest?.source_completeness ?? null,
+    operating_rule: health.degraded
+      ? 'Flag SYNC STALE / SYNC FAILED. Prefer the live Microsoft read for Microsoft-backed work and report degraded source coverage.'
+      : 'Reconciliation is fresh. Still perform the live Microsoft read — a successful sync never replaces it.',
+  }
 }
 
 const handleGetClientContext: ToolHandler = async (staff, input) => {
@@ -730,7 +884,22 @@ const handleAddLeadResearch: ToolHandler = async (staff, input) => {
 
 const handleGetMyProfile: ToolHandler = async (staff) => {
   const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
-  if (!hasTable) return { error: 'Staff assistant workspace not yet available. Complete #305 setup first.' }
+  if (!hasTable) {
+    // The canonical policy must still reach the Project even before the staff workspace
+    // exists, otherwise a fresh chat falls back to stale Project Instructions (#325).
+    return {
+      staff_assistant_policy: buildStaffAssistantPolicy(staff.contextKind),
+      policy_meta: {
+        policy_version: STAFF_ASSISTANT_POLICY_VERSION,
+        effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
+        context_kind: staff.contextKind,
+        retrieved_at: new Date().toISOString(),
+      },
+      identity: { profile_id: staff.profileId, full_name: staff.fullName, role: staff.role, is_active: staff.isActive, context_kind: staff.contextKind },
+      assistant_profile: null,
+      error: 'Staff assistant workspace not yet available. Complete #305 setup first.',
+    }
+  }
 
   const { data, error } = await staff.supabase
     .from('staff_assistant_profiles')
@@ -809,11 +978,21 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
   const senderReady = !!(profile?.preferred_company_from && profile?.signature_text)
 
   return {
+    // #325: the canonical shared runtime policy. This OVERRIDES any stale hand-maintained
+    // ChatGPT Project Instruction wording (e.g. "Dynamics is fallback-only").
+    staff_assistant_policy: buildStaffAssistantPolicy(staff.contextKind),
+    policy_meta: {
+      policy_version: STAFF_ASSISTANT_POLICY_VERSION,
+      effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
+      context_kind: staff.contextKind,
+      retrieved_at: new Date().toISOString(),
+    },
     identity: {
       profile_id: staff.profileId,
       full_name: staff.fullName,
       role: staff.role,
       is_active: staff.isActive,
+      context_kind: staff.contextKind,
     },
     assistant_profile: profile ? {
       responsibilities: profile.responsibilities,
@@ -1500,6 +1679,9 @@ const toolHandlers: Record<string, ToolHandler> = {
   update_my_preferences: handleUpdateMyPreferences,
   get_my_assistant_bootstrap: handleGetMyAssistantBootstrap,
   get_my_recurring_tasks: handleGetMyRecurringTasks,
+  list_company_tasks: handleListCompanyTasks,
+  list_company_recurring_tasks: handleListCompanyRecurringTasks,
+  get_microsoft_sync_status: handleGetMicrosoftSyncStatus,
   create_recurring_task: handleCreateRecurringTask,
   compose_mail_draft: handleComposeMailDraft,
   log_lead_email_activity: handleLogLeadEmailActivity,

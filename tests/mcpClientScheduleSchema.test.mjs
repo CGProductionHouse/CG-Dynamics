@@ -21,6 +21,9 @@ const INDEX = read('../supabase/functions/cg-dynamics-mcp/index.ts')
 const REAL_COLUMNS = new Set([
   'id', 'client_id', 'month', 'deliverable_type', 'title',
   'scheduled_date', 'due_date', 'production_status', 'assigned_to_name',
+  // #325 read-only provenance (phase-15a/17a columns, verified against live schema).
+  'package_id', 'template_id', 'microsoft_source_type', 'microsoft_plan_id',
+  'microsoft_task_id', 'microsoft_last_synced_at', 'microsoft_source_removed_at',
 ])
 
 /** Split a select string into top-level parts, ignoring embedded relation parentheses. */
