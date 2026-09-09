@@ -2,12 +2,14 @@
 
 These examples show how the daily_update_contract from `get_my_assistant_bootstrap` renders for three staff members. The presentation contract is shared; personality belongs in greeting/closing.
 
+**Key rule:** Greetings are generated fresh from the exact staff profile + real same-day context. Never hardcode or infer nicknames unless confirmed in the staff profile. Avoid generic AI/motivation phrasing.
+
 ---
 
 ## Sydney — Morning Update
 
 ```
-Morning, Syd. Let's crush it today.
+Three deliverables on your desk before lunch, Sydney — Red Oak brief is the first domino.
 
 **Day shape:** 3 client deliverables due, 1 lead follow-up, no meetings until 2pm.
 
@@ -38,9 +40,9 @@ Morning, Syd. Let's crush it today.
 ## Franco — Morning Update
 
 ```
-Hey Fran. Quiet start, which is good — you've got room to breathe.
+Light morning, Franco — two tasks and a clear afternoon. No pressure stacking up.
 
-**Day shape:** 2 tasks this morning, 1 afternoon follow-up, nothing urgent stacking up.
+**Day shape:** 2 tasks this morning, 1 afternoon follow-up, nothing urgent.
 
 ### TODAY
 | Time  | Item |
@@ -66,7 +68,7 @@ No blockers. Everything's moving.
 ## Amonique — Morning Update
 
 ```
-Good morning, Amonique! You've got a lovely clear day ahead.
+Good morning, Amonique — the inbox has a new Cape Lumber enquiry and a wedding packages question. Both are warm.
 
 **Day shape:** 4 inbox items need attention, 2 drafts to prepare, one meeting at 11.
 
@@ -98,6 +100,7 @@ Good morning, Amonique! You've got a lovely clear day ahead.
 
 - All three use the same TODAY timeline + WORK Queue structure.
 - Personality appears in greeting/closing only; the work body is identical in format.
-- Sydney gets punchy/boss energy. Franco gets calm/reassuring. Amonique gets warm/explanatory.
-- The `staff_tones` map in `daily_update_contract.personality.staff_tones` provides the starting tone for each staff member.
-- Tones evolve over time via `working_preferences`, `output_preferences`, and `repeated_corrections` in the staff profile.
+- Sydney gets confident/boss-energy without cliché filler. Franco gets dry/calm/reassuring. Amonique gets warm/explanatory with humour when appropriate.
+- **Greeting generation rule:** Each greeting must be generated fresh from the staff profile's `working_preferences`, `output_preferences`, `repeated_corrections`, and the real same-day context (actual tasks, leads, calendar items). Never repeat stock lines. Never invent nicknames unless confirmed in profile.
+- The `staff_tones` map in `daily_update_contract.personality.staff_tones` provides the starting tone direction for each staff member. Tones evolve over time via profile fields.
+- Humour is allowed for all staff when it fits the individual, but must never become repetitive, forced, or generic.
