@@ -1,0 +1,261 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-09T17:08:00+02:00",
+  "status": "WAITING FOR CG DYNAMICS WRITE-BACK",
+  "scope": "Christie-Ann Groenewald / CA only",
+  "privacy": {
+    "repository_visibility_at_audit": "public",
+    "rule": "Do not store private prospect contact details, confidential correspondence, internal message IDs, personal calendar content or sensitive company documents in this repository.",
+    "rehydration": "During authorised CG Dynamics write-back, rehydrate private fields from the cited live company source types and evidence dates/subjects."
+  },
+  "canonical_boundary": {
+    "cg_dynamics": "intended canonical staff/client/lead/action source once private connector is exposed",
+    "teams_planner": "live source for mutable assigned work when available",
+    "calendar": "live source for schedules when the correct staff calendar is exposed",
+    "mail": "live source for correspondence evidence and current outreach history",
+    "github": "continuity/staging only; never a shadow CRM or task system",
+    "email_policy": "DRAFT ONLY; never send directly"
+  },
+  "staff": {
+    "assistant_key": "CA",
+    "display_name": "Christie-Ann Groenewald",
+    "work_email": "ca@cgproductionhouse.com",
+    "identity_status": "VERIFIED / CLEARLY ESTABLISHED",
+    "identity_evidence": [
+      {
+        "source_type": "Microsoft Teams directory",
+        "date": "2026-09-09",
+        "summary": "Exact active company identity resolved successfully."
+      }
+    ]
+  },
+  "durable_profile": {
+    "verified": [
+      "Business-development outreach is a repeated part of CA's working context.",
+      "Evidenced work includes prospect research, commercial pitch development, opportunity meetings, external stakeholder coordination, POC/activation planning and presentation preparation.",
+      "Prospect outreach should be short, personal and human, without inflated corporate wording or filler.",
+      "Premium-prospect wording can be polished and executive while remaining natural and specific.",
+      "The newer 2026-06-03 prospecting direction is to focus general outreach on commercials/high-end commercial production rather than leading with generic social-media management.",
+      "Where an opportunity is genuinely for ongoing marketing support, CG can be positioned as the prospect's external marketing team / extension of the internal team.",
+      "Formal meetings, portfolio presentations and concrete creative discussions are preferred over vague collaboration language.",
+      "Creative copy should be specific and non-generic; captions should add to artwork rather than repeat it.",
+      "Use natural everyday Afrikaans when Afrikaans is requested.",
+      "Do not use em dashes in captions.",
+      "Avoid repetitive formulaic openings and mechanical three-claim sentence patterns.",
+      "Provide multiple genuinely different creative options by default unless one is requested.",
+      "Include a focused relevant hashtag set with social captions unless the client/request says otherwise.",
+      "Keep assistant replies concise and operational; use live company sources proactively; help close completed work in the relevant live system when authorised.",
+      "Never create a shadow CRM/task system and never expose development tooling in the normal CA staff workflow.",
+      "Email remains draft-only."
+    ],
+    "likely_but_needs_confirmation": [
+      "No formal durable lead-qualification rubric was recovered; do not infer one from a small set of historical targets.",
+      "No fixed daily operating cadence was verified; do not invent recurring routines.",
+      "Historical My Hours team-summary delivery does not establish a current CA timesheet-administration responsibility."
+    ],
+    "stale_do_not_use_as_current_truth": [
+      "Old lead status without current Dynamics/live correspondence evidence.",
+      "Shared-company Bark lead emails without CA ownership evidence.",
+      "Unassigned shared Planner items as evidence of CA responsibility.",
+      "Old calendar assumptions; the currently connected Calendar is the shared info mailbox only.",
+      "Client-specific copy/contact rules as part of CA's staff profile; keep those in client intelligence."
+    ],
+    "conflicts": [
+      {
+        "topic": "Mimosa Mall supplier onboarding",
+        "older_evidence": "2026-08-06 mail said CG had been loaded successfully and supplied a PO number.",
+        "newer_evidence": "2026-09-09 mail says final supplier registration remains delayed pending updated/corrected supplier documentation.",
+        "resolution": "Use the 2026-09-09 registration request as the latest admin truth. This does not undo the separate evidence that Mimosa Mall converted to real CG work. Do not assign the current admin action to CA without canonical ownership evidence."
+      },
+      {
+        "topic": "Prospecting positioning",
+        "older_evidence": "Earlier guidance supported external-marketing-team positioning for broader ongoing marketing opportunities.",
+        "newer_evidence": "2026-06-03 direction shifted general prospecting emphasis toward commercials/high-end production rather than social-media retainers.",
+        "resolution": "Lead with commercial-production value for general prospecting; use external-marketing-team positioning only when the opportunity truly concerns broader ongoing support."
+      }
+    ]
+  },
+  "leads": [
+    {
+      "company": "Net Nine Nine / DABO POC",
+      "staff_owner": "Christie-Ann Groenewald",
+      "ownership_confidence": "directly evidenced",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "became_client_or_opportunity": "Pursued POC/opportunity historically; conversion not established in the recovered evidence.",
+      "research_and_context": "Viljoenskroon and Rammulotsi POC rollout/activation work, public-participation support, brand/CI inputs, attribution/signup mechanics, local social-platform setup/access and proposed cinematic introductory film.",
+      "previous_outreach": [
+        {
+          "date": "2026-04-07",
+          "source_type": "live company Gmail",
+          "subject_context": "N99 POC Documentation | DABO & CG Production House",
+          "summary": "CA sent POC concept documentation and referenced a focused Viljoenskroon rollout/activation plan."
+        },
+        {
+          "date": "2026-04-29",
+          "source_type": "live company Gmail",
+          "subject_context": "Rammulotsi POC | Marketing and Activation",
+          "summary": "CA followed an alignment meeting with required marketing/activation inputs and proposed cinematic POC content."
+        }
+      ],
+      "last_known_action": {
+        "date": "2026-05-06",
+        "source_type": "live company Gmail",
+        "summary": "Net Nine Nine transferred a brand guide/assets to CG, showing progression beyond initial outreach."
+      },
+      "current_status_basis": "No newer live correspondence establishing a September 2026 state was found in this audit.",
+      "next_action": "Check CG Dynamics first once connected. If no newer canonical record exists, confirm whether the POC is still active before any follow-up is drafted.",
+      "contact_information": "REHYDRATE FROM AUTHORISED LIVE GMAIL DURING DYNAMICS WRITE-BACK; intentionally excluded from public GitHub."
+    },
+    {
+      "company": "Afrimat",
+      "staff_owner": "Christie-Ann Groenewald",
+      "ownership_confidence": "CA-specific historical conversation context",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "became_client_or_opportunity": "Not established.",
+      "research_and_context": "Identified 2026-01-21 as a potential CG client; outreach concept emphasized CG's South African client experience and content/brand-storytelling value.",
+      "previous_outreach": "A contact/outreach draft was requested in historical CA context; this audit found no current shared-mail evidence proving send or response.",
+      "last_known_action": "Historical outreach preparation only in recovered context.",
+      "current_status_basis": "No current Gmail evidence and no private Dynamics connector available.",
+      "next_action": "Check Dynamics/current lead ownership first. If absent, re-qualify before contacting.",
+      "contact_information": "No contact details persisted in public GitHub."
+    },
+    {
+      "company": "MSIY",
+      "staff_owner": "Christie-Ann Groenewald",
+      "ownership_confidence": "CA-specific historical conversation context",
+      "state": "STATUS NEEDS CONFIRMATION",
+      "became_client_or_opportunity": "Not established.",
+      "research_and_context": "Identified 2026-06-03 as a potential lead; intended pitch was a cinematic/high-end commercial and an in-person Cape Town meeting while the team was there.",
+      "previous_outreach": "Historical outreach concept recovered; no current shared-mail evidence proving send or response.",
+      "last_known_action": "Historical outreach preparation only in recovered context.",
+      "current_status_basis": "No current Gmail evidence and no private Dynamics connector available.",
+      "next_action": "Check Dynamics/current ownership first. If absent, re-qualify the commercial fit before contacting.",
+      "contact_information": "No contact details persisted in public GitHub."
+    },
+    {
+      "company": "Bat Hill Royale",
+      "staff_owner": "Christie-Ann Groenewald at lead/enquiry stage",
+      "ownership_confidence": "directly evidenced",
+      "state": "WON / CONVERTED",
+      "became_client_or_opportunity": "Converted into real CG delivery work.",
+      "research_and_context": "Direct enquiry/meeting coordination followed by website-image/asset delivery coordination with CG and the external website provider.",
+      "previous_outreach": [
+        {
+          "date": "2025-01",
+          "source_type": "live company Gmail",
+          "summary": "Bat Hill Royale contacted CA directly to arrange a meeting and supplied company information."
+        },
+        {
+          "date": "2025-03",
+          "source_type": "live company Gmail",
+          "summary": "Correspondence had progressed into delivery coordination for website assets."
+        }
+      ],
+      "last_known_action": "Historical delivery coordination in March 2025.",
+      "current_status_basis": "Conversion is established; current day-to-day ownership/activity is not inferred from old correspondence.",
+      "next_action": "No lead follow-up required solely from this historical conversion record; use current client/Dynamics data for present work.",
+      "contact_information": "Use canonical/current client record; private correspondence not duplicated here."
+    },
+    {
+      "company": "Mimosa Mall",
+      "staff_owner": "Team opportunity; CA directly included at origin; current CA ownership not established",
+      "ownership_confidence": "historical team association only for CA",
+      "state": "WON / CONVERTED",
+      "became_client_or_opportunity": "Converted into approved/paid CG work by 2026.",
+      "research_and_context": "Originating 2025 social-media-management/costing opportunity later progressed into approved quotation/PO, invoicing/statement and campaign/design activity.",
+      "previous_outreach": {
+        "date": "2025-11-05",
+        "source_type": "live company Gmail",
+        "summary": "Mimosa Mall contacted the CG team, including CA, regarding social-media management and comprehensive costings."
+      },
+      "last_known_action": {
+        "date": "2026-09-09",
+        "source_type": "live company Gmail",
+        "summary": "Current supplier-registration corrections and ongoing campaign/design correspondence exist at company level."
+      },
+      "current_status_basis": "Current work is active at company level, but newest operational correspondence is routed through the shared mailbox/Amonique. Do not assign current tasks to CA without canonical ownership evidence.",
+      "next_action": "No CA-specific lead action. Reconcile current owner and supplier-admin action in Dynamics/company workflow, not from this CA profile.",
+      "contact_information": "Use current client record/live mail; not duplicated into public GitHub."
+    }
+  ],
+  "lead_counts": {
+    "audited_ca_associated_records": 5,
+    "TO RESEARCH": 0,
+    "TO CONTACT": 0,
+    "CONTACTED / AWAITING RESPONSE": 0,
+    "FOLLOW UP": 0,
+    "PURSUED / ACTIVE OPPORTUNITY": 0,
+    "NOT NOW / NURTURE": 0,
+    "WON / CONVERTED": 2,
+    "CLOSED / NOT A FIT": 0,
+    "STATUS NEEDS CONFIRMATION": 3,
+    "notes": "Mimosa Mall is a team-origin converted record with historical CA inclusion but no current CA ownership. Net Nine Nine was historically pursued/active, but current September state is intentionally not promoted without recent evidence."
+  },
+  "capability_check": {
+    "microsoft_teams": {
+      "status": "VERIFIED WORKING",
+      "details": "Profile/directory resolution and Teams message search work."
+    },
+    "planner": {
+      "status": "VERIFIED WORKING / WRITE ACTIONS EXPOSED",
+      "details": "Plans/tasks are readable; create/update/delete actions are exposed. September 2026 client-socials tasks retrieved in the audit are unassigned, so they cannot be attributed to CA."
+    },
+    "outlook_calendar": {
+      "status": "VERIFIED WORKING BUT SHARED-ACCOUNT SCOPED",
+      "details": "Only the info@cgproductionhouse.com primary calendar and system calendars are exposed; no CA-specific/delegated calendar is currently listed."
+    },
+    "sharepoint_onedrive": {
+      "status": "VERIFIED SEARCHABLE",
+      "details": "Drive search executes successfully. Targeted Rammulotsi search returned no result; file presence/access was not inferred."
+    },
+    "canva": {
+      "status": "VERIFIED WORKING",
+      "details": "Existing CG designs are searchable; audit found CG designs including a Net99 presentation."
+    },
+    "adobe": {
+      "status": "PRESENT BUT BLOCKED",
+      "details": "Mandatory initialization returned HTTP 403 on 2026-09-09; treat as repairable auth/service state, not permanent unavailability."
+    },
+    "gmail": {
+      "status": "VERIFIED WORKING",
+      "details": "Search/read/thread access works; draft actions are exposed. Policy remains draft-only despite technical send action existing."
+    },
+    "github": {
+      "status": "VERIFIED WORKING FOR SETUP/CONTINUITY",
+      "details": "CGProductionHouse/CG-Dynamics is writable and currently public; keep staff workflow insulated from development tooling."
+    },
+    "cg_dynamics_private_connector": {
+      "status": "NOT EXPOSED",
+      "details": "No private CG Dynamics connector is available in this session; do not substitute another CRM/plugin."
+    }
+  },
+  "future_operating_rules": [
+    "Use live CG-connected sources before asking CA to hunt manually.",
+    "Use Planner/Calendar for mutable work and schedules, not chat memory.",
+    "Use CG Dynamics first for leads once connected; use live mail as evidence/provenance.",
+    "Never send email; drafts only.",
+    "Help close completed work in the relevant live system when authorised.",
+    "Keep responses concise, specific and practical.",
+    "Default general prospecting to commercial-production value; use broader external-marketing-team positioning only when the opportunity warrants it.",
+    "Never resurrect an old lead as active without current evidence.",
+    "Keep staff context strictly scoped to CA.",
+    "Re-test connector capability when needed."
+  ],
+  "setup_gaps": [
+    "Expose the private CG Dynamics connector for canonical reconciliation/write-back.",
+    "Repair Adobe authorization/service access if CA is expected to use Adobe through ChatGPT.",
+    "Expose/delegate CA's own calendar context if personal day planning is expected; current Calendar is shared-info only.",
+    "Use actual Planner assignees where staff accountability is expected; current retrieved September client-socials tasks are unassigned."
+  ],
+  "writeback_instructions": {
+    "precondition": "Retrieve CA's exact canonical Staff Assistant identity from the private CG Dynamics connector before writing anything.",
+    "rules": [
+      "Reconcile, do not blindly insert duplicates.",
+      "Preserve source provenance and evidence dates.",
+      "Never overwrite newer canonical data with this staged history.",
+      "Rehydrate private contact/correspondence fields from authorised live company sources rather than from public GitHub.",
+      "For status-needs-confirmation leads, check current canonical ownership/state before creating any action.",
+      "Do not create a parallel CRM or task store."
+    ]
+  }
+}
