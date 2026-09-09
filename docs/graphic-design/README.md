@@ -8,6 +8,7 @@ Start future sessions with [`STATUS.md`](./STATUS.md). It records current progre
 
 Supporting specifications:
 
+- [`client-bootstrap-sop.md`](./client-bootstrap-sop.md) — one-time client setup: resolve brand scopes, Canva history/style refs, OneDrive source provenance, freshness state and blocked media before normal month-to-month production.
 - [`poster-onedrive-naming-standard.md`](./poster-onedrive-naming-standard.md) — canonical DP/file/month naming and OneDrive production structure aligned with existing CG video + Dynamics identities.
 - [`staff-poster-production-sop.md`](./staff-poster-production-sop.md) — dummy-proof monthly staff workflow, including the amendment decision tree that prevents generative decay.
 - [`launch-now-chat-pack-workflow.md`](./launch-now-chat-pack-workflow.md) — current normal-browser ChatGPT production bridge and batch-generation workflow.
