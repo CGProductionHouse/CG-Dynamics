@@ -20,6 +20,12 @@
 
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { requireAdminOrManager } from '../_shared/auth.ts'
+import {
+  ANTI_SLOP_PATTERNS,
+  DEFAULT_MAX_HASHTAGS,
+  HASHTAG_RULES,
+  HUMAN_CREATIVE_STANDARD,
+} from '../_shared/humanCreativeStandard.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const TASK_TYPES = ['caption', 'content_idea', 'poster_copy', 'image_edit', 'factual_lookup', 'campaign', 'seo_hashtags'] as const
@@ -173,37 +179,43 @@ function buildTaskContext(
     case 'caption':
       return {
         task: 'caption',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
         voice_rules: extractPrinciples(voiceCards),
         caption_rules: extractPrinciples(captionCards),
         cta_behaviour: extractField(captionCards, 'how_to_apply'),
         contact_footer: contactContext,
         guardrails: extractPrinciples(guardrailCards),
-        hashtag_rules: extractPrinciples(hashtagCards),
-        hashtag_max: 5,
+        hashtag_rules: [...HASHTAG_RULES.rules, ...extractPrinciples(hashtagCards)],
+        hashtag_max: DEFAULT_MAX_HASHTAGS,
         platform_specific: platform ? `Optimise for ${platform}.` : null,
         topic,
         fresh_facts_required: true,
-        instruct: 'Generate caption using only the rules above. Do not invent mutable facts. Use natural searchable language. Choose 3-5 hashtags dynamically for current topic/platform.',
+        instruct: `Generate a caption that meets the human_creative_standard and the exact client voice_rules. Add to the artwork; do not restate it. Reject the avoid_filler phrases. Do not invent mutable facts. Choose up to ${DEFAULT_MAX_HASHTAGS} hashtags dynamically for the current topic/platform — never paste a fixed bank.`,
       }
 
     case 'content_idea':
       return {
         task: 'content_idea',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
         strategy: extractPrinciples(strategyCards),
         voice_rules: extractPrinciples(voiceCards),
         guardrails: extractPrinciples(guardrailCards),
         topic,
-        instruct: 'Suggest content ideas grounded in the strategy and voice rules above. Each idea must be specific to this client. Do not recycle generic ideas.',
+        instruct: 'Suggest content ideas grounded in the strategy, voice rules and human_creative_standard above. Each idea must be specific to this client. Do not recycle generic ideas or use the avoid_filler phrases.',
       }
 
     case 'poster_copy':
       return {
         task: 'poster_copy',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
         voice_rules: extractPrinciples(voiceCards),
         caption_rules: extractPrinciples(captionCards),
         contact_footer: contactContext,
         guardrails: extractPrinciples(guardrailCards),
-        instruct: 'Write poster copy using only the rules above. Keep it concise and visual. Do not repeat text that will appear on the artwork/video.',
+        instruct: 'Write poster copy that meets the human_creative_standard and exact client voice. Keep it concise and visual. Do not repeat text that will appear on the artwork/video. Reject the avoid_filler phrases.',
       }
 
     case 'image_edit':
@@ -227,23 +239,27 @@ function buildTaskContext(
     case 'campaign':
       return {
         task: 'campaign',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
         strategy: extractPrinciples(strategyCards),
         voice_rules: extractPrinciples(voiceCards),
         caption_rules: extractPrinciples(captionCards),
-        hashtag_rules: extractPrinciples(hashtagCards),
+        hashtag_rules: [...HASHTAG_RULES.rules, ...extractPrinciples(hashtagCards)],
+        hashtag_max: DEFAULT_MAX_HASHTAGS,
         guardrails: extractPrinciples(guardrailCards),
         topic,
-        instruct: 'Design the campaign using only the strategy, voice, and rules above. Every element must be grounded in verified client intelligence.',
+        instruct: 'Design the campaign using the strategy, voice, human_creative_standard and rules above. Every element must be grounded in verified client intelligence.',
       }
 
     case 'seo_hashtags':
       return {
         task: 'seo_hashtags',
-        hashtag_rules: extractPrinciples(hashtagCards),
-        hashtag_max: 5,
+        hashtag_rules: [...HASHTAG_RULES.rules, ...extractPrinciples(hashtagCards)],
+        hashtag_max: DEFAULT_MAX_HASHTAGS,
+        hashtag_bank_is_seed_only: true,
         platform,
         topic,
-        instruct: 'Choose 3-5 hashtags dynamically for the current topic and platform. Use SEO/search-intent driven selection: exact brand term, exact content term, relevant local/industry term, and a current/trending term only when evidence supports it. Do not use trending tags that are irrelevant or geographically wrong.',
+        instruct: `Choose up to ${DEFAULT_MAX_HASHTAGS} hashtags dynamically for the current topic and platform. Stored banks are seed/reference only — never output a fixed set. Use SEO/search-intent selection: exact brand term, exact content term, relevant local/industry term, and a current/trending term only when evidence supports it. Do not use trending tags that are irrelevant or geographically wrong.`,
       }
 
     default:
@@ -311,8 +327,27 @@ async function loadContactContext(
       contact.freshness_state === 'possible_change' ||
       contact.freshness_state === 'stale_unverified'
     ))
+
+  // Ambiguity guard: two different approved values of the same contact_type in one exact
+  // scope is an unresolved conflict — fail closed instead of guessing which is current.
+  const valuesByType = new Map<string, Set<string>>()
+  for (const contact of approved) {
+    const set = valuesByType.get(contact.contact_type) ?? new Set<string>()
+    set.add(contact.value)
+    valuesByType.set(contact.contact_type, set)
+  }
+  const conflictingTypes = [...valuesByType.entries()].filter(([, values]) => values.size > 1).map(([type]) => type)
+  const ambiguousConflict = conflictingTypes.length > 0
+  for (const contact of approved.filter(c => conflictingTypes.includes(c.contact_type))) {
+    unresolved.push({
+      contact_id: contact.id,
+      display_label: contact.display_label,
+      reason: `Multiple approved ${contact.contact_type} contacts conflict for this exact scope.`,
+    })
+  }
+
   const mandatoryMissing = policy?.requirement === 'mandatory' && approved.length === 0
-  const blocked = blockingUnresolved || mandatoryMissing
+  const blocked = blockingUnresolved || ambiguousConflict || mandatoryMissing
 
   return {
     data: {
@@ -330,7 +365,7 @@ async function loadContactContext(
       })),
       unresolved,
       can_generate_footer: !blocked && policy?.requirement !== 'omitted',
-      blocked_reason: blockingUnresolved
+      blocked_reason: blockingUnresolved || ambiguousConflict
         ? 'Contact conflict or freshness hold must be resolved before use.'
         : mandatoryMissing
           ? 'A footer is mandatory but no current caption-approved contact is available for this exact scope.'

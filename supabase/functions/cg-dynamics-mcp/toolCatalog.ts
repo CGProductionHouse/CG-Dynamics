@@ -61,7 +61,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   {
     name: 'get_client_context', title: 'Get exact client context',
     description: 'Retrieve compact task-specific context for one exact authorised client and optional exact branch/entity scope; never fall back to a sibling or national brand.',
-    inputSchema: objectSchema({ client_id: uuid, task_type: { enum: ['caption','content_idea','script','image_edit','factual_lookup','strategy','general'] }, scope_key: { type: 'string' }, supplied_context: { type: 'string', maxLength: 4000 } }, ['client_id','task_type']),
+    inputSchema: objectSchema({ client_id: uuid, task_type: { enum: ['caption','content_idea','poster_copy','image_edit','factual_lookup','campaign','seo_hashtags'] }, scope_key: { type: 'string' }, supplied_context: { type: 'string', maxLength: 4000 } }, ['client_id','task_type']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#241/#294', canonicalContract: 'supabase/functions/get-client-context',
   },

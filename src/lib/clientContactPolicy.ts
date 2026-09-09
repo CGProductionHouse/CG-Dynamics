@@ -123,14 +123,35 @@ export function resolveCaptionContacts(input: {
       contact.freshness_state === 'possible_change' ||
       contact.freshness_state === 'stale_unverified'),
   )
-  const blocked = blockingUnresolved || (mandatory && contacts.length === 0)
+
+  // Ambiguity guard: within one exact scope, two different approved values of the same
+  // contact_type is an unresolved conflict. Fail closed rather than guess which is current.
+  const valuesByType = new Map<string, Set<string>>()
+  for (const contact of contacts) {
+    const set = valuesByType.get(contact.contact_type) ?? new Set<string>()
+    set.add(contact.value)
+    valuesByType.set(contact.contact_type, set)
+  }
+  const conflictingTypes = [...valuesByType.entries()].filter(([, values]) => values.size > 1).map(([type]) => type)
+  const ambiguousConflict = conflictingTypes.length > 0
+  const conflictUnresolved = ambiguousConflict
+    ? contacts
+        .filter(contact => conflictingTypes.includes(contact.contact_type))
+        .map(contact => ({
+          id: contact.id,
+          display_label: contact.display_label,
+          reason: `Multiple approved ${contact.contact_type} contacts conflict for this exact scope.`,
+        }))
+    : []
+
+  const blocked = blockingUnresolved || ambiguousConflict || (mandatory && contacts.length === 0)
 
   return {
     contacts: blocked ? [] : contacts,
     policy,
-    unresolved,
+    unresolved: [...unresolved, ...conflictUnresolved],
     can_generate_footer: !blocked && policy?.requirement !== 'omitted',
-    reason: blockingUnresolved
+    reason: blockingUnresolved || ambiguousConflict
       ? 'Contact conflict or freshness hold must be resolved before use.'
       : mandatory && contacts.length === 0
         ? 'A footer is mandatory but no current caption-approved contact is available for this exact scope.'

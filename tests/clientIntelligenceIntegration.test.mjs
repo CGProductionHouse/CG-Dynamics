@@ -7,7 +7,7 @@ import { createServer } from 'vite'
 // stale/excluded knowledge grounding, Client Guide derivation correctness,
 // Project Instructions boundedness, and client-role access denial.
 
-let server, skilled, guideGenerator, contactPolicy, agent
+let server, skilled, guideGenerator, contactPolicy, clientScope, creativeStandard, agent
 
 const today = '2026-09-08'
 
@@ -25,6 +25,8 @@ before(async () => {
   skilled = await server.ssrLoadModule('/supabase/functions/cg-assistant-chat/skilledAgents.ts')
   guideGenerator = await server.ssrLoadModule('/src/lib/clientGuideGenerator.ts')
   contactPolicy = await server.ssrLoadModule('/src/lib/clientContactPolicy.ts')
+  clientScope = await server.ssrLoadModule('/src/lib/clientScope.ts')
+  creativeStandard = await server.ssrLoadModule('/src/lib/humanCreativeStandard.ts')
   agent = skilled.AGENT_CONTRACTS.copywriting_agent
 })
 after(async () => { await server?.close() })
@@ -43,6 +45,9 @@ const CLIENT_PROJECT_MAPPING_TS = read('../src/lib/clientProjectMapping.ts')
 const CLIENT_CONTEXT_TS = read('../src/lib/clientContext.ts')
 const CLIENT_CONTACTS_TS = read('../src/lib/clientContacts.ts')
 const GET_CLIENT_CONTEXT_FN = read('../supabase/functions/get-client-context/index.ts')
+const CREATIVE_STANDARD_SHARED = read('../supabase/functions/_shared/humanCreativeStandard.ts')
+const CREATIVE_STANDARD_APP = read('../src/lib/humanCreativeStandard.ts')
+const MCP_TOOL_CATALOG = read('../supabase/functions/cg-dynamics-mcp/toolCatalog.ts')
 
 const capeCard = {
   id: 'cape-1', slug: 'cape-lumber-positioning', title: 'Cape Lumber: supplier, not contractor',
@@ -550,4 +555,122 @@ test('Bridge contract: task-specific retrieval rules are present', () => {
   assert.ok(projectInstructions.includes('Image editing → fetch visual/image rules'), 'image retrieval specified')
   assert.ok(projectInstructions.includes('Factual claims → fetch verified facts'), 'factual lookup retrieval specified')
   assert.ok(projectInstructions.includes('SEO/hashtags → choose 3-5 dynamically'), 'SEO/hashtag retrieval specified')
+})
+
+// ── #248/#294 Piek entity modes: one canonical client, isolated sub-brand scopes ──
+
+const piek = 'piek-uuid'
+const piekCards = [
+  { id: 'piek-group', active_client_id: piek, client_scope_key: null, client_specific: true, status: 'active' },
+  { id: 'engen-1', active_client_id: piek, client_scope_key: 'engen', client_specific: true, status: 'active' },
+  { id: 'sasol-1', active_client_id: piek, client_scope_key: 'sasol', client_specific: true, status: 'active' },
+  { id: 'get-together-1', active_client_id: piek, client_scope_key: 'get-together', client_specific: true, status: 'active' },
+  { id: 'other-client', active_client_id: 'sasol-national-uuid', client_scope_key: 'sasol', client_specific: true, status: 'active' },
+]
+
+test('Piek entity modes return different context per exact scope (one canonical client)', () => {
+  const engen = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'engen' }).map(c => c.id)
+  const sasol = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'sasol' }).map(c => c.id)
+  const getTogether = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'get-together' }).map(c => c.id)
+  const group = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: null }).map(c => c.id)
+  assert.deepEqual(engen, ['engen-1'])
+  assert.deepEqual(sasol, ['sasol-1'])
+  assert.deepEqual(getTogether, ['get-together-1'])
+  assert.deepEqual(group, ['piek-group'])
+})
+
+test('Piek entity scope never leaks sibling-entity or group facts', () => {
+  const engen = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'engen' }).map(c => c.id)
+  assert.ok(!engen.includes('sasol-1'), 'Engen never sees Sasol')
+  assert.ok(!engen.includes('get-together-1'), 'Engen never sees Get Together')
+  assert.ok(!engen.includes('piek-group'), 'Engen never falls back to group scope')
+  // Group (umbrella) request must not pull entity cards up.
+  const group = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: null }).map(c => c.id)
+  assert.ok(!group.includes('engen-1') && !group.includes('sasol-1'), 'group scope excludes entity cards')
+})
+
+test('Piek Sasol scope never returns a different client sharing the sasol scope_key', () => {
+  const sasol = clientScope.selectScopeCards(piekCards, { clientId: piek, scopeKey: 'sasol' }).map(c => c.id)
+  assert.ok(!sasol.includes('other-client'), 'exact client_id required — no cross-client scope match')
+})
+
+// ── #248 shared human creative standard + anti-slop ─────────────────────────────
+
+test('human creative standard is a compact non-empty shared contract', () => {
+  assert.ok(Array.isArray(creativeStandard.HUMAN_CREATIVE_STANDARD))
+  assert.ok(creativeStandard.HUMAN_CREATIVE_STANDARD.length >= 8, 'covers the core creative rules')
+  assert.equal(creativeStandard.DEFAULT_MAX_HASHTAGS, 5, 'default max 5 hashtags')
+})
+
+test('anti-slop list rejects the known CG generic filler patterns', () => {
+  const patterns = creativeStandard.ANTI_SLOP_PATTERNS.map(p => p.toLowerCase())
+  for (const banned of ['elevate your experience', 'discover the difference', 'your trusted partner', 'something for everyone', 'experience excellence']) {
+    assert.ok(patterns.includes(banned), `anti-slop list includes: ${banned}`)
+  }
+})
+
+test('flagAntiSlop detects generic filler and passes human copy', () => {
+  assert.deepEqual(creativeStandard.flagAntiSlop('Elevate your experience with us today'), ['elevate your experience'])
+  assert.deepEqual(creativeStandard.flagAntiSlop('Fresh pine just landed — first cut goes to the early birds.'), [])
+})
+
+test('caption packet injects the shared human standard, anti-slop and dynamic hashtag rule', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /human_creative_standard: HUMAN_CREATIVE_STANDARD/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /avoid_filler: ANTI_SLOP_PATTERNS/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /hashtag_max: DEFAULT_MAX_HASHTAGS/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /never paste a fixed bank/)
+})
+
+test('seo_hashtags packet marks stored banks as seed-only, not a permanent output', () => {
+  assert.match(GET_CLIENT_CONTEXT_FN, /hashtag_bank_is_seed_only: true/)
+  assert.match(GET_CLIENT_CONTEXT_FN, /Stored banks are seed\/reference only/)
+})
+
+test('human creative standard app and Deno copies do not drift', () => {
+  const stripHeader = s => s.split('\n').slice(1).join('\n')
+  assert.equal(stripHeader(CREATIVE_STANDARD_APP), stripHeader(CREATIVE_STANDARD_SHARED), 'src/lib and _shared creative standard must match')
+})
+
+// ── #294 conflict auto-detection fails closed ───────────────────────────────────
+
+test('two different approved contacts of the same type fail closed (no guessing)', () => {
+  const phoneA = { ...currentPublicContact, id: 'a', contact_type: 'phone', value: '051-111-1111' }
+  const phoneB = { ...currentPublicContact, id: 'b', contact_type: 'phone', value: '051-222-2222' }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [phoneA, phoneB], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts.length, 0, 'ambiguous same-type contacts are not returned')
+  assert.equal(result.can_generate_footer, false)
+  assert.ok(result.unresolved.length >= 1, 'conflict is surfaced as unresolved')
+  assert.match(result.reason ?? '', /conflict/i)
+})
+
+test('distinct contact types (phone + email) are not treated as a conflict', () => {
+  const phone = { ...currentPublicContact, id: 'p', contact_type: 'phone', value: '051-111-1111', footer_order: 10 }
+  const email = { ...currentPublicContact, id: 'e', contact_type: 'email', value: 'hi@example.com', footer_order: 20 }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [phone, email], policies: [optionalCaptionPolicy],
+  })
+  assert.deepEqual(result.contacts.map(c => c.contact_type), ['phone', 'email'])
+  assert.equal(result.can_generate_footer, true)
+})
+
+// ── #311 consumes this canonical runtime, not a parallel context store ──────────
+
+test('#311 MCP get_client_context declares the canonical get-client-context contract', () => {
+  assert.match(MCP_TOOL_CATALOG, /name: 'get_client_context'/)
+  assert.match(MCP_TOOL_CATALOG, /canonicalContract: 'supabase\/functions\/get-client-context'/)
+  assert.match(MCP_TOOL_CATALOG, /dependency: '#241\/#294'/)
+})
+
+test('#311 MCP task_type enum matches the canonical runtime task types (no parallel taxonomy)', () => {
+  // Isolate the get_client_context tool's input schema line.
+  const toolLine = MCP_TOOL_CATALOG.split('\n').find(l => l.includes('task_type') && l.includes('enum'))
+  assert.ok(toolLine, 'get_client_context declares a task_type enum')
+  for (const task of ['caption', 'content_idea', 'poster_copy', 'image_edit', 'factual_lookup', 'campaign', 'seo_hashtags']) {
+    assert.ok(toolLine.includes(`'${task}'`), `MCP exposes canonical task_type: ${task}`)
+  }
+  for (const stray of ['script', 'strategy', 'general']) {
+    assert.ok(!toolLine.includes(`'${stray}'`), `no stray task_type '${stray}' in the client-context tool`)
+  }
 })

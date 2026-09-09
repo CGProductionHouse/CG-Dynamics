@@ -1,0 +1,22 @@
+{
+  "target": "https://cg-dynamics.vercel.app",
+  "checkedAt": "2026-08-31T09:13:37.879Z",
+  "results": [
+    {
+      "profile": "desktop",
+      "authenticated": false,
+      "finalUrl": "https://cg-dynamics.vercel.app/login",
+      "overflow": false,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "profile": "iphone",
+      "authenticated": false,
+      "finalUrl": "https://cg-dynamics.vercel.app/login",
+      "overflow": false,
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ]
+}
