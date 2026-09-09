@@ -99,7 +99,16 @@ External coding-agent/model routing is **not** the same thing as CG Dynamics run
 - A migration file on `main` does not prove production application.
 - Never expose/commit privileged secrets.
 - Never guess a `client_id` UUID.
-- Microsoft/Outlook remains read-only upstream unless explicitly redesigned later.
+- Microsoft/Outlook is read-only upstream **except** for the narrow #325 coexistence
+  exception: the exact operational task/meeting a staff member explicitly asked the Staff
+  Assistant to create/update/reschedule/complete/cancel, plus its exact linked counterpart,
+  matched by durable IDs. Nothing else. Do not build a broad write-back engine.
+- During coexistence (#325) CG Dynamics is **not** a fallback-only source. Every normal
+  Staff Assistant daily update cross-references BOTH live Microsoft and CG Dynamics.
+  Teams/Planner and Outlook are the freshness authority for Microsoft-backed records;
+  Dynamics-only work is legitimate and must still appear. The canonical runtime policy is
+  returned by `get_my_assistant_bootstrap` (see `supabase/functions/cg-dynamics-mcp/coexistencePolicy.ts`)
+  and overrides stale ChatGPT Project Instruction wording.
 
 Pending production migration order:
 

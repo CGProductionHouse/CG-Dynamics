@@ -1,5 +1,16 @@
 # Staff Assistant transition — Teams-primary daily ops + CG-native content pipeline
 
+> **SUPERSEDED IN PART — updated 10 September 2026 (#325).**
+> CG Dynamics is **no longer** a fallback-only/cross-check source. Every normal Staff
+> Assistant daily update MUST cross-reference **both** live Microsoft and CG Dynamics until
+> CA explicitly ends coexistence. Teams/Planner and Outlook remain the *freshness authority*
+> for Microsoft-backed records, but Dynamics is always read too: it holds the linked mirror
+> plus Dynamics-only recurring/daily work, client/package/Client Schedule obligations,
+> Content Runs, Guidelines, OneDrive mappings and leads context.
+> The canonical machine-readable policy is returned by `get_my_assistant_bootstrap`
+> (`supabase/functions/cg-dynamics-mcp/coexistencePolicy.ts`, versioned + effective-dated)
+> and overrides any wording below that still says "fallback".
+
 Effective: **10 September 2026**
 Owner decision: CA
 
@@ -25,7 +36,7 @@ CG Dynamics is:
 - the canonical source for Content Runs and Content Guidelines;
 - the canonical source for content-production state and history;
 - the canonical source for exact OneDrive mappings and upload/closeout evidence;
-- a **fallback/cross-check** for staff task/calendar data until cutover.
+- a **mandatory cross-referenced source** for staff task/calendar data until cutover (#325). Not fallback-only.
 
 A Dynamics-imported Microsoft task/calendar copy must not override a fresher live Microsoft state.
 
@@ -37,7 +48,7 @@ For each Staff Assistant Project:
 2. Read the live Microsoft/Teams/Planner work state for that staff member.
 3. Read the live Microsoft calendar for that staff member when available.
 4. Read CG Dynamics for CG-native work: Client Schedule, package deliverables, Content Runs, Content Guidelines, leads/CRM context and content-production state.
-5. Read Dynamics task/calendar mirrors only as fallback/reconciliation data.
+5. Read Dynamics task/calendar mirrors **always** (#325): the linked mirror for reconciliation AND Dynamics-only work that has no Microsoft counterpart.
 6. Deduplicate mirrored Microsoft work so one real task appears once.
 7. If Microsoft and Dynamics disagree on a mirrored staff task/calendar item, prefer the live Microsoft state during this transition and flag Dynamics as stale.
 8. The normal work queue shows **active work only**: To do / Not started, In progress, Waiting / Blocked, or another explicitly active state.
@@ -132,7 +143,7 @@ The transition is behaving correctly when:
 
 - a task marked complete in Microsoft no longer appears as active merely because its Dynamics mirror is stale;
 - active Microsoft tasks appear once in the daily queue;
-- Dynamics fallback can be used when Microsoft is temporarily unavailable and is clearly labelled as fallback;
+- If Microsoft is temporarily unavailable, use Dynamics but EXPLICITLY report degraded source coverage (#325) rather than implying the normal dual-source check happened;
 - Client Schedule remains sourced from `monthly_deliverables` rather than Microsoft Planner;
 - a package-driven monthly video deliverable can trace to its Content Run, Content Guideline and exact OneDrive mapping;
 - upcoming staff briefs can show live work plus CG-native content obligations without mixing their source-of-truth boundaries;
