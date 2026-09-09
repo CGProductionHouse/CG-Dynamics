@@ -1,6 +1,6 @@
 # Google Ads V2 — Issue #237
 
-Branch: `codex/google-ads-v2`, based on main `0a50ee6`.
+Branch: `codex/google-ads-v2`, reconciled with main `464742a` (Meta platform V3 / PR #240).
 
 Implemented checkpoints:
 
@@ -28,6 +28,19 @@ Denis's instruction of R4,000/month for September–November and R2,875 for Dece
 
 - The environment-backed focused Google Ads/client-safety suite passes all 130 assertions. Its V1 assertions now enforce the V2 RPC names and row contract, complete calendar-month boundary, exact current-period loading, client-safe projection, staged legacy fallback, and equal seven-day windows; it does not restore generic MoM.
 - `npx tsc -b`, `npm run build`, and `git diff --check` pass. The emitted build contains dedicated Google Ads dashboard, results, campaigns, integration and performance chunks.
-- Focused lint passes for the new Google Ads component/libraries/functions and test changes. Changed-file ESLint still reports two baseline findings on unchanged legacy lines: the existing `ClientReportView` memo dependency warning and `Dashboard` synchronous reset effect.
+- Scoped changed-file lint passes, including the shared report, Campaigns, Performance and client Dashboard surfaces. The previously documented Dashboard synchronous reset effect was removed without changing the client-safe request guard.
+- Meta #240's provider-native report grouping, unavailable-state copy and provider-scoped health evidence remain present after reconciliation. Its focused Meta/backend regression suite passes, and Google Ads remains outside Meta totals and health.
 - No production schema/data change, deployment, Google mutation or target seeding was performed.
 - Protected Google Ads pages could not be visually accepted without a local authenticated session. The local unauthenticated app/login rendered at desktop and 390×844 with no Vite overlay; authenticated Cape Lumber desktop/mobile acceptance remains a post-deploy gate.
+
+## Final rollout gate (not performed)
+
+After explicit production approval, use this dependency order:
+
+1. Review and apply `supabase/migrations/20260908181448_google_ads_v2_native_settings.sql`.
+2. Deploy `google-ads-list-accounts`, `google-ads-list-campaigns`, and `google-ads-sync` so their bundled shared Google Ads modules match the migration contract.
+3. Deploy the `cg-dynamics` app from the approved PR commit.
+4. Run one authorized Cape Lumber sync covering the selected reporting period plus the preceding 13 days required for two equal seven-day windows.
+5. Verify the stored campaign/status/budget snapshot and the configured conversion action against Google Ads; do not infer either from spend.
+6. After reconfirming Denis's instruction, save the CG monthly targets through the manager/admin approval-evidence workflow. This is separate from, and must not mutate, Google's provider budget.
+7. Complete authenticated Cape Lumber acceptance in admin Preview, client Performance, and client Campaigns at desktop and narrow-mobile widths. Publish the draft report only after approval.

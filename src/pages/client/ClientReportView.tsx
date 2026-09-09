@@ -136,7 +136,7 @@ export function ClientReportView({
       }
     })
     return new Set(keys)
-  }, [contentExclusions, report.posts, statsPosts])
+  }, [contentExclusions, report.posts])
   const master = useMemo(
     () => buildMasterReport(statsPosts, manualMetrics, excludedContentKeys),
     [excludedContentKeys, manualMetrics, statsPosts],
@@ -509,13 +509,15 @@ function VerifiedFactsUnavailable() {
 
 // ── Verified Overview (facts-driven, per-platform, comparability-gated) ───────
 function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabel: string }) {
+  const lines = sections.flatMap(section => section.lines)
+  const platforms = [...new Set(lines.map(line => line.platform))]
   return (
     <div className="mb-14 space-y-10">
-      {sections.map(section => (
-        <section key={section.key}>
-          <SectionHeading eyebrow="Verified performance" title={section.title} />
+      {platforms.map(platform => (
+        <section key={platform}>
+          <SectionHeading eyebrow="Meta insights" title={platform === 'facebook' ? 'Facebook' : 'Instagram'} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {section.lines.map(line => (
+            {lines.filter(line => line.platform === platform).map(line => (
               <VerifiedMetricCard key={`${line.platform}:${line.metricKey}`} line={line} />
             ))}
           </div>
@@ -532,6 +534,13 @@ function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabe
 
 function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
   const showMovement = line.comparable && typeof line.changePercent === 'number'
+  const unavailableMessage = line.availability === 'unavailable'
+    ? 'Unavailable from the connected Meta source'
+    : line.availability === 'permission_blocked'
+      ? 'Unavailable with the current Meta permissions'
+      : line.availability === 'error' || line.availability === 'stale'
+        ? 'Not currently verified from Meta'
+        : null
   const up = (line.changePercent ?? 0) > 0
   const down = (line.changePercent ?? 0) < 0
   return (
@@ -547,7 +556,9 @@ function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
         {line.availability === 'partial' && !line.reconstructed && (
           <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-amber-200">Partial platform coverage</span>
         )}
-        {line.isSnapshot ? (
+        {unavailableMessage ? (
+          <span className="text-slate-500">{unavailableMessage}</span>
+        ) : line.isSnapshot ? (
           <span className="text-slate-500">Current followers snapshot at the latest sync</span>
         ) : showMovement ? (
           <span className={up ? 'text-emerald-300' : down ? 'text-amber-300' : 'text-slate-400'}>
@@ -622,7 +633,15 @@ function ConnectorDataHealth({ rows }: { rows: ReportFactHealth[] }) {
                 <td className="py-1 pr-3">{PLATFORM_LABELS[r.platform as Platform] ?? r.platform}</td>
                 <td className="py-1 pr-3">{r.period_month}</td>
                 <td className="py-1 pr-3">{r.metric_key ?? 'Connector run'}{r.source_metric ? <span className="block text-slate-500">{r.source_metric}</span> : null}</td>
-                <td className="py-1 pr-3">{r.fact_availability ?? r.latest_health_state ?? r.latest_run_status ?? 'Not attempted'}{r.permission_blocked ? <span className="block text-amber-300">Permission blocked</span> : null}{r.partial_error_or_stale ? <span className="block text-amber-300">Partial, error or stale</span> : null}</td>
+                <td className="py-1 pr-3">
+                  {r.fact_availability ?? r.latest_health_state ?? r.latest_run_status ?? 'Not attempted'}
+                  {r.permission_blocked ? <span className="block text-amber-300">Permission blocked</span> : null}
+                  {r.partial_error_or_stale ? (
+                    <span className="block text-amber-300">
+                      Platform run: {formatHealthState(r.latest_run_status, r.latest_health_state)}
+                    </span>
+                  ) : null}
+                </td>
                 <td className="py-1 pr-3">{formatHealthTimestamp(r.latest_attempted_at)}</td>
                 <td className="py-1 pr-3">{formatHealthTimestamp(r.last_successful_at)}</td>
                 <td className="py-1 pr-3">{r.api_version ?? '—'}</td>
@@ -643,6 +662,14 @@ function formatHealthTimestamp(value: string | null): string {
   if (!value) return '—'
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString()
+}
+
+function formatHealthState(runStatus: string | null, healthState: string | null): string {
+  const humanize = (value: string) => value.replaceAll('_', ' ')
+  if (runStatus && healthState && runStatus !== healthState) {
+    return `${humanize(runStatus)} · ${humanize(healthState)}`
+  }
+  return humanize(runStatus ?? healthState ?? 'needs review')
 }
 
 // A. The "all your channels together" moment. Headlines ONLY metrics that are

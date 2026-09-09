@@ -6,7 +6,7 @@ interface EnqueueBody {
   clientId?: string
   syncRangeMonths: number
   months: string[]
-  items: Array<{ clientId: string; clientName: string }>
+  items: Array<{ assetId: string; clientId: string; clientName: string }>
 }
 
 Deno.serve(async (req) => {
@@ -39,8 +39,8 @@ Deno.serve(async (req) => {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
   let body: EnqueueBody
@@ -54,7 +54,24 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'No months or clients to sync.' }, 400)
   }
 
-  const totalItems = body.months.length * body.items.length
+  const months = [...new Set(body.months)]
+  if (months.some(month => !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))) {
+    return jsonResponse({ ok: false, error: 'Invalid sync month.' }, 400)
+  }
+  if (body.items.some(item => !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.assetId))) {
+    return jsonResponse({ ok: false, error: 'Every sync item requires an exact linked Meta asset.' }, 400)
+  }
+  const items = [...new Map(body.items.map(item => [item.assetId, item])).values()]
+  const { data: exactAssets, error: assetError } = await sb
+    .from('meta_client_assets')
+    .select('id, client_id')
+    .in('id', items.map(item => item.assetId))
+    .eq('is_active', true)
+  const clientByAsset = new Map((exactAssets ?? []).map(asset => [asset.id, asset.client_id]))
+  if (assetError || items.some(item => clientByAsset.get(item.assetId) !== item.clientId)) {
+    return jsonResponse({ ok: false, error: 'One or more queued Meta assets are not active for the selected client.' }, 400)
+  }
+  const totalItems = months.length * items.length
 
   const { data: batch, error: insertError } = await sb
     .from('meta_sync_batches')
@@ -66,7 +83,7 @@ Deno.serve(async (req) => {
       total_items: totalItems,
       completed_items: 0,
       failed_items: 0,
-      summary: { months: body.months, clientCount: body.items.length },
+      summary: { months, clientCount: items.length },
     })
     .select('id')
     .single()
@@ -80,16 +97,20 @@ Deno.serve(async (req) => {
     batch_id: string
     client_id: string
     client_name: string
+    asset_id: string
+    sync_kind: string
     month: string
     status: string
   }> = []
 
-  for (const month of body.months) {
-    for (const item of body.items) {
+  for (const month of months) {
+    for (const item of items) {
       itemRows.push({
         batch_id: batchId,
         client_id: item.clientId,
         client_name: item.clientName,
+        asset_id: item.assetId,
+        sync_kind: 'historical',
         month,
         status: 'queued',
       })
@@ -114,7 +135,7 @@ Deno.serve(async (req) => {
       'Content-Type': 'application/json',
       'x-worker-secret': workerSecret,
     },
-    body: JSON.stringify({ batchId, maxItems: 5 }),
+    body: JSON.stringify({ batchId, maxItems: 1, startLanes: true }),
   })
 
   // Keep runtime alive until trigger completes

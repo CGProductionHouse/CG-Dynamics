@@ -118,8 +118,6 @@ export default function Dashboard() {
       && selectedReportId === requestedReportId
 
     if (!requestedReportId || !requestedClientId || !requestedProfileId) {
-      setReport(null)
-      setReportLoading(false)
       return () => { reportRequestRef.current += 1 }
     }
     const reportId = requestedReportId
