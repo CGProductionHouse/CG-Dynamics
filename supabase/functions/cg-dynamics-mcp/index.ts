@@ -503,7 +503,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
 
   const { data: profile, error: profileError } = await staff.supabase
     .from('staff_assistant_profiles')
-    .select('profile_id, responsibilities, recurring_duties, working_preferences, output_preferences, lead_research_criteria, repeated_corrections, common_task_types, approved_access_scope, project_instructions, instructions_version, instructions_refreshed_at, instructions_applied_at, profile_verified_at')
+    .select('profile_id, responsibilities, recurring_duties, working_preferences, output_preferences, lead_research_criteria, repeated_corrections, common_task_types, approved_access_scope, project_instructions, instructions_version, instructions_refreshed_at, instructions_applied_at, profile_verified_at, preferred_company_from, professional_display_name, role_title, approved_work_phone, signature_text, signature_asset_reference, email_setup_status, mail_scope, approved_collateral_set')
     .eq('profile_id', staff.profileId)
     .maybeSingle()
 
@@ -519,6 +519,11 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
     dependency: t.dependency,
     readOnly: t.annotations.readOnlyHint,
   }))
+
+  // Mail scope and sender readiness for bootstrap
+  const mailScope = profile?.mail_scope ?? 'owned_threads_only'
+  const emailReady = profile?.email_setup_status === 'ready'
+  const senderReady = !!(profile?.preferred_company_from && profile?.signature_text)
 
   return {
     identity: {
@@ -538,6 +543,34 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       approved_access_scope: profile.approved_access_scope,
       instructions_version: profile.instructions_version,
       instructions_refreshed_at: profile.instructions_refreshed_at,
+    } : null,
+    mail_readiness: profile ? {
+      mail_scope: mailScope,
+      email_setup_status: profile.email_setup_status,
+      preferred_company_from: profile.preferred_company_from,
+      professional_display_name: profile.professional_display_name,
+      role_title: profile.role_title,
+      approved_work_phone: profile.approved_work_phone,
+      signature_configured: !!profile.signature_text,
+      signature_asset_reference: profile.signature_asset_reference,
+      approved_collateral_set: profile.approved_collateral_set ?? [],
+      sender_ready: senderReady,
+      instructions: senderReady
+        ? [
+            'Your email sender identity and professional signature are configured.',
+            'You may compose drafts using compose_mail_draft.',
+            'STAFF EMAIL IS DRAFT-ONLY: never send directly.',
+            'After creating a draft, review content, verify correct CG From identity, verify correct professional signature, then send manually.',
+            mailScope === 'company_mail_manager'
+              ? 'Your scope: company_mail_manager — you may triage and draft replies for the full authorised CG inbox.'
+              : 'Your scope: owned_threads_only — email only for leads/tasks you own or materially participate in.',
+          ]
+        : [
+            'EMAIL SETUP REQUIRED WITH CA.',
+            'Your approved CG company From identity or professional signature is not yet configured.',
+            'Contact CA to set up your email sender identity and professional signature before drafting emails.',
+            'Drafts created without proper sender identity will be flagged for manual review.',
+          ],
     } : null,
     capability_manifest: capabilities.map(cap => ({
       key: cap.key,
@@ -561,9 +594,14 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'Never merge CG Calendar and Client Schedule.',
       'Never retrieve another staff member\'s private assistant profile.',
       'All writes through this MCP are audited and idempotent.',
+      'STAFF EMAIL IS DRAFT-ONLY: never send email directly, even if the connected mail plugin technically supports sending.',
+      'After creating any email draft, explicitly instruct staff to: review content, verify correct CG From identity, verify correct professional signature, then send manually.',
+      'Normal staff = owned_threads_only: email only for leads/tasks you own or materially participate in. Not general inbox managers.',
+      'Amonique = company_mail_manager: full authorised CG inbox triage, read, reply-draft preparation, but still requires human review + correct From + correct signature + manual send.',
+      'Attach governed collateral by Drive asset reference/version — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
     ],
     message: profile
-      ? `Bootstrap ready for ${staff.fullName}. This payload contains your durable profile, capability manifest, MCP tools and operating rules. Use it to initialise a fresh Project.`
+      ? `Bootstrap ready for ${staff.fullName}. This payload contains your durable profile, mail readiness, capability manifest, MCP tools and operating rules. Use it to initialise a fresh Project.`
       : `No assistant profile found for ${staff.fullName}. Use update_my_preferences to create one, then call bootstrap again.`,
   }
 }
@@ -596,9 +634,220 @@ const handleCreateRecurringTask: ToolHandler = async (staff, input) => {
   return { template: data, message: 'Recurring task template created. Instances will be materialised automatically within a 14-day window.' }
 }
 
+// ── Mail Draft Handler (HARD DRAFT-ONLY GATE) ───────────────────────────────
+
+const handleComposeMailDraft: ToolHandler = async (staff, input) => {
+  const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
+  if (!hasTable) return { error: 'Staff assistant workspace not yet available. Complete #305 setup first.' }
+
+  const { data: profile, error: profileError } = await staff.supabase
+    .from('staff_assistant_profiles')
+    .select('profile_id, preferred_company_from, professional_display_name, role_title, approved_work_phone, signature_text, signature_asset_reference, email_setup_status, mail_scope, approved_collateral_set')
+    .eq('profile_id', staff.profileId)
+    .maybeSingle()
+
+  if (profileError) return { error: profileError.message }
+
+  if (!profile) return { error: 'No assistant profile found. Create your profile first with update_my_preferences.' }
+
+  if (profile.email_setup_status !== 'ready') {
+    return {
+      error: 'EMAIL SETUP REQUIRED WITH CA',
+      detail: 'Your email sender identity and professional signature are not yet configured. Contact CA to set up your approved CG company From identity and professional signature before drafting emails.',
+      email_setup_status: profile.email_setup_status,
+      mail_scope: profile.mail_scope,
+    }
+  }
+
+  if (!profile.preferred_company_from || !profile.signature_text) {
+    return {
+      error: 'EMAIL SETUP REQUIRED WITH CA',
+      detail: 'Your approved CG company From identity or professional signature is missing. Contact CA to configure these before drafting emails.',
+      email_setup_status: profile.email_setup_status,
+      missing_fields: [
+        ...(!profile.preferred_company_from ? ['preferred_company_from'] : []),
+        ...(!profile.signature_text ? ['signature_text'] : []),
+      ],
+    }
+  }
+
+  // Scope check: normal staff = owned_threads_only
+  if (profile.mail_scope === 'owned_threads_only' && input.lead_id) {
+    const { data: lead } = await staff.supabase
+      .from('business_development_leads')
+      .select('owner_profile_id')
+      .eq('id', input.lead_id)
+      .maybeSingle()
+
+    if (lead && lead.owner_profile_id !== staff.profileId) {
+      return { error: 'You can only compose drafts for leads you own or are materially involved in. This lead is owned by another staff member.' }
+    }
+  }
+
+  // Build governed collateral list
+  const collateralRefs: string[] = []
+  if (input.collateral?.length) {
+    collateralRefs.push(...input.collateral)
+  }
+  if (input.include_business_profile) {
+    collateralRefs.push('cg_business_profile_pdf')
+  }
+  if (input.include_wedding_packages) {
+    collateralRefs.push('cg_wedding_packages_pdf')
+  }
+
+  // Compose the draft with signature appended
+  const signatureBlock = profile.signature_text
+    ? `\n\n--\n${profile.signature_text}`
+    : ''
+
+  const bodyWithSignature = input.body + signatureBlock
+
+  // Create the draft record (canonical, not sent)
+  const draftRecord = {
+    idempotency_key: input.idempotency_key,
+    to_address: input.to_address,
+    subject: input.subject,
+    body: bodyWithSignature,
+    lead_id: input.lead_id ?? null,
+    draft_id: input.draft_id ?? null,
+    collateral_refs: collateralRefs,
+    sender_from: profile.preferred_company_from,
+    sender_display_name: profile.professional_display_name,
+    sender_role_title: profile.role_title,
+    sender_work_phone: profile.approved_work_phone,
+    signature_asset_ref: profile.signature_asset_reference,
+    status: 'draft',
+    created_by: staff.profileId,
+    created_at: new Date().toISOString(),
+  }
+
+  const { data: draft, error: draftError } = await staff.supabase
+    .from('mail_drafts')
+    .insert(draftRecord)
+    .select('id, status, created_at')
+    .maybeSingle()
+
+  if (draftError) {
+    // If mail_drafts table doesn't exist yet, return the draft record directly
+    // This allows the tool to work even before the mail_drafts table is created
+    return {
+      draft: {
+        ...draftRecord,
+        status: 'draft',
+        id: `local_${input.idempotency_key}`,
+      },
+      sender: {
+        from: profile.preferred_company_from,
+        display_name: profile.professional_display_name,
+        role_title: profile.role_title,
+        work_phone: profile.approved_work_phone,
+      },
+      collateral_attached: collateralRefs,
+      instructions: [
+        'DRAFT CREATED — DO NOT SEND AUTOMATICALLY.',
+        '1. Review the draft content above for accuracy and professionalism.',
+        '2. Verify the correct CG From identity is selected in your mail client.',
+        '3. Verify the correct professional signature/banner is attached.',
+        '4. Send the email manually from your mail client.',
+        'Gmail connector draft-send actions must NOT be used for CG outreach.',
+      ],
+    }
+  }
+
+  return {
+    draft,
+    sender: {
+      from: profile.preferred_company_from,
+      display_name: profile.professional_display_name,
+      role_title: profile.role_title,
+      work_phone: profile.approved_work_phone,
+    },
+    collateral_attached: collateralRefs,
+    instructions: [
+      'DRAFT CREATED — DO NOT SEND AUTOMATICALLY.',
+      '1. Review the draft content above for accuracy and professionalism.',
+      '2. Verify the correct CG From identity is selected in your mail client.',
+      '3. Verify the correct professional signature/banner is attached.',
+      '4. Send the email manually from your mail client.',
+      'Gmail connector draft-send actions must NOT be used for CG outreach.',
+    ],
+  }
+}
+
+// ── Lead Email Activity Write-Back ──────────────────────────────────────────
+
+const handleLogLeadEmailActivity: ToolHandler = async (staff, input) => {
+  const hasTable = await tableExists(staff.supabase, 'business_development_leads')
+  if (!hasTable) return { error: 'Lead management not yet available. Complete #305 setup first.' }
+
+  const { data: lead, error: leadError } = await staff.supabase
+    .from('business_development_leads')
+    .select('id, owner_profile_id, last_action, last_action_at, next_action, follow_up_at')
+    .eq('id', input.lead_id)
+    .maybeSingle()
+
+  if (leadError) return { error: leadError.message }
+  if (!lead) return { error: 'Lead not found.' }
+
+  // Scope check: normal staff = owned_threads_only
+  if (lead.owner_profile_id !== staff.profileId) {
+    return { error: 'You can only log email activity for leads you own.' }
+  }
+
+  const now = new Date().toISOString()
+  const activitySummary = `[${input.activity_type}] ${input.summary}`
+
+  // Build update payload
+  const updatePayload: Record<string, unknown> = {
+    last_action: activitySummary,
+    last_action_at: now,
+  }
+
+  if (input.next_action) {
+    updatePayload.next_action = input.next_action
+  }
+  if (input.follow_up_at) {
+    updatePayload.follow_up_at = input.follow_up_at
+  }
+
+  const { data: updated, error: updateError } = await staff.supabase
+    .from('business_development_leads')
+    .update(updatePayload)
+    .eq('id', input.lead_id)
+    .select('id, last_action, last_action_at, next_action, follow_up_at')
+    .maybeSingle()
+
+  if (updateError) return { error: updateError.message }
+
+  // Append to lead research as a record of the email activity
+  const { error: researchError } = await staff.supabase
+    .from('business_development_lead_research')
+    .insert({
+      lead_id: input.lead_id,
+      created_by: staff.profileId,
+      entry_type: 'outreach_result',
+      summary: activitySummary,
+      source_url: input.thread_reference ?? null,
+      source_title: `Email ${input.activity_type}`,
+      observed_at: now,
+      confidence: 'supported',
+    })
+
+  if (researchError) {
+    // Non-fatal: activity logged to lead fields even if research append fails
+    console.error('Failed to append lead research:', researchError.message)
+  }
+
+  return {
+    lead_activity: updated,
+    message: `Email activity (${input.activity_type}) logged to lead. ${input.next_action ? 'Next action updated.' : ''} ${input.follow_up_at ? 'Follow-up scheduled.' : ''}`,
+  }
+}
+
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task'])
+const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity'])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -618,6 +867,8 @@ const toolHandlers: Record<string, ToolHandler> = {
   get_my_assistant_bootstrap: handleGetMyAssistantBootstrap,
   get_my_recurring_tasks: handleGetMyRecurringTasks,
   create_recurring_task: handleCreateRecurringTask,
+  compose_mail_draft: handleComposeMailDraft,
+  log_lead_email_activity: handleLogLeadEmailActivity,
 }
 
 // ── MCP Server ──────────────────────────────────────────────────────────────

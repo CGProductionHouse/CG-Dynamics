@@ -164,6 +164,39 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
     expectedConnectedInCompanyWorkspace: true,
     sessionMissingGuidance: 'This is a company-standard CG capability. If it is missing from this session, try reconnecting or using the correct CG workspace account. Do not claim CG cannot do this.',
   },
+  {
+    key: 'email',
+    label: 'Email (draft-only staff assistance)',
+    description: 'Compose, research and prepare professional CG email drafts with governed collateral. Staff assistants may NEVER send directly — all drafts require manual staff review, correct CG From identity verification and correct professional signature verification before manual send.',
+    usefulFor: [
+      'Drafting lead outreach emails with approved CG business profile',
+      'Preparing wedding enquiry responses with approved CG Wedding Packages PDF',
+      'Researching prior email threads for lead/client context',
+      'Preparing professional reply drafts with correct tone and collateral',
+    ],
+    exampleActions: [
+      'Draft an introductory email for this new lead.',
+      'Prepare a reply to this wedding enquiry.',
+      'Draft a follow-up for the Red Oak lead.',
+      'What should I say in this outreach?',
+    ],
+    operatingStandards: [
+      'STAFF EMAIL IS DRAFT-ONLY. Never send email directly, even if the connected mail plugin technically supports sending.',
+      'After creating a draft, explicitly instruct staff to: review content, verify the correct CG From identity, verify the correct professional signature, then send manually.',
+      'If sender/signature readiness is incomplete, surface EMAIL SETUP REQUIRED WITH CA and stop at draft review.',
+      'Normal staff = owned_threads_only: email only for leads/tasks they own or materially participate in. Not general inbox managers.',
+      'Amonique = company_mail_manager: full authorised CG inbox triage, read, reply-draft preparation, but still requires human review + correct From + correct signature + manual send.',
+      'Attach governed collateral by Drive asset reference/version — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
+      'For new lead/outreach drafts, attach current approved CG business profile PDF by default unless lead context makes it inappropriate.',
+      'For wedding-related enquiries/replies, attach current approved CG Wedding Packages PDF by default where relevant.',
+      'Relevant outbound/inbound lead-thread activity must update canonical Dynamics lead/activity state so sales progress is shared.',
+      'Gmail sender identity is not acceptable for CG outreach — use approved CG company From identity.',
+      'Google is deprecating third-party Send-as support (Jan 2027). Use server-side forwarding / proper mailbox connections as the durable direction.',
+    ],
+    requiredRole: ['admin', 'manager', 'staff', 'team'],
+    expectedConnectedInCompanyWorkspace: true,
+    sessionMissingGuidance: 'This is a company-standard CG capability. If the Gmail/mail plugin is missing from this session, try reconnecting or using the correct CG workspace account. Email drafting may also require the mail plugin to be connected. Do not claim CG cannot do email work — but staff must always send manually.',
+  },
 ] as const
 
 export function filterCapabilitiesByScope(approvedScopes: string[]): readonly CgCapability[] {

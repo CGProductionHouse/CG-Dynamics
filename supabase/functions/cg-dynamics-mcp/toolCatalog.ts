@@ -159,6 +159,38 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: 'main', canonicalContract: 'create_assistant_recurring_task RPC + recurrence.ts materialisation',
   },
+  {
+    name: 'compose_mail_draft', title: 'Compose email draft',
+    description: 'Create or update a professional CG email draft with governed collateral attachments. STAFF EMAIL IS DRAFT-ONLY: never send directly. After creating/updating a draft, explicitly instruct staff to review content, verify correct CG From identity and professional signature, then send manually. If sender/signature readiness is incomplete, surface EMAIL SETUP REQUIRED WITH CA.',
+    inputSchema: objectSchema({
+      to_address: { type: 'string', format: 'email', description: 'Recipient email address.' },
+      subject: { type: 'string', minLength: 1, maxLength: 320 },
+      body: { type: 'string', minLength: 1, maxLength: 10000, description: 'Draft email body text. Staff will review and send manually.' },
+      lead_id: uuid,
+      draft_id: { type: 'string', description: 'Existing draft ID to update. Omit to create a new draft.' },
+      collateral: { type: 'array', items: { type: 'string', maxLength: 500 }, maxItems: 5, description: 'Governed Google Drive asset references to attach (e.g. CG business profile, wedding packages). Reference by asset/version, never frozen IDs.' },
+      include_business_profile: { type: 'boolean', description: 'Attach current approved CG business profile PDF by default for new lead/outreach drafts.' },
+      include_wedding_packages: { type: 'boolean', description: 'Attach current approved CG Wedding Packages PDF for wedding-related enquiries.' },
+      idempotency_key: uuid,
+    }, ['to_address', 'subject', 'body', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#305', canonicalContract: 'staff_assistant_profiles email fields + compose_mail_draft handler',
+  },
+  {
+    name: 'log_lead_email_activity', title: 'Log lead email activity',
+    description: 'Write back outbound or inbound lead-thread activity to canonical Dynamics lead/activity state so sales progress is shared with authorised management/team. Updates last_action, last_action_at, next_action and follow_up_at on the lead record.',
+    inputSchema: objectSchema({
+      lead_id: uuid,
+      activity_type: { enum: ['outbound_draft', 'outbound_sent', 'inbound_received', 'follow_up_scheduled'], description: 'Type of email activity being logged.' },
+      summary: { type: 'string', minLength: 1, maxLength: 2000, description: 'Brief summary of the email activity (subject, key points, outcome).' },
+      thread_reference: { type: 'string', maxLength: 500, description: 'Optional mail thread/message ID for traceability.' },
+      next_action: { type: 'string', maxLength: 2000, description: 'Suggested next action after this email activity.' },
+      follow_up_at: { type: 'string', format: 'date-time', description: 'Suggested follow-up date/time if a response is expected.' },
+      idempotency_key: uuid,
+    }, ['lead_id', 'activity_type', 'summary', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#305', canonicalContract: 'business_development_leads last_action/next_action fields',
+  },
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =

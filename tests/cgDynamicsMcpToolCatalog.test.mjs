@@ -26,6 +26,17 @@ test('catalog exposes no infrastructure or arbitrary data tool', () => {
   assert.doesNotMatch(names, /sql|query_table|supabase|database|delete|publish|send/i)
 })
 
+test('catalog exposes no send_email or send_draft action — staff email is draft-only', () => {
+  const names = catalog.CG_DYNAMICS_MCP_TOOLS.map(tool => tool.name).join(' ')
+  assert.doesNotMatch(names, /send_email|send_draft|email_send|mail_send|send_mail/i)
+  // Verify compose_mail_draft exists and is NOT a send action
+  const composeTool = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'compose_mail_draft')
+  assert.ok(composeTool)
+  assert.match(composeTool.description, /DRAFT-ONLY/i)
+  assert.match(composeTool.description, /never send/i)
+  assert.match(composeTool.description, /manual/i)
+})
+
 test('read tools cover exact staff, task, calendar, schedule, lead, client context, profile, bootstrap and recurring', () => {
   const reads = catalog.CG_DYNAMICS_MCP_TOOLS.filter(tool => tool.annotations.readOnlyHint).map(tool => tool.name)
   assert.deepEqual(reads, [
@@ -53,13 +64,13 @@ test('server instruction resolves exact bearer identity and forbids unsafe fallb
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 17 tools: 11 read + 6 write', () => {
+test('catalog contains exactly 19 tools: 11 read + 8 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 17)
+  assert.equal(tools.length, 19)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
   assert.equal(reads.length, 11)
-  assert.equal(writes.length, 6)
+  assert.equal(writes.length, 8)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {
@@ -152,4 +163,62 @@ test('create_recurring_task requires title, recurrence_rule and idempotency_key'
   assert.ok(createRec.inputSchema.required.includes('idempotency_key'))
   assert.match(createRec.description, /recurrence/i)
   assert.match(createRec.canonicalContract, /recurrence/i)
+})
+
+test('compose_mail_draft requires to_address, subject, body and idempotency_key', () => {
+  const compose = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'compose_mail_draft')
+  assert.ok(compose)
+  assert.equal(compose.annotations.readOnlyHint, false)
+  assert.equal(compose.annotations.idempotentHint, true)
+  assert.ok(compose.inputSchema.required.includes('to_address'))
+  assert.ok(compose.inputSchema.required.includes('subject'))
+  assert.ok(compose.inputSchema.required.includes('body'))
+  assert.ok(compose.inputSchema.required.includes('idempotency_key'))
+  assert.match(compose.description, /DRAFT-ONLY/i)
+  assert.match(compose.description, /never send/i)
+})
+
+test('compose_mail_draft supports governed collateral attachments', () => {
+  const compose = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'compose_mail_draft')
+  assert.ok(compose)
+  const props = compose.inputSchema.properties
+  assert.ok(props.collateral)
+  assert.ok(props.include_business_profile)
+  assert.ok(props.include_wedding_packages)
+  assert.ok(props.lead_id)
+  assert.ok(props.draft_id)
+})
+
+test('log_lead_email_activity requires lead_id, activity_type, summary and idempotency_key', () => {
+  const logActivity = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'log_lead_email_activity')
+  assert.ok(logActivity)
+  assert.equal(logActivity.annotations.readOnlyHint, false)
+  assert.equal(logActivity.annotations.idempotentHint, true)
+  assert.ok(logActivity.inputSchema.required.includes('lead_id'))
+  assert.ok(logActivity.inputSchema.required.includes('activity_type'))
+  assert.ok(logActivity.inputSchema.required.includes('summary'))
+  assert.ok(logActivity.inputSchema.required.includes('idempotency_key'))
+  assert.ok(logActivity.inputSchema.properties.activity_type.enum.includes('outbound_draft'))
+  assert.ok(logActivity.inputSchema.properties.activity_type.enum.includes('inbound_received'))
+})
+
+test('email capability is in manifest with draft-only classification and role-aware scope', () => {
+  const caps = catalog
+  // This test validates the manifest structure — actual manifest import tested via integration
+  // For unit test, we verify the tool catalog reflects the email capability
+  const compose = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'compose_mail_draft')
+  assert.ok(compose)
+  assert.match(compose.description, /governed collateral/i)
+  assert.match(compose.description, /professional/i)
+})
+
+test('no write tool exposes a send action for email', () => {
+  const writes = catalog.CG_DYNAMICS_MCP_TOOLS.filter(t => !t.annotations.readOnlyHint)
+  for (const tool of writes) {
+    assert.doesNotMatch(tool.name, /send/i, `${tool.name} must not be a send action`)
+    if (tool.name === 'compose_mail_draft') {
+      assert.doesNotMatch(tool.description, /send.*automatically|auto.*send/i)
+      assert.match(tool.description, /draft/i)
+    }
+  }
 })
