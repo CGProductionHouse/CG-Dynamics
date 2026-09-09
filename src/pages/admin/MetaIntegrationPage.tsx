@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { metaBatchHealth } from '../../lib/metaSyncHealth'
 import { supabase } from '../../lib/supabase'
 import { listClients, type Client } from '../../lib/db/clients'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
@@ -84,12 +85,38 @@ interface ConnectionInfo {
   grantedScopes: string[]
   schemaReady: boolean
   tokenEncryptedAtRest: boolean
+  tokenLifecycle: {
+    state: 'valid' | 'invalid' | 'unverified' | 'expired' | 'data_access_expired'
+    tokenType: string | null
+    expiresAt: string | null
+    dataAccessExpiresAt: string | null
+    lastValidatedAt: string | null
+    validationErrorCode: string | null
+  } | null
+  assetHealthAvailable: boolean
+  assetHealth: Array<{
+    clientId: string
+    facebook: MetaAssetRun | null
+    instagram: MetaAssetRun | null
+  }>
   lastVerifiedInsight: {
     platform: string
     periodMonth: string
     healthState: string
     finishedAt: string | null
   } | null
+}
+
+interface MetaAssetRun {
+  run_type: string
+  period_month: string | null
+  status: string
+  health_state: string
+  finished_at: string | null
+  created_at: string
+  high_watermark_at?: string | null
+  next_due_at?: string | null
+  last_error_code?: string | null
 }
 
 type ReadinessFilter = 'none' | 'active' | 'linked' | 'missingFacebook' | 'missingInstagram' | 'missingAdAccount' | 'noInstagram'
@@ -212,6 +239,38 @@ function redactForDisplay(text: string): string {
     .replace(/access_token=[^&\s"']+/gi, 'access_token=[redacted]')
     .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{20,}/gi, 'Bearer [redacted]')
     .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, '[redacted]')
+}
+
+function tokenStateLabel(info: ConnectionInfo | null): string {
+  const lifecycle = info?.tokenLifecycle
+  if (!lifecycle) return 'Validation metadata unavailable'
+  if (lifecycle.state === 'valid') return lifecycle.lastValidatedAt
+    ? `Valid · checked ${formatDateTime(lifecycle.lastValidatedAt)}`
+    : 'Valid'
+  if (lifecycle.state === 'expired') return 'Expired · reconnect required'
+  if (lifecycle.state === 'data_access_expired') return 'Data access expired · reconnect required'
+  if (lifecycle.state === 'invalid') return 'Invalid · reconnect required'
+  return lifecycle.validationErrorCode === 'migration_required' ? 'Migration required' : 'Validation pending'
+}
+
+function tokenExpiryLabel(info: ConnectionInfo | null): string {
+  const lifecycle = info?.tokenLifecycle
+  if (!lifecycle) return 'Not reported'
+  const values = [lifecycle.expiresAt, lifecycle.dataAccessExpiresAt].filter((value): value is string => Boolean(value))
+  if (values.length === 0) return 'No expiry reported by Meta'
+  const earliest = values.sort()[0]
+  return formatDateTime(earliest)
+}
+
+function assetRunLabel(platform: 'Facebook' | 'Instagram', run: MetaAssetRun | null): string {
+  if (!run) return `${platform}: no durable checkpoint recorded`
+  const timestamp = run.finished_at ?? run.created_at
+  const ageMs = Date.now() - new Date(timestamp).getTime()
+  const failure = run.status === 'failed' || ['sync_error', 'permission_blocked', 'reconnection_required'].includes(run.health_state)
+  const freshness = failure ? 'needs attention' : ageMs > 48 * 60 * 60 * 1000 ? 'stale' : 'current'
+  const kind = run.run_type === 'scheduled' ? 'incremental' : run.run_type.replaceAll('_', ' ')
+  const health = run.health_state.replaceAll('_', ' ')
+  return `${platform}: ${formatDateTime(timestamp)} · ${kind} · ${health} · ${freshness}${run.period_month ? ` · ${run.period_month}` : ''}`
 }
 
 function applyAliases(value: string): string {
@@ -442,13 +501,28 @@ export default function MetaIntegrationPage() {
     failed_items: number
     running_items: number
     queued_items: number
+    cooldown_until?: string | null
+    worker_heartbeat_at?: string | null
+    last_worker_error?: string | null
   } | null>(null)
   const [batchStalled, setBatchStalled] = useState(false)
+  const [batchHealthNow, setBatchHealthNow] = useState(() => Date.now())
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const stallRef = useRef(0)
   const retryWorkerRef = useRef(false)
   // Signature of the last observed child-item state — ANY movement resets stall.
   const lastProgressSigRef = useRef('')
+
+  const loadLinkedAssets = useCallback(async () => {
+    setLoadingLinked(true)
+    const { data } = await supabase
+      .from('meta_client_assets')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+    if (data) setLinkedAssets(data as LinkedAsset[])
+    setLoadingLinked(false)
+  }, [])
 
   type SyncResponse = Record<string, unknown>
 
@@ -472,7 +546,7 @@ export default function MetaIntegrationPage() {
     try {
       data = text ? JSON.parse(text) : null
     } catch {
-      data = null
+      // Keep the initialized null value when the provider body is not JSON.
     }
 
     return { response, data, text }
@@ -709,7 +783,7 @@ export default function MetaIntegrationPage() {
       const [{ data: batchData }, { data: itemRows }] = await Promise.all([
         supabase
           .from('meta_sync_batches')
-          .select('id, status, total_items, completed_items, failed_items')
+          .select('id, status, total_items, completed_items, failed_items, cooldown_until, worker_heartbeat_at, last_worker_error')
           .eq('id', batchIdValue)
           .single(),
         supabase
@@ -731,6 +805,7 @@ export default function MetaIntegrationPage() {
       ).length
       const totalCount = rows.length > 0 ? rows.length : Number(batchData?.total_items ?? 0)
 
+      setBatchHealthNow(Date.now())
       setBatch({
         id: batchIdValue,
         status: String(batchData?.status ?? 'running'),
@@ -739,6 +814,9 @@ export default function MetaIntegrationPage() {
         failed_items: rows.length > 0 ? failedCount : Number(batchData?.failed_items ?? 0),
         running_items: runningCount,
         queued_items: queuedCount,
+        cooldown_until: batchData?.cooldown_until,
+        worker_heartbeat_at: batchData?.worker_heartbeat_at,
+        last_worker_error: batchData?.last_worker_error,
       })
 
       // Restoration is finished the moment we have real counts — replace the
@@ -766,7 +844,8 @@ export default function MetaIntegrationPage() {
         if (
           stallRef.current >= 10
           && (runningCount === 0 || staleRunningCount === runningCount)
-        ) setBatchStalled(true)
+        ) setBatchStalled(metaBatchHealth(batchData, Date.now(), true).stalled)
+        else setBatchStalled(false)
       }
 
       const parentFinished = batchData?.status === 'completed' || batchData?.status === 'failed'
@@ -890,7 +969,7 @@ export default function MetaIntegrationPage() {
       }
 
       const months = getCompletedMonths(syncMonthCount)
-      const items = syncableAssets.map(a => ({ clientId: a.client_id, clientName: clientNameForAsset(a) }))
+      const items = syncableAssets.map(a => ({ assetId: a.id, clientId: a.client_id, clientName: clientNameForAsset(a) }))
 
       const { data, error } = await supabase.functions.invoke('meta-sync-enqueue', {
         method: 'POST',
@@ -932,6 +1011,9 @@ export default function MetaIntegrationPage() {
           grantedScopes: Array.isArray(data.connection?.grantedScopes) ? data.connection.grantedScopes : [],
           schemaReady: data.schemaReady === true,
           tokenEncryptedAtRest: data.tokenSecurity?.encryptedAtRest === true,
+          tokenLifecycle: data.tokenLifecycle ?? null,
+          assetHealthAvailable: Array.isArray(data.assetHealth),
+          assetHealth: Array.isArray(data.assetHealth) ? data.assetHealth : [],
           lastVerifiedInsight: data.connection?.lastVerifiedInsight ?? null,
         })
         setConnectMsg(null)
@@ -951,17 +1033,19 @@ export default function MetaIntegrationPage() {
 
   // On mount: load connection status, clients, and linked assets.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial provider hydration belongs to this mount boundary
     checkConnection()
     listClients('active').then(res => {
       if (res.data) setClients(res.data)
     })
     loadLinkedAssets()
-  }, [checkConnection])
+  }, [checkConnection, loadLinkedAssets])
 
   // OAuth result from URL query params.
   useEffect(() => {
     const meta = searchParams.get('meta')
     if (meta === 'connected') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reflect the provider callback encoded in the URL
       setConnectMsg('Meta connected. Next step: link assets to clients.')
       checkConnection()
       window.history.replaceState(null, '', window.location.pathname)
@@ -983,6 +1067,7 @@ export default function MetaIntegrationPage() {
     const clientParam = searchParams.get('client')
     if (!clientParam) return
     if (linkedAssets.some(asset => asset.client_id === clientParam)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- apply the explicit client deep link once after assets load
       setSyncMode('selected')
       setSelectedSyncClientId(clientParam)
       appliedClientParam.current = true
@@ -1004,7 +1089,7 @@ export default function MetaIntegrationPage() {
       if (savedBatchId) {
         const { data } = await supabase
           .from('meta_sync_batches')
-          .select('id, status, total_items, completed_items, failed_items')
+          .select('id, status, total_items, completed_items, failed_items, cooldown_until, worker_heartbeat_at, last_worker_error')
           .eq('id', savedBatchId)
           .single()
 
@@ -1025,7 +1110,7 @@ export default function MetaIntegrationPage() {
 
       const { data: activeBatches } = await supabase
         .from('meta_sync_batches')
-        .select('id, status, total_items, completed_items, failed_items')
+        .select('id, status, total_items, completed_items, failed_items, cooldown_until, worker_heartbeat_at, last_worker_error')
         .in('status', ['queued', 'running'])
         .order('created_at', { ascending: false })
         .limit(1)
@@ -1041,17 +1126,8 @@ export default function MetaIntegrationPage() {
     }
 
     restore()
-  }, [])
-
-  const loadLinkedAssets = useCallback(async () => {
-    setLoadingLinked(true)
-    const { data } = await supabase
-      .from('meta_client_assets')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-    if (data) setLinkedAssets(data as LinkedAsset[])
-    setLoadingLinked(false)
+  // Restore callbacks intentionally use the current mount snapshot; polling owns later transitions.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleConnect() {
@@ -1172,7 +1248,7 @@ export default function MetaIntegrationPage() {
   // Per-page IG options for inline row pickers.
   function igOptionsForPage(pageId: string | null | undefined) {
     const filtered = pageId ? igAccounts.filter(a => a.facebookPageId === pageId) : igAccounts
-    let options = filtered
+    const options = filtered
       .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
     // Also add any linked IG entry for this page from linked assets.
     for (const link of linkedAssets) {
@@ -1391,6 +1467,7 @@ export default function MetaIntegrationPage() {
         instagramNotApplicable: Boolean(s.currentLink?.instagram_not_applicable),
       }
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- seed editable rows after provider assets arrive
     setRowSelections(initial)
   }, [assetsLoaded, suggestions])
 
@@ -1662,6 +1739,16 @@ export default function MetaIntegrationPage() {
             label="Token storage"
             value={connectionInfo?.tokenEncryptedAtRest ? 'Encrypted at rest' : 'Server-only; encryption hardening required'}
             tone={connectionInfo?.tokenEncryptedAtRest ? 'ok' : 'warn'}
+          />
+          <HealthTile
+            label="Token validity"
+            value={tokenStateLabel(connectionInfo)}
+            tone={connectionInfo?.tokenLifecycle?.state === 'valid' ? 'ok' : 'warn'}
+          />
+          <HealthTile
+            label="Token/data access expiry"
+            value={tokenExpiryLabel(connectionInfo)}
+            tone={connectionInfo?.tokenLifecycle?.state === 'expired' || connectionInfo?.tokenLifecycle?.state === 'data_access_expired' ? 'warn' : 'neutral'}
           />
           <HealthTile
             label="Last verified insight"
@@ -2119,7 +2206,7 @@ export default function MetaIntegrationPage() {
             <div className="mt-3 rounded-xl border border-brand-accent/20 bg-brand-accent/10 p-4">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-sm font-semibold text-brand-accent">
-                  {batchStalled ? 'Sync is not moving' : 'Syncing in background...'}
+                  {metaBatchHealth(batch, batchHealthNow, false).coolingDown ? 'Waiting for Meta' : batchStalled ? 'Sync needs attention' : 'Syncing in background...'}
                 </p>
                 <span className="text-xs text-brand-primary/60">
                   {(batch.completed_items ?? 0) + (batch.failed_items ?? 0)} / {batch.total_items ?? 0}
@@ -2138,6 +2225,11 @@ export default function MetaIntegrationPage() {
                 <span>Queued: {batch.queued_items ?? 0}</span>
                 <span className="ml-auto">{batch.total_items > 0 ? Math.round((((batch.completed_items ?? 0) + (batch.failed_items ?? 0)) / batch.total_items) * 100) : 0}%</span>
               </div>
+              {metaBatchHealth(batch, batchHealthNow, false).coolingDown && (
+                <p className="mt-3 text-xs text-brand-primary" role="status">
+                  {batch.last_worker_error || 'Meta requested a pause.'} Next retry: {new Date(batch.cooldown_until!).toLocaleString('en-ZA')}. Sync resumes automatically.
+                </p>
+              )}
               {/* A restart is safe when nothing is running or every running item
                   has exceeded the worker lease. The claim RPC requeues stale rows
                   atomically before locking the next item. */}
@@ -2419,6 +2511,8 @@ export default function MetaIntegrationPage() {
           <div className="space-y-2">
             {linkedAssets.map(asset => {
               const client = clients.find(c => c.id === asset.client_id)
+              const health = connectionInfo?.assetHealth.find(item => item.clientId === asset.client_id)
+              const healthAvailable = connectionInfo?.assetHealthAvailable === true
               return (
                 <div key={asset.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-muted bg-brand-bg/50 p-4">
                   <div className="min-w-0 flex-1 text-sm">
@@ -2426,6 +2520,8 @@ export default function MetaIntegrationPage() {
                     <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
                     <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : asset.instagram_not_applicable ? 'Instagram not applicable' : 'No Instagram account linked'}</p>
                     <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
+                    {asset.facebook_page_id && <p className="mt-2 text-xs text-brand-primary/65">{healthAvailable ? assetRunLabel('Facebook', health?.facebook ?? null) : 'Facebook: refresh diagnostics unavailable'}</p>}
+                    {asset.instagram_account_id && <p className="text-xs text-brand-primary/65">{healthAvailable ? assetRunLabel('Instagram', health?.instagram ?? null) : 'Instagram: refresh diagnostics unavailable'}</p>}
                   </div>
                   <ActionButton variant="danger" size="sm" onClick={() => handleDeactivate(asset)}>
                     Deactivate

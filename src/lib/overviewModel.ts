@@ -110,6 +110,9 @@ export const METRIC_LABELS: Record<string, string> = {
   unique_viewers: 'Viewers',
   reach: 'Reach',
   content_interactions: 'Content interactions',
+  post_engagements: 'Post engagements',
+  unfollows: 'Unfollows',
+  net_follows: 'Net follows',
   profile_visits: 'Profile visits',
   page_visits: 'Page visits',
   website_clicks: 'Website clicks',
@@ -150,7 +153,7 @@ export interface OverviewSection {
 
 const SECTION_METRICS: Record<OverviewSection['key'], string[]> = {
   brand_visibility: ['brand_views', 'unique_viewers', 'reach'],
-  audience_response: ['content_interactions', 'profile_visits', 'follows_gained', 'current_followers'],
+  audience_response: ['content_interactions', 'post_engagements', 'profile_visits', 'follows_gained', 'unfollows', 'net_follows', 'current_followers'],
   commercial_intent: ['website_clicks', 'page_visits'],
 }
 
@@ -206,6 +209,12 @@ export function buildOverviewSections(
   current: PlatformFact[],
   previous: PlatformFact[] = [],
 ): OverviewSection[] {
+  // Historical facts retain their snapshots, but never retain a false semantic key.
+  const nativeFact = (fact: PlatformFact): PlatformFact => fact.platform === 'facebook' && fact.sourceMetric === 'page_post_engagements'
+    ? { ...fact, metricKey: 'post_engagements' } : fact
+  current = current.map(nativeFact).filter(f => f.sourceMetric !== 'reconstructed_post_engagements')
+  previous = previous.map(nativeFact).filter(f => f.sourceMetric !== 'reconstructed_post_engagements')
+  current = [...new Map(current.map(f => [f.platform + ':' + f.metricKey, f])).values()]
   const prevIndex = new Map<string, PlatformFact>()
   for (const f of previous) prevIndex.set(`${f.platform}:${f.metricKey}`, f)
 
@@ -214,7 +223,9 @@ export function buildOverviewSections(
     const lines: OverviewLine[] = []
     for (const metricKey of SECTION_METRICS[key]) {
       const facts = current
-        .filter(f => f.metricKey === metricKey && hasRenderableFact(f))
+        // A provider fact with no verified value is still part of the platform
+        // result. Render it as unavailable instead of silently removing it.
+        .filter(f => f.metricKey === metricKey)
         .sort((a, b) => {
           const ai = PLATFORM_ORDER.indexOf(a.platform); const bi = PLATFORM_ORDER.indexOf(b.platform)
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
