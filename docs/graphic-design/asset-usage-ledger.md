@@ -1,154 +1,288 @@
 # Graphic Design Asset Usage Ledger
 
+Last updated: 2026-09-09
+
 ## Purpose
 
-Prevent accidental repetition of client media and make the creative process auditable, staff-friendly and reusable across future ChatGPT conversations.
+Prevent accidental repetition of client media and creative ideas, make poster production auditable, and give both ChatGPT and human designers a reliable answer to: **what has already been used, what is safe to use now, and why?**
+
+This ledger is part of the existing CG Dynamics content system. It is not a second social calendar or a second media library.
+
+## Source-of-truth hierarchy
+
+- **CG Dynamics `monthly_deliverables`** = exact package/schedule item.
+- **Canonical client OneDrive** = original media/file truth.
+- **Poster month folder** = production derivatives/candidates/finals.
+- **Canva exact design + page** = editable creative/history linkage.
+- **Dynamics usage ledger** = long-term structured memory of source, usage, repetition and learning.
+- **`CG Creative Assistant` OneDrive workspace** = human-friendly helper/curation surface, not canonical database truth.
 
 ## Bootstrap once per client
 
-A client entering the Graphic Design Assistant lane gets a one-time historical reconciliation.
+A client entering the Graphic Design Assistant lane gets one historical reconciliation before normal monthly production begins.
 
-1. Read the client's Canva marketing design(s), especially POSTED / SCHEDULED history.
-2. Catalogue poster pages already published or scheduled.
-3. For each page, identify the main photo(s), supporting media, visible people, product/service/topic and creative mechanism.
-4. Match used photos back to OneDrive where possible.
-   - exact filename/asset ID match when available;
-   - exact-content hash when raw bytes are available;
-   - perceptual/near-duplicate comparison for resized/cropped versions;
+1. Resolve the exact active client and its canonical OneDrive/Canva mappings.
+2. Separate any sub-brand/design scopes before analysis (e.g. Piek corporate, Engen, Sasol, Get Together).
+3. Read the client's existing Canva marketing design(s), especially the `POSTED / SCHEDULED` area and relevant older approved work.
+4. Catalogue published/scheduled poster pages using stable Canva `design_id` + page identity wherever available.
+5. For each historic poster record:
+   - visible hero/support imagery;
+   - visible people without inventing identities;
+   - product/service/topic;
+   - branch/location;
+   - headline/copy idea;
+   - creative mechanism/layout family;
+   - approximate publish/schedule date where supported.
+6. Match used imagery back to canonical OneDrive where possible:
+   - exact OneDrive item ID/file reference when known;
+   - exact-content hash when bytes are available;
+   - perceptual similarity for crops/resizes/re-exports;
+   - capture-time/filename-sequence + visual similarity for burst groups;
    - visual review when automated matching is uncertain.
-5. Mark unmatched historic imagery as `legacy_external` rather than inventing provenance.
-6. Seed the Dynamics ledger and staff-friendly OneDrive workspace.
+7. Mark unmatched historic imagery as `legacy_external` or `unresolved_legacy`; never fabricate provenance.
+8. Seed the Dynamics usage ledger.
+9. Populate only the practical human-helper state in `CG Creative Assistant`; do not copy the entire photography library.
 
-## OneDrive workspace
+The bootstrap is deliberately heavier. Once completed, future months record usage as they happen and should not repeat historical archaeology.
 
-Working folder name: `CG Creative Assistant`.
+## `CG Creative Assistant` helper workspace
+
+Use one consistent helper structure:
 
 ```text
 CG Creative Assistant/
-  00_README/
-  01_READY_UNUSED/
-  02_USED_REFERENCE/
-  03_BLOCKED_DO_NOT_USE/
-  04_CURRENT_MONTH/
-  05_APPROVED_EXPORTS/
-  manifests/
+  00_SYSTEM/
+  01_ASSET_LIBRARY/
+    READY_UNUSED/
+    USED_REFERENCE/
+    BLOCKED_DO_NOT_USE/
+  02_STYLE_REFERENCES/
+    <BRAND_SCOPE>/
+  03_HISTORY/
 ```
+
+Canonical month production remains under:
+
+`Clients/<Client>/Posters/<YYYY>/<YYYY_MM_MON>/`
 
 ### Operating principle
 
-Do not destructively reorganise the client's canonical photography library merely for the assistant. Canonical originals remain in the existing client photo folders. The creative-assistant workspace contains curated working copies/references, current-month selects, exports and manifests so staff can continue manually when needed.
+Do not destructively reorganise the client's canonical photography library just to make the assistant easier to use.
 
-### Staff behaviour
+- Originals stay in existing `Photos`/client media folders.
+- `READY_UNUSED` is a curated reference/state surface, not proof that an image is globally unused by itself.
+- `USED_REFERENCE` helps staff see recent/important usage visually.
+- `BLOCKED_DO_NOT_USE` records clear exclusions such as departed staff, obsolete products or client-requested restrictions without requiring deletion.
+- Deletion of canonical media is a separate deliberate file-management action, never an automatic consequence of marking something blocked.
 
-- remove clearly irrelevant/expired media from the canonical client library when authorised;
-- alternatively mark it `blocked` immediately if deletion is not appropriate;
-- keep READY_UNUSED clean enough that manual designers can safely pick from it;
-- after a poster is approved/scheduled, move its workspace copy/reference to USED_REFERENCE and record the source asset in Dynamics.
+## Canonical content identity
 
-## Dynamics ledger model
+Every usage record must resolve to the actual Dynamics deliverable.
 
-Each static content item should link to the exact schedule/deliverable slot and store at minimum:
+Designed poster stable production ID:
+
+`YYYY_MM_CLIENT_DP_XX`
+
+Example:
+
+`2026_11_PIEK_DP_01`
+
+`monthly_deliverables.id` remains the immutable database identity. `brand_scope`, branch/location and descriptive topic stay separate metadata.
+
+Do not use the retired pilot naming pattern (`CLIENT-SUBBRAND_YYYY-MM_P##_*`) as the canonical key.
+
+## Minimum Dynamics ledger model
+
+Each designed-poster item should eventually retain at least:
 
 ```text
-content_item_id
+monthly_deliverable_id
+stable_production_id
 client_id
-subbrand_id
+client_short_code
+brand_scope
+branch_location
 month
-package_slot
-stable_poster_name
-canva_design_id
-canva_page_id_or_page_number
-status
+code = DP
+instance_number
 scheduled_at
 posted_at
+status
+
+strategy_version
 primary_objective
 buying_situation
 audience
+primary_content_role
 intended_emotion
 single_minded_proposition
-creative_mechanism
+proof
 headline
+creative_mechanism
+reuse_reason
+
 source_media[]
   onedrive_drive_id
-  onedrive_item_id
+  original_onedrive_item_id
+  edited_source_onedrive_item_id
   source_filename
   exact_hash
-  perceptual_hash
+  perceptual_fingerprint
+  near_duplicate_group
   shoot_group
-  role (hero/support/background)
+  role = hero | support | background
+  usage_confidence
+
 people_usage_tags[]
 product_service_tags[]
 branch_location_tags[]
+concept_tags[]
+
+wave_candidates[]
+canva_design_id
+canva_page_id
+canva_page_index
+approval_state
 approval_notes
+publish_platform_refs[]
 performance_summary
+learning_notes
 ```
 
-## Repetition controls
+Implementation field names may differ, but the information boundary should remain.
 
-### Exact image
+## Freshness dimensions
 
-Detect via OneDrive item ID and content hash.
+Freshness is not one boolean.
 
-### Cropped/resized/re-exported duplicate
+### 1. Exact image
 
-Use perceptual similarity and visual confirmation. The same source should remain recognised even if cropped, colour-corrected or exported at another resolution.
+Detect via durable OneDrive item ID and/or exact content hash.
 
-### Burst/near-duplicate
+If it was already used, treat reuse as deliberate and require a reason.
 
-Group adjacent photos from the same shoot/sequence using capture time, filename sequence and visual similarity. Avoid presenting a near-identical burst frame as 'fresh'.
+### 2. Cropped/resized/re-exported duplicate
 
-### Same person
+Use perceptual similarity plus visual confirmation. A source remains the same source even after crop, colour grade, resolution change or export.
 
-Do not build a hidden identity/biometric naming system. Use staff/client-provided person tags when names are needed. During creative review, ChatGPT may also flag that the same visible person appears repeatedly without naming them. The goal is rotation, not identity recognition.
+### 3. Burst / near-duplicate / same shoot angle
 
-### Same product/service/topic
+Group adjacent or visually near-identical photographs using available capture metadata, filename sequence and visual similarity.
 
-Record explicit semantic tags from the client schedule and design. Repetition is acceptable only with a reason and a fresh execution.
+A slightly different frame from the same burst is not automatically fresh.
 
-### Same creative mechanism
+### 4. Same visible person
 
-Track more than subject matter. Examples:
+Do not build a hidden biometric identity database.
+
+- Use staff/client-provided person tags when names are operationally needed.
+- ChatGPT may flag visual repetition such as “the same visible staff member appears in several recent creatives” without naming them.
+- If the business needs a named staff restriction, record that from explicit human/client knowledge, not inferred identity.
+
+The goal is creative rotation and compliance, not person identification.
+
+### 5. Same product/service/topic
+
+Record semantic tags from the deliverable/brief and final creative.
+
+A service may be repeated because the client requests it or because it becomes strategically relevant again, but the system should know that it is a repeat and demand a current reason.
+
+### 6. Same branch/location
+
+For multi-site clients, avoid unintentionally making one site look like the entire business. Track location representation alongside subject usage.
+
+### 7. Same headline/concept
+
+A new photograph does not make an old idea new. Track the core message/tension/hook separately from the media.
+
+### 8. Same creative mechanism
+
+Track the design idea, for example:
 
 - giant headline over cutout person;
-- split-screen before/after;
+- split-screen comparison;
 - dark gradient with floating product;
-- handwritten sticker treatment;
+- handwritten/sticker annotation;
 - editorial photo-led cover;
-- illustrated diagram;
+- newspaper/magazine ad treatment;
+- map/location visual;
 - meme/reaction format;
-- offer/pricing card.
+- offer/pricing architecture;
+- collage;
+- macro/scale play.
 
-Do not let a month become five colour variants of the same mechanism.
+Do not let a month become multiple colour/image variants of one mechanism.
 
-## Stable naming
+## Usage states
 
-Recurring package static:
+A practical asset may be treated as:
 
-`CLIENT-SUBBRAND_YYYY-MM_P##_[SHORT-TOPIC]`
+- `ready_unused` — no known conflicting recent use and suitable for selection;
+- `used_recent` — already used recently; avoid by default;
+- `used_historic` — used, but sufficiently old that strategic reuse may be considered;
+- `near_duplicate_recent` — not exact same file but materially similar to a recent source;
+- `blocked` — explicitly do not use;
+- `legacy_external` — historic poster image not found in canonical OneDrive;
+- `uncertain` — provenance/similarity unresolved; requires human/visual review.
 
-Once-off:
+Do not turn these into rigid time windows globally. What counts as “recent” depends on client posting volume, subject scarcity, campaign context and explicit client requests. The system should expose last-use evidence and make a reasoned choice.
 
-`CLIENT-SUBBRAND_YYYY-MM_X##_[SHORT-TOPIC]`
+## Reuse rule
 
-Examples:
+Reuse is allowed only when the record contains a defensible reason, for example:
 
-- `PIEK-ENGEN_2026-11_P01_SUMMER-TRAVEL`
-- `REDOAK_2026-10_P03_LOADED-OMELETTE`
+- explicit client request;
+- campaign continuity;
+- product/service is strategically relevant again;
+- event/season makes the old source specifically useful;
+- meaningful time has passed;
+- source is uniquely strong/only viable evidence;
+- deliberate reinterpretation creates a genuinely different execution.
 
-The package slot is stable even if the design is revised. Revision metadata belongs in version history, not by changing the slot identity.
+“Could not find another photo” is not automatically sufficient if the client has unused media available.
 
-## Selection score
+## Candidate source selection score
 
-Before selecting a hero photo, score candidates on:
+Before selecting hero media, evaluate:
 
-- unused/freshness confidence;
-- recency and current relevance;
+- freshness confidence;
+- relevance to the exact strategy/message;
+- current/seasonal relevance;
 - visual quality;
-- fit to the exact message;
 - branch/location truth;
-- person/product rotation;
+- person/product/service rotation;
+- source fidelity/identity safety;
 - crop/composition potential;
-- mobile readability around the subject;
-- brand/creative differentiation from recent work.
+- room for phone-readable type;
+- differentiation from recent Canva work;
+- whether professional editing can make the source production-ready without faking it.
 
-The 'best-looking photo' is not automatically the best poster source if it creates repetition or weak message fit.
+The best-looking photograph is not automatically the best poster source if it causes repetition or weak strategic fit.
+
+## Historical matching confidence
+
+Historic Canva-to-OneDrive matching should preserve uncertainty instead of forcing a false match.
+
+Suggested confidence states:
+
+- `exact` — same durable item/hash or clearly identical source;
+- `high` — perceptually/visually the same source with crop/export differences;
+- `probable` — likely near-duplicate/burst but not proven exact;
+- `unresolved` — cannot safely map.
+
+Only `exact`/`high` should normally block an image as an exact-source repeat automatically. `probable` should raise a review warning.
+
+## Staff/manual-design parity
+
+The ledger applies even when a designer chooses to build the poster manually from scratch.
+
+Staff should:
+
+1. choose media through the same freshness check;
+2. use the same stable production ID;
+3. save the professionally edited source into the month production folder;
+4. link the final Canva page to the same deliverable;
+5. record source/subject/concept usage;
+6. let approval/posting/performance write back to the same record.
+
+AI is optional. The production discipline is not.
