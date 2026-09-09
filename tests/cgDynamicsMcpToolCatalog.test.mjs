@@ -26,12 +26,12 @@ test('catalog exposes no infrastructure or arbitrary data tool', () => {
   assert.doesNotMatch(names, /sql|query_table|supabase|database|delete|publish|send/i)
 })
 
-test('read-first release covers exact staff, task, calendar, schedule, lead, client context and profile', () => {
+test('read tools cover exact staff, task, calendar, schedule, lead, client context, profile, bootstrap and recurring', () => {
   const reads = catalog.CG_DYNAMICS_MCP_TOOLS.filter(tool => tool.annotations.readOnlyHint).map(tool => tool.name)
   assert.deepEqual(reads, [
     'get_my_day', 'list_my_tasks', 'get_task', 'list_my_calendar',
     'list_client_schedule', 'get_client_context', 'list_my_leads', 'get_lead',
-    'get_my_profile',
+    'get_my_profile', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
   ])
 })
 
@@ -53,13 +53,13 @@ test('server instruction resolves exact bearer identity and forbids unsafe fallb
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 14 tools: 9 read + 5 write', () => {
+test('catalog contains exactly 17 tools: 11 read + 6 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 14)
+  assert.equal(tools.length, 17)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 9)
-  assert.equal(writes.length, 5)
+  assert.equal(reads.length, 11)
+  assert.equal(writes.length, 6)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {
@@ -124,4 +124,32 @@ test('update_my_preferences merges with existing values and requires idempotency
   assert.ok(props.working_preferences)
   assert.ok(props.repeated_corrections)
   assert.ok(props.lead_research_criteria)
+})
+
+test('get_my_assistant_bootstrap is a read-only tool requiring no parameters', () => {
+  const bootstrap = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_assistant_bootstrap')
+  assert.ok(bootstrap)
+  assert.equal(bootstrap.annotations.readOnlyHint, true)
+  assert.deepEqual(bootstrap.inputSchema.required, [])
+  assert.match(bootstrap.description, /self-brief/i)
+})
+
+test('get_my_recurring_tasks is a read-only tool listing templates not instances', () => {
+  const recurring = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_recurring_tasks')
+  assert.ok(recurring)
+  assert.equal(recurring.annotations.readOnlyHint, true)
+  assert.deepEqual(recurring.inputSchema.required, [])
+  assert.match(recurring.description, /template/i)
+})
+
+test('create_recurring_task requires title, recurrence_rule and idempotency_key', () => {
+  const createRec = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'create_recurring_task')
+  assert.ok(createRec)
+  assert.equal(createRec.annotations.readOnlyHint, false)
+  assert.equal(createRec.annotations.idempotentHint, true)
+  assert.ok(createRec.inputSchema.required.includes('title'))
+  assert.ok(createRec.inputSchema.required.includes('recurrence_rule'))
+  assert.ok(createRec.inputSchema.required.includes('idempotency_key'))
+  assert.match(createRec.description, /recurrence/i)
+  assert.match(createRec.canonicalContract, /recurrence/i)
 })

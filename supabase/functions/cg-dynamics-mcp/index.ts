@@ -10,6 +10,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { CG_DYNAMICS_MCP_TOOLS } from './toolCatalog.ts'
+import { filterCapabilitiesByScope } from './capabilityManifest.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -496,9 +497,107 @@ const handleUpdateMyPreferences: ToolHandler = async (staff, input) => {
   return { profile: data, message: 'Preferences updated.' }
 }
 
+const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
+  const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
+  if (!hasTable) return { error: 'Staff assistant workspace not yet available. Complete #305 setup first.' }
+
+  const { data: profile, error: profileError } = await staff.supabase
+    .from('staff_assistant_profiles')
+    .select('profile_id, responsibilities, recurring_duties, working_preferences, output_preferences, lead_research_criteria, repeated_corrections, common_task_types, approved_access_scope, project_instructions, instructions_version, instructions_refreshed_at, instructions_applied_at, profile_verified_at')
+    .eq('profile_id', staff.profileId)
+    .maybeSingle()
+
+  if (profileError) return { error: profileError.message }
+
+  const scopes = profile?.approved_access_scope ?? []
+  const capabilities = filterCapabilitiesByScope(scopes)
+
+  const mcpTools = CG_DYNAMICS_MCP_TOOLS.map(t => ({
+    name: t.name,
+    title: t.title,
+    description: t.description,
+    dependency: t.dependency,
+    readOnly: t.annotations.readOnlyHint,
+  }))
+
+  return {
+    identity: {
+      profile_id: staff.profileId,
+      full_name: staff.fullName,
+      role: staff.role,
+      is_active: staff.isActive,
+    },
+    assistant_profile: profile ? {
+      responsibilities: profile.responsibilities,
+      recurring_duties: profile.recurring_duties,
+      working_preferences: profile.working_preferences,
+      output_preferences: profile.output_preferences,
+      lead_research_criteria: profile.lead_research_criteria,
+      repeated_corrections: profile.repeated_corrections,
+      common_task_types: profile.common_task_types,
+      approved_access_scope: profile.approved_access_scope,
+      instructions_version: profile.instructions_version,
+      instructions_refreshed_at: profile.instructions_refreshed_at,
+    } : null,
+    capability_manifest: capabilities.map(cap => ({
+      key: cap.key,
+      label: cap.label,
+      description: cap.description,
+      usefulFor: cap.usefulFor,
+      exampleActions: cap.exampleActions,
+      operatingStandards: cap.operatingStandards,
+      expectedConnected: cap.expectedConnected,
+      fallbackGuidance: cap.fallbackGuidance,
+    })),
+    mcp_tools: mcpTools,
+    operating_rules: [
+      'CG Dynamics is the durable source of truth. Retrieve current personal operating context before operational work.',
+      'Before claiming a capability is unavailable, inspect the tools/plugins actually available in the current ChatGPT session and try the relevant connected tool when safe.',
+      'Distinguish expected, available-in-session, authorised, and blocked/error states. Never pretend a connector is live when it is not.',
+      'When a request can be materially reduced by a connected tool, proactively offer or perform the work within permission rules.',
+      'Use exact client IDs and canonical CG standards for file/task/client actions.',
+      'Never invent ownership, deadlines, status, or a second task list.',
+      'Never merge CG Calendar and Client Schedule.',
+      'Never retrieve another staff member\'s private assistant profile.',
+      'All writes through this MCP are audited and idempotent.',
+    ],
+    message: profile
+      ? `Bootstrap ready for ${staff.fullName}. This payload contains your durable profile, capability manifest, MCP tools and operating rules. Use it to initialise a fresh Project.`
+      : `No assistant profile found for ${staff.fullName}. Use update_my_preferences to create one, then call bootstrap again.`,
+  }
+}
+
+const handleGetMyRecurringTasks: ToolHandler = async (staff) => {
+  const { data, error } = await staff.supabase
+    .from('planner_tasks')
+    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, recurrence_rule, recurrence_until, created_at, updated_at')
+    .eq('assigned_to_name', staff.fullName)
+    .not('recurrence_rule', 'is', null)
+    .is('archived_at', null)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  return { templates: data ?? [], error: error?.message ?? null }
+}
+
+const handleCreateRecurringTask: ToolHandler = async (staff, input) => {
+  const { data, error } = await staff.supabase.rpc('create_assistant_recurring_task', {
+    p_title: input.title,
+    p_recurrence_rule: input.recurrence_rule,
+    p_recurrence_until: input.recurrence_until ?? null,
+    p_assignee_name: input.assignee_name ?? staff.fullName,
+    p_client_id: input.client_id ?? null,
+    p_client_name: input.client_name ?? null,
+    p_notes: input.notes ?? null,
+  })
+
+  if (error) return { error: error.message }
+  return { template: data, message: 'Recurring task template created. Instances will be materialised automatically within a 14-day window.' }
+}
+
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences'])
+const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task'])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -515,6 +614,9 @@ const toolHandlers: Record<string, ToolHandler> = {
   add_lead_research: handleAddLeadResearch,
   get_my_profile: handleGetMyProfile,
   update_my_preferences: handleUpdateMyPreferences,
+  get_my_assistant_bootstrap: handleGetMyAssistantBootstrap,
+  get_my_recurring_tasks: handleGetMyRecurringTasks,
+  create_recurring_task: handleCreateRecurringTask,
 }
 
 // ── MCP Server ──────────────────────────────────────────────────────────────

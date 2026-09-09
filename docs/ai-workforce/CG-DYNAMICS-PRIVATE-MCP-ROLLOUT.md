@@ -18,12 +18,22 @@ The official plugin developer documentation reviewed here does not prove that a 
 ## What is now implemented
 
 ### Tool catalog (`supabase/functions/cg-dynamics-mcp/toolCatalog.ts`)
-16 typed, closed-schema tools:
-- **9 read tools**: `get_my_day`, `list_my_tasks`, `get_task`, `list_my_calendar`, `list_client_schedule`, `get_client_context`, `list_my_leads`, `get_lead`, `get_my_profile`
-- **6 write tools**: `create_task`, `update_task`, `update_lead`, `add_lead_research`, `update_my_preferences` (all idempotent)
-- **1 profile read tool**: `get_my_profile` (durable preferences, corrections, responsibilities)
+17 typed, closed-schema tools:
+- **11 read tools**: `get_my_day`, `list_my_tasks`, `get_task`, `list_my_calendar`, `list_client_schedule`, `get_client_context`, `list_my_leads`, `get_lead`, `get_my_profile`, `get_my_assistant_bootstrap`, `get_my_recurring_tasks`
+- **6 write tools**: `create_task`, `update_task`, `update_lead`, `add_lead_research`, `update_my_preferences`, `create_recurring_task` (all idempotent)
 
 Every tool maps to an existing canonical Dynamics contract. No SQL, raw tables, service keys, arbitrary mutation, or destructive action.
+
+### CG capability manifest (`supabase/functions/cg-dynamics-mcp/capabilityManifest.ts`)
+Shared catalog of approved company capabilities, filtered per staff member:
+- **CG Dynamics MCP** (this connector): tasks, leads, client context, preferences, recurring tasks
+- **Microsoft Teams / Planner**: assigned work, task management, team context
+- **Outlook / Calendar**: schedule, meetings, timing context
+- **OneDrive / SharePoint**: client files, naming conventions, folder structure
+- **Canva**: brand templates, design workflows
+- **Adobe**: creative production, PDF/image workflows
+
+Each capability includes: key, label, description, useful-for examples, example actions, operating standards, required role, expected-connected flag, and fallback guidance. The manifest is filtered by the staff member's `approved_access_scope`.
 
 ### MCP Edge Function (`supabase/functions/cg-dynamics-mcp/index.ts`)
 Full working MCP server implementing:
@@ -44,16 +54,19 @@ Creates `mcp_idempotency_log` table with:
 - Service-role only access (no direct authenticated read/write)
 
 ### Tests (`tests/cgDynamicsMcpToolCatalog.test.mjs`)
-16 focused tests covering:
+17 focused tests covering:
 - Schema validity and uniqueness
 - Safety annotations (no destructive/open-world tools)
-- Read-first coverage (9 read tools including profile)
+- Read-first coverage (11 read tools including bootstrap and recurring)
 - Write idempotency requirements
 - Server instruction security
 - Dependency declarations
-- Tool count (16 total: 10 read + 6 write)
+- Tool count (17 total: 11 read + 6 write)
 - Action restrictions (no delete/destroy)
 - Profile read/write contracts
+- Bootstrap tool contract (read-only, no parameters, self-briefing description)
+- Recurring tasks read contract (templates, not instances)
+- Recurring task creation contract (requires title, recurrence_rule, idempotency_key)
 
 ## What each tool actually calls
 
@@ -73,16 +86,20 @@ Creates `mcp_idempotency_log` table with:
 | `add_lead_research` | `business_development_lead_research` RLS | `business_development_lead_research` INSERT |
 | `get_my_profile` | `staff_assistant_profiles` RLS | `staff_assistant_profiles` |
 | `update_my_preferences` | `save_my_staff_assistant_profile` RPC | `staff_assistant_profiles` UPSERT via RPC |
+| `get_my_assistant_bootstrap` | `staff_assistant_profiles` + `capabilityManifest.ts` | `staff_assistant_profiles` + shared CG capability registry |
+| `get_my_recurring_tasks` | `planner_tasks` where `recurrence_rule is not null` | `planner_tasks` templates filtered by `assigned_to_name` |
+| `create_recurring_task` | `create_assistant_recurring_task` RPC | `planner_tasks` INSERT with `recurrence_rule` + `source='recurring'` |
 
 ## Dependencies on upstream branches
 
 | Dependency | Branch | Status | MCP impact |
 |-----------|--------|--------|------------|
-| #305 staff assistant + leads | `feat/staff-assistant-workspaces` | DRAFT PR #309 | `get_my_profile`, `update_my_preferences`, `list_my_leads`, `get_lead`, `update_lead`, `add_lead_research` return clear errors until merged |
+| #305 staff assistant + leads | `feat/staff-assistant-workspaces` | DRAFT PR #309 | `get_my_profile`, `update_my_preferences`, `get_my_assistant_bootstrap`, `list_my_leads`, `get_lead`, `update_lead`, `add_lead_research` return clear errors until merged |
 | #241/#294 client intelligence | `feat/client-intelligence-runtime` | DRAFT PR #247 | `get_client_context` returns basic client data; full intelligence requires merge |
-| #208 task actions | `main` | Merged | `create_task`, `update_task` fully functional |
+| #208 task actions | `main` | Merged | `create_task`, `update_task`, `get_my_recurring_tasks`, `create_recurring_task` fully functional |
+| Recurrence model | `main` | Merged | `create_recurring_task` creates templates; `materializeRecurringTasks()` handles instance generation |
 
-**Key design**: tools that depend on unmerged tables detect table absence and return a clear error message instead of crashing. The 9 `main`-dependency tools work today against `main`.
+**Key design**: tools that depend on unmerged tables detect table absence and return a clear error message instead of crashing. The `main`-dependency tools work today against `main`.
 
 ## Identity proof: Sydney
 
@@ -117,6 +134,52 @@ The connector is now ready to support Sydney's history-salvage prompt writing di
 
 **Do not run the salvage prompt until the connector is connected to ChatGPT and verified working end-to-end.**
 
+## Bootstrap / self-briefing capability
+
+`get_my_assistant_bootstrap` returns a compact payload that lets a fresh ChatGPT Project self-brief:
+
+- **identity**: exact `profile_id`, `full_name`, `role`, `is_active`
+- **assistant_profile**: durable responsibilities, preferences, corrections, recurring duties, access scope, instructions version
+- **capability_manifest**: shared CG capability catalog filtered to the staff member's approved scope, with:
+  - key, label, description
+  - usefulFor (what it does)
+  - exampleActions (sample prompts)
+  - operatingStandards (CG rules for that capability)
+  - expectedConnected (whether the company workspace typically has it)
+  - fallbackGuidance (what to say if unavailable)
+- **mcp_tools**: all 17 MCP tools with name, description, dependency, readOnly flag
+- **operating_rules**: 9 mandatory runtime rules (truth source, tool-first check, no cross-client, etc.)
+
+The bootstrap does NOT contain: mutable daily tasks, current leads, client contacts, prices, tokens, secrets, or provider IDs. Those are read live from canonical Dynamics.
+
+### Tool-awareness rule
+
+The bootstrap instructs ChatGPT to:
+1. Inspect actual session tools before claiming a capability is unavailable
+2. Distinguish expected / available-in-session / authorised / blocked-error
+3. Proactively offer connected-tool actions when they reduce staff manual work
+4. Use exact client IDs and CG standards for file/task/client actions
+
+## Recurring task support
+
+`create_recurring_task` creates a template row in `planner_tasks` with `recurrence_rule` set. The existing `materializeRecurringTasks()` function (in `src/lib/recurrence.ts`) automatically generates instances within a 14-day window when the view loads.
+
+### Recurrence rules
+- **RRULE subset**: `FREQ=DAILY|WEEKLY|MONTHLY`, optional `INTERVAL`, `BYDAY` (MO..SU), `BYMONTHDAY` (1-28)
+- **recurrence_until**: optional end date (must not be in the past)
+- **recurrence_parent_id**: set on instances, points to the template
+- **recurrence_rule**: set on templates, null on instances
+- **import_hash**: `rec-<templateId>-<date>` for idempotent instance materialisation
+
+### Template behaviour
+- Templates do not appear in normal task lists (filtered by `recurrence_rule is null`)
+- Templates are excluded from calendar views, completion authority, and push counts
+- Completing/deleting an instance never touches the template
+- Instances inherit assignments from the template via `inherit_recurring_planner_task_assignments()` trigger
+
+### Tool: `get_my_recurring_tasks`
+Lists recurring templates assigned to the exact staff member. Returns `recurrence_rule`, `recurrence_until`, and current template status.
+
 ## Explicit gates
 
 ### CA ACTION REQUIRED — OAuth / secrets / endpoint / workspace connection
@@ -140,9 +203,9 @@ Before the connector can be used from ChatGPT, CA must:
    ```
    The function uses service role internally; the Bearer token is the user's Supabase auth token.
 
-4. **Apply the idempotency migration**:
+4. **Apply the idempotency + recurring task migrations**:
    ```bash
-   supabase db push  # or apply 20260909100000_mcp_idempotency_log.sql manually
+   supabase db push  # or apply 20260909100000_mcp_idempotency_log.sql + 20260909110000_create_assistant_recurring_task.sql
    ```
 
 5. **Apply the #305 staff assistant migration** (if not already applied):
@@ -158,12 +221,18 @@ Before the connector can be used from ChatGPT, CA must:
 
 7. **Verify end-to-end for Sydney**:
    - Sydney opens her `Sydney CG Assistant` ChatGPT Project
+   - She types: `Brief yourself from my CG Assistant profile.`
+   - ChatGPT calls `get_my_assistant_bootstrap` with her Bearer token
+   - Response shows her identity, profile, capability manifest, MCP tools, and operating rules
    - She types: `What's my day?`
    - ChatGPT calls `get_my_day` with her Bearer token
    - Response shows her actual tasks, calendar events, and deliverables
    - She types: `I'm waiting on Red Oak for the menu.`
-   - ChatGPT calls `update_task` (or `add_task_note`) with the correct task ID
+   - ChatGPT calls `update_task` with the correct task ID
    - The change appears in CG Dynamics UI
+   - She types: `Create a weekly Monday content review task.`
+   - ChatGPT calls `create_recurring_task` with a WEEKLY recurrence rule
+   - The template appears in `get_my_recurring_tasks`
 
 ### What CA must NOT do yet
 - Do not run the Sydney history-salvage prompt until step 7 passes

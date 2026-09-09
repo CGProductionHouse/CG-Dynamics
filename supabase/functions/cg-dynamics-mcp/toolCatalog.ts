@@ -130,6 +130,35 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#305', canonicalContract: 'save_my_staff_assistant_profile RPC',
   },
+  {
+    name: 'get_my_assistant_bootstrap', title: 'Get my assistant bootstrap',
+    description: 'Retrieve the exact staff member\'s complete operating bootstrap: identity, durable profile, capability manifest, MCP tools and operating standards. Use this to self-brief a fresh ChatGPT Project from canonical Dynamics. Never expose another staff member\'s bootstrap.',
+    inputSchema: objectSchema({}),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#305', canonicalContract: 'staff_assistant_profiles + capabilityManifest.ts',
+  },
+  {
+    name: 'get_my_recurring_tasks', title: 'List my recurring task templates',
+    description: 'List recurring task templates assigned to the exact authenticated staff profile. Templates define recurrence rules; instances are materialised automatically. Templates do not appear in normal task lists.',
+    inputSchema: objectSchema({}),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'planner_tasks where recurrence_rule is not null',
+  },
+  {
+    name: 'create_recurring_task', title: 'Create recurring task template',
+    description: 'Create a recurring Dynamics task template with a recurrence rule. Instances are materialised automatically within a 14-day window. Repeated calls require a caller-scoped idempotency key.',
+    inputSchema: objectSchema({
+      title: { type: 'string', minLength: 1, maxLength: 240 },
+      recurrence_rule: { type: 'string', minLength: 1, maxLength: 100, description: 'RRULE subset: FREQ=DAILY|WEEKLY|MONTHLY, optional INTERVAL, BYDAY (MO..SU), BYMONTHDAY (1-28).' },
+      recurrence_until: date,
+      assignee_name: { type: 'string' },
+      client_id: uuid,
+      notes: { type: 'string', maxLength: 4000 },
+      idempotency_key: uuid,
+    }, ['title', 'recurrence_rule', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: 'main', canonicalContract: 'create_assistant_recurring_task RPC + recurrence.ts materialisation',
+  },
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =
