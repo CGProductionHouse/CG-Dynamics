@@ -98,10 +98,29 @@ test('flatten tolerates an array-shaped embed and empty input', () => {
 
 // ── Handlers use the shared, verified selects ───────────────────────────────
 
-test('both monthly_deliverables handlers use the shared select constants', () => {
+test('every monthly_deliverables select is a verified shared constant or verified column list', () => {
   const selects = [...INDEX.matchAll(/\.from\('monthly_deliverables'\)\s*\n\s*\.select\(([^)]*)\)/g)].map(m => m[1].trim())
-  assert.equal(selects.length, 2, 'expected exactly two monthly_deliverables selects')
-  assert.deepEqual(selects.sort(), ['CLIENT_SCHEDULE_SELECT', 'MY_DAY_DELIVERABLE_SELECT'])
+  assert.equal(selects.length, 3, 'expected three monthly_deliverables selects')
+
+  const constants = selects.filter(x => !x.startsWith("'"))
+  assert.deepEqual(constants.sort(), ['CLIENT_SCHEDULE_SELECT', 'MY_DAY_DELIVERABLE_SELECT'],
+    'the two Client Schedule reads use the shared verified constants')
+
+  // #325 Assistant-owned linkage reads same-client deliverables to resolve links. It is a
+  // READ with an inline column list, so validate every column really exists.
+  const inline = selects.filter(x => x.startsWith("'"))
+  assert.equal(inline.length, 1, 'exactly one inline deliverable read (linkage candidate lookup)')
+  for (const part of inline[0].replace(/'/g, '').split(',').map(x => x.trim()).filter(Boolean)) {
+    assert.ok(REAL_COLUMNS.has(part), `linkage read selects nonexistent column "${part}"`)
+  }
+})
+
+test('the linkage deliverable read is client-scoped and never writes Client Schedule', () => {
+  const h = INDEX.slice(INDEX.indexOf('const handleLinkContentRunDeliverables'), INDEX.indexOf('const CALENDAR_EVENT_TYPES'))
+  assert.match(h, /\.from\('monthly_deliverables'\)[\s\S]*?\.eq\('client_id', run\.client_id\)/,
+    'candidates are restricted to the exact Content Run client')
+  assert.doesNotMatch(h, /\.from\('monthly_deliverables'\)[\s\S]{0,400}?\.(update|insert|delete)\(/,
+    'Client Schedule rows are never written by linkage')
 })
 
 test('no inline client_name string survives against monthly_deliverables', () => {

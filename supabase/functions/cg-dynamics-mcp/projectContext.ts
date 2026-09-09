@@ -123,6 +123,11 @@ export const CLIENT_SCOPED_TOOLS: readonly string[] = [
 export const COMPANY_ADMIN_TOOLS: readonly string[] = [
   'list_company_tasks',
   'list_company_recurring_tasks',
+  // #325 coexistence execution + Morning Ops surfaces. These act company-wide (or invoke a
+  // company-wide provider/reconciliation engine), so they require the explicit admin context.
+  'run_microsoft_sync',
+  'get_provider_health',
+  'run_provider_sync',
 ]
 
 /** Context-resolution helper; runs before any operating context exists. */
