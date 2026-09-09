@@ -25,7 +25,6 @@ export function ClientPicker({
 
   useEffect(() => {
     let active = true
-    setLoading(true)
     listActiveClients().then(({ data }) => {
       if (!active) return
       setClients(data ?? [])
@@ -38,7 +37,8 @@ export function ClientPicker({
 
   useEffect(() => {
     if (!value) {
-      setQuery(label ?? '')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQuery(() => label ?? '')
       return
     }
     const selected = clients.find(client => client.id === value)

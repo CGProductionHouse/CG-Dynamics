@@ -235,6 +235,7 @@ async function loadContext(
   const assignedTaskIds = new Set((assignmentRows ?? []).map(row => row.task_id))
   const tasks = ((taskRows ?? []) as Array<TaskContext & { board_id: string; assigned_to_name: string | null }>)
     .filter(task => role === 'admin' || role === 'manager' || assignedTaskIds.has(task.id) || task.assigned_to_name?.trim().toLowerCase() === fullName.trim().toLowerCase())
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .map(({ board_id: _boardId, ...task }) => task)
   return {
     staff: (staffRows ?? []).filter(row => row.full_name).map(row => ({ id: row.id, name: row.full_name })),
@@ -337,11 +338,10 @@ Deno.serve(async request => {
   }
 
   const contentType = request.headers.get('content-type') ?? ''
-  let action = ''
+  let action: string
   let transcript = ''
-  let requestId = ''
+  let requestId: string
   let clientId = ''
-  let page = ''
   let durationSeconds = 0
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}
@@ -351,7 +351,6 @@ Deno.serve(async request => {
       action = String(form.get('action') ?? '')
       requestId = String(form.get('requestId') ?? '')
       clientId = String(form.get('clientId') ?? '')
-      page = String(form.get('page') ?? '')
       durationSeconds = Number(form.get('durationSeconds'))
       const file = form.get('audio')
       audio = file instanceof File ? file : null
@@ -361,7 +360,6 @@ Deno.serve(async request => {
       transcript = typeof jsonBody.transcript === 'string' ? jsonBody.transcript.trim() : ''
       requestId = typeof jsonBody.requestId === 'string' ? jsonBody.requestId : ''
       clientId = typeof jsonBody.clientId === 'string' ? jsonBody.clientId : ''
-      page = typeof jsonBody.page === 'string' ? jsonBody.page : ''
     }
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid daily capture request.' }, 400)
@@ -431,7 +429,7 @@ Deno.serve(async request => {
       calls: interpreted.analysis.calls, decisions: interpreted.analysis.decisions, promises: interpreted.analysis.promises,
       unresolved: interpreted.analysis.unresolved, notes: interpreted.analysis.notes,
       mentions: interpreted.analysis.mentions, suggestions: interpreted.analysis.suggestions,
-      source_context: { page: page.slice(0, 120), client_id: preferredClientId },
+      source_context: { client_id: preferredClientId },
     }).select('id').single()
     if (insertError?.code === '23505') {
       const { data: duplicate } = await service.from('assistant_day_captures').select('*')

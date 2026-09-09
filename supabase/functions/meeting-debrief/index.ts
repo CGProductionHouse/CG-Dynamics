@@ -270,8 +270,6 @@ Deno.serve(async request => {
   let eventId: string
   let clientId: string
   let requestId: string
-  let providerName = ''
-  let providerRouteId = ''
   let durationSeconds = 0
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}
@@ -283,8 +281,6 @@ Deno.serve(async request => {
       eventId = String(form.get('eventId') ?? '')
       clientId = String(form.get('clientId') ?? '')
       requestId = String(form.get('requestId') ?? '')
-      providerName = String(form.get('provider') ?? '')
-      providerRouteId = String(form.get('routeId') ?? '')
       durationSeconds = Number(form.get('durationSeconds'))
       const file = form.get('audio')
       audio = file instanceof File ? file : null
@@ -295,8 +291,6 @@ Deno.serve(async request => {
       eventId = typeof jsonBody.eventId === 'string' ? jsonBody.eventId : ''
       clientId = typeof jsonBody.clientId === 'string' ? jsonBody.clientId : ''
       requestId = typeof jsonBody.requestId === 'string' ? jsonBody.requestId : ''
-      providerName = typeof jsonBody.provider === 'string' ? jsonBody.provider : ''
-      providerRouteId = typeof jsonBody.routeId === 'string' ? jsonBody.routeId : ''
     }
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid debrief request.' }, 400)

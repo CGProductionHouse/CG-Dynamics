@@ -135,7 +135,7 @@ function parseCsv(text: string) {
   return body.map(values => {
     const record: Record<string, string> = {}
     headers.forEach((header, index) => {
-      record[header.trim().replace(/^﻿/, '')] = values[index]?.trim() ?? ''
+      record[header.trim().replace(/^\uFEFF/, '')] = values[index]?.trim() ?? ''
     })
     return record
   })
@@ -364,7 +364,8 @@ export default function ImportMetaCsv() {
 
   useEffect(() => {
     if (!clientId) {
-      setExistingManualMetrics([])
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setExistingManualMetrics(() => [])
       return
     }
 

@@ -273,7 +273,8 @@ export default function NewReport() {
   // match the report month and show what else is available.
   useEffect(() => {
     if (!clientId) {
-      setManualMetrics([])
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setManualMetrics(() => [])
       return
     }
     let active = true

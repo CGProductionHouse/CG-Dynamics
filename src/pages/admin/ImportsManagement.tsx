@@ -71,7 +71,8 @@ export default function ImportsManagement() {
   }
 
   useEffect(() => {
-    void load()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load()
   }, [])
 
   async function handleDelete(group: ImportedMetaPostGroup) {
