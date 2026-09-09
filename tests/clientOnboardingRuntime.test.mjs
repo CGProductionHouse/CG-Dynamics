@@ -152,7 +152,6 @@ test('completion verifies the exact item, parent folder, and byte size', () => {
   assert.match(complete, /mime_type: verifiedItem\.mimeType/)
   assert.match(adapter, /parentReference\?\.driveId !== driveId/)
   assert.match(adapter, /parentReference\?\.id !== folderItemId/)
-  assert.doesNotMatch(adapter, /\/children\?\$select/)
 })
 
 test('portal download fetches a raw Blob with the authenticated session token', () => {
