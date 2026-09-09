@@ -176,7 +176,7 @@ export function GoogleAdsResults({
         </div>
         <div className="text-left text-xs leading-5 text-report-faint sm:text-right">
           <p>{dashboard.campaignCount} campaign{dashboard.campaignCount === 1 ? '' : 's'}</p>
-          <p>Last complete period sync: {formatDateTime(dashboard.lastSyncedAt)}</p>
+          <p>Last successful sync: {formatDateTime(dashboard.lastSyncedAt)}</p>
         </div>
       </div>
 

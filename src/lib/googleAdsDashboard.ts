@@ -163,12 +163,29 @@ function nonNegativeNumber(value: unknown): number | null {
 
 export interface GoogleAdsWeeklyReportData {
   provider: 'google_ads'
+  month: string
+  periodStart: string
+  periodEnd: string
   timeZone: string | null
   currencyCode: string | null
   dataThroughDate: string
   lastSyncedAt: string | null
+  spendMicros: number | null
   monthlyTargetMicros: number | null
+  targetCurrencyCode: string | null
+  spendToTargetPercent: number | null
+  daysRemaining: number | null
   projectedMonthEndSpendMicros: number | null
+  impressions: number
+  clicks: number
+  interactions: number | null
+  ctr: number | null
+  averageCpcMicros: number | null
+  conversions: number
+  conversionRate: number | null
+  costPerConversionMicros: number | null
+  conversionValue: number | null
+  campaigns: GoogleAdsReportCampaign[]
   current: GoogleAdsSevenDayWindow
   previous: GoogleAdsSevenDayWindow
 }
@@ -178,12 +195,29 @@ export function buildGoogleAdsWeeklyReportData(dashboard: GoogleAdsDashboardData
   if (!dashboard.dataThroughDate || !dashboard.sevenDayTrend) return null
   return {
     provider: 'google_ads',
+    month: dashboard.month,
+    periodStart: dashboard.periodStart,
+    periodEnd: dashboard.periodEnd,
     timeZone: dashboard.timeZone,
     currencyCode: dashboard.currencyCode,
     dataThroughDate: dashboard.dataThroughDate,
     lastSyncedAt: dashboard.lastSyncedAt,
+    spendMicros: dashboard.spendMicros,
     monthlyTargetMicros: dashboard.monthlyTargetMicros,
+    targetCurrencyCode: dashboard.targetCurrencyCode,
+    spendToTargetPercent: dashboard.spendToTargetPercent,
+    daysRemaining: dashboard.daysRemaining,
     projectedMonthEndSpendMicros: dashboard.projectedMonthEndSpendMicros,
+    impressions: dashboard.impressions,
+    clicks: dashboard.clicks,
+    interactions: dashboard.interactions,
+    ctr: dashboard.ctr,
+    averageCpcMicros: dashboard.averageCpcMicros,
+    conversions: dashboard.conversions,
+    conversionRate: dashboard.conversionRate,
+    costPerConversionMicros: dashboard.costPerConversionMicros,
+    conversionValue: dashboard.conversionValue,
+    campaigns: dashboard.campaigns.map(campaign => ({ ...campaign })),
     current: dashboard.sevenDayTrend.current,
     previous: dashboard.sevenDayTrend.previous,
   }

@@ -29,7 +29,7 @@ The numeric benchmarks match #237. The configured conversion value is intentiona
 - Client Campaigns requests the current tracking month using the latest published report only as its exact-client authorization anchor. Performance remains anchored to the selected report month.
 - A client-approved monthly target is dated, versioned, approval-evidenced and manager/admin writable. It is compared only when its currency matches canonical spend.
 - Near-live pacing uses the latest stored metric date, calendar days elapsed, and a clearly labelled run-rate projection. It is not a forecast guarantee.
-- Seven-day trends compare two exact seven-calendar-day windows only after sync-run coverage proves all 14 days were queried. The serializable weekly-report builder uses the same windows.
+- Seven-day trends compare two exact seven-calendar-day windows only after sync-run coverage proves all 14 days were queried. The serializable weekly-report builder carries the same canonical period, freshness, pacing, performance, campaign and equal-window data; it does not recalculate a parallel set of metrics.
 
 Denis's R4,000/month instruction for September–November and R2,875 for December is not seeded. It is recorded here only as business acceptance context; entering those targets requires the reviewed rollout and approval-evidence workflow, and it provides no authority or code path to mutate Google Ads.
 

@@ -189,7 +189,7 @@ test('campaigns page uses the canonical client-safe Google Ads results component
   assert.match(GOOGLE_ADS_RESULTS, /formatMoney/)
   assert.match(GOOGLE_ADS_RESULTS, /Unavailable/)
   assert.match(CAMPAIGNS, /currentTrackingMonth/)
-  assert.match(GOOGLE_ADS_RESULTS, /Last complete period sync/)
+  assert.match(GOOGLE_ADS_RESULTS, /Last successful sync/)
 })
 
 // ── 12. Google Ads dashboard data model invariants ────────────────────────────
