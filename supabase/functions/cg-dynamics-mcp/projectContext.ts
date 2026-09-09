@@ -115,6 +115,16 @@ export const CLIENT_SCOPED_TOOLS: readonly string[] = [
   'update_closeout_upload_status',
 ]
 
+/**
+ * Company-wide read-only audit inventories (#325). These are explicitly company_admin only:
+ * a staff or client Project must never receive a cross-staff/company-wide inventory just
+ * because the shared OAuth principal happens to be an admin account.
+ */
+export const COMPANY_ADMIN_TOOLS: readonly string[] = [
+  'list_company_tasks',
+  'list_company_recurring_tasks',
+]
+
 /** Context-resolution helper; runs before any operating context exists. */
 export const CONTEXT_BOOTSTRAP_TOOL = 'resolve_project_context'
 
@@ -122,6 +132,12 @@ export type ToolPolicyResult = { allowed: true } | { allowed: false; error: stri
 
 /** Is this tool permitted under the resolved context kind? */
 export function assertToolAllowedInContext(toolName: string, contextKind: ProjectContextKind): ToolPolicyResult {
+  if (COMPANY_ADMIN_TOOLS.includes(toolName) && contextKind !== 'company_admin') {
+    return {
+      allowed: false,
+      error: `${toolName} is a company-wide audit inventory and requires an explicit company_admin Project context. A staff Project must use the exact-staff tools instead.`,
+    }
+  }
   if (contextKind === 'client' && STAFF_SUBJECT_TOOLS.includes(toolName)) {
     return {
       allowed: false,
