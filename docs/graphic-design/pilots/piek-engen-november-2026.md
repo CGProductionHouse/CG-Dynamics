@@ -50,19 +50,17 @@ The November pilot intentionally avoids those subjects/headline structures.
 
 ### Poster 3 — Bloem network / warmer-day convenience
 
-- source A: `DJI_20260811165133_0856_D.JPG`
-- source folder: Engen Northridge / DRONE
-- source B: `0L8A0375.JPG`
-- source folder: Crossing / 2026_07
-- role: different Northridge aerial plus real Crossing Quickshop exterior
+- source: `0L8A0375.JPG`
+- source folder: Piek Group / Photos / Services / Crossing / 2026_07
+- role: real Crossing Quickshop exterior/convenience scene supporting a three-branch Bloem network message
 
-No exact source photo is repeated across the three designs. No Batho photo is substituted with North Ridge/Crossing photography; Batho appears only as verified branch text because an exact canonical Batho photo folder was not found in this pilot pass.
+No exact source photo is repeated across the three designs, and each poster uses a different visual role: place/aerial, person/service, and convenience/storefront. No Batho photo is substituted with North Ridge/Crossing photography; Batho appears only as verified branch text because an exact canonical Batho photo folder was not found in this pilot pass.
 
 ## Three creative directions
 
 1. **Summer Has Places To Be** — light editorial field, warm seasonal marker, wide current North Ridge aerial, minimal operational copy.
 2. **The Good Stop Is The Human One** — dark Piek anchor, real Crossing attendant, service-first human message.
-3. **Bloem, Your Warmer Days Are Sorted** — light network composition naming the three verified Bloem Engen branches, using distinct North Ridge and Crossing source images.
+3. **Bloem, Your Warmer Days Are Sorted** — light network composition naming the three verified Bloem Engen branches, with a real Crossing convenience/storefront image rather than repeating the aerial or staff-photo treatment.
 
 ## Brand handling
 
