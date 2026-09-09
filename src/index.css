@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .input {
+    @apply min-h-11 w-full rounded-lg border border-white/10 bg-black/25 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-brand-teal/50 focus:outline-none;
+  }
+}
+
 *,
 *::before,
 *::after {
