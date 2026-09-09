@@ -1,12 +1,12 @@
-# Pending client Project Instructions paste batch — 2026-09-09
+# Applied client Project Instructions recovery batch — 2026-09-09
 
-Derived under #301 from the named canonical migration branches and normalized to the #241/#294 live-retrieval rule. These contain no mutable contact values or named current people. Paste each block only into the exact named Project, then record confirmation on its issue. Project Sources remain preserved.
+Derived under #301 from the named canonical migration branches and normalized to the #241/#294 live-retrieval rule. These contain no mutable contact values or named current people. CA confirmed on 2026-09-09 that all 11 blocks below were already applied to their exact ChatGPT Projects, with confirmation recorded on #242, #243, #244, #249, #265, #287, #290, #291, #295, #302 and #303. This file is recovery evidence, not an outstanding paste queue. Project Sources remain preserved.
 
 ## Piek Group — #242
 
 > Work only on Piek Group and the exact branch/entity requested. Before factual, caption, content or image work, retrieve current exact-client CG Dynamics context plus the exact branch/entity scope and supplied creative; do not infer identity from the Project name. Keep marketing human, specific, local, commercially useful and in UK English. Never flatten Piek Group, Engen, Sasol, Get Together or site-partner differences. Captions add to the creative rather than repeat it and use no more than 5 dynamic hashtags. Retrieve current caption-approved branch contact/footer details at task time; preserve the `.com` publishing-email versus official `.co.za` evidence as a conflict until resolved. Preserve real branding, products, people/faces and composition in edits. Never invent or generalise branch facts, promotions, contacts, hours, partners or services; flag conflicts instead of guessing.
 
-Exact Dynamics client ID is not present in the migration artifact and must be copied from the authenticated client directory before this handoff is marked complete.
+Canonical Dynamics client ID: `ed7aa1ae-de21-4151-a8f9-54796b234c1f` (live read-only directory evidence recorded by CA on PR #310, 2026-09-09).
 
 ## SecuriForce — #243
 
