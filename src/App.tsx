@@ -62,6 +62,7 @@ const ClientStrategyPage = lazyRoute(() => import('./pages/client/ClientStrategy
 const WelcomeToCgPage = lazyRoute(() => import('./features/client-onboarding/WelcomeToCgPage'))
 const ClientSetupPage = lazyRoute(() => import('./features/client-onboarding/ClientSetupPage'))
 const InternalOnboardingPage = lazyRoute(() => import('./features/client-onboarding/InternalOnboardingPage'))
+const OAuthConsentPage = lazyRoute(() => import('./pages/OAuthConsentPage'))
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -101,6 +102,10 @@ export default function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/welcome" element={<WelcomeToCgPage />} />
+          {/* Supabase OAuth 2.1 consent surface for the CG Dynamics ChatGPT connector.
+              Public auth route: no staff/client guard, but inside AuthProvider so it can
+              resolve the session and route to /login (preserving the request) when needed. */}
+          <Route path="/oauth/consent" element={<OAuthConsentPage />} />
 
           {/* Staff routes */}
           <Route element={<RequireStaff />}>
