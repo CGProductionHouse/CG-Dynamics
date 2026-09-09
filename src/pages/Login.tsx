@@ -6,6 +6,7 @@ import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
 import { AuthMessage } from '../components/AuthShell'
 import { friendlyAuthError } from '../lib/authErrors'
+import { isSafeOAuthReturnPath } from '../lib/oauthConsent'
 
 function isNotConfirmed(error: { message?: string; code?: string } | null) {
   if (!error) return false
@@ -42,11 +43,16 @@ export default function Login() {
     } else {
       const requestedPath = (location.state as { from?: string } | null)?.from
       const clientRequestedPath = requestedPath && /^\/client(?:[/?#]|$)/.test(requestedPath) ? requestedPath : null
-      const destination = pendingInviteSetup
-        ? '/signup'
-        : role === 'client'
-          ? clientRequestedPath ?? '/client'
-          : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
+      // Honour a safe OAuth-consent return so a user sent to login mid-authorization
+      // lands back on the exact consent request (any role may approve their own).
+      const oauthReturnPath = isSafeOAuthReturnPath(requestedPath) ? requestedPath! : null
+      const destination = oauthReturnPath
+        ? oauthReturnPath
+        : pendingInviteSetup
+          ? '/signup'
+          : role === 'client'
+            ? clientRequestedPath ?? '/client'
+            : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
       navigate(destination, { replace: true })
     }
   }
