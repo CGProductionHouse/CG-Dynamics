@@ -1,6 +1,6 @@
 # CG Graphic Design Assistant — Status
 
-Last updated: 2026-09-09 15:12 SAST
+Last updated: 2026-09-09 15:16 SAST
 Branch: `feat/graphic-design-social-poster-lane`
 Draft PR: #312
 
@@ -77,19 +77,22 @@ Reject vague AI wording. A line that sounds profound but has no concrete meaning
 - Do not trust AI-rendered font texture/letterforms when they look distorted or incorrect.
 - Preferred hybrid: use image generation for the high-design visual world and leave clean text zones when needed; apply exact typography and exact logo assets afterward in Canva/Adobe.
 
-## Current important technical limitation
+## Current important technical limitations
 
 The internal image generator is generative: reference images guide it, but pixels can be reconstructed. It is not a guaranteed pixel-lock compositor for real people/logos.
 
-Also, the current browser-chat image generation flow does not reliably support a hidden `generate -> inspect -> reject -> regenerate` loop before the first output is shown to the user. Wave 1 therefore remains an internal CG review stage.
+The current browser-chat image generation flow also does not reliably support a hidden `generate -> inspect -> reject -> regenerate` loop before the first output is shown to the user. Wave 1 therefore remains an internal CG review stage.
 
-This limitation is documented as something the long-term system should replace with programmatic candidate QA/retry when a better surface becomes available.
+A ZIP is **not** the only thing staff should attach when using the internal image generator. The ZIP is the portable/archive package, but the required visual references should be multi-selected as actual image attachments in chat. Every monthly pack therefore has a `CHAT_ATTACH/` folder with the individual source photos, exact logo assets and reference screenshots to attach.
+
+This manual multi-select step can be removed later if ChatGPT exposes reliable direct image-reference ingestion from OneDrive/ZIP/Dynamics.
 
 ## Launch-now monthly Chat Pack
 
 Each client/month should get:
 
-- one attachable ZIP containing exact source photos, exact logos/brand assets, 3-6 recent Canva poster reference screenshots and `MANIFEST.csv`;
+- one ZIP for storage/transport;
+- one `CHAT_ATTACH/` folder containing the exact individual image files staff should attach to ChatGPT;
 - one separate exact prompt `.txt` file;
 - stable poster names tied to Dynamics package slots.
 
@@ -118,6 +121,7 @@ Structure:
 02_MONTHLY_PACKS/
   PIEK-ENGEN_2026-11/
     00_INPUT_PACK/
+      CHAT_ATTACH/
     01_PROMPT/
     02_WAVE_1/
     03_AMENDMENTS/
@@ -127,9 +131,9 @@ Structure:
 03_HISTORY/
 ```
 
-The first `CG_Creative_Assistant_README.txt`, Piek/Engen generation prompt, manifest and v1 Chat Pack have been uploaded there.
+The first `CG_Creative_Assistant_README.txt`, Piek/Engen generation prompt, manifest, v1 ZIP and individual `CHAT_ATTACH/` source files have been uploaded there.
 
-The v1 Chat Pack still needs physical screenshots of the selected recent Canva posters before it is considered fully generator-ready; the current internal image generator cannot simply ingest a Canva design ID as an image reference.
+The remaining v1 gap is adding physical screenshots of 3-6 selected recent Piek Canva posters before the pack is fully generator-ready; the image generator cannot simply ingest a Canva design ID as a visual reference.
 
 ## Freshness / no-repeat system
 
@@ -185,8 +189,8 @@ P03 — `PIEK-ENGEN_2026-11_P03_QUICK-STOP`
 
 ## Next concrete actions
 
-1. select/export 3-6 recent strong Piek Canva poster screenshots into the November `00_INPUT_PACK`;
-2. rebuild Chat Pack v2 so it is completely ready to attach to a normal ChatGPT chat;
+1. select/export 3-6 recent strong Piek Canva poster screenshots into November `CHAT_ATTACH/` and the ZIP;
+2. rebuild Chat Pack v2 so it is fully ready for staff multi-select + prompt paste in normal ChatGPT;
 3. generate a real high-design Wave 1 using the internal image generator;
 4. use exact typography/logo finishing and real-photo compositing rather than trusting regenerated text/logos/people;
 5. test Canva image-to-design / Magic Layers as the editable handoff path for approved flat designs;
