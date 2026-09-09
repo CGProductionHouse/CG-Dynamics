@@ -1,6 +1,13 @@
 // CG shared capability manifest — single source of truth for approved company
 // tool/action capabilities. Filtered per staff member by approved_access_scope.
 // Do not hardcode per-staff; update this registry centrally.
+//
+// Two distinct concepts:
+//   expectedConnectedInCompanyWorkspace — true for all approved CG company plugins.
+//     This is a company-standard fact, not a per-session observation.
+//   availableInCurrentSession — determined at runtime by inspecting actual session
+//     tools. A company-standard capability may be missing from one session due to
+//     session/account/tool-surface issues; that does not make it unavailable in CG.
 
 export interface CgCapability {
   key: string
@@ -10,8 +17,10 @@ export interface CgCapability {
   exampleActions: string[]
   operatingStandards: string[]
   requiredRole: string[]
-  expectedConnected: boolean
-  fallbackGuidance: string
+  /** Company-standard: true for all approved CG plugins connected in the company workspace. */
+  expectedConnectedInCompanyWorkspace: boolean
+  /** Fallback guidance when the capability is missing from a specific session. */
+  sessionMissingGuidance: string
 }
 
 export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
@@ -42,8 +51,8 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'All writes are audited and idempotent.',
     ],
     requiredRole: ['admin', 'manager', 'staff', 'team'],
-    expectedConnected: true,
-    fallbackGuidance: 'This is the primary CG Dynamics connector. If it is unavailable, report the connection issue.',
+    expectedConnectedInCompanyWorkspace: true,
+    sessionMissingGuidance: 'CG Dynamics is the primary connector. If unavailable, report the connection issue.',
   },
   {
     key: 'microsoft_teams_planner',
@@ -64,8 +73,8 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Preserve canonical assignee ownership.',
     ],
     requiredRole: ['admin', 'manager', 'staff', 'team'],
-    expectedConnected: true,
-    fallbackGuidance: 'If Teams/Planner is not connected in this session, report the connection issue. This capability is expected in the CG workspace.',
+    expectedConnectedInCompanyWorkspace: true,
+    sessionMissingGuidance: 'This is a company-standard CG capability. If it is missing from this session, try reconnecting or using the correct CG workspace account. Do not claim CG cannot do this.',
   },
   {
     key: 'outlook_calendar',
@@ -86,8 +95,8 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Calendar actions remain subject to approved connector permissions.',
     ],
     requiredRole: ['admin', 'manager', 'staff', 'team'],
-    expectedConnected: true,
-    fallbackGuidance: 'If the Outlook/Calendar connector is not available in this session, report the connection issue.',
+    expectedConnectedInCompanyWorkspace: true,
+    sessionMissingGuidance: 'This is a company-standard CG capability. If it is missing from this session, try reconnecting or using the correct CG workspace account. Do not claim CG cannot do this.',
   },
   {
     key: 'onedrive_sharepoint',
@@ -110,8 +119,8 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Low-risk/reversible actions only unless explicitly authorised.',
     ],
     requiredRole: ['admin', 'manager', 'staff', 'team'],
-    expectedConnected: true,
-    fallbackGuidance: 'If OneDrive/SharePoint is not connected in this session, report the connection issue. File operations should use the CG client mapping.',
+    expectedConnectedInCompanyWorkspace: true,
+    sessionMissingGuidance: 'This is a company-standard CG capability. If it is missing from this session, try reconnecting or using the correct CG workspace account. Do not claim CG cannot do this.',
   },
   {
     key: 'canva',
@@ -131,8 +140,8 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Never substitute another client\'s brand elements.',
     ],
     requiredRole: ['admin', 'manager', 'staff', 'team'],
-    expectedConnected: false,
-    fallbackGuidance: 'Canva is an approved CG tool but may not be connected in every session. If unavailable, report the connection issue and offer to prepare the design brief.',
+    expectedConnectedInCompanyWorkspace: true,
+    sessionMissingGuidance: 'This is a company-standard CG capability. If it is missing from this session, try reconnecting or using the correct CG workspace account. Do not claim CG cannot do this.',
   },
   {
     key: 'adobe',
@@ -152,8 +161,8 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Use approved templates and specifications.',
     ],
     requiredRole: ['admin', 'manager', 'staff', 'team'],
-    expectedConnected: false,
-    fallbackGuidance: 'Adobe is an approved CG tool but may not be connected in every session. If unavailable, report the connection issue and offer to prepare creative specifications.',
+    expectedConnectedInCompanyWorkspace: true,
+    sessionMissingGuidance: 'This is a company-standard CG capability. If it is missing from this session, try reconnecting or using the correct CG workspace account. Do not claim CG cannot do this.',
   },
 ] as const
 

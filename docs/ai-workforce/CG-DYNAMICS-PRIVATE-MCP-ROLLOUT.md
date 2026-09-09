@@ -33,7 +33,11 @@ Shared catalog of approved company capabilities, filtered per staff member:
 - **Canva**: brand templates, design workflows
 - **Adobe**: creative production, PDF/image workflows
 
-Each capability includes: key, label, description, useful-for examples, example actions, operating standards, required role, expected-connected flag, and fallback guidance. The manifest is filtered by the staff member's `approved_access_scope`.
+Each capability includes: key, label, description, useful-for examples, example actions, operating standards, required role, `expectedConnectedInCompanyWorkspace` (true for all — these are company-standard CG capabilities), and `sessionMissingGuidance` (what to say when a company-standard capability is absent from a specific session).
+
+Two distinct concepts enforced:
+1. **Company-standard** (`expectedConnectedInCompanyWorkspace: true`) — fact about the CG company ChatGPT workspace. True for all approved plugins.
+2. **Available in current session** — runtime result from inspecting actual session tools. May be false due to session/account/tool-surface issues. A missing-in-session capability is reported as a session issue, not a CG limitation.
 
 ### MCP Edge Function (`supabase/functions/cg-dynamics-mcp/index.ts`)
 Full working MCP server implementing:
@@ -155,10 +159,12 @@ The bootstrap does NOT contain: mutable daily tasks, current leads, client conta
 ### Tool-awareness rule
 
 The bootstrap instructs ChatGPT to:
-1. Inspect actual session tools before claiming a capability is unavailable
-2. Distinguish expected / available-in-session / authorised / blocked-error
-3. Proactively offer connected-tool actions when they reduce staff manual work
-4. Use exact client IDs and CG standards for file/task/client actions
+1. All CG company capabilities in the manifest are company-standard and expected to be connected
+2. Before claiming a capability is unavailable, inspect actual session tools and try the relevant connected tool
+3. If a company-standard capability is missing from this session, report it as a session/account issue (try reconnecting or using the correct CG workspace account) — never claim CG fundamentally cannot do the task
+4. Distinguish company-standard (always true for CG) from available-in-this-session (runtime result)
+5. Proactively offer connected-tool actions when they reduce staff manual work
+6. Use exact client IDs and CG standards for file/task/client actions
 
 ## Recurring task support
 
