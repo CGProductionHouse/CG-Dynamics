@@ -1,4 +1,4 @@
-export type McpToolDependency = 'main' | '#241/#294' | '#305'
+export type McpToolDependency = 'main' | '#241/#294' | '#305' | '#307' | '#313'
 
 export type JsonSchema = Readonly<Record<string, unknown>>
 
@@ -190,6 +190,56 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     }, ['lead_id', 'activity_type', 'summary', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#305', canonicalContract: 'business_development_leads last_action/next_action fields',
+  },
+  {
+    name: 'get_content_run_plan', title: 'Get content run plan',
+    description: 'Read the canonical planned shot list for one exact content run and client. Derives the plan from existing Content Run items and its Content Guideline videos; never asks staff to recreate the plan or falls back to another client.',
+    inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#313', canonicalContract: 'content_runs + content_run_items + content_guidelines + content_guide_ideas',
+  },
+  {
+    name: 'get_content_run_closeout', title: 'Get content run closeout',
+    description: 'Read the closeout record for a specific content run. Returns planned vs captured items, missed items, field notes, upload verification status and scope changes. Used by staff to check closeout state before updating.',
+    inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#313', canonicalContract: 'content_run_closeouts table + get_content_run_closeout RPC',
+  },
+  {
+    name: 'verify_content_run_upload', title: 'Verify content run upload',
+    description: 'Read-only authorised inspection of the exact durable OneDrive folder mapped to one content run and exact client. Compares observed media with the canonical closeout captured-item count: VERIFIED requires complete inspection and sufficient observed media; MISSING means none; PARTIAL means incomplete coverage, incomplete expected upload, or no canonical expected count; UNVERIFIED means the exact mapping or authorised connector could not be used. Staff self-report never upgrades this result. Raw Graph IDs, URLs and tokens are never returned.',
+    inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#307', canonicalContract: 'get_content_run_onedrive_folder RPC + delegated OneDrive adapter durable-ID read helpers',
+  },
+  {
+    name: 'close_content_run', title: 'Close content run',
+    description: 'Create or update a content run closeout record. Collects planned vs captured items, missed items with reasons, cancelled items, field notes and reshoot needs. New closeouts remain UNVERIFIED and later field updates preserve prior connector evidence; the caller cannot supply upload status, evidence or a second folder reference. Use the dedicated verification/status tools for the mapped OneDrive folder.',
+    inputSchema: objectSchema({
+      content_run_id: uuid,
+      planned_items: { type: 'array', description: 'Planned content items/shot list from content guideline. Structure: [{name, type, position}].' },
+      completed_items: { type: 'array', description: 'Items actually captured during the content run. Structure: [{name, type, position, notes}].' },
+      missed_items: { type: 'array', description: 'Planned items that were not captured. Structure: [{name, type, position}].' },
+      missed_reasons: { type: 'array', description: 'Reasons for missed items. Structure: [{item_name, reason}].' },
+      cancelled_items: { type: 'array', description: 'Items cancelled by client or no longer approved. Structure: [{name, reason}].' },
+      field_notes: { type: 'string', maxLength: 4000, description: 'Useful field notes / client feedback from the content run.' },
+      reshoot_needed: { type: 'boolean', description: 'Whether a reshoot is needed for any items.' },
+      reshoot_notes: { type: 'string', maxLength: 2000, description: 'Details about what needs reshooting.' },
+      scope_changes: { type: 'string', maxLength: 2000, description: 'Any scope/content-guideline change that should be written back to Dynamics.' },
+      idempotency_key: uuid,
+    }, ['content_run_id', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#313', canonicalContract: 'close_content_run RPC + content_run_closeouts table',
+  },
+  {
+    name: 'update_closeout_upload_status', title: 'Update closeout upload status',
+    description: 'After explicit staff approval, re-inspect the exact durable OneDrive folder mapped to this content run and persist the resulting VERIFIED, MISSING, PARTIAL or UNVERIFIED state. The caller cannot supply or promote status/evidence; staff self-report remains UNVERIFIED.',
+    inputSchema: objectSchema({
+      content_run_id: uuid,
+      idempotency_key: uuid,
+    }, ['content_run_id', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#313', canonicalContract: 'update_closeout_upload_status RPC + content_run_closeouts table',
   },
 ] as const
 

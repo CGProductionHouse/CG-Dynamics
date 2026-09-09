@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
+
+const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const MCP_INDEX = read('../supabase/functions/cg-dynamics-mcp/index.ts')
+const CLOSEOUT_MIGRATION = read('../supabase/migrations/20260909160000_content_run_closeout_tracking.sql')
 
 let server, catalog
 before(async () => {
@@ -43,6 +48,7 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
     'get_my_day', 'list_my_tasks', 'get_task', 'list_my_calendar',
     'list_client_schedule', 'get_client_context', 'list_my_leads', 'get_lead',
     'get_my_profile', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
+    'get_content_run_plan', 'get_content_run_closeout', 'verify_content_run_upload',
   ])
 })
 
@@ -64,17 +70,17 @@ test('server instruction resolves exact bearer identity and forbids unsafe fallb
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 19 tools: 11 read + 8 write', () => {
+test('catalog contains exactly 24 tools: 14 read + 10 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 19)
+  assert.equal(tools.length, 24)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 11)
-  assert.equal(writes.length, 8)
+  assert.equal(reads.length, 14)
+  assert.equal(writes.length, 10)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {
-  const validDeps = new Set(['main', '#241/#294', '#305'])
+  const validDeps = new Set(['main', '#241/#294', '#305', '#307', '#313'])
   for (const tool of catalog.CG_DYNAMICS_MCP_TOOLS) {
     assert.ok(validDeps.has(tool.dependency), `${tool.name} has unknown dependency: ${tool.dependency}`)
   }
@@ -237,4 +243,50 @@ test('no write tool exposes a send action for email', () => {
       assert.match(tool.description, /draft/i)
     }
   }
+})
+
+test('#313 exposes the canonical content-run plan as a read-only exact-ID tool', () => {
+  const plan = catalog.CG_DYNAMICS_MCP_TOOLS.find(tool => tool.name === 'get_content_run_plan')
+  assert.ok(plan)
+  assert.equal(plan.annotations.readOnlyHint, true)
+  assert.deepEqual(plan.inputSchema.required, ['content_run_id'])
+  assert.equal(plan.inputSchema.properties.content_run_id.format, 'uuid')
+  assert.match(plan.description, /canonical planned shot list/i)
+  assert.match(plan.description, /never asks staff to recreate/i)
+  assert.match(plan.description, /never.*fall.*another client/i)
+})
+
+test('#313 plan handler derives exact-client plan from canonical run and guideline structures', () => {
+  assert.match(MCP_INDEX, /function handleGetContentRunPlan/)
+  assert.match(MCP_INDEX, /\.from\('content_runs'\)[\s\S]*?\.eq\('id', runId\)/)
+  assert.match(MCP_INDEX, /\.from\('content_guidelines'\)[\s\S]*?\.eq\('content_run_id', runId\)[\s\S]*?\.eq\('client_id', run\.client_id\)/)
+  assert.match(MCP_INDEX, /\.from\('content_run_items'\)[\s\S]*?\.eq\('run_id', runId\)/)
+  assert.match(MCP_INDEX, /\.from\('content_guide_ideas'\)[\s\S]*?\.eq\('content_guideline_id', guideline\.id\)[\s\S]*?\.eq\('client_id', run\.client_id\)/)
+  assert.match(MCP_INDEX, /Content Run has no exact client assigned/)
+  assert.match(MCP_INDEX, /get_content_run_plan: handleGetContentRunPlan/)
+})
+
+test('#313 closeout migration adds coherent idempotency and uses canonical manager authority', () => {
+  assert.match(CLOSEOUT_MIGRATION, /idempotency_key uuid/)
+  assert.match(CLOSEOUT_MIGRATION, /create unique index if not exists content_run_closeouts_idempotency_key_idx[\s\S]*?\(idempotency_key\)[\s\S]*?where idempotency_key is not null/)
+  assert.match(CLOSEOUT_MIGRATION, /public\.is_active_planner_manager\(\)/)
+  assert.doesNotMatch(CLOSEOUT_MIGRATION, /mail_scope|company_mail_manager/, 'email capability is never manager authorisation')
+  assert.match(CLOSEOUT_MIGRATION, /idempotency_key = excluded\.idempotency_key/)
+  assert.match(CLOSEOUT_MIGRATION, /idempotency_key = coalesce\(p_idempotency_key, idempotency_key\)/)
+})
+
+test('#313 closeout tools keep unresolved upload states explicit and idempotent', () => {
+  const closeout = catalog.CG_DYNAMICS_MCP_TOOLS.find(tool => tool.name === 'close_content_run')
+  const upload = catalog.CG_DYNAMICS_MCP_TOOLS.find(tool => tool.name === 'update_closeout_upload_status')
+  assert.ok(closeout)
+  assert.ok(upload)
+  for (const tool of [closeout, upload]) {
+    assert.equal(tool.annotations.idempotentHint, true)
+    assert.ok(tool.inputSchema.required.includes('idempotency_key'))
+  }
+  assert.equal(closeout.inputSchema.properties.upload_status, undefined)
+  assert.equal(closeout.inputSchema.properties.upload_evidence, undefined)
+  assert.equal(upload.inputSchema.properties.upload_status, undefined)
+  assert.equal(upload.inputSchema.properties.upload_evidence, undefined)
+  assert.match(upload.description, /fresh authorised inspection|re-inspect/i)
 })

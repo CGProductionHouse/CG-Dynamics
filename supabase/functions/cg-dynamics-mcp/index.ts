@@ -11,6 +11,14 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { CG_DYNAMICS_MCP_TOOLS } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
+import {
+  inspectExactOneDriveFolder,
+  unavailableOneDriveEvidence,
+  validateExactContentRunFolderMapping,
+  validateExactFolderMetadata,
+  type OneDriveInspectionEvidence,
+  type OneDriveReadAdapter,
+} from './oneDriveFolderVerification.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -522,7 +530,6 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
 
   // Mail scope and sender readiness for bootstrap
   const mailScope = profile?.mail_scope ?? 'owned_threads_only'
-  const emailReady = profile?.email_setup_status === 'ready'
   const senderReady = !!(profile?.preferred_company_from && profile?.signature_text)
 
   return {
@@ -660,6 +667,8 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'DAILY UPDATE CONTRACT: morning = greeting → summary → Today timeline → Work Queue → optional blocker → action prompt. Evening = closing → Done Today → Still Open → Tomorrow → Prep.',
       'PERSONALITY: derived from staff profile (working_preferences, output_preferences, repeated_corrections). Never hardcode tone across staff. Personality belongs in greeting/closing; work body stays operational.',
       'NATURAL REPLIES: "done", "50%", "waiting on client", "move to Friday", "add note", "follow up Monday" should update canonical task/lead state through available tools.',
+      'CONTENT-RUN CLOSEOUT: When a staff member had client shoots/content runs that day, use get_content_run_plan to retrieve the canonical shot list, then collect per-client field updates, reconcile planned vs captured items, record missed/cancelled items with reasons, capture field notes, flag reshoots, verify OneDrive upload status and write approved updates to Dynamics via close_content_run. Never ask staff to recreate a plan already in Dynamics. Never mark closeout complete if upload is missing/partial/unverified.',
+      'ONEDRIVE UPLOAD GATE: For every content run, use verify_content_run_upload to inspect the exact mapped client/content-run folder. If footage is missing/partial/unverified, keep the item unresolved and give the staff member the exact next action. After staff approval, use update_closeout_upload_status; it performs a fresh authorised inspection and persists only that evidence. Staff self-report alone always remains unverified.',
     ],
     message: profile
       ? `Bootstrap ready for ${staff.fullName}. This payload contains your durable profile, mail readiness, capability manifest, MCP tools and operating rules. Use it to initialise a fresh Project.`
@@ -910,9 +919,264 @@ const handleLogLeadEmailActivity: ToolHandler = async (staff, input) => {
   }
 }
 
+async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const runId = input.content_run_id as string
+  const { data: run, error: runError } = await staff.supabase
+    .from('content_runs')
+    .select('id, client_id, client_name, name, run_date, start_time, location, status')
+    .eq('id', runId)
+    .maybeSingle()
+
+  if (runError) return { error: runError.message }
+  if (!run) return { error: 'Content Run not found.' }
+  if (!run.client_id) return { error: 'Content Run has no exact client assigned.' }
+
+  const { data: guideline, error: guidelineError } = await staff.supabase
+    .from('content_guidelines')
+    .select('id, content_run_id, client_id, title, month, status')
+    .eq('content_run_id', runId)
+    .eq('client_id', run.client_id)
+    .maybeSingle()
+
+  if (guidelineError) return { error: guidelineError.message }
+
+  const { data: runItems, error: runItemsError } = await staff.supabase
+    .from('content_run_items')
+    .select('id, run_id, guide_idea_id, sort_order, title, shot_notes, requirements, completed')
+    .eq('run_id', runId)
+    .order('sort_order', { ascending: true })
+
+  if (runItemsError) return { error: runItemsError.message }
+
+  let guidelineVideos: Array<Record<string, unknown>> = []
+  if (guideline) {
+    const { data, error } = await staff.supabase
+      .from('content_guide_ideas')
+      .select('id, content_guideline_id, client_id, title, objective, platform, format, hook, script, shot_breakdown, requirements, position, status')
+      .eq('content_guideline_id', guideline.id)
+      .eq('client_id', run.client_id)
+      .neq('status', 'archived')
+      .order('position', { ascending: true })
+
+    if (error) return { error: error.message }
+    guidelineVideos = data ?? []
+  }
+
+  const videosById = new Map(guidelineVideos.map(video => [video.id, video]))
+  const linkedVideoIds = new Set<string>()
+  const plannedItems = (runItems ?? []).map(item => {
+    const video = item.guide_idea_id ? videosById.get(item.guide_idea_id) : undefined
+    if (video && typeof video.id === 'string') linkedVideoIds.add(video.id)
+    return {
+      source: video ? 'content_guideline_video' : 'content_run_item',
+      run_item_id: item.id,
+      guideline_item_id: video?.id ?? null,
+      position: item.sort_order,
+      name: item.title ?? video?.title ?? null,
+      platform: video?.platform ?? null,
+      format: video?.format ?? null,
+      objective: video?.objective ?? null,
+      hook: video?.hook ?? null,
+      script: video?.script ?? null,
+      shot_breakdown: video?.shot_breakdown ?? null,
+      shot_notes: item.shot_notes,
+      requirements: item.requirements ?? video?.requirements ?? null,
+      completed: item.completed,
+    }
+  })
+
+  for (const video of guidelineVideos) {
+    if (typeof video.id !== 'string' || linkedVideoIds.has(video.id)) continue
+    plannedItems.push({
+      source: 'content_guideline_video',
+      run_item_id: null,
+      guideline_item_id: video.id,
+      position: typeof video.position === 'number' ? video.position : plannedItems.length + 1,
+      name: video.title ?? null,
+      platform: video.platform ?? null,
+      format: video.format ?? null,
+      objective: video.objective ?? null,
+      hook: video.hook ?? null,
+      script: video.script ?? null,
+      shot_breakdown: video.shot_breakdown ?? null,
+      shot_notes: null,
+      requirements: video.requirements ?? null,
+      completed: false,
+    })
+  }
+
+  plannedItems.sort((left, right) => left.position - right.position)
+
+  return {
+    content_run: run,
+    content_guideline: guideline ?? null,
+    planned_items: plannedItems,
+    source: 'canonical Dynamics Content Run and Content Guideline records',
+  }
+}
+
+async function handleGetContentRunCloseout(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const { data, error } = await staff.supabase
+    .rpc('get_content_run_closeout', {
+      p_actor_profile_id: staff.profileId,
+      p_content_run_id: input.content_run_id,
+    })
+
+  if (error) return { error: error.message }
+  return data
+}
+
+async function handleVerifyContentRunUpload(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const runId = input.content_run_id as string
+  const { data: run, error: runError } = await staff.supabase
+    .from('content_runs')
+    .select('id, client_id, client_name, name, run_date')
+    .eq('id', runId)
+    .maybeSingle()
+
+  if (runError) return { error: runError.message }
+  if (!run) return { error: 'Content Run not found.' }
+  if (!run.client_id) {
+    return {
+      content_run: { id: run.id, name: run.name, run_date: run.run_date },
+      exact_client: null,
+      evidence: unavailableOneDriveEvidence('content_run_has_no_exact_client'),
+    }
+  }
+
+  const { data: mappingResult, error: mappingError } = await staff.supabase
+    .rpc('get_content_run_onedrive_folder', { p_content_run_id: runId })
+
+  if (mappingError) {
+    return {
+      content_run: { id: run.id, name: run.name, run_date: run.run_date },
+      exact_client: { id: run.client_id, name: run.client_name },
+      evidence: unavailableOneDriveEvidence('canonical_content_run_mapping_contract_unavailable'),
+    }
+  }
+
+  const mapping = Array.isArray(mappingResult) ? mappingResult[0] : mappingResult
+  const mappingValidation = validateExactContentRunFolderMapping(mapping, run.id, run.client_id)
+  if (!mappingValidation.ok) {
+    return {
+      content_run: { id: run.id, name: run.name, run_date: run.run_date },
+      exact_client: { id: run.client_id, name: run.client_name },
+      evidence: unavailableOneDriveEvidence(mappingValidation.blocker),
+    }
+  }
+  const exactMapping = mappingValidation.mapping
+
+  const adapter = await import('../client-onboarding/onedrive-adapter.ts') as unknown as OneDriveReadAdapter
+  if (!adapter.getItem || !adapter.listChildren) {
+    return {
+      content_run: { id: run.id, name: run.name, run_date: run.run_date },
+      exact_client: { id: run.client_id, name: run.client_name },
+      mapped_folder: { name: exactMapping.folder_name ?? null },
+      evidence: unavailableOneDriveEvidence('delegated_onedrive_folder_reader_unavailable'),
+    }
+  }
+
+  const folder = await adapter.getItem(exactMapping.drive_id, exactMapping.month_folder_item_id)
+  const folderBlocker = validateExactFolderMetadata(folder, exactMapping)
+  if (folderBlocker || !folder) {
+    return {
+      content_run: { id: run.id, name: run.name, run_date: run.run_date },
+      exact_client: { id: run.client_id, name: run.client_name },
+      mapped_folder: { name: exactMapping.folder_name ?? null },
+      evidence: unavailableOneDriveEvidence(folderBlocker ?? 'authorised_folder_metadata_unavailable'),
+    }
+  }
+
+  const { data: closeout } = await staff.supabase
+    .from('content_run_closeouts')
+    .select('completed_items')
+    .eq('content_run_id', runId)
+    .maybeSingle()
+  const expectedMediaFileCount = Array.isArray(closeout?.completed_items) && closeout.completed_items.length > 0
+    ? closeout.completed_items.length
+    : null
+  const evidence = await inspectExactOneDriveFolder(
+    adapter,
+    exactMapping.drive_id,
+    exactMapping.month_folder_item_id,
+    expectedMediaFileCount,
+  )
+  return {
+    content_run: { id: run.id, name: run.name, run_date: run.run_date },
+    exact_client: { id: run.client_id, name: run.client_name },
+    mapped_folder: { name: folder.name },
+    inspected_at: new Date().toISOString(),
+    evidence,
+    source: 'authorised delegated OneDrive inspection of the exact durable content-run folder mapping',
+    persistence_note: 'Use update_closeout_upload_status only after staff approval; pass the lowercase evidence status. Staff self-report alone remains unverified.',
+  }
+}
+
+async function handleCloseContentRun(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const { data: existingCloseout } = await staff.supabase
+    .from('content_run_closeouts')
+    .select('upload_status, upload_evidence')
+    .eq('content_run_id', input.content_run_id)
+    .maybeSingle()
+
+  const { data, error } = await staff.supabase
+    .rpc('close_content_run', {
+      p_actor_profile_id: staff.profileId,
+      p_content_run_id: input.content_run_id,
+      p_planned_items: input.planned_items ?? '[]',
+      p_completed_items: input.completed_items ?? '[]',
+      p_missed_items: input.missed_items ?? '[]',
+      p_missed_reasons: input.missed_reasons ?? '[]',
+      p_cancelled_items: input.cancelled_items ?? '[]',
+      p_field_notes: input.field_notes ?? null,
+      p_reshoot_needed: input.reshoot_needed ?? false,
+      p_reshoot_notes: input.reshoot_notes ?? null,
+      // Preserve prior connector evidence when staff update field notes, but
+      // never accept a caller-supplied upload state. The dedicated status
+      // action re-inspects the exact durable mapping before changing it.
+      p_upload_status: existingCloseout?.upload_status ?? 'unverified',
+      p_upload_evidence: existingCloseout?.upload_evidence ?? null,
+      p_onedrive_folder_ref: null,
+      p_scope_changes: input.scope_changes ?? null,
+      p_idempotency_key: input.idempotency_key,
+    })
+
+  if (error) return { error: error.message }
+  return data
+}
+
+async function handleUpdateCloseoutUploadStatus(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const verification = await handleVerifyContentRunUpload(staff, input) as {
+    error?: string
+    inspected_at?: string
+    evidence?: OneDriveInspectionEvidence
+  }
+  if (verification.error) return verification
+  if (!verification.evidence) {
+    return { error: 'Exact-folder upload verification did not return evidence.' }
+  }
+
+  const uploadEvidence = JSON.stringify({
+    source: 'authorised_exact_content_run_folder_inspection',
+    inspected_at: verification.inspected_at ?? new Date().toISOString(),
+    ...verification.evidence,
+  })
+  const { data, error } = await staff.supabase
+    .rpc('update_closeout_upload_status', {
+      p_actor_profile_id: staff.profileId,
+      p_content_run_id: input.content_run_id,
+      p_upload_status: verification.evidence.status.toLowerCase(),
+      p_upload_evidence: uploadEvidence,
+      p_idempotency_key: input.idempotency_key,
+    })
+
+  if (error) return { error: error.message }
+  return { closeout: data, verification }
+}
+
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity'])
+const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status'])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -934,6 +1198,11 @@ const toolHandlers: Record<string, ToolHandler> = {
   create_recurring_task: handleCreateRecurringTask,
   compose_mail_draft: handleComposeMailDraft,
   log_lead_email_activity: handleLogLeadEmailActivity,
+  get_content_run_plan: handleGetContentRunPlan,
+  get_content_run_closeout: handleGetContentRunCloseout,
+  verify_content_run_upload: handleVerifyContentRunUpload,
+  close_content_run: handleCloseContentRun,
+  update_closeout_upload_status: handleUpdateCloseoutUploadStatus,
 }
 
 // ── MCP Server ──────────────────────────────────────────────────────────────
