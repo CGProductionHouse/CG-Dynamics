@@ -19,6 +19,7 @@ use those tools.
 ```
 chatgpt-plugin/cg-dynamics/
   .codex-plugin/plugin.json          # required manifest (identity, capabilities, prompts, skills path)
+  .app.json                          # real technical app id for the ONE communal connection
   README.md                          # this file
   PROJECT-CONTEXT.md                 # REQUIRED staff/client/company-admin context contract (#319)
   CONNECTION-HANDOFF.md              # final steps after the real MCP connection exists
@@ -45,11 +46,13 @@ chatgpt-plugin/cg-dynamics/
   OneDrive and Gmail remain their own authorities; skills orchestrate, never duplicate.
 - **Draft-only email.** Gmail is the real mailer; the lead skill never sends.
 
-## Intentionally missing
+## Connection
 
-The real `.app.json` MCP mapping and the `apps` manifest field are **deliberately absent**
-until the live CG Dynamics MCP connection is created in ChatGPT Developer mode and a real
-`plugin_asdk_app...` technical ID exists. See `CONNECTION-HANDOFF.md`.
+The live connector exists. `.app.json` carries the real technical app ID for the **single
+communal connection** (connected once as the shared company admin), and the manifest
+references it via `apps`. There is deliberately **no per-staff and no per-client connector
+or app id** — per-Project scope comes from `PROJECT-CONTEXT.md`. See `CONNECTION-HANDOFF.md`
+for what remains (acceptance run, then workspace enablement).
 
 ## Boundaries (do not change here)
 

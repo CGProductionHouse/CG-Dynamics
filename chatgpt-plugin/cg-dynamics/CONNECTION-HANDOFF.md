@@ -1,25 +1,24 @@
 # Connection handoff — CG Dynamics ChatGPT plugin
 
-This package (manifest + skills + golden prompts) is complete **except** the real MCP
-connection mapping, which cannot exist until the live CG Dynamics MCP endpoint is created
-in ChatGPT. The steps below are the only remaining work after Codex finishes the
-MCP/runtime lanes (#311/#313) and the OneDrive/OAuth lane (#307).
+**Status: the connection now exists.** The CG Dynamics MCP is deployed to production and the
+communal connector has been created and connected in the company ChatGPT account, so the
+real technical app ID is wired into `.app.json` and referenced by the manifest's `apps`
+field. Steps 1–5 below are **done**; only the acceptance run and workspace enablement remain.
 
-Do **not** perform these steps as part of this packaging lane, and do **not** commit any
-connector ID, OAuth secret, or production credential to the repo.
+Never commit an OAuth **secret**, client id, or callback URL to the repo. The technical app
+ID below is a non-secret connection identifier.
 
-## Remaining steps (in order)
+## Steps (1–5 complete)
 
-1. **Deploy / verify the real CG Dynamics MCP endpoint** (owned by the #311/#313/#307
-   lanes). Confirm it is reachable and staff-authenticated.
-2. **Create the custom MCP connection** in ChatGPT **Developer mode** for the CG Dynamics
-   MCP endpoint.
-3. **Copy the resulting real `plugin_asdk_app...` technical ID** that ChatGPT assigns to
-   that connection.
-4. **Create `.app.json`** in this package (`chatgpt-plugin/cg-dynamics/.app.json`) mapping
-   the plugin to that **exact real** technical ID. Never use a placeholder/fake ID.
-5. **Wire `apps: "./.app.json"`** into `.codex-plugin/plugin.json` if the tooling requires
-   the field (it is intentionally omitted now so no fake mapping ships).
+1. ✅ **Deploy / verify the real CG Dynamics MCP endpoint.** Deployed to project
+   `ehtjfntukiwbgptqgbzy` with OAuth discovery live (protected-resource metadata + Bearer
+   challenge).
+2. ✅ **Create the custom MCP connection** in ChatGPT **Developer mode**, signed in once as
+   the shared company admin (`info@cgproductionhouse.com`).
+3. ✅ **Real technical ID assigned:** `plugin_asdk_app_6aa1b73035948191bdb99d322521b977`.
+4. ✅ **`.app.json` created** with that exact real ID — no placeholder, no per-staff or
+   per-client app ids.
+5. ✅ **`apps: "./.app.json"`** wired into `.codex-plugin/plugin.json`.
 6. **Install from the personal/private source** and run every prompt in
    `acceptance/GOLDEN-PROMPTS.md` against the live connection, confirming the positive and
    negative/boundary behaviours. Connect **once**, with the communal CG Dynamics admin login
@@ -29,13 +28,16 @@ connector ID, OAuth secret, or production credential to the repo.
    over. See `../PROJECT-CONTEXT.md`.
 7. **Only then publish/enable** for the CG Production House company workspace.
 
-## Intentionally missing artifact
+## One connection, many Projects
 
-- `.app.json` and the `apps` manifest field are **deliberately absent**. Their absence is
-  the expected state of this PR. They are added only at step 4–5 above with the real ID.
+There is **exactly one** connector for the whole communal ChatGPT account. Do **not** create
+a second connector, a per-staff connector, or per-staff/per-client app ids. The OAuth
+principal is the shared admin account and is only the *connection principal*; which staff
+member or client a Project acts for comes from the per-call context contract in
+`PROJECT-CONTEXT.md` (#319).
 
 ## Guardrails
 
-- No fake connector IDs, no `plugin_asdk_app...` placeholders that could be mistaken for real.
-- No OAuth secrets or production credentials in the repo.
-- This package does not create the live connector, deploy, or change permissions.
+- No OAuth secrets, client ids, or callback URLs in the repo. The technical app ID is a
+  non-secret connection identifier.
+- No placeholder ids that could be mistaken for real.

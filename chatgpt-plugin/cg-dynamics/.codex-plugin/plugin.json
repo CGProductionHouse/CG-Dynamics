@@ -11,6 +11,7 @@
     "write": true
   },
   "skills": "./skills/",
+  "apps": "./.app.json",
   "starter_prompts": [
     "Set up this Project.",
     "Brief yourself from my CG Assistant profile.",
@@ -20,5 +21,5 @@
     "Research this lead and draft the follow-up email."
   ],
   "visibility": "private",
-  "notes": "This is a private workspace plugin. The `apps` / `.app.json` MCP mapping is intentionally omitted here: it is added only after the real CG Dynamics MCP connection is created in ChatGPT Developer mode and a real `plugin_asdk_app...` technical ID exists. See ../CONNECTION-HANDOFF.md. Do not add a placeholder connector ID."
+  "notes": "This is a private workspace plugin. The `apps` mapping points at ../.app.json, which carries the real technical app ID for the single communal CG Dynamics connection created in ChatGPT Developer mode. Connect ONCE as the shared company admin — there is deliberately no per-staff or per-client connector. Per-Project staff/client scope comes from the context contract in ../PROJECT-CONTEXT.md (#319), never from the OAuth identity. No client secret, client id, or callback URL belongs in this package."
 }
