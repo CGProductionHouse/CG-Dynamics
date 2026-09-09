@@ -1,0 +1,23 @@
+{
+  "schema_version": "v1",
+  "name": "cg-dynamics",
+  "display_name": "CG Dynamics",
+  "developer": "CG Production House",
+  "description_for_human": "Private CG Production House operating remote: brief yourself from your CG Assistant profile, see today's work, retrieve exact-client context, close out content runs, and draft governed lead follow-ups. Staff workspace only.",
+  "description_for_model": "Private, single-workspace assistant surface for CG Production House staff. All live data, authorization and actions come from the registered CG Dynamics MCP connection — this package only supplies the workflow skills. Always work from the exact signed-in staff identity and exact client scope; never infer identity, client facts, contacts, tasks, schedules or media state, and never fabricate a live connection. Prefer live retrieval over stale ChatGPT Project memory. Email is DRAFT-ONLY; never send.",
+  "category": "productivity",
+  "capabilities": {
+    "read": true,
+    "write": true
+  },
+  "skills": "./skills/",
+  "starter_prompts": [
+    "Brief yourself from my CG Assistant profile.",
+    "What do I have today?",
+    "I'm done with Red Oak's shoot.",
+    "Check whether today's footage is uploaded.",
+    "Research this lead and draft the follow-up email."
+  ],
+  "visibility": "private",
+  "notes": "This is a private workspace plugin. The `apps` / `.app.json` MCP mapping is intentionally omitted here: it is added only after the real CG Dynamics MCP connection is created in ChatGPT Developer mode and a real `plugin_asdk_app...` technical ID exists. See ../CONNECTION-HANDOFF.md. Do not add a placeholder connector ID."
+}
