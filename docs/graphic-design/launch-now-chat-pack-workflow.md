@@ -33,6 +33,24 @@ The internal image generator is generative. Reference images guide the output, b
 - where identity matters, preserve the real human photo as an exact imported/composited layer or use non-generative editing;
 - use the generator heavily for the surrounding art direction, background, graphic effects, depth and visual system.
 
+## Current browser-chat attachment reality
+
+A ZIP is useful for OneDrive storage, handoff and portability, but **do not rely on attaching only the ZIP to the browser chat when the internal image generator needs visual references**. The image generator works best when the required images are surfaced as actual image attachments in the conversation.
+
+Therefore every monthly `00_INPUT_PACK` should contain both:
+
+- the packaged ZIP; and
+- a `CHAT_ATTACH/` folder containing the individual images staff should multi-select into ChatGPT.
+
+The staff launch action is:
+
+1. open the month's `CHAT_ATTACH/` folder;
+2. multi-select the exact photos/logo/reference screenshots and attach them to the normal ChatGPT conversation;
+3. paste/upload the separate prompt text;
+4. generate the batch.
+
+If future ChatGPT versions can reliably unpack a ZIP directly into the image-generation reference surface, this manual multi-select step can be removed.
+
 ## Current QA limitation
 
 In the current browser-chat image generation flow, ChatGPT cannot reliably run a hidden multi-step loop of `generate -> inspect -> reject -> regenerate` before the user sees the first result. The image-generation response is surfaced as the result of that turn.
@@ -61,6 +79,7 @@ CG Creative Assistant/
   02_MONTHLY_PACKS/
     CLIENT-SUBBRAND_YYYY-MM/
       00_INPUT_PACK/
+        CHAT_ATTACH/
       01_PROMPT/
       02_WAVE_1/
       03_AMENDMENTS/
@@ -105,9 +124,13 @@ Exact filename matching is insufficient. The system should later use perceptual 
 
 ## Monthly Chat Pack
 
-For each batch, build one attachable ZIP and one separate prompt text file.
+For each batch, build:
 
-The ZIP should contain:
+- one ZIP for storage/transport;
+- one `CHAT_ATTACH/` folder containing the exact individual visual attachments;
+- one separate prompt text file.
+
+The package should contain:
 
 ```text
 inputs/
@@ -161,7 +184,7 @@ The same stable name should follow the poster through:
 ## Wave workflow
 
 ### 00_INPUT_PACK
-Exact generation inputs and ready-to-attach ZIP.
+Exact generation inputs, packaged ZIP, `CHAT_ATTACH/` images and manifest.
 
 ### 01_PROMPT
 Exact normal-browser-chat prompt.
@@ -258,4 +281,4 @@ and the November monthly pack structure exists at:
 
 `Clients/Piek Group/CG Creative Assistant/02_MONTHLY_PACKS/PIEK-ENGEN_2026-11/`
 
-The first Chat Pack and prompt are stored there. The v1 pack deliberately flags that the latest Canva poster screenshots still need to be physically included before it is considered fully ready for the internal image generator. This avoids pretending the generator can ingest a Canva design reference directly when it cannot.
+The first Chat Pack, manifest, prompt and individual `CHAT_ATTACH/` source files are stored there. The remaining v1 gap is adding 3-6 physical screenshots of selected recent Piek Canva posters into `CHAT_ATTACH/` / the ZIP before the pack is considered fully ready for the internal image generator.
