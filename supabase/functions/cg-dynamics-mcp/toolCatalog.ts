@@ -17,13 +17,53 @@ export interface CgDynamicsMcpTool {
   canonicalContract: string
 }
 
-const objectSchema = (properties: JsonSchema, required: string[] = []): JsonSchema => ({
-  type: 'object', properties, required, additionalProperties: false,
-})
 const uuid = { type: 'string', format: 'uuid' }
 const date = { type: 'string', format: 'date' }
 
+/** Schema with no Project context — only the context-bootstrap tool uses this. */
+const rawObjectSchema = (properties: JsonSchema, required: string[] = []): JsonSchema => ({
+  type: 'object', properties, required, additionalProperties: false,
+})
+
+// #319: CG Production House shares ONE communal ChatGPT account and ONE OAuth connection
+// (the company admin). The OAuth principal is therefore not the staff identity, so every
+// operational call must state which Project it is acting for. Context is per call — never
+// remembered server-side — so switching Projects can never reuse another Project's context.
+const projectContextSchema: JsonSchema = {
+  type: 'object',
+  description:
+    'Required. Which CG Project this call acts for. The single OAuth connection is the shared company admin account, so the effective staff/client subject must be stated explicitly on every call. Obtain the exact values from resolve_project_context and reuse them for every call in this Project.',
+  properties: {
+    context_kind: { enum: ['staff', 'client', 'company_admin'] },
+    staff_profile_id: { ...uuid, description: 'Exact canonical staff profile id. Required when context_kind="staff".' },
+    client_id: { ...uuid, description: 'Exact canonical client id. Required when context_kind="client".' },
+  },
+  required: ['context_kind'],
+  additionalProperties: false,
+}
+
+/** Every operational tool carries the required Project context. */
+const objectSchema = (properties: JsonSchema, required: string[] = []): JsonSchema => ({
+  type: 'object',
+  properties: { ...properties, context: projectContextSchema },
+  required: [...required, 'context'],
+  additionalProperties: false,
+})
+
 export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
+  {
+    name: 'resolve_project_context', title: 'Resolve this Project\'s context',
+    description: 'Resolve the exact canonical CG Project context for this chat (one staff member, one client, or explicit company admin) and return it to carry on every later tool call. Call this first in a fresh Project chat. Accepts an exact canonical id, or an exact-equality name that matches exactly one active record — never a fuzzy or partial match.',
+    inputSchema: rawObjectSchema({
+      context_kind: { enum: ['staff', 'client', 'company_admin'] },
+      staff_profile_id: uuid,
+      staff_full_name: { type: 'string', description: 'Exact full name of an active staff profile. Exact equality only.' },
+      client_id: uuid,
+      client_name: { type: 'string', description: 'Exact canonical client name. Exact equality only; never fuzzy-matched.' },
+    }, ['context_kind']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'profiles + clients canonical registry (#319)',
+  },
   {
     name: 'get_my_day', title: 'Get my day',
     description: 'Read current priorities for the exact authenticated active staff profile from the canonical Work, Calendar and Client Schedule authorities.',
@@ -244,5 +284,5 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =
-  'Resolve every call from the bearer token to one exact active CG staff profile. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
+  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
 

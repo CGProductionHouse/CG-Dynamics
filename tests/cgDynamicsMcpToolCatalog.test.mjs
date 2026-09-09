@@ -45,6 +45,7 @@ test('catalog exposes no send_email or send_draft action — staff email is draf
 test('read tools cover exact staff, task, calendar, schedule, lead, client context, profile, bootstrap and recurring', () => {
   const reads = catalog.CG_DYNAMICS_MCP_TOOLS.filter(tool => tool.annotations.readOnlyHint).map(tool => tool.name)
   assert.deepEqual(reads, [
+    'resolve_project_context',
     'get_my_day', 'list_my_tasks', 'get_task', 'list_my_calendar',
     'list_client_schedule', 'get_client_context', 'list_my_leads', 'get_lead',
     'get_my_profile', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
@@ -62,20 +63,23 @@ test('every mutation is non-destructive, idempotent and bound to a canonical act
   }
 })
 
-test('server instruction resolves exact bearer identity and forbids unsafe fallbacks', () => {
+// #319: the shared communal connection means the bearer token proves authorisation only.
+// The effective staff/client subject comes from explicit per-call Project context.
+test('server instruction states the shared-connection contract and forbids unsafe fallbacks', () => {
   const instructions = catalog.CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS
-  assert.match(instructions, /bearer token.*exact active CG staff profile/i)
+  assert.match(instructions, /OAuth connection is the company admin account and is NOT the staff identity/i)
+  assert.match(instructions, /resolve_project_context/)
   assert.match(instructions, /Never expose SQL/i)
   assert.match(instructions, /cross-client fallbacks/i)
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 24 tools: 14 read + 10 write', () => {
+test('catalog contains exactly 25 tools: 15 read + 10 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 24)
+  assert.equal(tools.length, 25)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 14)
+  assert.equal(reads.length, 15)
   assert.equal(writes.length, 10)
 })
 
@@ -92,10 +96,10 @@ test('write tools that create tasks accept optional client_id for exact client l
   assert.ok(createTask.inputSchema.properties.client_id)
 })
 
-test('get_my_day requires no input parameters', () => {
+test('get_my_day takes only the required Project context', () => {
   const getMyDay = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_day')
   assert.ok(getMyDay)
-  assert.deepEqual(getMyDay.inputSchema.required, [])
+  assert.deepEqual(getMyDay.inputSchema.required, ['context'])
 })
 
 test('update_task actions are limited to safe reversible operations', () => {
@@ -123,11 +127,11 @@ test('add_lead_research requires a non-empty summary and idempotency_key', () =>
   assert.equal(addResearch.inputSchema.properties.summary.minLength, 1)
 })
 
-test('get_my_profile is a read-only tool with no required parameters', () => {
+test('get_my_profile is a read-only tool taking only the Project context', () => {
   const getProfile = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_profile')
   assert.ok(getProfile)
   assert.equal(getProfile.annotations.readOnlyHint, true)
-  assert.deepEqual(getProfile.inputSchema.required, [])
+  assert.deepEqual(getProfile.inputSchema.required, ['context'])
 })
 
 test('update_my_preferences merges with existing values and requires idempotency_key', () => {
@@ -143,11 +147,11 @@ test('update_my_preferences merges with existing values and requires idempotency
   assert.ok(props.lead_research_criteria)
 })
 
-test('get_my_assistant_bootstrap is a read-only tool requiring no parameters', () => {
+test('get_my_assistant_bootstrap is a read-only tool taking only the Project context', () => {
   const bootstrap = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_assistant_bootstrap')
   assert.ok(bootstrap)
   assert.equal(bootstrap.annotations.readOnlyHint, true)
-  assert.deepEqual(bootstrap.inputSchema.required, [])
+  assert.deepEqual(bootstrap.inputSchema.required, ['context'])
   assert.match(bootstrap.description, /self-brief/i)
 })
 
@@ -155,7 +159,7 @@ test('get_my_recurring_tasks is a read-only tool listing templates not instances
   const recurring = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_my_recurring_tasks')
   assert.ok(recurring)
   assert.equal(recurring.annotations.readOnlyHint, true)
-  assert.deepEqual(recurring.inputSchema.required, [])
+  assert.deepEqual(recurring.inputSchema.required, ['context'])
   assert.match(recurring.description, /template/i)
 })
 
@@ -249,7 +253,7 @@ test('#313 exposes the canonical content-run plan as a read-only exact-ID tool',
   const plan = catalog.CG_DYNAMICS_MCP_TOOLS.find(tool => tool.name === 'get_content_run_plan')
   assert.ok(plan)
   assert.equal(plan.annotations.readOnlyHint, true)
-  assert.deepEqual(plan.inputSchema.required, ['content_run_id'])
+  assert.deepEqual(plan.inputSchema.required, ['content_run_id', 'context'])
   assert.equal(plan.inputSchema.properties.content_run_id.format, 'uuid')
   assert.match(plan.description, /canonical planned shot list/i)
   assert.match(plan.description, /never asks staff to recreate/i)

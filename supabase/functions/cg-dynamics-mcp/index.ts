@@ -25,6 +25,18 @@ import {
   deriveMcpOAuthUrls,
   isProtectedResourceMetadataRequest,
 } from './oauthDiscovery.ts'
+import {
+  assertRecordClientMatchesContext,
+  assertToolAllowedInContext,
+  buildAuditEnvelope,
+  CONTEXT_BOOTSTRAP_TOOL,
+  isUuid,
+  parseProjectContext,
+  resolveClientScopeForInput,
+  type ContextAuditEnvelope,
+  type ParsedProjectContext,
+  type ProjectContextKind,
+} from './projectContext.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -70,15 +82,33 @@ function jsonResponse(data: unknown, status = 200) {
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 
+// The communal ChatGPT account holds ONE OAuth connection, signed in as the company admin.
+// That principal proves the connector is authorised — it is NOT the staff identity. See
+// projectContext.ts for the connection-principal vs operating-context split (#319).
+interface ConnectionPrincipal {
+  userId: string
+  profileId: string
+  fullName: string | null
+  role: string
+}
+
+// Handed to every tool handler. `profileId` / `fullName` / `role` are the EFFECTIVE Project
+// subject (Franco in Franco's Project), never the shared OAuth principal, so existing
+// handlers act for the right person unchanged. `connection` is kept alongside for audit.
 interface AuthenticatedStaff {
   supabase: ReturnType<typeof createClient>
   profileId: string
   fullName: string | null
   role: string
   isActive: boolean
+  contextKind: ProjectContextKind
+  effectiveStaffProfileId: string | null
+  effectiveClientId: string | null
+  effectiveClientName: string | null
+  connection: ConnectionPrincipal
 }
 
-async function authenticateStaff(request: Request): Promise<{ ok: true; staff: AuthenticatedStaff } | { ok: false; response: Response }> {
+async function authenticateStaff(request: Request): Promise<{ ok: true; connection: ConnectionPrincipal; supabase: ReturnType<typeof createClient> } | { ok: false; response: Response }> {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) {
@@ -114,14 +144,161 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; staff: A
 
   return {
     ok: true,
-    staff: {
-      supabase,
+    supabase,
+    connection: {
+      userId: user.id,
       profileId: profile.id,
       fullName: profile.full_name,
       role: profile.role,
-      isActive: profile.is_active,
     },
   }
+}
+
+// ── Operating context (#319) ────────────────────────────────────────────────
+
+const ADMIN_CONTEXT_ROLES = new Set(['admin', 'manager'])
+
+/**
+ * Resolve the per-call Project context against canonical Dynamics records. Exact IDs only,
+ * active records only, fail closed. The shared admin OAuth principal never widens scope by
+ * itself — a staff Project acts as that exact staff member, a client Project is pinned to
+ * that exact client, and company_admin must be asked for explicitly.
+ */
+async function resolveOperatingContext(
+  supabase: ReturnType<typeof createClient>,
+  connection: ConnectionPrincipal,
+  context: ParsedProjectContext,
+): Promise<{ ok: true; staff: AuthenticatedStaff } | { ok: false; error: string }> {
+  const base = {
+    supabase,
+    contextKind: context.contextKind,
+    effectiveStaffProfileId: context.staffProfileId,
+    effectiveClientId: context.clientId,
+    effectiveClientName: null as string | null,
+    connection,
+  }
+
+  if (context.contextKind === 'staff') {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, role, is_active')
+      .eq('id', context.staffProfileId)
+      .maybeSingle()
+    if (error) return { ok: false, error: 'Staff context lookup unavailable.' }
+    if (!profile) return { ok: false, error: 'No canonical staff profile matches that exact staff_profile_id.' }
+    if (!STAFF_ROLES.has(profile.role) || profile.is_active !== true) {
+      return { ok: false, error: 'That staff profile is not an active CG staff member.' }
+    }
+    return {
+      ok: true,
+      staff: { ...base, profileId: profile.id, fullName: profile.full_name, role: profile.role, isActive: true },
+    }
+  }
+
+  if (context.contextKind === 'client') {
+    const { data: client, error } = await supabase
+      .from('clients')
+      .select('id, name, active')
+      .eq('id', context.clientId)
+      .maybeSingle()
+    if (error) return { ok: false, error: 'Client context lookup unavailable.' }
+    if (!client) return { ok: false, error: 'No canonical client matches that exact client_id.' }
+    if (!client.active) return { ok: false, error: 'That client is not active.' }
+    // A client Project has no staff subject. The communal connection principal is the
+    // recorded actor for idempotency/audit; staff-subject tools are refused outright.
+    return {
+      ok: true,
+      staff: {
+        ...base,
+        effectiveClientName: client.name,
+        profileId: connection.profileId,
+        fullName: connection.fullName,
+        role: connection.role,
+        isActive: true,
+      },
+    }
+  }
+
+  // company_admin — must be explicitly requested AND the connection principal must actually
+  // hold an admin/manager role. Never inferred.
+  if (!ADMIN_CONTEXT_ROLES.has(connection.role)) {
+    return { ok: false, error: 'company_admin context requires the connected account to hold an admin or manager role.' }
+  }
+  return {
+    ok: true,
+    staff: { ...base, profileId: connection.profileId, fullName: connection.fullName, role: connection.role, isActive: true },
+  }
+}
+
+/**
+ * Bootstrap helper for a fresh Project chat: resolve an exact canonical Project context and
+ * echo it back so the Project can carry it on every later call. Accepts an exact uuid, or an
+ * EXACT-equality name that matches exactly one active canonical record. Never fuzzy-matches,
+ * never guesses, and stores nothing server-side.
+ */
+async function handleResolveProjectContext(
+  supabase: ReturnType<typeof createClient>,
+  connection: ConnectionPrincipal,
+  input: Record<string, unknown>,
+) {
+  const kind = input.context_kind
+  if (kind === 'company_admin') {
+    if (!ADMIN_CONTEXT_ROLES.has(connection.role)) {
+      return { error: 'company_admin context requires the connected account to hold an admin or manager role.' }
+    }
+    return {
+      resolved_context: { context_kind: 'company_admin' },
+      display: { label: connection.fullName ?? 'CG Production House', role: connection.role },
+      usage: 'Pass this exact context object on every subsequent tool call in this Project.',
+    }
+  }
+
+  if (kind === 'staff') {
+    let query = supabase.from('profiles').select('id, full_name, role, is_active')
+    if (isUuid(input.staff_profile_id)) {
+      query = query.eq('id', (input.staff_profile_id as string).trim())
+    } else if (typeof input.staff_full_name === 'string' && input.staff_full_name.trim()) {
+      // Exact equality only — no ILIKE, no partial, no fuzzy.
+      query = query.eq('full_name', input.staff_full_name.trim())
+    } else {
+      return { error: 'Provide an exact staff_profile_id (uuid) or an exact staff_full_name.' }
+    }
+    const { data, error } = await query.eq('is_active', true).limit(5)
+    if (error) return { error: 'Staff context lookup unavailable.' }
+    const matches = (data ?? []).filter((p: { role: string }) => STAFF_ROLES.has(p.role))
+    if (matches.length === 0) return { error: 'No exact active CG staff profile matched. Supply the exact canonical staff_profile_id.' }
+    if (matches.length > 1) return { error: 'That name matched more than one active staff profile. Supply the exact canonical staff_profile_id.' }
+    const profile = matches[0] as { id: string; full_name: string | null; role: string }
+    return {
+      resolved_context: { context_kind: 'staff', staff_profile_id: profile.id },
+      display: { label: profile.full_name, role: profile.role },
+      usage: 'Pass this exact context object on every subsequent tool call in this Project.',
+    }
+  }
+
+  if (kind === 'client') {
+    let query = supabase.from('clients').select('id, name, active')
+    if (isUuid(input.client_id)) {
+      query = query.eq('id', (input.client_id as string).trim())
+    } else if (typeof input.client_name === 'string' && input.client_name.trim()) {
+      query = query.eq('name', input.client_name.trim())
+    } else {
+      return { error: 'Provide an exact client_id (uuid) or an exact client_name.' }
+    }
+    const { data, error } = await query.eq('active', true).limit(5)
+    if (error) return { error: 'Client context lookup unavailable.' }
+    const matches = data ?? []
+    if (matches.length === 0) return { error: 'No exact active client matched. Supply the exact canonical client_id. Client names are never fuzzy-matched.' }
+    if (matches.length > 1) return { error: 'That name matched more than one active client. Supply the exact canonical client_id.' }
+    const client = matches[0] as { id: string; name: string }
+    return {
+      resolved_context: { context_kind: 'client', client_id: client.id },
+      display: { label: client.name },
+      usage: 'Pass this exact context object on every subsequent tool call in this Project.',
+    }
+  }
+
+  return { error: 'context_kind must be one of: staff, client, company_admin.' }
 }
 
 // ── Idempotency ─────────────────────────────────────────────────────────────
@@ -160,7 +337,25 @@ async function recordIdempotency(
   idempotencyKey: string,
   inputHash: string,
   status: string,
+  audit?: ContextAuditEnvelope,
 ) {
+  // Preferred: record the dual principal (#319) — communal connection principal AND the
+  // effective Project context. Falls back to the original signature so an environment that
+  // has not yet applied the context columns still records the write.
+  if (audit) {
+    const { error } = await sb.rpc('mcp_record_idempotency_with_context', {
+      p_caller_profile_id: callerProfileId,
+      p_tool_name: toolName,
+      p_idempotency_key: idempotencyKey,
+      p_input_hash: inputHash,
+      p_result_status: status,
+      p_connection_principal_user_id: audit.connection_principal_user_id,
+      p_effective_context_kind: audit.effective_context_kind,
+      p_effective_staff_profile_id: audit.effective_staff_profile_id,
+      p_effective_client_id: audit.effective_client_id,
+    })
+    if (!error) return
+  }
   await sb.rpc('mcp_record_idempotency', {
     p_caller_profile_id: callerProfileId,
     p_tool_name: toolName,
@@ -956,6 +1151,9 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
   if (runError) return { error: runError.message }
   if (!run) return { error: 'Content Run not found.' }
   if (!run.client_id) return { error: 'Content Run has no exact client assigned.' }
+  // A client Project may only read its own runs, even under the shared admin connection.
+  const runScope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, run.client_id as string, 'content run')
+  if (!runScope.allowed) return { error: runScope.error }
 
   const { data: guideline, error: guidelineError } = await staff.supabase
     .from('content_guidelines')
@@ -1042,6 +1240,9 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
 }
 
 async function handleGetContentRunCloseout(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const scopeError = await assertRunInClientScope(staff, input.content_run_id)
+  if (scopeError) return scopeError
+
   const { data, error } = await staff.supabase
     .rpc('get_content_run_closeout', {
       p_actor_profile_id: staff.profileId,
@@ -1069,6 +1270,9 @@ async function handleVerifyContentRunUpload(staff: AuthenticatedStaff, input: Re
       evidence: unavailableOneDriveEvidence('content_run_has_no_exact_client'),
     }
   }
+  // A client Project may only verify its own runs, even under the shared admin connection.
+  const uploadScope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, run.client_id as string, 'content run')
+  if (!uploadScope.allowed) return { error: uploadScope.error }
 
   const { data: mappingResult, error: mappingError } = await staff.supabase
     .rpc('get_content_run_onedrive_folder', { p_content_run_id: runId })
@@ -1138,7 +1342,27 @@ async function handleVerifyContentRunUpload(staff: AuthenticatedStaff, input: Re
   }
 }
 
+/**
+ * In a client Project, refuse a content run that belongs to a different client. Read-only
+ * pre-check before the closeout RPCs, which take only a run id.
+ */
+async function assertRunInClientScope(staff: AuthenticatedStaff, runId: unknown): Promise<{ error: string } | null> {
+  if (staff.contextKind !== 'client' || !staff.effectiveClientId) return null
+  const { data: run, error } = await staff.supabase
+    .from('content_runs')
+    .select('id, client_id')
+    .eq('id', runId)
+    .maybeSingle()
+  if (error) return { error: 'Content Run scope check unavailable.' }
+  if (!run) return { error: 'Content Run not found.' }
+  const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, run.client_id as string, 'content run')
+  return scope.allowed ? null : { error: scope.error }
+}
+
 async function handleCloseContentRun(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const scopeError = await assertRunInClientScope(staff, input.content_run_id)
+  if (scopeError) return scopeError
+
   const { data: existingCloseout } = await staff.supabase
     .from('content_run_closeouts')
     .select('upload_status, upload_evidence')
@@ -1255,14 +1479,50 @@ function handleToolsList(id: string | number | null) {
 
 async function handleToolsCall(
   id: string | number | null,
-  staff: AuthenticatedStaff,
+  supabase: ReturnType<typeof createClient>,
+  connection: ConnectionPrincipal,
   toolName: string,
-  toolInput: Record<string, unknown>,
+  rawToolInput: Record<string, unknown>,
 ) {
+  // The context-bootstrap tool runs before any operating context exists.
+  if (toolName === CONTEXT_BOOTSTRAP_TOOL) {
+    const result = await handleResolveProjectContext(supabase, connection, rawToolInput)
+    const isError = result && typeof result === 'object' && 'error' in result
+    return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify(result) }], isError: !!isError })
+  }
+
   const handler = toolHandlers[toolName]
   if (!handler) {
     return jsonRpcError(id, -32602, `Unknown tool: ${toolName}`)
   }
+
+  // Every operational call must state whose Project it is acting for. One shared connection
+  // serves every Project, so context is per-call and never inherited or cached (#319).
+  const { context: rawContext, ...toolInputWithoutContext } = rawToolInput
+  const parsed = parseProjectContext(rawContext)
+  if (!parsed.ok) {
+    return jsonRpcError(id, -32602, parsed.error)
+  }
+
+  const policy = assertToolAllowedInContext(toolName, parsed.context.contextKind)
+  if (!policy.allowed) {
+    return jsonRpcError(id, -32602, policy.error)
+  }
+
+  const resolved = await resolveOperatingContext(supabase, connection, parsed.context)
+  if (!resolved.ok) {
+    return jsonRpcError(id, -32602, resolved.error)
+  }
+  const staff = resolved.staff
+
+  // In a client Project, pin every client-scoped call to that exact client.
+  const scoped = resolveClientScopeForInput(staff.contextKind, staff.effectiveClientId, toolInputWithoutContext)
+  if (!scoped.ok) {
+    return jsonRpcError(id, -32602, scoped.error)
+  }
+  const toolInput = scoped.input
+
+  const audit = buildAuditEnvelope(connection, parsed.context)
 
   const idempotencyKey = toolInput.idempotency_key as string | undefined
   const isWrite = WRITE_TOOLS.has(toolName)
@@ -1275,7 +1535,7 @@ async function handleToolsCall(
     const inputHash = computeInputHash(toolInput as Record<string, unknown>)
     const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash)
     if (existing.duplicate) {
-      return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify(existing.result) }], isError: false })
+      return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: false })
     }
   }
 
@@ -1285,18 +1545,22 @@ async function handleToolsCall(
     if (isWrite && idempotencyKey) {
       const inputHash = computeInputHash(toolInput as Record<string, unknown>)
       const hasError = result && typeof result === 'object' && 'error' in result
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash, hasError ? 'error' : 'success')
+      await recordIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
     }
 
     const isError = result && typeof result === 'object' && 'error' in result
+    // Dual-principal audit on every call: communal connection principal + effective context.
+    const payload = result && typeof result === 'object' && !Array.isArray(result)
+      ? { ...(result as Record<string, unknown>), _context: audit }
+      : { result, _context: audit }
     return jsonRpcResponse(id, {
-      content: [{ type: 'text', text: JSON.stringify(result) }],
+      content: [{ type: 'text', text: JSON.stringify(payload) }],
       isError: !!isError,
     })
   } catch (err) {
     if (isWrite && idempotencyKey) {
       const inputHash = computeInputHash(toolInput as Record<string, unknown>)
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash, 'error')
+      await recordIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash, 'error', audit)
     }
     return jsonRpcError(id, -32603, `Tool execution failed: ${err instanceof Error ? err.message : String(err)}`)
   }
@@ -1327,7 +1591,9 @@ Deno.serve(async (req) => {
   const auth = await authenticateStaff(req)
   if (!auth.ok) return auth.response
 
-  const staff = auth.staff
+  // Connection principal only — the communal admin account. The effective Project subject
+  // is resolved per tool call from explicit context (#319).
+  const { connection, supabase: connectionSupabase } = auth
 
   let body: Record<string, unknown>
   try {
@@ -1356,7 +1622,7 @@ Deno.serve(async (req) => {
       if (!args?.name) {
         return jsonRpcError(id as string | number | null, -32602, 'Missing tool name.')
       }
-      return handleToolsCall(id as string | number | null, staff, args.name, args.arguments ?? {})
+      return handleToolsCall(id as string | number | null, connectionSupabase, connection, args.name, args.arguments ?? {})
     }
 
     case 'ping':
