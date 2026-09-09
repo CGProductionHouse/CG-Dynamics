@@ -52,7 +52,11 @@ export function buildProtectedResourceMetadata(urls: McpOAuthUrls) {
     resource: urls.resource,
     authorization_servers: [urls.authorizationServer],
     bearer_methods_supported: ['header'],
-    scopes_supported: ['openid', 'profile', 'email', 'offline_access'],
+    // Supabase OAuth Server currently supports openid/email/profile/phone only.
+    // CG Dynamics does not need OIDC ID tokens for MCP access; the access token is
+    // resolved to the exact Supabase user and RLS remains authoritative. Keep the
+    // advertised set to scopes we actually need and avoid unsupported offline_access.
+    scopes_supported: ['email', 'profile'],
   }
 }
 
