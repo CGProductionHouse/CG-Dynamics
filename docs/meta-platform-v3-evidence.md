@@ -67,9 +67,9 @@ content counts and Facebook unfollows/net follows remain unverified.
 1. Apply the prepared schema and Edge Function checkpoint under explicit
    production rollout approval, then run one controlled Cape Lumber incremental
    sync and verify per-asset health plus stale-lease behavior.
-2. Re-run authenticated admin and client acceptance on the deployed head. The
-   latest preview deployment is blocked by Vercel's daily deployment cap, so
-   commit `6fdced8` has build/test evidence but no newer preview claim.
+2. Re-run authenticated admin and client acceptance after the Supabase function
+   deployment. The latest Vercel frontend preview is healthy, but it correctly
+   continues to call the currently deployed production Edge Function.
 3. Publishing must consume approved immutable content_review_versions and existing
    monthly_deliverables scheduling. Add idempotent receipts, provider-state
    reconciliation and Instagram container lifecycle. No parallel scheduler and no
@@ -126,9 +126,10 @@ Authenticated Chrome acceptance was repeated after current main was integrated:
   values. Staff-only connector details remain marked internal.
 - A live defect was found on the integration screen: `Last verified insight`
   displayed `tiktok`. Commit `6fdced8` constrains that query to Facebook/Instagram
-  and adds regression coverage. Browser verification of this final fix requires a
-  fresh preview or deployment; Vercel rejected the new preview solely because the
-  project exceeded its daily free deployment count.
+  and adds regression coverage. The new Vercel preview builds successfully, but
+  browser verification of this server-side fix requires deploying the corrected
+  `meta-connection-status` Edge Function; the preview still calls the currently
+  deployed function and therefore reproduces the old `tiktok` value as expected.
 
 ## Connection diagnostics checkpoint
 
