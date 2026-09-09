@@ -1,168 +1,194 @@
 # CG Graphic Design Assistant — Status
 
-Last updated: 2026-09-09
+Last updated: 2026-09-09 15:12 SAST
 Branch: `feat/graphic-design-social-poster-lane`
 Draft PR: #312
 
 ## Why this file exists
 
-This is the continuation checkpoint for the CG Production House graphic-design system. A future ChatGPT conversation must be able to resume the work from this file plus the linked graphic-design docs without relying on the original chat transcript.
+This is the continuation checkpoint for the CG Production House graphic-design system. A future ChatGPT conversation should be able to resume from this file plus the linked docs without relying on the original chat transcript.
+
+## Read these next
+
+- `docs/graphic-design/README.md`
+- `docs/graphic-design/social-poster-workflow.md`
+- `docs/graphic-design/launch-now-chat-pack-workflow.md`
+- `docs/graphic-design/pilots/piek-engen-november-2026.md`
 
 ## North-star outcome
 
-Build a repeatable browser-chat graphic-design system that consistently produces client-approvable CG Production House social posters at scale. The goal is not merely speed. It is higher client value, better creative judgement, stronger design craft, fresher media usage, measurable learning and progressively better output over time.
+Build a repeatable normal-browser-ChatGPT graphic-design system that consistently produces client-approvable CG Production House social posters at scale. The system must add client value, not merely reduce staff time.
 
-The workflow must remain usable from normal ChatGPT chat for CA and staff. Do not make ChatGPT Work mode a requirement for ordinary poster production.
+Routine production must remain usable from normal ChatGPT chat. Do not make ChatGPT Work mode a requirement.
 
-## Immediate goal
+## Immediate production decision
 
-Produce three strong, mobile-first, genuinely designed social posters for a client using:
+The first Piek/Engen poster pilot proved that Python/layout rendering is not the right high-love design engine. It produced flat, document-like work that felt closer to PowerPoint/Word than CGPH graphic design.
 
-- real client photography from OneDrive;
-- exact client/partner logos as imported assets;
-- exact brand fonts and colours;
-- existing Canva work as brand/creative history, not as a template to clone;
-- internal image generation for richer creative composition when appropriate;
-- Adobe/Photoshop-style non-generative editing for real human photography wherever identity preservation matters;
-- a deliberate marketing objective, audience, emotional result and single-minded message before visual execution.
+The launch-now creative route is therefore:
 
-A successful immediate result should feel like CGPH staff designed it with care in Canva/Photoshop, not like a Word/PowerPoint layout or generic AI poster.
+`Dynamics/strategy -> OneDrive Chat Pack -> normal ChatGPT browser chat -> internal image generation for art direction -> Adobe/Photoshop-style precision photo treatment -> Canva exact typography/logo/editable finishing -> Wave 1 -> approval -> schedule/publish -> usage recorded`
 
-## CA feedback that is locked as system guidance
+The internal image generator is currently the strongest creative composition surface available in this chat product. Canva's own generation is not the primary art-direction engine; Canva is used as creative history + exact finishing/handoff.
 
-### Creative quality
+## Locked CA feedback
 
-- The first Piek/Engen Python-rendered pilot was too flat and document-like. It lacked gradients, effects, masking, depth and graphic-design love.
-- Do not use Python/layout rendering as the primary creative route for high-love social posters.
-- Use the internal image generator for richer art direction and composition; use exact source images/assets as references.
-- For real people, prefer Adobe/Photoshop-style edits and compositing over generative reinterpretation where possible.
-- Every poster in a batch must feel designed from scratch. A grid of the month must complement, not expose one repeated template.
-- Vary headline position, image treatment, crop, visual weight, light/dark balance, composition and graphic devices while preserving brand grammar.
-- Design mobile-first. Headings and key information must remain readable and attention-grabbing on a phone.
-- Exact logos are never regenerated or reinterpreted.
-- Exact fonts and brand colours must be used in production.
+### Design quality
 
-### Human-photo integrity
+- Every poster must feel individually art-directed from scratch.
+- Monthly posters must complement one another in an Instagram grid without exposing one repeated template.
+- Vary headline position, crop, light/dark balance, image scale, negative space, visual mechanism, texture and graphic effects.
+- Use gradients, depth, masks, glow, layered effects and visual play where appropriate.
+- Mobile-first readability is mandatory.
+- Output must not look like generic AI, a Word document, a PowerPoint slide or a stock Canva template.
+- Existing Canva work is inspiration / brand grammar only. Do not clone old layouts.
 
-- Never change the features that make a real person themselves.
-- Do not alter nose, eyes, facial structure, body shape, age identity, beauty marks or permanent traits.
-- Professional retouching is allowed: temporary blemishes, obvious fresh scratches/redness, exposure, white balance, colour, crop, sharpness and similar photographer-grade corrections.
-- When generative tools are used around a human image, preserve the real person as an imported photographic element whenever possible instead of asking the model to recreate them.
-
-### Marketing/content strategy
+### Marketing/content
 
 Every poster must answer before design:
 
-1. Who exactly are we speaking to?
-2. What buying situation or real moment are we entering?
-3. What is the one useful idea/proposition?
-4. Why should someone stop scrolling?
-5. What should they feel: hunger, trust, relief, curiosity, humour, urgency, local familiarity, desire, pride, reassurance, etc.?
-6. What should they know/do after seeing it?
-7. What proves the message or makes it believable?
-8. Why is this relevant now, in this month, place and client context?
+1. who exactly is the audience;
+2. what real buying/use situation is being entered;
+3. the single useful proposition;
+4. why the viewer should stop;
+5. intended emotion;
+6. proof in real client truth/assets;
+7. desired next thought/action;
+8. why it is relevant now in month/place/context.
 
-Reject vague AI-sounding lines such as abstract 'human' or 'experience' language that has no concrete meaning. If a headline cannot explain its purpose and intended response, kill it.
-
-The system should use the CG Dynamics marketing research model:
+Use the existing CG marketing model:
 
 `Business objective -> buying situation -> audience/problem -> single-minded proposition -> proof -> distinctive brand signals -> creative idea -> platform execution -> exposure/memory -> action -> verified outcome`
 
-Do not skip from generic client info straight to caption/design.
+Reject vague AI wording. A line that sounds profound but has no concrete meaning is not acceptable.
 
-### Freshness and repetition
+### Human photography
 
-Freshness must be checked at multiple levels:
+- Real client photos first.
+- Never change identity-defining human features.
+- Professional photographic correction is allowed: exposure, white balance, crop, sharpness, temporary blemish/fresh scratch/redness cleanup, etc.
+- Preserve permanent traits such as beauty marks, facial structure, nose, eyes, body shape and age identity.
+- Prefer non-generative Adobe/Photoshop-style processing for the actual human layer where identity preservation matters.
 
-- exact photo;
-- near-duplicate/burst image;
-- same shoot/angle;
-- same person;
-- same product/service/topic;
-- same headline idea;
-- same creative mechanism/layout.
+### Logos/fonts
 
-A repeat is allowed only for a reason: client request, required campaign/service, seasonal relevance, long enough separation, or a deliberately transformed creative reinterpretation.
+- Exact logos only. Never redraw, approximate, reinterpret or regenerate client/partner logos.
+- Production typography uses exact client fonts.
+- Do not trust AI-rendered font texture/letterforms when they look distorted or incorrect.
+- Preferred hybrid: use image generation for the high-design visual world and leave clean text zones when needed; apply exact typography and exact logo assets afterward in Canva/Adobe.
 
-## OneDrive workspace direction
+## Current important technical limitation
 
-For every client onboarded to the Graphic Design Assistant, create a visual staff-friendly workspace under the client folder while preserving canonical originals elsewhere.
+The internal image generator is generative: reference images guide it, but pixels can be reconstructed. It is not a guaranteed pixel-lock compositor for real people/logos.
 
-Working name: `CG Creative Assistant`.
+Also, the current browser-chat image generation flow does not reliably support a hidden `generate -> inspect -> reject -> regenerate` loop before the first output is shown to the user. Wave 1 therefore remains an internal CG review stage.
 
-Recommended structure:
+This limitation is documented as something the long-term system should replace with programmatic candidate QA/retry when a better surface becomes available.
 
-```text
-CG Creative Assistant/
-  00_README/
-  01_READY_UNUSED/
-  02_USED_REFERENCE/
-  03_BLOCKED_DO_NOT_USE/
-  04_CURRENT_MONTH/
-  05_APPROVED_EXPORTS/
-  manifests/
-```
+## Launch-now monthly Chat Pack
 
-Important: canonical originals should not be destructively moved just to satisfy this workspace. The assistant/staff workspace may contain curated copies, exports, manifests and references. Dynamics remains the eventual canonical usage ledger.
+Each client/month should get:
 
-Bootstrap for a new client is a one-time historical audit:
+- one attachable ZIP containing exact source photos, exact logos/brand assets, 3-6 recent Canva poster reference screenshots and `MANIFEST.csv`;
+- one separate exact prompt `.txt` file;
+- stable poster names tied to Dynamics package slots.
 
-1. inspect Canva POSTED/SCHEDULED history;
-2. identify the source images used where possible;
-3. match them to OneDrive exact/near-duplicate assets;
-4. record unmatched legacy/external assets rather than pretending they map;
-5. seed the Dynamics social/media usage ledger;
-6. create the initial READY_UNUSED / USED_REFERENCE workspace state;
-7. thereafter record every newly produced poster automatically.
+Naming:
 
-## Universal poster naming
-
-Use a stable human-readable naming rule tied to the Dynamics schedule slot:
-
-`CLIENT-SUBBRAND_YYYY-MM_P##_[SHORT-TOPIC]`
+`CLIENT-SUBBRAND_YYYY-MM_P##_SHORT-TOPIC`
 
 Example:
 
-`PIEK-ENGEN_2026-11_P01_SUMMER-TRAVEL`
+`PIEK-ENGEN_2026-11_P01_SUMMER-PLANS`
 
-Rules:
+## OneDrive workspace
 
-- `P##` maps to the exact packaged/static deliverable slot for that month;
-- once-off work uses `X##` if it is outside the recurring package;
-- Dynamics stores its own immutable schedule/content item ID separately;
-- Canva design/page, exported file and usage ledger should all carry the stable human-readable name where practical.
+A real pilot workspace has been created for Piek Group:
+
+`Clients/Piek Group/CG Creative Assistant/`
+
+Structure:
+
+```text
+00_SYSTEM/
+01_ASSET_LIBRARY/
+  READY_UNUSED/
+  USED_REFERENCE/
+  BLOCKED_DO_NOT_USE/
+02_MONTHLY_PACKS/
+  PIEK-ENGEN_2026-11/
+    00_INPUT_PACK/
+    01_PROMPT/
+    02_WAVE_1/
+    03_AMENDMENTS/
+    04_APPROVED/
+    05_CANVA_HANDOFF/
+    06_ARCHIVE/
+03_HISTORY/
+```
+
+The first `CG_Creative_Assistant_README.txt`, Piek/Engen generation prompt, manifest and v1 Chat Pack have been uploaded there.
+
+The v1 Chat Pack still needs physical screenshots of the selected recent Canva posters before it is considered fully generator-ready; the current internal image generator cannot simply ingest a Canva design ID as an image reference.
+
+## Freshness / no-repeat system
+
+Track more than filenames:
+
+- exact source asset;
+- perceptual near-duplicate;
+- same burst/shoot/angle;
+- person(s) depicted;
+- product/service/topic;
+- headline/concept;
+- creative mechanism/layout;
+- last-used date;
+- poster/package slot;
+- Canva page/design;
+- publish/schedule record;
+- reuse reason where applicable.
+
+New-client setup requires a one-time historical Canva audit. Match posted/scheduled Canva images to OneDrive where possible, record unmatched legacy assets honestly, seed USED_REFERENCE / READY_UNUSED / BLOCKED and then record every new poster automatically.
+
+Long term, Dynamics becomes the canonical social/media usage ledger. OneDrive remains the human-friendly working surface.
 
 ## Performance-learning direction
 
-Long term, each month should read:
+Eventually each new month should read:
 
 - previous month strategy;
 - previous visual/content mix;
-- Meta/platform performance available through Dynamics;
+- Meta/platform performance exposed through Dynamics;
 - comments/interactions;
 - boosted/paid-supported posts;
-- client approval/rejection feedback;
-- content that the client specifically requested to reuse or amplify.
+- approval/rejection/amendment history;
+- explicit client reuse requests.
 
-The system should learn, but must not equate likes/views with commercial effectiveness. Use performance as evidence alongside client/business objectives and brand-building needs.
+Do not equate likes/views with commercial effectiveness. Use them as evidence alongside business objectives and brand-building needs.
 
-## Current technical direction
+## Piek / Engen November pilot — current concepts
 
-- Dynamics = canonical client/schedule/strategy/usage/performance brain.
-- OneDrive = canonical client media and brand files + staff-friendly creative workspace.
-- Canva = creative history, editable handoff and team production surface.
-- ChatGPT internal image generation = high-design creative composition engine.
-- Adobe/Photoshop-style tools = preferred precision path for non-destructive real-photo correction, cutouts, crops and compositing when available.
-- Publishing/scheduling = future Dynamics action layer.
+P01 — `PIEK-ENGEN_2026-11_P01_SUMMER-PLANS`
+- working hook: `BLOEM’S HEATING UP. SO ARE THE PLANS.`
+- goal: anticipation + local relevance + movement
+- source: Engen Northridge drone photo
 
-## Current known gaps
+P02 — `PIEK-ENGEN_2026-11_P02_FUEL-LIGHT`
+- working hook: `THE FACE YOU WANT TO SEE WHEN THE FUEL LIGHT COMES ON.`
+- goal: relatable reassurance + human service
+- source: real Engen Crossing staff photo
 
-- historical media-use ledger has not yet been bootstrapped per client;
-- current browser ChatGPT does not yet read live Dynamics client/schedule truth through the final private connector in every conversation;
-- exact Canva-page insertion/handoff remains imperfect;
-- exact fonts/logos must be materialised into the creative environment instead of substituted;
-- the design QA loop needs repeated client pilots until output is consistently CGPH-level, not just occasionally impressive.
+P03 — `PIEK-ENGEN_2026-11_P03_QUICK-STOP`
+- working hook: `YOUR QUICK STOP SHOULD ACTUALLY BE QUICK.`
+- goal: practical relevance + slight knowing humour
+- source: Engen Crossing convenience/store photo
 
-## Next action
+## Next concrete actions
 
-Redo the Piek Group / Engen November pilot using the richer image-generation route, with stronger strategy first, exact photography/brand assets, mobile-first craft, and three genuinely different poster mechanisms that still work as an Instagram grid.
+1. select/export 3-6 recent strong Piek Canva poster screenshots into the November `00_INPUT_PACK`;
+2. rebuild Chat Pack v2 so it is completely ready to attach to a normal ChatGPT chat;
+3. generate a real high-design Wave 1 using the internal image generator;
+4. use exact typography/logo finishing and real-photo compositing rather than trusting regenerated text/logos/people;
+5. test Canva image-to-design / Magic Layers as the editable handoff path for approved flat designs;
+6. use the results to refine the prompt/system, not merely the individual posters;
+7. continue researching better multimodal design/editing surfaces, deduplication, hidden QA and direct Dynamics integration.
