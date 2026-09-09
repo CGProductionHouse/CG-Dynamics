@@ -1,6 +1,7 @@
 // Google Ads v25 settings are a snapshot at fetch time, not historical daily facts.
 export const GOOGLE_ADS_NATIVE_FIELDS = `
       campaign.primary_status,
+      campaign.primary_status_reasons,
       campaign.start_date,
       campaign.end_date,
       campaign.bidding_strategy_type,
@@ -9,7 +10,10 @@ export const GOOGLE_ADS_NATIVE_FIELDS = `
       campaign_budget.total_amount_micros,
       campaign_budget.period,
       campaign_budget.explicitly_shared,
-      campaign_budget.status`
+      campaign_budget.reference_count,
+      campaign_budget.delivery_method,
+      campaign_budget.status,
+      campaign_budget.type`
 
 export function nullableGoogleAdsNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === '') return null
@@ -26,6 +30,9 @@ export function googleAdsNativeSnapshot(row: Record<string, unknown>, observedAt
     api_version: 'v25',
     observed_at: observedAt,
     primary_status: text(campaign.primaryStatus),
+    primary_status_reasons: Array.isArray(campaign.primaryStatusReasons)
+      ? campaign.primaryStatusReasons.filter((value): value is string => typeof value === 'string')
+      : [],
     start_date: text(campaign.startDate),
     end_date: text(campaign.endDate),
     bidding_strategy_type: text(campaign.biddingStrategyType),
@@ -34,6 +41,9 @@ export function googleAdsNativeSnapshot(row: Record<string, unknown>, observedAt
     budget_total_amount_micros: nullableGoogleAdsNumber(budget.totalAmountMicros),
     budget_period: text(budget.period),
     budget_shared: typeof budget.explicitlyShared === 'boolean' ? budget.explicitlyShared : null,
+    budget_reference_count: nullableGoogleAdsNumber(budget.referenceCount),
+    budget_delivery_method: text(budget.deliveryMethod),
     budget_status: text(budget.status),
+    budget_type: text(budget.type),
   }
 }

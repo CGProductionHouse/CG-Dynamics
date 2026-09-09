@@ -37,9 +37,8 @@ import {
   type TopContent,
 } from '../../lib/reportPerformance'
 import {
-  formatGoogleAdsCurrencyValue,
-  formatGoogleAdsMoney,
-} from '../../lib/googleAds'
+  GoogleAdsResults,
+} from '../../components/client/GoogleAdsResults'
 import {
   buildOverviewSections,
   type OverviewSection as VerifiedSection,
@@ -47,11 +46,7 @@ import {
   type PlatformFact,
 } from '../../lib/overviewModel'
 import type { ReportContentExclusion, ReportFactHealth } from '../../lib/db/reportingTruth'
-import {
-  googleAdsCampaignPeriodLabel,
-  type GoogleAdsDashboardData,
-  type GoogleAdsDashboardState,
-} from '../../lib/googleAdsDashboard'
+import type { GoogleAdsDashboardData, GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
 
 type TabKey = 'overview' | Platform | 'google_ads'
 
@@ -85,7 +80,6 @@ export function ClientReportView({
   client = null,
   manualMetrics = [],
   googleAds,
-  previousGoogleAds,
   googleAdsState,
   googleAdsError,
   showEmptyStrategy = false,
@@ -104,7 +98,6 @@ export function ClientReportView({
   previousReport?: RenderableReport | null
   previousManualMetrics?: ReportManualMetric[]
   googleAds: GoogleAdsDashboardData | null
-  previousGoogleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
   googleAdsError: string | null
   showEmptyStrategy?: boolean
@@ -209,7 +202,6 @@ export function ClientReportView({
           nextSteps={performance.nextSteps}
           showAdminDiagnostics={showAdminDiagnostics}
           googleAds={googleAds}
-          previousGoogleAds={previousGoogleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
           verifiedSections={verifiedSections}
@@ -223,7 +215,6 @@ export function ClientReportView({
       ) : tab === 'google_ads' ? (
         <GoogleAdsTab
           googleAds={googleAds}
-          previousGoogleAds={previousGoogleAds}
           state={googleAdsState}
           error={googleAdsError}
         />
@@ -365,7 +356,6 @@ function OverviewTab({
   nextSteps,
   showAdminDiagnostics,
   googleAds,
-  previousGoogleAds,
   googleAdsState,
   googleAdsError,
   verifiedSections,
@@ -383,7 +373,6 @@ function OverviewTab({
   nextSteps: NextStep[]
   showAdminDiagnostics: boolean
   googleAds: GoogleAdsDashboardData | null
-  previousGoogleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
   googleAdsError: string | null
   verifiedSections: VerifiedSection[]
@@ -470,7 +459,6 @@ function OverviewTab({
       {hasGoogleAdsSection && (
         <GoogleAdsOverview
           googleAds={googleAds}
-          previousGoogleAds={previousGoogleAds}
           state={googleAdsState}
           error={googleAdsError}
         />
@@ -1220,64 +1208,12 @@ function PlatformRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-type GoogleAdsMetric = {
-  key: string
-  label: string
-  current: number | null
-  previous: number | null
-  display: string
-}
-
-function googleAdsMetrics(
-  current: GoogleAdsDashboardData,
-  previous: GoogleAdsDashboardData | null,
-): GoogleAdsMetric[] {
-  const comparableCurrency =
-    previous !== null &&
-    !current.hasMixedCurrencies &&
-    !previous.hasMixedCurrencies &&
-    current.currencyCode !== null &&
-    current.currencyCode === previous.currencyCode
-  const numberWithDecimals = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
-
-  return [
-    {
-      key: 'spend',
-      label: 'Spend',
-      current: current.spendMicros,
-      previous: comparableCurrency ? previous.spendMicros : null,
-      display: formatGoogleAdsMoney(current.spendMicros, current.currencyCode),
-    },
-    { key: 'impressions', label: 'Impressions', current: current.impressions, previous: previous?.impressions ?? null, display: formatNumber(current.impressions) },
-    { key: 'clicks', label: 'Clicks', current: current.clicks, previous: previous?.clicks ?? null, display: formatNumber(current.clicks) },
-    { key: 'ctr', label: 'CTR', current: current.ctr, previous: previous?.ctr ?? null, display: current.ctr === null ? '-' : `${current.ctr.toFixed(2)}%` },
-    {
-      key: 'average_cpc',
-      label: 'Avg CPC',
-      current: current.averageCpcMicros,
-      previous: comparableCurrency ? previous.averageCpcMicros : null,
-      display: formatGoogleAdsMoney(current.averageCpcMicros, current.currencyCode),
-    },
-    { key: 'conversions', label: 'Conversions', current: current.conversions, previous: previous?.conversions ?? null, display: numberWithDecimals(current.conversions) },
-    {
-      key: 'conversion_value',
-      label: 'Conversion value',
-      current: current.conversionValue,
-      previous: comparableCurrency ? previous.conversionValue : null,
-      display: formatGoogleAdsCurrencyValue(current.conversionValue, current.currencyCode),
-    },
-    { key: 'campaign_count', label: 'Campaign count', current: current.campaignCount, previous: previous?.campaignCount ?? null, display: formatNumber(current.campaignCount) },
-  ]
-}
-
 function GoogleAdsOverview({
   googleAds,
-  previousGoogleAds,
   state,
   error,
 }: {
   googleAds: GoogleAdsDashboardData | null
-  previousGoogleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
 }) {
@@ -1288,11 +1224,7 @@ function GoogleAdsOverview({
         Paid campaign performance is shown separately from organic social results.
       </p>
       {googleAds ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {googleAdsMetrics(googleAds, previousGoogleAds).slice(0, 4).map(metric => (
-            <GoogleAdsMetricCard key={metric.key} metric={metric} />
-          ))}
-        </div>
+        <GoogleAdsResults dashboard={googleAds} compact />
       ) : (
         <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} compact />
       )}
@@ -1302,95 +1234,16 @@ function GoogleAdsOverview({
 
 function GoogleAdsTab({
   googleAds,
-  previousGoogleAds,
   state,
   error,
 }: {
   googleAds: GoogleAdsDashboardData | null
-  previousGoogleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
 }) {
   if (!googleAds) return <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} />
 
-  return (
-    <>
-      <SectionHeading eyebrow="Paid media" title="Google Ads performance" />
-      <p className="-mt-2 mb-7 max-w-2xl text-base leading-relaxed text-slate-300">
-        A focused view of campaign investment, traffic, and conversion outcomes for the month.
-      </p>
-
-      <section className="mb-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {googleAdsMetrics(googleAds, previousGoogleAds).map(metric => (
-          <GoogleAdsMetricCard key={metric.key} metric={metric} />
-        ))}
-      </section>
-
-      <section className="mb-12">
-        <SectionHeading eyebrow="Campaign performance" title="Campaign results" />
-        <p className="-mt-2 mb-5 text-sm leading-relaxed text-slate-400">Activity labels reflect the report month. A campaign&apos;s current Google Ads status may have changed after month end.</p>
-        {googleAds.campaigns.length > 0 ? (
-          <div className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#071311] shadow-[0_30px_80px_-48px_rgba(0,0,0,0.95)]">
-            <div className="overflow-x-auto">
-              <table className="min-w-[1040px] w-full text-left text-sm">
-                <thead className="border-b border-white/10 bg-white/[0.04] text-[0.65rem] font-black uppercase tracking-[0.16em] text-slate-500">
-                  <tr>
-                    <th className="px-5 py-4">Campaign</th>
-                    <th className="px-4 py-4">Report period</th>
-                    <th className="px-4 py-4 text-right">Spend</th>
-                    <th className="px-4 py-4 text-right">Impressions</th>
-                    <th className="px-4 py-4 text-right">Clicks</th>
-                    <th className="px-4 py-4 text-right">CTR</th>
-                    <th className="px-4 py-4 text-right">Conversions</th>
-                    <th className="px-5 py-4 text-right">Value</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.07]">
-                  {googleAds.campaigns.map((campaign, index) => (
-                    <tr key={`${campaign.name}-${index}`} className="transition hover:bg-white/[0.025]">
-                      <td className="max-w-xs px-5 py-4 font-bold text-white">{campaign.name}</td>
-                      <td className="px-4 py-4">
-                        <span className="rounded-full border border-emerald-300/15 bg-emerald-300/[0.06] px-2.5 py-1 text-xs font-bold text-emerald-100">
-                          {googleAdsCampaignPeriodLabel(campaign, googleAds.month)}
-                        </span>
-                        {campaign.status && <p className="mt-2 text-[11px] text-slate-500">Current status: {formatCampaignStatus(campaign.status)}</p>}
-                      </td>
-                      <td className="px-4 py-4 text-right font-semibold text-slate-200">{formatGoogleAdsMoney(campaign.spendMicros, campaign.currencyCode)}</td>
-                      <td className="px-4 py-4 text-right text-slate-300">{formatNumber(campaign.impressions)}</td>
-                      <td className="px-4 py-4 text-right text-slate-300">{formatNumber(campaign.clicks)}</td>
-                      <td className="px-4 py-4 text-right text-slate-300">{campaign.ctr === null ? '-' : `${campaign.ctr.toFixed(2)}%`}</td>
-                      <td className="px-4 py-4 text-right text-slate-300">{new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(campaign.conversions)}</td>
-                      <td className="px-5 py-4 text-right font-semibold text-slate-200">{formatGoogleAdsCurrencyValue(campaign.conversionValue, campaign.currencyCode)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <GoogleAdsEmptyState state="no-activity" hasError={false} compact />
-        )}
-      </section>
-    </>
-  )
-}
-
-function GoogleAdsMetricCard({ metric }: { metric: GoogleAdsMetric }) {
-  const movement = compareNullable(metric.current, metric.previous)
-  const hasMovement = movement.direction !== 'missing' && movement.difference !== null && !movement.notAvailable
-
-  return (
-    <article className="rounded-3xl border border-white/[0.08] bg-[#0b1715]/90 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-6">
-      <div className="mb-5 h-1 w-12 rounded-full bg-gradient-to-r from-[#f59e0b] to-[#f97316]" />
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{metric.label}</p>
-      <p className="mt-3 text-3xl font-black leading-none tracking-[-0.04em] text-white">{metric.display}</p>
-      {hasMovement ? (
-        <div className="mt-3"><ChannelGrowthPill label="MoM" movement={movement} /></div>
-      ) : (
-        <p className="mt-3 text-xs font-medium text-slate-500">This month</p>
-      )}
-    </article>
-  )
+  return <GoogleAdsResults dashboard={googleAds} />
 }
 
 function GoogleAdsEmptyState({
@@ -1436,11 +1289,6 @@ function GoogleAdsEmptyState({
       <p className="mt-2 text-sm leading-relaxed text-slate-400">{selected.message}</p>
     </div>
   )
-}
-
-function formatCampaignStatus(status: string | null): string {
-  if (!status) return 'Status unavailable'
-  return status.toLowerCase().replace(/_/g, ' ').replace(/^./, character => character.toUpperCase())
 }
 
 function StrategyBlocks({
