@@ -28,6 +28,11 @@ import {
   type McpAuthChallengeError,
 } from './oauthDiscovery.ts'
 import {
+  CLIENT_SCHEDULE_SELECT,
+  MY_DAY_DELIVERABLE_SELECT,
+  flattenDeliverableClient,
+} from './clientScheduleRows.ts'
+import {
   assertRecordClientMatchesContext,
   assertToolAllowedInContext,
   buildAuditEnvelope,
@@ -453,7 +458,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .limit(20),
     staff.supabase
       .from('monthly_deliverables')
-      .select('id, title, deliverable_type, scheduled_date, production_status, assigned_to_name, client_name')
+      .select(MY_DAY_DELIVERABLE_SELECT)
       .eq('assigned_to_name', staff.fullName)
       .eq('scheduled_date', today)
       .order('scheduled_date', { ascending: true })
@@ -465,7 +470,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
     staff_name: staff.fullName,
     tasks: tasksResult.data ?? [],
     calendar_events: calendarResult.data ?? [],
-    deliverables: scheduleResult.data ?? [],
+    deliverables: flattenDeliverableClient(scheduleResult.data),
     errors: [tasksResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
   }
 }
@@ -517,7 +522,7 @@ const handleListMyCalendar: ToolHandler = async (staff, input) => {
 const handleListClientSchedule: ToolHandler = async (staff, input) => {
   const query = staff.supabase
     .from('monthly_deliverables')
-    .select('id, client_id, client_name, month, deliverable_type, title, scheduled_date, due_date, production_status, assigned_to_name')
+    .select(CLIENT_SCHEDULE_SELECT)
     .gte('scheduled_date', input.from as string)
     .lte('scheduled_date', input.to as string)
     .order('scheduled_date', { ascending: true })
@@ -526,7 +531,7 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
   if (input.client_id) query.eq('client_id', input.client_id)
 
   const { data, error } = await query
-  return { deliverables: data ?? [], error: error?.message ?? null }
+  return { deliverables: flattenDeliverableClient(data), error: error?.message ?? null }
 }
 
 const handleGetClientContext: ToolHandler = async (staff, input) => {
