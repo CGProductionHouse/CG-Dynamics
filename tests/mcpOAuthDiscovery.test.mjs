@@ -35,12 +35,14 @@ test('deriveMcpOAuthUrls tolerates a trailing slash and fails closed on bad inpu
   assert.equal(oauth.deriveMcpOAuthUrls('http://insecure.example'), null, 'https only')
 })
 
-test('protected resource metadata identifies the resource and Supabase authorization server', () => {
+test('protected resource metadata identifies the resource, auth server, and only supported needed scopes', () => {
   const meta = oauth.buildProtectedResourceMetadata(oauth.deriveMcpOAuthUrls(SUPA))
   assert.equal(meta.resource, `${SUPA}/functions/v1/cg-dynamics-mcp/mcp`)
   assert.deepEqual(meta.authorization_servers, [`${SUPA}/auth/v1`])
   assert.deepEqual(meta.bearer_methods_supported, ['header'])
-  assert.ok(Array.isArray(meta.scopes_supported) && meta.scopes_supported.includes('openid'))
+  assert.deepEqual(meta.scopes_supported, ['email', 'profile'])
+  assert.equal(meta.scopes_supported.includes('offline_access'), false)
+  assert.equal(meta.scopes_supported.includes('openid'), false)
 })
 
 test('WWW-Authenticate challenge advertises resource_metadata and optional error', () => {
