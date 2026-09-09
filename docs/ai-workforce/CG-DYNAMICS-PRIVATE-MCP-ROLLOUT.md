@@ -50,7 +50,7 @@ Full working MCP server implementing:
 - **Cross-staff isolation**: tools enforce `owner_profile_id = profileId` for staff role; managers get broader access per canonical RLS
 - **Audit trail**: every write recorded via `planner_activity_log` (tasks) and `business_development_lead_events` (leads)
 
-### Migration (`supabase/migrations/20260909100000_mcp_idempotency_log.sql`)
+### Migration (`supabase/migrations/20260909133000_mcp_idempotency_log.sql`)
 Creates `mcp_idempotency_log` table with:
 - `(caller_profile_id, tool_name, idempotency_key)` unique constraint
 - `mcp_check_idempotency` RPC: checks for duplicate calls, returns existing result or conflict
@@ -211,7 +211,7 @@ Before the connector can be used from ChatGPT, CA must:
 
 4. **Apply the idempotency + recurring task migrations**:
    ```bash
-   supabase db push  # or apply 20260909100000_mcp_idempotency_log.sql + 20260909110000_create_assistant_recurring_task.sql
+   supabase db push  # or apply 20260909133000_mcp_idempotency_log.sql + 20260909140000_create_assistant_recurring_task.sql
    ```
 
 5. **Apply the #305 staff assistant migration** (if not already applied):
