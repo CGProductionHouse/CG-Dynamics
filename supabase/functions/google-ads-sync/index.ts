@@ -1,4 +1,5 @@
 import { requireAdminOrManager } from '../_shared/auth.ts'
+import { googleAdsNativeSnapshot } from '../_shared/google-ads-native.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import {
   googleAdsConfig,
@@ -46,10 +47,10 @@ type SyncItemResult = {
 
 const MAX_ACCOUNTS_PER_RUN = 10
 
-function numberValue(value: unknown): number {
+function requiredMetricNumber(value: unknown, field: string): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value
   if (typeof value === 'string' && value !== '' && Number.isFinite(Number(value))) return Number(value)
-  return 0
+  throw new Error(`Google Ads returned an incomplete ${field} metric.`)
 }
 
 function validIdList(value: unknown): value is string[] {
@@ -260,6 +261,7 @@ Deno.serve(async request => {
     try {
       // One provider request supplies the complete raw account snapshot for this date range.
       const rows = await searchStream(config, accessToken, customerId, googleAdsCampaignQuery(startDate, endDate))
+      const observedAt = new Date().toISOString()
       const metrics = rows.flatMap(row => {
         const campaign = row.campaign as Record<string, unknown> | undefined
         const segments = row.segments as Record<string, unknown> | undefined
@@ -269,15 +271,17 @@ Deno.serve(async request => {
         if (!/^\d+$/.test(campaignId) || !validGoogleAdsDate(date)) return []
         return [{
           campaign_id: campaignId,
+          native_settings: googleAdsNativeSnapshot(row, observedAt),
           metric_date: date,
           campaign_name: typeof campaign?.name === 'string' && campaign.name ? campaign.name : `Campaign ${campaignId}`,
           campaign_status: typeof campaign?.status === 'string' ? campaign.status : null,
           campaign_type: typeof campaign?.advertisingChannelType === 'string' ? campaign.advertisingChannelType : null,
-          impressions: numberValue(values?.impressions),
-          clicks: numberValue(values?.clicks),
-          cost_micros: numberValue(values?.costMicros),
-          conversions: numberValue(values?.conversions),
-          conversion_value: numberValue(values?.conversionsValue),
+          impressions: requiredMetricNumber(values?.impressions, 'impressions'),
+          clicks: requiredMetricNumber(values?.clicks, 'clicks'),
+          interactions: requiredMetricNumber(values?.interactions, 'interactions'),
+          cost_micros: requiredMetricNumber(values?.costMicros, 'cost'),
+          conversions: requiredMetricNumber(values?.conversions, 'conversions'),
+          conversion_value: requiredMetricNumber(values?.conversionsValue, 'conversion value'),
         }]
       })
       const distinctCampaigns = new Set(metrics.map(metric => metric.campaign_id))
