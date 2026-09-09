@@ -11,6 +11,7 @@ Supporting specifications:
 - [`poster-onedrive-naming-standard.md`](./poster-onedrive-naming-standard.md) — canonical DP/file/month naming and OneDrive production structure aligned with existing CG video + Dynamics identities.
 - [`staff-poster-production-sop.md`](./staff-poster-production-sop.md) — dummy-proof monthly staff workflow, including the amendment decision tree that prevents generative decay.
 - [`launch-now-chat-pack-workflow.md`](./launch-now-chat-pack-workflow.md) — current normal-browser ChatGPT production bridge and batch-generation workflow.
+- [`monthly-chat-pack-contract.md`](./monthly-chat-pack-contract.md) — exact launch-now handoff contract for `CHAT_ATTACH`, manifest, prompt, generation waves and clean amendment restarts.
 - [`tool-handoff-gaps.md`](./tool-handoff-gaps.md) — real tested limitations between Adobe, OneDrive, Canva and the internal image generator; read this before claiming a handoff is automated.
 - [`social-poster-workflow.md`](./social-poster-workflow.md)
 - [`asset-usage-ledger.md`](./asset-usage-ledger.md)
@@ -44,6 +45,8 @@ Example: `2026_11_PIEK_DP_01`.
 
 The immutable `monthly_deliverables.id` remains the actual Dynamics/database identity. OneDrive production names, manifests, Canva page linkage and later usage history all resolve to that one canonical deliverable rather than creating a parallel social record.
 
+New production month folders use the canonical three-letter English month tokens `JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC`. Historical OneDrive naming drift is resolved by actual folder/durable IDs rather than silently renamed or assumed.
+
 ## Source responsibilities
 
 - **CG Dynamics**: exact client, monthly deliverables, content schedule, client voice, services/products, restrictions, approvals, content rotation, performance learning, and eventual usage ledger.
@@ -70,6 +73,8 @@ The immutable `monthly_deliverables.id` remains the actual Dynamics/database ide
 13. Every poster needs a marketing reason before a visual execution: audience, buying situation, one useful proposition, proof, intended emotion, and intended action/memory.
 14. Reject vague AI language that cannot explain why it exists or what response it is meant to create.
 15. Design mobile-first and review the monthly batch as a grid. Brand consistency must not come from repeating one template.
+16. Creative approval and production approval are separate: exact font/logo/copy/source fidelity must be verified before final/client-ready status.
+17. Do not recursively regenerate failed poster bitmaps for routine amendments; classify the failure and return to exact source/strategy when a creative restart is required.
 
 ## Freshness model
 
