@@ -702,27 +702,45 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
   if (clientError || !client) return { error: 'Client not found.' }
   if (!client.active) return { error: 'Client is not active.' }
 
-  const [marketingResult, notesResult] = await Promise.all([
-    staff.supabase
-      .from('marketing_library_sources')
-      .select('id, title, content_type, trust_tier')
-      .eq('client_id', clientId)
-      .in('trust_tier', ['approved', 'verified'])
-      .limit(10),
-    staff.supabase
-      .from('client_notes')
-      .select('id, content, created_at')
-      .eq('client_id', clientId)
-      .order('created_at', { ascending: false })
-      .limit(5),
-  ])
+  // Canonical exact-client knowledge is the #241/#294 client guide, keyed by exact
+  // client_id with no sibling/group fallback. Previous code queried
+  // marketing_library_sources (a COMPANY-WIDE library with no client_id and no
+  // content_type column) and public.client_notes (which does not exist), so this tool
+  // returned schema errors and silently empty context. Both are corrected here.
+  const { data: guide, error: guideError } = await staff.supabase
+    .from('client_guides')
+    .select('id, client_id, guide_markdown, project_instructions, version, generated_at, source_pack_path')
+    .eq('client_id', clientId)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // Report coverage explicitly instead of presenting an unavailable source as empty (#325).
+  const unavailable: string[] = []
+  if (guideError) unavailable.push(`client_guides: ${guideError.message}`)
 
   return {
     client: { id: client.id, name: client.name },
     task_type: input.task_type,
-    marketing_sources: marketingResult.data ?? [],
-    recent_notes: notesResult.data ?? [],
-    errors: [marketingResult.error?.message, notesResult.error?.message].filter(Boolean),
+    scope_key: input.scope_key ?? null,
+    client_guide: guide
+      ? {
+          id: guide.id,
+          version: guide.version,
+          generated_at: guide.generated_at,
+          source_pack_path: guide.source_pack_path,
+          guide_markdown: guide.guide_markdown,
+          project_instructions: guide.project_instructions,
+        }
+      : null,
+    context_coverage: {
+      client_guide: guide ? 'available' : (guideError ? 'unavailable' : 'none_recorded'),
+      unavailable_sources: unavailable,
+      note: guide
+        ? 'Exact-client guide resolved by exact client_id. No sibling, group or national fallback was used.'
+        : 'No canonical client guide is recorded for this exact client. Do not substitute another client, a group/national record, or stale Project memory.',
+    },
+    errors: unavailable,
   }
 }
 
