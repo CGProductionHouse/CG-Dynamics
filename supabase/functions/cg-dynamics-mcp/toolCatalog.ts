@@ -17,6 +17,14 @@ export interface CgDynamicsMcpTool {
   canonicalContract: string
 }
 
+// Per-tool OAuth declaration required by current OpenAI Plugins auth docs ("Triggering
+// authentication UI"): every tool advertises the scheme even though the whole server shares
+// one policy. Scopes stay narrowed to what Supabase Auth actually issues for this connector
+// (#318) — deliberately no `openid` and no `offline_access`.
+export const CG_DYNAMICS_MCP_SECURITY_SCHEMES = [
+  { type: 'oauth2', scopes: ['email', 'profile'] },
+] as const
+
 const uuid = { type: 'string', format: 'uuid' }
 const date = { type: 'string', format: 'date' }
 

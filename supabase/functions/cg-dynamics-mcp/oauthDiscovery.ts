@@ -78,3 +78,29 @@ export function buildWwwAuthenticateChallenge(
 export function isProtectedResourceMetadataRequest(pathname: string): boolean {
   return typeof pathname === 'string' && pathname.includes(PROTECTED_RESOURCE_METADATA_MARKER)
 }
+
+// ── Tool-level auth challenge (OpenAI Plugins "Triggering authentication UI") ──
+//
+// Current OpenAI Plugins auth docs require BOTH per-tool `securitySchemes` metadata AND a
+// runtime auth error carrying `_meta["mcp/www_authenticate"]`. The HTTP 401 +
+// WWW-Authenticate transport challenge stays in place; this is the MCP-result form ChatGPT
+// reads to surface the account-linking UI for a tool call.
+
+export type McpAuthChallengeError = 'invalid_token' | 'insufficient_scope'
+
+export interface McpAuthChallengeMeta {
+  'mcp/www_authenticate': string[]
+}
+
+/** The `_meta` block for an MCP tool auth error. Never carries a token or secret. */
+export function buildMcpAuthChallengeMeta(
+  protectedResourceMetadataUrl: string,
+  error: McpAuthChallengeError,
+  errorDescription: string,
+): McpAuthChallengeMeta {
+  return {
+    'mcp/www_authenticate': [
+      buildWwwAuthenticateChallenge(protectedResourceMetadataUrl, { error, errorDescription }),
+    ],
+  }
+}

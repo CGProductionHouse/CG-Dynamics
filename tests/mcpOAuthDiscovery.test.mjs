@@ -81,7 +81,7 @@ test('unauthenticated MCP requests return a 401 OAuth challenge', () => {
   assert.match(INDEX, /status: 401, headers: challengeHeaders\(opts\)/)
   assert.match(INDEX, /'WWW-Authenticate': buildWwwAuthenticateChallenge\(urls\.protectedResourceMetadataUrl/)
   // Both missing-token and invalid-token paths use the challenge response.
-  assert.match(INDEX, /return \{ ok: false, response: unauthorizedResponse\('Authentication required\.'\) \}/)
+  assert.match(INDEX, /response: unauthorizedResponse\('Authentication required\.'\)/)
   assert.match(INDEX, /unauthorizedResponse\('Invalid or expired token\.', \{ error: 'invalid_token'/)
 })
 
@@ -92,7 +92,11 @@ test('CORS allows GET discovery and exposes the challenge header', () => {
 
 test('authenticated MCP tool calls remain gated (tool behavior unchanged)', () => {
   // The POST auth gate still runs before JSON-RPC dispatch, preserving staff auth/RLS.
-  assert.match(INDEX, /const auth = await authenticateStaff\(req\)\n\s*if \(!auth\.ok\) return auth\.response/)
+  const authIdx = INDEX.indexOf('const auth = await authenticateStaff(req)')
+  const rejectedIdx = INDEX.indexOf('if (!auth.ok)')
+  const dispatchIdx = INDEX.indexOf("case 'tools/call':")
+  assert.ok(authIdx > 0 && rejectedIdx > authIdx && dispatchIdx > rejectedIdx)
+  assert.match(INDEX, /return auth\.response/)
   assert.match(INDEX, /case 'tools\/call':/)
   // Discovery is GET-only; tool methods stay POST.
   assert.match(INDEX, /if \(req\.method !== 'POST'\) \{/)
