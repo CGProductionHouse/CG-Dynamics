@@ -1,13 +1,22 @@
 # Microsoft Graph Upload Permission Model — Client Onboarding
 
-This document is the canonical audit record for the narrowest valid Microsoft Graph permission model used by the client onboarding upload adapter.
+> **SUPERSEDED (2026-09-09, #225).** The app-only / client-credentials model below was written
+> for OneDrive **for Business** in an Entra tenant. The real CG Dynamics OneDrive is a **personal
+> Microsoft account** (`onedrive.live.com`), for which app-only is **not supported**. The current
+> model is **delegated OAuth (authorization-code + refresh token)** — see
+> `docs/onboarding/ONEDRIVE-PRODUCTION-MAPPING-225.md`. Env is now `ONEDRIVE_MS_CLIENT_ID` /
+> `ONEDRIVE_MS_CLIENT_SECRET` / `ONEDRIVE_MS_REDIRECT_URI` / `ONEDRIVE_TOKEN_ENC_KEY` (+ authority
+> `.../consumers`), scopes `Files.ReadWrite offline_access openid profile`. The tenant-based rows
+> below are retained only as historical context.
 
-## Current model: fail-closed, dedicated app, environment-gated
+This document is the historical audit record for the (now superseded) app-only permission model.
+
+## Historical model: fail-closed, dedicated app, environment-gated
 
 | Gate | Status | Notes |
 |------|--------|-------|
 | Dedicated Microsoft app | Required | Separate from the read-only transition sync connector |
-| Environment credentials | Required | `ONBOARDING_MS_TENANT_ID`, `ONBOARDING_MS_CLIENT_ID`, `ONBOARDING_MS_CLIENT_SECRET` |
+| Environment credentials | Historical | Delegated now: `ONEDRIVE_MS_CLIENT_ID`, `ONEDRIVE_MS_CLIENT_SECRET`, `ONEDRIVE_MS_REDIRECT_URI`, `ONEDRIVE_TOKEN_ENC_KEY` (was `ONBOARDING_MS_*`) |
 | Uploads feature flag | Required | `CLIENT_ONBOARDING_UPLOADS_ENABLED=true` in Edge Function env |
 | Drive mapping | Required | An active `client_onboarding_drive_mapping` row must exist for the exact client and upload category |
 | Migration applied | Required | Phase 2 migration maps each client upload category to an exact existing drive folder |

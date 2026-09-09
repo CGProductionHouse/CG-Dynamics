@@ -241,11 +241,13 @@ test('download proxy restricts staff downloads to authenticated staff roles', ()
   assert.match(edge, /\['admin', 'manager', 'staff', 'team'\]\.includes\(authorizedUser\.profile\.role\)/)
 })
 
-test('upload adapter uses a separate Microsoft app from the read-only transition connector', () => {
-  assert.match(adapter, /ONBOARDING_MS_TENANT_ID/)
-  assert.match(adapter, /ONBOARDING_MS_CLIENT_ID/)
-  assert.match(adapter, /ONBOARDING_MS_CLIENT_SECRET/)
+test('upload adapter uses delegated OAuth on a separate app from the read-only transition connector', () => {
+  // #225: the OneDrive is a PERSONAL Microsoft account — delegated OAuth, not app-only.
+  assert.match(adapter, /ONEDRIVE_MS_CLIENT_ID/)
+  assert.match(adapter, /ONEDRIVE_MS_CLIENT_SECRET/)
   assert.match(adapter, /isUploadAdapterConfigured/)
+  assert.doesNotMatch(adapter, /client_credentials/)
+  assert.doesNotMatch(adapter, /ONBOARDING_MS_/)
   assert.doesNotMatch(adapter, /MICROSOFT_TENANT_ID/)
   assert.doesNotMatch(adapter, /MICROSOFT_CLIENT_SECRET/)
 })

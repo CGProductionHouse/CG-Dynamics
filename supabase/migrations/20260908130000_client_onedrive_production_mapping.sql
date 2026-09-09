@@ -27,7 +27,9 @@ create table if not exists public.client_onedrive_mappings (
   client_id uuid not null references public.clients(id) on delete cascade,
   drive_id text not null check (char_length(drive_id) between 1 and 255),
   client_folder_item_id text not null check (char_length(client_folder_item_id) between 1 and 255),
-  videos_folder_item_id text not null check (char_length(videos_folder_item_id) between 1 and 255),
+  -- Nullable: a client folder can be mapped before its Videos subfolder exists
+  -- or is created on explicit request. Resolved/backfilled by durable ID later.
+  videos_folder_item_id text check (videos_folder_item_id is null or char_length(videos_folder_item_id) between 1 and 255),
   web_url text,
   folder_name text not null check (char_length(folder_name) between 1 and 255),
   mapped_by uuid not null references public.profiles(id) on delete restrict,
