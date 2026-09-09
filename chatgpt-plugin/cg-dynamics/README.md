@@ -9,12 +9,18 @@ connection (built by the #311/#313 runtime lane and #307 OneDrive/OAuth lane). T
 package only supplies the plugin manifest and the workflow **skills** that shape how staff
 use those tools.
 
+> **Project context is required (#319).** CG uses one communal ChatGPT account with a single
+> OAuth connection signed in as the company admin, so the connection does **not** identify
+> the staff member or client. Every Project calls `resolve_project_context` once and then
+> carries that exact `context` on every tool call. See **`PROJECT-CONTEXT.md`**.
+
 ## Layout
 
 ```
 chatgpt-plugin/cg-dynamics/
   .codex-plugin/plugin.json          # required manifest (identity, capabilities, prompts, skills path)
   README.md                          # this file
+  PROJECT-CONTEXT.md                 # REQUIRED staff/client/company-admin context contract (#319)
   CONNECTION-HANDOFF.md              # final steps after the real MCP connection exists
   skills/
     staff-assistant-daily-ops/       # bootstrap, today view, work queue, daily brief
@@ -30,6 +36,9 @@ chatgpt-plugin/cg-dynamics/
 - **Focused skills, not one instruction dump.** Each `SKILL.md` defines trigger, inputs,
   workflow-level tool sequence, output contract, facts-not-to-infer, when to ask/stop, and
   exact-client / exact-staff boundaries.
+- **Project-scoped, never account-scoped.** The shared admin OAuth connection authorises the
+  connector; the Project context decides whose data is in scope. Context is passed per call
+  and never remembered, so switching Projects cannot reuse stale context.
 - **Live-source-first.** No mutable tasks, leads, contacts, prices, schedules, or OneDrive
   IDs are frozen into the package — always retrieved live from the MCP connection.
 - **No shadow systems.** Planner/Work, CG Calendar, Client Schedule, client intelligence,

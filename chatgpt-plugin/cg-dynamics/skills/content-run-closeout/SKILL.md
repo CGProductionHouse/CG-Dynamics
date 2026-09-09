@@ -19,6 +19,9 @@ must not perform OneDrive access itself.
 
 ## Required inputs
 
+- **The exact Project context** (`../../PROJECT-CONTEXT.md`) carried as `context` on every
+  call — staff context in a staff Project, client context in a client Project. The shared
+  admin OAuth connection does not by itself authorise a run.
 - The exact `client` and the specific content run (date / run identifier) resolved via the
   MCP connection. Ask if it's ambiguous; never assume which run.
 
@@ -63,5 +66,6 @@ must not perform OneDrive access itself.
 
 - **Abstract tool contract only.** Do not duplicate #313 runtime logic or #307 OneDrive
   implementation; call the MCP tools and report their results.
-- Exact-client, exact-run scope only.
+- Exact-client, exact-run scope only. In a client Project the server refuses a content run
+  belonging to another client — switch Projects rather than working around it.
 - No shadow media-tracking or upload-verification system.

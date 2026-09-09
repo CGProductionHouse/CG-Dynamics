@@ -22,7 +22,11 @@ connector ID, OAuth secret, or production credential to the repo.
    the field (it is intentionally omitted now so no fake mapping ships).
 6. **Install from the personal/private source** and run every prompt in
    `acceptance/GOLDEN-PROMPTS.md` against the live connection, confirming the positive and
-   negative/boundary behaviours.
+   negative/boundary behaviours. Connect **once**, with the communal CG Dynamics admin login
+   (`info@cgproductionhouse.com`) — there is deliberately **no per-staff connector**. Then
+   verify per-Project scoping (#319): a staff Project returns that staff member's data, a
+   client Project returns only that client, and switching Projects does not carry context
+   over. See `../PROJECT-CONTEXT.md`.
 7. **Only then publish/enable** for the CG Production House company workspace.
 
 ## Intentionally missing artifact

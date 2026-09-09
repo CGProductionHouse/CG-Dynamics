@@ -17,8 +17,11 @@ send happened.
 
 ## Required inputs
 
-- The exact lead (resolved via the MCP connection) owned by the signed-in staff member.
-- The signed-in staff identity (for ownership scope and the correct CG From identity).
+- **The exact staff Project context** (`../../PROJECT-CONTEXT.md`): call
+  `resolve_project_context` with `{ context_kind: "staff", ... }` and carry the returned
+  object as `context` on every call. The shared OAuth connection is the company admin
+  account and never identifies the lead owner. This skill is unavailable in a client Project.
+- The exact lead (resolved via the MCP connection) owned by that exact staff member.
 
 ## Tool sequence (workflow level)
 
@@ -58,5 +61,6 @@ send happened.
 
 - **DRAFT ONLY. No send action, ever.** Gmail is the real mail system; this never becomes a
   parallel mailer or a shadow CRM.
-- Exact-staff ownership scope; never act on another staff member's leads or identity.
+- Exact-staff ownership scope; never act on another staff member's leads or identity. Admin
+  OAuth does not widen lead visibility — the Project context is the boundary.
 - No lead/contact values are frozen into this skill — always retrieve them live.

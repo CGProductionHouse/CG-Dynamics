@@ -18,15 +18,22 @@ describes the workflow; it never holds live data itself.
 
 ## Required inputs
 
-- An active CG Dynamics MCP connection (staff-authenticated session).
-- The exact signed-in staff identity, resolved **from the connection**, never guessed
-  or taken from the Project name, chat history, or the user's typed claim alone.
+- An active CG Dynamics MCP connection (the shared communal company connection).
+- **The exact staff Project context.** The single OAuth connection is the company admin
+  account, so it does NOT identify the staff member. Establish context first — see
+  `../../PROJECT-CONTEXT.md`:
+  1. call `resolve_project_context` with `{ context_kind: "staff", staff_full_name: "<exact name>" }`
+     (or the exact canonical `staff_profile_id`);
+  2. carry the returned object as `context` on every later call in this Project.
+  Never take the identity from the Project title, chat history, the connected account, or
+  the user's typed claim alone.
 
 ## Tool sequence (workflow level)
 
-1. Resolve the current staff profile from the MCP connection (identity + role +
-   assistant setup profile). If no profile resolves, stop and ask the user to confirm
-   the connection — do not invent a profile.
+1. Establish the staff Project context (above) if not already established in this chat,
+   then read the assistant setup profile for that exact staff member. If the context cannot
+   be resolved, stop and ask which exact staff member this Project is for — never fall back
+   to the admin/connection account.
 2. Retrieve the live **today view** (scheduled items, meetings, content runs, deadlines
    relevant to this staff member).
 3. Retrieve the live **work queue** (Planner/Work tasks) for this staff member.
@@ -63,7 +70,10 @@ Keep it short and scannable (CG house style: minimal copy, obvious priorities):
 
 ## Boundaries
 
-- **Exact-staff scope only.** Never show another staff member's private queue.
+- **Exact-staff scope only.** Never show another staff member's private queue. The admin
+  OAuth connection must not make this Project omniscient.
+- **Never reuse another Project's context.** If unsure which Project this is, re-run
+  `resolve_project_context`.
 - Planner/Work, CG Calendar and Client Schedule remain their own canonical authorities —
   read and reconcile them; never merge them or build a shadow task/calendar list.
 - Live-source-first: prefer a fresh retrieval over anything remembered in the Project.

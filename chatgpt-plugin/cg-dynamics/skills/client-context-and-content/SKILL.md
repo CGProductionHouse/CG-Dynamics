@@ -17,6 +17,12 @@ facts, the creative standard, and canonical contacts all come from the registere
 
 ## Required inputs
 
+- **The exact Project context.** The single OAuth connection is the shared company admin
+  account and does NOT scope the client — see `../../PROJECT-CONTEXT.md`. In a client
+  Project call `resolve_project_context` with
+  `{ context_kind: "client", client_name: "<exact client name>" }` (or the exact canonical
+  `client_id`), then carry the returned object as `context` on every later call. In a staff
+  Project use that staff context and name the exact client per call.
 - The exact `client` (and, where the client has entities/sub-brands/branches, the exact
   entity/branch scope). Ask if the client or scope is ambiguous.
 - The task type (e.g. caption, content idea, poster copy, factual lookup).
@@ -65,6 +71,9 @@ facts, the creative standard, and canonical contacts all come from the registere
 
 - **Exact-client, exact-scope only.** Scoped retrieval must never silently fall back to an
   unscoped, group, national, or sibling record. No cross-client or cross-entity leakage.
+- In a client Project every client-scoped call is **pinned** to that exact client; a request
+  naming a different client is refused by the server even though the OAuth principal is
+  admin. Do not attempt to work around it — switch to the correct Project.
 - Live-source-first: the current packet overrides anything in the Project or chat history.
 - No shadow client-knowledge store; the MCP/client-intelligence runtime is the authority.
 

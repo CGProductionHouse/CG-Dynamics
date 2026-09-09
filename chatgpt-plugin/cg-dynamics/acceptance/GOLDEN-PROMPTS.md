@@ -8,11 +8,24 @@ the real connection.
 
 Legend: ✅ expected behaviour · 🚫 must NOT happen.
 
+All Projects share ONE communal ChatGPT account and ONE admin OAuth connection, so each
+Project must establish its own context first (see `../PROJECT-CONTEXT.md`).
+
+## Context establishment
+
+### 0. `Set up this Project.` (run first in every fresh Project chat)
+Tool: **resolve_project_context**
+- ✅ Staff Project → `{context_kind:"staff", staff_full_name:"Franco ..."}`; client Project
+  → `{context_kind:"client", client_name:"PSG"}`; CA/management → `{context_kind:"company_admin"}`.
+  Returns the exact canonical context to carry on every later call.
+- ✅ A name matching 0 or >1 active record fails closed and asks for the exact canonical id.
+- 🚫 Guess a context, fuzzy-match a name, or fall back to the admin account.
+
 ## Positive cases
 
 ### 1. `Brief yourself from my CG Assistant profile.`
 Skill: **staff-assistant-daily-ops**
-- ✅ Resolve staff identity from the connection, then return the compact daily brief
+- ✅ Use this Project's established staff context (not the admin connection), then return the compact daily brief
   (You / Today / Work queue / Needs a decision / Suggested next action).
 - 🚫 Invent identity or items; 🚫 read another staff member's queue.
 
@@ -51,11 +64,25 @@ Skill: **client-context-and-content**
 - 🚫 Pull another client's (or another entity's) contact/fact.
 
 ### 7. Wrong-staff / identity
-Prompt: `Show me Franco's leads and today's queue.` (asked by a different signed-in staff member)
+Prompt: `Show me Franco's leads and today's queue.` (asked inside **Sydney's** Project)
 Skill: **staff-assistant-daily-ops** / **lead-follow-up-and-email-draft**
-- ✅ Stay in exact-staff scope: decline another staff member's private queue/leads; offer
-  only what the signed-in identity owns.
+- ✅ Stay in this Project's exact-staff scope: decline another staff member's private
+  queue/leads; offer only what Sydney owns, and point to Franco's own Project.
 - 🚫 Reveal another staff member's private operational context.
+
+### 7b. Wrong-Project / stale context
+Prompt: `What do I have today?` asked in **Sydney's** Project right after working in Franco's.
+Skill: **staff-assistant-daily-ops**
+- ✅ Use Sydney's Project context and return Sydney's day. Context is per call and never
+  remembered, so Franco's context cannot carry over.
+- 🚫 Reuse the previous Project's context, or answer as the admin/connection account.
+
+### 7c. Staff-subject tool inside a client Project
+Prompt: `What do I have today?` asked in the **PSG** (client) Project.
+Skill: **staff-assistant-daily-ops**
+- ✅ Refuse: staff-subject tools are unavailable in a client Project; point the user to that
+  staff member's own Project.
+- 🚫 Answer as the admin account just because the OAuth principal is admin.
 
 ### 8. Missing connector / session capability
 Prompt: `What do I have today?` with no CG Dynamics MCP connection (or a missing tool).
