@@ -1,73 +1,69 @@
 # Launch-now browser-chat graphic design workflow
 
 Last updated: 2026-09-09
-Status: working bridge system for immediate rollout while the deeper Dynamics integration is built.
+Status: bridge system for immediate rollout while the deeper Dynamics integration is built.
 
-## Why this exists
+## Purpose
 
-The highest-quality design surface currently available in normal ChatGPT browser chat is the internal image generator, not the Python/layout route and not Canva's own AI generation. The launch-now system therefore packages the right inputs so the internal generator is constrained by real client assets, real strategy and recent CG design references.
+Use the strongest current normal-browser ChatGPT creative surface without breaking CG's existing content/package/OneDrive architecture.
 
-This is deliberately a bridge workflow, not the end state.
+The bridge is deliberately replaceable. Preserve the strategy, tracking, freshness and QA standards as tools improve; do not preserve manual friction for its own sake.
 
-## Core operating principle
+## Canonical system relationship
 
-Use AI for creative composition, not for inventing client truth.
+`monthly_deliverables` remains Client Schedule truth.
 
-The production split is:
+Existing CG content types remain:
 
-- **CG Dynamics**: strategy, monthly package slot, client truth, usage ledger, approvals and later performance learning.
-- **OneDrive**: canonical client photography/brand assets plus a staff-friendly `CG Creative Assistant` workspace.
-- **ChatGPT internal image generation**: high-design art direction, composition, effects, gradients, texture, visual play and concept exploration.
-- **Adobe/Photoshop-style tools**: crop, colour, retouching, cutouts and other precision edits where the real photograph/identity must remain exact.
-- **Canva**: exact typography, exact logos, editable finishing, staff amendments, Magic Layers / image-to-design where useful, approval handoff and current creative history.
+- `DP` — Designed Poster
+- `F` — Photo
+- `Video`
+- `Reel`
 
-Do not use Python-layout rendering as the main creative route for high-love social posters.
+Poster naming/storage must follow `poster-onedrive-naming-standard.md` and extend the existing video production grammar.
 
-## Important generative limitation
+Stable DP production ID:
 
-The internal image generator is generative. Reference images guide the output, but the model can reconstruct pixels. Therefore:
+`YYYY_MM_CLIENT_DP_XX`
 
-- do not trust it to preserve a real staff member or logo pixel-for-pixel merely because they were supplied as references;
-- do not trust generated typography as production typography;
-- do not let the model redraw client logos;
-- where identity matters, preserve the real human photo as an exact imported/composited layer or use non-generative editing;
-- use the generator heavily for the surrounding art direction, background, graphic effects, depth and visual system.
+Example:
 
-## Current browser-chat attachment reality
+`2026_11_PIEK_DP_01`
 
-A ZIP is useful for OneDrive storage, handoff and portability, but **do not rely on attaching only the ZIP to the browser chat when the internal image generator needs visual references**. The image generator works best when the required images are surfaced as actual image attachments in the conversation.
+Sub-brand is separate metadata, e.g. `brand_scope=ENGEN`; optional descriptive suffix comes after `__`.
 
-Therefore every monthly `00_INPUT_PACK` should contain both:
+Do not create a second social calendar, second package identity or assistant-only poster ID.
 
-- the packaged ZIP; and
-- a `CHAT_ATTACH/` folder containing the individual images staff should multi-select into ChatGPT.
+## Production split
 
-The staff launch action is:
+- **CG Dynamics**: exact client/package/month/deliverable, strategy, approvals, usage/performance learning.
+- **OneDrive**: canonical original media + canonical monthly poster production files.
+- **Normal ChatGPT browser chat**: research, planning, asset selection, creative direction and generation.
+- **Internal image generation**: rich art direction, composition, gradients, masks, texture, depth, effects and visual play.
+- **Adobe/Photoshop-style tooling**: non-generative photo correction/crop/cutout/compositing where identity and source fidelity matter.
+- **Canva**: creative history, exact type/logo finishing, editable handoff, staff amendments and exact-page linkage.
 
-1. open the month's `CHAT_ATTACH/` folder;
-2. multi-select the exact photos/logo/reference screenshots and attach them to the normal ChatGPT conversation;
-3. paste/upload the separate prompt text;
-4. generate the batch.
+Do not use Python/layout rendering as the primary high-love poster engine.
 
-If future ChatGPT versions can reliably unpack a ZIP directly into the image-generation reference surface, this manual multi-select step can be removed.
+## Canonical OneDrive poster tree
 
-## Current QA limitation
+Monthly poster production lives alongside the existing client `Videos` hierarchy, not inside `CG Creative Assistant`.
 
-In the current browser-chat image generation flow, ChatGPT cannot reliably run a hidden multi-step loop of `generate -> inspect -> reject -> regenerate` before the user sees the first result. The image-generation response is surfaced as the result of that turn.
+```text
+Clients/<Client>/Posters/
+  <YYYY>/
+    <YYYY_MM_MON>/
+      00_MONTH_PLAN/
+      01_SOURCE_EDITED/
+      02_CHAT_PACK/
+      03_WAVE_1/
+      04_AMENDMENTS/
+      05_APPROVED/
+      06_CANVA_HANDOFF/
+      07_ARCHIVE/
+```
 
-Mitigation for launch-now:
-
-1. improve the generation pack and prompt quality so the model is tightly constrained;
-2. generate multiple deliberately varied candidates when appropriate;
-3. treat Wave 1 as internal CG review, not client approval;
-4. use the next chat turn for explicit QA/revision where needed;
-5. continue researching a future generation/editing surface that supports programmatic candidate scoring and retry before delivery.
-
-## Per-client OneDrive workspace
-
-Working folder: `CG Creative Assistant` under the client folder.
-
-Recommended structure:
+`CG Creative Assistant` is the supporting system layer:
 
 ```text
 CG Creative Assistant/
@@ -76,209 +72,229 @@ CG Creative Assistant/
     READY_UNUSED/
     USED_REFERENCE/
     BLOCKED_DO_NOT_USE/
-  02_MONTHLY_PACKS/
-    CLIENT-SUBBRAND_YYYY-MM/
-      00_INPUT_PACK/
-        CHAT_ATTACH/
-      01_PROMPT/
-      02_WAVE_1/
-      03_AMENDMENTS/
-      04_APPROVED/
-      05_CANVA_HANDOFF/
-      06_ARCHIVE/
+  02_STYLE_REFERENCES/
+    <BRAND_SCOPE>/
   03_HISTORY/
 ```
 
-Canonical originals should remain in their normal client folders. The assistant workspace is a curated working layer and usage aid, not a replacement media library.
+Do not duplicate the canonical photo library just to populate the helper workspace. Keep durable OneDrive IDs/usage metadata in Dynamics long term.
 
-## New-client bootstrap audit
+## Brand/sub-brand reference rule
 
-This is a one-time task per onboarded client:
+A parent client may contain multiple brands. Never mix them in one style-reference feed merely because they sit in one Canva design.
 
-1. inspect the existing Canva marketing design, especially POSTED/SCHEDULED history;
-2. record all practical historic poster pages and the source images used;
-3. match exact and near-duplicate images to OneDrive where possible;
-4. record unmatched legacy/external images rather than guessing;
-5. classify known media as USED_REFERENCE / BLOCKED / READY_UNUSED;
-6. seed the Dynamics usage ledger;
-7. thereafter record every new poster automatically.
+Example Piek scopes:
 
-## Freshness model
+- `PIEK_GROUP`
+- `ENGEN`
+- `SASOL`
+- `GET_TOGETHER`
 
-Track at least:
+For an Engen batch, use Engen references only. Existing Canva pages teach visual grammar and quality bar, not layouts to copy.
 
-- exact source file/item ID;
-- perceptual/near-duplicate group;
-- shoot/burst/angle group;
-- people depicted;
-- product/service/topic;
-- headline/concept;
-- creative mechanism/layout;
-- last-used date;
-- poster/package slot;
-- Canva design/page;
-- platform/publish record;
-- reuse reason when applicable.
+## Strategy phase — Wave 0
 
-Exact filename matching is insufficient. The system should later use perceptual image fingerprints / embeddings plus human-reviewed metadata to catch crops, burst shots and repeated people/scenes.
+The staff planning chat begins with the selected client/month/package and may include a voice note/idea from KG, Ger-Marie, CA, Amonique or another authorised staff member.
+
+The planning chat should:
+
+1. read canonical Dynamics client/month/package context;
+2. read previous strategy, approvals/rejections and relevant performance;
+3. inspect exact brand-scope Canva history;
+4. inspect usage history and OneDrive source media;
+5. research current seasonal/local/category context when materially useful;
+6. decide the monthly marketing mix before designing;
+7. map every planned static item to its exact `DP1`, `DP2`, etc. deliverable;
+8. assign the canonical production ID;
+9. select fresh sources;
+10. professionally prepare those sources before generation;
+11. build the month Chat Pack and exact prompt.
+
+The first month/client bootstrap is heavier. Every later month should resume from recorded state rather than repeat the entire audit.
+
+## Source preparation rule
+
+The generator/design batch should normally receive professionally edited production derivatives, not untouched raw camera files.
+
+Raw/original remains in the client's normal photo hierarchy.
+
+Prepared derivative example:
+
+`01_SOURCE_EDITED/2026_11_PIEK_DP_01__SRC_EDITED_01.png`
+
+Allowed non-generative prep:
+
+- exposure/highlight/shadow correction;
+- white balance/colour correction;
+- crop/straightening;
+- lens/perspective correction where appropriate;
+- clarity/sharpness;
+- temporary blemish/fresh scratch/redness cleanup;
+- cutout/background cleanup where conceptually required.
+
+Never alter permanent human identity features.
 
 ## Monthly Chat Pack
 
-For each batch, build:
+The whole planned month should be packaged together where practical so staff are not repeatedly doing setup work poster-by-poster.
 
-- one ZIP for storage/transport;
-- one `CHAT_ATTACH/` folder containing the exact individual visual attachments;
-- one separate prompt text file.
-
-The package should contain:
+`02_CHAT_PACK` contains:
 
 ```text
-inputs/
-  exact client/source photos
-  exact logos / partner logos
-  any approved graphic assets
-references/
-  3-6 recent strong CG/Canva poster screenshots
-  optional grid/contact sheet
+CHAT_ATTACH/
+  edited source image(s) named by stable DP ID
+  exact logos / partner assets
+  exact relevant style-reference screenshots
+PROMPT.txt
 MANIFEST.csv
+<YYYY_MM_CLIENT>_CHAT_PACK_vNN.zip
 ```
 
-References are inspiration only. They teach the current brand grammar and quality bar but must not be copied.
+The ZIP is storage/transport. In the current browser product, staff should also multi-select the actual `CHAT_ATTACH` images into ChatGPT because the internal generator works best with surfaced image attachments.
 
-The separate prompt contains:
+## Prompt requirements
 
-- exact client/sub-brand/month;
-- strategy gate;
-- poster names / Dynamics slots;
-- headline direction;
-- source photo assignment per poster;
-- emotional objective / audience / buying situation;
-- locked brand rules;
-- no-regenerated-logo rule;
-- human identity rule;
-- exact typography rule;
-- mobile-first rule;
-- batch/grid diversity rule;
-- instruction to avoid generic AI copy and generic Canva-template composition.
+The monthly prompt must identify each poster by its exact stable ID and define for each:
 
-## Universal naming
+- brand scope;
+- target audience / buying moment;
+- one useful proposition;
+- intended emotion;
+- stop-scroll reason;
+- proof/source asset;
+- headline/copy direction;
+- exact image assignment;
+- exact logo/partner requirements;
+- design mechanism direction without cloning an old poster;
+- intended next thought/action.
 
-`CLIENT-SUBBRAND_YYYY-MM_P##_SHORT-TOPIC`
+Batch-level instructions lock:
 
-Example:
+- exact brand colours/fonts/logos;
+- real-human identity preservation;
+- phone readability;
+- visual richness/craft;
+- no generic AI copy;
+- no repeated template skeleton;
+- grid balance;
+- references are inspiration, not cloning targets.
 
-`PIEK-ENGEN_2026-11_P01_SUMMER-PLANS`
+## Generation — Wave 1
 
-`P##` maps to the exact recurring package slot. `X##` is reserved for once-off work outside the package.
+Use the internal image generator as the creative composition engine.
 
-The same stable name should follow the poster through:
+Generate the planned month as a batch where practical. Each item should be visually unique but visibly belong to the same brand system.
 
-- generation pack;
-- Wave 1 candidate;
-- approved export;
-- Canva design/page where practical;
-- Dynamics schedule item;
-- media-usage ledger;
-- publish/schedule record.
+Candidate naming:
 
-## Wave workflow
+`YYYY_MM_CLIENT_DP_XX__W1_V01.png`
 
-### 00_INPUT_PACK
-Exact generation inputs, packaged ZIP, `CHAT_ATTACH/` images and manifest.
+Wave 1 is internal CG review only. Current browser image generation does not reliably support a hidden `generate -> score -> reject -> regenerate` loop before the first result is surfaced.
 
-### 01_PROMPT
-Exact normal-browser-chat prompt.
+## Amendment doctrine
 
-### 02_WAVE_1
-First candidates worth internal CG review. This is not client approval.
+Repeated generative editing can create visual drift and increasingly fake photography. Staff must classify the problem before changing anything.
 
-### 03_AMENDMENTS
-Revisions / alternates / corrected typography or compositing.
+### A — production correction: Canva/Adobe, no regeneration
 
-### 04_APPROVED
-CG-approved flat finals.
+Logo, typo, exact font, font size, spacing, brand colour, margin/alignment, small layout nudge.
 
-### 05_CANVA_HANDOFF
-Editable Canva versions, links, exact final naming, final fonts/logos and any staff-adjustable copy.
+### B — source-photo correction: return to original source
 
-A useful current Canva capability is image-to-design / Magic Layers: a strong flat social design produced outside Canva can be converted into editable Canva elements. Treat this as a finishing/handoff mechanism rather than the primary creative generator.
+Crop, exposure, colour, blemish, cutout/background cleanup. Edit the original selected source non-generatively, then recompose if necessary.
 
-### 06_ARCHIVE
-Rejected or superseded files retained only when useful for audit/learning.
+### C — creative failure: fresh regeneration from source pack
 
-## Content-strategy gate before image generation
+Weak concept, generic/template-like composition, wrong emotion, wrong visual hierarchy, fundamental design miss.
 
-Every poster must answer:
+Keep accepted DPs locked. For only failed DP IDs, reattach the exact original edited source + exact brand refs/logo + revised strategy instruction and generate a new clean candidate. Do not rely on the prior generated bitmap as the sole source.
 
-1. Who exactly are we speaking to?
-2. What real buying/use situation are we entering?
-3. What is the one useful proposition?
-4. Why should anyone stop scrolling?
-5. What should they feel?
-6. What visual/client truth proves the message?
-7. What should they think/do next?
-8. Why is this relevant now in this month/place/context?
+Candidate naming can advance wave/version, e.g.:
 
-Use the existing CG marketing research model:
+`2026_11_PIEK_DP_03__W2_V01.png`
 
-`Business objective -> buying situation -> audience/problem -> single-minded proposition -> proof -> distinctive brand signals -> creative idea -> platform execution -> exposure/memory -> action -> verified outcome`
+### D — minor effect change
 
-Do not skip directly from client facts to a headline/design.
+Prefer a clean Canva/Adobe edit if it avoids regeneration.
 
-## Typography and logo strategy
+## Approval / Canva handoff
 
-The internal generator can create richer visual systems, but final typography must not depend on AI-rendered letters when the result contains distortion, strange texture or incorrect brand fonts.
+Approved flat final:
 
-Preferred launch-now approach:
+`YYYY_MM_CLIENT_DP_XX__FINAL.png`
 
-- generator builds the high-design composition and creates clean intentional text zones;
-- exact Sora/Inter or client-specific typography is applied in Canva/Adobe as a finishing layer;
-- exact client/partner logos are imported afterward as original assets;
-- any generator output containing distorted/incorrect logo text is rejected or covered/rebuilt, never accepted as final.
+Use Canva for:
 
-This is not a downgrade in design quality: the generator remains responsible for the visual idea, effects, composition, masks, texture, depth, gradients and energy; Canva/Adobe provide exact production typography and locked assets.
+- exact typography;
+- exact client/partner logos;
+- small safe production adjustments;
+- editable handoff;
+- approval workflow;
+- final export variants.
 
-## Grid QA
+Canva image-to-design / Magic Layers may be useful to convert a strong external flat social design into editable elements. Treat it as a finishing/handoff route, not the primary art-direction generator.
 
-Before a monthly batch is approved, view the posters together.
+Dynamics stores exact Canva `design_id` + page identity against the same `monthly_deliverables` item.
 
-Reject the batch if:
+## Historical bootstrap / freshness
 
+New client onboarding is a one-time audit:
+
+1. inspect Canva POSTED/SCHEDULED history;
+2. identify practical source imagery used;
+3. match exact/near-duplicate OneDrive sources where possible;
+4. record unmatched legacy/external assets honestly;
+5. seed used/ready/blocked state;
+6. seed the Dynamics media-usage ledger;
+7. thereafter record every newly produced item automatically.
+
+Freshness dimensions include exact source, perceptual duplicate, shoot/angle, person, product/service/topic, brand/location, headline/concept and creative mechanism.
+
+## Month-to-month learning
+
+Before each new month, read the previous month and relevant history:
+
+- strategy;
+- visual/content mix;
+- approvals/rejections/amendments;
+- source/person/product usage;
+- client feedback;
+- Meta/platform performance where available;
+- boosted/paid-supported items;
+- explicit reuse requests;
+- current seasonal/local/category context.
+
+Use performance as evidence, not as the only definition of marketing quality.
+
+## Grid/mobile QA
+
+Review each poster at phone size and the batch as a grid.
+
+Reject when:
+
+- text is too small;
 - headline locations repeat mechanically;
-- every poster uses the same template skeleton;
-- the same photo/person/service dominates without reason;
-- crops and visual mechanisms feel repetitive;
-- the grid feels randomly inconsistent;
-- the work looks like three variants generated from one prompt rather than three individually art-directed ads.
+- each poster shares the same skeleton;
+- one person/product/photo dominates without reason;
+- visual effects are repetitive;
+- the batch feels random rather than related;
+- the work resembles generic AI / PowerPoint / stock Canva;
+- the brand is technically correct but there is no creative idea.
 
-Consistency comes from brand assets, palette, typography, tone and quality — not repeated layout.
+## Long-term system targets
 
-## Long-term research / build targets
+Keep challenging the bridge implementation as capabilities improve:
 
-The bridge system must be challenged continuously. Track improvements in:
-
-- multimodal generators/editors with programmatic image-reference inputs;
-- Adobe/Photoshop compositing and generated-fill workflows;
-- Canva APIs / Magic Layers / exact page insertion;
-- Illustrator / InDesign automation where useful;
-- perceptual-hash and vision-embedding media deduplication;
-- face/person clustering used only for internal repetition tracking, not identity naming;
+- direct OneDrive/Dynamics image-reference ingestion into ChatGPT image generation;
+- programmatic candidate scoring and hidden retry;
+- Adobe/Photoshop compositing and exact-photo pipelines;
+- Canva exact page insertion and Magic Layers reliability;
+- perceptual hashing / vision embeddings for near-duplicate media;
+- internal person repetition clustering without public identity naming;
 - automatic Dynamics usage-ledger writes;
-- Meta/platform performance ingestion and creative-performance comparison;
-- hidden candidate QA/scoring/retry before staff see outputs;
-- exact font/logo compositing pipelines;
-- automatic monthly generation-pack creation from Dynamics + OneDrive + Canva.
+- Meta/platform creative-performance learning;
+- automatic monthly Chat Pack construction;
+- exact font/logo compositing;
+- unified publish/schedule handoff through canonical Dynamics actions.
 
-The future goal is not to preserve today's workflow. It is to preserve CG's quality standard while replacing manual friction as AI capabilities improve.
-
-## Piek / Engen pilot implementation
-
-A real OneDrive pilot workspace now exists at:
-
-`Clients/Piek Group/CG Creative Assistant/`
-
-and the November monthly pack structure exists at:
-
-`Clients/Piek Group/CG Creative Assistant/02_MONTHLY_PACKS/PIEK-ENGEN_2026-11/`
-
-The first Chat Pack, manifest, prompt and individual `CHAT_ATTACH/` source files are stored there. The remaining v1 gap is adding 3-6 physical screenshots of selected recent Piek Canva posters into `CHAT_ATTACH/` / the ZIP before the pack is considered fully ready for the internal image generator.
+The final objective is a sustainable CG production system that improves with every month and remains useful even when a human designer elects to build the poster manually.
