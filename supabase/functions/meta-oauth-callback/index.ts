@@ -1,5 +1,6 @@
 import { corsHeaders } from '../_shared/cors.ts'
 import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
+import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
 
 // Server-side Supabase client using the service_role key.
 // This bypasses RLS — only Edge Functions should ever use this.
@@ -171,9 +172,12 @@ Deno.serve(async (req) => {
   }
 
   const grantedScopes = await fetchGrantedScopes(graphBaseUrl, accessToken)
+  const tokenDiagnostics = await inspectMetaAccessToken({ graphBaseUrl, appId, appSecret, accessToken })
   const missingScopes = REQUESTED_SCOPES.filter(scope => !grantedScopes.includes(scope))
-  const connectionStatus = missingScopes.length === 0 ? 'connected' : 'needs_reauth'
-  const permissionError = missingScopes.length > 0
+  const connectionStatus = tokenDiagnostics.state === 'invalid' || missingScopes.length > 0 ? 'needs_reauth' : 'connected'
+  const permissionError = tokenDiagnostics.state === 'invalid'
+    ? tokenDiagnostics.errorReason
+    : missingScopes.length > 0
     ? `Missing required Meta permissions: ${missingScopes.join(', ')}. Reconnect Meta and grant them.`
     : null
 
@@ -241,9 +245,15 @@ Deno.serve(async (req) => {
     .upsert({
       connection_id: connectionId,
       encrypted_access_token: accessToken,
-      token_expires_at: tokenData.expires_in
+      token_type: tokenDiagnostics.tokenType,
+      token_expires_at: tokenDiagnostics.expiresAt ?? (tokenData.expires_in
         ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
-        : null,
+        : null),
+      data_access_expires_at: tokenDiagnostics.dataAccessExpiresAt,
+      last_validated_at: tokenDiagnostics.validatedAt,
+      validation_state: tokenDiagnostics.state,
+      validation_error_code: tokenDiagnostics.errorCode,
+      validation_error_reason: tokenDiagnostics.errorReason,
     }, { onConflict: 'connection_id' })
 
   if (tokenError) {
@@ -252,5 +262,5 @@ Deno.serve(async (req) => {
   }
 
   // Success — redirect back to the app.
-  return redirect(`${appUrl}/admin/integrations/meta?meta=${missingScopes.length > 0 ? 'permissions_missing' : 'connected'}`)
+  return redirect(`${appUrl}/admin/integrations/meta?meta=${connectionStatus === 'connected' ? 'connected' : 'permissions_missing'}`)
 })

@@ -10,6 +10,19 @@ type JsonObject = Record<string, unknown>
 export type GoogleAdsAccountMode = 'shared' | 'dedicated'
 export type GoogleAdsSuggestionConfidence = 'high' | 'medium' | 'low' | 'ambiguous'
 
+export interface GoogleAdsNativeSettings {
+  apiVersion: string | null
+  observedAt: string | null
+  primaryStatus: string | null
+  budgetAmountMicros: number | null
+  budgetTotalAmountMicros: number | null
+  budgetPeriod: string | null
+  budgetShared: boolean | null
+  budgetReferenceCount: number | null
+  budgetStatus: string | null
+  budgetType: string | null
+}
+
 export interface GoogleAdsAccount {
   id: string
   customerId: string
@@ -27,6 +40,8 @@ export interface GoogleAdsCampaign {
   name: string
   status: string
   channelType: string
+  currencyCode: string
+  nativeSettings: GoogleAdsNativeSettings | null
 }
 
 export interface GoogleAdsAccountLink {
@@ -52,11 +67,22 @@ export interface GoogleAdsSyncRun {
   finishedAt: string | null
 }
 
+export interface GoogleAdsMonthlyTarget {
+  clientId: string
+  month: string
+  amountMicros: number
+  currencyCode: string
+  approvalNote: string
+  approvedAt: string
+  version: number
+}
+
 export interface GoogleAdsWorkspace {
   accounts: GoogleAdsAccount[]
   accountLinks: GoogleAdsAccountLink[]
   campaignLinks: GoogleAdsCampaignLink[]
   runs: GoogleAdsSyncRun[]
+  monthlyTargets: GoogleAdsMonthlyTarget[]
 }
 
 export interface GoogleAdsClientName {
@@ -159,6 +185,12 @@ function number(value: unknown): number {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
 }
 
+function nullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null
+  const parsed = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
 function integer(value: unknown): number {
   return Math.round(number(value))
 }
@@ -224,6 +256,8 @@ function parseCampaign(value: unknown, account: GoogleAdsAccount): GoogleAdsCamp
   if (!row) return null
   const campaignId = string(row.campaignId ?? row.campaign_id ?? row.id)
   if (!campaignId) return null
+  const native = object(row.nativeSettings ?? row.native_settings)
+  const rawBudgetShared = native?.budget_shared ?? native?.budgetShared
   return {
     id: string(row.id, `${account.id}:${campaignId}`),
     accountId: account.id,
@@ -232,7 +266,34 @@ function parseCampaign(value: unknown, account: GoogleAdsAccount): GoogleAdsCamp
     name: string(row.name ?? row.campaignName ?? row.campaign_name, 'Unnamed campaign'),
     status: string(row.status ?? row.campaignStatus ?? row.campaign_status, 'UNKNOWN').toUpperCase(),
     channelType: string(row.channelType ?? row.channel_type ?? row.advertisingChannelType ?? row.advertising_channel_type, 'UNKNOWN').toUpperCase(),
+    currencyCode: currency(row.currencyCode ?? row.currency_code ?? account.currencyCode),
+    nativeSettings: native ? {
+      apiVersion: nullableString(native.api_version ?? native.apiVersion),
+      observedAt: nullableString(native.observed_at ?? native.observedAt),
+      primaryStatus: nullableString(native.primary_status ?? native.primaryStatus),
+      budgetAmountMicros: nullableNumber(native.budget_amount_micros ?? native.budgetAmountMicros),
+      budgetTotalAmountMicros: nullableNumber(native.budget_total_amount_micros ?? native.budgetTotalAmountMicros),
+      budgetPeriod: nullableString(native.budget_period ?? native.budgetPeriod),
+      budgetShared: typeof rawBudgetShared === 'boolean' ? rawBudgetShared : null,
+      budgetReferenceCount: nullableNumber(native.budget_reference_count ?? native.budgetReferenceCount),
+      budgetStatus: nullableString(native.budget_status ?? native.budgetStatus),
+      budgetType: nullableString(native.budget_type ?? native.budgetType),
+    } : null,
   }
+}
+
+export function formatGoogleAdsCampaignBudget(campaign: GoogleAdsCampaign): string {
+  const settings = campaign.nativeSettings
+  if (!settings) return 'Unavailable'
+  const micros = settings.budgetPeriod === 'DAILY'
+    ? settings.budgetAmountMicros
+    : settings.budgetPeriod === 'CUSTOM_PERIOD'
+      ? settings.budgetTotalAmountMicros
+      : null
+  if (micros === null || micros < 0 || campaign.nativeSettings?.budgetStatus === 'REMOVED') return 'Unavailable'
+  const amount = formatGoogleAdsMoney(micros, campaign.currencyCode)
+  const period = settings.budgetPeriod === 'DAILY' ? 'average daily' : 'campaign total'
+  return `${amount} ${period}${settings.budgetShared ? ' · shared' : ''}`
 }
 
 function parseAccountLink(value: unknown): GoogleAdsAccountLink | null {
@@ -387,21 +448,56 @@ export async function listGoogleAdsCampaigns(account: GoogleAdsAccount): Promise
 }
 
 export async function getGoogleAdsWorkspace(): Promise<GoogleAdsWorkspace> {
-  const [accounts, accountLinksResult, campaignLinksResult, runsResult] = await Promise.all([
+  const [accounts, accountLinksResult, campaignLinksResult, runsResult, targetsResult] = await Promise.all([
     listGoogleAdsAccounts(),
     supabase.from('google_ads_account_links').select('*').order('created_at', { ascending: false }),
     supabase.from('google_ads_campaign_links').select('*').order('created_at', { ascending: false }),
     supabase.from('google_ads_sync_runs').select('*').order('created_at', { ascending: false }).limit(100),
+    supabase.rpc('list_google_ads_monthly_targets'),
   ])
   if (accountLinksResult.error) throw new Error(accountLinksResult.error.message)
   if (campaignLinksResult.error) throw new Error(campaignLinksResult.error.message)
   if (runsResult.error) throw new Error(runsResult.error.message)
+  if (targetsResult.error && targetsResult.error.code !== 'PGRST202') throw new Error(targetsResult.error.message)
   return {
     accounts,
     accountLinks: (accountLinksResult.data ?? []).map(parseAccountLink).filter((link): link is GoogleAdsAccountLink => link !== null),
     campaignLinks: (campaignLinksResult.data ?? []).map(parseCampaignLink).filter((link): link is GoogleAdsCampaignLink => link !== null),
     runs: (runsResult.data ?? []).map(parseRun).filter((run): run is GoogleAdsSyncRun => run !== null),
+    monthlyTargets: (targetsResult.data ?? []).map(parseMonthlyTarget).filter((target: GoogleAdsMonthlyTarget | null): target is GoogleAdsMonthlyTarget => target !== null),
   }
+}
+
+export async function saveGoogleAdsMonthlyTarget(input: {
+  clientId: string
+  month: string
+  amount: number
+  currencyCode: string
+  approvalNote: string
+  approvedAt: string
+  expectedVersion?: number | null
+}): Promise<void> {
+  const month = MONTH.test(input.month) ? `${input.month}-01` : ''
+  const amountMicros = Math.round(input.amount * 1_000_000)
+  const currencyCode = input.currencyCode.trim().toUpperCase()
+  if (!input.clientId || !month || !Number.isFinite(amountMicros) || amountMicros <= 0) {
+    throw new Error('Choose a client, month, and positive monthly target.')
+  }
+  if (!CURRENCY_CODE.test(currencyCode) || !input.approvalNote.trim() || !input.approvedAt) {
+    throw new Error('Currency and client approval evidence are required.')
+  }
+  const { error } = await supabase.rpc('set_google_ads_monthly_target', {
+    p_client_id: input.clientId,
+    p_month: month,
+    p_amount_micros: amountMicros,
+    p_currency_code: currencyCode,
+    p_approval_note: input.approvalNote.trim(),
+    p_approved_at: input.approvedAt,
+    p_expected_version: input.expectedVersion ?? null,
+  })
+  if (error) throw new Error(error.code === 'PGRST202'
+    ? 'Apply the Google Ads V2 migration before saving monthly targets.'
+    : error.message)
 }
 
 export async function setGoogleAdsAccountMode(accountId: string, mode: GoogleAdsAccountMode, confirmModeChange: boolean): Promise<void> {
@@ -446,6 +542,30 @@ export function monthDateRange(month: string): { startDate: string; endDate: str
   const [year, monthNumber] = month.split('-').map(Number)
   const endDay = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate()
   return { startDate: `${month}-01`, endDate: `${month}-${String(endDay).padStart(2, '0')}` }
+}
+
+function parseMonthlyTarget(value: unknown): GoogleAdsMonthlyTarget | null {
+  const row = object(value)
+  if (!row) return null
+  const clientId = string(row.client_id ?? row.clientId)
+  const month = string(row.month).slice(0, 10)
+  const amountMicros = nullableNumber(row.amount_micros ?? row.amountMicros)
+  const currencyCode = currency(row.currency_code ?? row.currencyCode)
+  const approvalNote = string(row.approval_note ?? row.approvalNote)
+  const approvedAt = string(row.approved_at ?? row.approvedAt)
+  const version = integer(row.version)
+  if (!clientId || !DATE.test(month) || amountMicros === null || currencyCode === 'XXX' || !approvalNote || !approvedAt || version < 1) return null
+  return { clientId, month, amountMicros, currencyCode, approvalNote, approvedAt, version }
+}
+
+export function googleAdsTrackingSyncDateRange(month: string, throughDate?: string): { startDate: string; endDate: string } {
+  const monthRange = monthDateRange(month)
+  const endDate = throughDate && DATE.test(throughDate) && throughDate < monthRange.endDate
+    ? throughDate
+    : monthRange.endDate
+  const start = new Date(`${monthRange.startDate}T00:00:00Z`)
+  start.setUTCDate(start.getUTCDate() - 13)
+  return { startDate: start.toISOString().slice(0, 10), endDate }
 }
 
 export async function syncGoogleAds(input: GoogleAdsSyncRequest): Promise<GoogleAdsSyncResult> {

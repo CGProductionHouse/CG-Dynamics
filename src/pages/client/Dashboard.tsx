@@ -45,7 +45,6 @@ export default function Dashboard() {
   const [report, setReport] = useState<ClientReportWithPosts | null>(null)
   const [manualMetrics, setManualMetrics] = useState<ReportManualMetric[]>([])
   const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
-  const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
   const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
   const [facts, setFacts] = useState<PlatformFact[]>([])
@@ -119,8 +118,6 @@ export default function Dashboard() {
       && selectedReportId === requestedReportId
 
     if (!requestedReportId || !requestedClientId || !requestedProfileId) {
-      setReport(null)
-      setReportLoading(false)
       return () => { reportRequestRef.current += 1 }
     }
     const reportId = requestedReportId
@@ -129,7 +126,6 @@ export default function Dashboard() {
       setReport(null)
       setManualMetrics([])
       setGoogleAds(null)
-      setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
       setFacts([])
@@ -148,12 +144,9 @@ export default function Dashboard() {
         if (data) {
           const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
-          const [metricsResult, googleAdsResult, previousGoogleAdsResult, factsResult] = await Promise.all([
+          const [metricsResult, googleAdsResult, factsResult] = await Promise.all([
             listClientReportManualMetrics(data.id),
             loadGoogleAdsDashboard(data.id, currentMonth),
-            previousMonth
-              ? loadGoogleAdsDashboard(data.id, previousMonth)
-              : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
             loadReportPlatformFacts(data.id, currentMonth, previousMonth),
           ])
           if (!requestIsCurrent()) return
@@ -167,9 +160,8 @@ export default function Dashboard() {
           }
           setManualMetrics(metricsResult.data)
           setGoogleAds(googleAdsResult.data)
-          setPreviousGoogleAds(previousGoogleAdsResult.data)
           setGoogleAdsState(googleAdsResult.state)
-          setGoogleAdsError(googleAdsResult.error ?? previousGoogleAdsResult.error)
+          setGoogleAdsError(googleAdsResult.error)
           setFacts(factsResult.facts)
           setPreviousFacts(factsResult.previousFacts)
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
@@ -257,7 +249,6 @@ export default function Dashboard() {
           client={client}
           manualMetrics={manualMetrics}
           googleAds={googleAds}
-          previousGoogleAds={previousGoogleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
           facts={facts}

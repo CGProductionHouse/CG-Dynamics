@@ -1,3 +1,5 @@
+import { GOOGLE_ADS_NATIVE_FIELDS } from './google-ads-native.ts'
+
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 const MAX_RANGE_DAYS = 366
 
@@ -44,9 +46,11 @@ export function googleAdsCampaignQuery(startDate: string, endDate: string): stri
       campaign.name,
       campaign.status,
       campaign.advertising_channel_type,
+      ${GOOGLE_ADS_NATIVE_FIELDS},
       segments.date,
       metrics.impressions,
       metrics.clicks,
+      metrics.interactions,
       metrics.cost_micros,
       metrics.conversions,
       metrics.conversions_value

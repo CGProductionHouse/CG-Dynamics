@@ -9,13 +9,16 @@ import {
   deactivateGoogleAdsCampaignLink,
   deactivateGoogleAdsDedicatedLink,
   deriveGoogleAdsCampaignReview,
+  formatGoogleAdsCampaignBudget,
   formatGoogleAdsCustomerId,
   getGoogleAdsWorkspace,
+  googleAdsTrackingSyncDateRange,
   isGoogleAdsAccountReady,
   listGoogleAdsCampaigns,
   monthDateRange,
   saveGoogleAdsCampaignMappings,
   saveGoogleAdsDedicatedLink,
+  saveGoogleAdsMonthlyTarget,
   setGoogleAdsAccountMode,
   syncGoogleAds,
   validateGoogleAdsModeCoexistence,
@@ -74,6 +77,12 @@ export default function GoogleAdsIntegrationPage() {
   const [syncMonth, setSyncMonth] = useState(currentMonth())
   const [syncAccountIds, setSyncAccountIds] = useState<Set<string>>(new Set())
   const [syncResult, setSyncResult] = useState<{ data: GoogleAdsSyncResult; month: string } | null>(null)
+  const [targetClientId, setTargetClientId] = useState('')
+  const [targetMonth, setTargetMonth] = useState(currentMonth())
+  const [targetAmount, setTargetAmount] = useState('')
+  const [targetCurrency, setTargetCurrency] = useState('ZAR')
+  const [targetApprovalNote, setTargetApprovalNote] = useState('')
+  const [targetApprovedAt, setTargetApprovedAt] = useState(new Date().toISOString().slice(0, 16))
 
   async function load(silent = false) {
     try {
@@ -146,16 +155,36 @@ export default function GoogleAdsIntegrationPage() {
 
   function runSync() {
     void runAction('sync', async () => {
-      const range = monthDateRange(syncMonth)
       const today = new Date().toISOString().slice(0, 10)
+      const monthRange = monthDateRange(syncMonth)
+      const range = googleAdsTrackingSyncDateRange(syncMonth, monthRange.endDate > today ? today : monthRange.endDate)
       const result = await syncGoogleAds({
         accountIds: [...syncAccountIds],
         startDate: range.startDate,
-        endDate: range.endDate > today ? today : range.endDate,
+        endDate: range.endDate,
       })
       setSyncResult({ data: result, month: syncMonth })
       await load(true)
       return result.ok ? 'Google Ads sync completed.' : 'Sync completed with errors.'
+    })
+  }
+
+  function saveMonthlyTarget() {
+    const existing = workspace?.monthlyTargets.find(target => target.clientId === targetClientId && target.month === `${targetMonth}-01`)
+    void runAction('target', async () => {
+      await saveGoogleAdsMonthlyTarget({
+        clientId: targetClientId,
+        month: targetMonth,
+        amount: Number(targetAmount),
+        currencyCode: targetCurrency,
+        approvalNote: targetApprovalNote,
+        approvedAt: new Date(targetApprovedAt).toISOString(),
+        expectedVersion: existing?.version,
+      })
+      await load(true)
+      setTargetAmount('')
+      setTargetApprovalNote('')
+      return `Monthly target saved for ${formatMonth(targetMonth)}. This does not change Google Ads.`
     })
   }
 
@@ -201,7 +230,32 @@ export default function GoogleAdsIntegrationPage() {
         </PremiumCard>
 
         <PremiumCard>
-          <PremiumCardHeader eyebrow="Sync" title="Sync selected accounts once" subtitle="One request syncs the selected canonical accounts and reports mapped and unmapped campaign counts." />
+          <PremiumCardHeader
+            eyebrow="CG planning authority"
+            title="Client-approved monthly targets"
+            subtitle="These dated targets drive pacing and projections in CG Dynamics. They are never Google provider budgets and saving one never changes Google Ads."
+          />
+          <div className="grid gap-4 lg:grid-cols-6 lg:items-end">
+            <Field label="Client"><ClientSearch clients={clients} value={targetClientId} onChange={setTargetClientId} /></Field>
+            <Field label="Month"><input className={INPUT_CLASS} type="month" value={targetMonth} onChange={event => setTargetMonth(event.target.value)} /></Field>
+            <Field label="Approved target"><input className={INPUT_CLASS} type="number" min="0.01" step="0.01" value={targetAmount} onChange={event => setTargetAmount(event.target.value)} /></Field>
+            <Field label="Currency"><input className={`${INPUT_CLASS} uppercase`} inputMode="text" maxLength={3} value={targetCurrency} onChange={event => setTargetCurrency(event.target.value.toUpperCase())} /></Field>
+            <Field label="Approval date"><input className={INPUT_CLASS} type="datetime-local" value={targetApprovedAt} onChange={event => setTargetApprovedAt(event.target.value)} /></Field>
+            <ActionButton loading={busy === 'target'} disabled={!targetClientId || !targetMonth || Number(targetAmount) <= 0 || !/^[A-Z]{3}$/.test(targetCurrency) || !targetApprovalNote.trim() || !targetApprovedAt} onClick={saveMonthlyTarget}>Save target</ActionButton>
+          </div>
+          <div className="mt-4"><Field label="Approval evidence"><input className={INPUT_CLASS} maxLength={500} placeholder="Who approved this target and where was approval recorded?" value={targetApprovalNote} onChange={event => setTargetApprovalNote(event.target.value)} /></Field></div>
+          {workspace?.monthlyTargets.length ? (
+            <div className="mt-5 overflow-x-auto rounded-lg border border-white/8">
+              <table className="min-w-[720px] w-full text-left text-sm">
+                <thead className="bg-black/30 text-xs uppercase tracking-wide text-brand-primary"><tr><th className="px-3 py-3">Client</th><th className="px-3 py-3">Month</th><th className="px-3 py-3">CG target</th><th className="px-3 py-3">Approval</th></tr></thead>
+                <tbody className="divide-y divide-white/8">{workspace.monthlyTargets.map(target => <tr key={`${target.clientId}:${target.month}`}><td className="px-3 py-3 text-white">{clientNames.get(target.clientId) ?? 'Unknown client'}</td><td className="px-3 py-3 text-brand-primary">{formatMonth(target.month.slice(0, 7))}</td><td className="px-3 py-3 text-white">{new Intl.NumberFormat('en-ZA', { style: 'currency', currency: target.currencyCode }).format(target.amountMicros / 1_000_000)}</td><td className="px-3 py-3 text-brand-primary">{target.approvalNote} · {formatDateTime(target.approvedAt)}</td></tr>)}</tbody>
+              </table>
+            </div>
+          ) : <p className="mt-4 text-sm text-brand-primary">No dated monthly targets are stored yet.</p>}
+        </PremiumCard>
+
+        <PremiumCard>
+          <PremiumCardHeader eyebrow="Sync" title="Sync selected accounts once" subtitle="One request syncs the selected month plus the prior 13 days needed for two equal seven-day trend windows." />
           <div className="grid gap-4 md:grid-cols-[220px_1fr_auto] md:items-end">
             <Field label="Month"><input className={INPUT_CLASS} type="month" max={currentMonth()} value={syncMonth} onChange={event => setSyncMonth(event.target.value)} /></Field>
             <fieldset>
@@ -325,10 +379,10 @@ function AccountCard({ account, workspace, clients, busy, clientNames, onModeCha
           <p className="mt-3 text-xs text-brand-primary">Paused and removed campaigns remain selectable so historical reporting mappings can be maintained.</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><input className={INPUT_CLASS} placeholder="Search campaigns" value={search} onChange={event => setSearch(event.target.value)} /><select className={INPUT_CLASS} value={status} onChange={event => setStatus(event.target.value)}><option value="all">All statuses</option>{statuses.map(value => <option key={value}>{value}</option>)}</select><select className={INPUT_CLASS} value={channel} onChange={event => setChannel(event.target.value)}><option value="all">All channels</option>{channels.map(value => <option key={value}>{value}</option>)}</select><select className={INPUT_CLASS} value={mappingFilter} onChange={event => setMappingFilter(event.target.value as typeof mappingFilter)}><option value="all">Mapped and unmapped</option><option value="mapped">Mapped</option><option value="unmapped">Unmapped</option></select></div>
           <div className="mt-3 flex flex-col gap-3 rounded-lg border border-white/8 bg-black/20 p-3 sm:flex-row sm:items-end"><div className="flex-1"><Field label="Assign selected to client"><ClientSearch clients={clients} value={bulkClientId} onChange={setBulkClientId} /></Field></div><ActionButton variant="outline" disabled={!bulkClientId || selected.size === 0} onClick={() => setDraftClients(current => { const next = { ...current }; for (const id of selected) next[id] = bulkClientId; return next })}>Apply to selection</ActionButton><ActionButton disabled={selected.size === 0} loading={busy === `campaigns:${account.id}`} onClick={saveSelected}>Confirm selected mappings</ActionButton></div>
-          <div className="mt-3 overflow-x-auto rounded-lg border border-white/8"><table className="min-w-[980px] w-full divide-y divide-white/8 text-left text-sm"><thead className="bg-black/30 text-xs uppercase tracking-wide text-brand-primary"><tr><th className="px-3 py-3">Select</th><th className="px-3 py-3">Campaign</th><th className="px-3 py-3">Status</th><th className="px-3 py-3">Channel</th><th className="px-3 py-3">Suggestion</th><th className="px-3 py-3">Client mapping</th><th className="px-3 py-3">Action</th></tr></thead><tbody className="divide-y divide-white/8">{visibleCampaigns.map(campaign => {
+          <div className="mt-3 overflow-x-auto rounded-lg border border-white/8"><table className="min-w-[1120px] w-full divide-y divide-white/8 text-left text-sm"><thead className="bg-black/30 text-xs uppercase tracking-wide text-brand-primary"><tr><th className="px-3 py-3">Select</th><th className="px-3 py-3">Campaign</th><th className="px-3 py-3">Status</th><th className="px-3 py-3">Channel</th><th className="px-3 py-3">Budget setting</th><th className="px-3 py-3">Suggestion</th><th className="px-3 py-3">Client mapping</th><th className="px-3 py-3">Action</th></tr></thead><tbody className="divide-y divide-white/8">{visibleCampaigns.map(campaign => {
             const link = campaignLinks.find(candidate => candidate.campaignId === campaign.campaignId)
             const suggestion = suggestions[campaign.campaignId]
-            return <tr key={campaign.campaignId}><td className="px-3 py-3"><input type="checkbox" checked={selected.has(campaign.campaignId)} onChange={() => setSelected(current => { const next = new Set(current); if (next.has(campaign.campaignId)) next.delete(campaign.campaignId); else next.add(campaign.campaignId); return next })} /></td><td className="px-3 py-3"><span className="font-medium text-white">{campaign.name}</span><br /><span className="text-xs text-brand-primary">{campaign.campaignId}</span></td><td className="px-3 py-3"><CampaignStatus status={campaign.status} /></td><td className="px-3 py-3 text-brand-primary">{campaign.channelType}</td><td className="px-3 py-3"><Suggestion suggestion={suggestion} /></td><td className="min-w-60 px-3 py-3">{link && <p className="mb-2 text-xs text-brand-teal">Current mapping: {clientNames.get(link.clientId) ?? 'Unknown client'}</p>}<ClientSearch clients={clients} value={draftClients[campaign.campaignId] ?? ''} onChange={clientId => { setDraftClients(current => ({ ...current, [campaign.campaignId]: clientId })); setSelected(current => new Set(current).add(campaign.campaignId)) }} /></td><td className="px-3 py-3">{link && <ActionButton size="sm" variant="danger" loading={busy === `deactivate-campaign:${link.id}`} onClick={() => { if (!window.confirm(`Deactivate the mapping for ${campaign.name}?`)) return; void onRunAction(`deactivate-campaign:${link.id}`, async () => { await deactivateGoogleAdsCampaignLink(account.id, link.id); await onReload(); setCampaigns(null); return 'Campaign mapping deactivated.' }) }}>Deactivate</ActionButton>}</td></tr>
+            return <tr key={campaign.campaignId}><td className="px-3 py-3"><input type="checkbox" checked={selected.has(campaign.campaignId)} onChange={() => setSelected(current => { const next = new Set(current); if (next.has(campaign.campaignId)) next.delete(campaign.campaignId); else next.add(campaign.campaignId); return next })} /></td><td className="px-3 py-3"><span className="font-medium text-white">{campaign.name}</span><br /><span className="text-xs text-brand-primary">{campaign.campaignId}</span></td><td className="px-3 py-3"><CampaignStatus status={campaign.status} /></td><td className="px-3 py-3 text-brand-primary">{campaign.channelType}</td><td className="px-3 py-3 text-brand-primary"><span className="text-white">{formatGoogleAdsCampaignBudget(campaign)}</span>{campaign.nativeSettings?.primaryStatus && <><br /><span className="text-xs">Serving: {campaign.nativeSettings.primaryStatus.toLowerCase().replaceAll('_', ' ')}</span></>}</td><td className="px-3 py-3"><Suggestion suggestion={suggestion} /></td><td className="min-w-60 px-3 py-3">{link && <p className="mb-2 text-xs text-brand-teal">Current mapping: {clientNames.get(link.clientId) ?? 'Unknown client'}</p>}<ClientSearch clients={clients} value={draftClients[campaign.campaignId] ?? ''} onChange={clientId => { setDraftClients(current => ({ ...current, [campaign.campaignId]: clientId })); setSelected(current => new Set(current).add(campaign.campaignId)) }} /></td><td className="px-3 py-3">{link && <ActionButton size="sm" variant="danger" loading={busy === `deactivate-campaign:${link.id}`} onClick={() => { if (!window.confirm(`Deactivate the mapping for ${campaign.name}?`)) return; void onRunAction(`deactivate-campaign:${link.id}`, async () => { await deactivateGoogleAdsCampaignLink(account.id, link.id); await onReload(); setCampaigns(null); return 'Campaign mapping deactivated.' }) }}>Deactivate</ActionButton>}</td></tr>
           })}</tbody></table>{visibleCampaigns.length === 0 && <p className="p-4 text-sm text-brand-primary">No campaigns match these filters.</p>}</div>
         </>}
       </div>}
