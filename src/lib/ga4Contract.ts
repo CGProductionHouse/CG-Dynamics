@@ -1,4 +1,4 @@
-// ga4-contract.ts — GA4 Data API reporting contract for the Google Ads website-after-the-click view (#335).
+// src/lib/ga4Contract.ts — app copy of supabase/functions/_shared/ga4-contract.ts (kept in sync; drift-guarded by tests).
 // Pure and import-free so it is unit-tested without Deno, matching google-ads-policy.ts.
 //
 // WHY A CONTRACT MODULE
