@@ -40,6 +40,10 @@ import {
   STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
 } from './coexistencePolicy.ts'
 import {
+  buildDailyUpdateContract,
+  ASSISTANT_PRESENTATION_VERSION,
+} from './assistantPresentationPolicy.ts'
+import {
   CALENDAR_MICROSOFT_FIELDS,
   PLANNER_MICROSOFT_FIELDS,
   summarizeSyncHealth,
@@ -1778,8 +1782,26 @@ const handleUpdateMyPreferences: ToolHandler = async (staff, input) => {
 }
 
 const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
+  const staffAssistantPolicy = buildStaffAssistantPolicy(staff.contextKind)
+  const dailyUpdateContract = buildDailyUpdateContract(staff.fullName)
+  const policyMeta = {
+    policy_version: STAFF_ASSISTANT_POLICY_VERSION,
+    presentation_version: ASSISTANT_PRESENTATION_VERSION,
+    effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
+    context_kind: staff.contextKind,
+    retrieved_at: new Date().toISOString(),
+  }
+  const identity = { profile_id: staff.profileId, full_name: staff.fullName, role: staff.role, is_active: staff.isActive, context_kind: staff.contextKind }
+
   const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
-  if (!hasTable) return { error: 'Staff assistant workspace not yet available. Complete #305 setup first.' }
+  if (!hasTable) return {
+    staff_assistant_policy: staffAssistantPolicy,
+    daily_update_contract: dailyUpdateContract,
+    policy_meta: policyMeta,
+    identity,
+    assistant_profile: null,
+    error: 'Staff assistant workspace not yet available. Complete #305 setup first.',
+  }
 
   const { data: profile, error: profileError } = await staff.supabase
     .from('staff_assistant_profiles')
@@ -1787,7 +1809,14 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
     .eq('profile_id', staff.profileId)
     .maybeSingle()
 
-  if (profileError) return { error: profileError.message }
+  if (profileError) return {
+    staff_assistant_policy: staffAssistantPolicy,
+    daily_update_contract: dailyUpdateContract,
+    policy_meta: policyMeta,
+    identity,
+    assistant_profile: null,
+    error: `Staff profile unavailable: ${profileError.message}`,
+  }
 
   const scopes = profile?.approved_access_scope ?? []
   const capabilities = filterCapabilitiesByScope(scopes)
@@ -1807,20 +1836,9 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
   return {
     // #325: the canonical shared runtime policy. This OVERRIDES any stale hand-maintained
     // ChatGPT Project Instruction wording (e.g. "Dynamics is fallback-only").
-    staff_assistant_policy: buildStaffAssistantPolicy(staff.contextKind),
-    policy_meta: {
-      policy_version: STAFF_ASSISTANT_POLICY_VERSION,
-      effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
-      context_kind: staff.contextKind,
-      retrieved_at: new Date().toISOString(),
-    },
-    identity: {
-      profile_id: staff.profileId,
-      full_name: staff.fullName,
-      role: staff.role,
-      is_active: staff.isActive,
-      context_kind: staff.contextKind,
-    },
+    staff_assistant_policy: staffAssistantPolicy,
+    policy_meta: policyMeta,
+    identity,
     assistant_profile: profile ? {
       responsibilities: profile.responsibilities,
       recurring_duties: profile.recurring_duties,
@@ -1871,63 +1889,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       expectedConnectedInCompanyWorkspace: cap.expectedConnectedInCompanyWorkspace,
       sessionMissingGuidance: cap.sessionMissingGuidance,
     })),
-    daily_update_contract: {
-      presentation: {
-        morning_structure: [
-          '1. PERSONALISED ONE-LINE GREETING — unique each morning, derived from staff profile tone/humour preferences.',
-          '2. COMPACT DAY SUMMARY — one line: key focus, any blockers, overall shape of the day.',
-          '3. TODAY TIMELINE TABLE — left-aligned narrow Time column, NOW anchor. Only items with actual times. No redundant narration.',
-          '4. WORK QUEUE TABLE — columns: Status | Task | Client | Next Move. Status labels: NOW, NEXT, WAITING, LATER, DONE (only if completed today). One next-move per row.',
-          '5. OPTIONAL BLOCKER/FOLLOW-UP — one line only if something is stuck or needs attention.',
-          '6. SHORT ACTION PROMPT — one line, action-oriented, tells staff exactly what to do next.',
-        ],
-        evening_structure: [
-          '1. ONE-LINE CLOSING — acknowledge what got done.',
-          '2. DONE TODAY — bullet list of completed items.',
-          '3. STILL OPEN / CARRY FORWARD — items not yet done.',
-          '4. TOMORROW TIMELINE — if known, brief preview.',
-          '5. PREP / FOLLOW-UP — only where useful.',
-        ],
-        rules: [
-          'LOW-NOISE: no essays, no repeated calendar/task narration, no generic motivational filler.',
-          'PERSONALITY belongs mainly in greeting/closing. The work body stays tight and operational.',
-          'LEFT-ALIGNED TIME SPINE in Today timeline. Use NOW anchor for current time.',
-          'DYNAMICS-ALIGNED TASK WORDING — use exact task titles, not invented summaries.',
-          'SHOW-MORE BEHAVIOUR: collapse low-priority items behind a brief summary line.',
-          'Single next-move per row in Work Queue. No multi-paragraph explanations.',
-        ],
-      },
-      personality: {
-        source: 'Derived from staff profile: working_preferences, output_preferences, repeated_corrections, responsibilities, recurring_duties. Do not hardcode tone across staff.',
-        greeting_rules: [
-          'One short opening sentence only.',
-          'Unique each morning; do not repeat stock lines mechanically.',
-          'Learn from response patterns, corrections, humour tolerance and preferred tone over time.',
-          'Humour allowed when it fits the individual; never repetitive, forced or generic.',
-          'Humour must not create factual noise or distract from the workday.',
-        ],
-        staff_tones: {
-          sydney: 'confident, punchy, women-empowerment/boss-energy, playful attitude without cringe.',
-          franco: 'dry, calm, reassuring, stress-reducing; help him feel supported and less alone; compensate gently for forgetfulness without sounding patronising.',
-          amonique: 'warm, patient, confidence-building, slightly more explanatory because she is hesitant with AI/tech; she has a strong sense of humour, so a well-judged joke can work very well; avoid repetition.',
-          ca: 'sharp, concise, high-trust, proactive.',
-          ger_marie: 'calm, creative, supportive.',
-          kgomotso: 'practical, encouraging, straightforward.',
-        },
-        runtime_rule: 'The presentation contract is shared company behaviour; the personality layer is exact-person behaviour. Both must survive a completely empty ChatGPT Project when the user says Brief yourself from my CG Assistant profile.',
-      },
-      interaction_model: {
-        natural_replies: [
-          '"done" — mark task complete via update_task.',
-          '"50%" — update task progress with note.',
-          '"waiting on client" — set status to WAITING, add note.',
-          '"move to Friday" — update due_date.',
-          '"add note" — append comment to task.',
-          '"follow up Monday" — set follow_up date.',
-        ],
-        rule: 'Natural staff replies should update canonical live task/lead state through available tools, not only live in chat.',
-      },
-    },
+    daily_update_contract: dailyUpdateContract,
     mcp_tools: mcpTools,
     operating_rules: [
       'CG Dynamics is the durable source of truth. Retrieve current personal operating context before operational work.',
@@ -1948,7 +1910,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'Attach governed collateral by Drive asset key — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
       'DAILY UPDATE CONTRACT: morning = greeting → summary → Today timeline → Work Queue → optional blocker → action prompt. Evening = closing → Done Today → Still Open → Tomorrow → Prep.',
       'PERSONALITY: derived from staff profile (working_preferences, output_preferences, repeated_corrections). Never hardcode tone across staff. Personality belongs in greeting/closing; work body stays operational.',
-      'NATURAL REPLIES: "done", "50%", "waiting on client", "move to Friday", "add note", "follow up Monday" should update canonical task/lead state through available tools.',
+      'NATURAL TASK REPLIES: during coexistence, "done", "50%", "waiting on client", "move to Friday", "add note" and "follow up Monday" update the exact live Teams/Planner task first, then run_microsoft_sync refreshes Dynamics. If reconciliation is delayed, report DYNAMICS SYNC PENDING; never duplicate the Microsoft-backed task.',
       'CONTENT-RUN CLOSEOUT: When a staff member had client shoots/content runs that day, use get_content_run_plan to retrieve the canonical shot list, then collect per-client field updates, reconcile planned vs captured items, record missed/cancelled items with reasons, capture field notes, flag reshoots, verify OneDrive upload status and write approved updates to Dynamics via close_content_run. Never ask staff to recreate a plan already in Dynamics. Never mark closeout complete if upload is missing/partial/unverified.',
       'ONEDRIVE UPLOAD GATE: For every content run, use verify_content_run_upload to inspect the exact mapped client/content-run folder. If footage is missing/partial/unverified, keep the item unresolved and give the staff member the exact next action. After staff approval, use update_closeout_upload_status; it performs a fresh authorised inspection and persists only that evidence. Staff self-report alone always remains unverified.',
     ],

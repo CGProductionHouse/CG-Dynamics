@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
 
-let server, policy, msf, cgtime, ctx, catalog
+let server, policy, presentation, msf, cgtime, ctx, catalog
 before(async () => {
   server = await createServer({
     root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom',
@@ -11,6 +11,7 @@ before(async () => {
   })
   const load = p => server.ssrLoadModule(`/supabase/functions/cg-dynamics-mcp/${p}`)
   policy = await load('coexistencePolicy.ts')
+  presentation = await load('assistantPresentationPolicy.ts')
   msf = await load('microsoftSourceFields.ts')
   cgtime = await load('cgTime.ts')
   ctx = await load('projectContext.ts')
@@ -20,6 +21,7 @@ after(async () => { await server?.close() })
 
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const INDEX = read('../supabase/functions/cg-dynamics-mcp/index.ts')
+const RENDER_EXAMPLES = read('../docs/ai-workforce/STAFF-DAILY-UPDATE-RENDER-EXAMPLES.md')
 
 // ── 1. Microsoft sync health ────────────────────────────────────────────────
 
@@ -190,12 +192,92 @@ test('company_admin gets the admin section; staff and client do not', () => {
 })
 
 test('bootstrap returns the canonical policy, including when the workspace table is absent', () => {
-  assert.equal((INDEX.match(/buildStaffAssistantPolicy\(staff\.contextKind\)/g) ?? []).length, 2,
-    'policy returned on both the normal and missing-workspace bootstrap paths')
-  assert.match(INDEX, /staff_assistant_policy: buildStaffAssistantPolicy/)
-  assert.match(INDEX, /policy_version: STAFF_ASSISTANT_POLICY_VERSION/)
-  assert.match(INDEX, /effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT/)
-  assert.match(INDEX, /context_kind: staff\.contextKind/)
+  const bootstrap = INDEX.slice(INDEX.indexOf('const handleGetMyAssistantBootstrap'), INDEX.indexOf('const handleGetMyRecurringTasks'))
+  assert.equal((bootstrap.match(/buildStaffAssistantPolicy\(staff\.contextKind\)/g) ?? []).length, 1,
+    'policy is built once centrally for every bootstrap outcome')
+  assert.equal((bootstrap.match(/buildDailyUpdateContract\(staff\.fullName\)/g) ?? []).length, 1,
+    'presentation is built once centrally for every bootstrap outcome')
+  assert.ok((bootstrap.match(/daily_update_contract: dailyUpdateContract/g) ?? []).length >= 3,
+    'presentation survives missing workspace, profile read failure and normal profile reads')
+  assert.ok((bootstrap.match(/staff_assistant_policy: staffAssistantPolicy/g) ?? []).length >= 3,
+    'runtime policy survives missing workspace, profile read failure and normal profile reads')
+  assert.match(bootstrap, /policy_version: STAFF_ASSISTANT_POLICY_VERSION/)
+  assert.match(bootstrap, /effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT/)
+  assert.match(bootstrap, /context_kind: staff\.contextKind/)
+  assert.match(bootstrap, /presentation_version: ASSISTANT_PRESENTATION_VERSION/)
+})
+
+test('central presentation contract uses CA-approved morning and EOD structures', () => {
+  const c = presentation.buildDailyUpdateContract('Sydney Oosthuizen')
+  assert.equal(c.contract_version, presentation.ASSISTANT_PRESENTATION_VERSION)
+  assert.match(c.applies_to, /all five scheduled staff tasks/)
+  assert.match(c.invocation_rule, /every scheduled.*morning\/EOD/i)
+  const morning = c.presentation.morning_structure.join(' ')
+  const evening = c.presentation.evening_structure.join(' ')
+  assert.match(morning, /Time \| Schedule \| Context \| Action/)
+  assert.match(morning, /State \| Task \| Next move \| Due/)
+  for (const state of ['NOW', 'NEXT', 'WAITING', 'LATER', 'DONE']) assert.match(morning, new RegExp(state))
+  for (const section of ['DONE TODAY', 'STILL OPEN', 'TOMORROW', 'BLOCKERS / PREP']) {
+    assert.match(evening, new RegExp(section))
+  }
+})
+
+test('morning semantic contract cannot collapse into a shallow pretty table', () => {
+  const c = presentation.buildDailyUpdateContract('Sydney Oosthuizen')
+  const coverage = c.presentation.required_coverage.join(' ')
+  for (const required of [
+    /every real appointment and Content Run/,
+    /location context/,
+    /travel, leave time and preparation/,
+    /usable gaps/,
+    /no due date/,
+    /done, active, waiting or blocked/,
+    /readiness and planned deliverables/,
+    /preparation action today/,
+    /completed, cancelled and historical staff tasks/,
+    /durable-ID matching/,
+  ]) assert.match(coverage, required)
+})
+
+test('Franco morning and EOD contract preserves exact content-run ownership boundaries', () => {
+  const franco = presentation.buildDailyUpdateContract('Franco Lessing')
+  const rules = franco.exact_staff_rules.join(' ')
+  for (const required of [
+    /Franco-owned active work.*not due today/,
+    /find_content_runs/,
+    /canonical Content Guideline/,
+    /real-world shoot facts/,
+    /Never ask him to choose record IDs/,
+    /link_content_run_deliverables/,
+    /same-client/,
+    /VERIFIED, PARTIAL, MISSING or UNVERIFIED/,
+    /self-report never upgrades upload evidence/,
+  ]) assert.match(rules, required)
+  assert.deepEqual(presentation.buildDailyUpdateContract('Sydney Oosthuizen').exact_staff_rules, [])
+})
+
+test('Amonique contract requires a real task and capacity check', () => {
+  const rules = presentation.buildDailyUpdateContract('Amonique Fourie').exact_staff_rules.join(' ')
+  assert.match(rules, /Amonique-owned active tasks/)
+  assert.match(rules, /capacity from real calendar\/work evidence/)
+})
+
+test('natural task updates keep temporary Teams/Planner-first authority', () => {
+  const c = presentation.buildDailyUpdateContract('Franco Lessing')
+  const sequence = c.interaction_model.task_write_sequence.join(' ')
+  assert.match(sequence, /first to the exact live Teams\/Planner task/)
+  assert.match(sequence, /run_microsoft_sync/)
+  assert.match(sequence, /existing durable sync engine/)
+  assert.match(sequence, /Do not directly write a second Microsoft-backed task state into Dynamics/)
+  assert.match(sequence, /DYNAMICS SYNC PENDING or PARTIAL SYNC/)
+})
+
+test('reviewed normal-user render examples match the live contract, including Franco EOD', () => {
+  assert.match(RENDER_EXAMPLES, /\| Time \| Schedule \| Context \| Action \|/)
+  assert.match(RENDER_EXAMPLES, /\| State \| Task \| Next move \| Due \|/)
+  assert.match(RENDER_EXAMPLES, /## Franco — EOD Update/)
+  assert.match(RENDER_EXAMPLES, /OneDrive upload — PARTIAL/)
+  assert.match(RENDER_EXAMPLES, /Assistant: finish exact same-client deliverable linkage; Franco does not choose IDs/)
 })
 
 // ── 5. SAST operating-day defect ────────────────────────────────────────────
