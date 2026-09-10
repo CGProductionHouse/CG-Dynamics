@@ -47,6 +47,7 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
   assert.deepEqual(reads, [
     'resolve_project_context',
     'get_microsoft_sync_status', 'list_company_tasks', 'list_company_recurring_tasks',
+    'get_provider_health', 'find_content_runs',
     'get_my_day', 'list_my_tasks', 'get_task', 'list_my_calendar',
     'list_client_schedule', 'get_client_context', 'list_my_leads', 'get_lead',
     'get_my_profile', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
@@ -54,13 +55,33 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
   ])
 })
 
-test('every mutation is non-destructive, idempotent and bound to a canonical action contract', () => {
-  const writes = catalog.CG_DYNAMICS_MCP_TOOLS.filter(tool => !tool.annotations.readOnlyHint)
+// #325: two classes of non-read tool.
+//  - RECORD MUTATIONS write Dynamics rows and are enforced by the connector's
+//    idempotency_key gate (WRITE_TOOLS in index.ts).
+//  - ORCHESTRATION actions mutate nothing directly; they drive an EXISTING durable engine
+//    (microsoft-transition-sync, provider sync) which carries its own idempotency, and are
+//    resumed by their own job token rather than a per-call key.
+const ORCHESTRATION_TOOLS = new Set(['run_microsoft_sync', 'run_provider_sync'])
+
+test('every record mutation is non-destructive, idempotent and bound to a canonical action contract', () => {
+  const writes = catalog.CG_DYNAMICS_MCP_TOOLS
+    .filter(tool => !tool.annotations.readOnlyHint && !ORCHESTRATION_TOOLS.has(tool.name))
   assert.ok(writes.length > 0)
   for (const tool of writes) {
     assert.equal(tool.annotations.idempotentHint, true)
-    assert.ok(tool.inputSchema.required.includes('idempotency_key'))
+    assert.ok(tool.inputSchema.required.includes('idempotency_key'), `${tool.name} requires idempotency_key`)
     assert.doesNotMatch(tool.canonicalContract, /table query|raw sql/i)
+  }
+})
+
+test('orchestration actions delegate to an existing durable engine without claiming retry idempotency', () => {
+  for (const name of ORCHESTRATION_TOOLS) {
+    const tool = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === name)
+    assert.ok(tool, `${name} exists`)
+    assert.equal(tool.annotations.idempotentHint, undefined, `${name} must not invite a blind retry`)
+    assert.equal(tool.annotations.destructiveHint, false)
+    // Must point at the pre-existing engine, never a second one built inside the connector.
+    assert.match(tool.canonicalContract, /microsoft-transition-sync|meta-sync|google-ads-sync|tiktok-sync/)
   }
 })
 
@@ -75,13 +96,13 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 28 tools: 18 read + 10 write', () => {
+test('catalog contains exactly 34 tools: 20 read + 14 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 28)
+  assert.equal(tools.length, 34)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 18)
-  assert.equal(writes.length, 10)
+  assert.equal(reads.length, 20)
+  assert.equal(writes.length, 14)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {

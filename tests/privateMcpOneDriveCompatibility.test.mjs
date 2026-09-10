@@ -24,7 +24,16 @@ test('verification consumes only #307 read helpers and exposes no OneDrive mutat
   assert.match(mcp, /adapter\.getItem\(/)
   assert.match(mcp, /inspectExactOneDriveFolder\(\s*adapter,/)
   assert.doesNotMatch(mcp, /adapter\.(?:createUploadSession|ensureCanonicalChildFolder|verifyDriveItem|downloadFile)\(/)
-  assert.doesNotMatch(mcp, /method:\s*['"](?:POST|PUT|PATCH|DELETE)['"]/)
+  // #325: the connector now delegates to SIBLING Supabase Edge Functions (reconciliation and
+  // provider sync), so a blanket "no POST" check no longer expresses the real rule. The rule
+  // is: no mutating HTTP to Microsoft Graph / OneDrive, and every outbound call must target
+  // an internal /functions/v1/ endpoint.
+  const outbound = [...mcp.matchAll(/fetch\(([^\n]*)/g)].map(m => m[1])
+  for (const call of outbound) {
+    assert.doesNotMatch(call, /graph\.microsoft\.com|onedrive|sharepoint/i, 'no direct Graph/OneDrive HTTP from the MCP')
+  }
+  assert.doesNotMatch(mcp, /fetch\(`?https:\/\/(?!\$)/, 'no hardcoded external host')
+  assert.match(mcp, /functions\/v1\/\$\{fn\}/, 'outbound delegation targets internal Edge Functions only')
 })
 
 test('#307 adapter reads exact durable IDs with paginated Graph children and fails closed', () => {

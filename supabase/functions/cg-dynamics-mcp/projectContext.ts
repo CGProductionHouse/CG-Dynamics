@@ -103,6 +103,9 @@ export const STAFF_SUBJECT_TOOLS: readonly string[] = [
   'create_task', 'update_task', 'update_lead', 'add_lead_research', 'get_my_profile',
   'update_my_preferences', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
   'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity',
+  // Internal operational/content actions. They may run for an exact staff subject or an
+  // explicit company-admin context, but never inside a client Project.
+  'find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event',
 ]
 
 /**
@@ -123,6 +126,11 @@ export const CLIENT_SCOPED_TOOLS: readonly string[] = [
 export const COMPANY_ADMIN_TOOLS: readonly string[] = [
   'list_company_tasks',
   'list_company_recurring_tasks',
+  // #325 coexistence execution + Morning Ops surfaces. These act company-wide (or invoke a
+  // company-wide provider/reconciliation engine), so they require the explicit admin context.
+  'run_microsoft_sync',
+  'get_provider_health',
+  'run_provider_sync',
 ]
 
 /** Context-resolution helper; runs before any operating context exists. */

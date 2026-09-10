@@ -29,6 +29,12 @@ import {
 } from './oauthDiscovery.ts'
 import { cgDate, cgDatePlusDays, CG_TIMEZONE } from './cgTime.ts'
 import {
+  classifyOneDriveReadiness,
+  gradeSyncRun,
+  planGuidelineVideoLinks,
+  summarizeProviderHealth,
+} from './opsActions.ts'
+import {
   buildStaffAssistantPolicy,
   STAFF_ASSISTANT_POLICY_VERSION,
   STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
@@ -140,6 +146,13 @@ interface ConnectionPrincipal {
   profileId: string
   fullName: string | null
   role: string
+  /**
+   * The caller's validated bearer token. Retained ONLY so company-admin actions can delegate
+   * to the existing durable Edge Functions (microsoft-transition-sync, provider
+   * connection-status/sync) as the same authenticated admin, instead of duplicating those
+   * engines here. Never logged, never returned in any tool result.
+   */
+  accessToken: string
 }
 
 // Handed to every tool handler. `profileId` / `fullName` / `role` are the EFFECTIVE Project
@@ -217,6 +230,7 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; connecti
       profileId: profile.id,
       fullName: profile.full_name,
       role: profile.role,
+      accessToken: match[1],
     },
   }
 }
@@ -448,6 +462,13 @@ type ToolHandler = (
   input: Record<string, unknown>,
 ) => Promise<unknown>
 
+// Every canonical Planner state except terminal `done` remains active work. In particular,
+// blocked/waiting/review/scheduled work must not disappear merely to exclude completions.
+const ACTIVE_TASK_STATES = [
+  'to_do', 'in_progress', 'blocked', 'waiting_client',
+  'ready_internal_review', 'approved', 'scheduled',
+]
+
 const handleGetMyDay: ToolHandler = async (staff) => {
   // CG operates in Africa/Johannesburg (UTC+2). Deriving the day from UTC returned the
   // PREVIOUS date between 00:00-02:00 SAST (#325/#327 defect: 00:37 SAST on 10 Sep -> 9 Sep).
@@ -461,6 +482,8 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id')
       .eq('assigned_to_name', staff.fullName)
       .is('archived_at', null)
+      .is('microsoft_source_removed_at', null)
+      .in('status', ACTIVE_TASK_STATES)
       .lte('due_date', tomorrow)
       .order('due_date', { ascending: true })
       .limit(20),
@@ -492,16 +515,18 @@ const handleGetMyDay: ToolHandler = async (staff) => {
 }
 
 const handleListMyTasks: ToolHandler = async (staff, input) => {
-  const query = staff.supabase
+  let query = staff.supabase
     .from('planner_tasks')
     .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
     .eq('assigned_to_name', staff.fullName)
     .is('archived_at', null)
+    .is('microsoft_source_removed_at', null)
     .order('due_date', { ascending: true })
     .limit(50)
 
-  if (input.status) query.eq('status', input.status)
-  if (input.due_before) query.lte('due_date', input.due_before)
+  if (input.status) query = query.eq('status', input.status)
+  else query = query.in('status', ACTIVE_TASK_STATES)
+  if (input.due_before) query = query.lte('due_date', input.due_before)
 
   const { data, error } = await query
   // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
@@ -552,9 +577,693 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
   return { deliverables: flattenDeliverableClient(data), error: error?.message ?? null }
 }
 
-// ── #325 company-admin observability (read-only) ────────────────────────────
+/**
+ * Internal Content Run discovery (#325 item 3). Finds exact Content Runs by date,
+ * client, calendar event or deliverable and returns the linked canonical guideline, ordered
+ * videos, Client Schedule linkage and OneDrive readiness, so Morning Ops and Franco EOD
+ * never have to guess a Content Run UUID.
+ *
+ * Read-only. Raw OneDrive drive/item identifiers and web URLs are deliberately withheld.
+ */
+const handleFindContentRuns: ToolHandler = async (staff, input) => {
+  let query = staff.supabase
+    .from('content_runs')
+    .select('id, client_id, client_name, name, run_date, start_time, location, status, calendar_event_id')
+    .order('run_date', { ascending: false })
+    .limit(Math.min(Math.max(Number(input.limit ?? 10), 1), 25))
 
-const ACTIVE_TASK_STATES = ['to_do', 'in_progress', 'ready_internal_review']
+  const clientId = (input.client_id as string | undefined) ?? staff.effectiveClientId ?? null
+  if (clientId) query = query.eq('client_id', clientId)
+  if (input.run_date) query = query.eq('run_date', input.run_date)
+  if (input.from) query = query.gte('run_date', input.from)
+  if (input.to) query = query.lte('run_date', input.to)
+  if (input.calendar_event_id) query = query.eq('calendar_event_id', input.calendar_event_id)
+
+  // Deliverable -> run: resolve through the guideline video that references the deliverable.
+  if (input.deliverable_id) {
+    const { data: ideas, error: ideaError } = await staff.supabase
+      .from('content_guide_ideas')
+      .select('content_guideline_id')
+      .eq('deliverable_id', input.deliverable_id)
+      .neq('status', 'archived')
+      .limit(2)
+    if (ideaError) return { error: ideaError.message }
+    if ((ideas ?? []).length > 1) {
+      return { error: 'More than one active guideline video references that deliverable. Exact Content Run discovery is ambiguous and was refused.' }
+    }
+    const guidelineId = ideas?.[0]?.content_guideline_id as string | undefined
+    if (!guidelineId) {
+      return { runs: [], matched_by: 'deliverable_id', note: 'No guideline video references that exact deliverable, so no Content Run could be resolved. Reported rather than guessed.' }
+    }
+    const { data: guideline, error: guidelineError } = await staff.supabase
+      .from('content_guidelines')
+      .select('content_run_id')
+      .eq('id', guidelineId)
+      .maybeSingle()
+    if (guidelineError) return { error: guidelineError.message }
+    if (!guideline?.content_run_id) {
+      return { runs: [], matched_by: 'deliverable_id', note: 'The referencing guideline has no linked Content Run.' }
+    }
+    query = query.eq('id', guideline.content_run_id)
+  }
+
+  const { data: runs, error } = await query
+  if (error) return { error: error.message }
+
+  const detailed = await Promise.all((runs ?? []).map(async (run: Record<string, unknown>) => {
+    const runId = run.id as string
+    const [guidelineRes, mappingRes, closeoutRes] = await Promise.all([
+      staff.supabase.from('content_guidelines').select('id, title, month, status, client_id').eq('content_run_id', runId).maybeSingle(),
+      staff.supabase.from('content_run_onedrive_folders').select('drive_id, month_folder_item_id, folder_name, web_url, last_verified_at').eq('content_run_id', runId).maybeSingle(),
+      staff.supabase.from('content_run_closeouts').select('upload_status').eq('content_run_id', runId).maybeSingle(),
+    ])
+
+    const detailErrors = [guidelineRes.error, mappingRes.error, closeoutRes.error].filter(Boolean)
+    if (detailErrors.length > 0) {
+      return {
+        content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+        error: detailErrors.map(item => item?.message).filter(Boolean).join('; '),
+      }
+    }
+
+    const guideline = guidelineRes.data as Record<string, unknown> | null
+    let videos: Array<Record<string, unknown>> = []
+    if (guideline?.id) {
+      const { data: ideaRows, error: ideaRowsError } = await staff.supabase
+        .from('content_guide_ideas')
+        .select('id, title, position, status, deliverable_id, client_id')
+        .eq('content_guideline_id', guideline.id)
+        .order('position', { ascending: true })
+      if (ideaRowsError) {
+        return {
+          content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+          error: ideaRowsError.message,
+        }
+      }
+      videos = (ideaRows ?? []) as Array<Record<string, unknown>>
+    }
+
+    return {
+      content_run: {
+        id: runId,
+        client: { id: run.client_id, name: run.client_name },
+        name: run.name,
+        run_date: run.run_date,
+        start_time: run.start_time,
+        location: run.location,
+        status: run.status,
+        calendar_event_id: run.calendar_event_id,
+      },
+      content_guideline: guideline
+        ? { id: guideline.id, title: guideline.title, month: guideline.month, status: guideline.status }
+        : null,
+      videos: videos.map(v => ({
+        id: v.id, title: v.title, position: v.position, status: v.status,
+        linked_deliverable_id: v.deliverable_id ?? null,
+      })),
+      client_schedule_linkage: {
+        linked_video_count: videos.filter(v => !!v.deliverable_id).length,
+        unlinked_video_count: videos.filter(v => !v.deliverable_id).length,
+      },
+      onedrive: classifyOneDriveReadiness(mappingRes.data as Record<string, unknown> | null),
+      upload_status: (closeoutRes.data as Record<string, unknown> | null)?.upload_status ?? 'unverified',
+    }
+  }))
+
+  return {
+    runs: detailed,
+    matched_by: input.deliverable_id ? 'deliverable_id' : input.calendar_event_id ? 'calendar_event_id' : input.run_date ? 'run_date' : clientId ? 'client' : 'recent',
+    note: detailed.length === 0
+      ? 'No Content Run matched those exact criteria. Reported rather than guessed - never substitute a different client or date.'
+      : 'One canonical Content Guideline per Content Run. Raw OneDrive identifiers and URLs are internal-only and withheld.',
+  }
+}
+
+/**
+ * Assistant-owned Content Guideline linkage (#325 item 4). Franco confirms only what
+ * happened on the shoot; the Assistant resolves the exact linkage itself:
+ * Content Run -> one canonical Content Guideline -> ordered videos -> exact same-client
+ * monthly deliverables.
+ *
+ * `dry_run` (default) returns the plan without writing. Same-client and one-active-link
+ * constraints fail closed; nothing is guessed and Franco is never asked to choose an ID.
+ */
+const handleLinkContentRunDeliverables: ToolHandler = async (staff, input) => {
+  const runId = input.content_run_id as string
+  const scopeError = await assertRunInClientScope(staff, runId)
+  if (scopeError) return scopeError
+
+  const { data: run, error: runError } = await staff.supabase
+    .from('content_runs')
+    .select('id, client_id, client_name, run_date')
+    .eq('id', runId)
+    .maybeSingle()
+  if (runError) return { error: runError.message }
+  if (!run) return { error: 'Content Run not found.' }
+  if (!run.client_id) return { error: 'Content Run has no exact client assigned; linkage is refused.' }
+
+  const { data: guideline, error: guidelineError } = await staff.supabase
+    .from('content_guidelines')
+    .select('id, title, month, coverage_start, coverage_end, client_id')
+    .eq('content_run_id', runId)
+    .maybeSingle()
+  if (guidelineError) return { error: guidelineError.message }
+  if (!guideline) {
+    return { error: 'No canonical Content Guideline is linked to this Content Run. Linkage is refused rather than creating a parallel guideline.' }
+  }
+  if (guideline.client_id && guideline.client_id !== run.client_id) {
+    return { error: 'The linked Content Guideline belongs to a different client than the Content Run. Failing closed.' }
+  }
+
+  const { data: videos, error: videosError } = await staff.supabase
+    .from('content_guide_ideas')
+    .select('id, title, position, month, video_number, status, deliverable_id, client_id')
+    .eq('content_guideline_id', guideline.id)
+    .order('position', { ascending: true })
+  if (videosError) return { error: videosError.message }
+
+  const coverageStart = (guideline.coverage_start as string | null) ?? (guideline.month as string | null)
+  const coverageEnd = (guideline.coverage_end as string | null) ?? coverageStart
+  let deliverablesQuery = staff.supabase
+    .from('monthly_deliverables')
+    .select('id, client_id, title, code, deliverable_type, month, instance_number, scheduled_date')
+    .eq('client_id', run.client_id)
+    .in('deliverable_type', ['video', 'reel'])
+    .order('scheduled_date', { ascending: true })
+    .limit(250)
+  if (coverageStart) deliverablesQuery = deliverablesQuery.gte('month', coverageStart)
+  if (coverageEnd) deliverablesQuery = deliverablesQuery.lte('month', coverageEnd)
+  const { data: deliverables, error: deliverablesError } = await deliverablesQuery
+  if (deliverablesError) return { error: deliverablesError.message }
+
+  const candidateIds = (deliverables ?? []).map(row => row.id).filter(Boolean)
+  const claimedElsewhere = new Set<string>()
+  if (candidateIds.length > 0) {
+    const { data: claimedRows, error: claimedError } = await staff.supabase
+      .from('content_guide_ideas')
+      .select('id, deliverable_id')
+      .in('deliverable_id', candidateIds)
+      .neq('status', 'archived')
+      .neq('content_guideline_id', guideline.id)
+    if (claimedError) return { error: claimedError.message }
+    for (const row of claimedRows ?? []) {
+      if (row.deliverable_id) claimedElsewhere.add(row.deliverable_id)
+    }
+  }
+
+  const deliverableCandidates = (deliverables ?? []).map(row => ({
+    ...row,
+    claimed_elsewhere: claimedElsewhere.has(row.id),
+  }))
+
+  const plan = planGuidelineVideoLinks(
+    (videos ?? []) as Array<Record<string, unknown>>,
+    deliverableCandidates as Array<Record<string, unknown>>,
+    run.client_id as string,
+  )
+
+  const dryRun = input.dry_run !== false
+  const linkable = plan.filter(p => p.outcome === 'linkable')
+  const blocked = plan.filter(p => p.outcome === 'blocked_cross_client' || p.outcome === 'ambiguous')
+
+  if (dryRun) {
+    return {
+      dry_run: true,
+      content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+      content_guideline: { id: guideline.id, title: guideline.title, month: guideline.month },
+      plan,
+      summary: { linkable: linkable.length, already_linked: plan.filter(p => p.outcome === 'already_linked').length, blocked: blocked.length, ambiguous: plan.filter(p => p.outcome === 'ambiguous').length, no_candidate: plan.filter(p => p.outcome === 'no_candidate').length },
+      note: 'Plan only - nothing was written. The Assistant resolved every link itself; Franco is never asked to choose an ID. Call again with dry_run=false to apply.',
+    }
+  }
+
+  if (blocked.length > 0) {
+    return {
+      dry_run: false, applied: 0, blocked: blocked.length, plan,
+      error: 'Refusing to apply: one or more video links are cross-client or ambiguous. Resolve the data conflict explicitly first.',
+    }
+  }
+
+  // Apply only the unambiguous same-client links. Idempotent: already-linked rows are
+  // untouched, and each deliverable is claimed at most once by the planner.
+  let applied = 0
+  const failures: Array<{ video_id: string; error: string }> = []
+  for (const item of linkable) {
+    const { data: updatedRow, error: updateError } = await staff.supabase
+      .from('content_guide_ideas')
+      .update({ deliverable_id: item.deliverable_id, updated_at: new Date().toISOString() })
+      .eq('id', item.video_id)
+      .is('deliverable_id', null)
+      .select('id')
+      .maybeSingle()
+    if (updateError) failures.push({ video_id: item.video_id, error: updateError.message })
+    else if (updatedRow) applied += 1
+    else failures.push({ video_id: item.video_id, error: 'The video changed before the link was applied. Reload and re-plan.' })
+  }
+
+  return {
+    dry_run: false,
+    content_run: { id: runId, client: { id: run.client_id, name: run.client_name } },
+    content_guideline: { id: guideline.id },
+    applied,
+    failed: failures.length,
+    failures,
+    plan,
+    note: 'Linked exact same-client monthly deliverables only. Guarded by `is deliverable_id null` so a repeat call cannot double-link. Client Schedule rows themselves were NOT modified.',
+  }
+}
+
+const CALENDAR_EVENT_TYPES = ['meeting', 'shoot', 'content_run', 'client_event', 'internal', 'deadline']
+const CALENDAR_STATUSES = ['planned', 'confirmed', 'completed', 'cancelled']
+
+/**
+ * Canonical CG Calendar write for coexistence dual-write (#325 item 2).
+ *
+ * Scope: the Dynamics side of a normal operational meeting/event the staff member explicitly
+ * asked the Assistant to create, reschedule or cancel. `company_calendar_events` remains CG
+ * Calendar truth. Client Schedule is NEVER written here and is never merged into CG Calendar.
+ *
+ * Durable Outlook identity is preserved: when `microsoft_event_id` is supplied the write is
+ * matched on it (idempotent upsert-by-source-key), never by title. `PARTIAL SYNC` is
+ * reported when the caller states the Outlook side did not succeed, so the pair is never
+ * claimed as fully written.
+ */
+const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
+  const action = String(input.action ?? 'create')
+  if (!['create', 'update', 'cancel'].includes(action)) {
+    return { error: 'action must be one of: create, update, cancel.' }
+  }
+
+  const microsoftEventId = typeof input.microsoft_event_id === 'string' && input.microsoft_event_id.trim()
+    ? input.microsoft_event_id.trim() : null
+  const eventId = typeof input.event_id === 'string' && input.event_id.trim() ? input.event_id.trim() : null
+
+  if (input.event_type && !CALENDAR_EVENT_TYPES.includes(String(input.event_type))) {
+    return { error: `event_type must be one of: ${CALENDAR_EVENT_TYPES.join(', ')}.` }
+  }
+  if (input.status && !CALENDAR_STATUSES.includes(String(input.status))) {
+    return { error: `status must be one of: ${CALENDAR_STATUSES.join(', ')}.` }
+  }
+  if (typeof input.outlook_write_succeeded !== 'boolean') {
+    return { error: 'outlook_write_succeeded must explicitly state whether the Outlook side landed. Never infer dual-write success.' }
+  }
+
+  // Resolve the exact existing row by durable identity only - never by title.
+  let existing: Record<string, unknown> | null = null
+  if (eventId) {
+    const { data } = await staff.supabase.from('company_calendar_events').select('id, client_id, microsoft_event_id, microsoft_calendar_id').eq('id', eventId).maybeSingle()
+    existing = data as Record<string, unknown> | null
+    if (!existing) return { error: 'No CG Calendar event matches that exact event_id.' }
+  } else if (microsoftEventId) {
+    const { data } = await staff.supabase.from('company_calendar_events').select('id, client_id, microsoft_event_id, microsoft_calendar_id').eq('microsoft_event_id', microsoftEventId).maybeSingle()
+    existing = data as Record<string, unknown> | null
+  }
+
+  const existingMicrosoftEventId = typeof existing?.microsoft_event_id === 'string' ? existing.microsoft_event_id : null
+  const existingMicrosoftCalendarId = typeof existing?.microsoft_calendar_id === 'string' ? existing.microsoft_calendar_id : null
+  const suppliedCalendarId = typeof input.microsoft_calendar_id === 'string' && input.microsoft_calendar_id.trim()
+    ? input.microsoft_calendar_id.trim() : null
+  if (existing && microsoftEventId && existingMicrosoftEventId && microsoftEventId !== existingMicrosoftEventId) {
+    return { error: 'event_id and microsoft_event_id resolve to different durable identities. Refusing to overwrite the existing Outlook identity.' }
+  }
+  if (existing && suppliedCalendarId && existingMicrosoftCalendarId && suppliedCalendarId !== existingMicrosoftCalendarId) {
+    return { error: 'microsoft_calendar_id does not match the existing event identity. Refusing the cross-calendar write.' }
+  }
+
+  if ((action === 'update' || action === 'cancel') && !existing) {
+    return { error: 'No existing CG Calendar event was resolved by exact id or durable Outlook event id. Refusing to match by title.' }
+  }
+
+  // Client-context pinning: a client Project cannot write another client's event.
+  const targetClientId = (input.client_id as string | undefined) ?? (existing?.client_id as string | undefined) ?? null
+  const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, targetClientId, 'calendar event')
+  if (!scope.allowed) return { error: scope.error }
+
+  const nowIso = new Date().toISOString()
+  const partialSync = input.outlook_write_succeeded === false
+  const effectiveMicrosoftEventId = microsoftEventId ?? existingMicrosoftEventId
+  const effectiveMicrosoftCalendarId = suppliedCalendarId ?? existingMicrosoftCalendarId
+  if (!partialSync && (!effectiveMicrosoftEventId || !effectiveMicrosoftCalendarId)) {
+    return { error: 'A successful Outlook-side write requires both microsoft_event_id and microsoft_calendar_id (supplied now or already stored). Otherwise report outlook_write_succeeded=false.' }
+  }
+  if (microsoftEventId && !suppliedCalendarId && !existingMicrosoftCalendarId) {
+    return { error: 'A new microsoft_event_id requires its exact microsoft_calendar_id. Partial Outlook identities are refused.' }
+  }
+
+  const writable: Record<string, unknown> = { updated_at: nowIso }
+  if (input.title !== undefined) writable.title = input.title
+  if (input.event_type !== undefined) writable.event_type = input.event_type
+  if (input.start_at !== undefined) writable.start_at = input.start_at
+  if (input.end_at !== undefined) writable.end_at = input.end_at
+  if (input.all_day !== undefined) writable.all_day = input.all_day
+  if (input.location !== undefined) writable.location = input.location
+  if (input.notes !== undefined) writable.notes = input.notes
+  if (input.assigned_to_name !== undefined) writable.assigned_to_name = input.assigned_to_name
+  if (input.client_id !== undefined) writable.client_id = input.client_id
+  if (input.client_name !== undefined) writable.client_name = input.client_name
+  if (!partialSync && effectiveMicrosoftEventId && effectiveMicrosoftCalendarId) {
+    writable.microsoft_event_id = effectiveMicrosoftEventId
+    writable.microsoft_source_type = 'outlook_calendar'
+    writable.microsoft_calendar_id = effectiveMicrosoftCalendarId
+    // Only claim Microsoft freshness when the caller confirms the Outlook write landed.
+    writable.microsoft_last_synced_at = nowIso
+  }
+
+  if (action === 'cancel') {
+    writable.status = 'cancelled'
+  } else if (input.status !== undefined) {
+    writable.status = input.status
+  }
+
+  let resultRow: Record<string, unknown> | null
+  let writeError: string | null
+
+  if (existing) {
+    const { data, error } = await staff.supabase
+      .from('company_calendar_events')
+      .update(writable)
+      .eq('id', existing.id)
+      .select('id, title, event_type, start_at, end_at, status, client_id, client_name, microsoft_event_id, microsoft_calendar_id, microsoft_last_synced_at')
+      .maybeSingle()
+    resultRow = data as Record<string, unknown> | null
+    writeError = error?.message ?? null
+  } else {
+    if (!input.title || !input.start_at) {
+      return { error: 'Creating a CG Calendar event requires at least title and start_at.' }
+    }
+    const { data, error } = await staff.supabase
+      .from('company_calendar_events')
+      .insert({ ...writable, created_at: nowIso })
+      .select('id, title, event_type, start_at, end_at, status, client_id, client_name, microsoft_event_id, microsoft_calendar_id, microsoft_last_synced_at')
+      .maybeSingle()
+    resultRow = data as Record<string, unknown> | null
+    writeError = error?.message ?? null
+  }
+
+  if (writeError) {
+    return { verdict: 'FAIL', action, error: writeError, sync_state: 'DYNAMICS_WRITE_FAILED', note: 'The Dynamics side did not write. If the Outlook side already succeeded this is a PARTIAL SYNC - preserve the Outlook write and reconcile.' }
+  }
+
+  return {
+    verdict: partialSync ? 'PARTIAL_SYNC' : 'PASS',
+    action,
+    event: resultRow,
+    matched_by: existing ? (eventId ? 'event_id' : 'microsoft_event_id') : 'created',
+    sync_state: partialSync ? 'PARTIAL SYNC' : 'BOTH_SIDES_REPORTED_OK',
+    note: partialSync
+      ? 'The caller reported the Outlook write did NOT succeed. The Dynamics mirror was written and Microsoft freshness was deliberately NOT stamped. Report PARTIAL SYNC and queue the Outlook side; never claim both were updated.'
+      : 'CG Calendar (company_calendar_events) is the Dynamics calendar truth. Client Schedule was not touched and is never merged into CG Calendar.',
+    scope_note: 'Durable Outlook identity is used for matching; title matching is refused.',
+  }
+}
+
+// -- #325 coexistence actions ------------------------------------------------
+
+/**
+ * Invoke a SIBLING Edge Function as the authenticated caller. This is how the connector
+ * reuses the existing durable engines (microsoft-transition-sync, provider status/sync)
+ * instead of reimplementing them. The caller token is forwarded, never logged.
+ */
+async function invokeSiblingFunction(
+  connection: ConnectionPrincipal,
+  fn: string,
+  body: Record<string, unknown>,
+): Promise<{ ok: boolean; data: Record<string, unknown> | null; error: string | null }> {
+  const baseUrl = Deno.env.get('SUPABASE_URL')
+  if (!baseUrl) return { ok: false, data: null, error: 'Server configuration error.' }
+  try {
+    const res = await fetch(`${baseUrl}/functions/v1/${fn}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${connection.accessToken}`,
+        apikey: Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      },
+      body: JSON.stringify(body),
+    })
+    const parsed = await res.json().catch(() => null)
+    if (!res.ok) {
+      return { ok: false, data: parsed, error: (parsed as { error?: string } | null)?.error ?? `${fn} returned ${res.status}.` }
+    }
+    return { ok: true, data: parsed, error: null }
+  } catch (err) {
+    return { ok: false, data: null, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/** Bounded work units per invocation so the Edge time budget is never exceeded. */
+const MAX_SYNC_PROCESS_STEPS = 40
+
+/**
+ * Run the EXISTING durable Microsoft reconciliation (#325 item 1). Drives the canonical
+ * microsoft-transition-sync job lifecycle (job_start -> bounded job_process loop ->
+ * job_status) as the authenticated admin. Builds no second sync engine and holds no
+ * Microsoft credentials of its own.
+ *
+ * Scope guard: fetches and assembles the durable Microsoft preview that the existing reviewed
+ * apply path consumes. This tool does not apply any Dynamics mirror. It deliberately cannot
+ * change Client Schedule/monthly_deliverables, MASTER CLIENT TO DO or protected Client Socials.
+ */
+const handleRunMicrosoftSync: ToolHandler = async (staff, input) => {
+  const conn = staff.connection
+  const resume = typeof input.job_id === 'string' && input.job_id.trim() ? input.job_id.trim() : null
+
+  let jobId = resume
+  if (!jobId) {
+    if (typeof input.range_start !== 'string' || typeof input.range_end !== 'string') {
+      return { verdict: 'FAIL', error: 'Starting a Microsoft reconciliation preview requires exact range_start and range_end timestamps.' }
+    }
+    const start = await invokeSiblingFunction(conn, 'microsoft-transition-sync', {
+      action: 'job_start',
+      rangeStart: input.range_start ?? undefined,
+      rangeEnd: input.range_end ?? undefined,
+    })
+    if (!start.ok) {
+      return { verdict: 'FAIL', error: start.error, reason: 'The durable reconciliation job could not be started. Flag SYNC FAILED and use the live Microsoft read.' }
+    }
+    jobId = (start.data?.jobId as string | undefined) ?? null
+    if (!jobId) return { verdict: 'FAIL', error: 'No job id was returned.', reason: 'Flag SYNC FAILED.' }
+  }
+
+  // Bounded and idempotent: each job_process claims exactly one unit and is safe to repeat.
+  let finished = false
+  let steps = 0
+  let lastError: string | null = null
+  let sources: Array<Record<string, unknown>> = []
+  let status: string | null = null
+
+  const maxSteps = Math.min(Math.max(Number(input.max_steps ?? MAX_SYNC_PROCESS_STEPS), 1), MAX_SYNC_PROCESS_STEPS)
+  while (steps < maxSteps && !finished) {
+    steps += 1
+    const step = await invokeSiblingFunction(conn, 'microsoft-transition-sync', { action: 'job_process', jobId })
+    if (!step.ok) { lastError = step.error; break }
+    finished = step.data?.finished === true
+    if (Array.isArray(step.data?.sources)) sources = step.data.sources as Array<Record<string, unknown>>
+  }
+
+  const statusRes = await invokeSiblingFunction(conn, 'microsoft-transition-sync', { action: 'job_status', jobId })
+  if (statusRes.ok) {
+    status = (statusRes.data?.status as string | undefined) ?? null
+    if (Array.isArray(statusRes.data?.sources)) sources = statusRes.data.sources as Array<Record<string, unknown>>
+  } else lastError = statusRes.error
+
+  let assembledRecordCount: number | null = null
+  if (finished) {
+    const resultRes = await invokeSiblingFunction(conn, 'microsoft-transition-sync', { action: 'job_result', jobId })
+    if (!resultRes.ok) lastError = resultRes.error
+    const snapshot = resultRes.data?.snapshot as { records?: unknown[] } | undefined
+    if (Array.isArray(snapshot?.records)) assembledRecordCount = snapshot.records.length
+  }
+
+  const outcome = gradeSyncRun(
+    lastError ? 'failed' : finished ? (status ?? 'complete') : (status ?? 'running'),
+    sources,
+  )
+
+  return {
+    job_id: jobId,
+    finished,
+    steps_processed: steps,
+    verdict: outcome.verdict,
+    reason: outcome.reason,
+    coverage: {
+      sources_total: outcome.sources_total,
+      sources_complete: outcome.sources_complete,
+      sources_failed: outcome.sources_failed,
+      required_incomplete: outcome.required_incomplete,
+      records_fetched: outcome.records_fetched,
+    },
+    sources,
+    transport_error: lastError,
+    preview_record_count: assembledRecordCount,
+    continuation: finished ? null : { job_id: jobId, note: 'Not finished within the bounded step budget. Call again with this job_id to continue; job_process is idempotent and claims one unit at a time.' },
+    scope_note: 'Fetches and assembles a durable reconciliation preview only. It does not claim planner_tasks/company_calendar_events mirrors are applied or fresh. Client Schedule/monthly_deliverables, MASTER CLIENT TO DO and protected Client Socials are untouched.',
+    apply_note: 'Reviewed APPLY remains in the existing admin reconciliation path. Until an apply succeeds, get_microsoft_sync_status may correctly remain stale and staff briefs must prefer live Microsoft freshness.',
+  }
+}
+
+const PROVIDER_STATUS_FUNCTIONS: Record<string, string> = {
+  meta: 'meta-connection-status',
+  google_ads: 'google-ads-connection-status',
+  tiktok: 'tiktok-connection-status',
+}
+
+const PROVIDER_SYNC_FUNCTIONS: Record<string, string> = {
+  meta: 'meta-sync',
+  google_ads: 'google-ads-sync',
+  tiktok: 'tiktok-sync',
+}
+
+function safeProviderEvidence(provider: string, response: Record<string, unknown> | null) {
+  if (!response) return null
+  if (provider === 'meta') {
+    const connection = response.connection as Record<string, unknown> | undefined
+    return {
+      status: response.status ?? null,
+      schema_ready: response.schemaReady ?? null,
+      linked_assets_count: response.linkedAssetsCount ?? null,
+      last_connected_at: connection?.lastConnectedAt ?? null,
+      last_verified_insight: connection?.lastVerifiedInsight ?? null,
+      asset_health: response.assetHealth ?? null,
+    }
+  }
+  if (provider === 'google_ads') {
+    return {
+      status: response.status ?? null,
+      configured: response.configured ?? null,
+      linked_accounts_count: response.linkedAccountsCount ?? null,
+      last_synced_at: response.lastSyncedAt ?? null,
+      last_checked_at: response.lastCheckedAt ?? null,
+    }
+  }
+  const connection = response.connection as Record<string, unknown> | undefined
+  return {
+    status: response.status ?? null,
+    schema_ready: response.schemaReady ?? null,
+    last_connected_at: connection?.lastConnectedAt ?? null,
+    token_expires_at: connection?.tokenExpiresAt ?? null,
+    token_expired: connection?.tokenExpired ?? null,
+  }
+}
+
+/**
+ * Compact Morning Ops provider health (#325 item 5). Reuses each provider EXISTING
+ * connection-status function; adds no provider client, no OAuth, no permission change, no
+ * account mapping and no publishing behaviour.
+ */
+const handleGetProviderHealth: ToolHandler = async (staff, input) => {
+  const suppliedProviders = Array.isArray(input.providers) && input.providers.length
+    ? input.providers as string[]
+    : null
+  const invalidProviders = (suppliedProviders ?? []).filter(p => !(p in PROVIDER_STATUS_FUNCTIONS))
+  if (invalidProviders.length > 0) return { error: `Unsupported provider(s): ${invalidProviders.join(', ')}.` }
+  const requested = suppliedProviders ?? Object.keys(PROVIDER_STATUS_FUNCTIONS)
+
+  const results = (await Promise.all(requested.map(async provider => {
+    if (provider !== 'tiktok') {
+      const res = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS[provider], {})
+      return [{
+        ...summarizeProviderHealth(provider, res.data as Record<string, unknown> | null, res.error),
+        evidence: safeProviderEvidence(provider, res.data),
+      }]
+    }
+
+    const requestedClientId = typeof input.client_id === 'string' ? input.client_id : null
+    let clientIds = requestedClientId ? [requestedClientId] : []
+    if (!requestedClientId) {
+      const { data, error } = await staff.supabase
+        .from('tiktok_connections')
+        .select('client_id')
+        .not('client_id', 'is', null)
+      if (error) return [summarizeProviderHealth('tiktok', null, error.message)]
+      clientIds = [...new Set((data ?? []).map(row => row.client_id).filter((id): id is string => typeof id === 'string'))]
+    }
+    if (clientIds.length === 0) {
+      return [{ ...summarizeProviderHealth('tiktok', { connected: false }, null), client_id: null }]
+    }
+    return Promise.all(clientIds.map(async clientId => {
+      const res = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS.tiktok, { clientId })
+      return {
+        ...summarizeProviderHealth('tiktok', res.data as Record<string, unknown> | null, res.error),
+        client_id: clientId,
+        evidence: safeProviderEvidence('tiktok', res.data),
+      }
+    }))
+  }))).flat()
+
+  const degraded = results.filter(r => r.degraded)
+  return {
+    providers: results,
+    overall: degraded.length === 0 ? 'PASS' : 'DEGRADED',
+    degraded_providers: degraded.map(d => d.provider),
+    note: degraded.length
+      ? 'Report degraded provider coverage explicitly. An unreadable provider is UNKNOWN, never a confirmed empty or disconnected state.'
+      : 'All requested providers reported a determinate connection state.',
+    scope_note: 'Read-only status via each existing provider connection-status function. No OAuth, permission, secret, account-mapping or publishing change.',
+  }
+}
+
+/**
+ * Targeted routine sync for an already-authorised, already-mapped provider account
+ * (#325 item 5). Delegates to the existing provider sync function; it cannot authorise a new
+ * account, change mappings or publish.
+ */
+const handleRunProviderSync: ToolHandler = async (staff, input) => {
+  const provider = String(input.provider ?? '')
+  const fn = PROVIDER_SYNC_FUNCTIONS[provider]
+  if (!fn) return { error: `provider must be one of: ${Object.keys(PROVIDER_SYNC_FUNCTIONS).join(', ')}.` }
+
+  const clientId = typeof input.client_id === 'string' ? input.client_id : null
+  if (!clientId) return { error: 'client_id is required so routine sync is pinned to one exact existing provider mapping.' }
+
+  if (provider === 'meta') {
+    const { data, error } = await staff.supabase.from('meta_client_assets').select('id').eq('client_id', clientId).eq('is_active', true).limit(1)
+    if (error) return { error: error.message }
+    if (!data?.length) return { provider, verdict: 'FAIL', skipped: true, reason: 'No active Meta mapping exists for that exact client. No sync or mapping change was attempted.' }
+  }
+  if (provider === 'google_ads') {
+    const [dedicated, campaigns] = await Promise.all([
+      staff.supabase.from('google_ads_account_links').select('id').eq('client_id', clientId).eq('is_active', true).limit(1),
+      staff.supabase.from('google_ads_campaign_links').select('id').eq('client_id', clientId).eq('is_active', true).limit(1),
+    ])
+    if (dedicated.error || campaigns.error) return { error: dedicated.error?.message ?? campaigns.error?.message }
+    if (!dedicated.data?.length && !campaigns.data?.length) return { provider, verdict: 'FAIL', skipped: true, reason: 'No active Google Ads account/campaign mapping exists for that exact client. No sync or mapping change was attempted.' }
+  }
+
+  const healthBody = provider === 'tiktok' ? { clientId } : {}
+  const health = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS[provider], healthBody)
+  const summary = summarizeProviderHealth(provider, health.data as Record<string, unknown> | null, health.error)
+  if (summary.state !== 'connected') {
+    return {
+      provider, verdict: 'FAIL', skipped: true, health: summary,
+      reason: 'Routine sync runs only for an already-authorised provider connection. No authorisation, mapping or permission change was attempted.',
+    }
+  }
+
+  let body: Record<string, unknown>
+  if (provider === 'meta') {
+    body = { mode: 'previous_completed_month', clientId }
+    if (input.month) body.month = input.month
+  } else if (provider === 'google_ads') {
+    if (!input.start_date || !input.end_date) return { error: 'Google Ads sync requires exact start_date and end_date.' }
+    body = { clientId, startDate: input.start_date, endDate: input.end_date }
+  } else {
+    body = { clientId }
+    if (input.period_month) body.periodMonth = input.period_month
+  }
+  const res = await invokeSiblingFunction(staff.connection, fn, body)
+
+  return {
+    provider,
+    verdict: res.ok ? 'PASS' : 'FAIL',
+    health: summary,
+    result: res.data,
+    ...(res.error ? { error: res.error } : {}),
+    scope_note: 'Routine sync for an already-authorised and already-mapped account only. No OAuth, permission, secret, account-mapping or publishing change.',
+  }
+}
+
+// ── #325 company-admin observability (read-only) ────────────────────────────
 
 /**
  * Company-wide planner task inventory for reconciliation audit. Deliberately a DISTINCT
@@ -1678,7 +2387,7 @@ async function handleUpdateCloseoutUploadStatus(staff: AuthenticatedStaff, input
 
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status'])
+const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status', 'link_content_run_deliverables', 'upsert_calendar_event'])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -1700,6 +2409,12 @@ const toolHandlers: Record<string, ToolHandler> = {
   list_company_tasks: handleListCompanyTasks,
   list_company_recurring_tasks: handleListCompanyRecurringTasks,
   get_microsoft_sync_status: handleGetMicrosoftSyncStatus,
+  run_microsoft_sync: handleRunMicrosoftSync,
+  get_provider_health: handleGetProviderHealth,
+  run_provider_sync: handleRunProviderSync,
+  find_content_runs: handleFindContentRuns,
+  link_content_run_deliverables: handleLinkContentRunDeliverables,
+  upsert_calendar_event: handleUpsertCalendarEvent,
   create_recurring_task: handleCreateRecurringTask,
   compose_mail_draft: handleComposeMailDraft,
   log_lead_email_activity: handleLogLeadEmailActivity,
