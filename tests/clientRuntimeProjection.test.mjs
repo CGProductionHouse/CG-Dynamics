@@ -39,7 +39,15 @@ test('Red Oak projection preserves its normal caption contract and anti-generic 
 test('all projected Project Instructions are mutable-free live-retrieval contracts', () => {
   for (const row of projectionRows) {
     const instructions = Buffer.from(row[6], 'base64').toString('utf8')
-    assert.match(instructions, /call get_client_context with its exact client_id/)
+    assert.match(instructions, /call get_client_context with that context and the exact task type/)
+    // Bootstrap must key on the canonical uuid: resolve_project_context matches client_name
+    // with case-sensitive exact equality, and many ChatGPT Project display names differ from
+    // clients.name, so a name-keyed bootstrap silently fails closed.
+    assert.ok(
+      instructions.includes(`"client_id": "${row[1]}"`),
+      `instructions for ${row[1]} must bootstrap on that exact canonical client_id`,
+    )
+    assert.doesNotMatch(instructions, /"client_name"/)
     assert.match(instructions, /CLIENT CONTEXT NOT READY as a hard stop/)
     assert.match(instructions, /Never hardcode or guess contacts/)
     assert.doesNotMatch(instructions, /\b(?:\+?27|0)\d[\d ]{7,}\b|@[a-z0-9.-]+\.[a-z]{2,}/i)
