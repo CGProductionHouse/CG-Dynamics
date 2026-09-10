@@ -13,6 +13,9 @@
 /** Bump when the policy text/rules change. Returned to the Assistant on every bootstrap. */
 export const STAFF_ASSISTANT_POLICY_VERSION = '2026.09.10-coexistence-1'
 
+/** Bump when the presentation contract (morning/EOD structure) changes. */
+export const STAFF_ASSISTANT_PRESENTATION_VERSION = '2026.09.10-presentation-1'
+
 /** CA decision effective date for this policy (#325). */
 export const STAFF_ASSISTANT_POLICY_EFFECTIVE_AT = '2026-09-10T00:00:00Z'
 
@@ -21,8 +24,34 @@ export const STAFF_ASSISTANT_POLICY_AUTHORITY = 'CG Dynamics issue #325 — Staf
 
 export type PolicyContextKind = 'staff' | 'client' | 'company_admin'
 
+export interface MorningPresentationContract {
+  opening: string
+  day_summary: string
+  today_table_columns: string[]
+  work_queue_table_columns: string[]
+  work_queue_states: string[]
+  optional_blocker: string
+  closing: string
+}
+
+export interface EodPresentationContract {
+  opening: string
+  done_today: string
+  still_open: string
+  tomorrow_preview: string
+  blockers_prep: string
+  franco_content_run_closeout: string
+}
+
+export interface PresentationContract {
+  morning: MorningPresentationContract
+  eod: EodPresentationContract
+  style_rules: string[]
+}
+
 export interface StaffAssistantPolicy {
   policy_version: string
+  presentation_version: string
   effective_at: string
   authority: string
   supersedes: string[]
@@ -38,6 +67,7 @@ export interface StaffAssistantPolicy {
   degraded_source_rule: string[]
   daily_sequence: string[]
   company_admin_rule?: string[]
+  presentation_contract: PresentationContract
 }
 
 const SUPERSEDES = [
@@ -134,6 +164,37 @@ const COMPANY_ADMIN_RULE = [
   'Protected Microsoft plans (MASTER CLIENT TO DO, current Client Socials) are excluded from cleanup classification regardless of age, date or completion percentage.',
 ]
 
+const PRESENTATION_CONTRACT: PresentationContract = {
+  morning: {
+    opening: 'One short personalised opening sentence — human, specific, low-noise; personality belongs mainly here/closing, not throughout the operational body.',
+    day_summary: 'One compact day-summary line — e.g. counts/next event, not a prose intro.',
+    today_table_columns: ['Time', 'Schedule', 'Context', 'Action'],
+    work_queue_table_columns: ['State', 'Task', 'Next move', 'Due'],
+    work_queue_states: ['NOW', 'NEXT', 'WAITING', 'LATER', 'DONE'],
+    optional_blocker: 'Optional one-line blocker/follow-up only when materially needed.',
+    closing: 'One short operational closing prompt inviting a useful reply/update, not generic chatbot filler.',
+  },
+  eod: {
+    opening: 'One short personalised line.',
+    done_today: 'Done today — bullet list of completed items.',
+    still_open: 'Still open — items not yet done.',
+    tomorrow_preview: 'Tomorrow — concise chronological preview/timeline.',
+    blockers_prep: 'Surface anything that must be prepared before morning / any blocker needing another person or CA.',
+    franco_content_run_closeout: 'Franco-specific: mandatory Content Run closeout/OneDrive verification/linking integrated into this design. Enumerate every Content Run attended, verify exact OneDrive mapping/naming, guideline linkage, upload evidence (VERIFIED/PARTIAL/MISSING/UNVERIFIED), and surface unresolved carry-forward items.',
+  },
+  style_rules: [
+    'Compact, highly scannable, human/friendly, action-focused.',
+    'No long prose; no generic AI headings/intros.',
+    'No repeated explanation of sync mechanics unless something is degraded.',
+    'Do not waste first-screen space on implementation detail.',
+    'Staff-specific personality/tone may colour the opening/closing; the operational body stays clean and consistent.',
+    'Today timeline: left-aligned narrow Time column, NOW anchor. Only items with actual times. No redundant narration.',
+    'Work Queue: single next-move per row. No multi-paragraph explanations.',
+    'Show-more behaviour: collapse low-priority items behind a brief summary line.',
+    'Dynamics-aligned task wording — use exact task titles, not invented summaries.',
+  ],
+}
+
 /**
  * The canonical runtime policy every Staff Assistant Project receives at bootstrap.
  * Deterministic and side-effect free; the company-admin section is added only for that
@@ -142,6 +203,7 @@ const COMPANY_ADMIN_RULE = [
 export function buildStaffAssistantPolicy(contextKind: PolicyContextKind): StaffAssistantPolicy {
   const policy: StaffAssistantPolicy = {
     policy_version: STAFF_ASSISTANT_POLICY_VERSION,
+    presentation_version: STAFF_ASSISTANT_PRESENTATION_VERSION,
     effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
     authority: STAFF_ASSISTANT_POLICY_AUTHORITY,
     supersedes: [...SUPERSEDES],
@@ -156,6 +218,7 @@ export function buildStaffAssistantPolicy(contextKind: PolicyContextKind): Staff
     privacy_rule: [...PRIVACY_RULE],
     degraded_source_rule: [...DEGRADED_SOURCE_RULE],
     daily_sequence: [...DAILY_SEQUENCE],
+    presentation_contract: PRESENTATION_CONTRACT,
   }
   if (contextKind === 'company_admin') {
     policy.company_admin_rule = [...COMPANY_ADMIN_RULE]

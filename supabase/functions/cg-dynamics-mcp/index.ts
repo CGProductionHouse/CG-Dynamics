@@ -37,6 +37,7 @@ import {
 import {
   buildStaffAssistantPolicy,
   STAFF_ASSISTANT_POLICY_VERSION,
+  STAFF_ASSISTANT_PRESENTATION_VERSION,
   STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
 } from './coexistencePolicy.ts'
 import {
@@ -1704,12 +1705,15 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
   const mailScope = profile?.mail_scope ?? 'owned_threads_only'
   const senderReady = !!(profile?.preferred_company_from && profile?.signature_text)
 
+  const policy = buildStaffAssistantPolicy(staff.contextKind)
+
   return {
     // #325: the canonical shared runtime policy. This OVERRIDES any stale hand-maintained
     // ChatGPT Project Instruction wording (e.g. "Dynamics is fallback-only").
-    staff_assistant_policy: buildStaffAssistantPolicy(staff.contextKind),
+    staff_assistant_policy: policy,
     policy_meta: {
       policy_version: STAFF_ASSISTANT_POLICY_VERSION,
+      presentation_version: STAFF_ASSISTANT_PRESENTATION_VERSION,
       effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
       context_kind: staff.contextKind,
       retrieved_at: new Date().toISOString(),
@@ -1773,29 +1777,24 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
     })),
     daily_update_contract: {
       presentation: {
-        morning_structure: [
-          '1. PERSONALISED ONE-LINE GREETING — unique each morning, derived from staff profile tone/humour preferences.',
-          '2. COMPACT DAY SUMMARY — one line: key focus, any blockers, overall shape of the day.',
-          '3. TODAY TIMELINE TABLE — left-aligned narrow Time column, NOW anchor. Only items with actual times. No redundant narration.',
-          '4. WORK QUEUE TABLE — columns: Status | Task | Client | Next Move. Status labels: NOW, NEXT, WAITING, LATER, DONE (only if completed today). One next-move per row.',
-          '5. OPTIONAL BLOCKER/FOLLOW-UP — one line only if something is stuck or needs attention.',
-          '6. SHORT ACTION PROMPT — one line, action-oriented, tells staff exactly what to do next.',
-        ],
-        evening_structure: [
-          '1. ONE-LINE CLOSING — acknowledge what got done.',
-          '2. DONE TODAY — bullet list of completed items.',
-          '3. STILL OPEN / CARRY FORWARD — items not yet done.',
-          '4. TOMORROW TIMELINE — if known, brief preview.',
-          '5. PREP / FOLLOW-UP — only where useful.',
-        ],
-        rules: [
-          'LOW-NOISE: no essays, no repeated calendar/task narration, no generic motivational filler.',
-          'PERSONALITY belongs mainly in greeting/closing. The work body stays tight and operational.',
-          'LEFT-ALIGNED TIME SPINE in Today timeline. Use NOW anchor for current time.',
-          'DYNAMICS-ALIGNED TASK WORDING — use exact task titles, not invented summaries.',
-          'SHOW-MORE BEHAVIOUR: collapse low-priority items behind a brief summary line.',
-          'Single next-move per row in Work Queue. No multi-paragraph explanations.',
-        ],
+        morning: {
+          opening: policy.presentation_contract.morning.opening,
+          day_summary: policy.presentation_contract.morning.day_summary,
+          today_table_columns: policy.presentation_contract.morning.today_table_columns,
+          work_queue_table_columns: policy.presentation_contract.morning.work_queue_table_columns,
+          work_queue_states: policy.presentation_contract.morning.work_queue_states,
+          optional_blocker: policy.presentation_contract.morning.optional_blocker,
+          closing: policy.presentation_contract.morning.closing,
+        },
+        evening: {
+          opening: policy.presentation_contract.eod.opening,
+          done_today: policy.presentation_contract.eod.done_today,
+          still_open: policy.presentation_contract.eod.still_open,
+          tomorrow_preview: policy.presentation_contract.eod.tomorrow_preview,
+          blockers_prep: policy.presentation_contract.eod.blockers_prep,
+          franco_content_run_closeout: policy.presentation_contract.eod.franco_content_run_closeout,
+        },
+        style_rules: policy.presentation_contract.style_rules,
       },
       personality: {
         source: 'Derived from staff profile: working_preferences, output_preferences, repeated_corrections, responsibilities, recurring_duties. Do not hardcode tone across staff.',
@@ -1846,7 +1845,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'Normal staff = owned_threads_only: email only for leads/tasks you own or materially participate in. Not general inbox managers.',
       'Amonique = company_mail_manager: full authorised CG inbox triage, read, reply-draft preparation, but still requires human review + correct From + correct signature + manual send.',
       'Attach governed collateral by Drive asset key — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
-      'DAILY UPDATE CONTRACT: morning = greeting → summary → Today timeline → Work Queue → optional blocker → action prompt. Evening = closing → Done Today → Still Open → Tomorrow → Prep.',
+      'DAILY UPDATE CONTRACT: morning = opening → day_summary → Today (Time|Schedule|Context|Action) → Work Queue (State|Task|Next move|Due, states: NOW/NEXT/WAITING/LATER/DONE) → optional blocker → closing. Evening = opening → Done today → Still open → Tomorrow (chronological) → blockers/prep. Franco EOD integrates Content Run/OneDrive closeout.',
       'PERSONALITY: derived from staff profile (working_preferences, output_preferences, repeated_corrections). Never hardcode tone across staff. Personality belongs in greeting/closing; work body stays operational.',
       'NATURAL REPLIES: "done", "50%", "waiting on client", "move to Friday", "add note", "follow up Monday" should update canonical task/lead state through available tools.',
       'CONTENT-RUN CLOSEOUT: When a staff member had client shoots/content runs that day, use get_content_run_plan to retrieve the canonical shot list, then collect per-client field updates, reconcile planned vs captured items, record missed/cancelled items with reasons, capture field notes, flag reshoots, verify OneDrive upload status and write approved updates to Dynamics via close_content_run. Never ask staff to recreate a plan already in Dynamics. Never mark closeout complete if upload is missing/partial/unverified.',
