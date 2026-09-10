@@ -2673,6 +2673,14 @@ Deno.serve(async (req) => {
     return jsonRpcError(id as string | number | null ?? null, -32600, 'Invalid request.')
   }
 
+  // Observability: record which method/tool was actually invoked. Names only - never
+  // arguments, tokens or client data. This is what tells us whether a ChatGPT Project
+  // genuinely called a client tool or only listed the catalogue.
+  const invokedTool = method === 'tools/call'
+    ? ((params as { name?: string } | undefined)?.name ?? 'unknown')
+    : null
+  console.log(`mcp method=${method}${invokedTool ? ` tool=${invokedTool}` : ''}`)
+
   switch (method) {
     case 'initialize':
       return handleInitialize(id as string | number | null)
