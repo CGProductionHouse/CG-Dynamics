@@ -16,9 +16,10 @@ import {
   pickNextSource,
   requiredSourcesComplete,
   type SourceManifest,
+  PAGINATION_BATCH_SIZE,
 } from './job-machine.ts'
 
-interface GraphPageResult { values: Array<Record<string, unknown>>; complete: boolean; safeError: string | null }
+interface GraphPageResult { values: Array<Record<string, unknown>>; complete: boolean; safeError: string | null; nextCursor: string | null }
 interface GraphBatchItem { id: string; status: number; headers?: Record<string, string>; body?: { description?: unknown } }
 
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
@@ -103,19 +104,24 @@ function safeMessage(status: number): string {
   return `Microsoft request failed (${status}).`
 }
 
-async function graphPages(path: string, token: string, prefer?: string): Promise<GraphPageResult> {
+async function graphPages(path: string, token: string, prefer?: string, cursor?: string, batchSize = PAGINATION_BATCH_SIZE): Promise<GraphPageResult> {
   const values: Array<Record<string, unknown>> = []
-  let next: string | null = path.startsWith('https://') ? path : `${GRAPH_ROOT}${path}`
-  while (next) {
+  let next: string | null = cursor ?? (path.startsWith('https://') ? path : `${GRAPH_ROOT}${path}`)
+  while (next && values.length < batchSize) {
     const response = await fetchGraph(next, token, prefer)
-    if (!response) return { values, complete: false, safeError: 'Microsoft connector request failed after bounded retries.' }
-    if (!response.ok) return { values, complete: false, safeError: safeMessage(response.status) }
+    if (!response) return { values, complete: false, safeError: 'Microsoft connector request failed after bounded retries.', nextCursor: next }
+    if (!response.ok) return { values, complete: false, safeError: safeMessage(response.status), nextCursor: next }
     const body = await response.json() as { value?: Array<Record<string, unknown>>; '@odata.nextLink'?: string }
-    values.push(...(body.value ?? []))
-    if (values.length > 5000) return { values: values.slice(0, 5000), complete: false, safeError: 'Microsoft source exceeded the 5,000 record safety cap.' }
+    const pageValues = body.value ?? []
+    const remainingCapacity = batchSize - values.length
+    if (pageValues.length > remainingCapacity) {
+      values.push(...pageValues.slice(0, remainingCapacity))
+      return { values, complete: false, safeError: null, nextCursor: next }
+    }
+    values.push(...pageValues)
     next = body['@odata.nextLink'] ?? null
   }
-  return { values, complete: true, safeError: null }
+  return { values, complete: next === null, safeError: null, nextCursor: next }
 }
 
 function dateOnly(value: unknown): string | null {
@@ -171,7 +177,7 @@ async function resolveAssignees(microsoftIds: string[], token: string): Promise<
 // ── Per-source bounded fetch units ───────────────────────────────────────────
 async function fetchOutlookUnit(token: string, manifest: SourceManifest, source: JobSourceRow) {
   const path = `/users/${encodeURIComponent(manifest.userId)}/calendars/${encodeURIComponent(source.source_id)}/calendarView?startDateTime=${encodeURIComponent(source.range_start ?? '')}&endDateTime=${encodeURIComponent(source.range_end ?? '')}&$select=id,subject,bodyPreview,start,end,isAllDay,isCancelled,sensitivity,location,attendees,lastModifiedDateTime`
-  const result = await graphPages(path, token, 'IdType="ImmutableId", outlook.timezone="South Africa Standard Time"')
+  const result = await graphPages(path, token, 'IdType="ImmutableId", outlook.timezone="South Africa Standard Time"', source.pagination_cursor ?? undefined)
   const records = result.values.map(event => {
     const privateEvent = Boolean(event.sensitivity && event.sensitivity !== 'normal')
     return {
@@ -185,12 +191,12 @@ async function fetchOutlookUnit(token: string, manifest: SourceManifest, source:
       private: privateEvent,
     }
   })
-  return { records, complete: result.complete, safeError: result.safeError }
+  return { records, complete: result.complete, safeError: result.safeError, nextCursor: result.nextCursor }
 }
 
 async function fetchPlannerTasksUnit(token: string, source: JobSourceRow) {
   const [taskResult, bucketResult] = await Promise.all([
-    graphPages(`/planner/plans/${encodeURIComponent(source.source_id)}/tasks`, token),
+    graphPages(`/planner/plans/${encodeURIComponent(source.source_id)}/tasks`, token, undefined, source.pagination_cursor ?? undefined),
     graphPages(`/planner/plans/${encodeURIComponent(source.source_id)}/buckets`, token),
   ])
   const buckets = new Map(bucketResult.values.map(bucket => [String(bucket.id ?? ''), String(bucket.name ?? '')]))
@@ -218,6 +224,7 @@ async function fetchPlannerTasksUnit(token: string, source: JobSourceRow) {
     detailIds,
     complete: taskResult.complete && bucketResult.complete,
     safeError: taskResult.safeError ?? bucketResult.safeError,
+    nextCursor: taskResult.nextCursor,
   }
 }
 
@@ -285,15 +292,16 @@ Deno.serve(async request => {
   if (!configured || !manifest || !tenantId || !clientId || !clientSecret) return jsonResponse({ ok: false, error: 'Microsoft transition connection is not configured.' }, 503)
   if (transitionStatus !== 'active') return jsonResponse({ ok: false, error: `Microsoft transition sync is ${transitionStatus}.` }, 409)
 
-  const SOURCE_FIELDS = 'id, position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, pending_detail_ids, range_start, range_end, attempts'
+  const SOURCE_FIELDS = 'id, position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, pending_detail_ids, range_start, range_end, attempts, pagination_cursor'
   const statusList = (rows: Array<Record<string, unknown>>) => rows
-    .map(r => ({ id: r.id, position: r.position, sourceType: r.source_type, sourceId: r.source_id, sourceName: r.source_name, required: r.required, stage: r.stage, recordCount: r.record_count, complete: r.complete, safeError: r.safe_error, detailsRemaining: Array.isArray(r.pending_detail_ids) ? (r.pending_detail_ids as unknown[]).length : 0 }))
+    .map(r => ({ id: r.id, position: r.position, sourceType: r.source_type, sourceId: r.source_id, sourceName: r.source_name, required: r.required, stage: r.stage, recordCount: r.record_count, complete: r.complete, safeError: r.safe_error, detailsRemaining: Array.isArray(r.pending_detail_ids) ? (r.pending_detail_ids as unknown[]).length : 0, paginationCursor: r.pagination_cursor ?? null }))
     .sort((a, b) => Number(a.position) - Number(b.position))
   const asJobRows = (rows: Array<Record<string, unknown>>): JobSourceRow[] => rows.map(r => ({
     position: Number(r.position), source_type: String(r.source_type), source_id: String(r.source_id), source_name: String(r.source_name),
     required: Boolean(r.required), stage: r.stage as JobSourceRow['stage'], record_count: Number(r.record_count), complete: Boolean(r.complete),
     safe_error: (r.safe_error as string) ?? null, pending_detail_ids: Array.isArray(r.pending_detail_ids) ? (r.pending_detail_ids as string[]) : [],
     range_start: (r.range_start as string) ?? null, range_end: (r.range_end as string) ?? null,
+    pagination_cursor: (r.pagination_cursor as string | null) ?? null,
   }))
 
   // ── job_start ───────────────────────────────────────────────────────────────
@@ -338,7 +346,7 @@ Deno.serve(async request => {
 
   // ── job_retry (failed sources only) ──────────────────────────────────────────
   if (action === 'job_retry') {
-    await sb.from('microsoft_sync_job_sources').update({ stage: 'queued', safe_error: null, records: [], pending_detail_ids: [], record_count: 0, complete: false, updated_at: new Date().toISOString() }).eq('job_id', jobId).eq('stage', 'failed')
+    await sb.from('microsoft_sync_job_sources').update({ stage: 'queued', safe_error: null, records: [], pending_detail_ids: [], record_count: 0, complete: false, pagination_cursor: null, updated_at: new Date().toISOString() }).eq('job_id', jobId).eq('stage', 'failed')
     await sb.from('microsoft_sync_jobs').update({ status: 'running', updated_at: new Date().toISOString() }).eq('id', jobId)
     const { data: rows } = await sb.from('microsoft_sync_job_sources').select(SOURCE_FIELDS).eq('job_id', jobId)
     return jsonResponse({ ok: true, jobId, status: 'running', sources: statusList(rows ?? []), progress: jobProgress(asJobRows(rows ?? [])) })
@@ -346,7 +354,7 @@ Deno.serve(async request => {
 
   // ── job_result (assemble once every required source completes) ───────────────
   if (action === 'job_result') {
-    const { data: rows } = await sb.from('microsoft_sync_job_sources').select('position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, records, range_start, range_end').eq('job_id', jobId)
+    const { data: rows } = await sb.from('microsoft_sync_job_sources').select('position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, records, range_start, range_end, pagination_cursor').eq('job_id', jobId)
     const jobRows = (rows ?? []).map(r => ({ ...asJobRows([r])[0], records: Array.isArray(r.records) ? (r.records as Array<Record<string, unknown>>) : [] }))
     if (!requiredSourcesComplete(jobRows)) return jsonResponse({ ok: false, error: 'Preview is not complete yet.', progress: jobProgress(jobRows) }, 409)
     const exportedAt = (job.exported_at as string | null) ?? new Date().toISOString()
@@ -380,16 +388,47 @@ Deno.serve(async request => {
     if (pick.source_type === 'outlook_calendar') {
       await sb.from('microsoft_sync_job_sources').update({ stage: 'fetching_tasks', attempts: (Number(dbRow.attempts) || 0) + 1, updated_at: now() }).eq('id', dbId)
       const result = await fetchOutlookUnit(graphToken, manifest, pick)
-      await sb.from('microsoft_sync_job_sources').update({ stage: 'complete', complete: result.complete, safe_error: result.safeError, records: result.records, record_count: result.records.length, updated_at: now() }).eq('id', dbId)
+      if (result.nextCursor) {
+        // Pagination not complete - store cursor and continue fetching
+        await sb.from('microsoft_sync_job_sources').update({
+          stage: 'fetching_tasks',
+          safe_error: result.safeError,
+          records: result.records,
+          record_count: result.records.length,
+          pagination_cursor: result.nextCursor,
+          updated_at: now(),
+        }).eq('id', dbId)
+      } else {
+        // Pagination complete
+        await sb.from('microsoft_sync_job_sources').update({
+          stage: 'complete',
+          complete: true,
+          safe_error: result.safeError,
+          records: result.records,
+          record_count: result.records.length,
+          pagination_cursor: null,
+          updated_at: now(),
+        }).eq('id', dbId)
+      }
     } else if (pick.stage === 'queued') {
       await sb.from('microsoft_sync_job_sources').update({ stage: 'fetching_tasks', attempts: (Number(dbRow.attempts) || 0) + 1, updated_at: now() }).eq('id', dbId)
       const result = await fetchPlannerTasksUnit(graphToken, pick)
-      if (result.detailIds.length === 0) {
+      if (result.nextCursor) {
+        // Pagination not complete - store cursor and continue fetching
+        await sb.from('microsoft_sync_job_sources').update({
+          stage: 'fetching_tasks',
+          safe_error: result.safeError,
+          records: result.records,
+          record_count: result.records.length,
+          pagination_cursor: result.nextCursor,
+          updated_at: now(),
+        }).eq('id', dbId)
+      } else if (result.detailIds.length === 0) {
         const assignees = await resolveAssignees(result.records.flatMap(r => (r.assigneeMicrosoftIds as string[]) ?? []), graphToken)
         await mergeAssignees(sb, jobId, job.assignee_map as Record<string, unknown>, assignees)
-        await sb.from('microsoft_sync_job_sources').update({ stage: 'complete', complete: result.complete, safe_error: result.safeError, records: result.records, record_count: result.records.length, pending_detail_ids: [], updated_at: now() }).eq('id', dbId)
+        await sb.from('microsoft_sync_job_sources').update({ stage: 'complete', complete: result.complete, safe_error: result.safeError, records: result.records, record_count: result.records.length, pending_detail_ids: [], pagination_cursor: null, updated_at: now() }).eq('id', dbId)
       } else {
-        await sb.from('microsoft_sync_job_sources').update({ stage: 'fetching_details', safe_error: result.safeError, records: result.records, record_count: result.records.length, pending_detail_ids: result.detailIds, updated_at: now() }).eq('id', dbId)
+        await sb.from('microsoft_sync_job_sources').update({ stage: 'fetching_details', safe_error: result.safeError, records: result.records, record_count: result.records.length, pending_detail_ids: result.detailIds, pagination_cursor: null, updated_at: now() }).eq('id', dbId)
       }
     } else {
       // fetching_details: one bounded batch of descriptions

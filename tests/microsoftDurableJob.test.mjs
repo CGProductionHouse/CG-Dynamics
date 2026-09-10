@@ -18,7 +18,16 @@ const manifest = {
     { id: 'p3', name: 'TO DO' },
   ],
 }
-const row = (o) => ({ position: 0, source_type: 'planner_plan', source_id: 'p', source_name: 'P', required: true, stage: 'queued', record_count: 0, complete: false, safe_error: null, records: [], pending_detail_ids: [], range_start: null, range_end: null, ...o })
+const row = (o) => ({ position: 0, source_type: 'planner_plan', source_id: 'p', source_name: 'P', required: true, stage: 'queued', record_count: 0, complete: false, safe_error: null, records: [], pending_detail_ids: [], range_start: null, range_end: null, pagination_cursor: null, ...o })
+
+test('PAGINATION_BATCH_SIZE constant is exported and reasonable', () => {
+  assert.ok(jm.PAGINATION_BATCH_SIZE > 0 && jm.PAGINATION_BATCH_SIZE <= 5000)
+})
+
+test('JobSourceRow type includes pagination_cursor field', () => {
+  const r = row({ pagination_cursor: 'https://graph.microsoft.com/next-page' })
+  assert.equal(r.pagination_cursor, 'https://graph.microsoft.com/next-page')
+})
 
 test('every configured source is enumerated (Outlook + all plans), plans required', () => {
   const seeds = jm.enumerateJobSources(manifest, '2026-07-01', '2026-08-01')

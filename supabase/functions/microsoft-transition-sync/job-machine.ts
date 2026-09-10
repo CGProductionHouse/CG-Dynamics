@@ -51,6 +51,7 @@ export function enumerateJobSources(
 }
 
 export const DETAIL_BATCH_SIZE = 300
+export const PAGINATION_BATCH_SIZE = 1000
 
 // Split the pending detail-id list into the next bounded batch + the remainder.
 export function nextDetailBatch(pending: string[], size = DETAIL_BATCH_SIZE): { batch: string[]; rest: string[] } {
@@ -71,6 +72,7 @@ export interface JobSourceRow {
   pending_detail_ids?: string[]
   range_start: string | null
   range_end: string | null
+  pagination_cursor?: string | null
 }
 
 export interface JobProgress {
