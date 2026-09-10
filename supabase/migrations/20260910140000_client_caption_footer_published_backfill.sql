@@ -18,7 +18,8 @@
 -- DELIBERATE EXCLUSIONS (evidence was not good enough to publish):
 --   * Piek Group phone - CA confirmed 051 444 3178 is WISEMAN GROUP's number and Piek carrying
 --     it is a mistake. It is wrong in three places (captions, the client guide, and the
---     PiekGroup-Website repo src/data/site.ts). Only Piek's email is seeded here; the correct
+--     PiekGroup-Website repo src/data/site.ts). Piek already has curated contacts, so nothing
+--     is inserted for it; the correction block at the end retires the wrong number. The correct
 --     Piek group phone still needs to come from CA.
 --   * Bohemia Quick Stop - one published number (073 242 5753) actually belongs to We Ar Fuels'
 --     rep Ryno Serfontein, and the email is a "bohemiaagri" gmail. Contaminated; needs CA.
