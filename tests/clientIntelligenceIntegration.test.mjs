@@ -683,18 +683,6 @@ test('task-type contract app and Deno copies do not drift', () => {
   assert.equal(stripHeader(CONTEXT_CONTRACT_APP), stripHeader(CONTEXT_CONTRACT_SHARED), 'src/lib and _shared contract must match')
 })
 
-test('#247 no longer carries #311-owned private-MCP implementation files', () => {
-  for (const p of [
-    '../supabase/functions/cg-dynamics-mcp/toolCatalog.ts',
-    '../tests/cgDynamicsMcpToolCatalog.test.mjs',
-    '../docs/ai-workforce/CG-DYNAMICS-PRIVATE-MCP-ROLLOUT.md',
-  ]) {
-    let exists = false
-    try { readFileSync(new URL(p, import.meta.url), 'utf8'); exists = true } catch { /* expected gone */ }
-    assert.equal(exists, false, `#311-owned file must not be in #247: ${p}`)
-  }
-})
-
 // ── #294 exact-client + entity isolation regression fixtures ─────────────────────
 
 function contact(over) {

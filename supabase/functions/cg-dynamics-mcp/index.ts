@@ -1418,7 +1418,7 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
   // returned schema errors and silently empty context. Both are corrected here.
   const { data: guide, error: guideError } = await staff.supabase
     .from('client_guides')
-    .select('id, client_id, guide_markdown, project_instructions, version, generated_at, source_pack_path')
+    .select('id, client_id, guide_markdown, project_instructions, version, generated_at, source_pack_path, source_revision, source_observed_at, runtime_readiness, readiness_reason')
     .eq('client_id', clientId)
     .order('version', { ascending: false })
     .limit(1)
@@ -1428,20 +1428,120 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
   const unavailable: string[] = []
   if (guideError) unavailable.push(`client_guides: ${guideError.message}`)
 
+  const ready = Boolean(
+    guide &&
+    guide.client_id === clientId &&
+    guide.runtime_readiness === 'ready' &&
+    typeof guide.guide_markdown === 'string' &&
+    guide.guide_markdown.trim().length > 0
+  )
+  if (!ready) {
+    return {
+      error: 'CLIENT CONTEXT NOT READY',
+      code: 'CLIENT_CONTEXT_NOT_READY',
+      client: { id: client.id, name: client.name },
+      task_type: input.task_type,
+      scope_key: input.scope_key ?? null,
+      runtime_readiness: 'not_ready',
+      reason: guideError
+        ? 'Exact-client intelligence readiness could not be verified.'
+        : guide?.readiness_reason ?? 'No reviewed exact-client intelligence projection is ready.',
+      instruction: 'Do not generate generic client creative or borrow a sibling, group, billing or national client. Surface this readiness gap.',
+      context_coverage: {
+        client_guide: guideError ? 'unavailable' : 'not_ready',
+        unavailable_sources: unavailable,
+      },
+    }
+  }
+
+  const needsCaptionContacts = ['caption', 'script', 'general'].includes(String(input.task_type))
+  let contactFooter: Record<string, unknown> | null = null
+  if (needsCaptionContacts) {
+    let contactsQuery = staff.supabase
+      .from('client_contacts')
+      .select('contact_type,display_label,person_name,person_role,value,approved_for_caption,visibility,provenance_summary,last_verified_at,freshness_state,lifecycle_state,platforms,content_modes,footer_order,blocks_caption')
+      .eq('client_id', clientId)
+    let policyQuery = staff.supabase
+      .from('client_contact_footer_policies')
+      .select('requirement,format_template,review_state,provenance_summary,last_verified_at')
+      .eq('client_id', clientId)
+      .eq('content_mode', 'caption')
+      .is('platform', null)
+    const scopeKey = typeof input.scope_key === 'string' ? input.scope_key : null
+    contactsQuery = scopeKey ? contactsQuery.eq('scope_key', scopeKey) : contactsQuery.is('scope_key', null)
+    policyQuery = scopeKey ? policyQuery.eq('scope_key', scopeKey) : policyQuery.is('scope_key', null)
+    const [contactsResult, policyResult] = await Promise.all([contactsQuery, policyQuery.maybeSingle()])
+    if (contactsResult.error || policyResult.error) {
+      contactFooter = {
+        status: 'unavailable',
+        contacts: [],
+        can_generate_footer: false,
+        reason: 'Exact-client contact/footer policy could not be verified.',
+      }
+    } else {
+      const eligible = (contactsResult.data ?? [])
+        .filter((contact: Record<string, unknown>) =>
+          contact.approved_for_caption === true &&
+          contact.visibility === 'public_marketing' &&
+          contact.freshness_state === 'current_verified' &&
+          contact.lifecycle_state === 'active' &&
+          (!Array.isArray(contact.content_modes) || contact.content_modes.length === 0 || contact.content_modes.includes('caption')))
+        .sort((a: Record<string, unknown>, b: Record<string, unknown>) => Number(a.footer_order) - Number(b.footer_order))
+      const held = (contactsResult.data ?? []).filter((contact: Record<string, unknown>) =>
+        contact.lifecycle_state === 'active' &&
+        (contact.blocks_caption === true || ['possible_change', 'stale_unverified'].includes(String(contact.freshness_state))))
+      const policy = policyResult.data
+      const valuesByType = new Map<string, Set<string>>()
+      for (const contact of eligible) {
+        const type = String(contact.contact_type)
+        const values = valuesByType.get(type) ?? new Set<string>()
+        values.add(String(contact.value))
+        valuesByType.set(type, values)
+      }
+      const ambiguous = [...valuesByType.values()].some(values => values.size > 1)
+      const blocked = !policy || policy.review_state !== 'current_verified' || ambiguous || held.some((contact: Record<string, unknown>) => contact.blocks_caption === true) || (policy.requirement === 'mandatory' && eligible.length === 0)
+      contactFooter = {
+        status: blocked ? 'not_ready' : 'ready',
+        requirement: policy?.requirement ?? 'unresolved',
+        format_template: blocked ? null : policy?.format_template ?? null,
+        contacts: blocked ? [] : eligible.map((contact: Record<string, unknown>) => ({
+          contact_type: contact.contact_type,
+          display_label: contact.display_label,
+          person_name: contact.person_name,
+          person_role: contact.person_role,
+          value: contact.value,
+          provenance: contact.provenance_summary,
+          last_verified_at: contact.last_verified_at,
+        })),
+        can_generate_footer: !blocked && policy?.requirement !== 'omitted',
+        reason: !policy
+          ? 'No current exact-client footer policy is recorded for this exact scope.'
+          : blocked
+            ? 'Exact-client footer/contact evidence is unresolved. Continue unrelated creative work, but do not invent a footer.'
+            : null,
+        exact_scope_only: true,
+      }
+    }
+  }
+
   return {
     client: { id: client.id, name: client.name },
     task_type: input.task_type,
     scope_key: input.scope_key ?? null,
+    runtime_readiness: 'ready',
     client_guide: guide
       ? {
           id: guide.id,
           version: guide.version,
           generated_at: guide.generated_at,
           source_pack_path: guide.source_pack_path,
+          source_revision: guide.source_revision,
+          source_observed_at: guide.source_observed_at,
           guide_markdown: guide.guide_markdown,
           project_instructions: guide.project_instructions,
         }
       : null,
+    contact_footer: contactFooter,
     context_coverage: {
       client_guide: guide ? 'available' : (guideError ? 'unavailable' : 'none_recorded'),
       unavailable_sources: unavailable,

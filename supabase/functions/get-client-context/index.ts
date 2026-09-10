@@ -49,6 +49,8 @@ interface TaskContext {
   topic?: string
   platform?: string
   generated_at: string
+  runtime_readiness: 'ready'
+  client_guide: Record<string, unknown>
   context: Record<string, unknown>
 }
 
@@ -110,6 +112,33 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Client is not active.' }, 400)
   }
 
+  // The shared creative standard is never a substitute for exact-client intelligence.
+  // A newly-created client remains deliberately blocked until a reviewed projection is
+  // attached to this exact UUID. No sibling, alias, group or national fallback is allowed.
+  const { data: guide, error: guideError } = await supabase
+    .from('client_guides')
+    .select('id,client_id,guide_markdown,project_instructions,version,generated_at,source_pack_path,source_revision,source_observed_at,runtime_readiness,readiness_reason')
+    .eq('client_id', client_id)
+    .maybeSingle()
+
+  if (guideError) {
+    return jsonResponse({
+      error: 'CLIENT CONTEXT NOT READY',
+      code: 'CLIENT_CONTEXT_NOT_READY',
+      client: { id: client.id, name: client.name },
+      reason: 'Exact-client intelligence readiness could not be verified.',
+    }, 503)
+  }
+  if (!guide || guide.client_id !== client_id || guide.runtime_readiness !== 'ready' || !guide.guide_markdown?.trim()) {
+    return jsonResponse({
+      error: 'CLIENT CONTEXT NOT READY',
+      code: 'CLIENT_CONTEXT_NOT_READY',
+      client: { id: client.id, name: client.name },
+      reason: guide?.readiness_reason ?? 'No reviewed exact-client intelligence projection is ready.',
+      instruction: 'Do not generate generic client creative or borrow another client. Ask an administrator to complete the exact-client projection.',
+    }, 409)
+  }
+
   // ── Load task-relevant skill cards (exact client match) ────────────────
   const today = new Date().toISOString().slice(0, 10)
   let cardQuery = supabase
@@ -150,6 +179,17 @@ Deno.serve(async (req) => {
     topic,
     platform,
     generated_at: new Date().toISOString(),
+    runtime_readiness: 'ready',
+    client_guide: {
+      id: guide.id,
+      version: guide.version,
+      generated_at: guide.generated_at,
+      source_pack_path: guide.source_pack_path,
+      source_revision: guide.source_revision,
+      source_observed_at: guide.source_observed_at,
+      guide_markdown: guide.guide_markdown,
+      project_instructions: guide.project_instructions,
+    },
     context,
   }
 
@@ -348,7 +388,8 @@ async function loadContactContext(
   }
 
   const mandatoryMissing = policy?.requirement === 'mandatory' && approved.length === 0
-  const blocked = blockingUnresolved || ambiguousConflict || mandatoryMissing
+  const missingPolicy = policy === null
+  const blocked = blockingUnresolved || ambiguousConflict || mandatoryMissing || missingPolicy
 
   return {
     data: {
@@ -370,7 +411,9 @@ async function loadContactContext(
         ? 'Contact conflict or freshness hold must be resolved before use.'
         : mandatoryMissing
           ? 'A footer is mandatory but no current caption-approved contact is available for this exact scope.'
-          : null,
+          : missingPolicy
+            ? 'No current exact-client footer policy is recorded for this exact scope.'
+            : null,
       exact_scope_only: true,
     },
     error: null,
