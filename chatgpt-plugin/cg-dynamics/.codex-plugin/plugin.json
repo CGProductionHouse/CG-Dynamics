@@ -1,0 +1,25 @@
+{
+  "schema_version": "v1",
+  "name": "cg-dynamics",
+  "display_name": "CG Dynamics",
+  "developer": "CG Production House",
+  "description_for_human": "Private CG Production House operating remote: brief yourself from your CG Assistant profile, see today's work, retrieve exact-client context, close out content runs, and draft governed lead follow-ups. Staff workspace only.",
+  "description_for_model": "Private assistant surface for CG Production House. One communal ChatGPT account holds a single OAuth connection signed in as the company admin, so the connection does NOT identify the staff member or client. In every fresh Project chat call resolve_project_context once, then pass that exact context object on every tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and company_admin must be asked for explicitly. Never reuse another Project context, never infer identity from the Project title, chat history or the connected account, and never fuzzy-match a staff or client name. All live data, authorization and actions come from the registered CG Dynamics MCP connection — this package only supplies the workflow skills. Prefer live retrieval over stale ChatGPT Project memory. Email is DRAFT-ONLY; never send.",
+  "category": "productivity",
+  "capabilities": {
+    "read": true,
+    "write": true
+  },
+  "skills": "./skills/",
+  "apps": "./.app.json",
+  "starter_prompts": [
+    "Set up this Project.",
+    "Brief yourself from my CG Assistant profile.",
+    "What do I have today?",
+    "I'm done with Red Oak's shoot.",
+    "Check whether today's footage is uploaded.",
+    "Research this lead and draft the follow-up email."
+  ],
+  "visibility": "private",
+  "notes": "This is a private workspace plugin. The `apps` mapping points at ../.app.json, which carries the real technical app ID for the single communal CG Dynamics connection created in ChatGPT Developer mode. Connect ONCE as the shared company admin — there is deliberately no per-staff or per-client connector. Per-Project staff/client scope comes from the context contract in ../PROJECT-CONTEXT.md (#319), never from the OAuth identity. No client secret, client id, or callback URL belongs in this package."
+}

@@ -90,8 +90,8 @@ test('shared account facts stop resumably between probes and cap every retry to 
 
 test('worker passes its safe deadline and requeues the distinct connector deadline', () => {
   assert.match(worker, /deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS/g)
-  assert.match(worker, /e instanceof MetaSyncDeadlineError[\s\S]*throw new RetryableIncompleteError\(e\.message\)/)
-  assert.match(worker, /e instanceof RetryableIncompleteError && item\.attempts < 3[\s\S]*itemStatus = 'queued'/)
+  assert.match(worker, /e instanceof MetaSyncDeadlineError[\s\S]*throw new RetryableIncompleteError\(e\.message, true\)/)
+  assert.match(worker, /e instanceof RetryableIncompleteError && \(item\.attempts < 3 \|\| isMetaRateLimitError\(message\)\)[\s\S]*itemStatus = 'queued'/)
 })
 
 test('worker resumes from safe per-platform cursors and clears them on page completion', () => {
@@ -100,14 +100,14 @@ test('worker resumes from safe per-platform cursors and clears them on page comp
   assert.match(hardeningMigration, /length\(facebook_next_cursor\) between 1 and 4096/)
   assert.match(worker, /requestUrl\.searchParams\.set\('after', nextCursor\)/)
   assert.match(worker, /savePlatformState\('facebook', complete \? 'facts_pending' : 'pending', cursor, pagePostsSynced\)/)
-  assert.match(worker, /savePlatformState\('instagram', complete \? 'facts_pending' : 'pending', cursor, pagePostsSynced\)/)
-  assert.match(worker, /processPage[\s\S]*checkpoint\(candidateCursor, !nextUrl, pagePostsSynced\)/)
+  assert.match(worker, /savePlatformState\([\s\S]*'instagram', complete \? 'facts_pending' : 'pending', cursor,[\s\S]*pagePostsSynced/)
+  assert.match(worker, /processPage[\s\S]*checkpoint\(stopAfterPage \? null : candidateCursor, !nextUrl \|\| stopAfterPage, pagePostsSynced\)/)
 })
 
 test('posts_synced advances atomically only with a completed page checkpoint', () => {
-  assert.match(worker, /const pagePostsSynced = await processPage[\s\S]*await checkpoint\(candidateCursor, !nextUrl, pagePostsSynced\)/)
-  assert.match(worker, /const checkpointedPostsSynced = postsSynced \+ completedPagePosts[\s\S]*posts_synced: checkpointedPostsSynced/)
-  assert.match(worker, /if \(error\) throw new Error[\s\S]*postsSynced = checkpointedPostsSynced/)
+  assert.match(worker, /const processedPage = await processPage[\s\S]*const pagePostsSynced =[\s\S]*await checkpoint\(stopAfterPage \? null : candidateCursor, !nextUrl \|\| stopAfterPage, pagePostsSynced\)/)
+  assert.match(worker, /const \{ data, error \} = await sb\.rpc\(checkpointRpc, checkpointArgs\)[\s\S]*if \(error\) throw new Error/)
+  assert.match(worker, /const nextPostsSynced = Number\(Array\.isArray\(data\) \? data\[0\] : data\)[\s\S]*if \(!Number\.isFinite\(nextPostsSynced\)\) throw new Error[\s\S]*postsSynced = nextPostsSynced/)
   assert.doesNotMatch(worker, /postsSynced\+\+/)
 })
 

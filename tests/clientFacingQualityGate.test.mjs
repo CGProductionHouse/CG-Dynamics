@@ -19,6 +19,7 @@ const REPORTS_DB = read('../src/lib/db/reports.ts')
 const REPORT_PROJECTION_SQL = read('../supabase/migrations/20260801190000_client_report_safe_projection.sql')
 const CALENDAR_LIB = read('../src/lib/clientPortalCalendar.ts')
 const CAMPAIGNS_DB_LOADER = read('../src/lib/googleAdsDashboard.ts')
+const GOOGLE_ADS_RESULTS = read('../src/components/client/GoogleAdsResults.tsx')
 const CALENDAR_RPC = read('../supabase/phase-11a-client-portal-read-access.sql')
 const GUIDES_PAGE = read('../src/pages/client/ClientContentGuidesPage.tsx')
 const GUIDES_LIB = read('../src/lib/clientContentGuides.ts')
@@ -99,8 +100,8 @@ test('campaigns page shows unsupported ad platforms as not connected, never fake
   assert.match(CAMPAIGNS, /not connected in the client portal yet/i)
   assert.match(CAMPAIGNS, /Meta Ads/)
   assert.match(CAMPAIGNS, /TikTok Ads/)
-  // No confirmed-revenue framing; spend goes "Unavailable" on mixed currency.
-  assert.match(CAMPAIGNS, /hasMixedCurrencies[\s\S]{0,60}Unavailable/)
+  // No confirmed-revenue framing; the canonical formatter fails closed.
+  assert.match(GOOGLE_ADS_RESULTS, /if \(micros === null \|\| !currency\) return 'Unavailable'/)
 })
 
 // ── 5. No staff-only data in client projections ──────────────────────────────
@@ -183,9 +184,12 @@ test('calendar uses client-safe status labels, never internal codes', () => {
   assert.doesNotMatch(CALENDAR, /internal_notes|assigned_to|helper_names|priority/)
 })
 
-test('campaigns page uses client-safe spend formatting (Unavailable on mixed currency)', () => {
-  assert.match(CAMPAIGNS, /formatSpend/)
-  assert.match(CAMPAIGNS, /hasMixedCurrencies[\s\S]{0,60}Unavailable/)
+test('campaigns page uses the canonical client-safe Google Ads results component', () => {
+  assert.match(CAMPAIGNS, /GoogleAdsResults/)
+  assert.match(GOOGLE_ADS_RESULTS, /formatMoney/)
+  assert.match(GOOGLE_ADS_RESULTS, /Unavailable/)
+  assert.match(CAMPAIGNS, /currentTrackingMonth/)
+  assert.match(GOOGLE_ADS_RESULTS, /Last successful sync/)
 })
 
 // ── 12. Google Ads dashboard data model invariants ────────────────────────────
@@ -288,11 +292,16 @@ test('report view includes a methodology and disclaimer section', () => {
   assert.match(REPORT_VIEW, /methodology|disclaimer/)
 })
 
-test('report view uses Google Ads metrics with safe MoM comparison and formatting', () => {
-  assert.match(REPORT_VIEW, /GoogleAdsMetricCard/)
-  assert.match(REPORT_VIEW, /compareNullable/)
-  assert.match(REPORT_VIEW, /formatGoogleAdsMoney/)
-  assert.match(REPORT_VIEW, /formatGoogleAdsCurrencyValue/)
+test('report and campaigns use provider-native Google Ads semantics without generic MoM', () => {
+  assert.match(REPORT_VIEW, /GoogleAdsResults/)
+  assert.match(CAMPAIGNS, /GoogleAdsResults/)
+  assert.match(GOOGLE_ADS_RESULTS, /average daily/)
+  assert.match(GOOGLE_ADS_RESULTS, /Configured conversion value/)
+  assert.match(GOOGLE_ADS_RESULTS, /No automatic month-on-month judgement is shown/)
+  assert.doesNotMatch(GOOGLE_ADS_RESULTS, /ChannelGrowthPill|label="MoM"/)
+  assert.doesNotMatch(PERFORMANCE, /previousGoogleAds/)
+  assert.match(GOOGLE_ADS_RESULTS, /Client-approved monthly target/)
+  assert.match(GOOGLE_ADS_RESULTS, /Latest 7 days vs previous 7 days/)
 })
 
 test('the report view explains that reach and viewers are never added across platforms', () => {
@@ -317,10 +326,11 @@ test('campaigns page shows CG review and optimisation direction from report stra
 })
 
 test('campaigns page shows campaign objective, lifecycle status and per-campaign metrics', () => {
-  assert.match(CAMPAIGNS, /campaign\.(type|status|name)/)
-  assert.match(CAMPAIGNS, /impressions/)
-  assert.match(CAMPAIGNS, /clicks/)
-  assert.match(CAMPAIGNS, /ctr/)
+  assert.match(CAMPAIGNS, /GoogleAdsResults/)
+  assert.match(GOOGLE_ADS_RESULTS, /campaign\.(type|status|name)/)
+  assert.match(GOOGLE_ADS_RESULTS, /campaign\.impressions/)
+  assert.match(GOOGLE_ADS_RESULTS, /campaign\.clicks/)
+  assert.match(GOOGLE_ADS_RESULTS, /campaign\.ctr/)
 })
 
 test('campaigns page handles all Google Ads dashboard states with honest messaging', () => {

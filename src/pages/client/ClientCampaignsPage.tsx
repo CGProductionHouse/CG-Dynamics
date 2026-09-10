@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
+import { GoogleAdsResults } from '../../components/client/GoogleAdsResults'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
@@ -8,7 +9,7 @@ import {
   type GoogleAdsDashboardData,
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
-import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 import { readStrategyData } from '../../lib/strategyEngine'
 
 type CampaignPageData = {
@@ -17,12 +18,16 @@ type CampaignPageData = {
   dashboard: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
 }
-
 const EMPTY_DATA: CampaignPageData = {
   client: null,
   report: null,
   dashboard: null,
   state: 'no-activity',
+}
+
+function currentTrackingMonth(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 }
 
 export default function ClientCampaignsPage() {
@@ -52,7 +57,7 @@ export default function ClientCampaignsPage() {
 
         const report = selectMonthlyReports(reportsResult.data)[0] ?? null
         const googleResult = report
-          ? await loadGoogleAdsDashboard(report.id, getReportMonthFromPeriod(report))
+          ? await loadGoogleAdsDashboard(report.id, currentTrackingMonth())
           : { data: null, state: 'no-activity' as const, error: null }
         if (!active) return
 
@@ -73,7 +78,7 @@ export default function ClientCampaignsPage() {
     return () => { active = false }
   }, [profile?.client_id])
 
-  const reportMonth = data.report ? getReportMonthFromPeriod(data.report) : null
+  const reportMonth = data.report ? currentTrackingMonth() : null
 
   return (
     <ClientPortalShell client={data.client}>
@@ -84,7 +89,7 @@ export default function ClientCampaignsPage() {
           Verified campaign activity and the information CG uses to refine paid media.
         </p>
         {reportMonth && (
-          <p className="mt-4 text-sm text-report-faint">Latest published reporting month: {monthDisplayLabel(reportMonth)}</p>
+          <p className="mt-4 text-sm text-report-faint">Near-live tracking month: {monthDisplayLabel(reportMonth)}</p>
         )}
       </section>
 
@@ -95,7 +100,7 @@ export default function ClientCampaignsPage() {
       ) : !data.report ? (
         <CampaignMessage message="No published campaign reporting is available yet." />
       ) : data.state === 'data' && data.dashboard ? (
-        <GoogleAdsCampaigns dashboard={data.dashboard} />
+        <GoogleAdsResults dashboard={data.dashboard} />
       ) : (
         <GoogleAdsEmptyState state={data.state} />
       )}
@@ -114,50 +119,6 @@ export default function ClientCampaignsPage() {
         </p>
       </aside>
     </ClientPortalShell>
-  )
-}
-
-function GoogleAdsCampaigns({ dashboard }: { dashboard: GoogleAdsDashboardData }) {
-  return (
-    <section className="mt-10">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-accent">Active reporting</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Google Ads</h2>
-        </div>
-        <p className="text-sm text-report-faint">{dashboard.campaignCount} campaign{dashboard.campaignCount === 1 ? '' : 's'}</p>
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard label="Spend" value={formatSpend(dashboard)} />
-        <MetricCard label="Impressions" value={formatNumber(dashboard.impressions)} />
-        <MetricCard label="Clicks" value={formatNumber(dashboard.clicks)} />
-        <MetricCard label="Click-through rate" value={dashboard.ctr === null ? 'Unavailable' : `${dashboard.ctr.toFixed(2)}%`} />
-      </div>
-
-      <div className="mt-6 space-y-3">
-        {dashboard.campaigns.map(campaign => (
-          <article
-            key={`${campaign.name}-${campaign.status ?? ''}`}
-            className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-5"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h3 className="font-semibold text-white">{campaign.name}</h3>
-                <p className="mt-1 text-xs text-report-faint">
-                  {[campaign.type, campaign.status].filter(Boolean).join(' / ') || 'Campaign details unavailable'}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs text-report-muted">
-                <span>{formatNumber(campaign.impressions)} impressions</span>
-                <span className="text-report-faint">/</span>
-                <span>{formatNumber(campaign.clicks)} clicks</span>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
   )
 }
 
@@ -244,15 +205,6 @@ function FutureCampaignCard({ platform }: { platform: string }) {
   )
 }
 
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-5">
-      <p className="text-xs text-report-faint">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-    </div>
-  )
-}
-
 function CampaignMessage({ message, tone = 'normal' }: { message: string; tone?: 'normal' | 'error' }) {
   return (
     <div className={`mt-10 rounded-lg border px-5 py-6 text-sm ${
@@ -263,19 +215,4 @@ function CampaignMessage({ message, tone = 'normal' }: { message: string; tone?:
       {message}
     </div>
   )
-}
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-ZA').format(value)
-}
-
-function formatSpend(dashboard: GoogleAdsDashboardData): string {
-  if (dashboard.spendMicros === null || !dashboard.currencyCode || dashboard.hasMixedCurrencies) {
-    return 'Unavailable'
-  }
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: dashboard.currencyCode,
-    maximumFractionDigits: 2,
-  }).format(dashboard.spendMicros / 1_000_000)
 }

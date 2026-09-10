@@ -8,6 +8,8 @@ export interface Profile {
   email: string | null
   role: AppRole
   client_id: string | null
+  is_active?: boolean
+  avatar_url?: string | null
   created_at: string
 }
 

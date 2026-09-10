@@ -1,0 +1,13 @@
+{
+  "app_id": "plugin_asdk_app_6aa1d01bafe081918b5738396d72ff17",
+  "name": "cg-dynamics",
+  "display_name": "CG Dynamics",
+  "connection": {
+    "kind": "mcp",
+    "resource": "https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/cg-dynamics-mcp/mcp",
+    "authorization_servers": [
+      "https://ehtjfntukiwbgptqgbzy.supabase.co/auth/v1"
+    ]
+  },
+  "notes": "Canonical CG Production House company-account connector. Single communal connection for the whole CG Production House ChatGPT account, OAuth-connected once as the shared company admin. There is deliberately NO per-staff and NO per-client connector or app id. The OAuth principal is the connection principal only; the effective staff/client subject comes from the per-call Project context contract (see ../PROJECT-CONTEXT.md, #319). No client secret, client id, or callback URL belongs in this file."
+}

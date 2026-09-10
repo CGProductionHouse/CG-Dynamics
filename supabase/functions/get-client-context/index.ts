@@ -1,0 +1,445 @@
+// get-client-context — Task-scoped client context retrieval for ChatGPT bridge
+//
+// POST /get-client-context
+// { client_id: uuid, task_type: TaskType, topic?: string, platform?: string }
+//
+// Returns a compact context packet with only the relevant slice for the requested
+// task type. No broad whole-app scan. No cross-client leakage.
+//
+// Task types:
+//   caption         — voice/tone, caption rules, CTA, contacts, guardrails, hashtags
+//   content_idea    — strategy, content pillars, opportunities, audience
+//   poster_copy     — poster copy rules, CTA, visual direction
+//   image_edit      — image/branding/person/product preservation rules
+//   factual_lookup  — verified facts, contacts, services, prices, provenance
+//   campaign        — positioning, audience, channels, measurement
+//   seo_hashtags    — hashtag rules, forbidden tags, industry terms, max count
+//
+// Client-isolation: exact UUID match enforced. No fuzzy client search.
+// Auth: staff-only (admin/manager). Client-role users are denied.
+
+import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
+import { requireAdminOrManager } from '../_shared/auth.ts'
+import {
+  ANTI_SLOP_PATTERNS,
+  DEFAULT_MAX_HASHTAGS,
+  HASHTAG_RULES,
+  HUMAN_CREATIVE_STANDARD,
+} from '../_shared/humanCreativeStandard.ts'
+import {
+  CLIENT_CONTEXT_TASK_TYPES as TASK_TYPES,
+  type ClientContextTaskType as TaskType,
+} from '../_shared/clientContextContract.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+interface ContextRequest {
+  client_id: string
+  task_type: TaskType
+  scope_key?: string
+  content_mode?: string
+  topic?: string
+  platform?: string
+}
+
+interface TaskContext {
+  client_id: string
+  client_name: string
+  task_type: TaskType
+  scope_key?: string
+  topic?: string
+  platform?: string
+  generated_at: string
+  runtime_readiness: 'ready'
+  client_guide: Record<string, unknown>
+  context: Record<string, unknown>
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  if (req.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed.' }, 405)
+  }
+
+  // ── Auth ──────────────────────────────────────────────────────────────
+  const auth = await requireAdminOrManager(req)
+  if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status)
+  const { supabase, user } = auth.value
+  const { data: callerProfile, error: callerProfileError } = await supabase
+    .from('profiles')
+    .select('is_active')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (callerProfileError) return jsonResponse({ error: 'Authorization check unavailable.' }, 503)
+  if (callerProfile?.is_active !== true) return jsonResponse({ error: 'Active staff access required.' }, 403)
+
+  // ── Parse request ─────────────────────────────────────────────────────
+  let body: ContextRequest
+  try {
+    body = await req.json()
+  } catch {
+    return jsonResponse({ error: 'Invalid JSON body.' }, 400)
+  }
+
+  const { client_id, task_type, scope_key, content_mode = 'caption', topic, platform } = body
+
+  if (!client_id || typeof client_id !== 'string') {
+    return jsonResponse({ error: 'client_id is required.' }, 400)
+  }
+  if (!task_type || !TASK_TYPES.includes(task_type)) {
+    return jsonResponse({ error: `task_type must be one of: ${TASK_TYPES.join(', ')}` }, 400)
+  }
+  if (scope_key !== undefined && (typeof scope_key !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(scope_key))) {
+    return jsonResponse({ error: 'scope_key must be a lowercase exact entity key.' }, 400)
+  }
+  if (typeof content_mode !== 'string' || !content_mode.trim() || content_mode.length > 80) {
+    return jsonResponse({ error: 'content_mode must be a short non-empty value.' }, 400)
+  }
+
+  // ── Verify client exists and is active ────────────────────────────────
+  const { data: client, error: clientError } = await supabase
+    .from('clients')
+    .select('id, name, active')
+    .eq('id', client_id)
+    .maybeSingle()
+
+  if (clientError || !client) {
+    return jsonResponse({ error: 'Client not found.' }, 404)
+  }
+  if (!client.active) {
+    return jsonResponse({ error: 'Client is not active.' }, 400)
+  }
+
+  // The shared creative standard is never a substitute for exact-client intelligence.
+  // A newly-created client remains deliberately blocked until a reviewed projection is
+  // attached to this exact UUID. No sibling, alias, group or national fallback is allowed.
+  const { data: guide, error: guideError } = await supabase
+    .from('client_guides')
+    .select('id,client_id,guide_markdown,project_instructions,version,generated_at,source_pack_path,source_revision,source_observed_at,runtime_readiness,readiness_reason')
+    .eq('client_id', client_id)
+    .maybeSingle()
+
+  if (guideError) {
+    return jsonResponse({
+      error: 'CLIENT CONTEXT NOT READY',
+      code: 'CLIENT_CONTEXT_NOT_READY',
+      client: { id: client.id, name: client.name },
+      reason: 'Exact-client intelligence readiness could not be verified.',
+    }, 503)
+  }
+  if (!guide || guide.client_id !== client_id || guide.runtime_readiness !== 'ready' || !guide.guide_markdown?.trim()) {
+    return jsonResponse({
+      error: 'CLIENT CONTEXT NOT READY',
+      code: 'CLIENT_CONTEXT_NOT_READY',
+      client: { id: client.id, name: client.name },
+      reason: guide?.readiness_reason ?? 'No reviewed exact-client intelligence projection is ready.',
+      instruction: 'Do not generate generic client creative or borrow another client. Ask an administrator to complete the exact-client projection.',
+    }, 409)
+  }
+
+  // ── Load task-relevant skill cards (exact client match) ────────────────
+  const today = new Date().toISOString().slice(0, 10)
+  let cardQuery = supabase
+    .from('skill_cards')
+    .select('id, slug, title, category, subcategory, principle, summary, why_it_matters, how_to_apply, mistakes_to_avoid, agent_instructions, relevant_agents, knowledge_layer, client_specific, active_client_id, client_scope_key, status, review_expires_at')
+    .eq('active_client_id', client_id)
+    .eq('status', 'active')
+    .eq('client_specific', true)
+  cardQuery = scope_key ? cardQuery.eq('client_scope_key', scope_key) : cardQuery.is('client_scope_key', null)
+  const { data: cards, error: cardsError } = await cardQuery
+  if (cardsError) return jsonResponse({ error: 'Client knowledge is unavailable.' }, 503)
+
+  // Filter expired cards
+  const activeCards = (cards ?? []).filter(c => {
+    if (!c.review_expires_at) return true
+    return c.review_expires_at.slice(0, 10) >= today
+  })
+
+  // ── Build task-specific context ───────────────────────────────────────
+  const contactContext = task_type === 'caption' || task_type === 'poster_copy' || task_type === 'factual_lookup'
+    ? await loadContactContext(supabase, client_id, scope_key ?? null, content_mode, platform ?? null)
+    : null
+  if (contactContext?.error) return jsonResponse({ error: contactContext.error }, 503)
+
+  const context = buildTaskContext(task_type, activeCards, topic, platform, contactContext?.data ?? null)
+
+  // ── Record retrieval timestamp ────────────────────────────────────────
+  await supabase
+    .from('client_project_mappings')
+    .update({ last_context_retrieved_at: new Date().toISOString() })
+    .eq('client_id', client_id)
+
+  const result: TaskContext = {
+    client_id,
+    client_name: client.name,
+    task_type,
+    scope_key,
+    topic,
+    platform,
+    generated_at: new Date().toISOString(),
+    runtime_readiness: 'ready',
+    client_guide: {
+      id: guide.id,
+      version: guide.version,
+      generated_at: guide.generated_at,
+      source_pack_path: guide.source_pack_path,
+      source_revision: guide.source_revision,
+      source_observed_at: guide.source_observed_at,
+      guide_markdown: guide.guide_markdown,
+      project_instructions: guide.project_instructions,
+    },
+    context,
+  }
+
+  return jsonResponse(result)
+})
+
+// ── Task-specific context builder ──────────────────────────────────────────
+// Returns only the slice relevant to the requested task type.
+// No broad whole-app scan. No cross-client data.
+
+function buildTaskContext(
+  taskType: TaskType,
+  cards: Array<Record<string, unknown>>,
+  topic?: string,
+  platform?: string,
+  contactContext?: Record<string, unknown> | null,
+): Record<string, unknown> {
+  // Extract common card data
+  const voiceCards = cards.filter(c => matchesCategory(c, ['voice', 'tone']))
+  const captionCards = cards.filter(c => matchesCategory(c, ['caption', 'copy']))
+  const imageCards = cards.filter(c => matchesCategory(c, ['image', 'visual', 'photo', 'editing']))
+  const hashtagCards = cards.filter(c => matchesCategory(c, ['hashtag', 'seo', 'social']))
+  const strategyCards = cards.filter(c => matchesCategory(c, ['strategy', 'positioning', 'audience']))
+  const factualCards = cards.filter(c => matchesCategory(c, ['product', 'service', 'contact', 'factual']))
+  const guardrailCards = cards.filter(c => matchesCategory(c, ['guardrail', 'avoid', 'mistake', 'correction']))
+
+  switch (taskType) {
+    case 'caption':
+      return {
+        task: 'caption',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
+        voice_rules: extractPrinciples(voiceCards),
+        caption_rules: extractPrinciples(captionCards),
+        cta_behaviour: extractField(captionCards, 'how_to_apply'),
+        contact_footer: contactContext,
+        guardrails: extractPrinciples(guardrailCards),
+        hashtag_rules: [...HASHTAG_RULES.rules, ...extractPrinciples(hashtagCards)],
+        hashtag_max: DEFAULT_MAX_HASHTAGS,
+        platform_specific: platform ? `Optimise for ${platform}.` : null,
+        topic,
+        fresh_facts_required: true,
+        instruct: `Generate a caption that meets the human_creative_standard and the exact client voice_rules. Add to the artwork; do not restate it. Reject the avoid_filler phrases. Do not invent mutable facts. Choose up to ${DEFAULT_MAX_HASHTAGS} hashtags dynamically for the current topic/platform — never paste a fixed bank.`,
+      }
+
+    case 'content_idea':
+      return {
+        task: 'content_idea',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
+        strategy: extractPrinciples(strategyCards),
+        voice_rules: extractPrinciples(voiceCards),
+        guardrails: extractPrinciples(guardrailCards),
+        topic,
+        instruct: 'Suggest content ideas grounded in the strategy, voice rules and human_creative_standard above. Each idea must be specific to this client. Do not recycle generic ideas or use the avoid_filler phrases.',
+      }
+
+    case 'poster_copy':
+      return {
+        task: 'poster_copy',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
+        voice_rules: extractPrinciples(voiceCards),
+        caption_rules: extractPrinciples(captionCards),
+        contact_footer: contactContext,
+        guardrails: extractPrinciples(guardrailCards),
+        instruct: 'Write poster copy that meets the human_creative_standard and exact client voice. Keep it concise and visual. Do not repeat text that will appear on the artwork/video. Reject the avoid_filler phrases.',
+      }
+
+    case 'image_edit':
+      return {
+        task: 'image_edit',
+        image_rules: extractPrinciples(imageCards),
+        brand_preservation: 'Preserve real people, products, branding, proportions, and composition. Change only what was explicitly requested.',
+        guardrails: extractPrinciples(guardrailCards),
+        instruct: 'Apply image edits using only the rules above. Never alter real people\'s faces, body proportions, or product appearance beyond what was requested.',
+      }
+
+    case 'factual_lookup':
+      return {
+        task: 'factual_lookup',
+        factual_rules: extractPrinciples(factualCards),
+        public_contacts: contactContext,
+        guardrails: extractPrinciples(guardrailCards),
+        instruct: 'Return only verified facts from the rules above. If a fact cannot be confirmed, say so. Never invent prices, contacts, hours, stock, or operational details.',
+      }
+
+    case 'campaign':
+      return {
+        task: 'campaign',
+        human_creative_standard: HUMAN_CREATIVE_STANDARD,
+        avoid_filler: ANTI_SLOP_PATTERNS,
+        strategy: extractPrinciples(strategyCards),
+        voice_rules: extractPrinciples(voiceCards),
+        caption_rules: extractPrinciples(captionCards),
+        hashtag_rules: [...HASHTAG_RULES.rules, ...extractPrinciples(hashtagCards)],
+        hashtag_max: DEFAULT_MAX_HASHTAGS,
+        guardrails: extractPrinciples(guardrailCards),
+        topic,
+        instruct: 'Design the campaign using the strategy, voice, human_creative_standard and rules above. Every element must be grounded in verified client intelligence.',
+      }
+
+    case 'seo_hashtags':
+      return {
+        task: 'seo_hashtags',
+        hashtag_rules: [...HASHTAG_RULES.rules, ...extractPrinciples(hashtagCards)],
+        hashtag_max: DEFAULT_MAX_HASHTAGS,
+        hashtag_bank_is_seed_only: true,
+        platform,
+        topic,
+        instruct: `Choose up to ${DEFAULT_MAX_HASHTAGS} hashtags dynamically for the current topic and platform. Stored banks are seed/reference only — never output a fixed set. Use SEO/search-intent selection: exact brand term, exact content term, relevant local/industry term, and a current/trending term only when evidence supports it. Do not use trending tags that are irrelevant or geographically wrong.`,
+      }
+
+    default:
+      return { task: taskType, instruct: 'No specific context rules defined for this task type.' }
+  }
+}
+
+async function loadContactContext(
+  supabase: ReturnType<typeof createClient>,
+  clientId: string,
+  scopeKey: string | null,
+  contentMode: string,
+  platform: string | null,
+): Promise<{ data: Record<string, unknown> | null; error: string | null }> {
+  let contactQuery = supabase
+    .from('client_contacts')
+    .select('id,client_id,scope_key,contact_type,display_label,person_name,person_role,value,approved_for_caption,blocks_caption,visibility,provenance_summary,last_verified_at,freshness_state,lifecycle_state,platforms,content_modes,footer_order')
+    .eq('client_id', clientId)
+  contactQuery = scopeKey ? contactQuery.eq('scope_key', scopeKey) : contactQuery.is('scope_key', null)
+
+  let policyQuery = supabase
+    .from('client_contact_footer_policies')
+    .select('client_id,scope_key,content_mode,platform,requirement,format_template,review_state,provenance_summary,last_verified_at')
+    .eq('client_id', clientId)
+    .eq('content_mode', contentMode)
+  policyQuery = scopeKey ? policyQuery.eq('scope_key', scopeKey) : policyQuery.is('scope_key', null)
+
+  const [{ data: contacts, error: contactsError }, { data: policies, error: policiesError }] = await Promise.all([
+    contactQuery,
+    policyQuery,
+  ])
+  if (contactsError || policiesError) return { data: null, error: 'Client contact policy is unavailable.' }
+
+  const unresolved = (contacts ?? [])
+    .filter(contact => contact.lifecycle_state === 'active' && (
+      contact.visibility === 'unverified_hold' ||
+      contact.freshness_state === 'possible_change' ||
+      contact.freshness_state === 'stale_unverified'
+    ))
+    .map(contact => ({
+      contact_id: contact.id,
+      display_label: contact.display_label,
+      reason: contact.visibility === 'unverified_hold'
+        ? 'Contact is on unverified hold.'
+        : `Contact freshness is ${contact.freshness_state}.`,
+    }))
+
+  const approved = (contacts ?? [])
+    .filter(contact =>
+      contact.lifecycle_state === 'active' &&
+      contact.visibility === 'public_marketing' &&
+      contact.approved_for_caption === true &&
+      contact.freshness_state === 'current_verified' &&
+      (!platform || contact.platforms.length === 0 || contact.platforms.includes(platform)) &&
+      (contact.content_modes.length === 0 || contact.content_modes.includes(contentMode)),
+    )
+    .sort((a, b) => a.footer_order - b.footer_order || a.display_label.localeCompare(b.display_label))
+
+  const policy = (policies ?? [])
+    .filter(candidate => candidate.review_state === 'current_verified' && (candidate.platform === platform || candidate.platform === null))
+    .sort((a, b) => Number(b.platform === platform) - Number(a.platform === platform))[0] ?? null
+  const blockingUnresolved = (contacts ?? []).some(contact =>
+    contact.lifecycle_state === 'active' && contact.blocks_caption === true && (
+      contact.visibility === 'unverified_hold' ||
+      contact.freshness_state === 'possible_change' ||
+      contact.freshness_state === 'stale_unverified'
+    ))
+
+  // Ambiguity guard: two different approved values of the same contact_type in one exact
+  // scope is an unresolved conflict — fail closed instead of guessing which is current.
+  const valuesByType = new Map<string, Set<string>>()
+  for (const contact of approved) {
+    const set = valuesByType.get(contact.contact_type) ?? new Set<string>()
+    set.add(contact.value)
+    valuesByType.set(contact.contact_type, set)
+  }
+  const conflictingTypes = [...valuesByType.entries()].filter(([, values]) => values.size > 1).map(([type]) => type)
+  const ambiguousConflict = conflictingTypes.length > 0
+  for (const contact of approved.filter(c => conflictingTypes.includes(c.contact_type))) {
+    unresolved.push({
+      contact_id: contact.id,
+      display_label: contact.display_label,
+      reason: `Multiple approved ${contact.contact_type} contacts conflict for this exact scope.`,
+    })
+  }
+
+  const mandatoryMissing = policy?.requirement === 'mandatory' && approved.length === 0
+  const missingPolicy = policy === null
+  const blocked = blockingUnresolved || ambiguousConflict || mandatoryMissing || missingPolicy
+
+  return {
+    data: {
+      requirement: policy?.requirement ?? 'unresolved',
+      format_template: blocked ? null : policy?.format_template ?? null,
+      contacts: blocked ? [] : approved.map(contact => ({
+        contact_type: contact.contact_type,
+        display_label: contact.display_label,
+        person_name: contact.person_name,
+        person_role: contact.person_role,
+        value: contact.value,
+        footer_order: contact.footer_order,
+        provenance: contact.provenance_summary,
+        last_verified_at: contact.last_verified_at,
+      })),
+      unresolved,
+      can_generate_footer: !blocked && policy?.requirement !== 'omitted',
+      blocked_reason: blockingUnresolved || ambiguousConflict
+        ? 'Contact conflict or freshness hold must be resolved before use.'
+        : mandatoryMissing
+          ? 'A footer is mandatory but no current caption-approved contact is available for this exact scope.'
+          : missingPolicy
+            ? 'No current exact-client footer policy is recorded for this exact scope.'
+            : null,
+      exact_scope_only: true,
+    },
+    error: null,
+  }
+}
+
+function matchesCategory(card: Record<string, unknown>, keywords: string[]): boolean {
+  const category = `${card.category ?? ''} ${card.subcategory ?? ''} ${card.title ?? ''}`.toLowerCase()
+  return keywords.some(kw => category.includes(kw))
+}
+
+function extractPrinciples(cards: Array<Record<string, unknown>>): string[] {
+  return cards
+    .map(c => c.principle)
+    .filter((p): p is string => typeof p === 'string' && p.length > 0)
+}
+
+function extractField(cards: Array<Record<string, unknown>>, field: string): string[] {
+  const values: string[] = []
+  for (const card of cards) {
+    const val = card[field]
+    if (Array.isArray(val)) {
+      values.push(...val.filter((v): v is string => typeof v === 'string'))
+    } else if (typeof val === 'string') {
+      values.push(val)
+    }
+  }
+  return values
+}

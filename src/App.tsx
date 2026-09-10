@@ -35,6 +35,7 @@ const MetaIntegrationPage = lazyRoute(() => import('./pages/admin/MetaIntegratio
 const GoogleAdsIntegrationPage = lazyRoute(() => import('./pages/admin/GoogleAdsIntegrationPage'))
 const TikTokIntegrationPage = lazyRoute(() => import('./pages/admin/TikTokIntegrationPage'))
 const AssistantPage = lazyRoute(() => import('./pages/admin/AssistantPage'))
+const MyAssistantPage = lazyRoute(() => import('./pages/admin/MyAssistantPage'))
 const PackageMasterPage = lazyRoute(() => import('./pages/admin/PackageMasterPage'))
 const ClientSchedulePage = lazyRoute(() => import('./pages/admin/ClientSchedulePage'))
 const ClientContentCalendarPage = lazyRoute(() => import('./pages/admin/ClientContentCalendarPage'))
@@ -61,6 +62,7 @@ const ClientStrategyPage = lazyRoute(() => import('./pages/client/ClientStrategy
 const WelcomeToCgPage = lazyRoute(() => import('./features/client-onboarding/WelcomeToCgPage'))
 const ClientSetupPage = lazyRoute(() => import('./features/client-onboarding/ClientSetupPage'))
 const InternalOnboardingPage = lazyRoute(() => import('./features/client-onboarding/InternalOnboardingPage'))
+const OAuthConsentPage = lazyRoute(() => import('./pages/OAuthConsentPage'))
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -100,6 +102,10 @@ export default function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/welcome" element={<WelcomeToCgPage />} />
+          {/* Supabase OAuth 2.1 consent surface for the CG Dynamics ChatGPT connector.
+              Public auth route: no staff/client guard, but inside AuthProvider so it can
+              resolve the session and route to /login (preserving the request) when needed. */}
+          <Route path="/oauth/consent" element={<OAuthConsentPage />} />
 
           {/* Staff routes */}
           <Route element={<RequireStaff />}>
@@ -127,6 +133,7 @@ export default function App() {
               <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/assistant" element={<AssistantPage />} />
+              <Route path="/admin/my-assistant" element={<MyAssistantPage />} />
               <Route path="/admin/client-dashboard" element={<PublishedPreview />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
               <Route path="/admin/content-guide-preview" element={<ClientContentGuidesPage preview />} />

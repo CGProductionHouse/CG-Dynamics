@@ -75,8 +75,8 @@ Deno.serve(async (req) => {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'team'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Staff access required.' }, 403)
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
   // Read the connected token.
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
   const accessToken = tokens[0].encrypted_access_token
   // ── Fetch Facebook Pages ─────────────────────────────────
   let pages: FbPage[] = []
-  let pagesDiagnostic: Record<string, unknown> = { available: false }
+  let pagesDiagnostic: Record<string, unknown>
 
   try {
     const pageParams = new URLSearchParams({
@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
   // ── Fetch Ad Accounts ─────────────────────────────────────
   let adAccounts: AdAccount[] = []
   let adAccountsError: string | null = null
-  let adAccountsDiagnostic: Record<string, unknown> = { available: false }
+  let adAccountsDiagnostic: Record<string, unknown>
 
   try {
     const adParams = new URLSearchParams({

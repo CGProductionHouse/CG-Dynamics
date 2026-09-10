@@ -71,7 +71,6 @@ export default function PublishedPreview() {
   const [previousReport, setPreviousReport] = useState<ReportWithPosts | null>(null)
   const [previousManualMetrics, setPreviousManualMetrics] = useState<ManualPlatformMetric[]>([])
   const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
-  const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
   const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
   const [facts, setFacts] = useState<PlatformFact[]>([])
@@ -181,7 +180,6 @@ export default function PublishedPreview() {
       setPreviousReport(null)
       setPreviousManualMetrics([])
       setGoogleAds(null)
-      setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
       setFacts([])
@@ -206,14 +204,11 @@ export default function PublishedPreview() {
           const previous = previousMonth
             ? reports.find(report => report.client_id === data.client_id && getReportMonthFromPeriod(report) === previousMonth)
             : null
-          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, previousGoogleAdsResult, factsResult, healthResult, exclusionsResult] = await Promise.all([
+          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, factsResult, healthResult, exclusionsResult] = await Promise.all([
             listManualMetricsForClientMonth(data.client_id, currentMonth),
             previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
             previousMonth ? listManualMetricsForClientMonth(data.client_id, previousMonth) : Promise.resolve({ data: [], error: null }),
             loadGoogleAdsDashboard(data.id, currentMonth),
-            previousMonth
-              ? loadGoogleAdsDashboard(data.id, previousMonth)
-              : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
             loadReportPlatformFacts(data.id, currentMonth, previousMonth),
             loadReportFactHealth(data.id),
             loadReportContentExclusions(data.id),
@@ -227,9 +222,8 @@ export default function PublishedPreview() {
           setPreviousReport(previousReportResult.data)
           setPreviousManualMetrics(previousMetricsResult.data)
           setGoogleAds(googleAdsResult.data)
-          setPreviousGoogleAds(previousGoogleAdsResult.data)
           setGoogleAdsState(googleAdsResult.state)
-          setGoogleAdsError(googleAdsResult.error || previousGoogleAdsResult.error ? 'Google Ads data could not be loaded.' : null)
+          setGoogleAdsError(googleAdsResult.error)
           setFacts(factsResult.facts)
           setPreviousFacts(factsResult.previousFacts)
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
@@ -290,7 +284,6 @@ export default function PublishedPreview() {
       setPreviousReport(null)
       setPreviousManualMetrics([])
       setGoogleAds(null)
-      setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
       setFacts([])
@@ -473,7 +466,6 @@ export default function PublishedPreview() {
               previousReport={previousReport}
               previousManualMetrics={previousManualMetrics}
               googleAds={googleAds}
-              previousGoogleAds={previousGoogleAds}
               googleAdsState={googleAdsState}
               googleAdsError={googleAdsError}
               facts={facts}
