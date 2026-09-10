@@ -1528,6 +1528,18 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
     }
   }
 
+  // Record that this exact client's live runtime was actually used. The standalone
+  // get-client-context function already does this; the MCP tool did not, so a Project
+  // driven through the connector left last_context_retrieved_at null even on success and
+  // there was no way to tell real runtime usage from a Project answering without it.
+  // Best-effort: a telemetry write must never fail the client context response.
+  try {
+    await staff.supabase
+      .from('client_project_mappings')
+      .update({ last_context_retrieved_at: new Date().toISOString() })
+      .eq('client_id', clientId)
+  } catch { /* telemetry only */ }
+
   return {
     client: { id: client.id, name: client.name },
     task_type: input.task_type,
