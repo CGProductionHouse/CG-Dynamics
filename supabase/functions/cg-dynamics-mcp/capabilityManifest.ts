@@ -44,7 +44,7 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Create a weekly Monday content-check task.',
     ],
     operatingStandards: [
-      'CG Dynamics is the durable source of truth.',
+      'During Microsoft coexistence, always cross-reference live Planner/Outlook freshness with CG Dynamics; Dynamics-only work remains legitimate.',
       'Never invent ownership, deadlines, status, or a second task list.',
       'Never merge CG Calendar and Client Schedule.',
       'Use exact client IDs; never borrow facts from another client.',

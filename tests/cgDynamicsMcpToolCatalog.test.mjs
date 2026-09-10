@@ -74,11 +74,11 @@ test('every record mutation is non-destructive, idempotent and bound to a canoni
   }
 })
 
-test('orchestration actions declare idempotency and delegate to an existing durable engine', () => {
+test('orchestration actions delegate to an existing durable engine without claiming retry idempotency', () => {
   for (const name of ORCHESTRATION_TOOLS) {
     const tool = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === name)
     assert.ok(tool, `${name} exists`)
-    assert.equal(tool.annotations.idempotentHint, true, `${name} is idempotent`)
+    assert.equal(tool.annotations.idempotentHint, undefined, `${name} must not invite a blind retry`)
     assert.equal(tool.annotations.destructiveHint, false)
     // Must point at the pre-existing engine, never a second one built inside the connector.
     assert.match(tool.canonicalContract, /microsoft-transition-sync|meta-sync|google-ads-sync|tiktok-sync/)

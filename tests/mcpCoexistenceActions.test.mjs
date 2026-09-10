@@ -98,10 +98,13 @@ test('calendar write matches by durable identity, never by title', () => {
 test('calendar write records PARTIAL SYNC and withholds Microsoft freshness', () => {
   const h = slice('const handleUpsertCalendarEvent', 'async function invokeSiblingFunction')
   assert.match(h, /outlook_write_succeeded === false/)
-  assert.match(h, /if \(!partialSync\) writable\.microsoft_last_synced_at = nowIso/,
+  assert.match(h, /if \(!partialSync && effectiveMicrosoftEventId && effectiveMicrosoftCalendarId\)[\s\S]*writable\.microsoft_last_synced_at = nowIso/,
     'freshness is only stamped when the Outlook side actually landed')
   assert.match(h, /PARTIAL_SYNC/)
   assert.match(h, /never claim both were updated/)
+  assert.match(h, /typeof input\.outlook_write_succeeded !== 'boolean'/)
+  assert.match(h, /requires both microsoft_event_id and microsoft_calendar_id/)
+  assert.match(h, /resolve to different durable identities/)
 })
 
 test('calendar write keeps CG Calendar separate from Client Schedule', () => {
@@ -149,12 +152,15 @@ test('an unmapped Content Run is reported, and no folder convention is invented'
 
 const RUN_CLIENT = 'c1'
 
-test('the Assistant resolves links itself, deterministically by schedule order', () => {
+test('the Assistant resolves links itself by exact month and video number', () => {
   const plan = ops.planGuidelineVideoLinks(
-    [{ id: 'v2', position: 2, client_id: RUN_CLIENT }, { id: 'v1', position: 1, client_id: RUN_CLIENT }],
     [
-      { id: 'd_late', client_id: RUN_CLIENT, scheduled_date: '2026-09-20', title: 'Late' },
-      { id: 'd_early', client_id: RUN_CLIENT, scheduled_date: '2026-09-10', title: 'Early' },
+      { id: 'v2', position: 2, month: '2026-09', video_number: 2, client_id: RUN_CLIENT },
+      { id: 'v1', position: 1, month: '2026-09', video_number: 1, client_id: RUN_CLIENT },
+    ],
+    [
+      { id: 'd_late', client_id: RUN_CLIENT, month: '2026-09', instance_number: 2, scheduled_date: '2026-09-20', title: 'Late' },
+      { id: 'd_early', client_id: RUN_CLIENT, month: '2026-09', instance_number: 1, scheduled_date: '2026-09-10', title: 'Early' },
     ],
     RUN_CLIENT,
   )
@@ -166,13 +172,41 @@ test('the Assistant resolves links itself, deterministically by schedule order',
 
 test('one deliverable is never claimed by two videos', () => {
   const plan = ops.planGuidelineVideoLinks(
-    [{ id: 'v1', position: 1 }, { id: 'v2', position: 2 }],
-    [{ id: 'd1', client_id: RUN_CLIENT, scheduled_date: '2026-09-10' }],
+    [{ id: 'v1', position: 1, title: 'Video' }, { id: 'v2', position: 2, title: 'Video' }],
+    [{ id: 'd1', client_id: RUN_CLIENT, title: 'Video', scheduled_date: '2026-09-10' }],
     RUN_CLIENT,
   )
   assert.equal(plan[0].outcome, 'linkable')
   assert.equal(plan[1].outcome, 'no_candidate')
   assert.match(plan[1].reason, /Reported rather than guessed/)
+})
+
+test('ambiguous or merely ordered same-client candidates are never guessed', () => {
+  const ambiguous = ops.planGuidelineVideoLinks(
+    [{ id: 'v1', position: 1, month: '2026-09', title: 'Video' }],
+    [
+      { id: 'd1', client_id: RUN_CLIENT, month: '2026-09', title: 'Video' },
+      { id: 'd2', client_id: RUN_CLIENT, month: '2026-09', code: 'Video' },
+    ],
+    RUN_CLIENT,
+  )
+  assert.equal(ambiguous[0].outcome, 'ambiguous')
+
+  const orderOnly = ops.planGuidelineVideoLinks(
+    [{ id: 'v1', position: 1, title: 'Unrelated concept' }],
+    [{ id: 'd1', client_id: RUN_CLIENT, title: 'Different item', scheduled_date: '2026-09-01' }],
+    RUN_CLIENT,
+  )
+  assert.equal(orderOnly[0].outcome, 'no_candidate')
+})
+
+test('deliverables claimed by another active guideline are unavailable', () => {
+  const plan = ops.planGuidelineVideoLinks(
+    [{ id: 'v1', position: 1, title: 'Video' }],
+    [{ id: 'd1', client_id: RUN_CLIENT, title: 'Video', claimed_elsewhere: true }],
+    RUN_CLIENT,
+  )
+  assert.equal(plan[0].outcome, 'no_candidate')
 })
 
 test('cross-client linkage fails closed', () => {
@@ -222,7 +256,7 @@ test('connected and not-connected are determinate states', () => {
   assert.equal(ops.summarizeProviderHealth('meta', { connected: true }).state, 'connected')
   const nc = ops.summarizeProviderHealth('tiktok', { connected: false })
   assert.equal(nc.state, 'not_connected')
-  assert.equal(nc.degraded, false, 'a known-absent connection is not a failure')
+  assert.equal(nc.degraded, true, 'a known-absent connection is not ready for Morning Ops')
   assert.equal(ops.summarizeProviderHealth('meta', { error: 'token expired' }).state, 'degraded')
 })
 
@@ -249,6 +283,10 @@ test('provider actions reuse existing functions and change no authorisation', ()
   const sync = slice('const handleRunProviderSync', 'const handleListCompanyTasks')
   assert.match(sync, /summary\.state !== 'connected'/)
   assert.match(sync, /skipped: true/)
+  assert.match(sync, /mode: 'previous_completed_month'/)
+  assert.match(sync, /startDate: input\.start_date, endDate: input\.end_date/)
+  assert.match(sync, /periodMonth/)
+  assert.match(sync, /client_id is required/)
 })
 
 // ── Catalogue + gating ──────────────────────────────────────────────────────
@@ -274,6 +312,30 @@ test('company-wide actions require an explicit company_admin context', () => {
     assert.equal(ctx.assertToolAllowedInContext(name, 'client').allowed, false)
     assert.equal(ctx.assertToolAllowedInContext(name, 'company_admin').allowed, true)
   }
+})
+
+test('internal calendar/content-run actions are unavailable in client Projects', () => {
+  for (const name of ['find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event']) {
+    assert.equal(ctx.assertToolAllowedInContext(name, 'client').allowed, false)
+    assert.equal(ctx.assertToolAllowedInContext(name, 'staff').allowed, true)
+    assert.equal(ctx.assertToolAllowedInContext(name, 'company_admin').allowed, true)
+  }
+})
+
+test('default staff task reads exclude terminal, archived and source-removed history', () => {
+  const activeStates = slice('const ACTIVE_TASK_STATES', 'const handleGetMyDay')
+  for (const state of ['to_do', 'in_progress', 'blocked', 'waiting_client', 'ready_internal_review', 'approved', 'scheduled']) {
+    assert.match(activeStates, new RegExp(`'${state}'`), `${state} remains visible as active work`)
+  }
+  assert.doesNotMatch(activeStates, /'done'|'completed'/, 'terminal states are not in the default active set')
+  const day = slice('const handleGetMyDay', 'const handleListMyTasks')
+  const tasks = slice('const handleListMyTasks', 'const handleGetTask')
+  for (const handler of [day, tasks]) {
+    assert.match(handler, /\.is\('archived_at', null\)/)
+    assert.match(handler, /\.is\('microsoft_source_removed_at', null\)/)
+    assert.match(handler, /\.in\('status', ACTIVE_TASK_STATES\)/)
+  }
+  assert.match(tasks, /if \(input\.status\)/, 'explicit status still allows a history query')
 })
 
 test('record mutations are idempotency-keyed', () => {

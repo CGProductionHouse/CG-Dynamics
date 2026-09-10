@@ -141,6 +141,8 @@ export interface GuidelineVideoRow {
   id?: unknown
   title?: unknown
   position?: unknown
+  month?: unknown
+  video_number?: unknown
   status?: unknown
   deliverable_id?: unknown
   client_id?: unknown
@@ -150,11 +152,15 @@ export interface DeliverableRow {
   id?: unknown
   client_id?: unknown
   title?: unknown
+  code?: unknown
   deliverable_type?: unknown
+  month?: unknown
+  instance_number?: unknown
   scheduled_date?: unknown
+  claimed_elsewhere?: unknown
 }
 
-export type LinkOutcome = 'already_linked' | 'linkable' | 'blocked_cross_client' | 'no_candidate'
+export type LinkOutcome = 'already_linked' | 'linkable' | 'blocked_cross_client' | 'ambiguous' | 'no_candidate'
 
 export interface VideoLinkPlan {
   video_id: string
@@ -172,8 +178,10 @@ export interface VideoLinkPlan {
  *
  * Fails closed: a video already carrying a deliverable from a DIFFERENT client is reported
  * as blocked rather than silently relinked, and a video with no unambiguous same-client
- * candidate is reported as `no_candidate` rather than guessed. Deliverables already claimed
- * by an earlier video are not reused, preserving the one-active-link constraint.
+ * candidate is reported rather than guessed. An exact video number (within the same month)
+ * is preferred; otherwise an exact normalized title/code match is accepted only when unique.
+ * Position/order alone is never treated as identity. Deliverables already claimed by another
+ * active video are not reused, preserving the one-active-link constraint.
  */
 export function planGuidelineVideoLinks(
   videos: ReadonlyArray<GuidelineVideoRow> | null | undefined,
@@ -189,6 +197,12 @@ export function planGuidelineVideoLinks(
     const existing = text(v.deliverable_id)
     if (existing) claimed.add(existing)
   }
+  for (const d of sameClient) {
+    const id = text(d.id)
+    if (id && d.claimed_elsewhere === true) claimed.add(id)
+  }
+
+  const normalized = (value: unknown) => (text(value) ?? '').replace(/\s+/g, ' ').toLocaleLowerCase()
 
   return ordered.map(v => {
     const videoId = text(v.id) ?? ''
@@ -208,19 +222,30 @@ export function planGuidelineVideoLinks(
       return { video_id: videoId, title, position, outcome: 'already_linked', deliverable_id: existing, reason: 'Already linked to an exact same-client deliverable. Left unchanged.' }
     }
 
-    const candidates = sameClient.filter(d => !claimed.has(text(d.id) ?? ''))
+    const available = sameClient.filter(d => !claimed.has(text(d.id) ?? ''))
+    const videoMonth = text(v.month)
+    const videoNumber = Number(v.video_number)
+    const hasVideoNumber = Number.isFinite(videoNumber) && videoNumber > 0
+    const monthCompatible = (d: DeliverableRow) => !videoMonth || text(d.month) === videoMonth
+    const byNumber = hasVideoNumber
+      ? available.filter(d => monthCompatible(d) && Number(d.instance_number) === videoNumber)
+      : []
+    const videoTitle = normalized(v.title)
+    const byTitle = videoTitle
+      ? available.filter(d => monthCompatible(d) && [normalized(d.title), normalized(d.code)].includes(videoTitle))
+      : []
+    const candidates = byNumber.length > 0 ? byNumber : byTitle
+
     if (candidates.length === 0) {
-      return { video_id: videoId, title, position, outcome: 'no_candidate', deliverable_id: null, reason: 'No unclaimed same-client monthly deliverable is available for this video. Reported rather than guessed.' }
+      return { video_id: videoId, title, position, outcome: 'no_candidate', deliverable_id: null, reason: 'No unique exact same-client deliverable matched this video by month + video number or exact title/code. Reported rather than guessed.' }
     }
-    // Deterministic: earliest scheduled, then id, so repeated runs plan identically.
-    const chosen = [...candidates].sort((a, b) => {
-      const sa = text(a.scheduled_date) ?? '9999-12-31'
-      const sb = text(b.scheduled_date) ?? '9999-12-31'
-      return sa === sb ? (text(a.id) ?? '').localeCompare(text(b.id) ?? '') : sa.localeCompare(sb)
-    })[0]
+    if (candidates.length > 1) {
+      return { video_id: videoId, title, position, outcome: 'ambiguous', deliverable_id: null, reason: `${candidates.length} same-client deliverables matched the exact available identity fields. Refusing to choose by date or order.` }
+    }
+    const chosen = candidates[0]
     const chosenId = text(chosen.id) ?? ''
     claimed.add(chosenId)
-    return { video_id: videoId, title, position, outcome: 'linkable', deliverable_id: chosenId, reason: `Resolved to the earliest unclaimed same-client deliverable (${text(chosen.title) ?? chosenId}).` }
+    return { video_id: videoId, title, position, outcome: 'linkable', deliverable_id: chosenId, reason: `Resolved by ${byNumber.length === 1 ? 'exact month + video number' : 'unique exact title/code'} to ${text(chosen.title) ?? chosenId}.` }
   })
 }
 
@@ -256,7 +281,7 @@ export function summarizeProviderHealth(
     return { provider, state: 'degraded', degraded: true, detail: err }
   }
   if (response.connected === false) {
-    return { provider, state: 'not_connected', degraded: false, detail: 'No authorised connection is configured. This is a known state, not a failure.' }
+    return { provider, state: 'not_connected', degraded: true, detail: 'No authorised connection is configured. This is a known state, but the provider is not ready for Morning Ops sync.' }
   }
   if (response.connected === true) {
     return { provider, state: 'connected', degraded: false, detail: 'Authorised connection present.' }

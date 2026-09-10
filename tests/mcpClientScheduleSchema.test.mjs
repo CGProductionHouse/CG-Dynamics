@@ -19,7 +19,7 @@ const INDEX = read('../supabase/functions/cg-dynamics-mcp/index.ts')
 // Columns that genuinely exist on public.monthly_deliverables. `client_name` is NOT one of
 // them — it lives on public.clients and is reached through monthly_deliverables_client_id_fkey.
 const REAL_COLUMNS = new Set([
-  'id', 'client_id', 'month', 'deliverable_type', 'title',
+  'id', 'client_id', 'month', 'code', 'instance_number', 'deliverable_type', 'title',
   'scheduled_date', 'due_date', 'production_status', 'assigned_to_name',
   // #325 read-only provenance (phase-15a/17a columns, verified against live schema).
   'package_id', 'template_id', 'microsoft_source_type', 'microsoft_plan_id',

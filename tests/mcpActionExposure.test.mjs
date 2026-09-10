@@ -31,13 +31,13 @@ const listedTools = () => catalog.CG_DYNAMICS_MCP_TOOLS.map(tool => ({
 
 // ── Action exposure ─────────────────────────────────────────────────────────
 
-test('tools/list exposes exactly 25 tools including resolve_project_context', () => {
+test('tools/list exposes exactly 34 tools including resolve_project_context', () => {
   const tools = listedTools()
-  assert.equal(tools.length, 25)
+  assert.equal(tools.length, 34)
   const names = tools.map(t => t.name)
   assert.ok(names.includes('resolve_project_context'), 'context bootstrap must be exposed')
   assert.equal(names[0], 'resolve_project_context', 'bootstrap is listed first')
-  assert.equal(new Set(names).size, 25, 'no duplicate tool names')
+  assert.equal(new Set(names).size, 34, 'no duplicate tool names')
 })
 
 test('every listed tool advertises the OAuth securityScheme with the narrowed #318 scopes', () => {
@@ -134,11 +134,12 @@ test('RFC 9728 PRM endpoint and HTTP 401 challenge remain intact', () => {
 })
 
 test('authentication still strictly precedes any use of the request body', () => {
-  const authIdx = INDEX.indexOf('const auth = await authenticateStaff(req)')
-  const parseIdx = INDEX.indexOf('body = await req.json()')
+  const entry = INDEX.slice(INDEX.indexOf('Deno.serve(async (req) =>'))
+  const authIdx = entry.indexOf('const auth = await authenticateStaff(req)')
+  const parseIdx = entry.indexOf('body = await req.json()')
   assert.ok(authIdx > 0 && parseIdx > authIdx, 'authenticateStaff must run before the body is read')
-  assert.equal(INDEX.match(/await req\.json\(\)/g)?.length, 1, 'JSON-RPC body must be parsed exactly once')
-  assert.equal(INDEX.match(/let body\b/g)?.length, 1, 'there must be exactly one body declaration')
+  assert.equal(entry.match(/await req\.json\(\)/g)?.length, 1, 'JSON-RPC body must be parsed exactly once')
+  assert.equal(entry.match(/let body\b/g)?.length, 1, 'there must be exactly one JSON-RPC body declaration')
 })
 
 test('missing and invalid bearer tokens both fail closed with HTTP 401', () => {

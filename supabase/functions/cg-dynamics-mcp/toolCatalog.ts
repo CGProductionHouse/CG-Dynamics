@@ -106,27 +106,37 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'run_microsoft_sync', title: 'Run Microsoft reconciliation',
-    description: 'Company-admin only. Runs the EXISTING durable Microsoft to Dynamics reconciliation job (job_start then bounded, idempotent job_process units) to refresh Planner task and Outlook/CG Calendar mirror freshness, and returns PASS/DEGRADED/FAIL with per-source completeness. Does NOT auto-apply Client Schedule or monthly_deliverables business decisions and never touches MASTER CLIENT TO DO or protected Client Socials plans. If it does not finish inside the step budget, call again with the returned job_id.',
+    description: 'Company-admin only. Runs the EXISTING durable Microsoft reconciliation PREVIEW job (job_start then bounded job_process units), returning PASS/DEGRADED/FAIL with per-source completeness. It fetches Microsoft truth but does not claim Dynamics mirrors were applied or fresh. It cannot auto-apply Client Schedule/monthly_deliverables decisions and never changes MASTER CLIENT TO DO or protected Client Socials plans. If unfinished, call again with the returned job_id.',
     inputSchema: objectSchema({
       job_id: { type: 'string', description: 'Resume an in-flight job returned by a previous call.' },
       range_start: { type: 'string' }, range_end: { type: 'string' },
       max_steps: { type: 'integer', minimum: 1, maximum: 40 },
     }),
-    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'microsoft-transition-sync durable job architecture (#325)',
   },
   {
     name: 'get_provider_health', title: 'Get provider health',
     description: 'Company-admin only. Compact Morning Ops health/freshness for Meta, Google Ads and TikTok using each existing connection-status function. Read-only: no OAuth, permission, secret, account-mapping or publishing change. An unreadable provider is reported UNKNOWN, never as a confirmed empty or disconnected state.',
-    inputSchema: objectSchema({ providers: { type: 'array', items: { enum: ['meta', 'google_ads', 'tiktok'] } } }),
+    inputSchema: objectSchema({
+      providers: { type: 'array', items: { enum: ['meta', 'google_ads', 'tiktok'] } },
+      client_id: { ...uuid, description: 'Optional exact client mapping to inspect. Required for a targeted TikTok health check; omit for company-wide TikTok mapping inventory.' },
+    }),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'meta/google-ads/tiktok connection-status functions (#325)',
   },
   {
     name: 'run_provider_sync', title: 'Run routine provider sync',
     description: 'Company-admin only. Targeted routine sync for ONE already-authorised, already-mapped provider account via its existing sync function. Refuses to run when the provider is not already connected. Never authorises an account, changes mappings or permissions, or publishes.',
-    inputSchema: objectSchema({ provider: { enum: ['meta', 'google_ads', 'tiktok'] }, client_id: uuid }, ['provider']),
-    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    inputSchema: objectSchema({
+      provider: { enum: ['meta', 'google_ads', 'tiktok'] },
+      client_id: uuid,
+      month: { type: 'string', pattern: '^\\d{4}-\\d{2}$', description: 'Meta completed month (YYYY-MM).' },
+      start_date: date,
+      end_date: date,
+      period_month: { type: 'string', pattern: '^\\d{4}-\\d{2}$', description: 'TikTok reporting month (YYYY-MM).' },
+    }, ['provider', 'client_id']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'meta-sync / google-ads-sync / tiktok-sync (#325)',
   },
   {
@@ -142,7 +152,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'link_content_run_deliverables', title: 'Link Content Run to deliverables',
-    description: 'Assistant-owned linkage: resolves Content Run -> its one canonical Content Guideline -> ordered videos -> exact SAME-CLIENT monthly deliverables, and links them. Staff confirm only what happened on the shoot and are never asked to choose or match an ID. Defaults to dry_run (plan only). Cross-client links and ambiguous candidates fail closed and are reported, never guessed. Client Schedule rows themselves are not modified.',
+    description: 'Internal Assistant-owned linkage: resolves Content Run -> its one canonical Content Guideline -> ordered videos -> exact SAME-CLIENT monthly deliverables using canonical month/video-number or a unique exact title/code match. Staff confirm only real-world shoot facts and are never asked to choose IDs. Defaults to dry_run. Cross-client, already-claimed and ambiguous candidates fail closed. Client Schedule rows are read-only.',
     inputSchema: objectSchema({
       content_run_id: uuid,
       dry_run: { type: 'boolean', description: 'Default true. Set false to apply the resolved plan.' },
@@ -164,9 +174,9 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
       location: { type: 'string' }, notes: { type: 'string' }, assigned_to_name: { type: 'string' },
       client_id: uuid, client_name: { type: 'string' },
       status: { enum: ['planned', 'confirmed', 'completed', 'cancelled'] },
-      outlook_write_succeeded: { type: 'boolean', description: 'False when the Outlook side did not succeed, so PARTIAL SYNC is recorded.' },
+      outlook_write_succeeded: { type: 'boolean', description: 'Required explicit evidence from the caller. False records PARTIAL SYNC; true requires a complete durable Outlook calendar/event identity.' },
       idempotency_key: uuid,
-    }, ['action', 'idempotency_key']),
+    }, ['action', 'outlook_write_succeeded', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: 'main', canonicalContract: 'company_calendar_events CG Calendar truth + durable Outlook identity (#325)',
   },
