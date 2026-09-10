@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { GoogleAdsResults } from '../../components/client/GoogleAdsResults'
+import { WebsiteAfterTheClick } from '../../components/client/WebsiteAfterTheClick'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
@@ -9,6 +10,7 @@ import {
   type GoogleAdsDashboardData,
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
+import { buildWebsiteAfterClickProjection } from '../../lib/websiteAfterClick'
 import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 import { readStrategyData } from '../../lib/strategyEngine'
 
@@ -100,7 +102,17 @@ export default function ClientCampaignsPage() {
       ) : !data.report ? (
         <CampaignMessage message="No published campaign reporting is available yet." />
       ) : data.state === 'data' && data.dashboard ? (
-        <GoogleAdsResults dashboard={data.dashboard} />
+        <div className="space-y-8">
+          <GoogleAdsResults dashboard={data.dashboard} />
+          {/* #335: same canonical projection as the client report and Admin Preview. */}
+          <WebsiteAfterTheClick
+            projection={buildWebsiteAfterClickProjection({
+              adsDashboard: data.dashboard,
+              ga4: null,
+              ctaDefinitions: [],
+            })}
+          />
+        </div>
       ) : (
         <GoogleAdsEmptyState state={data.state} />
       )}
