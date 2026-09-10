@@ -11,7 +11,7 @@
 // is preserved exactly and is NOT broadened.
 
 /** Bump when the policy text/rules change. Returned to the Assistant on every bootstrap. */
-export const STAFF_ASSISTANT_POLICY_VERSION = '2026.09.10-coexistence-1'
+export const STAFF_ASSISTANT_POLICY_VERSION = '2026.09.10-coexistence-2'
 
 /** CA decision effective date for this policy (#325). */
 export const STAFF_ASSISTANT_POLICY_EFFECTIVE_AT = '2026-09-10T00:00:00Z'
@@ -70,8 +70,9 @@ const FRESHNESS_AUTHORITY: Record<string, string> = {
 
 const DUAL_WRITE_RULE = [
   'Scope: ONLY a normal operational task or meeting the staff member explicitly asks the Assistant to create, update, reschedule, complete or cancel.',
-  'Write the change to the live Microsoft source AND the linked CG Dynamics record, matching by durable IDs, never by title.',
-  'If only one side succeeds, report PARTIAL SYNC, preserve the successful write, and queue the failed side for reconciliation. Never claim both were updated.',
+  'TASKS during the temporary coexistence period: write the exact live Teams/Planner task first through the connected Microsoft action, matched by durable IDs, then call run_microsoft_sync so the existing durable sync engine refreshes the Dynamics mirror. Do not directly write a second Microsoft-backed task state into Dynamics.',
+  'CALENDAR events use the narrow exact-ID coexistence action: write the explicitly requested Outlook change and call upsert_calendar_event with the exact durable event ID; PARTIAL SYNC is recorded when only one side succeeds. Client Schedule is never written.',
+  'If Microsoft succeeds but task reconciliation fails or is delayed, report DYNAMICS SYNC PENDING or PARTIAL SYNC, preserve the successful Microsoft write, and never claim Dynamics is current.',
   'Retries must be idempotent and must not create duplicates. Completion in Microsoft must not leave the Dynamics mirror active.',
   'This does NOT mean every Dynamics-only CG-native task must exist in Microsoft. Package-generated content obligations, poster/design daily tasks, Dynamics recurring tasks and content-run follow-up may remain Dynamics-only.',
   'Do not build a broad write-back engine. Microsoft writes are limited to the exact item the user changed and its exact linked counterpart.',
