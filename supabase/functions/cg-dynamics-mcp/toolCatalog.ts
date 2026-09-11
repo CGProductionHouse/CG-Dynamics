@@ -303,7 +303,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'create_task', title: 'Create task',
-    description: 'Create one canonical Dynamics task through the audited CG Assistant action. Repeated calls require a caller-scoped idempotency key.',
+    description: 'Create one canonical Dynamics task through the audited CG Assistant action. The task is assigned to you unless assignee_name names another active staff member, which only a manager may do. Repeated calls require a caller-scoped idempotency key.',
     inputSchema: objectSchema({ title: { type: 'string', minLength: 1, maxLength: 240 }, assignee_name: { type: 'string' }, due_date: date, client_id: uuid, notes: { type: 'string', maxLength: 4000 }, idempotency_key: uuid }, ['title','idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: 'main', canonicalContract: 'create_assistant_task RPC',
@@ -320,7 +320,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     description: 'Update one owned/managed lead state, qualification, last or next action, or follow-up date through the canonical lead service.',
     inputSchema: objectSchema({ lead_id: uuid, stage: { type: 'string' }, qualification: { type: 'string' }, last_action: { type: 'string', maxLength: 2000 }, next_action: { type: 'string', maxLength: 2000 }, follow_up_at: { type: 'string', format: 'date-time' }, idempotency_key: uuid }, ['lead_id','idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
-    dependency: '#305', canonicalContract: 'business_development_leads RLS/service',
+    dependency: '#305', canonicalContract: 'update_business_development_lead_as_actor RPC (app RLS owner/manager rule)',
   },
   {
     name: 'add_lead_research', title: 'Add lead research',
@@ -368,7 +368,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'create_recurring_task', title: 'Create recurring task template',
-    description: 'Create a recurring Dynamics task template with a recurrence rule. Instances are materialised automatically within a 14-day window. Repeated calls require a caller-scoped idempotency key.',
+    description: 'Create a recurring Dynamics task template with a recurrence rule. Instances are materialised automatically within a 14-day window. The template is assigned to you unless assignee_name names another active staff member, which only a manager may do. Repeated calls require a caller-scoped idempotency key.',
     inputSchema: objectSchema({
       title: { type: 'string', minLength: 1, maxLength: 240 },
       recurrence_rule: { type: 'string', minLength: 1, maxLength: 100, description: 'RRULE subset: FREQ=DAILY|WEEKLY|MONTHLY, optional INTERVAL, BYDAY (MO..SU), BYMONTHDAY (1-28).' },
@@ -411,7 +411,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
       idempotency_key: uuid,
     }, ['lead_id', 'activity_type', 'summary', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
-    dependency: '#305', canonicalContract: 'business_development_leads last_action/next_action fields',
+    dependency: '#305', canonicalContract: 'update_business_development_lead_as_actor RPC (owner-only) for last_action/next_action fields',
   },
   {
     name: 'get_content_run_plan', title: 'Get content run plan',
