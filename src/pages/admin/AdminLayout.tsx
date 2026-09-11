@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useEffectEvent, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { MyDayContextStoreProvider } from '../../contexts/MyDayContextStore'
 import BrandMark from '../../components/BrandMark'
 import { roleLabel } from '../../lib/roles'
 import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'
@@ -330,95 +331,97 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main
-        className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
-        aria-hidden={assistantFullscreen || undefined}
-        inert={assistantFullscreen || undefined}
-      >
-        <Suspense fallback={<div className="min-h-[40vh]" aria-label="Loading page" />}><Outlet /></Suspense>
-      </main>
-
-      {/* The bottom navigation is removed — not merely covered — while the
-          assistant is full-screen, so it cannot be tapped through and does not
-          compete with the keyboard. It returns as soon as the sheet closes. */}
-      {!assistantFullscreen && (
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
-          <div className="grid grid-cols-5 gap-1 px-2 pt-1.5" style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}>
-            {mobilePrimaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="min-h-11 min-w-11 rounded-md px-1 text-center text-[11px] font-bold text-brand-primary transition-colors hover:text-white"
-              aria-expanded={mobileMenuOpen}
-              aria-controls="staff-mobile-navigation"
-            >
-              More
-            </button>
-          </div>
-        </nav>
-      )}
-
-      {notificationOpen && (
-        <section
-          id="staff-notification-center"
-          aria-label="Notifications"
-          className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] top-[4.5rem] z-50 flex flex-col overflow-hidden rounded-xl border border-white/12 bg-brand-surface shadow-2xl md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:w-[25rem]"
+      <MyDayContextStoreProvider>
+        <main
+          className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
+          aria-hidden={assistantFullscreen || undefined}
+          inert={assistantFullscreen || undefined}
         >
-          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
-            <div>
-              <h2 className="font-black text-white">Notifications</h2>
-              <p className="text-xs text-brand-primary/60">{unreadCount > 0 ? `${unreadCount} unread` : 'You are up to date'}</p>
-            </div>
-            <button type="button" onClick={() => setNotificationOpen(false)} className="min-h-11 min-w-11 rounded-md border border-white/10 px-2 text-sm font-bold text-brand-primary hover:text-white">Close</button>
-          </div>
-          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-2">
-            <button type="button" onClick={() => void refreshNotifications(true)} className="min-h-11 rounded-md px-2 text-sm font-bold text-brand-teal hover:bg-white/[0.05]">Refresh</button>
-            <button type="button" onClick={() => void readAllNotifications()} disabled={unreadCount === 0} className="min-h-11 rounded-md px-2 text-sm font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white disabled:cursor-not-allowed disabled:opacity-40">Mark all read</button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3">
-            {notificationsLoading && <p className="px-2 py-8 text-center text-sm text-brand-primary/70">Loading notifications...</p>}
-            {!notificationsLoading && notificationsError && (
-              <div className="rounded-lg border border-red-400/25 bg-red-400/10 p-3 text-sm text-red-100">
-                <p>{notificationsError}</p>
-                <button type="button" onClick={() => void refreshNotifications(true)} className="mt-2 min-h-11 font-bold underline">Try again</button>
-              </div>
-            )}
-            {!notificationsLoading && !notificationsError && notifications.length === 0 && (
-              <div className="px-3 py-10 text-center">
-                <p className="font-bold text-white">No notifications yet</p>
-                <p className="mt-1 text-sm text-brand-primary/60">Job, schedule, and task updates will appear here.</p>
-              </div>
-            )}
-            {!notificationsLoading && notifications.length > 0 && (
-              <ul className="space-y-2">
-                {notifications.map(notification => {
-                  const link = safeNotificationLink(notification)
-                  return (
-                    <li key={notification.id} className={`rounded-lg border p-3 ${notification.read_at ? 'border-white/8 bg-white/[0.02]' : 'border-brand-teal/25 bg-brand-teal/[0.06]'}`}>
-                      <div className="flex items-start gap-2">
-                        {!notification.read_at && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-teal" aria-label="Unread" />}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-black text-white">{notification.title}</p>
-                          <p className="mt-1 text-sm leading-5 text-brand-primary/75">{notification.body?.trim() || notificationFallback(notification.type)}</p>
-                          <p className="mt-2 text-xs text-brand-primary/45">{notificationTime(notification.created_at)}</p>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex flex-wrap justify-end gap-2">
-                        {(notification.type === 'assistant_day' || notification.type === 'assistant_reminder') && <button type="button" onClick={() => void snoozeNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Snooze 30m</button>}
-                        {(notification.type === 'assistant_day' || notification.type === 'assistant_reminder') && <button type="button" onClick={() => void dismissNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Dismiss</button>}
-                        {!notification.read_at && <button type="button" onClick={() => void readNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Mark read</button>}
-                        {link && <button type="button" onClick={() => void openNotification(notification)} className="min-h-11 rounded-md bg-brand-teal/15 px-3 text-xs font-black text-brand-teal hover:bg-brand-teal/25">Open</button>}
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
-        </section>
-      )}
+          <Suspense fallback={<div className="min-h-[40vh]" aria-label="Loading page" />}><Outlet /></Suspense>
+        </main>
 
-      {backgroundReady && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} /></Suspense>}
+        {/* The bottom navigation is removed — not merely covered — while the
+            assistant is full-screen, so it cannot be tapped through and does not
+            compete with the keyboard. It returns as soon as the sheet closes. */}
+        {!assistantFullscreen && (
+          <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
+            <div className="grid grid-cols-5 gap-1 px-2 pt-1.5" style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}>
+              {mobilePrimaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="min-h-11 min-w-11 rounded-md px-1 text-center text-[11px] font-bold text-brand-primary transition-colors hover:text-white"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="staff-mobile-navigation"
+              >
+                More
+              </button>
+            </div>
+          </nav>
+        )}
+
+        {notificationOpen && (
+          <section
+            id="staff-notification-center"
+            aria-label="Notifications"
+            className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] top-[4.5rem] z-50 flex flex-col overflow-hidden rounded-xl border border-white/12 bg-brand-surface shadow-2xl md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:w-[25rem]"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+              <div>
+                <h2 className="font-black text-white">Notifications</h2>
+                <p className="text-xs text-brand-primary/60">{unreadCount > 0 ? `${unreadCount} unread` : 'You are up to date'}</p>
+              </div>
+              <button type="button" onClick={() => setNotificationOpen(false)} className="min-h-11 min-w-11 rounded-md border border-white/10 px-2 text-sm font-bold text-brand-primary hover:text-white">Close</button>
+            </div>
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-2">
+              <button type="button" onClick={() => void refreshNotifications(true)} className="min-h-11 rounded-md px-2 text-sm font-bold text-brand-teal hover:bg-white/[0.05]">Refresh</button>
+              <button type="button" onClick={() => void readAllNotifications()} disabled={unreadCount === 0} className="min-h-11 rounded-md px-2 text-sm font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white disabled:cursor-not-allowed disabled:opacity-40">Mark all read</button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3">
+              {notificationsLoading && <p className="px-2 py-8 text-center text-sm text-brand-primary/70">Loading notifications...</p>}
+              {!notificationsLoading && notificationsError && (
+                <div className="rounded-lg border border-red-400/25 bg-red-400/10 p-3 text-sm text-red-100">
+                  <p>{notificationsError}</p>
+                  <button type="button" onClick={() => void refreshNotifications(true)} className="mt-2 min-h-11 font-bold underline">Try again</button>
+                </div>
+              )}
+              {!notificationsLoading && !notificationsError && notifications.length === 0 && (
+                <div className="px-3 py-10 text-center">
+                  <p className="font-bold text-white">No notifications yet</p>
+                  <p className="mt-1 text-sm text-brand-primary/60">Job, schedule, and task updates will appear here.</p>
+                </div>
+              )}
+              {!notificationsLoading && notifications.length > 0 && (
+                <ul className="space-y-2">
+                  {notifications.map(notification => {
+                    const link = safeNotificationLink(notification)
+                    return (
+                      <li key={notification.id} className={`rounded-lg border p-3 ${notification.read_at ? 'border-white/8 bg-white/[0.02]' : 'border-brand-teal/25 bg-brand-teal/[0.06]'}`}>
+                        <div className="flex items-start gap-2">
+                          {!notification.read_at && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-teal" aria-label="Unread" />}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-black text-white">{notification.title}</p>
+                            <p className="mt-1 text-sm leading-5 text-brand-primary/75">{notification.body?.trim() || notificationFallback(notification.type)}</p>
+                            <p className="mt-2 text-xs text-brand-primary/45">{notificationTime(notification.created_at)}</p>
+                          </div>
+                        </div>
+                        <div className="mt-2 flex flex-wrap justify-end gap-2">
+                          {(notification.type === 'assistant_day' || notification.type === 'assistant_reminder') && <button type="button" onClick={() => void snoozeNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Snooze 30m</button>}
+                          {(notification.type === 'assistant_day' || notification.type === 'assistant_reminder') && <button type="button" onClick={() => void dismissNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Dismiss</button>}
+                          {!notification.read_at && <button type="button" onClick={() => void readNotification(notification)} className="min-h-11 rounded-md px-3 text-xs font-bold text-brand-primary hover:bg-white/[0.05] hover:text-white">Mark read</button>}
+                          {link && <button type="button" onClick={() => void openNotification(notification)} className="min-h-11 rounded-md bg-brand-teal/15 px-3 text-xs font-black text-brand-teal hover:bg-brand-teal/25">Open</button>}
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          </section>
+        )}
+
+        {backgroundReady && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} /></Suspense>}
+      </MyDayContextStoreProvider>
     </div>
   )
 }
