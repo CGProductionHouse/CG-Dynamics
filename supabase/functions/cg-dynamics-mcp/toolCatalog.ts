@@ -1,4 +1,4 @@
-export type McpToolDependency = 'main' | '#241/#294' | '#305' | '#307' | '#313'
+export type McpToolDependency = 'main' | '#241/#294' | '#305' | '#307' | '#313' | '#341'
 
 export type JsonSchema = Readonly<Record<string, unknown>>
 
@@ -216,10 +216,76 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_client_context', title: 'Get exact client context',
-    description: 'Retrieve compact task-specific context for one exact authorised client and optional exact branch/entity scope; never fall back to a sibling or national brand.',
+    description: 'Retrieve compact task-specific context for one exact authorised client and optional exact branch/entity scope; never fall back to a sibling or national brand. Also returns recorded_client_updates: durable updates recorded from this exact client Project (#341), newest first, with provenance.',
     inputSchema: objectSchema({ client_id: uuid, task_type: { enum: ['caption','content_idea','script','image_edit','factual_lookup','strategy','general'] }, scope_key: { type: 'string' }, supplied_context: { type: 'string', maxLength: 4000 } }, ['client_id','task_type']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#241/#294', canonicalContract: 'supabase/functions/get-client-context',
+  },
+  {
+    name: 'list_assignable_staff', title: 'List assignable CG staff',
+    description: 'Read the active CG staff directory for assigning work: exact profile_id, full name and role only — never email, phone, pay or any other profile data. Use it to turn a name such as "Sydney" into one exact assignee_profile_id before create_client_followup_task or record_client_request. Reading or assigning never changes who is acting.',
+    inputSchema: objectSchema({ query: { type: 'string', maxLength: 80, description: 'Optional case-insensitive name fragment.' } }),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#341', canonicalContract: 'profiles (active workforce roles) — id, full_name, role only',
+  },
+  {
+    name: 'record_client_request', title: 'Record a client request',
+    description: 'Client Project only (#341). Record one real request from THIS exact client as a canonical Dynamics client request (Operations board, Client Requests bucket, priority client_request). The client always comes from the Project context, never from input. Optionally assign one exact active staff member (assignee_profile_id from list_assignable_staff); the assignee is the target, not the caller, and gains no permissions. Give a due date only when one was explicitly stated — never invent one. If the request changes the Client Schedule, pass schedule_change to create a PENDING proposal for admin approval: monthly_deliverables is never edited here. Only say "recorded" after this returns a task id.',
+    inputSchema: objectSchema({
+      title: { type: 'string', minLength: 1, maxLength: 240 },
+      notes: { type: 'string', maxLength: 4000 },
+      due_date: date,
+      assignee_profile_id: uuid,
+      assignee_name: { type: 'string', maxLength: 120, description: 'Exact full name; prefer assignee_profile_id.' },
+      schedule_change: {
+        type: 'object',
+        description: 'Optional Client Schedule change the request implies. Creates a pending proposal for admin approval only.',
+        properties: { deliverable_id: uuid, change: { type: 'object' }, reason: { type: 'string', maxLength: 4000 } },
+        required: ['deliverable_id', 'change'],
+        additionalProperties: false,
+      },
+      meeting_reference: { type: 'string', maxLength: 240 },
+      idempotency_key: uuid,
+    }, ['title', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#341', canonicalContract: 'record_client_workspace_task RPC -> planner_tasks client request + client_schedule_change_requests proposal',
+  },
+  {
+    name: 'create_client_followup_task', title: 'Create a client follow-up task',
+    description: 'Client Project only (#341). Create one follow-up task for THIS exact client and assign it to one exact active CG staff member (assignee_profile_id from list_assignable_staff). The assignee is the target of the task, not the caller, and gains no permissions; this never acts as that staff member. A due date is used only when explicitly given — never invented. #325: content/package workflow follow-ups may stay Dynamics-only (microsoft_write="not_requested"). For a normal Microsoft-backed operational task, create it in Planner first, then pass microsoft_write="succeeded" with its microsoft_task_id and microsoft_plan_id so Dynamics links that same task by durable id; pass "failed" when the Planner write failed, which records PARTIAL SYNC. Never create tasks in MASTER CLIENT TO DO or Client Socials. Only say "created/assigned" after this returns a task id.',
+    inputSchema: objectSchema({
+      title: { type: 'string', minLength: 1, maxLength: 240 },
+      notes: { type: 'string', maxLength: 4000 },
+      due_date: date,
+      assignee_profile_id: uuid,
+      assignee_name: { type: 'string', maxLength: 120, description: 'Exact full name; prefer assignee_profile_id.' },
+      microsoft_write: { enum: ['not_requested', 'succeeded', 'failed'], description: 'Required evidence of the Planner side of this follow-up.' },
+      microsoft_task_id: { type: 'string' },
+      microsoft_plan_id: { type: 'string' },
+      microsoft_bucket_id: { type: 'string' },
+      meeting_reference: { type: 'string', maxLength: 240 },
+      idempotency_key: uuid,
+    }, ['title', 'microsoft_write', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#341', canonicalContract: 'record_client_workspace_task RPC -> planner_tasks + canonical assignee projection (#325 durable Planner linkage)',
+  },
+  {
+    name: 'record_client_update', title: 'Record a client update',
+    description: 'Client Project only (#341). Persist durable post-meeting or content-direction intelligence for THIS exact client as an append-only record with provenance — never a rewrite of the client guide. meeting_outcome also creates a canonical meeting debrief. Link the follow-up task ids created for this client. Recorded updates are returned by get_client_context under recorded_client_updates until they are reviewed into the client guide. Only say "recorded" after this returns an update id.',
+    inputSchema: objectSchema({
+      update_kind: { enum: ['content_direction', 'meeting_outcome', 'client_preference', 'client_fact'] },
+      title: { type: 'string', minLength: 1, maxLength: 240 },
+      body: { type: 'string', minLength: 1, maxLength: 8000 },
+      decisions: { type: 'array', maxItems: 20, items: { type: 'string', maxLength: 500 } },
+      unresolved: { type: 'array', maxItems: 20, items: { type: 'string', maxLength: 500 } },
+      linked_task_ids: { type: 'array', maxItems: 20, items: uuid },
+      meeting_title: { type: 'string', maxLength: 240 },
+      meeting_date: date,
+      calendar_event_id: uuid,
+      idempotency_key: uuid,
+    }, ['update_kind', 'title', 'body', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#341', canonicalContract: 'record_client_workspace_update RPC -> client_context_updates (append-only) + meeting_debriefs',
   },
   {
     name: 'list_my_leads', title: 'List my leads',
@@ -400,5 +466,5 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =
-  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
+  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. In a client Project the only writes are record_client_request, create_client_followup_task and record_client_update: they are pinned to that exact client, an assignee is the target of the work and never the caller, and say created, assigned or recorded only after the tool returns the record id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
 
