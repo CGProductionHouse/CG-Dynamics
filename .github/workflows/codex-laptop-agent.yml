@@ -1,0 +1,117 @@
+name: Codex laptop agent
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: codex-laptop-agent
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  dispatch:
+    if: >-
+      github.event.issue.number == 347 &&
+      github.actor == 'CGProductionHouse' &&
+      (github.event.comment.body == '/codex test' || startsWith(github.event.comment.body, '/codex issue='))
+    runs-on: [self-hosted, Windows, X64, cg-codex-laptop]
+    timeout-minutes: 90
+
+    steps:
+      - name: Verify local tools
+        shell: pwsh
+        run: |
+          codex --version
+          git --version
+          gh --version
+          gh auth status
+
+      - name: Parse command
+        shell: pwsh
+        env:
+          BODY: ${{ github.event.comment.body }}
+        run: |
+          if ($env:BODY -eq '/codex test') {
+            'MODE=test' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            exit 0
+          }
+          if ($env:BODY -notmatch '^/codex issue=([0-9]+)$') { throw 'Invalid command.' }
+          'MODE=issue' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "TASK_ISSUE=$($Matches[1])" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Test Codex ChatGPT subscription login
+        if: env.MODE == 'test'
+        shell: pwsh
+        run: |
+          $work = Join-Path $env:RUNNER_TEMP ("codex-test-" + $env:GITHUB_RUN_ID)
+          New-Item -ItemType Directory -Force -Path $work | Out-Null
+          Set-Location $work
+          git init | Out-Null
+          $out = Join-Path $work 'last-message.txt'
+          codex exec --sandbox read-only --cd $work --output-last-message $out 'Return exactly: CG CODEX READY'
+          $result = (Get-Content -Raw $out).Trim()
+          if ($result -ne 'CG CODEX READY') { throw "Unexpected Codex response: $result" }
+          gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex laptop test passed on run $env:GITHUB_RUN_ID."
+
+      - name: Prepare issue task
+        if: env.MODE == 'issue'
+        shell: pwsh
+        run: |
+          $issueJson = gh issue view $env:TASK_ISSUE --repo CGProductionHouse/CG-Dynamics --json number,title,body,state,url
+          $issue = $issueJson | ConvertFrom-Json
+          if ($issue.state -ne 'OPEN') { throw "Issue #$env:TASK_ISSUE is not open." }
+
+          $root = Join-Path $env:RUNNER_TEMP ("cg-codex-" + $env:GITHUB_RUN_ID)
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          $work = Join-Path $root 'repo'
+          gh repo clone CGProductionHouse/CG-Dynamics $work
+          Set-Location $work
+          git fetch origin main --depth=1
+          $branch = "codex/laptop-$env:GITHUB_RUN_ID"
+          git checkout -B $branch origin/main
+          git config user.name 'CG Codex Laptop Agent'
+          git config user.email 'info@cgproductionhouse.com'
+
+          $prompt = @"
+          Work on CG Dynamics issue #$($issue.number): $($issue.title)
+          $($issue.url)
+
+          ISSUE BODY:
+          $($issue.body)
+
+          Read AGENTS.md and all continuity files it requires before changing code. Check current open PRs/issues so you do not duplicate an active lane. Work only on this issue. Do not merge, deploy production, apply production migrations, rotate credentials, alter provider permissions, or weaken auth/RLS/client isolation. Implement and verify the smallest correct change, run relevant tests/lint/build, and leave only intentional changes in the working tree. Do not push or open a PR; the controller does that after you finish.
+          "@
+
+          $promptPath = Join-Path $root 'prompt.txt'
+          Set-Content $promptPath $prompt -Encoding utf8
+          "WORKDIR=$work" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "BRANCH=$branch" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "PROMPT_PATH=$promptPath" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Run Codex issue task
+        if: env.MODE == 'issue'
+        shell: pwsh
+        run: |
+          $prompt = Get-Content -Raw $env:PROMPT_PATH
+          $out = Join-Path (Split-Path $env:PROMPT_PATH) 'last-message.txt'
+          codex exec --sandbox workspace-write --cd $env:WORKDIR --output-last-message $out -c 'approval_policy="never"' -c 'sandbox_workspace_write.network_access=true' $prompt
+          if (Test-Path $out) { Get-Content $out }
+
+      - name: Publish issue task as PR
+        if: env.MODE == 'issue'
+        shell: pwsh
+        run: |
+          Set-Location $env:WORKDIR
+          if ([string]::IsNullOrWhiteSpace((git status --porcelain))) {
+            gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex run $env:GITHUB_RUN_ID completed issue #$env:TASK_ISSUE with no repository changes."
+            exit 0
+          }
+          git add -A
+          git commit -m "fix: Codex issue #$env:TASK_ISSUE"
+          git push -u origin $env:BRANCH
+          $url = gh pr create --repo CGProductionHouse/CG-Dynamics --base main --head $env:BRANCH --title "Codex: issue #$env:TASK_ISSUE" --body "Automated by CA's trusted Codex laptop worker for #$env:TASK_ISSUE. No merge or production action performed."
+          gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex run $env:GITHUB_RUN_ID completed issue #$env:TASK_ISSUE — $url"
