@@ -67,6 +67,35 @@ test('company_admin must be explicit and carries no staff or client id', () => {
   assert.equal(ctx.parseProjectContext({ context_kind: 'owner' }).ok, false)
 })
 
+// ── Idempotency key hashing: readable model keys → deterministic UUIDs ───────
+
+test('deriveMcpIdempotencyKey maps readable keys to stable canonical UUIDs', async () => {
+  const a = await ctx.deriveMcpIdempotencyKey(FRANCO, 'create_task', 'friday-follow-up-1')
+  const b = await ctx.deriveMcpIdempotencyKey(FRANCO, 'create_task', 'friday-follow-up-1')
+  assert.equal(a, b, 'same caller + tool + key yields the same UUID')
+  assert.ok(ctx.isUuidV4(a), 'result is a valid UUID v4')
+
+  const differentTool = await ctx.deriveMcpIdempotencyKey(FRANCO, 'update_task', 'friday-follow-up-1')
+  assert.notEqual(a, differentTool, 'different tool scopes the key')
+
+  const differentCaller = await ctx.deriveMcpIdempotencyKey(SYDNEY, 'create_task', 'friday-follow-up-1')
+  assert.notEqual(a, differentCaller, 'different caller scopes the key')
+
+  const differentKey = await ctx.deriveMcpIdempotencyKey(FRANCO, 'create_task', 'friday-follow-up-2')
+  assert.notEqual(a, differentKey, 'different readable key scopes the key')
+})
+
+test('deriveMcpIdempotencyKey is deterministic for long and trimmed keys', async () => {
+  const readable = 'record-client-request-we-ar-fuels-garage-talks-2026-09-11'
+  const key1 = await ctx.deriveMcpIdempotencyKey(FRANCO, 'record_client_request', `  ${readable}  `)
+  const key2 = await ctx.deriveMcpIdempotencyKey(FRANCO, 'record_client_request', readable)
+  assert.equal(key1, key2, 'whitespace is normalised before hashing')
+
+  const longKey = 'x'.repeat(240)
+  const longResult = await ctx.deriveMcpIdempotencyKey(FRANCO, 'create_task', longKey)
+  assert.ok(ctx.isUuidV4(longResult), 'a 240-character key still hashes to a UUID')
+})
+
 // ── Franco vs Sydney: per-staff Projects on one shared connection ────────────
 
 test('Franco and Sydney Projects resolve to different effective subjects', () => {
@@ -177,6 +206,17 @@ test('every operational tool requires the Project context; the bootstrap tool do
   assert.deepEqual(bootstrap.inputSchema.properties.context_kind.enum, ['staff', 'client', 'company_admin'])
 })
 
+test('write tools accept arbitrary string idempotency keys, not UUID format only', () => {
+  const tools = Object.fromEntries(catalog.CG_DYNAMICS_MCP_TOOLS.map(t => [t.name, t]))
+  for (const name of catalog.CG_DYNAMICS_MCP_TOOLS.filter(t => t.annotations.idempotentHint).map(t => t.name)) {
+    const schema = tools[name].inputSchema.properties.idempotency_key
+    assert.equal(schema?.type, 'string', `${name} idempotency_key is a string`)
+    assert.equal(schema?.minLength, 1, `${name} idempotency_key requires non-empty`)
+    assert.equal(schema?.maxLength, 240, `${name} idempotency_key is bounded`)
+    assert.notEqual(schema?.format, 'uuid', `${name} idempotency_key does not enforce UUID format`)
+  }
+})
+
 test('server instructions state the shared-connection rule', () => {
   const s = catalog.CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS
   assert.match(s, /shared by the whole CG Production House ChatGPT account/)
@@ -238,6 +278,14 @@ test('existing MCP safety rules are preserved', () => {
   // OAuth discovery from #316/#318 untouched.
   assert.match(INDEX, /isProtectedResourceMetadataRequest\(url\.pathname\)/)
   assert.match(INDEX, /buildWwwAuthenticateChallenge/)
+})
+
+test('MCP idempotency: readable keys are hashed to deterministic UUIDs before RPCs', () => {
+  assert.match(INDEX, /const rawIdempotencyKey = toolInput\.idempotency_key as string \| undefined/)
+  assert.match(INDEX, /deriveMcpIdempotencyKey\(staff\.profileId, toolName, rawIdempotencyKey\.trim\(\)\)/)
+  assert.match(INDEX, /toolInput\.idempotency_key = canonicalIdempotencyKey/)
+  assert.match(INDEX, /checkIdempotency\(staff\.supabase, staff\.profileId, toolName, canonicalIdempotencyKey, inputHash\)/)
+  assert.match(INDEX, /recordIdempotency\(staff\.supabase, staff\.profileId, toolName, canonicalIdempotencyKey, inputHash/)
 })
 
 // ── Audit migration ─────────────────────────────────────────────────────────
