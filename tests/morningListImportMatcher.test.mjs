@@ -26,12 +26,18 @@ let morningEditToInput
 
 before(async () => {
   const server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ parseMorningList, morningEditToInput } = await server.ssrLoadModule('/src/lib/commandCentre.ts'))
-  await server.close()
+  // Close in finally: if the module fails to load (for example missing
+  // VITE_SUPABASE_* values), a leaked server keeps the process alive and
+  // hangs npm test instead of failing it.
+  try {
+    ({ parseMorningList, morningEditToInput } = await server.ssrLoadModule('/src/lib/commandCentre.ts'))
+  } finally {
+    await server.close()
+  }
 })
 
 after(async () => {
-  // server already closed in before()
+  // the server is closed in the finally block of before()
 })
 
 function parseSingle(text) {
