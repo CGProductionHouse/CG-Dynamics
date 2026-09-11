@@ -109,6 +109,14 @@ When no web-grounded provider is configured the step is skipped and the sources 
 - Rename, move or delete anything in OneDrive.
 - Present another client's material, or invent client facts.
 
+## Open question for CA (not changed here)
+
+The Video Pipeline and guideline cards still show a per-video **canonical name**
+(`YYYY_MM_CLIENT_VIDEO_XX`) with a "copy folder name" button, from the earlier per-video folder
+convention. This flow creates no per-video folders, so that label now implies a structure the
+product no longer builds. It is left untouched because `canonical_name` is also used by the Video
+Pipeline's footage-link checks — removing or relabelling it is a separate, deliberate change.
+
 ## Gates
 
 | Capability | Gate |

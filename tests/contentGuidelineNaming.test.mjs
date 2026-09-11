@@ -59,3 +59,18 @@ test('the editor, Shoot Mode and client portal all use the shared name', async (
     assert.match(source, /guidelineVideoName\(/, `${label} renders the shared name`)
   }
 })
+
+test('the Edge Function copy of the prefix rule does not drift from the app', async () => {
+  const app = await readFile(new URL('../src/lib/contentGuidelineNaming.ts', import.meta.url), 'utf8')
+  const fn = await readFile(new URL('../supabase/functions/suggest-content-videos/directorModes.ts', import.meta.url), 'utf8')
+  const rule = source => source.match(/const NUMBER_PREFIX = (\/.*\/i)/)?.[1]
+  assert.ok(rule(app), 'app defines the prefix rule')
+  assert.equal(rule(fn), rule(app), 'the Edge Function uses the same rule')
+})
+
+test('both copies strip the same prefixes', async () => {
+  const modes = await server.ssrLoadModule('/supabase/functions/suggest-content-videos/directorModes.ts')
+  for (const title of ['VIDEO 1 - DULUX', 'Video 02 — Kitchen refresh', 'Video 10 Tips for Painters', 'Colour matching']) {
+    assert.equal(modes.cleanIdeaTitle(title), m.stripVideoNumberPrefix(title), title)
+  }
+})
