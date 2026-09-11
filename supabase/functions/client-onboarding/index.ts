@@ -720,7 +720,9 @@ Deno.serve(async request => {
     const result = await downloadFile(upload.storage_drive_id, upload.storage_item_id)
     if (!result) return json({ ok: false, error: 'Could not retrieve the file.' }, 503)
 
-    const buffer = await result.stream.arrayBuffer()
+    // downloadFile returns the Graph response body, a ReadableStream, which has no
+    // arrayBuffer() method. Wrap it in a Response to read it.
+    const buffer = await new Response(result.stream).arrayBuffer()
     return streamResponse(buffer, upload.mime_type ?? result.mimeType, upload.original_filename)
   }
 

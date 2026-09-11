@@ -73,8 +73,11 @@ export interface DailyUpdateContract {
   exact_staff_rules: string[]
 }
 
-export function buildDailyUpdateContract(fullName: string): DailyUpdateContract {
-  const normalized = fullName.trim().toLocaleLowerCase('en-ZA')
+// fullName comes from profiles.full_name, which is nullable. A staff member without a
+// name must still get the contract (with no staff-specific rules), not a crash in
+// get_my_assistant_bootstrap.
+export function buildDailyUpdateContract(fullName: string | null): DailyUpdateContract {
+  const normalized = (fullName ?? '').trim().toLocaleLowerCase('en-ZA')
   const exactStaffRules = normalized.startsWith('franco ') || normalized === 'franco'
     ? FRANCO_RULES
     : normalized.startsWith('amonique ') || normalized === 'amonique'
