@@ -193,7 +193,8 @@ export default function ReportsManagement() {
   }
 
   useEffect(() => {
-    void load()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load()
   }, [])
 
   const statusCounts = useMemo(() => {

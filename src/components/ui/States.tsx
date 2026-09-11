@@ -94,7 +94,7 @@ export function SkeletonCard({ className = '', lines = 3 }: SkeletonCardProps) {
       <div className="h-6 w-1/4 bg-white/10 animate-pulse rounded mb-4" />
       <div className="space-y-3">
         {Array.from({ length: lines }).map((_, i) => (
-          <div key={i} className="h-4 bg-white/10 animate-pulse rounded" style={{ width: `${60 + Math.random() * 30}%` }} />
+          <div key={i} className="h-4 bg-white/10 animate-pulse rounded" style={{ width: `${60 + (i * 17) % 30}%` }} />
         ))}
       </div>
     </div>

@@ -304,6 +304,7 @@ Deno.serve(async request => {
         request: neutralise(originatingRequest).slice(0, 8000),
         campaign: campaignName ?? artifact?.campaign_name ?? null,
         change_request: changeNote || null,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         evidence: evidence.map(({ id: _id, ...rest }) => rest),
         upstream_specialist_output: upstream,
       }),

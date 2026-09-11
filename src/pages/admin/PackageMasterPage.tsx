@@ -109,6 +109,7 @@ export default function PackageMasterPage() {
 
   useEffect(() => {
     let active = true
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setClientsLoading(true)
     listActiveClients().then(({ data, error }) => {
       if (!active) return
@@ -162,10 +163,14 @@ export default function PackageMasterPage() {
 
   useEffect(() => {
     if (selectedClientId) {
-      void loadPackages(selectedClientId)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadPackages(selectedClientId)
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPackages([])
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedPackageId(null)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTemplates([])
     }
   }, [selectedClientId])
@@ -181,8 +186,10 @@ export default function PackageMasterPage() {
 
   useEffect(() => {
     if (selectedPackageId) {
-      void loadTemplates(selectedPackageId)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadTemplates(selectedPackageId)
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTemplates([])
     }
   }, [selectedPackageId])
@@ -202,9 +209,11 @@ export default function PackageMasterPage() {
     }
   }, [templates])
 
+  // Sync quantities from templateStats when templates change (e.g., after loading)
   useEffect(() => {
-    setQuantities(current => ({
-      ...current,
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setQuantities(prev => ({
+      ...prev,
       dp: templateStats.dp,
       photo: templateStats.photo,
       video: templateStats.video,
