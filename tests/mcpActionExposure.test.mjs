@@ -31,13 +31,13 @@ const listedTools = () => catalog.CG_DYNAMICS_MCP_TOOLS.map(tool => ({
 
 // ── Action exposure ─────────────────────────────────────────────────────────
 
-test('tools/list exposes exactly 34 tools including resolve_project_context', () => {
+test('tools/list exposes exactly 38 tools including resolve_project_context', () => {
   const tools = listedTools()
-  assert.equal(tools.length, 34)
+  assert.equal(tools.length, 38)
   const names = tools.map(t => t.name)
   assert.ok(names.includes('resolve_project_context'), 'context bootstrap must be exposed')
   assert.equal(names[0], 'resolve_project_context', 'bootstrap is listed first')
-  assert.equal(new Set(names).size, 34, 'no duplicate tool names')
+  assert.equal(new Set(names).size, 38, 'no duplicate tool names')
 })
 
 test('every listed tool advertises the OAuth securityScheme with the narrowed #318 scopes', () => {

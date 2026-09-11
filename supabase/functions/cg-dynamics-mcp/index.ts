@@ -55,9 +55,29 @@ import {
   flattenDeliverableClient,
 } from './clientScheduleRows.ts'
 import {
+  ASSIGNABLE_STAFF_SELECT,
+  buildClientTaskWrite,
+  buildClientUpdateWrite,
+  gradeFollowupSync,
+  isProtectedMicrosoftPlanName,
+  listAssignableStaff,
+  planMicrosoftLinkage,
+  RECORDED_CLIENT_UPDATES_NOTE,
+  resolveAssignee,
+  shapeClientTaskResult,
+  shapeClientUpdateResult,
+  summarizeClientUpdates,
+  WORKFORCE_ROLES,
+  type AssignableStaff,
+  type ClientTaskKind,
+  type ClientWorkspaceScope,
+  type StaffDirectoryRow,
+} from './clientWorkspace.ts'
+import {
   assertRecordClientMatchesContext,
   assertToolAllowedInContext,
   buildAuditEnvelope,
+  CLIENT_WORKSPACE_ACTIONS,
   CONTEXT_BOOTSTRAP_TOOL,
   isUuid,
   parseProjectContext,
@@ -1432,6 +1452,11 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
   const unavailable: string[] = []
   if (guideError) unavailable.push(`client_guides: ${guideError.message}`)
 
+  // #341: durable updates recorded from this exact client's Project. Returned whether or not the
+  // reviewed guide is ready, so a later chat sees them without relying on the old transcript.
+  const recordedUpdates = await loadRecordedClientUpdates(staff, clientId)
+  if (recordedUpdates.status === 'unavailable') unavailable.push(`client_context_updates: ${recordedUpdates.error}`)
+
   const ready = Boolean(
     guide &&
     guide.client_id === clientId &&
@@ -1451,8 +1476,10 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
         ? 'Exact-client intelligence readiness could not be verified.'
         : guide?.readiness_reason ?? 'No reviewed exact-client intelligence projection is ready.',
       instruction: 'Do not generate generic client creative or borrow a sibling, group, billing or national client. Surface this readiness gap.',
+      recorded_client_updates: recordedUpdates.view,
       context_coverage: {
         client_guide: guideError ? 'unavailable' : 'not_ready',
+        client_updates: recordedUpdates.status,
         unavailable_sources: unavailable,
       },
     }
@@ -1558,8 +1585,10 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
         }
       : null,
     contact_footer: contactFooter,
+    recorded_client_updates: recordedUpdates.view,
     context_coverage: {
       client_guide: guide ? 'available' : (guideError ? 'unavailable' : 'none_recorded'),
+      client_updates: recordedUpdates.status,
       unavailable_sources: unavailable,
       note: guide
         ? 'Exact-client guide resolved by exact client_id. No sibling, group or national fallback was used.'
@@ -2459,9 +2488,128 @@ async function handleUpdateCloseoutUploadStatus(staff: AuthenticatedStaff, input
   return { closeout: data, verification }
 }
 
+// ── #341 Client-Project operational actions ─────────────────────────────────
+// A client Project is an internal company workspace pinned to one exact client. These handlers
+// always take the client from the resolved Project scope (never from input), record the communal
+// connection principal as the caller, and treat an assignee as the target of the action. The
+// pure rules live in clientWorkspace.ts; the canonical writes are the
+// record_client_workspace_task / record_client_workspace_update RPCs.
+
+function clientWorkspaceScope(staff: AuthenticatedStaff): ClientWorkspaceScope | { error: string } {
+  // Defence in depth: the router's context policy already refuses these tools elsewhere.
+  if (staff.contextKind !== 'client' || !staff.effectiveClientId) {
+    return { error: 'This action is only available inside an exact client Project (context_kind="client").' }
+  }
+  return { clientId: staff.effectiveClientId, actorProfileId: staff.connection.profileId, connectionUserId: staff.connection.userId }
+}
+
+async function loadStaffDirectory(staff: AuthenticatedStaff): Promise<{ rows: StaffDirectoryRow[] } | { error: string }> {
+  const { data, error } = await staff.supabase
+    .from('profiles')
+    .select(ASSIGNABLE_STAFF_SELECT)
+    .in('role', [...WORKFORCE_ROLES])
+  if (error) return { error: 'The CG staff directory is unavailable. Nothing was assigned.' }
+  return { rows: (data ?? []) as StaffDirectoryRow[] }
+}
+
+const handleListAssignableStaff: ToolHandler = async (staff, input) => {
+  const directory = await loadStaffDirectory(staff)
+  if ('error' in directory) return directory
+  return {
+    staff: listAssignableStaff(directory.rows, input.query),
+    note: 'Active CG staff only: profile id, name and role. Pass the exact profile_id as assignee_profile_id. Assigning work never changes who is acting.',
+  }
+}
+
+async function writeClientWorkspaceTask(staff: AuthenticatedStaff, kind: ClientTaskKind, toolName: string, input: Record<string, unknown>) {
+  const scope = clientWorkspaceScope(staff)
+  if ('error' in scope) return scope
+
+  let assignee: AssignableStaff | null = null
+  const wantsAssignee = kind === 'follow_up' || input.assignee_profile_id !== undefined || input.assignee_name !== undefined
+  if (wantsAssignee) {
+    const directory = await loadStaffDirectory(staff)
+    if ('error' in directory) return { ...directory, verdict: 'FAIL', created: false }
+    const resolved = resolveAssignee(directory.rows, input)
+    if (!resolved.ok) {
+      return { error: resolved.error, code: resolved.code, candidates: resolved.candidates, verdict: 'FAIL', created: false }
+    }
+    assignee = resolved.assignee
+  }
+
+  const linkage = planMicrosoftLinkage(input)
+  if (linkage.ok && linkage.mode === 'microsoft_linked') {
+    const { data: planRows } = await staff.supabase
+      .from('planner_tasks')
+      .select('original_plan_name')
+      .eq('microsoft_plan_id', linkage.microsoftPlanId)
+      .limit(5)
+    if ((planRows ?? []).some((row: Record<string, unknown>) => isProtectedMicrosoftPlanName(row.original_plan_name))) {
+      return { error: 'That Planner plan is MASTER CLIENT TO DO or Client Socials, which are protected and never written from a client Project.', verdict: 'FAIL', created: false }
+    }
+  }
+
+  const built = buildClientTaskWrite(kind, scope, input, assignee, linkage, toolName)
+  if (!built.ok) return { error: built.error, verdict: 'FAIL', created: false }
+
+  const { data, error } = await staff.supabase.rpc('record_client_workspace_task', built.params)
+  const sync = kind === 'follow_up' && linkage.ok ? gradeFollowupSync(linkage.mode, !error) : null
+  if (error) {
+    return { error: error.message, verdict: 'FAIL', created: false, ...(sync ? { sync_state: sync.sync_state, note: sync.note } : {}) }
+  }
+  return shapeClientTaskResult(kind, data, sync)
+}
+
+const handleRecordClientRequest: ToolHandler = (staff, input) =>
+  writeClientWorkspaceTask(staff, 'client_request', 'record_client_request', input)
+
+const handleCreateClientFollowupTask: ToolHandler = (staff, input) =>
+  writeClientWorkspaceTask(staff, 'follow_up', 'create_client_followup_task', input)
+
+const handleRecordClientUpdate: ToolHandler = async (staff, input) => {
+  const scope = clientWorkspaceScope(staff)
+  if ('error' in scope) return scope
+  const built = buildClientUpdateWrite(scope, input)
+  if (!built.ok) return { error: built.error, verdict: 'FAIL', created: false }
+  const { data, error } = await staff.supabase.rpc('record_client_workspace_update', built.params)
+  if (error) return { error: error.message, verdict: 'FAIL', created: false }
+  return shapeClientUpdateResult(data)
+}
+
+const MISSING_RELATION_CODES = new Set(['42P01', 'PGRST205'])
+
+async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: string) {
+  const { data, error } = await staff.supabase
+    .from('client_context_updates')
+    .select('id, update_kind, title, body, decisions, unresolved, linked_task_ids, meeting_debrief_id, source_kind, source_meeting_title, source_meeting_date, review_state, created_at')
+    .eq('client_id', clientId)
+    .neq('review_state', 'rejected')
+    .order('created_at', { ascending: false })
+    .limit(20)
+  if (error) {
+    const status = MISSING_RELATION_CODES.has(String(error.code ?? '')) ? 'not_installed' : 'unavailable'
+    return {
+      status,
+      error: error.message,
+      view: {
+        status,
+        note: status === 'not_installed'
+          ? 'Recorded client updates are not installed in this environment yet (#341 migration pending). Report this rather than implying there are none.'
+          : 'Recorded client updates could not be read. Report them as unknown, not as none.',
+        updates: [],
+      },
+    }
+  }
+  return {
+    status: 'available',
+    error: null,
+    view: { status: 'available', note: RECORDED_CLIENT_UPDATES_NOTE, updates: summarizeClientUpdates(data ?? []) },
+  }
+}
+
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status', 'link_content_run_deliverables', 'upsert_calendar_event'])
+const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status', 'link_content_run_deliverables', 'upsert_calendar_event', ...CLIENT_WORKSPACE_ACTIONS])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -2497,6 +2645,10 @@ const toolHandlers: Record<string, ToolHandler> = {
   verify_content_run_upload: handleVerifyContentRunUpload,
   close_content_run: handleCloseContentRun,
   update_closeout_upload_status: handleUpdateCloseoutUploadStatus,
+  list_assignable_staff: handleListAssignableStaff,
+  record_client_request: handleRecordClientRequest,
+  create_client_followup_task: handleCreateClientFollowupTask,
+  record_client_update: handleRecordClientUpdate,
 }
 
 // ── MCP Server ──────────────────────────────────────────────────────────────
@@ -2578,18 +2730,28 @@ async function handleToolsCall(
     return jsonRpcError(id, -32602, 'Write tools require an idempotency_key.')
   }
 
+  // #341 client-workspace writes replay through their own canonical per-client key, which returns
+  // the ORIGINAL record ids. The generic log only knows a status, so for these tools an identical
+  // repeat falls through to the handler instead of answering without the record. A reused key
+  // with different input is still refused.
+  let replayThroughCanonicalKey = false
   if (isWrite && idempotencyKey) {
     const inputHash = computeInputHash(toolInput as Record<string, unknown>)
     const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash)
     if (existing.duplicate) {
-      return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: false })
+      const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
+      if (CLIENT_WORKSPACE_ACTIONS.includes(toolName) && !conflict) {
+        replayThroughCanonicalKey = true
+      } else {
+        return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: CLIENT_WORKSPACE_ACTIONS.includes(toolName) && conflict })
+      }
     }
   }
 
   try {
     const result = await handler(staff, toolInput)
 
-    if (isWrite && idempotencyKey) {
+    if (isWrite && idempotencyKey && !replayThroughCanonicalKey) {
       const inputHash = computeInputHash(toolInput as Record<string, unknown>)
       const hasError = result && typeof result === 'object' && 'error' in result
       await recordIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash, hasError ? 'error' : 'success', audit)

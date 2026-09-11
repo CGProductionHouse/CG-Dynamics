@@ -133,6 +133,20 @@ export const COMPANY_ADMIN_TOOLS: readonly string[] = [
   'run_provider_sync',
 ]
 
+/**
+ * #341 client-workspace operational actions. A client Project is an internal company workspace
+ * pinned to one exact client: after a meeting, staff can record that client's requests, assign
+ * same-client follow-ups to exact active staff and persist client-direction updates without a
+ * staff subject. The server injects the Project's client on every call; an assignee is the
+ * target of the action, never the caller, and gains no permissions from it. These exist ONLY in
+ * a client Project — a staff Project keeps using create_task, whose staff-subject guard stays.
+ */
+export const CLIENT_WORKSPACE_ACTIONS: readonly string[] = [
+  'record_client_request',
+  'create_client_followup_task',
+  'record_client_update',
+]
+
 /** Context-resolution helper; runs before any operating context exists. */
 export const CONTEXT_BOOTSTRAP_TOOL = 'resolve_project_context'
 
@@ -144,6 +158,12 @@ export function assertToolAllowedInContext(toolName: string, contextKind: Projec
     return {
       allowed: false,
       error: `${toolName} is a company-wide audit inventory and requires an explicit company_admin Project context. A staff Project must use the exact-staff tools instead.`,
+    }
+  }
+  if (CLIENT_WORKSPACE_ACTIONS.includes(toolName) && contextKind !== 'client') {
+    return {
+      allowed: false,
+      error: `${toolName} is a client-Project action pinned to one exact client (context_kind="client"). In a staff Project use create_task for that staff member's own work.`,
     }
   }
   if (contextKind === 'client' && STAFF_SUBJECT_TOOLS.includes(toolName)) {

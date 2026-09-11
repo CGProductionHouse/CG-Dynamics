@@ -35,6 +35,7 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Retrieving exact-client intelligence when a task requires it',
       'Maintaining your durable working-style preferences and corrections',
       'Creating and managing recurring task templates',
+      'In a client Project: recording that client\'s requests, assigning same-client follow-ups to exact staff and saving client direction',
     ],
     exampleActions: [
       'What am I doing today?',
