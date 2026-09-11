@@ -2,6 +2,7 @@ import { useState, useEffect, useEffectEvent, useMemo } from 'react'
 import type { ReactNode, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useMyDayContextStore } from '../../contexts/MyDayContextStore'
 import {
   listTasks,
   createTask,
@@ -94,6 +95,7 @@ function deliverableDate(d: MonthlyDeliverable) {
 
 export default function CgHubPage() {
   const { profile } = useAuth()
+  const { setMyDayContext: setGlobalMyDayContext } = useMyDayContextStore()
 
   const today = useMemo(() => todayStr(), [])
   const currentMonth = useMemo(() => businessMonthKey(), [])
@@ -143,6 +145,7 @@ export default function CgHubPage() {
         events: rawEvents,
       })
       setMyDayContext(myDay)
+      setGlobalMyDayContext(myDay)
       setLoadingData(false)
       // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block
       // the Hub — but surface their errors instead of dropping them silently.
