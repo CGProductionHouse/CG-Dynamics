@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { useMyDayContext } from '../../contexts/MyDayContextStore'
+import { useSharedMyDay } from '../../contexts/MyDayContextStore'
+import { resolveWorkContextSource, workContextDelay } from '../../lib/myDayContextShare'
 import {
   buildAssistantLocalWorkContext,
   fetchActiveClients,
@@ -447,42 +448,35 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     return () => { active = false }
   }, [profileId])
 
-  // Load the signed-in user's live work context once (best-effort; the assistant
-  // still works without it). Deferred to avoid competing with Hub initial load.
-  // Prefers the pre-computed MyDayContext from the Hub page to avoid duplicate queries.
-  const sharedMyDayContext = useMyDayContext()
+  // Load the signed-in user's live work context (best-effort; the assistant still
+  // works without it). When the Hub is loading or has loaded this user's day, reuse
+  // its context instead of repeating its queries (src/lib/myDayContextShare.ts).
+  // The source is decided at render time, so a Hub result that arrives after the
+  // composer mounted is picked up rather than a null captured by a timer.
+  const sharedMyDay = useSharedMyDay()
+  const workContextSource = resolveWorkContextSource(sharedMyDay, profileId)
+  const sharedWorkContext = workContextSource === 'shared' ? sharedMyDay.context : null
   useEffect(() => {
     let active = true
     const requestedProfileId = profileId
-    const timer = window.setTimeout(async () => {
-      const ctx = sharedMyDayContext
-      if (ctx) {
-        // Hub has already computed the context — use it directly
-        const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
-        if (active && profileIdRef.current === requestedProfileId) {
-          const work = buildAssistantLocalWorkContext(ctx)
-          if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
-          workContextRef.current = work
-        }
-      } else {
-        // Fallback: Hub hasn't loaded yet or user navigated directly to Assistant
-        getMyDayContext(profile ?? null)
-          .then(async ctx => {
-            const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
-            if (active && profileIdRef.current === requestedProfileId) {
-              const work = buildAssistantLocalWorkContext(ctx)
-              if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
-              workContextRef.current = work
-            }
-          })
-          .catch(() => {})
-      }
-    }, 2000)
+    const timer = window.setTimeout(() => {
+      const load = sharedWorkContext ? Promise.resolve(sharedWorkContext) : getMyDayContext(profile ?? null)
+      load
+        .then(async ctx => {
+          const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
+          if (active && profileIdRef.current === requestedProfileId) {
+            const work = buildAssistantLocalWorkContext(ctx)
+            if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
+            workContextRef.current = work
+          }
+        })
+        .catch(() => {})
+    }, workContextDelay(workContextSource))
     return () => {
       active = false
       window.clearTimeout(timer)
     }
-  }, [profile, profileId, sharedMyDayContext])
+  }, [profile, profileId, workContextSource, sharedWorkContext])
 
   useEffect(() => {
     if (!profileId) return
@@ -1902,23 +1896,15 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
             onSaved={message => {
               setDailyCaptureOpen(false)
               pushAssistant(message)
-              const ctx = sharedMyDayContext
-              if (ctx) {
-                // Use pre-computed context from Hub
-                Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()]).then(([captureResult, itemResult]) => {
-                  const work = buildAssistantLocalWorkContext(ctx)
-                  if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
-                  workContextRef.current = work
-                })
-              } else {
-                // Fallback: fetch if not available
-                void getMyDayContext(profile ?? null).then(async ctx => {
+              const load = sharedWorkContext ? Promise.resolve(sharedWorkContext) : getMyDayContext(profile ?? null)
+              void load
+                .then(async ctx => {
                   const [captureResult, itemResult] = await Promise.all([listMyAssistantDayCaptures(), listMyAssistantDayItems()])
                   const work = buildAssistantLocalWorkContext(ctx)
                   if (work) work.personalDaySummary = dailyAssistantContextLine(captureResult.data ?? [], itemResult.data ?? [])
                   workContextRef.current = work
                 })
-              }
+                .catch(() => {})
             }}
           />
         )}
