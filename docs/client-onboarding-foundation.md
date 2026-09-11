@@ -75,18 +75,28 @@ not invent or create OneDrive folders. The Edge Function:
 
 ### Environment variables
 
-The dedicated upload app requires:
+> **Corrected 2026-09-09 (#225): the OneDrive is a PERSONAL Microsoft account — delegated OAuth,
+> not app-only.** See `docs/onboarding/ONEDRIVE-PRODUCTION-MAPPING-225.md`.
 
-- `ONBOARDING_MS_TENANT_ID`
-- `ONBOARDING_MS_CLIENT_ID`
-- `ONBOARDING_MS_CLIENT_SECRET`
+The dedicated OneDrive app (delegated) requires:
+
+- `ONEDRIVE_MS_CLIENT_ID`
+- `ONEDRIVE_MS_CLIENT_SECRET`
+- `ONEDRIVE_MS_REDIRECT_URI`
+- `ONEDRIVE_MS_AUTHORITY` (default `https://login.microsoftonline.com/consumers`)
+- `ONEDRIVE_TOKEN_ENC_KEY` (base64 32-byte AES-256-GCM key for the encrypted token store)
+- `ONEDRIVE_OAUTH_SETUP_TOKEN` (gates the one-time consent starter)
 
 These MUST be a separate app from `MICROSOFT_TENANT_ID` / `MICROSOFT_CLIENT_ID`
-used by `microsoft-transition-sync`. The upload app needs only:
+used by `microsoft-transition-sync`. The delegated app needs only:
 
-- `Files.ReadWrite.All` (application), which is tenant-wide and constrained at
-  runtime to the exact mapped client/category destinations;
-- no user delegation; client credentials flow only.
+- delegated scopes `Files.ReadWrite offline_access openid profile` — the user's own
+  OneDrive only, **not** tenant-wide, **not** `Files.ReadWrite.All`;
+- a one-time interactive consent by the personal `info@` account that mints a refresh
+  token (stored encrypted, rotated on use); app-only/client-credentials is not supported.
+
+(The former app-only `ONBOARDING_MS_TENANT_ID/CLIENT_ID/CLIENT_SECRET` +
+`Files.ReadWrite.All` model does not work for a personal Microsoft account and is retired.)
 
 ### Server-mediated download
 
