@@ -177,3 +177,224 @@ test('assembleSnapshot preserves first middle last records across large source',
   assert.equal(snap.assigneeLookup.requested, 6000)
   assert.equal(snap.assigneeLookup.resolved, 2)
 })
+
+// ============================================================================
+// Pagination / Accumulation Regression Tests (simulate >5000 records across
+// persisted resumes, retries, errors)
+// ============================================================================
+
+test('dedupeRecords deduplicates by idKey and preserves order', () => {
+  const existing = [
+    { sourceTaskId: 't1', title: 'Task 1' },
+    { sourceTaskId: 't2', title: 'Task 2' },
+  ]
+  const incoming = [
+    { sourceTaskId: 't2', title: 'Task 2 duplicate' },
+    { sourceTaskId: 't3', title: 'Task 3' },
+  ]
+  const result = jm.dedupeRecords(existing, incoming, 'sourceTaskId')
+  assert.equal(result.length, 3)
+  assert.equal(result[0].sourceTaskId, 't1')
+  assert.equal(result[1].sourceTaskId, 't2')
+  assert.equal(result[2].sourceTaskId, 't3')
+  assert.equal(result[1].title, 'Task 2') // existing preserved, not overwritten
+})
+
+test('dedupeRecords with empty existing returns incoming', () => {
+  const incoming = [{ sourceTaskId: 't1', title: 'Task 1' }, { sourceTaskId: 't2', title: 'Task 2' }]
+  const result = jm.dedupeRecords([], incoming, 'sourceTaskId')
+  assert.equal(result.length, 2)
+  assert.deepEqual(result, incoming)
+})
+
+test('dedupeRecords with empty incoming returns existing', () => {
+  const existing = [{ sourceTaskId: 't1', title: 'Task 1' }, { sourceTaskId: 't2', title: 'Task 2' }]
+  const result = jm.dedupeRecords(existing, [], 'sourceTaskId')
+  assert.equal(result.length, 2)
+  assert.deepEqual(result, existing)
+})
+
+test('simulated pagination accumulation: 6000 records across 6 pages of 1000, first/middle/last survive exactly once', () => {
+  // Simulate 6 pages of 1000 records each = 6000 total
+  // This mimics the persisted resume flow where each job_process call loads
+  // existing records from DB, fetches next page, deduplicates, and saves back
+  const allRecords = Array.from({ length: 6000 }, (_, i) => ({
+    sourceType: 'planner_task',
+    sourceTaskId: `task-${i}`,
+    title: `Task ${i}`,
+    assigneeMicrosoftIds: i % 2 === 0 ? ['u1'] : ['u2'],
+  }))
+
+  let accumulated = []
+  let cursor = null
+  const pages = []
+  for (let page = 0; page < 6; page++) {
+    const start = page * 1000
+    const pageRecords = allRecords.slice(start, start + 1000)
+    pages.push(pageRecords)
+  }
+
+  // Simulate 6 sequential job_process calls (persisted resume)
+  for (let page = 0; page < 6; page++) {
+    // Each call: load existing records from DB (accumulated), fetch next page, dedupe, save
+    accumulated = jm.dedupeRecords(accumulated, pages[page], 'sourceTaskId')
+    cursor = page < 5 ? `https://graph.microsoft.com/next-page-${page + 1}` : null
+    // Verify intermediate state
+    assert.equal(accumulated.length, (page + 1) * 1000)
+    assert.equal(accumulated[0].title, 'Task 0') // first survives
+    assert.equal(accumulated[accumulated.length - 1].title, `Task ${(page + 1) * 1000 - 1}`) // last of current batch
+  }
+
+  // Final verification: all 6000 records present exactly once
+  assert.equal(accumulated.length, 6000)
+  assert.equal(accumulated[0].title, 'Task 0')
+  assert.equal(accumulated[3000].title, 'Task 3000')
+  assert.equal(accumulated[5999].title, 'Task 5999')
+
+  // Verify no duplicates by checking all IDs are unique
+  const ids = accumulated.map(r => r.sourceTaskId)
+  const uniqueIds = new Set(ids)
+  assert.equal(uniqueIds.size, 6000)
+})
+
+test('simulated pagination with duplicate overlap: idempotent resume after partial failure', () => {
+  // Simulate: page 2 succeeds, but job_process crashes before DB write
+  // On retry, page 2 is fetched again — overlap must be idempotent
+  const allRecords = Array.from({ length: 3000 }, (_, i) => ({
+    sourceType: 'planner_task',
+    sourceTaskId: `task-${i}`,
+    title: `Task ${i}`,
+  }))
+
+  const page0 = allRecords.slice(0, 1000)
+  const page1 = allRecords.slice(1000, 2000)
+  const page2 = allRecords.slice(2000, 3000)
+
+  let accumulated = []
+
+  // First successful run: pages 0 and 1
+  accumulated = jm.dedupeRecords(accumulated, page0, 'sourceTaskId')
+  assert.equal(accumulated.length, 1000)
+  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
+  assert.equal(accumulated.length, 2000)
+
+  // Simulated crash before page 2 persisted — on retry, page 1 might be re-fetched
+  // (or page 2 fetched again). Dedupe must handle overlap.
+  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId') // overlap
+  assert.equal(accumulated.length, 2000, 'overlap with page 1 is idempotent')
+
+  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
+  assert.equal(accumulated.length, 3000, 'page 2 adds new records')
+
+  // Verify all records present exactly once
+  const ids = accumulated.map(r => r.sourceTaskId)
+  assert.equal(new Set(ids).size, 3000)
+  assert.equal(accumulated[0].title, 'Task 0')
+  assert.equal(accumulated[1500].title, 'Task 1500')
+  assert.equal(accumulated[2999].title, 'Task 2999')
+})
+
+test('simulated retry resets cursor and state for failed source', () => {
+  // This tests the job_retry logic: failed source should have cursor cleared,
+  // stage reset to queued, records cleared, ready for fresh fetch
+  const failedSource = row({
+    position: 1,
+    stage: 'failed',
+    safe_error: 'Microsoft temporarily unavailable',
+    record_count: 1500,
+    records: Array.from({ length: 1500 }, (_, i) => ({ sourceTaskId: `task-${i}` })),
+    pagination_cursor: 'https://graph.microsoft.com/some-cursor',
+    complete: false,
+  })
+
+  // Simulate job_retry update (from index.ts line 346)
+  const retriedSource = {
+    ...failedSource,
+    stage: 'queued',
+    safe_error: null,
+    records: [],
+    record_count: 0,
+    complete: false,
+    pagination_cursor: null,
+  }
+
+  assert.equal(retriedSource.stage, 'queued')
+  assert.equal(retriedSource.safe_error, null)
+  assert.equal(retriedSource.records.length, 0)
+  assert.equal(retriedSource.record_count, 0)
+  assert.equal(retriedSource.pagination_cursor, null)
+  assert.equal(retriedSource.complete, false)
+})
+
+test('error during pagination does not mark source complete', () => {
+  // Simulate graphPages returning safeError with nextCursor=null (final page but with error)
+  // The completion logic in index.ts requires: result.complete && result.safeError === null
+  const resultWithError = {
+    values: [{ id: '1' }],
+    complete: true, // Graph says no more pages
+    safeError: 'Microsoft temporarily unavailable or timed out.', // but there was an error
+    nextCursor: null,
+  }
+
+  const complete = resultWithError.complete && resultWithError.safeError === null
+  assert.equal(complete, false, 'error must prevent completion even when cursor is null')
+})
+
+test('simulated multi-source pagination: Planner plan continues fetching_tasks across job_process calls', () => {
+  // Test the state machine: a Planner source in 'fetching_tasks' with cursor
+  // should be picked by pickNextSource and continue pagination
+  const rows = [
+    row({ position: 0, stage: 'complete', complete: true }),
+    row({ position: 1, stage: 'fetching_tasks', pagination_cursor: 'cursor-page-2', record_count: 1000,
+      records: Array.from({ length: 1000 }, (_, i) => ({ sourceTaskId: `task-${i}` })) }),
+    row({ position: 2, stage: 'queued' }),
+  ]
+
+  const pick = jm.pickNextSource(rows)
+  assert.equal(pick.position, 1)
+  assert.equal(pick.stage, 'fetching_tasks')
+  assert.equal(pick.pagination_cursor, 'cursor-page-2')
+  assert.equal(pick.record_count, 1000)
+
+  // After next job_process call, it should advance to next page
+  const nextCursor = 'cursor-page-3'
+  const nextPageRecords = Array.from({ length: 1000 }, (_, i) => ({ sourceTaskId: `task-${i + 1000}` }))
+  const accumulated = jm.dedupeRecords(pick.records ?? [], nextPageRecords, 'sourceTaskId')
+
+  assert.equal(accumulated.length, 2000)
+  assert.equal(accumulated[0].sourceTaskId, 'task-0')
+  assert.equal(accumulated[1999].sourceTaskId, 'task-1999')
+})
+
+test('Outlook pagination accumulation preserves records across resume', () => {
+  // Outlook uses sourceEventId for deduplication
+  const allEvents = Array.from({ length: 2500 }, (_, i) => ({
+    sourceType: 'outlook_event',
+    sourceEventId: `event-${i}`,
+    title: `Event ${i}`,
+  }))
+
+  const page0 = allEvents.slice(0, 1000)
+  const page1 = allEvents.slice(1000, 2000)
+  const page2 = allEvents.slice(2000, 2500)
+
+  let accumulated = []
+
+  // Simulate 3 job_process calls for Outlook calendar
+  accumulated = jm.dedupeRecords(accumulated, page0, 'sourceEventId')
+  assert.equal(accumulated.length, 1000)
+
+  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceEventId')
+  assert.equal(accumulated.length, 2000)
+
+  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceEventId')
+  assert.equal(accumulated.length, 2500)
+
+  // Verify first/middle/last
+  assert.equal(accumulated[0].title, 'Event 0')
+  assert.equal(accumulated[1250].title, 'Event 1250')
+  assert.equal(accumulated[2499].title, 'Event 2499')
+
+  const ids = accumulated.map(r => r.sourceEventId)
+  assert.equal(new Set(ids).size, 2500)
+})

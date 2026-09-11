@@ -58,6 +58,16 @@ export function nextDetailBatch(pending: string[], size = DETAIL_BATCH_SIZE): { 
   return { batch: pending.slice(0, size), rest: pending.slice(size) }
 }
 
+export function dedupeRecords(
+  existing: Array<Record<string, unknown>>,
+  incoming: Array<Record<string, unknown>>,
+  idKey: string,
+): Array<Record<string, unknown>> {
+  const seen = new Set(existing.map(r => String(r[idKey] ?? '')))
+  const appended = incoming.filter(r => !seen.has(String(r[idKey] ?? '')))
+  return [...existing, ...appended]
+}
+
 export interface JobSourceRow {
   position: number
   source_type: string

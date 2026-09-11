@@ -1,7 +1,7 @@
 # Tool-Mount Failure Analysis — ChatGPT/Platform Side
 
 ## Summary
-The post-reconnect tool-mount failure where the ChatGPT runtime does not mount the current CG Dynamics company-admin tool catalogue **has no repository-side cause we can fix**. The failure is definitively ChatGPT/platform-side cache/session mounting.
+The post-reconnect tool-mount failure where the ChatGPT runtime does not mount the current CG Dynamics company-admin tool catalogue **has no identified repository-side cause**. Repository/backend evidence shows the backend catalogue is healthy; the remaining gap is on the ChatGPT/platform side.
 
 ## Evidence
 
@@ -18,12 +18,11 @@ The post-reconnect tool-mount failure where the ChatGPT runtime does not mount t
 - Project context resolution (`resolve_project_context`) works for `company_admin` kind (verified in production checkpoint)
 - Transport layer is healthy — no code changes to OAuth, scopes, permissions, or connector architecture required
 
-### 3. ChatGPT/Platform-Side Root Cause
-The issue is **ChatGPT's connector cache/session mounting**:
+### 3. Observed Platform Behaviour (Not Internal Mechanics)
 - The communal ChatGPT account holds one OAuth connection (company admin)
 - After reconnect, ChatGPT must re-fetch the tool catalogue from the MCP endpoint
-- ChatGPT's connector infrastructure caches the tool manifest and may not invalidate it on reconnect
-- The "34-tool catalogue" is live and correct; ChatGPT's UI simply hasn't refreshed its local view
+- The "34-tool catalogue" is live and correct at the endpoint; ChatGPT's UI has not refreshed its local view
+- Repository/backend evidence proves **no identified repo-side fault**; it does not prove internal ChatGPT cache/session mechanics
 
 ### 4. Smallest Manual/Runtime Action (No Code Changes)
 **CA action required**: In the company-admin ChatGPT Project:
@@ -31,10 +30,10 @@ The issue is **ChatGPT's connector cache/session mounting**:
 2. Disconnect and reconnect the CG Dynamics connector (or use "Refresh tools" if available)
 3. Verify the tool list shows all 34 tools including company-admin tools
 4. Call `resolve_project_context({ context_kind: "company_admin" })` to bootstrap
-5. Call `get_microsoft_sync_status` to verify sync health
-6. Call `run_microsoft_sync` with `range_start`/`range_end` to resume the stuck preview job
+4. Call `get_microsoft_sync_status` to verify sync health
+5. Call `run_microsoft_sync` with `range_start`/`range_end` to resume the stuck preview job
 
-This is a **human/platform-only connector gate** — no coding workaround can force ChatGPT to refresh its cached tool manifest.
+This is a **human/platform-only connector gate** — no coding workaround can force ChatGPT to refresh its local tool manifest view.
 
 ## Microsoft Durable-Sync Fix (Code Changes Applied)
 

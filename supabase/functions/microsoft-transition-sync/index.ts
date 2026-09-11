@@ -9,6 +9,7 @@ import {
 } from './assignee-lookup.ts'
 import {
   assembleSnapshot,
+  dedupeRecords,
   enumerateJobSources,
   jobProgress,
   type JobSourceRow,
@@ -113,11 +114,11 @@ async function graphPages(path: string, token: string, prefer?: string, cursor?:
     if (!response.ok) return { values, complete: false, safeError: safeMessage(response.status), nextCursor: next }
     const body = await response.json() as { value?: Array<Record<string, unknown>>; '@odata.nextLink'?: string }
     const pageValues = body.value ?? []
-    if (values.length + pageValues.length > batchSize) {
-      return { values, complete: false, safeError: null, nextCursor: next }
-    }
     values.push(...pageValues)
     next = body['@odata.nextLink'] ?? null
+    if (next && values.length >= batchSize) {
+      return { values, complete: false, safeError: null, nextCursor: next }
+    }
   }
   return { values, complete: next === null, safeError: null, nextCursor: next }
 }
@@ -169,12 +170,6 @@ async function resolveAssignees(microsoftIds: string[], token: string): Promise<
     if (index + 20 < idList.length) await sleep(200)
   }
   return assigneeMap
-}
-
-function dedupeRecords(existing: Array<Record<string, unknown>>, incoming: Array<Record<string, unknown>>, idKey: string): Array<Record<string, unknown>> {
-  const seen = new Set(existing.map(r => String(r[idKey] ?? '')))
-  const appended = incoming.filter(r => !seen.has(String(r[idKey] ?? '')))
-  return [...existing, ...appended]
 }
 
 async function fetchOutlookUnit(token: string, manifest: SourceManifest, source: JobSourceRow) {
@@ -295,7 +290,7 @@ Deno.serve(async request => {
   if (!configured || !manifest || !tenantId || !clientId || !clientSecret) return jsonResponse({ ok: false, error: 'Microsoft transition connection is not configured.' }, 503)
   if (transitionStatus !== 'active') return jsonResponse({ ok: false, error: `Microsoft transition sync is ${transitionStatus}.` }, 409)
 
-  const SOURCE_FIELDS = 'id, position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, pending_detail_ids, range_start, range_end, attempts, pagination_cursor'
+  const SOURCE_FIELDS = 'id, position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, pending_detail_ids, range_start, range_end, attempts, pagination_cursor, records'
   const statusList = (rows: Array<Record<string, unknown>>) => rows
     .map(r => ({ id: r.id, position: r.position, sourceType: r.source_type, sourceId: r.source_id, sourceName: r.source_name, required: r.required, stage: r.stage, recordCount: r.record_count, complete: r.complete, safeError: r.safe_error, detailsRemaining: Array.isArray(r.pending_detail_ids) ? (r.pending_detail_ids as unknown[]).length : 0, paginationCursor: r.pagination_cursor ?? null }))
     .sort((a, b) => Number(a.position) - Number(b.position))
