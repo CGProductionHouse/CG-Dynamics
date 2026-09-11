@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Verify local tools
-        shell: pwsh
+        shell: powershell
         run: |
           codex --version
           git --version
@@ -31,7 +31,7 @@ jobs:
           gh auth status
 
       - name: Parse command
-        shell: pwsh
+        shell: powershell
         env:
           BODY: ${{ github.event.comment.body }}
         run: |
@@ -45,7 +45,7 @@ jobs:
 
       - name: Test Codex ChatGPT subscription login
         if: env.MODE == 'test'
-        shell: pwsh
+        shell: powershell
         run: |
           $work = Join-Path $env:RUNNER_TEMP ("codex-test-" + $env:GITHUB_RUN_ID)
           New-Item -ItemType Directory -Force -Path $work | Out-Null
@@ -59,7 +59,7 @@ jobs:
 
       - name: Prepare issue task
         if: env.MODE == 'issue'
-        shell: pwsh
+        shell: powershell
         run: |
           $issueJson = gh issue view $env:TASK_ISSUE --repo CGProductionHouse/CG-Dynamics --json number,title,body,state,url
           $issue = $issueJson | ConvertFrom-Json
@@ -98,7 +98,7 @@ jobs:
 
       - name: Run Codex issue task
         if: env.MODE == 'issue'
-        shell: pwsh
+        shell: powershell
         run: |
           $prompt = Get-Content -Raw $env:PROMPT_PATH
           $out = Join-Path (Split-Path $env:PROMPT_PATH) 'last-message.txt'
@@ -107,7 +107,7 @@ jobs:
 
       - name: Publish issue task as PR
         if: env.MODE == 'issue'
-        shell: pwsh
+        shell: powershell
         run: |
           Set-Location $env:WORKDIR
           if ([string]::IsNullOrWhiteSpace((git status --porcelain))) {
