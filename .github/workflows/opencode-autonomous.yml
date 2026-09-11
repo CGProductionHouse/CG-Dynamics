@@ -48,9 +48,24 @@ jobs:
 
             If #216 is launch-ready or only true external blockers remain, make no code changes and exit quietly without posting a routine status update.
 
+      - name: Run OpenCode — Go quality fallback
+        id: go
+        if: steps.primary.outcome == 'failure'
+        continue-on-error: true
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ vars.OPENCODE_GO_MODEL || 'opencode-go/kimi-k2.7-code' }}
+          prompt: |
+            Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
+
+            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
+
       - name: Run OpenCode — configured quality fallback
         id: sol
-        if: steps.primary.outcome == 'failure' && vars.OPENCODE_FALLBACK_MODEL_1 != ''
+        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && vars.OPENCODE_FALLBACK_MODEL_1 != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -65,7 +80,7 @@ jobs:
 
       - name: Run OpenCode — NVIDIA fallback
         id: nvidia
-        if: steps.primary.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && vars.OPENCODE_NVIDIA_MODEL != ''
+        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && vars.OPENCODE_NVIDIA_MODEL != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -79,6 +94,6 @@ jobs:
             Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
 
       - name: Record unavailable model lanes
-        if: steps.primary.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
+        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
         run: |
           echo "All configured OpenCode model lanes were unavailable or failed. The supervisor can inspect this run; no email-worthy failure is raised here."
