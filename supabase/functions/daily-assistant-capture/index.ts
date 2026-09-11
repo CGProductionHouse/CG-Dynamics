@@ -342,6 +342,7 @@ Deno.serve(async request => {
   let transcript = ''
   let requestId: string
   let clientId = ''
+  let page: string
   let durationSeconds = 0
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}
@@ -351,6 +352,7 @@ Deno.serve(async request => {
       action = String(form.get('action') ?? '')
       requestId = String(form.get('requestId') ?? '')
       clientId = String(form.get('clientId') ?? '')
+      page = String(form.get('page') ?? '')
       durationSeconds = Number(form.get('durationSeconds'))
       const file = form.get('audio')
       audio = file instanceof File ? file : null
@@ -360,6 +362,7 @@ Deno.serve(async request => {
       transcript = typeof jsonBody.transcript === 'string' ? jsonBody.transcript.trim() : ''
       requestId = typeof jsonBody.requestId === 'string' ? jsonBody.requestId : ''
       clientId = typeof jsonBody.clientId === 'string' ? jsonBody.clientId : ''
+      page = typeof jsonBody.page === 'string' ? jsonBody.page : ''
     }
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid daily capture request.' }, 400)
@@ -429,7 +432,7 @@ Deno.serve(async request => {
       calls: interpreted.analysis.calls, decisions: interpreted.analysis.decisions, promises: interpreted.analysis.promises,
       unresolved: interpreted.analysis.unresolved, notes: interpreted.analysis.notes,
       mentions: interpreted.analysis.mentions, suggestions: interpreted.analysis.suggestions,
-      source_context: { client_id: preferredClientId },
+      source_context: { page: page.slice(0, 120), client_id: preferredClientId },
     }).select('id').single()
     if (insertError?.code === '23505') {
       const { data: duplicate } = await service.from('assistant_day_captures').select('*')

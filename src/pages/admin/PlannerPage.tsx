@@ -309,7 +309,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     const linkedTask = displayedTasks.find(task => task.id === routeTaskId)
     if (!linkedTask) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDrawerTask(() => linkedTask)
+    setDrawerTask(linkedTask)
     if (isPlannerHistoryTask(linkedTask)) setWorkView('history')
     if (routeParams.get('task') !== linkedTask.title) {
       const next = new URLSearchParams(routeParams)

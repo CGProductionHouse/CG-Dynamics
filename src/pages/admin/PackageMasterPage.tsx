@@ -109,6 +109,8 @@ export default function PackageMasterPage() {
 
   useEffect(() => {
     let active = true
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setClientsLoading(true)
     listActiveClients().then(({ data, error }) => {
       if (!active) return
       setClientsLoading(false)
@@ -204,12 +206,6 @@ export default function PackageMasterPage() {
       photo: active.filter(t => t.deliverable_type === 'photo').reduce((s, t) => s + t.count_per_month, 0),
       video: active.filter(t => t.deliverable_type === 'video').reduce((s, t) => s + t.count_per_month, 0),
       reel: active.filter(t => t.deliverable_type === 'reel').reduce((s, t) => s + t.count_per_month, 0),
-      content_run: 0,
-      website_update: 0,
-      monthly_report: 0,
-      strategy: 0,
-      admin: 0,
-      other: 0,
     }
   }, [templates])
 
@@ -564,7 +560,7 @@ export default function PackageMasterPage() {
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {QUANTITY_FIELDS.map(field => (
                     <div key={field.type} className="rounded-lg border border-white/8 bg-white/[0.035] p-3 text-center">
-                      <p className="text-2xl font-black text-white">{templateStats[field.type]}</p>
+                      <p className="text-2xl font-black text-white">{quantities[field.type]}</p>
                       <p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/40">{field.label}</p>
                     </div>
                   ))}
