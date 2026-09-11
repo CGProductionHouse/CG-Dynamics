@@ -5,7 +5,10 @@ on:
     types: [created]
 
 concurrency:
-  group: codex-laptop-agent
+  # Every repository issue comment starts this workflow before the job-level `if`
+  # is evaluated. Give irrelevant comments their own run-scoped group so an /oc
+  # or normal issue comment cannot cancel an active trusted Codex task.
+  group: ${{ github.event.issue.number == 347 && (github.event.comment.body == '/codex test' || startsWith(github.event.comment.body, '/codex issue=')) && 'codex-laptop-agent' || format('codex-ignore-{0}', github.run_id) }}
   cancel-in-progress: true
 
 permissions:
