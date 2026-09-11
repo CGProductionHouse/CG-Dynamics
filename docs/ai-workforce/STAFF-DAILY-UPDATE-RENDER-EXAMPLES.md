@@ -14,21 +14,19 @@ Three deliverables on your desk before lunch, Sydney — Red Oak brief is the fi
 **Day shape:** 3 client deliverables due, 1 lead follow-up, no meetings until 2pm.
 
 ### TODAY
-| Time  | Item |
-|-------|------|
-| NOW   | Review Red Oak content brief — due 10am |
-| 10:30 | Dulux caption draft — client waiting |
-| 11:00 | Bloem shoot prep — check assets |
-| 2:00  | Team sync — bring Red Oak status |
-| 4:00  | Follow up Bloem lead — they went quiet |
+| Time | Schedule | Context | Action |
+|------|----------|---------|--------|
+| NOW | Focus gap | Studio; 45 minutes before first commitment | Review Red Oak content brief |
+| 10:30 | Dulux caption review | Remote; client waiting | Approve or return exact changes |
+| 2:00 | Team sync | CG studio | Bring Red Oak status |
 
 ### WORK QUEUE
-| Status | Task                    | Client    | Next Move |
-|--------|-------------------------|-----------|-----------|
-| NOW    | Content brief review    | Red Oak   | Approve and send |
-| NEXT   | Caption draft           | Dulux     | Write 3 options |
-| WAITING| Logo variants           | Bloem     | Waiting on designer — chase at 3pm |
-| LATER  | Proposal outline        | New Lead  | Draft by Thursday |
+| State | Task | Next move | Due |
+|-------|------|-----------|-----|
+| NOW | Red Oak content brief review | Approve and send | 10:00 |
+| NEXT | Dulux caption review | Approve or return changes | Today |
+| WAITING | Bloem logo variants | Chase designer at 3pm | Friday |
+| LATER | New lead proposal outline | Draft first section | Thursday |
 
 **Blocked:** Nothing stuck today.
 
@@ -45,22 +43,46 @@ Light morning, Franco — two tasks and a clear afternoon. No pressure stacking 
 **Day shape:** 2 tasks this morning, 1 afternoon follow-up, nothing urgent.
 
 ### TODAY
-| Time  | Item |
-|-------|------|
-| NOW   | Planner task: update client notes — quick win |
-| 10:00 | Content review for Red Oak — just the captions |
-| 2:00  | Bloem follow-up — they replied yesterday |
+| Time | Schedule | Context | Action |
+|------|----------|---------|--------|
+| NOW | Focus gap | CG studio; 40 minutes available | Update client notes |
+| 10:00 | Red Oak content review | Remote; captions only | Review and record exact changes |
+| 2:00 | Bloem follow-up | Remote; reply received yesterday | Reply in the existing thread |
 
 ### WORK QUEUE
-| Status | Task                    | Client    | Next Move |
-|--------|-------------------------|-----------|-----------|
-| NOW    | Client notes update     | General   | Mark done when complete |
-| NEXT   | Caption review          | Red Oak   | Read through, approve |
-| LATER  | Bloem follow-up         | Bloem     | Reply to their email |
+| State | Task | Next move | Due |
+|-------|------|-----------|-----|
+| NOW | Client notes update | Complete in the focus gap | No due date |
+| NEXT | Red Oak caption review | Review and record changes | Today |
+| LATER | Bloem follow-up | Reply in the existing thread | Today |
 
 No blockers. Everything's moving.
 
 → Knock out the client notes first — it's a quick one and clears the board.
+```
+
+## Franco — EOD Update
+
+```
+Solid close, Franco — the Red Oak run is captured; the upload still needs a verified finish.
+
+### DONE TODAY
+- Red Oak Video 1 and Video 2 confirmed captured against the canonical guideline.
+
+### STILL OPEN
+- Red Oak Video 3 — missed because the client contact left early; reshoot decision needed.
+- OneDrive upload — PARTIAL; keep the run unresolved until the exact run folder verifies complete.
+
+### TOMORROW
+| Time | Schedule | Context | Action |
+|------|----------|---------|--------|
+| 9:00 | Editing handoff | CG studio; only verified footage is ready | Confirm the remaining upload, then hand over |
+
+### BLOCKERS / PREP
+- Assistant: finish exact same-client deliverable linkage; Franco does not choose IDs.
+- Franco: confirm whether Video 3 must be reshot.
+
+Reply naturally with the reshoot decision or any missed field fact and I’ll keep the exact records aligned.
 ```
 
 ---
@@ -73,21 +95,19 @@ Good morning, Amonique — the inbox has a new Cape Lumber enquiry and a wedding
 **Day shape:** 4 inbox items need attention, 2 drafts to prepare, one meeting at 11.
 
 ### TODAY
-| Time  | Item |
-|-------|------|
-| NOW   | New enquiry from Cape Lumber — draft reply needed |
-| 10:00 | Wedding package enquiry — attach packages PDF |
-| 11:00 | Team check-in — bring inbox summary |
-| 2:00  | Draft follow-up for Red Oak lead |
-| 3:00  | Review pending replies — chase if needed |
+| Time | Schedule | Context | Action |
+|------|----------|---------|--------|
+| NOW | Inbox focus gap | Remote; 50 minutes before meeting | Draft Cape Lumber reply |
+| 11:00 | Team check-in | CG studio | Bring inbox summary |
+| 2:00 | Red Oak lead follow-up | Remote | Draft in the existing thread |
 
 ### WORK QUEUE
-| Status | Task                    | Client    | Next Move |
-|--------|-------------------------|-----------|-----------|
-| NOW    | Enquiry reply           | Cape Lumber | Draft with business profile attached |
-| NEXT   | Wedding enquiry         | New Lead  | Draft with wedding packages PDF |
-| WAITING| Red Oak proposal        | Red Oak   | Sent yesterday — follow up if no reply by 3pm |
-| LATER  | Inbox triage            | General   | Review unresolved threads |
+| State | Task | Next move | Due |
+|-------|------|-----------|-----|
+| NOW | Cape Lumber enquiry reply | Draft with approved business profile | Today |
+| NEXT | Wedding enquiry | Draft with approved wedding packages PDF | Today |
+| WAITING | Red Oak proposal | Follow up if no reply by 3pm | Today |
+| LATER | Inbox triage | Review unresolved owned/company-mail threads | Today |
 
 **Tip:** Cape Lumber enquiry came in at 8:42am — they're warm, reply within the hour if you can.
 
@@ -98,7 +118,8 @@ Good morning, Amonique — the inbox has a new Cape Lumber enquiry and a wedding
 
 ## Notes
 
-- All three use the same TODAY timeline + WORK Queue structure.
+- All morning updates use the exact `Time | Schedule | Context | Action` and `State | Task | Next move | Due` structures.
+- Franco EOD shows the required exact Content Run, canonical guideline, Assistant-owned linkage and OneDrive evidence boundary.
 - Personality appears in greeting/closing only; the work body is identical in format.
 - Sydney gets confident/boss-energy without cliché filler. Franco gets dry/calm/reassuring. Amonique gets warm/explanatory with humour when appropriate.
 - **Greeting generation rule:** Each greeting must be generated fresh from the staff profile's `working_preferences`, `output_preferences`, `repeated_corrections`, and the real same-day context (actual tasks, leads, calendar items). Never repeat stock lines. Never invent nicknames unless confirmed in profile.

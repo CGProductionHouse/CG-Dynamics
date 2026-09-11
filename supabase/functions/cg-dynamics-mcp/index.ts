@@ -27,6 +27,33 @@ import {
   buildMcpAuthChallengeMeta,
   type McpAuthChallengeError,
 } from './oauthDiscovery.ts'
+import { cgDate, cgDatePlusDays, CG_TIMEZONE } from './cgTime.ts'
+import {
+  classifyOneDriveReadiness,
+  gradeSyncRun,
+  planGuidelineVideoLinks,
+  summarizeProviderHealth,
+} from './opsActions.ts'
+import {
+  buildStaffAssistantPolicy,
+  STAFF_ASSISTANT_POLICY_VERSION,
+  STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
+} from './coexistencePolicy.ts'
+import {
+  buildDailyUpdateContract,
+  ASSISTANT_PRESENTATION_VERSION,
+} from './assistantPresentationPolicy.ts'
+import {
+  CALENDAR_MICROSOFT_FIELDS,
+  PLANNER_MICROSOFT_FIELDS,
+  summarizeSyncHealth,
+  withSourceLinkage,
+} from './microsoftSourceFields.ts'
+import {
+  CLIENT_SCHEDULE_SELECT,
+  MY_DAY_DELIVERABLE_SELECT,
+  flattenDeliverableClient,
+} from './clientScheduleRows.ts'
 import {
   assertRecordClientMatchesContext,
   assertToolAllowedInContext,
@@ -123,6 +150,13 @@ interface ConnectionPrincipal {
   profileId: string
   fullName: string | null
   role: string
+  /**
+   * The caller's validated bearer token. Retained ONLY so company-admin actions can delegate
+   * to the existing durable Edge Functions (microsoft-transition-sync, provider
+   * connection-status/sync) as the same authenticated admin, instead of duplicating those
+   * engines here. Never logged, never returned in any tool result.
+   */
+  accessToken: string
 }
 
 // Handed to every tool handler. `profileId` / `fullName` / `role` are the EFFECTIVE Project
@@ -200,6 +234,7 @@ async function authenticateStaff(request: Request): Promise<{ ok: true; connecti
       profileId: profile.id,
       fullName: profile.full_name,
       role: profile.role,
+      accessToken: match[1],
     },
   }
 }
@@ -431,9 +466,19 @@ type ToolHandler = (
   input: Record<string, unknown>,
 ) => Promise<unknown>
 
+// Every canonical Planner state except terminal `done` remains active work. In particular,
+// blocked/waiting/review/scheduled work must not disappear merely to exclude completions.
+const ACTIVE_TASK_STATES = [
+  'to_do', 'in_progress', 'blocked', 'waiting_client',
+  'ready_internal_review', 'approved', 'scheduled',
+]
+
 const handleGetMyDay: ToolHandler = async (staff) => {
-  const today = new Date().toISOString().slice(0, 10)
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10)
+  // CG operates in Africa/Johannesburg (UTC+2). Deriving the day from UTC returned the
+  // PREVIOUS date between 00:00-02:00 SAST (#325/#327 defect: 00:37 SAST on 10 Sep -> 9 Sep).
+  const now = new Date()
+  const today = cgDate(now)
+  const tomorrow = cgDatePlusDays(1, now)
 
   const [tasksResult, calendarResult, scheduleResult] = await Promise.all([
     staff.supabase
@@ -441,6 +486,8 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id')
       .eq('assigned_to_name', staff.fullName)
       .is('archived_at', null)
+      .is('microsoft_source_removed_at', null)
+      .in('status', ACTIVE_TASK_STATES)
       .lte('due_date', tomorrow)
       .order('due_date', { ascending: true })
       .limit(20),
@@ -453,7 +500,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .limit(20),
     staff.supabase
       .from('monthly_deliverables')
-      .select('id, title, deliverable_type, scheduled_date, production_status, assigned_to_name, client_name')
+      .select(MY_DAY_DELIVERABLE_SELECT)
       .eq('assigned_to_name', staff.fullName)
       .eq('scheduled_date', today)
       .order('scheduled_date', { ascending: true })
@@ -462,28 +509,32 @@ const handleGetMyDay: ToolHandler = async (staff) => {
 
   return {
     today,
+    timezone: CG_TIMEZONE,
     staff_name: staff.fullName,
     tasks: tasksResult.data ?? [],
     calendar_events: calendarResult.data ?? [],
-    deliverables: scheduleResult.data ?? [],
+    deliverables: flattenDeliverableClient(scheduleResult.data),
     errors: [tasksResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
   }
 }
 
 const handleListMyTasks: ToolHandler = async (staff, input) => {
-  const query = staff.supabase
+  let query = staff.supabase
     .from('planner_tasks')
-    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at')
+    .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
     .eq('assigned_to_name', staff.fullName)
     .is('archived_at', null)
+    .is('microsoft_source_removed_at', null)
     .order('due_date', { ascending: true })
     .limit(50)
 
-  if (input.status) query.eq('status', input.status)
-  if (input.due_before) query.lte('due_date', input.due_before)
+  if (input.status) query = query.eq('status', input.status)
+  else query = query.in('status', ACTIVE_TASK_STATES)
+  if (input.due_before) query = query.lte('due_date', input.due_before)
 
   const { data, error } = await query
-  return { tasks: data ?? [], error: error?.message ?? null }
+  // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
+  return { tasks: withSourceLinkage(data, 'planner'), error: error?.message ?? null }
 }
 
 const handleGetTask: ToolHandler = async (staff, input) => {
@@ -505,19 +556,20 @@ const handleGetTask: ToolHandler = async (staff, input) => {
 const handleListMyCalendar: ToolHandler = async (staff, input) => {
   const { data, error } = await staff.supabase
     .from('company_calendar_events')
-    .select('id, title, event_type, start_at, end_at, all_day, location, notes, assigned_to_name, status, client_name, client_id')
+    .select(`id, title, event_type, start_at, end_at, all_day, location, notes, assigned_to_name, status, client_name, client_id, linked_deliverable_id, linked_task_id, ${CALENDAR_MICROSOFT_FIELDS.join(', ')}`)
     .gte('start_at', input.from as string)
     .lte('start_at', (input.to as string) + 'T23:59:59')
     .order('start_at', { ascending: true })
     .limit(50)
 
-  return { events: data ?? [], error: error?.message ?? null }
+  // #325: durable Outlook identity + freshness for ID-based dedupe against live Outlook.
+  return { events: withSourceLinkage(data, 'calendar'), error: error?.message ?? null }
 }
 
 const handleListClientSchedule: ToolHandler = async (staff, input) => {
   const query = staff.supabase
     .from('monthly_deliverables')
-    .select('id, client_id, client_name, month, deliverable_type, title, scheduled_date, due_date, production_status, assigned_to_name')
+    .select(CLIENT_SCHEDULE_SELECT)
     .gte('scheduled_date', input.from as string)
     .lte('scheduled_date', input.to as string)
     .order('scheduled_date', { ascending: true })
@@ -526,7 +578,827 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
   if (input.client_id) query.eq('client_id', input.client_id)
 
   const { data, error } = await query
-  return { deliverables: data ?? [], error: error?.message ?? null }
+  return { deliverables: flattenDeliverableClient(data), error: error?.message ?? null }
+}
+
+/**
+ * Internal Content Run discovery (#325 item 3). Finds exact Content Runs by date,
+ * client, calendar event or deliverable and returns the linked canonical guideline, ordered
+ * videos, Client Schedule linkage and OneDrive readiness, so Morning Ops and Franco EOD
+ * never have to guess a Content Run UUID.
+ *
+ * Read-only. Raw OneDrive drive/item identifiers and web URLs are deliberately withheld.
+ */
+const handleFindContentRuns: ToolHandler = async (staff, input) => {
+  let query = staff.supabase
+    .from('content_runs')
+    .select('id, client_id, client_name, name, run_date, start_time, location, status, calendar_event_id')
+    .order('run_date', { ascending: false })
+    .limit(Math.min(Math.max(Number(input.limit ?? 10), 1), 25))
+
+  const clientId = (input.client_id as string | undefined) ?? staff.effectiveClientId ?? null
+  if (clientId) query = query.eq('client_id', clientId)
+  if (input.run_date) query = query.eq('run_date', input.run_date)
+  if (input.from) query = query.gte('run_date', input.from)
+  if (input.to) query = query.lte('run_date', input.to)
+  if (input.calendar_event_id) query = query.eq('calendar_event_id', input.calendar_event_id)
+
+  // Deliverable -> run: resolve through the guideline video that references the deliverable.
+  if (input.deliverable_id) {
+    const { data: ideas, error: ideaError } = await staff.supabase
+      .from('content_guide_ideas')
+      .select('content_guideline_id')
+      .eq('deliverable_id', input.deliverable_id)
+      .neq('status', 'archived')
+      .limit(2)
+    if (ideaError) return { error: ideaError.message }
+    if ((ideas ?? []).length > 1) {
+      return { error: 'More than one active guideline video references that deliverable. Exact Content Run discovery is ambiguous and was refused.' }
+    }
+    const guidelineId = ideas?.[0]?.content_guideline_id as string | undefined
+    if (!guidelineId) {
+      return { runs: [], matched_by: 'deliverable_id', note: 'No guideline video references that exact deliverable, so no Content Run could be resolved. Reported rather than guessed.' }
+    }
+    const { data: guideline, error: guidelineError } = await staff.supabase
+      .from('content_guidelines')
+      .select('content_run_id')
+      .eq('id', guidelineId)
+      .maybeSingle()
+    if (guidelineError) return { error: guidelineError.message }
+    if (!guideline?.content_run_id) {
+      return { runs: [], matched_by: 'deliverable_id', note: 'The referencing guideline has no linked Content Run.' }
+    }
+    query = query.eq('id', guideline.content_run_id)
+  }
+
+  const { data: runs, error } = await query
+  if (error) return { error: error.message }
+
+  const detailed = await Promise.all((runs ?? []).map(async (run: Record<string, unknown>) => {
+    const runId = run.id as string
+    const [guidelineRes, mappingRes, closeoutRes] = await Promise.all([
+      staff.supabase.from('content_guidelines').select('id, title, month, status, client_id').eq('content_run_id', runId).maybeSingle(),
+      staff.supabase.from('content_run_onedrive_folders').select('drive_id, month_folder_item_id, folder_name, web_url, last_verified_at').eq('content_run_id', runId).maybeSingle(),
+      staff.supabase.from('content_run_closeouts').select('upload_status').eq('content_run_id', runId).maybeSingle(),
+    ])
+
+    const detailErrors = [guidelineRes.error, mappingRes.error, closeoutRes.error].filter(Boolean)
+    if (detailErrors.length > 0) {
+      return {
+        content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+        error: detailErrors.map(item => item?.message).filter(Boolean).join('; '),
+      }
+    }
+
+    const guideline = guidelineRes.data as Record<string, unknown> | null
+    let videos: Array<Record<string, unknown>> = []
+    if (guideline?.id) {
+      const { data: ideaRows, error: ideaRowsError } = await staff.supabase
+        .from('content_guide_ideas')
+        .select('id, title, position, status, deliverable_id, client_id')
+        .eq('content_guideline_id', guideline.id)
+        .order('position', { ascending: true })
+      if (ideaRowsError) {
+        return {
+          content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+          error: ideaRowsError.message,
+        }
+      }
+      videos = (ideaRows ?? []) as Array<Record<string, unknown>>
+    }
+
+    return {
+      content_run: {
+        id: runId,
+        client: { id: run.client_id, name: run.client_name },
+        name: run.name,
+        run_date: run.run_date,
+        start_time: run.start_time,
+        location: run.location,
+        status: run.status,
+        calendar_event_id: run.calendar_event_id,
+      },
+      content_guideline: guideline
+        ? { id: guideline.id, title: guideline.title, month: guideline.month, status: guideline.status }
+        : null,
+      videos: videos.map(v => ({
+        id: v.id, title: v.title, position: v.position, status: v.status,
+        linked_deliverable_id: v.deliverable_id ?? null,
+      })),
+      client_schedule_linkage: {
+        linked_video_count: videos.filter(v => !!v.deliverable_id).length,
+        unlinked_video_count: videos.filter(v => !v.deliverable_id).length,
+      },
+      onedrive: classifyOneDriveReadiness(mappingRes.data as Record<string, unknown> | null),
+      upload_status: (closeoutRes.data as Record<string, unknown> | null)?.upload_status ?? 'unverified',
+    }
+  }))
+
+  return {
+    runs: detailed,
+    matched_by: input.deliverable_id ? 'deliverable_id' : input.calendar_event_id ? 'calendar_event_id' : input.run_date ? 'run_date' : clientId ? 'client' : 'recent',
+    note: detailed.length === 0
+      ? 'No Content Run matched those exact criteria. Reported rather than guessed - never substitute a different client or date.'
+      : 'One canonical Content Guideline per Content Run. Raw OneDrive identifiers and URLs are internal-only and withheld.',
+  }
+}
+
+/**
+ * Assistant-owned Content Guideline linkage (#325 item 4). Franco confirms only what
+ * happened on the shoot; the Assistant resolves the exact linkage itself:
+ * Content Run -> one canonical Content Guideline -> ordered videos -> exact same-client
+ * monthly deliverables.
+ *
+ * `dry_run` (default) returns the plan without writing. Same-client and one-active-link
+ * constraints fail closed; nothing is guessed and Franco is never asked to choose an ID.
+ */
+const handleLinkContentRunDeliverables: ToolHandler = async (staff, input) => {
+  const runId = input.content_run_id as string
+  const scopeError = await assertRunInClientScope(staff, runId)
+  if (scopeError) return scopeError
+
+  const { data: run, error: runError } = await staff.supabase
+    .from('content_runs')
+    .select('id, client_id, client_name, run_date')
+    .eq('id', runId)
+    .maybeSingle()
+  if (runError) return { error: runError.message }
+  if (!run) return { error: 'Content Run not found.' }
+  if (!run.client_id) return { error: 'Content Run has no exact client assigned; linkage is refused.' }
+
+  const { data: guideline, error: guidelineError } = await staff.supabase
+    .from('content_guidelines')
+    .select('id, title, month, coverage_start, coverage_end, client_id')
+    .eq('content_run_id', runId)
+    .maybeSingle()
+  if (guidelineError) return { error: guidelineError.message }
+  if (!guideline) {
+    return { error: 'No canonical Content Guideline is linked to this Content Run. Linkage is refused rather than creating a parallel guideline.' }
+  }
+  if (guideline.client_id && guideline.client_id !== run.client_id) {
+    return { error: 'The linked Content Guideline belongs to a different client than the Content Run. Failing closed.' }
+  }
+
+  const { data: videos, error: videosError } = await staff.supabase
+    .from('content_guide_ideas')
+    .select('id, title, position, month, video_number, status, deliverable_id, client_id')
+    .eq('content_guideline_id', guideline.id)
+    .order('position', { ascending: true })
+  if (videosError) return { error: videosError.message }
+
+  const coverageStart = (guideline.coverage_start as string | null) ?? (guideline.month as string | null)
+  const coverageEnd = (guideline.coverage_end as string | null) ?? coverageStart
+  let deliverablesQuery = staff.supabase
+    .from('monthly_deliverables')
+    .select('id, client_id, title, code, deliverable_type, month, instance_number, scheduled_date')
+    .eq('client_id', run.client_id)
+    .in('deliverable_type', ['video', 'reel'])
+    .order('scheduled_date', { ascending: true })
+    .limit(250)
+  if (coverageStart) deliverablesQuery = deliverablesQuery.gte('month', coverageStart)
+  if (coverageEnd) deliverablesQuery = deliverablesQuery.lte('month', coverageEnd)
+  const { data: deliverables, error: deliverablesError } = await deliverablesQuery
+  if (deliverablesError) return { error: deliverablesError.message }
+
+  const candidateIds = (deliverables ?? []).map(row => row.id).filter(Boolean)
+  const claimedElsewhere = new Set<string>()
+  if (candidateIds.length > 0) {
+    const { data: claimedRows, error: claimedError } = await staff.supabase
+      .from('content_guide_ideas')
+      .select('id, deliverable_id')
+      .in('deliverable_id', candidateIds)
+      .neq('status', 'archived')
+      .neq('content_guideline_id', guideline.id)
+    if (claimedError) return { error: claimedError.message }
+    for (const row of claimedRows ?? []) {
+      if (row.deliverable_id) claimedElsewhere.add(row.deliverable_id)
+    }
+  }
+
+  const deliverableCandidates = (deliverables ?? []).map(row => ({
+    ...row,
+    claimed_elsewhere: claimedElsewhere.has(row.id),
+  }))
+
+  const plan = planGuidelineVideoLinks(
+    (videos ?? []) as Array<Record<string, unknown>>,
+    deliverableCandidates as Array<Record<string, unknown>>,
+    run.client_id as string,
+  )
+
+  const dryRun = input.dry_run !== false
+  const linkable = plan.filter(p => p.outcome === 'linkable')
+  const blocked = plan.filter(p => p.outcome === 'blocked_cross_client' || p.outcome === 'ambiguous')
+
+  if (dryRun) {
+    return {
+      dry_run: true,
+      content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+      content_guideline: { id: guideline.id, title: guideline.title, month: guideline.month },
+      plan,
+      summary: { linkable: linkable.length, already_linked: plan.filter(p => p.outcome === 'already_linked').length, blocked: blocked.length, ambiguous: plan.filter(p => p.outcome === 'ambiguous').length, no_candidate: plan.filter(p => p.outcome === 'no_candidate').length },
+      note: 'Plan only - nothing was written. The Assistant resolved every link itself; Franco is never asked to choose an ID. Call again with dry_run=false to apply.',
+    }
+  }
+
+  if (blocked.length > 0) {
+    return {
+      dry_run: false, applied: 0, blocked: blocked.length, plan,
+      error: 'Refusing to apply: one or more video links are cross-client or ambiguous. Resolve the data conflict explicitly first.',
+    }
+  }
+
+  // Apply only the unambiguous same-client links. Idempotent: already-linked rows are
+  // untouched, and each deliverable is claimed at most once by the planner.
+  let applied = 0
+  const failures: Array<{ video_id: string; error: string }> = []
+  for (const item of linkable) {
+    const { data: updatedRow, error: updateError } = await staff.supabase
+      .from('content_guide_ideas')
+      .update({ deliverable_id: item.deliverable_id, updated_at: new Date().toISOString() })
+      .eq('id', item.video_id)
+      .is('deliverable_id', null)
+      .select('id')
+      .maybeSingle()
+    if (updateError) failures.push({ video_id: item.video_id, error: updateError.message })
+    else if (updatedRow) applied += 1
+    else failures.push({ video_id: item.video_id, error: 'The video changed before the link was applied. Reload and re-plan.' })
+  }
+
+  return {
+    dry_run: false,
+    content_run: { id: runId, client: { id: run.client_id, name: run.client_name } },
+    content_guideline: { id: guideline.id },
+    applied,
+    failed: failures.length,
+    failures,
+    plan,
+    note: 'Linked exact same-client monthly deliverables only. Guarded by `is deliverable_id null` so a repeat call cannot double-link. Client Schedule rows themselves were NOT modified.',
+  }
+}
+
+const CALENDAR_EVENT_TYPES = ['meeting', 'shoot', 'content_run', 'client_event', 'internal', 'deadline']
+const CALENDAR_STATUSES = ['planned', 'confirmed', 'completed', 'cancelled']
+
+/**
+ * Canonical CG Calendar write for coexistence dual-write (#325 item 2).
+ *
+ * Scope: the Dynamics side of a normal operational meeting/event the staff member explicitly
+ * asked the Assistant to create, reschedule or cancel. `company_calendar_events` remains CG
+ * Calendar truth. Client Schedule is NEVER written here and is never merged into CG Calendar.
+ *
+ * Durable Outlook identity is preserved: when `microsoft_event_id` is supplied the write is
+ * matched on it (idempotent upsert-by-source-key), never by title. `PARTIAL SYNC` is
+ * reported when the caller states the Outlook side did not succeed, so the pair is never
+ * claimed as fully written.
+ */
+const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
+  const action = String(input.action ?? 'create')
+  if (!['create', 'update', 'cancel'].includes(action)) {
+    return { error: 'action must be one of: create, update, cancel.' }
+  }
+
+  const microsoftEventId = typeof input.microsoft_event_id === 'string' && input.microsoft_event_id.trim()
+    ? input.microsoft_event_id.trim() : null
+  const eventId = typeof input.event_id === 'string' && input.event_id.trim() ? input.event_id.trim() : null
+
+  if (input.event_type && !CALENDAR_EVENT_TYPES.includes(String(input.event_type))) {
+    return { error: `event_type must be one of: ${CALENDAR_EVENT_TYPES.join(', ')}.` }
+  }
+  if (input.status && !CALENDAR_STATUSES.includes(String(input.status))) {
+    return { error: `status must be one of: ${CALENDAR_STATUSES.join(', ')}.` }
+  }
+  if (typeof input.outlook_write_succeeded !== 'boolean') {
+    return { error: 'outlook_write_succeeded must explicitly state whether the Outlook side landed. Never infer dual-write success.' }
+  }
+
+  // Resolve the exact existing row by durable identity only - never by title.
+  let existing: Record<string, unknown> | null = null
+  if (eventId) {
+    const { data } = await staff.supabase.from('company_calendar_events').select('id, client_id, microsoft_event_id, microsoft_calendar_id').eq('id', eventId).maybeSingle()
+    existing = data as Record<string, unknown> | null
+    if (!existing) return { error: 'No CG Calendar event matches that exact event_id.' }
+  } else if (microsoftEventId) {
+    const { data } = await staff.supabase.from('company_calendar_events').select('id, client_id, microsoft_event_id, microsoft_calendar_id').eq('microsoft_event_id', microsoftEventId).maybeSingle()
+    existing = data as Record<string, unknown> | null
+  }
+
+  const existingMicrosoftEventId = typeof existing?.microsoft_event_id === 'string' ? existing.microsoft_event_id : null
+  const existingMicrosoftCalendarId = typeof existing?.microsoft_calendar_id === 'string' ? existing.microsoft_calendar_id : null
+  const suppliedCalendarId = typeof input.microsoft_calendar_id === 'string' && input.microsoft_calendar_id.trim()
+    ? input.microsoft_calendar_id.trim() : null
+  if (existing && microsoftEventId && existingMicrosoftEventId && microsoftEventId !== existingMicrosoftEventId) {
+    return { error: 'event_id and microsoft_event_id resolve to different durable identities. Refusing to overwrite the existing Outlook identity.' }
+  }
+  if (existing && suppliedCalendarId && existingMicrosoftCalendarId && suppliedCalendarId !== existingMicrosoftCalendarId) {
+    return { error: 'microsoft_calendar_id does not match the existing event identity. Refusing the cross-calendar write.' }
+  }
+
+  if ((action === 'update' || action === 'cancel') && !existing) {
+    return { error: 'No existing CG Calendar event was resolved by exact id or durable Outlook event id. Refusing to match by title.' }
+  }
+
+  // Client-context pinning: a client Project cannot write another client's event.
+  const targetClientId = (input.client_id as string | undefined) ?? (existing?.client_id as string | undefined) ?? null
+  const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, targetClientId, 'calendar event')
+  if (!scope.allowed) return { error: scope.error }
+
+  const nowIso = new Date().toISOString()
+  const partialSync = input.outlook_write_succeeded === false
+  const effectiveMicrosoftEventId = microsoftEventId ?? existingMicrosoftEventId
+  const effectiveMicrosoftCalendarId = suppliedCalendarId ?? existingMicrosoftCalendarId
+  if (!partialSync && (!effectiveMicrosoftEventId || !effectiveMicrosoftCalendarId)) {
+    return { error: 'A successful Outlook-side write requires both microsoft_event_id and microsoft_calendar_id (supplied now or already stored). Otherwise report outlook_write_succeeded=false.' }
+  }
+  if (microsoftEventId && !suppliedCalendarId && !existingMicrosoftCalendarId) {
+    return { error: 'A new microsoft_event_id requires its exact microsoft_calendar_id. Partial Outlook identities are refused.' }
+  }
+
+  const writable: Record<string, unknown> = { updated_at: nowIso }
+  if (input.title !== undefined) writable.title = input.title
+  if (input.event_type !== undefined) writable.event_type = input.event_type
+  if (input.start_at !== undefined) writable.start_at = input.start_at
+  if (input.end_at !== undefined) writable.end_at = input.end_at
+  if (input.all_day !== undefined) writable.all_day = input.all_day
+  if (input.location !== undefined) writable.location = input.location
+  if (input.notes !== undefined) writable.notes = input.notes
+  if (input.assigned_to_name !== undefined) writable.assigned_to_name = input.assigned_to_name
+  if (input.client_id !== undefined) writable.client_id = input.client_id
+  if (input.client_name !== undefined) writable.client_name = input.client_name
+  if (!partialSync && effectiveMicrosoftEventId && effectiveMicrosoftCalendarId) {
+    writable.microsoft_event_id = effectiveMicrosoftEventId
+    writable.microsoft_source_type = 'outlook_calendar'
+    writable.microsoft_calendar_id = effectiveMicrosoftCalendarId
+    // Only claim Microsoft freshness when the caller confirms the Outlook write landed.
+    writable.microsoft_last_synced_at = nowIso
+  }
+
+  if (action === 'cancel') {
+    writable.status = 'cancelled'
+  } else if (input.status !== undefined) {
+    writable.status = input.status
+  }
+
+  let resultRow: Record<string, unknown> | null
+  let writeError: string | null
+
+  if (existing) {
+    const { data, error } = await staff.supabase
+      .from('company_calendar_events')
+      .update(writable)
+      .eq('id', existing.id)
+      .select('id, title, event_type, start_at, end_at, status, client_id, client_name, microsoft_event_id, microsoft_calendar_id, microsoft_last_synced_at')
+      .maybeSingle()
+    resultRow = data as Record<string, unknown> | null
+    writeError = error?.message ?? null
+  } else {
+    if (!input.title || !input.start_at) {
+      return { error: 'Creating a CG Calendar event requires at least title and start_at.' }
+    }
+    const { data, error } = await staff.supabase
+      .from('company_calendar_events')
+      .insert({ ...writable, created_at: nowIso })
+      .select('id, title, event_type, start_at, end_at, status, client_id, client_name, microsoft_event_id, microsoft_calendar_id, microsoft_last_synced_at')
+      .maybeSingle()
+    resultRow = data as Record<string, unknown> | null
+    writeError = error?.message ?? null
+  }
+
+  if (writeError) {
+    return { verdict: 'FAIL', action, error: writeError, sync_state: 'DYNAMICS_WRITE_FAILED', note: 'The Dynamics side did not write. If the Outlook side already succeeded this is a PARTIAL SYNC - preserve the Outlook write and reconcile.' }
+  }
+
+  return {
+    verdict: partialSync ? 'PARTIAL_SYNC' : 'PASS',
+    action,
+    event: resultRow,
+    matched_by: existing ? (eventId ? 'event_id' : 'microsoft_event_id') : 'created',
+    sync_state: partialSync ? 'PARTIAL SYNC' : 'BOTH_SIDES_REPORTED_OK',
+    note: partialSync
+      ? 'The caller reported the Outlook write did NOT succeed. The Dynamics mirror was written and Microsoft freshness was deliberately NOT stamped. Report PARTIAL SYNC and queue the Outlook side; never claim both were updated.'
+      : 'CG Calendar (company_calendar_events) is the Dynamics calendar truth. Client Schedule was not touched and is never merged into CG Calendar.',
+    scope_note: 'Durable Outlook identity is used for matching; title matching is refused.',
+  }
+}
+
+// -- #325 coexistence actions ------------------------------------------------
+
+/**
+ * Invoke a SIBLING Edge Function as the authenticated caller. This is how the connector
+ * reuses the existing durable engines (microsoft-transition-sync, provider status/sync)
+ * instead of reimplementing them. The caller token is forwarded, never logged.
+ */
+async function invokeSiblingFunction(
+  connection: ConnectionPrincipal,
+  fn: string,
+  body: Record<string, unknown>,
+): Promise<{ ok: boolean; data: Record<string, unknown> | null; error: string | null }> {
+  const baseUrl = Deno.env.get('SUPABASE_URL')
+  if (!baseUrl) return { ok: false, data: null, error: 'Server configuration error.' }
+  try {
+    const res = await fetch(`${baseUrl}/functions/v1/${fn}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${connection.accessToken}`,
+        apikey: Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      },
+      body: JSON.stringify(body),
+    })
+    const parsed = await res.json().catch(() => null)
+    if (!res.ok) {
+      return { ok: false, data: parsed, error: (parsed as { error?: string } | null)?.error ?? `${fn} returned ${res.status}.` }
+    }
+    return { ok: true, data: parsed, error: null }
+  } catch (err) {
+    return { ok: false, data: null, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/** Bounded work units per invocation so the Edge time budget is never exceeded. */
+const MAX_SYNC_PROCESS_STEPS = 40
+
+/**
+ * Run the EXISTING durable Microsoft reconciliation (#325 item 1). Drives the canonical
+ * microsoft-transition-sync job lifecycle (job_start -> bounded job_process loop ->
+ * job_status) as the authenticated admin. Builds no second sync engine and holds no
+ * Microsoft credentials of its own.
+ *
+ * Scope guard: fetches and assembles the durable Microsoft preview that the existing reviewed
+ * apply path consumes. This tool does not apply any Dynamics mirror. It deliberately cannot
+ * change Client Schedule/monthly_deliverables, MASTER CLIENT TO DO or protected Client Socials.
+ */
+const handleRunMicrosoftSync: ToolHandler = async (staff, input) => {
+  const conn = staff.connection
+  const resume = typeof input.job_id === 'string' && input.job_id.trim() ? input.job_id.trim() : null
+
+  let jobId = resume
+  if (!jobId) {
+    if (typeof input.range_start !== 'string' || typeof input.range_end !== 'string') {
+      return { verdict: 'FAIL', error: 'Starting a Microsoft reconciliation preview requires exact range_start and range_end timestamps.' }
+    }
+    const start = await invokeSiblingFunction(conn, 'microsoft-transition-sync', {
+      action: 'job_start',
+      rangeStart: input.range_start ?? undefined,
+      rangeEnd: input.range_end ?? undefined,
+    })
+    if (!start.ok) {
+      return { verdict: 'FAIL', error: start.error, reason: 'The durable reconciliation job could not be started. Flag SYNC FAILED and use the live Microsoft read.' }
+    }
+    jobId = (start.data?.jobId as string | undefined) ?? null
+    if (!jobId) return { verdict: 'FAIL', error: 'No job id was returned.', reason: 'Flag SYNC FAILED.' }
+  }
+
+  // Bounded and idempotent: each job_process claims exactly one unit and is safe to repeat.
+  let finished = false
+  let steps = 0
+  let lastError: string | null = null
+  let sources: Array<Record<string, unknown>> = []
+  let status: string | null = null
+
+  const maxSteps = Math.min(Math.max(Number(input.max_steps ?? MAX_SYNC_PROCESS_STEPS), 1), MAX_SYNC_PROCESS_STEPS)
+  while (steps < maxSteps && !finished) {
+    steps += 1
+    const step = await invokeSiblingFunction(conn, 'microsoft-transition-sync', { action: 'job_process', jobId })
+    if (!step.ok) { lastError = step.error; break }
+    finished = step.data?.finished === true
+    if (Array.isArray(step.data?.sources)) sources = step.data.sources as Array<Record<string, unknown>>
+  }
+
+  const statusRes = await invokeSiblingFunction(conn, 'microsoft-transition-sync', { action: 'job_status', jobId })
+  if (statusRes.ok) {
+    status = (statusRes.data?.status as string | undefined) ?? null
+    if (Array.isArray(statusRes.data?.sources)) sources = statusRes.data.sources as Array<Record<string, unknown>>
+  } else lastError = statusRes.error
+
+  let assembledRecordCount: number | null = null
+  if (finished) {
+    const resultRes = await invokeSiblingFunction(conn, 'microsoft-transition-sync', { action: 'job_result', jobId })
+    if (!resultRes.ok) lastError = resultRes.error
+    const snapshot = resultRes.data?.snapshot as { records?: unknown[] } | undefined
+    if (Array.isArray(snapshot?.records)) assembledRecordCount = snapshot.records.length
+  }
+
+  const outcome = gradeSyncRun(
+    lastError ? 'failed' : finished ? (status ?? 'complete') : (status ?? 'running'),
+    sources,
+  )
+
+  return {
+    job_id: jobId,
+    finished,
+    steps_processed: steps,
+    verdict: outcome.verdict,
+    reason: outcome.reason,
+    coverage: {
+      sources_total: outcome.sources_total,
+      sources_complete: outcome.sources_complete,
+      sources_failed: outcome.sources_failed,
+      required_incomplete: outcome.required_incomplete,
+      records_fetched: outcome.records_fetched,
+    },
+    sources,
+    transport_error: lastError,
+    preview_record_count: assembledRecordCount,
+    continuation: finished ? null : { job_id: jobId, note: 'Not finished within the bounded step budget. Call again with this job_id to continue; job_process is idempotent and claims one unit at a time.' },
+    scope_note: 'Fetches and assembles a durable reconciliation preview only. It does not claim planner_tasks/company_calendar_events mirrors are applied or fresh. Client Schedule/monthly_deliverables, MASTER CLIENT TO DO and protected Client Socials are untouched.',
+    apply_note: 'Reviewed APPLY remains in the existing admin reconciliation path. Until an apply succeeds, get_microsoft_sync_status may correctly remain stale and staff briefs must prefer live Microsoft freshness.',
+  }
+}
+
+const PROVIDER_STATUS_FUNCTIONS: Record<string, string> = {
+  meta: 'meta-connection-status',
+  google_ads: 'google-ads-connection-status',
+  tiktok: 'tiktok-connection-status',
+}
+
+const PROVIDER_SYNC_FUNCTIONS: Record<string, string> = {
+  meta: 'meta-sync',
+  google_ads: 'google-ads-sync',
+  tiktok: 'tiktok-sync',
+}
+
+function safeProviderEvidence(provider: string, response: Record<string, unknown> | null) {
+  if (!response) return null
+  if (provider === 'meta') {
+    const connection = response.connection as Record<string, unknown> | undefined
+    return {
+      status: response.status ?? null,
+      schema_ready: response.schemaReady ?? null,
+      linked_assets_count: response.linkedAssetsCount ?? null,
+      last_connected_at: connection?.lastConnectedAt ?? null,
+      last_verified_insight: connection?.lastVerifiedInsight ?? null,
+      asset_health: response.assetHealth ?? null,
+    }
+  }
+  if (provider === 'google_ads') {
+    return {
+      status: response.status ?? null,
+      configured: response.configured ?? null,
+      linked_accounts_count: response.linkedAccountsCount ?? null,
+      last_synced_at: response.lastSyncedAt ?? null,
+      last_checked_at: response.lastCheckedAt ?? null,
+    }
+  }
+  const connection = response.connection as Record<string, unknown> | undefined
+  return {
+    status: response.status ?? null,
+    schema_ready: response.schemaReady ?? null,
+    last_connected_at: connection?.lastConnectedAt ?? null,
+    token_expires_at: connection?.tokenExpiresAt ?? null,
+    token_expired: connection?.tokenExpired ?? null,
+  }
+}
+
+/**
+ * Compact Morning Ops provider health (#325 item 5). Reuses each provider EXISTING
+ * connection-status function; adds no provider client, no OAuth, no permission change, no
+ * account mapping and no publishing behaviour.
+ */
+const handleGetProviderHealth: ToolHandler = async (staff, input) => {
+  const suppliedProviders = Array.isArray(input.providers) && input.providers.length
+    ? input.providers as string[]
+    : null
+  const invalidProviders = (suppliedProviders ?? []).filter(p => !(p in PROVIDER_STATUS_FUNCTIONS))
+  if (invalidProviders.length > 0) return { error: `Unsupported provider(s): ${invalidProviders.join(', ')}.` }
+  const requested = suppliedProviders ?? Object.keys(PROVIDER_STATUS_FUNCTIONS)
+
+  const results = (await Promise.all(requested.map(async provider => {
+    if (provider !== 'tiktok') {
+      const res = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS[provider], {})
+      return [{
+        ...summarizeProviderHealth(provider, res.data as Record<string, unknown> | null, res.error),
+        evidence: safeProviderEvidence(provider, res.data),
+      }]
+    }
+
+    const requestedClientId = typeof input.client_id === 'string' ? input.client_id : null
+    let clientIds = requestedClientId ? [requestedClientId] : []
+    if (!requestedClientId) {
+      const { data, error } = await staff.supabase
+        .from('tiktok_connections')
+        .select('client_id')
+        .not('client_id', 'is', null)
+      if (error) return [summarizeProviderHealth('tiktok', null, error.message)]
+      clientIds = [...new Set((data ?? []).map(row => row.client_id).filter((id): id is string => typeof id === 'string'))]
+    }
+    if (clientIds.length === 0) {
+      return [{ ...summarizeProviderHealth('tiktok', { connected: false }, null), client_id: null }]
+    }
+    return Promise.all(clientIds.map(async clientId => {
+      const res = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS.tiktok, { clientId })
+      return {
+        ...summarizeProviderHealth('tiktok', res.data as Record<string, unknown> | null, res.error),
+        client_id: clientId,
+        evidence: safeProviderEvidence('tiktok', res.data),
+      }
+    }))
+  }))).flat()
+
+  const degraded = results.filter(r => r.degraded)
+  return {
+    providers: results,
+    overall: degraded.length === 0 ? 'PASS' : 'DEGRADED',
+    degraded_providers: degraded.map(d => d.provider),
+    note: degraded.length
+      ? 'Report degraded provider coverage explicitly. An unreadable provider is UNKNOWN, never a confirmed empty or disconnected state.'
+      : 'All requested providers reported a determinate connection state.',
+    scope_note: 'Read-only status via each existing provider connection-status function. No OAuth, permission, secret, account-mapping or publishing change.',
+  }
+}
+
+/**
+ * Targeted routine sync for an already-authorised, already-mapped provider account
+ * (#325 item 5). Delegates to the existing provider sync function; it cannot authorise a new
+ * account, change mappings or publish.
+ */
+const handleRunProviderSync: ToolHandler = async (staff, input) => {
+  const provider = String(input.provider ?? '')
+  const fn = PROVIDER_SYNC_FUNCTIONS[provider]
+  if (!fn) return { error: `provider must be one of: ${Object.keys(PROVIDER_SYNC_FUNCTIONS).join(', ')}.` }
+
+  const clientId = typeof input.client_id === 'string' ? input.client_id : null
+  if (!clientId) return { error: 'client_id is required so routine sync is pinned to one exact existing provider mapping.' }
+
+  if (provider === 'meta') {
+    const { data, error } = await staff.supabase.from('meta_client_assets').select('id').eq('client_id', clientId).eq('is_active', true).limit(1)
+    if (error) return { error: error.message }
+    if (!data?.length) return { provider, verdict: 'FAIL', skipped: true, reason: 'No active Meta mapping exists for that exact client. No sync or mapping change was attempted.' }
+  }
+  if (provider === 'google_ads') {
+    const [dedicated, campaigns] = await Promise.all([
+      staff.supabase.from('google_ads_account_links').select('id').eq('client_id', clientId).eq('is_active', true).limit(1),
+      staff.supabase.from('google_ads_campaign_links').select('id').eq('client_id', clientId).eq('is_active', true).limit(1),
+    ])
+    if (dedicated.error || campaigns.error) return { error: dedicated.error?.message ?? campaigns.error?.message }
+    if (!dedicated.data?.length && !campaigns.data?.length) return { provider, verdict: 'FAIL', skipped: true, reason: 'No active Google Ads account/campaign mapping exists for that exact client. No sync or mapping change was attempted.' }
+  }
+
+  const healthBody = provider === 'tiktok' ? { clientId } : {}
+  const health = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS[provider], healthBody)
+  const summary = summarizeProviderHealth(provider, health.data as Record<string, unknown> | null, health.error)
+  if (summary.state !== 'connected') {
+    return {
+      provider, verdict: 'FAIL', skipped: true, health: summary,
+      reason: 'Routine sync runs only for an already-authorised provider connection. No authorisation, mapping or permission change was attempted.',
+    }
+  }
+
+  let body: Record<string, unknown>
+  if (provider === 'meta') {
+    body = { mode: 'previous_completed_month', clientId }
+    if (input.month) body.month = input.month
+  } else if (provider === 'google_ads') {
+    if (!input.start_date || !input.end_date) return { error: 'Google Ads sync requires exact start_date and end_date.' }
+    body = { clientId, startDate: input.start_date, endDate: input.end_date }
+  } else {
+    body = { clientId }
+    if (input.period_month) body.periodMonth = input.period_month
+  }
+  const res = await invokeSiblingFunction(staff.connection, fn, body)
+
+  return {
+    provider,
+    verdict: res.ok ? 'PASS' : 'FAIL',
+    health: summary,
+    result: res.data,
+    ...(res.error ? { error: res.error } : {}),
+    scope_note: 'Routine sync for an already-authorised and already-mapped account only. No OAuth, permission, secret, account-mapping or publishing change.',
+  }
+}
+
+// ── #325 company-admin observability (read-only) ────────────────────────────
+
+/**
+ * Company-wide planner task inventory for reconciliation audit. Deliberately a DISTINCT
+ * tool rather than overloading list_my_tasks, which stays scoped to one exact staff member.
+ * Read-only: exposes state + durable Microsoft identity so a later dry run can classify
+ * stale mirrors without title matching. Executes no cleanup.
+ */
+const handleListCompanyTasks: ToolHandler = async (staff, input) => {
+  const state = (input.state as string | undefined) ?? 'active'
+  const limit = Math.min(Math.max(Number(input.limit ?? 100), 1), 200)
+  const offset = Math.max(Number(input.offset ?? 0), 0)
+
+  let query = staff.supabase
+    .from('planner_tasks')
+    .select(`id, title, assigned_to_name, client_name, client_id, status, due_date, start_date, notes, source, original_plan_name, original_bucket_name, recurrence_rule, archived_at, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`, { count: 'exact' })
+    .order('updated_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  // Explicit, non-inferred state selection. Completion is never inferred from age/due date.
+  if (state === 'active') {
+    query = query.is('archived_at', null).is('microsoft_source_removed_at', null).in('status', ACTIVE_TASK_STATES)
+  } else if (state === 'completed') {
+    query = query.is('archived_at', null).not('status', 'in', `(${ACTIVE_TASK_STATES.join(',')})`)
+  } else if (state === 'archived') {
+    query = query.not('archived_at', 'is', null)
+  } else if (state === 'source_removed') {
+    query = query.not('microsoft_source_removed_at', 'is', null)
+  } else if (state !== 'all') {
+    return { error: 'state must be one of: active, completed, archived, source_removed, all.' }
+  }
+
+  if (input.assigned_to_name) query = query.eq('assigned_to_name', input.assigned_to_name)
+  if (input.microsoft_plan_id) query = query.eq('microsoft_plan_id', input.microsoft_plan_id)
+
+  const { data, error, count } = await query
+  if (error) return { error: error.message }
+
+  const tasks = withSourceLinkage(data, 'planner')
+  const classification = { microsoft_backed: 0, dynamics_only: 0, microsoft_source_removed: 0 }
+  for (const t of tasks) {
+    const c = (t.source as { classification: keyof typeof classification }).classification
+    classification[c] = (classification[c] ?? 0) + 1
+  }
+
+  return {
+    state,
+    tasks,
+    counts: { returned: tasks.length, total_matching: count ?? null, by_classification: classification },
+    pagination: { limit, offset, next_offset: count !== null && offset + tasks.length < count ? offset + tasks.length : null },
+    audit_note: 'Read-only inventory. No cleanup, archive or suppression was performed. Reconcile by durable Microsoft IDs only.',
+  }
+}
+
+/**
+ * Company-wide Dynamics recurring-task template inventory with ownership + source
+ * classification, so legitimate Dynamics-only recurrence is distinguishable from
+ * Microsoft-backed recurrence at audit time. Read-only.
+ */
+const handleListCompanyRecurringTasks: ToolHandler = async (staff, input) => {
+  const limit = Math.min(Math.max(Number(input.limit ?? 100), 1), 200)
+  const offset = Math.max(Number(input.offset ?? 0), 0)
+
+  let query = staff.supabase
+    .from('planner_tasks')
+    .select(`id, title, assigned_to_name, client_name, client_id, status, due_date, notes, source, original_plan_name, recurrence_rule, recurrence_until, archived_at, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`, { count: 'exact' })
+    .not('recurrence_rule', 'is', null)
+    .order('updated_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (input.include_archived !== true) query = query.is('archived_at', null)
+  if (input.assigned_to_name) query = query.eq('assigned_to_name', input.assigned_to_name)
+
+  const { data, error, count } = await query
+  if (error) return { error: error.message }
+
+  const templates = withSourceLinkage(data, 'planner')
+  const dynamicsOnly = templates.filter(t => (t.source as { classification: string }).classification === 'dynamics_only')
+
+  return {
+    templates,
+    counts: {
+      returned: templates.length,
+      total_matching: count ?? null,
+      dynamics_only: dynamicsOnly.length,
+      microsoft_backed: templates.length - dynamicsOnly.length,
+    },
+    pagination: { limit, offset, next_offset: count !== null && offset + templates.length < count ? offset + templates.length : null },
+    audit_note: 'Dynamics-only recurrence is legitimate CG-native work and must remain visible even with no Microsoft counterpart.',
+  }
+}
+
+/**
+ * Latest Microsoft -> Dynamics reconciliation health/freshness (#325 §2). Read-only view of
+ * the EXISTING canonical sync-run architecture — no second sync subsystem, and it triggers
+ * nothing. The Assistant must call this before relying on Dynamics mirrors in a daily brief.
+ */
+const handleGetMicrosoftSyncStatus: ToolHandler = async (staff, input) => {
+  const hasTable = await tableExists(staff.supabase, 'microsoft_sync_runs')
+  if (!hasTable) {
+    return {
+      sync_health: summarizeSyncHealth(null, new Date().toISOString()),
+      latest_run: null,
+      error: 'Microsoft reconciliation run history is not available in this environment. Treat Dynamics mirrors as unverified.',
+    }
+  }
+
+  const { data, error } = await staff.supabase
+    .from('microsoft_sync_runs')
+    .select('id, trigger_type, status, snapshot_exported_at, snapshot_exported_by, range_start, range_end, source_completeness, summary, safe_error, started_at, applied_at, finished_at, created_at')
+    .order('created_at', { ascending: false })
+    .limit(Math.min(Math.max(Number(input.history_limit ?? 5), 1), 20))
+
+  if (error) return { error: error.message }
+
+  const runs = data ?? []
+  const latest = runs[0] ?? null
+  const thresholdMinutes = Number(input.freshness_threshold_minutes ?? 0) || undefined
+  const health = summarizeSyncHealth(latest, new Date().toISOString(), thresholdMinutes)
+
+  return {
+    sync_health: health,
+    latest_run: latest,
+    recent_runs: runs.map((r: Record<string, unknown>) => ({
+      id: r.id, status: r.status, trigger_type: r.trigger_type,
+      started_at: r.started_at, finished_at: r.finished_at, safe_error: r.safe_error,
+    })),
+    source_completeness: latest?.source_completeness ?? null,
+    operating_rule: health.degraded
+      ? 'Flag SYNC STALE / SYNC FAILED. Prefer the live Microsoft read for Microsoft-backed work and report degraded source coverage.'
+      : 'Reconciliation is fresh. Still perform the live Microsoft read — a successful sync never replaces it.',
+  }
 }
 
 const handleGetClientContext: ToolHandler = async (staff, input) => {
@@ -543,27 +1415,157 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
   if (clientError || !client) return { error: 'Client not found.' }
   if (!client.active) return { error: 'Client is not active.' }
 
-  const [marketingResult, notesResult] = await Promise.all([
-    staff.supabase
-      .from('marketing_library_sources')
-      .select('id, title, content_type, trust_tier')
+  // Canonical exact-client knowledge is the #241/#294 client guide, keyed by exact
+  // client_id with no sibling/group fallback. Previous code queried
+  // marketing_library_sources (a COMPANY-WIDE library with no client_id and no
+  // content_type column) and public.client_notes (which does not exist), so this tool
+  // returned schema errors and silently empty context. Both are corrected here.
+  const { data: guide, error: guideError } = await staff.supabase
+    .from('client_guides')
+    .select('id, client_id, guide_markdown, project_instructions, version, generated_at, source_pack_path, source_revision, source_observed_at, runtime_readiness, readiness_reason')
+    .eq('client_id', clientId)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // Report coverage explicitly instead of presenting an unavailable source as empty (#325).
+  const unavailable: string[] = []
+  if (guideError) unavailable.push(`client_guides: ${guideError.message}`)
+
+  const ready = Boolean(
+    guide &&
+    guide.client_id === clientId &&
+    guide.runtime_readiness === 'ready' &&
+    typeof guide.guide_markdown === 'string' &&
+    guide.guide_markdown.trim().length > 0
+  )
+  if (!ready) {
+    return {
+      error: 'CLIENT CONTEXT NOT READY',
+      code: 'CLIENT_CONTEXT_NOT_READY',
+      client: { id: client.id, name: client.name },
+      task_type: input.task_type,
+      scope_key: input.scope_key ?? null,
+      runtime_readiness: 'not_ready',
+      reason: guideError
+        ? 'Exact-client intelligence readiness could not be verified.'
+        : guide?.readiness_reason ?? 'No reviewed exact-client intelligence projection is ready.',
+      instruction: 'Do not generate generic client creative or borrow a sibling, group, billing or national client. Surface this readiness gap.',
+      context_coverage: {
+        client_guide: guideError ? 'unavailable' : 'not_ready',
+        unavailable_sources: unavailable,
+      },
+    }
+  }
+
+  const needsCaptionContacts = ['caption', 'script', 'general'].includes(String(input.task_type))
+  let contactFooter: Record<string, unknown> | null = null
+  if (needsCaptionContacts) {
+    let contactsQuery = staff.supabase
+      .from('client_contacts')
+      .select('contact_type,display_label,person_name,person_role,value,approved_for_caption,visibility,provenance_summary,last_verified_at,freshness_state,lifecycle_state,platforms,content_modes,footer_order,blocks_caption')
       .eq('client_id', clientId)
-      .in('trust_tier', ['approved', 'verified'])
-      .limit(10),
-    staff.supabase
-      .from('client_notes')
-      .select('id, content, created_at')
+    let policyQuery = staff.supabase
+      .from('client_contact_footer_policies')
+      .select('requirement,format_template,review_state,provenance_summary,last_verified_at')
       .eq('client_id', clientId)
-      .order('created_at', { ascending: false })
-      .limit(5),
-  ])
+      .eq('content_mode', 'caption')
+      .is('platform', null)
+    const scopeKey = typeof input.scope_key === 'string' ? input.scope_key : null
+    contactsQuery = scopeKey ? contactsQuery.eq('scope_key', scopeKey) : contactsQuery.is('scope_key', null)
+    policyQuery = scopeKey ? policyQuery.eq('scope_key', scopeKey) : policyQuery.is('scope_key', null)
+    const [contactsResult, policyResult] = await Promise.all([contactsQuery, policyQuery.maybeSingle()])
+    if (contactsResult.error || policyResult.error) {
+      contactFooter = {
+        status: 'unavailable',
+        contacts: [],
+        can_generate_footer: false,
+        reason: 'Exact-client contact/footer policy could not be verified.',
+      }
+    } else {
+      const eligible = (contactsResult.data ?? [])
+        .filter((contact: Record<string, unknown>) =>
+          contact.approved_for_caption === true &&
+          contact.visibility === 'public_marketing' &&
+          contact.freshness_state === 'current_verified' &&
+          contact.lifecycle_state === 'active' &&
+          (!Array.isArray(contact.content_modes) || contact.content_modes.length === 0 || contact.content_modes.includes('caption')))
+        .sort((a: Record<string, unknown>, b: Record<string, unknown>) => Number(a.footer_order) - Number(b.footer_order))
+      const held = (contactsResult.data ?? []).filter((contact: Record<string, unknown>) =>
+        contact.lifecycle_state === 'active' &&
+        (contact.blocks_caption === true || ['possible_change', 'stale_unverified'].includes(String(contact.freshness_state))))
+      const policy = policyResult.data
+      const valuesByType = new Map<string, Set<string>>()
+      for (const contact of eligible) {
+        const type = String(contact.contact_type)
+        const values = valuesByType.get(type) ?? new Set<string>()
+        values.add(String(contact.value))
+        valuesByType.set(type, values)
+      }
+      const ambiguous = [...valuesByType.values()].some(values => values.size > 1)
+      const blocked = !policy || policy.review_state !== 'current_verified' || ambiguous || held.some((contact: Record<string, unknown>) => contact.blocks_caption === true) || (policy.requirement === 'mandatory' && eligible.length === 0)
+      contactFooter = {
+        status: blocked ? 'not_ready' : 'ready',
+        requirement: policy?.requirement ?? 'unresolved',
+        format_template: blocked ? null : policy?.format_template ?? null,
+        contacts: blocked ? [] : eligible.map((contact: Record<string, unknown>) => ({
+          contact_type: contact.contact_type,
+          display_label: contact.display_label,
+          person_name: contact.person_name,
+          person_role: contact.person_role,
+          value: contact.value,
+          provenance: contact.provenance_summary,
+          last_verified_at: contact.last_verified_at,
+        })),
+        can_generate_footer: !blocked && policy?.requirement !== 'omitted',
+        reason: !policy
+          ? 'No current exact-client footer policy is recorded for this exact scope.'
+          : blocked
+            ? 'Exact-client footer/contact evidence is unresolved. Continue unrelated creative work, but do not invent a footer.'
+            : null,
+        exact_scope_only: true,
+      }
+    }
+  }
+
+  // Record that this exact client's live runtime was actually used. The standalone
+  // get-client-context function already does this; the MCP tool did not, so a Project
+  // driven through the connector left last_context_retrieved_at null even on success and
+  // there was no way to tell real runtime usage from a Project answering without it.
+  // Best-effort: a telemetry write must never fail the client context response.
+  try {
+    await staff.supabase
+      .from('client_project_mappings')
+      .update({ last_context_retrieved_at: new Date().toISOString() })
+      .eq('client_id', clientId)
+  } catch { /* telemetry only */ }
 
   return {
     client: { id: client.id, name: client.name },
     task_type: input.task_type,
-    marketing_sources: marketingResult.data ?? [],
-    recent_notes: notesResult.data ?? [],
-    errors: [marketingResult.error?.message, notesResult.error?.message].filter(Boolean),
+    scope_key: input.scope_key ?? null,
+    runtime_readiness: 'ready',
+    client_guide: guide
+      ? {
+          id: guide.id,
+          version: guide.version,
+          generated_at: guide.generated_at,
+          source_pack_path: guide.source_pack_path,
+          source_revision: guide.source_revision,
+          source_observed_at: guide.source_observed_at,
+          guide_markdown: guide.guide_markdown,
+          project_instructions: guide.project_instructions,
+        }
+      : null,
+    contact_footer: contactFooter,
+    context_coverage: {
+      client_guide: guide ? 'available' : (guideError ? 'unavailable' : 'none_recorded'),
+      unavailable_sources: unavailable,
+      note: guide
+        ? 'Exact-client guide resolved by exact client_id. No sibling, group or national fallback was used.'
+        : 'No canonical client guide is recorded for this exact client. Do not substitute another client, a group/national record, or stale Project memory.',
+    },
+    errors: unavailable,
   }
 }
 
@@ -725,7 +1727,22 @@ const handleAddLeadResearch: ToolHandler = async (staff, input) => {
 
 const handleGetMyProfile: ToolHandler = async (staff) => {
   const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
-  if (!hasTable) return { error: 'Staff assistant workspace not yet available. Complete #305 setup first.' }
+  if (!hasTable) {
+    // The canonical policy must still reach the Project even before the staff workspace
+    // exists, otherwise a fresh chat falls back to stale Project Instructions (#325).
+    return {
+      staff_assistant_policy: buildStaffAssistantPolicy(staff.contextKind),
+      policy_meta: {
+        policy_version: STAFF_ASSISTANT_POLICY_VERSION,
+        effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
+        context_kind: staff.contextKind,
+        retrieved_at: new Date().toISOString(),
+      },
+      identity: { profile_id: staff.profileId, full_name: staff.fullName, role: staff.role, is_active: staff.isActive, context_kind: staff.contextKind },
+      assistant_profile: null,
+      error: 'Staff assistant workspace not yet available. Complete #305 setup first.',
+    }
+  }
 
   const { data, error } = await staff.supabase
     .from('staff_assistant_profiles')
@@ -777,8 +1794,26 @@ const handleUpdateMyPreferences: ToolHandler = async (staff, input) => {
 }
 
 const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
+  const staffAssistantPolicy = buildStaffAssistantPolicy(staff.contextKind)
+  const dailyUpdateContract = buildDailyUpdateContract(staff.fullName)
+  const policyMeta = {
+    policy_version: STAFF_ASSISTANT_POLICY_VERSION,
+    presentation_version: ASSISTANT_PRESENTATION_VERSION,
+    effective_at: STAFF_ASSISTANT_POLICY_EFFECTIVE_AT,
+    context_kind: staff.contextKind,
+    retrieved_at: new Date().toISOString(),
+  }
+  const identity = { profile_id: staff.profileId, full_name: staff.fullName, role: staff.role, is_active: staff.isActive, context_kind: staff.contextKind }
+
   const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
-  if (!hasTable) return { error: 'Staff assistant workspace not yet available. Complete #305 setup first.' }
+  if (!hasTable) return {
+    staff_assistant_policy: staffAssistantPolicy,
+    daily_update_contract: dailyUpdateContract,
+    policy_meta: policyMeta,
+    identity,
+    assistant_profile: null,
+    error: 'Staff assistant workspace not yet available. Complete #305 setup first.',
+  }
 
   const { data: profile, error: profileError } = await staff.supabase
     .from('staff_assistant_profiles')
@@ -786,7 +1821,14 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
     .eq('profile_id', staff.profileId)
     .maybeSingle()
 
-  if (profileError) return { error: profileError.message }
+  if (profileError) return {
+    staff_assistant_policy: staffAssistantPolicy,
+    daily_update_contract: dailyUpdateContract,
+    policy_meta: policyMeta,
+    identity,
+    assistant_profile: null,
+    error: `Staff profile unavailable: ${profileError.message}`,
+  }
 
   const scopes = profile?.approved_access_scope ?? []
   const capabilities = filterCapabilitiesByScope(scopes)
@@ -804,12 +1846,11 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
   const senderReady = !!(profile?.preferred_company_from && profile?.signature_text)
 
   return {
-    identity: {
-      profile_id: staff.profileId,
-      full_name: staff.fullName,
-      role: staff.role,
-      is_active: staff.isActive,
-    },
+    // #325: the canonical shared runtime policy. This OVERRIDES any stale hand-maintained
+    // ChatGPT Project Instruction wording (e.g. "Dynamics is fallback-only").
+    staff_assistant_policy: staffAssistantPolicy,
+    policy_meta: policyMeta,
+    identity,
     assistant_profile: profile ? {
       responsibilities: profile.responsibilities,
       recurring_duties: profile.recurring_duties,
@@ -860,63 +1901,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       expectedConnectedInCompanyWorkspace: cap.expectedConnectedInCompanyWorkspace,
       sessionMissingGuidance: cap.sessionMissingGuidance,
     })),
-    daily_update_contract: {
-      presentation: {
-        morning_structure: [
-          '1. PERSONALISED ONE-LINE GREETING — unique each morning, derived from staff profile tone/humour preferences.',
-          '2. COMPACT DAY SUMMARY — one line: key focus, any blockers, overall shape of the day.',
-          '3. TODAY TIMELINE TABLE — left-aligned narrow Time column, NOW anchor. Only items with actual times. No redundant narration.',
-          '4. WORK QUEUE TABLE — columns: Status | Task | Client | Next Move. Status labels: NOW, NEXT, WAITING, LATER, DONE (only if completed today). One next-move per row.',
-          '5. OPTIONAL BLOCKER/FOLLOW-UP — one line only if something is stuck or needs attention.',
-          '6. SHORT ACTION PROMPT — one line, action-oriented, tells staff exactly what to do next.',
-        ],
-        evening_structure: [
-          '1. ONE-LINE CLOSING — acknowledge what got done.',
-          '2. DONE TODAY — bullet list of completed items.',
-          '3. STILL OPEN / CARRY FORWARD — items not yet done.',
-          '4. TOMORROW TIMELINE — if known, brief preview.',
-          '5. PREP / FOLLOW-UP — only where useful.',
-        ],
-        rules: [
-          'LOW-NOISE: no essays, no repeated calendar/task narration, no generic motivational filler.',
-          'PERSONALITY belongs mainly in greeting/closing. The work body stays tight and operational.',
-          'LEFT-ALIGNED TIME SPINE in Today timeline. Use NOW anchor for current time.',
-          'DYNAMICS-ALIGNED TASK WORDING — use exact task titles, not invented summaries.',
-          'SHOW-MORE BEHAVIOUR: collapse low-priority items behind a brief summary line.',
-          'Single next-move per row in Work Queue. No multi-paragraph explanations.',
-        ],
-      },
-      personality: {
-        source: 'Derived from staff profile: working_preferences, output_preferences, repeated_corrections, responsibilities, recurring_duties. Do not hardcode tone across staff.',
-        greeting_rules: [
-          'One short opening sentence only.',
-          'Unique each morning; do not repeat stock lines mechanically.',
-          'Learn from response patterns, corrections, humour tolerance and preferred tone over time.',
-          'Humour allowed when it fits the individual; never repetitive, forced or generic.',
-          'Humour must not create factual noise or distract from the workday.',
-        ],
-        staff_tones: {
-          sydney: 'confident, punchy, women-empowerment/boss-energy, playful attitude without cringe.',
-          franco: 'dry, calm, reassuring, stress-reducing; help him feel supported and less alone; compensate gently for forgetfulness without sounding patronising.',
-          amonique: 'warm, patient, confidence-building, slightly more explanatory because she is hesitant with AI/tech; she has a strong sense of humour, so a well-judged joke can work very well; avoid repetition.',
-          ca: 'sharp, concise, high-trust, proactive.',
-          ger_marie: 'calm, creative, supportive.',
-          kgomotso: 'practical, encouraging, straightforward.',
-        },
-        runtime_rule: 'The presentation contract is shared company behaviour; the personality layer is exact-person behaviour. Both must survive a completely empty ChatGPT Project when the user says Brief yourself from my CG Assistant profile.',
-      },
-      interaction_model: {
-        natural_replies: [
-          '"done" — mark task complete via update_task.',
-          '"50%" — update task progress with note.',
-          '"waiting on client" — set status to WAITING, add note.',
-          '"move to Friday" — update due_date.',
-          '"add note" — append comment to task.',
-          '"follow up Monday" — set follow_up date.',
-        ],
-        rule: 'Natural staff replies should update canonical live task/lead state through available tools, not only live in chat.',
-      },
-    },
+    daily_update_contract: dailyUpdateContract,
     mcp_tools: mcpTools,
     operating_rules: [
       'CG Dynamics is the durable source of truth. Retrieve current personal operating context before operational work.',
@@ -937,7 +1922,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'Attach governed collateral by Drive asset key — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
       'DAILY UPDATE CONTRACT: morning = greeting → summary → Today timeline → Work Queue → optional blocker → action prompt. Evening = closing → Done Today → Still Open → Tomorrow → Prep.',
       'PERSONALITY: derived from staff profile (working_preferences, output_preferences, repeated_corrections). Never hardcode tone across staff. Personality belongs in greeting/closing; work body stays operational.',
-      'NATURAL REPLIES: "done", "50%", "waiting on client", "move to Friday", "add note", "follow up Monday" should update canonical task/lead state through available tools.',
+      'NATURAL TASK REPLIES: during coexistence, "done", "50%", "waiting on client", "move to Friday", "add note" and "follow up Monday" update the exact live Teams/Planner task first, then run_microsoft_sync refreshes Dynamics. If reconciliation is delayed, report DYNAMICS SYNC PENDING; never duplicate the Microsoft-backed task.',
       'CONTENT-RUN CLOSEOUT: When a staff member had client shoots/content runs that day, use get_content_run_plan to retrieve the canonical shot list, then collect per-client field updates, reconcile planned vs captured items, record missed/cancelled items with reasons, capture field notes, flag reshoots, verify OneDrive upload status and write approved updates to Dynamics via close_content_run. Never ask staff to recreate a plan already in Dynamics. Never mark closeout complete if upload is missing/partial/unverified.',
       'ONEDRIVE UPLOAD GATE: For every content run, use verify_content_run_upload to inspect the exact mapped client/content-run folder. If footage is missing/partial/unverified, keep the item unresolved and give the staff member the exact next action. After staff approval, use update_closeout_upload_status; it performs a fresh authorised inspection and persists only that evidence. Staff self-report alone always remains unverified.',
     ],
@@ -1476,7 +2461,7 @@ async function handleUpdateCloseoutUploadStatus(staff: AuthenticatedStaff, input
 
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status'])
+const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status', 'link_content_run_deliverables', 'upsert_calendar_event'])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -1495,6 +2480,15 @@ const toolHandlers: Record<string, ToolHandler> = {
   update_my_preferences: handleUpdateMyPreferences,
   get_my_assistant_bootstrap: handleGetMyAssistantBootstrap,
   get_my_recurring_tasks: handleGetMyRecurringTasks,
+  list_company_tasks: handleListCompanyTasks,
+  list_company_recurring_tasks: handleListCompanyRecurringTasks,
+  get_microsoft_sync_status: handleGetMicrosoftSyncStatus,
+  run_microsoft_sync: handleRunMicrosoftSync,
+  get_provider_health: handleGetProviderHealth,
+  run_provider_sync: handleRunProviderSync,
+  find_content_runs: handleFindContentRuns,
+  link_content_run_deliverables: handleLinkContentRunDeliverables,
+  upsert_calendar_event: handleUpsertCalendarEvent,
   create_recurring_task: handleCreateRecurringTask,
   compose_mail_draft: handleComposeMailDraft,
   log_lead_email_activity: handleLogLeadEmailActivity,
@@ -1678,6 +2672,14 @@ Deno.serve(async (req) => {
   if (typeof method !== 'string') {
     return jsonRpcError(id as string | number | null ?? null, -32600, 'Invalid request.')
   }
+
+  // Observability: record which method/tool was actually invoked. Names only - never
+  // arguments, tokens or client data. This is what tells us whether a ChatGPT Project
+  // genuinely called a client tool or only listed the catalogue.
+  const invokedTool = method === 'tools/call'
+    ? ((params as { name?: string } | undefined)?.name ?? 'unknown')
+    : null
+  console.log(`mcp method=${method}${invokedTool ? ` tool=${invokedTool}` : ''}`)
 
   switch (method) {
     case 'initialize':
