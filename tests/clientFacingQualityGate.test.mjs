@@ -188,7 +188,8 @@ test('campaigns page uses the canonical client-safe Google Ads results component
   assert.match(CAMPAIGNS, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /formatMoney/)
   assert.match(GOOGLE_ADS_RESULTS, /Unavailable/)
-  assert.match(CAMPAIGNS, /currentTrackingMonth/)
+  assert.match(CAMPAIGNS, /getReportMonthFromPeriod/)
+  assert.match(CAMPAIGNS, /reportMonth\(report\)/)
   assert.match(GOOGLE_ADS_RESULTS, /Last successful sync/)
 })
 

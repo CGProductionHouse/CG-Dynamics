@@ -65,8 +65,11 @@ test('date validation rejects impossible, reversed, future, and oversized ranges
 
 test('GAQL is the fixed campaign reporting query with only validated dates interpolated', () => {
   const query = googleAdsCampaignQuery('2026-07-01', '2026-07-23')
-  for (const field of ['campaign.id', 'campaign.name', 'campaign.status', 'segments.date', 'metrics.impressions', 'metrics.clicks', 'metrics.cost_micros', 'metrics.conversions', 'metrics.conversions_value']) {
+  for (const field of ['campaign.id', 'campaign.name', 'campaign.status', 'segments.date', 'metrics.impressions', 'metrics.clicks', 'metrics.interactions', 'metrics.cost_micros', 'metrics.conversions', 'metrics.conversions_value']) {
     assert.ok(query.includes(field), `missing ${field}`)
+  }
+  for (const field of ['campaign.primary_status', 'campaign.start_date', 'campaign.bidding_strategy_type', 'campaign_budget.amount_micros', 'campaign_budget.period']) {
+    assert.ok(query.includes(field), `missing native setting field ${field}`)
   }
   assert.match(query, /FROM campaign/)
   assert.match(query, /segments\.date BETWEEN '2026-07-01' AND '2026-07-23'/)
