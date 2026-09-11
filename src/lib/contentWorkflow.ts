@@ -468,9 +468,26 @@ export function normalizeGuidelineVideoMonth(value: string | null | undefined): 
   return value.slice(0, 7) + '-01'
 }
 
+export interface GuidelineVideoInput {
+  title: string
+  script: string
+  position: number
+  month?: string | null
+  deliverable_id?: string | null
+  created_by?: string | null
+  // Planning fields kept with the video so an accepted AI idea is not reduced to a title.
+  objective?: string | null
+  hook?: string | null
+  cta?: string | null
+  shot_breakdown?: string | null
+  requirements?: string | null
+  visual_notes?: string | null
+  notes?: string | null
+}
+
 export async function addGuidelineVideo(
   guideline: ContentGuideline,
-  input: { title: string; script: string; position: number; month?: string | null; deliverable_id?: string | null; created_by?: string | null },
+  input: GuidelineVideoInput,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
   const { data, error } = await supabase
     .from('content_guide_ideas')
@@ -485,6 +502,13 @@ export async function addGuidelineVideo(
       status: 'idea',
       deliverable_id: input.deliverable_id ?? null,
       created_by: input.created_by ?? null,
+      objective: input.objective ?? null,
+      hook: input.hook ?? null,
+      cta: input.cta ?? null,
+      shot_breakdown: input.shot_breakdown ?? null,
+      requirements: input.requirements ?? null,
+      visual_notes: input.visual_notes ?? null,
+      notes: input.notes ?? null,
     })
     .select('*')
     .single()
@@ -699,14 +723,149 @@ export function suggestionToVideoInput(
   suggestion: ContentVideoSuggestion,
   position: number,
   createdBy: string | null,
-) {
+): GuidelineVideoInput {
+  // Keep the whole suggestion: direction, props and on-screen text were previously dropped.
+  const visualNotes = [
+    suggestion.sceneDirection?.trim(),
+    suggestion.onScreenText?.trim() ? `On-screen text: ${suggestion.onScreenText.trim()}` : '',
+    suggestion.locationSuggestion?.trim() ? `Location: ${suggestion.locationSuggestion.trim()}` : '',
+  ].filter(Boolean).join('\n\n')
   return {
     title: suggestion.title,
     script: suggestion.script,
     hook: suggestion.hook,
     objective: suggestion.objective,
     cta: suggestion.cta,
+    requirements: suggestion.propsProductsPeople?.trim() || null,
+    visual_notes: visualNotes || null,
     month: suggestion.targetMonth,
+    position,
+    created_by: createdBy,
+  }
+}
+
+// ── AI Content Director: plan ideas, then develop the saved, staff-edited videos (#224) ──
+
+export interface ContentDirectorEvidence {
+  kind: 'client_fact' | 'cg_knowledge' | 'fresh_research' | 'inference' | 'needs_confirmation'
+  note: string
+  sourceUri: string | null
+}
+
+export interface GuidelineVideoIdea {
+  title: string
+  objective: string
+  audience: string
+  hook: string
+  angle: string
+  deliverableId: string | null
+  targetMonth: string | null
+  evidence: ContentDirectorEvidence[]
+  needsConfirmation: string | null
+}
+
+export interface GuidelineVideoDevelopment {
+  videoId: string
+  script: string
+  shotBreakdown: string
+  requirements: string
+  visualNotes: string
+  cta: string
+  notes: string | null
+}
+
+export interface ContentDirectorSources {
+  canonicalInternal: string[]
+  marketingLibraryKnowledge: string[]
+  saCalendarContext: string[]
+  liveExternalResearch: string[]
+  researchSources: Array<{ title: string; uri: string }>
+}
+
+export interface PlanIdeasResult {
+  mode: 'ideas'
+  ideas: GuidelineVideoIdea[]
+  context: { clientName: string; coverageMonths: string[]; totalDeliverableSlots: number; existingVideoCount: number }
+  sources: ContentDirectorSources
+}
+
+export interface DevelopVideosResult {
+  mode: 'develop'
+  developments: GuidelineVideoDevelopment[]
+  context: { clientName: string; developedCount: number; requestedCount: number }
+  sources: ContentDirectorSources
+}
+
+async function callContentDirector<T>(body: Record<string, unknown>): Promise<QueryResult<T>> {
+  const sessionResult = await supabase.auth.getSession()
+  const token = sessionResult.data.session?.access_token
+  if (!token) return { data: null as never, error: 'Authentication required.', migrationNeeded: false }
+  try {
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/suggest-content-videos`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requestId: crypto.randomUUID(), ...body }),
+    })
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      return { data: null as never, error: typeof payload.error === 'string' ? payload.error : `Server responded ${response.status}.`, migrationNeeded: false }
+    }
+    return { data: payload as T, error: null, migrationNeeded: false }
+  } catch (error) {
+    return { data: null as never, error: error instanceof Error ? error.message : 'Could not reach the Content Director service.', migrationNeeded: false }
+  }
+}
+
+/** Step 1: ordered, client-specific video ideas for this run. Drafts only — nothing is written. */
+export function planGuidelineVideoIdeas(
+  guideline: ContentGuideline,
+  coverage: { start: string; end: string },
+): Promise<QueryResult<PlanIdeasResult>> {
+  return callContentDirector<PlanIdeasResult>({
+    mode: 'ideas',
+    clientId: guideline.client_id,
+    guidelineId: guideline.id,
+    coverageStart: coverage.start,
+    coverageEnd: coverage.end,
+  })
+}
+
+/** Step 2: scripts, shot plans and CTAs for the SAVED videos, in their saved order. */
+export function developGuidelineVideos(
+  guideline: ContentGuideline,
+  coverage: { start: string; end: string },
+  videoIds?: string[],
+): Promise<QueryResult<DevelopVideosResult>> {
+  return callContentDirector<DevelopVideosResult>({
+    mode: 'develop',
+    clientId: guideline.client_id,
+    guidelineId: guideline.id,
+    coverageStart: coverage.start,
+    coverageEnd: coverage.end,
+    ...(videoIds && videoIds.length > 0 ? { videoIds } : {}),
+  })
+}
+
+/** An accepted idea becomes a guideline video with no script yet — scripts come from step 2. */
+export function ideaToVideoInput(
+  idea: GuidelineVideoIdea,
+  position: number,
+  createdBy: string | null,
+): GuidelineVideoInput {
+  const notes = [
+    idea.angle?.trim() ? `Angle: ${idea.angle.trim()}` : '',
+    idea.audience?.trim() ? `Audience: ${idea.audience.trim()}` : '',
+    idea.needsConfirmation?.trim() ? `Confirm with client: ${idea.needsConfirmation.trim()}` : '',
+    ...idea.evidence.filter(item => item.kind === 'fresh_research' && item.sourceUri).map(item => `Research: ${item.note} (${item.sourceUri})`),
+  ].filter(Boolean).join('\n')
+  return {
+    title: idea.title,
+    script: '',
+    objective: idea.objective || null,
+    hook: idea.hook || null,
+    month: idea.targetMonth,
+    deliverable_id: idea.deliverableId,
+    notes: notes || null,
     position,
     created_by: createdBy,
   }
