@@ -271,6 +271,9 @@ export type ClientTaskKind = 'client_request' | 'follow_up'
 
 export type BuildResult = { ok: true; params: Record<string, unknown> } | { ok: false; error: string }
 
+/** The only fields a Client Schedule proposal may touch — the same whitelist tg_cscr_capture_baseline enforces. */
+export const SCHEDULE_CHANGE_FIELDS = ['scheduled_date', 'due_date', 'production_status', 'assigned_to_name', 'notes'] as const
+
 function scheduleChangeProposal(value: unknown): { ok: true; value: Record<string, unknown> | null } | { ok: false; error: string } {
   if (value === undefined || value === null) return { ok: true, value: null }
   if (typeof value !== 'object' || Array.isArray(value)) return { ok: false, error: 'schedule_change must be an object with deliverable_id and change.' }
@@ -279,6 +282,10 @@ function scheduleChangeProposal(value: unknown): { ok: true; value: Record<strin
   const change = proposal.change
   if (!change || typeof change !== 'object' || Array.isArray(change) || Object.keys(change as object).length === 0) {
     return { ok: false, error: 'schedule_change.change must describe the proposed change. It is a proposal for admin approval, not an edit.' }
+  }
+  const unsupported = Object.keys(change as object).filter(field => !(SCHEDULE_CHANGE_FIELDS as readonly string[]).includes(field))
+  if (unsupported.length > 0) {
+    return { ok: false, error: `A Client Schedule proposal may only change ${SCHEDULE_CHANGE_FIELDS.join(', ')} — not ${unsupported.join(', ')}.` }
   }
   const reason = boundedText(proposal.reason, 'schedule_change.reason', NOTES_MAX, false)
   if (!reason.ok) return reason

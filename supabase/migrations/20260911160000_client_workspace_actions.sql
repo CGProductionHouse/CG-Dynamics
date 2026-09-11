@@ -440,3 +440,44 @@ revoke all on function public.record_client_workspace_update(
 grant execute on function public.record_client_workspace_update(
   uuid, uuid, uuid, text, text, text, jsonb, jsonb, uuid[], text, date, uuid, uuid
 ) to service_role;
+
+-- ── Client Schedule proposals made through the service-role connector ────────
+-- tg_cscr_capture_baseline identifies the requester from auth.uid() and overwrites requested_by,
+-- so a signed-in user can never propose a change on someone else's behalf. The CG Dynamics MCP
+-- connects with the service role, where auth.uid() is null, so every proposal it attempted
+-- failed with "Active requester profile not found" (found by the #341 local acceptance run).
+--
+-- The signed-in path is unchanged. Only for the service role — which is already fully
+-- privileged — is the explicit requested_by trusted, after checking it is an active profile.
+-- record_client_workspace_task sets it to the verified connection principal. The field whitelist,
+-- baseline capture and forced 'pending' status are exactly as before.
+create or replace function public.tg_cscr_capture_baseline()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare target public.monthly_deliverables; requester_name text; requester_id uuid;
+begin
+  if jsonb_typeof(new.change) <> 'object'
+    or new.change = '{}'::jsonb
+    or new.change - array['scheduled_date','due_date','production_status','assigned_to_name','notes'] <> '{}'::jsonb
+  then
+    raise exception 'Client Schedule change contains unsupported fields';
+  end if;
+
+  select * into target from public.monthly_deliverables where id = new.deliverable_id;
+  if target.id is null then raise exception 'Schedule item not found'; end if;
+  requester_id := case when auth.uid() is null and auth.role() = 'service_role' then new.requested_by else auth.uid() end;
+  select full_name into requester_name from public.profiles where id = requester_id and is_active is distinct from false;
+  if requester_name is null then raise exception 'Active requester profile not found'; end if;
+
+  new.requested_by := requester_id;
+  new.requested_by_name := requester_name;
+  new.status := 'pending';
+  new.target_updated_at := target.updated_at;
+  new.baseline := jsonb_build_object(
+    'scheduled_date', target.scheduled_date,
+    'due_date', target.due_date,
+    'production_status', target.production_status,
+    'assigned_to_name', target.assigned_to_name,
+    'notes', target.notes
+  );
+  return new;
+end $$;

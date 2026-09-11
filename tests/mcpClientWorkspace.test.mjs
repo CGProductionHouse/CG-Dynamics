@@ -353,3 +353,21 @@ test('the catalogue exposes the four client-workspace tools with closed, context
     assert.match(INDEX, new RegExp(`${name}: handle[A-Za-z]+`))
   }
 })
+
+test('a service-role proposal is attributed to the verified caller, and signed-in users still cannot spoof a requester', () => {
+  // Found by the local acceptance run: the baseline trigger read the requester from auth.uid(),
+  // which is null for the MCP's service-role connection, so every proposal failed.
+  assert.match(SQL, /requester_id := case when auth\.uid\(\) is null and auth\.role\(\) = 'service_role' then new\.requested_by else auth\.uid\(\) end;/)
+  assert.match(SQL, /new\.requested_by := requester_id;/)
+  assert.match(SQL, /new\.status := 'pending';/)
+  // The field whitelist is unchanged, and the connector mirrors it before calling the database.
+  assert.match(SQL, /new\.change - array\['scheduled_date','due_date','production_status','assigned_to_name','notes'\] <> '\{\}'::jsonb/)
+  assert.deepEqual([...ws.SCHEDULE_CHANGE_FIELDS], ['scheduled_date', 'due_date', 'production_status', 'assigned_to_name', 'notes'])
+  const moveClient = ws.buildClientTaskWrite('client_request', scope, {
+    title: 'Move this deliverable to Red Oak',
+    idempotency_key: key(9),
+    schedule_change: { deliverable_id: '2e3f4a5b-6c7d-4e8f-8a9b-0c1d2e3f4a63', change: { client_id: RED_OAK } },
+  }, null, ws.planMicrosoftLinkage({}), 'record_client_request')
+  assert.equal(moveClient.ok, false, 'a proposal can never re-home a deliverable to another client')
+  assert.match(moveClient.error, /may only change/)
+})
