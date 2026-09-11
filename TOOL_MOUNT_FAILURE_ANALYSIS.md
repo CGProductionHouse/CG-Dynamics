@@ -31,7 +31,7 @@ The post-reconnect tool-mount failure where the ChatGPT runtime does not mount t
 3. Verify the tool list shows all 34 tools including company-admin tools
 4. Call `resolve_project_context({ context_kind: "company_admin" })` to bootstrap
 4. Call `get_microsoft_sync_status` to verify sync health
-5. Call `run_microsoft_sync` with `range_start`/`range_end` to resume the stuck preview job
+5. Only after the pagination fix is deployed (see Remaining actions): call `run_microsoft_sync` with `range_start`/`range_end` to start a **fresh** preview job. Do not resume the stuck job: its `2025 CLIENTS SCHEDULE` source was already truncated by the old cap. Starting a new job cancels the stuck one automatically.
 
 This is a **human/platform-only connector gate** — no coding workaround can force ChatGPT to refresh its local tool manifest view.
 
@@ -41,25 +41,26 @@ This is a **human/platform-only connector gate** — no coding workaround can fo
 The `graphPages` function in `microsoft-transition-sync/index.ts` had a hard 5,000-record safety cap that truncated results and returned an error, causing the `2025 CLIENTS SCHEDULE` plan (>5,000 tasks) to stall.
 
 ### Solution: Bounded Continuation/Checkpointing
-1. **Migration**: Added `pagination_cursor` column to `microsoft_sync_job_sources` table
-2. **Job Machine**: Added `PAGINATION_BATCH_SIZE = 1000` constant and `pagination_cursor` to `JobSourceRow`
-3. **Graph Fetching**: Modified `graphPages` to accept optional cursor, return `nextCursor`, and respect batch size
-4. **Fetch Units**: Updated `fetchPlannerTasksUnit` and `fetchOutlookUnit` to pass/return cursors
-5. **Job Processing**: Updated `job_process` to store cursor when pagination incomplete, only mark `complete` when `nextCursor` is null
-6. **Retry Logic**: Clear `pagination_cursor` on `job_retry`
+1. **Migration** (prepared, not applied): adds a nullable `pagination_cursor` column to `microsoft_sync_job_sources`.
+2. **Pure pagination logic in `job-machine.ts`**, called by `index.ts` and unit-tested directly:
+   - `paginateGraph` consumes Graph pages whole and checkpoints only on `@odata.nextLink`, so no page is ever re-read. It returns once a bounded batch (`PAGINATION_BATCH_SIZE`) is held.
+   - `accumulatePlannerPage` / `accumulateOutlookPage` append each batch to the persisted records (deduplicated by source id). Planner detail work is marked per task and survives page boundaries.
+   - `planSourceUpdate` is the single transition rule: an error **fails** the source (retryable); a cursor keeps paging; pending detail work moves to `fetching_details`; otherwise the source completes.
+3. **`job_process`** loads only the source it is fetching; status polls do not load record payloads.
+4. **`job_retry`** re-queues a failed source from scratch (`retrySourceReset`).
 
-### Guarantees Preserved
-- **Pagination**: Microsoft Graph `@odata.nextLink` used for resumable fetches
-- **Source Completeness**: Source only marked `complete` when all pages fetched
-- **Idempotency**: Each `job_process` call processes exactly one batch; repeat calls resume from cursor
-- **Protected Rules**: No changes to MASTER CLIENT TO DO, Client Socials, or Client Schedule handling
-- **No Silent Truncation**: Safety cap removed; large sources process in multiple bounded steps
+### Guarantees
+- **No silent truncation:** the 5,000-record cap is gone; large plans are fetched across several bounded `job_process` calls.
+- **Completeness:** a source completes only after every page is fetched and every pending detail id is drained. A failed required source blocks apply.
+- **No stuck jobs:** a failing page, a repeating page link, or a runaway cursor chain (`MAX_PAGINATION_STEPS`) fails the source instead of retrying it forever.
+- **Idempotency:** a step that crashes before persisting is simply re-run from the same cursor; overlap is deduplicated.
+- **Protected rules:** no changes to MASTER CLIENT TO DO, Client Socials or Client Schedule handling.
 
 ## Acceptance Sequence (Once Tool Mount Works)
 1. `resolve_project_context({ context_kind: "company_admin" })` → confirms company-admin context
 2. `get_microsoft_sync_status` → shows stale 19 Aug 2026 run, SYNC STALE verdict
 3. `run_microsoft_sync({ range_start: "2026-08-19", range_end: "2026-09-15" })` → starts new preview job
-4. Poll `run_microsoft_sync({ job_id: "<returned>" })` until `finished: true` (multiple calls for 2025 CLIENTS SCHEDULE pagination)
+4. Poll `run_microsoft_sync({ job_id: "<returned>" })` until `finished: true` (several calls for 2025 CLIENTS SCHEDULE). Confirm no source is `failed` and that 2025 CLIENTS SCHEDULE reports more than 5,000 records.
 5. `get_microsoft_sync_status` → shows fresh run, PASS verdict
 6. `get_provider_health` → Meta/Google Ads/TikTok freshness
 7. `run_provider_sync` for each mapped client → routine syncs
@@ -67,14 +68,21 @@ The `graphPages` function in `microsoft-transition-sync/index.ts` had a hard 5,0
 9. Morning Ops checkpoint → READY/FIXED/DEGRADED/CA ACTION
 
 ## Files Changed
-- `supabase/migrations/20260910120000_microsoft_sync_pagination_cursor.sql` — DB migration
-- `supabase/functions/microsoft-transition-sync/job-machine.ts` — PAGINATION_BATCH_SIZE, JobSourceRow.pagination_cursor
-- `supabase/functions/microsoft-transition-sync/index.ts` — graphPages cursor support, fetch units, job_process pagination logic
-- `tests/microsoftDurableJob.test.mjs` — Regression tests for pagination constants and types
+- `supabase/migrations/20260910120000_microsoft_sync_pagination_cursor.sql` — additive nullable column (prepared, not applied)
+- `supabase/functions/microsoft-transition-sync/job-machine.ts` — pure pagination, accumulation and transition logic
+- `supabase/functions/microsoft-transition-sync/index.ts` — Graph I/O wired to that logic; lean status queries
+- `tests/microsoftDurableJob.test.mjs` — drives the production functions against a fake Graph
 
 ## Tests
-- `npm run build` — ✅ passes
-- `node --test tests/microsoftDurableJob.test.mjs` — ✅ 8 tests pass (2 new pagination tests)
+- `node --test tests/microsoftDurableJob.test.mjs` — 27 pass, including a 6,300-task / 7-page plan, page-1 + final-page detail ids surviving resume, oversized pages, a failing page, retry, crash-before-persist replay, a looping page link, Outlook, and a wiring test proving `index.ts` calls the tested functions.
+- `node --test tests/microsoft*.test.mjs` — 178 pass.
+- ESLint clean on the changed files; strict `tsc` clean on `job-machine.ts`. (`index.ts` is a Deno function; no Deno toolchain was available to type-check it.)
 
-## Remaining CA/Platform Action
-**Only**: ChatGPT connector refresh in company-admin Project to mount the 34-tool catalogue. No further code changes required.
+## Remaining CA Actions (in order)
+The connector refresh alone does **not** fix the 5,000-record stall: production still runs the old capped code until steps 2 and 3 are done.
+
+1. Review and merge this PR.
+2. Apply `20260910120000_microsoft_sync_pagination_cursor.sql` to production.
+3. Deploy the `microsoft-transition-sync` Edge Function.
+4. Refresh the CG Dynamics connector in the company-admin ChatGPT Project (the separate tool-mount issue above).
+5. Run the acceptance sequence above with a **fresh** preview job.
