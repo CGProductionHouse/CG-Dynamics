@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
 
@@ -214,409 +215,204 @@ test('dedupeRecords with empty incoming returns existing', () => {
   assert.deepEqual(result, existing)
 })
 
-test('simulated pagination accumulation: 6000 records across 6 pages of 1000, first/middle/last survive exactly once', () => {
-  // Simulate 6 pages of 1000 records each = 6000 total
-  // This mimics the persisted resume flow where each job_process call loads
-  // existing records from DB, fetches next page, deduplicates, and saves back
-  const allRecords = Array.from({ length: 6000 }, (_, i) => ({
-    sourceType: 'planner_task',
-    sourceTaskId: `task-${i}`,
-    title: `Task ${i}`,
-    assigneeMicrosoftIds: i % 2 === 0 ? ['u1'] : ['u2'],
-  }))
+// ────────────────────────────────────────────────────────────────────────────
+// The real pagination path.
+//
+// Everything below drives the production functions index.ts calls
+// (paginateGraph → accumulatePlannerPage / accumulateOutlookPage →
+// planSourceUpdate → retrySourceReset) against a fake Microsoft Graph, persisting
+// each update into an in-memory source row exactly as job_process does between
+// calls. Nothing here re-implements index.ts by hand; the last test asserts
+// index.ts is actually wired to these functions.
+// ────────────────────────────────────────────────────────────────────────────
 
-  let accumulated = []
-  let cursor = null
-  const pages = []
-  for (let page = 0; page < 6; page++) {
-    const start = page * 1000
-    const pageRecords = allRecords.slice(start, start + 1000)
-    pages.push(pageRecords)
-  }
+const TASKS_URL = 'https://graph.microsoft.com/v1.0/planner/plans/big/tasks'
+const describeFailure = status => (status === null ? 'Microsoft connector request failed.' : `Microsoft returned ${status}.`)
+const bucketsOk = { values: [], complete: true, safeError: null, nextCursor: null }
 
-  // Simulate 6 sequential job_process calls (persisted resume)
-  for (let page = 0; page < 6; page++) {
-    // Each call: load existing records from DB (accumulated), fetch next page, dedupe, save
-    accumulated = jm.dedupeRecords(accumulated, pages[page], 'sourceTaskId')
-    cursor = page < 5 ? `https://graph.microsoft.com/next-page-${page + 1}` : null
-    // Verify intermediate state
-    assert.equal(accumulated.length, (page + 1) * 1000)
-    assert.equal(accumulated[0].title, 'Task 0') // first survives
-    assert.equal(accumulated[accumulated.length - 1].title, `Task ${(page + 1) * 1000 - 1}`) // last of current batch
-  }
-
-  // Final verification: all 6000 records present exactly once
-  assert.equal(accumulated.length, 6000)
-  assert.equal(accumulated[0].title, 'Task 0')
-  assert.equal(accumulated[3000].title, 'Task 3000')
-  assert.equal(accumulated[5999].title, 'Task 5999')
-
-  // Verify no duplicates by checking all IDs are unique
-  const ids = accumulated.map(r => r.sourceTaskId)
-  const uniqueIds = new Set(ids)
-  assert.equal(uniqueIds.size, 6000)
-})
-
-test('simulated pagination with duplicate overlap: idempotent resume after partial failure', () => {
-  // Simulate: page 2 succeeds, but job_process crashes before DB write
-  // On retry, page 2 is fetched again — overlap must be idempotent
-  const allRecords = Array.from({ length: 3000 }, (_, i) => ({
-    sourceType: 'planner_task',
-    sourceTaskId: `task-${i}`,
-    title: `Task ${i}`,
-  }))
-
-  const page0 = allRecords.slice(0, 1000)
-  const page1 = allRecords.slice(1000, 2000)
-  const page2 = allRecords.slice(2000, 3000)
-
-  let accumulated = []
-
-  // First successful run: pages 0 and 1
-  accumulated = jm.dedupeRecords(accumulated, page0, 'sourceTaskId')
-  assert.equal(accumulated.length, 1000)
-  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
-  assert.equal(accumulated.length, 2000)
-
-  // Simulated crash before page 2 persisted — on retry, page 1 might be re-fetched
-  // (or page 2 fetched again). Dedupe must handle overlap.
-  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId') // overlap
-  assert.equal(accumulated.length, 2000, 'overlap with page 1 is idempotent')
-
-  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
-  assert.equal(accumulated.length, 3000, 'page 2 adds new records')
-
-  // Verify all records present exactly once
-  const ids = accumulated.map(r => r.sourceTaskId)
-  assert.equal(new Set(ids).size, 3000)
-  assert.equal(accumulated[0].title, 'Task 0')
-  assert.equal(accumulated[1500].title, 'Task 1500')
-  assert.equal(accumulated[2999].title, 'Task 2999')
-})
-
-test('simulated retry resets cursor and state for failed source', () => {
-  // This tests the job_retry logic: failed source should have cursor cleared,
-  // stage reset to queued, records cleared, ready for fresh fetch
-  const failedSource = row({
-    position: 1,
-    stage: 'failed',
-    safe_error: 'Microsoft temporarily unavailable',
-    record_count: 1500,
-    records: Array.from({ length: 1500 }, (_, i) => ({ sourceTaskId: `task-${i}` })),
-    pagination_cursor: 'https://graph.microsoft.com/some-cursor',
-    complete: false,
+// A fake Graph serving `pageSizes` pages. failAt: page index answering 403.
+// repeatAt: page index whose nextLink points back at itself.
+function fakeGraph(pageSizes, { failAt = -1, repeatAt = -1, idPrefix = 'task' } = {}) {
+  const urls = pageSizes.map((_, index) => (index === 0 ? TASKS_URL : `${TASKS_URL}?$skiptoken=page-${index}`))
+  const bodies = new Map()
+  let offset = 0
+  pageSizes.forEach((size, index) => {
+    const value = Array.from({ length: size }, (_, n) => ({ id: `${idPrefix}-${offset + n}` }))
+    offset += size
+    const nextLink = index === repeatAt ? urls[index] : urls[index + 1]
+    bodies.set(urls[index], nextLink ? { value, '@odata.nextLink': nextLink } : { value })
   })
-
-  // Simulate job_retry update (from index.ts line 346)
-  const retriedSource = {
-    ...failedSource,
-    stage: 'queued',
-    safe_error: null,
-    records: [],
-    record_count: 0,
-    complete: false,
-    pagination_cursor: null,
+  const fetched = []
+  async function fetchPage(url) {
+    fetched.push(url)
+    if (urls.indexOf(url) === failAt) return { ok: false, status: 403, body: null }
+    const body = bodies.get(url)
+    return body ? { ok: true, status: 200, body } : { ok: false, status: 404, body: null }
   }
+  return { fetchPage, fetched, urls, total: offset }
+}
 
-  assert.equal(retriedSource.stage, 'queued')
-  assert.equal(retriedSource.safe_error, null)
-  assert.equal(retriedSource.records.length, 0)
-  assert.equal(retriedSource.record_count, 0)
-  assert.equal(retriedSource.pagination_cursor, null)
-  assert.equal(retriedSource.complete, false)
-})
+const plannerRow = (overrides = {}) => ({ ...row({ source_id: 'big', source_name: '2025 CLIENTS SCHEDULE' }), attempts: 0, ...overrides })
 
-test('error during pagination does not mark source complete', () => {
-  // Simulate graphPages returning safeError with nextCursor=null (final page but with error)
-  // The completion logic in index.ts requires: result.complete && result.safeError === null
-  const resultWithError = {
-    values: [{ id: '1' }],
-    complete: true, // Graph says no more pages
-    safeError: 'Microsoft temporarily unavailable or timed out.', // but there was an error
-    nextCursor: null,
-  }
-
-  const complete = resultWithError.complete && resultWithError.safeError === null
-  assert.equal(complete, false, 'error must prevent completion even when cursor is null')
-})
-
-test('simulated multi-source pagination: Planner plan continues fetching_tasks across job_process calls', () => {
-  // Test the state machine: a Planner source in 'fetching_tasks' with cursor
-  // should be picked by pickNextSource and continue pagination
-  const rows = [
-    row({ position: 0, stage: 'complete', complete: true }),
-    row({ position: 1, stage: 'fetching_tasks', pagination_cursor: 'cursor-page-2', record_count: 1000,
-      records: Array.from({ length: 1000 }, (_, i) => ({ sourceTaskId: `task-${i}` })) }),
-    row({ position: 2, stage: 'queued' }),
-  ]
-
-  const pick = jm.pickNextSource(rows)
-  assert.equal(pick.position, 1)
-  assert.equal(pick.stage, 'fetching_tasks')
-  assert.equal(pick.pagination_cursor, 'cursor-page-2')
-  assert.equal(pick.record_count, 1000)
-
-  // After next job_process call, it should advance to next page
-  const nextCursor = 'cursor-page-3'
-  const nextPageRecords = Array.from({ length: 1000 }, (_, i) => ({ sourceTaskId: `task-${i + 1000}` }))
-  const accumulated = jm.dedupeRecords(pick.records ?? [], nextPageRecords, 'sourceTaskId')
-
-  assert.equal(accumulated.length, 2000)
-  assert.equal(accumulated[0].sourceTaskId, 'task-0')
-  assert.equal(accumulated[1999].sourceTaskId, 'task-1999')
-})
-
-test('Outlook pagination accumulation preserves records across resume', () => {
-  // Outlook uses sourceEventId for deduplication
-  const allEvents = Array.from({ length: 2500 }, (_, i) => ({
-    sourceType: 'outlook_event',
-    sourceEventId: `event-${i}`,
-    title: `Event ${i}`,
+// One job_process fetch step for a Planner source, through the production functions.
+async function plannerStep(source, graph, needsDetail) {
+  const attempts = source.attempts + 1
+  const taskResult = await jm.paginateGraph(source.pagination_cursor ?? TASKS_URL, graph.fetchPage, describeFailure, jm.PAGINATION_BATCH_SIZE)
+  const incoming = taskResult.values.map(task => ({
+    sourceType: 'planner_task',
+    sourceTaskId: String(task.id),
+    title: String(task.id),
+    [jm.NEEDS_DETAIL_MARKER]: needsDetail.has(String(task.id)),
   }))
+  const update = jm.planSourceUpdate(jm.accumulatePlannerPage(source.records, incoming, taskResult, bucketsOk), attempts)
+  return { update, attempts }
+}
 
-  const page0 = allEvents.slice(0, 1000)
-  const page1 = allEvents.slice(1000, 2000)
-  const page2 = allEvents.slice(2000, 2500)
+// Drive a Planner source through job_process-equivalent calls until it leaves the
+// fetch stage. crashBeforePersistAt discards that step, as if the Edge Function
+// died after fetching but before its DB write.
+async function runPlanner(graph, { needsDetail = new Set(), crashBeforePersistAt = -1, source = plannerRow() } = {}) {
+  let steps = 0
+  while ((source.stage === 'queued' || source.stage === 'fetching_tasks') && steps < 100) {
+    steps += 1
+    const { update, attempts } = await plannerStep(source, graph, needsDetail)
+    if (steps === crashBeforePersistAt) continue
+    source = { ...source, ...update, attempts }
+  }
+  return { source, steps }
+}
 
-  let accumulated = []
+const idsOf = records => records.map(record => record.sourceTaskId ?? record.sourceEventId)
 
-  // Simulate 3 job_process calls for Outlook calendar
-  accumulated = jm.dedupeRecords(accumulated, page0, 'sourceEventId')
-  assert.equal(accumulated.length, 1000)
+function assertEachExactlyOnce(records, expectedIds) {
+  const ids = idsOf(records)
+  assert.equal(new Set(ids).size, ids.length, 'no record is duplicated')
+  for (const id of expectedIds) assert.equal(ids.filter(value => value === id).length, 1, `${id} survives exactly once`)
+}
 
-  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceEventId')
-  assert.equal(accumulated.length, 2000)
-
-  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceEventId')
-  assert.equal(accumulated.length, 2500)
-
-  // Verify first/middle/last
-  assert.equal(accumulated[0].title, 'Event 0')
-  assert.equal(accumulated[1250].title, 'Event 1250')
-  assert.equal(accumulated[2499].title, 'Event 2499')
-
-  const ids = accumulated.map(r => r.sourceEventId)
-  assert.equal(new Set(ids).size, 2500)
+test('a >5,000-task plan is fetched across bounded calls and every task survives exactly once', async () => {
+  const graph = fakeGraph([900, 900, 900, 900, 900, 900, 900]) // 6,300 tasks over 7 Graph pages
+  const { source, steps } = await runPlanner(graph)
+  assert.equal(source.stage, 'complete')
+  assert.equal(source.complete, true)
+  assert.equal(source.pagination_cursor, null)
+  assert.equal(source.records.length, 6300)
+  assert.equal(source.record_count, 6300)
+  assertEachExactlyOnce(source.records, ['task-0', 'task-3150', 'task-6299'])
+  assert.ok(steps > 1, 'the plan must span several job_process calls, not one capped fetch')
+  assert.deepEqual(graph.fetched, graph.urls, 'each Graph page is fetched exactly once, in order')
+  assert.ok(source.records.every(record => !(jm.NEEDS_DETAIL_MARKER in record)), 'the internal marker never leaves the job')
 })
 
-// ============================================================================
-// Planner Multi-Page Detail Enrichment Regression Tests
-// ============================================================================
+test('detail work from page 1 and the final page survives resume and is drained before completion', async () => {
+  const graph = fakeGraph([900, 900, 900, 900, 900, 900, 900])
+  const needsDetail = new Set(['task-0', 'task-950', 'task-6299'])
+  const { source } = await runPlanner(graph, { needsDetail })
+  assert.equal(source.stage, 'fetching_details', 'detail work must run before the source can complete')
+  assert.equal(source.complete, false)
+  assert.deepEqual([...source.pending_detail_ids].sort(), [...needsDetail].sort(), 'page-1, middle and final-page detail ids all survive')
+  assert.ok(source.records.every(record => !(jm.NEEDS_DETAIL_MARKER in record)))
 
-test('simulated Planner multi-page pagination: detail IDs from page 1 and final page both survive and accumulate', () => {
-  // Simulate a 3-page Planner plan (e.g., 2025 CLIENTS SCHEDULE)
-  // Page 1: tasks 0-999, some need details (percentComplete < 100)
-  // Page 2: tasks 1000-1999, some need details
-  // Page 3: tasks 2000-2999, some need details
-  // Total: 3000 tasks across 3 pages
-  
-  const makeTask = (index, percentComplete) => ({
-    sourceType: 'planner_task',
-    sourceTaskId: `task-${index}`,
-    title: `Task ${index}`,
-    percentComplete,
-    assigneeMicrosoftIds: [],
-    _needsDetail: percentComplete !== 100, // Client Schedule plans always need details, or incomplete tasks
-  })
-
-  // Page 1: 1000 tasks, tasks 0, 100, 500 need details
-  const page1 = Array.from({ length: 1000 }, (_, i) => 
-    makeTask(i, i === 0 || i === 100 || i === 500 ? 50 : 100)
-  )
-  // Page 2: 1000 tasks, tasks 1000, 1500 need details  
-  const page2 = Array.from({ length: 1000 }, (_, i) => 
-    makeTask(1000 + i, i === 0 || i === 500 ? 50 : 100)
-  )
-  // Page 3: 1000 tasks, tasks 2000, 2500, 2999 need details
-  const page3 = Array.from({ length: 1000 }, (_, i) => 
-    makeTask(2000 + i, i === 0 || i === 500 || i === 999 ? 50 : 100)
-  )
-
-  // Simulate 3 sequential job_process calls (persisted resume)
-  let accumulated = []
-  let allDetailIds = []
-
-  // Call 1: Fetch page 1
-  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
-  const detailIds1 = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
-  allDetailIds.push(...detailIds1)
-  assert.equal(accumulated.length, 1000)
-  assert.equal(detailIds1.length, 3) // tasks 0, 100, 500
-  assert.deepEqual(detailIds1.sort(), ['task-0', 'task-100', 'task-500'])
-
-  // Call 2: Fetch page 2 (resume with accumulated records from page 1)
-  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
-  const detailIds2 = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
-  // Should now include page 1 + page 2 detail IDs
-  assert.equal(accumulated.length, 2000)
-  assert.equal(detailIds2.length, 5) // tasks 0, 100, 500, 1000, 1500
-  assert.ok(detailIds2.includes('task-0'))
-  assert.ok(detailIds2.includes('task-100'))
-  assert.ok(detailIds2.includes('task-500'))
-  assert.ok(detailIds2.includes('task-1000'))
-  assert.ok(detailIds2.includes('task-1500'))
-
-  // Call 3: Fetch page 3 (final page, resume with accumulated records from pages 1-2)
-  accumulated = jm.dedupeRecords(accumulated, page3, 'sourceTaskId')
-  const detailIds3 = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
-  // Should now include page 1 + page 2 + page 3 detail IDs
-  assert.equal(accumulated.length, 3000)
-  assert.equal(detailIds3.length, 8) // tasks 0, 100, 500, 1000, 1500, 2000, 2500, 2999
-  assert.ok(detailIds3.includes('task-0'))      // page 1
-  assert.ok(detailIds3.includes('task-100'))    // page 1
-  assert.ok(detailIds3.includes('task-500'))    // page 1
-  assert.ok(detailIds3.includes('task-1000'))   // page 2
-  assert.ok(detailIds3.includes('task-1500'))   // page 2
-  assert.ok(detailIds3.includes('task-2000'))   // page 3
-  assert.ok(detailIds3.includes('task-2500'))   // page 3
-  assert.ok(detailIds3.includes('task-2999'))   // page 3 (final task)
-
-  // Verify all 3000 records present exactly once
-  const allIds = accumulated.map(r => r.sourceTaskId)
-  assert.equal(new Set(allIds).size, 3000)
-
-  // Verify _needsDetail is preserved in accumulated records during pagination
-  const needsDetailRecords = accumulated.filter(r => r._needsDetail === true)
-  assert.equal(needsDetailRecords.length, 8)
-})
-
-test('simulated Planner pagination complete: _needsDetail stripped only after final page, detail IDs passed to fetching_details', () => {
-  // This test simulates the fetchPlannerTasksUnit behavior:
-  // - During pagination (nextCursor exists): records keep _needsDetail
-  // - When pagination complete (nextCursor null): _needsDetail stripped, detailIds returned
-  
-  const makeTask = (index, percentComplete) => ({
-    sourceType: 'planner_task',
-    sourceTaskId: `task-${index}`,
-    title: `Task ${index}`,
-    percentComplete,
-    assigneeMicrosoftIds: [],
-    _needsDetail: percentComplete !== 100,
-  })
-
-  const page1 = Array.from({ length: 1000 }, (_, i) => makeTask(i, i === 100 ? 50 : 100))
-  const page2 = Array.from({ length: 1000 }, (_, i) => makeTask(1000 + i, i === 500 ? 50 : 100))
-
-  // Simulate pagination NOT complete (has nextCursor)
-  let accumulated = []
-  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
-  // During pagination, _needsDetail should be preserved in records
-  const duringPagination = accumulated.map(r => ({ ...r }))
-  const hasNeedsDetailDuring = duringPagination.some(r => r._needsDetail === true)
-  assert.equal(hasNeedsDetailDuring, true, '_needsDetail preserved during pagination')
-
-  // Simulate pagination complete (no nextCursor) - strip _needsDetail
-  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
-  const detailIds = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
-  const recordsForSnapshot = accumulated.map(({ _needsDetail, ...record }) => { void _needsDetail; return record; })
-  
-  // detailIds should include from both pages
-  assert.equal(detailIds.length, 2)
-  assert.ok(detailIds.includes('task-100'))
-  assert.ok(detailIds.includes('task-1500'))
-  
-  // Records for snapshot should NOT have _needsDetail
-  const hasNeedsDetailAfter = recordsForSnapshot.some(r => '_needsDetail' in r)
-  assert.equal(hasNeedsDetailAfter, false, '_needsDetail stripped after pagination complete')
-  
-  // But all original records preserved
-  assert.equal(recordsForSnapshot.length, 2000)
-})
-
-test('Planner detail enrichment drains all pending detail IDs before source marked complete', () => {
-  // Simulate the detail fetching phase: pending_detail_ids are processed in batches
-  // until empty, then source moves to complete
-  
-  const pendingDetailIds = [
-    'task-0', 'task-100', 'task-500',      // from page 1
-    'task-1000', 'task-1500',              // from page 2  
-    'task-2000', 'task-2500', 'task-2999'  // from page 3
-  ]
-  
-  let pending = [...pendingDetailIds]
-  const batches = []
-  const DETAIL_BATCH_SIZE = 300
-  
+  const drained = []
+  let pending = source.pending_detail_ids
   while (pending.length > 0) {
-    const batch = pending.slice(0, DETAIL_BATCH_SIZE)
-    batches.push(batch)
-    pending = pending.slice(DETAIL_BATCH_SIZE)
+    const { batch, rest } = jm.nextDetailBatch(pending, 2)
+    drained.push(...batch)
+    pending = rest
   }
-  
-  // Should take 1 batch for 8 items (well under 300)
-  assert.equal(batches.length, 1)
-  assert.equal(batches[0].length, 8)
-  assert.deepEqual(batches[0].sort(), pendingDetailIds.sort())
-  
-  // After processing, pending should be empty
-  assert.equal(pending.length, 0)
-  
-  // Simulate the job_progress check: source should not be complete until pending_detail_ids is empty
-  const sourceDuringDetails = row({
-    stage: 'fetching_details',
-    pending_detail_ids: pendingDetailIds,
-    complete: false,
-    required: true
-  })
-  const sourceAfterDetails = row({
-    stage: 'complete',
-    pending_detail_ids: [],
-    complete: true,
-    required: true
-  })
-  
-  // requiredSourcesComplete should return false while in fetching_details
-  const rowsDuring = [sourceDuringDetails]
-  const rowsAfter = [sourceAfterDetails]
-  
-  assert.equal(jm.requiredSourcesComplete(rowsDuring), false)
-  assert.equal(jm.requiredSourcesComplete(rowsAfter), true)
-  
-  // jobProgress should show detailsRemaining > 0 during fetching_details
-  assert.equal(jm.jobProgress(rowsDuring).detailsRemaining, 8)
-  assert.equal(jm.jobProgress(rowsAfter).detailsRemaining, 0)
+  assert.deepEqual(drained.sort(), [...needsDetail].sort())
 })
 
-test('Planner multi-page idempotent resume: re-fetching page 2 after crash preserves page 1 detail IDs', () => {
-  // Simulate: pages 1 and 2 fetched successfully, crash before page 3
-  // On retry: page 2 might be re-fetched (overlap), page 3 fetched fresh
-  // Page 1 detail IDs must survive the overlap
-  
-  const makeTask = (index, percentComplete) => ({
-    sourceType: 'planner_task',
-    sourceTaskId: `task-${index}`,
-    title: `Task ${index}`,
-    percentComplete,
-    assigneeMicrosoftIds: [],
-    _needsDetail: percentComplete !== 100,
-  })
+test('a Graph page larger than the batch is consumed whole and never re-fetched', async () => {
+  const graph = fakeGraph([1500, 1500, 10])
+  const { source } = await runPlanner(graph)
+  assert.equal(source.stage, 'complete')
+  assert.equal(source.records.length, 3010)
+  assert.deepEqual(graph.fetched, graph.urls, 'checkpointing only on @odata.nextLink means no page is read twice')
+})
 
-  const page1 = Array.from({ length: 1000 }, (_, i) => makeTask(i, i === 100 ? 50 : 100))
-  const page2 = Array.from({ length: 1000 }, (_, i) => makeTask(1000 + i, i === 500 ? 50 : 100))
-  const page3 = Array.from({ length: 1000 }, (_, i) => makeTask(2000 + i, i === 999 ? 50 : 100))
+test('a failing page fails the source instead of pinning the job in fetching_tasks', async () => {
+  const { source } = await runPlanner(fakeGraph([900, 900, 900, 900], { failAt: 2 }))
+  assert.equal(source.stage, 'failed')
+  assert.equal(source.complete, false)
+  assert.equal(source.pagination_cursor, null)
+  assert.equal(source.safe_error, 'Microsoft returned 403.')
 
-  let accumulated = []
-  
-  // First run: pages 1 and 2 succeed
-  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
-  assert.equal(accumulated.filter(r => r._needsDetail).length, 1) // task-100
-  
-  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
-  assert.equal(accumulated.filter(r => r._needsDetail).length, 2) // task-100, task-1500
-  
-  // Simulated crash here - DB has pages 1-2 with _needsDetail preserved
-  
-  // Retry: page 2 re-fetched (overlap), then page 3
-  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId') // overlap - idempotent
-  assert.equal(accumulated.length, 2000, 'page 2 overlap idempotent')
-  assert.equal(accumulated.filter(r => r._needsDetail).length, 2, 'page 1 detail IDs survive overlap')
-  
-  accumulated = jm.dedupeRecords(accumulated, page3, 'sourceTaskId')
-  assert.equal(accumulated.length, 3000)
-  assert.equal(accumulated.filter(r => r._needsDetail).length, 3) // task-100, task-1500, task-2999
-  
-  const detailIds = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
-  assert.ok(detailIds.includes('task-100'), 'page 1 detail ID survives')
-  assert.ok(detailIds.includes('task-1500'), 'page 2 detail ID survives')
-  assert.ok(detailIds.includes('task-2999'), 'page 3 detail ID added')
+  // The job moves on and reports honestly instead of retrying the same page forever.
+  const next = row({ position: 1, source_id: 'p2' })
+  assert.equal(jm.pickNextSource([{ ...source, position: 0 }, next]), next)
+  assert.equal(jm.jobProgress([source]).finished, true)
+  assert.equal(jm.jobProgress([source]).anyFailed, true)
+  assert.equal(jm.requiredSourcesComplete([source]), false, 'a failed required source still blocks apply')
+})
+
+test('job_retry re-queues a failed source and a fresh run completes', async () => {
+  const failing = await runPlanner(fakeGraph([900, 900, 900, 900], { failAt: 2 }))
+  const reset = { ...failing.source, ...jm.retrySourceReset() }
+  assert.equal(reset.stage, 'queued')
+  assert.deepEqual(reset.records, [])
+  assert.equal(reset.pagination_cursor, null)
+  assert.equal(reset.attempts, 0)
+  assert.equal(jm.pickNextSource([reset]), reset)
+
+  const { source } = await runPlanner(fakeGraph([900, 900, 900, 900]), { source: reset })
+  assert.equal(source.stage, 'complete')
+  assert.equal(source.records.length, 3600)
+})
+
+test('a step that crashes before persisting is replayed idempotently', async () => {
+  const graph = fakeGraph([900, 900, 900, 900, 900, 900, 900])
+  const { source } = await runPlanner(graph, { crashBeforePersistAt: 2 })
+  assert.equal(source.stage, 'complete')
+  assert.equal(source.records.length, 6300)
+  assertEachExactlyOnce(source.records, ['task-0', 'task-1800', 'task-6299'])
+  assert.ok(graph.fetched.length > graph.urls.length, 'the crashed step really was fetched again')
+})
+
+test('a repeating page link is refused rather than looped', async () => {
+  const { source } = await runPlanner(fakeGraph([900, 900, 900], { repeatAt: 1 }))
+  assert.equal(source.stage, 'failed')
+  assert.match(source.safe_error, /repeating page link/)
+})
+
+test('a source that never stops paginating is bounded', () => {
+  const stillPaging = { records: [], detailIds: [], complete: false, safeError: null, nextCursor: 'https://graph.example/next' }
+  assert.equal(jm.planSourceUpdate(stillPaging, jm.MAX_PAGINATION_STEPS - 1).stage, 'fetching_tasks')
+  const bounded = jm.planSourceUpdate(stillPaging, jm.MAX_PAGINATION_STEPS)
+  assert.equal(bounded.stage, 'failed')
+  assert.equal(bounded.complete, false)
+})
+
+test('Outlook pagination accumulates across resume through the real path', async () => {
+  const graph = fakeGraph([700, 700, 700], { idPrefix: 'event' })
+  let source = { ...row({ source_type: 'outlook_calendar', source_id: 'cal-1' }), attempts: 0 }
+  let steps = 0
+  while ((source.stage === 'queued' || source.stage === 'fetching_tasks') && steps < 20) {
+    steps += 1
+    const result = await jm.paginateGraph(source.pagination_cursor ?? TASKS_URL, graph.fetchPage, describeFailure, jm.PAGINATION_BATCH_SIZE)
+    const incoming = result.values.map(event => ({ sourceType: 'outlook_event', sourceEventId: String(event.id) }))
+    const attempts = source.attempts + 1
+    source = { ...source, ...jm.planSourceUpdate(jm.accumulateOutlookPage(source.records, incoming, result), attempts), attempts }
+  }
+  assert.equal(source.stage, 'complete')
+  assert.equal(source.complete, true)
+  assert.equal(source.records.length, 2100)
+  assertEachExactlyOnce(source.records, ['event-0', 'event-1050', 'event-2099'])
+  assert.equal(steps, 2)
+})
+
+test('index.ts is wired to the tested functions and keeps status polls light', () => {
+  const code = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/index.ts', import.meta.url), 'utf8')
+    .replace(/\r\n/g, '\n')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1')
+  for (const call of ['paginateGraph(', 'accumulatePlannerPage(', 'accumulateOutlookPage(', 'planSourceUpdate(', 'retrySourceReset(']) {
+    assert.ok(code.includes(call), `index.ts must call ${call}`)
+  }
+  const sourceFields = code.match(/const SOURCE_FIELDS = '([^']*)'/)
+  assert.ok(sourceFields, 'SOURCE_FIELDS must exist')
+  assert.doesNotMatch(sourceFields[1], /\brecords\b/, 'status polls must not load every source payload')
+  assert.match(code, /\.select\('records'\)\.eq\('id', dbId\)/, 'job_process loads only the source it fetches')
+  assert.doesNotMatch(code, /nextCursor: next\b/, 'a failed page URL must never be handed back as a resume cursor')
+  assert.match(code, /if \(rest\.length === 0\)[\s\S]{0,400}stage: 'complete'/, 'detail work completes the source only once drained')
 })
