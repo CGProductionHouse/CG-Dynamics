@@ -1,4 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "case \"$VERCEL_GIT_COMMIT_REF\" in *dev-bridge*) exit 1 ;; *) echo \"Skipping dev-bridge deployment for non-dev-bridge branch: $VERCEL_GIT_COMMIT_REF\"; exit 0 ;; esac"
+  "git": {
+    "deploymentEnabled": false
+  }
 }
