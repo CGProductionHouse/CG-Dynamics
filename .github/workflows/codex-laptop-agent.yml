@@ -76,6 +76,10 @@ jobs:
           git config user.name 'CG Codex Laptop Agent'
           git config user.email 'info@cgproductionhouse.com'
 
+          if (Test-Path 'package-lock.json') {
+            npm ci
+          }
+
           $prompt = @"
           Work on CG Dynamics issue #$($issue.number): $($issue.title)
           $($issue.url)
@@ -98,7 +102,7 @@ jobs:
         run: |
           $prompt = Get-Content -Raw $env:PROMPT_PATH
           $out = Join-Path (Split-Path $env:PROMPT_PATH) 'last-message.txt'
-          codex exec --sandbox workspace-write --cd $env:WORKDIR --output-last-message $out -c 'approval_policy="never"' -c 'sandbox_workspace_write.network_access=true' $prompt
+          codex exec --sandbox workspace-write --cd $env:WORKDIR --output-last-message $out -c 'approval_policy="never"' -c 'sandbox_workspace_write.network_access=false' $prompt
           if (Test-Path $out) { Get-Content $out }
 
       - name: Publish issue task as PR
