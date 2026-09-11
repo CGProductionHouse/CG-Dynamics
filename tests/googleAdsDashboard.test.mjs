@@ -9,6 +9,7 @@ const DASHBOARD_LIB_SOURCE = readSource('../src/lib/googleAdsDashboard.ts')
 const GOOGLE_ADS_LIB_SOURCE = readSource('../src/lib/googleAds.ts')
 const PREVIEW_SOURCE = readSource('../src/pages/admin/PublishedPreview.tsx')
 const CLIENT_DASHBOARD_SOURCE = readSource('../src/pages/client/Dashboard.tsx')
+const CLIENT_CAMPAIGNS_SOURCE = readSource('../src/pages/client/ClientCampaignsPage.tsx')
 const REPORT_VIEW_SOURCE = readSource('../src/pages/client/ClientReportView.tsx')
 const GOOGLE_ADS_PAGE_SOURCE = readSource('../src/pages/admin/GoogleAdsIntegrationPage.tsx')
 const INTEGRATIONS_SOURCE = readSource('../src/pages/admin/IntegrationsPage.tsx')
@@ -146,6 +147,13 @@ test('admin preview and client dashboard load only the selected Google Ads perio
     assert.doesNotMatch(source, /loadGoogleAdsDashboard\(data\.id, previousMonth\)/)
     assert.doesNotMatch(source, /previousGoogleAds/)
   }
+})
+
+test('client campaigns page renders the full provider-native dashboard for the report month', () => {
+  assert.match(CLIENT_CAMPAIGNS_SOURCE, /loadGoogleAdsDashboard\(report\.id, trackingMonth\)/)
+  assert.match(CLIENT_CAMPAIGNS_SOURCE, /<GoogleAdsResults dashboard=\{data\.dashboard\} \/>/)
+  assert.doesNotMatch(CLIENT_CAMPAIGNS_SOURCE, /<GoogleAdsResults dashboard=\{data\.dashboard\} compact\s*\/>/)
+  assert.doesNotMatch(CLIENT_CAMPAIGNS_SOURCE, /currentTrackingMonth\(\)/)
 })
 
 test('client route uses only its published report list and passes Google Ads to the report view', () => {

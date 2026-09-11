@@ -9,7 +9,7 @@ import {
   type GoogleAdsDashboardData,
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
-import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 import { readStrategyData } from '../../lib/strategyEngine'
 
 type CampaignPageData = {
@@ -25,9 +25,9 @@ const EMPTY_DATA: CampaignPageData = {
   state: 'no-activity',
 }
 
-function currentTrackingMonth(): string {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+function reportTrackingMonth(report: ClientReport | null): string | null {
+  if (!report) return null
+  return getReportMonthFromPeriod(report)
 }
 
 export default function ClientCampaignsPage() {
@@ -56,8 +56,9 @@ export default function ClientCampaignsPage() {
         if (clientResult.error || reportsResult.error) throw new Error('Campaign data unavailable')
 
         const report = selectMonthlyReports(reportsResult.data)[0] ?? null
-        const googleResult = report
-          ? await loadGoogleAdsDashboard(report.id, currentTrackingMonth())
+        const trackingMonth = reportTrackingMonth(report)
+        const googleResult = report && trackingMonth
+          ? await loadGoogleAdsDashboard(report.id, trackingMonth)
           : { data: null, state: 'no-activity' as const, error: null }
         if (!active) return
 
@@ -78,7 +79,7 @@ export default function ClientCampaignsPage() {
     return () => { active = false }
   }, [profile?.client_id])
 
-  const reportMonth = data.report ? currentTrackingMonth() : null
+  const reportMonth = data.report ? reportTrackingMonth(data.report) : null
 
   return (
     <ClientPortalShell client={data.client}>
@@ -89,7 +90,7 @@ export default function ClientCampaignsPage() {
           Verified campaign activity and the information CG uses to refine paid media.
         </p>
         {reportMonth && (
-          <p className="mt-4 text-sm text-report-faint">Near-live tracking month: {monthDisplayLabel(reportMonth)}</p>
+          <p className="mt-4 text-sm text-report-faint">Reporting period: {monthDisplayLabel(reportMonth)}</p>
         )}
       </section>
 
