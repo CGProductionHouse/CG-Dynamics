@@ -1684,12 +1684,13 @@ const handleUpdateLead: ToolHandler = async (staff, input) => {
     if (input[key] !== undefined) updateFields[key] = input[key]
   }
 
-  const { data, error } = await staff.supabase
-    .from('business_development_leads')
-    .update(updateFields)
-    .eq('id', leadId)
-    .select()
-    .single()
+  // Through the service-role RPC: the lead audit trigger needs the acting staff member and the
+  // service-role connection has no auth.uid(). The RPC re-checks the app's owner/manager rule.
+  const { data, error } = await staff.supabase.rpc('update_business_development_lead_as_actor', {
+    p_actor_profile_id: staff.profileId,
+    p_lead_id: leadId,
+    p_changes: updateFields,
+  })
 
   if (error) return { error: error.message }
   return { lead: data, message: 'Lead updated.' }
@@ -2149,14 +2150,24 @@ const handleLogLeadEmailActivity: ToolHandler = async (staff, input) => {
     updatePayload.follow_up_at = input.follow_up_at
   }
 
-  const { data: updated, error: updateError } = await staff.supabase
-    .from('business_development_leads')
-    .update(updatePayload)
-    .eq('id', input.lead_id)
-    .select('id, last_action, last_action_at, next_action, follow_up_at')
-    .maybeSingle()
+  // Owner-only, through the same service-role RPC as update_lead (see handleUpdateLead).
+  const { data: updatedLead, error: updateError } = await staff.supabase.rpc('update_business_development_lead_as_actor', {
+    p_actor_profile_id: staff.profileId,
+    p_lead_id: input.lead_id,
+    p_changes: updatePayload,
+    p_owner_only: true,
+  })
 
   if (updateError) return { error: updateError.message }
+  const updated = updatedLead
+    ? {
+        id: updatedLead.id,
+        last_action: updatedLead.last_action,
+        last_action_at: updatedLead.last_action_at,
+        next_action: updatedLead.next_action,
+        follow_up_at: updatedLead.follow_up_at,
+      }
+    : null
 
   // Append to lead research as a record of the email activity
   const { error: researchError } = await staff.supabase

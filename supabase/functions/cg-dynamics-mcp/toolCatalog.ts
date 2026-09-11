@@ -254,7 +254,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     description: 'Update one owned/managed lead state, qualification, last or next action, or follow-up date through the canonical lead service.',
     inputSchema: objectSchema({ lead_id: uuid, stage: { type: 'string' }, qualification: { type: 'string' }, last_action: { type: 'string', maxLength: 2000 }, next_action: { type: 'string', maxLength: 2000 }, follow_up_at: { type: 'string', format: 'date-time' }, idempotency_key: uuid }, ['lead_id','idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
-    dependency: '#305', canonicalContract: 'business_development_leads RLS/service',
+    dependency: '#305', canonicalContract: 'update_business_development_lead_as_actor RPC (app RLS owner/manager rule)',
   },
   {
     name: 'add_lead_research', title: 'Add lead research',
@@ -345,7 +345,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
       idempotency_key: uuid,
     }, ['lead_id', 'activity_type', 'summary', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
-    dependency: '#305', canonicalContract: 'business_development_leads last_action/next_action fields',
+    dependency: '#305', canonicalContract: 'update_business_development_lead_as_actor RPC (owner-only) for last_action/next_action fields',
   },
   {
     name: 'get_content_run_plan', title: 'Get content run plan',

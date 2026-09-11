@@ -359,4 +359,80 @@ begin
   raise notice 'PASS 8: signed-in path unchanged; a supplied p_actor_profile_id is ignored for users (no manager, preference or status spoofing)';
 end $$;
 
+-- ── 9. MCP path: lead updates are audited as the exact actor ────────────────
+-- Every statement in one DO block shares a transaction timestamp, so "latest event" cannot be
+-- found by created_at. Attribution is checked by counting each actor's events instead.
+create function pg_temp.lead_events(p_actor uuid) returns bigint language sql as $$
+  select count(*) from public.business_development_lead_events e
+  where e.lead_id = '9a9a9a9a-0000-4000-8000-000000000001' and e.actor_profile_id = p_actor
+$$;
+
+do $$
+declare
+  v_admin constant uuid := '1b2c3d4e-5f60-4a7b-8c9d-0e1f2a3b4c63';
+  v_sydney constant uuid := '2c3d4e5f-6071-4b8c-9d0e-1f2a3b4c5d74';
+  v_franco constant uuid := '4e5f6071-8293-4d0e-9f2a-3b4c5d6e7f96';
+  v_lead public.business_development_leads;
+  v_fn constant text := 'public.update_business_development_lead_as_actor(uuid,uuid,jsonb,boolean)';
+begin
+  -- Franco creates his lead in the app (signed in), exactly as today.
+  perform pg_temp.as_user(v_franco);
+  insert into public.business_development_leads (id, owner_profile_id, created_by, company_name, idempotency_key)
+  values ('9a9a9a9a-0000-4000-8000-000000000001', v_franco, v_franco, 'Synthetic Fleet Co (local)', gen_random_uuid());
+  if pg_temp.lead_events(v_franco) <> 1 then
+    raise exception 'CHECK 9: the signed-in create was not audited as Franco';
+  end if;
+
+  -- A signed-in user cannot borrow the service-role actor setting.
+  perform set_config('app.lead_actor_profile_id', v_admin::text, false);
+  update public.business_development_leads set next_action = 'Signed-in edit' where id = '9a9a9a9a-0000-4000-8000-000000000001';
+  perform set_config('app.lead_actor_profile_id', '', false);
+  if pg_temp.lead_events(v_franco) <> 2 or pg_temp.lead_events(v_admin) <> 0 then
+    raise exception 'CHECK 9: a signed-in edit was attributed to someone else';
+  end if;
+
+  perform pg_temp.as_service();
+
+  -- The MCP's old direct update is refused clearly (it used to hit the NOT NULL constraint).
+  perform pg_temp.expect_error($q$update public.business_development_leads set next_action = 'direct'
+    where id = '9a9a9a9a-0000-4000-8000-000000000001'$q$, '%Lead changes must be made by an identified staff member%');
+
+  select * into v_lead from public.update_business_development_lead_as_actor(
+    v_franco, '9a9a9a9a-0000-4000-8000-000000000001',
+    jsonb_build_object('stage', 'follow_up', 'next_action', 'Call back Tuesday', 'follow_up_at', '2026-09-15T08:00:00Z'));
+  if v_lead.stage <> 'follow_up' or v_lead.next_action <> 'Call back Tuesday' or v_lead.follow_up_at <> timestamptz '2026-09-15T08:00:00Z' then
+    raise exception 'CHECK 9: MCP lead update did not apply';
+  end if;
+  if pg_temp.lead_events(v_franco) <> 3 or pg_temp.lead_events(v_admin) <> 0 then
+    raise exception 'CHECK 9: MCP lead update was not audited as Franco';
+  end if;
+  if coalesce(current_setting('app.lead_actor_profile_id', true), '') <> '' then
+    raise exception 'CHECK 9: the actor setting leaked past the RPC';
+  end if;
+
+  perform pg_temp.expect_error(format($q$select public.update_business_development_lead_as_actor(%L, %L, '{"next_action":"x"}'::jsonb)$q$,
+    v_sydney, v_lead.id), '%You can only update your own leads%');
+  perform pg_temp.expect_error(format($q$select public.update_business_development_lead_as_actor(%L, %L, '{"next_action":"x"}'::jsonb, true)$q$,
+    v_admin, v_lead.id), '%You can only update your own leads%');
+  perform pg_temp.expect_error(format($q$select public.update_business_development_lead_as_actor(%L, %L, '{"owner_profile_id":"%s"}'::jsonb)$q$,
+    v_franco, v_lead.id, v_sydney), '%Lead fields cannot be changed here: owner_profile_id%');
+  perform pg_temp.expect_error(format($q$select public.update_business_development_lead_as_actor(%L, %L, '{"next_action":"x"}'::jsonb)$q$,
+    '3d4e5f60-7182-4c9d-8e1f-2a3b4c5d6e85', v_lead.id), '%Active staff profile required%');
+  perform pg_temp.expect_error(format($q$select public.update_business_development_lead_as_actor(null, %L, '{"next_action":"x"}'::jsonb)$q$,
+    v_lead.id), '%Active staff profile required%');
+
+  -- A manager may update someone else's lead (the app's RLS rule), audited as the manager.
+  select * into v_lead from public.update_business_development_lead_as_actor(
+    v_admin, v_lead.id, jsonb_build_object('qualification', 'qualified'));
+  if pg_temp.lead_events(v_admin) <> 1 or pg_temp.lead_events(v_franco) <> 3 then
+    raise exception 'CHECK 9: manager lead update was not audited as the admin';
+  end if;
+
+  if has_function_privilege('authenticated', v_fn, 'execute') or has_function_privilege('anon', v_fn, 'execute')
+     or not has_function_privilege('service_role', v_fn, 'execute') then
+    raise exception 'CHECK 9: update_business_development_lead_as_actor must be service-role only';
+  end if;
+  raise notice 'PASS 9: MCP lead updates audited as the exact actor; non-owner staff, owner-only, ownership change, inactive/missing actor, unidentified direct write and signed-in spoofing all refused';
+end $$;
+
 do $$ begin raise notice 'ALL MCP STAFF-WRITE ACCEPTANCE CHECKS PASSED'; end $$;

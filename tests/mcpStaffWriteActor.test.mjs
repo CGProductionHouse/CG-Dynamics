@@ -91,7 +91,53 @@ test('the MCP passes its resolved staff subject as the actor to every staff-writ
   }
 })
 
-test('the migration is prepared only and touches no Microsoft data', () => {
-  assert.match(MIGRATION, /Prepared only\. Do not apply to production without explicit CA approval\./)
-  assert.doesNotMatch(code, /(insert\s+into|update|delete\s+from)\s+public\.microsoft_/i)
+// ── Lead updates (update_lead, log_lead_email_activity) ─────────────────────
+const LEAD_MIGRATION = read('../supabase/migrations/20260911171000_mcp_lead_update_actor.sql')
+const leadCode = LEAD_MIGRATION.replace(/--[^\n]*/g, '')
+const WORKSPACES = read('../supabase/migrations/20260908220000_staff_assistant_workspaces.sql')
+
+test('the migrations are prepared only and touch no Microsoft data', () => {
+  for (const sql of [MIGRATION, LEAD_MIGRATION]) {
+    assert.match(sql, /Prepared only\. Do not apply to production without explicit CA approval\./)
+    assert.doesNotMatch(sql.replace(/--[^\n]*/g, ''), /(insert\s+into|update|delete\s+from)\s+public\.microsoft_/i)
+  }
+})
+
+test('the lead audit trigger trusts the actor setting only for the service role', () => {
+  const trigger = leadCode.slice(leadCode.indexOf('function public.audit_business_development_lead()'), leadCode.indexOf('function public.update_business_development_lead_as_actor'))
+  assert.match(trigger, /when auth\.uid\(\) is null and auth\.role\(\) = 'service_role'\s+then nullif\(current_setting\('app\.lead_actor_profile_id', true\), ''\)::uuid\s+else auth\.uid\(\)/)
+  assert.match(trigger, /Lead changes must be made by an identified staff member/)
+  assert.match(trigger, /lead_id, actor_profile_id, event_type, state_snapshot[\s\S]*v_actor_id,/)
+})
+
+test('the lead RPC is service-role only and applies the app RLS owner/manager rule', () => {
+  assert.match(leadCode, /revoke all on function public\.update_business_development_lead_as_actor\(uuid, uuid, jsonb, boolean\) from public, anon, authenticated;/)
+  assert.match(leadCode, /grant execute on function public\.update_business_development_lead_as_actor\(uuid, uuid, jsonb, boolean\) to service_role;/)
+  assert.doesNotMatch(leadCode, /update_business_development_lead_as_actor\([^)]*\) to [^;]*authenticated/)
+  assert.match(leadCode, /v_lead\.owner_profile_id is distinct from v_actor\.id\s+and \(p_owner_only or v_actor\.role not in \('admin', 'manager'\)\)/)
+  assert.match(leadCode, /for update;/)
+  assert.match(leadCode, /perform set_config\('app\.lead_actor_profile_id', v_actor\.id::text, true\)/)
+  assert.match(leadCode, /perform set_config\('app\.lead_actor_profile_id', coalesce\(v_previous_actor, ''\), true\)/)
+})
+
+test('the lead RPC changes exactly the columns the app may update', () => {
+  const grant = WORKSPACES.match(/grant update \(([^)]*)\)\s+on public\.business_development_leads to authenticated;/)
+  assert.ok(grant, 'app update column grant found')
+  const appColumns = grant[1].split(',').map((column) => column.trim()).sort()
+  const allowlist = leadCode.match(/c_updatable constant text\[\] := array\[([^\]]*)\]/)
+  assert.ok(allowlist, 'RPC allowlist found')
+  const rpcColumns = allowlist[1].split(',').map((column) => column.trim().replace(/'/g, '')).sort()
+  assert.deepEqual(rpcColumns, appColumns)
+  for (const column of appColumns) {
+    assert.match(leadCode, new RegExp(`\\b${column} = case when p_changes \\? '${column}' then`), `${column} is applied`)
+  }
+  assert.doesNotMatch(leadCode, /owner_profile_id = case/)
+})
+
+test('the MCP updates leads only through the lead RPC, owner-only for email activity', () => {
+  assert.doesNotMatch(MCP, /\.from\('business_development_leads'\)\s*\.(update|upsert|insert)\(/)
+  const calls = [...MCP.matchAll(/rpc\('update_business_development_lead_as_actor', \{([\s\S]*?)\n\s*\}\)/g)].map((match) => match[1])
+  assert.equal(calls.length, 2)
+  for (const call of calls) assert.match(call, /p_actor_profile_id: staff\.profileId,/)
+  assert.equal(calls.filter((call) => /p_owner_only: true/.test(call)).length, 1)
 })
