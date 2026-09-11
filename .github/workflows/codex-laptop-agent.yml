@@ -18,7 +18,7 @@ jobs:
       github.event.issue.number == 347 &&
       github.actor == 'CGProductionHouse' &&
       (github.event.comment.body == '/codex test' || startsWith(github.event.comment.body, '/codex issue='))
-    runs-on: [self-hosted, Windows, X64, cg-codex-laptop]
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 90
 
     steps:
