@@ -398,3 +398,225 @@ test('Outlook pagination accumulation preserves records across resume', () => {
   const ids = accumulated.map(r => r.sourceEventId)
   assert.equal(new Set(ids).size, 2500)
 })
+
+// ============================================================================
+// Planner Multi-Page Detail Enrichment Regression Tests
+// ============================================================================
+
+test('simulated Planner multi-page pagination: detail IDs from page 1 and final page both survive and accumulate', () => {
+  // Simulate a 3-page Planner plan (e.g., 2025 CLIENTS SCHEDULE)
+  // Page 1: tasks 0-999, some need details (percentComplete < 100)
+  // Page 2: tasks 1000-1999, some need details
+  // Page 3: tasks 2000-2999, some need details
+  // Total: 3000 tasks across 3 pages
+  
+  const makeTask = (index, percentComplete) => ({
+    sourceType: 'planner_task',
+    sourceTaskId: `task-${index}`,
+    title: `Task ${index}`,
+    percentComplete,
+    assigneeMicrosoftIds: [],
+    _needsDetail: percentComplete !== 100, // Client Schedule plans always need details, or incomplete tasks
+  })
+
+  // Page 1: 1000 tasks, tasks 0, 100, 500 need details
+  const page1 = Array.from({ length: 1000 }, (_, i) => 
+    makeTask(i, i === 0 || i === 100 || i === 500 ? 50 : 100)
+  )
+  // Page 2: 1000 tasks, tasks 1000, 1500 need details  
+  const page2 = Array.from({ length: 1000 }, (_, i) => 
+    makeTask(1000 + i, i === 0 || i === 500 ? 50 : 100)
+  )
+  // Page 3: 1000 tasks, tasks 2000, 2500, 2999 need details
+  const page3 = Array.from({ length: 1000 }, (_, i) => 
+    makeTask(2000 + i, i === 0 || i === 500 || i === 999 ? 50 : 100)
+  )
+
+  // Simulate 3 sequential job_process calls (persisted resume)
+  let accumulated = []
+  let allDetailIds = []
+
+  // Call 1: Fetch page 1
+  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
+  const detailIds1 = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
+  allDetailIds.push(...detailIds1)
+  assert.equal(accumulated.length, 1000)
+  assert.equal(detailIds1.length, 3) // tasks 0, 100, 500
+  assert.deepEqual(detailIds1.sort(), ['task-0', 'task-100', 'task-500'])
+
+  // Call 2: Fetch page 2 (resume with accumulated records from page 1)
+  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
+  const detailIds2 = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
+  // Should now include page 1 + page 2 detail IDs
+  assert.equal(accumulated.length, 2000)
+  assert.equal(detailIds2.length, 5) // tasks 0, 100, 500, 1000, 1500
+  assert.ok(detailIds2.includes('task-0'))
+  assert.ok(detailIds2.includes('task-100'))
+  assert.ok(detailIds2.includes('task-500'))
+  assert.ok(detailIds2.includes('task-1000'))
+  assert.ok(detailIds2.includes('task-1500'))
+
+  // Call 3: Fetch page 3 (final page, resume with accumulated records from pages 1-2)
+  accumulated = jm.dedupeRecords(accumulated, page3, 'sourceTaskId')
+  const detailIds3 = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
+  // Should now include page 1 + page 2 + page 3 detail IDs
+  assert.equal(accumulated.length, 3000)
+  assert.equal(detailIds3.length, 8) // tasks 0, 100, 500, 1000, 1500, 2000, 2500, 2999
+  assert.ok(detailIds3.includes('task-0'))      // page 1
+  assert.ok(detailIds3.includes('task-100'))    // page 1
+  assert.ok(detailIds3.includes('task-500'))    // page 1
+  assert.ok(detailIds3.includes('task-1000'))   // page 2
+  assert.ok(detailIds3.includes('task-1500'))   // page 2
+  assert.ok(detailIds3.includes('task-2000'))   // page 3
+  assert.ok(detailIds3.includes('task-2500'))   // page 3
+  assert.ok(detailIds3.includes('task-2999'))   // page 3 (final task)
+
+  // Verify all 3000 records present exactly once
+  const allIds = accumulated.map(r => r.sourceTaskId)
+  assert.equal(new Set(allIds).size, 3000)
+
+  // Verify _needsDetail is preserved in accumulated records during pagination
+  const needsDetailRecords = accumulated.filter(r => r._needsDetail === true)
+  assert.equal(needsDetailRecords.length, 8)
+})
+
+test('simulated Planner pagination complete: _needsDetail stripped only after final page, detail IDs passed to fetching_details', () => {
+  // This test simulates the fetchPlannerTasksUnit behavior:
+  // - During pagination (nextCursor exists): records keep _needsDetail
+  // - When pagination complete (nextCursor null): _needsDetail stripped, detailIds returned
+  
+  const makeTask = (index, percentComplete) => ({
+    sourceType: 'planner_task',
+    sourceTaskId: `task-${index}`,
+    title: `Task ${index}`,
+    percentComplete,
+    assigneeMicrosoftIds: [],
+    _needsDetail: percentComplete !== 100,
+  })
+
+  const page1 = Array.from({ length: 1000 }, (_, i) => makeTask(i, i === 100 ? 50 : 100))
+  const page2 = Array.from({ length: 1000 }, (_, i) => makeTask(1000 + i, i === 500 ? 50 : 100))
+
+  // Simulate pagination NOT complete (has nextCursor)
+  let accumulated = []
+  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
+  // During pagination, _needsDetail should be preserved in records
+  const duringPagination = accumulated.map(r => ({ ...r }))
+  const hasNeedsDetailDuring = duringPagination.some(r => r._needsDetail === true)
+  assert.equal(hasNeedsDetailDuring, true, '_needsDetail preserved during pagination')
+
+  // Simulate pagination complete (no nextCursor) - strip _needsDetail
+  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
+  const detailIds = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
+  const recordsForSnapshot = accumulated.map(({ _needsDetail, ...record }) => { void _needsDetail; return record; })
+  
+  // detailIds should include from both pages
+  assert.equal(detailIds.length, 2)
+  assert.ok(detailIds.includes('task-100'))
+  assert.ok(detailIds.includes('task-1500'))
+  
+  // Records for snapshot should NOT have _needsDetail
+  const hasNeedsDetailAfter = recordsForSnapshot.some(r => '_needsDetail' in r)
+  assert.equal(hasNeedsDetailAfter, false, '_needsDetail stripped after pagination complete')
+  
+  // But all original records preserved
+  assert.equal(recordsForSnapshot.length, 2000)
+})
+
+test('Planner detail enrichment drains all pending detail IDs before source marked complete', () => {
+  // Simulate the detail fetching phase: pending_detail_ids are processed in batches
+  // until empty, then source moves to complete
+  
+  const pendingDetailIds = [
+    'task-0', 'task-100', 'task-500',      // from page 1
+    'task-1000', 'task-1500',              // from page 2  
+    'task-2000', 'task-2500', 'task-2999'  // from page 3
+  ]
+  
+  let pending = [...pendingDetailIds]
+  const batches = []
+  const DETAIL_BATCH_SIZE = 300
+  
+  while (pending.length > 0) {
+    const batch = pending.slice(0, DETAIL_BATCH_SIZE)
+    batches.push(batch)
+    pending = pending.slice(DETAIL_BATCH_SIZE)
+  }
+  
+  // Should take 1 batch for 8 items (well under 300)
+  assert.equal(batches.length, 1)
+  assert.equal(batches[0].length, 8)
+  assert.deepEqual(batches[0].sort(), pendingDetailIds.sort())
+  
+  // After processing, pending should be empty
+  assert.equal(pending.length, 0)
+  
+  // Simulate the job_progress check: source should not be complete until pending_detail_ids is empty
+  const sourceDuringDetails = row({
+    stage: 'fetching_details',
+    pending_detail_ids: pendingDetailIds,
+    complete: false,
+    required: true
+  })
+  const sourceAfterDetails = row({
+    stage: 'complete',
+    pending_detail_ids: [],
+    complete: true,
+    required: true
+  })
+  
+  // requiredSourcesComplete should return false while in fetching_details
+  const rowsDuring = [sourceDuringDetails]
+  const rowsAfter = [sourceAfterDetails]
+  
+  assert.equal(jm.requiredSourcesComplete(rowsDuring), false)
+  assert.equal(jm.requiredSourcesComplete(rowsAfter), true)
+  
+  // jobProgress should show detailsRemaining > 0 during fetching_details
+  assert.equal(jm.jobProgress(rowsDuring).detailsRemaining, 8)
+  assert.equal(jm.jobProgress(rowsAfter).detailsRemaining, 0)
+})
+
+test('Planner multi-page idempotent resume: re-fetching page 2 after crash preserves page 1 detail IDs', () => {
+  // Simulate: pages 1 and 2 fetched successfully, crash before page 3
+  // On retry: page 2 might be re-fetched (overlap), page 3 fetched fresh
+  // Page 1 detail IDs must survive the overlap
+  
+  const makeTask = (index, percentComplete) => ({
+    sourceType: 'planner_task',
+    sourceTaskId: `task-${index}`,
+    title: `Task ${index}`,
+    percentComplete,
+    assigneeMicrosoftIds: [],
+    _needsDetail: percentComplete !== 100,
+  })
+
+  const page1 = Array.from({ length: 1000 }, (_, i) => makeTask(i, i === 100 ? 50 : 100))
+  const page2 = Array.from({ length: 1000 }, (_, i) => makeTask(1000 + i, i === 500 ? 50 : 100))
+  const page3 = Array.from({ length: 1000 }, (_, i) => makeTask(2000 + i, i === 999 ? 50 : 100))
+
+  let accumulated = []
+  
+  // First run: pages 1 and 2 succeed
+  accumulated = jm.dedupeRecords(accumulated, page1, 'sourceTaskId')
+  assert.equal(accumulated.filter(r => r._needsDetail).length, 1) // task-100
+  
+  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId')
+  assert.equal(accumulated.filter(r => r._needsDetail).length, 2) // task-100, task-1500
+  
+  // Simulated crash here - DB has pages 1-2 with _needsDetail preserved
+  
+  // Retry: page 2 re-fetched (overlap), then page 3
+  accumulated = jm.dedupeRecords(accumulated, page2, 'sourceTaskId') // overlap - idempotent
+  assert.equal(accumulated.length, 2000, 'page 2 overlap idempotent')
+  assert.equal(accumulated.filter(r => r._needsDetail).length, 2, 'page 1 detail IDs survive overlap')
+  
+  accumulated = jm.dedupeRecords(accumulated, page3, 'sourceTaskId')
+  assert.equal(accumulated.length, 3000)
+  assert.equal(accumulated.filter(r => r._needsDetail).length, 3) // task-100, task-1500, task-2999
+  
+  const detailIds = accumulated.filter(r => r._needsDetail).map(r => r.sourceTaskId)
+  assert.ok(detailIds.includes('task-100'), 'page 1 detail ID survives')
+  assert.ok(detailIds.includes('task-1500'), 'page 2 detail ID survives')
+  assert.ok(detailIds.includes('task-2999'), 'page 3 detail ID added')
+})

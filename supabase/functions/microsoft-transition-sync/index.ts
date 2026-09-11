@@ -108,19 +108,20 @@ function safeMessage(status: number): string {
 async function graphPages(path: string, token: string, prefer?: string, cursor?: string, batchSize = PAGINATION_BATCH_SIZE): Promise<GraphPageResult> {
   const values: Array<Record<string, unknown>> = []
   let next: string | null = cursor ?? (path.startsWith('https://') ? path : `${GRAPH_ROOT}${path}`)
-  while (next && values.length < batchSize) {
+  while (next) {
     const response = await fetchGraph(next, token, prefer)
     if (!response) return { values, complete: false, safeError: 'Microsoft connector request failed after bounded retries.', nextCursor: next }
     if (!response.ok) return { values, complete: false, safeError: safeMessage(response.status), nextCursor: next }
     const body = await response.json() as { value?: Array<Record<string, unknown>>; '@odata.nextLink'?: string }
     const pageValues = body.value ?? []
     values.push(...pageValues)
-    next = body['@odata.nextLink'] ?? null
-    if (next && values.length >= batchSize) {
-      return { values, complete: false, safeError: null, nextCursor: next }
+    const nextLink = body['@odata.nextLink'] ?? null
+    if (nextLink && values.length >= batchSize) {
+      return { values, complete: false, safeError: null, nextCursor: nextLink }
     }
+    next = nextLink
   }
-  return { values, complete: next === null, safeError: null, nextCursor: next }
+  return { values, complete: true, safeError: null, nextCursor: null }
 }
 
 function dateOnly(value: unknown): string | null {
@@ -217,11 +218,15 @@ async function fetchPlannerTasksUnit(token: string, source: JobSourceRow) {
   })
   const existingRecords = (source.records ?? []) as Array<Record<string, unknown>>
   const records = dedupeRecords(existingRecords, newRecords, 'sourceTaskId')
-  const detailIds = records.filter(r => r._needsDetail).map(r => r.sourceTaskId).filter(Boolean)
-  const complete = taskResult.complete && bucketResult.complete && taskResult.safeError === null && bucketResult.safeError === null
+  const paginationComplete = taskResult.nextCursor === null
+  const allDetailIds = records.filter(r => r._needsDetail).map(r => r.sourceTaskId).filter(Boolean)
+  const complete = paginationComplete && bucketResult.complete && taskResult.safeError === null && bucketResult.safeError === null
+  const recordsToPersist = paginationComplete
+    ? records.map(({ _needsDetail, ...record }) => { void _needsDetail; return record; })
+    : records
   return {
-    records: records.map(({ _needsDetail, ...record }) => { void _needsDetail; return record; }),
-    detailIds,
+    records: recordsToPersist,
+    detailIds: allDetailIds,
     complete,
     safeError: taskResult.safeError ?? bucketResult.safeError,
     nextCursor: taskResult.nextCursor,
