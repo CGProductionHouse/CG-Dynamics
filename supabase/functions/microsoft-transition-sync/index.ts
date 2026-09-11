@@ -113,9 +113,7 @@ async function graphPages(path: string, token: string, prefer?: string, cursor?:
     if (!response.ok) return { values, complete: false, safeError: safeMessage(response.status), nextCursor: next }
     const body = await response.json() as { value?: Array<Record<string, unknown>>; '@odata.nextLink'?: string }
     const pageValues = body.value ?? []
-    const remainingCapacity = batchSize - values.length
-    if (pageValues.length > remainingCapacity) {
-      values.push(...pageValues.slice(0, remainingCapacity))
+    if (values.length + pageValues.length > batchSize) {
       return { values, complete: false, safeError: null, nextCursor: next }
     }
     values.push(...pageValues)
@@ -154,7 +152,6 @@ function publicSources(manifest: SourceManifest) {
   ]
 }
 
-// Resolve Planner assignee display names for a batch of Microsoft user ids.
 async function resolveAssignees(microsoftIds: string[], token: string): Promise<Record<string, { displayName: string; mail: string | null; userPrincipalName: string | null }>> {
   const assigneeMap: Record<string, { displayName: string; mail: string | null; userPrincipalName: string | null }> = {}
   const idList = [...new Set(microsoftIds)]
@@ -174,11 +171,16 @@ async function resolveAssignees(microsoftIds: string[], token: string): Promise<
   return assigneeMap
 }
 
-// ── Per-source bounded fetch units ───────────────────────────────────────────
+function dedupeRecords(existing: Array<Record<string, unknown>>, incoming: Array<Record<string, unknown>>, idKey: string): Array<Record<string, unknown>> {
+  const seen = new Set(existing.map(r => String(r[idKey] ?? '')))
+  const appended = incoming.filter(r => !seen.has(String(r[idKey] ?? '')))
+  return [...existing, ...appended]
+}
+
 async function fetchOutlookUnit(token: string, manifest: SourceManifest, source: JobSourceRow) {
   const path = `/users/${encodeURIComponent(manifest.userId)}/calendars/${encodeURIComponent(source.source_id)}/calendarView?startDateTime=${encodeURIComponent(source.range_start ?? '')}&endDateTime=${encodeURIComponent(source.range_end ?? '')}&$select=id,subject,bodyPreview,start,end,isAllDay,isCancelled,sensitivity,location,attendees,lastModifiedDateTime`
   const result = await graphPages(path, token, 'IdType="ImmutableId", outlook.timezone="South Africa Standard Time"', source.pagination_cursor ?? undefined)
-  const records = result.values.map(event => {
+  const newRecords = result.values.map(event => {
     const privateEvent = Boolean(event.sensitivity && event.sensitivity !== 'normal')
     return {
       sourceType: 'outlook_event', sourceCalendarId: source.source_id, sourceEventId: String(event.id ?? ''),
@@ -191,7 +193,10 @@ async function fetchOutlookUnit(token: string, manifest: SourceManifest, source:
       private: privateEvent,
     }
   })
-  return { records, complete: result.complete, safeError: result.safeError, nextCursor: result.nextCursor }
+  const existingRecords = (source.records ?? []) as Array<Record<string, unknown>>
+  const records = dedupeRecords(existingRecords, newRecords, 'sourceEventId')
+  const complete = result.complete && result.safeError === null
+  return { records, complete, safeError: result.safeError, nextCursor: result.nextCursor }
 }
 
 async function fetchPlannerTasksUnit(token: string, source: JobSourceRow) {
@@ -200,7 +205,7 @@ async function fetchPlannerTasksUnit(token: string, source: JobSourceRow) {
     graphPages(`/planner/plans/${encodeURIComponent(source.source_id)}/buckets`, token),
   ])
   const buckets = new Map(bucketResult.values.map(bucket => [String(bucket.id ?? ''), String(bucket.name ?? '')]))
-  const records = taskResult.values.map(task => {
+  const newRecords = taskResult.values.map(task => {
     const taskId = String(task.id ?? '')
     const bucketId = String(task.bucketId ?? '')
     return {
@@ -215,14 +220,14 @@ async function fetchPlannerTasksUnit(token: string, source: JobSourceRow) {
       _needsDetail: shouldFetchPlannerTaskDetails(source.source_name, task.percentComplete),
     }
   })
+  const existingRecords = (source.records ?? []) as Array<Record<string, unknown>>
+  const records = dedupeRecords(existingRecords, newRecords, 'sourceTaskId')
   const detailIds = records.filter(r => r._needsDetail).map(r => r.sourceTaskId).filter(Boolean)
+  const complete = taskResult.complete && bucketResult.complete && taskResult.safeError === null && bucketResult.safeError === null
   return {
-    records: records.map(({ _needsDetail, ...record }) => {
-      void _needsDetail
-      return record
-    }),
+    records: records.map(({ _needsDetail, ...record }) => { void _needsDetail; return record; }),
     detailIds,
-    complete: taskResult.complete && bucketResult.complete,
+    complete,
     safeError: taskResult.safeError ?? bucketResult.safeError,
     nextCursor: taskResult.nextCursor,
   }
@@ -253,8 +258,6 @@ Deno.serve(async request => {
     const raw = Deno.env.get('MICROSOFT_SYNC_SOURCES_JSON')
     if (raw) manifest = JSON.parse(raw) as SourceManifest
   } catch { manifest = null }
-  // Merge admin-managed plan sources so a plan (e.g. "2025 CLIENTS SCHEDULE") is
-  // fetched without editing the secret. Dedup by id; env wins. Read-only to MS.
   if (manifest && Array.isArray(manifest.plans)) {
     try {
       const { data: registryPlans } = await sb.from('microsoft_sync_plan_sources').select('plan_id, plan_name').eq('active', true)
@@ -302,15 +305,14 @@ Deno.serve(async request => {
     safe_error: (r.safe_error as string) ?? null, pending_detail_ids: Array.isArray(r.pending_detail_ids) ? (r.pending_detail_ids as string[]) : [],
     range_start: (r.range_start as string) ?? null, range_end: (r.range_end as string) ?? null,
     pagination_cursor: (r.pagination_cursor as string | null) ?? null,
+    records: Array.isArray(r.records) ? (r.records as Array<Record<string, unknown>>) : [],
   }))
 
-  // ── job_start ───────────────────────────────────────────────────────────────
   if (action === 'job_start') {
     if (!body.rangeStart || !body.rangeEnd || Number.isNaN(Date.parse(body.rangeStart)) || Number.isNaN(Date.parse(body.rangeEnd)) || Date.parse(body.rangeEnd) <= Date.parse(body.rangeStart)) {
       return jsonResponse({ ok: false, error: 'A valid bounded calendar range is required.' }, 400)
     }
     if (Date.parse(body.rangeEnd) - Date.parse(body.rangeStart) > 370 * 24 * 60 * 60 * 1000) return jsonResponse({ ok: false, error: 'Outlook range cannot exceed 370 days.' }, 400)
-    // Supersede any earlier running job for this admin so status is unambiguous.
     await sb.from('microsoft_sync_jobs').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('created_by', user.id).eq('status', 'running')
     const { data: job, error: jobError } = await sb.from('microsoft_sync_jobs').insert({ status: 'running', range_start: body.rangeStart, range_end: body.rangeEnd, created_by: user.id }).select('id').single()
     if (jobError || !job) return jsonResponse({ ok: false, error: 'Could not start the preview job.' }, 500)
@@ -321,7 +323,6 @@ Deno.serve(async request => {
     return jsonResponse({ ok: true, jobId: job.id, status: 'running', sources: statusList(rows ?? []), progress: jobProgress(asJobRows(rows ?? [])) })
   }
 
-  // ── job_latest (resume) ──────────────────────────────────────────────────────
   if (action === 'job_latest') {
     const { data: job } = await sb.from('microsoft_sync_jobs').select('id, status, range_start, range_end, created_at').eq('created_by', user.id).in('status', ['running', 'complete']).order('created_at', { ascending: false }).limit(1).maybeSingle()
     if (!job) return jsonResponse({ ok: true, job: null })
@@ -332,19 +333,15 @@ Deno.serve(async request => {
   const jobId = typeof body.jobId === 'string' ? body.jobId : ''
   if (!jobId) return jsonResponse({ ok: false, error: 'jobId is required.' }, 400)
   let jobQuery = sb.from('microsoft_sync_jobs').select('id, status, assignee_map, range_start, range_end, exported_at').eq('id', jobId)
-  // Any admin may restore an admin-visible completed preview for reconciliation
-  // recovery. Mutating fetch/retry/process actions remain creator-scoped.
   if (action !== 'job_result') jobQuery = jobQuery.eq('created_by', user.id)
   const { data: job } = await jobQuery.maybeSingle()
   if (!job) return jsonResponse({ ok: false, error: 'Preview job not found.' }, 404)
 
-  // ── job_status ───────────────────────────────────────────────────────────────
   if (action === 'job_status') {
     const { data: rows } = await sb.from('microsoft_sync_job_sources').select(SOURCE_FIELDS).eq('job_id', jobId)
     return jsonResponse({ ok: true, jobId, status: job.status, sources: statusList(rows ?? []), progress: jobProgress(asJobRows(rows ?? [])) })
   }
 
-  // ── job_retry (failed sources only) ──────────────────────────────────────────
   if (action === 'job_retry') {
     await sb.from('microsoft_sync_job_sources').update({ stage: 'queued', safe_error: null, records: [], pending_detail_ids: [], record_count: 0, complete: false, pagination_cursor: null, updated_at: new Date().toISOString() }).eq('job_id', jobId).eq('stage', 'failed')
     await sb.from('microsoft_sync_jobs').update({ status: 'running', updated_at: new Date().toISOString() }).eq('id', jobId)
@@ -352,7 +349,6 @@ Deno.serve(async request => {
     return jsonResponse({ ok: true, jobId, status: 'running', sources: statusList(rows ?? []), progress: jobProgress(asJobRows(rows ?? [])) })
   }
 
-  // ── job_result (assemble once every required source completes) ───────────────
   if (action === 'job_result') {
     const { data: rows } = await sb.from('microsoft_sync_job_sources').select('position, source_type, source_id, source_name, required, stage, record_count, complete, safe_error, records, range_start, range_end, pagination_cursor').eq('job_id', jobId)
     const jobRows = (rows ?? []).map(r => ({ ...asJobRows([r])[0], records: Array.isArray(r.records) ? (r.records as Array<Record<string, unknown>>) : [] }))
@@ -365,10 +361,6 @@ Deno.serve(async request => {
     return jsonResponse({ ok: true, jobId, snapshot })
   }
 
-  // ── job_process (one bounded unit) ───────────────────────────────────────────
-  // Claim the next source and do exactly ONE bounded unit of work, then return.
-  // The admin page polls this until the job is finished — every invocation stays
-  // well under the Edge time budget even for a 4,000-task plan.
   const { data: rows } = await sb.from('microsoft_sync_job_sources').select(SOURCE_FIELDS).eq('job_id', jobId)
   const jobRows = asJobRows(rows ?? [])
   const rowIndex = new Map((rows ?? []).map(r => [`${r.source_type}:${r.source_id}`, r]))
@@ -389,7 +381,6 @@ Deno.serve(async request => {
       await sb.from('microsoft_sync_job_sources').update({ stage: 'fetching_tasks', attempts: (Number(dbRow.attempts) || 0) + 1, updated_at: now() }).eq('id', dbId)
       const result = await fetchOutlookUnit(graphToken, manifest, pick)
       if (result.nextCursor) {
-        // Pagination not complete - store cursor and continue fetching
         await sb.from('microsoft_sync_job_sources').update({
           stage: 'fetching_tasks',
           safe_error: result.safeError,
@@ -399,10 +390,9 @@ Deno.serve(async request => {
           updated_at: now(),
         }).eq('id', dbId)
       } else {
-        // Pagination complete
         await sb.from('microsoft_sync_job_sources').update({
           stage: 'complete',
-          complete: true,
+          complete: result.complete,
           safe_error: result.safeError,
           records: result.records,
           record_count: result.records.length,
@@ -410,11 +400,10 @@ Deno.serve(async request => {
           updated_at: now(),
         }).eq('id', dbId)
       }
-    } else if (pick.stage === 'queued') {
+    } else if (pick.stage === 'queued' || pick.stage === 'fetching_tasks') {
       await sb.from('microsoft_sync_job_sources').update({ stage: 'fetching_tasks', attempts: (Number(dbRow.attempts) || 0) + 1, updated_at: now() }).eq('id', dbId)
       const result = await fetchPlannerTasksUnit(graphToken, pick)
       if (result.nextCursor) {
-        // Pagination not complete - store cursor and continue fetching
         await sb.from('microsoft_sync_job_sources').update({
           stage: 'fetching_tasks',
           safe_error: result.safeError,
@@ -431,7 +420,6 @@ Deno.serve(async request => {
         await sb.from('microsoft_sync_job_sources').update({ stage: 'fetching_details', safe_error: result.safeError, records: result.records, record_count: result.records.length, pending_detail_ids: result.detailIds, pagination_cursor: null, updated_at: now() }).eq('id', dbId)
       }
     } else {
-      // fetching_details: one bounded batch of descriptions
       const { data: full } = await sb.from('microsoft_sync_job_sources').select('records, pending_detail_ids, safe_error').eq('id', dbId).single()
       const records = Array.isArray(full?.records) ? full!.records as Array<Record<string, unknown>> : []
       const pending = Array.isArray(full?.pending_detail_ids) ? full!.pending_detail_ids as string[] : []
