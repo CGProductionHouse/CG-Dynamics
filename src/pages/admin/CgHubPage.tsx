@@ -148,8 +148,10 @@ export default function CgHubPage() {
         events: rawEvents,
       })
       setMyDayContext(myDay)
-      myDayShare.publish(profile?.id ?? null, myDay)
       setLoadingData(false)
+      // Same tick as the two updates above (React batches them); kept after
+      // setLoadingData so the core-work-first render order stays explicit.
+      myDayShare.publish(profile?.id ?? null, myDay)
       // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block
       // the Hub — but surface their errors instead of dropping them silently.
       const [runsRes, videosRes] = await Promise.all([listRuns(), listPipelineVideos()])
