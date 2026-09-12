@@ -1,3 +1,6 @@
+import {
+  isGoogleAdsTrendComparable,
+} from '../../lib/googleAdsDashboard'
 import type {
   GoogleAdsDashboardData,
   GoogleAdsNativeSettings,
@@ -48,15 +51,15 @@ function formatTrend(current: number, previous: number, suffix = ''): string {
 
 function googleAdsBudgetLabel(
   campaign: Pick<GoogleAdsReportCampaign, 'nativeSettings' | 'currencyCode'>,
-): string {
+): string | null {
   const settings = campaign.nativeSettings
-  if (!settings || !campaign.currencyCode || settings.budgetStatus === 'REMOVED') return 'Unavailable'
+  if (!settings || !campaign.currencyCode || settings.budgetStatus === 'REMOVED') return null
   const value = settings.budgetPeriod === 'DAILY'
     ? settings.budgetAmountMicros
     : settings.budgetPeriod === 'CUSTOM_PERIOD'
       ? settings.budgetTotalAmountMicros
       : null
-  if (value === null) return 'Unavailable'
+  if (value === null) return null
   const cadence = settings.budgetPeriod === 'DAILY' ? 'average daily' : 'campaign total'
   const sharing = settings.budgetShared === true
     ? ` · shared${settings.budgetReferenceCount && settings.budgetReferenceCount > 1 ? ` by ${settings.budgetReferenceCount} campaigns` : ''}`
@@ -88,6 +91,18 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
 function CampaignResult({ campaign }: { campaign: GoogleAdsReportCampaign }) {
   const settings = campaign.nativeSettings
   const reasons = settings?.primaryStatusReasons ?? []
+  const budgetLabel = googleAdsBudgetLabel(campaign)
+  const metrics = [
+    { label: 'Spend', value: formatMoney(campaign.spendMicros, campaign.currencyCode) },
+    { label: 'Impressions', value: formatNumber(campaign.impressions) },
+    { label: 'Clicks', value: formatNumber(campaign.clicks) },
+    { label: 'CTR', value: formatPercent(campaign.ctr) },
+    { label: 'Avg CPC', value: formatMoney(campaign.averageCpcMicros, campaign.currencyCode) },
+    { label: 'Conversions', value: formatNumber(campaign.conversions) },
+    { label: 'Conversion rate', value: formatPercent(campaign.conversionRate) },
+    { label: 'Cost / conversion', value: formatMoney(campaign.costPerConversionMicros, campaign.currencyCode) },
+  ].filter(metric => metric.value !== 'Unavailable')
+
   return (
     <article className="rounded-2xl border border-white/[0.08] bg-[#071311] p-5 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -98,21 +113,15 @@ function CampaignResult({ campaign }: { campaign: GoogleAdsReportCampaign }) {
             {settings?.primaryStatus ? ` · Serving ${providerLabel(settings.primaryStatus)}` : ''}
           </p>
         </div>
-        <span className="w-fit rounded-full border border-report-accent/20 bg-report-accent/[0.07] px-3 py-1 text-xs font-semibold text-report-accent">
-          {googleAdsBudgetLabel(campaign)}
-        </span>
+        {budgetLabel && (
+          <span className="w-fit rounded-full border border-report-accent/20 bg-report-accent/[0.07] px-3 py-1 text-xs font-semibold text-report-accent">
+            {budgetLabel}
+          </span>
+        )}
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-y border-white/[0.07] py-5 sm:grid-cols-4">
-        <CampaignMetric label="Spend" value={formatMoney(campaign.spendMicros, campaign.currencyCode)} />
-        <CampaignMetric label="Impressions" value={formatNumber(campaign.impressions)} />
-        <CampaignMetric label="Clicks" value={formatNumber(campaign.clicks)} />
-        <CampaignMetric label="CTR" value={formatPercent(campaign.ctr)} />
-        <CampaignMetric label="Avg CPC" value={formatMoney(campaign.averageCpcMicros, campaign.currencyCode)} />
-        <CampaignMetric label="Conversions" value={formatNumber(campaign.conversions)} />
-        <CampaignMetric label="Conversion rate" value={formatPercent(campaign.conversionRate)} />
-        <CampaignMetric label="Cost / conversion" value={formatMoney(campaign.costPerConversionMicros, campaign.currencyCode)} />
-        <CampaignMetric label="Configured value" value={formatNumber(campaign.conversionValue)} />
+        {metrics.map(metric => <CampaignMetric key={metric.label} {...metric} />)}
       </div>
 
       <div className="mt-4 space-y-1 text-xs leading-5 text-report-faint">
@@ -159,10 +168,43 @@ export function GoogleAdsResults({
     { label: 'Conversions', value: formatNumber(dashboard.conversions), note: 'Google Ads Conversions column.' },
     { label: 'Conversion rate', value: formatPercent(dashboard.conversionRate), note: 'Conversions divided by provider-reported ad interactions.' },
     { label: 'Cost / conversion', value: formatMoney(dashboard.costPerConversionMicros, dashboard.currencyCode) },
-    { label: 'Configured conversion value', value: formatNumber(dashboard.conversionValue), note: 'Unitless until conversion-action value configuration is verified.' },
-  ]
+  ].filter(metric => metric.value !== 'Unavailable')
   const visibleMetrics = compact ? metrics.slice(0, 4) : metrics
-  const projectionLabel = dashboard.daysRemaining === 0 ? 'Final period spend' : 'Projected month-end spend'
+
+  const hasTarget = dashboard.monthlyTargetMicros !== null && dashboard.targetCurrencyCode !== null
+  const daysKnown = dashboard.daysRemaining !== null
+  const showProjection = daysKnown && dashboard.daysRemaining !== 0 && dashboard.projectedMonthEndSpendMicros !== null
+  const trendComparable = !compact && isGoogleAdsTrendComparable(dashboard.sevenDayTrend)
+
+  const contextCards: { label: string; value: string; note?: string }[] = []
+  if (hasTarget) {
+    contextCards.push({
+      label: 'Client-approved monthly target',
+      value: formatMoney(dashboard.monthlyTargetMicros, dashboard.targetCurrencyCode),
+      note: 'CG planning target; separate from every Google provider budget.',
+    })
+    if (dashboard.spendToTargetPercent !== null) {
+      contextCards.push({ label: 'Spend to target', value: formatPercent(dashboard.spendToTargetPercent) })
+    }
+  }
+  if (showProjection) {
+    contextCards.push({
+      label: 'Days remaining',
+      value: formatNumber(dashboard.daysRemaining),
+      note: `Data through ${dashboard.dataThroughDate ?? 'unavailable'}.`,
+    })
+    contextCards.push({
+      label: 'Projected month-end spend',
+      value: formatMoney(dashboard.projectedMonthEndSpendMicros, dashboard.currencyCode),
+      note: 'Calendar-day run rate through the latest synced date; not a guarantee.',
+    })
+  }
+
+  const setupNotes: string[] = []
+  if (!hasTarget) setupNotes.push('No client-approved monthly target is set for this period.')
+  if (daysKnown && dashboard.daysRemaining === 0) {
+    setupNotes.push(`Completed period. Data through ${dashboard.dataThroughDate ?? 'unavailable'}.`)
+  }
 
   return (
     <section className={compact ? 'space-y-5' : 'my-8 space-y-7'} aria-label="Google Ads results">
@@ -185,36 +227,30 @@ export function GoogleAdsResults({
       </div>
 
       {!compact && (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard
-            label="Client-approved monthly target"
-            value={formatMoney(dashboard.monthlyTargetMicros, dashboard.targetCurrencyCode)}
-            note="CG planning target; separate from every Google provider budget."
-          />
-          <MetricCard label="Spend to target" value={formatPercent(dashboard.spendToTargetPercent)} />
-          <MetricCard
-            label="Days remaining"
-            value={dashboard.daysRemaining === null ? 'Unavailable' : formatNumber(dashboard.daysRemaining)}
-            note={`Data through ${dashboard.dataThroughDate ?? 'unavailable'}.`}
-          />
-          <MetricCard
-            label={projectionLabel}
-            value={formatMoney(dashboard.projectedMonthEndSpendMicros, dashboard.currencyCode)}
-            note={dashboard.daysRemaining === 0 ? 'Actual completed-period spend.' : 'Calendar-day run rate through the latest synced date; not a guarantee.'}
-          />
-        </div>
-      )}
+        <div className="space-y-4">
+          {contextCards.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {contextCards.map(card => <MetricCard key={card.label} {...card} />)}
+            </div>
+          )}
 
-      <p className="text-xs leading-5 text-report-faint">
-        No automatic month-on-month judgement is shown. Comparisons require explicit equivalent periods and meaningful campaign states.
-      </p>
+          {setupNotes.length > 0 && (
+            <div className="space-y-1">
+              {setupNotes.map(note => (
+                <p key={note} className="text-xs leading-5 text-report-faint">{note}</p>
+              ))}
+            </div>
+          )}
 
-      {!compact && (
-        <>
+          <p className="text-xs leading-5 text-report-faint">
+            No automatic month-on-month judgement is shown. Comparisons require explicit equivalent periods and meaningful campaign states.
+          </p>
+
           <div className="rounded-xl border border-report-accent/15 bg-report-accent/[0.045] px-4 py-3 text-xs leading-5 text-report-muted">
-            Conversions and configured conversion value follow Google Ads conversion-action settings. Value is not shown as revenue or account currency until that configuration is verified.
+            Conversions follow the Google Ads conversion-action settings configured for this account. Conversion value is not shown as revenue or account currency until that configuration is verified.
           </div>
-          {dashboard.sevenDayTrend && (
+
+          {trendComparable && dashboard.sevenDayTrend && (
             <section className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5 sm:p-6" aria-label="Equal-window seven-day trends">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
@@ -238,7 +274,7 @@ export function GoogleAdsResults({
               <CampaignResult key={`${campaign.campaignId}-${index}`} campaign={campaign} />
             ))}
           </div>
-        </>
+        </div>
       )}
     </section>
   )

@@ -275,6 +275,23 @@ function parseSevenDayTrend(row: UnknownRecord): GoogleAdsSevenDayTrend | null {
   return current && previous ? { current, previous } : null
 }
 
+/**
+ * An equal-window trend is only comparable when both windows have real activity.
+ * A window with zero spend/clicks would produce an Unavailable or misleading
+ * percentage, so the whole trend section is suppressed instead.
+ */
+export function isGoogleAdsTrendComparable(trend: GoogleAdsSevenDayTrend | null): boolean {
+  if (!trend) return false
+  const { current, previous } = trend
+  return Boolean(
+    current.startDate && current.endDate && previous.startDate && previous.endDate
+    && previous.spendMicros > 0
+    && current.spendMicros > 0
+    && previous.clicks > 0
+    && current.clicks > 0,
+  )
+}
+
 type ParsedCampaign = GoogleAdsReportCampaign
 
 function parseCampaign(value: unknown): ParsedCampaign | null {

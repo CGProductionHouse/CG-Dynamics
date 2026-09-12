@@ -26,6 +26,7 @@ let server
 let loadGoogleAdsDashboard
 let googleAdsCampaignPeriodLabel
 let parseGoogleAdsDashboardData
+let isGoogleAdsTrendComparable
 let formatGoogleAdsCampaignBudget
 let formatGoogleAdsCustomerId
 let supabase
@@ -33,7 +34,7 @@ let originalRpc
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel, parseGoogleAdsDashboardData } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
+  ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel, parseGoogleAdsDashboardData, isGoogleAdsTrendComparable } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
   ;({ formatGoogleAdsCampaignBudget, formatGoogleAdsCustomerId } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
   ;({ supabase } = await server.ssrLoadModule('/src/lib/supabase.ts'))
   originalRpc = supabase.rpc
@@ -355,12 +356,28 @@ test('budget is shown separately from spend and uses provider-native settings', 
   assert.doesNotMatch(budget, /572\.32/)
 })
 
-test('conversion value is rendered as a unitless configured value, not account currency', () => {
+test('conversion value is hidden from client-facing reporting until verified', () => {
   const resultsSource = readSource('../src/components/client/GoogleAdsResults.tsx')
-  assert.match(resultsSource, /Configured conversion value/)
-  assert.match(resultsSource, /Unitless until conversion-action value configuration is verified/)
-  assert.doesNotMatch(resultsSource, /formatMoney\([^)]*conversionValue/)
-  assert.doesNotMatch(resultsSource, /style: 'currency'[^}]*conversionValue/)
+  assert.doesNotMatch(resultsSource, /Configured conversion value/)
+  assert.doesNotMatch(resultsSource, /formatNumber\([^)]*conversionValue/)
+  assert.doesNotMatch(resultsSource, /Unitless until conversion-action value configuration is verified/)
+  assert.match(resultsSource, /Conversion value is not shown as revenue or account currency until that configuration is verified/)
+})
+
+test('incomparable equal-window trends are suppressed, not rendered as Unavailable', () => {
+  const comparable = {
+    current: { startDate: '2026-09-08', endDate: '2026-09-14', spendMicros: 100_000_000, impressions: 100, clicks: 20, conversions: 5 },
+    previous: { startDate: '2026-09-01', endDate: '2026-09-07', spendMicros: 80_000_000, impressions: 90, clicks: 10, conversions: 4 },
+  }
+  assert.equal(isGoogleAdsTrendComparable(comparable), true)
+  assert.equal(
+    isGoogleAdsTrendComparable({
+      ...comparable,
+      previous: { ...comparable.previous, spendMicros: 0, clicks: 0 },
+    }),
+    false,
+  )
+  assert.equal(isGoogleAdsTrendComparable(null), false)
 })
 
 test('Campaigns page loads Google Ads for the exact published report month', () => {
