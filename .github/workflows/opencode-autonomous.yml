@@ -57,7 +57,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: opencode-go/deepseek-v4-pro
+          model: opencode-go/glm-5.3
           prompt: |
             Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
 
