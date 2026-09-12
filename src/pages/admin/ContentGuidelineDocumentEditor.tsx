@@ -4,20 +4,23 @@ import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import {
   addGuidelineVideo,
+  developGuidelineVideos,
   guidelineScheduleCandidates,
+  ideaToVideoInput,
   importGuidelineVideosFromSchedule,
+  planGuidelineVideoIdeas,
   reorderGuidelineVideos,
   runGuideAction,
   setGuidelinePublication,
-  suggestContentVideos,
-  suggestionToVideoInput,
   updateContentGuideline,
   updateGuidelineVideo,
   type ContentGuideline,
   type ContentGuidelineVideo,
   type ContentRun,
-  type ContentVideoSuggestion,
+  type GuidelineVideoDevelopment,
+  type GuidelineVideoIdea,
 } from '../../lib/contentWorkflow'
+import { guidelineVideoName, guidelineVideoNumber } from '../../lib/contentGuidelineNaming'
 import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../lib/planner'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { humanizeStatus, INPUT_CLS, LABEL_CLS } from './contentGuidelineHelpers'
@@ -93,12 +96,17 @@ export default function ContentGuidelineDocumentEditor({
   const [error, setError] = useState<string | null>(null)
   const [scheduleError, setScheduleError] = useState<string | null>(null)
   const [importMessage, setImportMessage] = useState<string | null>(null)
-  // AI suggestions
-  const [suggestions, setSuggestions] = useState<Array<ContentVideoSuggestion & { _localId: string }>>([])
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
-  const [suggestionsError, setSuggestionsError] = useState<string | null>(null)
-  const [suggestionsContext, setSuggestionsContext] = useState<string | null>(null)
-  const [showSuggestions, setShowSuggestions] = useState(false)
+  // AI Content Director — step 1 plans ideas, step 2 develops the saved videos.
+  const [ideas, setIdeas] = useState<Array<GuidelineVideoIdea & { _localId: string }>>([])
+  const [ideasLoading, setIdeasLoading] = useState(false)
+  const [ideasError, setIdeasError] = useState<string | null>(null)
+  const [ideasContext, setIdeasContext] = useState<string | null>(null)
+  const [researchNote, setResearchNote] = useState<string | null>(null)
+  const [plannedOnce, setPlannedOnce] = useState(false)
+  const [developments, setDevelopments] = useState<GuidelineVideoDevelopment[]>([])
+  const [developLoading, setDevelopLoading] = useState(false)
+  const [developError, setDevelopError] = useState<string | null>(null)
+  const [developContext, setDevelopContext] = useState<string | null>(null)
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -307,7 +315,7 @@ export default function ContentGuidelineDocumentEditor({
         setError('Save your video changes before publishing the guideline.')
         return
       }
-      const incomplete = videos.filter(v => !v.script?.trim())
+      const incomplete = videos.filter(v => !v.script?.trim() || /^script pending/i.test(v.script.trim()))
       if (incomplete.length > 0) {
         setError(`Cannot publish: ${incomplete.length} video${incomplete.length === 1 ? '' : 's'} ${incomplete.length === 1 ? 'is' : 'are'} missing a complete script.`)
         return
@@ -335,47 +343,112 @@ export default function ContentGuidelineDocumentEditor({
     await onChanged()
   }
 
-  // AI suggestions
-  async function loadSuggestions() {
+  // ── Step 1: plan ordered, client-specific ideas (drafts — nothing is written) ──
+  async function planIdeas() {
     if (!guideline.client_id || !coverageStart || !coverageEnd) {
-      setSuggestionsError('Set the coverage window first.')
+      setIdeasError('Set the coverage window first.')
       return
     }
-    setSuggestionsLoading(true)
-    setSuggestionsError(null)
-    setSuggestions([])
-    const result = await suggestContentVideos(
-      guideline.client_id,
-      `${coverageStart}-01`,
-      `${coverageEnd}-01`,
-      { guidelineId: guideline.id },
+    setIdeasLoading(true)
+    setIdeasError(null)
+    setIdeas([])
+    const result = await planGuidelineVideoIdeas(guideline, { start: `${coverageStart}-01`, end: `${coverageEnd}-01` })
+    setIdeasLoading(false)
+    setPlannedOnce(true)
+    if (result.error) { setIdeasError(result.error); return }
+    setIdeas(result.data.ideas.map((idea, index) => ({ ...idea, _localId: `idea-${index}` })))
+    setIdeasContext(
+      `${result.data.context.clientName} · ${result.data.context.coverageMonths.join(', ')} · ${result.data.context.totalDeliverableSlots} Client Schedule slot${result.data.context.totalDeliverableSlots === 1 ? '' : 's'}`,
     )
-    setSuggestionsLoading(false)
-    if (result.error) { setSuggestionsError(result.error); return }
-    const withIds = result.data.suggestions.map((s, i) => ({ ...s, _localId: `suggest-${i}` }))
-    setSuggestions(withIds)
-    setSuggestionsContext(
-      `${result.data.context.clientName} · ${result.data.context.coverageMonths.length} month${result.data.context.coverageMonths.length === 1 ? '' : 's'} · ${result.data.context.totalDeliverableSlots} available deliverable${result.data.context.totalDeliverableSlots === 1 ? '' : 's'}`,
-    )
-    setShowSuggestions(true)
+    setResearchNote(result.data.sources.liveExternalResearch[0] ?? null)
   }
 
-  async function acceptSuggestion(suggestion: ContentVideoSuggestion & { _localId: string }) {
-    setBusy(`accept-${suggestion._localId}`)
+  async function acceptIdea(idea: GuidelineVideoIdea & { _localId: string }, position: number) {
+    setBusy(`idea-${idea._localId}`)
     setError(null)
-    const input = suggestionToVideoInput(suggestion, videos.length + 1, currentUserId ?? null)
-    const result = await addGuidelineVideo(guideline, {
-      ...input,
-      script: input.script || 'Script pending — draft from AI suggestion.',
-    })
+    const result = await addGuidelineVideo(guideline, ideaToVideoInput(idea, position, currentUserId ?? null))
     setBusy(null)
     if (result.error) { setError(result.error); return }
-    setSuggestions(current => current.filter(s => s._localId !== suggestion._localId))
+    setIdeas(current => current.filter(item => item._localId !== idea._localId))
     await onChanged()
   }
 
-  function rejectSuggestion(localId: string) {
-    setSuggestions(current => current.filter(s => s._localId !== localId))
+  async function acceptAllIdeas() {
+    setBusy('accept-all')
+    setError(null)
+    let position = videos.length
+    for (const idea of ideas) {
+      position += 1
+      const result = await addGuidelineVideo(guideline, ideaToVideoInput(idea, position, currentUserId ?? null))
+      if (result.error) { setBusy(null); setError(result.error); await onChanged(); return }
+    }
+    setIdeas([])
+    setBusy(null)
+    await onChanged()
+  }
+
+  function skipIdea(localId: string) {
+    setIdeas(current => current.filter(item => item._localId !== localId))
+  }
+
+  // ── Step 2: develop the SAVED videos — saved order and staff edits are authoritative ──
+  async function developSavedVideos() {
+    if (videos.length === 0) {
+      setDevelopError('Accept or add at least one video first.')
+      return
+    }
+    if (!coverageStart || !coverageEnd) {
+      setDevelopError('Set the coverage window first.')
+      return
+    }
+    setDevelopLoading(true)
+    setDevelopError(null)
+    setDevelopments([])
+    const result = await developGuidelineVideos(guideline, { start: `${coverageStart}-01`, end: `${coverageEnd}-01` })
+    setDevelopLoading(false)
+    if (result.error) { setDevelopError(result.error); return }
+    setDevelopments(result.data.developments)
+    setDevelopContext(`${result.data.context.developedCount} of ${result.data.context.requestedCount} video${result.data.context.requestedCount === 1 ? '' : 's'} drafted — review before saving.`)
+  }
+
+  const DEVELOP_FIELDS = [
+    ['script', 'script', 'Complete script'],
+    ['shotBreakdown', 'shot_breakdown', 'Shot-by-shot breakdown'],
+    ['requirements', 'requirements', 'People, products & props'],
+    ['visualNotes', 'visual_notes', 'Visual / filming notes'],
+    ['cta', 'cta', 'Call to action'],
+  ] as const
+
+  function developmentConflicts(video: ContentGuidelineVideo, development: GuidelineVideoDevelopment) {
+    return DEVELOP_FIELDS.filter(([draftField, videoField]) =>
+      Boolean(development[draftField]?.trim()) && Boolean((video[videoField] as string | null)?.trim()))
+  }
+
+  /** `fill` writes only empty fields; `replace` overwrites the staff text as well (explicit click). */
+  async function applyDevelopment(video: ContentGuidelineVideo, development: GuidelineVideoDevelopment, mode: 'fill' | 'replace') {
+    const patch: Record<string, string> = {}
+    for (const [draftField, videoField] of DEVELOP_FIELDS) {
+      const value = development[draftField]?.trim()
+      if (!value) continue
+      const existing = (video[videoField] as string | null)?.trim()
+      if (!existing || mode === 'replace') patch[videoField] = value
+    }
+    if (Object.keys(patch).length === 0) {
+      setDevelopError('Every field already has your own text. Use Replace to overwrite it.')
+      return
+    }
+    setBusy(`develop-${video.id}`)
+    setDevelopError(null)
+    const result = await updateGuidelineVideo(video.id, patch)
+    setBusy(null)
+    if (result.error) { setDevelopError(result.error); return }
+    setDevelopments(current => current.filter(item => item.videoId !== video.id))
+    setDrafts(current => {
+      const next = { ...current }
+      delete next[video.id]
+      return next
+    })
+    await onChanged()
   }
 
   const coverageChanged = coverageStart !== toMonthOption(guideline.coverage_start ?? guideline.month)
@@ -479,63 +552,135 @@ export default function ContentGuidelineDocumentEditor({
           </div>
         )}
 
-        {/* AI suggestions */}
+        {/* AI Content Director — plan ideas, then develop the saved videos */}
         <div className="rounded-xl border border-violet-300/20 bg-violet-300/[0.04] p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-black text-white">AI content suggestions</p>
-              <p className="mt-1 text-xs text-white/50">
-                AI-assisted video ideas grounded in the client profile, schedule, approved Marketing Library and SA calendar context.
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-black text-white">AI Content Director</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/50">
+                Step 1 plans ideas for this client from its approved client knowledge, the Client Schedule and the approved Marketing Library.
+                You edit and reorder them. Step 2 writes the scripts, shot plans and CTAs for the videos you kept.
               </p>
             </div>
-            <ActionButton size="sm" variant="secondary" loading={suggestionsLoading} onClick={() => void loadSuggestions()}>
-              {suggestions.length > 0 ? 'Refresh suggestions' : 'Research content ideas'}
-            </ActionButton>
+            <div className="flex shrink-0 flex-col gap-2">
+              <ActionButton size="sm" variant="secondary" loading={ideasLoading} onClick={() => void planIdeas()}>
+                {plannedOnce ? 'Plan more ideas' : 'Plan video ideas'}
+              </ActionButton>
+              <ActionButton size="sm" variant="secondary" loading={developLoading} disabled={videos.length === 0} onClick={() => void developSavedVideos()}>
+                Develop scripts &amp; shot plans
+              </ActionButton>
+            </div>
           </div>
-          {suggestionsContext && (
-            <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-violet-200/60">{suggestionsContext}</p>
+          {ideasContext && <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-violet-200/60">{ideasContext}</p>}
+          {researchNote && <p className="mt-1 text-[11px] text-white/40">{researchNote}</p>}
+          {ideasError && <p className="mt-2 text-xs text-red-300">{ideasError}</p>}
+          {developError && <p className="mt-2 text-xs text-red-300">{developError}</p>}
+          {developContext && developments.length > 0 && <p className="mt-2 text-[11px] text-teal-200/70">{developContext}</p>}
+          {plannedOnce && ideas.length === 0 && !ideasLoading && !ideasError && (
+            <p className="mt-3 text-xs text-white/40">No new ideas were returned. Adjust the coverage window, or add videos yourself below.</p>
           )}
-          {suggestionsError && <p className="mt-2 text-xs text-red-300">{suggestionsError}</p>}
-          {showSuggestions && suggestions.length === 0 && !suggestionsLoading && !suggestionsError && (
-            <p className="mt-3 text-xs text-white/40">No new suggestions available. Try adjusting the coverage window or add manual videos.</p>
+
+          {ideas.length > 0 && (
+            <>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-violet-200/70">Step 1 · proposed ideas, in order</p>
+                <ActionButton size="sm" loading={busy === 'accept-all'} onClick={() => void acceptAllIdeas()}>Accept all in order</ActionButton>
+              </div>
+              <ol className="mt-2 space-y-2">
+                {ideas.map((idea, index) => (
+                  <li key={idea._localId} className="rounded-lg border border-violet-300/15 bg-black/30 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-white">{guidelineVideoName(videos.length + index + 1, idea.title)}</p>
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
+                            {idea.targetMonth ? monthLabel(idea.targetMonth) : 'Unallocated'}
+                          </span>
+                          {idea.deliverableId && <span className="rounded-full border border-brand-teal/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-teal">Client Schedule slot</span>}
+                        </div>
+                        <p className="mt-1.5 text-xs italic text-white/45">{idea.objective}</p>
+                        {idea.hook && <p className="mt-1 text-xs text-violet-200/60">Hook: {idea.hook}</p>}
+                        {idea.angle && <p className="mt-1 text-xs text-white/55">{idea.angle}</p>}
+                        {idea.audience && <p className="mt-1 text-[11px] text-white/40">Audience: {idea.audience}</p>}
+                        {idea.needsConfirmation && (
+                          <p className="mt-1.5 rounded border border-amber-300/25 bg-amber-300/[0.07] px-2 py-1 text-[11px] text-amber-100">
+                            Confirm with client: {idea.needsConfirmation}
+                          </p>
+                        )}
+                        {idea.evidence.length > 0 && (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-white/40">Where this comes from</summary>
+                            <ul className="mt-1 space-y-1">
+                              {idea.evidence.map((item, evidenceIndex) => (
+                                <li key={evidenceIndex} className="text-[11px] text-white/45">
+                                  <span className="font-bold uppercase tracking-wider text-white/35">{humanizeStatus(item.kind)}</span>{' '}{item.note}
+                                  {item.sourceUri && (
+                                    <a className="ml-1 text-brand-teal underline" href={item.sourceUri} target="_blank" rel="noreferrer">source</a>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 flex-col gap-1">
+                        <ActionButton size="sm" loading={busy === `idea-${idea._localId}`} onClick={() => void acceptIdea(idea, videos.length + 1)}>Accept</ActionButton>
+                        <ActionButton size="sm" variant="ghost" onClick={() => skipIdea(idea._localId)}>Skip</ActionButton>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </>
           )}
-          {suggestions.length > 0 && (
-            <ul className="mt-3 space-y-2">
-              {suggestions.map(suggestion => (
-                <li key={suggestion._localId} className="rounded-lg border border-violet-300/15 bg-black/30 p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-black text-white">{suggestion.title}</p>
-                      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-200/60">
-                        {suggestion.targetMonth ? monthLabel(suggestion.targetMonth) : 'Unallocated'}
-                      </p>
-                      <p className="mt-1 text-xs text-white/55">{suggestion.reasoning}</p>
-                      <p className="mt-1 text-xs italic text-white/40">{suggestion.objective}</p>
-                      {suggestion.hook && <p className="mt-1 text-xs text-violet-200/60">Hook: {suggestion.hook}</p>}
-                      {suggestion.cta && <p className="mt-1 text-xs text-teal-200/60">CTA: {suggestion.cta}</p>}
-                      {suggestion.script && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-white/40">Script & direction</summary>
-                          <pre className="mt-1 whitespace-pre-wrap rounded bg-black/40 px-2 py-1.5 text-[11px] leading-relaxed text-white/50">
-                            {suggestion.script}
-                          </pre>
-                          {suggestion.sceneDirection && (
-                            <p className="mt-1 text-[11px] text-white/35">Direction: {suggestion.sceneDirection}</p>
-                          )}
-                          {suggestion.duplicationRisk && (
-                            <p className="mt-1 text-[11px] text-amber-300/60">Duplication: {suggestion.duplicationRisk}</p>
-                          )}
-                        </details>
+
+          {developments.length > 0 && (
+            <>
+              <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-teal-200/70">Step 2 · drafted for your saved videos</p>
+              <ul className="mt-2 space-y-2">
+                {developments.map(development => {
+                  const video = videos.find(item => item.id === development.videoId)
+                  if (!video) return null
+                  const index = videos.indexOf(video)
+                  const conflicts = developmentConflicts(video, development)
+                  return (
+                    <li key={development.videoId} className="rounded-lg border border-teal-300/15 bg-black/30 p-3">
+                      <p className="text-sm font-black text-white">{guidelineVideoName(index + 1, video.title)}</p>
+                      {conflicts.length > 0 ? (
+                        <p className="mt-1 text-[11px] text-amber-200/80">
+                          You already wrote: {conflicts.map(([, , label]) => label).join(', ')}. Those stay unless you choose Replace.
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-[11px] text-white/40">All fields are empty — applying fills them in.</p>
                       )}
-                    </div>
-                    <div className="flex shrink-0 flex-col gap-1">
-                      <ActionButton size="sm" loading={busy === `accept-${suggestion._localId}`} onClick={() => void acceptSuggestion(suggestion)}>Accept</ActionButton>
-                      <ActionButton size="sm" variant="ghost" onClick={() => rejectSuggestion(suggestion._localId)}>Skip</ActionButton>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-white/40">Read the draft</summary>
+                        <div className="mt-1 space-y-2">
+                          {DEVELOP_FIELDS.map(([draftField, , label]) => development[draftField]?.trim() ? (
+                            <div key={draftField}>
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{label}</p>
+                              <pre className="mt-0.5 whitespace-pre-wrap rounded bg-black/40 px-2 py-1.5 text-[11px] leading-relaxed text-white/55">{development[draftField]}</pre>
+                            </div>
+                          ) : null)}
+                          {development.notes && <p className="text-[11px] text-amber-200/70">Confirm: {development.notes}</p>}
+                        </div>
+                      </details>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <ActionButton size="sm" loading={busy === `develop-${video.id}`} onClick={() => void applyDevelopment(video, development, 'fill')}>
+                          {conflicts.length > 0 ? 'Fill empty fields' : 'Apply to this video'}
+                        </ActionButton>
+                        {conflicts.length > 0 && (
+                          <ActionButton size="sm" variant="secondary" loading={busy === `develop-${video.id}`} onClick={() => void applyDevelopment(video, development, 'replace')}>
+                            Replace my text
+                          </ActionButton>
+                        )}
+                        <ActionButton size="sm" variant="ghost" onClick={() => setDevelopments(current => current.filter(item => item.videoId !== development.videoId))}>Discard draft</ActionButton>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            </>
           )}
         </div>
 
@@ -565,7 +710,7 @@ export default function ContentGuidelineDocumentEditor({
               return (
                 <li key={video.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-teal">Video {index + 1}</p>
+                    <p className="min-w-0 break-words text-xs font-black uppercase tracking-[0.14em] text-brand-teal">{guidelineVideoName(index + 1, draft.title || video.title)}</p>
                     <div className="flex items-center gap-1">
                       <button type="button" title="Move video up" disabled={index === 0 || busy === 'reorder'} onClick={() => void moveVideo(index, -1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8593;</button>
                       <button type="button" title="Move video down" disabled={index === videos.length - 1 || busy === 'reorder'} onClick={() => void moveVideo(index, 1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8595;</button>
@@ -581,7 +726,7 @@ export default function ContentGuidelineDocumentEditor({
                     )}
                   </div>
                   <label className="mt-3 block space-y-1.5">
-                    <span className={LABEL_CLS}>Video name</span>
+                    <span className={LABEL_CLS}>Descriptive name (shown as {guidelineVideoNumber(index + 1)} - name)</span>
                     <input
                       className={INPUT_CLS}
                       value={draft.title}
@@ -658,7 +803,7 @@ export default function ContentGuidelineDocumentEditor({
         )}
 
         <div className="rounded-xl border border-dashed border-brand-teal/25 bg-brand-teal/[0.035] p-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-teal">Add Video {videos.length + 1}</p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-teal">Add {guidelineVideoNumber(videos.length + 1)}</p>
           <label className="mt-3 block space-y-1.5">
             <span className={LABEL_CLS}>Video name</span>
             <input className={INPUT_CLS} value={newTitle} onChange={event => setNewTitle(event.target.value)} placeholder="Video title" />
@@ -692,7 +837,7 @@ export default function ContentGuidelineDocumentEditor({
             {scheduleError && <span className="block text-[11px] text-red-300">{scheduleError}</span>}
           </label>
           <div className="mt-3 flex justify-end">
-            <ActionButton size="sm" loading={busy === 'add'} onClick={() => void addVideo()}>Add Video {videos.length + 1}</ActionButton>
+            <ActionButton size="sm" loading={busy === 'add'} onClick={() => void addVideo()}>Add {guidelineVideoNumber(videos.length + 1)}</ActionButton>
           </div>
         </div>
       </div>

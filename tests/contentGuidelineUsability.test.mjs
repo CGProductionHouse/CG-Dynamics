@@ -35,7 +35,7 @@ test('videos remain ordered children and keep their complete scripts', () => {
   assert.match(MIGRATION, /add column if not exists position integer/)
   assert.match(MIGRATION, /uniq_content_guideline_video_position/)
   assert.match(MIGRATION, /Every video needs a name and complete script before publishing/)
-  assert.match(EDITOR, /Video \{index \+ 1\}/g)
+  assert.match(EDITOR, /guidelineVideoName\(index \+ 1/)
   assert.match(EDITOR, /Complete script/)
   assert.match(EDITOR, /reorderGuidelineVideos/)
   assert.match(EDITOR, /updateGuidelineVideo/)
@@ -73,7 +73,7 @@ test('client projection returns only own published documents and ordered safe vi
   }
   assert.match(CLIENT_DATA, /client_portal_published_content_guidelines/)
   assert.match(CLIENT_PAGE, /Complete script/)
-  assert.match(CLIENT_PAGE, /Video \{index \+ 1\}/g)
+  assert.match(CLIENT_PAGE, /guidelineVideoName\(video\.position \?\? index \+ 1/)
 })
 
 test('staff workflow and calendar resolve the same run document', () => {

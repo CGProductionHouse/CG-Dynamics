@@ -46,6 +46,7 @@ import {
 } from './contentGuidelineHelpers'
 import VideoPipelineTab from './VideoPipelineTab'
 import ContentGuidelineDocumentEditor from './ContentGuidelineDocumentEditor'
+import ContentRunOneDriveCard from '../../components/content/ContentRunOneDriveCard'
 import ContentOverview from './ContentOverview'
 import FullContentGuidePage from './FullContentGuidePage'
 import { type ContentTab, resolveContentTab } from './contentTabTypes'
@@ -574,6 +575,8 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
                                 Date, name and location come from Microsoft/Outlook and are read-only here. Crew, the Content Guideline and extra shots stay editable.
                               </p>
                             )}
+
+                            <ContentRunOneDriveCard run={selectedRun} />
 
                             {/* One canonical Content Guideline document per Content Run */}
                             <div className="space-y-3">

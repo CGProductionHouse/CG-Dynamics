@@ -30,6 +30,24 @@ import {
   type AiChatMessage,
 } from '../cg-assistant-chat/ai-router.ts'
 import { fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
+import {
+  buildDevelopPrompt,
+  buildIdeasPrompt,
+  buildResearchPrompt,
+  clientGuideExcerpt,
+  DEVELOP_MAX_OUTPUT_TOKENS,
+  IDEAS_MAX_OUTPUT_TOKENS,
+  isDirectorMode,
+  MAX_DEVELOP_VIDEOS,
+  parseDevelopments,
+  parseIdeas,
+  parseResearchFindings,
+  RESEARCH_MAX_OUTPUT_TOKENS,
+  type DevelopTarget,
+  type DirectorMode,
+  type ResearchInput,
+  type ScheduleSlot,
+} from './directorModes.ts'
 
 // Canonical staff roles (matches STAFF_ROLES in src/lib/roles.ts and
 // cg-assistant-chat). The DB CHECK constraint allows 'admin','team','client';
@@ -75,6 +93,10 @@ interface SuggestRequest {
   coverageStart: string
   coverageEnd: string
   guidelineId?: string
+  /** 'suggest' (shipped single-pass), 'ideas' (plan only) or 'develop' (#224). */
+  mode?: string
+  /** 'develop' only: a subset of the guideline's saved videos. */
+  videoIds?: string[]
 }
 
 interface VideoSuggestion {
@@ -247,6 +269,7 @@ Deno.serve(async (req) => {
   }
 
   const { requestId, clientId, coverageStart, coverageEnd, guidelineId } = body
+  const mode: DirectorMode = isDirectorMode(body.mode) ? body.mode : 'suggest'
   if (!requestId || !clientId || !coverageStart || !coverageEnd) {
     return jsonResponse({ error: 'requestId, clientId, coverageStart and coverageEnd are required.' }, 400)
   }
@@ -416,6 +439,39 @@ Deno.serve(async (req) => {
     'Live web research was not performed for this session.',
     'The AI provider may draw on its training data for general marketing knowledge, but that is not labelled as research.',
   ]
+
+  // ── AI Content Director modes (#224) ────────────────────────────────────────
+  // Handled below, so the shipped single-pass flow that follows is unchanged.
+  if (mode === 'ideas' || mode === 'develop') {
+    const requestedVideoIds = Array.isArray(body.videoIds)
+      ? body.videoIds.filter(id => typeof id === 'string' && uuidRE.test(id)).slice(0, MAX_DEVELOP_VIDEOS)
+      : []
+    const directorContext: DirectorContext = {
+      sb,
+      userId: user.id,
+      requestId,
+      client: { id: client.id, name: client.name, tier: client.tier },
+      guidelineId: guidelineId ?? null,
+      coverageStart,
+      coverageEnd,
+      coverageMonths,
+      slots: (deliverableSlots ?? []).map(slot => ({
+        id: slot.id as string,
+        code: (slot.code as string | null) ?? null,
+        title: (slot.title as string | null) ?? null,
+        month: String(slot.month),
+        deliverableType: String(slot.deliverable_type),
+      })),
+      marketingKnowledge: marketingLibraryKnowledge,
+      calendar: saCalendarContext,
+      canonicalInternal,
+      existingTitles: existingVideos.map(video => video.title),
+      historicalTitles: (historicalConcepts ?? []).slice(0, 20).map(concept => concept.title as string),
+    }
+    return mode === 'ideas'
+      ? await handleIdeasMode(directorContext)
+      : await handleDevelopMode(directorContext, requestedVideoIds)
+  }
 
   // ── Build system prompt ──────────────────────────────────────────────────────
 
@@ -665,3 +721,293 @@ Deno.serve(async (req) => {
 
   return jsonResponse(response)
 })
+
+// ── AI Content Director (#224) ───────────────────────────────────────────────
+// Two reviewable steps around the staff's own editing:
+//   ideas   → ordered, client-specific ideas with no scripts; staff accept/edit/reorder them
+//   develop → scripts, shot plans, requirements, visual direction and CTAs for the SAVED videos,
+//             in their saved order, keeping the staff titles and edits
+// Both refuse to run for a client whose exact-client intelligence projection is not ready, and
+// both return drafts: nothing here writes into a guideline.
+
+interface DirectorContext {
+  sb: ReturnType<typeof createClient>
+  userId: string
+  requestId: string
+  client: { id: string; name: string; tier: string }
+  guidelineId: string | null
+  coverageStart: string
+  coverageEnd: string
+  coverageMonths: string[]
+  slots: ScheduleSlot[]
+  marketingKnowledge: string[]
+  calendar: string[]
+  canonicalInternal: string[]
+  existingTitles: string[]
+  historicalTitles: string[]
+}
+
+type ReadyGuide = { markdown: string } | { notReady: { reason: string } }
+
+async function loadReadyClientGuide(sb: ReturnType<typeof createClient>, clientId: string): Promise<ReadyGuide> {
+  const { data } = await sb
+    .from('client_guides')
+    .select('client_id, guide_markdown, runtime_readiness, readiness_reason')
+    .eq('client_id', clientId)
+    .maybeSingle()
+  const markdown = String((data?.guide_markdown as string | null) ?? '').trim()
+  if (!data || data.client_id !== clientId || data.runtime_readiness !== 'ready' || !markdown) {
+    return { notReady: { reason: (data?.readiness_reason as string | null) ?? 'No reviewed exact-client intelligence projection is ready.' } }
+  }
+  return { markdown }
+}
+
+function clientContextNotReady(clientName: string, reason: string): Response {
+  return jsonResponse({
+    error: 'CLIENT CONTEXT NOT READY',
+    code: 'CLIENT_CONTEXT_NOT_READY',
+    reason,
+    instruction: `Complete the exact-client intelligence projection for ${clientName} before planning its content. Do not borrow another client.`,
+  }, 409)
+}
+
+function directorSources(context: DirectorContext, research: { findings: string[]; sources: Array<{ title: string; uri: string }>; note: string }) {
+  return {
+    canonicalInternal: context.canonicalInternal,
+    marketingLibraryKnowledge: context.marketingKnowledge,
+    saCalendarContext: context.calendar,
+    liveExternalResearch: [research.note, ...research.findings],
+    researchSources: research.sources,
+  }
+}
+
+function directorProviderError(error: unknown): { body: Record<string, unknown>; status: number } {
+  const message = error instanceof Error ? error.message : 'Unknown AI provider error.'
+  if (message === 'AI_DUPLICATE_REQUEST') {
+    return { body: { error: 'This request was already submitted. No duplicate provider request was sent.' }, status: 425 }
+  }
+  if (message === 'AI_HARD_BUDGET') {
+    return { body: { error: 'The monthly AI budget has been reached. No provider request was sent.' }, status: 429 }
+  }
+  if (message === 'NO_AI_PROVIDER_KEYS') {
+    return { body: { error: 'No AI provider key is configured.' }, status: 503 }
+  }
+  return { body: { error: 'AI provider is currently unavailable.' }, status: 503 }
+}
+
+/**
+ * Fresh external research, when a web-grounded provider is configured. Findings are INPUT for the
+ * planner, never truth: each one keeps its source, and ideas may only cite a listed source.
+ */
+async function runClientResearch(
+  context: DirectorContext,
+  guideExcerpt: string,
+): Promise<{ findings: string[]; sources: Array<{ title: string; uri: string }>; note: string }> {
+  const prompt = buildResearchPrompt({
+    clientName: context.client.name,
+    guideExcerpt,
+    coverageMonths: context.coverageMonths,
+  })
+  try {
+    const routed = await routeAiChat(
+      [{ role: 'system', content: prompt.system }, { role: 'user', content: prompt.user }],
+      {
+        usageClient: context.sb as unknown as AiUsageClient,
+        feature: 'content_video_research',
+        action: 'research',
+        actorId: context.userId,
+        idempotencyKey: `${context.requestId}:research`,
+        fingerprint: await sha256(JSON.stringify({
+          actorId: context.userId,
+          clientId: context.client.id,
+          coverageStart: context.coverageStart,
+          coverageEnd: context.coverageEnd,
+          kind: 'research',
+        })),
+        complexity: 'simple',
+        maxOutputTokens: RESEARCH_MAX_OUTPUT_TOKENS,
+        webSearch: true,
+      },
+    )
+    const findings = parseResearchFindings(routed.content)
+    const sources = routed.groundingSources ?? []
+    if (findings.length === 0 || sources.length === 0) {
+      return { findings: [], sources: [], note: 'Live external research: NOT PERFORMED — the web-grounded provider returned nothing citable.' }
+    }
+    return {
+      findings,
+      sources,
+      note: `Live external research: performed this session via ${routed.provider} with ${sources.length} cited source${sources.length === 1 ? '' : 's'}.`,
+    }
+  } catch {
+    return { findings: [], sources: [], note: 'Live external research: NOT PERFORMED — no web-grounded AI provider is configured.' }
+  }
+}
+
+async function handleIdeasMode(context: DirectorContext): Promise<Response> {
+  const guide = await loadReadyClientGuide(context.sb, context.client.id)
+  if ('notReady' in guide) return clientContextNotReady(context.client.name, guide.notReady.reason)
+  const guideExcerpt = clientGuideExcerpt(guide.markdown)
+  const research = await runClientResearch(context, guideExcerpt)
+  const researchInput: ResearchInput | null = research.findings.length > 0
+    ? { findings: research.findings, sources: research.sources }
+    : null
+  const prompt = buildIdeasPrompt({
+    clientName: context.client.name,
+    guideExcerpt,
+    coverageMonths: context.coverageMonths,
+    slots: context.slots,
+    existingTitles: context.existingTitles,
+    historicalTitles: context.historicalTitles,
+    marketingKnowledge: context.marketingKnowledge,
+    calendar: context.calendar,
+    research: researchInput,
+  })
+  const allowed = {
+    deliverableIds: new Set(context.slots.map(slot => slot.id)),
+    months: new Set(context.coverageMonths),
+    researchUris: new Set(research.sources.map(source => source.uri)),
+  }
+  const sources = directorSources(context, research)
+  const baseContext = {
+    clientName: context.client.name,
+    coverageMonths: context.coverageMonths,
+    totalDeliverableSlots: context.slots.length,
+    existingVideoCount: context.existingTitles.length,
+  }
+  let routed: Awaited<ReturnType<typeof routeAiChat>>
+  try {
+    routed = await routeAiChat(
+      [{ role: 'system', content: prompt.system }, { role: 'user', content: prompt.user }],
+      {
+        usageClient: context.sb as unknown as AiUsageClient,
+        feature: 'content_video_ideas',
+        action: 'generate',
+        actorId: context.userId,
+        idempotencyKey: context.requestId,
+        fingerprint: await sha256(JSON.stringify({
+          actorId: context.userId,
+          clientId: context.client.id,
+          coverageStart: context.coverageStart,
+          coverageEnd: context.coverageEnd,
+          guidelineId: context.guidelineId,
+          kind: 'ideas',
+        })),
+        complexity: 'complex',
+        maxOutputTokens: IDEAS_MAX_OUTPUT_TOKENS,
+        validateContent: content => parseIdeas(content, allowed).length > 0,
+      },
+    )
+  } catch (error) {
+    const mapped = directorProviderError(error)
+    return jsonResponse({ mode: 'ideas', ideas: [], context: baseContext, sources, ...mapped.body }, mapped.status)
+  }
+  const ideas = parseIdeas(routed.content, allowed)
+  if (ideas.length === 0) {
+    return jsonResponse({
+      mode: 'ideas',
+      ideas: [],
+      error: 'The AI provider returned an incomplete response. Please try again.',
+      context: baseContext,
+      sources,
+    }, 502)
+  }
+  console.info(
+    `[content-director] mode=ideas user=${context.userId} client=${context.client.id} ` +
+    `months=${context.coverageMonths.length} slots=${context.slots.length} ideas=${ideas.length} ` +
+    `research=${research.sources.length} provider=${routed.provider}`,
+  )
+  return jsonResponse({ mode: 'ideas', ideas, context: baseContext, sources })
+}
+
+async function handleDevelopMode(context: DirectorContext, requestedVideoIds: string[]): Promise<Response> {
+  if (!context.guidelineId) return jsonResponse({ error: 'guidelineId is required to develop saved videos.' }, 400)
+  const guide = await loadReadyClientGuide(context.sb, context.client.id)
+  if ('notReady' in guide) return clientContextNotReady(context.client.name, guide.notReady.reason)
+
+  // The guideline's SAVED rows are the authority: staff order and staff edits win.
+  const { data: savedVideos } = await context.sb
+    .from('content_guide_ideas')
+    .select('id, position, title, objective, hook, notes, month, deliverable_id')
+    .eq('content_guideline_id', context.guidelineId)
+    .neq('status', 'archived')
+    .order('position', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  const slotLabels = new Map(context.slots.map(slot => [slot.id, `${slot.code ?? slot.deliverableType}${slot.title ? ` — ${slot.title}` : ''} (${slot.month.slice(0, 7)})`]))
+  const wanted = new Set(requestedVideoIds)
+  const targets: DevelopTarget[] = (savedVideos ?? [])
+    .filter(video => wanted.size === 0 || wanted.has(video.id as string))
+    .slice(0, MAX_DEVELOP_VIDEOS)
+    .map((video, index) => ({
+      id: video.id as string,
+      position: (video.position as number | null) ?? index + 1,
+      title: String(video.title ?? ''),
+      objective: (video.objective as string | null) ?? null,
+      hook: (video.hook as string | null) ?? null,
+      notes: (video.notes as string | null) ?? null,
+      targetMonth: video.month ? String(video.month).slice(0, 7) : null,
+      deliverableLabel: video.deliverable_id ? (slotLabels.get(video.deliverable_id as string) ?? 'linked to Client Schedule') : null,
+    }))
+
+  if (targets.length === 0) {
+    return jsonResponse({ error: 'There are no saved videos to develop yet. Accept ideas into the guideline first.' }, 409)
+  }
+
+  const guideExcerpt = clientGuideExcerpt(guide.markdown)
+  const research = { findings: [], sources: [], note: 'Live external research: NOT PERFORMED for this step — development follows the saved plan.' }
+  const sources = directorSources(context, research)
+  const baseContext = { clientName: context.client.name, developedCount: 0, requestedCount: targets.length }
+  const prompt = buildDevelopPrompt({
+    clientName: context.client.name,
+    guideExcerpt,
+    targets,
+    marketingKnowledge: context.marketingKnowledge,
+  })
+  let routed: Awaited<ReturnType<typeof routeAiChat>>
+  try {
+    routed = await routeAiChat(
+      [{ role: 'system', content: prompt.system }, { role: 'user', content: prompt.user }],
+      {
+        usageClient: context.sb as unknown as AiUsageClient,
+        feature: 'content_video_development',
+        action: 'generate',
+        actorId: context.userId,
+        idempotencyKey: context.requestId,
+        fingerprint: await sha256(JSON.stringify({
+          actorId: context.userId,
+          clientId: context.client.id,
+          guidelineId: context.guidelineId,
+          videoIds: targets.map(target => target.id),
+          kind: 'develop',
+        })),
+        complexity: 'complex',
+        maxOutputTokens: DEVELOP_MAX_OUTPUT_TOKENS,
+        validateContent: content => parseDevelopments(content, targets).length > 0,
+      },
+    )
+  } catch (error) {
+    const mapped = directorProviderError(error)
+    return jsonResponse({ mode: 'develop', developments: [], context: baseContext, sources, ...mapped.body }, mapped.status)
+  }
+  const developments = parseDevelopments(routed.content, targets)
+  if (developments.length === 0) {
+    return jsonResponse({
+      mode: 'develop',
+      developments: [],
+      error: 'The AI provider returned an incomplete response. Please try again.',
+      context: baseContext,
+      sources,
+    }, 502)
+  }
+  console.info(
+    `[content-director] mode=develop user=${context.userId} client=${context.client.id} ` +
+    `requested=${targets.length} developed=${developments.length} provider=${routed.provider}`,
+  )
+  return jsonResponse({
+    mode: 'develop',
+    developments,
+    context: { ...baseContext, developedCount: developments.length },
+    sources,
+  })
+}

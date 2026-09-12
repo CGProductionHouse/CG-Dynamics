@@ -4,6 +4,7 @@ import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { getClient, type Client } from '../../lib/db/clients'
+import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 
 export default function ClientContentGuidesPage({ preview = false }: { preview?: boolean }) {
@@ -103,8 +104,7 @@ export default function ClientContentGuidesPage({ preview = false }: { preview?:
               <ol className="divide-y divide-white/[0.08]">
                 {guideline.videos.map((video, index) => (
                   <li key={`${guideline.row_key}-${video.position}`} className="p-5 sm:p-7">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-report-accent">Video {index + 1}</p>
-                    <h3 className="mt-2 text-xl font-semibold text-white">{video.title}</h3>
+                    <h3 className="text-xl font-semibold text-white">{guidelineVideoName(video.position ?? index + 1, video.title)}</h3>
                     <div className="mt-5 rounded-lg border border-white/[0.08] bg-black/15 p-4 sm:p-5">
                       <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-report-faint">Complete script</p>
                       <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-report-text">{video.script}</p>

@@ -4,6 +4,7 @@ import { Pill } from '../../components/ui/Badges'
 import type { ClientOption } from '../../lib/commandCentre'
 import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../lib/planner'
 import type { ContentGuideIdea, ContentGuideInput, StaffProfileOption } from '../../lib/contentWorkflow'
+import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import {
   VIDEO_STATUS_LABELS,
   buildCanonicalName,
@@ -324,7 +325,7 @@ export function GuidelineBrief({
             {onEdit && <ActionButton size="sm" variant="secondary" onClick={onEdit}>Edit guideline</ActionButton>}
           </div>
         </div>
-        <h2 className="mt-3 break-words text-xl font-black text-white">{idea.title}</h2>
+        <h2 className="mt-3 break-words text-xl font-black text-white">{guidelineVideoName(idea.position ?? idea.video_number ?? 0, idea.title)}</h2>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Pill>{clientName(clients, idea.client_id)}</Pill>
           {idea.month && <Pill>{idea.month.slice(0, 7)}</Pill>}
@@ -392,7 +393,7 @@ export function GuidelineCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="break-all font-mono text-[11px] text-white/50">{idea.canonical_name ?? '(no canonical name)'}</p>
-          <p className="mt-0.5 break-words text-sm font-black text-white">{idea.title}</p>
+          <p className="mt-0.5 break-words text-sm font-black text-white">{guidelineVideoName(idea.position ?? idea.video_number ?? 0, idea.title)}</p>
           <p className="mt-1 text-xs text-white/45">{clientName(clients, idea.client_id)}{deliverableLabel ? ` · ${deliverableLabel}` : ''}</p>
         </div>
         <button type="button" onClick={() => setExpanded(prev => !prev)} className="shrink-0 rounded-lg border border-white/10 px-2 py-1 text-[11px] font-bold text-white/60 hover:text-white" aria-expanded={expanded}>
@@ -478,7 +479,7 @@ export function ShootMode({
                 <p className="break-all font-mono text-xs text-white/60">{idea.canonical_name ?? '—'}</p>
                 {idea.canonical_name && <CopyFolderButton name={idea.canonical_name} />}
               </div>
-              <h2 className="mt-2 break-words text-2xl font-black text-white">{idea.title}</h2>
+              <h2 className="mt-2 break-words text-2xl font-black text-white">{guidelineVideoName(idea.position ?? idea.video_number ?? 0, idea.title)}</h2>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <Pill>{clientName(clients, idea.client_id)}</Pill>
                 <Pill tone={videoStatusTone(idea.production_status)}>{VIDEO_STATUS_LABELS[idea.production_status]}</Pill>
