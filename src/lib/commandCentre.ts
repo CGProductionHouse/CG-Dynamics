@@ -49,6 +49,12 @@ export interface CommandCentreTask {
   microsoft_task_id?: string | null
   /** Non-null means Microsoft confirmed the source task was removed. */
   microsoft_source_removed_at?: string | null
+  /** Non-null means this native task was archived and must not appear in active work. */
+  archived_at?: string | null
+  /** Name of the admin who archived the task. */
+  archived_by_name?: string | null
+  /** Reason for archiving. */
+  archive_reason?: string | null
   bucket: TaskBucket
   priority: TaskPriority
   status: TaskStatus
@@ -314,7 +320,9 @@ export async function listTasks(options: ListTaskOptions = {}) {
     .order('created_at', { ascending: false })
 
   if (options.activeOnly) {
-    nativeQuery = nativeQuery.not('status', 'in', '(done,completed)')
+    nativeQuery = nativeQuery
+      .not('status', 'in', '(done,completed)')
+      .is('archived_at', null)
   }
 
   const [nativeResult, plannerResult, assignmentResult] = await Promise.all([
@@ -359,11 +367,13 @@ export async function listTasks(options: ListTaskOptions = {}) {
     }
   }
 
-  const nativeTasks = ((nativeResult.data ?? []) as CommandCentreTask[]).map(task => ({
-    ...task,
-    native_id: task.id,
-    data_origin: 'command_centre' as const,
-  }))
+  const nativeTasks = ((nativeResult.data ?? []) as CommandCentreTask[])
+    .filter(task => !task.archived_at)
+    .map(task => ({
+      ...task,
+      native_id: task.id,
+      data_origin: 'command_centre' as const,
+    }))
   const importedTasks = plannerRows.map(row => plannerTaskToCommandTask(
     row,
     row.bucket_id ? bucketNames.get(row.bucket_id) : undefined,
@@ -407,6 +417,22 @@ export async function archiveImportedPlannerTask(id: string, actorName: string |
       archive_reason: reason,
     })
     .eq('id', stripPlannerTaskId(id))
+    .select()
+    .single()
+}
+
+export async function archiveNativeTask(id: string, actorName: string | null, reason = 'Removed from active work') {
+  if (isPlannerTaskId(id)) {
+    return { data: null, error: { message: 'Only native command centre tasks can be archived here.' } }
+  }
+  return supabase
+    .from(TABLE)
+    .update({
+      archived_at: new Date().toISOString(),
+      archived_by_name: actorName,
+      archive_reason: reason,
+    })
+    .eq('id', id)
     .select()
     .single()
 }
