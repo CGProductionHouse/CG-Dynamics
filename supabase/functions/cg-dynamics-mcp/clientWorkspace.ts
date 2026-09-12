@@ -40,10 +40,15 @@ export const LIST_ITEM_MAX = 500
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+const IDEMPOTENCY_KEY_MAX = 240
 
 const text = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value.trim() : null)
 const isUuid = (value: unknown): value is string => typeof value === 'string' && UUID_RE.test(value.trim())
 const sameId = (a: unknown, b: unknown) => isUuid(a) && isUuid(b) && a.trim().toLowerCase() === b.trim().toLowerCase()
+
+export function isIdempotencyKey(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && value.trim().length <= IDEMPOTENCY_KEY_MAX
+}
 
 // ── Assignment directory ─────────────────────────────────────────────────────
 
@@ -307,7 +312,9 @@ export function buildClientTaskWrite(
   if (!isUuid(scope.clientId) || !isUuid(scope.actorProfileId) || !isUuid(scope.connectionUserId)) {
     return { ok: false, error: 'Client-Project writes need a resolved exact client and connection principal.' }
   }
-  if (!isUuid(input.idempotency_key)) return { ok: false, error: 'idempotency_key must be a uuid. Reuse the same key when retrying so nothing is created twice.' }
+  if (!isIdempotencyKey(input.idempotency_key)) {
+    return { ok: false, error: `idempotency_key must be a non-empty string at most ${IDEMPOTENCY_KEY_MAX} characters. Reuse the same key when retrying so nothing is created twice.` }
+  }
   const title = boundedText(input.title, 'title', TITLE_MAX, true)
   if (!title.ok) return title
   const notes = boundedText(input.notes, 'notes', NOTES_MAX, false)
@@ -358,7 +365,9 @@ export function buildClientUpdateWrite(scope: ClientWorkspaceScope, input: Recor
   if (!isUuid(scope.clientId) || !isUuid(scope.actorProfileId) || !isUuid(scope.connectionUserId)) {
     return { ok: false, error: 'Client-Project writes need a resolved exact client and connection principal.' }
   }
-  if (!isUuid(input.idempotency_key)) return { ok: false, error: 'idempotency_key must be a uuid. Reuse the same key when retrying so nothing is recorded twice.' }
+  if (!isIdempotencyKey(input.idempotency_key)) {
+    return { ok: false, error: `idempotency_key must be a non-empty string at most ${IDEMPOTENCY_KEY_MAX} characters. Reuse the same key when retrying so nothing is recorded twice.` }
+  }
   const kind = input.update_kind
   if (typeof kind !== 'string' || !(CLIENT_UPDATE_KINDS as readonly string[]).includes(kind)) {
     return { ok: false, error: `update_kind must be one of: ${CLIENT_UPDATE_KINDS.join(', ')}.` }
