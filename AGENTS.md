@@ -8,15 +8,16 @@ Before planning or editing code, read:
 
 1. `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` — cross-project AI tools, agent allocation, new-chat grounding, OpenCode state and reusable website workflow.
 2. `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md` — canonical wake/supervise workflow, GitHub-as-control-plane rules, agent lanes, model fallback and CA-removal-from-dispatch strategy.
-3. `CONTINUE-HERE.md`
-4. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
-5. `docs/cg-dynamics-page-vision-and-milestones.md`
-6. `docs/current-product-game-plan.md`
-7. `docs/vision/CURRENT-MILESTONE.md`
-8. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when changing detailed provider/model configuration
-9. the latest relevant open PRs/issues on GitHub
+3. `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md` — mandatory short-prompt contract for any coding-agent prompt CA manually copies/runs.
+4. `CONTINUE-HERE.md`
+5. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
+6. `docs/cg-dynamics-page-vision-and-milestones.md`
+7. `docs/current-product-game-plan.md`
+8. `docs/vision/CURRENT-MILESTONE.md`
+9. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when changing detailed provider/model configuration
+10. the latest relevant open PRs/issues on GitHub
 
-The master AI/tools file is cross-project authority for shared capability/process. The autonomous orchestration file is the current authority for how coding workers are woken, supervised, handed off and prevented from duplicating one another. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
+The master AI/tools file is cross-project authority for shared capability/process. The autonomous orchestration file is the current authority for how coding workers are woken, supervised, handed off and prevented from duplicating one another. The CA coding-prompt contract is mandatory whenever ChatGPT or another coordinator prepares a prompt CA will manually send to a coding agent. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
 
 ## Product direction
 
@@ -77,7 +78,7 @@ Do NOT:
 
 ## Agent allocation
 
-CA's preferred workflow is defined cross-project in `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`; autonomous dispatch/supervision is defined in `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md`.
+CA's preferred workflow is defined cross-project in `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`; autonomous dispatch/supervision is defined in `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md`; prompts CA manually sends must follow `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md`.
 
 In short:
 
@@ -90,6 +91,7 @@ In short:
 - Do not launch overlapping broad missions.
 - Review actual GitHub output before merge advice.
 - Prefer GitHub-first handoffs so a new chat/agent can continue without private conversational history.
+- If repository authority already contains the context, do not repeat it in a CA manual prompt. Normal CA manual prompts should be tiny and point the agent to GitHub authority.
 
 External coding-agent/model routing is **not** the same thing as CG Dynamics runtime AI. Never redesign product AI because a desktop coding model is capped, retired or unavailable.
 
@@ -138,6 +140,7 @@ Do not apply either without approval. Do not replay obsolete client-portal phase
 
 - Cross-project master authority: `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`.
 - Autonomous dispatch/supervision authority: `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md`.
+- CA manual prompt authority: `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md`.
 - Detailed provider/model appendix: `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`.
 - Do not use a global OpenCode provider allowlist that accidentally hides connected providers without first verifying the intended effect.
 - Keep CA's proven working models available; distinguish a dead provider endpoint from a similarly named working Zen model.
