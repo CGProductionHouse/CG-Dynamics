@@ -1,6 +1,6 @@
 # Website Performance Reporting Goal
 
-Status: planned product goal
+Status: V1 Performance panel and server-side Builder bridge implemented on `codex/website-reporting-v1`; no live mapping, Edge deployment or client publication yet.
 Primary zone: CG Dynamics -> Performance
 Upstream system: CG Website Builder / Website System
 
