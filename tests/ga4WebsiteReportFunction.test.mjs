@@ -104,7 +104,16 @@ test('CTA results come from the client configured taxonomy, not from guessed eve
   assert.match(FN, /evaluateCtas\(\{ definitions, observedEventNames, eventCounts, ga4Reachable: true \}\)/)
 })
 
-test('the function requires an authenticated admin or manager', () => {
-  assert.match(FN, /requireAdminOrManager\(request\)/)
+const AUTH = readFileSync(
+  new URL('../supabase/functions/_shared/auth.ts', import.meta.url),
+  'utf8',
+).replace(/\r\n/g, '\n')
+
+test('the function requires an authenticated admin, manager or the owning client', () => {
+  assert.match(FN, /requireClientOwnerOrManager\(request, clientId\)/)
   assert.match(FN, /if \(!auth\.ok\) return jsonResponse/)
+})
+
+test('a client may only request their own client_id', () => {
+  assert.match(AUTH, /profile\?\.client_id === clientId/)
 })

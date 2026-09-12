@@ -12,7 +12,7 @@
 // stand in for "unknown".
 
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { requireAdminOrManager } from '../_shared/auth.ts'
+import { requireClientOwnerOrManager } from '../_shared/auth.ts'
 import {
   evaluateCtas,
   resolveGa4JoinStrategy,
@@ -103,9 +103,6 @@ Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders })
   if (request.method !== 'POST') return jsonResponse({ ok: false, error: 'Method not allowed.' }, 405)
 
-  const auth = await requireAdminOrManager(request)
-  if (!auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status)
-
   const input = await request.json().catch(() => null) as Record<string, unknown> | null
   const clientId = typeof input?.clientId === 'string' ? input.clientId.trim() : ''
   const campaignId = typeof input?.campaignId === 'string' ? input.campaignId.trim() : ''
@@ -117,6 +114,9 @@ Deno.serve(async request => {
   if (!validGa4Date(startDate) || !validGa4Date(endDate) || endDate < startDate) {
     return jsonResponse({ ok: false, error: 'A valid startDate and endDate are required (YYYY-MM-DD).' }, 400)
   }
+
+  const auth = await requireClientOwnerOrManager(request, clientId)
+  if (!auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status)
 
   const supabase = auth.value.supabase
 

@@ -49,6 +49,8 @@ export interface Ga4WebsitePayload {
   eventCounts: Record<string, number>
   /** Requested field names the property does not support. */
   unsupportedFields: string[]
+  /** CTA evaluation returned by the provider path. When present it is used directly. */
+  ctas?: CtaResult[]
 }
 
 export type WebsiteAfterClickState =
@@ -168,7 +170,7 @@ export function buildWebsiteAfterClickProjection(
     )
   }
 
-  const ctas = evaluateCtas({
+  const ctas = ga4.ctas ?? evaluateCtas({
     definitions,
     observedEventNames: ga4.observedEventNames ?? [],
     eventCounts: ga4.eventCounts ?? {},

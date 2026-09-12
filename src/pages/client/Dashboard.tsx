@@ -21,6 +21,10 @@ import {
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
 import {
+  loadGa4WebsiteReportForDashboard,
+  type Ga4WebsitePayload,
+} from '../../lib/ga4WebsiteReport'
+import {
   loadReportPlatformFacts,
 } from '../../lib/db/reportingTruth'
 import type { PlatformFact } from '../../lib/overviewModel'
@@ -47,6 +51,7 @@ export default function Dashboard() {
   const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
   const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
+  const [ga4Website, setGa4Website] = useState<Ga4WebsitePayload | null>(null)
   const [facts, setFacts] = useState<PlatformFact[]>([])
   const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
   const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
@@ -128,6 +133,7 @@ export default function Dashboard() {
       setGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
+      setGa4Website(null)
       setFacts([])
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
@@ -178,6 +184,16 @@ export default function Dashboard() {
     void loadReport()
     return () => { reportRequestRef.current += 1 }
   }, [profile?.client_id, profile?.id, selectedReportId])
+
+  // #335: load the GA4 "after the click" view once Google Ads dashboard truth is known.
+  useEffect(() => {
+    let active = true
+    if (!profile?.client_id || !googleAds) return () => { active = false }
+    loadGa4WebsiteReportForDashboard(profile.client_id, googleAds)
+      .then(data => { if (active) setGa4Website(data) })
+      .catch(() => { if (active) setGa4Website(null) })
+    return () => { active = false }
+  }, [profile?.client_id, googleAds])
 
   if (!profile?.client_id) {
     return (
@@ -251,6 +267,7 @@ export default function Dashboard() {
           googleAds={googleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
+          ga4Website={ga4Website}
           facts={facts}
           previousFacts={previousFacts}
           normalizedFactsAttempted={normalizedFactsAttempted}
