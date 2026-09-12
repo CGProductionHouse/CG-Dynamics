@@ -38,7 +38,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: ${{ vars.OPENCODE_GO_MODEL || 'opencode-go/kimi-k2.7-code' }}
+          model: opencode-go/deepseek-v4-pro
 
       - name: Run OpenCode — free fallback
         if: steps.go.outcome == 'failure'
@@ -70,7 +70,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: ${{ vars.OPENCODE_GO_MODEL || 'opencode-go/kimi-k2.7-code' }}
+          model: opencode-go/deepseek-v4-pro
           prompt: ${{ inputs.prompt }}
 
       - name: Run OpenCode — free fallback
