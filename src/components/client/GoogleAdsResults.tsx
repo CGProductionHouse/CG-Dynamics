@@ -38,8 +38,8 @@ function formatDateTime(value: string | null): string {
     : date.toLocaleString('en-ZA', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-function providerLabel(value: string | null): string {
-  if (!value) return 'Unavailable'
+function providerLabel(value: string | null): string | null {
+  if (!value) return null
   return value.toLowerCase().replaceAll('_', ' ').replace(/^./, character => character.toUpperCase())
 }
 
@@ -103,15 +103,23 @@ function CampaignResult({ campaign }: { campaign: GoogleAdsReportCampaign }) {
     { label: 'Cost / conversion', value: formatMoney(campaign.costPerConversionMicros, campaign.currencyCode) },
   ].filter(metric => metric.value !== 'Unavailable')
 
+  const typeLabel = providerLabel(campaign.type)
+  const statusLabel = providerLabel(campaign.status)
+  const primaryStatusLabel = settings?.primaryStatus ? providerLabel(settings.primaryStatus) : null
+  const statusParts = [
+    typeLabel,
+    statusLabel ? `Campaign ${statusLabel}` : null,
+    primaryStatusLabel ? `Serving ${primaryStatusLabel}` : null,
+  ].filter((part): part is string => part !== null)
+
   return (
     <article className="rounded-2xl border border-white/[0.08] bg-[#071311] p-5 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-white">{campaign.name}</h3>
-          <p className="mt-1 text-sm text-report-muted">
-            {providerLabel(campaign.type)} · Campaign {providerLabel(campaign.status)}
-            {settings?.primaryStatus ? ` · Serving ${providerLabel(settings.primaryStatus)}` : ''}
-          </p>
+          {statusParts.length > 0 && (
+            <p className="mt-1 text-sm text-report-muted">{statusParts.join(' · ')}</p>
+          )}
         </div>
         {budgetLabel && (
           <span className="w-fit rounded-full border border-report-accent/20 bg-report-accent/[0.07] px-3 py-1 text-xs font-semibold text-report-accent">
@@ -201,10 +209,20 @@ export function GoogleAdsResults({
   }
 
   const setupNotes: string[] = []
-  if (!hasTarget) setupNotes.push('No client-approved monthly target is set for this period.')
+  // Monthly targets are only meaningful for live/in-progress periods.
+  if (!hasTarget && !(daysKnown && dashboard.daysRemaining === 0)) {
+    setupNotes.push('No client-approved monthly target is set for this period.')
+  }
   if (daysKnown && dashboard.daysRemaining === 0) {
     setupNotes.push(`Completed period. Data through ${dashboard.dataThroughDate ?? 'unavailable'}.`)
   }
+
+  const metaParts = [
+    `${dashboard.periodStart} to ${dashboard.periodEnd}`,
+    dashboard.timeZone,
+    dashboard.currencyCode,
+  ].filter((part): part is string => Boolean(part))
+  const syncLine = dashboard.lastSyncedAt ? `Last successful sync: ${formatDateTime(dashboard.lastSyncedAt)}` : null
 
   return (
     <section className={compact ? 'space-y-5' : 'my-8 space-y-7'} aria-label="Google Ads results">
@@ -212,13 +230,11 @@ export function GoogleAdsResults({
         <div>
           {!compact && <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-accent">Paid search</p>}
           <h2 className={`${compact ? 'text-xl' : 'mt-2 text-2xl'} font-semibold text-white`}>Google Ads performance</h2>
-          <p className="mt-2 text-sm text-report-muted">
-            {dashboard.periodStart} to {dashboard.periodEnd} · {dashboard.timeZone ?? 'Timezone unavailable'} · {dashboard.currencyCode ?? 'Currency unavailable'}
-          </p>
+          <p className="mt-2 text-sm text-report-muted">{metaParts.join(' · ')}</p>
         </div>
         <div className="text-left text-xs leading-5 text-report-faint sm:text-right">
           <p>{dashboard.campaignCount} campaign{dashboard.campaignCount === 1 ? '' : 's'}</p>
-          <p>Last successful sync: {formatDateTime(dashboard.lastSyncedAt)}</p>
+          {syncLine && <p>{syncLine}</p>}
         </div>
       </div>
 
