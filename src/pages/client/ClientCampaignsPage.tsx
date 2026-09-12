@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { GoogleAdsResults } from '../../components/client/GoogleAdsResults'
+import { WebsiteAfterTheClick } from '../../components/client/WebsiteAfterTheClick'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
@@ -9,6 +10,11 @@ import {
   type GoogleAdsDashboardData,
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
+import {
+  loadGa4WebsiteReportForDashboard,
+  type Ga4WebsitePayload,
+} from '../../lib/ga4WebsiteReport'
+import { buildWebsiteAfterClickProjection } from '../../lib/websiteAfterClick'
 import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 import { readStrategyData } from '../../lib/strategyEngine'
 
@@ -35,6 +41,7 @@ export default function ClientCampaignsPage() {
   const [data, setData] = useState<CampaignPageData>(EMPTY_DATA)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [ga4Website, setGa4Website] = useState<Ga4WebsitePayload | null>(null)
 
   useEffect(() => {
     let active = true
@@ -47,6 +54,7 @@ export default function ClientCampaignsPage() {
 
       setLoading(true)
       setError(false)
+      setGa4Website(null)
       try {
         const [clientResult, reportsResult] = await Promise.all([
           getClient(profile.client_id),
@@ -78,6 +86,16 @@ export default function ClientCampaignsPage() {
     return () => { active = false }
   }, [profile?.client_id])
 
+  // #335: load the GA4 "after the click" view once Google Ads campaign data is known.
+  useEffect(() => {
+    let active = true
+    if (!profile?.client_id || !data.dashboard) return () => { active = false }
+    loadGa4WebsiteReportForDashboard(profile.client_id, data.dashboard)
+      .then(payload => { if (active) setGa4Website(payload) })
+      .catch(() => { if (active) setGa4Website(null) })
+    return () => { active = false }
+  }, [profile?.client_id, data.dashboard])
+
   const reportMonth = data.report ? currentTrackingMonth() : null
 
   return (
@@ -100,7 +118,17 @@ export default function ClientCampaignsPage() {
       ) : !data.report ? (
         <CampaignMessage message="No published campaign reporting is available yet." />
       ) : data.state === 'data' && data.dashboard ? (
-        <GoogleAdsResults dashboard={data.dashboard} />
+        <div className="space-y-8">
+          <GoogleAdsResults dashboard={data.dashboard} />
+          {/* #335: same canonical projection as the client report and Admin Preview. */}
+          <WebsiteAfterTheClick
+            projection={buildWebsiteAfterClickProjection({
+              adsDashboard: data.dashboard,
+              ga4: ga4Website,
+              ctaDefinitions: [],
+            })}
+          />
+        </div>
       ) : (
         <GoogleAdsEmptyState state={data.state} />
       )}
