@@ -1,0 +1,126 @@
+# Client and staff ChatGPT reconstruction ledger — 2026-09-09
+
+Issue authority: #301. This ledger was reconciled from current GitHub issue comments, remote branch heads, and committed migration artifacts on 2026-09-09 SAST. It is recovery evidence, not production state.
+
+## Gate result
+
+**NOT SAFE TO DELETE PROJECT CHATS.** Repository implementation now exists for exact-client retrieval/contact policy (#241/#294) and staff Assistant/lead preservation (#305), but those branches are unmerged and their migrations/functions are not live. The #294 backfill covers only three prepared pilots, not the all-client set. Staff Project/Leads history was not accessible from this environment, so active lead salvage is unproven. Identified history gaps and duplicate folders still require the reviews below.
+
+Shared state applying to every non-skip row:
+
+- canonical migration artifacts are on the named remote branch, not necessarily `main`;
+- Project Instructions are derived/recoverable from that branch's canonical intelligence/guide or migration audit and must contain no mutable contacts, people, prices, stock, hours, promotions, or live work;
+- Project Sources remain physically preserved; KEEP/REPLACE/REMOVE labels are grounding recommendations only;
+- current caption contacts must come from #294 classified live retrieval, never from static Instructions;
+- deletion readiness remains blocked until #241/#294 are merged, deployed, backfilled, and accepted.
+
+## #294 consolidation handoff
+
+The authoritative branch-by-branch consolidation input is `CLIENT-294-CONSOLIDATION-MANIFEST-2026-09-09.csv`. It records the exact current head and recovery artifacts for all 52 remote refs matching `client-migration-*-2026-09-08`; it does not fold in Agri-Secure's differently named branch or any skip workspace.
+
+Current exact totals:
+
+- 52 requested migration branches;
+- 8 final/ready rows: 5 `ALREADY_FINAL` and 3 `READY_FOR_294_CONSOLIDATION`;
+- 41 `NEEDS_EVIDENCE_EXTRACTION` rows with useful contact/footer evidence awaiting five-part #294 conversion;
+- 3 `IDENTITY_BLOCKED` rows: Cape Lumber, Action Sport/Bloem Action Sports and Dulux Bloemfontein lack durable evidenced UUIDs in the reviewed repo artifacts;
+- 0 genuinely missing-evidence rows.
+
+Piek Group is no longer identity-blocked: CA recorded canonical Dynamics ID `ed7aa1ae-de21-4151-a8f9-54796b234c1f` from a live read-only lookup on PR #310. WiseRide remains a separate exact client from Wiseman Group; no inference or shared fallback is permitted.
+
+Manifest classification contract:
+
+- `ALREADY_FINAL`: the artifacts explicitly cover public-marketing, internal-only, stale/superseded, unresolved-conflict and footer-rule outcomes.
+- `READY_FOR_294_CONSOLIDATION`: a structured #294 audit exists and only the precise missing category named in `unresolved_blocker` must be normalized.
+- `NEEDS_EVIDENCE_EXTRACTION`: useful existing evidence is present but remains distributed through pre-#294 guide/audit sections.
+- `IDENTITY_BLOCKED`: exact-name evidence exists, but a durable Dynamics UUID is not evidenced; do not guess or fuzzy-match.
+
+`contact_audit_5_part` and `unconverted_contact_footer_evidence` use `YES`, `NO` or `PARTIAL` deliberately. A classification describes repository consolidation readiness only; it does not claim that #247 is merged, data is backfilled, or production runtime acceptance has passed.
+
+### Claude continuation
+
+Consume the CSV directly; do not reopen all 52 branches as a discovery exercise. Process `ALREADY_FINAL` rows first as deterministic contact/footer inputs, complete only the named missing categories for `READY_FOR_294_CONSOLIDATION`, then extract the five explicit categories from the listed artifacts for `NEEDS_EVIDENCE_EXTRACTION`. Stop rather than generate rows for `IDENTITY_BLOCKED` until the durable UUID is evidenced. Preserve every `entity_scope_requirements` value as a hard isolation boundary, especially WiseRide versus Wiseman Group and all branch/dealer/entity-specific contacts. This handoff authorizes consolidation code/docs on #247 only; it does not authorize production backfill.
+
+## Broader recovery inventory (52 requested migration refs + adjacent Agri-Secure branch)
+
+`History` means an explicitly recorded inaccessible-history risk, not merely an open issue. `Contact` describes repo evidence; none of these rows is claimed live until deployment/backfill acceptance.
+
+| Client (exact Dynamics identity) | ID | Issue | Canonical recovery artifact and remote head | Migration / actual handoff | Contact | History | Legacy duplicate | Deletion state |
+|---|---|---:|---|---|---|---|---|---|
+| Cape Lumber | ID not recorded in migration artifact; exact live-directory lookup required | #241 | `CAPE-LUMBER-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-cape-lumber-2026-09-08@dadc3e7187e6` | MIGRATION COMPLETE / handoff reconciliation in #241 | PILOT BACKFILL PREPARED; NOT LIVE | no flag | none identified | BLOCKED — live gates |
+| Bloem Action Sports (Dynamics row: Action Sport) | ID not recorded in migration artifact; exact live-directory lookup required | #241 | `BLOEM-ACTION-SPORTS-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-bloem-action-sports-2026-09-08@395460b84f5a` | MIGRATION COMPLETE / handoff reconciliation in #241 | PILOT BACKFILL PREPARED; NOT LIVE | no flag | none identified | BLOCKED — live gates |
+| Dulux Bloemfontein | ID not recorded in migration artifact; exact live-directory lookup required | #241 | `DULUX-PAINT-PAPER-BLOEMFONTEIN-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-dulux-bloemfontein-2026-09-08@5db7702ec269` | MIGRATION COMPLETE / handoff reconciliation in #241 | PILOT BACKFILL PREPARED; NOT LIVE | no flag | possible duplicate identified | BLOCKED — #300 + live gates |
+| Piek Group | `ed7aa1ae-de21-4151-a8f9-54796b234c1f` | #242 | `PIEK-GROUP-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-piek-group-2026-09-08@06986fa0de25` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | all-client backfill pending; `.com` publishing email vs official `.co.za` conflict preserved | complete accessible history recorded | none identified | BLOCKED — contact conflict + live gates |
+| SecuriForce | `83063815-30a2-4cf2-abb6-2034e746f6d4` | #243 | `SECURIFORCE-CLIENT-MARKETING-INTELLIGENCE.md`; `client-migration-securiforce-2026-09-08@ccd3550c7d34` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Toyota Bloemfontein | `e2ad6d57-5b06-46e1-b75b-b67f017d57f1` | #244 | `TOYOTA-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-toyota-bloemfontein-2026-09-08@a2aa56af7cdc` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | corrected evidence; all-client backfill pending | no flag | SALVAGE COMPLETE #300 (`155e2472a08a`) | BLOCKED — live gates |
+| All Around PVC | `fd16ebae-a50b-4920-afe0-94c2631f8f06` | #249 | `ALL-AROUND-PVC-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-all-around-pvc-2026-09-08@383ae2cb1c43` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Bohemia Quick Stop | `5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb` | #250 | `BOHEMIA-QUICK-STOP-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-bohemia-quick-stop-2026-09-08@01fcdad0741f` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Econofoods | `61acf81b-1011-404e-9fae-2e209be65fca` | #251 | `ECONOFOODS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-econofoods-2026-09-08@6164d78d3962` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| First Technology Central | `c8d34a97-8400-4f52-8b0d-843491fe3d3b` | #252 | `FIRST-TECHNOLOGY-CENTRAL-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`; `client-migration-first-technology-central-2026-09-08@d47954305eb6` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Ipopeng Office Supplies | `2e643855-e2ad-481f-a6c6-3d934b9f4a50` | #253 | `IPOPENG-OFFICE-SUPPLIES-CLIENT-INTELLIGENCE-2026-09.md`; `client-migration-ipopeng-office-supplies-2026-09-08@785a60a0e57c` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Mimosa Mall | `e276f019-a580-44c5-a7ab-e43840c33a64` | #254 | `MIMOSA-MALL-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-mimosa-mall-2026-09-08@df77b027ef59` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| PSG Bloemfontein | `29a28efd-c998-45e2-a57c-4a751e779e66` | #255 | `PSG-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-psg-bloemfontein-2026-09-08@322b28b6f63e` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| TBS Brokers | `a36ba938-e9dc-4ecf-bb67-4853608b1c01` | #256 | `TBS-BROKERS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-tbs-brokers-2026-09-08@21c872945c46` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| The Staffordshire | `dfa47255-875d-43cf-8a22-cfe1a6247fb7` | #257 | `THE-STAFFORDSHIRE-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-the-staffordshire-2026-09-08@3b2032edc5d0` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| WiseRide | `504113ee-fba9-4993-807e-a86066615212` | #258 | `WISERIDE-CLIENT-INTELLIGENCE-2026-09.md`; `client-migration-wiseride-2026-09-08@16204a8d3d16` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE / separate Project | all-client backfill pending; Langenhoven Park conflicts held | no flag | none identified | BLOCKED — live gates |
+| Red Oak | `cdb11a82-339e-4b46-9b09-bde1a23efeaf` | #259 | `RED-OAK-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-red-oak-2026-09-08@aaca2bffb70b` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Supa Quick BFN | `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97` | #260 | `SUPA-QUICK-BFN-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-supa-quick-bfn-2026-09-08@97ec81d53022` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Supa Quick Centurion | `e2870110-930c-4e63-b2fe-c858030f7258` | #261 | `SUPA-QUICK-CENTURION-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-supa-quick-centurion-2026-09-08@4bd35988f5f4` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Agri-Secure | `893992a5-23cd-4ee6-b5d9-ccf7b17fe071` | #263 | `AGRI-SECURE-CG-DYNAMICS-CLIENT-GUIDE.md`; `codex/issue-263-agri-secure-migration@aef880891f05` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| AV Event Life | `3b85973f-bcad-49eb-b8f1-c27f7c7f1aba` | #264 | `AV-EVENT-LIFE-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-av-event-life-2026-09-08@65c55627eb1e` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no explicit flag | none identified | BLOCKED — live gates |
+| Bloem Marble & Granite | `89e0ad6d-e08c-4a75-8b8e-abea71af581c` | #265 | `BLOEM-MARBLE-GRANITE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`; `client-migration-bloem-marble-granite-2026-09-08@744bdef91493` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Bloem Vascular | `2d16262d-8450-458d-ae7e-084ef9ff662d` | #266 | `BLOEM-VASCULAR-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-bloem-vascular-2026-09-08@52e4d0e9b765` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Bouwer & Coetzee Attorneys | `8e448cf9-1534-4ba1-89a4-93e4c8b83d2f` | #267 | `BOUWER-COETZEE-ATTORNEYS-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-bouwer-coetzee-attorneys-2026-09-08@98da2261a84c` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Braize | `6b67a2df-e2ab-418b-bcee-03aef5963d37` | #268 | `BRAIZE-EVENT-STAFFING-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`; `client-migration-braize-2026-09-08@9c379e378542` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| C&L Innovations | `afb62c53-d6d3-4ef8-9393-def88ed899d8` | #271 | `C-L-INNOVATIONS-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-c-l-innovations-2026-09-08@b132069e1c40` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Case Bloemfontein | `079df21e-783a-4648-b3fa-0acae6e68867` | #272 | `CASE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`; `client-migration-case-bloemfontein-2026-09-08@2ab107bc61e0` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Central Canvas | `6b313cac-283e-48c4-9df6-ba43af2f7353` | #274 | `CENTRAL-CANVAS-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`; `client-migration-central-canvas-2026-09-08@63b3683694c8` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Daisy & Co | `3404f726-a693-4b2d-8c13-c9d3dfd17bbc` | #275 | `DAISY-CO-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-daisy-co-2026-09-08@cca107e5959e` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Delta Gas | `06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba` | #276 | `DELTA-GAS-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-delta-gas-2026-09-08@6a7ce096e407` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending; mutable facts held | no flag | SALVAGE COMPLETE #300 (`6a7ce096e407`) | BLOCKED — live gates |
+| Ehrlich Park Butchery | `ec643c75-51f5-4839-829f-3f5b7f48829a` | #277 | `EHRLICH-PARK-BUTCHERY-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-ehrlich-park-butchery-2026-09-08@5aa73d999ed0` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Emmanuel Funerals | `d53d8e62-9e6a-4bb9-be3f-554f40942d45` | #278 | `EMMANUEL-FUNERALS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-emmanuel-funerals-2026-09-08@bf319f00380c` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | YES — raw history incomplete | none identified | BLOCKED — HISTORY REVIEW + live gates |
+| Forklift Trucks | `4424ed69-7270-4d30-a1ea-0b77d76912df` | #279 | `FORKLIFT-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-forklift-trucks-2026-09-08@e9335fe2a416` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Germoparts | `b6052710-417d-4b3b-8348-0f126bfea671` | #280 | `GERMOPARTS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-germoparts-2026-09-08@e808404571ba` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | YES — Project/source coverage incomplete | none identified | BLOCKED — HISTORY REVIEW + live gates |
+| Hino Trucks | `1007e58b-3fea-4515-88b7-ddaa85763de6` | #281 | `HINO-TRUCKS-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-hino-trucks-2026-09-08@57411cca2910` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | possible duplicate identified; salvage not recorded | BLOCKED — #300 + live gates |
+| HMHI | `572555e0-d4d0-404a-8d67-beeeeed6a1f2` | #282 | `HILL-MCHARDY-HERBST-INC-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-hmh-attorneys-2026-09-08@7e44edb52906` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE; Lydenburg HMH quarantined | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Human Auto | `816c7f59-d56c-46a3-ba15-f76971d83769` | #283 | `HUMAN-AUTO-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-human-auto-2026-09-08@08e30839d533` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Jenkor | `a5eab798-3e00-44cc-947e-463386fdac39` | #284 | `JENKOR-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-jenkor-2026-09-08@28105226a837` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Local Deli | `2a5ea019-64f5-4f8e-8a61-61a28940aa6e` | #286 | `LOCAL-DELI-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-local-deli-2026-09-08@ed343124e489` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Loraclox | `21300630-6755-4591-9a49-e22abbaf7e3d` | #287 | `LORACLOX-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-loraclox-2026-09-08@63ca07a17017` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Madison Wear | `7b47afb0-fa55-4916-85f6-09c57e5905b9` | #288 | `MADISON-WEAR-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-madison-wear-2026-09-08@52b90ef46a63` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Novus Steel | `4236a60a-990f-484f-8d19-13d2f92fbe3b` | #289 | `NOVUS-STEEL-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-novus-steel-2026-09-08@dba733f761c8` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Peyper Bonds | `a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b` | #290 | `PEYPER-BONDS-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-peyper-bonds-2026-09-08@bbf466cecbde` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| RC-Polypipe | `4f6106de-c437-404e-8cef-fbe848de0665` | #291 | `RC-POLYPIPE-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-rc-polypipe-2026-09-08@16473b409df9` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Tobich Optics | `204f4f22-14c7-42ed-a956-da57af102706` | #293 | `TOBICH-OPTICS-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-tobich-optics-2026-09-08@134cdae1b5be` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | contact/footer evidence captured; all-client backfill pending | no flag | not a #300 salvage client | BLOCKED — live gates |
+| CG Production House | `c27d2185-08e4-4c49-be48-2572564ceecf` | #295 | `CG-PRODUCTION-HOUSE-CANONICAL-CLIENT-INTELLIGENCE-2026-09.md`; `client-migration-cg-production-house-2026-09-08@22cefb3da4ff` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | five-part #294 audit present; live backfill pending | no flag | none identified | BLOCKED — live gates |
+| Vrystaat Kunstefees | `1f0406bb-d643-4b83-bc3e-b1ebe87eeb89` | #296 | `VRYSTAAT-KUNSTEFEES-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-vryfees-2026-09-08@7eda72b09e0c` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | evidence captured; all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Watch Addict | `e1cb958e-3f68-4a77-b5ea-b471ea62bdef` | #297 | `WATCH-ADDICT-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-watch-addict-2026-09-08@04178cfa73ac` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | evidence captured; all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| We Ar Fuels | `2b953772-e791-4dff-a278-d4dd3521f02e` | #298 | `WE-AR-FUELS-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-we-ar-fuels-2026-09-08@11013c779753` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | regional evidence captured; all-client backfill pending | no flag | none identified | BLOCKED — live gates |
+| Wiseman Group | `899c9988-8207-4e45-a8fc-a7446dfcf96b` | #299 | `WISEMAN-GROUP-PROJECT-MIGRATION-AUDIT-2026-09-08.md`; `client-migration-wiseman-group-2026-09-08@33f53f23447a` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE / separate exact Project | all-client backfill pending | no flag | old shared container #262 is SKIP/NOT PLANNED | BLOCKED — live gates |
+| Bat Hill Royale | `32bd9db3-5339-4404-825b-5a615cadec6a` | #302 | `BAT-HILL-ROYALE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md`; `client-migration-bat-hill-royale-2026-09-08@c32fef89b9e8` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | five-part #294 audit present; live backfill pending | YES | none identified | BLOCKED — HISTORY REVIEW + live gates |
+| Emoya Estate Driving Range | `217a547c-7b22-45cc-bf88-9d45a8e93dfe` | #303 | `EMOYA-ESTATE-DRIVING-RANGE-CG-DYNAMICS-CLIENT-GUIDE.md`; `client-migration-emoya-driving-range-2026-09-08@7db320ba78fa` | MIGRATION COMPLETE / PROJECT INSTRUCTIONS APPLIED 2026-09-09 | five-part #294 audit present; live backfill pending | YES | unrelated TBS source preserved / DO NOT GROUND | BLOCKED — HISTORY REVIEW + live gates |
+| NCNA / Northern Cape Nature Academy | `94fe2568-3cf1-47dc-801e-d8d5396a0965` | #304 | `NCNA-CLIENT-MARKETING-INTELLIGENCE-2026-09.md`; `client-migration-ncna-2026-09-08@fb401c0c838e` | MIGRATION COMPLETE / PROJECT HANDOFF COMPLETE | evidence captured; live all-client backfill pending | YES | none identified | BLOCKED — HISTORY REVIEW + live gates |
+
+## Explicit skips (not part of the requested 52-branch manifest)
+
+| Workspace | Issue | State | Reason |
+|---|---:|---|---|
+| Wiseman Group shared multi-client container | #262 | SKIP / NOT PLANNED | Superseded by separate exact-client Projects; never use as a routing authority. |
+| Kundedienste | #285 | SKIP / NOT A CHATGPT CLIENT | CA confirmed it is not an active migration client. |
+| Rusoord Farmstay | #292 | SKIP / WEBSITE-ONLY | CA confirmed it is outside this Project migration. |
+
+## Staff workspace and lead salvage ledger
+
+| Scope | Canonical artifact | Current state | Delete implication |
+|---|---|---|---|
+| Active CG staff profiles | #305 / draft PR #309, `feat/staff-assistant-workspaces@f526c80` | Exact-profile Assistant schema/UI and recoverable Instructions implemented; migration not live. | BLOCKED |
+| Existing staff Assistant / `... Leads` ChatGPT Projects | ChatGPT account history | Inaccessible from this repo/browser environment; no claim of review. | HISTORY GAP — DO NOT DELETE |
+| Active/relevant leads and prospects | #305 canonical lead model | Empty migration target is implemented, but chat-only leads were not accessible and therefore were not imported. | LEAD SALVAGE PENDING |
+
+## Minimum remaining gates
+
+1. Review/merge/deploy #241/#294. Before any migration apply, #247 must assign unique versions to `20260908100000_client_guides.sql`, `20260908110000_client_intelligence_registration.sql` and `20260908120000_client_project_mappings.sql`; current `main` already owns all three versions for Meta migrations. After that code-only correction, explicitly approve the uniquely versioned client-intelligence migrations, `20260909100000_client_contacts.sql`, and a reviewed all-client contact backfill (the prepared `20260909110000_client_contact_pilot_backfill.sql` is only three clients), then perform authenticated exact-client/branch/privacy acceptance.
+2. Review/merge #309, explicitly approve/apply `20260908220000_staff_assistant_workspaces.sql`, then audit each active staff Assistant/Leads Project and import every still-relevant lead with the exact owner/state/last action/next action.
+3. The Project Instructions for #242, #243, #244, #249, #265, #287, #290, #291, #295, #302 and #303 were confirmed applied by CA on 2026-09-09. Preserve `PENDING-PROJECT-INSTRUCTIONS-BATCH-2026-09-09.md` as the exact recovery record, not an outstanding paste queue. Piek Group's exact ID is now recorded; Cape Lumber, Action Sport and Dulux Bloemfontein still require durable exact UUID evidence before all-client consolidation.
+4. Risk-review the explicit history gaps for Emmanuel Funerals, Germoparts, Bat Hill Royale, Emoya Estate Driving Range, NCNA, and all inaccessible staff Projects; complete Hino/Dulux duplicate salvage if CA confirms those folders still exist.
+5. Re-run this ledger against live deployed truth. Only then may #301 emit `SAFE TO DELETE PROJECT CHATS`; Project Sources remain a separate, preserved class.
