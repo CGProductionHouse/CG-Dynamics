@@ -1,6 +1,6 @@
 # Website Performance Reporting Goal
 
-Status: planned product goal
+Status: V1 Performance panel and server-side Builder bridge implemented on `codex/website-reporting-v1`; no live mapping, Edge deployment or client publication yet. Red Oak's active client ID was verified read-only on 2026-09-12 as `cdb11a82-339e-4b46-9b09-bde1a23efeaf`; the Builder Website ID remains unverified, so do not configure `WEBSITE_REPORTING_CLIENT_MAP` yet.
 Primary zone: CG Dynamics -> Performance
 Upstream system: CG Website Builder / Website System
 
@@ -172,6 +172,10 @@ Do not build CG Dynamics charts first and then discover that the upstream data m
 ## Definition of done
 
 The feature is done when CA/Amonique can open a client in CG Dynamics, choose a month and produce/share a website-performance report without manually opening Vercel/analytics dashboards or counting form submissions, and the report can truthfully explain traffic source and conversions to the extent the underlying evidence allows.
+
+## Red Oak pilot gate (2026-09-12)
+
+Vercel Web Analytics was enabled on the existing Red Oak project at the included Hobby tier. The protected PR #3 preview recorded 1 real test visitor and 2 page views (`/`, `/menu`); the preview aggregate API returned the same numbers. This proves site-to-Vercel page-view ingest, not Builder-to-Dynamics delivery. Hobby custom-event API returned HTTP 402 and the Vercel dashboard says custom events require Pro. No paid plan was selected. Builder PR #18 now supports a preview-only project mapping, but the exact Builder Website ID, server-side secrets, and Edge deployment remain unconfigured. Until an authenticated Builder record lookup and a supported CTA collection path exist, the Dynamics Performance panel must not claim live Red Oak conversions or an end-to-end pass.
 
 Canonical upstream roadmap:
 
