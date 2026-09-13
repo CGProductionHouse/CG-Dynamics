@@ -1150,6 +1150,11 @@ export async function listPlannerTaskRows(options: PlannerTaskReadOptions = {}) 
         .not('status', 'in', '(done,completed)')
         // Microsoft-removed tasks are no longer current operational work (#217).
         .is('microsoft_source_removed_at', null)
+        // Stale Excel imports with no Microsoft sync evidence are not current
+        // operational work (#217). Tasks imported with a Microsoft task ID
+        // (original_task_id) but never seen by Microsoft sync have no basis in
+        // the live Planner source and must not surface as active work.
+        .or('original_task_id.is.null,microsoft_last_seen_at.not.is.null,microsoft_task_id.not.is.null')
     }
 
     query = options.order === 'due'

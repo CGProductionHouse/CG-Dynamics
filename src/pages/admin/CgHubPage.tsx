@@ -710,7 +710,7 @@ function CompanyCalendarSection({
                   <Link
                     key={event.id}
                     to="/admin/cg-calendar"
-                    className="flex items-center gap-2 rounded-lg px-1 py-1.5 transition-colors hover:bg-white/[0.04]"
+                    className="flex items-center gap-2 rounded-lg px-1 py-1.5 transition-colors hover:bg-white/[0.04] min-w-0"
                   >
                     <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
                       event.event_type === 'content_run'
@@ -729,7 +729,7 @@ function CompanyCalendarSection({
                       <p className="truncate text-sm font-semibold text-white">{event.title}</p>
                       {event.client_name && <p className="truncate text-[10px] text-brand-teal/75">{event.client_name}</p>}
                     </div>
-                    <span className="shrink-0 text-xs text-brand-primary/60">
+                    <span className="truncate text-xs text-brand-primary/60 max-w-[80px] sm:max-w-none">
                       {event.all_day ? 'All day' : formatBusinessTime(event.start_at)}
                     </span>
                   </Link>
@@ -928,14 +928,14 @@ function TaskRow({ task, todayStr }: { task: CommandCentreTask; todayStr: string
   return (
     <Link
       to={task.data_origin === 'planner_tasks' ? '/admin/work?tab=board' : '/admin/command-centre'}
-      className="flex items-start gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]"
+      className="flex items-start gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04] min-w-0"
     >
       <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-white">{task.title}</p>
         {meta && <p className="mt-0.5 truncate text-xs text-brand-primary/45">{meta}</p>}
       </div>
-      <span className="shrink-0 text-xs font-semibold text-brand-primary/40">
+      <span className="truncate text-xs font-semibold text-brand-primary/40 max-w-[120px] sm:max-w-none">
         {taskStatusDisplayLabel(task)}
       </span>
     </Link>
@@ -955,13 +955,13 @@ function DeliverableRow({ deliverable }: { deliverable: MonthlyDeliverable }) {
   return (
     <Link
       to="/admin/client-schedule?view=calendar"
-      className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]"
+      className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04] min-w-0"
     >
       <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#2dd4bf]/10 text-[#2dd4bf]">
         {DELIVERABLE_TYPE_CODE[deliverable.deliverable_type] ?? deliverable.deliverable_type}
       </span>
       <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{deliverable.title}</p>
-      <span className={`shrink-0 text-xs font-semibold ${statusClass}`}>
+      <span className={`truncate text-xs font-semibold ${statusClass} max-w-[120px] sm:max-w-none`}>
         {DELIVERABLE_STATUS_SHORT[simplified] ?? simplified}
       </span>
     </Link>
