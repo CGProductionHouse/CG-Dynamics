@@ -32,6 +32,10 @@ jobs:
 
       - name: Run OpenCode — Go quality lane
         id: go
+        # Bounded below the 55-minute job timeout so the free fallback lane
+        # keeps execution time (issue #357). A step-level timeout concludes
+        # the step as cancelled, not failure.
+        timeout-minutes: 30
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -41,7 +45,7 @@ jobs:
           model: opencode-go/glm-5.3
 
       - name: Run OpenCode — free fallback
-        if: steps.go.outcome == 'failure'
+        if: steps.go.outcome == 'failure' || steps.go.outcome == 'cancelled'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -64,6 +68,10 @@ jobs:
 
       - name: Run OpenCode — Go quality lane
         id: go
+        # Bounded below the 55-minute job timeout so the free fallback lane
+        # keeps execution time (issue #357). A step-level timeout concludes
+        # the step as cancelled, not failure.
+        timeout-minutes: 30
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -74,7 +82,7 @@ jobs:
           prompt: ${{ inputs.prompt }}
 
       - name: Run OpenCode — free fallback
-        if: steps.go.outcome == 'failure'
+        if: steps.go.outcome == 'failure' || steps.go.outcome == 'cancelled'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:

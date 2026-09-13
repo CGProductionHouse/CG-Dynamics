@@ -16,13 +16,19 @@ Use GitHub as the persistent control plane so OpenCode can keep CG Dynamics movi
   - genuine blockers are surfaced by the supervisor rather than repeated bot comments;
   - does not merge, production-deploy, apply production migrations, change credentials/provider permissions, or publish externally;
   - concurrency guard prevents overlapping autonomous runs;
-  - model-lane exhaustion is recorded in the workflow log without deliberately failing the run just to generate notification mail.
+  - model-lane exhaustion is recorded in the workflow log without deliberately failing the run just to generate notification mail;
+  - the primary lane is step-bounded (`timeout-minutes: 30`) below the 55-minute job
+    timeout so a fallback lane always keeps real execution time (issue #357);
+    a step-level timeout concludes the step as `cancelled`, so every fallback
+    step triggers on `failure` **or** `cancelled` outcomes instead of being skipped.
 
 - `.github/workflows/opencode-on-demand.yml`
   - `/oc ...` or `/opencode ...` in an issue/PR comment wakes OpenCode on that exact thread;
   - manual `workflow_dispatch` supports a direct prompt from GitHub Actions;
   - comment-triggered mode inherently creates/updates a GitHub bot comment, so it is reserved for deliberate ad-hoc use rather than routine supervisor dispatch;
-  - OpenCode action-step failures are allowed to conclude without turning the whole workflow into a notification-generating failed run; supervisors inspect logs directly.
+  - OpenCode action-step failures are allowed to conclude without turning the whole workflow into a notification-generating failed run; supervisors inspect logs directly;
+  - both jobs bound the Go quality lane (`timeout-minutes: 30`) below the 55-minute
+    job timeout and trigger the free fallback on `failure` or `cancelled` (issue #357).
 
 ## Model routing
 
@@ -30,15 +36,20 @@ The scheduled worker uses an explicit ordered fallback at the GitHub workflow le
 
 1. `OPENCODE_PRIMARY_MODEL`
    - repo variable;
-   - default: `opencode/nemotron-3-ultra-free`.
-2. `OPENCODE_FALLBACK_MODEL_1`
+   - default: `opencode/nemotron-3-ultra-free`;
+   - step-bounded to 30 minutes; if it fails, times out or is cancelled, the Go lane starts from GitHub truth.
+2. Go quality lane (`OPENCODE_GO_API_KEY`, model `opencode-go/glm-5.3`)
+   - fixed in the workflow;
+   - per current CA authority GLM-5.3 is the preferred serious-coding Go model and the DeepSeek V4 Pro hardcode was removed (issue #357);
+   - receives the remaining job window after the primary lane ends.
+3. `OPENCODE_FALLBACK_MODEL_1`
    - optional repo variable;
    - set to `opencode/gpt-5.6-sol` if CA explicitly wants the paid Zen quality fallback enabled.
-3. `OPENCODE_NVIDIA_MODEL`
+4. `OPENCODE_NVIDIA_MODEL`
    - optional repo variable;
    - exact NVIDIA model ID from OpenCode's current `/models` catalog.
 
-If a lane fails, the next configured lane starts from GitHub truth. This is deliberate: GitHub state is the durable memory, not the previous model session.
+If a lane fails, times out or is cancelled, the next configured lane starts from GitHub truth. This is deliberate: GitHub state is the durable memory, not the previous model session.
 
 ### Important billing/auth boundary
 

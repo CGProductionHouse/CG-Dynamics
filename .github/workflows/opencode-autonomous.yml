@@ -28,6 +28,10 @@ jobs:
 
       - name: Run OpenCode — primary
         id: primary
+        # Bounded below the 55-minute job timeout so a real fallback lane
+        # always keeps execution time (issue #357). A step-level timeout
+        # concludes the step as cancelled, not failure.
+        timeout-minutes: 30
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -50,7 +54,7 @@ jobs:
 
       - name: Run OpenCode — Go quality fallback
         id: go
-        if: steps.primary.outcome == 'failure'
+        if: steps.primary.outcome == 'failure' || steps.primary.outcome == 'cancelled'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -65,7 +69,7 @@ jobs:
 
       - name: Run OpenCode — configured quality fallback
         id: sol
-        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && vars.OPENCODE_FALLBACK_MODEL_1 != ''
+        if: (steps.primary.outcome == 'failure' || steps.primary.outcome == 'cancelled') && (steps.go.outcome == 'failure' || steps.go.outcome == 'cancelled') && vars.OPENCODE_FALLBACK_MODEL_1 != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -80,7 +84,7 @@ jobs:
 
       - name: Run OpenCode — NVIDIA fallback
         id: nvidia
-        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && vars.OPENCODE_NVIDIA_MODEL != ''
+        if: (steps.primary.outcome == 'failure' || steps.primary.outcome == 'cancelled') && (steps.go.outcome == 'failure' || steps.go.outcome == 'cancelled') && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure' || steps.sol.outcome == 'cancelled') && vars.OPENCODE_NVIDIA_MODEL != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -94,6 +98,6 @@ jobs:
             Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
 
       - name: Record unavailable model lanes
-        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
+        if: (steps.primary.outcome == 'failure' || steps.primary.outcome == 'cancelled') && (steps.go.outcome == 'failure' || steps.go.outcome == 'cancelled') && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure' || steps.sol.outcome == 'cancelled') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure' || steps.nvidia.outcome == 'cancelled')
         run: |
           echo "All configured OpenCode model lanes were unavailable or failed. The supervisor can inspect this run; no email-worthy failure is raised here."
