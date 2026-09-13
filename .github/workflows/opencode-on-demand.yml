@@ -32,6 +32,7 @@ jobs:
 
       - name: Run OpenCode — Go quality lane
         id: go
+        timeout-minutes: 35
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -41,6 +42,7 @@ jobs:
           model: opencode-go/glm-5.3
 
       - name: Run OpenCode — free fallback
+        timeout-minutes: 15
         if: steps.go.outcome == 'failure'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
@@ -64,6 +66,7 @@ jobs:
 
       - name: Run OpenCode — Go quality lane
         id: go
+        timeout-minutes: 35
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -74,6 +77,7 @@ jobs:
           prompt: ${{ inputs.prompt }}
 
       - name: Run OpenCode — free fallback
+        timeout-minutes: 15
         if: steps.go.outcome == 'failure'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
