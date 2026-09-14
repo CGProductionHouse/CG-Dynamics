@@ -161,7 +161,7 @@ function RunForm({
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defaultTab?: ContentTab }) {
+export default function ContentWorkflowPage({ defaultTab = 'runs' }: { defaultTab?: ContentTab }) {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = resolveContentTab(searchParams.get('tab'), defaultTab)

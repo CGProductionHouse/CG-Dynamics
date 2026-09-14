@@ -12,10 +12,11 @@ const GlobalAssistantComposer = lazy(() => import('../../components/assistant/Gl
 const NOTIFICATION_POLL_MS = 30_000
 const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
 
-// The mobile quick-nav stays the same for every role — Hub / Work / Calendar /
-// Schedule / More. Manager-only work entries (Team Work, Morning List Import)
-// live in the More drawer instead of displacing Calendar or Schedule.
-const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/cg-calendar', '/admin/client-schedule']
+// Mobile primary navigation — stable five-item model per UX reset #1.
+// Hub, Work, Content, Calendar are direct one-tap destinations. Everything else
+// (Client Schedule, Clients, Marketing, Team Work, Import, CG Hours, Admin) lives
+// under More. This matches iOS tab bar guidance and Microsoft Teams/Outlook patterns.
+const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/content', '/admin/cg-calendar']
 
 function scheduleWhenIdle(callback: () => void) {
   const idleWindow = window as Window & {
