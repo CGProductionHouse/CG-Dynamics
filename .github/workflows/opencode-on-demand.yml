@@ -32,15 +32,17 @@ jobs:
 
       - name: Run OpenCode — Go quality lane
         id: go
+        timeout-minutes: 35
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: opencode-go/deepseek-v4-pro
+          model: opencode-go/glm-5.3
 
       - name: Run OpenCode — free fallback
+        timeout-minutes: 15
         if: steps.go.outcome == 'failure'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
@@ -64,16 +66,18 @@ jobs:
 
       - name: Run OpenCode — Go quality lane
         id: go
+        timeout-minutes: 35
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: opencode-go/deepseek-v4-pro
+          model: opencode-go/glm-5.3
           prompt: ${{ inputs.prompt }}
 
       - name: Run OpenCode — free fallback
+        timeout-minutes: 15
         if: steps.go.outcome == 'failure'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
