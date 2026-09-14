@@ -61,7 +61,7 @@ Do not create a second project directory as a workaround.
 
 ## Rule 5 — scaffold only after path validation
 
-For a Next.js app already opened in its confirmed empty folder:
+For a generic Next.js app already opened in its confirmed empty folder:
 
 ```powershell
 npx create-next-app@latest . --ts --tailwind --eslint --app --src-dir --use-npm --yes
@@ -69,11 +69,20 @@ npx create-next-app@latest . --ts --tailwind --eslint --app --src-dir --use-npm 
 
 The `.` means scaffold into the current confirmed folder. Do not provide another destination path unless intentionally creating a different project.
 
+For a **new CG client website**, do not use raw `create-next-app` when the canonical website system is available. Use the guarded CG website fast path instead:
+
+```powershell
+C:\Projects\CG-Websites\cg-website-editor\website-system\scripts\start-new-site.ps1 `
+  -ProjectPath "C:\Projects\CG-Websites\<lowercase-site-slug>"
+```
+
+That script validates the exact empty folder, copies the canonical starter into it, applies the package slug, creates the standard asset folders and project docs, installs dependencies, verifies lint/build, initializes Git on `main`, and checks GitHub authentication. It must fail closed rather than inventing a second folder.
+
 Only after the scaffold succeeds should Git/GitHub setup continue.
 
 ## Rule 6 — GitHub creation comes from the confirmed local project
 
-Preferred new-repo flow:
+Preferred generic new-repo flow:
 
 ```powershell
 git branch -M main
@@ -82,7 +91,31 @@ gh repo create CGProductionHouse/<repo-slug> --private --source=. --remote=origi
 
 Before running it, verify the authenticated GitHub account and that the intended repo does not already exist.
 
-## Rule 7 — websites and apps use the same anti-duplicate discipline
+For a new CG client website, prefer the guarded publisher after supplied client assets have been added:
+
+```powershell
+C:\Projects\CG-Websites\cg-website-editor\website-system\scripts\publish-new-site.ps1 `
+  -ProjectPath "C:\Projects\CG-Websites\<lowercase-site-slug>"
+```
+
+The website publisher verifies `main`, authentication, the absence of an existing `origin`, the absence of an existing same-name GitHub repository, and the staged first commit before creating/pushing the one matching private repo.
+
+## Rule 7 — Vercel follows the same one-project identity
+
+For CG client websites, the normal Vercel project name should match the local folder / npm / GitHub slug unless a specific existing project requires otherwise.
+
+After the GitHub repository exists, use:
+
+```powershell
+C:\Projects\CG-Websites\cg-website-editor\website-system\scripts\setup-vercel-site.ps1 `
+  -ProjectPath "C:\Projects\CG-Websites\<lowercase-site-slug>"
+```
+
+Default CG Vercel scope: `cg-dynamics-projects`.
+
+The Vercel setup may create/link the same-name Vercel project and connect the existing GitHub origin. It does not itself approve a custom production domain, DNS/email record changes, indexing, or an explicit production deployment. Those remain separate launch decisions.
+
+## Rule 8 — websites and apps use the same anti-duplicate discipline
 
 Websites normally live under:
 
@@ -103,5 +136,14 @@ Do not scaffold until all are true:
 - repo does not already exist unless intentionally reusing it;
 - current folder state is understood;
 - no active unrelated coding agent owns the same branch/worktree.
+
+For CG websites, the preferred sequence is now:
+
+1. CA creates/opens the one empty folder.
+2. `start-new-site.ps1` prepares and verifies the baseline.
+3. Real supplied client assets are added.
+4. `publish-new-site.ps1` creates/pushes the one matching GitHub repo.
+5. `setup-vercel-site.ps1` links the same-name Vercel project and Git origin.
+6. Project-specific authority/docs and a bounded GitHub issue are completed before a coding agent builds the site.
 
 If any item is uncertain, stop before creating files.
