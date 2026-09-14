@@ -28,6 +28,7 @@ jobs:
 
       - name: Run OpenCode — primary
         id: primary
+        timeout-minutes: 25
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
@@ -50,6 +51,7 @@ jobs:
 
       - name: Run OpenCode — Go quality fallback
         id: go
+        timeout-minutes: 15
         if: steps.primary.outcome == 'failure'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
@@ -65,6 +67,7 @@ jobs:
 
       - name: Run OpenCode — configured quality fallback
         id: sol
+        timeout-minutes: 8
         if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && vars.OPENCODE_FALLBACK_MODEL_1 != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
@@ -76,10 +79,11 @@ jobs:
           prompt: |
             Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
 
-            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
+            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface that blocker to CA.
 
       - name: Run OpenCode — NVIDIA fallback
         id: nvidia
+        timeout-minutes: 5
         if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && vars.OPENCODE_NVIDIA_MODEL != ''
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
@@ -91,7 +95,7 @@ jobs:
           prompt: |
             Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
 
-            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
+            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface that blocker to CA.
 
       - name: Record unavailable model lanes
         if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
