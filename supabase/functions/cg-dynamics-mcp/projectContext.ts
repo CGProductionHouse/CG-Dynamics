@@ -43,6 +43,36 @@ export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID_RE.test(value.trim())
 }
 
+const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+export function isUuidV4(value: unknown): value is string {
+  return typeof value === 'string' && UUID_V4_RE.test(value.trim())
+}
+
+/**
+ * Deterministically map an arbitrary model-supplied idempotency key to a canonical UUID.
+ * The DB/log path expects UUIDs; ChatGPT sends readable strings. Hashing scopes the key
+ * by caller + tool so the same readable key from different tools or staff never collides,
+ * and retries with the same key are idempotent without forcing UUIDs on the model.
+ */
+export async function deriveMcpIdempotencyKey(
+  callerProfileId: string,
+  toolName: string,
+  key: string,
+): Promise<string> {
+  const normalized = `${callerProfileId.trim().toLowerCase()}|${toolName.trim()}|${key.trim()}`
+  const encoder = new TextEncoder()
+  const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(normalized))
+  const bytes = new Uint8Array(buffer)
+  // Set UUID v4 version/variant bits so the result is a valid UUID.
+  bytes[6] = (bytes[6] & 0x0f) | 0x40
+  bytes[8] = (bytes[8] & 0x3f) | 0x80
+  const hex = Array.from(bytes)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`
+}
+
 export const MISSING_CONTEXT_ERROR =
   'Project context is required. This connector is shared by the whole CG ChatGPT account, so every call must state whose Project it is acting for. Call resolve_project_context first, then pass context={"context_kind":"staff|client|company_admin", ...} on every tool call.'
 

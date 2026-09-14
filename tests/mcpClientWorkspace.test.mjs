@@ -263,11 +263,33 @@ test('a retry returns the original record instead of creating another', () => {
   // with a bare status; a reused key with different input is still refused.
   assert.match(INDEX, /CLIENT_WORKSPACE_ACTIONS\.includes\(toolName\) && !conflict/)
   assert.match(INDEX, /replayThroughCanonicalKey = true/)
-  assert.match(INDEX, /isWrite && idempotencyKey && !replayThroughCanonicalKey/)
+  assert.match(INDEX, /isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey/)
   // The database serialises each (client, key) and returns the existing row before inserting.
   assert.match(SQL, /v_hash := 'cgw-' \|\| p_client_id::text \|\| '-' \|\| p_idempotency_key::text/)
   assert.match(SQL, /pg_advisory_xact_lock\(hashtextextended\(v_hash, 0\)\)/)
   assert.match(SQL, /create unique index if not exists client_context_updates_client_key_idx\s+on public\.client_context_updates \(client_id, idempotency_key\)/)
+})
+
+test('client-workspace writes accept readable idempotency keys, not only UUIDs', () => {
+  const readableKey = 'we-ar-fuels-garage-talks-2026-09-11'
+  const assignee = ws.resolveAssignee(DIRECTORY, { assignee_profile_id: SYDNEY }).assignee
+  const linkage = ws.planMicrosoftLinkage({ microsoft_write: 'not_requested' })
+  const built = ws.buildClientTaskWrite('follow_up', scope, { title: 'Garage Talks script', idempotency_key: readableKey }, assignee, linkage, 'create_client_followup_task')
+  assert.equal(built.ok, true, built.error)
+  assert.equal(built.params.p_idempotency_key, readableKey, 'the readable key is passed through to the RPC, which receives the canonical UUID after index.ts hashes it')
+
+  const update = ws.buildClientUpdateWrite(scope, {
+    update_kind: 'content_direction',
+    title: 'Garage Talks interview series',
+    body: 'We Ar Fuels wants a recurring interview series.',
+    idempotency_key: readableKey,
+  })
+  assert.equal(update.ok, true, update.error)
+  assert.equal(update.params.p_idempotency_key, readableKey)
+
+  assert.equal(ws.buildClientTaskWrite('follow_up', scope, { title: 'x', idempotency_key: '' }, assignee, linkage, 't').ok, false, 'empty key rejected')
+  assert.equal(ws.buildClientTaskWrite('follow_up', scope, { title: 'x', idempotency_key: 'x'.repeat(241) }, assignee, linkage, 't').ok, false, 'over-long key rejected')
+  assert.equal(ws.buildClientUpdateWrite(scope, { update_kind: 'content_direction', title: 'x', body: 'y', idempotency_key: '   ' }).ok, false, 'whitespace-only key rejected')
 })
 
 test('nothing is reported as created or recorded without a real record id', () => {

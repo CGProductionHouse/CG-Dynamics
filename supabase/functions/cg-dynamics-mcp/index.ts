@@ -79,6 +79,7 @@ import {
   buildAuditEnvelope,
   CLIENT_WORKSPACE_ACTIONS,
   CONTEXT_BOOTSTRAP_TOOL,
+  deriveMcpIdempotencyKey,
   isUuid,
   parseProjectContext,
   resolveClientScopeForInput,
@@ -2742,11 +2743,20 @@ async function handleToolsCall(
 
   const audit = buildAuditEnvelope(connection, parsed.context)
 
-  const idempotencyKey = toolInput.idempotency_key as string | undefined
+  const rawIdempotencyKey = toolInput.idempotency_key as string | undefined
   const isWrite = WRITE_TOOLS.has(toolName)
 
-  if (isWrite && !idempotencyKey) {
+  if (isWrite && (!rawIdempotencyKey || typeof rawIdempotencyKey !== 'string' || rawIdempotencyKey.trim().length === 0)) {
     return jsonRpcError(id, -32602, 'Write tools require an idempotency_key.')
+  }
+
+  // ChatGPT sends readable idempotency keys; the DB/log path expects UUIDs. Hash to a
+  // deterministic, caller+tool-scoped canonical UUID before any handler or RPC sees the key,
+  // so retries are idempotent without forcing UUIDs on the model.
+  let canonicalIdempotencyKey: string | undefined
+  if (isWrite && rawIdempotencyKey) {
+    canonicalIdempotencyKey = await deriveMcpIdempotencyKey(staff.profileId, toolName, rawIdempotencyKey.trim())
+    toolInput.idempotency_key = canonicalIdempotencyKey
   }
 
   // #341 client-workspace writes replay through their own canonical per-client key, which returns
@@ -2754,9 +2764,9 @@ async function handleToolsCall(
   // repeat falls through to the handler instead of answering without the record. A reused key
   // with different input is still refused.
   let replayThroughCanonicalKey = false
-  if (isWrite && idempotencyKey) {
+  if (isWrite && canonicalIdempotencyKey) {
     const inputHash = computeInputHash(toolInput as Record<string, unknown>)
-    const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash)
+    const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
       if (CLIENT_WORKSPACE_ACTIONS.includes(toolName) && !conflict) {
@@ -2770,10 +2780,10 @@ async function handleToolsCall(
   try {
     const result = await handler(staff, toolInput)
 
-    if (isWrite && idempotencyKey && !replayThroughCanonicalKey) {
+    if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey) {
       const inputHash = computeInputHash(toolInput as Record<string, unknown>)
       const hasError = result && typeof result === 'object' && 'error' in result
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
+      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
     }
 
     const isError = result && typeof result === 'object' && 'error' in result
@@ -2786,9 +2796,9 @@ async function handleToolsCall(
       isError: !!isError,
     })
   } catch (err) {
-    if (isWrite && idempotencyKey) {
+    if (isWrite && canonicalIdempotencyKey) {
       const inputHash = computeInputHash(toolInput as Record<string, unknown>)
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, idempotencyKey, inputHash, 'error', audit)
+      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit)
     }
     return jsonRpcError(id, -32603, `Tool execution failed: ${err instanceof Error ? err.message : String(err)}`)
   }
