@@ -103,15 +103,15 @@ test('Cape Lumber August truth parses exactly without inventing budget or conver
   assert.equal(parsed.campaigns[0].lastActivity, '2026-08-31')
 })
 
-test('provider-native conversion rate uses interactions and configured value stays unitless', () => {
+test('provider-native conversion rate uses interactions and conversion value stays hidden from clients', () => {
   const parsed = dashboard.parseGoogleAdsDashboardData('2026-09', [{
     campaign_name: 'Example', campaign_status: 'ENABLED', campaign_type: 'SEARCH',
     impressions: 1000, clicks: 150, interactions: 200, cost: 500,
     conversions: 20, value: 40, currency: 'ZAR', time_zone: 'Africa/Johannesburg',
   }])
   assert.equal(parsed?.conversionRate, 10)
-  assert.match(RESULTS, /Configured conversion value/)
-  assert.match(RESULTS, /Unitless until conversion-action value configuration is verified/)
+  assert.doesNotMatch(RESULTS, /Configured conversion value/)
+  assert.doesNotMatch(RESULTS, /Unitless until conversion-action value configuration is verified/)
   assert.doesNotMatch(RESULTS, /formatMoney\(dashboard\.conversionValue/)
   assert.match(RESULTS, /No automatic month-on-month judgement is shown/)
 })

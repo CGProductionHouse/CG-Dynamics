@@ -25,14 +25,17 @@ const USER_FACING_SOURCES = [
 let server
 let loadGoogleAdsDashboard
 let googleAdsCampaignPeriodLabel
+let parseGoogleAdsDashboardData
+let isGoogleAdsTrendComparable
+let formatGoogleAdsCampaignBudget
 let formatGoogleAdsCustomerId
 let supabase
 let originalRpc
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
-  ;({ formatGoogleAdsCustomerId } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
+  ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel, parseGoogleAdsDashboardData, isGoogleAdsTrendComparable } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
+  ;({ formatGoogleAdsCampaignBudget, formatGoogleAdsCustomerId } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
   ;({ supabase } = await server.ssrLoadModule('/src/lib/supabase.ts'))
   originalRpc = supabase.rpc
 })
@@ -271,4 +274,116 @@ test('integrations index preserves Meta status while exposing Google Ads sync ma
   assert.match(INTEGRATIONS_SOURCE, /Manage Google Ads/)
   assert.match(INTEGRATIONS_SOURCE, /Set up Google Ads/)
   assert.match(INTEGRATIONS_SOURCE, /Google Ads data sync/)
+})
+
+test('Cape Lumber August 2026 dashboard matches provider-native totals and period', () => {
+  const row = {
+    campaign_id: '23937664317',
+    campaign_name: 'Cape Lumber Brand Search',
+    campaign_status: 'ENABLED',
+    campaign_type: 'SEARCH',
+    impressions: 5490,
+    clicks: 151,
+    interactions: 151,
+    cost: 572.32,
+    conversions: 37,
+    value: 37,
+    currency: 'ZAR',
+    time_zone: 'Africa/Johannesburg',
+    first_activity: '2026-08-25',
+    last_activity: '2026-08-31',
+    data_through_date: '2026-08-31',
+  }
+  const data = parseGoogleAdsDashboardData('2026-08', [row])
+  assert.ok(data, 'dashboard parsed')
+  assert.equal(data.month, '2026-08')
+  assert.equal(data.periodStart, '2026-08-01')
+  assert.equal(data.periodEnd, '2026-08-31')
+  assert.equal(data.timeZone, 'Africa/Johannesburg')
+  assert.equal(data.currencyCode, 'ZAR')
+  assert.equal(data.spendMicros, 572_320_000)
+  assert.equal(data.impressions, 5490)
+  assert.equal(data.clicks, 151)
+  assert.equal(data.conversions, 37)
+  assert.equal(data.conversionValue, 37)
+  assert.equal(data.campaignCount, 1)
+  assert.equal(data.campaigns[0].campaignId, '23937664317')
+  assert.equal(data.campaigns[0].currencyCode, 'ZAR')
+  assert.equal(data.campaigns[0].timeZone, 'Africa/Johannesburg')
+  assert.ok(Math.abs(data.ctr - (151 / 5490) * 100) < 1e-6)
+  assert.ok(Math.abs(data.averageCpcMicros - 572_320_000 / 151) < 1)
+  assert.ok(Math.abs(data.conversionRate - (37 / 151) * 100) < 1e-6)
+  assert.ok(Math.abs(data.costPerConversionMicros - 572_320_000 / 37) < 1)
+  assert.equal(data.sevenDayTrend, null)
+})
+
+test('budget is shown separately from spend and uses provider-native settings', () => {
+  const campaign = {
+    campaignId: '23937664317',
+    name: 'Cape Lumber Brand Search',
+    currencyCode: 'ZAR',
+    timeZone: 'Africa/Johannesburg',
+    status: 'ENABLED',
+    type: 'SEARCH',
+    spendMicros: 572_320_000,
+    impressions: 5490,
+    clicks: 151,
+    interactions: 151,
+    ctr: 2.75,
+    averageCpcMicros: 3_790_000,
+    conversions: 37,
+    conversionRate: 24.5,
+    costPerConversionMicros: 15_470_000,
+    conversionValue: 37,
+    nativeSettings: {
+      apiVersion: 'v25',
+      observedAt: '2026-08-31T12:00:00Z',
+      primaryStatus: 'SERVING',
+      budgetAmountMicros: 2_500_000_000,
+      budgetPeriod: 'DAILY',
+      budgetShared: false,
+      budgetStatus: 'ENABLED',
+    },
+    firstActivity: '2026-08-25',
+    lastActivity: '2026-08-31',
+    campaignName: 'Cape Lumber Brand Search',
+    campaignStatus: 'ENABLED',
+    campaignType: 'SEARCH',
+  }
+  const budget = formatGoogleAdsCampaignBudget(campaign)
+  assert.match(budget, /2,500\.00/)
+  assert.match(budget, /average daily/)
+  assert.doesNotMatch(budget, /572\.32/)
+})
+
+test('conversion value is hidden from client-facing reporting until verified', () => {
+  const resultsSource = readSource('../src/components/client/GoogleAdsResults.tsx')
+  assert.doesNotMatch(resultsSource, /Configured conversion value/)
+  assert.doesNotMatch(resultsSource, /formatNumber\([^)]*conversionValue/)
+  assert.doesNotMatch(resultsSource, /Unitless until conversion-action value configuration is verified/)
+  assert.match(resultsSource, /Conversion value is not shown as revenue or account currency until that configuration is verified/)
+})
+
+test('incomparable equal-window trends are suppressed, not rendered as Unavailable', () => {
+  const comparable = {
+    current: { startDate: '2026-09-08', endDate: '2026-09-14', spendMicros: 100_000_000, impressions: 100, clicks: 20, conversions: 5 },
+    previous: { startDate: '2026-09-01', endDate: '2026-09-07', spendMicros: 80_000_000, impressions: 90, clicks: 10, conversions: 4 },
+  }
+  assert.equal(isGoogleAdsTrendComparable(comparable), true)
+  assert.equal(
+    isGoogleAdsTrendComparable({
+      ...comparable,
+      previous: { ...comparable.previous, spendMicros: 0, clicks: 0 },
+    }),
+    false,
+  )
+  assert.equal(isGoogleAdsTrendComparable(null), false)
+})
+
+test('Campaigns page loads Google Ads for the exact published report month', () => {
+  const campaignsSource = readSource('../src/pages/client/ClientCampaignsPage.tsx')
+  assert.match(campaignsSource, /getReportMonthFromPeriod/)
+  assert.match(campaignsSource, /reportMonth\(report\)/)
+  assert.match(campaignsSource, /loadGoogleAdsDashboard\(report\.id, reportMonth\(report\)\)/)
+  assert.doesNotMatch(campaignsSource, /currentTrackingMonth\(\)/)
 })

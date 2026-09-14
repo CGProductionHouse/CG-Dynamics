@@ -9,7 +9,7 @@ import {
   type GoogleAdsDashboardData,
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
-import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 import { readStrategyData } from '../../lib/strategyEngine'
 
 type CampaignPageData = {
@@ -25,9 +25,8 @@ const EMPTY_DATA: CampaignPageData = {
   state: 'no-activity',
 }
 
-function currentTrackingMonth(): string {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+function reportMonth(report: ClientReport): string {
+  return getReportMonthFromPeriod(report)
 }
 
 export default function ClientCampaignsPage() {
@@ -57,7 +56,7 @@ export default function ClientCampaignsPage() {
 
         const report = selectMonthlyReports(reportsResult.data)[0] ?? null
         const googleResult = report
-          ? await loadGoogleAdsDashboard(report.id, currentTrackingMonth())
+          ? await loadGoogleAdsDashboard(report.id, reportMonth(report))
           : { data: null, state: 'no-activity' as const, error: null }
         if (!active) return
 
@@ -78,7 +77,7 @@ export default function ClientCampaignsPage() {
     return () => { active = false }
   }, [profile?.client_id])
 
-  const reportMonth = data.report ? currentTrackingMonth() : null
+  const trackingMonth = data.report ? reportMonth(data.report) : null
 
   return (
     <ClientPortalShell client={data.client}>
@@ -88,8 +87,8 @@ export default function ClientCampaignsPage() {
         <p className="mt-4 text-base leading-7 text-report-muted">
           Verified campaign activity and the information CG uses to refine paid media.
         </p>
-        {reportMonth && (
-          <p className="mt-4 text-sm text-report-faint">Near-live tracking month: {monthDisplayLabel(reportMonth)}</p>
+        {trackingMonth && (
+          <p className="mt-4 text-sm text-report-faint">Campaign reporting month: {monthDisplayLabel(trackingMonth)}</p>
         )}
       </section>
 

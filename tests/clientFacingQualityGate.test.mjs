@@ -188,7 +188,8 @@ test('campaigns page uses the canonical client-safe Google Ads results component
   assert.match(CAMPAIGNS, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /formatMoney/)
   assert.match(GOOGLE_ADS_RESULTS, /Unavailable/)
-  assert.match(CAMPAIGNS, /currentTrackingMonth/)
+  assert.match(CAMPAIGNS, /getReportMonthFromPeriod/)
+  assert.match(CAMPAIGNS, /reportMonth\(report\)/)
   assert.match(GOOGLE_ADS_RESULTS, /Last successful sync/)
 })
 
@@ -296,7 +297,7 @@ test('report and campaigns use provider-native Google Ads semantics without gene
   assert.match(REPORT_VIEW, /GoogleAdsResults/)
   assert.match(CAMPAIGNS, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /average daily/)
-  assert.match(GOOGLE_ADS_RESULTS, /Configured conversion value/)
+  assert.doesNotMatch(GOOGLE_ADS_RESULTS, /Configured conversion value/)
   assert.match(GOOGLE_ADS_RESULTS, /No automatic month-on-month judgement is shown/)
   assert.doesNotMatch(GOOGLE_ADS_RESULTS, /ChannelGrowthPill|label="MoM"/)
   assert.doesNotMatch(PERFORMANCE, /previousGoogleAds/)
