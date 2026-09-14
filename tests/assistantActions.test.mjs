@@ -7,6 +7,8 @@ let parseAssistantAction
 let resolveRelativeDate
 let firstOfNextMonth
 let businessDateKey
+let resolveCalendarEventForCancel
+let resolveTime
 
 // 2026-07-01 is a Wednesday.
 const CTX = {
@@ -29,7 +31,7 @@ const CTX = {
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ parseAssistantAction, resolveRelativeDate, firstOfNextMonth } = await server.ssrLoadModule('/src/lib/assistantActions.ts'))
+  ;({ parseAssistantAction, resolveRelativeDate, firstOfNextMonth, resolveCalendarEventForCancel, resolveTime } = await server.ssrLoadModule('/src/lib/assistantActions.ts'))
   ;({ businessDateKey } = await server.ssrLoadModule('/src/lib/businessTime.ts'))
 })
 
@@ -315,4 +317,158 @@ test('"What schedule items are overdue?" falls through to server', () => {
 test('"Any missing posts?" falls through to server', () => {
   const r = parseAssistantAction('Any missing posts?', CTX)
   assert.equal(r, null)
+})
+
+// ── Task notes: "add a note to this task: …" (#208 do-it path) ──────────────
+
+test('"Add a note to this task: client approved the artwork" → task.note on the open task', () => {
+  const r = parseAssistantAction('Add a note to this task: client approved the artwork', CTX)
+  assert.equal(r.type, 'task.note')
+  assert.equal(r.fields.note, 'client approved the artwork')
+  assert.equal(r.target.type, 'planner_task')
+  assert.equal(r.target.id, 'task-1')
+  assert.equal(r.target.label, 'Prepare Dulux artwork')
+})
+
+test('"Note on this task: waiting for feedback" → task.note', () => {
+  const r = parseAssistantAction('Note on this task: waiting for feedback', CTX)
+  assert.equal(r.type, 'task.note')
+  assert.equal(r.fields.note, 'waiting for feedback')
+})
+
+test('AF: "Voeg \'n nota by hierdie taak: kliënt het goedgekeur" → task.note', () => {
+  const r = parseAssistantAction("Voeg 'n nota by hierdie taak: kliënt het goedgekeur", CTX)
+  assert.equal(r.type, 'task.note')
+  assert.equal(r.fields.note, 'kliënt het goedgekeur')
+})
+
+test('"Add a comment to that task saying Franco will deliver tomorrow" → task.note via follow-up context', () => {
+  const r = parseAssistantAction('Add a comment to that task saying Franco will deliver tomorrow', {
+    ...CTX, currentTaskId: null, currentTaskName: null, lastTaskId: 'task-9', lastTaskName: 'Red Oak poster',
+  })
+  assert.equal(r.type, 'task.note')
+  assert.equal(r.fields.note, 'Franco will deliver tomorrow')
+  assert.equal(r.target.id, 'task-9')
+})
+
+test('"Add a note to the Red Oak poster: waiting for artwork" → task.note resolved by title match', () => {
+  const r = parseAssistantAction('Add a note to the Red Oak poster: waiting for artwork', {
+    ...CTX, currentTaskId: null, currentTaskName: null,
+    tasks: [
+      { id: 't-poster', title: 'Red Oak rugby poster', clientId: 'c-red-oak', clientName: 'Red Oak', dueDate: null },
+      { id: 't-website', title: 'Piek website changes', clientId: 'c-mimosa', clientName: 'Mimosa Mall', dueDate: null },
+    ],
+  })
+  assert.equal(r.type, 'task.note')
+  assert.equal(r.target.id, 't-poster')
+  assert.equal(r.fields.note, 'waiting for artwork')
+})
+
+test('task.note with no task in context asks ONE small clarification', () => {
+  const r = parseAssistantAction('Add a note: client approved the artwork', { ...CTX, currentTaskId: null, currentTaskName: null, lastTaskId: null, lastTaskName: null, tasks: [] })
+  assert.ok(r.clarify)
+  assert.match(r.clarify, /Which task/)
+})
+
+test('task.note without a note body asks what it should say', () => {
+  const r = parseAssistantAction('Add a note to this task', CTX)
+  assert.ok(r.clarify)
+  assert.match(r.clarify, /What should the note say\?/)
+})
+
+test('completion verb before the note request wins: "Mark it done and add a note that it was approved" → task.update, not task.note', () => {
+  const r = parseAssistantAction('Mark it done and add a note that it was approved', CTX)
+  assert.equal(r.type, 'task.update')
+  assert.equal(r.fields.status, 'done')
+})
+
+test('note request containing "done" stays a note: "Add a note that it was done by Franco"', () => {
+  const r = parseAssistantAction('Add a note that it was done by Franco', CTX)
+  assert.equal(r.type, 'task.note')
+  assert.equal(r.fields.note, 'it was done by Franco')
+})
+
+test('"note to self" is never a task note', () => {
+  const r = parseAssistantAction('Note to self: buy milk', CTX)
+  assert.notEqual(r?.type, 'task.note')
+})
+
+// ── Calendar cancel: proposal + deterministic event resolution ──────────────
+
+test('"Cancel the Dulux meeting" → calendar.cancel proposal', () => {
+  const r = parseAssistantAction('Cancel the Dulux meeting', CTX)
+  assert.equal(r.type, 'calendar.cancel')
+  assert.equal(r.clientId, 'c-dulux')
+  assert.equal(r.clientName, 'Dulux')
+  assert.equal(r.target, undefined)
+})
+
+test('"Cancel that meeting" with follow-up event context → calendar.cancel with company_event target', () => {
+  const r = parseAssistantAction('Cancel that meeting', {
+    ...CTX, lastCalendarEventId: 'evt-1', lastCalendarEventTitle: 'Dulux meeting',
+  })
+  assert.equal(r.type, 'calendar.cancel')
+  assert.equal(r.target.type, 'company_event')
+  assert.equal(r.target.id, 'evt-1')
+  assert.equal(r.target.label, 'Dulux meeting')
+})
+
+test('"Cancel the shoot" resolves as a cancel intent (wider event nouns)', () => {
+  const r = parseAssistantAction('Cancel the Red Oak shoot', CTX)
+  assert.equal(r.type, 'calendar.cancel')
+  assert.equal(r.clientName, 'Red Oak')
+})
+
+test('resolveCalendarEventForCancel: unique title match wins', () => {
+  const events = [
+    { id: 'e1', title: 'Dulux meeting', clientName: 'Dulux', startAt: '2026-07-02T09:00:00', status: 'planned', supersededByEventId: null },
+    { id: 'e2', title: 'Braize shoot', clientName: 'Braize', startAt: '2026-07-03T14:00:00', status: 'planned', supersededByEventId: null },
+  ]
+  const r = resolveCalendarEventForCancel('Cancel the Dulux meeting', events)
+  assert.equal(r.event.id, 'e1')
+  assert.equal(r.ambiguous.length, 0)
+})
+
+test('resolveCalendarEventForCancel: bare "2pm" filters by start time', () => {
+  const events = [
+    { id: 'e1', title: 'Team sync', clientName: null, startAt: '2026-07-02T09:00:00', status: 'planned', supersededByEventId: null },
+    { id: 'e2', title: 'Team sync', clientName: null, startAt: '2026-07-02T14:00:00', status: 'planned', supersededByEventId: null },
+  ]
+  const r = resolveCalendarEventForCancel('Cancel the 2pm team sync', events)
+  assert.equal(r.event.id, 'e2')
+})
+
+test('resolveCalendarEventForCancel: equal scores come back as ambiguity, never a guess', () => {
+  const events = [
+    { id: 'e1', title: 'Dulux meeting', clientName: 'Dulux', startAt: '2026-07-02T09:00:00', status: 'planned', supersededByEventId: null },
+    { id: 'e2', title: 'Dulux meeting', clientName: 'Dulux', startAt: '2026-07-04T09:00:00', status: 'planned', supersededByEventId: null },
+  ]
+  const r = resolveCalendarEventForCancel('Cancel the Dulux meeting', events)
+  assert.equal(r.event, null)
+  assert.equal(r.ambiguous.length, 2)
+})
+
+test('resolveCalendarEventForCancel: cancelled and superseded events are never candidates', () => {
+  const events = [
+    { id: 'e1', title: 'Dulux meeting', clientName: 'Dulux', startAt: '2026-07-02T09:00:00', status: 'cancelled', supersededByEventId: null },
+    { id: 'e2', title: 'Dulux meeting', clientName: 'Dulux', startAt: '2026-07-03T09:00:00', status: 'planned', supersededByEventId: 'other' },
+  ]
+  const r = resolveCalendarEventForCancel('Cancel the Dulux meeting', events)
+  assert.equal(r.event, null)
+  assert.equal(r.ambiguous.length, 0)
+})
+
+test('resolveCalendarEventForCancel: no meaningful words → no guess', () => {
+  const events = [
+    { id: 'e1', title: 'Dulux meeting', clientName: 'Dulux', startAt: '2026-07-02T09:00:00', status: 'planned', supersededByEventId: null },
+  ]
+  const r = resolveCalendarEventForCancel('Cancel the meeting', events)
+  assert.equal(r.event, null)
+  assert.equal(r.ambiguous.length, 0)
+})
+
+test('resolveTime: bare am/pm forms ("2pm", "10am") resolve like "at 2pm"', () => {
+  assert.equal(resolveTime('Cancel my 2pm meeting'), '14:00')
+  assert.equal(resolveTime('Move it to 10am'), '10:00')
+  assert.equal(resolveTime('meeting at 2pm'), '14:00')
 })
