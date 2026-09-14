@@ -18,6 +18,7 @@ export type AssistantActionType =
   | 'task.assign'
   | 'task.update'
   | 'task.due_date'
+  | 'task.note'
   | 'schedule.propose'
   | 'video.move'
   | 'video.mark_shot'
@@ -41,6 +42,18 @@ export interface ActionTask {
   clientId: string | null
   clientName: string | null
   dueDate: string | null
+}
+
+// Upcoming CG Calendar event, as seen by the cancel resolver. The composer
+// fills this from the canonical calendar service; the parser stays pure.
+export interface ActionCalendarEvent {
+  id: string
+  title: string
+  clientName: string | null
+  startAt: string
+  status: string
+  supersededByEventId?: string | null
+  microsoftSourceType?: string | null
 }
 
 export interface ActionContext {
@@ -77,7 +90,7 @@ export interface ActionContext {
 }
 
 export interface ActionTarget {
-  type: 'planner_task' | 'content_run'
+  type: 'planner_task' | 'content_run' | 'company_event'
   id: string
   label: string
 }
@@ -129,6 +142,9 @@ const NUMBER_WORDS: Record<string, number> = {
 
 const CREATE_MEETING = /\b(add|create|make|schedule|book|set ?up|new|skep|maak|voeg|boek|skeduleer|reël|reel)\b/
 const MEETING_NOUN = /\b(meeting|vergadering|event|afspraak|call|oproep)\b/
+// Events a cancel request may point at. Wider than MEETING_NOUN so "cancel the
+// shoot" resolves too, but used only for cancelling — never for creation.
+const CANCEL_EVENT_NOUN = /\b(meeting|vergadering|event|geleentheid|afspraak|call|oproep|shoot|skiet|content run)\b/
 const CANCEL = /\b(cancel|kanselleer|delete|remove|verwyder|skrap)\b/
 const ASSIGN = /\b(reassign|assign|herassign|toewys|wys .* toe|gee (?:die|hierdie)?\s*taak|gee vir)\b/
 const ASSIGNED_BY = /\b(?:done|completed|handled|designed|made|finished)\b.{0,40}\b(?:by|deur)\b/
@@ -199,7 +215,7 @@ export function firstOfNextMonth(today: string): string {
   return toISO(new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + 1, 1)))
 }
 
-// "at 10", "om 10", "10:00", "10am" → "HH:MM" or null.
+// "at 10", "om 10", "10:00", "10am", "2pm" → "HH:MM" or null.
 export function resolveTime(text: string): string | null {
   const lower = text.toLowerCase()
   const hhmm = lower.match(/\b(\d{1,2}):(\d{2})\b/)
@@ -209,6 +225,14 @@ export function resolveTime(text: string): string | null {
     let h = Number(at[1])
     if (at[2] === 'pm' && h < 12) h += 12
     if (at[2] === 'am' && h === 12) h = 0
+    return `${String(h).padStart(2, '0')}:00`
+  }
+  // Bare "2pm" / "10am" without an "at" preposition.
+  const bare = lower.match(/\b(\d{1,2})\s*(am|pm)\b/)
+  if (bare) {
+    let h = Number(bare[1])
+    if (bare[2] === 'pm' && h < 12) h += 12
+    if (bare[2] === 'am' && h === 12) h = 0
     return `${String(h).padStart(2, '0')}:00`
   }
   return null
@@ -298,6 +322,71 @@ function collectNumbers(text: string): number[] {
     if (token in NUMBER_WORDS) found.push(NUMBER_WORDS[token])
   }
   return [...new Set(found)]
+}
+
+// ── Task note ("add a note to this task: …") ─────────────────────────────────
+
+// Verbs that introduce a note on a task: "add a note…", "los 'n opmerking…".
+const NOTE_VERB_NOUN = /\b(?:add|put|make|leave|log|append|attach|voeg|skryf|los)\s+(?:a\s+|an\s+|n\s+|'n\s+|’n\s+)?(?:quick\s+|short\s+|klein\s+)?(?:note|notes|comment|comments|nota|notas|opmerking|opmerkinge)\b/
+// Prepositional forms: "note on this task", "comment on the poster task",
+// "nota op die taak".
+const NOTE_PREP = /\b(?:note|notes|comment|nota|notas|opmerking)\s+(?:on|to|for|in|op|aan|vir)\b/
+const NOTE_WORD = /note|notes|comment|comments|nota|notas|opmerking/
+const TASK_NOTE_STATUS_WORD = /\b(?:complete|completed|done|klaar|voltooi|finish|afgehandel|block|blocked|geblokkeer|stuck|wag(?:tend)?)\b/
+
+/** The note body: after a colon, after "saying", or after "note that". */
+function extractTaskNoteText(raw: string): string | null {
+  const colon = raw.match(/:\s*([\s\S]+)$/)
+  if (colon && colon[1].trim()) return colon[1].trim()
+  const saying = raw.match(/\b(?:saying|that says|sê(?:\s+dat)?)\s+([\s\S]+)$/i)
+  if (saying && saying[1].trim()) return saying[1].trim()
+  const noteThat = raw.match(/\bnote that\s+([\s\S]+)$/i)
+  if (noteThat && noteThat[1].trim()) return noteThat[1].trim()
+  return null
+}
+
+// ── Calendar cancel event resolution (pure) ─────────────────────────────────
+
+// Command words never used for event-title matching, so "cancel the meeting"
+// alone can never guess an event.
+const CANCEL_COMMAND_WORDS = new Set([
+  'cancel', 'canceled', 'cancelled', 'kanselleer', 'delete', 'remove', 'verwyder',
+  'skrap', 'meeting', 'vergadering', 'event', 'afspraak', 'call', 'oproep',
+  'shoot', 'skiet', 'please', 'my', 'the', 'a', 'an',
+])
+
+export interface CalendarEventResolution {
+  event: ActionCalendarEvent | null
+  ambiguous: ActionCalendarEvent[]
+}
+
+/**
+ * Resolves which upcoming event a "cancel the X meeting" request refers to.
+ * Pure and deterministic: a time qualifier filters by start time, meaningful
+ * words must overlap the event title/client, and equally-scoring candidates
+ * come back as an ambiguity list rather than a guess. Cancelled and
+ * superseded events are never candidates.
+ */
+export function resolveCalendarEventForCancel(raw: string, events: ActionCalendarEvent[]): CalendarEventResolution {
+  const usable = events.filter(event => event.status !== 'cancelled' && !event.supersededByEventId)
+  if (usable.length === 0) return { event: null, ambiguous: [] }
+  const time = resolveTime(raw)
+  const pool = time ? usable.filter(event => event.startAt.slice(11, 16) === time) : usable
+  if (pool.length === 0) return { event: null, ambiguous: [] }
+  const words = new Set(normaliseWords(raw).filter(word => !CANCEL_COMMAND_WORDS.has(word)))
+  if (words.size === 0) return { event: null, ambiguous: [] }
+  const scored = pool
+    .map(event => {
+      const titleWords = normaliseWords(`${event.title} ${event.clientName ?? ''}`)
+      const matched = titleWords.filter(word => words.has(word)).length
+      return { event, matched }
+    })
+    .filter(entry => entry.matched > 0)
+    .sort((a, b) => b.matched - a.matched || a.event.startAt.localeCompare(b.event.startAt))
+  if (scored.length === 0) return { event: null, ambiguous: [] }
+  const top = scored.filter(entry => entry.matched === scored[0].matched).map(entry => entry.event)
+  if (top.length === 1) return { event: top[0], ambiguous: [] }
+  return { event: null, ambiguous: top }
 }
 
 // ── Meta Business sync intent ────────────────────────────────────────────────
@@ -617,6 +706,46 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
     }
   }
 
+  // 2a. Add a note/comment to an existing task.
+  // Checked BEFORE the completion/block parser so a note whose text mentions
+  // "done" ("add a note that it was done by Franco") stays a note. When a
+  // complete/block verb clearly precedes the note request, this step stands
+  // down so the status change wins instead.
+  if ((NOTE_VERB_NOUN.test(lower) || NOTE_PREP.test(lower)) && !/\bnote to self\b/.test(lower)) {
+    const noteWordPos = lower.search(NOTE_WORD)
+    const statusPos = lower.search(TASK_NOTE_STATUS_WORD)
+    const statusFirst = statusPos !== -1 && (noteWordPos === -1 || statusPos < noteWordPos)
+    if (!statusFirst) {
+      const noteText = extractTaskNoteText(raw)
+      const effectiveTaskId = context.currentTaskId ?? context.lastTaskId ?? null
+      const effectiveTaskName = context.currentTaskName ?? context.lastTaskName ?? null
+      let existing: ActionTask | null
+      if (effectiveTaskId) {
+        existing = {
+          id: effectiveTaskId,
+          title: effectiveTaskName ?? 'Task',
+          clientId: context.currentClientId ?? context.lastClientId ?? null,
+          clientName: context.currentClientName ?? context.lastClientName ?? null,
+          dueDate: null,
+        }
+      } else {
+        const matches = findTasks(raw, context.tasks ?? [], null)
+        if (matches.length > 1) return { clarify: `Which task - ${matches.slice(0, 3).map(taskChoice).join(' or ')}?` }
+        existing = matches[0] ?? null
+      }
+      if (!existing) return { clarify: 'Which task should I add the note to? Open the task or name it.' }
+      if (!noteText) return { clarify: 'What should the note say?' }
+      return {
+        type: 'task.note',
+        title: `Add a note to "${existing.title}"`,
+        fields: { note: noteText },
+        clientId: existing.clientId ?? context.currentClientId ?? context.lastClientId ?? null,
+        clientName: existing.clientName ?? context.currentClientName ?? context.lastClientName ?? null,
+        target: taskTarget(existing),
+      }
+    }
+  }
+
   // 2b. Task status / completion / blocker (on "this task" / a task in context).
   // Also handles follow-up context: "mark that done", "complete it", etc.
   // Exclude "done by X" / "should be done by X" which is an assignment, not a completion.
@@ -695,15 +824,21 @@ export function parseAssistantAction(input: string, context: ActionContext): Par
     }
   }
 
-  // 4. Cancel a meeting/event.
-  if (CANCEL.test(lower) && MEETING_NOUN.test(lower)) {
+  // 4. Cancel a meeting/event. The composer resolves the exact upcoming event
+  // (follow-up context or a deterministic title/time match) before the
+  // confirmed write — cancelling happens directly, not by navigation.
+  if (CANCEL.test(lower) && CANCEL_EVENT_NOUN.test(lower)) {
     const { matches } = findClient(lower, context.clients)
+    const followUpId = context.lastCalendarEventId ?? null
     return {
       type: 'calendar.cancel',
-      title: 'Cancel meeting',
+      title: 'Cancel event',
       fields: { match: raw, client: matches[0]?.name ?? context.currentClientName ?? null },
       clientId: matches[0]?.id ?? context.currentClientId ?? null,
       clientName: matches[0]?.name ?? context.currentClientName ?? null,
+      target: followUpId
+        ? { type: 'company_event', id: followUpId, label: context.lastCalendarEventTitle ?? 'Event' }
+        : undefined,
     }
   }
 

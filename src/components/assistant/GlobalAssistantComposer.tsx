@@ -13,7 +13,7 @@ import {
   type AssistantLocalWorkContext,
 } from '../../lib/assistant'
 import { getMyDayContext } from '../../lib/workforceMyDay'
-import { parseAssistantAction, type ActionProposal, type AssistantActionType } from '../../lib/assistantActions'
+import { parseAssistantAction, resolveCalendarEventForCancel, type ActionCalendarEvent, type ActionProposal, type AssistantActionType } from '../../lib/assistantActions'
 
 // Compound action plan: multiple actions extracted from a single message.
 interface CompoundActionPlan {
@@ -23,7 +23,7 @@ interface CompoundActionPlan {
   confidence: number
 }
 import { listStaffProfiles } from '../../lib/contentWorkflow'
-import { createCompanyEvent } from '../../lib/companyCalendar'
+import { createCompanyEvent, getCompanyEvent, listCompanyEvents, updateCompanyEvent, type CompanyCalendarEvent } from '../../lib/companyCalendar'
 import { logPlannerActivity, listPlannerWorkloadSummary, loadOwnershipReviewSummary } from '../../lib/planner'
 import { proposeScheduleChange } from '../../lib/scheduleChangeRequests'
 import { enqueueBackgroundJob, nudgeBackgroundWorker, listMyBackgroundJobs, type BackgroundJob } from '../../lib/backgroundJobs'
@@ -639,6 +639,19 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     setMessages(current => [...current, { id: nextId(), role: 'assistant', text: presentAssistantReply(text) }])
   }
 
+  // Canonical calendar event → the pure parser's event shape.
+  function toActionCalendarEvent(event: CompanyCalendarEvent): ActionCalendarEvent {
+    return {
+      id: event.id,
+      title: event.title,
+      clientName: event.client_name,
+      startAt: event.start_at,
+      status: event.status,
+      supersededByEventId: event.superseded_by_event_id ?? null,
+      microsoftSourceType: event.microsoft_source_type ?? null,
+    }
+  }
+
   // Confirmed action → execute through an existing RLS-protected path, then
   // audit. Nothing here runs until the user confirms the preview.
   async function applyProposal() {
@@ -984,12 +997,67 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
         setProposal(null)
         pushAssistant(`Done — due date for "${p.target.label}" changed to ${dueDate}.`)
         lastTaskRef.current = { id: p.target.id, name: p.target.label }
-      } else {
-        // calendar.cancel still needs the on-record calendar entry to act on.
+      } else if (p.type === 'task.note') {
+        // Add a note/comment to a task through the canonical audited RPC. The
+        // server enforces manager-or-assignee access and writes the audit log;
+        // this only sends the confirmed text.
+        if (p.target?.type !== 'planner_task') {
+          setProposalError('Open the Planner task first so I know exactly which task the note belongs to.')
+          return
+        }
+        const note = String(p.fields.note ?? '').trim()
+        if (!note) { setProposalError('What should the note say?'); return }
+        const res = await updateAssistantTask({ taskId: p.target.id, action: 'comment', comment: note })
+        if (!actionIsCurrent()) return
+        if (res.error) throw new Error(res.error.message)
+        setProposal(null)
+        pushAssistant(`Done — note added to "${p.target.label}".`)
+        lastTaskRef.current = { id: p.target.id, name: p.target.label }
+        if (p.clientId && p.clientName) lastClientRef.current = { id: p.clientId, name: p.clientName }
+      } else if (p.type === 'calendar.cancel') {
+        // Cancel the resolved event directly through the same canonical service
+        // the CG Calendar editor uses: a reversible local status change, not a
+        // delete, with the write audited. Managers/admins only, exactly like
+        // the calendar UI. Microsoft/Outlook stays read-only upstream — an
+        // Outlook-imported event is never mutated from here.
+        if (p.target?.type !== 'company_event') {
+          setProposalError('Which event should I cancel? Give me its name or date.')
+          return
+        }
+        if (!isManager) {
+          setProposalError('Cancelling calendar events is restricted to managers and admins.')
+          return
+        }
+        const current = await getCompanyEvent(p.target.id)
+        if (!actionIsCurrent()) return
+        if (current.error || current.tableMissing || !current.data) throw new Error('I could not find that event anymore. Check it on CG Calendar.')
+        if (current.data.status === 'cancelled') {
+          setProposal(null)
+          pushAssistant(`"${current.data.title}" is already cancelled.`)
+          return
+        }
+        if (current.data.microsoft_source_type === 'outlook_event') {
+          setProposal(null)
+          pushAssistant('That event is an Outlook import, so I cannot cancel it from here. I have opened CG Calendar so you can handle it on the record.')
+          navigate('/admin/cg-calendar')
+          return
+        }
+        const res = await updateCompanyEvent(p.target.id, { status: 'cancelled' })
+        if (!actionIsCurrent()) return
+        if (res.error) throw new Error(res.error.message)
+        if (res.tableMissing) throw new Error('CG Calendar is not enabled in this database yet.')
+        await logPlannerActivity({
+          entity_type: 'company_calendar_event', entity_id: p.target.id, action: 'assistant_cancelled',
+          actor_user_id: applyingProfileId, actor_name: applyingProfileName,
+          metadata: { via: 'cg_assistant', title: current.data.title, start_at: current.data.start_at },
+        })
         if (!actionIsCurrent()) return
         setProposal(null)
-        pushAssistant('Opening CG Calendar so you can finish this on the record.')
-        navigate('/admin/cg-calendar')
+        const when = `${current.data.start_at.slice(0, 10)}${current.data.start_at.slice(11, 16) !== '00:00' ? ` at ${current.data.start_at.slice(11, 16)}` : ''}`
+        pushAssistant(`Done — cancelled "${current.data.title}" on ${when}.`)
+        lastCalendarEventRef.current = { id: p.target.id, title: current.data.title, client: current.data.client_name ?? null }
+      } else {
+        setProposalError('That action is not available right now.')
       }
     } catch (err) {
       if (actionIsCurrent()) setProposalError(err instanceof Error ? err.message : 'Could not complete that action.')
@@ -1433,6 +1501,96 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           nextProposal = { ...parsed, target: { type: 'content_run', id: run.id, label: run.name } }
         } catch {
           if (profileIdRef.current === sendingProfileId) setChatError('I could not verify the selected Content Run. Try again.')
+          return
+        } finally {
+          sendingRef.current = false
+          if (profileIdRef.current === sendingProfileId) setSending(false)
+        }
+      }
+      if (parsed.type === 'calendar.cancel') {
+        // Resolve the exact upcoming event before showing the confirm preview:
+        // follow-up context first, then a deterministic title/time match over
+        // real calendar events. Ambiguity asks; nothing is guessed.
+        sendingRef.current = true
+        setSending(true)
+        setChatError(null)
+        try {
+          let resolved: ActionCalendarEvent | null = null
+          let alreadyCancelled: ActionCalendarEvent | null = null
+          const followUpId = parsed.target?.type === 'company_event'
+            ? parsed.target.id
+            : lastCalendarEventRef.current?.id ?? null
+          if (followUpId) {
+            const res = await getCompanyEvent(followUpId)
+            if (profileIdRef.current !== sendingProfileId) return
+            if (!res.error && !res.tableMissing && res.data) {
+              const event = toActionCalendarEvent(res.data)
+              if (event.status === 'cancelled') alreadyCancelled = event
+              else if (!event.supersededByEventId) resolved = event
+            }
+          }
+          if (!resolved && !alreadyCancelled) {
+            const today = businessDateKey()
+            const [y, m, d] = today.split('-').map(Number)
+            const rangeEnd = new Date(Date.UTC(y, (m ?? 1) - 1, (d ?? 1) + 21))
+            const res = await listCompanyEvents(`${today}T00:00:00`, `${rangeEnd.toISOString().slice(0, 10)}T23:59:59`)
+            if (profileIdRef.current !== sendingProfileId) return
+            if (res.error) {
+              setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+              setInput('')
+              setOpen(true)
+              pushAssistant('I could not read the calendar to find that event right now. Try again in a moment.')
+              return
+            }
+            if (res.tableMissing) {
+              setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+              setInput('')
+              setOpen(true)
+              pushAssistant('CG Calendar is not enabled in this database yet.')
+              return
+            }
+            const outcome = resolveCalendarEventForCancel(clean, (res.data ?? []).map(toActionCalendarEvent))
+            if (outcome.event) resolved = outcome.event
+            else if (outcome.ambiguous.length > 1) {
+              const options = outcome.ambiguous.slice(0, 3)
+                .map(event => `"${event.title}" on ${event.startAt.slice(0, 10)}${event.startAt.slice(11, 16) !== '00:00' ? ` at ${event.startAt.slice(11, 16)}` : ''}`)
+                .join(' or ')
+              setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+              setInput('')
+              setOpen(true)
+              pushAssistant(`I found ${outcome.ambiguous.length} events that could match — ${options}. Which one?`)
+              return
+            }
+          }
+          if (profileIdRef.current !== sendingProfileId) return
+          if (alreadyCancelled) {
+            setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+            setInput('')
+            setOpen(true)
+            pushAssistant(`"${alreadyCancelled.title}" is already cancelled.`)
+            return
+          }
+          if (!resolved) {
+            setMessages(current => [...current, { id: nextId(), role: 'user', text: clean }])
+            setInput('')
+            setOpen(true)
+            pushAssistant('I could not find an upcoming event matching that. Check the exact name and date on CG Calendar.')
+            return
+          }
+          const event = resolved
+          const date = event.startAt.slice(0, 10)
+          const time = event.startAt.slice(11, 16)
+          const when = `${date}${time !== '00:00' ? ` at ${time}` : ''}`
+          nextProposal = {
+            ...parsed,
+            title: `Cancel "${event.title}" on ${when}`,
+            fields: { title: event.title, date, time: time !== '00:00' ? time : null },
+            target: { type: 'company_event', id: event.id, label: event.title },
+            clientName: event.clientName ?? parsed.clientName,
+            clientId: parsed.clientId,
+          }
+        } catch {
+          if (profileIdRef.current === sendingProfileId) setChatError('I could not verify that calendar event. Try again.')
           return
         } finally {
           sendingRef.current = false
@@ -2074,6 +2232,9 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
               {Object.entries(proposal.fields)
                 .filter(([key, value]) => {
                   if (key === 'job' || key === 'sync_previous_month' || key === 'status') return false
+                  // The cancel preview acts on the resolved event — the header
+                  // already names it with its date/time, so no editable fields.
+                  if (proposal.type === 'calendar.cancel') return false
                   if (proposal.type === 'task.assign' && key === 'task') return false
                   if ((proposal.type === 'task.assign' || proposal.type === 'task.create') && (key === 'assignee' || key === 'due_date')) return true
                   return value !== null && value !== undefined && String(value) !== ''
