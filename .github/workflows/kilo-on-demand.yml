@@ -1,0 +1,133 @@
+name: Kilo on demand
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: Instruction for Kilo
+        required: true
+        type: string
+      model:
+        description: Kilo Gateway model ID
+        required: false
+        default: kilocode/poolside/laguna-xs-2.1:free
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  issue_comment:
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/kilo') && github.actor == 'CGProductionHouse'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+      KILO_PROVIDER: kilocode
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PROMPT: ${{ github.event.comment.body }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Kilo CLI
+        run: npm install -g @kilocode/cli
+
+      - name: Select free model
+        id: route
+        shell: bash
+        run: |
+          if [[ "$PROMPT" == *"/kilo-ultra"* ]]; then
+            MODEL="kilocode/nvidia/nemotron-3-ultra-550b-a55b:free"
+          elif [[ "$PROMPT" == *"/kilo-laguna-s"* ]]; then
+            MODEL="kilocode/poolside/laguna-s-2.1:free"
+          elif [[ "$PROMPT" == *"/kilo-step"* ]]; then
+            MODEL="kilocode/stepfun/step-3.7-flash:free"
+          elif [[ "$PROMPT" == *"/kilo-auto"* ]]; then
+            MODEL="kilocode/kilo-auto/free"
+          else
+            MODEL="kilocode/poolside/laguna-xs-2.1:free"
+          fi
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+          echo "Selected $MODEL"
+
+      - name: Confirm Kilo catalogue access
+        run: |
+          kilo --version
+          kilo models kilocode | grep -E 'laguna|nemotron|step-3.7|kilo-auto/free' | head -40 || true
+
+      - name: Run Kilo worker
+        id: worker
+        shell: bash
+        env:
+          MODEL: ${{ steps.route.outputs.model }}
+        run: |
+          set +e
+          kilo run "$PROMPT" --auto --model "$MODEL" --format default 2>&1 | tee /tmp/kilo-output.txt
+          STATUS=${PIPESTATUS[0]}
+          set -e
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Post durable result
+        if: always()
+        shell: bash
+        env:
+          MODEL: ${{ steps.route.outputs.model }}
+          STATUS: ${{ steps.worker.outputs.status }}
+        run: |
+          {
+            echo "Kilo worker result"
+            echo
+            echo "Model: \`$MODEL\`"
+            echo "Exit: \`${STATUS:-unknown}\`"
+            echo
+            echo '```text'
+            tail -c 5500 /tmp/kilo-output.txt 2>/dev/null || echo 'No Kilo output captured.'
+            echo
+            echo '```'
+          } > /tmp/kilo-comment.md
+          gh issue comment "$ISSUE_NUMBER" --body-file /tmp/kilo-comment.md
+
+      - name: Fail if Kilo failed
+        if: steps.worker.outputs.status != '0'
+        run: exit 1
+
+  manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+      KILO_PROVIDER: kilocode
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PROMPT: ${{ inputs.prompt }}
+      MODEL: ${{ inputs.model }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Kilo CLI
+        run: npm install -g @kilocode/cli
+
+      - name: Run Kilo worker
+        run: kilo run "$PROMPT" --auto --model "$MODEL" --format default
