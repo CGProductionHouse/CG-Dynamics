@@ -84,7 +84,6 @@ export default function ClientContentCalendarPage() {
   const [clients, setClients] = useState<ClientOption[]>([])
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [presenting, setPresenting] = useState(false)
   const [dayPanel, setDayPanel] = useState<{ date: string; items: MonthlyDeliverable[] } | null>(null)
 
@@ -99,7 +98,6 @@ export default function ClientContentCalendarPage() {
     let cancelled = false
     async function load() {
       setLoading(true)
-      setError(null)
       const [clientResult, scheduleResult] = await Promise.all([
         listActiveClients(),
         clientId
@@ -108,11 +106,6 @@ export default function ClientContentCalendarPage() {
       ])
       if (cancelled) return
       setLoading(false)
-      if (clientResult.error || scheduleResult.error) {
-        setError(clientResult.error?.message ?? scheduleResult.error?.message ?? 'Could not load the content calendar.')
-        setDeliverables([])
-        return
-      }
       setClients(clientResult.data ?? [])
       setDeliverables(scheduleResult.data ?? [])
     }
