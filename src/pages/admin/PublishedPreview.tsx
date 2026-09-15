@@ -23,6 +23,10 @@ import {
   type GoogleAdsDashboardState,
 } from '../../lib/googleAdsDashboard'
 import {
+  loadGa4WebsiteReportForDashboard,
+  type Ga4WebsitePayload,
+} from '../../lib/ga4WebsiteReport'
+import {
   loadReportContentExclusions,
   loadReportFactHealth,
   loadReportPlatformFacts,
@@ -73,6 +77,7 @@ export default function PublishedPreview() {
   const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
   const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
+  const [ga4Website, setGa4Website] = useState<Ga4WebsitePayload | null>(null)
   const [facts, setFacts] = useState<PlatformFact[]>([])
   const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
   const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
@@ -182,6 +187,7 @@ export default function PublishedPreview() {
       setGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
+      setGa4Website(null)
       setFacts([])
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
@@ -242,6 +248,16 @@ export default function PublishedPreview() {
     return () => { active = false }
   }, [reports, selectedClientId, selectedReportId, setSearchParams, surface])
 
+  // #335: load the GA4 "after the click" view once Google Ads dashboard truth is known.
+  useEffect(() => {
+    let active = true
+    if (!selectedClientId || !googleAds) return () => { active = false }
+    loadGa4WebsiteReportForDashboard(selectedClientId, googleAds)
+      .then(data => { if (active) setGa4Website(data) })
+      .catch(() => { if (active) setGa4Website(null) })
+    return () => { active = false }
+  }, [selectedClientId, googleAds])
+
   useEffect(() => {
     let active = true
     if (surface !== 'setup' || !selectedClientId) {
@@ -286,6 +302,7 @@ export default function PublishedPreview() {
       setGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
+      setGa4Website(null)
       setFacts([])
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
@@ -468,6 +485,7 @@ export default function PublishedPreview() {
               googleAds={googleAds}
               googleAdsState={googleAdsState}
               googleAdsError={googleAdsError}
+              ga4Website={ga4Website}
               facts={facts}
               previousFacts={previousFacts}
               normalizedFactsAttempted={normalizedFactsAttempted}
