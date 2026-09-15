@@ -6,9 +6,9 @@ on:
 
 concurrency:
   # Every repository issue comment starts this workflow before the job-level `if`
-  # is evaluated. Give irrelevant comments their own run-scoped group so an /oc
-  # or normal issue comment cannot cancel an active trusted Codex task.
-  group: ${{ github.event.issue.number == 347 && (github.event.comment.body == '/codex test' || startsWith(github.event.comment.body, '/codex issue=')) && 'codex-laptop-agent' || format('codex-ignore-{0}', github.run_id) }}
+  # is evaluated. Keep default and CA subscription work in separate groups so
+  # one account's dispatch does not cancel the other account's task.
+  group: ${{ github.event.issue.number == 347 && (github.event.comment.body == '/codex test' || startsWith(github.event.comment.body, '/codex issue=')) && 'codex-laptop-agent-default' || github.event.issue.number == 347 && (github.event.comment.body == '/codex-ca test' || startsWith(github.event.comment.body, '/codex-ca issue=')) && 'codex-laptop-agent-ca' || format('codex-ignore-{0}', github.run_id) }}
   cancel-in-progress: true
 
 permissions:
@@ -20,7 +20,10 @@ jobs:
     if: >-
       github.event.issue.number == 347 &&
       github.actor == 'CGProductionHouse' &&
-      (github.event.comment.body == '/codex test' || startsWith(github.event.comment.body, '/codex issue='))
+      (github.event.comment.body == '/codex test' ||
+       startsWith(github.event.comment.body, '/codex issue=') ||
+       github.event.comment.body == '/codex-ca test' ||
+       startsWith(github.event.comment.body, '/codex-ca issue='))
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 90
 
@@ -33,16 +36,29 @@ jobs:
           gh --version
           gh auth status
 
-      - name: Parse command
+      - name: Parse command and select Codex account
         shell: powershell
         env:
           BODY: ${{ github.event.comment.body }}
         run: |
-          if ($env:BODY -eq '/codex test') {
+          $body = $env:BODY.Trim()
+          $isCa = $body -eq '/codex-ca test' -or $body.StartsWith('/codex-ca issue=')
+
+          if ($isCa) {
+            $caHome = 'C:\Users\chris\.codex-ca'
+            if (-not (Test-Path $caHome)) { throw "CA Codex home not found at $caHome" }
+            "CODEX_HOME=$caHome" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            'CODEX_ACCOUNT=ca' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          } else {
+            'CODEX_ACCOUNT=default' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          }
+
+          if ($body -eq '/codex test' -or $body -eq '/codex-ca test') {
             'MODE=test' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
             exit 0
           }
-          if ($env:BODY -notmatch '^/codex issue=([0-9]+)$') { throw 'Invalid command.' }
+
+          if ($body -notmatch '^/codex(?:-ca)? issue=([0-9]+)$') { throw 'Invalid command.' }
           'MODE=issue' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "TASK_ISSUE=$($Matches[1])" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
@@ -58,7 +74,7 @@ jobs:
           codex exec --sandbox read-only --cd $work --output-last-message $out 'Return exactly: CG CODEX READY'
           $result = (Get-Content -Raw $out).Trim()
           if ($result -ne 'CG CODEX READY') { throw "Unexpected Codex response: $result" }
-          gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex laptop test passed on run $env:GITHUB_RUN_ID."
+          gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex $env:CODEX_ACCOUNT subscription test passed on run $env:GITHUB_RUN_ID."
 
       - name: Prepare issue task
         if: env.MODE == 'issue'
@@ -74,7 +90,8 @@ jobs:
           gh repo clone CGProductionHouse/CG-Dynamics $work
           Set-Location $work
           git fetch origin main --depth=1
-          $branch = "codex/laptop-$env:GITHUB_RUN_ID"
+          $branchPrefix = if ($env:CODEX_ACCOUNT -eq 'ca') { 'codex-ca' } else { 'codex' }
+          $branch = "$branchPrefix/laptop-$env:GITHUB_RUN_ID"
           git checkout -B $branch origin/main
           git config user.name 'CG Codex Laptop Agent'
           git config user.email 'info@cgproductionhouse.com'
@@ -114,11 +131,11 @@ jobs:
         run: |
           Set-Location $env:WORKDIR
           if ([string]::IsNullOrWhiteSpace((git status --porcelain))) {
-            gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex run $env:GITHUB_RUN_ID completed issue #$env:TASK_ISSUE with no repository changes."
+            gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex $env:CODEX_ACCOUNT run $env:GITHUB_RUN_ID completed issue #$env:TASK_ISSUE with no repository changes."
             exit 0
           }
           git add -A
           git commit -m "fix: Codex issue #$env:TASK_ISSUE"
           git push -u origin $env:BRANCH
-          $url = gh pr create --repo CGProductionHouse/CG-Dynamics --base main --head $env:BRANCH --title "Codex: issue #$env:TASK_ISSUE" --body "Automated by CA's trusted Codex laptop worker for #$env:TASK_ISSUE. No merge or production action performed."
-          gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex run $env:GITHUB_RUN_ID completed issue #$env:TASK_ISSUE — $url"
+          $url = gh pr create --repo CGProductionHouse/CG-Dynamics --base main --head $env:BRANCH --title "Codex: issue #$env:TASK_ISSUE" --body "Automated by CA's trusted Codex laptop worker using the $env:CODEX_ACCOUNT subscription for #$env:TASK_ISSUE. No merge or production action performed."
+          gh issue comment 347 --repo CGProductionHouse/CG-Dynamics --body "Codex $env:CODEX_ACCOUNT run $env:GITHUB_RUN_ID completed issue #$env:TASK_ISSUE — $url"
