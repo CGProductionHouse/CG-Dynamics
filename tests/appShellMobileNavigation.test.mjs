@@ -42,7 +42,7 @@ test('staff mobile controls meet touch target and safe-area requirements', () =>
 
 test('shell padding clears mobile controls but drops unused desktop assistant space', () => {
   assert.match(layout, /const assistantVisible = location\.pathname !== '\/admin\/assistant'/)
-  assert.match(layout, /pb-\[calc\(9rem\+env\(safe-area-inset-bottom\)\)\] md:pb-16/)
+  assert.match(layout, /pb-\[calc\(3\.5rem\+env\(safe-area-inset-bottom\)\)\] md:pb-16/)
   assert.match(layout, /pb-\[calc\(3\.5rem\+env\(safe-area-inset-bottom\)\)\] md:pb-0/)
   assert.doesNotMatch(layout, /md:pb-24/)
 })

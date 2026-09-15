@@ -333,7 +333,7 @@ export default function AdminLayout() {
 
       <MyDayContextStoreProvider>
         <main
-          className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
+          className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
           aria-hidden={assistantFullscreen || undefined}
           inert={assistantFullscreen || undefined}
         >
