@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   comment:
-    if: github.event_name != 'workflow_dispatch' && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode'))
+    if: github.event_name != 'workflow_dispatch' && !contains(github.event.comment.body, '/nvidia') && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode'))
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
@@ -54,7 +54,7 @@ jobs:
           model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
 
   nvidia_comment:
-    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/nvidia') && github.actor == 'CGProductionHouse'
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/nvidia') && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) && github.actor == 'CGProductionHouse'
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
