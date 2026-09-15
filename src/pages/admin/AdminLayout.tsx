@@ -17,16 +17,19 @@ const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
 // live in the More drawer instead of displacing Calendar or Schedule.
 const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/cg-calendar', '/admin/client-schedule']
 
+// Defer non-critical shell work (notifications, assistant composer) until after
+// the initial render is complete and the browser is idle. A longer timeout
+// prevents this work from competing with the critical first paint on mobile.
 function scheduleWhenIdle(callback: () => void) {
   const idleWindow = window as Window & {
     requestIdleCallback?: (handler: () => void, options?: { timeout: number }) => number
     cancelIdleCallback?: (id: number) => void
   }
   if (idleWindow.requestIdleCallback) {
-    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })
+    const id = idleWindow.requestIdleCallback(callback, { timeout: 5_000 })
     return () => idleWindow.cancelIdleCallback?.(id)
   }
-  const id = window.setTimeout(callback, 250)
+  const id = window.setTimeout(callback, 2_000)
   return () => window.clearTimeout(id)
 }
 
@@ -123,7 +126,7 @@ export default function AdminLayout() {
   // stands down and the page behind leaves the accessibility tree, so the
   // assistant is a single focused surface rather than another floating layer.
   const [assistantFullscreen, setAssistantFullscreen] = useState(false)
-  const [backgroundReady, setBackgroundReady] = useState(false)
+  const [assistantLoaded, setAssistantLoaded] = useState(false)
   const [selectedZone, setSelectedZone] = useState<NavZone>(() => {
     const routeZone = resolveNavZone(location.pathname)
     if (!isSharedNavZonePath(location.pathname)) return routeZone
@@ -174,10 +177,15 @@ export default function AdminLayout() {
 
   useEffect(() => {
     let poll: number | null = null
+    let assistantTimer: number | null = null
     const cancelIdle = scheduleWhenIdle(() => {
-      setBackgroundReady(true)
       pollNotifications()
       poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)
+      // Defer assistant composer loading even further to avoid competing with
+      // critical-path render. 10s idle timeout / 5s fallback.
+      assistantTimer = window.setTimeout(() => {
+        setAssistantLoaded(true)
+      }, 10_000)
     })
     const refreshWhenVisible = () => {
       if (poll !== null && document.visibilityState === 'visible') pollNotifications()
@@ -187,6 +195,7 @@ export default function AdminLayout() {
     return () => {
       cancelIdle()
       if (poll !== null) window.clearInterval(poll)
+      if (assistantTimer !== null) window.clearTimeout(assistantTimer)
       window.removeEventListener('focus', refreshWhenVisible)
       document.removeEventListener('visibilitychange', refreshWhenVisible)
     }
@@ -420,7 +429,7 @@ export default function AdminLayout() {
           </section>
         )}
 
-        {backgroundReady && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} /></Suspense>}
+        {assistantLoaded && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} /></Suspense>}
       </MyDayContextStoreProvider>
     </div>
   )
