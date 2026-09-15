@@ -12,7 +12,7 @@ on:
       model:
         description: Kilo Gateway model ID
         required: false
-        default: kilocode/poolside/laguna-xs-2.1:free
+        default: kilo/poolside/laguna-xs-2.1:free
         type: string
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 50
     env:
       KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
-      KILO_PROVIDER: kilocode
+      KILO_PROVIDER: kilo
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PROMPT: ${{ github.event.comment.body }}
       ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -50,15 +50,15 @@ jobs:
         shell: bash
         run: |
           if [[ "$PROMPT" == *"/kilo-ultra"* ]]; then
-            MODEL="kilocode/nvidia/nemotron-3-ultra-550b-a55b:free"
+            MODEL="kilo/nvidia/nemotron-3-ultra-550b-a55b:free"
           elif [[ "$PROMPT" == *"/kilo-laguna-s"* ]]; then
-            MODEL="kilocode/poolside/laguna-s-2.1:free"
+            MODEL="kilo/poolside/laguna-s-2.1:free"
           elif [[ "$PROMPT" == *"/kilo-step"* ]]; then
-            MODEL="kilocode/stepfun/step-3.7-flash:free"
+            MODEL="kilo/stepfun/step-3.7-flash:free"
           elif [[ "$PROMPT" == *"/kilo-auto"* ]]; then
-            MODEL="kilocode/kilo-auto/free"
+            MODEL="kilo/kilo-auto/free"
           else
-            MODEL="kilocode/poolside/laguna-xs-2.1:free"
+            MODEL="kilo/poolside/laguna-xs-2.1:free"
           fi
           echo "model=$MODEL" >> "$GITHUB_OUTPUT"
           echo "Selected $MODEL"
@@ -66,7 +66,7 @@ jobs:
       - name: Confirm Kilo catalogue access
         run: |
           kilo --version
-          kilo models kilocode | grep -E 'laguna|nemotron|step-3.7|kilo-auto/free' | head -40 || true
+          kilo models kilo | grep -E 'laguna|nemotron|step-3.7|kilo-auto/free' | head -40
 
       - name: Run Kilo worker
         id: worker
@@ -111,7 +111,7 @@ jobs:
     timeout-minutes: 50
     env:
       KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
-      KILO_PROVIDER: kilocode
+      KILO_PROVIDER: kilo
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PROMPT: ${{ inputs.prompt }}
       MODEL: ${{ inputs.model }}
