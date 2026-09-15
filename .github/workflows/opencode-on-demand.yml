@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   comment:
-    if: github.event_name != 'workflow_dispatch' && !contains(github.event.comment.body, '/nvidia') && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode'))
+    if: github.event_name != 'workflow_dispatch' && !contains(github.event.comment.body, '/nvidia') && !contains(github.event.comment.body, '/zen') && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode'))
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
@@ -45,6 +45,27 @@ jobs:
         timeout-minutes: 15
         if: steps.go.outcome == 'failure'
         continue-on-error: true
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
+
+  zen_comment:
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/zen') && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) && github.actor == 'CGProductionHouse'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Run OpenCode — Zen direct lane
+        timeout-minutes: 45
         uses: anomalyco/opencode/github@latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
