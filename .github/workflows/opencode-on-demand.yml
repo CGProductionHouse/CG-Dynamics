@@ -53,6 +53,26 @@ jobs:
         with:
           model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
 
+  nvidia_comment:
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/nvidia') && github.actor == 'CGProductionHouse'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Run OpenCode — NVIDIA direct lane
+        timeout-minutes: 45
+        uses: anomalyco/opencode/github@latest
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ vars.OPENCODE_NVIDIA_MODEL || 'nvidia/moonshotai/kimi-k3' }}
+
   manual:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
