@@ -12,10 +12,9 @@ const GlobalAssistantComposer = lazy(() => import('../../components/assistant/Gl
 const NOTIFICATION_POLL_MS = 30_000
 const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
 
-// The mobile quick-nav stays the same for every role — Hub / Work / Calendar /
-// Schedule / More. Manager-only work entries (Team Work, Morning List Import)
-// live in the More drawer instead of displacing Calendar or Schedule.
-const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/cg-calendar', '/admin/client-schedule']
+// The mobile quick-nav stays the same for every role — Hub / Work / Content /
+// Calendar / More. Client Schedule stays reachable via More / contextual Content flow.
+const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/content', '/admin/cg-calendar']
 
 function scheduleWhenIdle(callback: () => void) {
   const idleWindow = window as Window & {
