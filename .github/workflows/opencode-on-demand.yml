@@ -68,7 +68,8 @@ jobs:
         timeout-minutes: 45
         uses: anomalyco/opencode/github@latest
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          # Add /ca-key to any NVIDIA command to use CA's second NVIDIA account.
+          NVIDIA_API_KEY: ${{ contains(github.event.comment.body, '/ca-key') && secrets.NVIDIA_API_KEY_CA || secrets.NVIDIA_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # Current NVIDIA trial pool. Keep only live endpoint IDs here.
