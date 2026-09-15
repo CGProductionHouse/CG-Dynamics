@@ -71,7 +71,14 @@ jobs:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: ${{ vars.OPENCODE_NVIDIA_MODEL || 'nvidia/moonshotai/kimi-k3' }}
+          # Explicit aliases let the supervisor route work by model without changing secrets.
+          # /nvidia or /nvidia-kimi        -> Kimi K3, long-horizon + multimodal
+          # /nvidia-deepseek              -> DeepSeek V4 Pro, coding/reasoning
+          # /nvidia-poolside              -> Laguna XS 2.1, agentic coding/terminal
+          # /nvidia-lightning             -> Nemotron 3.5 Lightning, fast sub-agent
+          # /nvidia-ultra                 -> Nemotron 3 Ultra, hardest reasoning/long context
+          # /nvidia-step                  -> Step 3.7 Flash, visual + coding agent work
+          model: ${{ contains(github.event.comment.body, '/nvidia-deepseek') && 'nvidia/deepseek-ai/deepseek-v4-pro-0813' || contains(github.event.comment.body, '/nvidia-poolside') && 'nvidia/poolside/laguna-xs-2.1' || contains(github.event.comment.body, '/nvidia-lightning') && 'nvidia/nvidia/nemotron-3.5-lightning-30b-a3b' || contains(github.event.comment.body, '/nvidia-ultra') && 'nvidia/nvidia/nemotron-3-ultra-550b-a55b' || contains(github.event.comment.body, '/nvidia-step') && 'nvidia/stepfun-ai/step-3.7-flash' || vars.OPENCODE_NVIDIA_MODEL || 'nvidia/moonshotai/kimi-k3' }}
 
   manual:
     if: github.event_name == 'workflow_dispatch'
