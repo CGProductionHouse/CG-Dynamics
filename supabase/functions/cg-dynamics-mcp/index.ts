@@ -86,6 +86,8 @@ import {
   type ContextAuditEnvelope,
   type ParsedProjectContext,
   type ProjectContextKind,
+  verifyStaffTarget,
+  verifyClientTarget,
 } from './projectContext.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
@@ -2851,6 +2853,24 @@ async function handleToolsCall(
     return jsonRpcError(id, -32602, scoped.error)
   }
   const toolInput = scoped.input
+
+  // Authority/delegation seam (#377 checkpoint): verify requested targets against
+  // the verified operating context. Exact UUID alone never grants scope.
+  const authStaff = verifyStaffTarget(staff.contextKind, staff.role, staff.effectiveStaffProfileId, toolInput)
+  if (authStaff.ok && !authStaff.authorised) {
+    return jsonRpcError(id, -32602, `Staff target not authorised: ${authStaff.reason}. This Project acts for staff profile ${staff.effectiveStaffProfileId ?? 'none'}.`)
+  }
+  if (!authStaff.ok) {
+    return jsonRpcError(id, -32602, authStaff.error)
+  }
+
+  const authClient = verifyClientTarget(staff.contextKind, staff.role, staff.effectiveClientId, toolInput)
+  if (authClient.ok && !authClient.authorised) {
+    return jsonRpcError(id, -32602, `Client target not authorised: ${authClient.reason}. This Project is scoped to client ${staff.effectiveClientId ?? 'none'}.`)
+  }
+  if (!authClient.ok) {
+    return jsonRpcError(id, -32602, authClient.error)
+  }
 
   const audit = buildAuditEnvelope(connection, parsed.context)
 

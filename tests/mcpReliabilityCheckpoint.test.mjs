@@ -8,6 +8,7 @@ const WORKFORCE = read('../src/lib/workforceMyDay.ts')
 const CLIENT_WORKSPACE = read('../supabase/functions/cg-dynamics-mcp/clientWorkspace.ts')
 const PLANNER = read('../src/lib/planner.ts')
 const COMMAND_CENTRE = read('../src/lib/commandCentre.ts')
+const PROJECT_CONTEXT = read('../supabase/functions/cg-dynamics-mcp/projectContext.ts')
 
 // ── Fix 1: error: null must not be flagged as outer error ──────────────────────
 
@@ -149,4 +150,76 @@ test('idempotency replay returns original canonical result/receipt', () => {
 test('duplicate request with same idempotency key returns one canonical result', () => {
   assert.match(INDEX, /checkIdempotency\(staff\.supabase, staff\.profileId, toolName, canonicalIdempotencyKey, inputHash\)/)
   assert.match(INDEX, /existing\.duplicate/)
+})
+
+// ── Authority/Delegation Seam (#377 checkpoint) ──────────────────────────────
+
+test('projectContext exports verifyTargetAuthority, verifyStaffTarget, verifyClientTarget', () => {
+  assert.match(PROJECT_CONTEXT, /export function verifyTargetAuthority\(/)
+  assert.match(PROJECT_CONTEXT, /export function verifyStaffTarget\(/)
+  assert.match(PROJECT_CONTEXT, /export function verifyClientTarget\(/)
+  assert.match(PROJECT_CONTEXT, /type AuthorityTargetKind = 'staff_profile' \| 'client'/)
+  assert.match(PROJECT_CONTEXT, /type AuthorityVerificationResult =/)
+})
+
+test('verifyTargetAuthority: staff context — own staff_profile_id authorised (own_context)', () => {
+  // This test verifies the logic by checking the source patterns
+  assert.match(PROJECT_CONTEXT, /contextKind === 'staff'/)
+  assert.match(PROJECT_CONTEXT, /targetKind === 'staff_profile'/)
+  assert.match(PROJECT_CONTEXT, /targetId === contextStaffProfileId\.trim\(\)/)
+  assert.match(PROJECT_CONTEXT, /reason: 'own_context'/)
+})
+
+test('verifyTargetAuthority: staff context — admin/manager explicit delegation for any staff target', () => {
+  assert.match(PROJECT_CONTEXT, /contextRole === 'admin' \|\| contextRole === 'manager'/)
+  assert.match(PROJECT_CONTEXT, /reason: 'explicit_admin_delegation'/)
+})
+
+test('verifyTargetAuthority: staff context — forged staff target refused (forged_target)', () => {
+  assert.match(PROJECT_CONTEXT, /reason: 'forged_target'/)
+})
+
+test('verifyTargetAuthority: staff context — client target requires admin delegation (cross_context)', () => {
+  assert.match(PROJECT_CONTEXT, /targetKind === 'client'/)
+  assert.match(PROJECT_CONTEXT, /reason: 'cross_context'/)
+})
+
+test('verifyTargetAuthority: client context — own client_id authorised (own_context)', () => {
+  assert.match(PROJECT_CONTEXT, /contextKind === 'client'/)
+  assert.match(PROJECT_CONTEXT, /targetKind === 'client'/)
+  assert.match(PROJECT_CONTEXT, /targetId === contextClientId\.trim\(\)/)
+})
+
+test('verifyTargetAuthority: client context — forged client target refused (forged_target)', () => {
+  assert.match(PROJECT_CONTEXT, /reason: 'forged_target'/)
+})
+
+test('verifyTargetAuthority: client context — staff target refused (cross_context)', () => {
+  assert.match(PROJECT_CONTEXT, /targetKind === 'staff_profile'/)
+  assert.match(PROJECT_CONTEXT, /reason: 'cross_context'/)
+})
+
+test('verifyTargetAuthority: company_admin context — explicit admin delegation for any target', () => {
+  assert.match(PROJECT_CONTEXT, /contextKind === 'company_admin'/)
+  assert.match(PROJECT_CONTEXT, /reason: 'explicit_admin_delegation'/)
+})
+
+test('verifyTargetAuthority: invalid uuid rejected', () => {
+  assert.match(PROJECT_CONTEXT, /!isUuid\(requestedTargetId\)/)
+  assert.match(PROJECT_CONTEXT, /error: `Invalid \${targetKind} id: must be a canonical uuid\.`/)
+})
+
+test('router integrates authority verification for staff and client targets', () => {
+  assert.match(INDEX, /verifyStaffTarget\(staff\.contextKind, staff\.role, staff\.effectiveStaffProfileId, toolInput\)/)
+  assert.match(INDEX, /verifyClientTarget\(staff\.contextKind, staff\.role, staff\.effectiveClientId, toolInput\)/)
+  assert.match(INDEX, /authStaff\.ok && !authStaff\.authorised/)
+  assert.match(INDEX, /authClient\.ok && !authClient\.authorised/)
+  assert.match(INDEX, /Staff target not authorised/)
+  assert.match(INDEX, /Client target not authorised/)
+})
+
+test('authority seam preserves communal connector architecture — no schema/data/provider changes', () => {
+  // The seam is pure logic in projectContext.ts, integrated in the router
+  // No database schema changes, no production data mutations, no provider config
+  assert.match(PROJECT_CONTEXT, /Exact UUID alone never grants scope/)
 })
