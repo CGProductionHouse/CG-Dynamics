@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { isAdminRole, isManagerRole } from '../../lib/roles'
@@ -6,6 +6,7 @@ import { PageContainer, PageHeader } from '../../components/layout/PageShell'
 import { EmptyState, LoadingState } from '../../components/ui/States'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
+import { Drawer, DrawerOverlay, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerCloseButton, DrawerBody } from '../../components/ui/Drawer'
 
 // ── Email Marketing workspace (Phase 1: shell + draft workflow) ─────────────────
 //
@@ -71,6 +72,18 @@ interface Template {
   content_blocks: unknown[]
   created_at: string
   updated_at: string
+}
+
+interface CampaignDraft {
+  id: string
+  name: string
+  client_id: string | null
+  subject: string
+  preheader: string
+  body: string
+  template_id: string | null
+  send_at: string | null
+  isMobilePreview: boolean
 }
 
 function CampaignRow({ campaign, clientName }: { campaign: Campaign; clientName: string }) {
@@ -215,6 +228,128 @@ function useTemplates() {
   return { templates, loading, error, migrationNeeded, reload: load }
 }
 
+function CampaignComposer({ onClose }: { onClose: () => void }) {
+  const [isOpen, setIsOpen] = useState(true)
+  const [draft, setDraft] = useState<CampaignDraft>({
+    id: 'tmp',
+    name: '',
+    client_id: null,
+    subject: '',
+    preheader: '',
+    body: '',
+    template_id: null,
+    send_at: null,
+    isMobilePreview: false,
+  })
+
+  const handleSave = () => {
+    onClose(draft)
+    setIsOpen(false)
+  }
+
+  if (isOpen === false) return null
+
+  return (
+    <Drawer open={isOpen} onOpenChange={() => setIsOpen(false)}>
+      <DrawerOverlay className="bg-black/40" />
+      <DrawerContent className="w-full max-w-2xl bg-white/[5] backdrop-blur-sm">
+        <DrawerHeader>
+          <DrawerTitle>Create New Campaign</DrawerTitle>
+          <DrawerDescription>Fill in the campaign details below</DrawerDescription>
+        </DrawerHeader>
+        <DrawerBody className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-white/60 mb-1 block">Campaign Name</label>
+              <input
+                className={`${INPUT_CLS}`}
+                value={draft.name}
+                onChange={e => setDraft(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g. Welcome Series"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-white/60 mb-1 block">Client</label>
+              <select
+                className={`${INPUT_CLS}`}
+                value={draft.client_id || ''}
+                onChange={e => setDraft(prev => ({ ...prev, client_id: e.target.value || null }))}
+              >
+                <option value="">-- Select Client --</option>
+                <option value="client_1">Acme Corp</option>
+                <option value="client_2">Human Auto</option>
+                <option value="client_3">HMH Attorneys</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-white/60 mb-1 block">Subject</label>
+            <input
+              className={`${INPUT_CLS}`}
+              value={draft.subject}
+              onChange={e => setDraft(prev => ({ ...prev, subject: e.target.value }))}
+              placeholder="e.g. Welcome to our newsletter"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-white/60 mb-1 block">Preheader</label>
+            <input
+              className={`${INPUT_CLS}`}
+              value={draft.preheader}
+              onChange={e => setDraft(prev => ({ ...prev, preheader: e.target.value }))}
+              placeholder="Preview text (optional)"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-white/60 mb-1 block">Email Body</label>
+            <textarea
+              className={`${INPUT_CLS} h-24 resize-none`}
+              value={draft.body}
+              onChange={e => setDraft(prev => ({ ...prev, body: e.target.value }))}
+              placeholder="Write your email content here..."
+            ></textarea>
+          </div>
+          <div className="flex items-center justify-between">
+            <DrawerDescription>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="preview-mode"
+                  value="desktop"
+                  checked={!draft.isMobilePreview}
+                  onChange={e => setDraft(prev => ({ ...prev, isMobilePreview: e.target.value === 'mobile' }))}
+                  className="rounded border-white/10 hover:border-brand-teal/50"
+                />
+                <span className="text-sm text-white/60">Desktop</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  type="radio"
+                  name="preview-mode"
+                  value="mobile"
+                  checked={draft.isMobilePreview}
+                  onChange={e => setDraft(prev => ({ ...prev, isMobilePreview: e.target.value === 'mobile' }))}
+                  className="rounded border-white/10 hover:border-brand-teal/50"
+                />
+                <span className="text-sm text-white/60">Mobile</span>
+              </div>
+            </DrawerDescription>
+          </div>
+        </DrawerBody>
+        <DrawerFooter className="pt-3 border-t border-white/10">
+          <button
+            onClick={handleSave}
+            className="rounded-full border px-4 py-2 text-sm font-black transition-colors border-brand-teal/50 bg-brand-teal/10 text-brand-teal hover:text-white"
+          >
+            Create Campaign
+          </button>
+          <DrawerCloseButton />
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
 function CampaignsSection({ isAdmin: _isAdmin, isManager: _isManager, setSearchParams }: { isAdmin: boolean; isManager: boolean; setSearchParams: ReturnType<typeof useSearchParams>[1] }) {
   const { campaigns, loading, error, migrationNeeded, reload } = useCampaigns()
   const [search, setSearch] = useState('')
@@ -355,6 +490,24 @@ export default function EmailMarketingPage() {
   const isManager = isManagerRole(profile?.role)
   const [searchParams, setSearchParams] = useSearchParams()
 
+  const requested = searchParams.get('section') as Section | null
+  const section: Section = tabs.some(t => t.key === requested) ? (requested as Section) : 'campaigns'
+  const mode = searchParams.get('mode') as 'create' | null
+
+  const [draft, setDraft] = useState<CampaignDraft | null>(mode === 'create' ? {
+    id: 'tmp',
+    name: '',
+    client_id: null,
+    subject: '',
+    preheader: '',
+    body: '',
+    template_id: null,
+    send_at: null,
+    isMobilePreview: false,
+  } : null)
+
+  const composerRef = useRef<HTMLDivElement>(null)
+
   const tabs = useMemo(() => {
     const list: Array<{ key: Section; label: string }> = [
       { key: 'campaigns', label: 'Campaigns' },
@@ -364,8 +517,9 @@ export default function EmailMarketingPage() {
     return list
   }, [])
 
-  const requested = searchParams.get('section') as Section | null
-  const section: Section = tabs.some(t => t.key === requested) ? (requested as Section) : 'campaigns'
+  const handleCreateCampaign = () => {
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('section', 'campaigns'); next.set('mode', 'create'); return next })
+  }
 
   return (
     <PageContainer width="wide" className="pb-16">
@@ -385,11 +539,23 @@ export default function EmailMarketingPage() {
             {tab.label}
           </button>
         ))}
+        {mode === 'create' && (
+          <ActionButton
+            size="sm"
+            variant="secondary"
+            onClick={() => setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('section'); next.delete('mode'); return next })}
+            style={{ marginLeft: '8px' }}
+          >
+            Cancel
+          </ActionButton>
+        )}
       </div>
 
       {section === 'campaigns' && <CampaignsSection isAdmin={isAdmin} isManager={isManager} setSearchParams={setSearchParams} />}
       {section === 'audiences' && <AudiencesSection isAdmin={isAdmin} setSearchParams={setSearchParams} />}
       {section === 'templates' && <TemplatesSection isAdmin={isAdmin} setSearchParams={setSearchParams} />}
+      {mode === 'create' && <CampaignComposer onClose={draft => setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('section'); next.delete('mode'); return next })} />}
+
     </PageContainer>
   )
 }
