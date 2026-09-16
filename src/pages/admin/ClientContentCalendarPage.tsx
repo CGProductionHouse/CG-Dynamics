@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ClientPicker } from '../../components/ClientPicker'
 import { ClientLogo } from '../../components/ClientLogo'
 import { EmptyState } from '../../components/ui/States'
+import { ActionButton } from '../../components/ui/Buttons'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
 import {
   CLIENT_SAFE_STATUS_LABELS,
@@ -84,6 +85,7 @@ export default function ClientContentCalendarPage() {
   const [clients, setClients] = useState<ClientOption[]>([])
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [presenting, setPresenting] = useState(false)
   const [dayPanel, setDayPanel] = useState<{ date: string; items: MonthlyDeliverable[] } | null>(null)
 
@@ -98,6 +100,7 @@ export default function ClientContentCalendarPage() {
     let cancelled = false
     async function load() {
       setLoading(true)
+      setError(null)
       const [clientResult, scheduleResult] = await Promise.all([
         listActiveClients(),
         clientId
@@ -108,6 +111,11 @@ export default function ClientContentCalendarPage() {
       setLoading(false)
       setClients(clientResult.data ?? [])
       setDeliverables(scheduleResult.data ?? [])
+      if (clientResult.error) {
+        setError(clientResult.error.message ?? 'Failed to load clients')
+      } else if (scheduleResult.error) {
+        setError(scheduleResult.error.message ?? 'Failed to load schedule')
+      }
     }
     void load()
     return () => { cancelled = true }
@@ -177,11 +185,41 @@ export default function ClientContentCalendarPage() {
           </div>
         )}
 
-          {!clientId ? (
+          {error ? (
             <EmptyState
-              title="Choose a client"
-              message="Pick a client in the internal controls below to build their client-ready content calendar for the month."
+              className="mt-8"
+              title="Could not load content calendar"
+              message={error}
+              action={<ActionButton variant="secondary" onClick={() => window.location.reload()}>Try again</ActionButton>}
             />
+          ) : !clientId ? (
+            <>
+              <EmptyState
+                title="Choose a client"
+                message="Pick a client in the internal controls below to build their client-ready content calendar for the month."
+              />
+              {/* Client picker accessible even in initial/no-data state */}
+              {!presenting && (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[0_24px_60px_-44px_rgba(0,0,0,0.9)] backdrop-blur sm:p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="mr-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Staff controls</span>
+                    <div className="min-w-[220px] flex-1">
+                      <ClientPicker
+                        value={clientId}
+                        label={client?.name ?? ''}
+                        onChange={next => setParam('client', next?.id ?? '')}
+                        placeholder="Search all active clients"
+                        maxResults={0}
+                        showAllOnFocus
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    Client list uses active clients visible to your role. If a client is missing here, check the Clients table active flag or RLS access.
+                  </p>
+                </div>
+              )}
+            </>
           ) : loading ? (
             <div className="h-[480px] animate-pulse rounded-2xl border border-report-line bg-report-bg" />
           ) : (
