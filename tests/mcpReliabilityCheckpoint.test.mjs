@@ -42,43 +42,59 @@ test('genuine query failure returns error: "message" — is flagged as isError',
 
 // ── Fix 2: team/staff own-vs-other-owner read policy uses canonical ownership ──
 
-test('handleGetMyDay queries planner_tasks WITHOUT name-based filter, uses canonical ownership filter', () => {
+test('handleGetMyDay queries planner_tasks_canonical WITHOUT name-based filter, uses canonical ownership filter with assignee_user_ids RPC', () => {
   const getMyDayIdx = INDEX.indexOf('const handleGetMyDay:')
   const listMyTasksIdx = INDEX.indexOf('const handleListMyTasks:')
   const handler = INDEX.slice(getMyDayIdx, listMyTasksIdx)
-  // The planner_tasks query should NOT have the old name-based filter
-  const plannerTasksQuery = handler.slice(handler.indexOf("from('planner_tasks')"), handler.indexOf("from('company_calendar_events')"))
+  // The planner_tasks_canonical query should NOT have the old name-based filter
+  // Extract just the planner_tasks_canonical query portion (before company_calendar_events)
+  const plannerTasksQuery = handler.slice(handler.indexOf("from('planner_tasks_canonical')"), handler.indexOf("from('company_calendar_events')"))
   assert.doesNotMatch(plannerTasksQuery, /\.eq\('assigned_to_name', staff\.fullName\)/)
+  // Should use canonical view
+  assert.match(handler, /from\('planner_tasks_canonical'\)/)
   // Should select ownership columns for canonical filtering
   assert.match(handler, /assigned_to_user_id/)
   assert.match(handler, /assignment_review_state/)
-  // Should use userMatchesTask for filtering
+  // Should call list_planner_board_assignments RPC for assignee_user_ids
+  assert.match(handler, /rpc\('list_planner_board_assignments'/)
+  // Should use userMatchesTask for filtering with assignee_user_ids from RPC
   assert.match(handler, /userMatchesTask\(/)
+  assert.match(handler, /assigneeIdsByTask\.get\(task\.id/)
   // Note: monthly_deliverables correctly uses assigned_to_name (different table schema)
 })
 
-test('handleListMyTasks queries planner_tasks WITHOUT name-based filter, uses canonical ownership filter', () => {
+test('handleListMyTasks queries planner_tasks_canonical WITHOUT name-based filter, uses canonical ownership filter with assignee_user_ids RPC', () => {
   const listMyTasksIdx = INDEX.indexOf('const handleListMyTasks:')
   const getTaskIdx = INDEX.indexOf('const handleGetTask:')
   const handler = INDEX.slice(listMyTasksIdx, getTaskIdx)
   // Should NOT have the old name-based filter
   assert.doesNotMatch(handler, /\.eq\('assigned_to_name', staff\.fullName\)/)
+  // Should use canonical view
+  assert.match(handler, /from\('planner_tasks_canonical'\)/)
   // Should select ownership columns for canonical filtering
   assert.match(handler, /assigned_to_user_id/)
   assert.match(handler, /assignment_review_state/)
-  // Should use userMatchesTask for filtering
+  // Should call list_planner_board_assignments RPC for assignee_user_ids
+  assert.match(handler, /rpc\('list_planner_board_assignments'/)
+  // Should use userMatchesTask for filtering with assignee_user_ids from RPC
   assert.match(handler, /userMatchesTask\(/)
+  assert.match(handler, /assigneeIdsByTask\.get\(task\.id/)
 })
 
-test('handleGetTask uses canonical ownership check with profileId, includes team role', () => {
+test('handleGetTask uses canonical ownership check with profileId, includes team role, fetches assignee_user_ids via RPC', () => {
   const getTaskIdx = INDEX.indexOf('const handleGetTask:')
   const listMyCalendarIdx = INDEX.indexOf('const handleListMyCalendar:')
   const handler = INDEX.slice(getTaskIdx, listMyCalendarIdx)
   // Should NOT have old name-based check
   assert.doesNotMatch(handler, /data\.assigned_to_name !== staff\.fullName && staff\.role === 'staff'/)
-  // Should use userMatchesTask with profileId
+  // Should use canonical view
+  assert.match(handler, /from\('planner_tasks_canonical'\)/)
+  // Should call list_planner_board_assignments RPC for assignee_user_ids
+  assert.match(handler, /rpc\('list_planner_board_assignments'/)
+  // Should use userMatchesTask with profileId and assignee_user_ids
   assert.match(handler, /userMatchesTask\(/)
   assert.match(handler, /staff\.profileId/)
+  assert.match(handler, /assigneeIdsByTask\.get\(data\.id/)
   // Admins/managers can read others; staff/team can only read own (enforced by userMatchesTask)
   assert.match(handler, /canReadOthers|staff\.role === 'admin' \|\| staff\.role === 'manager'/)
   // The ownership check is role-agnostic — userMatchesTask uses profileId, not role

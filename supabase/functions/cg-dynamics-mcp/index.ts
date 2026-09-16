@@ -536,17 +536,11 @@ const handleGetMyDay: ToolHandler = async (staff) => {
   const tomorrow = cgDatePlusDays(1, now)
   const staffProfileId = staff.profileId
 
-  // Fetch tasks from canonical planner_tasks view equivalent — we select the ownership
-  // columns needed for canonical userMatches logic (assigned_to_user_id via assignees RPC,
-  // but here we read the base columns and will filter by profileId).
-  // NOTE: The canonical app uses listPlannerTaskRows + listPlannerBoardAssignments to get
-  // assignee_user_ids. Here we approximate by reading assigned_to_name for display but
-  // filtering by the canonical ownership rule using profileId where possible.
-  // For a full fix, this should call the same RPCs as the app, but we keep the query
-  // shape and fix the ownership filter to use profileId when available.
-  const [tasksResult, calendarResult, scheduleResult] = await Promise.all([
+  // Canonical planner read: use the canonical view and fetch assignee_user_ids via the
+  // same RPC the app uses (listPlannerBoardAssignments -> list_planner_board_assignments).
+  const [tasksResult, assignmentsResult, calendarResult, scheduleResult] = await Promise.all([
     staff.supabase
-      .from('planner_tasks')
+      .from('planner_tasks_canonical')
       .select('id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, assignment_review_state')
       .is('archived_at', null)
       .is('microsoft_source_removed_at', null)
@@ -554,6 +548,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .lte('due_date', tomorrow)
       .order('due_date', { ascending: true })
       .limit(20),
+    staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
     staff.supabase
       .from('company_calendar_events')
       .select('id, title, event_type, start_at, end_at, client_name, status, assigned_to_name')
@@ -570,11 +565,21 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .limit(20),
   ])
 
-  // Filter tasks using canonical ownership logic (profileId-based, honours review state)
+  // Build assignee_user_ids map from assignments RPC (canonical multi-assignee authority)
+  const assigneeIdsByTask = new Map<string, string[]>()
+  if (!assignmentsResult.error) {
+    for (const assignment of assignmentsResult.data ?? []) {
+      const current = assigneeIdsByTask.get(assignment.task_id) ?? []
+      current.push(assignment.profile_id)
+      assigneeIdsByTask.set(assignment.task_id, current)
+    }
+  }
+
+  // Filter tasks using canonical ownership logic (profileId-based, honours review state, multi-assignee)
   const ownedTasks = (tasksResult.data ?? []).filter((task: Record<string, unknown>) =>
     userMatchesTask(
       task.assigned_to_user_id as string | null,
-      undefined, // assignee_user_ids would come from assignments RPC; not available in this query
+      assigneeIdsByTask.get(task.id as string),
       staffProfileId,
       task.assignment_review_state as string | null,
     ),
@@ -587,57 +592,89 @@ const handleGetMyDay: ToolHandler = async (staff) => {
     tasks: ownedTasks,
     calendar_events: calendarResult.data ?? [],
     deliverables: flattenDeliverableClient(scheduleResult.data),
-    errors: [tasksResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
+    errors: [tasksResult.error?.message, assignmentsResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
   }
 }
 
 const handleListMyTasks: ToolHandler = async (staff, input) => {
   const staffProfileId = staff.profileId
 
-  let query = staff.supabase
-    .from('planner_tasks')
-    .select(`id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
-    .is('archived_at', null)
-    .is('microsoft_source_removed_at', null)
-    .order('due_date', { ascending: true })
-    .limit(50)
+  // Canonical planner read: use the canonical view and fetch assignee_user_ids via the
+  // same RPC the app uses (listPlannerBoardAssignments -> list_planner_board_assignments).
+  const [tasksResult, assignmentsResult] = await Promise.all([
+    staff.supabase
+      .from('planner_tasks_canonical')
+      .select(`id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
+      .is('archived_at', null)
+      .is('microsoft_source_removed_at', null)
+      .order('due_date', { ascending: true })
+      .limit(50),
+    staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
+  ])
 
-  if (input.status) query = query.eq('status', input.status)
-  else query = query.in('status', ACTIVE_TASK_STATES)
-  if (input.due_before) query = query.lte('due_date', input.due_before)
+  if (tasksResult.error) return { tasks: [], error: tasksResult.error.message }
 
-  const { data, error } = await query
+  // Build assignee_user_ids map from assignments RPC (canonical multi-assignee authority)
+  const assigneeIdsByTask = new Map<string, string[]>()
+  if (!assignmentsResult.error) {
+    for (const assignment of assignmentsResult.data ?? []) {
+      const current = assigneeIdsByTask.get(assignment.task_id) ?? []
+      current.push(assignment.profile_id)
+      assigneeIdsByTask.set(assignment.task_id, current)
+    }
+  }
 
-  // Filter using canonical ownership logic (profileId-based, honours review state)
-  const ownedTasks = (data ?? []).filter((task: Record<string, unknown>) =>
+  let data = tasksResult.data ?? []
+
+  if (input.status) data = data.filter((t: Record<string, unknown>) => t.status === input.status)
+  else data = data.filter((t: Record<string, unknown>) => ACTIVE_TASK_STATES.includes(t.status as string))
+  if (input.due_before) data = data.filter((t: Record<string, unknown>) => (t.due_date as string | null) && t.due_date <= input.due_before)
+
+  // Filter using canonical ownership logic (profileId-based, honours review state, multi-assignee)
+  const ownedTasks = data.filter((task: Record<string, unknown>) =>
     userMatchesTask(
       task.assigned_to_user_id as string | null,
-      undefined,
+      assigneeIdsByTask.get(task.id as string),
       staffProfileId,
       task.assignment_review_state as string | null,
     ),
   )
 
   // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
-  return { tasks: withSourceLinkage(ownedTasks, 'planner'), error: error?.message ?? null }
+  return { tasks: withSourceLinkage(ownedTasks, 'planner'), error: assignmentsResult.error?.message ?? null }
 }
 
 const handleGetTask: ToolHandler = async (staff, input) => {
   const taskId = input.task_id as string
-  const { data, error } = await staff.supabase
-    .from('planner_tasks')
-    .select('id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state')
-    .eq('id', taskId)
-    .maybeSingle()
+  const [taskResult, assignmentsResult] = await Promise.all([
+    staff.supabase
+      .from('planner_tasks_canonical')
+      .select('id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state')
+      .eq('id', taskId)
+      .maybeSingle(),
+    staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
+  ])
 
-  if (error) return { error: error.message }
-  if (!data) return { error: 'Task not found.' }
+  if (taskResult.error) return { error: taskResult.error.message }
+  if (!taskResult.data) return { error: 'Task not found.' }
+
+  // Build assignee_user_ids map from assignments RPC (canonical multi-assignee authority)
+  const assigneeIdsByTask = new Map<string, string[]>()
+  if (!assignmentsResult.error) {
+    for (const assignment of assignmentsResult.data ?? []) {
+      const current = assigneeIdsByTask.get(assignment.task_id) ?? []
+      current.push(assignment.profile_id)
+      assigneeIdsByTask.set(assignment.task_id, current)
+    }
+  }
+
+  const data = taskResult.data
 
   // Canonical ownership check: use profileId and review state, not name matching.
   // Both 'staff' and 'team' roles have personal task access.
   const isOwnTask = userMatchesTask(
     data.assigned_to_user_id as string | null,
-    undefined,
+    assigneeIdsByTask.get(data.id as string),
     staff.profileId,
     data.assignment_review_state as string | null,
   )
