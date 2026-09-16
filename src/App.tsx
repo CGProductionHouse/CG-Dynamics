@@ -47,6 +47,7 @@ const MicrosoftImportPage = lazyRoute(() => import('./pages/admin/MicrosoftImpor
 const MarketingLibraryPage = lazyRoute(() => import('./pages/admin/MarketingLibraryPage'))
 const MarketingAiDepartmentPage = lazyRoute(() => import('./pages/admin/MarketingAiDepartmentPage'))
 const MarketingWorkspacePage = lazyRoute(() => import('./pages/admin/MarketingWorkspacePage'))
+const EmailMarketingPage = lazyRoute(() => import('./pages/admin/EmailMarketingPage'))
 const SystemHubPage = lazyRoute(() => import('./pages/admin/SystemHubPage'))
 const SkillCardReviewPage = lazyRoute(() => import('./pages/admin/SkillCardReviewPage'))
 const ContentWorkflowPage = lazyRoute(() => import('./pages/admin/ContentWorkflowPage'))
@@ -143,6 +144,8 @@ export default function App() {
                   knowledge; sources/review/registration sections are admin-scoped
                   in-page and by RLS. */}
               <Route path="/admin/marketing" element={<MarketingWorkspacePage />} />
+              <Route path="/admin/marketing/email" element={<EmailMarketingPage />} />
+              <Route path="/admin/marketing/email/*" element={<EmailMarketingPage />} />
 
               {/* Consolidated Import workspace (CSV import is admin-gated inside
                   the hub; manual summaries + history are staff read-only). */}
