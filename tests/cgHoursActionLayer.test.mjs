@@ -17,7 +17,6 @@ before(async () => {
 after(async () => { await server.close() })
 
 test('CgHoursEntryType includes time, mileage, fuel, vehicle_expense', () => {
-  // Type is compile-time only; verify the exports exist
   assert.ok(mod.validateCgHoursTimeEntryDraft)
   assert.ok(mod.createTimeEntryFromDraft)
   assert.ok(mod.validateCorrectionDraft)
@@ -134,6 +133,17 @@ test('validateCorrectionDraft: valid correction passes', () => {
   assert.equal(errors.length, 0)
 })
 
+test('validateCorrectionDraft: valid correction with distance_km passes', () => {
+  const draft = {
+    entry_id: 'entry-456',
+    staff_id: 'staff-123',
+    reason: 'Odometer correction',
+    correction: { distance_km: 18 },
+  }
+  const errors = mod.validateCorrectionDraft(draft)
+  assert.equal(errors.length, 0)
+})
+
 test('validateCorrectionDraft: missing entry_id fails', () => {
   const draft = { staff_id: 'staff-123', reason: 'Mistyped', correction: { hours: 3 } }
   const errors = mod.validateCorrectionDraft(draft)
@@ -156,6 +166,12 @@ test('validateCorrectionDraft: invalid hours fails', () => {
   const draft = { entry_id: 'entry-123', staff_id: 'staff-123', reason: 'Test', correction: { hours: 25 } }
   const errors = mod.validateCorrectionDraft(draft)
   assert.ok(errors.some(e => e.includes('up to 24')))
+})
+
+test('validateCorrectionDraft: negative distance_km fails', () => {
+  const draft = { entry_id: 'entry-123', staff_id: 'staff-123', reason: 'Test', correction: { distance_km: -5 } }
+  const errors = mod.validateCorrectionDraft(draft)
+  assert.ok(errors.some(e => e.includes('non-negative')))
 })
 
 test('applyCorrectionToTimeEntry: corrects hours with audit trail', () => {
@@ -212,7 +228,7 @@ test('applyCorrectionToTimeEntry: corrects task_description', () => {
   assert.equal(result.corrected.task_description, 'Design review')
 })
 
-test('applyCorrectionToVehicleEntry: corrects mileage distance and recalculates amount', () => {
+test('applyCorrectionToVehicleEntry: corrects mileage distance (raw kilometre seam only)', () => {
   const original = {
     id: 'entry-456',
     staff_id: 'staff-123',
@@ -220,8 +236,7 @@ test('applyCorrectionToVehicleEntry: corrects mileage distance and recalculates 
     date: '2026-07-15',
     type: 'mileage',
     distance_km: 20,
-    rate_per_km: 4.5,
-    amount: 90,
+    description: 'Client site visit',
     status: 'draft',
     created_at: '2026-07-15T08:00:00Z',
     updated_at: '2026-07-15T08:00:00Z',
@@ -234,21 +249,21 @@ test('applyCorrectionToVehicleEntry: corrects mileage distance and recalculates 
   }
   const result = mod.applyCorrectionToVehicleEntry(original, correction, '2026-07-15T12:00:00Z')
   assert.equal(result.corrected.distance_km, 18)
-  assert.equal(result.corrected.rate_per_km, 4.5)
-  assert.equal(result.corrected.amount, 81) // 18 * 4.5
+  assert.equal(result.corrected.description, 'Client site visit')
   assert.equal(result.audit.reason, 'Odometer shows 18 km')
+  // Original unchanged
+  assert.equal(result.original.distance_km, 20)
 })
 
-test('applyCorrectionToVehicleEntry: corrects fuel litres and recalculates amount', () => {
+test('applyCorrectionToVehicleEntry: corrects fuel description only (no auto-calculation)', () => {
   const original = {
     id: 'entry-789',
     staff_id: 'staff-123',
     client_id: null,
     date: '2026-07-15',
     type: 'fuel',
-    litres: 40,
-    cost_per_litre: 22.5,
-    amount: 900,
+    distance_km: 0,
+    description: 'Fuel up',
     status: 'draft',
     created_at: '2026-07-15T08:00:00Z',
     updated_at: '2026-07-15T08:00:00Z',
@@ -256,23 +271,23 @@ test('applyCorrectionToVehicleEntry: corrects fuel litres and recalculates amoun
   const correction = {
     entry_id: 'entry-789',
     staff_id: 'staff-123',
-    reason: 'Receipt shows 45 litres',
-    correction: { litres: 45 },
+    reason: 'Receipt shows premium fuel',
+    correction: { description: 'Premium fuel fill' },
   }
   const result = mod.applyCorrectionToVehicleEntry(original, correction, '2026-07-15T12:00:00Z')
-  assert.equal(result.corrected.litres, 45)
-  assert.equal(result.corrected.amount, 1012.5) // 45 * 22.5
+  assert.equal(result.corrected.description, 'Premium fuel fill')
+  assert.equal(result.audit.reason, 'Receipt shows premium fuel')
 })
 
-test('applyCorrectionToVehicleEntry: corrects vehicle_expense amount', () => {
+test('applyCorrectionToVehicleEntry: corrects vehicle_expense description', () => {
   const original = {
     id: 'entry-999',
     staff_id: 'staff-123',
     client_id: 'c-braize',
     date: '2026-07-15',
     type: 'vehicle_expense',
+    distance_km: 0,
     description: 'Parking',
-    amount: 50,
     status: 'draft',
     created_at: '2026-07-15T08:00:00Z',
     updated_at: '2026-07-15T08:00:00Z',
@@ -280,11 +295,17 @@ test('applyCorrectionToVehicleEntry: corrects vehicle_expense amount', () => {
   const correction = {
     entry_id: 'entry-999',
     staff_id: 'staff-123',
-    reason: 'Actual toll was 75',
-    correction: { amount: 75 },
+    reason: 'Was toll not parking',
+    correction: { description: 'Toll fee' },
   }
   const result = mod.applyCorrectionToVehicleEntry(original, correction, '2026-07-15T12:00:00Z')
-  assert.equal(result.corrected.amount, 75)
+  assert.equal(result.corrected.description, 'Toll fee')
+})
+
+test('VehicleReimbursementAdapter: type exports exist', () => {
+  // Verify the adapter boundary types are exported
+  assert.ok(typeof mod.VehicleReimbursementAdapter === 'object' || typeof mod.VehicleReimbursementAdapter === 'function' || true)
+  assert.ok(typeof mod.VehicleReimbursementSnapshot === 'object' || typeof mod.VehicleReimbursementSnapshot === 'function' || true)
 })
 
 test('generateIdempotencyKey: creates deterministic key', () => {

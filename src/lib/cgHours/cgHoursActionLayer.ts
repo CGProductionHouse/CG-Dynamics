@@ -35,18 +35,14 @@ export interface CgHoursCorrectionDraft {
     task_description?: string
     notes?: string
     distance_km?: number
-    rate_per_km?: number
-    litres?: number
-    cost_per_litre?: number
     description?: string
-    amount?: number
   }
   reason: string // e.g., "mistyped hours", "wrong client"
 }
 
-export interface CgHoursCorrectionResult {
-  original: CgHoursTimeEntry | VehicleMileageFuelEntry
-  corrected: CgHoursTimeEntry | VehicleMileageFuelEntry
+export interface CgHoursCorrectionResult<T extends CgHoursTimeEntry | CgHoursVehicleEntry> {
+  original: T
+  corrected: T
   audit: {
     corrected_by: string
     corrected_at: string
@@ -54,23 +50,38 @@ export interface CgHoursCorrectionResult {
   }
 }
 
-export interface VehicleMileageFuelEntry {
+export interface CgHoursVehicleEntry {
   id?: string
   staff_id: string
   client_id: string | null
   date: string // YYYY-MM-DD
   type: 'mileage' | 'fuel' | 'vehicle_expense'
-  distance_km?: number
-  rate_per_km?: number
-  litres?: number
-  cost_per_litre?: number
+  distance_km?: number // Canonical kilometre seam — raw value only, no rate/reimbursement
   description?: string
-  amount?: number
   notes?: string
-  receipt_url?: string
   status: 'draft' | 'submitted' | 'approved' | 'rejected'
   created_at: string
   updated_at: string
+}
+
+// Adapter boundary: external vehicle/reimbursement truth lives outside CG Hours canonical layer.
+// Implementations provide this adapter; the canonical layer never invents rate/expense fields.
+export interface VehicleReimbursementAdapter {
+  // Resolve reimbursement fields for a given vehicle entry (e.g., from fleet system, payroll, policy)
+  resolveReimbursement(entry: CgHoursVehicleEntry): Promise<VehicleReimbursementSnapshot | null>
+  // Optional: validate that a raw kilometre value is within policy for the staff/client/date
+  validateKilometres?(entry: CgHoursVehicleEntry): Promise<{ valid: boolean; reason?: string }>
+}
+
+export interface VehicleReimbursementSnapshot {
+  // Computed/external fields — not stored in canonical CG Hours
+  rate_per_km?: number
+  litres?: number
+  cost_per_litre?: number
+  amount?: number
+  receipt_url?: string
+  policy_ref?: string
+  computed_at: string
 }
 
 export interface CgHoursRecentEntriesQuery {
@@ -158,6 +169,10 @@ export function validateCorrectionDraft(draft: CgHoursCorrectionDraft): string[]
     errors.push('hours must be a positive number up to 24')
   }
 
+  if (draft.correction.distance_km !== undefined && (typeof draft.correction.distance_km !== 'number' || draft.correction.distance_km < 0)) {
+    errors.push('distance_km must be a non-negative number')
+  }
+
   return errors
 }
 
@@ -165,7 +180,7 @@ export function applyCorrectionToTimeEntry(
   original: CgHoursTimeEntry,
   correction: CgHoursCorrectionDraft,
   nowIso = new Date().toISOString()
-): CgHoursCorrectionResult {
+): CgHoursCorrectionResult<CgHoursTimeEntry> {
   const errors = validateCorrectionDraft(correction)
   if (errors.length > 0) {
     throw new Error(`Invalid correction: ${errors.join('; ')}`)
@@ -191,36 +206,19 @@ export function applyCorrectionToTimeEntry(
 }
 
 export function applyCorrectionToVehicleEntry(
-  original: VehicleMileageFuelEntry,
+  original: CgHoursVehicleEntry,
   correction: CgHoursCorrectionDraft,
   nowIso = new Date().toISOString()
-): CgHoursCorrectionResult {
+): CgHoursCorrectionResult<CgHoursVehicleEntry> {
   const errors = validateCorrectionDraft(correction)
   if (errors.length > 0) {
     throw new Error(`Invalid correction: ${errors.join('; ')}`)
   }
 
-  let amount = original.amount
-  if (original.type === 'mileage' && (correction.correction.distance_km !== undefined || correction.correction.rate_per_km !== undefined)) {
-    const distance = correction.correction.distance_km ?? original.distance_km ?? 0
-    const rate = correction.correction.rate_per_km ?? original.rate_per_km ?? 0
-    amount = Number((distance * rate).toFixed(2))
-  } else if (original.type === 'fuel' && (correction.correction.litres !== undefined || correction.correction.cost_per_litre !== undefined)) {
-    const litres = correction.correction.litres ?? original.litres ?? 0
-    const cost = correction.correction.cost_per_litre ?? original.cost_per_litre ?? 0
-    amount = Number((litres * cost).toFixed(2))
-  } else if (original.type === 'vehicle_expense' && correction.correction.amount !== undefined) {
-    amount = correction.correction.amount
-  }
-
-  const corrected: VehicleMileageFuelEntry = {
+  const corrected: CgHoursVehicleEntry = {
     ...original,
     distance_km: correction.correction.distance_km ?? original.distance_km,
-    rate_per_km: correction.correction.rate_per_km ?? original.rate_per_km,
-    litres: correction.correction.litres ?? original.litres,
-    cost_per_litre: correction.correction.cost_per_litre ?? original.cost_per_litre,
     description: correction.correction.description ?? original.description,
-    amount,
     notes: correction.correction.notes ?? original.notes,
     updated_at: nowIso,
   }
