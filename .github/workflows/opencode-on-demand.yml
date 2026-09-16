@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Run OpenCode — Go quality lane
         id: go
@@ -64,7 +64,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Run OpenCode — Zen direct lane
         timeout-minutes: 45
@@ -86,7 +86,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Run OpenCode — NVIDIA direct lane
         timeout-minutes: 45
@@ -116,7 +116,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Run OpenCode — Go quality lane
         id: go
